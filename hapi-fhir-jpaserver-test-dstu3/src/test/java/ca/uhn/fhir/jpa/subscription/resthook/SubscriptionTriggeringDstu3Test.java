@@ -54,10 +54,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test the rest-hook subscriptions
@@ -182,7 +180,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 
 		Parameters response = myClient
 			.operation()
@@ -297,9 +295,9 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 
 		SubscriptionTriggeringSvcImpl svc = ProxyUtil.getSingletonTarget(mySubscriptionTriggeringSvc, SubscriptionTriggeringSvcImpl.class);
-		assertEquals(0, svc.getActiveJobCount());
+		assertThat(svc.getActiveJobCount()).isEqualTo(0);
 
-		assertEquals(0, ourCreatedPatients.size());
+		assertThat(ourCreatedPatients.size()).isEqualTo(0);
 		await().until(() -> ourUpdatedPatients.size() == 3);
 
 	}
@@ -400,9 +398,9 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 				.named(JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
 				.withParameter(Parameters.class, ProviderConstants.SUBSCRIPTION_TRIGGERING_PARAM_SEARCH_URL, new StringType("Observation"))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(24) + "Search URL is not valid (must be in the form \"[resource type]?[optional params]\")", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(24) + "Search URL is not valid (must be in the form \"[resource type]?[optional params]\")");
 		}
 	}
 
@@ -464,7 +462,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 
 		Parameters response = myClient
 			.operation()
@@ -536,8 +534,8 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 			List<String> resubmittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
 
-			assertTrue(resubmittedPatientIds.size() == submittedPatientIds.size());
-			assertTrue(resubmittedPatientIds.containsAll(submittedPatientIds));
+			assertThat(resubmittedPatientIds.size() == submittedPatientIds.size()).isTrue();
+			assertThat(resubmittedPatientIds.containsAll(submittedPatientIds)).isTrue();
 
 		}
 
@@ -575,8 +573,8 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 			List<String> resubmittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
 
-			assertTrue(resubmittedPatientIds.size() == expectedPatientIds.size());
-			assertTrue(resubmittedPatientIds.containsAll(expectedPatientIds));
+			assertThat(resubmittedPatientIds.size() == expectedPatientIds.size()).isTrue();
+			assertThat(resubmittedPatientIds.containsAll(expectedPatientIds)).isTrue();
 		}
 	}
 

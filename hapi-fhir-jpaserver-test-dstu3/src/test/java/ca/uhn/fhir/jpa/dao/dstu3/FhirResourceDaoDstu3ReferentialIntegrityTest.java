@@ -12,8 +12,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Test {
 
@@ -30,9 +30,9 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 		p.setManagingOrganization(new Reference("Organization/AAA"));
 		try {
 			myPatientDao.create(p);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1094) + "Resource Organization/AAA not found, specified in path: Patient.managingOrganization", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1094) + "Resource Organization/AAA not found, specified in path: Patient.managingOrganization");
 		}
 
 	}
@@ -46,7 +46,7 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 		p = myPatientDao.read(id);
-		assertEquals("Organization/AAA", p.getManagingOrganization().getReference());
+		assertThat(p.getManagingOrganization().getReference()).isEqualTo("Organization/AAA");
 
 	}
 
@@ -62,9 +62,9 @@ public class FhirResourceDaoDstu3ReferentialIntegrityTest extends BaseJpaDstu3Te
 
 		try {
 			myOrganizationDao.delete(oid);
-			fail();
+			fail("");
 		} catch (ResourceVersionConflictException e) {
-			assertEquals(Msg.code(550) + Msg.code(515) + "Unable to delete Organization/" + oid.getIdPart() + " because at least one resource has a reference to this resource. First reference found was resource Patient/" + pid.getIdPart() + " in path Patient.managingOrganization", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(550) + Msg.code(515) + "Unable to delete Organization/" + oid.getIdPart() + " because at least one resource has a reference to this resource. First reference found was resource Patient/" + pid.getIdPart() + " in path Patient.managingOrganization");
 		}
 
 		myPatientDao.delete(pid);

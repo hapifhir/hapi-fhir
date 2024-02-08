@@ -15,9 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Test {
 
@@ -35,7 +33,7 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 			.setResource(bundle);
 		try {
 			myClient.operation().onServer().named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
-			fail();
+			fail("");
 		} catch (NotImplementedOperationException e) {
 			assertThat(e.getMessage()).contains("This operation is not yet implemented on this server");
 		}
@@ -51,11 +49,11 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 			List<StringType> searchInclude = patient.get().getSearchInclude();
 			List<StringType> searchRevInclude = patient.get().getSearchRevInclude();
 
-			assertTrue(searchRevInclude.stream().map(PrimitiveType::getValue).anyMatch(stringRevIncludes -> stringRevIncludes.equals("Observation:subject")));
-			assertEquals(searchRevInclude.size(), 152);
+			assertThat(searchRevInclude.stream().map(PrimitiveType::getValue).anyMatch(stringRevIncludes -> stringRevIncludes.equals("Observation:subject"))).isTrue();
+			assertThat(152).isEqualTo(searchRevInclude.size());
 
-			assertTrue(searchInclude.stream().map(PrimitiveType::getValue).anyMatch(stringRevIncludes -> stringRevIncludes.equals("Patient:general-practitioner")));
-			assertEquals(searchInclude.size(), 4);
+			assertThat(searchInclude.stream().map(PrimitiveType::getValue).anyMatch(stringRevIncludes -> stringRevIncludes.equals("Patient:general-practitioner"))).isTrue();
+			assertThat(4).isEqualTo(searchInclude.size());
 		}
 	}
 

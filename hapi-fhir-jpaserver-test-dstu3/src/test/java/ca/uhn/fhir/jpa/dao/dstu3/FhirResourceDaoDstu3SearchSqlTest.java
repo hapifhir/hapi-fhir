@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoDstu3SearchSqlTest.class);
@@ -81,7 +80,7 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 
 			List<IBaseResource> resources = outcome.getResources(i, i + 300);
 			ourLog.info("Batch {}-{} returned {} resources", i, i+300, resources.size());
-			assertEquals(300, resources.size());
+			assertThat(resources.size()).isEqualTo(300);
 
 			List<SqlQuery> query = myCaptureQueriesListener.getSelectQueries();
 			for (SqlQuery next : query) {

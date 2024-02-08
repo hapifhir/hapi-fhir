@@ -15,8 +15,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -39,7 +39,7 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		try {
 			ourLog.info(resp.toString());
-			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.debug(respString);
@@ -51,12 +51,12 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 				Set<String> sps = new HashSet<String>();
 				for (CapabilityStatementRestResourceSearchParamComponent nextSp : nextResource.getSearchParam()) {
 					if (sps.add(nextSp.getName()) == false) {
-						fail("Duplicate search parameter " + nextSp.getName() + " for resource " + nextResource.getType());
+						fail("", "Duplicate search parameter " + nextSp.getName() + " for resource " + nextResource.getType());
 					}
 				}
 
 				if (!sps.contains("_id")) {
-					fail("No search parameter _id for resource " + nextResource.getType());
+					fail("", "No search parameter _id for resource " + nextResource.getType());
 				}
 			}
 		} finally {
@@ -74,7 +74,7 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 			String string = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(string);
 
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 		}
 	}
 

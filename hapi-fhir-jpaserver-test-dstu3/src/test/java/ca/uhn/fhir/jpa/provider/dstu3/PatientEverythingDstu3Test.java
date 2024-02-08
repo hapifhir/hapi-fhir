@@ -31,9 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -121,8 +118,8 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testEverythingReturnsCorrectResources() throws Exception {
 		
 		Bundle bundle = fetchBundle(myServerBase + "/" + myPatientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
-		
-		assertNull(bundle.getLink("next"));
+
+		assertThat(bundle.getLink("next")).isNull();
 		
 		Set<String> actual = new TreeSet<String>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
@@ -156,7 +153,7 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Bundle bundle = fetchBundle(myServerBase + "/" + myPatientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
-		assertNull(bundle.getLink("next"));
+		assertThat(bundle.getLink("next")).isNull();
 
 		Set<String> actual = new TreeSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
@@ -185,8 +182,8 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 		myStorageSettings.setEverythingIncludesFetchPageSize(1);
 		
 		Bundle bundle = fetchBundle(myServerBase + "/" + myPatientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
-		
-		assertNull(bundle.getLink("next"));
+
+		assertThat(bundle.getLink("next")).isNull();
 		
 		Set<String> actual = new TreeSet<String>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
@@ -211,12 +208,12 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testEverythingPagesWithCorrectEncodingJson() throws Exception {
 		
 		Bundle bundle = fetchBundle(myServerBase + "/" + myPatientId + "/$everything?_format=json&_count=1", EncodingEnum.JSON);
-		
-		assertNotNull(bundle.getLink("next").getUrl());
+
+		assertThat(bundle.getLink("next").getUrl()).isNotNull();
 		assertThat(bundle.getLink("next").getUrl()).contains("_format=json");
 		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.JSON);
-		
-		assertNotNull(bundle.getLink("next").getUrl());
+
+		assertThat(bundle.getLink("next").getUrl()).isNotNull();
 		assertThat(bundle.getLink("next").getUrl()).contains("_format=json");
 		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.JSON);
 	}
@@ -228,13 +225,13 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testEverythingPagesWithCorrectEncodingXml() throws Exception {
 		
 		Bundle bundle = fetchBundle(myServerBase + "/" + myPatientId + "/$everything?_format=xml&_count=1", EncodingEnum.XML);
-		
-		assertNotNull(bundle.getLink("next").getUrl());
+
+		assertThat(bundle.getLink("next").getUrl()).isNotNull();
 		ourLog.info("Next link: {}", bundle.getLink("next").getUrl());
 		assertThat(bundle.getLink("next").getUrl()).contains("_format=xml");
 		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.XML);
 
-		assertNotNull(bundle.getLink("next").getUrl());
+		assertThat(bundle.getLink("next").getUrl()).isNotNull();
 		ourLog.info("Next link: {}", bundle.getLink("next").getUrl());
 		assertThat(bundle.getLink("next").getUrl()).contains("_format=xml");
 		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.XML);
@@ -245,7 +242,7 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 		HttpGet get = new HttpGet(theUrl);
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		try {
-			assertEquals(theEncoding.getResourceContentTypeNonLegacy(), resp.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
+			assertThat(resp.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", "")).isEqualTo(theEncoding.getResourceContentTypeNonLegacy());
 			bundle = theEncoding.newParser(myFhirContext).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
 		} finally {
 			IOUtils.closeQuietly(resp);

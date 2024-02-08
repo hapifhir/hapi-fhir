@@ -11,8 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 	public static final int TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE = 5;
@@ -50,7 +49,7 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 
 		try {
 			mySystemDao.transaction(null, bundle);
-			fail();
+			fail("");
 		} catch (PayloadTooLargeException e) {
 			assertThat(e.getMessage()).contains("Transaction Bundle Too large.  Transaction bundle contains " +
 				(TEST_MAXIMUM_TRANSACTION_BUNDLE_SIZE + 1) +
@@ -69,9 +68,9 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 		Bundle bundle = createInputTransactionWithSize(theSize);
 		Bundle response = mySystemDao.transaction(null, bundle);
 
-		assertEquals(theSize, response.getEntry().size());
-		assertEquals("201 Created", response.getEntry().get(0).getResponse().getStatus());
-		assertEquals("201 Created", response.getEntry().get(theSize - 1).getResponse().getStatus());
+		assertThat(response.getEntry().size()).isEqualTo(theSize);
+		assertThat(response.getEntry().get(0).getResponse().getStatus()).isEqualTo("201 Created");
+		assertThat(response.getEntry().get(theSize - 1).getResponse().getStatus()).isEqualTo("201 Created");
 	}
 
 }

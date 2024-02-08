@@ -31,10 +31,7 @@ import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.ourPro
 import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.propertyCode;
 import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.propertyCodeSystem;
 import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.propertyDisplay;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderDstu3CodeSystemPropertiesTest extends BaseResourceProviderDstu3Test {
 
@@ -78,7 +75,7 @@ public class ResourceProviderDstu3CodeSystemPropertiesTest extends BaseResourceP
 
 		// verify
 		if (theExpectedReturnedProperties.isEmpty()) {
-			assertNull(parameter);
+			assertThat(parameter).isNull();
 			return;
 		}
 
@@ -87,17 +84,17 @@ public class ResourceProviderDstu3CodeSystemPropertiesTest extends BaseResourceP
 
 		while (propertyIterator.hasNext()) {
 			ConceptPropertyComponent property = propertyIterator.next();
-			assertNotNull(parameter);
+			assertThat(parameter).isNotNull();
 
 			Iterator<ParametersParameterComponent> parameterPartIterator = parameter.getPart().iterator();
 
 			parameter = parameterPartIterator.next();
-			assertEquals("code", parameter.getName());
-			assertEquals(property.getCode(), ((CodeType) parameter.getValue()).getValue());
+			assertThat(parameter.getName()).isEqualTo("code");
+			assertThat(((CodeType) parameter.getValue()).getValue()).isEqualTo(property.getCode());
 
 			parameter = parameterPartIterator.next();
-			assertEquals("value", parameter.getName());
-			assertTrue(property.getValue().equalsShallow(parameter.getValue()));
+			assertThat(parameter.getName()).isEqualTo("value");
+			assertThat(property.getValue().equalsShallow(parameter.getValue())).isTrue();
 
 			if (paramIterator.hasNext()) {
 				parameter = paramIterator.next();

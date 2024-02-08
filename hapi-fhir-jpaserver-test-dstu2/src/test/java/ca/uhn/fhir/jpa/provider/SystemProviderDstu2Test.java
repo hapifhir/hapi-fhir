@@ -51,13 +51,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
@@ -157,7 +155,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
 			assertThat(response, (containsString("_format=json")));
-			assertEquals(200, http.getStatusLine().getStatusCode());
+			assertThat(http.getStatusLine().getStatusCode()).isEqualTo(200);
 		} finally {
 			http.close();
 		}
@@ -192,10 +190,10 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
 			assertThat(response).doesNotContain("_format");
-			assertEquals(200, http.getStatusLine().getStatusCode());
+			assertThat(http.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			Bundle responseBundle = ourCtx.newXmlParser().parseResource(Bundle.class, response);
-			assertEquals(BundleTypeEnum.SEARCH_RESULTS, responseBundle.getTypeElement().getValueAsEnum());
+			assertThat(responseBundle.getTypeElement().getValueAsEnum()).isEqualTo(BundleTypeEnum.SEARCH_RESULTS);
 
 		} finally {
 			http.close();
@@ -209,7 +207,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		HttpGet get = new HttpGet(ourServerBase + "/Patient/$everything");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
 		try {
-			assertEquals(200, http.getStatusLine().getStatusCode());
+			assertThat(http.getStatusLine().getStatusCode()).isEqualTo(200);
 		} finally {
 			http.close();
 		}
@@ -219,7 +217,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 	@Test
 	public void testGetOperationDefinition() {
 		OperationDefinition op = ourClient.read(OperationDefinition.class, "-s-get-resource-counts");
-		assertEquals("get-resource-counts", op.getCode());
+		assertThat(op.getCode()).isEqualTo("get-resource-counts");
 	}
 
 	@Test
@@ -245,7 +243,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 			try {
 				myPatientDao.read(new IdType("Patient/Patient1063259"));
-				fail();
+				fail("");
 			} catch (ResourceGoneException e) {
 				// good
 			}
@@ -279,7 +277,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
 		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
 		IdDt id1_1 = new IdDt(resp.getEntry().get(0).getResponse().getLocation());
-		assertEquals("Provenance", id1_1.getResourceType());
+		assertThat(id1_1.getResourceType()).isEqualTo("Provenance");
 		IdDt id1_2 = new IdDt(resp.getEntry().get(1).getResponse().getLocation());
 		IdDt id1_3 = new IdDt(resp.getEntry().get(2).getResponse().getLocation());
 		IdDt id1_4 = new IdDt(resp.getEntry().get(3).getResponse().getLocation());
@@ -299,11 +297,11 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		IdDt id2_3 = new IdDt(resp.getEntry().get(2).getResponse().getLocation());
 		IdDt id2_4 = new IdDt(resp.getEntry().get(3).getResponse().getLocation());
 
-		assertNotEquals(id1_1.toVersionless(), id2_1.toVersionless());
-		assertEquals("Provenance", id2_1.getResourceType());
-		assertEquals(id1_2.toVersionless(), id2_2.toVersionless());
-		assertEquals(id1_3.toVersionless(), id2_3.toVersionless());
-		assertEquals(id1_4.toVersionless(), id2_4.toVersionless());
+		assertThat(id2_1.toVersionless()).isNotEqualTo(id1_1.toVersionless());
+		assertThat(id2_1.getResourceType()).isEqualTo("Provenance");
+		assertThat(id2_2.toVersionless()).isEqualTo(id1_2.toVersionless());
+		assertThat(id2_3.toVersionless()).isEqualTo(id1_3.toVersionless());
+		assertThat(id2_4.toVersionless()).isEqualTo(id1_4.toVersionless());
 	}
 
 	/**
@@ -327,11 +325,11 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		ourLog.info(response);
 		Bundle bundleResp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
 		IdDt id = new IdDt(bundleResp.getEntry().get(0).getResponse().getLocation());
-		assertEquals("Patient", id.getResourceType());
-		assertTrue(id.hasIdPart());
-		assertTrue(id.isIdPartValidLong());
-		assertTrue(id.hasVersionIdPart());
-		assertTrue(id.isVersionIdPartValidLong());
+		assertThat(id.getResourceType()).isEqualTo("Patient");
+		assertThat(id.hasIdPart()).isTrue();
+		assertThat(id.isIdPartValidLong()).isTrue();
+		assertThat(id.hasVersionIdPart()).isTrue();
+		assertThat(id.isVersionIdPartValidLong()).isTrue();
 	}
 
 	@Test
@@ -340,11 +338,11 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		try {
 			ourClient.transaction().withBundle(bundle).prettyPrint().execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertEquals(Msg.code(533) + "Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
-			assertEquals("processing", oo.getIssue().get(0).getCode());
+			assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(533) + "Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'");
+			assertThat(oo.getIssue().get(0).getCode()).isEqualTo("processing");
 		}
 	}
 
@@ -376,14 +374,14 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		Bundle resp = ourClient.transaction().withBundle(req).execute();
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		assertEquals(1, resp.getEntry().size());
+		assertThat(resp.getEntry().size()).isEqualTo(1);
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
-		assertEquals("self", respSub.getLink().get(0).getRelation());
-		assertEquals(ourServerBase + "/Patient", respSub.getLink().get(0).getUrl());
-		assertEquals("next", respSub.getLink().get(1).getRelation());
+		assertThat(respSub.getLink().get(0).getRelation()).isEqualTo("self");
+		assertThat(respSub.getLink().get(0).getUrl()).isEqualTo(ourServerBase + "/Patient");
+		assertThat(respSub.getLink().get(1).getRelation()).isEqualTo("next");
 		assertThat(respSub.getLink().get(1).getUrl()).contains("/fhir/context?_getpages");
 		assertThat(respSub.getEntry().get(0).getFullUrl()).startsWith(ourServerBase + "/Patient/");
-		assertEquals(Patient.class, respSub.getEntry().get(0).getResource().getClass());
+		assertThat(respSub.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
 	}
 
 	@Test
@@ -400,10 +398,10 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		Bundle resp = ourClient.transaction().withBundle(req).execute();
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		assertEquals(1, resp.getEntry().size());
+		assertThat(resp.getEntry().size()).isEqualTo(1);
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
-		assertEquals(20, respSub.getTotal().intValue());
-		assertEquals(0, respSub.getEntry().size());
+		assertThat(respSub.getTotal().intValue()).isEqualTo(20);
+		assertThat(respSub.getEntry().size()).isEqualTo(0);
 	}
 
 	@Test
@@ -413,7 +411,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		try {
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
-			assertEquals(200, http.getStatusLine().getStatusCode());
+			assertThat(http.getStatusLine().getStatusCode()).isEqualTo(200);
 		} finally {
 			IOUtils.closeQuietly(http);
 		}

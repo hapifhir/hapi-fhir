@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.net.URLEncoder;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3Test {
 
@@ -45,8 +45,8 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 				.returnBundle(Bundle.class)
 				.execute();
 
-			assertEquals(1, actual.getEntry().size());
-			assertEquals(locId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertThat(actual.getEntry().size()).isEqualTo(1);
+			assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(locId.getIdPart());
 		}
 		{ // Outside the box
 			double tooSmallDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN / 2;
@@ -65,7 +65,7 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 				.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
-			assertEquals(0, actual.getEntry().size());
+			assertThat(actual.getEntry().size()).isEqualTo(0);
 		}
 	}
 
@@ -93,8 +93,8 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(1, actual.getEntry().size());
-		assertEquals(prId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
+		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(prId.getIdPart());
 	}
 
 	@Test
@@ -128,8 +128,8 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 				.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
-			assertEquals(1, actual.getEntry().size());
-			assertEquals(prId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertThat(actual.getEntry().size()).isEqualTo(1);
+			assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(prId.getIdPart());
 		}
 
 		{ // Outside the box
@@ -149,7 +149,7 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 				.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
-			assertEquals(0, actual.getEntry().size());
+			assertThat(actual.getEntry().size()).isEqualTo(0);
 		}
 	}
 }

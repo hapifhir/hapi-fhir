@@ -57,9 +57,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
@@ -196,20 +196,20 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		// Do all the stubbing before starting any work, since we want to avoid threading issues
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
-		assertNotNull(result.getUuid());
-		assertEquals(790, result.size());
+		assertThat(result.getUuid()).isNotNull();
+		assertThat(result.size()).isEqualTo(790);
 
 		List<IBaseResource> resources = result.getResources(0, 100000);
-		assertEquals(790, resources.size());
-		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
-		assertEquals("799", resources.get(789).getIdElement().getValueAsString());
+		assertThat(resources.size()).isEqualTo(790);
+		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
+		assertThat(resources.get(789).getIdElement().getValueAsString()).isEqualTo("799");
 
 		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
 		verify(mySearchCacheSvc, atLeastOnce()).save(searchCaptor.capture(), any());
 
-		assertEquals(790, allResults.size());
-		assertEquals(10, allResults.get(0).getId());
-		assertEquals(799, allResults.get(789).getId());
+		assertThat(allResults.size()).isEqualTo(790);
+		assertThat(allResults.get(0).getId()).isEqualTo(10);
+		assertThat(allResults.get(789).getId()).isEqualTo(799);
 
 		myExpectedNumberOfSearchBuildersCreated = 4;
 	}
@@ -231,9 +231,9 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		try {
 			mySvc.getResources("1234-5678", 0, 100, null, null);
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
-			assertEquals("Search ID \"1234-5678\" does not exist and may have expired", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Search ID \"1234-5678\" does not exist and may have expired");
 		}
 	}
 
@@ -253,7 +253,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		try {
 			mySvc.getResources("1234-5678", 0, 100, null, null);
-			fail();
+			fail("");
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage()).contains("Request timed out");
 		}
@@ -275,15 +275,15 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
-		assertNotNull(result.getUuid());
-		assertEquals(790, result.size());
+		assertThat(result.getUuid()).isNotNull();
+		assertThat(result.size()).isEqualTo(790);
 
 		List<IBaseResource> resources;
 
 		resources = result.getResources(0, 30);
-		assertEquals(30, resources.size());
-		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
-		assertEquals("39", resources.get(29).getIdElement().getValueAsString());
+		assertThat(resources.size()).isEqualTo(30);
+		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
+		assertThat(resources.get(29).getIdElement().getValueAsString()).isEqualTo("39");
 
 	}
 
@@ -328,11 +328,11 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		CountDownLatch completionLatch = new CountDownLatch(1);
 		Runnable taskStarter = () -> {
 			try {
-				assertNotNull(searchId);
+				assertThat(searchId).isNotNull();
 				ourLog.info("About to pull the first resource");
 				List<JpaPid> resources = mySvc.getResources(searchId, 0, 1, null, null);
 				ourLog.info("Done pulling the first resource");
-				assertEquals(1, resources.size());
+				assertThat(resources.size()).isEqualTo(1);
 			} finally {
 				completionLatch.countDown();
 			}
@@ -379,22 +379,22 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		mockSearchTask();
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
-		assertNotNull(result.getUuid());
-		assertEquals(790, result.size());
+		assertThat(result.getUuid()).isNotNull();
+		assertThat(result.size()).isEqualTo(790);
 
 		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
 		verify(mySearchCacheSvc, atLeast(1)).save(searchCaptor.capture(), any());
 		Search search = searchCaptor.getValue();
-		assertEquals(SearchTypeEnum.SEARCH, search.getSearchType());
+		assertThat(search.getSearchType()).isEqualTo(SearchTypeEnum.SEARCH);
 
 		List<IBaseResource> resources;
 		PersistedJpaBundleProvider provider;
 
 		resources = result.getResources(0, 10);
-		assertEquals(790, result.size());
-		assertEquals(10, resources.size());
-		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
-		assertEquals("19", resources.get(9).getIdElement().getValueAsString());
+		assertThat(result.size()).isEqualTo(790);
+		assertThat(resources.size()).isEqualTo(10);
+		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
+		assertThat(resources.get(9).getIdElement().getValueAsString()).isEqualTo("19");
 
 		myExpectedNumberOfSearchBuildersCreated = 4;
 	}
@@ -416,13 +416,13 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
-		assertNotNull(result.getUuid());
-		assertEquals(90, Objects.requireNonNull(result.size()).intValue());
+		assertThat(result.getUuid()).isNotNull();
+		assertThat(Objects.requireNonNull(result.size()).intValue()).isEqualTo(90);
 
 		List<IBaseResource> resources = result.getResources(0, 30);
-		assertEquals(30, resources.size());
-		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
-		assertEquals("39", resources.get(29).getIdElement().getValueAsString());
+		assertThat(resources.size()).isEqualTo(30);
+		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
+		assertThat(resources.get(29).getIdElement().getValueAsString()).isEqualTo("39");
 
 	}
 
@@ -430,8 +430,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	public void testGetPage() {
 		Pageable page = SearchCoordinatorSvcImpl.toPage(50, 73);
 		assert page != null;
-		assertEquals(50, page.getOffset());
-		assertEquals(23, page.getPageSize());
+		assertThat(page.getOffset()).isEqualTo(50);
+		assertThat(page.getPageSize()).isEqualTo(23);
 	}
 
 	@Test
@@ -478,9 +478,9 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		 */
 		provider = newPersistedJpaBundleProvider(uuid);
 		resources = provider.getResources(10, 20);
-		assertEquals(10, resources.size());
-		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
-		assertEquals("29", resources.get(9).getIdElement().getValueAsString());
+		assertThat(resources.size()).isEqualTo(10);
+		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("20");
+		assertThat(resources.get(9).getIdElement().getValueAsString()).isEqualTo("29");
 
 		provider = new PersistedJpaBundleProvider(null, uuid);
 		provider.setTxServiceForUnitTest(myTransactionService);
@@ -492,9 +492,9 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		provider.setStorageSettingsForUnitTest(new JpaStorageSettings());
 		provider.setRequestPartitionId(RequestPartitionId.defaultPartition());
 		resources = provider.getResources(20, 40);
-		assertEquals(20, resources.size());
-		assertEquals("30", resources.get(0).getIdElement().getValueAsString());
-		assertEquals("49", resources.get(19).getIdElement().getValueAsString());
+		assertThat(resources.size()).isEqualTo(20);
+		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("30");
+		assertThat(resources.get(19).getIdElement().getValueAsString()).isEqualTo("49");
 
 		myExpectedNumberOfSearchBuildersCreated = 3;
 	}
@@ -570,9 +570,9 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		try {
 			mySvc.getResources("0000-1111", 0, 10, null, null);
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
-			assertEquals("Search ID \"0000-1111\" does not exist and may have expired", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Search ID \"0000-1111\" does not exist and may have expired");
 		}
 
 	}
@@ -603,9 +603,9 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		try {
 			mySvc.getResources("0000-1111", 0, 10, null, null);
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
-			assertEquals("Search ID \"0000-1111\" does not exist and may have expired", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Search ID \"0000-1111\" does not exist and may have expired");
 		}
 
 	}

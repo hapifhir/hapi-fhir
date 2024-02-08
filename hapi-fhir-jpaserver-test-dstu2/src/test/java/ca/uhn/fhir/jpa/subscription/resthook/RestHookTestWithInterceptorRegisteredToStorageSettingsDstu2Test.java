@@ -37,8 +37,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test the rest-hook subscriptions
@@ -144,7 +143,7 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test ext
 		waitForSize(1, ourUpdatedObservations);
 
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
-		assertNotNull(subscriptionTemp);
+		assertThat(subscriptionTemp).isNotNull();
 
 		subscriptionTemp.setCriteria(criteria1);
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
@@ -193,9 +192,9 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test ext
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		assertFalse(subscription1.getId().equals(subscription2.getId()));
-		assertFalse(observation1.getId().isEmpty());
-		assertFalse(observation2.getId().isEmpty());
+		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
+		assertThat(observation1.getId().isEmpty()).isFalse();
+		assertThat(observation2.getId().isEmpty()).isFalse();
 	}
 
 	@Test
@@ -228,7 +227,7 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test ext
 		waitForSize(1, ourUpdatedObservations);
 
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
-		assertNotNull(subscriptionTemp);
+		assertThat(subscriptionTemp).isNotNull();
 
 		subscriptionTemp.setCriteria(criteria1);
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
@@ -277,9 +276,9 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu2Test ext
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		assertFalse(subscription1.getId().equals(subscription2.getId()));
-		assertFalse(observation1.getId().isEmpty());
-		assertFalse(observation2.getId().isEmpty());
+		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
+		assertThat(observation1.getId().isEmpty()).isFalse();
+		assertThat(observation2.getId().isEmpty()).isFalse();
 	}
 
 	public static class ObservationListener implements IResourceProvider {

@@ -18,8 +18,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -41,9 +42,9 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 		ISearchParamRegistry searchParamRegistry = mock(ISearchParamRegistry.class);
 		when(searchParamRegistry.getActiveSearchParam(any(), eq("patient"))).thenReturn(resourceDef.getSearchParam("patient"));
 		SearchParameterMap match = myMatchUrlService.translateMatchUrl("Condition?patient=304&_lastUpdated=>2011-01-01T11:12:21.0000Z", resourceDef);
-		assertEquals("2011-01-01T11:12:21.0000Z", match.getLastUpdated().getLowerBound().getValueAsString());
-		assertEquals(ReferenceParam.class, match.get("patient").get(0).get(0).getClass());
-		assertEquals("304", ((ReferenceParam) match.get("patient").get(0).get(0)).getIdPart());
+		assertThat(match.getLastUpdated().getLowerBound().getValueAsString()).isEqualTo("2011-01-01T11:12:21.0000Z");
+		assertThat(match.get("patient").get(0).get(0).getClass()).isEqualTo(ReferenceParam.class);
+		assertThat(((ReferenceParam) match.get("patient").get(0).get(0)).getIdPart()).isEqualTo("304");
 	}
 
 	@Test
@@ -58,9 +59,9 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 		Dstu3DistanceHelper.setNearDistance(Location.class, map);
 
 		QuantityParam nearDistanceParam = map.getNearDistanceParam();
-		assertEquals(1, map.size());
-		assertNotNull(nearDistanceParam);
-		assertEquals(kmDistance, nearDistanceParam.getValue().doubleValue(), 0.0);
+		assertThat(map.size()).isEqualTo(1);
+		assertThat(nearDistanceParam).isNotNull();
+		assertThat(nearDistanceParam.getValue().doubleValue()).isCloseTo(kmDistance, within(0.0));
 	}
 
 	@Test
@@ -74,9 +75,9 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 				ourCtx.getResourceDefinition("Location"));
 			Dstu3DistanceHelper.setNearDistance(Location.class, map);
 
-			fail();
+			fail("");
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
 		}
 	}
 
@@ -91,9 +92,9 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 				ourCtx.getResourceDefinition("Location"));
 			Dstu3DistanceHelper.setNearDistance(Location.class, map);
 
-			fail();
+			fail("");
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
 		}
 	}
 

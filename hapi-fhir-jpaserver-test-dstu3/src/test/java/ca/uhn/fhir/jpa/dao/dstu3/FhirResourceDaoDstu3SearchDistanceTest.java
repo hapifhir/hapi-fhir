@@ -15,8 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 	@Autowired
@@ -118,9 +117,9 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 		map.setLoadSynchronous(true);
 		try {
 			myLocationDao.search(map);
-			fail();
+			fail("");
 		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(1228) + "Invalid position format '" + theCoords + "'.  Required format is 'latitude:longitude'", e.getCause().getMessage());
+			assertThat(e.getCause().getMessage()).isEqualTo(Msg.code(1228) + "Invalid position format '" + theCoords + "'.  Required format is 'latitude:longitude'");
 		}
 	}
 
@@ -131,9 +130,9 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 		map.setLoadSynchronous(true);
 		try {
 			myLocationDao.search(map);
-			fail();
+			fail("");
 		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(1229) + "Invalid position format ':2'.  Both latitude and longitude must be provided.", e.getCause().getMessage());
+			assertThat(e.getCause().getMessage()).isEqualTo(Msg.code(1229) + "Invalid position format ':2'.  Both latitude and longitude must be provided.");
 		}
 	}
 

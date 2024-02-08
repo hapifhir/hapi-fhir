@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderDeleteSqlDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -40,6 +40,6 @@ public class ResourceProviderDeleteSqlDstu3Test extends BaseResourceProviderDstu
 			.filter(query -> query.getSql(false, false).contains("HFJ_SPIDX_TOKEN"))
 			.collect(Collectors.summarizingInt(SqlQuery::getSize))
 			.getSum();
-		assertEquals(1, deleteCount);
+		assertThat(deleteCount).isEqualTo(1);
 	}
 }

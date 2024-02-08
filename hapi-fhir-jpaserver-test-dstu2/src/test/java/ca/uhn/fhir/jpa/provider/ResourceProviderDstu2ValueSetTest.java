@@ -22,9 +22,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2Test {
@@ -53,7 +53,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(new BooleanDt(true), respParam.getParameter().get(0).getValue());
+		assertThat(respParam.getParameter().get(0).getValue()).isEqualTo(new BooleanDt(true));
 	}
 
 	@Test
@@ -69,10 +69,10 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("display", respParam.getParameter().get(0).getName());
-		assertEquals(new StringDt("Systolic blood pressure--expiration"), respParam.getParameter().get(0).getValue());
-		assertEquals("abstract", respParam.getParameter().get(1).getName());
-		assertEquals(new BooleanDt(false), respParam.getParameter().get(1).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("display");
+		assertThat(respParam.getParameter().get(0).getValue()).isEqualTo(new StringDt("Systolic blood pressure--expiration"));
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("abstract");
+		assertThat(respParam.getParameter().get(1).getValue()).isEqualTo(new BooleanDt(false));
 	}
 
 	@Test
@@ -89,12 +89,12 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(new StringDt("Unknown"), respParam.getParameter().get(0).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals(new StringDt("Married"), respParam.getParameter().get(1).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(new BooleanDt(false), respParam.getParameter().get(2).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(respParam.getParameter().get(0).getValue()).isEqualTo(new StringDt("Unknown"));
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("display");
+		assertThat(respParam.getParameter().get(1).getValue()).isEqualTo(new StringDt("Married"));
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("abstract");
+		assertThat(respParam.getParameter().get(2).getValue()).isEqualTo(new BooleanDt(false));
 	}
 
 	@Test
@@ -109,10 +109,10 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("display", respParam.getParameter().get(0).getName());
-		assertEquals(new StringDt("Systolic blood pressure--expiration"), respParam.getParameter().get(0).getValue());
-		assertEquals("abstract", respParam.getParameter().get(1).getName());
-		assertEquals(new BooleanDt(false), respParam.getParameter().get(1).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("display");
+		assertThat(respParam.getParameter().get(0).getValue()).isEqualTo(new StringDt("Systolic blood pressure--expiration"));
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("abstract");
+		assertThat(respParam.getParameter().get(1).getValue()).isEqualTo(new BooleanDt(false));
 	}
 
 	@Test
@@ -126,9 +126,9 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.andParameter("code", new CodeDt("8450-9"))
 				.andParameter("system", new UriDt("http://acme.org"))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
 		}
 	}
 
@@ -142,9 +142,9 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.withParameter(Parameters.class, "coding", new CodingDt("http://acme.org", "8450-9"))
 				.andParameter("system", new UriDt("http://acme.org"))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
 		}
 	}
 
@@ -157,9 +157,9 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.named("lookup")
 				.withParameter(Parameters.class, "coding", new CodingDt("http://acme.org", null))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1126) + "No code, coding, or codeableConcept provided to validate", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1126) + "No code, coding, or codeableConcept provided to validate");
 		}
 	}
 
@@ -291,9 +291,9 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.named("expand")
 				.withNoParameters(Parameters.class)
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1130) + "$expand operation at the type level (no ID specified) requires an identifier or a valueSet as a part of the request", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1130) + "$expand operation at the type level (no ID specified) requires an identifier or a valueSet as a part of the request");
 		}
 
 		try {
@@ -305,9 +305,9 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.withParameter(Parameters.class, "valueSet", toExpand)
 				.andParameter("identifier", new UriDt("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1131) + "$expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1131) + "$expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.");
 		}
 
 		try {
@@ -319,9 +319,9 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.withParameter(Parameters.class, "valueSet", toExpand)
 				.andParameter("identifier", new UriDt("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1131) + "$expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1131) + "$expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.");
 		}
 
 	}

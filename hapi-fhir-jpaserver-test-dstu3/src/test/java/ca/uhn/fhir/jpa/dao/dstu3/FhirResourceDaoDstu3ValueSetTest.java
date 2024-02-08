@@ -25,12 +25,11 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
@@ -70,12 +69,12 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		// Validate good
 		code.setValue("NL");
 		validationOutcome = myValueSetDao.validateCode(vsIdentifier, null, code, system, null, null, null, mySrd);
-		assertEquals(true, validationOutcome.isOk());
+		assertThat(validationOutcome.isOk()).isEqualTo(true);
 
 		// Validate bad
 		code.setValue("QQ");
 		validationOutcome = myValueSetDao.validateCode(vsIdentifier, null, code, system, null, null, null, mySrd);
-		assertEquals(false, validationOutcome.isOk());
+		assertThat(validationOutcome.isOk()).isEqualTo(false);
 
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -88,12 +87,12 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		// Validate good
 		code.setValue("NL");
 		validationOutcome = myValueSetDao.validateCode(vsIdentifier, null, code, system, null, null, null, mySrd);
-		assertEquals(true, validationOutcome.isOk());
+		assertThat(validationOutcome.isOk()).isEqualTo(true);
 
 		// Validate bad
 		code.setValue("QQ");
 		validationOutcome = myValueSetDao.validateCode(vsIdentifier, null, code, system, null, null, null, mySrd);
-		assertEquals(false, validationOutcome.isOk());
+		assertThat(validationOutcome.isOk()).isEqualTo(false);
 
 	}
 
@@ -114,7 +113,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 
 		try {
 			myValueSetDao.read(new IdType("ValueSet/endpoint-payload-type"));
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -123,8 +122,8 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		myValueSetDao.update(vs);
 
 		vs = myValueSetDao.read(new IdType("ValueSet/endpoint-payload-type"));
-		assertNotNull(vs);
-		assertEquals("http://hl7.org/fhir/ValueSet/endpoint-payload-type", vs.getUrl());
+		assertThat(vs).isNotNull();
+		assertThat(vs.getUrl()).isEqualTo("http://hl7.org/fhir/ValueSet/endpoint-payload-type");
 
 		ValueSet expansion = myValueSetDao.expand(vs.getIdElement(), null, mySrd);
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expansion));
@@ -210,8 +209,8 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 	}
 
 	@Test
@@ -224,8 +223,8 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 	}
 
 	@Test
@@ -238,8 +237,8 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 	}
 
 	@Test
@@ -252,8 +251,8 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		Coding coding = null;
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 	}
 
 	@Test
@@ -267,8 +266,8 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding().setSystem("http://acme.org").setCode("11378-7");
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 	}
 
 	@Test
@@ -282,7 +281,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(vsIdentifier, null, code, system, display, coding, codeableConcept, mySrd);
 
 		ourLog.info(result.getMessage());
-		assertTrue(result.isOk(), result.getMessage());
+		assertThat(result.isOk()).as(result.getMessage()).isTrue();
 	}
 
 

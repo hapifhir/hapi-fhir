@@ -27,10 +27,9 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.ClasspathUtil.loadResourceAsByteArray;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 
@@ -75,7 +74,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 		// That patient profile in this NPM package has an invalid base
 		try {
 			igInstaller.install(new PackageInstallationSpec().setName("erroneous-ig").setVersion("1.0.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL).setPackageContents(bytes));
-			fail();
+			fail("");
 		} catch (ImplementationGuideInstallationException e) {
 			assertThat(e.getMessage()).contains("Could not load NPM package erroneous-ig#1.0.2");
 		}
@@ -205,7 +204,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 		installationSpec.setReloadExisting(true);
 		try {
 			ensureNoCreatesOrUpdates(() -> igInstaller.install(installationSpec));
-			fail();
+			fail("");
 		} catch (RuntimeException e) {
 			assertThat(e.getMessage()).contains("Not allowed!");
 		}
@@ -228,9 +227,9 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 				.setVersion("1.0.2")
 				.setPackageUrl(myServer.getBaseUrl() + "/foo.tgz")
 			);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1297) + "Package ID nictiz.fhir.nl.stu3.questionnaires doesn't match expected: blah", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1297) + "Package ID nictiz.fhir.nl.stu3.questionnaires doesn't match expected: blah");
 		}
 
 	}
@@ -243,9 +242,9 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 				.setVersion("1.0.2")
 				.setPackageUrl(myServer.getBaseUrl() + "/foo.tgz")
 			);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(1303) + "Received HTTP 404 from URL: " + myServer.getBaseUrl() + "/foo.tgz", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1303) + "Received HTTP 404 from URL: " + myServer.getBaseUrl() + "/foo.tgz");
 		}
 
 	}

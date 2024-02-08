@@ -10,8 +10,8 @@ import ca.uhn.fhir.validation.ValidationResult;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * This test doesn't really belong to JPA, but it needs to be in a project with both DSTU2 and HL7ORG_DSTU2 present, so here will do.
@@ -24,9 +24,9 @@ public class ValidatorAcrossVersionsTest {
 		FhirContext ctxDstu2 = FhirContext.forDstu2Cached();
 		try {
 			ctxDstu2.getResourceDefinition(org.hl7.fhir.dstu3.model.Patient.class);
-			fail();
+			fail("");
 		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(1731) + "This context is for FHIR version \"DSTU2\" but the class \"org.hl7.fhir.dstu3.model.Patient\" is for version \"DSTU3\"", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1731) + "This context is for FHIR version \"DSTU2\" but the class \"org.hl7.fhir.dstu3.model.Patient\" is for version \"DSTU3\"");
 		}
 		
 	}
@@ -47,9 +47,9 @@ public class ValidatorAcrossVersionsTest {
 		ValidationResult result = val.validateWithResult(resp);
 		ourLog.debug(ctxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 
-		assertEquals(2, result.getMessages().size());
-		assertEquals("QuestionnaireResponse.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse)", result.getMessages().get(0).getMessage());
-		assertEquals("No questionnaire is identified, so no validation can be performed against the base questionnaire", result.getMessages().get(1).getMessage());
+		assertThat(result.getMessages().size()).isEqualTo(2);
+		assertThat(result.getMessages().get(0).getMessage()).isEqualTo("QuestionnaireResponse.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse)");
+		assertThat(result.getMessages().get(1).getMessage()).isEqualTo("No questionnaire is identified, so no validation can be performed against the base questionnaire");
 	}
 
 }

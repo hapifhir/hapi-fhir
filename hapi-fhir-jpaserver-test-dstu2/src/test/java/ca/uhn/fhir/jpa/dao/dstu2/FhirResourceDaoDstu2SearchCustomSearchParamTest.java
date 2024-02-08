@@ -46,8 +46,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2SearchCustomSearchParamTest.class);
@@ -74,9 +73,9 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		fooSp.setStatus(ConformanceResourceStatusEnum.ACTIVE);
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1113) + "SearchParameter.base is missing", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1113) + "SearchParameter.base is missing");
 		}
 	}
 
@@ -98,7 +97,7 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		com.setStatus(CommunicationStatusEnum.IN_PROGRESS);
 		try {
 			myCommunicationDao.create(com, mySrd);
-			fail();
+			fail("");
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(504) + "Failed to extract values from resource using FHIRPath \"Communication.payload[1].contentAttachment is not null\": ca.uhn");
 		}
@@ -115,9 +114,9 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		fooSp.setStatus(ConformanceResourceStatusEnum.ACTIVE);
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1114) + "SearchParameter.expression is missing", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1114) + "SearchParameter.expression is missing");
 		}
 	}
 
@@ -133,9 +132,9 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		fooSp.setStatus((ConformanceResourceStatusEnum) null);
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1112) + "SearchParameter.status is missing or invalid", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1112) + "SearchParameter.status is missing or invalid");
 		}
 
 	}
@@ -221,13 +220,13 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		IBundleProvider search;
 
 		search = myPatientDao.search(SearchParameterMap.newSynchronous("future-appointment-count", new NumberParam(1)));
-		assertEquals(1, search.size());
+		assertThat(search.size()).isEqualTo(1);
 
 		search = myPatientDao.search(SearchParameterMap.newSynchronous("future-appointment-count", new NumberParam("gt0")));
-		assertEquals(1, search.size());
+		assertThat(search.size()).isEqualTo(1);
 
 		search = myPatientDao.search(SearchParameterMap.newSynchronous("future-appointment-count", new NumberParam("lt0")));
-		assertEquals(0, search.size());
+		assertThat(search.size()).isEqualTo(0);
 
 	}
 
@@ -987,9 +986,9 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		map.add("foo", new TokenParam(null, "male"));
 		try {
 			myPatientDao.search(map).size();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, careprovider, deathdate, deceased, email, family, gender, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, careprovider, deathdate, deceased, email, family, gender, given, identifier, language, link, name, organization, phone, phonetic, telecom]");
 		}
 	}
 
@@ -1024,9 +1023,9 @@ public class FhirResourceDaoDstu2SearchCustomSearchParamTest extends BaseJpaDstu
 		map.add("foo", new TokenParam(null, "male"));
 		try {
 			myPatientDao.search(map).size();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, careprovider, deathdate, deceased, email, family, gender, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, careprovider, deathdate, deceased, email, family, gender, given, identifier, language, link, name, organization, phone, phonetic, telecom]");
 		}
 
 		// Try with normal gender SP

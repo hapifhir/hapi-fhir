@@ -20,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NpmDstu3Test extends BaseJpaDstu3Test {
 
@@ -62,13 +61,13 @@ public class NpmDstu3Test extends BaseJpaDstu3Test {
 		myServer.stopServer();
 
 		StructureDefinition sd = (StructureDefinition) myNpmJpaValidationSupport.fetchStructureDefinition("http://fhir.de/StructureDefinition/condition-de-basis/0.2");
-		assertEquals("http://fhir.de/StructureDefinition/condition-de-basis/0.2", sd.getUrl());
+		assertThat(sd.getUrl()).isEqualTo("http://fhir.de/StructureDefinition/condition-de-basis/0.2");
 
 		ValueSet vs = (ValueSet) myNpmJpaValidationSupport.fetchValueSet("http://fhir.de/ValueSet/ifa/pzn");
-		assertEquals("http://fhir.de/ValueSet/ifa/pzn", vs.getUrl());
+		assertThat(vs.getUrl()).isEqualTo("http://fhir.de/ValueSet/ifa/pzn");
 
 		CodeSystem cs = (CodeSystem) myNpmJpaValidationSupport.fetchCodeSystem("http://fhir.de/CodeSystem/deuev/anlage-8-laenderkennzeichen");
-		assertEquals("http://fhir.de/CodeSystem/deuev/anlage-8-laenderkennzeichen", cs.getUrl());
+		assertThat(cs.getUrl()).isEqualTo("http://fhir.de/CodeSystem/deuev/anlage-8-laenderkennzeichen");
 
 		// Try and validate using a profile from the IG
 		Condition condition = new Condition();

@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 
@@ -143,11 +142,11 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
-		
-		assertEquals(1, output.getEntry().size());
+
+		assertThat(output.getEntry().size()).isEqualTo(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
-		assertEquals(5, respBundle.getEntry().size());
-		assertEquals(null, respBundle.getLink("next"));
+		assertThat(respBundle.getEntry().size()).isEqualTo(5);
+		assertThat(respBundle.getLink("next")).isEqualTo(null);
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 	}
@@ -166,17 +165,17 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
-		
-		assertEquals(1, output.getEntry().size());
+
+		assertThat(output.getEntry().size()).isEqualTo(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
-		assertEquals(5, respBundle.getEntry().size());
+		assertThat(respBundle.getEntry().size()).isEqualTo(5);
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 		
 		String nextPageLink = respBundle.getLink("next").getUrl();
 		output = ourClient.loadPage().byUrl(nextPageLink).andReturnBundle(Bundle.class).execute();
 		respBundle = output;
-		assertEquals(5, respBundle.getEntry().size());
+		assertThat(respBundle.getEntry().size()).isEqualTo(5);
 		actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(5, 10).toArray(new String[0]));
 	}
@@ -224,8 +223,8 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		assertThat(response.getLocation()).isEqualTo(pid1.getValue() + "/_history/2");
 
 		Patient newPt = ourClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertEquals("2", newPt.getIdElement().getVersionIdPart());
-		assertEquals(false, newPt.getActive());
+		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("2");
+		assertThat(newPt.getActive()).isEqualTo(false);
 	}
 
 
@@ -246,11 +245,11 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
-		
-		assertEquals(1, output.getEntry().size());
+
+		assertThat(output.getEntry().size()).isEqualTo(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
-		assertEquals(5, respBundle.getEntry().size());
-		assertEquals(null, respBundle.getLink("next"));
+		assertThat(respBundle.getEntry().size()).isEqualTo(5);
+		assertThat(respBundle.getLink("next")).isEqualTo(null);
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 	}
@@ -269,17 +268,17 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
-		
-		assertEquals(1, output.getEntry().size());
+
+		assertThat(output.getEntry().size()).isEqualTo(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
-		assertEquals(5, respBundle.getEntry().size());
+		assertThat(respBundle.getEntry().size()).isEqualTo(5);
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 		
 		String nextPageLink = respBundle.getLink("next").getUrl();
 		output = ourClient.loadPage().byUrl(nextPageLink).andReturnBundle(Bundle.class).execute();
 		respBundle = output;
-		assertEquals(5, respBundle.getEntry().size());
+		assertThat(respBundle.getEntry().size()).isEqualTo(5);
 		actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(5, 10).toArray(new String[0]));
 	}
@@ -304,11 +303,11 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
-		
-		assertEquals(30, output.getEntry().size());
+
+		assertThat(output.getEntry().size()).isEqualTo(30);
 		for (int i = 0; i < 30; i++) {
 			Bundle respBundle = (Bundle) output.getEntry().get(i).getResource();
-			assertEquals(5, respBundle.getEntry().size());
+			assertThat(respBundle.getEntry().size()).isEqualTo(5);
 			assertThat(respBundle.getLink("next").getUrl()).isNotNull();
 			List<String> actualIds = toIds(respBundle);
 			assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));

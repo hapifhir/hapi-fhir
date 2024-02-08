@@ -14,8 +14,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2Test {
 	private IIdType myOneVersionPatientId;
@@ -34,7 +34,7 @@ public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2T
 	private void assertExpunged(IIdType theId) {
 		try {
 			getDao(theId).read(theId);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -110,7 +110,7 @@ public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2T
 				dao = myObservationDao;
 				break;
 			default:
-				fail("Restype: " + theId.getResourceType());
+				fail("", "Restype: " + theId.getResourceType());
 				dao = myPatientDao;
 		}
 		return dao;
@@ -150,9 +150,9 @@ public class ResourceProviderExpungeDstu2Test extends BaseResourceProviderDstu2T
 			myPatientDao.expunge(myTwoVersionPatientId.withVersion("2"), new ExpungeOptions()
 				.setExpungeDeletedResources(true)
 				.setExpungeOldVersions(true), null);
-			fail();
+			fail("");
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(969) + "Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(969) + "Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version");
 		}
 	}
 

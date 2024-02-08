@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CorsDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -22,7 +22,7 @@ public class CorsDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info(resp.toString());
 		
 		IOUtils.closeQuietly(resp.getEntity().getContent());
-		assertEquals(200, resp.getStatusLine().getStatusCode());
+		assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
 	}
 
 }

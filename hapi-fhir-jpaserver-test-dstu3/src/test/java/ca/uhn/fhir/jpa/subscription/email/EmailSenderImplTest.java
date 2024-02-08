@@ -19,8 +19,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class EmailSenderImplTest {
 
@@ -46,22 +45,22 @@ public class EmailSenderImplTest {
 		details.setBodyTemplate("foo");
 		fixture.send(details);
 
-		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
+		assertThat(ourGreenMail.waitForIncomingEmail(10000, 1)).isTrue();
 
 		MimeMessage[] messages = ourGreenMail.getReceivedMessages();
-		assertEquals(2, messages.length);
+		assertThat(messages.length).isEqualTo(2);
 		final MimeMessage message = messages[0];
 		ourLog.info("Received: " + GreenMailUtil.getWholeMessage(message));
-		assertEquals("test subject", message.getSubject());
-		assertEquals(1, message.getFrom().length);
-		assertEquals("foo@example.com", ((InternetAddress) message.getFrom()[0]).getAddress());
-		assertEquals(2, message.getAllRecipients().length);
-		assertEquals("to1@example.com", ((InternetAddress) message.getAllRecipients()[0]).getAddress());
-		assertEquals("to2@example.com", ((InternetAddress) message.getAllRecipients()[1]).getAddress());
-		assertEquals(1, message.getHeader("Content-Type").length);
-		assertEquals("text/plain; charset=UTF-8", message.getHeader("Content-Type")[0]);
+		assertThat(message.getSubject()).isEqualTo("test subject");
+		assertThat(message.getFrom().length).isEqualTo(1);
+		assertThat(((InternetAddress) message.getFrom()[0]).getAddress()).isEqualTo("foo@example.com");
+		assertThat(message.getAllRecipients().length).isEqualTo(2);
+		assertThat(((InternetAddress) message.getAllRecipients()[0]).getAddress()).isEqualTo("to1@example.com");
+		assertThat(((InternetAddress) message.getAllRecipients()[1]).getAddress()).isEqualTo("to2@example.com");
+		assertThat(message.getHeader("Content-Type").length).isEqualTo(1);
+		assertThat(message.getHeader("Content-Type")[0]).isEqualTo("text/plain; charset=UTF-8");
 		String foundBody = GreenMailUtil.getBody(message);
-		assertEquals("foo", foundBody);
+		assertThat(foundBody).isEqualTo("foo");
 	}
 
 	private IMailSvc withMailService() {

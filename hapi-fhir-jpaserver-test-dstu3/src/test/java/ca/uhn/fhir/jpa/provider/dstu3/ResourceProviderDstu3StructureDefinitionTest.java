@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourceProviderDstu3Test {
 
@@ -29,7 +29,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 			.withParameter(Parameters.class, "definition", sd)
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(54, response.getSnapshot().getElement().size());
+		assertThat(response.getSnapshot().getElement().size()).isEqualTo(54);
 	}
 
 
@@ -45,7 +45,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 			.withNoParameters(Parameters.class)
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(54, response.getSnapshot().getElement().size());
+		assertThat(response.getSnapshot().getElement().size()).isEqualTo(54);
 	}
 
 
@@ -61,7 +61,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 			.withParameter(Parameters.class, "url", new StringType("http://hl7.org/fhir/StructureDefinition/MyPatient421"))
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertEquals(54, response.getSnapshot().getElement().size());
+		assertThat(response.getSnapshot().getElement().size()).isEqualTo(54);
 	}
 
 	@Test
@@ -75,7 +75,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 				.returnResourceType(StructureDefinition.class)
 				.execute();
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1770) + "Must supply either an ID or a StructureDefinition or a URL (but not more than one of these things)", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1770) + "Must supply either an ID or a StructureDefinition or a URL (but not more than one of these things)");
 		}
 	}
 
@@ -90,7 +90,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 				.returnResourceType(StructureDefinition.class)
 				.execute();
 		} catch (ResourceNotFoundException e) {
-			assertEquals("HTTP 404 Not Found: " + Msg.code(1162) + "No StructureDefiniton found with url = 'http://hl7.org/fhir/StructureDefinition/FOO'", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 404 Not Found: " + Msg.code(1162) + "No StructureDefiniton found with url = 'http://hl7.org/fhir/StructureDefinition/FOO'");
 		}
 	}
 }

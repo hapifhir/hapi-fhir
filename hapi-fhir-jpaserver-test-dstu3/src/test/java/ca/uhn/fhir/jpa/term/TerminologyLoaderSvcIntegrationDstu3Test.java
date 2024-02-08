@@ -30,9 +30,6 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
@@ -160,21 +157,21 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
 		Optional<Coding> propertyValue = findProperty(parameters, "SCALE_TYP");
-		assertTrue(propertyValue.isPresent());
-		assertEquals(ITermLoaderSvc.LOINC_URI, propertyValue.get().getSystem());
-		assertEquals("LP7753-9", propertyValue.get().getCode());
-		assertEquals("Qn", propertyValue.get().getDisplay());
+		assertThat(propertyValue.isPresent()).isTrue();
+		assertThat(propertyValue.get().getSystem()).isEqualTo(ITermLoaderSvc.LOINC_URI);
+		assertThat(propertyValue.get().getCode()).isEqualTo("LP7753-9");
+		assertThat(propertyValue.get().getDisplay()).isEqualTo("Qn");
 
 		propertyValue = findProperty(parameters, "COMPONENT");
-		assertTrue(propertyValue.isPresent());
+		assertThat(propertyValue.isPresent()).isTrue();
 
 		Optional<StringType> propertyValueString = findProperty(parameters, "ORDER_OBS");
-		assertTrue(propertyValueString.isPresent());
-		assertEquals("Observation", propertyValueString.get().getValue());
+		assertThat(propertyValueString.isPresent()).isTrue();
+		assertThat(propertyValueString.get().getValue()).isEqualTo("Observation");
 
 		propertyValueString = findProperty(parameters, "CLASSTYPE");
-		assertTrue(propertyValueString.isPresent());
-		assertEquals("2", propertyValueString.get().getValue());
+		assertThat(propertyValueString.isPresent()).isTrue();
+		assertThat(propertyValueString.get().getValue()).isEqualTo("2");
 
 	}
 
@@ -190,10 +187,10 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
 		Optional<Coding> propertyValue = findProperty(parameters, "COMPONENT");
-		assertTrue(propertyValue.isPresent());
-		assertEquals(ITermLoaderSvc.LOINC_URI, propertyValue.get().getSystem());
-		assertEquals("LP31101-6", propertyValue.get().getCode());
-		assertEquals("R' wave amplitude.lead I", propertyValue.get().getDisplay());
+		assertThat(propertyValue.isPresent()).isTrue();
+		assertThat(propertyValue.get().getSystem()).isEqualTo(ITermLoaderSvc.LOINC_URI);
+		assertThat(propertyValue.get().getCode()).isEqualTo("LP31101-6");
+		assertThat(propertyValue.get().getDisplay()).isEqualTo("R' wave amplitude.lead I");
 	}
 
 	@Test
@@ -209,13 +206,13 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
 		Optional<Coding> propertyValueCoding = findProperty(parameters, "SCALE_TYP");
-		assertTrue(propertyValueCoding.isPresent());
-		assertEquals(ITermLoaderSvc.LOINC_URI, propertyValueCoding.get().getSystem());
-		assertEquals("LP7753-9", propertyValueCoding.get().getCode());
-		assertEquals("Qn", propertyValueCoding.get().getDisplay());
+		assertThat(propertyValueCoding.isPresent()).isTrue();
+		assertThat(propertyValueCoding.get().getSystem()).isEqualTo(ITermLoaderSvc.LOINC_URI);
+		assertThat(propertyValueCoding.get().getCode()).isEqualTo("LP7753-9");
+		assertThat(propertyValueCoding.get().getDisplay()).isEqualTo("Qn");
 
 		propertyValueCoding = findProperty(parameters, "COMPONENT");
-		assertFalse(propertyValueCoding.isPresent());
+		assertThat(propertyValueCoding.isPresent()).isFalse();
 
 	}
 
@@ -229,8 +226,8 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
-		assertTrue(result.isOk());
-		assertEquals("R' wave amplitude in lead I", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("R' wave amplitude in lead I");
 	}
 
 	@Test
@@ -242,8 +239,8 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		myTerminologyDeferredStorageSvc.saveDeferred();
 
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
-		assertFalse(result.isOk());
-		assertEquals("Unknown code 'http://loinc.org#10013-1-9999999999' for in-memory expansion of ValueSet 'http://loinc.org/vs'", result.getMessage());
+		assertThat(result.isOk()).isFalse();
+		assertThat(result.getMessage()).isEqualTo("Unknown code 'http://loinc.org#10013-1-9999999999' for in-memory expansion of ValueSet 'http://loinc.org/vs'");
 	}
 
 	private Set<String> toExpandedCodes(ValueSet theExpanded) {

@@ -42,9 +42,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.DaoTestUtils.logAllInterceptors;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -148,9 +146,9 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		try {
 			createSubscription(criteria1, payload, ourListenerServerBase);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(9) + "Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT " + Msg.code(488) + "Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 422 Unprocessable Entity: " + Msg.code(9) + "Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT " + Msg.code(488) + "Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee");
 		}
 	}
 
@@ -181,7 +179,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		waitForSize(1, ourUpdatedObservations);
 
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
-		assertNotNull(subscriptionTemp);
+		assertThat(subscriptionTemp).isNotNull();
 
 		// Update subscription 2 to match as well
 		subscriptionTemp.setCriteria(criteria1);
@@ -235,9 +233,9 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		assertFalse(subscription1.getId().equals(subscription2.getId()));
-		assertFalse(observation1.getId().isEmpty());
-		assertFalse(observation2.getId().isEmpty());
+		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
+		assertThat(observation1.getId().isEmpty()).isFalse();
+		assertThat(observation2.getId().isEmpty()).isFalse();
 	}
 
 	@Test
@@ -259,7 +257,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		waitForSize(1, ourUpdatedObservations);
 
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
-		assertNotNull(subscriptionTemp);
+		assertThat(subscriptionTemp).isNotNull();
 
 		subscriptionTemp.setCriteria(criteria1);
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
@@ -307,9 +305,9 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		assertFalse(subscription1.getId().equals(subscription2.getId()));
-		assertFalse(observation1.getId().isEmpty());
-		assertFalse(observation2.getId().isEmpty());
+		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
+		assertThat(observation1.getId().isEmpty()).isFalse();
+		assertThat(observation2.getId().isEmpty()).isFalse();
 	}
 
 	@Test
@@ -319,7 +317,7 @@ public class RestHookTestDstu2Test extends BaseResourceProviderDstu2Test {
 
 		try {
 			myClient.create().resource(subscription).execute();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Can not process submitted Subscription - Subscription.status must be populated on this server");
 		}

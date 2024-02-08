@@ -21,8 +21,8 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -43,7 +43,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 	private void assertExpunged(IIdType theId) {
 		try {
 			getDao(theId).read(theId);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -119,7 +119,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 				dao = myObservationDao;
 				break;
 			default:
-				fail("Restype: " + theId.getResourceType());
+				fail("", "Restype: " + theId.getResourceType());
 				dao = myPatientDao;
 		}
 		return dao;
@@ -159,9 +159,9 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 			myPatientDao.expunge(myTwoVersionPatientId.withVersion("2"), new ExpungeOptions()
 				.setExpungeDeletedResources(true)
 				.setExpungeOldVersions(true), null);
-			fail();
+			fail("");
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(969) + "Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(969) + "Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version");
 		}
 	}
 
@@ -295,9 +295,9 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 				.setExpungeDeletedResources(true)
 				.setExpungeOldVersions(true)
 				.setLimit(0), null);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1087) + "Expunge limit may not be less than 1.  Received expunge limit 0.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1087) + "Expunge limit may not be less than 1.  Received expunge limit 0.");
 		}
 	}
 

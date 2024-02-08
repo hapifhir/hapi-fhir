@@ -19,9 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ExpungeHookTest extends BaseJpaDstu3Test {
@@ -46,8 +44,8 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 
 	@AfterEach
 	public void after() {
-		assertTrue(myInterceptorService.unregisterInterceptor(myEverythingLatch));
-		assertTrue(myInterceptorService.unregisterInterceptor(myExpungeResourceLatch));
+		assertThat(myInterceptorService.unregisterInterceptor(myEverythingLatch)).isTrue();
+		assertThat(myInterceptorService.unregisterInterceptor(myExpungeResourceLatch)).isTrue();
 		myStorageSettings.setExpungeEnabled(new JpaStorageSettings().isExpungeEnabled());
 		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
@@ -56,7 +54,7 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 	@Test
 	public void expungeEverythingHook() throws InterruptedException {
 		IIdType id = myPatientDao.create(new Patient()).getId();
-		assertNotNull(myPatientDao.read(id));
+		assertThat(myPatientDao.read(id)).isNotNull();
 
 		myEverythingLatch.setExpectedCount(1);
 		ExpungeOptions options = new ExpungeOptions();
@@ -77,7 +75,7 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 		thePatient.setMeta(theMeta);
 
 		IIdType id = myPatientDao.update(thePatient, mySrd).getId();
-		assertNotNull(myPatientDao.read(id));
+		assertThat(myPatientDao.read(id)).isNotNull();
 
 		// Expunge it directly.
 		myPatientDao.delete(id);
@@ -93,7 +91,7 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 
 		// Create it a second time.
 		myPatientDao.update(thePatient, mySrd);
-		assertNotNull(myPatientDao.read(id));
+		assertThat(myPatientDao.read(id)).isNotNull();
 
 		// Expunge everything with the service.
 		myEverythingLatch.setExpectedCount(1);
@@ -103,13 +101,13 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 
 		// Create it a third time.
 		myPatientDao.update(thePatient, mySrd);
-		assertNotNull(myPatientDao.read(id));
+		assertThat(myPatientDao.read(id)).isNotNull();
 	}
 
 	private void assertPatientGone(IIdType theId) {
 		try {
 			myPatientDao.read(theId);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			assertThat(e.getMessage()).contains("is not known");
 		}
@@ -118,7 +116,7 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 	@Test
 	public void expungeResourceHook() throws InterruptedException {
 		IIdType expungeId = myPatientDao.create(new Patient()).getId();
-		assertNotNull(myPatientDao.read(expungeId));
+		assertThat(myPatientDao.read(expungeId)).isNotNull();
 		myPatientDao.delete(expungeId);
 
 		ExpungeOptions options = new ExpungeOptions();
@@ -129,6 +127,6 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 		HookParams hookParams = myExpungeResourceLatch.awaitExpected().get(0);
 
 		IIdType hookId = hookParams.get(IIdType.class);
-		assertEquals(expungeId.getValue(), hookId.getValue());
+		assertThat(hookId.getValue()).isEqualTo(expungeId.getValue());
 	}
 }

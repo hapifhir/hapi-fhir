@@ -32,8 +32,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
@@ -57,8 +56,8 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		codeSystem.setUrl("http://foo");
 		IIdType id2 = myCodeSystemDao.update(codeSystem, "CodeSystem?url=http://foo", mySrd).getId();
 
-		assertNotEquals(id.getIdPart(), id2.getIdPart());
-		assertEquals("1", id2.getVersionIdPart());
+		assertThat(id2.getIdPart()).isNotEqualTo(id.getIdPart());
+		assertThat(id2.getVersionIdPart()).isEqualTo("1");
 	}
 
 	@Test
@@ -73,7 +72,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.addIdentifier().setSystem("urn:system").setValue(methodName + "2");
 		p.setActive(true);
 		IIdType id2 = myPatientDao.create(p, "Patient?identifier=urn:system|" + methodName + "2").getId().toUnqualified();
-		assertEquals(id.getValue(), id2.getValue());
+		assertThat(id2.getValue()).isEqualTo(id.getValue());
 
 		p = new Patient();
 		p.setId(id);
@@ -83,20 +82,20 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 		p.setActive(true);
 		id2 = myPatientDao.update(p, "Patient?identifier=urn:system|" + methodName + "2").getId().toUnqualified();
-		assertEquals(id.getIdPart(), id2.getIdPart());
-		assertEquals("3", id2.getVersionIdPart());
+		assertThat(id2.getIdPart()).isEqualTo(id.getIdPart());
+		assertThat(id2.getVersionIdPart()).isEqualTo("3");
 
 		Patient newPatient = myPatientDao.read(id);
-		assertEquals("1", newPatient.getIdElement().getVersionIdPart());
+		assertThat(newPatient.getIdElement().getVersionIdPart()).isEqualTo("1");
 
 		newPatient = myPatientDao.read(id.toVersionless());
-		assertEquals("3", newPatient.getIdElement().getVersionIdPart());
+		assertThat(newPatient.getIdElement().getVersionIdPart()).isEqualTo("3");
 
 		myPatientDao.delete(id.toVersionless());
 
 		try {
 			myPatientDao.read(id.toVersionless());
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// nothing
 		}
@@ -124,8 +123,8 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
 			List<UriType> tl = patient.getMeta().getProfile();
-			assertEquals(1, tl.size());
-			assertEquals("http://foo/bar", tl.get(0).getValue());
+			assertThat(tl.size()).isEqualTo(1);
+			assertThat(tl.get(0).getValue()).isEqualTo("http://foo/bar");
 		}
 
 	}
@@ -149,9 +148,9 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			patient.setActive(true);
 			try {
 				id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-				fail();
+				fail("");
 			} catch (UnprocessableEntityException e) {
-				assertEquals(Msg.code(932) + "Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
+				assertThat(e.getMessage()).isEqualTo(Msg.code(932) + "Resource contains 4 meta entries (tag/profile/security label), maximum is 3");
 			}
 		}
 	}
@@ -175,9 +174,9 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			meta.addTag().setSystem("http://foo").setCode("4");
 			try {
 				myPatientDao.metaAddOperation(id, meta, null);
-				fail();
+				fail("");
 			} catch (UnprocessableEntityException e) {
-				assertEquals(Msg.code(932) + "Resource contains 4 meta entries (tag/profile/security label), maximum is 3", e.getMessage());
+				assertThat(e.getMessage()).isEqualTo(Msg.code(932) + "Resource contains 4 meta entries (tag/profile/security label), maximum is 3");
 			}
 
 		}
@@ -202,9 +201,9 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
 			List<Coding> tl = patient.getMeta().getTag();
-			assertEquals(1, tl.size());
-			assertEquals("http://foo", tl.get(0).getSystem());
-			assertEquals("bar", tl.get(0).getCode());
+			assertThat(tl.size()).isEqualTo(1);
+			assertThat(tl.get(0).getSystem()).isEqualTo("http://foo");
+			assertThat(tl.get(0).getCode()).isEqualTo("bar");
 		}
 
 	}
@@ -232,16 +231,16 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
 			List<Coding> tl = patient.getMeta().getTag();
-			assertEquals(1, tl.size());
-			assertEquals("http://foo", tl.get(0).getSystem());
-			assertEquals("bar", tl.get(0).getCode());
+			assertThat(tl.size()).isEqualTo(1);
+			assertThat(tl.get(0).getSystem()).isEqualTo("http://foo");
+			assertThat(tl.get(0).getCode()).isEqualTo("bar");
 		}
 
 		// Do a read on first version
 		{
 			Patient patient = myPatientDao.read(id.withVersion("1"), mySrd);
 			List<Coding> tl = patient.getMeta().getTag();
-			assertEquals(0, tl.size());
+			assertThat(tl.size()).isEqualTo(0);
 		}
 
 		Meta meta = new Meta();
@@ -254,9 +253,9 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		{
 			Patient patient = myPatientDao.read(id.withVersion("1"), mySrd);
 			List<Coding> tl = patient.getMeta().getTag();
-			assertEquals(1, tl.size());
-			assertEquals("http://foo", tl.get(0).getSystem());
-			assertEquals("bar", tl.get(0).getCode());
+			assertThat(tl.size()).isEqualTo(1);
+			assertThat(tl.get(0).getSystem()).isEqualTo("http://foo");
+			assertThat(tl.get(0).getCode()).isEqualTo("bar");
 		}
 
 	}
@@ -270,7 +269,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.setId("Patient/A");
 		String id = myPatientDao.update(p).getId().getValue();
 		assertThat(id).endsWith("Patient/A/_history/1");
-		assertEquals("1", myPatientDao.read(new IdType("Patient/A")).getIdElement().getVersionIdPart());
+		assertThat(myPatientDao.read(new IdType("Patient/A")).getIdElement().getVersionIdPart()).isEqualTo("1");
 
 		// Second time should not result in an update
 		p = new Patient();
@@ -278,7 +277,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.setId("Patient/A");
 		id = myPatientDao.update(p).getId().getValue();
 		assertThat(id).endsWith("Patient/A/_history/1");
-		assertEquals("1", myPatientDao.read(new IdType("Patient/A")).getIdElement().getVersionIdPart());
+		assertThat(myPatientDao.read(new IdType("Patient/A")).getIdElement().getVersionIdPart()).isEqualTo("1");
 
 		// And third time should not result in an update
 		p = new Patient();
@@ -286,19 +285,19 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.setId("Patient/A");
 		id = myPatientDao.update(p).getId().getValue();
 		assertThat(id).endsWith("Patient/A/_history/1");
-		assertEquals("1", myPatientDao.read(new IdType("Patient/A")).getIdElement().getVersionIdPart());
+		assertThat(myPatientDao.read(new IdType("Patient/A")).getIdElement().getVersionIdPart()).isEqualTo("1");
 
 		myPatientDao.read(new IdType("Patient/A"));
 		myPatientDao.read(new IdType("Patient/A/_history/1"));
 		try {
 			myPatientDao.read(new IdType("Patient/A/_history/2"));
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
 		try {
 			myPatientDao.read(new IdType("Patient/A/_history/3"));
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -332,8 +331,8 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 		p = myPatientDao.read(id.toVersionless(), mySrd);
 		assertThat(p.getIdElement().toVersionless().toString()).doesNotContain("test");
-		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
-		assertNotEquals(id, p.getIdElement());
+		assertThat(p.getIdElement().toVersionless()).isEqualTo(id.toVersionless());
+		assertThat(p.getIdElement()).isNotEqualTo(id);
 		assertThat(p.getIdElement().toString()).endsWith("/_history/2");
 
 	}
@@ -368,8 +367,8 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 		p = myPatientDao.read(id.toVersionless(), mySrd);
 		assertThat(p.getIdElement().toVersionless().toString()).doesNotContain("test");
-		assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
-		assertNotEquals(id, p.getIdElement());
+		assertThat(p.getIdElement().toVersionless()).isEqualTo(id.toVersionless());
+		assertThat(p.getIdElement()).isNotEqualTo(id);
 		assertThat(p.getIdElement().toString()).endsWith("/_history/2");
 
 	}
@@ -404,8 +403,8 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 
 			p = myPatientDao.read(id.toVersionless(), mySrd);
 			assertThat(p.getIdElement().toVersionless().toString()).doesNotContain("test");
-			assertEquals(id.toVersionless(), p.getIdElement().toVersionless());
-			assertNotEquals(id, p.getIdElement());
+			assertThat(p.getIdElement().toVersionless()).isEqualTo(id.toVersionless());
+			assertThat(p.getIdElement()).isNotEqualTo(id);
 			assertThat(p.getIdElement().toString()).endsWith("/_history/2");
 		} finally {
 			TimeZone.setDefault(def);
@@ -421,10 +420,10 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.setId("Patient/" + methodName);
 
 		IIdType id = myPatientDao.update(p, mySrd).getId();
-		assertEquals("Patient/" + methodName, id.toUnqualifiedVersionless().getValue());
+		assertThat(id.toUnqualifiedVersionless().getValue()).isEqualTo("Patient/" + methodName);
 
 		p = myPatientDao.read(id, mySrd);
-		assertEquals(methodName, p.getIdentifier().get(0).getValue());
+		assertThat(p.getIdentifier().get(0).getValue()).isEqualTo(methodName);
 	}
 
 	@Test
@@ -448,11 +447,11 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		IIdType p1id = myPatientDao.create(p1, mySrd).getId();
 
 		IIdType p1id2 = myPatientDao.update(p1, mySrd).getId();
-		assertEquals(p1id.getValue(), p1id2.getValue());
+		assertThat(p1id2.getValue()).isEqualTo(p1id.getValue());
 
 		p1.addName().addGiven("NewGiven");
 		IIdType p1id3 = myPatientDao.update(p1, mySrd).getId();
-		assertNotEquals(p1id.getValue(), p1id3.getValue());
+		assertThat(p1id3.getValue()).isNotEqualTo(p1id.getValue());
 
 	}
 
@@ -469,7 +468,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		myPatientDao.create(p2, mySrd).getId();
 
 		List<JpaPid> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")), null);
-		assertEquals(1, ids.size());
+		assertThat(ids.size()).isEqualTo(1);
 		assertThat(JpaPid.toLongList(ids)).containsExactly(p1id.getIdPartAsLong());
 
 		// Update the name
@@ -478,17 +477,17 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		IIdType p1id2 = update2.getId();
 
 		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2AAA")), null);
-		assertEquals(0, ids.size());
+		assertThat(ids.size()).isEqualTo(0);
 
 		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringParam("testUpdateMaintainsSearchParamsDstu2BBB")), null);
-		assertEquals(2, ids.size());
+		assertThat(ids.size()).isEqualTo(2);
 
 		// Make sure vreads work
 		p1 = myPatientDao.read(p1id, mySrd);
-		assertEquals("testUpdateMaintainsSearchParamsDstu2AAA", p1.getName().get(0).getGivenAsSingleString());
+		assertThat(p1.getName().get(0).getGivenAsSingleString()).isEqualTo("testUpdateMaintainsSearchParamsDstu2AAA");
 
 		p1 = myPatientDao.read(p1id2, mySrd);
-		assertEquals("testUpdateMaintainsSearchParamsDstu2BBB", p1.getName().get(0).getGivenAsSingleString());
+		assertThat(p1.getName().get(0).getGivenAsSingleString()).isEqualTo("testUpdateMaintainsSearchParamsDstu2BBB");
 
 	}
 
@@ -536,8 +535,8 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			}
 			assertThat(secListValues).containsExactlyInAnyOrder("sec_scheme1|sec_term1", "sec_scheme2|sec_term2");
 			List<UriType> profileList = p1.getMeta().getProfile();
-			assertEquals(1, profileList.size());
-			assertEquals("http://foo2", profileList.get(0).getValueAsString()); // no foo1
+			assertThat(profileList.size()).isEqualTo(1);
+			assertThat(profileList.get(0).getValueAsString()).isEqualTo("http://foo2"); // no foo1
 		}
 	}
 
@@ -560,8 +559,8 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
 			List<UriType> tl = patient.getMeta().getProfile();
-			assertEquals(1, tl.size());
-			assertEquals("http://foo/bar", tl.get(0).getValue());
+			assertThat(tl.size()).isEqualTo(1);
+			assertThat(tl.get(0).getValue()).isEqualTo("http://foo/bar");
 		}
 
 		// Update
@@ -582,8 +581,8 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
 			List<UriType> tl = patient.getMeta().getProfile();
-			assertEquals(1, tl.size());
-			assertEquals("http://foo/baz", tl.get(0).getValue());
+			assertThat(tl.size()).isEqualTo(1);
+			assertThat(tl.get(0).getValue()).isEqualTo("http://foo/baz");
 		}
 
 	}
@@ -600,17 +599,17 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		try {
 			p2.setId(new IdType("Organization/" + p1id.getIdPart()));
 			myOrganizationDao.update(p2, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(930) + "Existing resource ID[Patient/" + p1id.getIdPartAsLong() + "] is of type[Patient] - Cannot update with [Organization]", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(930) + "Existing resource ID[Patient/" + p1id.getIdPartAsLong() + "] is of type[Patient] - Cannot update with [Organization]");
 		}
 
 		try {
 			p2.setId(new IdType("Patient/" + p1id.getIdPart()));
 			myOrganizationDao.update(p2, mySrd);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(996) + "Incorrect resource type (Patient) for this DAO, wanted: Organization", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(996) + "Incorrect resource type (Patient) for this DAO, wanted: Organization");
 		}
 
 	}
@@ -623,7 +622,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.setId("Patient/9999999999999999");
 		try {
 			myPatientDao.update(p, mySrd);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Can not create resource with ID[9999999999999999], no resource with this ID exists and clients may only");
 		}
@@ -637,9 +636,9 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.setId("Patient/123:456");
 		try {
 			myPatientDao.update(p, mySrd);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(521) + "Can not process entity with ID[123:456], this is not a valid FHIR ID", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(521) + "Can not process entity with ID[123:456], this is not a valid FHIR ID");
 		}
 	}
 
@@ -663,7 +662,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			id2 = myPatientDao.update(patient, mySrd).getId().toUnqualified();
 		}
 
-		assertNotEquals(id1.getValue(), id2.getValue());
+		assertThat(id2.getValue()).isNotEqualTo(id1.getValue());
 	}
 
 	@Test
@@ -685,7 +684,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			id2 = myPatientDao.update(patient, mySrd).getId().toUnqualified();
 		}
 
-		assertNotEquals(id1.getValue(), id2.getValue());
+		assertThat(id2.getValue()).isNotEqualTo(id1.getValue());
 	}
 
 	@Test
@@ -704,7 +703,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		myPatientDao.metaDeleteOperation(id1, meta, null);
 
 		meta = myPatientDao.metaGetOperation(Meta.class, id1, null);
-		assertEquals(0, meta.getTag().size());
+		assertThat(meta.getTag().size()).isEqualTo(0);
 
 		// Update
 		{
@@ -714,10 +713,10 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			id2 = myPatientDao.update(patient, mySrd).getId().toUnqualified();
 		}
 
-		assertEquals(id1.getValue(), id2.getValue());
+		assertThat(id2.getValue()).isEqualTo(id1.getValue());
 
 		meta = myPatientDao.metaGetOperation(Meta.class, id2, null);
-		assertEquals(0, meta.getTag().size());
+		assertThat(meta.getTag().size()).isEqualTo(0);
 	}
 
 	@Test
@@ -744,11 +743,11 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			id2 = myPatientDao.update(patient, mySrd).getId().toUnqualified();
 		}
 
-		assertEquals(id1.getValue(), id2.getValue());
+		assertThat(id2.getValue()).isEqualTo(id1.getValue());
 
 		meta = myPatientDao.metaGetOperation(Meta.class, id2, null);
-		assertEquals(1, meta.getTag().size());
-		assertEquals("CODE", meta.getTag().get(0).getCode());
+		assertThat(meta.getTag().size()).isEqualTo(1);
+		assertThat(meta.getTag().get(0).getCode()).isEqualTo("CODE");
 	}
 
 	@Test
@@ -770,11 +769,11 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			id2 = myPatientDao.update(patient, mySrd).getId().toUnqualified();
 		}
 
-		assertEquals(id1.getValue(), id2.getValue());
+		assertThat(id2.getValue()).isEqualTo(id1.getValue());
 
 		Meta meta = myPatientDao.metaGetOperation(Meta.class, id2, null);
-		assertEquals(1, meta.getTag().size());
-		assertEquals("CODE", meta.getTag().get(0).getCode());
+		assertThat(meta.getTag().size()).isEqualTo(1);
+		assertThat(meta.getTag().get(0).getCode()).isEqualTo("CODE");
 	}
 
 	@Test
@@ -795,7 +794,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 			id2 = myPatientDao.update(patient, mySrd).getId().toUnqualified();
 		}
 
-		assertEquals(id1.getValue(), id2.getValue());
+		assertThat(id2.getValue()).isEqualTo(id1.getValue());
 	}
 
 	@Test
@@ -806,7 +805,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.setId("Patient/123");
 		try {
 			myPatientDao.update(p, mySrd);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("clients may only assign IDs which contain at least one non-numeric");
 		}
@@ -819,12 +818,12 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		p.addName().setFamily("Hello");
 		p.setId("Patient/123abc");
 		IIdType id = myPatientDao.update(p, mySrd).getId();
-		assertEquals("123abc", id.getIdPart());
-		assertEquals("1", id.getVersionIdPart());
+		assertThat(id.getIdPart()).isEqualTo("123abc");
+		assertThat(id.getVersionIdPart()).isEqualTo("1");
 
 		p = myPatientDao.read(id.toUnqualifiedVersionless(), mySrd);
-		assertEquals("Patient/123abc", p.getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals("Hello", p.getName().get(0).getFamily());
+		assertThat(p.getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/123abc");
+		assertThat(p.getName().get(0).getFamily()).isEqualTo("Hello");
 
 	}
 
@@ -844,7 +843,7 @@ public class FhirResourceDaoDstu3UpdateTest extends BaseJpaDstu3Test {
 		try {
 			UUID.fromString(result);
 		} catch (IllegalArgumentException exception){
-			fail("Result id is not a UUID. Instead, it was: " + result);
+			fail("", "Result id is not a UUID. Instead, it was: " + result);
 		}
 	}
 

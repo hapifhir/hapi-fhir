@@ -21,7 +21,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"Duplicates"})
@@ -60,7 +59,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		IBundleProvider result = myPatientDao.search(params);
 		assertThat(toUnqualifiedVersionlessIdValues(result)).containsExactlyInAnyOrder(pt0id.getValue());
 		pt0 = (Patient) result.getResources(0, 1).get(0);
-		assertEquals("urn:source:0#a_request_id", pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE));
+		assertThat(pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE)).isEqualTo("urn:source:0#a_request_id");
 
 		// Search by request ID
 		params = new SearchParameterMap();
@@ -169,14 +168,14 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		pt0 = myPatientDao.read(pt0id);
-		assertEquals("urn:source:0", pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE));
+		assertThat(pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE)).isEqualTo("urn:source:0");
 
 		pt0.getMeta().getExtension().clear();
 		pt0.setActive(false);
 		myPatientDao.update(pt0);
 
 		pt0 = myPatientDao.read(pt0id.withVersion("2"));
-		assertEquals(null, pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE));
+		assertThat(pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE)).isEqualTo(null);
 
 	}
 
@@ -191,14 +190,14 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		pt0 = myPatientDao.read(pt0id);
-		assertEquals(null, pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE));
+		assertThat(pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE)).isEqualTo(null);
 
 		pt0.getMeta().addExtension(HapiExtensions.EXT_META_SOURCE, new StringType("urn:source:1"));
 		pt0.setActive(false);
 		myPatientDao.update(pt0);
 
 		pt0 = myPatientDao.read(pt0id.withVersion("2"));
-		assertEquals(null, pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE));
+		assertThat(pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE)).isEqualTo(null);
 
 		// Search without source param
 		SearchParameterMap params = new SearchParameterMap();
@@ -214,7 +213,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		try {
 			myPatientDao.search(params);
 		} catch (InvalidRequestException e) {
-			assertEquals(e.getMessage(), Msg.code(1216) + "The _source parameter is disabled on this server");
+			assertThat(Msg.code(1216) + "The _source parameter is disabled on this server").isEqualTo(e.getMessage());
 		}
 	}
 

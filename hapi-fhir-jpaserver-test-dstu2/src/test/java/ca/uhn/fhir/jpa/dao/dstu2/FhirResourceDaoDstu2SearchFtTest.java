@@ -24,7 +24,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.mock;
 
 public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
@@ -166,7 +165,7 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 		obs4.getCode().addCoding().setCode("CODE1");
 		obs4.setValue(new StringDt("obsvalue1"));
 		IIdType obsId4 = myObservationDao.create(obs4, mySrd).getId().toUnqualifiedVersionless();
-		assertNotEquals(obsId4.getIdPart(), devId1, obsId1.getIdPart());
+		assertThat(devId1).as(obsId1.getIdPart()).isNotEqualTo(obsId4.getIdPart());
 
 		param = new StringAndListParam();
 		everythingParams = new PatientEverythingParameters();
@@ -259,7 +258,7 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 		obs4.getCode().addCoding().setCode("CODE1");
 		obs4.setValue(new StringDt("obsvalue1"));
 		IIdType obsId4 = myObservationDao.create(obs4, mySrd).getId().toUnqualifiedVersionless();
-		assertNotEquals(obsId4.getIdPart(), devId1, obsId1.getIdPart());
+		assertThat(devId1).as(obsId1.getIdPart()).isNotEqualTo(obsId4.getIdPart());
 
 		param = new StringAndListParam();
 		everythingParams = new PatientEverythingParameters();

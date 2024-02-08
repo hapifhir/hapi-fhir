@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -120,7 +119,7 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 			});
 
 		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.DOCUMENT);
-		assertNull(bundle.getLinkOrCreate("next").getUrl());
+		assertThat(bundle.getLinkOrCreate("next").getUrl()).isNull();
 
 		Set<String> actual = new HashSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {

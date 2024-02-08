@@ -30,8 +30,8 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDstu3Test {
 
@@ -69,14 +69,14 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("SYSTEM NAME"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals(("SYSTEM VERSION"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Parent A", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(("SYSTEM NAME"));
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo(("SYSTEM VERSION"));
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo("Parent A");
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).getValue()).isEqualTo(false);
 
 		// With HTTP GET
 		respParam = myClient
@@ -91,14 +91,14 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("SYSTEM NAME"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("SYSTEM VERSION", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Parent A", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(("SYSTEM NAME"));
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo("SYSTEM VERSION");
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo("Parent A");
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).getValue()).isEqualTo(false);
 
 	}
 
@@ -159,14 +159,14 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("v2 Identifier Type"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals(("2.8.2"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Accession ID", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(("v2 Identifier Type"));
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo(("2.8.2"));
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo("Accession ID");
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).getValue()).isEqualTo(false);
 	}
 
 	@Test
@@ -180,7 +180,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.withParameter(Parameters.class, "code", new CodeType("ACSNAAAAAA"))
 				.andParameter("system", new UriType("http://hl7.org/fhir/v2/0203"))
 				.execute();
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -200,12 +200,12 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals("ACME Codes", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("ACME Codes");
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo(("Systolic blood pressure--expiration"));
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo(false);
 	}
 
 	@Test
@@ -219,7 +219,7 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.withParameter(Parameters.class, "code", new CodeType("8450-9AAAAA"))
 				.andParameter("system", new UriType("http://acme.org"))
 				.execute();
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -238,12 +238,12 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(1).getName());
-		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(2).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(("ACME Codes"));
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo(("Systolic blood pressure--expiration"));
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo(false);
 	}
 
 	@Test
@@ -258,9 +258,9 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.andParameter("code", new CodeType("8450-9"))
 				.andParameter("system", new UriType("http://acme.org"))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
 		}
 		//@formatter:on
 	}
@@ -276,9 +276,9 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode("8450-9"))
 				.andParameter("system", new UriType("http://acme.org"))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
 		}
 		//@formatter:on
 	}
@@ -293,9 +293,9 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 				.named("lookup")
 				.withParameter(Parameters.class, "coding", new Coding().setSystem("http://acme.org").setCode(null))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1126) + "No code, coding, or codeableConcept provided to validate", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1126) + "No code, coding, or codeableConcept provided to validate");
 		}
 		//@formatter:on
 	}
@@ -313,14 +313,14 @@ public class ResourceProviderDstu3CodeSystemTest extends BaseResourceProviderDst
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals("v3 Code System MaritalStatus", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("2016-11-11", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Married", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).booleanValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("v3 Code System MaritalStatus");
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo("2016-11-11");
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo("Married");
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).booleanValue()).isEqualTo(false);
 	}
 
 	@Test

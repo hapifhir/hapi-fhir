@@ -16,9 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -53,13 +51,13 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 			.loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
 		IBundleProvider result = mySynchronousSearchSvc.executeQuery( "Patient", params, RequestPartitionId.allPartitions());
-		assertNull(result.getUuid());
-		assertFalse(result.isEmpty());
+		assertThat(result.getUuid()).isNull();
+		assertThat(result.isEmpty()).isFalse();
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
-		assertEquals(790, resources.size());
-		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
-		assertEquals("799", resources.get(789).getIdElement().getValueAsString());
+		assertThat(resources.size()).isEqualTo(790);
+		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
+		assertThat(resources.get(789).getIdElement().getValueAsString()).isEqualTo("799");
 	}
 
 	@Test
@@ -80,8 +78,8 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 		IBundleProvider result = mySynchronousSearchSvc.executeQuery("Patient", params, RequestPartitionId.allPartitions());
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
-		assertEquals(10, resources.size());
-		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
+		assertThat(resources.size()).isEqualTo(10);
+		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("20");
 	}
 
 	@Test
@@ -103,9 +101,9 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 		IBundleProvider result = mySynchronousSearchSvc.executeQuery("Patient", params,   RequestPartitionId.allPartitions());
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
-		assertEquals(100, resources.size());
-		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
-		assertEquals("109", resources.get(99).getIdElement().getValueAsString());
+		assertThat(resources.size()).isEqualTo(100);
+		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
+		assertThat(resources.get(99).getIdElement().getValueAsString()).isEqualTo("109");
 	}
 
 }

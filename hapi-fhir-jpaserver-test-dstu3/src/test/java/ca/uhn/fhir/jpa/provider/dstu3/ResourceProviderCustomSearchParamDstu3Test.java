@@ -45,9 +45,8 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProviderDstu3Test {
@@ -96,9 +95,9 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 
 		try {
 			myClient.create().resource(sp).execute();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(1112) + "SearchParameter.status is missing or invalid", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 422 Unprocessable Entity: " + Msg.code(1112) + "SearchParameter.status is missing or invalid");
 		}
 	}
 
@@ -113,10 +112,10 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = extractSearchParams(conformance, "Patient");
 
 		CapabilityStatementRestResourceSearchParamComponent param = map.get("foo");
-		assertNull(param);
+		assertThat(param).isNull();
 
 		param = map.get("gender");
-		assertNotNull(param);
+		assertThat(param).isNotNull();
 
 		TransactionTemplate txTemplate = newTxTemplate();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -166,10 +165,10 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		map = extractSearchParams(conformance, "Patient");
 
 		param = map.get("foo");
-		assertEquals("foo", param.getName());
+		assertThat(param.getName()).isEqualTo("foo");
 
 		param = map.get("gender");
-		assertNull(param);
+		assertThat(param).isNull();
 
 	}
 
@@ -185,9 +184,9 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		IIdType obsId = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
 		ResourceTable res = myResourceTableDao.findById(patId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
+		assertThat(res.getIndexStatus().longValue()).isEqualTo(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
 		res = myResourceTableDao.findById(obsId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
+		assertThat(res.getIndexStatus().longValue()).isEqualTo(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
 
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");
@@ -244,7 +243,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), Constants.CHARSET_UTF8);
 			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			assertThat(resp).contains("<fullUrl value=\"http://localhost:" + myPort + "/fhir/context/Practitioner/");
 		} finally {

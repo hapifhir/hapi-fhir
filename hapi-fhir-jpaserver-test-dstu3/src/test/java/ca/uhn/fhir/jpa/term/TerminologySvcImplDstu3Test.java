@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -232,7 +233,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		codeSystem.setContent(CodeSystemContentMode.NOTPRESENT);
 		try {
 			myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualified();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\" and CodeSystem.version \"SYSTEM VERSION\", already have one with resource ID: CodeSystem/");
 		}
@@ -264,13 +265,13 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		assertThat(codes).containsExactlyInAnyOrder("childAAB");
 
 		ValueSet.ValueSetExpansionContainsComponent concept = outcome.getExpansion().getContains().get(0);
-		assertEquals("childAAB", concept.getCode());
-		assertEquals("http://example.com/my_code_system", concept.getSystem());
-		assertEquals(null, concept.getDisplay());
-		assertEquals("D1S", concept.getDesignation().get(0).getUse().getSystem());
-		assertEquals("D1C", concept.getDesignation().get(0).getUse().getCode());
-		assertEquals("D1D", concept.getDesignation().get(0).getUse().getDisplay());
-		assertEquals("D1V", concept.getDesignation().get(0).getValue());
+		assertThat(concept.getCode()).isEqualTo("childAAB");
+		assertThat(concept.getSystem()).isEqualTo("http://example.com/my_code_system");
+		assertThat(concept.getDisplay()).isEqualTo(null);
+		assertThat(concept.getDesignation().get(0).getUse().getSystem()).isEqualTo("D1S");
+		assertThat(concept.getDesignation().get(0).getUse().getCode()).isEqualTo("D1C");
+		assertThat(concept.getDesignation().get(0).getUse().getDisplay()).isEqualTo("D1D");
+		assertThat(concept.getDesignation().get(0).getValue()).isEqualTo("D1V");
 	}
 
 	@Test
@@ -502,9 +503,9 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		try {
 			myTermSvc.expandValueSet(null, vs);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(897) + "Don't know how to handle op=ISA on property copyright", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(897) + "Don't know how to handle op=ISA on property copyright");
 		}
 	}
 
@@ -528,9 +529,9 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		try {
 			myTermSvc.expandValueSet(null, vs);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(895) + "Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
 		}
 
 	}
@@ -554,9 +555,9 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		try {
 			myTermSvc.expandValueSet(null, vs);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(898) + "Don't know how to handle value=bogus on property copyright", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(898) + "Don't know how to handle value=bogus on property copyright");
 		}
 
 	}
@@ -711,7 +712,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-4");
 		outcome = myTermSvc.expandValueSet(null, vs);
-		assertEquals(0, outcome.getExpansion().getContains().size());
+		assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
 
 		// Include
 		vs = new ValueSet();
@@ -723,7 +724,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
-		assertEquals(0, outcome.getExpansion().getContains().size());
+		assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
 	}
 
 	@Test
@@ -768,9 +769,9 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		try {
 			myTermSvc.expandValueSet(null, vs);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(892) + "Don't know how to handle op=ISA on property ancestor", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(892) + "Don't know how to handle op=ISA on property ancestor");
 		}
 
 	}
@@ -795,9 +796,9 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		try {
 			myTermSvc.expandValueSet(null, vs);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(895) + "Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
 		}
 
 	}
@@ -926,7 +927,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
 		outcome = myTermSvc.expandValueSet(null, vs);
-		assertEquals(0, outcome.getExpansion().getContains().size());
+		assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
 
 		// Include
 		vs = new ValueSet();
@@ -1010,9 +1011,9 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		try {
 			myTermSvc.expandValueSet(null, vs);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(893) + "Don't know how to handle op=ISA on property child", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(893) + "Don't know how to handle op=ISA on property child");
 		}
 
 	}
@@ -1037,9 +1038,9 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		try {
 			myTermSvc.expandValueSet(null, vs);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(895) + "Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
 		}
 
 	}
@@ -1169,7 +1170,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
 		outcome = myTermSvc.expandValueSet(null, vs);
-		assertEquals(0, outcome.getExpansion().getContains().size());
+		assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
 
 		// Include
 		vs = new ValueSet();
@@ -1253,9 +1254,9 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		try {
 			myTermSvc.expandValueSet(null, vs);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(896) + "Don't know how to handle op=ISA on property descendant", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(896) + "Don't know how to handle op=ISA on property descendant");
 		}
 
 	}
@@ -1280,9 +1281,9 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		try {
 			myTermSvc.expandValueSet(null, vs);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(895) + "Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
 		}
 
 	}
@@ -1437,7 +1438,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-4");
 		outcome = myTermSvc.expandValueSet(null, vs);
-		assertEquals(0, outcome.getExpansion().getContains().size());
+		assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
 
 		// Include
 		vs = new ValueSet();
@@ -1449,7 +1450,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
-		assertEquals(0, outcome.getExpansion().getContains().size());
+		assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
 	}
 
 	@Test
@@ -1494,9 +1495,9 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		try {
 			myTermSvc.expandValueSet(null, vs);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(893) + "Don't know how to handle op=ISA on property parent", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(893) + "Don't know how to handle op=ISA on property parent");
 		}
 
 	}
@@ -1521,9 +1522,9 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		try {
 			myTermSvc.expandValueSet(null, vs);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(895) + "Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
 		}
 
 	}
@@ -1803,14 +1804,14 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		assertThat(codes).containsExactlyInAnyOrder("childAAB");
 
 		ValueSet.ValueSetExpansionContainsComponent concept = outcome.getExpansion().getContains().get(0);
-		assertEquals("childAAB", concept.getCode());
-		assertEquals("http://example.com/my_code_system", concept.getSystem());
-		assertEquals(null, concept.getDisplay());
-		assertEquals("D1L", concept.getDesignation().get(0).getLanguage());
-		assertEquals("D1S", concept.getDesignation().get(0).getUse().getSystem());
-		assertEquals("D1C", concept.getDesignation().get(0).getUse().getCode());
-		assertEquals("D1D", concept.getDesignation().get(0).getUse().getDisplay());
-		assertEquals("D1V", concept.getDesignation().get(0).getValue());
+		assertThat(concept.getCode()).isEqualTo("childAAB");
+		assertThat(concept.getSystem()).isEqualTo("http://example.com/my_code_system");
+		assertThat(concept.getDisplay()).isEqualTo(null);
+		assertThat(concept.getDesignation().get(0).getLanguage()).isEqualTo("D1L");
+		assertThat(concept.getDesignation().get(0).getUse().getSystem()).isEqualTo("D1S");
+		assertThat(concept.getDesignation().get(0).getUse().getCode()).isEqualTo("D1C");
+		assertThat(concept.getDesignation().get(0).getUse().getDisplay()).isEqualTo("D1D");
+		assertThat(concept.getDesignation().get(0).getValue()).isEqualTo("D1V");
 	}
 
 	@Test
@@ -1840,9 +1841,9 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 
 		try {
 			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getPersistentId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(849) + "CodeSystem contains circular reference around code parent", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(849) + "CodeSystem contains circular reference around code parent");
 		}
 	}
 
@@ -1985,7 +1986,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.map(t -> t.getCode())
 			.sorted()
 			.collect(Collectors.toList());
-		assertEquals(Lists.newArrayList("A", "C"), expansionCodes);
+		assertThat(expansionCodes).isEqualTo(Lists.newArrayList("A", "C"));
 
 	}
 
@@ -1995,8 +1996,8 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	public void testValidateCodeWithProperties() {
 		createCodeSystem();
 		IValidationSupport.CodeValidationResult code = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "childAAB", null, null);
-		assertEquals(true, code.isOk());
-		assertEquals(2, code.getProperties().size());
+		assertThat(code.isOk()).isEqualTo(true);
+		assertThat(code.getProperties().size()).isEqualTo(2);
 	}
 
 

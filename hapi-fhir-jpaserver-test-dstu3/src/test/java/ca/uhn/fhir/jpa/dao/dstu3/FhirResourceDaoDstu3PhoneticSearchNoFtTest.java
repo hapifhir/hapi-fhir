@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 @ContextConfiguration(classes = TestHSearchAddInConfig.NoFT.class)
 public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test {
@@ -73,26 +71,26 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		Soundex soundex = new Soundex();
 
 		// The tests below depend on these assumptions:
-		assertEquals(soundex.encode(GALE), soundex.encode(GAIL));
-		assertNotEquals(soundex.encode(GALE), GALE);
-		assertNotEquals(soundex.encode(GAIL), GALE);
-		assertNotEquals(soundex.encode(GALE), GAIL);
-		assertNotEquals(soundex.encode(GAIL), GAIL);
+		assertThat(soundex.encode(GAIL)).isEqualTo(soundex.encode(GALE));
+		assertThat(GALE).isNotEqualTo(soundex.encode(GALE));
+		assertThat(GALE).isNotEqualTo(soundex.encode(GAIL));
+		assertThat(GAIL).isNotEqualTo(soundex.encode(GALE));
+		assertThat(GAIL).isNotEqualTo(soundex.encode(GAIL));
 		ourLog.info("Encoded Gale: {}", soundex.encode(GALE));
 		ourLog.info("Encoded Gail: {}", soundex.encode(GAIL));
-		assertNotEquals(soundex.encode(GALE), soundex.encode(BOB));
-		assertEquals(soundex.encode(ADDRESS), soundex.encode(ADDRESS_CLOSE));
-		assertNotEquals(soundex.encode(ADDRESS), soundex.encode(ADDRESS_FAR));
+		assertThat(soundex.encode(BOB)).isNotEqualTo(soundex.encode(GALE));
+		assertThat(soundex.encode(ADDRESS_CLOSE)).isEqualTo(soundex.encode(ADDRESS));
+		assertThat(soundex.encode(ADDRESS_FAR)).isNotEqualTo(soundex.encode(ADDRESS));
 		ourLog.info("Encoded address: {}", soundex.encode(ADDRESS));
 	}
 
 	@Test
 	public void testNumeric() {
 		NumericEncoder numeric = new NumericEncoder();
-		assertEquals(PHONE, numeric.encode(PHONE_CLOSE));
-		assertEquals(PHONE, numeric.encode(PHONE));
-		assertEquals(numeric.encode(PHONE), numeric.encode(PHONE_CLOSE));
-		assertNotEquals(numeric.encode(PHONE), numeric.encode(PHONE_FAR));
+		assertThat(numeric.encode(PHONE_CLOSE)).isEqualTo(PHONE);
+		assertThat(numeric.encode(PHONE)).isEqualTo(PHONE);
+		assertThat(numeric.encode(PHONE_CLOSE)).isEqualTo(numeric.encode(PHONE));
+		assertThat(numeric.encode(PHONE_FAR)).isNotEqualTo(numeric.encode(PHONE));
 	}
 
 	@Test
@@ -148,8 +146,8 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 
 		// verify
 		List<String> resultIds = result.getAllResourceIds();
-		assertEquals(1, resultIds.size());
-		assertEquals(patientId.getIdPart(), resultIds.get(0));
+		assertThat(resultIds.size()).isEqualTo(1);
+		assertThat(resultIds.get(0)).isEqualTo(patientId.getIdPart());
 	}
 
 	private void assertSearchMatch(IIdType thePId1, String theSp, String theValue) {

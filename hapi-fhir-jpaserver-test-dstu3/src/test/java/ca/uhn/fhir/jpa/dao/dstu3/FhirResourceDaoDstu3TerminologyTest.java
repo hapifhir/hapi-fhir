@@ -49,8 +49,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
@@ -230,7 +229,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 		if (!result.isSuccessful()) {
 			ourLog.info(parser.encodeResourceToString(result.toOperationOutcome()));
-			fail(parser.encodeResourceToString(result.toOperationOutcome()));
+			fail("", parser.encodeResourceToString(result.toOperationOutcome()));
 		}
 	}
 
@@ -246,9 +245,9 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		codeSystem.setContent(CodeSystemContentMode.COMPLETE);
 		try {
 			myCodeSystemDao.create(codeSystem, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(848) + "Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/" + id.getIdPart(), e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(848) + "Can not create multiple CodeSystem resources with CodeSystem.url \"http://example.com/my_code_system\", already have one with resource ID: CodeSystem/" + id.getIdPart());
 		}
 	}
 
@@ -287,9 +286,9 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 		try {
 			myValueSetDao.expand(vs, null);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(891) + "Invalid filter, must have fields populated: property op value", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(891) + "Invalid filter, must have fields populated: property op value");
 		}
 	}
 
@@ -317,7 +316,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
 		logAndValidateValueSet(result);
 
-		assertEquals(4, result.getExpansion().getTotal());
+		assertThat(result.getExpansion().getTotal()).isEqualTo(4);
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes).containsExactlyInAnyOrder("hello", "goodbye", "labrador", "beagle");
 
@@ -358,7 +357,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter("lab"));
 		logAndValidateValueSet(result);
 
-		assertEquals(1, result.getExpansion().getTotal());
+		assertThat(result.getExpansion().getTotal()).isEqualTo(1);
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes).containsExactlyInAnyOrder("labrador");
 
@@ -388,7 +387,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter("hel"));
 		logAndValidateValueSet(result);
 
-		assertEquals(1, result.getExpansion().getTotal());
+		assertThat(result.getExpansion().getTotal()).isEqualTo(1);
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes).containsExactlyInAnyOrder("hello");
 
@@ -406,7 +405,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter("lab"));
 		logAndValidateValueSet(result);
 
-		assertEquals(1, result.getExpansion().getTotal());
+		assertThat(result.getExpansion().getTotal()).isEqualTo(1);
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes).containsExactlyInAnyOrder("labrador");
 
@@ -481,9 +480,9 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		exclude.addConcept().setCode("childAAA");
 		try {
 			myValueSetDao.expand(vs, null);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(890) + "ValueSet contains exclude criteria with no system defined", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(890) + "ValueSet contains exclude criteria with no system defined");
 		}
 	}
 
@@ -520,7 +519,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		myTerminologyDeferredStorageSvc.saveDeferred();
 
 		IValidationSupport.LookupCodeResult lookupResults = myCodeSystemDao.lookupCode(new StringType("childAA"), new StringType(URL_MY_CODE_SYSTEM), null, mySrd);
-		assertEquals(true, lookupResults.isFound());
+		assertThat(lookupResults.isFound()).isEqualTo(true);
 
 		ValueSet vs = new ValueSet();
 		ConceptSetComponent include = vs.getCompose().addInclude();
@@ -545,7 +544,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.addConcept().setCode("ZZZZ");
 
 		ValueSet expansion = myValueSetDao.expand(vs, null);
-		assertEquals(0, expansion.getExpansion().getContains().size());
+		assertThat(expansion.getExpansion().getContains().size()).isEqualTo(0);
 	}
 
 	@Test
@@ -566,9 +565,9 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		assertThat(codes).containsExactlyInAnyOrder("ParentA", "childAA", "childAAA");
 
 		int idx = codes.indexOf("childAA");
-		assertEquals("childAA", result.getExpansion().getContains().get(idx).getCode());
-		assertEquals("Child AA", result.getExpansion().getContains().get(idx).getDisplay());
-		assertEquals(URL_MY_CODE_SYSTEM, result.getExpansion().getContains().get(idx).getSystem());
+		assertThat(result.getExpansion().getContains().get(idx).getCode()).isEqualTo("childAA");
+		assertThat(result.getExpansion().getContains().get(idx).getDisplay()).isEqualTo("Child AA");
+		assertThat(result.getExpansion().getContains().get(idx).getSystem()).isEqualTo(URL_MY_CODE_SYSTEM);
 	}
 
 	@Test
@@ -590,9 +589,9 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		assertThat(codes).containsExactlyInAnyOrder("A", "AA", "AAA", "AB");
 
 		int idx = codes.indexOf("AAA");
-		assertEquals("AAA", result.getExpansion().getContains().get(idx).getCode());
-		assertEquals("Code AAA", result.getExpansion().getContains().get(idx).getDisplay());
-		assertEquals(URL_MY_CODE_SYSTEM, result.getExpansion().getContains().get(idx).getSystem());
+		assertThat(result.getExpansion().getContains().get(idx).getCode()).isEqualTo("AAA");
+		assertThat(result.getExpansion().getContains().get(idx).getDisplay()).isEqualTo("Code AAA");
+		assertThat(result.getExpansion().getContains().get(idx).getSystem()).isEqualTo(URL_MY_CODE_SYSTEM);
 		// ValueSet expansion = myValueSetDao.expandByIdentifier(URL_MY_VALUE_SET, "cervical");
 		// ValueSet expansion = myValueSetDao.expandByIdentifier(URL_MY_VALUE_SET, "cervical");
 		//
@@ -611,7 +610,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		ValueSet result = myValueSetDao.expand(valueSet, new ValueSetExpansionOptions().setFilter(""));
 		logAndValidateValueSet(result);
 
-		assertEquals(5, result.getExpansion().getTotal());
+		assertThat(result.getExpansion().getTotal()).isEqualTo(5);
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes).containsExactlyInAnyOrder("hello", "goodbye", "dogs", "labrador", "beagle");
 
@@ -651,7 +650,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		ValueSet result = myValueSetDao.expand(vs, null);
 		logAndValidateValueSet(result);
 
-		assertEquals(0, result.getExpansion().getContains().size());
+		assertThat(result.getExpansion().getContains().size()).isEqualTo(0);
 
 		myTerminologyDeferredStorageSvc.setProcessDeferred(true);
 		myTerminologyDeferredStorageSvc.saveDeferred();
@@ -669,7 +668,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		result = myValueSetDao.expand(vs, null);
 		logAndValidateValueSet(result);
 
-		assertEquals(4, result.getExpansion().getContains().size());
+		assertThat(result.getExpansion().getContains().size()).isEqualTo(4);
 
 		String encoded = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
 		assertThat(encoded).containsIgnoringCase("<code value=\"childAAB\"/>");
@@ -694,7 +693,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		StringType code = new StringType("ParentA");
 		StringType system = new StringType("http://snomed.info/sct");
 		IValidationSupport.LookupCodeResult outcome = myCodeSystemDao.lookupCode(code, system, null, mySrd);
-		assertEquals(true, outcome.isFound());
+		assertThat(outcome.isFound()).isEqualTo(true);
 	}
 
 	/**
@@ -710,9 +709,9 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		params.add(AuditEvent.SP_TYPE, new TokenParam(null, "http://hl7.org/fhir/ValueSet/audit-event-type").setModifier(TokenParamModifier.IN));
 		try {
 			myAuditEventDao.search(params);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("");
 		}
 	}
 
@@ -725,7 +724,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		params.add(Observation.SP_CODE, new TokenParam(URL_MY_CODE_SYSTEM, "AAA").setModifier(TokenParamModifier.ABOVE));
 		try {
 			myObservationDao.search(params).size();
-			fail();
+			fail("");
 		} catch (InternalErrorException e) {
 			assertThat(e.getMessage()).contains(Msg.code(885) + "Expansion of ValueSet produced too many codes (maximum 1) - Operation aborted!");
 
@@ -805,7 +804,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 			assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(params))).isEmpty();
 		} catch (ResourceNotFoundException e) {
 			//noinspection SpellCheckingInspection
-			assertEquals(Msg.code(2024) + "Unknown ValueSet: http%3A%2F%2Fexample.com%2Fmy_value_set", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(2024) + "Unknown ValueSet: http%3A%2F%2Fexample.com%2Fmy_value_set");
 		}
 	}
 
@@ -983,7 +982,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		try {
 			myAllergyIntoleranceDao.search(params);
 		} catch (InvalidRequestException e) {
-			assertEquals("Unable to find imported value set http://hl7.org/fhir/ValueSet/FOO", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Unable to find imported value set http://hl7.org/fhir/ValueSet/FOO");
 		}
 
 	}
@@ -1110,7 +1109,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		try {
 			myObservationDao.search(params);
 		} catch (InvalidRequestException e) {
-			assertEquals("Unable to expand imported value set: Unable to find imported value set http://non_existant_VS", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Unable to expand imported value set: Unable to find imported value set http://non_existant_VS");
 		}
 
 		// Now let's update 
@@ -1126,7 +1125,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 			params.add(Observation.SP_STATUS, new TokenParam(null, "final"));
 		} catch (ResourceNotFoundException e) {
 			//noinspection SpellCheckingInspection
-			assertEquals("Unknown ValueSet: http%3A%2F%2Fexample.com%2Fmy_value_set", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Unknown ValueSet: http%3A%2F%2Fexample.com%2Fmy_value_set");
 		}
 
 	}
@@ -1165,7 +1164,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		try {
 			myAllergyIntoleranceDao.search(params);
 		} catch (InvalidRequestException e) {
-			assertEquals("Unable to find imported value set http://hl7.org/fhir/ValueSet/FOO", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Unable to find imported value set http://hl7.org/fhir/ValueSet/FOO");
 		}
 
 	}

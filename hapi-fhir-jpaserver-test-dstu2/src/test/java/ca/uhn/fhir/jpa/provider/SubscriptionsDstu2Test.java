@@ -21,8 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 
@@ -60,7 +59,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		subs.getChannel().setEndpoint("http://localhost");
 		try {
 			myClient.create().resource(subs).execute();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}
@@ -68,7 +67,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		subs.setId("ABC");
 		try {
 			myClient.update().resource(subs).execute();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}
@@ -87,17 +86,17 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		subs.setCriteria("Observation?identifier=123");
 		try {
 			myClient.create().resource(subs).execute();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(804) + "Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 422 Unprocessable Entity: " + Msg.code(804) + "Subscription.status must be 'off' or 'requested' on a newly created subscription");
 		}
 
 		subs.setId("ABC");
 		try {
 			myClient.update().resource(subs).execute();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(804) + "Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 422 Unprocessable Entity: " + Msg.code(804) + "Subscription.status must be 'off' or 'requested' on a newly created subscription");
 		}
 	}
 
@@ -111,7 +110,7 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 
 		try {
 			myClient.create().resource(subs).execute();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Unknown SubscriptionStatus code 'aaaaa'");
 		}
@@ -132,15 +131,15 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			subs.setStatus(SubscriptionStatusEnum.ACTIVE);
 			myClient.update().resource(subs).execute();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(802) + "Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 422 Unprocessable Entity: " + Msg.code(802) + "Subscription.status can not be changed from 'requested' to 'active'");
 		}
 
 		try {
 			subs.setStatus((SubscriptionStatusEnum) null);
 			myClient.update().resource(subs).execute();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}
@@ -161,15 +160,15 @@ public class SubscriptionsDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			subs.setStatus(SubscriptionStatusEnum.ACTIVE);
 			myClient.update().resource(subs).execute();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(802) + "Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 422 Unprocessable Entity: " + Msg.code(802) + "Subscription.status can not be changed from 'requested' to 'active'");
 		}
 
 		try {
 			subs.setStatus((SubscriptionStatusEnum) null);
 			myClient.update().resource(subs).execute();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Subscription.status must be populated on this server");
 		}

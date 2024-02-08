@@ -9,7 +9,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings({ })
 public class FhirResourceDaoCustomTypeDstu3Test extends BaseJpaDstu3Test {
@@ -29,12 +29,12 @@ public class FhirResourceDaoCustomTypeDstu3Test extends BaseJpaDstu3Test {
 		IIdType id = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 		
 		CustomObservationDstu3 read = (CustomObservationDstu3) myObservationDao.read(id);
-		assertEquals("blue", read.getEyeColour().getValue());
+		assertThat(read.getEyeColour().getValue()).isEqualTo("blue");
 		
 		IBundleProvider found = myObservationDao.search(new SearchParameterMap());
-		assertEquals(1, found.size().intValue());
+		assertThat(found.size().intValue()).isEqualTo(1);
 		CustomObservationDstu3 search = (CustomObservationDstu3) found.getResources(0, 1).get(0);
-		assertEquals("blue", search.getEyeColour().getValue());
+		assertThat(search.getEyeColour().getValue()).isEqualTo("blue");
 		
 	}
 	

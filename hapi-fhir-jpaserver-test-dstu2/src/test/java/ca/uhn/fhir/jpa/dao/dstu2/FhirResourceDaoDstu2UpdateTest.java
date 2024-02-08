@@ -29,8 +29,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
@@ -60,8 +59,8 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 
 		p = myPatientDao.read(id.toVersionless(), mySrd);
 		assertThat(p.getId().toVersionless().toString()).doesNotContain("test");
-		assertEquals(id.toVersionless(), p.getId().toVersionless());
-		assertNotEquals(id, p.getId());
+		assertThat(p.getId().toVersionless()).isEqualTo(id.toVersionless());
+		assertThat(p.getId()).isNotEqualTo(id);
 		assertThat(p.getId().toString()).endsWith("/_history/2");
 
 	}
@@ -75,10 +74,10 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		p.setId("Patient/" + methodName);
 
 		IIdType id = myPatientDao.update(p, mySrd).getId();
-		assertEquals("Patient/" + methodName, id.toUnqualifiedVersionless().getValue());
+		assertThat(id.toUnqualifiedVersionless().getValue()).isEqualTo("Patient/" + methodName);
 
 		p = myPatientDao.read(id, mySrd);
-		assertEquals(methodName, p.getIdentifierFirstRep().getValue());
+		assertThat(p.getIdentifierFirstRep().getValue()).isEqualTo(methodName);
 	}
 
 	@Test
@@ -100,7 +99,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		conformance.setId("");
 		myConformanceDao.create(conformance);
 
-		assertEquals(1, myConformanceDao.search(new SearchParameterMap().setLoadSynchronous(true)).sizeOrThrowNpe());
+		assertThat(myConformanceDao.search(new SearchParameterMap().setLoadSynchronous(true)).sizeOrThrowNpe()).isEqualTo(1);
 	}
 
 	/**
@@ -172,7 +171,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		myPatientDao.create(p2, mySrd);
 
 		List<JpaPid> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2AAA")), null);
-		assertEquals(1, ids.size());
+		assertThat(ids.size()).isEqualTo(1);
 		assertThat(JpaPid.toLongList(ids)).containsExactly(p1id.getIdPartAsLong());
 
 		// Update the name
@@ -181,17 +180,17 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		IIdType p1id2 = update2.getId();
 
 		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2AAA")), null);
-		assertEquals(0, ids.size());
+		assertThat(ids.size()).isEqualTo(0);
 
 		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2BBB")), null);
-		assertEquals(2, ids.size());
+		assertThat(ids.size()).isEqualTo(2);
 
 		// Make sure vreads work
 		p1 = myPatientDao.read(p1id, mySrd);
-		assertEquals("testUpdateMaintainsSearchParamsDstu2AAA", p1.getNameFirstRep().getGivenAsSingleString());
+		assertThat(p1.getNameFirstRep().getGivenAsSingleString()).isEqualTo("testUpdateMaintainsSearchParamsDstu2AAA");
 
 		p1 = myPatientDao.read(p1id2, mySrd);
-		assertEquals("testUpdateMaintainsSearchParamsDstu2BBB", p1.getNameFirstRep().getGivenAsSingleString());
+		assertThat(p1.getNameFirstRep().getGivenAsSingleString()).isEqualTo("testUpdateMaintainsSearchParamsDstu2BBB");
 
 	}
 
@@ -207,7 +206,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		try {
 			p2.setId(new IdDt("Organization/" + p1id.getIdPart()));
 			myOrganizationDao.update(p2, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			// good
 		}
@@ -215,7 +214,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		try {
 			p2.setId(new IdDt("Patient/" + p1id.getIdPart()));
 			myOrganizationDao.update(p2, mySrd);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			ourLog.error("Good", e);
 		}
@@ -243,8 +242,8 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
 			List<IdDt> tl = ResourceMetadataKeyEnum.PROFILES.get(patient);
-			assertEquals(1, tl.size());
-			assertEquals("http://foo/bar", tl.get(0).getValue());
+			assertThat(tl.size()).isEqualTo(1);
+			assertThat(tl.get(0).getValue()).isEqualTo("http://foo/bar");
 		}
 
 	}
@@ -268,8 +267,8 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
 			List<IdDt> tl = ResourceMetadataKeyEnum.PROFILES.get(patient);
-			assertEquals(1, tl.size());
-			assertEquals("http://foo/bar", tl.get(0).getValue());
+			assertThat(tl.size()).isEqualTo(1);
+			assertThat(tl.get(0).getValue()).isEqualTo("http://foo/bar");
 		}
 
 		// Update
@@ -289,8 +288,8 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
 			List<IdDt> tl = ResourceMetadataKeyEnum.PROFILES.get(patient);
-			assertEquals(1, tl.size());
-			assertEquals("http://foo/baz", tl.get(0).getValue());
+			assertThat(tl.size()).isEqualTo(1);
+			assertThat(tl.get(0).getValue()).isEqualTo("http://foo/baz");
 		}
 
 	}
@@ -303,7 +302,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		p.setId("Patient/9999999999999999");
 		try {
 			myPatientDao.update(p, mySrd);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Can not create resource with ID[9999999999999999], no resource with this ID exists and clients may only");
 		}
@@ -317,9 +316,9 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		p.setId("Patient/123:456");
 		try {
 			myPatientDao.update(p, mySrd);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(521) + "Can not process entity with ID[123:456], this is not a valid FHIR ID", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(521) + "Can not process entity with ID[123:456], this is not a valid FHIR ID");
 		}
 	}
 
@@ -331,7 +330,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		p.setId("Patient/123");
 		try {
 			myPatientDao.update(p, mySrd);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("clients may only assign IDs which contain at least one non-numeric");
 		}
@@ -344,12 +343,12 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		p.addName().addFamily("Hello");
 		p.setId("Patient/123abc");
 		IIdType id = myPatientDao.update(p, mySrd).getId();
-		assertEquals("123abc", id.getIdPart());
-		assertEquals("1", id.getVersionIdPart());
+		assertThat(id.getIdPart()).isEqualTo("123abc");
+		assertThat(id.getVersionIdPart()).isEqualTo("1");
 
 		p = myPatientDao.read(id.toUnqualifiedVersionless(), mySrd);
-		assertEquals("Patient/123abc", p.getId().toUnqualifiedVersionless().getValue());
-		assertEquals("Hello", p.getName().get(0).getFamily().get(0).getValue());
+		assertThat(p.getId().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/123abc");
+		assertThat(p.getName().get(0).getFamily().get(0).getValue()).isEqualTo("Hello");
 
 	}
 
@@ -370,7 +369,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		try {
 			UUID.fromString(result);
 		} catch (IllegalArgumentException exception){
-			fail("Result id is not a UUID. Instead, it was: " + result);
+			fail("", "Result id is not a UUID. Instead, it was: " + result);
 		}
 	}
 
