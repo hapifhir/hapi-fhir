@@ -1963,7 +1963,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequest, getResourceName(), theParams);
+				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
+						theRequest, getResourceName(), theParams);
 		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(
 				this, theParams, getResourceName(), cacheControlDirective, theRequest, requestPartitionId);
 
@@ -2131,7 +2132,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			RequestDetails theRequest,
 			BiFunction<RequestDetails, Stream<JpaPid>, Stream<V>> transform) {
 		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(theRequest, myResourceName, theParams);
+				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
+						theRequest, myResourceName, theParams);
 
 		String uuid = UUID.randomUUID().toString();
 

@@ -105,7 +105,8 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 		String resourceType = theDetails.getResourceType();
 		// Handle system requests
 
-		if (theRequestDetails instanceof SystemRequestDetails && isResourcePartitionable(theDetails.getResourceType())) {
+		if (theRequestDetails instanceof SystemRequestDetails
+				&& isResourcePartitionable(theDetails.getResourceType())) {
 			SystemRequestDetails systemRequestDetails = (SystemRequestDetails) theRequestDetails;
 			if (systemRequestHasExplicitPartition(systemRequestDetails)) {
 				requestPartitionId = getSystemRequestPartitionId(systemRequestDetails, true);

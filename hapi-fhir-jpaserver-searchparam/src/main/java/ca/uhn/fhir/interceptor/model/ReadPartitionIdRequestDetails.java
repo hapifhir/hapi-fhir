@@ -109,7 +109,8 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 	}
 
 	public static ReadPartitionIdRequestDetails forServerOperation(@Nonnull String theOperationName) {
-		return new ReadPartitionIdRequestDetails(null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null, null, theOperationName);
+		return new ReadPartitionIdRequestDetails(
+				null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null, null, theOperationName);
 	}
 
 	public static ReadPartitionIdRequestDetails forRead(

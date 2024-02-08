@@ -105,7 +105,8 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 		ISearchBuilder searchBuilder = myMdmSearchParamSvc.generateSearchBuilderForType(theSourceResourceType);
 
 		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequestDetails, theSourceResourceType, spMap);
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+						theRequestDetails, theSourceResourceType, spMap);
 		return submitAllMatchingResourcesToMdmChannel(spMap, searchBuilder, requestPartitionId);
 	}
 

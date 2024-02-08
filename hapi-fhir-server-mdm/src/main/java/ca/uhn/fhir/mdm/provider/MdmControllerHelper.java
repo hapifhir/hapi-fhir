@@ -145,7 +145,8 @@ public class MdmControllerHelper {
 		if (myMdmSettings.getSearchAllPartitionForMatch()) {
 			requestPartitionId = RequestPartitionId.allPartitions();
 		} else {
-			requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(theRequestDetails, theResourceType);
+			requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
+					theRequestDetails, theResourceType);
 		}
 		List<MatchedTarget> matches =
 				myMdmMatchFinderSvc.getMatchedTargets(theResourceType, theResource, requestPartitionId);

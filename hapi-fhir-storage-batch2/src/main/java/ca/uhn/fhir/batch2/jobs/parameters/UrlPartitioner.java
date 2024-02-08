@@ -38,9 +38,7 @@ public class UrlPartitioner {
 		ResourceSearch resourceSearch = myMatchUrlService.getResourceSearch(theUrl);
 		RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-						theRequestDetails,
-						resourceSearch.getResourceName(),
-						resourceSearch.getSearchParameterMap());
+						theRequestDetails, resourceSearch.getResourceName(), resourceSearch.getSearchParameterMap());
 		PartitionedUrl retval = new PartitionedUrl();
 		retval.setUrl(theUrl);
 		retval.setRequestPartitionId(requestPartitionId);

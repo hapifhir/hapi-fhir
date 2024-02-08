@@ -119,9 +119,9 @@ public class PatientIdPartitionInterceptor {
 			ReadPartitionIdRequestDetails theReadDetails, RequestDetails theRequestDetails) {
 		List<RuntimeSearchParam> compartmentSps = null;
 		if (!isBlank(theReadDetails.getResourceType())) {
-			RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
-			compartmentSps =
-				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
+			RuntimeResourceDefinition resourceDef =
+					myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
+			compartmentSps = ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
 			if (compartmentSps.isEmpty()) {
 				return provideNonCompartmentMemberTypeResponse(null);
 			}
@@ -192,15 +192,14 @@ public class PatientIdPartitionInterceptor {
 		List<String> idParts = new ArrayList<>();
 		idParamAndList.stream().flatMap(Collection::stream).forEach(idParam -> {
 			if (isNotBlank(idParam.getQueryParameterQualifier())) {
-				throw new MethodNotAllowedException(
-					Msg.code(1322) + "The parameter " + theParamName + idParam.getQueryParameterQualifier()
-						+ " is not supported in patient compartment mode");
+				throw new MethodNotAllowedException(Msg.code(1322) + "The parameter " + theParamName
+						+ idParam.getQueryParameterQualifier() + " is not supported in patient compartment mode");
 			}
 			if (idParam instanceof ReferenceParam) {
 				String chain = ((ReferenceParam) idParam).getChain();
 				if (chain != null) {
-					throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "."
-						+ chain + " is not supported in patient compartment mode");
+					throw new MethodNotAllowedException(Msg.code(1323) + "The parameter " + theParamName + "." + chain
+							+ " is not supported in patient compartment mode");
 				}
 			}
 			IdType id = new IdType(idParam.getValueAsQueryToken(myFhirContext));
