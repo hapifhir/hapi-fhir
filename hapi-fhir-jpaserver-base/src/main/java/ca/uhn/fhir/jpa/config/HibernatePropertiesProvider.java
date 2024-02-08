@@ -75,4 +75,8 @@ public class HibernatePropertiesProvider {
 	public DataSource getDataSource() {
 		return myEntityManagerFactory.getDataSource();
 	}
+
+	public boolean isOracleDialect() {
+		return getDialect() instanceof org.hibernate.dialect.OracleDialect;
+	}
 }

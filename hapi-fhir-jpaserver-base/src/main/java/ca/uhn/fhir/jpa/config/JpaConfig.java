@@ -51,6 +51,7 @@ import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.MatchResourceUrlService;
+import ca.uhn.fhir.jpa.dao.ResourceHistoryCalculator;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
@@ -868,5 +869,11 @@ public class JpaConfig {
 	@Bean
 	public IMetaTagSorter metaTagSorter() {
 		return new MetaTagSorterAlphabetical();
+	}
+
+	@Bean
+	public ResourceHistoryCalculator resourceHistoryCalculator(
+			FhirContext theFhirContext, HibernatePropertiesProvider theHibernatePropertiesProvider) {
+		return new ResourceHistoryCalculator(theFhirContext, theHibernatePropertiesProvider.isOracleDialect());
 	}
 }

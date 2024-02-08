@@ -19,6 +19,10 @@
  */
 package ca.uhn.fhir.jpa.cache;
 
+import org.springframework.context.event.ContextClosedEvent;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.event.EventListener;
+
 /**
  * This is an internal service and is not intended to be used outside this package.  Implementers should only directly
  * call the {@link IResourceChangeListenerRegistry}.
@@ -40,4 +44,10 @@ public interface IResourceChangeListenerCacheRefresher {
 	 * @return the number of resources that have been created, updated and deleted since the last time the cache was refreshed
 	 */
 	ResourceChangeResult refreshCacheAndNotifyListener(IResourceChangeListenerCache theEntry);
+
+	@EventListener(ContextRefreshedEvent.class)
+	public void start();
+
+	@EventListener(ContextClosedEvent.class)
+	public void shutdown();
 }

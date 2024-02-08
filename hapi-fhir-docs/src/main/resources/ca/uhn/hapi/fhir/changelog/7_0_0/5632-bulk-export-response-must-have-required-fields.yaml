@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5632
+title: "Previously bulk export operation was returning an empty response when no resources matched the request, which 
+    didn't comply with [HL7 HAPI IG](https://hl7.org/fhir/uv/bulkdata/export/index.html#response---complete-status).
+    This has been corrected."
