@@ -42,6 +42,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -331,74 +332,95 @@ class BaseHapiFhirResourceDaoTest {
 		);
 	}
 
-	@ParameterizedTest
-	@MethodSource("thresholdsAndResourceIds")
-	void deleteByUrlConsiderThreshold(long theThreshold, Set<Long> theResourceIds) {
-		final String url = "Patient?_lastUpdated=gt2024-01-01";
-		final RequestDetails request = new SystemRequestDetails();
+	@Nested
+	class DeleteThresholds {
+		private static final String URL = "Patient?_lastUpdated=gt2024-01-01";
+		private static final RequestDetails REQUEST = new SystemRequestDetails();
+		private static final DeleteMethodOutcome EXPECTED_DELETE_OUTCOME = new DeleteMethodOutcome();
 
-		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
-		when(myMatchUrlService.getResourceSearch(url))
-			.thenReturn(new ResourceSearch(mock(RuntimeResourceDefinition.class), SearchParameterMap.newSynchronous(), RequestPartitionId.allPartitions()));
+		@BeforeEach
+		void beforeEach() {
+			when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
+			when(myMatchUrlService.getResourceSearch(URL))
+				.thenReturn(new ResourceSearch(mock(RuntimeResourceDefinition.class), SearchParameterMap.newSynchronous(), RequestPartitionId.allPartitions()));
 
-		// mocks for transaction handling:
-		final IHapiTransactionService.IExecutionBuilder mockExecutionBuilder = mock(IHapiTransactionService.IExecutionBuilder.class);
-		when(mockExecutionBuilder.withTransactionDetails(any(TransactionDetails.class))).thenReturn(mockExecutionBuilder);
-		when(myTransactionService.withRequest(request)).thenReturn(mockExecutionBuilder);
-		final Answer<DeleteMethodOutcome> answer = theInvocationOnMock -> {
-            final TransactionCallback<DeleteMethodOutcome> arg = theInvocationOnMock.getArgument(0);
-            return arg.doInTransaction(mock(TransactionStatus.class));
-        };
-		when(mockExecutionBuilder.execute(ArgumentMatchers.<TransactionCallback<DeleteMethodOutcome>>any()))
-			.thenAnswer(answer);
-
-		if (theResourceIds.size() > 1) {
-			when(myStorageSettings.isAllowMultipleDelete()).thenReturn(true);
-			when(myStorageSettings.getRestDeleteByUrlResourceIdThreshold()).thenReturn(theThreshold);
+			// mocks for transaction handling:
+			final IHapiTransactionService.IExecutionBuilder mockExecutionBuilder = mock(IHapiTransactionService.IExecutionBuilder.class);
+			when(mockExecutionBuilder.withTransactionDetails(any(TransactionDetails.class))).thenReturn(mockExecutionBuilder);
+			when(myTransactionService.withRequest(REQUEST)).thenReturn(mockExecutionBuilder);
+			final Answer<DeleteMethodOutcome> answer = theInvocationOnMock -> {
+				final TransactionCallback<DeleteMethodOutcome> arg = theInvocationOnMock.getArgument(0);
+				return arg.doInTransaction(mock(TransactionStatus.class));
+			};
+			when(mockExecutionBuilder.execute(ArgumentMatchers.<TransactionCallback<DeleteMethodOutcome>>any()))
+				.thenAnswer(answer);
 		}
 
-        if (theResourceIds.size() <= 1 || theResourceIds.size() <= theThreshold) {
-            doReturn(new DeleteMethodOutcome()).when(mySpiedSvc).deletePidList(any(), any(), any(), any(), any());
-        }
+		@ParameterizedTest
+		@MethodSource("thresholdsAndResourceIds_Pass")
+		void deleteByUrlConsiderThresholdUnder_Pass(long theThreshold, Set<Long> theResourceIds) {
+			if (theResourceIds.size() > 1) {
+				when(myStorageSettings.isAllowMultipleDelete()).thenReturn(true);
+				when(myStorageSettings.getRestDeleteByUrlResourceIdThreshold()).thenReturn(theThreshold);
+			}
 
-        final Set<JpaPid> expectedResourceIds = theResourceIds.stream().map(JpaPid::fromId).collect(Collectors.toUnmodifiableSet());
+			 doReturn(EXPECTED_DELETE_OUTCOME).when(mySpiedSvc).deletePidList(any(), any(), any(), any(), any());
 
-		when(myMatchResourceUrlService.search(any(), any(), any(), any())).thenReturn(expectedResourceIds);
+			handleExpectedResourceIds(theResourceIds);
 
-		if (expectedResourceIds.size() > 1 && expectedResourceIds.size() > theThreshold) {
+			final DeleteMethodOutcome deleteMethodOutcome = mySpiedSvc.deleteByUrl(URL, REQUEST);
+			assertEquals(EXPECTED_DELETE_OUTCOME, deleteMethodOutcome);
+		}
+
+		@ParameterizedTest
+		@MethodSource("thresholdsAndResourceIds_Fail")
+		void deleteByUrlConsiderThreshold_Over_Fail(long theThreshold, Set<Long> theResourceIds) {
+			 when(myStorageSettings.isAllowMultipleDelete()).thenReturn(true);
+			 when(myStorageSettings.getRestDeleteByUrlResourceIdThreshold()).thenReturn(theThreshold);
+
+			final Set<JpaPid> expectedResourceIds = handleExpectedResourceIds(theResourceIds);
+
 			try {
-				mySpiedSvc.deleteByUrl(url, request);
+				mySpiedSvc.deleteByUrl(URL, REQUEST);
 				fail();
 			} catch (PreconditionFailedException exception) {
-				assertEquals(String.format("HAPI-2496: Failed to DELETE resources with match URL \"Patient?_lastUpdated=gt2024-01-01\" because the resolved number of resources: %s exceeds the threshold of %s", expectedResourceIds.size(), theThreshold), exception.getMessage());
+				 assertEquals(String.format("HAPI-2496: Failed to DELETE resources with match URL \"Patient?_lastUpdated=gt2024-01-01\" because the resolved number of resources: %s exceeds the threshold of %s", expectedResourceIds.size(), theThreshold), exception.getMessage());
 			}
-		} else {
-			final DeleteMethodOutcome deleteMethodOutcome = mySpiedSvc.deleteByUrl(url, request);
-			assertNotNull(deleteMethodOutcome);
 		}
-	}
 
-	static Stream<Arguments> thresholdsAndResourceIds() {
-		return Stream.of(
-			Arguments.of(0, Collections.emptySet()),
-			Arguments.of(1, Collections.emptySet()),
-			Arguments.of(2, Collections.emptySet()),
-			Arguments.of(3, Collections.emptySet()),
-			Arguments.of(4, Collections.emptySet()),
-			Arguments.of(5, Collections.emptySet()),
-			Arguments.of(0, Set.of(1L)),
-			Arguments.of(1, Set.of(1L)),
-			Arguments.of(2, Set.of(1L)),
-			Arguments.of(3, Set.of(1L)),
-			Arguments.of(4, Set.of(1L)),
-			Arguments.of(5, Set.of(1L)),
-			Arguments.of(0, Set.of(1L,2L,3L)),
-			Arguments.of(1, Set.of(1L,2L,3L)),
-			Arguments.of(2, Set.of(1L,2L,3L)),
-			Arguments.of(3, Set.of(1L,2L,3L)),
-			Arguments.of(4, Set.of(1L,2L,3L)),
-			Arguments.of(5, Set.of(1L,2L,3L))
-		);
+		private Set<JpaPid> handleExpectedResourceIds(Set<Long> theResourceIds) {
+			final Set<JpaPid> expectedResourceIds = theResourceIds.stream().map(JpaPid::fromId).collect(Collectors.toUnmodifiableSet());
+			when(myMatchResourceUrlService.search(any(), any(), any(), any())).thenReturn(expectedResourceIds);
+			return expectedResourceIds;
+		}
+
+		static Stream<Arguments> thresholdsAndResourceIds_Pass() {
+			return Stream.of(
+				Arguments.of(0, Collections.emptySet()),
+				Arguments.of(1, Collections.emptySet()),
+				Arguments.of(2, Collections.emptySet()),
+				Arguments.of(3, Collections.emptySet()),
+				Arguments.of(4, Collections.emptySet()),
+				Arguments.of(5, Collections.emptySet()),
+				Arguments.of(1, Set.of(1L)),
+				Arguments.of(2, Set.of(1L)),
+				Arguments.of(3, Set.of(1L)),
+				Arguments.of(4, Set.of(1L)),
+				Arguments.of(5, Set.of(1L)),
+				Arguments.of(4, Set.of(1L,2L,3L)),
+				Arguments.of(5, Set.of(1L,2L,3L))
+			);
+		}
+
+		static Stream<Arguments> thresholdsAndResourceIds_Fail() {
+			return Stream.of(
+				Arguments.of(0, Set.of(1L,2L)),
+				Arguments.of(1, Set.of(1L,2L)),
+				Arguments.of(0, Set.of(1L,2L,3L)),
+				Arguments.of(1, Set.of(1L,2L,3L)),
+				Arguments.of(2, Set.of(1L,2L,3L))
+			);
+		}
 	}
 
 	static class TestResourceDao extends BaseHapiFhirResourceDao<Patient> {
