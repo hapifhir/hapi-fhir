@@ -18,8 +18,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ChangelogFilesTest {
 
@@ -44,7 +43,7 @@ public class ChangelogFilesTest {
 			}
 
 			if (!nextFilename.matches("[a-zA-Z0-9]+-[a-zA-Z0-9_-]+\\.yaml")) {
-				fail("Invalid changelog filename: " + next);
+				fail("", "Invalid changelog filename: " + next);
 			}
 
 			ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
@@ -57,10 +56,10 @@ public class ChangelogFilesTest {
 
 			List<String> fieldNames = IteratorUtils.toList(tree.fieldNames());
 			boolean title = fieldNames.remove("title");
-			assertTrue(title, "No 'title' element in " + next);
+			assertThat(title).as("No 'title' element in " + next).isTrue();
 
 			boolean type = fieldNames.remove("type");
-			assertTrue(type, "No 'type' element in " + next);
+			assertThat(type).as("No 'type' element in " + next).isTrue();
 
 			// this one is optional
 			boolean haveIssue = fieldNames.remove("issue");
@@ -78,7 +77,7 @@ public class ChangelogFilesTest {
 				try {
 					Integer.parseInt(issue);
 				} catch (NumberFormatException e) {
-					fail("Invalid issue value in " + next);
+					fail("", "Invalid issue value in " + next);
 				}
 			}
 		}
