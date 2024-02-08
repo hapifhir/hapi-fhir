@@ -8,10 +8,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class BaseBatchJobParametersTest {
 
@@ -66,17 +64,16 @@ public class BaseBatchJobParametersTest {
 		// test
 		if (theParams.isExpectedToWork()) {
 			parameters.setUserData(key, testValue);
-			assertFalse(parameters.getUserData().isEmpty());
-			assertEquals(testValue, parameters.getUserData().get(key));
+			assertThat(parameters.getUserData().isEmpty()).isFalse();
+			assertThat(parameters.getUserData().get(key)).isEqualTo(testValue);
 		} else {
 			try {
 				parameters.setUserData(key, testValue);
-				fail();
+				fail("");
 			} catch (IllegalArgumentException ex) {
 				String dataType = testValue.getClass().getName();
-				assertTrue(ex.getMessage().contains("Invalid data type provided " + dataType),
-					ex.getMessage());
-				assertTrue(parameters.getUserData().isEmpty());
+				assertThat(ex.getMessage().contains("Invalid data type provided " + dataType)).as(ex.getMessage()).isTrue();
+				assertThat(parameters.getUserData().isEmpty()).isTrue();
 			}
 		}
 	}
@@ -90,10 +87,9 @@ public class BaseBatchJobParametersTest {
 		for (String key : new String[] { null, "" }) {
 			try {
 				parameters.setUserData(key, "test");
-				fail();
+				fail("");
 			} catch (IllegalArgumentException ex) {
-				assertTrue(ex.getMessage().contains("Invalid key; key must be non-empty, non-null"),
-					ex.getMessage());
+				assertThat(ex.getMessage().contains("Invalid key; key must be non-empty, non-null")).as(ex.getMessage()).isTrue();
 			}
 		}
 	}
@@ -106,9 +102,9 @@ public class BaseBatchJobParametersTest {
 
 		// test
 		parameters.setUserData(key, "test");
-		assertTrue(parameters.getUserData().containsKey(key));
+		assertThat(parameters.getUserData().containsKey(key)).isTrue();
 
 		parameters.setUserData(key, null);
-		assertFalse(parameters.getUserData().containsKey(key));
+		assertThat(parameters.getUserData().containsKey(key)).isFalse();
 	}
 }

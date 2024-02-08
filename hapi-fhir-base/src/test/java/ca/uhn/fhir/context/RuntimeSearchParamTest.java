@@ -3,7 +3,7 @@ package ca.uhn.fhir.context;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class RuntimeSearchParamTest {
 
@@ -44,7 +44,7 @@ public class RuntimeSearchParamTest {
 		"false, Patient, ((  Observation.identifier))"
 	})
 	public void getPathMatchesResourceType(boolean theShouldMatch, String theResourceType, String thePath) {
-		assertEquals(theShouldMatch, RuntimeSearchParam.pathMatchesResourceType(theResourceType, thePath));
+		assertThat(RuntimeSearchParam.pathMatchesResourceType(theResourceType, thePath)).isEqualTo(theShouldMatch);
 	}
 
 }

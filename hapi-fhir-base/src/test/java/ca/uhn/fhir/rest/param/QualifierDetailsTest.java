@@ -3,8 +3,7 @@ package ca.uhn.fhir.rest.param;
 import com.google.common.collect.Sets;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class QualifierDetailsTest {
 
@@ -13,8 +12,8 @@ public class QualifierDetailsTest {
 
 		QualifierDetails details = new QualifierDetails();
 		details.setColonQualifier(":Patient");
-		assertFalse(details.passes(null, Sets.newHashSet(":Patient")));
-		assertTrue(details.passes(null, Sets.newHashSet(":Observation")));
+		assertThat(details.passes(null, Sets.newHashSet(":Patient"))).isFalse();
+		assertThat(details.passes(null, Sets.newHashSet(":Observation"))).isTrue();
 
 	}
 

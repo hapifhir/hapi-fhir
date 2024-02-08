@@ -10,8 +10,8 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class DateRangeParamTest {
@@ -35,7 +35,7 @@ public class DateRangeParamTest {
 		DateRangeParam dateRangeParam = new DateRangeParam();
 		dateRangeParam.setValuesAsQueryTokens(fhirContext, "_lastUpdated", params);
 
-		assertTrue(dateRangeParam.isEmpty());
+		assertThat(dateRangeParam.isEmpty()).isTrue();
 	}
 
 	/**
@@ -51,7 +51,7 @@ public class DateRangeParamTest {
 		DateRangeParam dateRangeParam = new DateRangeParam();
 		try {
 			dateRangeParam.setValuesAsQueryTokens(fhirContext, "_lastUpdated", params);
-			fail();
+			fail("");
 		} catch (DataFormatException e) {
 			// good
 		}
@@ -70,7 +70,7 @@ public class DateRangeParamTest {
 		DateRangeParam dateRangeParam = new DateRangeParam();
 		try {
 			dateRangeParam.setValuesAsQueryTokens(fhirContext, "_lastUpdated", params);
-			fail();
+			fail("");
 		} catch (DataFormatException e) {
 			// good
 		}
@@ -86,10 +86,10 @@ public class DateRangeParamTest {
 		DateRangeParam dateRangeParam = new DateRangeParam();
 
 		dateRangeParam.setValuesAsQueryTokens(fhirContext, "_lastUpdated", params);
-		assertEquals("1965", dateRangeParam.getLowerBound().getValueAsString());
-		assertEquals("1965", dateRangeParam.getUpperBound().getValueAsString());
-		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getLowerBound().getPrefix());
-		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getUpperBound().getPrefix());
+		assertThat(dateRangeParam.getLowerBound().getValueAsString()).isEqualTo("1965");
+		assertThat(dateRangeParam.getUpperBound().getValueAsString()).isEqualTo("1965");
+		assertThat(dateRangeParam.getLowerBound().getPrefix()).isEqualTo(ParamPrefixEnum.NOT_EQUAL);
+		assertThat(dateRangeParam.getUpperBound().getPrefix()).isEqualTo(ParamPrefixEnum.NOT_EQUAL);
 	}
 
 	@Test
@@ -102,10 +102,10 @@ public class DateRangeParamTest {
 		DateRangeParam dateRangeParam = new DateRangeParam();
 
 		dateRangeParam.setValuesAsQueryTokens(fhirContext, "_lastUpdated", params);
-		assertEquals("1965-11", dateRangeParam.getLowerBound().getValueAsString());
-		assertEquals("1965-11", dateRangeParam.getUpperBound().getValueAsString());
-		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getLowerBound().getPrefix());
-		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getUpperBound().getPrefix());
+		assertThat(dateRangeParam.getLowerBound().getValueAsString()).isEqualTo("1965-11");
+		assertThat(dateRangeParam.getUpperBound().getValueAsString()).isEqualTo("1965-11");
+		assertThat(dateRangeParam.getLowerBound().getPrefix()).isEqualTo(ParamPrefixEnum.NOT_EQUAL);
+		assertThat(dateRangeParam.getUpperBound().getPrefix()).isEqualTo(ParamPrefixEnum.NOT_EQUAL);
 	}
 
 	@Test
@@ -118,10 +118,10 @@ public class DateRangeParamTest {
 		DateRangeParam dateRangeParam = new DateRangeParam();
 
 		dateRangeParam.setValuesAsQueryTokens(fhirContext, "_lastUpdated", params);
-		assertEquals("1965-11-23", dateRangeParam.getLowerBound().getValueAsString());
-		assertEquals("1965-11-23", dateRangeParam.getUpperBound().getValueAsString());
-		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getLowerBound().getPrefix());
-		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getUpperBound().getPrefix());
+		assertThat(dateRangeParam.getLowerBound().getValueAsString()).isEqualTo("1965-11-23");
+		assertThat(dateRangeParam.getUpperBound().getValueAsString()).isEqualTo("1965-11-23");
+		assertThat(dateRangeParam.getLowerBound().getPrefix()).isEqualTo(ParamPrefixEnum.NOT_EQUAL);
+		assertThat(dateRangeParam.getUpperBound().getPrefix()).isEqualTo(ParamPrefixEnum.NOT_EQUAL);
 	}
 
 	@Test
@@ -132,8 +132,8 @@ public class DateRangeParamTest {
 
 		DateRangeParam copy = new DateRangeParam(input);
 
-		assertEquals(dateStart, copy.getLowerBound());
-		assertEquals(dateEnd, copy.getUpperBound());
+		assertThat(copy.getLowerBound()).isEqualTo(dateStart);
+		assertThat(copy.getUpperBound()).isEqualTo(dateEnd);
 
 	}
 

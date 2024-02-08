@@ -2,25 +2,22 @@ package ca.uhn.fhir.rest.param;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class HistorySearchStyleEnumTest {
 	@Test
 	public void testParse(){
-		assertNull(HistorySearchStyleEnum.parse(""));
-		assertNull(HistorySearchStyleEnum.parse(null));
-		assertNull(HistorySearchStyleEnum.parse("Anything"));
-		assertEquals(HistorySearchStyleEnum.AT, HistorySearchStyleEnum.parse("_at"));
-		assertEquals(HistorySearchStyleEnum.SINCE, HistorySearchStyleEnum.parse("_since"));
-		assertEquals(HistorySearchStyleEnum.COUNT, HistorySearchStyleEnum.parse("_count"));
+		assertThat(HistorySearchStyleEnum.parse("")).isNull();
+		assertThat(HistorySearchStyleEnum.parse(null)).isNull();
+		assertThat(HistorySearchStyleEnum.parse("Anything")).isNull();
+		assertThat(HistorySearchStyleEnum.parse("_at")).isEqualTo(HistorySearchStyleEnum.AT);
+		assertThat(HistorySearchStyleEnum.parse("_since")).isEqualTo(HistorySearchStyleEnum.SINCE);
+		assertThat(HistorySearchStyleEnum.parse("_count")).isEqualTo(HistorySearchStyleEnum.COUNT);
 	}
 
 	@Test
 	public void testIsAt(){
-		assertTrue(HistorySearchStyleEnum.AT.isAt());
-		assertFalse(HistorySearchStyleEnum.SINCE.isAt());
+		assertThat(HistorySearchStyleEnum.AT.isAt()).isTrue();
+		assertThat(HistorySearchStyleEnum.SINCE.isAt()).isFalse();
 	}
 }

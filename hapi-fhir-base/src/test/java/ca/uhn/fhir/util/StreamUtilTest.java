@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class StreamUtilTest {
 
@@ -18,7 +17,7 @@ class StreamUtilTest {
 	void testStreamPartitionBy4(String theCase, List<Integer> theInput, List<List<Integer>> theOutput) {
 		List<List<Integer>> result = StreamUtil.partition(theInput.stream(), 4).toList();
 
-		assertEquals(theOutput, result, theCase);
+		assertThat(result).as(theCase).isEqualTo(theOutput);
 	}
 
 	static Object[][] streamPartitionTestCases() {

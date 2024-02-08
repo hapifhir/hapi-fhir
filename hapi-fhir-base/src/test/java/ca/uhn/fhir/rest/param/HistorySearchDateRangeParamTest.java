@@ -4,8 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class HistorySearchDateRangeParamTest {
 	private final int theOffset = 100;
@@ -14,29 +13,29 @@ class HistorySearchDateRangeParamTest {
 	@Test
 	public void testSearchDateRangeParamWithInvalidSearchType() {
 		HistorySearchDateRangeParam param = new HistorySearchDateRangeParam(Map.of("Some key", new String[]{"value"}), dateRangeParam, theOffset);
-		assertNull(param.getHistorySearchType());
-		assertEquals(theOffset, param.getOffset());
+		assertThat(param.getHistorySearchType()).isNull();
+		assertThat(param.getOffset()).isEqualTo(theOffset);
 	}
 
 	@Test
 	public void testSearchDateRangeParamWithSearchTypeAsAt() {
 		HistorySearchDateRangeParam param = new HistorySearchDateRangeParam(Map.of("_at", new String[]{"value"}), dateRangeParam, theOffset);
-		assertEquals(HistorySearchStyleEnum.AT, param.getHistorySearchType());
-		assertEquals(theOffset, param.getOffset());
+		assertThat(param.getHistorySearchType()).isEqualTo(HistorySearchStyleEnum.AT);
+		assertThat(param.getOffset()).isEqualTo(theOffset);
 	}
 	@Test
 	public void testSearchDateRangeParamWithSearchTypeAsSince() {
 		HistorySearchDateRangeParam param = new HistorySearchDateRangeParam(Map.of("_since", new String[]{"value"}), dateRangeParam, theOffset);
-		assertEquals(HistorySearchStyleEnum.SINCE, param.getHistorySearchType());
-		assertEquals(theOffset, param.getOffset());
+		assertThat(param.getHistorySearchType()).isEqualTo(HistorySearchStyleEnum.SINCE);
+		assertThat(param.getOffset()).isEqualTo(theOffset);
 	}
 
 
 	@Test
 	public void testSearchDateRangeParamWithSearchTypeAsCount() {
 		HistorySearchDateRangeParam param = new HistorySearchDateRangeParam(Map.of("_count", new String[]{"value"}), dateRangeParam, theOffset);
-		assertEquals(HistorySearchStyleEnum.COUNT, param.getHistorySearchType());
-		assertEquals(theOffset, param.getOffset());
+		assertThat(param.getHistorySearchType()).isEqualTo(HistorySearchStyleEnum.COUNT);
+		assertThat(param.getOffset()).isEqualTo(theOffset);
 
 	}
 }

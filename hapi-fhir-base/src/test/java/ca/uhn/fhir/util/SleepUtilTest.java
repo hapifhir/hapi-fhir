@@ -2,7 +2,7 @@ package ca.uhn.fhir.util;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class SleepUtilTest {
 
@@ -16,7 +16,7 @@ class SleepUtilTest {
 		long stop = System.currentTimeMillis();
 
 		long actualSleepDurationMs = stop - start;
-		assertTrue(actualSleepDurationMs >= amountToSleepMs);
+		assertThat(actualSleepDurationMs >= amountToSleepMs).isTrue();
 	}
 
 	@Test

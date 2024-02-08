@@ -2,23 +2,23 @@ package ca.uhn.fhir.rest.api;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class EncodingEnumTest {
 
 	@Test
 	public void getTypeWithoutCharset() {
-		assertEquals("text/plain", EncodingEnum.getTypeWithoutCharset("text/plain"));
-		assertEquals("text/plain", EncodingEnum.getTypeWithoutCharset("  text/plain"));
-		assertEquals("text/plain", EncodingEnum.getTypeWithoutCharset("  text/plain; charset=utf-8"));
-		assertEquals("text/plain", EncodingEnum.getTypeWithoutCharset("  text/plain  ; charset=utf-8"));
+		assertThat(EncodingEnum.getTypeWithoutCharset("text/plain")).isEqualTo("text/plain");
+		assertThat(EncodingEnum.getTypeWithoutCharset("  text/plain")).isEqualTo("text/plain");
+		assertThat(EncodingEnum.getTypeWithoutCharset("  text/plain; charset=utf-8")).isEqualTo("text/plain");
+		assertThat(EncodingEnum.getTypeWithoutCharset("  text/plain  ; charset=utf-8")).isEqualTo("text/plain");
 	}
 
 	@Test
 	public void getTypeWithSpace() {
-		assertEquals("application/fhir+xml", EncodingEnum.getTypeWithoutCharset("application/fhir xml"));
-		assertEquals("application/fhir+xml", EncodingEnum.getTypeWithoutCharset("application/fhir xml; charset=utf-8"));
-		assertEquals("application/fhir+xml", EncodingEnum.getTypeWithoutCharset("application/fhir xml ; charset=utf-8"));
+		assertThat(EncodingEnum.getTypeWithoutCharset("application/fhir xml")).isEqualTo("application/fhir+xml");
+		assertThat(EncodingEnum.getTypeWithoutCharset("application/fhir xml; charset=utf-8")).isEqualTo("application/fhir+xml");
+		assertThat(EncodingEnum.getTypeWithoutCharset("application/fhir xml ; charset=utf-8")).isEqualTo("application/fhir+xml");
 	}
 
 }

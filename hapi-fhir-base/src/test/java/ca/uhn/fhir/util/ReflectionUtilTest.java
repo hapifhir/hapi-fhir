@@ -8,35 +8,34 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ReflectionUtilTest {
 
 	@Test
 	public void testNewInstance() {
-		assertEquals(ArrayList.class, ReflectionUtil.newInstance(ArrayList.class).getClass());
+		assertThat(ReflectionUtil.newInstance(ArrayList.class).getClass()).isEqualTo(ArrayList.class);
 	}
 
 	@Test
 	public void testNewInstanceOrReturnNullString() {
-		assertEquals(ArrayList.class, ReflectionUtil.newInstanceOrReturnNull(ArrayList.class.getName(), List.class).getClass());
+		assertThat(ReflectionUtil.newInstanceOrReturnNull(ArrayList.class.getName(), List.class).getClass()).isEqualTo(ArrayList.class);
 	}
 
 	@Test
 	public void testNewInstanceOrReturnNullWrong1() {
-		assertEquals(null, ReflectionUtil.newInstanceOrReturnNull("foo.Foo", List.class));
+		assertThat(ReflectionUtil.newInstanceOrReturnNull("foo.Foo", List.class)).isEqualTo(null);
 	}
 
 	@Test
 	public void testNewInstanceOrReturnNullWrong2() {
 		try {
 			ReflectionUtil.newInstanceOrReturnNull("java.lang.String", List.class);
-			fail();
+			fail("");
 		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(1787) + "java.lang.String is not assignable to interface java.util.List", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1787) + "java.lang.String is not assignable to interface java.util.List");
 		}
 	}
 
@@ -44,23 +43,23 @@ public class ReflectionUtilTest {
 	public void testNewInstanceFail() {
 		try {
 			ReflectionUtil.newInstance(List.class);
-			fail();
+			fail("");
 		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(1784) + "Failed to instantiate java.util.List", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1784) + "Failed to instantiate java.util.List");
 		}
 	}
 
 	@Test
 	public void testTypeExists() {
-		assertFalse(ReflectionUtil.typeExists("ca.Foo"));
-		assertTrue(ReflectionUtil.typeExists(String.class.getName()));
+		assertThat(ReflectionUtil.typeExists("ca.Foo")).isFalse();
+		assertThat(ReflectionUtil.typeExists(String.class.getName())).isTrue();
 	}
 
 	@Test
 	public void testDescribeMethod() throws NoSuchMethodException {
 		Method method = String.class.getMethod("startsWith", String.class, int.class);
 		String description = ReflectionUtil.describeMethodInSortFriendlyWay(method);
-		assertEquals("startsWith returns(boolean) params(java.lang.String, int)", description);
+		assertThat(description).isEqualTo("startsWith returns(boolean) params(java.lang.String, int)");
 	}
 
 }

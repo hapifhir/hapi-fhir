@@ -8,7 +8,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
@@ -19,7 +19,7 @@ public class ClasspathUtilTest {
 		try {
 			ClasspathUtil.loadResource("/FOOOOOO");
 		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(1758) + "Unable to find classpath resource: /FOOOOOO", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1758) + "Unable to find classpath resource: /FOOOOOO");
 		}
 	}
 
@@ -28,7 +28,7 @@ public class ClasspathUtilTest {
 		try {
 			ClasspathUtil.loadResourceAsStream("/FOOOOOO");
 		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(1758) + "Unable to find classpath resource: /FOOOOOO", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1758) + "Unable to find classpath resource: /FOOOOOO");
 		}
 	}
 
@@ -37,7 +37,7 @@ public class ClasspathUtilTest {
 		try {
 			ClasspathUtil.loadResourceAsReader("/FOOOOOO");
 		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(1758) + "Unable to find classpath resource: /FOOOOOO", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1758) + "Unable to find classpath resource: /FOOOOOO");
 		}
 	}
 

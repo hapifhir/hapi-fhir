@@ -17,9 +17,8 @@ import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -62,7 +61,7 @@ class TimeoutManagerTest {
 	@Test
 	public void checkTimeout_noThreadholdHit_noLogging() {
 		// execute
-		assertFalse(mySvc.checkTimeout());
+		assertThat(mySvc.checkTimeout()).isFalse();
 		// verify
 		verifyNoInteractions(myAppender);
 	}
@@ -72,12 +71,12 @@ class TimeoutManagerTest {
 		// setup
 		mySvc.addTimeForUnitTest(Duration.ofDays(2));
 		// execute
-		assertTrue(mySvc.checkTimeout());
+		assertThat(mySvc.checkTimeout()).isTrue();
 		// verify
 		verify(myAppender, times(1)).doAppend(myLoggingEvent.capture());
 		ILoggingEvent event = myLoggingEvent.getValue();
-		assertEquals(Level.WARN, event.getLevel());
-		assertEquals(TEST_SERVICE_NAME + " has run for 2.0 days", event.getFormattedMessage());
+		assertThat(event.getLevel()).isEqualTo(Level.WARN);
+		assertThat(event.getFormattedMessage()).isEqualTo(TEST_SERVICE_NAME + " has run for 2.0 days");
 	}
 
 	@Test
@@ -90,12 +89,12 @@ class TimeoutManagerTest {
 		verify(myAppender, times(2)).doAppend(myLoggingEvent.capture());
 
 		ILoggingEvent event1 = myLoggingEvent.getAllValues().get(0);
-		assertEquals(Level.WARN, event1.getLevel());
-		assertEquals(TEST_SERVICE_NAME + " has run for 20 days", event1.getFormattedMessage());
+		assertThat(event1.getLevel()).isEqualTo(Level.WARN);
+		assertThat(event1.getFormattedMessage()).isEqualTo(TEST_SERVICE_NAME + " has run for 20 days");
 
 		ILoggingEvent event2 = myLoggingEvent.getAllValues().get(1);
-		assertEquals(Level.ERROR, event2.getLevel());
-		assertEquals(TEST_SERVICE_NAME + " has run for 20 days", event2.getFormattedMessage());
+		assertThat(event2.getLevel()).isEqualTo(Level.ERROR);
+		assertThat(event2.getFormattedMessage()).isEqualTo(TEST_SERVICE_NAME + " has run for 20 days");
 	}
 
 
@@ -107,16 +106,16 @@ class TimeoutManagerTest {
 		// execute
 		try {
 			mySvc.checkTimeout();
-			fail();
+			fail("");
 		} catch (TimeoutException e) {
-			assertEquals("HAPI-2133: TEST TIMEOUT timed out after running for 20 days", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-2133: TEST TIMEOUT timed out after running for 20 days");
 		}
 		verify(myAppender, times(1)).doAppend(myLoggingEvent.capture());
 
 		verify(myAppender, times(1)).doAppend(myLoggingEvent.capture());
 		ILoggingEvent event = myLoggingEvent.getValue();
-		assertEquals(Level.WARN, event.getLevel());
-		assertEquals(TEST_SERVICE_NAME + " has run for 20 days", event.getFormattedMessage());
+		assertThat(event.getLevel()).isEqualTo(Level.WARN);
+		assertThat(event.getFormattedMessage()).isEqualTo(TEST_SERVICE_NAME + " has run for 20 days");
 	}
 
 }

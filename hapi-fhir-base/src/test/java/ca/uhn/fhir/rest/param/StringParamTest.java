@@ -21,10 +21,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAMQUALIFIER_STRING_TEXT;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(MockitoExtension.class)
 public class StringParamTest {
@@ -50,11 +47,11 @@ public class StringParamTest {
 	@Test
 	public void testEquals() {
 		StringParam input = new StringParam("foo", true);
-		
-		assertTrue(input.equals(input));
-		assertFalse(input.equals(null));
-		assertFalse(input.equals(""));
-		assertFalse(input.equals(new StringParam("foo", false)));
+
+		assertThat(input.equals(input)).isTrue();
+		assertThat(input.equals(null)).isFalse();
+		assertThat(input.equals("")).isFalse();
+		assertThat(input.equals(new StringParam("foo", false))).isFalse();
 	}
 
 	@Nested
@@ -65,36 +62,36 @@ public class StringParamTest {
 			// exact
 			StringParam sp = new StringParam("the-value", true);
 			sp.setText(false);
-			assertTrue(sp.isExact());
+			assertThat(sp.isExact()).isTrue();
 			sp.setText(true);
-			assertFalse(sp.isExact());
+			assertThat(sp.isExact()).isFalse();
 
 			// contains
 			sp = new StringParam("the-value");
 			sp.setContains(true);
 
 			sp.setText(false);
-			assertTrue(sp.isContains());
+			assertThat(sp.isContains()).isTrue();
 			sp.setText(true);
-			assertFalse(sp.isContains());
+			assertThat(sp.isContains()).isFalse();
 
 			// exact
 			sp = new StringParam("the-value");
 			sp.setExact(true);
 
 			sp.setText(false);
-			assertTrue(sp.isExact());
+			assertThat(sp.isExact()).isTrue();
 			sp.setText(true);
-			assertFalse(sp.isExact());
+			assertThat(sp.isExact()).isFalse();
 
 			// missing
 			sp = new StringParam("the-value");
 			sp.setMissing(true);
 
 			sp.setText(false);
-			assertTrue(sp.getMissing());
+			assertThat(sp.getMissing()).isTrue();
 			sp.setText(true);
-			assertNull(sp.getMissing());
+			assertThat(sp.getMissing()).isNull();
 		}
 
 		@Test
@@ -109,7 +106,7 @@ public class StringParamTest {
 			StringParam sp = new StringParam("the-value");
 			sp.doSetValueAsQueryToken(myContext, "value-string", PARAMQUALIFIER_STRING_TEXT, "yellow");
 
-			assertEquals(PARAMQUALIFIER_STRING_TEXT, ((IQueryParameterType) sp).getQueryParameterQualifier());
+			assertThat(((IQueryParameterType) sp).getQueryParameterQualifier()).isEqualTo(PARAMQUALIFIER_STRING_TEXT);
 		}
 	}
 
@@ -133,19 +130,19 @@ public class StringParamTest {
 	}
 
 	private void assertNicknameQualifierSearchParameterIsValid(StringParam theStringParam, String theExpectedValue){
-		assertTrue(theStringParam.isNicknameExpand());
-		assertFalse(theStringParam.isExact());
-		assertFalse(theStringParam.isContains());
-		assertFalse(theStringParam.isText());
-		assertEquals(theExpectedValue, theStringParam.getValue());
+		assertThat(theStringParam.isNicknameExpand()).isTrue();
+		assertThat(theStringParam.isExact()).isFalse();
+		assertThat(theStringParam.isContains()).isFalse();
+		assertThat(theStringParam.isText()).isFalse();
+		assertThat(theStringParam.getValue()).isEqualTo(theExpectedValue);
 	}
 
 	private void assertTextQualifierSearchParameterIsValid(StringParam theStringParam, String theExpectedValue){
-		assertFalse(theStringParam.isNicknameExpand());
-		assertFalse(theStringParam.isExact());
-		assertFalse(theStringParam.isContains());
-		assertTrue(theStringParam.isText());
-		assertEquals(theExpectedValue, theStringParam.getValue());
+		assertThat(theStringParam.isNicknameExpand()).isFalse();
+		assertThat(theStringParam.isExact()).isFalse();
+		assertThat(theStringParam.isContains()).isFalse();
+		assertThat(theStringParam.isText()).isTrue();
+		assertThat(theStringParam.getValue()).isEqualTo(theExpectedValue);
 	}
 
 	private void assertNicknameWarningLogged(boolean theWasLogged){
@@ -159,9 +156,9 @@ public class StringParamTest {
 			.collect(Collectors.toList());
 
 		if (theWasLogged) {
-			assertEquals(1, warningLogs.size());
+			assertThat(warningLogs.size()).isEqualTo(1);
 		} else {
-			assertTrue(warningLogs.isEmpty());
+			assertThat(warningLogs.isEmpty()).isTrue();
 		}
 	}
 	

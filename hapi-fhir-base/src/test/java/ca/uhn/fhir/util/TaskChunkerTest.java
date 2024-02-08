@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import jakarta.annotation.Nonnull;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
 
@@ -35,10 +35,10 @@ public class TaskChunkerTest {
 
 		// Verify
 		verify(myConsumer, times(4)).accept(myConsumerCaptor.capture());
-		assertEquals(newIntRangeList(0, 10), myConsumerCaptor.getAllValues().get(0));
-		assertEquals(newIntRangeList(10, 20), myConsumerCaptor.getAllValues().get(1));
-		assertEquals(newIntRangeList(20, 30), myConsumerCaptor.getAllValues().get(2));
-		assertEquals(newIntRangeList(30, 35), myConsumerCaptor.getAllValues().get(3));
+		assertThat(myConsumerCaptor.getAllValues().get(0)).isEqualTo(newIntRangeList(0, 10));
+		assertThat(myConsumerCaptor.getAllValues().get(1)).isEqualTo(newIntRangeList(10, 20));
+		assertThat(myConsumerCaptor.getAllValues().get(2)).isEqualTo(newIntRangeList(20, 30));
+		assertThat(myConsumerCaptor.getAllValues().get(3)).isEqualTo(newIntRangeList(30, 35));
 
 	}
 

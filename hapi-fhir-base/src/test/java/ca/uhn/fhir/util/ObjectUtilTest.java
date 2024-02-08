@@ -5,11 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 class ObjectUtilTest {
 
@@ -17,12 +14,12 @@ class ObjectUtilTest {
 	void testEquals() {
 		String a = "a";
 		String b = "b";
-		assertFalse(ObjectUtil.equals(b, a));
-		assertFalse(ObjectUtil.equals(a, b));
-		assertFalse(ObjectUtil.equals(a, null));
-		assertFalse(ObjectUtil.equals(null, a));
-		assertTrue(ObjectUtil.equals(null, null));
-		assertTrue(ObjectUtil.equals(a, a));
+		assertThat(ObjectUtil.equals(b, a)).isFalse();
+		assertThat(ObjectUtil.equals(a, b)).isFalse();
+		assertThat(ObjectUtil.equals(a, null)).isFalse();
+		assertThat(ObjectUtil.equals(null, a)).isFalse();
+		assertThat(ObjectUtil.equals(null, null)).isTrue();
+		assertThat(ObjectUtil.equals(a, a)).isTrue();
 	}
 	
 	@Test
@@ -32,9 +29,9 @@ class ObjectUtilTest {
 			ObjectUtil.requireNonNull(null, message);
 			fail("should not get here.");
 		} catch (NullPointerException e) {
-			assertEquals(Msg.code(1776) + message, e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1776) + message);
 		}
-		assertNotNull(ObjectUtil.requireNonNull("some string", message));
+		assertThat(ObjectUtil.requireNonNull("some string", message)).isNotNull();
 	}
 	
 	@Test
@@ -57,7 +54,7 @@ class ObjectUtilTest {
 			ObjectUtil.requireNotEmpty(string, message);
 			fail("should not get here.");
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1777) + message, e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1777) + message);
 		}
 	}
 
@@ -67,7 +64,7 @@ class ObjectUtilTest {
 
 		Optional<Boolean> result = ObjectUtil.castIfInstanceof(value, Boolean.class);
 
-		assertTrue(result.isPresent());
+		assertThat(result.isPresent()).isTrue();
 	}
 
 	@Test
@@ -76,6 +73,6 @@ class ObjectUtilTest {
 
 		Optional<Integer> result = ObjectUtil.castIfInstanceof(value, Integer.class);
 
-		assertTrue(result.isEmpty());
+		assertThat(result.isEmpty()).isTrue();
 	}
 }

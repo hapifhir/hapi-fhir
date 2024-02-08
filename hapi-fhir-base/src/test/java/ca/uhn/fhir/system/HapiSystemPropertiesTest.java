@@ -6,7 +6,7 @@ import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 import uk.org.webcompere.systemstubs.properties.SystemProperties;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SystemStubsExtension.class)
 class HapiSystemPropertiesTest {
@@ -21,7 +21,7 @@ class HapiSystemPropertiesTest {
 		// execute
 		final boolean actual = HapiSystemProperties.isHapiClientKeepResponsesEnabled();
 		// validate
-		assertTrue(actual);
+		assertThat(actual).isTrue();
 	}
 
 	@Test
@@ -31,7 +31,7 @@ class HapiSystemPropertiesTest {
 		// execute
 		final boolean actual = HapiSystemProperties.isTestModeEnabled();
 		// validate
-		assertTrue(actual);
+		assertThat(actual).isTrue();
 	}
 
 	@Test
@@ -41,7 +41,7 @@ class HapiSystemPropertiesTest {
 		// execute
 		final boolean actual = HapiSystemProperties.isUnitTestModeEnabled();
 		// validate
-		assertTrue(actual);
+		assertThat(actual).isTrue();
 	}
 
 	@Test
@@ -51,7 +51,7 @@ class HapiSystemPropertiesTest {
 		// execute
 		final boolean actual = HapiSystemProperties.isUnitTestCaptureStackEnabled();
 		// validate
-		assertTrue(actual);
+		assertThat(actual).isTrue();
 	}
 
 	@Test
@@ -61,7 +61,7 @@ class HapiSystemPropertiesTest {
 		// execute
 		final boolean actual = HapiSystemProperties.isDisableStatusBasedReindex();
 		// validate
-		assertTrue(actual);
+		assertThat(actual).isTrue();
 	}
 
 	@Test
@@ -71,6 +71,6 @@ class HapiSystemPropertiesTest {
 		// execute
 		final boolean actual = HapiSystemProperties.isSuppressHapiFhirVersionLogEnabled();
 		// validate
-		assertTrue(actual);
+		assertThat(actual).isTrue();
 	}
 }

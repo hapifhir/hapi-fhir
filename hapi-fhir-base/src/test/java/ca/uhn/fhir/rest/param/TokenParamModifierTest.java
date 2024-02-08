@@ -5,7 +5,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.EnumSet;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class TokenParamModifierTest {
 
@@ -17,7 +17,7 @@ class TokenParamModifierTest {
 			TokenParamModifier.NOT_IN
 		);
 
-		assertEquals(negativeSet.contains(theTokenParamModifier), theTokenParamModifier.isNegative());
+		assertThat(theTokenParamModifier.isNegative()).isEqualTo(negativeSet.contains(theTokenParamModifier));
 	}
 
 }

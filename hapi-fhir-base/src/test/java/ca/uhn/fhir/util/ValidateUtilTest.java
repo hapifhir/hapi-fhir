@@ -1,7 +1,7 @@
 package ca.uhn.fhir.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -17,9 +17,9 @@ public class ValidateUtilTest {
 		
 		try {
 			ValidateUtil.isTrueOrThrowInvalidRequest(false, "The message");
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1769) + "The message", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1769) + "The message");
 		}
 	}
 	
@@ -28,9 +28,9 @@ public class ValidateUtilTest {
 		ValidateUtil.isGreaterThan(2L, 1L, "");
 		try {
 			ValidateUtil.isGreaterThan(1L, 1L, "The message");
-			fail();
+			fail("");
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1762) + "The message", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1762) + "The message");
 		}
 	}
 
@@ -39,9 +39,9 @@ public class ValidateUtilTest {
 		ValidateUtil.isGreaterThanOrEqualTo(1L, 1L, "");
 		try {
 			ValidateUtil.isGreaterThanOrEqualTo(0L, 1L, "The message");
-			fail();
+			fail("");
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1763) + "The message", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1763) + "The message");
 		}
 	}
 
@@ -51,23 +51,23 @@ public class ValidateUtilTest {
 		
 		try {
 			ValidateUtil.isNotBlankOrThrowInvalidRequest("", "The message");
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1765) + "The message", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1765) + "The message");
 		}
 
 		try {
 			ValidateUtil.isNotBlankOrThrowInvalidRequest(null, "The message");
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1765) + "The message", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1765) + "The message");
 		}
 
 		try {
 			ValidateUtil.isNotBlankOrThrowInvalidRequest(" ", "The message");
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1765) + "The message", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1765) + "The message");
 		}
 	}
 
@@ -79,9 +79,9 @@ public class ValidateUtilTest {
 		try {
 			ValidateUtil.isNotNullOrThrowUnprocessableEntity(null, "The message %s", "123");
 
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1767) + "The message 123", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1767) + "The message 123");
 		}
 
 	}

@@ -8,7 +8,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import java.math.BigDecimal;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class NumericParamRangeUtilTest {
 
@@ -18,7 +18,7 @@ public class NumericParamRangeUtilTest {
 		BigDecimal bd = new BigDecimal(theNumber);
 		System.out.printf("%1$10s %2$2s %3$2s %4$2s %n",
 			theNumber, bd.scale(), bd.precision(), theExpectedSigDigs);
-		assertEquals(theExpectedSigDigs, bd.precision());
+		assertThat(bd.precision()).isEqualTo(theExpectedSigDigs);
 	}
 
 
@@ -34,8 +34,8 @@ public class NumericParamRangeUtilTest {
 			theExpectedRange.getLeft(), theExpectedRange.getRight(),
 			range.getLeft(), range.getRight() );
 
-		assertEquals(theExpectedRange.getLeft(), range.getLeft().doubleValue() );
-		assertEquals(theExpectedRange.getRight(), range.getRight().doubleValue() );
+		assertThat(range.getLeft().doubleValue()).isEqualTo(theExpectedRange.getLeft());
+		assertThat(range.getRight().doubleValue()).isEqualTo(theExpectedRange.getRight());
 	}
 
 

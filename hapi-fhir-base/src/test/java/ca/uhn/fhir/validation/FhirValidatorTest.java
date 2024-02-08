@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class FhirValidatorTest {
@@ -31,8 +30,8 @@ class FhirValidatorTest {
 
 		// validate
 		assertThat(resultMessages).hasSize(1);
-		assertEquals(MESSAGE, resultMessages.get(0).getMessage());
-		assertEquals(PREFIX + ".name.first", resultMessages.get(0).getLocationString());
+		assertThat(resultMessages.get(0).getMessage()).isEqualTo(MESSAGE);
+		assertThat(resultMessages.get(0).getLocationString()).isEqualTo(PREFIX + ".name.first");
 	}
 
 	@Test
@@ -45,8 +44,8 @@ class FhirValidatorTest {
 
 		// validate
 		assertThat(resultMessages).hasSize(1);
-		assertEquals(MESSAGE, resultMessages.get(0).getMessage());
-		assertEquals(PREFIX + ".name", resultMessages.get(0).getLocationString());
+		assertThat(resultMessages.get(0).getMessage()).isEqualTo(MESSAGE);
+		assertThat(resultMessages.get(0).getLocationString()).isEqualTo(PREFIX + ".name");
 	}
 
 	@Test
@@ -59,8 +58,8 @@ class FhirValidatorTest {
 
 		// validate
 		assertThat(resultMessages).hasSize(1);
-		assertEquals(MESSAGE, resultMessages.get(0).getMessage());
-		assertEquals(PREFIX, resultMessages.get(0).getLocationString());
+		assertThat(resultMessages.get(0).getMessage()).isEqualTo(MESSAGE);
+		assertThat(resultMessages.get(0).getLocationString()).isEqualTo(PREFIX);
 	}
 
 	@Test
@@ -73,8 +72,8 @@ class FhirValidatorTest {
 
 		// validate
 		assertThat(resultMessages).hasSize(1);
-		assertEquals(MESSAGE, resultMessages.get(0).getMessage());
-		assertEquals(PREFIX + ".patient", resultMessages.get(0).getLocationString());
+		assertThat(resultMessages.get(0).getMessage()).isEqualTo(MESSAGE);
+		assertThat(resultMessages.get(0).getLocationString()).isEqualTo(PREFIX + ".patient");
 	}
 
 	private List<FhirValidator.ConcurrentValidationTask> buildTasks(String theLocation) {

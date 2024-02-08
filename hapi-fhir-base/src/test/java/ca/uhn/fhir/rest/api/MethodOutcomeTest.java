@@ -7,8 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class MethodOutcomeTest {
 
@@ -25,7 +24,7 @@ class MethodOutcomeTest {
 
 		Optional<String> firstHeader = myMethodOutcome.getFirstResponseHeader("some-header");
 
-		assertTrue(firstHeader.isEmpty());
+		assertThat(firstHeader.isEmpty()).isTrue();
 	}
 
 	@Test
@@ -34,8 +33,8 @@ class MethodOutcomeTest {
 
 		Optional<String> firstHeader = myMethodOutcome.getFirstResponseHeader("some-header");
 
-		assertTrue(firstHeader.isPresent());
-		assertEquals("value1", firstHeader.get());
+		assertThat(firstHeader.isPresent()).isTrue();
+		assertThat(firstHeader.get()).isEqualTo("value1");
 	}
 
 }

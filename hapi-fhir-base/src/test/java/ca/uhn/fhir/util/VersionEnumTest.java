@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class VersionEnumTest {
 
@@ -23,7 +22,7 @@ public class VersionEnumTest {
 		version = version.replace("-SNAPSHOT", "");
 
 		String[] parts = version.split("\\.");
-		assertEquals(3, parts.length);
+		assertThat(parts.length).isEqualTo(3);
 		int major = Integer.parseInt(parts[0]);
 		int minor = Integer.parseInt(parts[1]);
 		int patch = Integer.parseInt(parts[2]);

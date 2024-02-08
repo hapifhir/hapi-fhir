@@ -12,9 +12,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PhoneticEncoderUtilTests {
 
@@ -37,8 +35,8 @@ public class PhoneticEncoderUtilTests {
 		// test
 		IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(enumString);
 
-		assertNotNull(encoder);
-		assertEquals(enumVal.name(), encoder.name());
+		assertThat(encoder).isNotNull();
+		assertThat(encoder.name()).isEqualTo(enumVal.name());
 	}
 
 	@Test
@@ -47,8 +45,8 @@ public class PhoneticEncoderUtilTests {
 		for (PhoneticEncoderEnum enumVal : PhoneticEncoderEnum.values()) {
 			IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(enumVal.name());
 
-			assertNotNull(encoder);
-			assertEquals(enumVal.name(), encoder.name());
+			assertThat(encoder).isNotNull();
+			assertThat(encoder.name()).isEqualTo(enumVal.name());
 		}
 	}
 
@@ -64,13 +62,12 @@ public class PhoneticEncoderUtilTests {
 		);
 
 		// verify
-		assertNull(encoder);
+		assertThat(encoder).isNull();
 		ArgumentCaptor<ILoggingEvent> loggingCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		Mockito.verify(myListAppender).doAppend(loggingCaptor.capture());
-		assertEquals(1, loggingCaptor.getAllValues().size());
+		assertThat(loggingCaptor.getAllValues().size()).isEqualTo(1);
 		ILoggingEvent event = loggingCaptor.getValue();
-		assertEquals("Invalid encoder max character length: " + num,
-			event.getMessage());
+		assertThat(event.getMessage()).isEqualTo("Invalid encoder max character length: " + num);
 	}
 
 	@Test
@@ -82,14 +79,13 @@ public class PhoneticEncoderUtilTests {
 		IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(theString);
 
 		// verify
-		assertNull(encoder);
+		assertThat(encoder).isNull();
 		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		Mockito.verify(myListAppender)
 			.doAppend(captor.capture());
-		assertEquals(1, captor.getAllValues().size());
+		assertThat(captor.getAllValues().size()).isEqualTo(1);
 		ILoggingEvent event = captor.getValue();
-		assertEquals("Invalid phonetic param string " + theString,
-			event.getMessage());
+		assertThat(event.getMessage()).isEqualTo("Invalid phonetic param string " + theString);
 	}
 
 	@Test
@@ -131,20 +127,19 @@ public class PhoneticEncoderUtilTests {
 			PhoneticEncoderEnum.METAPHONE.name() + "(" + Integer.MAX_VALUE + ")"
 		);
 
-		assertNotNull(encoder);
-		assertEquals(PhoneticEncoderEnum.METAPHONE.name(), encoder.name());
+		assertThat(encoder).isNotNull();
+		assertThat(encoder.name()).isEqualTo(PhoneticEncoderEnum.METAPHONE.name());
 	}
 
 	/**
 	 * Verifies the outcome encoder when an invalid string was passed in.
 	 */
 	private void verifyOutcome_getEncoder_NumberParseFailure(IPhoneticEncoder theEncoder, String theNumberParam) {
-		assertNull(theEncoder);
+		assertThat(theEncoder).isNull();
 		ArgumentCaptor<ILoggingEvent> loggingCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		Mockito.verify(myListAppender).doAppend(loggingCaptor.capture());
-		assertEquals(1, loggingCaptor.getAllValues().size());
+		assertThat(loggingCaptor.getAllValues().size()).isEqualTo(1);
 		ILoggingEvent event = loggingCaptor.getValue();
-		assertEquals("Invalid encoder max character length: " + theNumberParam,
-			event.getMessage());
+		assertThat(event.getMessage()).isEqualTo("Invalid encoder max character length: " + theNumberParam);
 	}
 }

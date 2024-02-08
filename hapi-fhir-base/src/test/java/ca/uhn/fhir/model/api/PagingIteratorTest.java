@@ -6,11 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class PagingIteratorTest {
 
@@ -39,14 +36,14 @@ public class PagingIteratorTest {
 	public void hasNext_returnsTrue_ifElementsAvailable() {
 		myPagingIterator = createPagingIterator(1);
 
-		assertTrue(myPagingIterator.hasNext());
+		assertThat(myPagingIterator.hasNext()).isTrue();
 	}
 
 	@Test
 	public void hasNext_returnsFalse_ifNoElementsAvialable() {
 		myPagingIterator = createPagingIterator(0);
 
-		assertFalse(myPagingIterator.hasNext());
+		assertThat(myPagingIterator.hasNext()).isFalse();
 	}
 
 	@Test
@@ -54,8 +51,8 @@ public class PagingIteratorTest {
 		myPagingIterator = createPagingIterator(10);
 
 		String next = myPagingIterator.next();
-		assertNotNull(next);
-		assertFalse(next.isEmpty());
+		assertThat(next).isNotNull();
+		assertThat(next.isEmpty()).isFalse();
 	}
 
 	@Test
@@ -72,7 +69,7 @@ public class PagingIteratorTest {
 				myPagingIterator.next();
 				count++;
 			}
-			assertEquals(size, count);
+			assertThat(count).isEqualTo(size);
 		}
 	}
 
@@ -82,9 +79,9 @@ public class PagingIteratorTest {
 
 		try {
 			myPagingIterator.next();
-			fail();
+			fail("");
 		} catch (NoSuchElementException ex) {
-			assertTrue(ex.getMessage().contains("Nothing to fetch"));
+			assertThat(ex.getMessage().contains("Nothing to fetch")).isTrue();
 		}
 	}
 }

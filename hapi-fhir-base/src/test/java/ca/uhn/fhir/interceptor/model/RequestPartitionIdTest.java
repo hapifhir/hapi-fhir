@@ -9,36 +9,32 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RequestPartitionIdTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(RequestPartitionIdTest.class);
 
 	@Test
 	public void testHashCode() {
-		assertEquals(31860737, RequestPartitionId.allPartitions().hashCode());
+		assertThat(RequestPartitionId.allPartitions().hashCode()).isEqualTo(31860737);
 	}
 
 	@Test
 	public void testEquals() {
-		assertEquals(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)), RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
-		assertNotEquals(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)), null);
-		assertNotEquals(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)), "123");
+		assertThat(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1))).isEqualTo(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
+		assertThat(null).isNotEqualTo(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
+		assertThat("123").isNotEqualTo(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
 	}
 
 	@Test
 	public void testPartition() {
-		assertFalse(RequestPartitionId.allPartitions().isDefaultPartition());
-		assertFalse(RequestPartitionId.defaultPartition().isAllPartitions());
-		assertTrue(RequestPartitionId.defaultPartition().isDefaultPartition());
-		assertTrue(RequestPartitionId.allPartitions().isAllPartitions());
-		assertFalse(RequestPartitionId.forPartitionIdsAndNames(Lists.newArrayList("Name1", "Name2"), null, null).isAllPartitions());
-		assertFalse(RequestPartitionId.forPartitionIdsAndNames(Lists.newArrayList("Name1", "Name2"), null, null).isDefaultPartition());
-		assertFalse(RequestPartitionId.forPartitionIdsAndNames(null, Lists.newArrayList(1, 2), null).isAllPartitions());
-		assertFalse(RequestPartitionId.forPartitionIdsAndNames(null, Lists.newArrayList(1, 2), null).isDefaultPartition());
+		assertThat(RequestPartitionId.allPartitions().isDefaultPartition()).isFalse();
+		assertThat(RequestPartitionId.defaultPartition().isAllPartitions()).isFalse();
+		assertThat(RequestPartitionId.defaultPartition().isDefaultPartition()).isTrue();
+		assertThat(RequestPartitionId.allPartitions().isAllPartitions()).isTrue();
+		assertThat(RequestPartitionId.forPartitionIdsAndNames(Lists.newArrayList("Name1", "Name2"), null, null).isAllPartitions()).isFalse();
+		assertThat(RequestPartitionId.forPartitionIdsAndNames(Lists.newArrayList("Name1", "Name2"), null, null).isDefaultPartition()).isFalse();
+		assertThat(RequestPartitionId.forPartitionIdsAndNames(null, Lists.newArrayList(1, 2), null).isAllPartitions()).isFalse();
+		assertThat(RequestPartitionId.forPartitionIdsAndNames(null, Lists.newArrayList(1, 2), null).isDefaultPartition()).isFalse();
 	}
 
 	@Test
@@ -62,9 +58,9 @@ public class RequestPartitionIdTest {
 		String json = start.asJson();
 		ourLog.info(json);
 		RequestPartitionId end = RequestPartitionId.fromJson(json);
-		assertEquals(start, end);
+		assertThat(end).isEqualTo(start);
 		String json2 = end.asJson();
-		assertEquals(json, json2);
+		assertThat(json2).isEqualTo(json);
 		return json;
 	}
 }
