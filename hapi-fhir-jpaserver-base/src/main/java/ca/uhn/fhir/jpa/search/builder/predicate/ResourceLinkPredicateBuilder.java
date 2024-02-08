@@ -70,6 +70,7 @@ import com.healthmarketscience.sqlbuilder.UnaryCondition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
@@ -204,7 +205,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 							targetQualifiedUrls.add(dt.getValue());
 						}
 					} else {
-						validateResourceTypeInReferenceParam(ref);
+						validateResourceTypeInReferenceParam(ref.getResourceType());
 						targetIds.add(dt);
 					}
 
@@ -257,17 +258,15 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		}
 	}
 
-	private void validateResourceTypeInReferenceParam(final ReferenceParam theReferenceParam) {
-		if (!theReferenceParam.hasResourceType()) {
+	private void validateResourceTypeInReferenceParam(final String theResourceType) {
+		if (StringUtils.isEmpty(theResourceType)) {
 			return;
 		}
 
-		String referenceResourceType = theReferenceParam.getResourceType();
-
 		try {
-			getFhirContext().getResourceDefinition(referenceResourceType);
+			getFhirContext().getResourceDefinition(theResourceType);
 		} catch (DataFormatException e) {
-			throw newInvalidResourceTypeException(referenceResourceType);
+			throw newInvalidResourceTypeException(theResourceType);
 		}
 	}
 
@@ -377,9 +376,9 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 			String typeValue = theReferenceParam.getValue();
 
-			validateResourceTypeInReferenceParam(theReferenceParam);
+			validateResourceTypeInReferenceParam(typeValue);
 			if (!resourceTypes.contains(typeValue)) {
-				throw newInvalidTargetTypeForReferenceException(theResourceName, theParamName, typeValue);
+				throw newInvalidTargetTypeForChainException(theResourceName, theParamName, typeValue);
 			}
 
 			Condition condition = BinaryCondition.equalTo(
@@ -565,6 +564,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			}
 
 		} else {
+
 			try {
 				RuntimeResourceDefinition resDef =
 						getFhirContext().getResourceDefinition(theReferenceParam.getResourceType());
@@ -708,16 +708,13 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	}
 
 	@Nonnull
-	private InvalidRequestException newInvalidTargetTypeForReferenceException(
+	private InvalidRequestException newInvalidTargetTypeForChainException(
 			String theResourceName, String theParamName, String theTypeValue) {
 		String searchParamName = theResourceName + ":" + theParamName;
 		String msg = getFhirContext()
 				.getLocalizer()
 				.getMessage(
-						ResourceLinkPredicateBuilder.class,
-						"invalidTargetTypeForReference",
-						theTypeValue,
-						searchParamName);
+						ResourceLinkPredicateBuilder.class, "invalidTargetTypeForChain", theTypeValue, searchParamName);
 		return new InvalidRequestException(Msg.code(2495) + msg);
 	}
 
