@@ -29,6 +29,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -185,9 +186,12 @@ public class BulkDataExportProvider {
 			theOptions.setResourceTypes(resourceTypes);
 		}
 
+		ReadPartitionIdRequestDetails theDetails =
+				ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_EXPORT);
+
 		// Determine and validate partition permissions (if needed).
 		RequestPartitionId partitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+				myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, theDetails);
 		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 		theOptions.setPartitionId(partitionId);
 
@@ -467,8 +471,10 @@ public class BulkDataExportProvider {
 		BulkExportJobParameters parameters = info.getParameters(BulkExportJobParameters.class);
 		if (parameters.getPartitionId() != null) {
 			// Determine and validate permissions for partition (if needed)
+			ReadPartitionIdRequestDetails theDetails = ReadPartitionIdRequestDetails.forOperation(
+					null, null, ProviderConstants.OPERATION_EXPORT_POLL_STATUS);
 			RequestPartitionId partitionId =
-					myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, null);
+					myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, theDetails);
 			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 			if (!parameters.getPartitionId().equals(partitionId)) {
 				throw new InvalidRequestException(
