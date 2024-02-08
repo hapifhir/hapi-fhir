@@ -819,7 +819,7 @@ public class BulkDataExportProviderTest {
 		expectedResourceTypes.add("Device");
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
-		assertThat(bp.getResourceTypes()).containsExactlyInAnyOrder(expectedResourceTypes.toArray());
+		assertThat(bp.getResourceTypes()).hasSameElementsAs(expectedResourceTypes);
 	}
 
 	@Test

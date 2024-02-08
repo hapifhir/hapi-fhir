@@ -212,7 +212,11 @@
 			<groupId>com.icegreen</groupId>
 			<artifactId>greenmail-junit5</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>org.assertj</groupId>
+			<artifactId>assertj-core</artifactId>
+			<scope>compile</scope>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

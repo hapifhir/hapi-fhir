@@ -189,7 +189,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		ourLog.info(getFhirContext().newJsonParser().setPrettyPrint(true).encodeResourceToString(receivedPatient));
 
 		List<String> receivedTagList = toSimpleTagList(receivedPatient.getMeta().getTag());
-		assertThat(receivedTagList).containsExactlyInAnyOrder(theExpectedTags.toArray());
+		assertThat(receivedTagList).containsExactlyInAnyOrderElementsOf(theExpectedTags);
 
 	}
 

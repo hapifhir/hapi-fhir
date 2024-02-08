@@ -380,7 +380,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.collect(Collectors.toList());
 
 			assertThat(matched).hasSize(2);
-			assertThat(matched).contains(hasProperty("uri", nullValue()), hasProperty("uri", is("http://foo")));
+			assertThat(matched.get(0).getUri()).isNull();
+			assertThat(matched.get(1).getUri()).isEqualTo("http://foo");
 		});
 
 		// when

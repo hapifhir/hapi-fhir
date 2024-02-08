@@ -512,7 +512,7 @@ chunk3, LAST, QUEUED
 		}
 
 		public void assertNotifications() {
-			assertThat(myChannelInterceptor.getReceivedChunkIds()).containsExactlyInAnyOrder(myExpectedChunkIdNotifications.toArray());
+			assertThat(myChannelInterceptor.getReceivedChunkIds()).containsExactlyInAnyOrderElementsOf(myExpectedChunkIdNotifications);
 		}
 	}
 

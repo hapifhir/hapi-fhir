@@ -22,7 +22,7 @@ class ExtendedOrganizationResourceTest {
          .target("http://localhost:$ourPort/Organization?_id=1")
          .request()
          .method("GET")
-      assertThat(response.status).as("This should not explode!").isEqualTo(Response.Status.OK.statusCode)
+      assertThat(response.status).isEqualTo(Response.Status.OK.statusCode)
    }
 
    companion object {

@@ -1321,8 +1321,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			ourLog.info(output);
-			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
+			List<IIdType> ids = toIdListUnqualifiedVersionless(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
+			assertThat(ids).containsExactlyInAnyOrder();
 			assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
 		} finally {
 			response.close();
@@ -1336,7 +1337,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			ourLog.info(output);
-			List<IdDt> ids = toIdListUnqualifiedVersionless(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
+			List<IIdType> ids = toIdListUnqualifiedVersionless(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
 			ourLog.info(ids.toString());
 			assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
 		} finally {
@@ -2020,7 +2021,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.lastUpdated(new DateRangeParam(beforeAny, null))
 				.returnBundle(Bundle.class)
 				.execute();
-			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
+			List<IIdType> patients = toIdListUnqualifiedVersionless(found);
 			assertThat(patients).contains(id1a, id1b, id2);
 		}
 
@@ -2030,7 +2031,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.where(Patient.NAME.matches().value("testSearchLastUpdatedParamRp"))
 				.returnBundle(Bundle.class)
 				.execute();
-			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
+			List<IIdType> patients = toIdListUnqualifiedVersionless(found);
 			assertThat(patients).contains(id1a, id1b, id2);
 		}
 
@@ -2041,7 +2042,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.lastUpdated(new DateRangeParam(beforeR2, null))
 				.returnBundle(Bundle.class)
 				.execute();
-			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
+			List<IIdType> patients = toIdListUnqualifiedVersionless(found);
 			assertThat(patients).contains(id2);
 			assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
 		}
@@ -2053,7 +2054,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
+			List<IIdType> patients = toIdListUnqualifiedVersionless(found);
 			assertThat(patients.toString(), patients, not(hasItem(id2)));
 			assertThat(patients.toString(), patients, (hasItems(id1a, id1b)));
 		}
@@ -2065,7 +2066,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-			List<IdDt> patients = toIdListUnqualifiedVersionless(found);
+			List<IIdType> patients = toIdListUnqualifiedVersionless(found);
 			assertThat(patients, (hasItems(id1a, id1b)));
 			assertThat(patients, not(hasItem(id2)));
 		}
@@ -2317,7 +2318,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-			List<IdDt> list = toIdListUnqualifiedVersionless(found);
+			List<IIdType> list = toIdListUnqualifiedVersionless(found);
 			ourLog.info(methodName + ": " + list.toString());
 			ourLog.info("Wanted " + orgNotMissing + " and not " + deletedIdMissingFalse + " but got " + list.size() + ": " + list);
 			assertThat("Wanted " + orgNotMissing + " but got " + list.size() + ": " + list, list, containsInRelativeOrder(orgNotMissing));
@@ -2334,7 +2335,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		List<IdDt> list = toIdListUnqualifiedVersionless(found);
+		List<IIdType> list = toIdListUnqualifiedVersionless(found);
 		ourLog.info(methodName + " found: " + list.toString() + " - Wanted " + orgMissing + " but not " + orgNotMissing);
 		assertThat(list, not(containsInRelativeOrder(orgNotMissing)));
 		assertThat(list, not(containsInRelativeOrder(deletedIdMissingTrue)));

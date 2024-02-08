@@ -181,8 +181,8 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
 		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE)).isEmpty();
 		Date results1Date = TestUtil.getTimestamp(results1).getValue();
-		assertThat(results1Date).isGreaterThan(beforeFirst);
-		assertThat(results1Date).isLessThan(new Date());
+		assertThat(results1Date).isAfter(beforeFirst);
+		assertThat(results1Date).isBefore(new Date());
 		assertThat(results1.getId(), not(blankOrNullString()));
 
 		Patient pt2 = new Patient();

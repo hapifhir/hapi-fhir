@@ -411,6 +411,7 @@
 			<artifactId>hamcrest-date</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 	</dependencies>
 
 	<build>

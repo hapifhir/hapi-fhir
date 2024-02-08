@@ -436,11 +436,11 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 			.map(r -> r.getIdElement().getIdPart())
 			.collect(Collectors.toList());
 
-		assertThat(resultUnqualifiedIds).containsExactlyInAnyOrder(resultUnqualifiedIds.toArray());
+		assertThat(resultUnqualifiedIds).containsExactlyInAnyOrderElementsOf(resultUnqualifiedIds);
 
 		Set<String> theExpectedIdVersionsPlusNull = Sets.newHashSet(theExpectedIdVersions);
 		theExpectedIdVersionsPlusNull.add(null);
-		assertThat(theExpectedIdVersionsPlusNull).containsExactlyInAnyOrder(theValueSets.stream().map(r -> ((ValueSet) r).getVersion()).toArray());
+		assertThat(theExpectedIdVersionsPlusNull).containsExactlyInAnyOrderElementsOf(theValueSets.stream().map(r -> ((ValueSet) r).getVersion()).toList());
 
 	}
 

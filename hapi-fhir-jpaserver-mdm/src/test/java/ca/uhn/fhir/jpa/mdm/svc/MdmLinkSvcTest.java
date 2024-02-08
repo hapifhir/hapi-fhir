@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -178,11 +179,11 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 			.map(link -> link.getSourcePersistenceId().getId().toString())
 			.collect(Collectors.toList());
 
-		List<String> expected = Arrays.asList(patient1, patient2)
-			.stream().map(p -> p.getIdElement().toVersionless().getIdPart())
+		List<String> expected = Stream.of(patient1, patient2)
+			.map(p -> p.getIdElement().toVersionless().getIdPart())
 			.collect(Collectors.toList());
 
-		assertThat(actual).containsExactlyInAnyOrder(expected.toArray());
+		assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);
 	}
 
 	@Test
