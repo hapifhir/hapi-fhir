@@ -116,7 +116,9 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ImagingStudy;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Location;
@@ -7421,6 +7423,52 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				// 8
 				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.DISABLED, false, false))
 			);
+		}
+	}
+	@Nested
+	class SearchWithIdentifiers {
+		private static final String SYSTEM = "http://acme.org/fhir/identifier/mrn";
+		private static final String VALUE = "123456";
+		private IIdType myPatientId;
+		private IIdType myObservationId;
+
+		@BeforeEach
+		void beforeEach() {
+			final Patient patient = new Patient();
+			patient.addIdentifier().setValue(VALUE).setSystem(SYSTEM);
+			patient.addName().setUse(HumanName.NameUse.OFFICIAL).setFamily("Abbott").addGiven("Elias").addPrefix("Mr.");
+			patient.setGender(Enumerations.AdministrativeGender.MALE);
+
+			myPatientId = myClient.create().resource(patient).execute().getResource().getIdElement();
+
+			final Observation observation = new Observation();
+			observation.setStatus(Observation.ObservationStatus.FINAL);
+			observation.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://loinc.org").setCode("15074-8").setDisplay("Glucose [Moles/volume] in Blood")));
+			observation.setSubject(new Reference(myPatientId.toUnqualifiedVersionless()).setIdentifier(new Identifier().setSystem(SYSTEM).setValue(VALUE)));
+
+			myObservationId = myClient.create().resource(observation).execute().getResource().getIdElement();
+		}
+
+		@Test
+		void searchWithIdentifierToIdentifier() {
+			final String url = "Observation?subject:identifier=http://acme.org/fhir/identifier/mrn|123456";
+			final Bundle bundleFromIdentifierToIdentifier = myClient.search()
+				.byUrl(url)
+				.returnBundle(Bundle.class)
+				.execute();
+
+			assertFalse(bundleFromIdentifierToIdentifier.getEntry().isEmpty(), "Identifier to Identifier");
+		}
+
+		@Test
+		void searchWithIdentifierToId() {
+			final String url = String.format("Observation?subject:identifier=%s", myPatientId.getIdPart());
+			final Bundle bundleFromIdentifierToId = myClient.search()
+				.byUrl(url)
+				.returnBundle(Bundle.class)
+				.execute();
+
+			assertTrue(bundleFromIdentifierToId.getEntry().isEmpty(), "Identifier to ID");
 		}
 	}
 }

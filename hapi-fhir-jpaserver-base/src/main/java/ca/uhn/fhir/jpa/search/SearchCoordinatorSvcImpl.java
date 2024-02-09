@@ -361,6 +361,7 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 		final String searchUuid = UUID.randomUUID().toString();
 
 		final String queryString = theParams.toNormalizedQueryString(myContext);
+		ourLog.info("5071: theParams: {}, queryString: {}", theParams.get("subject"), queryString);
 		ourLog.debug("Registering new search {}", searchUuid);
 
 		Search search = new Search();
