@@ -13,8 +13,6 @@ import jakarta.annotation.Nonnull;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.blankOrNullString;
 
 class CodingSpyTest {
 
@@ -75,7 +73,7 @@ class CodingSpyTest {
 	    // when
 		var s = b.asStringValue();
 
-		assertThat(s, blankOrNullString());
+		assertThat(s).isNullOrEmpty();
 	}
 
 

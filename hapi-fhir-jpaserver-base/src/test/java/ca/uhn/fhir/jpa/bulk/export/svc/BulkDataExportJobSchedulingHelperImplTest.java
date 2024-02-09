@@ -120,7 +120,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		}
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
-		assertThat(cutoffDate, within(1, ChronoUnit.MINUTES, computeDateFromConfig(expectedRetentionHours)));
+		assertThat(cutoffDate).isInSameMinuteWindowAs(computeDateFromConfig(expectedRetentionHours));
 	}
 
 	@Test
