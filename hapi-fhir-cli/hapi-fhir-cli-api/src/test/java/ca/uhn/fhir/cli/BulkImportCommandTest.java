@@ -44,8 +44,8 @@ import java.nio.file.Path;
 import java.util.Date;
 import java.util.zip.GZIPOutputStream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -118,7 +118,7 @@ public class BulkImportCommandTest {
 		})).start();
 
 		ourLog.info("Waiting for initiation requests");
-		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
+		await().untilAsserted(() -> assertThat(myRestfulServerExtension.getRequestContentTypes()).hasSize(2));
 		ourLog.info("Initiation requests complete");
 
 		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(RequestDetails.class), myStartCaptor.capture());
@@ -160,7 +160,7 @@ public class BulkImportCommandTest {
 		})).start();
 
 		ourLog.info("Waiting for initiation requests");
-		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
+		await().untilAsserted(() -> assertThat(myRestfulServerExtension.getRequestContentTypes()).hasSize(2));
 		ourLog.info("Initiation requests complete");
 
 		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(RequestDetails.class), myStartCaptor.capture());
@@ -201,7 +201,7 @@ public class BulkImportCommandTest {
 		})).start();
 
 		ourLog.info("Waiting for initiation requests");
-		await().until(() -> myRestfulServerExtension.getRequestContentTypes().size(), equalTo(2));
+		await().untilAsserted(() -> assertThat(myRestfulServerExtension.getRequestContentTypes()).hasSize(2));
 		ourLog.info("Initiation requests complete");
 
 		verify(myJobCoordinator, timeout(10000).times(1)).startInstance(any(RequestDetails.class), myStartCaptor.capture());
