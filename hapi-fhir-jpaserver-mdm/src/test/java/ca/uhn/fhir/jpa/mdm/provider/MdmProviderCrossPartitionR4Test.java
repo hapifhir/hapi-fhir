@@ -53,7 +53,7 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
 		createPatientOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
 
 		Bundle result = (Bundle) myMdmProvider.match(buildJanePatient(), new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(2)));
-		assertThat(result.getEntry().size()).isEqualTo(1);
+		assertThat(result.getEntry()).hasSize(1);
 	}
 
 	@Test
@@ -62,7 +62,7 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
 		createPatientOnPartition(buildJanePatient(), RequestPartitionId.fromPartitionId(1));
 
 		Bundle result = (Bundle) myMdmProvider.match(buildJanePatient(), new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(2)));
-		assertThat(result.getEntry().size()).isEqualTo(0);
+		assertThat(result.getEntry()).isEmpty();
 	}
 
 	@Test

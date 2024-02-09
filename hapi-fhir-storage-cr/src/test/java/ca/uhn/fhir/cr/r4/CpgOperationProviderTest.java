@@ -160,7 +160,7 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		Parameters results = runCqlExecution(params);
 
 		assertThat(results.isEmpty()).isFalse();
-		assertThat(results.getParameter().size()).isEqualTo(1);
+		assertThat(results.getParameter()).hasSize(1);
 		assertThat(results.getParameter("return").getValue() instanceof BooleanType).isTrue();
 		assertThat(((BooleanType) results.getParameter("return").getValue()).booleanValue()).isTrue();
 	}

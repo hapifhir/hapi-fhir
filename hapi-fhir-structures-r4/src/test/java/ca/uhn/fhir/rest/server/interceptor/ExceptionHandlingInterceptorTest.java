@@ -34,8 +34,8 @@ import org.opentest4j.AssertionFailedError;
 import java.io.IOException;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ExceptionHandlingInterceptorTest {
 
@@ -73,7 +73,7 @@ public class ExceptionHandlingInterceptorTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info(responseContent);
-			assertEquals(500, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(500);
 			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), StringContains.containsString("Exception Text"));
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), (StringContains.containsString("InternalErrorException: Exception Text")));
@@ -97,7 +97,7 @@ public class ExceptionHandlingInterceptorTest {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertEquals(500, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(500);
 		OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
 		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), StringContains.containsString("Simulated IOException"));
@@ -111,7 +111,7 @@ public class ExceptionHandlingInterceptorTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info(responseContent);
-			assertEquals(500, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(500);
 			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), StringContains.containsString("Exception Text"));
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue(), (StringContains.containsString("InternalErrorException: Exception Text")));

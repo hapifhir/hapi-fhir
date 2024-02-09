@@ -177,7 +177,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		Patient patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertThat(patient.getActive()).isTrue();
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(myCaptureQueriesListener.getSelectQueries().size()).isEqualTo(3);
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(3);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("rt1_0.PARTITION_ID in (?)");
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false)).contains("where rt1_0.PARTITION_ID=? and rt1_0.RES_ID=?");
 	}
@@ -210,7 +210,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		assertThat(patient.getIdElement().getVersionIdPart()).isEqualTo("1");
 
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(myCaptureQueriesListener.getSelectQueries().size()).isEqualTo(4);
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(4);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("PARTITION_ID in (?)");
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false)).contains("PARTITION_ID=");
 
@@ -225,7 +225,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous("_id", new TokenParam("A")), mySrd);
 		assertThat(outcome.size()).isEqualTo(1);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(myCaptureQueriesListener.getSelectQueries().size()).isEqualTo(3);
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(3);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("rt1_0.PARTITION_ID in (?)");
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false)).contains("t0.PARTITION_ID = ?");
 	}
@@ -239,7 +239,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous("subject", new ReferenceParam("Patient/A")), mySrd);
 		assertThat(outcome.size()).isEqualTo(1);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(myCaptureQueriesListener.getSelectQueries().size()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("SELECT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.PARTITION_ID = ?)");
 
 		// Typed
@@ -249,7 +249,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		outcome = myObservationDao.search(SearchParameterMap.newSynchronous("subject", referenceParam), mySrd);
 		assertThat(outcome.size()).isEqualTo(1);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(myCaptureQueriesListener.getSelectQueries().size()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("SELECT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.PARTITION_ID = ?)");
 	}
 
@@ -323,7 +323,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		IBundleProvider outcome = myOrganizationDao.search(SearchParameterMap.newSynchronous(), mySrd);
 		assertThat(outcome.size()).isEqualTo(1);
 		myCaptureQueriesListener.logSelectQueries();
-		assertThat(myCaptureQueriesListener.getSelectQueries().size()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(2);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("t0.PARTITION_ID = ?");
 	}
 
@@ -341,7 +341,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 		IBundleProvider outcome = myOrganizationDao.history(new IdType("Organization/C"), null, null, null, mySrd);
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(outcome.size()).isEqualTo(2);
-		assertThat(myCaptureQueriesListener.getSelectQueries().size()).isEqualTo(3);
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(3);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("PARTITION_ID in ");
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false)).contains("PARTITION_ID=");
 	}

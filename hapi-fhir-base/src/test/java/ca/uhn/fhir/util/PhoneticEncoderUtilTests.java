@@ -65,7 +65,7 @@ public class PhoneticEncoderUtilTests {
 		assertThat(encoder).isNull();
 		ArgumentCaptor<ILoggingEvent> loggingCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		Mockito.verify(myListAppender).doAppend(loggingCaptor.capture());
-		assertThat(loggingCaptor.getAllValues().size()).isEqualTo(1);
+		assertThat(loggingCaptor.getAllValues()).hasSize(1);
 		ILoggingEvent event = loggingCaptor.getValue();
 		assertThat(event.getMessage()).isEqualTo("Invalid encoder max character length: " + num);
 	}
@@ -83,7 +83,7 @@ public class PhoneticEncoderUtilTests {
 		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		Mockito.verify(myListAppender)
 			.doAppend(captor.capture());
-		assertThat(captor.getAllValues().size()).isEqualTo(1);
+		assertThat(captor.getAllValues()).hasSize(1);
 		ILoggingEvent event = captor.getValue();
 		assertThat(event.getMessage()).isEqualTo("Invalid phonetic param string " + theString);
 	}
@@ -138,7 +138,7 @@ public class PhoneticEncoderUtilTests {
 		assertThat(theEncoder).isNull();
 		ArgumentCaptor<ILoggingEvent> loggingCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		Mockito.verify(myListAppender).doAppend(loggingCaptor.capture());
-		assertThat(loggingCaptor.getAllValues().size()).isEqualTo(1);
+		assertThat(loggingCaptor.getAllValues()).hasSize(1);
 		ILoggingEvent event = loggingCaptor.getValue();
 		assertThat(event.getMessage()).isEqualTo("Invalid encoder max character length: " + theNumberParam);
 	}

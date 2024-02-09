@@ -31,8 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -84,7 +83,7 @@ public class LoggingInterceptorTest {
 		LoggingInterceptor interceptor = new LoggingInterceptor(false);
 		client.registerInterceptor(interceptor);
 		Patient patient = client.read(Patient.class, "1");
-		assertFalse(patient.getIdentifierFirstRep().isEmpty());
+		assertThat(patient.getIdentifierFirstRep().isEmpty()).isFalse();
 
 		verify(myMockAppender, times(2)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 			@Override
@@ -109,7 +108,7 @@ public class LoggingInterceptorTest {
 		LoggingInterceptor interceptor = new LoggingInterceptor(true);
 		client.registerInterceptor(interceptor);
 		Patient patient = client.read(Patient.class, "1");
-		assertFalse(patient.getIdentifierFirstRep().isEmpty());
+			assertThat(patient.getIdentifierFirstRep().isEmpty()).isFalse();
 
 		verify(myMockAppender, times(1)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 			@Override
@@ -124,7 +123,7 @@ public class LoggingInterceptorTest {
 		client.unregisterInterceptor(interceptor);
 		
 		patient = client.read(Patient.class, "1");
-		assertFalse(patient.getIdentifierFirstRep().isEmpty());
+			assertThat(patient.getIdentifierFirstRep().isEmpty()).isFalse();
 
 		verify(myMockAppender, times(1)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 			@Override
@@ -147,7 +146,7 @@ public class LoggingInterceptorTest {
 	public static void beforeClass() throws Exception {
 
 		URL conf = LoggingInterceptor.class.getResource("/logback-test-dstuforce.xml");
-		assertNotNull(conf);
+		assertThat(conf).isNotNull();
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 		JoranConfigurator configurator = new JoranConfigurator();
 		configurator.setContext(context);

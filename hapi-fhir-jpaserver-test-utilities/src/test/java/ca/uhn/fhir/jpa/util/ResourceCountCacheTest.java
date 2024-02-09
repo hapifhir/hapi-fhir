@@ -44,17 +44,17 @@ public class ResourceCountCacheTest {
 
 		// Not time to update yet
 		cache.update();
-		assertThat(cache.get().get("A")).isEqualTo(Long.valueOf(1));
+		assertThat(cache.get()).containsEntry("A", Long.valueOf(1));
 
 		// Wait a bit, still not time to update
 		ResourceCountCache.setNowForUnitTest(start + 400);
 		cache.update();
-		assertThat(cache.get().get("A")).isEqualTo(Long.valueOf(1));
+		assertThat(cache.get()).containsEntry("A", Long.valueOf(1));
 
 		// Wait a bit more and the cache is expired
 		ResourceCountCache.setNowForUnitTest(start + 800);
 		cache.update();
-		assertThat(cache.get().get("A")).isEqualTo(Long.valueOf(2));
+		assertThat(cache.get()).containsEntry("A", Long.valueOf(2));
 
 	}
 

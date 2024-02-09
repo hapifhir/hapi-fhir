@@ -64,7 +64,7 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs);
-		assertThat(tokens.size()).isEqualTo(1);
+		assertThat(tokens).hasSize(1);
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
 		assertThat(token.getParamName()).isEqualTo("category");
 		assertThat(token.getSystem()).isEqualTo("SYSTEM");
@@ -87,7 +87,7 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 		Set<ResourceIndexedSearchParamString> params = extractor.extractSearchParamStrings(questionnaire);
-		assertThat(params.size()).isEqualTo(1);
+		assertThat(params).hasSize(1);
 	}
 
 	@Test
@@ -105,7 +105,7 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 		Set<ResourceIndexedSearchParamNumber> params = extractor.extractSearchParamNumber(enc);
-		assertThat(params.size()).isEqualTo(1);
+		assertThat(params).hasSize(1);
 		// Normalized to days
 		assertThat(params.iterator().next().getValue().toPlainString()).isEqualTo("2");
 	}
@@ -141,7 +141,7 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 		Set<ResourceIndexedSearchParamNumber> params = extractor.extractSearchParamNumber(enc);
-		assertThat(params.size()).isEqualTo(1);
+		assertThat(params).hasSize(1);
 		// Normalized to days
 		assertThat(params.iterator().next().getValue().toPlainString()).isEqualTo("15");
 	}
@@ -173,7 +173,7 @@ public class SearchParamExtractorDstu3Test {
 		Patient resource = new Patient();
 		resource.getCommunicationFirstRep().getLanguage().getCodingFirstRep().setCode("blah");
 		Set<ResourceIndexedSearchParamString> strings = extractor.extractSearchParamStrings(resource);
-		assertThat(strings.size()).isEqualTo(1);
+		assertThat(strings).hasSize(1);
 		assertThat(strings.iterator().next().getValueNormalized()).isEqualTo("BLAH");
 
 	}
@@ -238,7 +238,7 @@ public class SearchParamExtractorDstu3Test {
 		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ourCtx, searchParamRegistry);
 		extractor.start();
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> coords = extractor.extractSearchParamTokens(loc);
-		assertThat(coords.size()).isEqualTo(1);
+		assertThat(coords).hasSize(1);
 		ResourceIndexedSearchParamCoords coord = (ResourceIndexedSearchParamCoords) coords.iterator().next();
 		assertThat(coord.getLatitude()).isCloseTo(latitude, within(0.0));
 		assertThat(coord.getLongitude()).isCloseTo(longitude, within(0.0));

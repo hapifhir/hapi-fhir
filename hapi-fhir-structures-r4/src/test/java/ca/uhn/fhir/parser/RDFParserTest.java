@@ -62,10 +62,10 @@ import java.util.stream.Stream;
 
 import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds;
 import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.jupiter.api.Assertions.*;
 
 public class RDFParserTest extends BaseTest {
 
@@ -108,7 +108,7 @@ public class RDFParserTest extends BaseTest {
 
 		// Parse RDF content as resource
 		IBaseResource viaTurtleResource = parseRdf(ourCtx, new StringReader(turtleString));
-		assertNotNull(viaTurtleResource);
+		assertThat(viaTurtleResource).isNotNull();
 
 		// Compare original JSON-based resource against RDF-based resource
 		String viaTurtleJson = serializeJson(ourCtx, viaTurtleResource);
@@ -119,7 +119,7 @@ public class RDFParserTest extends BaseTest {
 					+ "\nttl: " + turtleString
 					+ "\nexp: " + referenceJson);
 			else
-				assertEquals(referenceJson, viaTurtleJson, failMessage + "\nttl: " + turtleString);
+				assertThat(viaTurtleJson).as(failMessage + "\nttl: " + turtleString).isEqualTo(referenceJson);
 		}
 	}
 
@@ -140,7 +140,7 @@ public class RDFParserTest extends BaseTest {
 		refParser.setStripVersionsFromReferences(false);
 		// parser.setDontStripVersionsFromReferencesAtPaths();
 		IBaseResource ret = refParser.parseResource(inputStream);
-		assertNotNull(ret);
+		assertThat(ret).isNotNull();
 		return ret;
 	}
 
@@ -148,7 +148,7 @@ public class RDFParserTest extends BaseTest {
 		IParser jsonParser = ctx.newJsonParser();
 		jsonParser.setStripVersionsFromReferences(false);
 		String ret = jsonParser.encodeResourceToString(resource);
-		assertNotNull(ret);
+		assertThat(ret).isNotNull();
 		return ret;
 	}
 
@@ -156,7 +156,7 @@ public class RDFParserTest extends BaseTest {
 	public IBaseResource parseRdf(FhirContext ctx, StringReader inputStream) {
 		IParser refParser = ctx.newRDFParser();
 		IBaseResource ret = refParser.parseResource(inputStream);
-		assertNotNull(ret);
+		assertThat(ret).isNotNull();
 		return ret;
 	}
 
@@ -165,7 +165,7 @@ public class RDFParserTest extends BaseTest {
 		rdfParser.setStripVersionsFromReferences(false);
 		rdfParser.setServerBaseUrl("http://a.example/fhir/");
 		String ret = rdfParser.encodeResourceToString(resource);
-		assertNotNull(ret);
+		assertThat(ret).isNotNull();
 		return ret;
 	}
 
@@ -179,11 +179,9 @@ public class RDFParserTest extends BaseTest {
 		ValidationAlgorithm validation = new RecursiveValidation(fhirSchema, dataGraph);
 		validation.validate(fixedMapEntry.node, fixedMapEntry.shape);
 		boolean result = validation.getTyping().isConformant(fixedMapEntry.node, fixedMapEntry.shape);
-		assertTrue(result,
-			   referenceFileName + ": failed to validate " + fixedMapEntry
-			   + "\n" + referenceFileName
-			   + "\n" + rdfContent
-			   );
+		assertThat(result).as(referenceFileName + ": failed to validate " + fixedMapEntry
+			+ "\n" + referenceFileName
+			+ "\n" + rdfContent).isTrue();
 	}
 
 	// Shape Expressions functions

@@ -59,7 +59,7 @@ public class TagTestUtil {
 	 * @param theActualCodings
 	 */
 	public static void assertCodingsEqualAndInOrder(List<? extends IBaseCoding> theExpectedCodings, List<? extends IBaseCoding> theActualCodings) {
-		assertThat(theActualCodings.size()).isEqualTo(theExpectedCodings.size());
+		assertThat(theActualCodings).hasSize(theExpectedCodings.size());
 
 		for (int index = 0; index < theExpectedCodings.size(); index++) {
 			final IBaseCoding expectedCoding = theExpectedCodings.get(index);

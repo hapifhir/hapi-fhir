@@ -22,8 +22,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ExportConceptMapToCsvCommandR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommandR4Test.class);
@@ -95,7 +95,7 @@ public class ExportConceptMapToCsvCommandR4Test {
 			"\"http://example.com/codesystem/2\",\"Version 2s\",\"http://example.com/codesystem/3\",\"Version 3t\",\"Code 2c\",\"Display 2c\",\"Code 3c\",\"Display 3c\",\"equal\",\"3c This is a comment.\"\n" +
 			"\"http://example.com/codesystem/2\",\"Version 2s\",\"http://example.com/codesystem/3\",\"Version 3t\",\"Code 2d\",\"Display 2d\",\"Code 3d\",\"Display 3d\",\"equal\",\"3d This is a comment.\"\n";
 		String result = IOUtils.toString(new FileInputStream(FILE), Charsets.UTF_8);
-		assertEquals(expected, result);
+		assertThat(result).isEqualTo(expected);
 
 		FileUtils.deleteQuietly(new File(FILE));
 	}

@@ -28,7 +28,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PatchServerDstu3Test {
 
@@ -69,16 +69,16 @@ public class PatchServerDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>", responseContent);
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertThat(responseContent).isEqualTo("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 
-		assertEquals("patientPatch", ourLastMethod);
-		assertEquals("Patient/123", ourLastId.getValue());
-		assertEquals(requestContents, ourLastBody);
-		assertEquals(PatchTypeEnum.JSON_PATCH, ourLastPatchType);
+		assertThat(ourLastMethod).isEqualTo("patientPatch");
+		assertThat(ourLastId.getValue()).isEqualTo("Patient/123");
+		assertThat(ourLastBody).isEqualTo(requestContents);
+		assertThat(ourLastPatchType).isEqualTo(PatchTypeEnum.JSON_PATCH);
 	}
 
 	@Test
@@ -92,17 +92,17 @@ public class PatchServerDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>", responseContent);
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertThat(responseContent).isEqualTo("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 
-		assertEquals("patientPatch", ourLastMethod);
-		assertEquals("Patient?_id=123", ourLastConditional);
-		assertEquals(null, ourLastId);
-		assertEquals(requestContents, ourLastBody);
-		assertEquals(PatchTypeEnum.JSON_PATCH, ourLastPatchType);
+		assertThat(ourLastMethod).isEqualTo("patientPatch");
+		assertThat(ourLastConditional).isEqualTo("Patient?_id=123");
+		assertThat(ourLastId).isEqualTo(null);
+		assertThat(ourLastBody).isEqualTo(requestContents);
+		assertThat(ourLastPatchType).isEqualTo(PatchTypeEnum.JSON_PATCH);
 	}
 
 	@Test
@@ -116,16 +116,16 @@ public class PatchServerDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>", responseContent);
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertThat(responseContent).isEqualTo("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div></text></OperationOutcome>");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 
-		assertEquals("patientPatch", ourLastMethod);
-		assertEquals("Patient/123", ourLastId.getValue());
-		assertEquals(requestContents, ourLastBody);
-		assertEquals(PatchTypeEnum.XML_PATCH, ourLastPatchType);
+		assertThat(ourLastMethod).isEqualTo("patientPatch");
+		assertThat(ourLastId.getValue()).isEqualTo("Patient/123");
+		assertThat(ourLastBody).isEqualTo(requestContents);
+		assertThat(ourLastPatchType).isEqualTo(PatchTypeEnum.XML_PATCH);
 	}
 
 	@Test
@@ -138,14 +138,14 @@ public class PatchServerDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
 
-		assertEquals("patientPatch", ourLastMethod);
-		assertEquals("Patient/123", ourLastId.getValue());
-		assertEquals(requestContents, ourLastBody);
+		assertThat(ourLastMethod).isEqualTo("patientPatch");
+		assertThat(ourLastId.getValue()).isEqualTo("Patient/123");
+		assertThat(ourLastBody).isEqualTo(requestContents);
 	}
 
 	@Test
@@ -158,8 +158,8 @@ public class PatchServerDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\""+ Msg.code(1965)+"Invalid Content-Type for PATCH operation: text/plain\"/></issue></OperationOutcome>", responseContent);
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertThat(responseContent).isEqualTo("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(1965) + "Invalid Content-Type for PATCH operation: text/plain\"/></issue></OperationOutcome>");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}

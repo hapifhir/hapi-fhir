@@ -21,11 +21,8 @@ import java.util.HashMap;
 import java.util.Properties;
 
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.impl.LoquateAddressValidator.PROPERTY_GEOCODE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.assertj.core.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -129,21 +126,21 @@ class LoquateAddressValidatorTest {
 		node.set("text2", new TextNode("This Is-Text,"));
 		node.set("text3", new TextNode("This Is-Text  with Invalid Formatting"));
 
-		assertEquals("This, Is, Text", myValidator.standardize(myValidator.getString(node, "text1")));
-		assertEquals("This Is-Text,", myValidator.standardize(myValidator.getString(node, "text2")));
-		assertEquals("This Is-Text, with Invalid Formatting", myValidator.standardize(myValidator.getString(node, "text3")));
+		assertThat(myValidator.standardize(myValidator.getString(node, "text1"))).isEqualTo("This, Is, Text");
+		assertThat(myValidator.standardize(myValidator.getString(node, "text2"))).isEqualTo("This Is-Text,");
+		assertThat(myValidator.standardize(myValidator.getString(node, "text3"))).isEqualTo("This Is-Text, with Invalid Formatting");
 	}
 
 	@Test
 	public void testEndpointOverride() {
-		assertEquals(LoquateAddressValidator.DEFAULT_DATA_CLEANSE_ENDPOINT, myValidator.getApiEndpoint());
+		assertThat(myValidator.getApiEndpoint()).isEqualTo(LoquateAddressValidator.DEFAULT_DATA_CLEANSE_ENDPOINT);
 
 		myProperties = new Properties();
 		myProperties.setProperty(LoquateAddressValidator.PROPERTY_SERVICE_KEY, "MY_KEY");
 		myProperties.setProperty(LoquateAddressValidator.PROPERTY_SERVICE_ENDPOINT, "HTTP://MY_ENDPOINT/LOQUATE");
 		myValidator = new LoquateAddressValidator(myProperties);
 
-		assertEquals("HTTP://MY_ENDPOINT/LOQUATE", myValidator.getApiEndpoint());
+		assertThat(myValidator.getApiEndpoint()).isEqualTo("HTTP://MY_ENDPOINT/LOQUATE");
 	}
 
 	@Test
@@ -166,7 +163,7 @@ class LoquateAddressValidatorTest {
 	@Test
 	public void testRequestBody() {
 		try {
-			assertEquals(clear(REQUEST), clear(myValidator.getRequestBody(ourCtx, getAddress())));
+			assertThat(clear(myValidator.getRequestBody(ourCtx, getAddress()))).isEqualTo(clear(REQUEST));
 		} catch (JsonProcessingException e) {
 			fail("");		}
 	}
@@ -208,12 +205,12 @@ class LoquateAddressValidatorTest {
 	public void testSuccessfulResponses() throws Exception {
 		AddressValidationResult res = myValidator.getValidationResult(new AddressValidationResult(),
 			new ObjectMapper().readTree(RESPONSE_INVALID_ADDRESS), ourCtx);
-		assertFalse(res.isValid());
+		assertThat(res.isValid()).isFalse();
 
 		res = myValidator.getValidationResult(new AddressValidationResult(),
 			new ObjectMapper().readTree(RESPONSE_VALID_ADDRESS), ourCtx);
-		assertTrue(res.isValid());
-		assertEquals("My Valid Address", res.getValidatedAddressString());
+		assertThat(res.isValid()).isTrue();
+		assertThat(res.getValidatedAddressString()).isEqualTo("My Valid Address");
 	}
 
 	@Test
@@ -221,31 +218,31 @@ class LoquateAddressValidatorTest {
 		myValidator.getProperties().setProperty(PROPERTY_GEOCODE, "true");
 		AddressValidationResult res = myValidator.getValidationResult(new AddressValidationResult(),
 			new ObjectMapper().readTree(RESPONSE_VALID_ADDRESS_W_GEO), ourCtx);
-		assertTrue(res.isValid());
+		assertThat(res.isValid()).isTrue();
 
 		IBase address = res.getValidatedAddress();
 		IBaseExtension geocode = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.FHIR_GEOCODE_EXTENSION_URL);
-		assertNotNull(geocode);
-		assertEquals(2, geocode.getExtension().size());
-		assertEquals("latitude", ((IBaseExtension)geocode.getExtension().get(0)).getUrl());
-		assertEquals("longitude", ((IBaseExtension)geocode.getExtension().get(1)).getUrl());
+		assertThat(geocode).isNotNull();
+		assertThat(geocode.getExtension()).hasSize(2);
+		assertThat(((IBaseExtension) geocode.getExtension().get(0)).getUrl()).isEqualTo("latitude");
+		assertThat(((IBaseExtension) geocode.getExtension().get(1)).getUrl()).isEqualTo("longitude");
 
 		IBaseExtension quality = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL);
-		assertNotNull(quality);
-		assertEquals("A", quality.getValue().toString());
+		assertThat(quality).isNotNull();
+		assertThat(quality.getValue().toString()).isEqualTo("A");
 
 		IBaseExtension verificationCode = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.ADDRESS_VERIFICATION_CODE_EXTENSION_URL);
-		assertNotNull(verificationCode);
-		assertEquals("V44-I44-P6-100", verificationCode.getValue().toString());
+		assertThat(verificationCode).isNotNull();
+		assertThat(verificationCode.getValue().toString()).isEqualTo("V44-I44-P6-100");
 
 		IBaseExtension geoAccuracy = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.ADDRESS_GEO_ACCURACY_EXTENSION_URL);
-		assertNotNull(geoAccuracy);
-		assertEquals("Z1", geoAccuracy.getValue().toString());
+		assertThat(geoAccuracy).isNotNull();
+		assertThat(geoAccuracy.getValue().toString()).isEqualTo("Z1");
 	}
 
 	@Test
 	public void testErrorResponses() throws Exception {
-		assertThrows(IllegalArgumentException.class, () -> {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 			myValidator.getValidationResult(new AddressValidationResult(),
 				new ObjectMapper().readTree(RESPONSE_INVALID_KEY), ourCtx);
 		});

@@ -1149,7 +1149,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 			.setEquivalence("equal")
 			.setConceptMapUrl("http://foo")
 			.setValueSet("http://target"));
-		assertThat(new HashSet<>(translationResults).size()).isEqualTo(translationResults.size());
+		assertThat(new HashSet<>(translationResults)).hasSize(translationResults.size());
 	}
 
 	/**

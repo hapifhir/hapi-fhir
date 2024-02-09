@@ -50,8 +50,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class CorsInterceptorDstu3Test {
 	private static String ourBaseUri;
@@ -71,8 +69,8 @@ public class CorsInterceptorDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info("Response was:\n{}", responseContent);
-			assertEquals("GET,POST,PUT,DELETE,OPTIONS", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_METHODS).getValue());
-			assertEquals("http://www.fhir-starter.com", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN).getValue());
+			assertThat(status.getFirstHeader(Constants.HEADER_CORS_ALLOW_METHODS).getValue()).isEqualTo("GET,POST,PUT,DELETE,OPTIONS");
+			assertThat(status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN).getValue()).isEqualTo("http://www.fhir-starter.com");
 		}
 		{
 			String uri = ourBaseUri + "/Patient?identifier=urn:hapitest:mrns%7C00001";
@@ -82,16 +80,16 @@ public class CorsInterceptorDstu3Test {
 			HttpResponse status = ourClient.execute(httpGet);
 
 			Header origin = status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN);
-			assertEquals("http://www.fhir-starter.com", origin.getValue());
+			assertThat(origin.getValue()).isEqualTo("http://www.fhir-starter.com");
 
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info("Response was:\n{}", responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
-			assertEquals(1, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(1);
 		}
 		{
 			HttpPost httpOpt = new HttpPost(ourBaseUri + "/Patient");
@@ -104,14 +102,14 @@ public class CorsInterceptorDstu3Test {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info("Response: {}", status);
 			ourLog.info("Response was:\n{}", responseContent);
-			assertEquals("http://www.fhir-starter.com", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN).getValue());
+			assertThat(status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN).getValue()).isEqualTo("http://www.fhir-starter.com");
 		}
 	}
 	
 	@Test
 	public void testCorsConfigMethods() {
 		CorsInterceptor corsInterceptor = new CorsInterceptor();
-		assertNotNull(corsInterceptor.getConfig());
+		assertThat(corsInterceptor.getConfig()).isNotNull();
 		corsInterceptor.setConfig(new CorsConfiguration());
 	}
 
@@ -132,7 +130,7 @@ public class CorsInterceptorDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info("Response was:\n{}", responseContent);
-			assertEquals(403, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
 		}
 	}
 
@@ -147,8 +145,8 @@ public class CorsInterceptorDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info("Response was:\n{}", responseContent);
-			assertEquals("GET,POST,PUT,DELETE,OPTIONS", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_METHODS).getValue());
-			assertEquals("null", status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN).getValue());
+			assertThat(status.getFirstHeader(Constants.HEADER_CORS_ALLOW_METHODS).getValue()).isEqualTo("GET,POST,PUT,DELETE,OPTIONS");
+			assertThat(status.getFirstHeader(Constants.HEADER_CORS_ALLOW_ORIGIN).getValue()).isEqualTo("null");
 		}
 	}
 	

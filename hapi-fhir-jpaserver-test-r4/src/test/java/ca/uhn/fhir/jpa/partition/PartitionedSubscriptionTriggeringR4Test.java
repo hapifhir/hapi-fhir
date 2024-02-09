@@ -169,7 +169,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 			BaseSubscriptionsR4Test.ourPatientProvider.waitForUpdateCount(1);
 			fail("");
 		} catch (ConditionTimeoutException e) {
-			assertThat(BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().size()).isEqualTo(0);
+			assertThat(BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes()).isEmpty();
 		}
 	}
 
@@ -200,7 +200,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		waitForQueueToDrain();
 		List<Observation> resourceUpdates = BaseSubscriptionsR4Test.ourObservationProvider.getResourceUpdates();
-		assertThat(resourceUpdates.size()).isEqualTo(1);
+		assertThat(resourceUpdates).hasSize(1);
 		assertThat(resourceUpdates.get(0).getId()).isEqualTo(observationIdPartitionOne.toString());
 
 		String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
@@ -237,7 +237,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		waitForQueueToDrain();
 		List<Observation> resourceUpdates = BaseSubscriptionsR4Test.ourObservationProvider.getResourceUpdates();
-		assertThat(resourceUpdates.size()).isEqualTo(2);
+		assertThat(resourceUpdates).hasSize(2);
 	}
 	@Test
 	public void testManualTriggeredSubscriptionInPartition() throws Exception {

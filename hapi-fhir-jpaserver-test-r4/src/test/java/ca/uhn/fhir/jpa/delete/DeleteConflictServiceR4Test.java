@@ -228,7 +228,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 			// good
 		}
 
-		assertThat(conflicts.size()).isEqualTo(1);
+		assertThat(conflicts).hasSize(1);
 	}
 
 	private DeleteConflictOutcome deleteConflicts(DeleteConflictList theList) {

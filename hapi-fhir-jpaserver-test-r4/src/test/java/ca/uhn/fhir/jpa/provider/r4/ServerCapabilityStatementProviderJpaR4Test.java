@@ -117,7 +117,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 
 		List<CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent> fooSearchParams = findSearchParams(cs, "Patient", "foo");
-		assertThat(fooSearchParams.size()).isEqualTo(1);
+		assertThat(fooSearchParams).hasSize(1);
 		assertThat(fooSearchParams.get(0).getName()).isEqualTo("foo");
 		assertThat(fooSearchParams.get(0).getDefinition()).isEqualTo("http://acme.com/foo");
 		assertThat(fooSearchParams.get(0).getDocumentation()).isEqualTo("This is a search param!");
@@ -130,7 +130,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 
 		List<CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent> fooSearchParams = findSearchParams(cs, "Patient", "_lastUpdated");
-		assertThat(fooSearchParams.size()).isEqualTo(1);
+		assertThat(fooSearchParams).hasSize(1);
 		assertThat(fooSearchParams.get(0).getName()).isEqualTo("_lastUpdated");
 		assertThat(fooSearchParams.get(0).getDefinition()).isEqualTo("http://hl7.org/fhir/SearchParameter/Resource-lastUpdated");
 		assertThat(fooSearchParams.get(0).getDocumentation()).isEqualTo("When the resource version last changed");
@@ -319,7 +319,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 
 	@Nonnull
 	private List<String> findSupportedProfiles(CapabilityStatement theCapabilityStatement, String theResourceType) {
-		assertThat(theCapabilityStatement.getRest().size()).isEqualTo(1);
+		assertThat(theCapabilityStatement.getRest()).hasSize(1);
 		return theCapabilityStatement
 			.getRest()
 			.get(0)
@@ -336,7 +336,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 
 	@Nonnull
 	private List<CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent> findSearchParams(CapabilityStatement theCapabilityStatement, String theResourceType, String theParamName) {
-		assertThat(theCapabilityStatement.getRest().size()).isEqualTo(1);
+		assertThat(theCapabilityStatement.getRest()).hasSize(1);
 		return theCapabilityStatement
 			.getRest()
 			.get(0)

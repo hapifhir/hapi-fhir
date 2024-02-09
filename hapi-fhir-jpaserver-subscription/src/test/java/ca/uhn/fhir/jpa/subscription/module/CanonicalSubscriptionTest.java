@@ -66,7 +66,7 @@ public class CanonicalSubscriptionTest {
 	public void testCanonicalSubscriptionRetainsMetaTags() throws IOException {
 		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4());
 		CanonicalSubscription sub1 = canonicalizer.canonicalize(makeMdmSubscription());
-		assertThat(sub1.getTags().keySet().contains(TAG_SYSTEM)).isTrue();
+		assertThat(sub1.getTags()).containsKey(TAG_SYSTEM);
 		assertThat(TAG_VALUE).isEqualTo(sub1.getTags().get(TAG_SYSTEM));
    }
 

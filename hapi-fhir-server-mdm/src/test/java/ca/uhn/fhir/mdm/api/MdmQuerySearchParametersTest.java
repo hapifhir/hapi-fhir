@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class MdmQuerySearchParametersTest {
 
@@ -28,12 +28,12 @@ class MdmQuerySearchParametersTest {
 		params.setLinkSource(LINK_SOURCE);
 		params.setPartitionIds(PARTITION_ID);
 		params.setResourceType(RESOURCE_TYPE);
-		assertEquals(GOLDEN_RESOURCE_ID, params.getGoldenResourceId().getValueAsString());
-		assertEquals(SOURCE_ID, params.getSourceId().getValueAsString());
-		assertEquals(MATCH_RESULT, params.getMatchResult());
-		assertEquals(LINK_SOURCE, params.getLinkSource());
-		assertEquals(PARTITION_ID, params.getPartitionIds());
-		assertEquals(PAGE_REQUEST, params.getPageRequest());
-		assertEquals(RESOURCE_TYPE, params.getResourceType());
+		assertThat(params.getGoldenResourceId().getValueAsString()).isEqualTo(GOLDEN_RESOURCE_ID);
+		assertThat(params.getSourceId().getValueAsString()).isEqualTo(SOURCE_ID);
+		assertThat(params.getMatchResult()).isEqualTo(MATCH_RESULT);
+		assertThat(params.getLinkSource()).isEqualTo(LINK_SOURCE);
+		assertThat(params.getPartitionIds()).isEqualTo(PARTITION_ID);
+		assertThat(params.getPageRequest()).isEqualTo(PAGE_REQUEST);
+		assertThat(params.getResourceType()).isEqualTo(RESOURCE_TYPE);
 	}
 }

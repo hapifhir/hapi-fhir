@@ -14,8 +14,7 @@ import org.slf4j.LoggerFactory;
 import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildMatched;
 import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildUnmatched;
 import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildUnsupported;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
@@ -59,7 +58,7 @@ class FhirQueryRuleTesterTest  {
 
 		boolean matches = myTester.matchesOutput(myTestRequest);
 
-		assertTrue(matches);
+		assertThat(matches).isTrue();
 	}
 
 
@@ -72,7 +71,7 @@ class FhirQueryRuleTesterTest  {
 
 		boolean matches = myTester.matchesOutput(myTestRequest);
 
-		assertFalse(matches);
+		assertThat(matches).isFalse();
 	}
 
 	@Test
@@ -85,7 +84,7 @@ class FhirQueryRuleTesterTest  {
 
 		boolean matches = myTester.matchesOutput(myTestRequest);
 
-		assertFalse(matches);
+		assertThat(matches).isFalse();
 	}
 
 	@Test
@@ -98,7 +97,7 @@ class FhirQueryRuleTesterTest  {
 
 		boolean matches = myTester.matchesOutput(myTestRequest);
 
-		assertTrue(matches);
+		assertThat(matches).isTrue();
 	}
 
 	@Test
@@ -110,7 +109,7 @@ class FhirQueryRuleTesterTest  {
 
 		boolean matches = myTester.matchesOutput(myTestRequest);
 
-		assertTrue(matches);
+		assertThat(matches).isTrue();
 	}
 
 

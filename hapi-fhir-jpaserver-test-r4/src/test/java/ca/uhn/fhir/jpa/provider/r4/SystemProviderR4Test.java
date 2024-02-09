@@ -353,10 +353,10 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		Bundle resp = myClient.transaction().withBundle(req).execute();
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		assertThat(resp.getEntry().size()).isEqualTo(1);
+		assertThat(resp.getEntry()).hasSize(1);
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
 		assertThat(respSub.getTotal()).isEqualTo(20);
-		assertThat(respSub.getEntry().size()).isEqualTo(0);
+		assertThat(respSub.getEntry()).isEmpty();
 	}
 
 	@Test
@@ -487,7 +487,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			assertThat(encoded).contains("transaction-response");
 
 			Bundle response = myFhirContext.newXmlParser().parseResource(Bundle.class, encoded);
-			assertThat(response.getEntry().size()).isEqualTo(3);
+			assertThat(response.getEntry()).hasSize(3);
 
 		} finally {
 			IOUtils.closeQuietly(resp.getEntity().getContent());
@@ -610,7 +610,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
 
-		assertThat(output.getEntry().size()).isEqualTo(2);
+		assertThat(output.getEntry()).hasSize(2);
 		assertThat(new IdType(output.getEntry().get(0).getResponse().getLocation()).getIdPart()).isEqualTo("A");
 		assertThat(new IdType(output.getEntry().get(1).getResponse().getLocation()).getIdPart()).isEqualTo("B");
 	}
@@ -742,7 +742,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		Bundle resp = myClient.transaction().withBundle(req).execute();
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		assertThat(resp.getEntry().size()).isEqualTo(1);
+		assertThat(resp.getEntry()).hasSize(1);
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
 		assertThat(respSub.getLink().get(0).getRelation()).isEqualTo("self");
 		assertThat(respSub.getLink().get(0).getUrl()).isEqualTo(ourServerBase + "/Patient");

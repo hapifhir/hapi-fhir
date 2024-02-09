@@ -12,8 +12,8 @@ import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -38,7 +38,7 @@ public class MultiVersionXmlParserTest {
 		try {
 			FhirContext.forDstu3().newXmlParser().encodeResourceToString(p);
 			fail("");		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1829) + "This parser is for FHIR version DSTU3 - Can not encode a structure for version DSTU2", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1829) + "This parser is for FHIR version DSTU3 - Can not encode a structure for version DSTU2");
 		}
 	}
 
@@ -59,12 +59,12 @@ public class MultiVersionXmlParserTest {
 		try {
 			ourCtxDstu3.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Patient.class, res);
 			fail("");		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(1731) + "This context is for FHIR version \"DSTU3\" but the class \"ca.uhn.fhir.model.dstu2.resource.Patient\" is for version \"DSTU2\"", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1731) + "This context is for FHIR version \"DSTU3\" but the class \"ca.uhn.fhir.model.dstu2.resource.Patient\" is for version \"DSTU2\"");
 		}
 		try {
 			ourCtxDstu3.newXmlParser().parseResource(Patient.class, res);
 			fail("");		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(1731) + "This context is for FHIR version \"DSTU3\" but the class \"ca.uhn.fhir.model.dstu2.resource.Patient\" is for version \"DSTU2\"", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1731) + "This context is for FHIR version \"DSTU3\" but the class \"ca.uhn.fhir.model.dstu2.resource.Patient\" is for version \"DSTU2\"");
 		}
 
 	}

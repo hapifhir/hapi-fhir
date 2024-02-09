@@ -374,7 +374,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		Bundle resp = ourClient.transaction().withBundle(req).execute();
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		assertThat(resp.getEntry().size()).isEqualTo(1);
+		assertThat(resp.getEntry()).hasSize(1);
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
 		assertThat(respSub.getLink().get(0).getRelation()).isEqualTo("self");
 		assertThat(respSub.getLink().get(0).getUrl()).isEqualTo(ourServerBase + "/Patient");
@@ -398,10 +398,10 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		Bundle resp = ourClient.transaction().withBundle(req).execute();
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		assertThat(resp.getEntry().size()).isEqualTo(1);
+		assertThat(resp.getEntry()).hasSize(1);
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
 		assertThat(respSub.getTotal().intValue()).isEqualTo(20);
-		assertThat(respSub.getEntry().size()).isEqualTo(0);
+		assertThat(respSub.getEntry()).isEmpty();
 	}
 
 	@Test

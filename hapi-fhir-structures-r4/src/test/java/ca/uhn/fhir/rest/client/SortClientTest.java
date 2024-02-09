@@ -31,7 +31,7 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -67,9 +67,9 @@ public class SortClientTest {
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.searchWithParam(new StringParam("hello"), new SortSpec("given"));
 
-		assertEquals(HttpGet.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
 		HttpGet get = (HttpGet) capt.getValue();
-		assertEquals("http://foo/Patient?name=hello&_sort=given", get.getURI().toString());
+		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient?name=hello&_sort=given");
 	}
 
 	@Test
@@ -83,9 +83,9 @@ public class SortClientTest {
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.searchWithParam(new StringParam("hello"), new SortSpec("given", SortOrderEnum.DESC, new SortSpec("family", SortOrderEnum.ASC)));
 
-		assertEquals(HttpGet.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
 		HttpGet get = (HttpGet) capt.getValue();
-		assertEquals("http://foo/Patient?name=hello&_sort=-given%2Cfamily", get.getURI().toString());
+		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient?name=hello&_sort=-given%2Cfamily");
 	}
 
 	private String createBundle() {

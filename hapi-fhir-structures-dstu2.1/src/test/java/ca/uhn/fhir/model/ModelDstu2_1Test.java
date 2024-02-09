@@ -20,9 +20,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ModelDstu2_1Test {
 
@@ -30,7 +28,7 @@ public class ModelDstu2_1Test {
 
 	@Test
 	public void testElementHasInterface() {
-		assertTrue(IBaseElement.class.isAssignableFrom(Element.class));
+		assertThat(IBaseElement.class.isAssignableFrom(Element.class)).isTrue();
 	}
 	
 	
@@ -42,7 +40,7 @@ public class ModelDstu2_1Test {
 		Practitioner p = new Practitioner();
 		PractitionerPractitionerRoleComponent role = p.addPractitionerRole();
 		CodeableConcept roleField = role.getRole();
-		assertEquals(CodeableConcept.class, roleField.getClass());
+		assertThat(roleField.getClass()).isEqualTo(CodeableConcept.class);
 	}
 
 	@AfterAll
@@ -66,7 +64,7 @@ public class ModelDstu2_1Test {
 		try {
 			ourCtx.newXmlParser().encodeResourceToString(p);
 		} catch (ClassCastException e) {
-			assertEquals(Msg.code(1794) + "Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1794) + "Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase");
 		}
 	}
 	
@@ -93,32 +91,32 @@ public class ModelDstu2_1Test {
 		Patient patient2 = context.newJsonParser().parseResource(Patient.class,
 		        context.newJsonParser().encodeResourceToString(patient1));
 
-		assertTrue(patient1.equalsDeep(patient2));
-		assertTrue(patient1.equalsShallow(patient2));
+		assertThat(patient1.equalsDeep(patient2)).isTrue();
+		assertThat(patient1.equalsShallow(patient2)).isTrue();
 
 		Patient patient3 = new Patient();
 		patient3.setBirthDate(date)
 		        .setGender(Enumerations.AdministrativeGender.MALE)
 		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").addFamily("family");
 
-		assertTrue(patient1.equalsDeep(patient3));
-		assertTrue(patient1.equalsShallow(patient3));
+		assertThat(patient1.equalsDeep(patient3)).isTrue();
+		assertThat(patient1.equalsShallow(patient3)).isTrue();
 
 		Patient patient4 = new Patient();
 		patient4.setBirthDate(date)
 		        .setGender(Enumerations.AdministrativeGender.MALE)
 		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").addFamily("family2");
 
-		assertTrue(patient1.equalsShallow(patient4));
-		assertFalse(patient1.equalsDeep(patient4));
+		assertThat(patient1.equalsShallow(patient4)).isTrue();
+		assertThat(patient1.equalsDeep(patient4)).isFalse();
 
 		Patient patient5 = new Patient();
 		patient5.setBirthDate(date)
 		        .setGender(Enumerations.AdministrativeGender.FEMALE)
 		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").addFamily("family2");
 
-		assertFalse(patient1.equalsShallow(patient5));
-		assertFalse(patient1.equalsDeep(patient5));
+		assertThat(patient1.equalsShallow(patient5)).isFalse();
+		assertThat(patient1.equalsDeep(patient5)).isFalse();
 
 	}
 

@@ -16,8 +16,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResponseTerminologyDisplayPopulationInterceptorTest extends BaseValidationTestWithInlineMocks {
 
@@ -49,8 +48,8 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest extends BaseVal
 		IIdType id = myClient.create().resource(p).execute().getId();
 
 		p = myClient.read().resource(Patient.class).withId(id).execute();
-		assertEquals(1, p.getMaritalStatus().getCoding().size());
-		assertEquals("Annulled", p.getMaritalStatus().getCoding().get(0).getDisplay());
+		assertThat(p.getMaritalStatus().getCoding()).hasSize(1);
+		assertThat(p.getMaritalStatus().getCoding().get(0).getDisplay()).isEqualTo("Annulled");
 	}
 
 	@Test
@@ -62,8 +61,8 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest extends BaseVal
 		IIdType id = myClient.create().resource(p).execute().getId();
 
 		p = myClient.read().resource(Patient.class).withId(id).execute();
-		assertEquals(1, p.getMaritalStatus().getCoding().size());
-		assertNull(p.getMaritalStatus().getCoding().get(0).getDisplay());
+		assertThat(p.getMaritalStatus().getCoding()).hasSize(1);
+		assertThat(p.getMaritalStatus().getCoding().get(0).getDisplay()).isNull();
 	}
 
 	@Test
@@ -75,10 +74,10 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest extends BaseVal
 		myClient.create().resource(p).execute();
 
 		Bundle bundle = myClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
-		assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 		p = (Patient) bundle.getEntry().get(0).getResource();
-		assertEquals(1, p.getMaritalStatus().getCoding().size());
-		assertEquals("Annulled", p.getMaritalStatus().getCoding().get(0).getDisplay());
+		assertThat(p.getMaritalStatus().getCoding()).hasSize(1);
+		assertThat(p.getMaritalStatus().getCoding().get(0).getDisplay()).isEqualTo("Annulled");
 	}
 
 	@Test
@@ -90,10 +89,10 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest extends BaseVal
 		myClient.create().resource(p).execute();
 
 		Bundle bundle = myClient.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
-		assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 		p = (Patient) bundle.getEntry().get(0).getResource();
-		assertEquals(1, p.getMaritalStatus().getCoding().size());
-		assertNull(p.getMaritalStatus().getCoding().get(0).getDisplay());
+		assertThat(p.getMaritalStatus().getCoding()).hasSize(1);
+		assertThat(p.getMaritalStatus().getCoding().get(0).getDisplay()).isNull();
 	}
 
 	@Test
@@ -105,8 +104,8 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest extends BaseVal
 		IIdType id = myClient.create().resource(p).execute().getId();
 
 		p = myClient.read().resource(Patient.class).withId(id).execute();
-		assertEquals(1, p.getMaritalStatus().getCoding().size());
-		assertEquals("FOO", p.getMaritalStatus().getCoding().get(0).getDisplay());
+		assertThat(p.getMaritalStatus().getCoding()).hasSize(1);
+		assertThat(p.getMaritalStatus().getCoding().get(0).getDisplay()).isEqualTo("FOO");
 	}
 
 	@Test
@@ -118,8 +117,8 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest extends BaseVal
 		IIdType id = myClient.create().resource(p).execute().getId();
 
 		p = myClient.read().resource(Patient.class).withId(id).execute();
-		assertEquals(1, p.getMaritalStatus().getCoding().size());
-		assertNull(p.getMaritalStatus().getCoding().get(0).getDisplay());
+		assertThat(p.getMaritalStatus().getCoding()).hasSize(1);
+		assertThat(p.getMaritalStatus().getCoding().get(0).getDisplay()).isNull();
 	}
 
 	private static class NullableValidationSupport implements IValidationSupport {

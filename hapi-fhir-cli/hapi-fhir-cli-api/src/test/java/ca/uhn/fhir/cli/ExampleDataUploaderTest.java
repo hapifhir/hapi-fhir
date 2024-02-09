@@ -20,10 +20,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ExampleDataUploaderTest {
 
@@ -65,20 +61,20 @@ class ExampleDataUploaderTest {
 		myRestServerR4Helper.executeWithLatch(() -> runCommand(commandLine));
 
 		// validate
-		assertNotNull(myCapturingInterceptor.getLastRequest());
+		assertThat(myCapturingInterceptor.getLastRequest()).isNotNull();
 		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
-		assertFalse(allHeaders.isEmpty());
+		assertThat(allHeaders.isEmpty()).isFalse();
 
-		assertTrue(allHeaders.containsKey(headerKey));
-		assertEquals(1, allHeaders.get(headerKey).size());
+		assertThat(allHeaders).containsKey(headerKey);
+		assertThat(allHeaders.get(headerKey)).hasSize(1);
 
 		assertThat(allHeaders.get(headerKey)).contains(headerValue);
 
-		assertEquals(1, myRestServerR4Helper.getTransactions().size());
+		assertThat(myRestServerR4Helper.getTransactions()).hasSize(1);
 		Bundle bundle = myRestServerR4Helper.getTransactions().get(0);
 		Resource resource = bundle.getEntry().get(0).getResource();
-		assertEquals(Patient.class, resource.getClass());
-		assertEquals("EX3152", resource.getIdElement().getIdPart());
+		assertThat(resource.getClass()).isEqualTo(Patient.class);
+		assertThat(resource.getIdElement().getIdPart()).isEqualTo("EX3152");
 	}
 
 	private void runCommand(CommandLine commandLine) {

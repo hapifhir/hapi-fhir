@@ -436,16 +436,16 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		IIdType id = myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
 
 		Meta meta = myClient.meta().get(Meta.class).fromResource(id).execute();
-		assertThat(meta.getTag().size()).isEqualTo(2);
+		assertThat(meta.getTag()).hasSize(2);
 
 		Meta inMeta = new Meta();
 		inMeta.addTag().setSystem("urn:system2").setCode("urn:code2");
 		meta = myClient.meta().delete().onResource(id).meta(inMeta).execute();
-		assertThat(meta.getTag().size()).isEqualTo(1);
+		assertThat(meta.getTag()).hasSize(1);
 
 		Bundle patientBundle = myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
 		Patient patient = (Patient) patientBundle.getEntry().get(0).getResource();
-		assertThat(patient.getMeta().getTag().size()).isEqualTo(1);
+		assertThat(patient.getMeta().getTag()).hasSize(1);
 	}
 
 	@Test
@@ -458,16 +458,16 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		IIdType id = myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
 
 		Meta meta = myClient.meta().get(Meta.class).fromResource(id).execute();
-		assertThat(meta.getTag().size()).isEqualTo(2);
+		assertThat(meta.getTag()).hasSize(2);
 
 		Meta inMeta = new Meta();
 		inMeta.addTag().setSystem("urn:system2").setCode("urn:code2");
 		meta = myClient.meta().delete().onResource(id).meta(inMeta).execute();
-		assertThat(meta.getTag().size()).isEqualTo(1);
+		assertThat(meta.getTag()).hasSize(1);
 
 		Bundle patientBundle = myClient.search().forResource("Patient").returnBundle(Bundle.class).execute();
 		Patient patient = (Patient) patientBundle.getEntry().get(0).getResource();
-		assertThat(patient.getMeta().getTag().size()).isEqualTo(1);
+		assertThat(patient.getMeta().getTag()).hasSize(1);
 	}
 
 	@Test

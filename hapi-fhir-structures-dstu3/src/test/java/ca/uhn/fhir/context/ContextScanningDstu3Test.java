@@ -20,11 +20,10 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.TreeSet;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ContextScanningDstu3Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
@@ -105,7 +104,7 @@ public class ContextScanningDstu3Test {
 		assertThat(resDefs, not(containsInRelativeOrder("Observation")));
 		
 		BaseRuntimeElementCompositeDefinition<?> compositeDef = (BaseRuntimeElementCompositeDefinition<?>) ctx.getElementDefinition("identifier");
-		assertFalse(compositeDef.isSealed());
+		assertThat(compositeDef.isSealed()).isFalse();
 		
 		IGenericClient client = ctx.newRestfulGenericClient(ourServer.getBaseUrl());
 		client.read().resource(Patient.class).withId("1").execute();
@@ -116,7 +115,7 @@ public class ContextScanningDstu3Test {
 		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);		
 		assertThat(resDefs, not(containsInRelativeOrder("Observation")));
 		compositeDef = (BaseRuntimeElementCompositeDefinition<?>) ctx.getElementDefinition("identifier");
-		assertFalse(compositeDef.isSealed());
+		assertThat(compositeDef.isSealed()).isFalse();
 
 		client.read().resource(Observation.class).withId("1").execute();
 		resDefs = scannedResourceNames(ctx);
@@ -125,7 +124,7 @@ public class ContextScanningDstu3Test {
 		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);		
 		assertThat(resDefs, containsInRelativeOrder("Observation"));		
 		compositeDef = (BaseRuntimeElementCompositeDefinition<?>) ctx.getElementDefinition("identifier");
-		assertTrue(compositeDef.isSealed());
+		assertThat(compositeDef.isSealed()).isTrue();
 	}
 
 	private TreeSet<String> scannedResourceNames(FhirContext ctx) {

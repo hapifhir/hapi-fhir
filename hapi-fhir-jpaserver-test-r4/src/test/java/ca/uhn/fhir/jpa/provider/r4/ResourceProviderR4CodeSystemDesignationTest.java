@@ -51,7 +51,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
 		// should be de-AT and default
-		assertThat(designationList.size()).isEqualTo(2); 
+		assertThat(designationList).hasSize(2); 
 		verifyDesignationDeAT(designationList.get(0));
 		verifyDesignationNoLanguage(designationList.get(1));
 	}
@@ -77,7 +77,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
 		// should be default only
-		assertThat(designationList.size()).isEqualTo(1); 
+		assertThat(designationList).hasSize(1); 
 		verifyDesignationNoLanguage(designationList.get(0));
 
 	}
@@ -101,7 +101,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
 		// designation should be fr-FR, De-AT and default
-		assertThat(designationList.size()).isEqualTo(3); 
+		assertThat(designationList).hasSize(3); 
 		verifyDesignationfrFR(designationList.get(0));
 		verifyDesignationDeAT(designationList.get(1));
 		verifyDesignationNoLanguage(designationList.get(2));
@@ -130,7 +130,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
 		// should be de-AT and default
-		assertThat(designationList.size()).isEqualTo(2); 
+		assertThat(designationList).hasSize(2); 
 		verifyDesignationDeAT(designationList.get(0));
 		verifyDesignationNoLanguage(designationList.get(1));
 
@@ -153,7 +153,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		designationList = getDesignations(parameterList);
 		// should be default only
-		assertThat(designationList.size()).isEqualTo(1); 
+		assertThat(designationList).hasSize(1); 
 		verifyDesignationNoLanguage(designationList.get(0));
 		
 		//-- third call with no language
@@ -174,7 +174,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		designationList = getDesignations(parameterList);
 		// designation should be fr-FR, De-AT and default
-		assertThat(designationList.size()).isEqualTo(3); 
+		assertThat(designationList).hasSize(3); 
 		verifyDesignationfrFR(designationList.get(0));
 		verifyDesignationDeAT(designationList.get(1));
 		verifyDesignationNoLanguage(designationList.get(2));
@@ -198,7 +198,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		designationList = getDesignations(parameterList);
 		// designation should be fr-FR, default
-		assertThat(designationList.size()).isEqualTo(2); 
+		assertThat(designationList).hasSize(2); 
 		verifyDesignationfrFR(designationList.get(0));
 		verifyDesignationNoLanguage(designationList.get(1));
 	}

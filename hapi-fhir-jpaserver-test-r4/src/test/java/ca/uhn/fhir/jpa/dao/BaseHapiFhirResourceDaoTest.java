@@ -235,7 +235,7 @@ class BaseHapiFhirResourceDaoTest {
 		assertThat(actualRequest.getParameters()).isNotNull();
 		ReindexJobParameters actualParameters = actualRequest.getParameters(ReindexJobParameters.class);
 
-		assertThat(actualParameters.getPartitionedUrls().size()).isEqualTo(2);
+		assertThat(actualParameters.getPartitionedUrls()).hasSize(2);
 		assertThat(actualParameters.getPartitionedUrls().get(0).getUrl()).isEqualTo("Patient?");
 		assertThat(actualParameters.getPartitionedUrls().get(1).getUrl()).isEqualTo("Group?");
 	}
@@ -256,7 +256,7 @@ class BaseHapiFhirResourceDaoTest {
 		assertThat(actualRequest.getParameters()).isNotNull();
 		ReindexJobParameters actualParameters = actualRequest.getParameters(ReindexJobParameters.class);
 
-		assertThat(actualParameters.getPartitionedUrls().size()).isEqualTo(0);
+		assertThat(actualParameters.getPartitionedUrls()).isEmpty();
 	}
 
 	@ParameterizedTest

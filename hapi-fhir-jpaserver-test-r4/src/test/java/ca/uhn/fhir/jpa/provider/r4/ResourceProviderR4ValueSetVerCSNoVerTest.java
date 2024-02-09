@@ -687,7 +687,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 
 		// Update the CodeSystem URL and Codes
 		cs = new CodeSystem();
@@ -711,7 +711,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 		assertThat(expanded.getId()).isNotNull();
 	}
 

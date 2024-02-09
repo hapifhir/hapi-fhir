@@ -13,7 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -56,9 +56,9 @@ public class ServletRestfulResponseTest {
 
 	@Test
 	public void testSanitizeHeaderField() {
-		assertEquals("AB", ServletRestfulResponse.sanitizeHeaderField("A\nB"));
-		assertEquals("AB", ServletRestfulResponse.sanitizeHeaderField("A\r\r\rB"));
-		assertEquals("AB", ServletRestfulResponse.sanitizeHeaderField("AB"));
+		assertThat(ServletRestfulResponse.sanitizeHeaderField("A\nB")).isEqualTo("AB");
+		assertThat(ServletRestfulResponse.sanitizeHeaderField("A\r\r\rB")).isEqualTo("AB");
+		assertThat(ServletRestfulResponse.sanitizeHeaderField("AB")).isEqualTo("AB");
 	}
 
 }

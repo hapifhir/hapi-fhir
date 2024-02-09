@@ -90,7 +90,7 @@ public class EIDHelperR4Test extends BaseR4Test {
 		CanonicalEID internalEid = myEidHelper.createHapiEid();
 
 		assertThat(internalEid.getSystem()).isEqualTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM);
-		assertThat(internalEid.getValue().length()).isEqualTo(36);
+		assertThat(internalEid.getValue()).hasSize(36);
 		assertThat(internalEid.getUse()).isNull();
 	}
 }

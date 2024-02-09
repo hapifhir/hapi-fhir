@@ -25,7 +25,7 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 	@Test
 	public void testGenerateSnapshot() throws IOException {
 		StructureDefinition differential = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-differential-patient-r4.json");
-		assertThat(differential.getSnapshot().getElement().size()).isEqualTo(0);
+		assertThat(differential.getSnapshot().getElement()).isEmpty();
 
 		// Create a validation chain that includes default validation support and a
 		// snapshot generator
@@ -42,7 +42,7 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 		StructureDefinition output = myStructureDefinitionDao.generateSnapshot(differential, url, webUrl, name);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertThat(output.getSnapshot().getElement().size()).isEqualTo(54);
+		assertThat(output.getSnapshot().getElement()).hasSize(54);
 	}
 
 

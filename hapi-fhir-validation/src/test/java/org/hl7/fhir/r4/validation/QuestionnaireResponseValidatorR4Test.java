@@ -52,7 +52,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -255,7 +254,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code0"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
-		assertEquals(0, errors.getMessages().size(), errors.toString());
+		assertThat(errors.getMessages().size()).as(errors.toString()).isEqualTo(0);
 
 		// Bad code
 
@@ -320,7 +319,7 @@ public class QuestionnaireResponseValidatorR4Test {
 
 		ourLog.info(errors.toString());
 		assertThat(errors.toString()).contains("Definition for item link0 does not contain a type");
-		assertEquals(1, errors.getMessages().size());
+		assertThat(errors.getMessages()).hasSize(1);
 	}
 
 	@Test
@@ -516,14 +515,14 @@ public class QuestionnaireResponseValidatorR4Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
 		assertThat(errors.getMessages()).hasSize(1);
-		assertEquals(ResultSeverityEnum.WARNING, errors.getMessages().get(0).getSeverity());
+		assertThat(errors.getMessages().get(0).getSeverity()).isEqualTo(ResultSeverityEnum.WARNING);
 
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
 		assertThat(errors.getMessages()).hasSize(1);
-		assertEquals(ResultSeverityEnum.ERROR, errors.getMessages().get(0).getSeverity());
+		assertThat(errors.getMessages().get(0).getSeverity()).isEqualTo(ResultSeverityEnum.ERROR);
 	}
 
 	@Test
@@ -698,7 +697,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://foo").setCode("foo"));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertEquals(true, errors.isSuccessful());
+		assertThat(errors.isSuccessful()).isEqualTo(true);
 
 		qa = new QuestionnaireResponse();
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -722,7 +721,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
 		// This is set in InstanceValidator#validateAnswerCode
-		assertEquals(false, errors.isSuccessful());
+		assertThat(errors.isSuccessful()).isEqualTo(false);
 
 	}
 

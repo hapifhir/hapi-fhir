@@ -48,7 +48,7 @@ public class SearchQueryBuilderDialectPostgresTest extends BaseSearchQueryBuilde
 		assertThat(sql).isEqualTo("SELECT t0.RES_ID FROM HFJ_SPIDX_DATE t0 WHERE ((t0.HASH_IDENTITY = ?) AND ((t0.SP_VALUE_LOW_DATE_ORDINAL >= ?) AND (t0.SP_VALUE_HIGH_DATE_ORDINAL <= ?))) fetch first ? rows only");
 
 		assertThat(StringUtils.countMatches(sql, "?")).isEqualTo(4);
-		assertThat(generatedSql.getBindVariables().size()).isEqualTo(4);
+		assertThat(generatedSql.getBindVariables()).hasSize(4);
 		assertThat(generatedSql.getBindVariables().get(0)).isEqualTo(123682819940570799L);
 		assertThat(generatedSql.getBindVariables().get(1)).isEqualTo(20220101);
 		assertThat(generatedSql.getBindVariables().get(2)).isEqualTo(20221231);

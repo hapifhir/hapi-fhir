@@ -127,7 +127,7 @@ public class FindCandidateByExampleSvcTest {
 
 		// verify
 		assertThat(goldenResourceCanddiates).isNotNull();
-		assertThat(goldenResourceCanddiates.size()).isEqualTo(2);
+		assertThat(goldenResourceCanddiates).hasSize(2);
 		Set<String> ids = new HashSet<>();
 		for (MatchedGoldenResourceCandidate r : goldenResourceCanddiates) {
 			// we know these are strings

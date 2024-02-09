@@ -62,9 +62,6 @@ import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class OpenApiInterceptorTest {
 
@@ -115,7 +112,7 @@ public class OpenApiInterceptorTest {
 
 			org.hl7.fhir.r4.model.CapabilityStatement cs = myServer.getFhirClient().capabilities().ofType(org.hl7.fhir.r4.model.CapabilityStatement.class).execute();
 			org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent patientResource = findPatientResource(cs);
-			assertEquals("This is **bolded** documentation", patientResource.getDocumentation());
+			assertThat(patientResource.getDocumentation()).isEqualTo("This is **bolded** documentation");
 
 			String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
 			String resp = fetchSwaggerUi(url);
@@ -222,22 +219,22 @@ public class OpenApiInterceptorTest {
 			OpenAPI parsed = Yaml.mapper().readValue(resp, OpenAPI.class);
 
 			PathItem fooOpPath = parsed.getPaths().get("/$foo-op");
-			assertNull(fooOpPath.getGet());
-			assertNotNull(fooOpPath.getPost());
-			assertEquals("Foo Op Description", fooOpPath.getPost().getDescription());
-			assertEquals("Foo Op Short", fooOpPath.getPost().getSummary());
+			assertThat(fooOpPath.getGet()).isNull();
+			assertThat(fooOpPath.getPost()).isNotNull();
+			assertThat(fooOpPath.getPost().getDescription()).isEqualTo("Foo Op Description");
+			assertThat(fooOpPath.getPost().getSummary()).isEqualTo("Foo Op Short");
 
 			PathItem lastNPath = parsed.getPaths().get("/Observation/$lastn");
-			assertNotNull(lastNPath.getPost());
-			assertEquals("LastN Description", lastNPath.getPost().getDescription());
-			assertEquals("LastN Short", lastNPath.getPost().getSummary());
-			assertNull(lastNPath.getPost().getParameters());
-			assertNotNull(lastNPath.getPost().getRequestBody());
-			assertNotNull(lastNPath.getGet());
-			assertEquals("LastN Description", lastNPath.getGet().getDescription());
-			assertEquals("LastN Short", lastNPath.getGet().getSummary());
-			assertEquals(4, lastNPath.getGet().getParameters().size());
-			assertEquals("Subject description", lastNPath.getGet().getParameters().get(0).getDescription());
+			assertThat(lastNPath.getPost()).isNotNull();
+			assertThat(lastNPath.getPost().getDescription()).isEqualTo("LastN Description");
+			assertThat(lastNPath.getPost().getSummary()).isEqualTo("LastN Short");
+			assertThat(lastNPath.getPost().getParameters()).isNull();
+			assertThat(lastNPath.getPost().getRequestBody()).isNotNull();
+			assertThat(lastNPath.getGet()).isNotNull();
+			assertThat(lastNPath.getGet().getDescription()).isEqualTo("LastN Description");
+			assertThat(lastNPath.getGet().getSummary()).isEqualTo("LastN Short");
+			assertThat(lastNPath.getGet().getParameters()).hasSize(4);
+			assertThat(lastNPath.getGet().getParameters().get(0).getDescription()).isEqualTo("Subject description");
 		}
 
 		@Test
@@ -248,7 +245,7 @@ public class OpenApiInterceptorTest {
 
 			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/");
 			try (CloseableHttpResponse response = myClient.execute(get)) {
-				assertEquals(400, response.getStatusLine().getStatusCode());
+				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
 			}
 
 			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/");
@@ -257,20 +254,20 @@ public class OpenApiInterceptorTest {
 				String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info("Response: {}", response);
 				ourLog.info("Response: {}", responseString);
-				assertEquals(200, response.getStatusLine().getStatusCode());
+				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 				assertThat(responseString).contains("<title>Swagger UI</title>");
 			}
 
 			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/?foo=foo");
 			get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML);
 			try (CloseableHttpResponse response = myClient.execute(get)) {
-				assertEquals(400, response.getStatusLine().getStatusCode());
+				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
 			}
 
 			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir?foo=foo");
 			get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML);
 			try (CloseableHttpResponse response = myClient.execute(get)) {
-				assertEquals(400, response.getStatusLine().getStatusCode());
+				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
 			}
 
 		}
@@ -317,7 +314,7 @@ public class OpenApiInterceptorTest {
 				font-size: 1.1em;
 				}
 				""";
-			assertEquals(removeCtrlR(expected), removeCtrlR(resp));
+			assertThat(removeCtrlR(resp)).isEqualTo(removeCtrlR(expected));
 		}
 
 		protected String removeCtrlR(String source) {
@@ -350,16 +347,16 @@ public class OpenApiInterceptorTest {
 			String url2 = interceptor.removeTrailingSlash("http://localhost:8000/");
 			String url3 = interceptor.removeTrailingSlash("http://localhost:8000//");
 			String expect = "http://localhost:8000";
-			assertEquals(expect, url1);
-			assertEquals(expect, url2);
-			assertEquals(expect, url3);
+			assertThat(url1).isEqualTo(expect);
+			assertThat(url2).isEqualTo(expect);
+			assertThat(url3).isEqualTo(expect);
 		}
 
 		@Test
 		public void testRemoveTrailingSlashWithNullUrl() {
 			OpenApiInterceptor interceptor = new OpenApiInterceptor();
 			String url = interceptor.removeTrailingSlash(null);
-			assertEquals(null, url);
+			assertThat(url).isEqualTo(null);
 		}
 
 		@Test
@@ -369,7 +366,7 @@ public class OpenApiInterceptorTest {
 
 			HttpGet get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/oauth2-redirect.html");
 			try (CloseableHttpResponse response = myClient.execute(get)) {
-				assertEquals(200, response.getStatusLine().getStatusCode());
+				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 			}
 		}
 

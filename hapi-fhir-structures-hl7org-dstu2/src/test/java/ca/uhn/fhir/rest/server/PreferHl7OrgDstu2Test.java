@@ -22,7 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -59,9 +59,9 @@ public class PreferHl7OrgDstu2Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
+		assertThat(status.getFirstHeader("location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 		
 	}
 

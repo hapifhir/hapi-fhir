@@ -311,7 +311,7 @@ public class BaseHapiFhirDaoTest {
 		assertThat(persistInt.get()).as("Not enough persists " + persistInt.get()).isEqualTo(threads);
 
 		// verify
-		assertThat(outcomes.size()).isEqualTo(1);
+		assertThat(outcomes).hasSize(1);
 		assertThat(counter.get()).isEqualTo(threads);
 		assertThat(errors.size()).as(errors.values().stream().map(Throwable::getMessage)
 			.collect(Collectors.joining(", "))).isEqualTo(0);
@@ -320,8 +320,7 @@ public class BaseHapiFhirDaoTest {
 		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender, Mockito.atLeastOnce())
 			.doAppend(captor.capture());
-		assertThat(captor.getAllValues().get(0).getMessage()
-			.contains(raceConditionError)).isTrue();
+		assertThat(captor.getAllValues().get(0).getMessage()).contains(raceConditionError);
 	}
 
 	@Test
@@ -365,13 +364,13 @@ public class BaseHapiFhirDaoTest {
 			fail("");
 		} catch (Exception ex) {
 			// verify
-			assertThat(ex.getMessage().contains("Tag get/create failed after 10 attempts with error(s): " + exMsg)).isTrue();
+			assertThat(ex.getMessage()).contains("Tag get/create failed after 10 attempts with error(s): " + exMsg);
 
 			ArgumentCaptor<ILoggingEvent> appenderCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 			verify(myAppender, Mockito.times(10))
 				.doAppend(appenderCaptor.capture());
 			List<ILoggingEvent> events = appenderCaptor.getAllValues();
-			assertThat(events.size()).isEqualTo(10);
+			assertThat(events).hasSize(10);
 			for (int i = 0; i < 10; i++) {
 				String actualMsg = events.get(i).getMessage();
 				assertThat(actualMsg).isEqualTo("Tag read/write failed: "

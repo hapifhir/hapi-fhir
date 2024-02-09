@@ -33,8 +33,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsNot.not;
 import static org.hamcrest.text.IsEmptyString.emptyString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class UpdateDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateDstu3Test.class);
@@ -77,14 +75,14 @@ public class UpdateDstu3Test {
 		assertThat(responseContent, is(not(emptyString())));
 
 		Patient actualPatient = (Patient) ourCtx.newXmlParser().parseResource(responseContent);
-		assertEquals(patient.getIdElement().getIdPart(), actualPatient.getIdElement().getIdPart());
-		assertEquals(patient.getIdentifier().get(0).getValue(), actualPatient.getIdentifier().get(0).getValue());
+		assertThat(actualPatient.getIdElement().getIdPart()).isEqualTo(patient.getIdElement().getIdPart());
+		assertThat(actualPatient.getIdentifier().get(0).getValue()).isEqualTo(patient.getIdentifier().get(0).getValue());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertNull(status.getFirstHeader("location"));
-		assertEquals(ourServer.getBaseUrl() + "/Patient/123/_history/002", status.getFirstHeader("content-location").getValue());
-		assertEquals("W/\"002\"", status.getFirstHeader(Constants.HEADER_ETAG_LC).getValue());
-		assertEquals("Mon, 22 Apr 2002 11:22:33 GMT", status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE).getValue());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertThat(status.getFirstHeader("location")).isNull();
+		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/123/_history/002");
+		assertThat(status.getFirstHeader(Constants.HEADER_ETAG_LC).getValue()).isEqualTo("W/\"002\"");
+		assertThat(status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE).getValue()).isEqualTo("Mon, 22 Apr 2002 11:22:33 GMT");
 
 	}
 
@@ -102,10 +100,10 @@ public class UpdateDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was:\n{}", responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertEquals("Patient?_id=001", ourConditionalUrl);
-			assertNull(ourId);
+			assertThat(ourConditionalUrl).isEqualTo("Patient?_id=001");
+			assertThat(ourId).isNull();
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -128,10 +126,10 @@ public class UpdateDstu3Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals(Msg.code(419) + "Can not update resource, resource body must contain an ID element for update (PUT) operation", oo.getIssue().get(0).getDiagnostics());
+		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(419) + "Can not update resource, resource body must contain an ID element for update (PUT) operation");
 	}
 
 	@Test
@@ -148,10 +146,10 @@ public class UpdateDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was:\n{}", responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertNull(ourConditionalUrl);
-			assertEquals("Patient/001", ourId.getValue());
+			assertThat(ourConditionalUrl).isNull();
+			assertThat(ourId.getValue()).isEqualTo("Patient/001");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -175,7 +173,7 @@ public class UpdateDstu3Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 		assertThat(responseContent).contains("Resource body ID of &quot;3&quot; does not match");
 	}
 

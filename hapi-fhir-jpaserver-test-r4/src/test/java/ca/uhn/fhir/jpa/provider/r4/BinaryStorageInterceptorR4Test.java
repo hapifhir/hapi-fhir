@@ -449,7 +449,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify bundle response
-		assertThat(output.getEntry().size()).isEqualTo(3);
+		assertThat(output.getEntry()).hasSize(3);
 		output.getEntry().forEach(entry -> assertEquals("201 Created", entry.getResponse().getStatus()));
 
 		// Read back and verify first DocumentReference and attachments

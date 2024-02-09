@@ -641,7 +641,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		PersistedJpaSearchFirstPageBundleProvider search = (PersistedJpaSearchFirstPageBundleProvider) myPatientDao.search(new SearchParameterMap());
 		assertThat(search.getClass()).isEqualTo(PersistedJpaSearchFirstPageBundleProvider.class);
 		assertThat(search.size().intValue()).isEqualTo(2);
-		assertThat(search.getResources(0, 2).size()).isEqualTo(2);
+		assertThat(search.getResources(0, 2)).hasSize(2);
 
 		await().until(() -> runInTransaction(() -> mySearchEntityDao.count() == 1));
 		await().until(() -> runInTransaction(() -> mySearchResultDao.count() == 2));
@@ -1007,7 +1007,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	private void verifyOneVersionCodeSystemChildrenExpunged() {
 		List<TermCodeSystemVersion> myOneVersionCodeSystemVersions = myTermCodeSystemVersionDao.findByCodeSystemResourcePid(myOneVersionCodeSystemId.getIdPartAsLong());
-		assertThat(myOneVersionCodeSystemVersions.size()).isEqualTo(0);
+		assertThat(myOneVersionCodeSystemVersions).isEmpty();
 		assertThat(myTermConceptDesignationDao.findAll()).isEmpty();
 		assertThat(myTermConceptPropertyDao.findAll()).isEmpty();
 		assertThat(myTermConceptParentChildLinkDao.findAll()).isEmpty();
@@ -1024,7 +1024,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		TermCodeSystemVersion myTwoVersionCodeSystemVersion1 = verifyTermCodeSystemVersionExistsWithDisplayName("CS2-V1");
 		assertThat(myTwoVersionCodeSystemVersion1.getPid()).isNotEqualTo(myTwoVersionCodeSystem.getCurrentVersion().getPid());
 		List<TermConcept> myTwoVersionCodeSystemVersion1Concepts = new ArrayList(myTwoVersionCodeSystemVersion1.getConcepts());
-		assertThat(myTwoVersionCodeSystemVersion1Concepts.size()).isEqualTo(1);
+		assertThat(myTwoVersionCodeSystemVersion1Concepts).hasSize(1);
 		TermConcept conceptE = myTwoVersionCodeSystemVersion1Concepts.get(0);
 		assertThat(conceptE.getCode()).isEqualTo("E");
 	}
@@ -1034,7 +1034,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		TermCodeSystemVersion myTwoVersionCodeSystemVersion2 = verifyTermCodeSystemVersionExistsWithDisplayName("CS2-V2");
 		assertThat(myTwoVersionCodeSystemVersion2.getPid()).isEqualTo(myTwoVersionCodeSystem.getCurrentVersion().getPid());
 		List<TermConcept> myTwoVersionCodeSystemVersion2Concepts = new ArrayList(myTwoVersionCodeSystemVersion2.getConcepts());
-		assertThat(myTwoVersionCodeSystemVersion2Concepts.size()).isEqualTo(1);
+		assertThat(myTwoVersionCodeSystemVersion2Concepts).hasSize(1);
 		TermConcept conceptF = myTwoVersionCodeSystemVersion2Concepts.get(0);
 		assertThat(conceptF.getCode()).isEqualTo("F");
 	}

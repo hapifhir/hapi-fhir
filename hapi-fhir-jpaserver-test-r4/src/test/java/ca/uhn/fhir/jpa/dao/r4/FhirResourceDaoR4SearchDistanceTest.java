@@ -164,7 +164,7 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 					tooSmallDistance, myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-			assertThat(ids.size()).isEqualTo(0);
+			assertThat(ids).isEmpty();
 		}
 
 	}
@@ -198,7 +198,7 @@ public class FhirResourceDaoR4SearchDistanceTest extends BaseJpaR4Test {
 					tooSmallDistance, myFhirContext.getResourceDefinition("Location"));
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(myLocationDao.search(map));
-			assertThat(ids.size()).isEqualTo(0);
+			assertThat(ids).isEmpty();
 		}
 	}
 

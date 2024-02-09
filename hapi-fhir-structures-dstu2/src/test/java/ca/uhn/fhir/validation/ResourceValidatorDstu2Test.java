@@ -41,10 +41,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -88,13 +84,13 @@ public class ResourceValidatorDstu2Test {
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertEquals(2, ((OperationOutcome) result.toOperationOutcome()).getIssue().size());
+		assertThat(((OperationOutcome) result.toOperationOutcome()).getIssue()).hasSize(2);
 		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
 
 		try {
 			parser.parseResource(encoded);
 			fail("");		} catch (DataFormatException e) {
-			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"birthDate\"] Invalid attribute value \"2000-15-31\": " + Msg.code(1882) + "Invalid date/time format: \"2000-15-31\"", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"birthDate\"] Invalid attribute value \"2000-15-31\": " + Msg.code(1882) + "Invalid date/time format: \"2000-15-31\"");
 		}
 	}
 
@@ -107,7 +103,7 @@ public class ResourceValidatorDstu2Test {
 		FhirValidator val = createFhirValidator();
 
 		ValidationResult result = val.validateWithResult(b);
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 
 		MedicationOrder p = (MedicationOrder) b.getEntry().get(0).getResource();
 		TimingDt timing = new TimingDt();
@@ -116,7 +112,7 @@ public class ResourceValidatorDstu2Test {
 		p.getDosageInstructionFirstRep().setTiming(timing);
 
 		result = val.validateWithResult(b);
-		assertFalse(result.isSuccessful());
+		assertThat(result.isSuccessful()).isFalse();
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.getOperationOutcome());
 		ourLog.info(encoded);
 		assertThat(encoded).contains("tim-1:");
@@ -132,7 +128,7 @@ public class ResourceValidatorDstu2Test {
 		FhirValidator val = createFhirValidator();
 
 		ValidationResult validationResult = val.validateWithResult(b);
-		assertTrue(validationResult.isSuccessful());
+		assertThat(validationResult.isSuccessful()).isTrue();
 
 		MedicationOrder p = (MedicationOrder) b.getEntry().get(0).getResource();
 		TimingDt timing = new TimingDt();
@@ -146,7 +142,7 @@ public class ResourceValidatorDstu2Test {
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(validationResult.toOperationOutcome()));
 
-		assertFalse(validationResult.isSuccessful());
+		assertThat(validationResult.isSuccessful()).isFalse();
 
 		String encoded = logOperationOutcome(validationResult);
 		assertThat(encoded).contains("tim-1:");
@@ -165,9 +161,9 @@ public class ResourceValidatorDstu2Test {
 
 		OperationOutcome operationOutcome = (OperationOutcome) result.toOperationOutcome();
 
-		assertTrue(result.isSuccessful(), result.toString());
-		assertNotNull(operationOutcome);
-		assertEquals(1, operationOutcome.getIssue().size());
+		assertThat(result.isSuccessful()).as(result.toString()).isTrue();
+		assertThat(operationOutcome).isNotNull();
+		assertThat(operationOutcome.getIssue()).hasSize(1);
 	}
 
 //	@Test
@@ -207,14 +203,14 @@ public class ResourceValidatorDstu2Test {
 		val.setValidateAgainstStandardSchematron(false);
 
 		ValidationResult result = val.validateWithResult(p);
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 
 		p.getAnimal().getBreed().setText("The Breed");
 		result = val.validateWithResult(p);
-		assertFalse(result.isSuccessful());
+		assertThat(result.isSuccessful()).isFalse();
 		OperationOutcome operationOutcome = (OperationOutcome) result.getOperationOutcome();
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
-		assertEquals(1, operationOutcome.getIssue().size());
+		assertThat(operationOutcome.getIssue()).hasSize(1);
 		assertThat(operationOutcome.getIssueFirstRep().getDetailsElement().getValue()).contains("cvc-complex-type");
 	}
 
@@ -228,19 +224,19 @@ public class ResourceValidatorDstu2Test {
 		val.setValidateAgainstStandardSchematron(true);
 
 		ValidationResult validationResult = val.validateWithResult(p);
-		assertTrue(validationResult.isSuccessful());
+		assertThat(validationResult.isSuccessful()).isTrue();
 
 		p.getTelecomFirstRep().setValue("123-4567");
 		validationResult = val.validateWithResult(p);
-		assertFalse(validationResult.isSuccessful());
+		assertThat(validationResult.isSuccessful()).isFalse();
 		OperationOutcome operationOutcome = (OperationOutcome) validationResult.toOperationOutcome();
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
-		assertEquals(1, operationOutcome.getIssue().size());
+		assertThat(operationOutcome.getIssue()).hasSize(1);
 		assertThat(operationOutcome.getIssueFirstRep().getDiagnostics()).contains("cpt-2:");
 
 		p.getTelecomFirstRep().setSystem(ContactPointSystemEnum.EMAIL);
 		validationResult = val.validateWithResult(p);
-		assertTrue(validationResult.isSuccessful());
+		assertThat(validationResult.isSuccessful()).isTrue();
 	}
 
 	/**
@@ -277,7 +273,7 @@ public class ResourceValidatorDstu2Test {
 
 		String messageString = logOperationOutcome(result);
 
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 
 		assertThat(messageString).contains("No issues");
 
@@ -324,7 +320,7 @@ public class ResourceValidatorDstu2Test {
 
 		logOperationOutcome(result);
 
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 
 		assertThat(messageString).contains("valueReference");
 		assertThat(messageString).doesNotContain("valueResource");
@@ -373,7 +369,7 @@ public class ResourceValidatorDstu2Test {
 
 		logOperationOutcome(result);
 
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 
 		assertThat(messageString).contains("valueReference");
 		assertThat(messageString).doesNotContain("valueResource");

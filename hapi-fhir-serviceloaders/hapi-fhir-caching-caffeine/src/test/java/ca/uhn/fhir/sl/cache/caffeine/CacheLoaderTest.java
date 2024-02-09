@@ -19,8 +19,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class CacheLoaderTest {
@@ -41,7 +40,7 @@ public class CacheLoaderTest {
 			for (var next : futures) {
 				Cache<?, ?> actual = next.get(1, TimeUnit.MINUTES);
 				ourLog.info("Got cache: {}", actual);
-				assertNotNull(actual);
+				assertThat(actual).isNotNull();
 			}
 		} finally {
 			executor.shutdown();
@@ -54,6 +53,6 @@ public class CacheLoaderTest {
 		LoadingCache<String, String> cache = CacheFactory.build(1000, key -> {
 			return null;
 		});
-		assertNull(cache.get("1"));
+		assertThat(cache.get("1")).isNull();
 	}
 }

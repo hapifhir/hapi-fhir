@@ -77,7 +77,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		waitForActivatedSubscriptionCount(1);
 
 		Subscription subscription = mySubscriptionDao.read(id, mySrd);
-		assertThat(subscription.getMeta().getTag().size()).isEqualTo(1);
+		assertThat(subscription.getMeta().getTag()).hasSize(1);
 		assertThat(subscription.getMeta().getTag().get(0).getCode()).isEqualTo("DATABASE");
 
 		mySubscriptionDao.delete(id, mySrd);
@@ -87,7 +87,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		waitForActivatedSubscriptionCount(1);
 
 		subscription = mySubscriptionDao.read(id, mySrd);
-		assertThat(subscription.getMeta().getTag().size()).isEqualTo(1);
+		assertThat(subscription.getMeta().getTag()).hasSize(1);
 		assertThat(subscription.getMeta().getTag().get(0).getCode()).isEqualTo("IN_MEMORY");
 	}
 
@@ -674,8 +674,8 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		ourObservationProvider.waitForUpdateCount(5);
 
 		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
-		assertThat(observation1.getId().isEmpty()).isFalse();
-		assertThat(observation2.getId().isEmpty()).isFalse();
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	@Test
@@ -752,8 +752,8 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		ourObservationProvider.waitForUpdateCount(5);
 
 		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
-		assertThat(observation1.getId().isEmpty()).isFalse();
-		assertThat(observation2.getId().isEmpty()).isFalse();
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	@Test
@@ -824,8 +824,8 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		ourObservationProvider.waitForUpdateCount(5);
 
 		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
-		assertThat(observation1.getId().isEmpty()).isFalse();
-		assertThat(observation2.getId().isEmpty()).isFalse();
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	@Test
@@ -1225,7 +1225,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 			ourTransactionProvider.waitForTransactionCount(1);
 
 			Bundle xact = ourTransactionProvider.getTransactions().get(0);
-			assertThat(xact.getEntry().size()).isEqualTo(2);
+			assertThat(xact.getEntry()).hasSize(2);
 		}
 
 	}

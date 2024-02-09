@@ -46,7 +46,7 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 		// verify
 		Bundle receivedBundle = getLastSystemProviderBundle();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
-		assertThat(resources.size()).isEqualTo(2);
+		assertThat(resources).hasSize(2);
 
 		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
 		validateSubscriptionStatus(subscription, goodSentEncounter, ss, 1L);

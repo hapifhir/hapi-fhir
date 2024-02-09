@@ -68,7 +68,7 @@ class TermLoaderSvcImplTest {
 			() -> testedClass.processLoincFiles(
 				theDescriptors, theRequestDetails, theUploadProperties, true));
 
-		assertThat(thrown.getMessage().contains("Did not find loinc.xml in the ZIP distribution.")).isTrue();
+		assertThat(thrown.getMessage()).contains("Did not find loinc.xml in the ZIP distribution.");
 	}
 
 	@Test
@@ -81,7 +81,7 @@ class TermLoaderSvcImplTest {
 			() -> testedClass.processLoincFiles(
 				theDescriptors, theRequestDetails, theUploadProperties, true));
 
-		assertThat(thrown.getMessage().contains("'loinc.xml' file must not have a version defined.")).isTrue();
+		assertThat(thrown.getMessage()).contains("'loinc.xml' file must not have a version defined.");
 	}
 
 

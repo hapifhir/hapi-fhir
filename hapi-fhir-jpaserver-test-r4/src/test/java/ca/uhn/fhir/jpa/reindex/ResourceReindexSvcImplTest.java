@@ -53,10 +53,10 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 
 		// Verify
 		List<TypedResourcePid> typedPids = queryStream.visitStream(Stream::toList);
-		assertThat(typedPids.size()).isEqualTo(3);
+		assertThat(typedPids).hasSize(3);
 		assertThat(typedPids).containsExactly(new TypedResourcePid("Patient", id0), new TypedResourcePid("Patient", id1), new TypedResourcePid("Observation", id2));
 
-		assertThat(myCaptureQueriesListener.logSelectQueries().size()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(1);
 		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
@@ -82,9 +82,9 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Verify
 		List<TypedResourcePid> typedPids = queryStream.visitStream(Stream::toList);
 
-		assertThat(typedPids.isEmpty()).isTrue();
+		assertThat(typedPids).isEmpty();
 
-		assertThat(myCaptureQueriesListener.logSelectQueries().size()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(1);
 		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
@@ -129,10 +129,10 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Verify
 		List<TypedResourcePid> typedResourcePids = queryStream.visitStream(Stream::toList);
 
-		assertThat(typedResourcePids.size()).isEqualTo(2);
+		assertThat(typedResourcePids).hasSize(2);
 		assertThat(typedResourcePids).containsExactly(new TypedResourcePid("Patient", patientId1), new TypedResourcePid("Patient", patientId2));
 
-		assertThat(myCaptureQueriesListener.logSelectQueries().size()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(1);
 		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);

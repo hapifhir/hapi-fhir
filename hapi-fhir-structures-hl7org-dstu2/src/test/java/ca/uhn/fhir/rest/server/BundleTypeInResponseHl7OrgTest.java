@@ -18,7 +18,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BundleTypeInResponseHl7OrgTest {
 
@@ -41,13 +41,13 @@ public class BundleTypeInResponseHl7OrgTest {
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
-    assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
     ourLog.info(responseContent);
 
 		org.hl7.fhir.dstu2.model.Bundle bundle = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Bundle.class, responseContent);
-    assertEquals(1, bundle.getEntry().size());
-    assertEquals(BundleType.SEARCHSET, bundle.getType());
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getType()).isEqualTo(BundleType.SEARCHSET);
   }
 
   public static class DummyPatientResourceProvider implements IResourceProvider {

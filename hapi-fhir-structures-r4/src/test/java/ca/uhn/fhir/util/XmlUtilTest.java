@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -20,7 +20,7 @@ public class XmlUtilTest {
 		try {
 			XmlUtil.newInputFactory();
 			fail("");		} catch (Exception e) {
-			assertEquals(Msg.code(1753) + "Unable to initialize StAX - XML processing is disabled", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1753) + "Unable to initialize StAX - XML processing is disabled");
 		}
 	}
 
@@ -30,7 +30,7 @@ public class XmlUtilTest {
 		try {
 			XmlUtil.newOutputFactory();
 			fail("");		} catch (Exception e) {
-			assertEquals(Msg.code(1754) + "Unable to initialize StAX - XML processing is disabled", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1754) + "Unable to initialize StAX - XML processing is disabled");
 		}
 	}
 

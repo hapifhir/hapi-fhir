@@ -69,8 +69,8 @@ class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient1, matchOutcome, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 
 		final List<MdmLink> targets = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenPatient);
-		assertThat(targets.isEmpty()).isFalse();
-		assertThat(targets.size()).isEqualTo(1);
+		assertThat(targets).isNotEmpty();
+		assertThat(targets).hasSize(1);
 		final MdmLink mdmLink = targets.get(0);
 
 		assertThat(mdmLink.getScore()).isEqualTo(matchOutcome.getNormalizedScore());
@@ -98,8 +98,8 @@ class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
 		myMdmLinkUpdaterSvc.updateLink(params);
 
 		final List<MdmLink> targets = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenPatient);
-		assertThat(targets.isEmpty()).isFalse();
-		assertThat(targets.size()).isEqualTo(1);
+		assertThat(targets).isNotEmpty();
+		assertThat(targets).hasSize(1);
 
 		final MdmLink mdmLink = targets.get(0);
 

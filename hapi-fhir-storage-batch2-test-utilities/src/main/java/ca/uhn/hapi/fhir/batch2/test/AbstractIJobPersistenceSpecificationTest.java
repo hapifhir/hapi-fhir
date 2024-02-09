@@ -111,7 +111,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, freshFetchWorkChunk(id).getStatus()));
 
 			WorkChunk chunk = mySvc.onWorkChunkDequeue(id).orElseThrow(IllegalArgumentException::new);
-			assertThat(chunk.getInstanceId().length()).isEqualTo(36);
+			assertThat(chunk.getInstanceId()).hasSize(36);
 			assertThat(chunk.getJobDefinitionId()).isEqualTo(JOB_DEFINITION_ID);
 			assertThat(chunk.getJobDefinitionVersion()).isEqualTo(JOB_DEF_VER);
 			assertThat(chunk.getStatus()).isEqualTo(WorkChunkStatusEnum.IN_PROGRESS);
@@ -394,7 +394,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			});
 
 			List<WorkChunk> chunks = ImmutableList.copyOf(mySvc.fetchAllWorkChunksIterator(instanceId, true));
-			assertThat(chunks.size()).isEqualTo(1);
+			assertThat(chunks).hasSize(1);
 			assertThat(chunks.get(0).getErrorCount()).isEqualTo(2);
 		}
 
@@ -452,7 +452,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 
 			while (reducedChunks.hasNext()) {
 				WorkChunk reducedChunk = reducedChunks.next();
-				assertThat(chunkIds.contains(reducedChunk.getId())).isTrue();
+				assertThat(chunkIds).contains(reducedChunk);
 				assertThat(reducedChunk.getStatus()).isEqualTo(WorkChunkStatusEnum.COMPLETED);
 			}
 		}

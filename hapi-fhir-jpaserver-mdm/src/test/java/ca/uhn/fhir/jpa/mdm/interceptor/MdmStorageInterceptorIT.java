@@ -113,7 +113,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 		// Then
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
-		assertThat(resources.isEmpty()).isTrue();
+		assertThat(resources).isEmpty();
 		assertLinkCount(0);
 
 		try {
@@ -141,7 +141,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 		// Then
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
-		assertThat(resources.size()).isEqualTo(2);
+		assertThat(resources).hasSize(2);
 
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH);
 	}
@@ -174,7 +174,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 		// Then
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
-		assertThat(resources.size()).isEqualTo(3);
+		assertThat(resources).hasSize(3);
 
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}
@@ -215,7 +215,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		   Paul 3 POSSIBLE_MATCH to GR2 --> KEPT
 		   GR1 POSSIBLE_DUPLICATE GR2 --> DELETED */
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
-		assertThat(resources.size()).isEqualTo(3);
+		assertThat(resources).hasSize(3);
 
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}
@@ -257,7 +257,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		   Paul 3 POSSIBLE_MATCH to GR2 --> KEPT
 		   GR1 POSSIBLE_DUPLICATE GR2 --> DELETED */
 		List<IBaseResource> resources = myPatientDao.search(new SearchParameterMap(), SystemRequestDetails.forAllPartitions()).getAllResources();
-		assertThat(resources.size()).isEqualTo(3);
+		assertThat(resources).hasSize(3);
 
 		assertLinksMatchResult(MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}

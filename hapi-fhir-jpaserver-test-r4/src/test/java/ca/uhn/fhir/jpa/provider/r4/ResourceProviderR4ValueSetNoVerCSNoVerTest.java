@@ -371,7 +371,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		await().until(() -> clearDeferredStorageQueue());
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		Slice<TermValueSet> page = runInTransaction(() -> myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED));
-		assertThat(page.getContent().size()).isEqualTo(1);
+		assertThat(page.getContent()).hasSize(1);
 
 		Parameters respParam = myClient
 			.operation()
@@ -775,7 +775,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 
 		// Update the CodeSystem URL and Codes
 		cs = new CodeSystem();
@@ -799,7 +799,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 	}
 
 
@@ -1090,7 +1090,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		assertThat(toDirectCodes(expansion.getExpansion().getContains())).containsExactlyInAnyOrder("A");
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains())).containsExactlyInAnyOrder("AA", "AB");
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t -> t.getCode().equals("AA")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getContains())).containsExactlyInAnyOrder("AAA");
-		assertThat(myCaptureQueriesListener.getSelectQueries().size()).isEqualTo(15);
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(15);
 
 	}
 
@@ -1130,7 +1130,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		assertThat(toDirectCodes(expansion.getExpansion().getContains())).containsExactlyInAnyOrder("A");
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains())).containsExactlyInAnyOrder("AA", "AB");
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t -> t.getCode().equals("AA")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getContains())).containsExactlyInAnyOrder("AAA");
-		assertThat(myCaptureQueriesListener.getSelectQueries().size()).isEqualTo(13);
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(13);
 
 	}
 
@@ -1167,7 +1167,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains())).containsExactlyInAnyOrder("A", "AA", "AB", "AAA");
-		assertThat(myCaptureQueriesListener.getSelectQueries().size()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.getSelectQueries()).isEmpty();
 		assertThat(expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE)).contains("ValueSet was expanded using an expansion that was pre-calculated");
 
 		// Hierarchical (shouldn't reuse cache)
@@ -1184,7 +1184,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		assertThat(toDirectCodes(expansion.getExpansion().getContains())).containsExactlyInAnyOrder("A");
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains())).containsExactlyInAnyOrder("AA", "AB");
 		assertThat(toDirectCodes(expansion.getExpansion().getContains().get(0).getContains().stream().filter(t -> t.getCode().equals("AA")).findFirst().orElseThrow(() -> new IllegalArgumentException()).getContains())).containsExactlyInAnyOrder("AAA");
-		assertThat(myCaptureQueriesListener.getSelectQueries().size()).isEqualTo(3);
+		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(3);
 
 	}
 

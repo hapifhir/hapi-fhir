@@ -144,7 +144,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			.include(IBaseResource.INCLUDE_ALL)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(output.getEntry().size()).isEqualTo(2);
+		assertThat(output.getEntry()).hasSize(2);
 	}
 
 	@Test

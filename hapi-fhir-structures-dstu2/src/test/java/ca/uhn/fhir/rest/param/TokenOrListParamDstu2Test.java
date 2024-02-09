@@ -8,8 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TokenOrListParamDstu2Test {
 	@Test
@@ -22,7 +21,7 @@ public class TokenOrListParamDstu2Test {
 		codings.add(new CodingDt("http://baz.org", "53"));
 		codings.add(new CodingDt("http://bar.org", "52"));
 
-		assertTrue(params.doesCodingListMatch(codings));
+		assertThat(params.doesCodingListMatch(codings)).isTrue();
 	}
 
 	@Test
@@ -35,7 +34,7 @@ public class TokenOrListParamDstu2Test {
 		codings.add(new CodingDt("http://baz.org", "53"));
 		codings.add(new CodingDt("http://bar.org", "11"));
 
-		assertFalse(params.doesCodingListMatch(codings));
+		assertThat(params.doesCodingListMatch(codings)).isFalse();
 	}
 
 	@Test
@@ -48,7 +47,7 @@ public class TokenOrListParamDstu2Test {
 		codings.add(new CodingDt("http://baz.org", "53"));
 		codings.add(new CodingDt("http://bar.org", "11"));
 
-		assertFalse(params.doesCodingListMatch(codings));
+		assertThat(params.doesCodingListMatch(codings)).isFalse();
 	}
 
 	@AfterAll

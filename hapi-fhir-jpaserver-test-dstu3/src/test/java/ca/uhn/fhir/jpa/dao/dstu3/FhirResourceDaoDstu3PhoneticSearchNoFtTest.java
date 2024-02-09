@@ -146,7 +146,7 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 
 		// verify
 		List<String> resultIds = result.getAllResourceIds();
-		assertThat(resultIds.size()).isEqualTo(1);
+		assertThat(resultIds).hasSize(1);
 		assertThat(resultIds.get(0)).isEqualTo(patientId.getIdPart());
 	}
 

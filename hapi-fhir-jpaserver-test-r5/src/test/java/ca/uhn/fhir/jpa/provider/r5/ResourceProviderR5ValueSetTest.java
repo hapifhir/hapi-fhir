@@ -316,7 +316,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(1);
 		assertThat(expanded.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
 		assertThat(expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(1000);
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(23);
+		assertThat(expanded.getExpansion().getContains()).hasSize(23);
 
 
 		assertThat(toCodes(expanded)).isEqualTo(expandedConceptsByValueSetUrl.subList(1, 24));
@@ -351,7 +351,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(0);
 		assertThat(expanded.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
 		assertThat(expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(1);
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 		assertThat(toCodes(expanded)).isEqualTo(expandedConcepts.subList(0, 1));
 
 	}
@@ -383,7 +383,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(1);
 		assertThat(expanded.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
 		assertThat(expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(1);
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 
 		assertThat(toCodes(expanded)).isEqualTo(expandedConcepts.subList(1, 2));
 	}
@@ -537,7 +537,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(1);
 		assertThat(expanded.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
 		assertThat(expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(1000);
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(23);
+		assertThat(expanded.getExpansion().getContains()).hasSize(23);
 		assertThat(toCodes(expanded)).isEqualTo(expandedConcepts.subList(1, 24));
 	}
 
@@ -567,7 +567,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(0);
 		assertThat(expanded.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
 		assertThat(expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(1);
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 		assertThat(toCodes(expanded)).isEqualTo(expandedConcepts.subList(0, 1));
 	}
 
@@ -599,7 +599,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(1);
 		assertThat(expanded.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
 		assertThat(expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(1);
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 		assertThat(toCodes(expanded)).isEqualTo(expandedConcepts.subList(1, 2));
 
 	}
@@ -699,7 +699,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(1);
 		assertThat(expanded.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
 		assertThat(expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(1000);
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(23);
+		assertThat(expanded.getExpansion().getContains()).hasSize(23);
 		assertThat(toCodes(expanded)).isEqualTo(expandedConcepts.subList(1, 24));
 
 	}
@@ -732,7 +732,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(0);
 		assertThat(expanded.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
 		assertThat(expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(1);
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 		assertThat(toCodes(expanded)).isEqualTo(expandedConcepts.subList(0, 1));
 
 	}
@@ -766,7 +766,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		assertThat(expanded.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(1);
 		assertThat(expanded.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
 		assertThat(expanded.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(1);
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 		assertThat(toCodes(expanded)).isEqualTo(expandedConcepts.subList(1, 2));
 	}
 
@@ -968,7 +968,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug("Expanded: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 
 		// Update the CodeSystem URL and Codes
 		cs = new CodeSystem();
@@ -992,7 +992,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug("Expanded: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 	}
 
 

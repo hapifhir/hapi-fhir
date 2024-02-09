@@ -42,7 +42,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(2);
+		assertThat(diff.getParameter()).hasSize(2);
 
 		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.text.div");
@@ -73,7 +73,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(4);
+		assertThat(diff.getParameter()).hasSize(4);
 
 		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.meta.versionId");
@@ -116,7 +116,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(5);
+		assertThat(diff.getParameter()).hasSize(5);
 
 		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.meta.versionId");
@@ -140,7 +140,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 
 		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("insert");
 		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient");
@@ -166,7 +166,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(5);
+		assertThat(diff.getParameter()).hasSize(5);
 
 		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.meta.versionId");
@@ -193,7 +193,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(3);
+		assertThat(diff.getParameter()).hasSize(3);
 
 		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.id");
@@ -222,7 +222,7 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(3);
+		assertThat(diff.getParameter()).hasSize(3);
 
 		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.id");

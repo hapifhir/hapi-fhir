@@ -19,7 +19,7 @@ class ValidationResultTest {
 		List<SingleValidationMessage> validationMessages = getTestValidationErrors(2);
 		ValidationResult vr = new ValidationResult(myFhirContext, validationMessages);
 		String toStringValue = vr.toString();
-		assertThat(toStringValue.contains("Error message #" + 1)).isTrue();
+		assertThat(toStringValue).contains("Error message #" + 1);
 		assertThat(toStringValue.contains("Error message #" + 2)).isFalse();
 	}
 
@@ -29,7 +29,7 @@ class ValidationResultTest {
 			getTestValidationErrors(ValidationResult.ERROR_DISPLAY_LIMIT_DEFAULT * 2);
 		ValidationResult vr = new ValidationResult(myFhirContext, validationMessages);
 		String toStringValue = vr.toString();
-		assertThat(toStringValue.contains("Error message #" + ValidationResult.ERROR_DISPLAY_LIMIT_DEFAULT)).isTrue();
+		assertThat(toStringValue).contains("Error message #" + ValidationResult.ERROR_DISPLAY_LIMIT_DEFAULT);
 		assertThat(toStringValue.contains("Error message #" + (ValidationResult.ERROR_DISPLAY_LIMIT_DEFAULT + 1))).isFalse();
 	}
 
@@ -39,7 +39,7 @@ class ValidationResultTest {
 		ValidationResult vr = new ValidationResult(myFhirContext, validationMessages);
 		vr.setErrorDisplayLimit(8);
 		String toStringValue = vr.toString();
-		assertThat(toStringValue.contains("Error message #" + 8)).isTrue();
+		assertThat(toStringValue).contains("Error message #" + 8);
 		assertThat(toStringValue.contains("Error message #" + 9)).isFalse();
 	}
 

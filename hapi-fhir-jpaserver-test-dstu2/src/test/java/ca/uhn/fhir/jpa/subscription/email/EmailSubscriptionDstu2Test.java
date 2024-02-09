@@ -123,7 +123,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		mySubscriptionTestUtil.waitForQueueToDrain();
 		await().until(() -> mySubscriptionRegistry.get(subscription1.getIdElement().getIdPart()), Matchers.not(Matchers.nullValue()));
 		mySubscriptionTestUtil.setEmailSender(subscription1.getIdElement(), new EmailSenderImpl(withMailService()));
-		assertThat(Arrays.asList(ourGreenMail.getReceivedMessages()).size()).isEqualTo(0);
+		assertThat(Arrays.asList(ourGreenMail.getReceivedMessages())).isEmpty();
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 

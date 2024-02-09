@@ -64,7 +64,7 @@ class ObjectUtilTest {
 
 		Optional<Boolean> result = ObjectUtil.castIfInstanceof(value, Boolean.class);
 
-		assertThat(result.isPresent()).isTrue();
+		assertThat(result).isPresent();
 	}
 
 	@Test

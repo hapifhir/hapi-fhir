@@ -614,7 +614,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
 		ourLog.info("Ids: {}", ids);
-		assertThat(output.getEntry().size()).isEqualTo(6);
+		assertThat(output.getEntry()).hasSize(6);
 		assertThat(output.getLink("next")).isNotNull();
 
 		// Page 2
@@ -625,7 +625,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
 		ourLog.info("Ids: {}", ids);
-		assertThat(output.getEntry().size()).isEqualTo(4);
+		assertThat(output.getEntry()).hasSize(4);
 		assertThat(output.getLink("next")).isNull();
 
 	}
@@ -734,7 +734,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.byUrl(url)
 			.andReturnBundle(Bundle.class)
 			.execute();
-		assertThat(output.getEntry().size()).isEqualTo(0);
+		assertThat(output.getEntry()).isEmpty();
 
 	}
 
@@ -784,7 +784,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		List<String> locationHeader = captureInterceptor.getLastResponse().getHeaders(Constants.HEADER_LOCATION);
-		assertThat(locationHeader.size()).isEqualTo(1);
+		assertThat(locationHeader).hasSize(1);
 		assertThat(locationHeader.get(0)).contains(id.getValue() + "/_history/2");
 	}
 
@@ -921,7 +921,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Basic basic = myClient.read().resource(Basic.class).withId(id).execute();
 		List<Extension> exts = basic.getExtensionsByUrl("http://localhost:1080/hapi-fhir-jpaserver-example/baseDstu2/StructureDefinition/DateID");
-		assertThat(exts.size()).isEqualTo(1);
+		assertThat(exts).hasSize(1);
 	}
 
 	private List<String> searchAndReturnUnqualifiedIdValues(String theUri) throws IOException {
@@ -1109,10 +1109,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.count(10)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(found.getEntry().size()).isEqualTo(10);
+		assertThat(found.getEntry()).hasSize(10);
 
 		found = myClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpr4_testCountParam_01")).count(999).returnBundle(Bundle.class).execute();
-		assertThat(found.getEntry().size()).isEqualTo(50);
+		assertThat(found.getEntry()).hasSize(50);
 
 	}
 
@@ -1366,7 +1366,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.where(Observation.ENCOUNTER.hasId(patientReference.getReference()))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(returnedBundle.getEntry().size()).isEqualTo(0);
+		assertThat(returnedBundle.getEntry()).isEmpty();
 
 		// Search for right type
 		returnedBundle = myClient.search()
@@ -1434,7 +1434,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(parameterPost)) {
 			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
 			String responseString = EntityUtils.toString(response.getEntity(), "UTF-8");
-			assertThat(responseString.contains("Extension contains both a value and nested extensions")).isTrue();
+			assertThat(responseString).contains("Extension contains both a value and nested extensions");
 		}
 
 		// Get procedures
@@ -1628,8 +1628,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(res));
 
-		assertThat(res.getEntry().size()).isEqualTo(3);
-		assertThat(genResourcesOfType(res, Encounter.class).size()).isEqualTo(1);
+		assertThat(res.getEntry()).hasSize(3);
+		assertThat(genResourcesOfType(res, Encounter.class)).hasSize(1);
 		assertThat(genResourcesOfType(res, Encounter.class).get(0).getIdElement().toUnqualifiedVersionless()).isEqualTo(e1id.toUnqualifiedVersionless());
 
 	}
@@ -1654,8 +1654,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(res));
 
-		assertThat(res.getEntry().size()).isEqualTo(1);
-		assertThat(genResourcesOfType(res, Encounter.class).size()).isEqualTo(1);
+		assertThat(res.getEntry()).hasSize(1);
+		assertThat(genResourcesOfType(res, Encounter.class)).hasSize(1);
 		assertThat(genResourcesOfType(res, Encounter.class).get(0).getIdElement().toUnqualifiedVersionless()).isEqualTo(e1id.toUnqualifiedVersionless());
 
 		// Right type
@@ -1667,9 +1667,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(res));
 
-		assertThat(res.getEntry().size()).isEqualTo(2);
-		assertThat(genResourcesOfType(res, Encounter.class).size()).isEqualTo(1);
-		assertThat(genResourcesOfType(res, Group.class).size()).isEqualTo(1);
+		assertThat(res.getEntry()).hasSize(2);
+		assertThat(genResourcesOfType(res, Encounter.class)).hasSize(1);
+		assertThat(genResourcesOfType(res, Group.class)).hasSize(1);
 
 	}
 
@@ -2399,16 +2399,16 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Res ID: {}", id);
 
 		Bundle history = myClient.history().onInstance(id.getValue()).andReturnBundle(Bundle.class).prettyPrint().summaryMode(SummaryEnum.DATA).execute();
-		assertThat(history.getEntry().size()).isEqualTo(3);
+		assertThat(history.getEntry()).hasSize(3);
 		assertThat(history.getEntry().get(0).getResource().getId()).isEqualTo(id.withVersion("3").getValue());
-		assertThat(((Patient) history.getEntry().get(0).getResource()).getName().size()).isEqualTo(1);
+		assertThat(((Patient) history.getEntry().get(0).getResource()).getName()).hasSize(1);
 
 		assertThat(history.getEntry().get(1).getRequest().getMethodElement().getValue()).isEqualTo(HTTPVerb.DELETE);
 		assertThat(history.getEntry().get(1).getRequest().getUrl()).isEqualTo("Patient/" + id.getIdPart() + "/_history/2");
 		assertThat(history.getEntry().get(1).getResource()).isEqualTo(null);
 
 		assertThat(history.getEntry().get(2).getResource().getId()).isEqualTo(id.withVersion("1").getValue());
-		assertThat(((Patient) history.getEntry().get(2).getResource()).getName().size()).isEqualTo(1);
+		assertThat(((Patient) history.getEntry().get(2).getResource()).getName()).hasSize(1);
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(history));
 
@@ -2497,7 +2497,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.next(history)
 			.execute();
 
-		assertThat(history.getEntry().size()).isEqualTo(0);
+		assertThat(history.getEntry()).isEmpty();
 
 	}
 
@@ -2658,8 +2658,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.byUrl("Task?_count=10&_tag=test&status=requested&_include=Task%3Aowner&_sort=status")
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(bundle.getEntry().isEmpty()).isFalse();
-		assertThat(bundle.getEntry().size()).isEqualTo(11);
+		assertThat(bundle.getEntry()).isNotEmpty();
+		assertThat(bundle.getEntry()).hasSize(11);
 		for (BundleEntryComponent resource : bundle.getEntry()) {
 			ids.add(resource.getResource().getId());
 		}
@@ -2671,7 +2671,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				nextUrl = nextLink.getUrl();
 
 				// make sure we're always requesting 10
-				assertThat(nextUrl.contains(String.format("_count=%d", requestedAmount))).isTrue();
+				assertThat(nextUrl).contains(String);
 
 				// get next batch
 				bundle = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
@@ -2693,7 +2693,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		// verify
 		// we should receive all resources and the single organization (repeatedly)
-		assertThat(ids.size()).isEqualTo(total + 1);
+		assertThat(ids).hasSize(total + 1);
 	}
 
 
@@ -2751,7 +2751,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		int count = bundle.getEntry().size();
-		assertThat(bundle.getEntry().isEmpty()).isFalse();
+		assertThat(bundle.getEntry()).isNotEmpty();
 
 		String nextUrl = null;
 		do {
@@ -2760,14 +2760,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				nextUrl = nextLink.getUrl();
 
 				// make sure we're always requesting 10
-				assertThat(nextUrl.contains(String.format("_count=%d", requestedAmount))).isTrue();
+				assertThat(nextUrl).contains(String);
 
 				// get next batch
 				bundle = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 				int received = bundle.getEntry().size();
 
 				// every next result should produce results
-				assertThat(bundle.getEntry().isEmpty()).isFalse();
+				assertThat(bundle.getEntry()).isNotEmpty();
 				count += received;
 			} else {
 				nextUrl = null;
@@ -2815,7 +2815,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		int count = bundle.getEntry().size();
-		assertThat(bundle.getEntry().isEmpty()).isFalse();
+		assertThat(bundle.getEntry()).isNotEmpty();
 
 		String nextUrl = null;
 		do {
@@ -2824,14 +2824,14 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				nextUrl = nextLink.getUrl();
 
 				// make sure we're always requesting 10
-				assertThat(nextUrl.contains(String.format("_count=%d", requestedAmount))).isTrue();
+				assertThat(nextUrl).contains(String);
 
 				// get next batch
 				bundle = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 				int received = bundle.getEntry().size();
 
 				// every next result should produce results
-				assertThat(bundle.getEntry().isEmpty()).isFalse();
+				assertThat(bundle.getEntry()).isNotEmpty();
 				count += received;
 			} else {
 				nextUrl = null;
@@ -2870,7 +2870,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		assertThat(bundle.getEntry().size()).isEqualTo(3);
+		assertThat(bundle.getEntry()).hasSize(3);
 		assertThat(bundle.getEntry().get(0).getResource().getIdElement().getResourceType()).isEqualTo("Patient");
 		assertThat(bundle.getEntry().get(1).getResource().getIdElement().getResourceType()).isEqualTo("Patient");
 		assertThat(bundle.getEntry().get(2).getResource().getIdElement().getResourceType()).isEqualTo("Organization");
@@ -2886,7 +2886,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		myClient.create().resource(p).execute();
 
 		Bundle b = myClient.search().forResource("Patient").include(Patient.INCLUDE_ORGANIZATION).returnBundle(Bundle.class).execute();
-		assertThat(b.getEntry().size()).isEqualTo(1);
+		assertThat(b.getEntry()).hasSize(1);
 	}
 
 	@Test
@@ -2942,17 +2942,17 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id = myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
 
 		Meta meta = myClient.meta().get(Meta.class).fromResource(id).execute();
-		assertThat(meta.getTag().size()).isEqualTo(0);
+		assertThat(meta.getTag()).isEmpty();
 
 		Meta inMeta = new Meta();
 		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
 		meta = myClient.meta().add().onResource(id).meta(inMeta).execute();
-		assertThat(meta.getTag().size()).isEqualTo(1);
+		assertThat(meta.getTag()).hasSize(1);
 
 		inMeta = new Meta();
 		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
 		meta = myClient.meta().delete().onResource(id).meta(inMeta).execute();
-		assertThat(meta.getTag().size()).isEqualTo(0);
+		assertThat(meta.getTag()).isEmpty();
 
 	}
 
@@ -3242,7 +3242,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Bundle bundle = myClient.history().onServer().andReturnBundle(Bundle.class).execute();
 		assertThat(bundle.getTotal()).isEqualTo(1);
-		assertThat(bundle.getEntry().size()).isEqualTo(1);
+		assertThat(bundle.getEntry()).hasSize(1);
 		assertThat(bundle.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(id2.getIdPart());
 	}
 
@@ -3273,7 +3273,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 		ourLog.debug("Result: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		assertThat(bundle.getTotal()).isEqualTo(2);
-		assertThat(bundle.getEntry().size()).isEqualTo(1);
+		assertThat(bundle.getEntry()).hasSize(1);
 		assertThat(bundle.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(id2.getIdPart());
 	}
 
@@ -3335,7 +3335,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType newId = myClient.create().resource(p1).execute().getId();
 
 		Patient actual = myClient.read(Patient.class, new UriDt(newId.getValue()));
-		assertThat(actual.getContained().size()).isEqualTo(1);
+		assertThat(actual.getContained()).hasSize(1);
 
 		Bundle b = myClient
 			.search()
@@ -3344,7 +3344,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.prettyPrint()
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(b.getEntry().size()).isEqualTo(1);
+		assertThat(b.getEntry()).hasSize(1);
 
 	}
 
@@ -3503,7 +3503,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private void assertOneResult(Bundle theResponse) {
-		assertThat(theResponse.getEntry().size()).isEqualTo(1);
+		assertThat(theResponse.getEntry()).hasSize(1);
 	}
 
 	private void printResourceToConsole(IBaseResource theResource) {
@@ -3727,7 +3727,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 		//@formatter:on
 
-		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry()).hasSize(1);
 		assertThat(actual.getEntry().get(0).getFullUrl()).isEqualTo(myServerBase + "/Patient/" + p1Id.getIdPart());
 		assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(p1Id.getIdPart());
 		assertThat(actual.getEntry().get(0).getSearch().getModeElement().getValue()).isEqualTo(SearchEntryMode.MATCH);
@@ -3750,7 +3750,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		//@formatter:on
-		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry()).hasSize(1);
 		assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(p1Id.getIdPart());
 
 	}
@@ -3914,7 +3914,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.where(Patient.ORGANIZATION.hasId(o1id.getIdPart()))
 			.encodedJson().prettyPrint().returnBundle(Bundle.class).execute();
 		//@formatter:on
-		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry()).hasSize(1);
 		assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(p1Id.getIdPart());
 
 		//@formatter:off
@@ -3923,7 +3923,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.where(Patient.ORGANIZATION.hasId(o1id.getValue()))
 			.encodedJson().prettyPrint().returnBundle(Bundle.class).execute();
 		//@formatter:on
-		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry()).hasSize(1);
 		assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(p1Id.getIdPart());
 
 	}
@@ -4117,7 +4117,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		for (int i = 0; i < 100; i++) {
 			Bundle bundle = myClient.search().forResource(Patient.class).where(Patient.NAME.matches().value("testSearchPagingKeepsOldSearches")).count(5).returnBundle(Bundle.class).execute();
 			assertThat(isNotBlank(bundle.getLink("next").getUrl())).isTrue();
-			assertThat(bundle.getEntry().size()).isEqualTo(5);
+			assertThat(bundle.getEntry()).hasSize(5);
 			linkNext.add(bundle.getLink("next").getUrl());
 		}
 
@@ -4125,7 +4125,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		for (String nextLink : linkNext) {
 			ourLog.info("Fetching index {}", index++);
 			Bundle b = myClient.fetchResourceFromUrl(Bundle.class, nextLink);
-			assertThat(b.getEntry().size()).isEqualTo(5);
+			assertThat(b.getEntry()).hasSize(5);
 		}
 	}
 
@@ -4236,19 +4236,19 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String uri = myServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt1|http://unitsofmeasure.org|m");
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids.size()).isEqualTo(3);
+		assertThat(ids).hasSize(3);
 
 		//>= 100cm
 		uri = myServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt100|http://unitsofmeasure.org|cm");
 		ourLog.info("uri = " + uri);
 		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids.size()).isEqualTo(3);
+		assertThat(ids).hasSize(3);
 
 		//>= 10dm
 		uri = myServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt10|http://unitsofmeasure.org|dm");
 		ourLog.info("uri = " + uri);
 		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids.size()).isEqualTo(3);
+		assertThat(ids).hasSize(3);
 	}
 
 	@Test
@@ -4313,12 +4313,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// With non-normalized
 		uri = myServerBase + "/Observation?value-quantity=" + UrlUtil.escapeUrlParam("100|http://unitsofmeasure.org|cm,100|http://foo|cm");
 		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids.size()).isEqualTo(1);
+		assertThat(ids).hasSize(1);
 
 		// With normalized
 		uri = myServerBase + "/Observation?value-quantity=" + UrlUtil.escapeUrlParam("1|http://unitsofmeasure.org|m,100|http://foo|cm");
 		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids.size()).isEqualTo(2);
+		assertThat(ids).hasSize(2);
 	}
 
 	@Test
@@ -4376,7 +4376,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(returnedBundle.getEntry().size()).isEqualTo(1);
+		assertThat(returnedBundle.getEntry()).hasSize(1);
 
 		//-- check use normalized quantity table to search
 		String searchSql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
@@ -4641,7 +4641,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		patient = (Patient) response.getEntry().get(0).getResource();
-		assertThat(patient.getMeta().getTag().size()).isEqualTo(1);
+		assertThat(patient.getMeta().getTag()).hasSize(1);
 	}
 
 	@Test
@@ -4670,7 +4670,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(response.getEntry().size()).isEqualTo(2);
+		assertThat(response.getEntry()).hasSize(2);
 	}
 
 	@Test
@@ -4706,7 +4706,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// search to finish before returning
 		if (TestR4Config.getMaxThreads() > 1) {
 			assertThat(found.getTotalElement().getValue()).isNull();
-			assertThat(found.getEntry().size()).isEqualTo(1);
+			assertThat(found.getEntry()).hasSize(1);
 			assertThat(sw.getMillis()).isLessThan(1000L);
 		} else {
 			assertThat(sw.getMillis()).isGreaterThan(1000L);
@@ -4738,7 +4738,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(sw.getMillis(), not(lessThan(1000L)));
 
 		assertThat(found.getTotalElement().getValue().intValue()).isEqualTo(10);
-		assertThat(found.getEntry().size()).isEqualTo(1);
+		assertThat(found.getEntry()).hasSize(1);
 
 	}
 
@@ -4771,7 +4771,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// search to finish before returning
 		if (TestR4Config.getMaxThreads() > 1) {
 			assertThat(found.getTotalElement().getValue()).isNull();
-			assertThat(found.getEntry().size()).isEqualTo(1);
+			assertThat(found.getEntry()).hasSize(1);
 			assertThat(sw.getMillis()).isLessThan(1500L);
 		} else {
 			assertThat(sw.getMillis()).isGreaterThan(1500L);
@@ -4801,7 +4801,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
 			String respString = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, respString);
-			assertThat(bundle.getEntry().size()).isEqualTo(1);
+			assertThat(bundle.getEntry()).hasSize(1);
 		}
 	}
 
@@ -4825,7 +4825,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(found.getEntry().size()).isEqualTo(2);
+		assertThat(found.getEntry()).hasSize(2);
 		assertThat(found.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
 		assertThat(found.getEntry().get(0).getSearch().getMode()).isEqualTo(SearchEntryMode.MATCH);
 		assertThat(found.getEntry().get(1).getResource().getClass()).isEqualTo(Organization.class);
@@ -4854,7 +4854,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(found.getEntry().size()).isEqualTo(2);
+		assertThat(found.getEntry()).hasSize(2);
 		assertThat(found.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
 		assertThat(found.getEntry().get(0).getSearch().getMode()).isEqualTo(SearchEntryMode.MATCH);
 		assertThat(found.getEntry().get(1).getResource().getClass()).isEqualTo(Organization.class);
@@ -4985,7 +4985,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourLog.debug("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
-		assertThat(found.getEntry().size()).isEqualTo(4);
+		assertThat(found.getEntry()).hasSize(4);
 		assertThat(list.get(0)).isEqualTo(oid3);
 		assertThat(list.get(1)).isEqualTo(oid1);
 		assertThat(list.get(2)).isEqualTo(oid4);
@@ -5081,7 +5081,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourLog.debug("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
-		assertThat(found.getEntry().size()).isEqualTo(4);
+		assertThat(found.getEntry()).hasSize(4);
 		assertThat(list.get(0)).isEqualTo(oid3);
 		assertThat(list.get(1)).isEqualTo(oid1);
 		assertThat(list.get(2)).isEqualTo(oid4);
@@ -5342,7 +5342,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(b.getEntry().size()).isEqualTo(2);
+		assertThat(b.getEntry()).hasSize(2);
 
 	}
 
@@ -5901,7 +5901,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 		//@formatter:on
 
-		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry()).hasSize(1);
 		assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(p1Id.getIdPart());
 
 	}
@@ -6366,20 +6366,20 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String uri = myServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt1|http://unitsofmeasure.org|m");
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids.size()).isEqualTo(2);
+		assertThat(ids).hasSize(2);
 
 
 		//>= 100cm
 		uri = myServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt100|http://unitsofmeasure.org|cm");
 		ourLog.info("uri = " + uri);
 		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids.size()).isEqualTo(2);
+		assertThat(ids).hasSize(2);
 
 		//>= 10dm
 		uri = myServerBase + "/Observation?code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$gt10|http://unitsofmeasure.org|dm");
 		ourLog.info("uri = " + uri);
 		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids.size()).isEqualTo(2);
+		assertThat(ids).hasSize(2);
 	}
 
 	@Test
@@ -6597,7 +6597,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
 
-		assertThat(returnedPatientMetaSource.startsWith(sourceURL)).isTrue();
+		assertThat(returnedPatientMetaSource).startsWith(sourceURL);
 		assertThat(returnedPatientMetaSource.endsWith(requestId)).isFalse();
 	}
 
@@ -6626,7 +6626,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Patient returnedPatient = (Patient) results.getEntry().get(0).getResource();
 		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
 
-		assertThat(results.getEntry().size()).isEqualTo(1);
+		assertThat(results.getEntry()).hasSize(1);
 		assertThat(returnedPatientMetaSource).isEqualTo(expectedSourceUrl);
 	}
 
@@ -6649,7 +6649,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(results.getEntry().size()).isEqualTo(0);
+		assertThat(results.getEntry()).isEmpty();
 	}
 
 	@Test
@@ -6675,7 +6675,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(result.getEntry().size()).isEqualTo(2);
+		assertThat(result.getEntry()).hasSize(2);
 
 		Patient patientV1 = (Patient) result.getEntry().get(1).getResource();
 		assertThat(patientV1.getIdElement().getIdPartAsLong()).isEqualTo(patientId);
@@ -6703,9 +6703,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(timeBetweenUpdates.after(dateV1)).isTrue();
 		assertThat(timeBetweenUpdates.before(dateV2)).isTrue();
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
-		assertThat(resultIds.size()).isEqualTo(2);
-		assertThat(resultIds.contains("Patient/" + patientId + "/_history/1")).isTrue();
-		assertThat(resultIds.contains("Patient/" + patientId + "/_history/2")).isTrue();
+		assertThat(resultIds).hasSize(2);
+		assertThat(resultIds).contains("Patient/" + patientId + "/_history/1");
+		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
 	}
 
 	private void verifyAtBehaviourWhenQueriedDateAfterTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
@@ -6713,8 +6713,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(timeBetweenUpdates.after(dateV1)).isTrue();
 		assertThat(timeBetweenUpdates.after(dateV2)).isTrue();
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
-		assertThat(resultIds.size()).isEqualTo(1);
-		assertThat(resultIds.contains("Patient/" + patientId + "/_history/2")).isTrue();
+		assertThat(resultIds).hasSize(1);
+		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
 	}
 
 	private void verifyAtBehaviourWhenQueriedDateBeforeTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
@@ -6722,9 +6722,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(timeBetweenUpdates.before(dateV1)).isTrue();
 		assertThat(timeBetweenUpdates.before(dateV2)).isTrue();
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
-		assertThat(resultIds.size()).isEqualTo(2);
-		assertThat(resultIds.contains("Patient/" + patientId + "/_history/1")).isTrue();
-		assertThat(resultIds.contains("Patient/" + patientId + "/_history/2")).isTrue();
+		assertThat(resultIds).hasSize(2);
+		assertThat(resultIds).contains("Patient/" + patientId + "/_history/1");
+		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
 	}
 
 	private void verifySinceBehaviourWhenQueriedDateDuringTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
@@ -6732,8 +6732,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(timeBetweenUpdates.after(dateV1)).isTrue();
 		assertThat(timeBetweenUpdates.before(dateV2)).isTrue();
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates));
-		assertThat(resultIds.size()).isEqualTo(1);
-		assertThat(resultIds.contains("Patient/" + patientId + "/_history/2")).isTrue();
+		assertThat(resultIds).hasSize(1);
+		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
 	}
 
 	private void verifySinceBehaviourWhenQueriedDateAfterTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
@@ -6741,7 +6741,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(timeBetweenUpdates.after(dateV1)).isTrue();
 		assertThat(timeBetweenUpdates.after(dateV2)).isTrue();
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates));
-		assertThat(resultIds.size()).isEqualTo(0);
+		assertThat(resultIds).isEmpty();
 	}
 
 	private void verifySinceBehaviourWhenQueriedDateBeforeTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
@@ -6749,9 +6749,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(timeBetweenUpdates.before(dateV1)).isTrue();
 		assertThat(timeBetweenUpdates.before(dateV2)).isTrue();
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates));
-		assertThat(resultIds.size()).isEqualTo(2);
-		assertThat(resultIds.contains("Patient/" + patientId + "/_history/1")).isTrue();
-		assertThat(resultIds.contains("Patient/" + patientId + "/_history/2")).isTrue();
+		assertThat(resultIds).hasSize(2);
+		assertThat(resultIds).contains("Patient/" + patientId + "/_history/1");
+		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
 	}
 
 
@@ -6817,7 +6817,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.search(new SearchParameterMap(), mySrd)
 				.getAllResources();
 
-			assertThat(orgs.isEmpty()).isTrue();
+			assertThat(orgs).isEmpty();
 		}
 
 		boolean isEnforceRefOnWrite = myStorageSettings.isEnforceReferentialIntegrityOnWrite();
@@ -6841,7 +6841,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 					.search(new SearchParameterMap(), mySrd)
 					.getAllResources();
 
-				assertThat(orgs.isEmpty()).isTrue();
+				assertThat(orgs).isEmpty();
 			}
 
 			// only if all 3 are true do we expect this to fail
@@ -6881,8 +6881,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Patient returnedPatient = (Patient) results.getEntry().get(0).getResource();
 		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
 
-		assertThat(results.getEntry().size()).isEqualTo(1);
-		assertThat(returnedPatientMetaSource.startsWith(sourceUri)).isTrue();
+		assertThat(results.getEntry()).hasSize(1);
+		assertThat(returnedPatientMetaSource).startsWith(sourceUri);
 		assertThat(returnedPatientMetaSource.endsWith(requestId)).isFalse();
 	}
 
@@ -6910,7 +6910,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Patient returnedPatient = (Patient) results.getEntry().get(0).getResource();
 		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
 
-		assertThat(results.getEntry().size()).isEqualTo(1);
+		assertThat(results.getEntry()).hasSize(1);
 		assertThat(returnedPatientMetaSource).isEqualTo(expectedSourceUrl);
 	}
 
@@ -6935,7 +6935,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(results.getEntry().size()).isEqualTo(1);
+		assertThat(results.getEntry()).hasSize(1);
 
 		Patient returnedPatient = (Patient) results.getEntry().get(0).getResource();
 		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
@@ -6960,7 +6960,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(results.getEntry().size()).isEqualTo(0);
+		assertThat(results.getEntry()).isEmpty();
 	}
 
 	@Test
@@ -6991,22 +6991,22 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		OperationOutcome oo = (OperationOutcome) responseBundle.getEntry().get(0).getResponse().getOutcome();
 		assertThat(oo.getIssueFirstRep().getDetails().getCodingFirstRep().getCode()).isEqualTo(StorageResponseCodeEnum.SUCCESSFUL_CREATE.name());
 		assertThat(oo.getIssueFirstRep().getDetails().getCodingFirstRep().getSystem()).isEqualTo(StorageResponseCodeEnum.SYSTEM);
-		assertThat(responseBundle.getEntry().size()).isEqualTo(1);
+		assertThat(responseBundle.getEntry()).hasSize(1);
 
 		IdType id = new IdType(responseBundle.getEntry().get(0).getResponse().getLocationElement());
 		ConceptMap savedConceptMap = (ConceptMap) myClient.read().resource("ConceptMap").withId(id).execute();
 		assertThat(savedConceptMap.getUrl()).isEqualTo(conceptMap.getUrl());
 		assertThat(savedConceptMap.getStatus()).isEqualTo(conceptMap.getStatus());
-		assertThat(savedConceptMap.getGroup().size()).isEqualTo(1);
+		assertThat(savedConceptMap.getGroup()).hasSize(1);
 
 		ConceptMap.ConceptMapGroupComponent savedGroup = savedConceptMap.getGroup().get(0);
 		assertThat(savedGroup.getSource()).isEqualTo(group.getSource());
 		assertThat(savedGroup.getTarget()).isEqualTo(group.getTarget());
-		assertThat(savedGroup.getElement().size()).isEqualTo(1);
+		assertThat(savedGroup.getElement()).hasSize(1);
 
 		ConceptMap.SourceElementComponent savedSource = savedGroup.getElement().get(0);
 		assertThat(savedSource.getCode()).isEqualTo(source.getCode());
-		assertThat(source.getTarget().size()).isEqualTo(1);
+		assertThat(source.getTarget()).hasSize(1);
 
 		ConceptMap.TargetElementComponent savedTarget = savedSource.getTarget().get(0);
 		assertThat(savedTarget.getCode()).isEqualTo(target.getCode());

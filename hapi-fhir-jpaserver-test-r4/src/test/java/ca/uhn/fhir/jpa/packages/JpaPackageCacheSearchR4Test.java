@@ -64,7 +64,7 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
 		assertThat(search.getTotal()).isEqualTo(2);
 
-		assertThat(search.getObjects().size()).isEqualTo(2);
+		assertThat(search.getObjects()).hasSize(2);
 		assertThat(search.getObjects().get(0).getPackage().getName()).isEqualTo("hl7.fhir.uv.shorthand");
 		assertThat(search.getObjects().get(0).getPackage().getDescription()).isEqualTo("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)");
 		assertThat(search.getObjects().get(0).getPackage().getVersion()).isEqualTo("0.12.0");
@@ -120,7 +120,7 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
 		assertThat(search.getTotal()).isEqualTo(1);
-		assertThat(search.getObjects().size()).isEqualTo(1);
+		assertThat(search.getObjects()).hasSize(1);
 		assertThat(search.getObjects().get(0).getPackage().getName()).isEqualTo("hl7.fhir.uv.shorthand");
 		assertThat(search.getObjects().get(0).getPackage().getVersion()).isEqualTo("0.12.0");
 		assertThat(search.getObjects().get(0).getPackage().getDescription()).isEqualTo("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)");
@@ -133,7 +133,7 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
 		assertThat(search.getTotal()).isEqualTo(0);
-		assertThat(search.getObjects().size()).isEqualTo(0);
+		assertThat(search.getObjects()).isEmpty();
 
 	}
 
@@ -190,7 +190,7 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
 		assertThat(search.getTotal()).isEqualTo(0);
-		assertThat(search.getObjects().size()).isEqualTo(0);
+		assertThat(search.getObjects()).isEmpty();
 
 	}
 
@@ -225,7 +225,7 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
 		assertThat(search.getTotal()).isEqualTo(1);
-		assertThat(search.getObjects().size()).isEqualTo(1);
+		assertThat(search.getObjects()).hasSize(1);
 		assertThat(search.getObjects().get(0).getPackage().getName()).isEqualTo("hl7.fhir.uv.shorthand");
 		assertThat(search.getObjects().get(0).getPackage().getVersion()).isEqualTo("0.12.0");
 		assertThat(search.getObjects().get(0).getPackage().getDescription()).isEqualTo("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)");
@@ -238,7 +238,7 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
 		assertThat(search.getTotal()).isEqualTo(0);
-		assertThat(search.getObjects().size()).isEqualTo(0);
+		assertThat(search.getObjects()).isEmpty();
 
 	}
 

@@ -7,8 +7,8 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 class AddressHelperTest {
 
@@ -20,11 +20,11 @@ class AddressHelperTest {
 		name.setFamily("Test");
 
 		final AddressHelper helper = new AddressHelper(null, name);
-		assertThrows(IllegalStateException.class, () -> {
+		assertThatExceptionOfType(IllegalStateException.class).isThrownBy(() -> {
 			helper.getCountry();
 		});
 
-		assertThrows(IllegalArgumentException.class, () -> {
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 			new AddressHelper(null, new StringType("this will blow up"));
 		});
 	}
@@ -35,7 +35,7 @@ class AddressHelperTest {
 		a.setCountry("Test");
 
 		AddressHelper helper = new AddressHelper(null, a);
-		assertEquals("Test", helper.getCountry());
+		assertThat(helper.getCountry()).isEqualTo("Test");
 	}
 
 	@Test
@@ -45,11 +45,11 @@ class AddressHelperTest {
 
 		AddressHelper helper = new AddressHelper(null, a);
 		helper.setDelimiter("; ");
-		assertEquals("Hammer", helper.getParts());
+		assertThat(helper.getParts()).isEqualTo("Hammer");
 
 		a.addLine("Street");
 		a.setPostalCode("L9C6L6");
-		assertEquals("Hammer; L9C6L6", helper.getParts());
+		assertThat(helper.getParts()).isEqualTo("Hammer; L9C6L6");
 	}
 
 	@Test
@@ -59,10 +59,10 @@ class AddressHelperTest {
 		a.setCity("Hammer");
 
 		AddressHelper helper = new AddressHelper(null, a);
-		assertEquals("Unit 10", helper.getLine());
+		assertThat(helper.getLine()).isEqualTo("Unit 10");
 
 		a.addLine("100 Main St.");
-		assertEquals("Unit 10, 100 Main St.", helper.getLine());
+		assertThat(helper.getLine()).isEqualTo("Unit 10, 100 Main St.");
 	}
 
 	@Test
@@ -75,7 +75,7 @@ class AddressHelperTest {
 		helper.setState("State");
 		helper.setCountry("Country");
 		helper.setText("Some Text Too");
-		assertEquals("Some Text Too, Line 1, Line 2, Hammer, State, Country", helper.toString());
+		assertThat(helper.toString()).isEqualTo("Some Text Too, Line 1, Line 2, Hammer, State, Country");
 	}
 
 }

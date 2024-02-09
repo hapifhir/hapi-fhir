@@ -207,7 +207,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 				@Hook(Pointcut.MDM_POST_UPDATE_LINK)
 				void onUpdate(RequestDetails theDetails, MdmLinkEvent theEvent) {
 					called.getAndSet(true);
-					assertThat(theEvent.getMdmLinks().size()).isEqualTo(1);
+					assertThat(theEvent.getMdmLinks()).hasSize(1);
 					MdmLinkJson link = theEvent.getMdmLinks().get(0);
 					assertThat(link.getMatchResult()).isEqualTo(toSave);
 					assertThat(link.getSourceId()).isEqualTo("Patient/" + p1.getIdPart());
@@ -241,7 +241,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 				@Hook(Pointcut.MDM_POST_CREATE_LINK)
 				void onCreate(RequestDetails theDetails, MdmLinkEvent theEvent) {
 					called.getAndSet(true);
-					assertThat(theEvent.getMdmLinks().size()).isEqualTo(1);
+					assertThat(theEvent.getMdmLinks()).hasSize(1);
 					MdmLinkJson link = theEvent.getMdmLinks().get(0);
 					assertThat(link.getMatchResult()).isEqualTo(match);
 					assertThat(link.getSourceId()).isEqualTo("Patient/" + patient.getIdPart());
@@ -285,7 +285,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 				void call(RequestDetails theRequestDetails, MdmLinkEvent theEvent) {
 					called.getAndSet(true);
 
-					assertThat(theEvent.getMdmLinks().size()).isEqualTo(1);
+					assertThat(theEvent.getMdmLinks()).hasSize(1);
 					MdmLinkJson link = theEvent.getMdmLinks().get(0);
 					assertThat(link.getSourceId()).isEqualTo("Patient/" + gp2.getIdPart());
 					assertThat(link.getGoldenResourceId()).isEqualTo("Patient/" + gp1.getIdPart());
@@ -339,11 +339,10 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 
 					assertThat(theEvent.getResourceTypes()).isNotNull();
 					if (isNotBlank(theResourceTypes)) {
-						assertThat(theEvent.getResourceTypes().size()).isEqualTo(resourceTypes.size());
+						assertThat(theEvent.getResourceTypes()).hasSize(resourceTypes.size());
 
 						for (IPrimitiveType<String> resourceName : resourceTypes) {
-							assertThat(theEvent.getResourceTypes()
-								.contains(resourceName.getValueAsString())).isTrue();
+							assertThat(theEvent.getResourceTypes()).contains(resourceName);
 						}
 					} else {
 						// null or empty resource types means all
@@ -571,15 +570,15 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 					List<String> sids = theEvent.getSourceIds();
 
 					if (theParametersToSend == LinkHistoryParameters.SOURCE_IDS) {
-						assertThat(gids.isEmpty()).isTrue();
+						assertThat(gids).isEmpty();
 					} else if (theParametersToSend == LinkHistoryParameters.GOLDEN_IDS) {
-						assertThat(sids.isEmpty()).isTrue();
+						assertThat(sids).isEmpty();
 					} else {
 						assertThat(sids.isEmpty() && gids.isEmpty()).isFalse();
 					}
 
-					assertThat(history.isEmpty()).isFalse();
-					assertThat(history.size()).isEqualTo(2);
+					assertThat(history).isNotEmpty();
+					assertThat(history).hasSize(2);
 				}
 			};
 			myInterceptors.add(interceptor);

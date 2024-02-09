@@ -20,8 +20,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DeleteDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
@@ -58,10 +57,10 @@ public class DeleteDstu2Test {
 
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertEquals(204, status.getStatusLine().getStatusCode());
-		
-		assertNull(ourLastIdParam);
-		assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(204);
+
+		assertThat(ourLastIdParam).isNull();
+		assertThat(ourLastConditionalUrl).isEqualTo("Patient?identifier=system%7C001");
 	}
 
 	@Test
@@ -73,11 +72,11 @@ public class DeleteDstu2Test {
 
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertEquals(204, status.getStatusLine().getStatusCode());
-		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
-		
-		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
-		assertNull(ourLastConditionalUrl);
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(204);
+		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE)).isNull();
+
+		assertThat(ourLastIdParam.toUnqualified().getValue()).isEqualTo("Patient/2");
+		assertThat(ourLastConditionalUrl).isNull();
 	}
 
 

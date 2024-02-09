@@ -167,7 +167,7 @@ public class MdmMetricSvcJpaIT extends BaseMdmR4Test implements IMdmMetricSvcTes
 			return myObjectMapper.writeValueAsString(theMetrics);
 		} catch (JsonProcessingException ex) {
 			// we've failed anyway - we might as well display the exception
-			org.assertj.core.api.Assertions.fail("", ex);
+			fail("", ex);
 			return "NOT PARSEABLE!";
 		}
 	}

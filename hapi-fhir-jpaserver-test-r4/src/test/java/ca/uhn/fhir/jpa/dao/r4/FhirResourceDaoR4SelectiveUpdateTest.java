@@ -50,7 +50,7 @@ public class FhirResourceDaoR4SelectiveUpdateTest extends BaseJpaR4Test {
 			// Read it back
 			p = myPatientDao.read(id);
 			assertThat(p.getActive()).isEqualTo(false);
-			assertThat(p.getIdentifier().size()).isEqualTo(2);
+			assertThat(p.getIdentifier()).hasSize(2);
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);

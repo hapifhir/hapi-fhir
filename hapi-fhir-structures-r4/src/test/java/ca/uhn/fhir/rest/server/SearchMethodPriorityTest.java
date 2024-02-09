@@ -19,7 +19,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SearchMethodPriorityTest {
 
@@ -52,7 +52,7 @@ public class SearchMethodPriorityTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("findDateRangeParam", myLastMethod);
+		assertThat(myLastMethod).isEqualTo("findDateRangeParam");
 	}
 
 	@Test
@@ -66,7 +66,7 @@ public class SearchMethodPriorityTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("findDateParam", myLastMethod);
+		assertThat(myLastMethod).isEqualTo("findDateParam");
 	}
 
 	@Test
@@ -79,7 +79,7 @@ public class SearchMethodPriorityTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("find", myLastMethod);
+		assertThat(myLastMethod).isEqualTo("find");
 	}
 
 	@Test
@@ -94,7 +94,7 @@ public class SearchMethodPriorityTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("findStringAndListParam", myLastMethod);
+		assertThat(myLastMethod).isEqualTo("findStringAndListParam");
 	}
 
 	@Test
@@ -108,7 +108,7 @@ public class SearchMethodPriorityTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("findString", myLastMethod);
+		assertThat(myLastMethod).isEqualTo("findString");
 	}
 
 	@Test
@@ -121,7 +121,7 @@ public class SearchMethodPriorityTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("find", myLastMethod);
+		assertThat(myLastMethod).isEqualTo("find");
 	}
 
 	@Test
@@ -134,7 +134,7 @@ public class SearchMethodPriorityTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("find", myLastMethod);
+		assertThat(myLastMethod).isEqualTo("find");
 	}
 
 	public class DateStrengthsWithRequiredResourceProvider implements IResourceProvider {

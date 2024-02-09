@@ -343,7 +343,7 @@ public class InMemoryResourceMatcherR5Test {
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=gt" + BaseDateTimeDt.NOW_DATE_CONSTANT, futureObservation, searchParams, newRequest());
 		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
-		assertThat(searchParams.myDateParams.size()).isEqualTo(1);
+		assertThat(searchParams.myDateParams).hasSize(1);
 		ResourceIndexedSearchParamDate searchParamDate = searchParams.myDateParams.iterator().next();
 		assertThat(result.matched()).as("Expected resource data " + futureObservation.getEffectiveDateTimeType().getValueAsString() +
 				" and resource indexed searchparam date " + searchParamDate +

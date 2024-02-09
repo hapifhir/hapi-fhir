@@ -34,7 +34,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchReturningProfiledResourceDstu2Test {
 
@@ -68,7 +67,7 @@ public class SearchReturningProfiledResourceDstu2Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/");
 		Bundle bundle = client.search().forResource(PatientProfileDstu2.class).returnBundle(Bundle.class).execute();
 
-		assertEquals(PatientProfileDstu2.class, bundle.getEntry().get(0).getResource().getClass());
+		assertThat(bundle.getEntry().get(0).getResource().getClass()).isEqualTo(PatientProfileDstu2.class);
 	}
 
 	@Test
@@ -77,7 +76,7 @@ public class SearchReturningProfiledResourceDstu2Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/");
 		Bundle bundle = client.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
 
-		assertEquals(PatientProfileDstu2.class, bundle.getEntry().get(0).getResource().getClass());
+		assertThat(bundle.getEntry().get(0).getResource().getClass()).isEqualTo(PatientProfileDstu2.class);
 	}
 
 	@Test
@@ -85,7 +84,7 @@ public class SearchReturningProfiledResourceDstu2Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/");
 		Bundle bundle = client.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
 
-		assertEquals(Patient.class, bundle.getEntry().get(0).getResource().getClass());
+		assertThat(bundle.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
 	}
 
 	@Test

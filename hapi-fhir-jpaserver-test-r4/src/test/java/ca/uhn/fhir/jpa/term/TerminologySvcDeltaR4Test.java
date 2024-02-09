@@ -54,7 +54,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		createNotPresentCodeSystem();
 		ValueSet vs;
 		vs = expandNotPresentCodeSystem();
-		assertThat(vs.getExpansion().getContains().size()).isEqualTo(0);
+		assertThat(vs.getExpansion().getContains()).isEmpty();
 
 		CustomTerminologySet delta = new CustomTerminologySet();
 		delta.addRootConcept("RootA", "Root A");
@@ -82,7 +82,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		createNotPresentCodeSystem();
 		ValueSet vs;
 		vs = expandNotPresentCodeSystem();
-		assertThat(vs.getExpansion().getContains().size()).isEqualTo(0);
+		assertThat(vs.getExpansion().getContains()).isEmpty();
 
 		CustomTerminologySet delta = new CustomTerminologySet();
 
@@ -381,7 +381,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		createNotPresentCodeSystem();
 		ValueSet vs;
 		vs = expandNotPresentCodeSystem();
-		assertThat(vs.getExpansion().getContains().size()).isEqualTo(0);
+		assertThat(vs.getExpansion().getContains()).isEmpty();
 
 		CustomTerminologySet delta = new CustomTerminologySet();
 

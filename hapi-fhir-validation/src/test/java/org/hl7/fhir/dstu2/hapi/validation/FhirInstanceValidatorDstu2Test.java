@@ -34,8 +34,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInlineMocks {
 
@@ -64,7 +62,7 @@ public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInline
 		ValidationResult result = val.validateWithResult(input);
 
 		ourLog.debug(ourCtxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 	}
 
 	@Test
@@ -84,7 +82,7 @@ public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInline
 		String encoded = ourCtxHl7OrgDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(encoded);
 
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 	}
 
 	/**
@@ -112,7 +110,7 @@ public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInline
 		String encoded = ourCtxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(encoded);
 
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 	}
 
 	@Test
@@ -129,7 +127,7 @@ public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInline
 		String encoded = ourCtxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(encoded);
 
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 	}
 
 	@Test
@@ -148,7 +146,7 @@ public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInline
 		ValidationResult result = val.validateWithResult(input);
 
 		ourLog.debug(ourCtxHl7OrgDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 	}
 
 	@Test
@@ -167,7 +165,7 @@ public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInline
 		ValidationResult result = val.validateWithResult(input);
 
 		ourLog.debug(ourCtxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 	}
 
 	@Test
@@ -185,7 +183,7 @@ public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInline
 		String encoded = ourCtxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(encoded);
 
-		assertFalse(result.isSuccessful());
+		assertThat(result.isSuccessful()).isFalse();
 		assertThat(encoded).contains("A parameter must have a value or a resource, but not both");
 	}
 
@@ -208,7 +206,7 @@ public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInline
 		String encoded = ourCtxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(encoded);
 
-		assertFalse(result.isSuccessful());
+		assertThat(result.isSuccessful()).isFalse();
 		assertThat(encoded).contains("A parameter must have a value or a resource, but not both");
 	}
 
@@ -231,7 +229,7 @@ public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInline
 		String encoded = ourCtxHl7OrgDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(encoded);
 
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 		assertThat(encoded).doesNotContain("A parameter must have a value or a resource, but not both");
 	}
 
@@ -251,7 +249,7 @@ public class FhirInstanceValidatorDstu2Test extends BaseValidationTestWithInline
 		String encoded = ourCtxHl7OrgDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(encoded);
 
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 	}
 	
 

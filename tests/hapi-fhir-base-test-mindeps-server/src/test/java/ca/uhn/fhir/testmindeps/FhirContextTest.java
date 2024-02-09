@@ -1,6 +1,6 @@
 package ca.uhn.fhir.testmindeps;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +15,7 @@ public class FhirContextTest {
 
 		FhirContext ctx = FhirContext.forDstu2();
 		RuntimeResourceDefinition def = ctx.getResourceDefinition("Patient");
-		assertEquals(Patient.class, def.getImplementingClass());
+		assertThat(def.getImplementingClass()).isEqualTo(Patient.class);
 	}
 
 }

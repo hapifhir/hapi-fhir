@@ -33,7 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -128,8 +128,8 @@ public abstract class BaseGenericClientR4Test {
 	}
 
 	protected void validateUserAgent(ArgumentCaptor<HttpUriRequest> capt) {
-		assertEquals(1, capt.getAllValues().get(0).getHeaders("User-Agent").length);
-		assertEquals(expectedUserAgent(), capt.getAllValues().get(0).getHeaders("User-Agent")[0].getValue());
+		assertThat(capt.getAllValues().get(0).getHeaders("User-Agent").length).isEqualTo(1);
+		assertThat(capt.getAllValues().get(0).getHeaders("User-Agent")[0].getValue()).isEqualTo(expectedUserAgent());
 	}
 
 	@AfterAll

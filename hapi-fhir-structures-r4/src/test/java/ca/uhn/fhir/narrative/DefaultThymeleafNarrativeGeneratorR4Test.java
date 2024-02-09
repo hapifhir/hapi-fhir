@@ -30,7 +30,6 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class DefaultThymeleafNarrativeGeneratorR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorR4Test.class);
@@ -231,8 +230,8 @@ public class DefaultThymeleafNarrativeGeneratorR4Test {
 		myGen.populateResourceNarrative(myCtx, mp);
 		String output = mp.getText().getDiv().getValueAsString();
 
-		assertTrue(output.contains("ciprofloaxin"), "Expected medication name of ciprofloaxin within narrative: " + output);
-		assertTrue(output.contains("ACTIVE"), "Expected string status of ACTIVE within narrative: " + output);
+		assertThat(output.contains("ciprofloaxin")).as("Expected medication name of ciprofloaxin within narrative: " + output).isTrue();
+		assertThat(output.contains("ACTIVE")).as("Expected string status of ACTIVE within narrative: " + output).isTrue();
 
 	}
 

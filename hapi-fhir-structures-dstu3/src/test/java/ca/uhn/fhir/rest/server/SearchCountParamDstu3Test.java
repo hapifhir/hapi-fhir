@@ -26,7 +26,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchCountParamDstu3Test {
 
@@ -58,9 +57,9 @@ public class SearchCountParamDstu3Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("search", ourLastMethod);
-			assertEquals(Integer.valueOf(2), ourLastParam);
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertThat(ourLastMethod).isEqualTo("search");
+			assertThat(ourLastParam).isEqualTo(Integer.valueOf(2));
 
 			assertThat(responseContent, stringContainsInOrder(
 				"<link>",
@@ -84,9 +83,9 @@ public class SearchCountParamDstu3Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("search", ourLastMethod);
-			assertEquals(Integer.valueOf(0), ourLastParam);
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertThat(ourLastMethod).isEqualTo("search");
+			assertThat(ourLastParam).isEqualTo(Integer.valueOf(0));
 
 			assertThat(responseContent, stringContainsInOrder(
 				"<Bundle",
@@ -108,9 +107,9 @@ public class SearchCountParamDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("searchWithNoCountParam", ourLastMethod);
-			assertEquals(null, ourLastParam);
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertThat(ourLastMethod).isEqualTo("searchWithNoCountParam");
+			assertThat(ourLastParam).isEqualTo(null);
 
 			assertThat(responseContent, stringContainsInOrder(
 				"<link>",

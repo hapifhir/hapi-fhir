@@ -155,12 +155,12 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 			interceptor.getFinishedLatch().await(10, TimeUnit.SECONDS);
 			ResourceDeliveryMessage lastDelivery = interceptor.getLastDelivery();
-			assertThat(lastDelivery.getAttribute("ATTR1").isPresent()).isTrue();
-			assertThat(lastDelivery.getAttribute("ATTR2").isPresent()).isTrue();
-			assertThat(lastDelivery.getAttribute("ATTRBLANK").isPresent()).isTrue();
-			assertThat(lastDelivery.getAttribute("ATTR1").get()).isEqualTo("Some value 1");
-			assertThat(lastDelivery.getAttribute("ATTR2").get()).isEqualTo("Some value 2");
-			assertThat(lastDelivery.getAttribute("ATTRBLANK").get()).isEqualTo("");
+			assertThat(lastDelivery.getAttribute("ATTR1")).isPresent();
+			assertThat(lastDelivery.getAttribute("ATTR2")).isPresent();
+			assertThat(lastDelivery.getAttribute("ATTRBLANK")).isPresent();
+			assertThat(lastDelivery.getAttribute("ATTR1")).contains("Some value 1");
+			assertThat(lastDelivery.getAttribute("ATTR2")).contains("Some value 2");
+			assertThat(lastDelivery.getAttribute("ATTRBLANK")).contains("");
 			assertThat(lastDelivery.getAttribute("ATTRNONEXISTENT").isPresent()).isEqualTo(false);
 
 		} finally {

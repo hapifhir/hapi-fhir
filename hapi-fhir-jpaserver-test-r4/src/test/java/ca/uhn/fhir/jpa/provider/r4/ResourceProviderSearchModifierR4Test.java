@@ -77,7 +77,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		String uri = myServerBase + "/Observation?code:not=2345-3";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
-		assertThat(ids.size()).isEqualTo(9);
+		assertThat(ids).hasSize(9);
 		assertThat(ids.get(0)).isEqualTo(obsList.get(0).toString());
 		assertThat(ids.get(1)).isEqualTo(obsList.get(1).toString());
 		assertThat(ids.get(2)).isEqualTo(obsList.get(2).toString());
@@ -96,11 +96,11 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		String uri = myServerBase + "/Observation?date=eb2023-02-02";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
-		assertThat(ids.size()).isEqualTo(10);
+		assertThat(ids).hasSize(10);
 
 		uri = myServerBase + "/Observation?date=sa2023-01-31";
 		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids.size()).isEqualTo(10);
+		assertThat(ids).hasSize(10);
 	}
 
 	@Test
@@ -111,7 +111,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		String uri = myServerBase + "/Observation?code:not=2345-3&code:not=2345-7&code:not=2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
-		assertThat(ids.size()).isEqualTo(7);
+		assertThat(ids).hasSize(7);
 		assertThat(ids.get(0)).isEqualTo(obsList.get(0).toString());
 		assertThat(ids.get(1)).isEqualTo(obsList.get(1).toString());
 		assertThat(ids.get(2)).isEqualTo(obsList.get(2).toString());
@@ -131,7 +131,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		String uri = myServerBase + "/Observation?code:not=2345-3&code=2345-7&code:not=2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
-		assertThat(ids.size()).isEqualTo(1);
+		assertThat(ids).hasSize(1);
 		assertThat(ids.get(0)).isEqualTo(obsList.get(7).toString());
 	}
 	
@@ -143,7 +143,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		String uri = myServerBase + "/Observation?code:not=2345-3,2345-7,2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
-		assertThat(ids.size()).isEqualTo(7);
+		assertThat(ids).hasSize(7);
 		assertThat(ids.get(0)).isEqualTo(obsList.get(0).toString());
 		assertThat(ids.get(1)).isEqualTo(obsList.get(1).toString());
 		assertThat(ids.get(2)).isEqualTo(obsList.get(2).toString());
@@ -161,7 +161,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		String uri = myServerBase + "/Observation?code:not=2345-3";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
-		assertThat(ids.size()).isEqualTo(8);
+		assertThat(ids).hasSize(8);
 		assertThat(ids.get(0)).isEqualTo(obsList.get(0).toString());
 		assertThat(ids.get(1)).isEqualTo(obsList.get(1).toString());
 		assertThat(ids.get(2)).isEqualTo(obsList.get(4).toString());
@@ -180,7 +180,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		String uri = myServerBase + "/Observation?code:not=2345-3&code:not=2345-4";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
-		assertThat(ids.size()).isEqualTo(7);
+		assertThat(ids).hasSize(7);
 		assertThat(ids.get(0)).isEqualTo(obsList.get(0).toString());
 		assertThat(ids.get(1)).isEqualTo(obsList.get(1).toString());
 		assertThat(ids.get(2)).isEqualTo(obsList.get(5).toString());
@@ -198,7 +198,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		String uri = myServerBase + "/Observation?code:not=2345-3&code=2345-7&code:not=2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
-		assertThat(ids.size()).isEqualTo(2);
+		assertThat(ids).hasSize(2);
 		assertThat(ids.get(0)).isEqualTo(obsList.get(6).toString());
 		assertThat(ids.get(1)).isEqualTo(obsList.get(7).toString());
 	}
@@ -211,7 +211,7 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		String uri = myServerBase + "/Observation?code:not=2345-3,2345-7,2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
-		assertThat(ids.size()).isEqualTo(4);
+		assertThat(ids).hasSize(4);
 		assertThat(ids.get(0)).isEqualTo(obsList.get(0).toString());
 		assertThat(ids.get(1)).isEqualTo(obsList.get(1).toString());
 		assertThat(ids.get(2)).isEqualTo(obsList.get(4).toString());

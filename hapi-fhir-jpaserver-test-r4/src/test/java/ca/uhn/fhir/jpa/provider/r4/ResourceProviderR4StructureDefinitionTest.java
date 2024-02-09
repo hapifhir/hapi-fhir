@@ -35,7 +35,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 			.execute();
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 		assertThat(response.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo("dhtest7");
 	}
 
@@ -50,7 +50,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 			.withParameter(Parameters.class, "definition", sd)
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertThat(response.getSnapshot().getElement().size()).isEqualTo(54);
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 	@Test
@@ -65,7 +65,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 			.withNoParameters(Parameters.class)
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertThat(response.getSnapshot().getElement().size()).isEqualTo(54);
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 	@Test
@@ -80,7 +80,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 			.withParameter(Parameters.class, "url", new StringType("http://example.com/fhir/StructureDefinition/patient-1a-extensions"))
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertThat(response.getSnapshot().getElement().size()).isEqualTo(54);
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 	@Test

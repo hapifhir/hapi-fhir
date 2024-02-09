@@ -30,8 +30,7 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -69,19 +68,19 @@ public class IncludedResourceStitchingClientTest {
 		    .returnBundle(Bundle.class)
 		    .execute();
 
-		assertEquals(HttpGet.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
 		HttpGet get = (HttpGet) capt.getValue();
-		assertEquals("http://foo/Patient", get.getURI().toString());
-		
-		assertEquals(3, bundle.getEntry().size());
+		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient");
+
+		assertThat(bundle.getEntry()).hasSize(3);
 		
 		Patient p = (Patient) bundle.getEntry().get(0).getResource();
 		List<Extension> exts = p.getExtensionsByUrl("http://foo");
-		assertEquals(1,exts.size());
+		assertThat(exts).hasSize(1);
 		Extension ext = exts.get(0);
 		Reference ref = (Reference) ext.getValue();
-		assertEquals("Organization/o1", ref.getReferenceElement().getValue());
-		assertNotNull(ref.getResource());
+		assertThat(ref.getReferenceElement().getValue()).isEqualTo("Organization/o1");
+		assertThat(ref.getResource()).isNotNull();
 		
 	}
 
@@ -97,20 +96,20 @@ public class IncludedResourceStitchingClientTest {
 		IGenericClient client = ctx.newRestfulGenericClient( "http://foo");
 		Bundle bundle = client.search().forResource(IncludeTest.ExtPatient.class).returnBundle(Bundle.class).execute();
 
-		assertEquals(HttpGet.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
 		HttpGet get = (HttpGet) capt.getValue();
-		assertEquals("http://foo/Patient", get.getURI().toString());
-		
-		assertEquals(4, bundle.getEntry().size());
+		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient");
+
+		assertThat(bundle.getEntry()).hasSize(4);
 		
 		ExtPatient p = (ExtPatient) bundle.getEntry().get(0).getResource();
 		Reference ref = p.getSecondOrg();
-		assertEquals("Organization/o1", ref.getReferenceElement().getValue());
-		assertNotNull(ref.getResource());
+		assertThat(ref.getReferenceElement().getValue()).isEqualTo("Organization/o1");
+		assertThat(ref.getResource()).isNotNull();
 		
 		Organization o1 = (Organization) ref.getResource();
-		assertEquals("o2", o1.getPartOf().getReferenceElement().toUnqualifiedVersionless().getIdPart());
-		assertNotNull(o1.getPartOf().getResource());
+		assertThat(o1.getPartOf().getReferenceElement().toUnqualifiedVersionless().getIdPart()).isEqualTo("o2");
+		assertThat(o1.getPartOf().getResource()).isNotNull();
 		
 	}
 	

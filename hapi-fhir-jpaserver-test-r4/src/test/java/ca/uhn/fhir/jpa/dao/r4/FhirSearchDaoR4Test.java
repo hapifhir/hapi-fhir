@@ -64,7 +64,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		List<JpaPid> ids = mySearchDao.search("Patient", params, SystemRequestDetails.newSystemRequestAllPartitions());
 
 		// verify results
-		assertThat(ids.size()).isEqualTo(1);
+		assertThat(ids).hasSize(1);
 		assertThat(ids.get(0).getId()).isEqualTo(id1);
 	}
 

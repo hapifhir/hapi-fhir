@@ -202,7 +202,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		validator.setValidateAgainstStandardSchematron(true);
 		ValidationResult result = validator.validateWithResult(theResult);
 
-		assertThat(result.getMessages().size()).isEqualTo(0);
+		assertThat(result.getMessages()).isEmpty();
 
 	}
 
@@ -325,7 +325,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertThat(codes).containsExactlyInAnyOrder("hello", "goodbye");
 		for (ValueSetExpansionContainsComponent vsConcept : result.getExpansion().getContains()) {
-			assertThat(vsConcept.getDisplay().contains("VS")).isTrue();
+			assertThat(vsConcept.getDisplay()).contains("VS");
 		}
 
 
@@ -795,7 +795,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		ValueSet result = myValueSetDao.expand(vs, null);
 		logAndValidateValueSet(result);
 
-		assertThat(result.getExpansion().getContains().size()).isEqualTo(0);
+		assertThat(result.getExpansion().getContains()).isEmpty();
 
 		myTerminologyDeferredStorageSvc.setProcessDeferred(true);
 		myTerminologyDeferredStorageSvc.saveDeferred();
@@ -813,7 +813,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		result = myValueSetDao.expand(vs, null);
 		logAndValidateValueSet(result);
 
-		assertThat(result.getExpansion().getContains().size()).isEqualTo(4);
+		assertThat(result.getExpansion().getContains()).hasSize(4);
 
 		String encoded = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
 		assertThat(encoded).containsIgnoringCase("<code value=\"childAAB\"/>");

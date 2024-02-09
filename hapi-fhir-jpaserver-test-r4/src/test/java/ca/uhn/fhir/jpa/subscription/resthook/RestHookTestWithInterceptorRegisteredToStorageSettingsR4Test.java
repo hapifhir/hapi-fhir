@@ -195,8 +195,8 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 		waitForSize(5, ourUpdatedObservations);
 
 		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
-		assertThat(observation1.getId().isEmpty()).isFalse();
-		assertThat(observation2.getId().isEmpty()).isFalse();
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	// TODO KHS this test has been failing intermittently
@@ -271,8 +271,8 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 		ourLog.info("Have observations: {}", toUnqualifiedVersionlessIds(ourUpdatedObservations));
 
 		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
-		assertThat(observation1.getId().isEmpty()).isFalse();
-		assertThat(observation2.getId().isEmpty()).isFalse();
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	@BeforeAll

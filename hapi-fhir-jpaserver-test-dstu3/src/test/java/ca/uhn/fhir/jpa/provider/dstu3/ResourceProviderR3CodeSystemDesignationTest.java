@@ -55,7 +55,7 @@ public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourcePro
 		assertThat(((BooleanType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo(false);
 
 		//-- designationList
-		assertThat(designationList.size()).isEqualTo(2);
+		assertThat(designationList).hasSize(2);
 		
 		// 1. de-AT:Systolic blood pressure 12 hour minimum
 		ParametersParameterComponent designation = designationList.get(0);
@@ -99,7 +99,7 @@ public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourcePro
 		assertThat(((BooleanType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo(false);
 
 		//-- designationList
-		assertThat(designationList.size()).isEqualTo(1);
+		assertThat(designationList).hasSize(1);
 		
 		// 1. Systolic blood pressure 12 hour minimum (no language)
 		ParametersParameterComponent designation = designationList.get(0);
@@ -134,7 +134,7 @@ public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourcePro
 		assertThat(((BooleanType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo(false);
 
 		//-- designationList
-		assertThat(designationList.size()).isEqualTo(3);
+		assertThat(designationList).hasSize(3);
 		
 		// 1. fr-FR:Systolic blood pressure 12 hour minimum
 		ParametersParameterComponent designation = designationList.get(0);

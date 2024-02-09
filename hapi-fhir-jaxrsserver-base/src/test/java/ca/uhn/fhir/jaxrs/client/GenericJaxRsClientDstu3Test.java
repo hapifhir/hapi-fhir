@@ -120,19 +120,19 @@ public class GenericJaxRsClientDstu3Test {
 
 		client.fetchConformance().ofType(CapabilityStatement.class).execute();
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/metadata");
-		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept")).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue()).contains(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY);
 
 
 		client.fetchConformance().ofType(CapabilityStatement.class).encodedJson().execute();
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/metadata?_format=json");
-		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept")).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
 
 
 		client.fetchConformance().ofType(CapabilityStatement.class).encodedXml().execute();
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/metadata?_format=xml");
-		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept")).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_XML);
 
 	}
@@ -156,12 +156,12 @@ public class GenericJaxRsClientDstu3Test {
 		Patient resp = client.read(Patient.class, new IdType("123").getValue());
 		assertThat(resp.getName().get(0).getFamily()).isEqualTo("FAMILY");
 		assertThat(MY_SERVLET.ourRequestUriAll.get(0)).isEqualTo(ourServer.getBaseUrl() + "/fhir/metadata");
-		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept")).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).contains(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_XML);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
 		assertThat(MY_SERVLET.ourRequestUriAll.get(1)).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123");
-		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept")).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).contains(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_XML);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
@@ -187,11 +187,11 @@ public class GenericJaxRsClientDstu3Test {
 		Patient resp = client.read(Patient.class, new IdType("123").getValue());
 		assertThat(resp.getName().get(0).getFamily()).isEqualTo("FAMILY");
 		assertThat(MY_SERVLET.ourRequestUriAll.get(0)).isEqualTo(ourServer.getBaseUrl() + "/fhir/metadata?_format=json");
-		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept")).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).doesNotContain(Constants.CT_FHIR_XML);
 		assertThat(MY_SERVLET.ourRequestUriAll.get(1)).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=json");
-		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept")).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).doesNotContain(Constants.CT_FHIR_XML);
 	}
@@ -247,7 +247,7 @@ public class GenericJaxRsClientDstu3Test {
 
 		client.create().resource(p).encodedXml().execute();
 
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient");
@@ -257,7 +257,7 @@ public class GenericJaxRsClientDstu3Test {
 		p.setId("123");
 
 		client.create().resource(p).encodedXml().execute();
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		String body = MY_SERVLET.ourRequestBodyString;
 		assertThat(body).contains("<family value=\"FOOFAMILY\"/>");
@@ -281,7 +281,7 @@ public class GenericJaxRsClientDstu3Test {
 		p.addName().setFamily("FOOFAMILY");
 
 		client.create().resource(p).conditionalByUrl("Patient?name=foo").encodedXml().execute();
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient");
@@ -290,7 +290,7 @@ public class GenericJaxRsClientDstu3Test {
 
 
 		client.create().resource(p).conditionalByUrl("Patient?name=http://foo|bar").encodedXml().execute();
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient");
@@ -299,7 +299,7 @@ public class GenericJaxRsClientDstu3Test {
 
 
 		client.create().resource(p).conditional().where(Patient.NAME.matches().value("foo")).encodedXml().execute();
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient");
@@ -321,7 +321,7 @@ public class GenericJaxRsClientDstu3Test {
 
 		client.create().resource(p).encodedXml().execute();
 
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient");
@@ -342,12 +342,12 @@ public class GenericJaxRsClientDstu3Test {
 		p.addName().setFamily("FOOFAMILY");
 
 		client.create().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue()).isEqualTo(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL);
 
 
 		client.create().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue()).isEqualTo(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 
 
@@ -433,7 +433,7 @@ public class GenericJaxRsClientDstu3Test {
 			.execute();
 		//@formatter:on
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/_history");
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 
 
 		//@formatter:off
@@ -446,7 +446,7 @@ public class GenericJaxRsClientDstu3Test {
 			.execute();
 		//@formatter:on
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/_history");
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 
 
 		//@formatter:off
@@ -458,7 +458,7 @@ public class GenericJaxRsClientDstu3Test {
 			.execute();
 		//@formatter:on
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/_history");
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 
 
 		//@formatter:off
@@ -469,7 +469,7 @@ public class GenericJaxRsClientDstu3Test {
 			.execute();
 		//@formatter:on
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/_history");
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 
 
 		//@formatter:off
@@ -480,7 +480,7 @@ public class GenericJaxRsClientDstu3Test {
 			.execute();
 		//@formatter:on
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123/_history");
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 
 
 		//@formatter:off
@@ -493,7 +493,7 @@ public class GenericJaxRsClientDstu3Test {
 			.execute();
 		//@formatter:on
 		assertThat(MY_SERVLET.ourRequestUri, either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123/_history?_since=2001-01-02T11:22:33Z&_count=123")).or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123/_history?_count=123&_since=2001-01-02T11:22:33Z")));
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 
 
 		//@formatter:off
@@ -505,7 +505,7 @@ public class GenericJaxRsClientDstu3Test {
 			.execute();
 		//@formatter:on
 		assertThat(MY_SERVLET.ourRequestUri).contains("_since=2001-01");
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 
 	}
 
@@ -802,11 +802,11 @@ public class GenericJaxRsClientDstu3Test {
 			.execute();
 		//@formatter:on
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION");
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(reqString).isEqualTo(MY_SERVLET.ourRequestBodyString);
 		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
-		assertThat(resp.getParameter().size()).isEqualTo(1);
+		assertThat(resp.getParameter()).hasSize(1);
 		assertThat(resp.getParameter().get(0).getResource().getClass()).isEqualTo(org.hl7.fhir.dstu3.model.Bundle.class);
 
 	}
@@ -838,7 +838,7 @@ public class GenericJaxRsClientDstu3Test {
 		//@formatter:on
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION");
 		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
 		assertThat((MY_SERVLET.ourRequestBodyString)).isEqualTo("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueString value=\"value1\"/></parameter><parameter><name value=\"name2\"/><valueString value=\"value1\"/></parameter></Parameters>");
@@ -860,7 +860,7 @@ public class GenericJaxRsClientDstu3Test {
 		//@formatter:on
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION");
 		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
 		assertThat((MY_SERVLET.ourRequestBodyString)).isEqualTo("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueIdentifier><system value=\"system1\"/><value value=\"value1\"/></valueIdentifier></parameter><parameter><name value=\"name2\"/><valueString value=\"value1\"/></parameter></Parameters>");
@@ -882,7 +882,7 @@ public class GenericJaxRsClientDstu3Test {
 		//@formatter:on
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION");
 		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
 		assertThat((MY_SERVLET.ourRequestBodyString)).isEqualTo("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueIdentifier><system value=\"system1\"/><value value=\"value1\"/></valueIdentifier></parameter><parameter><name value=\"name2\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><active value=\"true\"/></Patient></resource></parameter></Parameters>");
@@ -1018,7 +1018,7 @@ public class GenericJaxRsClientDstu3Test {
 		//@formatter:on
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION");
 		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(reqString).isEqualTo(MY_SERVLET.ourRequestBodyString);
 		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
@@ -1035,7 +1035,7 @@ public class GenericJaxRsClientDstu3Test {
 		//@formatter:on
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/$SOMEOPERATION");
 		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(reqString).isEqualTo(MY_SERVLET.ourRequestBodyString);
 		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
@@ -1052,7 +1052,7 @@ public class GenericJaxRsClientDstu3Test {
 		//@formatter:on
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION");
 		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(reqString).isEqualTo(MY_SERVLET.ourRequestBodyString);
 		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
@@ -1092,7 +1092,7 @@ public class GenericJaxRsClientDstu3Test {
 		//@formatter:on
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION");
 		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(reqString).isEqualTo(MY_SERVLET.ourRequestBodyString);
 		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
@@ -1107,7 +1107,7 @@ public class GenericJaxRsClientDstu3Test {
 		//@formatter:on
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/$SOMEOPERATION");
 		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(reqString).isEqualTo(MY_SERVLET.ourRequestBodyString);
 		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
@@ -1124,7 +1124,7 @@ public class GenericJaxRsClientDstu3Test {
 		//@formatter:on
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION");
 		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(reqString).isEqualTo(MY_SERVLET.ourRequestBodyString);
 		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
@@ -1162,7 +1162,7 @@ public class GenericJaxRsClientDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertThat(resp.getEntry().size()).isEqualTo(1);
+		assertThat(resp.getEntry()).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/next");
 
 
@@ -1200,7 +1200,7 @@ public class GenericJaxRsClientDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertThat(resp.getEntry().size()).isEqualTo(1);
+		assertThat(resp.getEntry()).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/prev");
 
 
@@ -1218,7 +1218,7 @@ public class GenericJaxRsClientDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertThat(resp.getEntry().size()).isEqualTo(1);
+		assertThat(resp.getEntry()).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/prev");
 
 
@@ -1734,11 +1734,11 @@ public class GenericJaxRsClientDstu3Test {
 		//@formatter:on
 
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir");
-		assertThat(response.size()).isEqualTo(2);
+		assertThat(response).hasSize(2);
 
 		String requestString = MY_SERVLET.ourRequestBodyString;
 		org.hl7.fhir.dstu3.model.Bundle requestBundle = ourCtx.newJsonParser().parseResource(org.hl7.fhir.dstu3.model.Bundle.class, requestString);
-		assertThat(requestBundle.getEntry().size()).isEqualTo(2);
+		assertThat(requestBundle.getEntry()).hasSize(2);
 		assertThat(requestBundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(HTTPVerb.POST);
 		assertThat(requestBundle.getEntry().get(1).getRequest().getMethod()).isEqualTo(HTTPVerb.PUT);
 		assertThat(requestBundle.getEntry().get(1).getFullUrl()).isEqualTo("http://example.com/Patient/2");
@@ -1845,7 +1845,7 @@ public class GenericJaxRsClientDstu3Test {
 		//@formatter:on
 
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir");
-		assertThat(response.getEntry().size()).isEqualTo(2);
+		assertThat(response.getEntry()).hasSize(2);
 
 		assertThat(response.getEntry().get(0).getResponse().getLocation()).isEqualTo("Patient/1/_history/1");
 		assertThat(response.getEntry().get(1).getResponse().getLocation()).isEqualTo("Patient/2/_history/2");
@@ -1864,7 +1864,7 @@ public class GenericJaxRsClientDstu3Test {
 		p.addName().setFamily("FOOFAMILY");
 
 		client.update().resource(p).conditionalByUrl("Patient?name=foo").encodedXml().execute();
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("PUT");
@@ -1872,7 +1872,7 @@ public class GenericJaxRsClientDstu3Test {
 
 
 		client.update().resource(p).conditionalByUrl("Patient?name=http://foo|bar").encodedXml().execute();
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("PUT");
@@ -1880,7 +1880,7 @@ public class GenericJaxRsClientDstu3Test {
 
 
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditionalByUrl("Patient?name=foo").execute();
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("PUT");
@@ -1888,7 +1888,7 @@ public class GenericJaxRsClientDstu3Test {
 
 
 		client.update().resource(p).conditional().where(Patient.NAME.matches().value("foo")).and(Patient.ADDRESS.matches().value("AAA|BBB")).encodedXml().execute();
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("PUT");
@@ -1896,7 +1896,7 @@ public class GenericJaxRsClientDstu3Test {
 
 
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditional().where(Patient.NAME.matches().value("foo")).and(Patient.ADDRESS.matches().value("AAA|BBB")).encodedXml().execute();
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("PUT");
@@ -1919,7 +1919,7 @@ public class GenericJaxRsClientDstu3Test {
 		p.addName().setFamily("FOOFAMILY");
 
 		client.update(new IdType("Patient/123").getValue(), p);
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=xml");
@@ -1927,7 +1927,7 @@ public class GenericJaxRsClientDstu3Test {
 
 
 		client.update("123", p);
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_CONTENT_TYPE).getValue().replace(";char", "; char")).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
 		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=xml");
@@ -1947,12 +1947,12 @@ public class GenericJaxRsClientDstu3Test {
 		p.addName().setFamily("FOOFAMILY");
 
 		client.update().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue()).isEqualTo(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL);
 
 
 		client.update().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).size()).isEqualTo(1);
+		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER)).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue()).isEqualTo(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
 
 

@@ -198,7 +198,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertThat(ourGreenMail.waitForIncomingEmail(10000, 1)).isTrue();
 
 		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
-		assertThat(received.size()).isEqualTo(1);
+		assertThat(received).hasSize(1);
 		assertThat(received.get(0).getFrom().length).isEqualTo(1);
 		assertThat(((InternetAddress) received.get(0).getFrom()[0]).getAddress()).isEqualTo("myfrom@from.com");
 		assertThat(received.get(0).getAllRecipients().length).isEqualTo(1);
@@ -246,7 +246,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertThat(ourGreenMail.waitForIncomingEmail(10000, 1)).isTrue();
 
 		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
-		assertThat(received.size()).isEqualTo(1);
+		assertThat(received).hasSize(1);
 		assertThat(received.get(0).getFrom().length).isEqualTo(1);
 		assertThat(((InternetAddress) received.get(0).getFrom()[0]).getAddress()).isEqualTo("myfrom@from.com");
 		assertThat(received.get(0).getAllRecipients().length).isEqualTo(1);

@@ -817,7 +817,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
-			assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
+			assertThat(outcome.getExpansion().getContains()).isEmpty();
 
 			// Include
 			vs = new ValueSet();
@@ -829,7 +829,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
-			assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
+			assertThat(outcome.getExpansion().getContains()).isEmpty();
 		}
 
 		@Test
@@ -1032,7 +1032,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
-			assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
+			assertThat(outcome.getExpansion().getContains()).isEmpty();
 
 			// Include
 			vs = new ValueSet();
@@ -1275,7 +1275,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("50015-7");
 			outcome = myTermSvc.expandValueSet(null, vs);
-			assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
+			assertThat(outcome.getExpansion().getContains()).isEmpty();
 
 			// Include
 			vs = new ValueSet();
@@ -1543,7 +1543,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("43343-4");
 			outcome = myTermSvc.expandValueSet(null, vs);
-			assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
+			assertThat(outcome.getExpansion().getContains()).isEmpty();
 
 			// Include
 			vs = new ValueSet();
@@ -1555,7 +1555,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				.setOp(ValueSet.FilterOperator.EQUAL)
 				.setValue("47239-9");
 			outcome = myTermSvc.expandValueSet(null, vs);
-			assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
+			assertThat(outcome.getExpansion().getContains()).isEmpty();
 		}
 
 		@Test
@@ -1665,7 +1665,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			include = vs.getCompose().addInclude();
 			include.setSystem(CS_URL);
 			ValueSet outcome = myTermSvc.expandValueSet(null, vs);
-			assertThat(outcome.getExpansion().getContains().size()).isEqualTo(109);
+			assertThat(outcome.getExpansion().getContains()).hasSize(109);
 
 		}
 
@@ -1933,7 +1933,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		public void testShouldNotFindAny() {
 			List<String> hits = search(allCodesNotIncludingSearched);
 			assertThat(hits).isNotNull();
-			assertThat(hits.isEmpty()).isTrue();
+			assertThat(hits).isEmpty();
 		}
 
 
@@ -1945,7 +1945,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			allCodesNotIncludingSearched.addAll(insertIndex, existingCodes);
 
 			List<String> hits = search(allCodesNotIncludingSearched);
-			assertThat(hits.size()).isEqualTo(existingCodes.size());
+			assertThat(hits).hasSize(existingCodes.size());
 		}
 
 
@@ -1956,7 +1956,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 
 			List<String> hits = search(allCodesNotIncludingSearched);
 
-			assertThat(hits.size()).isEqualTo(existingCodes.size());
+			assertThat(hits).hasSize(existingCodes.size());
 		}
 
 
@@ -1965,7 +1965,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			// insert half of existing codes in first sublist and half in last
 
 			List<List<String>> partitionedExistingCodes = ListUtils.partition(existingCodes, existingCodes.size() / 2);
-			assertThat(partitionedExistingCodes.size()).isEqualTo(2);
+			assertThat(partitionedExistingCodes).hasSize(2);
 
 			// insert first partition of existing codes into first sublist of searched codes
 			allCodesNotIncludingSearched.addAll(0, partitionedExistingCodes.get(0));
@@ -1974,7 +1974,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 			allCodesNotIncludingSearched.addAll(allCodesNotIncludingSearched.size(), partitionedExistingCodes.get(1));
 
 			List<String> hits = search(allCodesNotIncludingSearched);
-			assertThat(hits.size()).isEqualTo(existingCodes.size());
+			assertThat(hits).hasSize(existingCodes.size());
 		}
 
 		private List<String> search(List<String> theSearchedCodes) {

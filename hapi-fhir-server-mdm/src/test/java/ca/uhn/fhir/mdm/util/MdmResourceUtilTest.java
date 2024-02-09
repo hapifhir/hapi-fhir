@@ -11,9 +11,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MdmResourceUtilTest {
 
@@ -41,15 +38,15 @@ class MdmResourceUtilTest {
 		);
 
 		// verify
-		assertNotNull(changed);
+		assertThat(changed).isNotNull();
 		List<Coding> tags = changed.getMeta().getTag();
 		Set<String> codes = new HashSet<>();
 		codes.add(MdmConstants.CODE_BLOCKED);
 		codes.add(MdmConstants.CODE_GOLDEN_RECORD);
-		assertEquals(2, tags.size());
+		assertThat(tags).hasSize(2);
 		for (Coding code : tags) {
-			assertEquals(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, code.getSystem());
-			assertTrue(codes.contains(code.getCode()));
+			assertThat(code.getSystem()).isEqualTo(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS);
+			assertThat(codes).contains(code);
 		}
 	}
 }

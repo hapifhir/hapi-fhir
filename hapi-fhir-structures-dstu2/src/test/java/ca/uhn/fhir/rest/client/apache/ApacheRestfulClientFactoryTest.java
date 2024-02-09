@@ -3,7 +3,9 @@ package ca.uhn.fhir.rest.client.apache;
 import java.io.IOException;
 import java.util.function.Consumer;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.Mockito.*;
 
 import ca.uhn.fhir.i18n.Msg;
@@ -43,7 +45,7 @@ public class ApacheRestfulClientFactoryTest {
 		try {
 			factory.setFhirContext(FhirContext.forDstu2());
 			fail("");		} catch (IllegalStateException e) {
-			assertEquals("java.lang.IllegalStateException: " + Msg.code(1356) + "RestfulClientFactory instance is already associated with one FhirContext. RestfulClientFactory instances can not be shared.", e.toString());
+			assertThat(e.toString()).isEqualTo("java.lang.IllegalStateException: " + Msg.code(1356) + "RestfulClientFactory instance is already associated with one FhirContext. RestfulClientFactory instances can not be shared.");
 		}
 	}
 
@@ -56,7 +58,7 @@ public class ApacheRestfulClientFactoryTest {
 		try {
 			factory.validateServerBase("http://127.0.0.1:22225", factory.getHttpClient("http://foo"), (BaseClient) ctx.newRestfulGenericClient("http://foo"));
 			fail("");		} catch (FhirClientConnectionException e) {
-			assertEquals(Msg.code(1357) + "Failed to retrieve the server metadata statement during client initialization. URL used was http://127.0.0.1:22225metadata", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1357) + "Failed to retrieve the server metadata statement during client initialization. URL used was http://127.0.0.1:22225metadata");
 		}
 	}
 
@@ -66,9 +68,9 @@ public class ApacheRestfulClientFactoryTest {
 				f -> f.setProxy("theHost", 0));
 
 		HttpHost proxyHost = httpRoute.getProxyHost();
-		assertNotNull(proxyHost.getHostName());
-		assertEquals("theHost", proxyHost.getHostName());
-		assertEquals(0, proxyHost.getPort());
+		assertThat(proxyHost.getHostName()).isNotNull();
+		assertThat(proxyHost.getHostName()).isEqualTo("theHost");
+		assertThat(proxyHost.getPort()).isEqualTo(0);
 	}
 
 	@Test
@@ -79,9 +81,9 @@ public class ApacheRestfulClientFactoryTest {
 		});
 
 		HttpHost proxyHost = httpRoute.getProxyHost();
-		assertNotNull(proxyHost.getHostName());
-		assertEquals("hostFromSystemProperty", proxyHost.getHostName());
-		assertEquals(1234, proxyHost.getPort());
+		assertThat(proxyHost.getHostName()).isNotNull();
+		assertThat(proxyHost.getHostName()).isEqualTo("hostFromSystemProperty");
+		assertThat(proxyHost.getPort()).isEqualTo(1234);
 	}
 
 	@Test
@@ -92,9 +94,9 @@ public class ApacheRestfulClientFactoryTest {
 				f -> f.setProxy("providedProxy", 0));
 
 		HttpHost proxyHost = httpRoute.getProxyHost();
-		assertNotNull(proxyHost.getHostName());
-		assertEquals("providedProxy", proxyHost.getHostName());
-		assertEquals(0, proxyHost.getPort());
+		assertThat(proxyHost.getHostName()).isNotNull();
+		assertThat(proxyHost.getHostName()).isEqualTo("providedProxy");
+		assertThat(proxyHost.getPort()).isEqualTo(0);
 	}
 
 	private HttpRoute executeRequestAndCaptureHttpRoute(Consumer<ApacheRestfulClientFactory> factoryConsumer)

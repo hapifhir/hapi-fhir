@@ -504,8 +504,8 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		awaitUntilReceivedTransactionCount(6);
 
 		assertThat(subscription2.getId()).isNotEqualTo(subscription1.getId());
-		assertThat(sentObservation1.getId().isEmpty()).isFalse();
-		assertThat(observation2.getId().isEmpty()).isFalse();
+		assertThat(sentObservation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	private void deleteSubscription(Subscription subscription2) throws InterruptedException {
@@ -813,7 +813,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 	private Observation assertBundleAndGetObservation(Subscription subscription, Observation sentObservation, Long theExpectedEventNumber) {
 		Bundle receivedBundle = getLastSystemProviderBundle();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
-		assertThat(resources.size()).isEqualTo(2);
+		assertThat(resources).hasSize(2);
 
 		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
 		validateSubscriptionStatus(subscription, sentObservation, ss, theExpectedEventNumber);

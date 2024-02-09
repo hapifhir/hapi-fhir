@@ -52,8 +52,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -88,9 +86,9 @@ public class SearchR4Test {
 	private Bundle executeSearchAndValidateHasLinkNext(HttpGet httpGet, EncodingEnum theExpectEncoding) throws IOException {
 		Bundle bundle = executeSearch(httpGet, theExpectEncoding);
 		String linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertNotNull(linkNext);
+		assertThat(linkNext).isNotNull();
 
-		assertEquals(10, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(10);
 		return bundle;
 	}
 
@@ -99,9 +97,9 @@ public class SearchR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
-			assertEquals(theExpectEncoding, ct);
+			assertThat(ct).isEqualTo(theExpectEncoding);
 			bundle = ct.newParser(myCtx).parseResource(Bundle.class, responseContent);
 			validate(bundle);
 		}
@@ -117,7 +115,7 @@ public class SearchR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 			assertThat(responseContent).contains("not know how to handle GET operation[Patient] with parameters [[_getpages]]");
 		}
 	}
@@ -131,9 +129,9 @@ public class SearchR4Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&" + Constants.PARAM_SUMMARY + "=" + SummaryEnum.COUNT.getCode());
 		Bundle bundle = executeSearch(httpGet, EncodingEnum.JSON);
 		ourLog.info(toJson(bundle));
-		assertEquals(200, bundle.getTotal());
-		assertEquals("searchset", bundle.getType().toCode());
-		assertEquals(0, bundle.getEntry().size());
+		assertThat(bundle.getTotal()).isEqualTo(200);
+		assertThat(bundle.getType().toCode()).isEqualTo("searchset");
+		assertThat(bundle.getEntry()).isEmpty();
 	}
 
 
@@ -192,7 +190,7 @@ public class SearchR4Test {
 		// No include specified
 		httpGet = new HttpGet("http://localhost:" + myPort + "/MedicationRequest");
 		bundle = executeAndReturnBundle(httpGet);
-		assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 	}
 
 	/**
@@ -206,7 +204,7 @@ public class SearchR4Test {
 		// * include specified
 		httpGet = new HttpGet("http://localhost:" + myPort + "/MedicationRequest?_include=" + UrlUtil.escapeUrlParam("*"));
 		bundle = executeAndReturnBundle(httpGet);
-		assertEquals(2, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(2);
 	}
 
 	/**
@@ -220,7 +218,7 @@ public class SearchR4Test {
 		// MedicationRequest:medication include specified
 		httpGet = new HttpGet("http://localhost:" + myPort + "/MedicationRequest?_include=" + UrlUtil.escapeUrlParam(MedicationRequest.INCLUDE_MEDICATION.getValue()));
 		bundle = executeAndReturnBundle(httpGet);
-		assertEquals(2, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(2);
 
 	}
 
@@ -228,7 +226,7 @@ public class SearchR4Test {
 		Bundle bundle;
 		try (CloseableHttpResponse status = ourClient.execute(theHttpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			bundle = myCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 		}
 		return bundle;
@@ -406,12 +404,12 @@ public class SearchR4Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			validate(myCtx.newJsonParser().parseResource(responseContent));
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertEquals("search", ourLastMethod);
+			assertThat(ourLastMethod).isEqualTo("search");
 
-			assertEquals("foo", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
-			assertEquals("bar", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+			assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("foo");
+			assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("bar");
 		}
 
 	}
@@ -420,7 +418,7 @@ public class SearchR4Test {
 	public void testRequestIdGeneratedAndReturned() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
 			assertThat(requestId).matches("[a-zA-Z0-9]{16}");
 		}
@@ -431,7 +429,7 @@ public class SearchR4Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
 		httpGet.addHeader(Constants.HEADER_REQUEST_ID, "help im a bug");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
 			assertThat(requestId).matches("help im a bug");
 		}
@@ -442,7 +440,7 @@ public class SearchR4Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
 		httpGet.addHeader(Constants.HEADER_REQUEST_ID, "help i'm a bug");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
 			assertThat(requestId).matches("[a-zA-Z0-9]{16}");
 		}
@@ -454,12 +452,10 @@ public class SearchR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 			OperationOutcome oo = (OperationOutcome) myCtx.newJsonParser().parseResource(responseContent);
-			assertEquals(
-				Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)",
-				oo.getIssueFirstRep().getDiagnostics());
+			assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)");
 		}
 
 	}

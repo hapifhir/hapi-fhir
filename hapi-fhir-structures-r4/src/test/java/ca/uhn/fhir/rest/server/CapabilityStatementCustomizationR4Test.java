@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CapabilityStatementCustomizationR4Test {
 
@@ -58,7 +58,7 @@ public class CapabilityStatementCustomizationR4Test {
 		myServerExtension.getRestfulServer().registerInterceptor(new CapabilityStatementCustomizer());
 
 		CapabilityStatement received = myServerExtension.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
-		assertEquals("Acme FHIR Server", received.getSoftware().getName());
+		assertThat(received.getSoftware().getName()).isEqualTo("Acme FHIR Server");
 
 	}
 
@@ -88,7 +88,7 @@ public class CapabilityStatementCustomizationR4Test {
 		myServerExtension.getRestfulServer().registerInterceptor(new CapabilityStatementCustomizer());
 
 		CapabilityStatement received = myServerExtension.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
-		assertEquals("Acme FHIR Server", received.getSoftware().getName());
+		assertThat(received.getSoftware().getName()).isEqualTo("Acme FHIR Server");
 
 	}
 

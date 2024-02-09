@@ -4,8 +4,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 class RawElasticJsonBuilderTest {
 
 	JsonObject myJson;
@@ -40,7 +38,7 @@ class RawElasticJsonBuilderTest {
 	}
 
 	private void assertJson(String expected) {
-		assertEquals(JsonParser.parseString(expected).getAsJsonObject(), myJson);
+		assertThat(myJson).isEqualTo(JsonParser.parseString(expected).getAsJsonObject());
 	}
 
 

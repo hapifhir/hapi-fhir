@@ -297,7 +297,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 		// validate
 		List<Patient> bundlePatients = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
-		assertThat(bundlePatients.size()).isEqualTo(myServer.getDefaultPageSize());
+		assertThat(bundlePatients).hasSize(myServer.getDefaultPageSize());
 	}
 
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException {

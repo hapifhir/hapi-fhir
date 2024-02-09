@@ -140,7 +140,7 @@ class ITermReadSvcTest {
 		@Test
 		void startsWithGenericPlusSlashPlusIdReturnsValid() {
 			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://loinc.org/vs/some-vs-id");
-			assertThat(vsIdOpt.isPresent()).isTrue();
+			assertThat(vsIdOpt).isPresent();
 		}
 
 	}
@@ -237,7 +237,7 @@ class ITermReadSvcTest {
 				NonUniqueResultException.class,
 				() -> testedClass.readCodeSystemByForcedId("a-cs-id"));
 
-			assertThat(thrown.getMessage().contains("More than one CodeSystem is pointed by forcedId:")).isTrue();
+			assertThat(thrown.getMessage()).contains("More than one CodeSystem is pointed by forcedId:");
 		}
 
 		@Test
@@ -287,12 +287,12 @@ class ITermReadSvcTest {
 				testedClass, "getTermConceptsFetchExceptionMsg", termConcepts, values);
 
 			assertThat(msg).isNotNull();
-			assertThat(msg.contains("No TermConcept(s) were found")).isTrue();
+			assertThat(msg).contains("No TermConcept(s) were found");
 			assertThat(msg.contains(CODE_1)).isFalse();
-			assertThat(msg.contains(CODE_2)).isTrue();
+			assertThat(msg).contains(CODE_2);
 			assertThat(msg.contains(CODE_3)).isFalse();
 			assertThat(msg.contains(CODE_4)).isFalse();
-			assertThat(msg.contains(CODE_5)).isTrue();
+			assertThat(msg).contains(CODE_5);
 		}
 
 		@Test
@@ -308,9 +308,9 @@ class ITermReadSvcTest {
 				testedClass, "getTermConceptsFetchExceptionMsg", termConcepts, values);
 
 			assertThat(msg).isNotNull();
-			assertThat(msg.contains("More TermConcepts were found than indicated codes")).isTrue();
+			assertThat(msg).contains("More TermConcepts were found than indicated codes");
 			assertThat(msg.contains("Queried codes: [" + CODE_3 + "]")).isFalse();
-			assertThat(msg.contains("Obtained TermConcept IDs, codes: [1, code-1; 3, code-3]")).isTrue();
+			assertThat(msg).contains("Obtained TermConcept IDs, codes: [1, code-1; 3, code-3]");
 		}
 	}
 

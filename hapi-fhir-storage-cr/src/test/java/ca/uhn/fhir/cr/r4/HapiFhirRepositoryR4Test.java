@@ -40,17 +40,17 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 			.create(new Patient().addName(new HumanName().setFamily("Test").addGiven("Name1")));
 		assertThat(result.getCreated()).isEqualTo(true);
 		var patient = (Patient) result.getResource();
-		assertThat(patient.getName().size()).isEqualTo(1);
+		assertThat(patient.getName()).hasSize(1);
 		assertThat(patient.getName().get(0).getFamily()).isEqualTo("Test");
-		assertThat(patient.getName().get(0).getGiven().size()).isEqualTo(1);
+		assertThat(patient.getName().get(0).getGiven()).hasSize(1);
 		patient.getName().get(0).addGiven("Name2");
 		repository.update(patient);
 		var updatedPatient = repository.read(Patient.class, patient.getIdElement());
-		assertThat(updatedPatient.getName().get(0).getGiven().size()).isEqualTo(2);
+		assertThat(updatedPatient.getName().get(0).getGiven()).hasSize(2);
 		repository.delete(Patient.class, patient.getIdElement());
 		var ex = assertThrows(Exception.class,
 			() -> repository.read(Patient.class, new IdType(patient.getIdElement().getIdPart())));
-		assertThat(ex.getMessage().contains("Resource was deleted")).isTrue();
+		assertThat(ex.getMessage()).contains("Resource was deleted");
 	}
 
 	@Test
@@ -79,12 +79,12 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 		var requestDetails = setupRequestDetails();
 		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, myRestfulServer);
 		var result = repository.search(Bundle.class, Patient.class, withCountParam(20));
-		assertThat(result.getEntry().size()).isEqualTo(20);
+		assertThat(result.getEntry()).hasSize(20);
 		var next = result.getLink().get(1);
 		assertThat(next.getRelation()).isEqualTo("next");
 		var nextUrl = next.getUrl();
 		var nextResult = repository.link(Bundle.class, nextUrl);
-		assertThat(nextResult.getEntry().size()).isEqualTo(20);
+		assertThat(nextResult.getEntry()).hasSize(20);
 		assertThat(result.getEntry().stream().map(e -> e.getResource().getIdPart()).anyMatch(
 				i -> nextResult.getEntry().stream().map(e -> e.getResource().getIdPart())
 						.collect(Collectors.toList()).contains(i))).isEqualTo(false);

@@ -93,7 +93,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 
 		// Verify
 		validateDocument(output);
-		assertThat(output.getEntry().size()).isEqualTo(117);
+		assertThat(output.getEntry()).hasSize(117);
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getId();
 		assertThat(patientId).matches("urn:uuid:.*");
 		MedicationStatement medicationStatement = findFirstEntryResource(output, MedicationStatement.class, 2);
@@ -127,7 +127,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
-		assertThat(output.getEntry().size()).isEqualTo(74);
+		assertThat(output.getEntry()).hasSize(74);
 	}
 
 	@Test
@@ -153,7 +153,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify
-		assertThat(output.getEntry().size()).isEqualTo(80);
+		assertThat(output.getEntry()).hasSize(80);
 	}
 
 	@Test
@@ -180,7 +180,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 
 		// Verify
 		validateDocument(output);
-		assertThat(output.getEntry().size()).isEqualTo(7);
+		assertThat(output.getEntry()).hasSize(7);
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getId();
 		assertThat(patientId).matches("urn:uuid:.*");
 		assertThat(findEntryResource(output, Condition.class, 0, 2).getSubject().getReference()).isEqualTo(patientId);
@@ -323,7 +323,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 			.map(Bundle.BundleEntryComponent::getResource)
 			.filter(r -> theType.isAssignableFrom(r.getClass()))
 			.toList();
-		assertThat(resources.size()).isEqualTo(theExpectedCount);
+		assertThat(resources).hasSize(theExpectedCount);
 		return (T) resources.get(index);
 	}
 

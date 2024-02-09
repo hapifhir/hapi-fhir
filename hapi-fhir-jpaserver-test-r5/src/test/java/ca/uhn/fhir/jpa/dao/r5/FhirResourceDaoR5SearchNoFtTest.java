@@ -79,7 +79,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
         value.addAnd(new HasOrListParam().addOr(new HasParam("PractitionerRole", "practitioner", "organization", "ORG")));
         params.add("_has", value);
         IBundleProvider outcome = myPractitionerDao.search(params);
-		assertThat(outcome.getResources(0, 1).size()).isEqualTo(1);
+			assertThat(outcome.getResources(0, 1)).hasSize(1);
     }
 
     @Test
@@ -105,7 +105,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
         value.addAnd(new HasOrListParam().addOr(new HasParam("PractitionerRole", "practitioner", "organization", "Organization/ORG")));
         params.add("_has", value);
         IBundleProvider outcome = myPractitionerDao.search(params);
-		assertThat(outcome.getResources(0, 1).size()).isEqualTo(1);
+			assertThat(outcome.getResources(0, 1)).hasSize(1);
     }
 
     @Test
@@ -137,7 +137,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
         myCaptureQueriesListener.clear();
         IBundleProvider outcome = myPractitionerDao.search(params);
         myCaptureQueriesListener.logSelectQueriesForCurrentThread(1);
-		assertThat(outcome.getResources(0, 1).size()).isEqualTo(1);
+			assertThat(outcome.getResources(0, 1)).hasSize(1);
     }
 
     @Test
@@ -164,13 +164,13 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
             myResourceTableDao.save(table);
         });
 
-		assertThat(outcome.getResources(0, 3).size()).isEqualTo(2);
+			assertThat(outcome.getResources(0, 3)).hasSize(2);
 
         runInTransaction(() -> {
             myResourceHistoryTableDao.deleteAll();
         });
 
-		assertThat(outcome.getResources(0, 3).size()).isEqualTo(0);
+			assertThat(outcome.getResources(0, 3)).isEmpty();
     }
 
     @Test

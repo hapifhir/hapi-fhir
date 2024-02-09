@@ -32,8 +32,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
@@ -87,9 +85,9 @@ public class ClientServerValidationDstu3Test {
 		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
 
 		// don't load the conformance until the first time the client is actually used
-		assertTrue(myFirstResponse);
+		assertThat(myFirstResponse).isTrue();
 		client.read(new UriDt("http://foo/Patient/123"));
-		assertFalse(myFirstResponse);
+		assertThat(myFirstResponse).isFalse();
 		myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/123"));
 		myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/123"));
 

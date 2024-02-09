@@ -31,8 +31,6 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import java.io.ByteArrayInputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -66,12 +64,12 @@ public class BinaryClientTest {
 		IClient client = mtCtx.newRestfulClient(IClient.class, "http://foo");
 		Binary resp = client.read(new IdType("http://foo/Patient/123"));
 
-		assertEquals(HttpGet.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
 		HttpGet get = (HttpGet) capt.getValue();
-		assertEquals("http://foo/Binary/123", get.getURI().toString());
+		assertThat(get.getURI().toString()).isEqualTo("http://foo/Binary/123");
 
-		assertEquals("foo/bar", resp.getContentType());
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, resp.getContent());
+		assertThat(resp.getContentType()).isEqualTo("foo/bar");
+		assertThat(resp.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 	}
 
 	@Test
@@ -89,12 +87,12 @@ public class BinaryClientTest {
 		IClient client = mtCtx.newRestfulClient(IClient.class, "http://foo");
 		client.create(res);
 
-		assertEquals(HttpPost.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpPost.class);
 		HttpPost post = (HttpPost) capt.getValue();
-		assertEquals("http://foo/Binary", post.getURI().toString());
+		assertThat(post.getURI().toString()).isEqualTo("http://foo/Binary");
 
-		assertEquals("text/plain", capt.getValue().getFirstHeader("Content-Type").getValue());
-		assertArrayEquals(new byte[] { 1, 2, 3, 4 }, IOUtils.toByteArray(post.getEntity().getContent()));
+		assertThat(capt.getValue().getFirstHeader("Content-Type").getValue()).isEqualTo("text/plain");
+		assertThat(IOUtils.toByteArray(post.getEntity().getContent())).containsExactly(new byte[]{1, 2, 3, 4});
 
 	}
 
@@ -112,12 +110,12 @@ public class BinaryClientTest {
 		IClient client = mtCtx.newRestfulClient(IClient.class, "http://foo");
 		client.create(res);
 
-		assertEquals(HttpPost.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpPost.class);
 		HttpPost post = (HttpPost) capt.getValue();
-		assertEquals("http://foo/Binary", post.getURI().toString());
+		assertThat(post.getURI().toString()).isEqualTo("http://foo/Binary");
 
 		assertThat(capt.getValue().getFirstHeader("Content-Type").getValue()).contains(Constants.CT_FHIR_JSON_NEW);
-		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"image/png\"}", IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8));
+		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8)).isEqualTo("{\"resourceType\":\"Binary\",\"contentType\":\"image/png\"}");
 
 	}
 

@@ -18,7 +18,7 @@ class CdsServiceResponseJsonTest {
         final List<CdsServiceResponseCardJson> actual = fixture.getCards();
 		//validate
 		assertThat(actual).isNotNull();
-		assertThat(actual.size()).isEqualTo(1);
+			assertThat(actual).hasSize(1);
 		assertThat(actual.get(0)).isEqualTo(expected);
     }
 

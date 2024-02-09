@@ -70,9 +70,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -97,7 +94,7 @@ public class ServerConformanceProviderDstu2Test {
 		String outcome = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info("Outcome: {}", outcome);
 
-		assertTrue(result.isSuccessful(), outcome);
+		assertThat(result.isSuccessful()).as(outcome).isTrue();
 	}
 
 	private HttpServletRequest createHttpServletRequest() {
@@ -144,11 +141,11 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		RestResource res = conformance.getRest().get(0).getResource().get(1);
-		assertEquals("Patient", res.getType());
+		assertThat(res.getType()).isEqualTo("Patient");
 
-		assertTrue(res.getConditionalCreate());
-		assertEquals(ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED, res.getConditionalDeleteElement().getValueAsEnum());
-		assertTrue(res.getConditionalUpdate());
+		assertThat(res.getConditionalCreate()).isTrue();
+		assertThat(res.getConditionalDeleteElement().getValueAsEnum()).isEqualTo(ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED);
+		assertThat(res.getConditionalUpdate()).isTrue();
 	}
 
 	@Test
@@ -167,9 +164,9 @@ public class ServerConformanceProviderDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertEquals(1, conformance.getRest().get(0).getOperation().size());
-		assertEquals("everything", conformance.getRest().get(0).getOperation().get(0).getName());
-		assertEquals("OperationDefinition/Patient-i-everything", conformance.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
+		assertThat(conformance.getRest().get(0).getOperation()).hasSize(1);
+		assertThat(conformance.getRest().get(0).getOperation().get(0).getName()).isEqualTo("everything");
+		assertThat(conformance.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue()).isEqualTo("OperationDefinition/Patient-i-everything");
 	}
 
 	@Test
@@ -187,8 +184,8 @@ public class ServerConformanceProviderDstu2Test {
 		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
 		validate(opDef);
 
-		assertEquals("everything", opDef.getCode());
-		assertEquals(true, opDef.getIdempotent().booleanValue());
+		assertThat(opDef.getCode()).isEqualTo("everything");
+		assertThat(opDef.getIdempotent().booleanValue()).isEqualTo(true);
 	}
 
 	@Test
@@ -229,12 +226,12 @@ public class ServerConformanceProviderDstu2Test {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
-				assertEquals("The patient's identifier", param.getDescription());
+				assertThat(param.getDescription()).isEqualTo("The patient's identifier");
 				found = true;
 			}
 		}
 
-		assertTrue(found);
+		assertThat(found).isTrue();
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -260,11 +257,11 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		RestResource res = conformance.getRest().get(0).getResource().get(1);
-		assertEquals("Patient", res.getType());
+		assertThat(res.getType()).isEqualTo("Patient");
 
-		assertNull(res.getConditionalCreate());
-		assertNull(res.getConditionalDelete());
-		assertNull(res.getConditionalUpdate());
+		assertThat(res.getConditionalCreate()).isNull();
+		assertThat(res.getConditionalDelete()).isNull();
+		assertThat(res.getConditionalUpdate()).isNull();
 	}
 
 	/**
@@ -285,7 +282,7 @@ public class ServerConformanceProviderDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertEquals(2, conformance.getRest().get(0).getOperation().size());
+		assertThat(conformance.getRest().get(0).getOperation()).hasSize(2);
 		List<String> operationNames = toOperationNames(conformance.getRest().get(0).getOperation());
 		assertThat(operationNames).containsExactlyInAnyOrder("someOp", "validate");
 
@@ -297,14 +294,14 @@ public class ServerConformanceProviderDstu2Test {
 			validate(opDef);
 
 			Set<String> types = toStrings(opDef.getType());
-			assertEquals("someOp", opDef.getCode());
-			assertEquals(true, opDef.getInstance());
-			assertEquals(false, opDef.getSystem());
+			assertThat(opDef.getCode()).isEqualTo("someOp");
+			assertThat(opDef.getInstance()).isEqualTo(true);
+			assertThat(opDef.getSystem()).isEqualTo(false);
 			assertThat(types).containsExactlyInAnyOrder("Patient", "Encounter");
-			assertEquals(2, opDef.getParameter().size());
-			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
-			assertEquals("date", opDef.getParameter().get(0).getType());
-			assertEquals("someOpParam2", opDef.getParameter().get(1).getName());
+			assertThat(opDef.getParameter()).hasSize(2);
+			assertThat(opDef.getParameter().get(0).getName()).isEqualTo("someOpParam1");
+			assertThat(opDef.getParameter().get(0).getType()).isEqualTo("date");
+			assertThat(opDef.getParameter().get(1).getName()).isEqualTo("someOpParam2");
 		}
 	}
 
@@ -388,17 +385,17 @@ public class ServerConformanceProviderDstu2Test {
 
 		Rest rest = conformance.getRestFirstRep();
 		RestResource res = rest.getResourceFirstRep();
-		assertEquals("DiagnosticReport", res.getType());
+		assertThat(res.getType()).isEqualTo("DiagnosticReport");
 
-		assertEquals(DiagnosticReport.SP_SUBJECT, res.getSearchParam().get(0).getName());
-		assertEquals("identifier", res.getSearchParam().get(0).getChain().get(0).getValue());
+		assertThat(res.getSearchParam().get(0).getName()).isEqualTo(DiagnosticReport.SP_SUBJECT);
+		assertThat(res.getSearchParam().get(0).getChain().get(0).getValue()).isEqualTo("identifier");
 
-		assertEquals(DiagnosticReport.SP_CODE, res.getSearchParam().get(1).getName());
+		assertThat(res.getSearchParam().get(1).getName()).isEqualTo(DiagnosticReport.SP_CODE);
 
-		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(2).getName());
+		assertThat(res.getSearchParam().get(2).getName()).isEqualTo(DiagnosticReport.SP_DATE);
 
-		assertEquals(1, res.getSearchInclude().size());
-		assertEquals("DiagnosticReport.result", res.getSearchIncludeFirstRep().getValue());
+		assertThat(res.getSearchInclude()).hasSize(1);
+		assertThat(res.getSearchIncludeFirstRep().getValue()).isEqualTo("DiagnosticReport.result");
 	}
 
 	@Test
@@ -467,7 +464,7 @@ public class ServerConformanceProviderDstu2Test {
 				found = true;
 			}
 		}
-		assertTrue(found);
+		assertThat(found).isTrue();
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -499,11 +496,11 @@ public class ServerConformanceProviderDstu2Test {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(24);
-				assertEquals("The organization at which this person is a patient", param.getDescription());
+				assertThat(param.getDescription()).isEqualTo("The organization at which this person is a patient");
 				found = true;
 			}
 		}
-		assertTrue(found);
+		assertThat(found).isTrue();
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -533,11 +530,11 @@ public class ServerConformanceProviderDstu2Test {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
-				assertEquals("The organization at which this person is a patient", param.getDescription());
+				assertThat(param.getDescription()).isEqualTo("The organization at which this person is a patient");
 				found = true;
 			}
 		}
-		assertTrue(found);
+		assertThat(found).isTrue();
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -546,9 +543,9 @@ public class ServerConformanceProviderDstu2Test {
 		RestResource resource = findRestResource(conformance, "Patient");
 
 		RestResourceSearchParam param = resource.getSearchParam().get(0);
-		assertEquals("bar", param.getChain().get(0).getValue());
-		assertEquals("foo", param.getChain().get(1).getValue());
-		assertEquals(2, param.getChain().size());
+		assertThat(param.getChain().get(0).getValue()).isEqualTo("bar");
+		assertThat(param.getChain().get(1).getValue()).isEqualTo("foo");
+		assertThat(param.getChain()).hasSize(2);
 	}
 
 	@Test
@@ -569,11 +566,11 @@ public class ServerConformanceProviderDstu2Test {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
-				assertEquals("The organization at which this person is a patient", param.getDescription());
+				assertThat(param.getDescription()).isEqualTo("The organization at which this person is a patient");
 				found = true;
 			}
 		}
-		assertTrue(found);
+		assertThat(found).isTrue();
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -581,13 +578,13 @@ public class ServerConformanceProviderDstu2Test {
 
 		RestResource resource = findRestResource(conformance, "Patient");
 
-		assertEquals(1, resource.getSearchParam().size());
+		assertThat(resource.getSearchParam()).hasSize(1);
 		RestResourceSearchParam param = resource.getSearchParam().get(0);
-		assertEquals("organization", param.getName());
-		assertEquals("bar", param.getChain().get(0).getValue());
-		assertEquals("baz.bob", param.getChain().get(1).getValue());
-		assertEquals("foo", param.getChain().get(2).getValue());
-		assertEquals(3, param.getChain().size());
+		assertThat(param.getName()).isEqualTo("organization");
+		assertThat(param.getChain().get(0).getValue()).isEqualTo("bar");
+		assertThat(param.getChain().get(1).getValue()).isEqualTo("baz.bob");
+		assertThat(param.getChain().get(2).getValue()).isEqualTo("foo");
+		assertThat(param.getChain()).hasSize(3);
 	}
 
 	@Test
@@ -643,7 +640,7 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance));
 
 		ValidationResult result = ourCtx.newValidator().validateWithResult(conformance);
-		assertTrue(result.isSuccessful(), result.getMessages().toString());
+		assertThat(result.isSuccessful()).as(result.getMessages().toString()).isTrue();
 	}
 
 	private List<String> toOperationIdParts(List<RestOperation> theOperation) {

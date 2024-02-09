@@ -23,7 +23,7 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -86,7 +86,7 @@ public class GraphQLEngineR5Test extends BaseValidationTestWithInlineMocks {
 			"    \"unit\":\"cm\"\n" +
 			"  }\n" +
 			"}";
-		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
+		assertThat(TestUtil.stripReturns(outputBuilder.toString())).isEqualTo(TestUtil.stripReturns(expected));
 
 	}
 
@@ -110,7 +110,7 @@ public class GraphQLEngineR5Test extends BaseValidationTestWithInlineMocks {
 		String expected = "{\n" +
 			"  \"id\":\"PATA\"\n" +
 			"}";
-		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
+		assertThat(TestUtil.stripReturns(outputBuilder.toString())).isEqualTo(TestUtil.stripReturns(expected));
 	}
 
 	@Test
@@ -133,7 +133,7 @@ public class GraphQLEngineR5Test extends BaseValidationTestWithInlineMocks {
 			"  \"id\":\"PATA\",\n" +
 			"  \"effectiveDateTime\":\"2022-01-01T12:12:12Z\"\n" +
 			"}";
-		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
+		assertThat(TestUtil.stripReturns(outputBuilder.toString())).isEqualTo(TestUtil.stripReturns(expected));
 	}
 
 
@@ -171,7 +171,7 @@ public class GraphQLEngineR5Test extends BaseValidationTestWithInlineMocks {
 			"    }\n" +
 			"  }\n" +
 			"}";
-		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
+		assertThat(TestUtil.stripReturns(outputBuilder.toString())).isEqualTo(TestUtil.stripReturns(expected));
 
 	}
 

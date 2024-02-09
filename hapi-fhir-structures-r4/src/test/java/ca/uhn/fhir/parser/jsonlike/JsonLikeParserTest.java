@@ -39,9 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class JsonLikeParserTest {
 	private static FhirContext ourCtx = FhirContext.forR4();
@@ -65,7 +63,7 @@ public class JsonLikeParserTest {
 		IJsonLikeParser jsonLikeparser = (IJsonLikeParser)ourCtx.newJsonParser();
 		
 		IBaseResource resource = jsonLikeparser.parseResource(jsonLikeStructure);
-		assertEquals(parsed.getClass().getName(), resource.getClass().getName(), "reparsed resource classes not equal");
+		assertThat(resource.getClass().getName()).as("reparsed resource classes not equal").isEqualTo(parsed.getClass().getName());
 	}
 
 	@Test
@@ -80,7 +78,7 @@ public class JsonLikeParserTest {
 		jsonLikeStructure.load(stringReader);
 
 		// then
-		assertNotNull(jsonLikeStructure.getRootObject());
+		assertThat(jsonLikeStructure.getRootObject()).isNotNull();
 
 	}
 
@@ -103,20 +101,20 @@ public class JsonLikeParserTest {
 		
 		System.out.println("encoded map: " + jsonLikeMap.toString());
 
-		assertNotNull(jsonLikeMap.get("resourceType"), "Encoded resource missing 'resourceType' element");
-		assertEquals(jsonLikeMap.get("resourceType"), "Patient", "Expecting 'resourceType'='Patient'; found '"+jsonLikeMap.get("resourceType")+"'");
+		assertThat(jsonLikeMap.get("resourceType")).as("Encoded resource missing 'resourceType' element").isNotNull();
+		assertThat("Patient").as("Expecting 'resourceType'='Patient'; found '" + jsonLikeMap.get("resourceType") + "'").isEqualTo(jsonLikeMap.get("resourceType"));
 
-		assertNotNull(jsonLikeMap.get("extension"), "Encoded resource missing 'extension' element");
-		assertTrue((jsonLikeMap.get("extension") instanceof List), "'extension' element is not a List");
+		assertThat(jsonLikeMap.get("extension")).as("Encoded resource missing 'extension' element").isNotNull();
+		assertThat((jsonLikeMap.get("extension") instanceof List)).as("'extension' element is not a List").isTrue();
 		
 		List<Object> extensions = (List<Object>)jsonLikeMap.get("extension");
-		assertEquals( 1, extensions.size(), "'extnesion' array has more than one entry");
-		assertTrue((extensions.get(0) instanceof Map), "'extension' array entry is not a Map");
+		assertThat(extensions.size()).as("'extnesion' array has more than one entry").isEqualTo(1);
+		assertThat((extensions.get(0) instanceof Map)).as("'extension' array entry is not a Map").isTrue();
 		
 		Map<String, Object> extension = (Map<String,Object>)extensions.get(0);
-		assertNotNull(extension.get("url"), "'extension' entry missing 'url' member");
-		assertTrue((extension.get("url") instanceof String), "'extension' entry 'url' member is not a String");
-		assertEquals("x1", extension.get("url"), "Expecting '/extension[]/url' = 'x1'; found '"+extension.get("url")+"'");
+		assertThat(extension.get("url")).as("'extension' entry missing 'url' member").isNotNull();
+		assertThat((extension.get("url") instanceof String)).as("'extension' entry 'url' member is not a String").isTrue();
+		assertThat(extension.get("url")).as("Expecting '/extension[]/url' = 'x1'; found '" + extension.get("url") + "'").isEqualTo("x1");
 	
 	}
 
@@ -144,33 +142,33 @@ public class JsonLikeParserTest {
 		IJsonLikeParser parser = (IJsonLikeParser)ourCtx.newJsonParser();
 		Patient nonExt = parser.parseResource(Patient.class, jsonStructure);
 
-		assertEquals(Patient.class, nonExt.getClass());
-		assertEquals("urn:sys", nonExt.getIdentifier().get(0).getSystem());
-		assertEquals("id1", nonExt.getIdentifier().get(0).getValue());
-		assertEquals("urn:sys", nonExt.getIdentifier().get(1).getSystem());
-		assertEquals("id2", nonExt.getIdentifier().get(1).getValue());
+		assertThat(nonExt.getClass()).isEqualTo(Patient.class);
+		assertThat(nonExt.getIdentifier().get(0).getSystem()).isEqualTo("urn:sys");
+		assertThat(nonExt.getIdentifier().get(0).getValue()).isEqualTo("id1");
+		assertThat(nonExt.getIdentifier().get(1).getSystem()).isEqualTo("urn:sys");
+		assertThat(nonExt.getIdentifier().get(1).getValue()).isEqualTo("id2");
 
 		List<Extension> ext = nonExt.getExtensionsByUrl("urn:ext");
-		assertEquals(1, ext.size());
-		assertEquals("urn:ext", ext.get(0).getUrl());
-		assertEquals(IntegerType.class, ext.get(0).getValueAsPrimitive().getClass());
-		assertEquals("100", ext.get(0).getValueAsPrimitive().getValueAsString());
+		assertThat(ext).hasSize(1);
+		assertThat(ext.get(0).getUrl()).isEqualTo("urn:ext");
+		assertThat(ext.get(0).getValueAsPrimitive().getClass()).isEqualTo(IntegerType.class);
+		assertThat(ext.get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("100");
 
 		List<Extension> modExt = nonExt.getExtensionsByUrl("urn:modExt");
-		assertEquals(1, modExt.size());
-		assertEquals("urn:modExt", modExt.get(0).getUrl());
-		assertEquals(IntegerType.class, modExt.get(0).getValueAsPrimitive().getClass());
-		assertEquals("200", modExt.get(0).getValueAsPrimitive().getValueAsString());
+		assertThat(modExt).hasSize(1);
+		assertThat(modExt.get(0).getUrl()).isEqualTo("urn:modExt");
+		assertThat(modExt.get(0).getValueAsPrimitive().getClass()).isEqualTo(IntegerType.class);
+		assertThat(modExt.get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("200");
 
 		ExtPatient va = ourCtx.newViewGenerator().newView(nonExt, ExtPatient.class);
-		assertEquals("urn:sys", va.getIdentifier().get(0).getSystem());
-		assertEquals("id1", va.getIdentifier().get(0).getValue());
-		assertEquals("urn:sys", va.getIdentifier().get(1).getSystem());
-		assertEquals("id2", va.getIdentifier().get(1).getValue());
-		assertEquals(100, va.getExt().getValue().intValue());
-		assertEquals(200, va.getModExt().getValue().intValue());
+		assertThat(va.getIdentifier().get(0).getSystem()).isEqualTo("urn:sys");
+		assertThat(va.getIdentifier().get(0).getValue()).isEqualTo("id1");
+		assertThat(va.getIdentifier().get(1).getSystem()).isEqualTo("urn:sys");
+		assertThat(va.getIdentifier().get(1).getValue()).isEqualTo("id2");
+		assertThat(va.getExt().getValue().intValue()).isEqualTo(100);
+		assertThat(va.getModExt().getValue().intValue()).isEqualTo(200);
 
-		assertEquals(0, va.getExtension().size());
+		assertThat(va.getExtension()).isEmpty();
 	}
 
 	private IBaseParameters getUploadTerminologyCommandInputParametersForLoinc() throws IOException {

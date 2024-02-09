@@ -129,10 +129,10 @@ class LoincCodingPropertiesHandlerTest {
 
 			// JUnit assertions
 			List<ILoggingEvent> logsList = testListAppender.list;
-			assertThat(logsList.size()).isEqualTo(1);
+			assertThat(logsList).hasSize(1);
 			assertThat(logsList.get(0).getLevel()).isEqualTo(Level.ERROR);
-			assertThat(logsList.get(0).getFormattedMessage().startsWith("Couldn't find TermConcept for code: 'ref-code-02'")).isTrue();
-			assertThat(logsList.get(0).getFormattedMessage().contains(thePropName)).isTrue();
+			assertThat(logsList.get(0).getFormattedMessage()).startsWith("Couldn't find TermConcept for code: 'ref-code-02'");
+			assertThat(logsList.get(0).getFormattedMessage()).contains(thePropName);
 
 		} finally {
 			testLogger.detachAppender(testListAppender);

@@ -55,7 +55,7 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(patient);
 
 		// verify
-		assertThat(oPreviousPatient.isPresent()).isTrue();
+		assertThat(oPreviousPatient).isPresent();
 		Patient previousPatient = oPreviousPatient.get();
 		assertThat(previousPatient.getGenderElement().getValue()).isEqualTo(Enumerations.AdministrativeGender.MALE);
 	}
@@ -91,7 +91,7 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(currentDeletedVersion);
 
 		// verify
-		assertThat(oPreviousPatient.isPresent()).isTrue();
+		assertThat(oPreviousPatient).isPresent();
 		Patient previousPatient = oPreviousPatient.get();
 		assertThat(previousPatient.getGenderElement().getValue()).isEqualTo(Enumerations.AdministrativeGender.MALE);
 	}
@@ -115,7 +115,7 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(latestUndeletedVersion, true);
 
 		// verify
-		assertThat(oPreviousPatient.isPresent()).isTrue();
+		assertThat(oPreviousPatient).isPresent();
 		Patient previousPatient = oPreviousPatient.get();
 		assertThat(previousPatient.isDeleted()).isTrue();
 	}

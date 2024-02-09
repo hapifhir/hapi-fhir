@@ -32,7 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CustomTypeServerDstu2_1 {
 	private static final FhirContext ourCtx = FhirContext.forDstu2_1();
@@ -76,7 +76,7 @@ public class CustomTypeServerDstu2_1 {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 	}
 
 	@Test
@@ -96,9 +96,9 @@ public class CustomTypeServerDstu2_1 {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
+		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)");
 	}
 
 	@Test
@@ -118,9 +118,9 @@ public class CustomTypeServerDstu2_1 {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertEquals(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
+		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)");
 	}
 
 

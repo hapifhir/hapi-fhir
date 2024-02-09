@@ -830,10 +830,10 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Parameters diff;
 
 		diff = myClient.operation().onInstance("Patient/A").named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 
 		diff = myClient.operation().onInstanceVersion(new IdType("Patient/A/_history/2")).named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 
 		try {
 			myClient.operation().onInstance("Observation/B").named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
@@ -872,7 +872,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withParameter(Parameters.class, ProviderConstants.DIFF_FROM_PARAMETER, new StringType("Patient/A"))
 			.andParameter(ProviderConstants.DIFF_TO_PARAMETER, new StringType("Patient/B"))
 			.execute();
-		assertThat(diff.getParameter().size()).isEqualTo(2);
+		assertThat(diff.getParameter()).hasSize(2);
 
 		try {
 			myClient
@@ -961,7 +961,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		request.addEntry().setResource(o).getRequest().setMethod(Bundle.HTTPVerb.POST);
 
 		Bundle resp = myClient.transaction().withBundle(request).execute();
-		assertThat(resp.getEntry().size()).isEqualTo(2);
+		assertThat(resp.getEntry()).hasSize(2);
 
 
 	}
@@ -1114,7 +1114,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withBundle(bundle)
 			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
 			.execute();
-		assertThat(resp.getEntry().size()).isEqualTo(3);
+		assertThat(resp.getEntry()).hasSize(3);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 	}
 
@@ -1148,7 +1148,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withNoParameters(Parameters.class)
 			.returnResourceType(Bundle.class)
 			.execute();
-		assertThat(outcome.getEntry().size()).isEqualTo(2);
+		assertThat(outcome.getEntry()).hasSize(2);
 
 		// Add an Encounter, which will be returned by $everything but that hasn't been
 		// explicitly authorized

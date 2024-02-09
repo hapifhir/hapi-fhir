@@ -33,7 +33,7 @@ class TermReadSvcUtilTest {
 		@Test
 		void startWithLoincGenericValuesetIdPluSlashPlusIdReturnsId() {
 			Optional<String> result = TermReadSvcUtil.getValueSetId("http://loinc.org/vs/radiology-playbook");
-			assertThat(result.isPresent()).isTrue();
+			assertThat(result).isPresent();
 		}
 	}
 

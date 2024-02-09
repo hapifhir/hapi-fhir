@@ -25,7 +25,6 @@ import jakarta.annotation.Nullable;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ThymeleafNarrativeGeneratorTest {
 
@@ -91,7 +90,7 @@ public class ThymeleafNarrativeGeneratorTest {
 	@Test
 	public void testTemplateCount() throws IOException {
 		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:narrative2/narratives.properties");
-		assertEquals(4, manifest.getNamedTemplateCount());
+		assertThat(manifest.getNamedTemplateCount()).isEqualTo(4);
 	}
 
 
@@ -102,7 +101,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		String output = gen.generateResourceNarrative(ourCtx, new Bundle());
 		ourLog.info("Output:\n{}", output);
 
-		assertEquals("<html> This is some content <div> Fragment-1-content blah </div></html>", output);
+		assertThat(output).isEqualTo("<html> This is some content <div> Fragment-1-content blah </div></html>");
 	}
 
 	@Test
@@ -117,7 +116,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		String output = gen.generateResourceNarrative(ourCtx, ms);
 		ourLog.info("Output:\n{}", output);
 
-		assertEquals("<div> Some Text</div>", output);
+		assertThat(output).isEqualTo("<div> Some Text</div>");
 	}
 
 	@Test
@@ -146,7 +145,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		String output = gen.generateResourceNarrative(ourCtx, ms);
 		ourLog.info("Output:\n{}", output);
 
-		assertEquals("<div> Other Med</div>", output);
+		assertThat(output).isEqualTo("<div> Other Med</div>");
 	}
 
 

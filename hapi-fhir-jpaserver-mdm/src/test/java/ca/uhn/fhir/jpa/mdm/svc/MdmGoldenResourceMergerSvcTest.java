@@ -89,15 +89,15 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	
 	@Test
 	public void emptyMerge() {
-		assertThat(getAllGoldenPatients().size()).isEqualTo(2);
-		assertThat(getAllRedirectedGoldenPatients().size()).isEqualTo(0);
+		assertThat(getAllGoldenPatients()).hasSize(2);
+		assertThat(getAllRedirectedGoldenPatients()).isEmpty();
 
 		Patient mergedGoldenPatient = mergeGoldenPatients();
 
 		assertThat(mergedGoldenPatient.getIdElement()).isEqualTo(myToGoldenPatient.getIdElement());
 		assertThat(mergedGoldenPatient, sameGoldenResourceAs(mergedGoldenPatient));
-		assertThat(getAllGoldenPatients().size()).isEqualTo(1);
-		assertThat(getAllRedirectedGoldenPatients().size()).isEqualTo(1);
+		assertThat(getAllGoldenPatients()).hasSize(1);
+		assertThat(getAllRedirectedGoldenPatients()).hasSize(1);
 	}
 
 	private Patient mergeGoldenPatients() {
@@ -240,7 +240,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		Patient mergedGoldenPatient = mergeGoldenPatients();
 		List<MdmLink> links = getNonRedirectLinksByGoldenResource(mergedGoldenPatient);
-		assertThat(links.size()).isEqualTo(1);
+		assertThat(links).hasSize(1);
 		assertThat(mergedGoldenPatient, possibleLinkedTo(myTargetPatient1));
 	}
 
@@ -250,7 +250,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		Patient mergedSourcePatient = mergeGoldenPatients();
 		List<MdmLink> links = getNonRedirectLinksByGoldenResource(mergedSourcePatient);
-		assertThat(links.size()).isEqualTo(1);
+		assertThat(links).hasSize(1);
 		assertThat(mergedSourcePatient, possibleLinkedTo(myTargetPatient1));
 	}
 
@@ -313,7 +313,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		mergeGoldenPatients();
 		List<MdmLink> links = getNonRedirectLinksByGoldenResource(myToGoldenPatient);
-		assertThat(links.size()).isEqualTo(1);
+		assertThat(links).hasSize(1);
 		assertThat(links.get(0).getLinkSource()).isEqualTo(MdmLinkSourceEnum.MANUAL);
 		assertThat(links.get(0).getMatchResult()).isEqualTo(MdmMatchResultEnum.NO_MATCH);
 	}
@@ -329,7 +329,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		mergeGoldenPatients();
 		List<MdmLink> links = getNonRedirectLinksByGoldenResource(myToGoldenPatient);
-		assertThat(links.size()).isEqualTo(1);
+		assertThat(links).hasSize(1);
 		assertThat(links.get(0).getLinkSource()).isEqualTo(MdmLinkSourceEnum.MANUAL);
 		assertThat(links.get(0).getMatchResult()).isEqualTo(MdmMatchResultEnum.NO_MATCH);
 	}
@@ -428,7 +428,7 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 	private void assertResourceHasLinkCount(IBaseResource theResource, int theCount) {
 		List<? extends IMdmLink> links = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theResource);
-		assertThat(links.size()).isEqualTo(theCount);
+		assertThat(links).hasSize(theCount);
 	}
 
 	@Test

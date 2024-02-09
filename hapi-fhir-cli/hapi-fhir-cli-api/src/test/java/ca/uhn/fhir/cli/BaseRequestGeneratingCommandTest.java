@@ -18,8 +18,7 @@ import static ca.uhn.fhir.cli.BaseRequestGeneratingCommand.BaseRequestGenerating
 import static ca.uhn.fhir.cli.BaseRequestGeneratingCommand.BaseRequestGeneratingCommandOptions.HEADER_PASSTHROUGH;
 import static ca.uhn.fhir.cli.BaseRequestGeneratingCommand.BaseRequestGeneratingCommandOptions.VERSION;
 import static ca.uhn.fhir.cli.BaseRequestGeneratingCommand.BaseRequestGeneratingCommandOptions.values;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BaseRequestGeneratingCommandTest {
@@ -32,14 +31,14 @@ class BaseRequestGeneratingCommandTest {
 	@Test
 	void getOptions() {
 		Options options = tested.getOptions();
-		assertEquals(7, options.getOptions().size());
-		assertTrue(options.hasShortOption(BaseCommand.FHIR_VERSION_PARAM));
-		assertTrue(options.hasShortOption(BaseCommand.BASE_URL_PARAM));
-		assertTrue(options.hasShortOption(BaseCommand.BASIC_AUTH_PARAM));
-		assertTrue(options.hasShortOption(BaseCommand.BEARER_TOKEN_PARAM_NAME));
-		assertTrue(options.hasShortOption(BaseCommand.VERBOSE_LOGGING_PARAM));
-		assertTrue(options.hasShortOption(BaseRequestGeneratingCommand.HEADER_PASSTHROUGH));
-		assertTrue(options.hasShortOption(BaseRequestGeneratingCommand.TLS_AUTH_PARAM_NAME));
+		assertThat(options.getOptions()).hasSize(7);
+		assertThat(options.hasShortOption(BaseCommand.FHIR_VERSION_PARAM)).isTrue();
+		assertThat(options.hasShortOption(BaseCommand.BASE_URL_PARAM)).isTrue();
+		assertThat(options.hasShortOption(BaseCommand.BASIC_AUTH_PARAM)).isTrue();
+		assertThat(options.hasShortOption(BaseCommand.BEARER_TOKEN_PARAM_NAME)).isTrue();
+		assertThat(options.hasShortOption(BaseCommand.VERBOSE_LOGGING_PARAM)).isTrue();
+		assertThat(options.hasShortOption(BaseRequestGeneratingCommand.HEADER_PASSTHROUGH)).isTrue();
+		assertThat(options.hasShortOption(BaseRequestGeneratingCommand.TLS_AUTH_PARAM_NAME)).isTrue();
 	}
 
 	@ParameterizedTest(name = "Excluding {0}")
@@ -52,11 +51,11 @@ class BaseRequestGeneratingCommandTest {
 
 		// BASIC_AUTH exclusion excludes 2 options
 		int expectedSize = excludedOption == BASIC_AUTH ? 5 : 6;
-		assertEquals(expectedSize, options.getOptions().size());
+		assertThat(options.getOptions()).hasSize(expectedSize);
 
-		assertFalse(options.hasShortOption(getOptionForExcludedOption(excludedOption)));
+		assertThat(options.hasShortOption(getOptionForExcludedOption(excludedOption))).isFalse();
 		if (excludedOption == BASIC_AUTH) {
-			assertFalse(options.hasLongOption(BaseCommand.BEARER_TOKEN_PARAM_LONGOPT));
+			assertThat(options.hasLongOption(BaseCommand.BEARER_TOKEN_PARAM_LONGOPT)).isFalse();
 		}
 
 		Arrays.stream(values())
@@ -98,12 +97,12 @@ class BaseRequestGeneratingCommandTest {
 	void getSomeOptionsExcludeTwo() {
 		Options options = tested.getSomeOptions(Lists.newArrayList(VERSION, HEADER_PASSTHROUGH));
 
-		assertEquals(5, options.getOptions().size());
-		assertTrue(options.hasShortOption(BaseCommand.BASE_URL_PARAM));
-		assertTrue(options.hasShortOption(BaseCommand.BASIC_AUTH_PARAM));
-		assertTrue(options.hasShortOption(BaseCommand.BEARER_TOKEN_PARAM_NAME));
-		assertTrue(options.hasShortOption(BaseCommand.VERBOSE_LOGGING_PARAM));
-		assertTrue(options.hasShortOption(BaseCommand.TLS_AUTH_PARAM_NAME));
+		assertThat(options.getOptions()).hasSize(5);
+		assertThat(options.hasShortOption(BaseCommand.BASE_URL_PARAM)).isTrue();
+		assertThat(options.hasShortOption(BaseCommand.BASIC_AUTH_PARAM)).isTrue();
+		assertThat(options.hasShortOption(BaseCommand.BEARER_TOKEN_PARAM_NAME)).isTrue();
+		assertThat(options.hasShortOption(BaseCommand.VERBOSE_LOGGING_PARAM)).isTrue();
+		assertThat(options.hasShortOption(BaseCommand.TLS_AUTH_PARAM_NAME)).isTrue();
 	}
 
 

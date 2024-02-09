@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -16,8 +15,8 @@ public class ModelR4BTest {
 
 	@Test
 	public void testbase64BinaryName() {
-		assertEquals("base64Binary", ourCtx.getElementDefinition("base64binary").getName());
-		assertEquals("base64Binary", ourCtx.getElementDefinition("base64Binary").getName());
+		assertThat(ourCtx.getElementDefinition("base64binary").getName()).isEqualTo("base64Binary");
+		assertThat(ourCtx.getElementDefinition("base64Binary").getName()).isEqualTo("base64Binary");
 	}
 
 	@Test

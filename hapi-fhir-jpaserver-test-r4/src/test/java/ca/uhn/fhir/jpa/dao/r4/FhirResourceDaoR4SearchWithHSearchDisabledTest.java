@@ -278,7 +278,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		map.add("code", new TokenParam("http://fooVS").setModifier(TokenParamModifier.IN));
 		IBundleProvider results = myObservationDao.search(map);
 		List<IBaseResource> resultsList = results.getResources(0, 10);
-		assertThat(resultsList.size()).isEqualTo(1);
+		assertThat(resultsList).hasSize(1);
 		assertThat(resultsList.get(0).getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(obs1id);
 
 	}
@@ -297,7 +297,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
 		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
-		assertThat(expansion.getExpansion().getContains().size()).isEqualTo(6);
+		assertThat(expansion.getExpansion().getContains()).hasSize(6);
 
 	}
 
@@ -321,12 +321,12 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
 		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
-		assertThat(expansion.getExpansion().getContains().size()).isEqualTo(5);
+		assertThat(expansion.getExpansion().getContains()).hasSize(5);
 
 		ValueSet expansion2 = myValueSetDao.expandByIdentifier("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", null);
 		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion2));
 
-		assertThat(expansion2.getExpansion().getContains().size()).isEqualTo(22);
+		assertThat(expansion2.getExpansion().getContains()).hasSize(22);
 
 	}
 

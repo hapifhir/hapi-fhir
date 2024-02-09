@@ -13,14 +13,14 @@ public class QualifiedParamListTest {
 	@Test
 	public void testSplit1() {
 		List<String> actual = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null,"aaa");
-		assertThat(actual.size()).isEqualTo(1);
+		assertThat(actual).hasSize(1);
 		assertThat(actual.get(0)).isEqualTo("aaa");
 	}
 	
 	@Test
 	public void testSplit2() {
 		List<String> actual = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null,"aaa,bbb");
-		assertThat(actual.size()).isEqualTo(2);
+		assertThat(actual).hasSize(2);
 		assertThat(actual.get(0)).isEqualTo("aaa");
 		assertThat(actual.get(1)).isEqualTo("bbb");
 	}
@@ -29,7 +29,7 @@ public class QualifiedParamListTest {
 	public void testSplit3() {
 		List<String> actual = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null,"aaa,b\\,bb");
 		System.out.println(actual);
-		assertThat(actual.size()).isEqualTo(2);
+		assertThat(actual).hasSize(2);
 		assertThat(actual.get(0)).isEqualTo("aaa");
 		assertThat(actual.get(1)).isEqualTo("b,bb");
 	}

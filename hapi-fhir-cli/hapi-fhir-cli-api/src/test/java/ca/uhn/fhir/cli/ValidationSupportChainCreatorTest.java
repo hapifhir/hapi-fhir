@@ -8,7 +8,7 @@ import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ValidationSupportChainCreatorTest {
 
@@ -34,6 +34,6 @@ public class ValidationSupportChainCreatorTest {
 		ValidationSupportChain chain = ValidationSupportChainCreator.getValidationSupportChainR4(myContextR4, commandLine);
 		StructureDefinition structureDefinition = (StructureDefinition) chain.fetchStructureDefinition("https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient");
 
-		assertEquals(structureDefinition.getName(), "Profile_MII_Patient_PatientIn");
+		assertThat("Profile_MII_Patient_PatientIn").isEqualTo(structureDefinition.getName());
 	}
 }

@@ -28,9 +28,6 @@ import static ca.uhn.fhir.rest.api.RequestTypeEnum.GET;
 import static ca.uhn.fhir.rest.api.RequestTypeEnum.POST;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.fail;
 
 import static org.mockito.Mockito.when;
@@ -44,46 +41,46 @@ public class RestfulServerUtilsTest {
 	@Test
 	public void testParsePreferReturn() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "return=representation");
-		assertEquals(PreferReturnEnum.REPRESENTATION, header.getReturn());
-		assertFalse(header.getRespondAsync());
+		assertThat(header.getReturn()).isEqualTo(PreferReturnEnum.REPRESENTATION);
+		assertThat(header.getRespondAsync()).isFalse();
 	}
 
 	@Test
 	public void testParsePreferReturnAndAsync() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "return=OperationOutcome; respond-async");
-		assertEquals(PreferReturnEnum.OPERATION_OUTCOME, header.getReturn());
-		assertTrue(header.getRespondAsync());
+		assertThat(header.getReturn()).isEqualTo(PreferReturnEnum.OPERATION_OUTCOME);
+		assertThat(header.getRespondAsync()).isTrue();
 	}
 
 	@Test
 	public void testParsePreferAsync() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "respond-async");
-		assertEquals(null, header.getReturn());
-		assertTrue(header.getRespondAsync());
+		assertThat(header.getReturn()).isEqualTo(null);
+		assertThat(header.getRespondAsync()).isTrue();
 	}
 
 	@Test
 	public void testParseHandlingLenient() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "handling=lenient");
-		assertEquals(null, header.getReturn());
-		assertFalse(header.getRespondAsync());
-		assertEquals(PreferHandlingEnum.LENIENT, header.getHanding());
+		assertThat(header.getReturn()).isEqualTo(null);
+		assertThat(header.getRespondAsync()).isFalse();
+		assertThat(header.getHanding()).isEqualTo(PreferHandlingEnum.LENIENT);
 	}
 
 	@Test
 	public void testParseHandlingLenientAndReturnRepresentation_CommaSeparatd() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "handling=lenient, return=representation");
-		assertEquals(PreferReturnEnum.REPRESENTATION, header.getReturn());
-		assertFalse(header.getRespondAsync());
-		assertEquals(PreferHandlingEnum.LENIENT, header.getHanding());
+		assertThat(header.getReturn()).isEqualTo(PreferReturnEnum.REPRESENTATION);
+		assertThat(header.getRespondAsync()).isFalse();
+		assertThat(header.getHanding()).isEqualTo(PreferHandlingEnum.LENIENT);
 	}
 
 	@Test
 	public void testParseHandlingLenientAndReturnRepresentation_SemicolonSeparatd() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "handling=lenient; return=representation");
-		assertEquals(PreferReturnEnum.REPRESENTATION, header.getReturn());
-		assertFalse(header.getRespondAsync());
-		assertEquals(PreferHandlingEnum.LENIENT, header.getHanding());
+		assertThat(header.getReturn()).isEqualTo(PreferReturnEnum.REPRESENTATION);
+		assertThat(header.getRespondAsync()).isFalse();
+		assertThat(header.getHanding()).isEqualTo(PreferHandlingEnum.LENIENT);
 	}
 
 	@ParameterizedTest
@@ -123,8 +120,8 @@ public class RestfulServerUtilsTest {
 			}
 		} else {
 			RestfulServerUtils.DeleteCascadeDetails outcome = RestfulServerUtils.extractDeleteCascadeParameter(myRequestDetails);
-			assertEquals(theExpectedMode, outcome.getMode());
-			assertEquals(theExpectedMaxRounds, outcome.getMaxRounds());
+			assertThat(outcome.getMode()).isEqualTo(theExpectedMode);
+			assertThat(outcome.getMaxRounds()).isEqualTo(theExpectedMaxRounds);
 		}
 	}
 
@@ -174,7 +171,7 @@ public class RestfulServerUtilsTest {
 		//Then
 		String linkSelfWithoutGivenParameters = RestfulServerUtils.createLinkSelfWithoutGivenParameters(theServerBaseUrl, servletRequestDetails, null);
 		//Test
-		assertEquals(theExpectedUrl, linkSelfWithoutGivenParameters);
+		assertThat(linkSelfWithoutGivenParameters).isEqualTo(theExpectedUrl);
 	}
 	static Stream<Arguments> testParameters(){
 		return Stream.of(

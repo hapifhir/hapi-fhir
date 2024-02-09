@@ -296,7 +296,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			myObservationDao.update(observation);
 
 			// Make sure we're not introducing any extra DB operations
-			assertThat(myCaptureQueriesListener.logSelectQueries().size()).isEqualTo(5);
+			assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(5);
 
 			// Read back and verify that reference is now versioned
 			observation = myObservationDao.read(observationId);
@@ -434,7 +434,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			assertThat(observationId.getVersionIdPart()).isEqualTo("1");
 
 			// Make sure we're not introducing any extra DB operations
-			assertThat(myCaptureQueriesListener.logSelectQueries().size()).isEqualTo(3);
+			assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(3);
 
 			// Read back and verify that reference is now versioned
 			observation = myObservationDao.read(observationId);
@@ -473,7 +473,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			assertThat(observationId.getVersionIdPart()).isEqualTo("1");
 
 			// Make sure we're not introducing any extra DB operations
-			assertThat(myCaptureQueriesListener.logSelectQueries().size()).isEqualTo(4);
+			assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(4);
 
 			// Read back and verify that reference is now versioned
 			observation = myObservationDao.read(observationId);
@@ -653,7 +653,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			IBundleProvider outcome = myObservationDao.search(new SearchParameterMap().addInclude(IBaseResource.INCLUDE_ALL));
 			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(1);
 			List<IBaseResource> resources = outcome.getResources(0, 1);
-			assertThat(resources.size()).isEqualTo(2);
+			assertThat(resources).hasSize(2);
 			assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(observationId.getValue());
 			assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(patientId.withVersion("1").getValue());
 		}
@@ -663,7 +663,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			IBundleProvider outcome = myObservationDao.search(new SearchParameterMap().addInclude(Observation.INCLUDE_PATIENT));
 			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(1);
 			List<IBaseResource> resources = outcome.getResources(0, 1);
-			assertThat(resources.size()).isEqualTo(2);
+			assertThat(resources).hasSize(2);
 			assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(observationId.getValue());
 			assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(patientId.withVersion("1").getValue());
 		}
@@ -694,7 +694,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous().addInclude(IBaseResource.INCLUDE_ALL));
 			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(2);
 			List<IBaseResource> resources = outcome.getResources(0, 2);
-			assertThat(resources.size()).isEqualTo(2);
+			assertThat(resources).hasSize(2);
 			assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(observationId.getValue());
 			assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(patientId.withVersion("1").getValue());
 		}
@@ -704,7 +704,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous().addInclude(Observation.INCLUDE_PATIENT));
 			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(2);
 			List<IBaseResource> resources = outcome.getResources(0, 2);
-			assertThat(resources.size()).isEqualTo(2);
+			assertThat(resources).hasSize(2);
 			assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(observationId.getValue());
 			assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(patientId.withVersion("1").getValue());
 		}
@@ -745,7 +745,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		outcome = myTaskDao.search(SearchParameterMap.newSynchronous().addInclude(Task.INCLUDE_BASED_ON));
 		assertThat(outcome.size()).isEqualTo(2);
 		resources = outcome.getResources(0, 2);
-		assertThat(resources.size()).isEqualTo(2);
+		assertThat(resources).hasSize(2);
 		assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(taskId.getValue());
 		assertThat(((Task) resources.get(0)).getBasedOn().get(0).getReference()).isEqualTo(conditionId.getValue());
 		assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(conditionId.withVersion("1").getValue());
@@ -854,7 +854,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			IBundleProvider outcome = myObservationDao.search(new SearchParameterMap().addInclude(IBaseResource.INCLUDE_ALL));
 			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(1);
 			List<IBaseResource> resources = outcome.getResources(0, 1);
-			assertThat(resources.size()).isEqualTo(2);
+			assertThat(resources).hasSize(2);
 			assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(observationId.getValue());
 			assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(patientId.withVersion("2").getValue());
 		}
@@ -864,7 +864,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			IBundleProvider outcome = myObservationDao.search(new SearchParameterMap().addInclude(Observation.INCLUDE_PATIENT));
 			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(1);
 			List<IBaseResource> resources = outcome.getResources(0, 1);
-			assertThat(resources.size()).isEqualTo(2);
+			assertThat(resources).hasSize(2);
 			assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(observationId.getValue());
 			assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(patientId.withVersion("2").getValue());
 		}
@@ -899,7 +899,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous().addInclude(IBaseResource.INCLUDE_ALL));
 			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(2);
 			List<IBaseResource> resources = outcome.getResources(0, 2);
-			assertThat(resources.size()).isEqualTo(2);
+			assertThat(resources).hasSize(2);
 			assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(observationId.getValue());
 			assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(patientId.withVersion("2").getValue());
 		}
@@ -909,7 +909,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous().addInclude(Observation.INCLUDE_PATIENT));
 			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(2);
 			List<IBaseResource> resources = outcome.getResources(0, 2);
-			assertThat(resources.size()).isEqualTo(2);
+			assertThat(resources).hasSize(2);
 			assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(observationId.getValue());
 			assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(patientId.withVersion("2").getValue());
 		}
@@ -974,7 +974,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 				bundle);
 			fail("We expect invalid full urls to fail");
 		} catch (InvalidRequestException ex) {
-			assertThat(ex.getMessage().contains("Unable to perform POST, URL provided is invalid:")).isTrue();
+			assertThat(ex.getMessage()).contains("Unable to perform POST, URL provided is invalid:");
 		}
 	}
 
@@ -987,7 +987,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			bundle);
 
 		// verify it was created
-		assertThat(outcome.getEntry().size()).isEqualTo(1);
+		assertThat(outcome.getEntry()).hasSize(1);
 		IdType idType = new IdType(bundle.getEntry().get(0)
 				.getResource().getId());
 		// the bundle above contains an observation, so we'll verify it was created here

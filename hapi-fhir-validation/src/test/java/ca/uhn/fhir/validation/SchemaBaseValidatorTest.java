@@ -8,7 +8,6 @@ import org.junit.jupiter.api.Test;
 import javax.xml.transform.Source;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -18,7 +17,7 @@ public class SchemaBaseValidatorTest extends BaseValidationTestWithInlineMocks {
 	public void testLoadXmlSuccess() {
 		SchemaBaseValidator validator = new SchemaBaseValidator(FhirContext.forR4());
 		Source schema = validator.loadXml("fhir-single.xsd");
-		assertNotNull(schema);
+		assertThat(schema).isNotNull();
 	}
 
 

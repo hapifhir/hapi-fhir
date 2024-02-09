@@ -79,8 +79,8 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 						DataFormatException.class,
 						() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=" + invalidQtyParam));
 
-				assertThat(thrown.getMessage().startsWith("HAPI-1940: Invalid")).isTrue();
-				assertThat(thrown.getMessage().contains(invalidQtyParam)).isTrue();
+				assertThat(thrown.getMessage()).startsWith("HAPI-1940: Invalid");
+				assertThat(thrown.getMessage()).contains(invalidQtyParam);
 			}
 
 			@Test

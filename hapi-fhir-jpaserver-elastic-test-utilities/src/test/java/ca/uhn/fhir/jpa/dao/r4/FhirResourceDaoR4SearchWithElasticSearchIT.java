@@ -123,9 +123,6 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -595,8 +592,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 		IBundleProvider bundle = myQuestionnaireResponseDao.search(map);
 		List<IBaseResource> result = bundle.getResources(0, bundle.sizeOrThrowNpe());
-		assertEquals(1, result.size());
-		assertEquals(questionnaireResponseId, result.get(0).getIdElement());
+		assertThat(result).hasSize(1);
+		assertThat(result.get(0).getIdElement()).isEqualTo(questionnaireResponseId);
 	}
 
 	@Test
@@ -759,8 +756,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		assertThat(result).hasSize(1);
-		assertEquals(((Observation) result.get(0)).getIdElement().getIdPart(), id1.getIdPart());
-		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "JPA search for IDs and for resources");
+		assertThat(id1.getIdPart()).isEqualTo(((Observation) result.get(0)).getIdElement().getIdPart());
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("JPA search for IDs and for resources").isEqualTo(2);
 
 		// restore changed property
 		JpaStorageSettings defaultConfig = new JpaStorageSettings();
@@ -957,7 +954,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		validator.setValidateAgainstStandardSchematron(true);
 		ValidationResult result = validator.validateWithResult(theResult);
 
-		assertEquals(0, result.getMessages().size());
+		assertThat(result.getMessages()).isEmpty();
 
 	}
 
@@ -982,8 +979,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		SearchParameterMap map = new SearchParameterMap();
 		map.add("code", new TokenParam().setSystem("http://example.com"));
 		List<IResourcePersistentId> bp = myObservationDao.searchForIds(map, new ServletRequestDetails());
-		assertNotNull(bp);
-		assertEquals(600, bp.size());
+		assertThat(bp).isNotNull();
+		assertThat(bp).hasSize(600);
 
 	}
 
@@ -1005,7 +1002,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 	private void assertFindIds(String theMessage, Collection<String> theResourceIds, String theUrl) {
 		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-		assertEquals(theResourceIds, new HashSet<>(resourceIds), theMessage);
+		assertThat(new HashSet<>(resourceIds)).as(theMessage).isEqualTo(theResourceIds);
 	}
 
 	private void assertNotFindId(String theMessage, IIdType theResourceId, String theUrl) {
@@ -1294,8 +1291,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 			assertThat(result).hasSize(1);
-			assertEquals(((Observation) result.get(0)).getId(), id.getIdPart());
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(id.getIdPart()).isEqualTo(((Observation) result.get(0)).getId());
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 
 			// only one hibernate search took place
 			Mockito.verify(mySearchEventListener, Mockito.times(1)).hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
@@ -1314,7 +1311,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			assertThat(ids).hasSize(1);
 			assertThat(ids).containsExactly(id.getIdPart());
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic, but we use sql to sort");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("the pids come from elastic, but we use sql to sort").isEqualTo(0);
 		}
 
 		@Test
@@ -1329,7 +1326,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 			assertThat(ids).hasSize(0);
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "the pids come from elastic, and nothing to fetch");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("the pids come from elastic, and nothing to fetch").isEqualTo(0);
 		}
 
 		@Test
@@ -1346,7 +1343,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			assertThat(ids).hasSize(1);
 			assertThat(ids).containsExactly(id.getIdPart());
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "no sql required");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("no sql required").isEqualTo(0);
 		}
 
 		/**
@@ -1400,7 +1397,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
-			assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(2);
 
 			// index only queried once for count
 			Mockito.verify(mySearchEventListener, Mockito.times(1)).hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
@@ -1419,7 +1416,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 			assertThat(resultIds).containsExactlyInAnyOrder(idCode2.getIdPart(), idCode3.getIdPart());
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 
 			// only one hibernate search took place
 			Mockito.verify(mySearchEventListener, Mockito.times(1)).hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
@@ -1456,7 +1453,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_tag=http://example.com|aTag");
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(id);
 		}
 
@@ -1469,7 +1466,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_security=http://example.com|security-label");
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(id);
 		}
 
@@ -1485,7 +1482,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				"?_security=http://example.com|non-existing-security-label,http://example.com|security-label" +
 				"&_security=http://example.com|other-non-existing-security-label,http://example.com|other-security-label");
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(id);
 		}
 
@@ -1501,7 +1498,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				"?_tag=http://example.com|not-existing-tag,http://example.com|one-more-not-existing-tag" +
 				"&_tag=http://example.com|other-not-existing-tag,http://example.com|anotherTag");
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).isEmpty();
 		}
 
@@ -1517,7 +1514,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				"?_tag=http://example.com|not-existing-tag" +
 				"&_tag=http://example.com|other-not-existing-tag,http://example.com|anotherTag");
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).isEmpty();
 		}
 
@@ -1533,7 +1530,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				"?_profile=http://example.com/non-existing-profile,http://example.com/theProfile" +
 				"&_profile=http://example.com/other-non-existing-profile,http://example.com/anotherProfile");
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(id);
 		}
 
@@ -1546,7 +1543,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_profile=http://example.com/theProfile");
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(id);
 		}
 
@@ -1559,7 +1556,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_source=http://example.com/theSource");
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(id);
 		}
 
@@ -1594,7 +1591,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=eq" + myOldLastUpdatedDateTime);
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myOldObsId);
 		}
 
@@ -1603,7 +1600,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=eq2017-03-24");
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myOldObsId);
 		}
 
@@ -1612,7 +1609,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=ne" + myOldLastUpdatedDateTime);
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myNewObsId);
 		}
 
@@ -1621,7 +1618,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=gt2018-01-01");
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myNewObsId);
 		}
 
@@ -1630,7 +1627,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=ge" + myOldLastUpdatedDateTime);
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myOldObsId, myNewObsId);
 		}
 
@@ -1639,7 +1636,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=lt2018-01-01");
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myOldObsId);
 		}
 
@@ -1648,7 +1645,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.clear();
 			List<String> allIds = myTestDaoSearch.searchForIds("/Observation?_lastUpdated=le" + myOldLastUpdatedDateTime);
 
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 			assertThat(allIds).containsExactly(myOldObsId);
 		}
 
@@ -1666,7 +1663,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.clear();
 			myTestDaoSearch.searchForIds("Observation?code=theCode&_total=" + theTotalModeEnum);
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-			assertEquals(1, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("bundle was built with no sql").isEqualTo(1);
 		}
 
 
@@ -1677,7 +1674,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-3")));
 
 			IBundleProvider resultBundle = myTestDaoSearch.searchForBundleProvider("Observation?_total=" + SearchTotalModeEnum.ACCURATE);
-			assertEquals(3, resultBundle.size());
+			assertThat(resultBundle.size()).isEqualTo(3);
 		}
 
 	}
@@ -1703,7 +1700,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 			assertThat(resultIds).containsExactlyInAnyOrder(idCode2.getIdPart(), idCode3.getIdPart());
 			// make also sure no extra SQL queries were executed
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("bundle was built with no sql").isEqualTo(0);
 		}
 
 
@@ -1719,7 +1716,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 			assertThat(resultIds).containsExactlyInAnyOrder(idCode2.getIdPart());
 			// also validate no extra SQL queries were executed
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("bundle was built with no sql").isEqualTo(0);
 		}
 
 		@Test
@@ -1732,9 +1729,9 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			List<String> resultIds = myTestDaoSearch.searchForIds("Observation?_offset=0&_count=100");
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
-			assertEquals(60, resultIds.size());
+			assertThat(resultIds).hasSize(60);
 			// also validate no extra SQL queries were executed
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "bundle was built with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("bundle was built with no sql").isEqualTo(0);
 		}
 	}
 
@@ -1778,7 +1775,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 			assertThat(result.stream().map(r -> r.getIdElement().getIdPart()).collect(Collectors.toList())).containsExactly(idC, idB, idA);
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 
 			// only one hibernate search took place
 			Mockito.verify(mySearchEventListener, Mockito.times(1)).hsearchEvent(IHSearchEventListener.HSearchEventType.SEARCH);
@@ -1802,7 +1799,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					myCaptureQueriesListener.clear();
 					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-_tag");
 
-					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 					// asked _tag (token) descending using system then code so order must be: id2, id1
 					assertThat(getResultIds(result)).containsExactly(id2, id1);
 				}
@@ -1819,7 +1816,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					myCaptureQueriesListener.clear();
 					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-_tag");
 
-					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 					// asked _tag (token) descending so order must be: id2, id1
 					assertThat(getResultIds(result)).containsExactly(id2, id1);
 				}
@@ -1835,7 +1832,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					myCaptureQueriesListener.clear();
 					List<String> result = myTestDaoSearch.searchForIds("/Observation?_sort=-date");
 
-					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 					ourLog.info("byDate sort {}", result);
 					// date descending - order should be id2, id1
 					assertThat(result).containsExactly(id2, id3, id4, id1);
@@ -1853,7 +1850,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					myCaptureQueriesListener.clear();
 					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-value-string");
 
-					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 					// requested value-string descending so order should be id2, id1
 					assertThat(getResultIds(result)).containsExactly(id2, id1);
 				}
@@ -1870,7 +1867,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					myCaptureQueriesListener.clear();
 					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-value-quantity");
 
-					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 					// requested qty descending so order should be id2, id1
 					assertThat(getResultIds(result)).containsExactly(id2, id1);
 				}
@@ -1887,7 +1884,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					myCaptureQueriesListener.clear();
 					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-_profile");
 
-					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 					// requested profile (uri) descending so order should be id2, id1
 					assertThat(getResultIds(result)).containsExactly(id2, id1);
 				}
@@ -1911,7 +1908,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					myCaptureQueriesListener.clear();
 					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-subject");
 
-					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 					// requested reference descending so order should be id2, id1
 					assertThat(getResultIds(result)).containsExactly(obsId2, obsId1);
 				}
@@ -1925,7 +1922,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					myCaptureQueriesListener.clear();
 					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/RiskAssessment?_sort=-probability");
 
-					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 					// requested profile (uri) descending so order should be id2, id1
 					assertThat(getResultIds(result)).containsExactly(raId3, raId2, raId1);
 				}
@@ -1939,7 +1936,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					myCaptureQueriesListener.clear();
 					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/RiskAssessment?_sort=-probability&_offset=1");
 
-					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 					// requested profile (uri) descending so order should be id2, id1
 					assertThat(getResultIds(result)).containsExactly(raId2, raId1);
 				}
@@ -1961,7 +1958,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					myCaptureQueriesListener.clear();
 					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=_tag");
 
-					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 					// should use nulls last so order must be: id2, id1
 					assertThat(getResultIds(result)).containsExactly(id2, id1);
 				}
@@ -1978,7 +1975,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					myCaptureQueriesListener.clear();
 					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-date");
 
-					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 					// should use nulls last so order must be: id2, id1
 					assertThat(getResultIds(result)).containsExactly(id2, id1);
 				}
@@ -1995,7 +1992,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					myCaptureQueriesListener.clear();
 					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-value-string");
 
-					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 					// should use nulls last so order must be: id2, id1
 					assertThat(getResultIds(result)).containsExactly(id2, id1);
 				}
@@ -2012,7 +2009,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					myCaptureQueriesListener.clear();
 					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-value-quantity");
 
-					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 					// requested qty descending so order should be id2, id1
 					assertThat(getResultIds(result)).containsExactly(id2, id1);
 				}
@@ -2029,7 +2026,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					myCaptureQueriesListener.clear();
 					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-_profile");
 
-					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 					// requested nulls last so order should be id2, id1
 					assertThat(getResultIds(result)).containsExactly(id2, id1);
 				}
@@ -2049,7 +2046,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					myCaptureQueriesListener.clear();
 					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=-subject");
 
-					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 					// requested reference with nulls last so order should be: obsId2, obsId1
 					assertThat(getResultIds(result)).containsExactly(obsId2, obsId1);
 				}
@@ -2062,7 +2059,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 					myCaptureQueriesListener.clear();
 					IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/RiskAssessment?_sort=probability");
 
-					assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+					assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 					// requested profile (uri) descending so order should be id2, id1
 					assertThat(getResultIds(result)).containsExactly(raId1, raId2);
 				}
@@ -2090,12 +2087,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				myCaptureQueriesListener.clear();
 				IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=_tag,-date");
 
-				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
-				assertEquals(2, result.getAllResources().size());
+				assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
+				assertThat(result.getAllResources()).hasSize(2);
 				DateTimeType effectiveFirst = (DateTimeType) ((Observation) result.getAllResources().get(0)).getEffective();
 				DateTimeType effectiveSecond = (DateTimeType) ((Observation) result.getAllResources().get(1)).getEffective();
 				// requested date descending so first result should be the one with the latest effective date: id2
-				assertTrue(effectiveFirst.after(effectiveSecond));
+				assertThat(effectiveFirst.after(effectiveSecond)).isTrue();
 			}
 
 			@Test
@@ -2116,12 +2113,12 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				myCaptureQueriesListener.clear();
 				IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=_tag,-value-string");
 
-				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
-				assertEquals(2, result.getAllResources().size());
+				assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
+				assertThat(result.getAllResources()).hasSize(2);
 				DateTimeType effectiveFirst = (DateTimeType) ((Observation) result.getAllResources().get(0)).getEffective();
 				DateTimeType effectiveSecond = (DateTimeType) ((Observation) result.getAllResources().get(1)).getEffective();
 				// requested date descending so first result should be the one with the latest effective date: id2
-				assertTrue(effectiveFirst.after(effectiveSecond));
+				assertThat(effectiveFirst.after(effectiveSecond)).isTrue();
 			}
 
 			@Test
@@ -2138,7 +2135,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				myCaptureQueriesListener.clear();
 				IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=_tag,-value-quantity");
 
-				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+				assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 				// requested qty descending so order should be id2, id1
 				assertThat(getResultIds(result)).containsExactly(id2, id1);
 			}
@@ -2161,7 +2158,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				myCaptureQueriesListener.clear();
 				IBundleProvider result = myTestDaoSearch.searchForBundleProvider("/Observation?_sort=code,date,_tag,_tag,-value-quantity");
 
-				assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+				assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 				// all sorted values are the same except the last (value-quantity)  so order should be id2, id1
 				assertThat(getResultIds(result)).containsExactly(id2, id1);
 			}
@@ -2198,7 +2195,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 			myCaptureQueriesListener.clear();
 			assertFindId("when exact", raId1, "/RiskAssessment?probability=0.25");
-			assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 		}
 
 		@Test
@@ -2333,8 +2330,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 			myCaptureQueriesListener.clear();
 			assertFindId("when exact", obsId, "/Observation?subject=" + patId.getVersionIdPartAsLong());
-			assertEquals(myStorageSettings.isAdvancedHSearchIndexing() ? 1 : 2,
-				myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(myStorageSettings.isAdvancedHSearchIndexing() ? 1 : 2);
 		}
 	}
 

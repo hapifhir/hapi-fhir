@@ -50,7 +50,7 @@ public class MdmPreProcessingInterceptorIT extends BaseMdmR4Test{
 
 		Patient interceptedResource = (Patient) myPatientInterceptorWrapper.getReturnedValue();
 
-		assertThat(interceptedResource.getName().size()).isEqualTo(0);
+		assertThat(interceptedResource.getName()).isEmpty();
 
 	}
 

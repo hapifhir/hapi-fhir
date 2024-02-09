@@ -8,7 +8,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CustomThymeleafNarrativeGeneratorR4Test {
 
@@ -80,7 +79,7 @@ public class CustomThymeleafNarrativeGeneratorR4Test {
 			"  } ],\n" +
 			"  \"active\": true\n" +
 			"}";
-		assertEquals(expectedEncoding, output);
+		assertThat(output).isEqualTo(expectedEncoding);
 
 		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:narrative/customtypes_r4.properties");
 		myCtx.setNarrativeGenerator(gen);
@@ -90,7 +89,7 @@ public class CustomThymeleafNarrativeGeneratorR4Test {
 		ourLog.info(actual);
 
 		String expected = "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h1>CustomPatient</h1><div><div><h1>Favourite Pizza</h1> Toppings: <span>Mushrooms, Onions</span> Size: <span>14</span></div></div></div>";
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 
 	}
 

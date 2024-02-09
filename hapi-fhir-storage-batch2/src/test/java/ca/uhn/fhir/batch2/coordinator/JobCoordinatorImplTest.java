@@ -192,7 +192,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		verify(myJobInstancePersister)
 			.fetchInstances(requestArgumentCaptor.capture(), anyInt(), anyInt());
 		FetchJobInstancesRequest req = requestArgumentCaptor.getValue();
-		assertThat(req.getStatuses().size()).isEqualTo(2);
+		assertThat(req.getStatuses()).hasSize(2);
 		assertThat(req.getStatuses().contains(StatusEnum.IN_PROGRESS)
 				&& req.getStatuses().contains(StatusEnum.QUEUED)).isTrue();
 	}

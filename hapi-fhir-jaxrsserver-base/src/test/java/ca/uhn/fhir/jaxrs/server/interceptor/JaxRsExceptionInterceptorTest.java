@@ -73,7 +73,7 @@ public class JaxRsExceptionInterceptorTest {
 			interceptor.intercept(context);
 			fail("");
 		} catch (BaseServerResponseException e) {
-			assertThat(e.getMessage().contains("someMessage")).isTrue();
+			assertThat(e.getMessage()).contains("someMessage");
 		}
 	}
 

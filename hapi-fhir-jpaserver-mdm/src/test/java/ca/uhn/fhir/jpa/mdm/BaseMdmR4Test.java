@@ -554,7 +554,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	protected Patient getOnlyGoldenPatient() {
 		List<IBaseResource> resources = getAllGoldenPatients();
-		assertThat(resources.size()).isEqualTo(1);
+		assertThat(resources).hasSize(1);
 		return (Patient) resources.get(0);
 	}
 
@@ -631,7 +631,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 
 	private <T> void assertFields(Function<MdmLink, T> theAccessor, T... theExpectedValues) {
 		List<MdmLink> links = myMdmLinkDao.findAll();
-		assertThat(links.size()).isEqualTo(theExpectedValues.length);
+		assertThat(links).hasSize(theExpectedValues.length);
 		for (int i = 0; i < links.size(); ++i) {
 			assertThat(theAccessor.apply(links.get(i))).as("Value at index " + i + " was not equal").isEqualTo(theExpectedValues[i]);
 		}

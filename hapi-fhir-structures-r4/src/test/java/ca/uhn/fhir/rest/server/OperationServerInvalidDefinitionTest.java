@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -40,7 +40,7 @@ public class OperationServerInvalidDefinitionTest {
 		try {
 			myRestfulServerExtension.registerProvider(new OperationProvider());
 			fail("");		} catch (ConfigurationException e) {
-			assertEquals("HAPI-0288: Failure scanning class OperationProvider: HAPI-0360: Incorrect use of type StringDt as return type for method when theContext is for version R4 in method: public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationServerInvalidDefinitionTest$1OperationProvider.mdmMatch(org.hl7.fhir.instance.model.api.IBaseResource)", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-0288: Failure scanning class OperationProvider: HAPI-0360: Incorrect use of type StringDt as return type for method when theContext is for version R4 in method: public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationServerInvalidDefinitionTest$1OperationProvider.mdmMatch(org.hl7.fhir.instance.model.api.IBaseResource)");
 		}
 
 	}

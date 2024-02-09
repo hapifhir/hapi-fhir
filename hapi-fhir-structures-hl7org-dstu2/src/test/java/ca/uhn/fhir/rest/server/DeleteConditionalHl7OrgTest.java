@@ -18,8 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -56,10 +55,10 @@ public class DeleteConditionalHl7OrgTest {
 
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertEquals(204, status.getStatusLine().getStatusCode());
-		
-		assertNull(ourLastIdParam);
-		assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(204);
+
+		assertThat(ourLastIdParam).isNull();
+		assertThat(ourLastConditionalUrl).isEqualTo("Patient?identifier=system%7C001");
 	}
 
 	
@@ -72,10 +71,10 @@ public class DeleteConditionalHl7OrgTest {
 
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertEquals(204, status.getStatusLine().getStatusCode());
-		
-		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
-		assertNull(ourLastConditionalUrl);
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(204);
+
+		assertThat(ourLastIdParam.toUnqualified().getValue()).isEqualTo("Patient/2");
+		assertThat(ourLastConditionalUrl).isNull();
 	}
 
 	@AfterAll

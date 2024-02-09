@@ -34,8 +34,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TransactionWithBundleResourceParamTest {
 
@@ -65,8 +64,8 @@ public class TransactionWithBundleResourceParamTest {
 				supportsTransaction = true;
 			}
 		}
-		
-		assertTrue(supportsTransaction);
+
+		assertThat(supportsTransaction).isTrue();
 	}
 
 	@Test
@@ -100,21 +99,21 @@ public class TransactionWithBundleResourceParamTest {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		ourLog.info(responseContent);
 
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-		assertEquals(3, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(3);
 
 		Entry entry0 = bundle.getEntry().get(0);
-		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
+		assertThat(entry0.getResponse().getLocation()).isEqualTo("Patient/81/_history/91");
 
 		Entry entry1 = bundle.getEntry().get(1);
-		assertEquals( "Patient/82/_history/92", entry1.getResponse().getLocation());
+		assertThat(entry1.getResponse().getLocation()).isEqualTo("Patient/82/_history/92");
 
 		Entry entry2 = bundle.getEntry().get(2);
-		assertEquals("Patient/123/_history/93", entry2.getResponse().getLocation());
+		assertThat(entry2.getResponse().getLocation()).isEqualTo("Patient/123/_history/93");
 	}
 	
 	@Test
@@ -151,23 +150,23 @@ public class TransactionWithBundleResourceParamTest {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		ourLog.info(responseContent);
 
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-		assertEquals(4, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(4);
 
-		assertEquals(OperationOutcome.class, bundle.getEntry().get(0).getResource().getClass());
+		assertThat(bundle.getEntry().get(0).getResource().getClass()).isEqualTo(OperationOutcome.class);
 
 		Entry entry0 = bundle.getEntry().get(1);
-		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
+		assertThat(entry0.getResponse().getLocation()).isEqualTo("Patient/81/_history/91");
 
 		Entry entry1 = bundle.getEntry().get(2);
-		assertEquals("Patient/82/_history/92", entry1.getResponse().getLocation());
+		assertThat(entry1.getResponse().getLocation()).isEqualTo("Patient/82/_history/92");
 
 		Entry entry2 = bundle.getEntry().get(3);
-		assertEquals( "Patient/3/_history/93", entry2.getResponse().getLocation());
+		assertThat(entry2.getResponse().getLocation()).isEqualTo("Patient/3/_history/93");
 	}
 
 	@Test
@@ -200,21 +199,21 @@ public class TransactionWithBundleResourceParamTest {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		ourLog.info(responseContent);
 
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-		assertEquals(3, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(3);
 
 		Entry entry0 = bundle.getEntry().get(0);
-		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
+		assertThat(entry0.getResponse().getLocation()).isEqualTo("Patient/81/_history/91");
 
 		Entry entry1 = bundle.getEntry().get(1);
-		assertEquals( "Patient/82/_history/92", entry1.getResponse().getLocation());
+		assertThat(entry1.getResponse().getLocation()).isEqualTo("Patient/82/_history/92");
 
 		Entry entry2 = bundle.getEntry().get(2);
-		assertEquals("Patient/123/_history/93", entry2.getResponse().getLocation());
+		assertThat(entry2.getResponse().getLocation()).isEqualTo("Patient/123/_history/93");
 	}
 
 

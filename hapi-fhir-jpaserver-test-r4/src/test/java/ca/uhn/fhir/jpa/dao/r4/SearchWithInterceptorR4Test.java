@@ -59,10 +59,10 @@ public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 
 			IBundleProvider results = myConditionDao.search(map, mySrd);
 			List<String> ids = toUnqualifiedVersionlessIdValues(results);
-			assertThat(ids.size()).isEqualTo(2);
+			assertThat(ids).hasSize(2);
 
 			SqlQueryList list = (SqlQueryList) mySrd.getUserData().get("QUERIES");
-			assertThat(list.size()).isEqualTo(1);
+			assertThat(list).hasSize(1);
 			String query = list.get(0).getSql(true, false);
 			ourLog.info("Query: {}", query);
 

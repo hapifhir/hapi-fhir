@@ -32,8 +32,6 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InterceptorThrowingExceptionR4Test {
 
@@ -120,9 +118,9 @@ public class InterceptorThrowingExceptionR4Test {
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
 		status = ourClient.execute(httpGet);
 		response = extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(response).contains("FAM");
-		assertTrue(ourHitMethod);
+		assertThat(ourHitMethod).isTrue();
 
 		await().until(() -> hit.size() == 3);
 

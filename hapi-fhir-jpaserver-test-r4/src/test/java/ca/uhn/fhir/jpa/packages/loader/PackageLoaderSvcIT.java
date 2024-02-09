@@ -72,8 +72,8 @@ public class PackageLoaderSvcIT {
 		}
 
 		// verify fetched resources
-		assertThat(resources.isEmpty()).isFalse();
-		assertThat(resources.size()).isEqualTo(1);
+		assertThat(resources).isNotEmpty();
+		assertThat(resources).hasSize(1);
 		assertThat(resources.get(0).fhirType()).isEqualTo("SearchParameter");
 	}
 
@@ -96,7 +96,7 @@ public class PackageLoaderSvcIT {
 			myPackageLoaderSvc.loadPackageFromCacheOnly("id", "versionId");
 			fail("");
 		} catch (UnsupportedOperationException ex) {
-			assertThat(ex.getMessage().contains("Cannot load from cache.")).isTrue();
+			assertThat(ex.getMessage()).contains("Cannot load from cache.");
 		}
 
 		// addPackageToCache
@@ -104,7 +104,7 @@ public class PackageLoaderSvcIT {
 			myPackageLoaderSvc.addPackageToCache("id", "version", Mockito.mock(InputStream.class), "description or url");
 			fail("");
 		} catch (UnsupportedOperationException ex) {
-			assertThat(ex.getMessage().contains("Cannot add to cache.")).isTrue();
+			assertThat(ex.getMessage()).contains("Cannot add to cache.");
 		}
 
 		// loadPackage
@@ -112,7 +112,7 @@ public class PackageLoaderSvcIT {
 			myPackageLoaderSvc.loadPackage("id", "version");
 			fail("");
 		} catch (UnsupportedOperationException ex) {
-			assertThat(ex.getMessage().contains("No packages are cached;")).isTrue();
+			assertThat(ex.getMessage()).contains("No packages are cached;");
 		}
 	}
 }

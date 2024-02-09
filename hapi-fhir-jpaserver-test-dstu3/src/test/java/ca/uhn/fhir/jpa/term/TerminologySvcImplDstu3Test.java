@@ -713,7 +713,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-4");
 		outcome = myTermSvc.expandValueSet(null, vs);
-		assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
+		assertThat(outcome.getExpansion().getContains()).isEmpty();
 
 		// Include
 		vs = new ValueSet();
@@ -725,7 +725,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
-		assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
+		assertThat(outcome.getExpansion().getContains()).isEmpty();
 	}
 
 	@Test
@@ -928,7 +928,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
 		outcome = myTermSvc.expandValueSet(null, vs);
-		assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
+		assertThat(outcome.getExpansion().getContains()).isEmpty();
 
 		// Include
 		vs = new ValueSet();
@@ -1171,7 +1171,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("50015-7");
 		outcome = myTermSvc.expandValueSet(null, vs);
-		assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
+		assertThat(outcome.getExpansion().getContains()).isEmpty();
 
 		// Include
 		vs = new ValueSet();
@@ -1439,7 +1439,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("43343-4");
 		outcome = myTermSvc.expandValueSet(null, vs);
-		assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
+		assertThat(outcome.getExpansion().getContains()).isEmpty();
 
 		// Include
 		vs = new ValueSet();
@@ -1451,7 +1451,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.setOp(ValueSet.FilterOperator.EQUAL)
 			.setValue("47239-9");
 		outcome = myTermSvc.expandValueSet(null, vs);
-		assertThat(outcome.getExpansion().getContains().size()).isEqualTo(0);
+		assertThat(outcome.getExpansion().getContains()).isEmpty();
 	}
 
 	@Test
@@ -1998,7 +1998,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		createCodeSystem();
 		IValidationSupport.CodeValidationResult code = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "childAAB", null, null);
 		assertThat(code.isOk()).isEqualTo(true);
-		assertThat(code.getProperties().size()).isEqualTo(2);
+		assertThat(code.getProperties()).hasSize(2);
 	}
 
 

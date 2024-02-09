@@ -36,7 +36,7 @@ public class Icd10CmLoaderTest {
 	@Test
 	public void testLoadIcd10CmCheckRootConcepts() {
 		List<TermConcept> rootConcepts = new ArrayList<>(codeSystemVersion.getConcepts());
-		assertThat(rootConcepts.size()).isEqualTo(4);
+		assertThat(rootConcepts).hasSize(4);
 		assertThat(rootConcepts.get(0).getCode()).isEqualTo("A00");
 		assertThat(rootConcepts.get(0).getDisplay()).isEqualTo("Cholera");
 		List<String> conceptNames = rootConcepts.stream().map(t -> t.getCode()).collect(Collectors.toList());
@@ -46,7 +46,7 @@ public class Icd10CmLoaderTest {
 	@Test
 	public void testLoadIcd10CmCheckChildCode() {
 		List<TermConcept> rootConcepts = new ArrayList<>(codeSystemVersion.getConcepts());
-		assertThat(rootConcepts.get(0).getChildCodes().size()).isEqualTo(3);
+		assertThat(rootConcepts.get(0).getChildCodes()).hasSize(3);
 		TermConcept firstChildCode = rootConcepts.get(0).getChildCodes().get(0);
 		assertThat(firstChildCode.getCode()).isEqualTo("A00.0");
 		assertThat(firstChildCode.getDisplay()).isEqualTo("Cholera due to Vibrio cholerae 01, biovar cholerae");

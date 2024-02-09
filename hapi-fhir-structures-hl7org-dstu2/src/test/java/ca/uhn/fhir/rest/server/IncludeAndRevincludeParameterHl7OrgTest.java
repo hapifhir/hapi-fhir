@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IncludeAndRevincludeParameterHl7OrgTest {
 
@@ -54,7 +53,7 @@ public class IncludeAndRevincludeParameterHl7OrgTest {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(ourIncludes).hasSize(0);
 		assertThat(ourReverseIncludes).hasSize(0);
@@ -66,7 +65,7 @@ public class IncludeAndRevincludeParameterHl7OrgTest {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(ourIncludes).hasSize(2);
 		assertThat(ourReverseIncludes).hasSize(2);

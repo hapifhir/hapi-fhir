@@ -56,20 +56,20 @@ class SearchParameterHelperTest {
 
 		Optional<SearchParameterMap> result = myTestedHelper.buildSearchParameterMapFromCanonical(mockedSearchParam);
 
-		assertThat(result.isPresent()).isTrue();
+		assertThat(result).isPresent();
 		SearchParameterMap spMap = result.get();
 		assertThat(spMap.size()).isEqualTo(2);
 
 		List<List<IQueryParameterType>> codeParam = spMap.get("code");
-		assertThat(codeParam.size()).isEqualTo(1);
-		assertThat(codeParam.get(0).size()).isEqualTo(1);
+		assertThat(codeParam).hasSize(1);
+		assertThat(codeParam.get(0)).hasSize(1);
 		assertThat(codeParam.get(0).get(0) instanceof TokenParam).isTrue();
 		TokenParam codeTokenParam = (TokenParam) codeParam.get(0).get(0);
 		assertThat(codeTokenParam.getValue()).isEqualTo(codeParamValue);
 
 		List<List<IQueryParameterType>> baseParam = spMap.get("base");
-		assertThat(baseParam.size()).isEqualTo(1);
-		assertThat(baseParam.get(0).size()).isEqualTo(1);
+		assertThat(baseParam).hasSize(1);
+		assertThat(baseParam.get(0)).hasSize(1);
 		assertThat(baseParam.get(0).get(0) instanceof TokenParam).isTrue();
 		TokenParam baseTokenParam = (TokenParam) baseParam.get(0).get(0);
 		assertThat(baseTokenParam.getValue()).isEqualTo(baseParamValue);

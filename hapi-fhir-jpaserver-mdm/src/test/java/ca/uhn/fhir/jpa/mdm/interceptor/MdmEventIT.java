@@ -77,7 +77,7 @@ public class MdmEventIT extends BaseMdmR4Test {
 		assertThat(expectOnePossibleDuplicate).isEqualTo(1);
 
 		List<MdmLinkJson> mdmLinkEvent = linkChangeEvent.getMdmLinks();
-		assertThat(mdmLinkEvent.size()).isEqualTo(3);
+		assertThat(mdmLinkEvent).hasSize(3);
 	}
 
 	@Test
@@ -94,7 +94,7 @@ public class MdmEventIT extends BaseMdmR4Test {
 		MdmLinkEvent linkChangeEvent = outcome.getMdmLinkEvent();
 		assertThat(linkChangeEvent).isNotNull();
 
-		assertThat(linkChangeEvent.getMdmLinks().size()).isEqualTo(1);
+		assertThat(linkChangeEvent.getMdmLinks()).hasSize(1);
 		MdmLinkJson l = linkChangeEvent.getMdmLinks().get(0);
 		assertThat(new IdDt(l.getGoldenResourceId()).getIdPartAsLong()).isEqualTo(link.getGoldenResourcePid());
 		assertThat(new IdDt(l.getSourceId()).getIdPartAsLong()).isEqualTo(link.getSourcePid());
@@ -113,7 +113,7 @@ public class MdmEventIT extends BaseMdmR4Test {
 
 		MdmLinkEvent linkChangeEvent = outcome.getMdmLinkEvent();
 		assertThat(linkChangeEvent).isNotNull();
-		assertThat(linkChangeEvent.getMdmLinks().size()).isEqualTo(1);
+		assertThat(linkChangeEvent.getMdmLinks()).hasSize(1);
 
 		MdmLinkJson link = linkChangeEvent.getMdmLinks().get(0);
 		assertThat(link.getSourceId()).isEqualTo(patient1.getIdElement().toVersionless().getValueAsString());

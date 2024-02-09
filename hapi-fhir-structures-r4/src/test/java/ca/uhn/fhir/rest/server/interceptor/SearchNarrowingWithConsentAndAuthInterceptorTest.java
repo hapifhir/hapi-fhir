@@ -45,9 +45,6 @@ import java.util.Set;
 
 import static ca.uhn.fhir.test.utilities.SearchTestUtil.toUnqualifiedVersionlessIdValues;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -78,7 +75,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 	private final AuthorizationInterceptor myAuthorizationInterceptor = new AuthorizationInterceptor() {
 		@Override
 		public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-			assertNotNull(myAuthorizationInterceptorRuleList);
+			assertThat(myAuthorizationInterceptorRuleList).isNotNull();
 			return myAuthorizationInterceptorRuleList;
 		}
 	};
@@ -86,7 +83,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 	private final SearchNarrowingInterceptor mySearchNarrowingInterceptor = new SearchNarrowingInterceptor() {
 		@Override
 		protected AuthorizedList buildAuthorizedList(RequestDetails theRequestDetails) {
-			assertNotNull(mySearchNarrowingInterceptorAuthorizedList);
+			assertThat(mySearchNarrowingInterceptorAuthorizedList).isNotNull();
 			return mySearchNarrowingInterceptorAuthorizedList;
 		}
 	};
@@ -153,8 +150,8 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		// Verify
 
-		assertEquals(1, myObservationProvider.getRequestParams().size());
-		assertTrue(myObservationProvider.getRequestParams().get(0).isEmpty(), myObservationProvider.getRequestParams().toString());
+		assertThat(myObservationProvider.getRequestParams()).hasSize(1);
+		assertThat(myObservationProvider.getRequestParams().get(0).isEmpty()).as(myObservationProvider.getRequestParams().toString()).isTrue();
 		assertThat(toUnqualifiedVersionlessIdValues(response)).containsExactly("Observation/O0");
 
 	}
@@ -200,8 +197,8 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		// Verify
 
-		assertEquals(1, myObservationProvider.getRequestParams().size());
-		assertTrue(myObservationProvider.getRequestParams().get(0).isEmpty(), myObservationProvider.getRequestParams().toString());
+		assertThat(myObservationProvider.getRequestParams()).hasSize(1);
+		assertThat(myObservationProvider.getRequestParams().get(0).isEmpty()).as(myObservationProvider.getRequestParams().toString()).isTrue();
 		assertThat(toUnqualifiedVersionlessIdValues(response)).containsExactly("Observation/O0");
 
 	}
@@ -247,8 +244,8 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		// Verify
 
-		assertEquals(1, myObservationProvider.getRequestParams().size());
-		assertTrue(myObservationProvider.getRequestParams().get(0).isEmpty(), myObservationProvider.getRequestParams().toString());
+		assertThat(myObservationProvider.getRequestParams()).hasSize(1);
+		assertThat(myObservationProvider.getRequestParams().get(0).isEmpty()).as(myObservationProvider.getRequestParams().toString()).isTrue();
 		assertThat(toUnqualifiedVersionlessIdValues(response)).containsExactly("Observation/O1");
 
 	}
@@ -295,8 +292,8 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		// Verify
 
-		assertEquals(1, myObservationProvider.getRequestParams().size());
-		assertTrue(myObservationProvider.getRequestParams().get(0).isEmpty(), myObservationProvider.getRequestParams().toString());
+		assertThat(myObservationProvider.getRequestParams()).hasSize(1);
+		assertThat(myObservationProvider.getRequestParams().get(0).isEmpty()).as(myObservationProvider.getRequestParams().toString()).isTrue();
 		assertThat(toUnqualifiedVersionlessIdValues(response)).containsExactly("Observation/O1");
 
 	}
@@ -479,7 +476,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		@Search(allowUnknownParams = true)
 		public List<IBaseResource> searchAll(RequestDetails theRequestDetails, @IncludeParam(reverse = true) Set<Include> theRevIncludes) {
-			assertNotNull(myNextPatientResponse);
+			assertThat(myNextPatientResponse).isNotNull();
 			myNextPatientResponse = ServerInterceptorUtil.fireStoragePreshowResource(myNextPatientResponse, theRequestDetails, myServer.getRestfulServer().getInterceptorService());
 			return myNextPatientResponse;
 		}
@@ -492,7 +489,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		@Operation(name = "$everything")
 		public IBundleProvider everything(RequestDetails theRequestDetails, @IdParam IdType theId) {
-			assertNotNull(myNextPatientResponse);
+			assertThat(myNextPatientResponse).isNotNull();
 			myNextPatientResponse = ServerInterceptorUtil.fireStoragePreshowResource(myNextPatientResponse, theRequestDetails, myServer.getRestfulServer().getInterceptorService());
 			return new SimpleBundleProvider(myNextPatientResponse);
 		}

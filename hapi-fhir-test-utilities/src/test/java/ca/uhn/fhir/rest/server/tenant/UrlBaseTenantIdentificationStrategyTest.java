@@ -181,7 +181,7 @@ public class UrlBaseTenantIdentificationStrategyTest {
 
 		//then we should see an exception thrown with HAPI-0307 in it
 		verify(myHapiLocalizer, times(1)).getMessage(RestfulServer.class, "rootRequest.multitenant");
-		assertThat(ire.getMessage().contains("HAPI-0307")).isTrue();
+		assertThat(ire.getMessage()).contains("HAPI-0307");
 	}
 
 	@Test

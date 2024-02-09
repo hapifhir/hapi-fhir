@@ -63,12 +63,12 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 
 		// Root code
 		TermConcept code;
-		assertThat(concepts.size()).isEqualTo(2);
+		assertThat(concepts).hasSize(2);
 		code = concepts.get("CHEM");
 		assertThat(code.getCode()).isEqualTo("CHEM");
 		assertThat(code.getDisplay()).isEqualTo("Chemistry");
 
-		assertThat(code.getChildren().size()).isEqualTo(2);
+		assertThat(code.getChildren()).hasSize(2);
 		assertThat(code.getChildren().get(0).getChild().getCode()).isEqualTo("HB");
 		assertThat(code.getChildren().get(0).getChild().getDisplay()).isEqualTo("Hemoglobin");
 		assertThat(code.getChildren().get(1).getChild().getCode()).isEqualTo("NEUT");
@@ -108,7 +108,7 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		TermConcept code;
 
 		// Root code
-		assertThat(concepts.size()).isEqualTo(5);
+		assertThat(concepts).hasSize(5);
 		code = concepts.get("CHEM");
 		assertThat(code.getCode()).isEqualTo("CHEM");
 		assertThat(code.getDisplay()).isEqualTo("Chemistry");
@@ -131,14 +131,14 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		CustomTerminologySet set = myCustomTerminologySetCaptor.getValue();
 
 		// Root concepts
-		assertThat(set.getRootConcepts().size()).isEqualTo(2);
+		assertThat(set.getRootConcepts()).hasSize(2);
 		assertThat(set.getRootConcepts().get(0).getCode()).isEqualTo("CHEM");
 		assertThat(set.getRootConcepts().get(0).getDisplay()).isEqualTo("Chemistry");
 		assertThat(set.getRootConcepts().get(1).getCode()).isEqualTo("MICRO");
 		assertThat(set.getRootConcepts().get(1).getDisplay()).isEqualTo("Microbiology");
 
 		// Child concepts
-		assertThat(set.getRootConcepts().get(0).getChildren().size()).isEqualTo(2);
+		assertThat(set.getRootConcepts().get(0).getChildren()).hasSize(2);
 		assertThat(set.getRootConcepts().get(0).getChildren().get(0).getChild().getCode()).isEqualTo("HB");
 		assertThat(set.getRootConcepts().get(0).getChildren().get(0).getChild().getDisplay()).isEqualTo("Hemoglobin");
 		assertThat(set.getRootConcepts().get(0).getChildren().get(0).getChild().getSequence()).isEqualTo(null);
@@ -166,7 +166,7 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		CustomTerminologySet set = myCustomTerminologySetCaptor.getValue();
 
 		// Root concepts
-		assertThat(set.getRootConcepts().size()).isEqualTo(5);
+		assertThat(set.getRootConcepts()).hasSize(5);
 		assertThat(set.getRootConcepts().get(0).getCode()).isEqualTo("CHEM");
 		assertThat(set.getRootConcepts().get(0).getDisplay()).isEqualTo("Chemistry");
 		assertThat(set.getRootConcepts().get(1).getCode()).isEqualTo("HB");

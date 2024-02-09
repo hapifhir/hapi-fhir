@@ -63,7 +63,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 				p.getMeta().addTag().setSystem("http://dynamic").setCode("tag" + t).setUserSelected(true).setVersion("1");
 				return myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
 			}).toList();
-		assertThat(ids.size()).isEqualTo(count);
+		assertThat(ids).hasSize(count);
 
 		ResourceIdList resourceList = new ResourceIdList();
 		resourceList.setResourceType("Patient");
@@ -84,7 +84,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 
 		verify(mySink, times(1)).accept(myWorkChunkCaptor.capture());
 		ExpandedResourcesList expandedResourceList = myWorkChunkCaptor.getValue();
-		assertThat(expandedResourceList.getStringifiedResources().size()).isEqualTo(10);
+		assertThat(expandedResourceList.getStringifiedResources()).hasSize(10);
 		assertThat(expandedResourceList.getStringifiedResources().get(0)).contains("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}");
 		assertThat(expandedResourceList.getStringifiedResources().get(1)).contains("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}");
 

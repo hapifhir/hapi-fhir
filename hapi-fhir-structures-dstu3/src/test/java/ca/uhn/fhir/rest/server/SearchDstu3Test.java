@@ -36,8 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -70,12 +68,12 @@ public class SearchDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertEquals("search", ourLastMethod);
+			assertThat(ourLastMethod).isEqualTo("search");
 
-			assertEquals("foo", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
-			assertEquals("bar", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+			assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("foo");
+			assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("bar");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -89,12 +87,10 @@ public class SearchDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 			OperationOutcome oo = (OperationOutcome) ourCtx.newJsonParser().parseResource(responseContent);
-			assertEquals(
-					Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)",
-					oo.getIssueFirstRep().getDiagnostics());
+			assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -272,13 +268,13 @@ public class SearchDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
-			assertEquals(theExpectEncoding, ct);
+			assertThat(ct).isEqualTo(theExpectEncoding);
 			bundle = ct.newParser(ourCtx).parseResource(Bundle.class, responseContent);
-			assertEquals(10, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(10);
 			String linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-			assertNotNull(linkNext);
+			assertThat(linkNext).isNotNull();
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -310,7 +306,7 @@ public class SearchDstu3Test {
 			fail("");		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Invalid request: The FHIR endpoint on this server does not know how to handle POST operation[Patient/_search] with parameters [[_pretty, foo]]");
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertEquals(OperationOutcome.IssueType.NOTSUPPORTED, oo.getIssueFirstRep().getCode());
+			assertThat(oo.getIssueFirstRep().getCode()).isEqualTo(OperationOutcome.IssueType.NOTSUPPORTED);
 		}
 
 	}

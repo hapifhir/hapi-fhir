@@ -28,7 +28,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ClientIntegrationTest {
 	private MyPatientResourceProvider myPatientProvider = new MyPatientResourceProvider();
@@ -59,10 +59,10 @@ public class ClientIntegrationTest {
 		PatientClient client = ourCtx.newRestfulClient(PatientClient.class, ourServer.getBaseUrl() + "/");
 
 		List<Patient> actualPatients = client.searchForPatients(new StringDt("AAAABBBB"));
-		assertEquals(1, actualPatients.size());
-		assertEquals("AAAABBBB", actualPatients.get(0).getNameFirstRep().getFamily());
+		assertThat(actualPatients).hasSize(1);
+		assertThat(actualPatients.get(0).getNameFirstRep().getFamily()).isEqualTo("AAAABBBB");
 
-		assertEquals("Basic Zm9vYmFyOmJvb2JlYXI=", myPatientProvider.getAuthorizationHeader());
+		assertThat(myPatientProvider.getAuthorizationHeader()).isEqualTo("Basic Zm9vYmFyOmJvb2JlYXI=");
 	}
 
 	@AfterEach

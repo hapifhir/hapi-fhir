@@ -69,7 +69,7 @@ public class IdHelperServiceTest {
 
 		assertThat(idToPid.isEmpty()).isFalse();
 		for (String pid : patientIdsToResolve) {
-			assertThat(idToPid.containsKey(pid)).isTrue();
+			assertThat(idToPid).containsKey(pid);
 		}
 	}
 
@@ -110,7 +110,7 @@ public class IdHelperServiceTest {
 
 		assertThat(map.isEmpty()).isFalse();
 		for (String id : patientIdsToResolve) {
-			assertThat(map.containsKey(id)).isTrue();
+			assertThat(map).containsKey(id);
 		}
 	}
 
@@ -141,10 +141,10 @@ public class IdHelperServiceTest {
 
 		assertThat(map.isEmpty()).isFalse();
 		for (String id : patientIdsToResolve) {
-			assertThat(map.containsKey(id)).isTrue();
+			assertThat(map).containsKey(id);
 		}
-		assertThat(map.get("RED")).isEqualTo(red);
-		assertThat(map.get("BLUE")).isEqualTo(blue);
+		assertThat(map).containsEntry("RED", red);
+		assertThat(map).containsEntry("BLUE", blue);
 	}
 
 	@Test

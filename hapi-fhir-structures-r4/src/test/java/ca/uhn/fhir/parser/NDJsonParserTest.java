@@ -1,8 +1,7 @@
 package ca.uhn.fhir.parser;
 
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
@@ -49,7 +48,7 @@ public class NDJsonParserTest {
 		IBaseResource myBundle = myBuilder.getBundle();
 		IBaseResource responseBundle = fromNDJson(toNDJson(myBundle));
 
-		assertTrue(fhirResourcesEqual(myBundle, responseBundle));
+		assertThat(fhirResourcesEqual(myBundle, responseBundle)).isTrue();
 	}
 
 	@Test
@@ -60,7 +59,7 @@ public class NDJsonParserTest {
 		IBaseResource myBundle = myBuilder.getBundle();
 		IBaseResource responseBundle = fromNDJson(toNDJson(myBundle));
 
-		assertTrue(fhirResourcesEqual(myBundle, responseBundle));
+		assertThat(fhirResourcesEqual(myBundle, responseBundle)).isTrue();
 	}
 
 	@Test
@@ -80,7 +79,7 @@ public class NDJsonParserTest {
 		IBaseResource myBundle = myBuilder.getBundle();
 		IBaseResource responseBundle = fromNDJson(toNDJson(myBundle));
 
-		assertTrue(fhirResourcesEqual(myBundle, responseBundle));
+		assertThat(fhirResourcesEqual(myBundle, responseBundle)).isTrue();
 	}
 
 	@Test
@@ -94,15 +93,16 @@ public class NDJsonParserTest {
 		IBaseResource myBundle = myBuilder.getBundle();
 		IBaseResource responseBundle = fromNDJson(toNDJson(myBundle));
 
-		assertTrue(fhirResourcesEqual(myBundle, responseBundle));
+		assertThat(fhirResourcesEqual(myBundle, responseBundle)).isTrue();
 	}
 
 	@Test
 	public void testOnlyEncodesBundles() {
 		Patient p = new Patient();
 		p.setId("Patient/P1");
-		assertThrows(IllegalArgumentException.class,
-		             ()->{toNDJson(p);});
+		assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
+			toNDJson(p);
+		});
 	}
 
 	@Test
@@ -115,8 +115,9 @@ public class NDJsonParserTest {
 		IBaseResource myBundle = myBuilder.getBundle();
  		String myBundleJson = toNDJson(myBundle);
 		IParser parser = ourCtx.newNDJsonParser();
-		assertThrows(DataFormatException.class,
-		             ()->{parser.parseResource(Patient.class, myBundleJson);});
+		assertThatExceptionOfType(DataFormatException.class).isThrownBy(() -> {
+			parser.parseResource(Patient.class, myBundleJson);
+		});
 	}
 	
 	@AfterAll

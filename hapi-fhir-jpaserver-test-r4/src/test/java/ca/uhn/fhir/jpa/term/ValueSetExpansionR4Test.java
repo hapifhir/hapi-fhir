@@ -86,7 +86,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		myCaptureQueriesListener.clear();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(24);
+		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(24);
 
 		runInTransaction(() -> assertEquals(24, myTermValueSetConceptDao.count()));
 
@@ -95,7 +95,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		runInTransaction(() -> assertEquals(0, myTermValueSetConceptDao.count()));
 
 		expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(24);
+		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(24);
 	}
 
 
@@ -262,7 +262,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		assertThat(myValueSetTestUtil.toCodes(expandedValueSet)).as(myValueSetTestUtil.toCodes(expandedValueSet).toString()).isEqualTo(expandedConceptCodes.subList(offset, offset + count));
 		assertThat(expandedValueSet.getExpansion().getContains().size()).as(myValueSetTestUtil.toCodes(expandedValueSet).toString()).isEqualTo(count);
 		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(offset + count);
-		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(count);
+		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(count);
 
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
@@ -476,16 +476,16 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(3);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(3);
 		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).isEmpty();
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread()).isEmpty();
 		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread()).isEmpty();
 
 		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
 		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(myStorageSettings.getPreExpandValueSetsDefaultOffset());
-		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(0);
+		assertThat(expandedValueSet.getExpansion().getParameter()).isEmpty();
 
-		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(codeSystem.getConcept().size());
+		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(codeSystem.getConcept().size());
 
 		ValueSet.ValueSetExpansionContainsComponent concept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
 		assertConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
@@ -517,7 +517,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(3);
+		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(3);
 	}
 
 	@Test
@@ -537,9 +537,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
 		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(myStorageSettings.getPreExpandValueSetsDefaultOffset());
-		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(0);
+		assertThat(expandedValueSet.getExpansion().getParameter()).isEmpty();
 
-		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(codeSystem.getConcept().size());
+		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(codeSystem.getConcept().size());
 
 		ValueSet.ValueSetExpansionContainsComponent concept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
 
@@ -555,8 +555,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertThat(reexpandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
 		assertThat(reexpandedValueSet.getExpansion().getOffset()).isEqualTo(myStorageSettings.getPreExpandValueSetsDefaultOffset());
-		assertThat(reexpandedValueSet.getExpansion().getParameter().size()).isEqualTo(0);
-		assertThat(reexpandedValueSet.getExpansion().getContains().size()).isEqualTo(codeSystem.getConcept().size());
+		assertThat(reexpandedValueSet.getExpansion().getParameter()).isEmpty();
+		assertThat(reexpandedValueSet.getExpansion().getContains()).hasSize(codeSystem.getConcept().size());
 
 		concept = assertExpandedValueSetContainsConcept(reexpandedValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
 		assertConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
@@ -595,9 +595,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
 		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(myStorageSettings.getPreExpandValueSetsDefaultOffset());
-		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(0);
+		assertThat(expandedValueSet.getExpansion().getParameter()).isEmpty();
 
-		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(codeSystem.getConcept().size());
+		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(codeSystem.getConcept().size());
 
 		ValueSet.ValueSetExpansionContainsComponent concept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
 
@@ -640,15 +640,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
 		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(myStorageSettings.getPreExpandValueSetsDefaultOffset());
-		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(2);
+		assertThat(expandedValueSet.getExpansion().getParameter()).hasSize(2);
 		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getName()).isEqualTo("offset");
 		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(0);
 		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
 		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(23);
-		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(23);
+		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(23);
 
 		ValueSet.ValueSetExpansionContainsComponent concept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 1);
-		assertThat(concept.getDesignation().size()).isEqualTo(1);
+		assertThat(concept.getDesignation()).hasSize(1);
 		assertConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
 
 		//It is enough to test that the sublist returned is the correct one.
@@ -679,13 +679,13 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
 		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(myStorageSettings.getPreExpandValueSetsDefaultOffset());
-		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(2);
+		assertThat(expandedValueSet.getExpansion().getParameter()).hasSize(2);
 		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getName()).isEqualTo("offset");
 		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(0);
 		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
 		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(23);
 
-		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(23);
+		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(23);
 		//It is enough to test that the sublist returned is the correct one.
 		assertThat(myValueSetTestUtil.toCodes(expandedValueSet)).isEqualTo(expandedConceptCodes.subList(0, 23));
 	}
@@ -702,7 +702,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// If this ever fails, it just means that new codes have been added to the
 		// code system used by this test, so the numbers below may also need to be
 		// updated
-		assertThat(codeSystem.getConcept().size()).isEqualTo(24);
+		assertThat(codeSystem.getConcept()).hasSize(24);
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
@@ -719,13 +719,13 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
 		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(myStorageSettings.getPreExpandValueSetsDefaultOffset());
-		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(2);
+		assertThat(expandedValueSet.getExpansion().getParameter()).hasSize(2);
 		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getName()).isEqualTo("offset");
 		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(0);
 		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
 		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(24);
 
-		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(24);
+		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(24);
 
 		ValueSet.ValueSetExpansionContainsComponent concept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
 
@@ -792,7 +792,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
 		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(myStorageSettings.getPreExpandValueSetsDefaultOffset());
-		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(2);
+		assertThat(expandedValueSet.getExpansion().getParameter()).hasSize(2);
 		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getName()).isEqualTo("offset");
 		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(0);
 		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
@@ -823,13 +823,13 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
 		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(1);
-		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(2);
+		assertThat(expandedValueSet.getExpansion().getParameter()).hasSize(2);
 		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getName()).isEqualTo("offset");
 		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(1);
 		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
 		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(1000);
 
-		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(codeSystem.getConcept().size() - expandedValueSet.getExpansion().getOffset());
+		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(codeSystem.getConcept().size() - expandedValueSet.getExpansion().getOffset());
 		assertThat(myValueSetTestUtil.toCodes(expandedValueSet)).isEqualTo(expandedConcepts.subList(1, expandedConcepts.size()));
 	}
 
@@ -855,13 +855,13 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
 		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(1);
-		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(2);
+		assertThat(expandedValueSet.getExpansion().getParameter()).hasSize(2);
 		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getName()).isEqualTo("offset");
 		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(1);
 		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
 		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(1000);
 
-		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(codeSystem.getConcept().size() - expandedValueSet.getExpansion().getOffset());
+		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(codeSystem.getConcept().size() - expandedValueSet.getExpansion().getOffset());
 		assertThat(myValueSetTestUtil.toCodes(expandedValueSet)).isEqualTo(expandedConcepts.subList(1, expandedConcepts.size()));
 	}
 
@@ -889,13 +889,13 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
 		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(1);
-		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(2);
+		assertThat(expandedValueSet.getExpansion().getParameter()).hasSize(2);
 		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getName()).isEqualTo("offset");
 		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(1);
 		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
 		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(22);
 
-		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(22);
+		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(22);
 
 		//It is enough to test that the sublist returned is the correct one.
 		assertThat(myValueSetTestUtil.toCodes(expandedValueSet)).isEqualTo(expandedConceptCodes.subList(1, 23));
@@ -908,7 +908,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		vs.getCompose().addInclude().setSystem("http://unknown-system");
 		vs = myTermSvc.expandValueSet(new ValueSetExpansionOptions().setFailOnMissingCodeSystem(false), vs);
 		assertThat(vs).isNotNull();
-		assertThat(vs.getExpansion().getContains().size()).isEqualTo(0);
+		assertThat(vs.getExpansion().getContains()).isEmpty();
 
 		// Store it
 		vs = new ValueSet();
@@ -985,13 +985,13 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
 		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(1);
-		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(2);
+		assertThat(expandedValueSet.getExpansion().getParameter()).hasSize(2);
 		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getName()).isEqualTo("offset");
 		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(1);
 		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
 		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(22);
 
-		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(22);
+		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(22);
 
 		//It is enough to test that the sublist returned is the correct one.
 		assertThat(myValueSetTestUtil.toCodes(expandedValueSet)).isEqualTo(expandedConceptCodes.subList(1, 23));
@@ -1022,8 +1022,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myValueSetDao.expand(id, new ValueSetExpansionOptions(), mySrd);
 
 		// check expansion size and include CodeSystem version
-		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(7);
-		assertThat(expandedValueSet.getCompose().getInclude().size()).isEqualTo(1);
+		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(7);
+		assertThat(expandedValueSet.getCompose().getInclude()).hasSize(1);
 		assertThat(expandedValueSet.getCompose().getInclude().get(0).getVersion()).isEqualTo(expectedCodeSystemVersion);
 	}
 
@@ -1830,7 +1830,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		ValueSet valueSet = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 		assertThat(valueSet).isNotNull();
-		assertThat(valueSet.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(valueSet.getExpansion().getContains()).hasSize(1);
 		assertThat(valueSet.getExpansion().getContains().get(0).getCode()).isEqualTo("28571000087109");
 		assertThat(valueSet.getExpansion().getContains().get(0).getDisplay()).isEqualTo("MODERNA COVID-19 mRNA-1273");
 
@@ -1885,7 +1885,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		ValueSet valueSet = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 		assertThat(valueSet).isNotNull();
-		assertThat(valueSet.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(valueSet.getExpansion().getContains()).hasSize(1);
 		ValueSet.ValueSetExpansionContainsComponent expansionCode = valueSet.getExpansion().getContains().get(0);
 		assertThat(expansionCode.getCode()).isEqualTo("28571000087109");
 		assertThat(expansionCode.getDisplay()).isEqualTo("MODERNA COVID-19 mRNA-1273");
@@ -1896,7 +1896,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		valueSet = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 		assertThat(valueSet).isNotNull();
-		assertThat(valueSet.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(valueSet.getExpansion().getContains()).hasSize(1);
 		expansionCode = valueSet.getExpansion().getContains().get(0);
 		assertThat(expansionCode.getCode()).isEqualTo("28571000087109");
 		assertThat(expansionCode.getDisplay()).isEqualTo("MODERNA COVID-19 mRNA-1273");
@@ -1949,7 +1949,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		ValueSet valueSet = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 		assertThat(valueSet).isNotNull();
-		assertThat(valueSet.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(valueSet.getExpansion().getContains()).hasSize(1);
 		assertThat(valueSet.getExpansion().getContains().get(0).getCode()).isEqualTo("28571000087109");
 		assertThat(valueSet.getExpansion().getContains().get(0).getDisplay()).isEqualTo("MODERNA COVID-19 mRNA-1273");
 	}

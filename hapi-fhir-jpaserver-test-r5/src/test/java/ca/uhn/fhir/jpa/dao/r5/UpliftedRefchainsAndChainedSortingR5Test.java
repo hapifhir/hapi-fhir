@@ -506,7 +506,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual).containsExactly(ENCOUNTER_E1);
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(countMatches(querySql, "HFJ_SPIDX_STRING")).as(querySql).isEqualTo(1);
 		assertThat(countMatches(querySql, "HASH_NORM_PREFIX")).as(querySql).isEqualTo(2);
@@ -537,7 +537,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual).containsExactly(ENCOUNTER_E1);
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(countMatches(querySql, "HFJ_SPIDX_STRING")).as(querySql).isEqualTo(1);
 		assertThat(countMatches(querySql, "HASH_NORM_PREFIX")).as(querySql).isEqualTo(1);
@@ -573,7 +573,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual).containsExactly(ENCOUNTER_E1);
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(countMatches(querySql, "HFJ_SPIDX_STRING")).as(querySql).isEqualTo(1);
 		assertThat(countMatches(querySql, "HASH_NORM_PREFIX")).as(querySql).isEqualTo(1);
@@ -608,7 +608,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual).as(actual.toString()).containsExactly(ENCOUNTER_E3, ENCOUNTER_E1, ENCOUNTER_E2);
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(countMatches(querySql, "HFJ_SPIDX_STRING")).as(querySql).isEqualTo(1);
 		assertThat(countMatches(querySql, "HASH_NORM_PREFIX")).as(querySql).isEqualTo(0);
@@ -643,7 +643,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual).as(actual.toString()).containsExactly(ENCOUNTER_E3, ENCOUNTER_E1, ENCOUNTER_E2);
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(countMatches(querySql, "HFJ_SPIDX_STRING")).as(querySql).isEqualTo(1);
 		assertThat(countMatches(querySql, "HASH_NORM_PREFIX")).as(querySql).isEqualTo(0);
@@ -678,7 +678,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual).as(actual.toString()).containsExactly(ENCOUNTER_E3, ENCOUNTER_E1, ENCOUNTER_E2);
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(countMatches(querySql, "HFJ_SPIDX_STRING")).as(querySql).isEqualTo(1);
 		assertThat(countMatches(querySql, "HASH_NORM_PREFIX")).as(querySql).isEqualTo(0);
@@ -714,7 +714,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual).as(actual.toString()).containsExactly(ENCOUNTER_E3, ENCOUNTER_E1, ENCOUNTER_E2);
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(countMatches(querySql, "HFJ_SPIDX_STRING")).as(querySql).isEqualTo(2);
 		assertThat(countMatches(querySql, "HASH_NORM_PREFIX")).as(querySql).isEqualTo(1);
@@ -749,7 +749,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual).as(actual.toString()).containsExactly(ENCOUNTER_E3, ENCOUNTER_E1, ENCOUNTER_E2);
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(countMatches(querySql, "HFJ_SPIDX_TOKEN")).as(querySql).isEqualTo(1);
 		assertThat(countMatches(querySql, "HASH_IDENTITY")).as(querySql).isEqualTo(1);
@@ -783,7 +783,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual).as(actual.toString()).containsExactly(ENCOUNTER_E3, ENCOUNTER_E1, ENCOUNTER_E2);
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(countMatches(querySql, "HFJ_SPIDX_DATE")).as(querySql).isEqualTo(1);
 		assertThat(countMatches(querySql, "HASH_IDENTITY")).as(querySql).isEqualTo(1);
@@ -817,7 +817,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		List<String> actual = toUnqualifiedVersionlessIdValues(outcome);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertThat(actual).as(actual.toString()).containsExactly(ENCOUNTER_E3, ENCOUNTER_E1, ENCOUNTER_E2);
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertThat(countMatches(querySql, "HFJ_SPIDX_STRING")).as(querySql).isEqualTo(1);
 		assertThat(countMatches(querySql, "HASH_NORM_PREFIX")).as(querySql).isEqualTo(0);

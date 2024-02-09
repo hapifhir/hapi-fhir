@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ServletRequestTracingTest {
 
@@ -24,7 +23,7 @@ public class ServletRequestTracingTest {
 
 		// verify
 		assertThat(myRequestIdResult).as("id generated").isNotBlank();
-		assertEquals(myRequest.getAttribute(ServletRequestTracing.ATTRIBUTE_REQUEST_ID),myRequestIdResult);
+		assertThat(myRequestIdResult).isEqualTo(myRequest.getAttribute(ServletRequestTracing.ATTRIBUTE_REQUEST_ID));
 	}
 
 	@Test
@@ -35,7 +34,7 @@ public class ServletRequestTracingTest {
 		run();
 
 		// verify
-		assertEquals("a_request_id", myRequestIdResult);
+		assertThat(myRequestIdResult).isEqualTo("a_request_id");
 	}
 
 	@Test
@@ -48,7 +47,7 @@ public class ServletRequestTracingTest {
 
 		// verify
 		assertThat(secondResult).as("id generated").isNotBlank();
-		assertEquals(myRequestIdResult, secondResult);
+		assertThat(secondResult).isEqualTo(myRequestIdResult);
 	}
 
 }

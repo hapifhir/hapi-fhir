@@ -646,12 +646,12 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Patient.SP_FAMILY, new StringDt("Tester_testDeleteResource"));
 		List<Patient> patients = toList(myPatientDao.search(params));
-		assertThat(patients.size()).isEqualTo(2);
+		assertThat(patients).hasSize(2);
 
 		myPatientDao.delete(id1, mySrd);
 
 		patients = toList(myPatientDao.search(params));
-		assertThat(patients.size()).isEqualTo(1);
+		assertThat(patients).hasSize(1);
 
 		myPatientDao.read(id1, mySrd);
 		try {
@@ -676,7 +676,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myPatientDao.delete(id2.toVersionless(), mySrd);
 
 		patients = toList(myPatientDao.search(params));
-		assertThat(patients.size()).isEqualTo(0);
+		assertThat(patients).isEmpty();
 
 	}
 
@@ -1226,7 +1226,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			SearchParameterMap paramMap = new SearchParameterMap();
 			paramMap.add("_id", new StringParam(outcome.getId().getIdPart()));
 			List<Patient> ret = toList(myPatientDao.search(paramMap));
-			assertThat(ret.size()).isEqualTo(1);
+			assertThat(ret).hasSize(1);
 			Patient p = ret.get(0);
 			assertThat(p.getNameFirstRep().getFamilyAsSingleString()).isEqualTo("Tester");
 		}
@@ -1235,7 +1235,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			paramMap.add("_id", new StringParam(outcome.getId().getIdPart()));
 			paramMap.add(Patient.SP_NAME, new StringParam("tester"));
 			List<Patient> ret = toList(myPatientDao.search(paramMap));
-			assertThat(ret.size()).isEqualTo(1);
+			assertThat(ret).hasSize(1);
 			Patient p = ret.get(0);
 			assertThat(p.getNameFirstRep().getFamilyAsSingleString()).isEqualTo("Tester");
 		}
@@ -1244,7 +1244,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			paramMap.add(Patient.SP_NAME, new StringParam("tester"));
 			paramMap.add("_id", new StringParam(outcome.getId().getIdPart()));
 			List<Patient> ret = toList(myPatientDao.search(paramMap));
-			assertThat(ret.size()).isEqualTo(1);
+			assertThat(ret).hasSize(1);
 			Patient p = ret.get(0);
 			assertThat(p.getNameFirstRep().getFamilyAsSingleString()).isEqualTo("Tester");
 		}
@@ -1253,7 +1253,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			paramMap.add(Patient.SP_NAME, new StringParam("tester"));
 			paramMap.add("_id", new StringParam("000"));
 			List<Patient> ret = toList(myPatientDao.search(paramMap));
-			assertThat(ret.size()).isEqualTo(0);
+			assertThat(ret).isEmpty();
 		}
 	}
 
@@ -1301,9 +1301,9 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		meta.addProfile("http://profile/1");
 		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
 		MetaDt newMeta = myPatientDao.metaDeleteOperation(id.withVersion("1"), meta, mySrd);
-		assertThat(newMeta.getProfile().size()).isEqualTo(1);
-		assertThat(newMeta.getSecurity().size()).isEqualTo(1);
-		assertThat(newMeta.getTag().size()).isEqualTo(1);
+		assertThat(newMeta.getProfile()).hasSize(1);
+		assertThat(newMeta.getSecurity()).hasSize(1);
+		assertThat(newMeta.getTag()).hasSize(1);
 		assertThat(newMeta.getTag().get(0).getCode()).isEqualTo("tag_code2");
 		assertThat(newMeta.getProfile().get(0).getValue()).isEqualTo("http://profile/2");
 		assertThat(newMeta.getSecurity().get(0).getCode()).isEqualTo("seclabel_code2");
@@ -1313,9 +1313,9 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		 */
 
 		meta = myPatientDao.metaGetOperation(MetaDt.class, id.withVersion("1"), mySrd);
-		assertThat(meta.getProfile().size()).isEqualTo(1);
-		assertThat(meta.getSecurity().size()).isEqualTo(1);
-		assertThat(meta.getTag().size()).isEqualTo(1);
+		assertThat(meta.getProfile()).hasSize(1);
+		assertThat(meta.getSecurity()).hasSize(1);
+		assertThat(meta.getTag()).hasSize(1);
 		assertThat(meta.getTag().get(0).getCode()).isEqualTo("tag_code2");
 		assertThat(meta.getProfile().get(0).getValue()).isEqualTo("http://profile/2");
 		assertThat(meta.getSecurity().get(0).getCode()).isEqualTo("seclabel_code2");
@@ -1324,17 +1324,17 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		 * Meta-read on Version 2
 		 */
 		meta = myPatientDao.metaGetOperation(MetaDt.class, id.withVersion("2"), mySrd);
-		assertThat(meta.getProfile().size()).isEqualTo(2);
-		assertThat(meta.getSecurity().size()).isEqualTo(2);
-		assertThat(meta.getTag().size()).isEqualTo(2);
+		assertThat(meta.getProfile()).hasSize(2);
+		assertThat(meta.getSecurity()).hasSize(2);
+		assertThat(meta.getTag()).hasSize(2);
 
 		/*
 		 * Meta-read on latest version
 		 */
 		meta = myPatientDao.metaGetOperation(MetaDt.class, id.toVersionless(), mySrd);
-		assertThat(meta.getProfile().size()).isEqualTo(2);
-		assertThat(meta.getSecurity().size()).isEqualTo(2);
-		assertThat(meta.getTag().size()).isEqualTo(2);
+		assertThat(meta.getProfile()).hasSize(2);
+		assertThat(meta.getSecurity()).hasSize(2);
+		assertThat(meta.getTag()).hasSize(2);
 		assertThat(meta.getVersionId()).isEqualTo("2");
 
 		/*
@@ -1346,18 +1346,18 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		meta.addProfile("http://profile/1");
 		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
 		newMeta = myPatientDao.metaAddOperation(id.withVersion("1"), meta, mySrd);
-		assertThat(newMeta.getProfile().size()).isEqualTo(2);
-		assertThat(newMeta.getSecurity().size()).isEqualTo(2);
-		assertThat(newMeta.getTag().size()).isEqualTo(2);
+		assertThat(newMeta.getProfile()).hasSize(2);
+		assertThat(newMeta.getSecurity()).hasSize(2);
+		assertThat(newMeta.getTag()).hasSize(2);
 
 		/*
 		 * Meta Read on Version
 		 */
 
 		meta = myPatientDao.metaGetOperation(MetaDt.class, id.withVersion("1"), mySrd);
-		assertThat(meta.getProfile().size()).isEqualTo(2);
-		assertThat(meta.getSecurity().size()).isEqualTo(2);
-		assertThat(meta.getTag().size()).isEqualTo(2);
+		assertThat(meta.getProfile()).hasSize(2);
+		assertThat(meta.getSecurity()).hasSize(2);
+		assertThat(meta.getTag()).hasSize(2);
 		assertThat(meta.getVersionId()).isEqualTo("1");
 
 		/*
@@ -1369,9 +1369,9 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		meta.addProfile("http://profile/1");
 		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
 		newMeta = myPatientDao.metaDeleteOperation(id.toVersionless(), meta, mySrd);
-		assertThat(newMeta.getProfile().size()).isEqualTo(1);
-		assertThat(newMeta.getSecurity().size()).isEqualTo(1);
-		assertThat(newMeta.getTag().size()).isEqualTo(1);
+		assertThat(newMeta.getProfile()).hasSize(1);
+		assertThat(newMeta.getSecurity()).hasSize(1);
+		assertThat(newMeta.getTag()).hasSize(1);
 		assertThat(newMeta.getTag().get(0).getCode()).isEqualTo("tag_code2");
 		assertThat(newMeta.getProfile().get(0).getValue()).isEqualTo("http://profile/2");
 		assertThat(newMeta.getSecurity().get(0).getCode()).isEqualTo("seclabel_code2");
@@ -1385,9 +1385,9 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		meta.addProfile("http://profile/1");
 		meta.addSecurity().setSystem("seclabel_sys1").setCode("seclabel_code1");
 		newMeta = myPatientDao.metaAddOperation(id.toVersionless(), meta, mySrd);
-		assertThat(newMeta.getProfile().size()).isEqualTo(2);
-		assertThat(newMeta.getSecurity().size()).isEqualTo(2);
-		assertThat(newMeta.getTag().size()).isEqualTo(2);
+		assertThat(newMeta.getProfile()).hasSize(2);
+		assertThat(newMeta.getSecurity()).hasSize(2);
+		assertThat(newMeta.getTag()).hasSize(2);
 		assertThat(newMeta.getVersionId()).isEqualTo("2");
 
 	}
@@ -1473,7 +1473,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myOrganizationDao.create(org, mySrd);
 
 		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
-		assertThat(val.size()).isEqualTo(initial + 1);
+		assertThat(val).hasSize(initial + 1);
 
 	}
 
@@ -1488,7 +1488,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myPatientDao.create(patient, mySrd);
 
 		found = toList(myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_TELECOM, new TokenParam(null, "555-123-4567"))));
-		assertThat(found.size()).isEqualTo(1 + initialSize2000);
+		assertThat(found).hasSize(1 + initialSize2000);
 
 	}
 
@@ -1520,15 +1520,15 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		ourLog.info("P1[{}] P2[{}] O1[{}] O2[{}] D1[{}]", new Object[]{patientId01, patientId02, obsId01, obsId02, drId01});
 
 		List<Observation> result = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam(patientId01.getIdPart()))));
-		assertThat(result.size()).isEqualTo(1);
+		assertThat(result).hasSize(1);
 		assertThat(result.get(0).getId().getIdPart()).isEqualTo(obsId01.getIdPart());
 
 		result = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam(patientId02.getIdPart()))));
-		assertThat(result.size()).isEqualTo(1);
+		assertThat(result).hasSize(1);
 		assertThat(result.get(0).getId().getIdPart()).isEqualTo(obsId02.getIdPart());
 
 		result = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam("999999999999"))));
-		assertThat(result.size()).isEqualTo(0);
+		assertThat(result).isEmpty();
 
 	}
 
@@ -1547,15 +1547,15 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myPatientDao.create(patient, mySrd);
 
 		found = toList(myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_BIRTHDATE, new DateParam(ParamPrefixEnum.GREATERTHAN, "2000-01-01"))));
-		assertThat(found.size()).isEqualTo(1 + initialSize2000);
+		assertThat(found).hasSize(1 + initialSize2000);
 
 		found = toList(myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_BIRTHDATE, new DateParam(ParamPrefixEnum.GREATERTHAN, "2002-01-01"))));
-		assertThat(found.size()).isEqualTo(initialSize2002);
+		assertThat(found).hasSize(initialSize2002);
 
 		// If this throws an exception, that would be an acceptable outcome as well..
 		try {
 			found = toList(myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_BIRTHDATE + "AAAA", new DateParam(ParamPrefixEnum.GREATERTHAN, "2000-01-01"))));
-			assertThat(found.size()).isEqualTo(0);
+			assertThat(found).isEmpty();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(1223) + "Unknown search parameter \"birthdateAAAA\" for resource type \"Patient\". Valid search parameters for this search are: [_id, _lastUpdated, active, address, address-city, address-country, address-postalcode, address-state, address-use, animal-breed, animal-species, birthdate, careprovider, deathdate, deceased, email, family, gender, given, identifier, language, link, name, organization, phone, phonetic, telecom]");
 		}
@@ -1571,10 +1571,10 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myObservationDao.create(obs, mySrd);
 
 		List<Observation> found = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add("value-string", new StringDt("AAAABBBB"))));
-		assertThat(found.size()).isEqualTo(1);
+		assertThat(found).hasSize(1);
 
 		found = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add("value-string", new StringDt("AAAABBBBCCC"))));
-		assertThat(found.size()).isEqualTo(0);
+		assertThat(found).isEmpty();
 
 	}
 
@@ -1587,13 +1587,13 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myObservationDao.create(obs, mySrd);
 
 		List<Observation> found = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add("value-quantity", new QuantityParam(111))));
-		assertThat(found.size()).isEqualTo(1);
+		assertThat(found).hasSize(1);
 
 		found = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add("value-quantity", new QuantityParam(112))));
-		assertThat(found.size()).isEqualTo(0);
+		assertThat(found).isEmpty();
 
 		found = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add("value-quantity", new QuantityParam(212))));
-		assertThat(found.size()).isEqualTo(0);
+		assertThat(found).isEmpty();
 
 	}
 
@@ -1612,7 +1612,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		IdentifierDt value = new IdentifierDt("urn:system", "001testPersistSearchParams");
 		List<Patient> found = toList(myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_IDENTIFIER, value)));
-		assertThat(found.size()).isEqualTo(1);
+		assertThat(found).hasSize(1);
 		assertThat(found.get(0).getId().getIdPartAsLong().longValue()).isEqualTo(id);
 
 		// found = ourPatientDao.search(Patient.SP_GENDER, new IdentifierDt(null, "M"));
@@ -1626,14 +1626,14 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		map.add(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "001testPersistSearchParams"));
 		map.add(Patient.SP_GENDER, new IdentifierDt("urn:some:wrong:system", AdministrativeGenderEnum.MALE.getCode()));
 		found = toList(myPatientDao.search(map));
-		assertThat(found.size()).isEqualTo(0);
+		assertThat(found).isEmpty();
 
 		// Now with no system on the gender (should match)
 		map = new SearchParameterMap();
 		map.add(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "001testPersistSearchParams"));
 		map.add(Patient.SP_GENDER, new IdentifierDt(null, AdministrativeGenderEnum.MALE.getCode()));
 		found = toList(myPatientDao.search(map));
-		assertThat(found.size()).isEqualTo(1);
+		assertThat(found).hasSize(1);
 		assertThat(found.get(0).getId().getIdPartAsLong().longValue()).isEqualTo(id);
 
 		// Now with the wrong gender
@@ -1641,7 +1641,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		map.add(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "001testPersistSearchParams"));
 		map.add(Patient.SP_GENDER, new IdentifierDt(AdministrativeGenderEnum.MALE.getSystem(), AdministrativeGenderEnum.FEMALE.getCode()));
 		found = toList(myPatientDao.search(map));
-		assertThat(found.size()).isEqualTo(0);
+		assertThat(found).isEmpty();
 
 	}
 
@@ -1677,10 +1677,10 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertThat(p1idv2.getValue()).isNotEqualTo(p1id.getValue());
 
 		Patient v1 = myPatientDao.read(p1id, mySrd);
-		assertThat(v1.getIdentifier().size()).isEqualTo(1);
+		assertThat(v1.getIdentifier()).hasSize(1);
 
 		Patient v2 = myPatientDao.read(p1idv2, mySrd);
-		assertThat(v2.getIdentifier().size()).isEqualTo(2);
+		assertThat(v2.getIdentifier()).hasSize(2);
 
 	}
 
@@ -1742,10 +1742,10 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		Patient p;
 
 		p = myPatientDao.read(id, mySrd);
-		assertThat((p).getName().size()).isEqualTo(1);
+		assertThat((p).getName()).hasSize(1);
 
 		p = myPatientDao.read(id.withVersion("1"), mySrd);
-		assertThat((p).getName().size()).isEqualTo(1);
+		assertThat((p).getName()).hasSize(1);
 
 		try {
 			myPatientDao.read(id.withVersion("2"), mySrd);
@@ -1755,7 +1755,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		}
 
 		p = myPatientDao.read(id.withVersion("3"), mySrd);
-		assertThat((p).getName().size()).isEqualTo(1);
+		assertThat((p).getName()).hasSize(1);
 	}
 
 	@Test
@@ -1815,7 +1815,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		meta = myPatientDao.metaGetOperation(MetaDt.class, mySrd);
 		List<CodingDt> published = meta.getTag();
-		assertThat(published.size()).isEqualTo(2);
+		assertThat(published).hasSize(2);
 		assertThat(published.get(0).getSystem()).isEqualTo(null);
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
@@ -1823,7 +1823,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertThat(published.get(1).getCode()).isEqualTo("Cat");
 		assertThat(published.get(1).getDisplay()).isEqualTo("Kittens");
 		List<CodingDt> secLabels = meta.getSecurity();
-		assertThat(secLabels.size()).isEqualTo(2);
+		assertThat(secLabels).hasSize(2);
 		assertThat(secLabels.get(0).getSystemElement().getValue()).isEqualTo("seclabel:sys:1");
 		assertThat(secLabels.get(0).getCodeElement().getValue()).isEqualTo("seclabel:code:1");
 		assertThat(secLabels.get(0).getDisplayElement().getValue()).isEqualTo("seclabel:dis:1");
@@ -1831,23 +1831,23 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertThat(secLabels.get(1).getCodeElement().getValue()).isEqualTo("seclabel:code:2");
 		assertThat(secLabels.get(1).getDisplayElement().getValue()).isEqualTo("seclabel:dis:2");
 		List<UriDt> profiles = meta.getProfile();
-		assertThat(profiles.size()).isEqualTo(2);
+		assertThat(profiles).hasSize(2);
 		assertThat(profiles.get(0).getValue()).isEqualTo("http://profile/1");
 		assertThat(profiles.get(1).getValue()).isEqualTo("http://profile/2");
 
 		meta = myPatientDao.metaGetOperation(MetaDt.class, id2, mySrd);
 		published = meta.getTag();
-		assertThat(published.size()).isEqualTo(1);
+		assertThat(published).hasSize(1);
 		assertThat(published.get(0).getSystem()).isEqualTo("http://foo");
 		assertThat(published.get(0).getCode()).isEqualTo("Cat");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Kittens");
 		secLabels = meta.getSecurity();
-		assertThat(secLabels.size()).isEqualTo(1);
+		assertThat(secLabels).hasSize(1);
 		assertThat(secLabels.get(0).getSystemElement().getValue()).isEqualTo("seclabel:sys:2");
 		assertThat(secLabels.get(0).getCodeElement().getValue()).isEqualTo("seclabel:code:2");
 		assertThat(secLabels.get(0).getDisplayElement().getValue()).isEqualTo("seclabel:dis:2");
 		profiles = meta.getProfile();
-		assertThat(profiles.size()).isEqualTo(1);
+		assertThat(profiles).hasSize(1);
 		assertThat(profiles.get(0).getValue()).isEqualTo("http://profile/2");
 
 		{
@@ -1860,17 +1860,17 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		meta = myPatientDao.metaGetOperation(MetaDt.class, mySrd);
 		published = meta.getTag();
-		assertThat(published.size()).isEqualTo(1);
+		assertThat(published).hasSize(1);
 		assertThat(published.get(0).getSystem()).isEqualTo("http://foo");
 		assertThat(published.get(0).getCode()).isEqualTo("Cat");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Kittens");
 		secLabels = meta.getSecurity();
-		assertThat(secLabels.size()).isEqualTo(1);
+		assertThat(secLabels).hasSize(1);
 		assertThat(secLabels.get(0).getSystemElement().getValue()).isEqualTo("seclabel:sys:2");
 		assertThat(secLabels.get(0).getCodeElement().getValue()).isEqualTo("seclabel:code:2");
 		assertThat(secLabels.get(0).getDisplayElement().getValue()).isEqualTo("seclabel:dis:2");
 		profiles = meta.getProfile();
-		assertThat(profiles.size()).isEqualTo(1);
+		assertThat(profiles).hasSize(1);
 		assertThat(profiles.get(0).getValue()).isEqualTo("http://profile/2");
 
 	}
@@ -1938,7 +1938,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		meta = myPatientDao.metaGetOperation(MetaDt.class, mySrd);
 		List<CodingDt> published = meta.getTag();
-		assertThat(published.size()).isEqualTo(2);
+		assertThat(published).hasSize(2);
 		assertThat(published.get(0).getSystem()).isEqualTo(null);
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
@@ -1946,7 +1946,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertThat(published.get(1).getCode()).isEqualTo("Cat");
 		assertThat(published.get(1).getDisplay()).isEqualTo("Kittens");
 		List<CodingDt> secLabels = meta.getSecurity();
-		assertThat(secLabels.size()).isEqualTo(2);
+		assertThat(secLabels).hasSize(2);
 		assertThat(secLabels.get(0).getSystemElement().getValue()).isEqualTo("seclabel:sys:1");
 		assertThat(secLabels.get(0).getCodeElement().getValue()).isEqualTo("seclabel:code:1");
 		assertThat(secLabels.get(0).getDisplayElement().getValue()).isEqualTo("seclabel:dis:1");
@@ -1954,23 +1954,23 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertThat(secLabels.get(1).getCodeElement().getValue()).isEqualTo("seclabel:code:2");
 		assertThat(secLabels.get(1).getDisplayElement().getValue()).isEqualTo("seclabel:dis:2");
 		List<UriDt> profiles = meta.getProfile();
-		assertThat(profiles.size()).isEqualTo(2);
+		assertThat(profiles).hasSize(2);
 		assertThat(profiles.get(0).getValue()).isEqualTo("http://profile/1");
 		assertThat(profiles.get(1).getValue()).isEqualTo("http://profile/2");
 
 		meta = myPatientDao.metaGetOperation(MetaDt.class, id2, mySrd);
 		published = meta.getTag();
-		assertThat(published.size()).isEqualTo(1);
+		assertThat(published).hasSize(1);
 		assertThat(published.get(0).getSystem()).isEqualTo("http://foo");
 		assertThat(published.get(0).getCode()).isEqualTo("Cat");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Kittens");
 		secLabels = meta.getSecurity();
-		assertThat(secLabels.size()).isEqualTo(1);
+		assertThat(secLabels).hasSize(1);
 		assertThat(secLabels.get(0).getSystemElement().getValue()).isEqualTo("seclabel:sys:2");
 		assertThat(secLabels.get(0).getCodeElement().getValue()).isEqualTo("seclabel:code:2");
 		assertThat(secLabels.get(0).getDisplayElement().getValue()).isEqualTo("seclabel:dis:2");
 		profiles = meta.getProfile();
-		assertThat(profiles.size()).isEqualTo(1);
+		assertThat(profiles).hasSize(1);
 		assertThat(profiles.get(0).getValue()).isEqualTo("http://profile/2");
 
 		myPatientDao.removeTag(id1, TagTypeEnum.TAG, null, "Dog", mySrd);
@@ -1979,17 +1979,17 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		meta = myPatientDao.metaGetOperation(MetaDt.class, mySrd);
 		published = meta.getTag();
-		assertThat(published.size()).isEqualTo(1);
+		assertThat(published).hasSize(1);
 		assertThat(published.get(0).getSystem()).isEqualTo("http://foo");
 		assertThat(published.get(0).getCode()).isEqualTo("Cat");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Kittens");
 		secLabels = meta.getSecurity();
-		assertThat(secLabels.size()).isEqualTo(1);
+		assertThat(secLabels).hasSize(1);
 		assertThat(secLabels.get(0).getSystemElement().getValue()).isEqualTo("seclabel:sys:2");
 		assertThat(secLabels.get(0).getCodeElement().getValue()).isEqualTo("seclabel:code:2");
 		assertThat(secLabels.get(0).getDisplayElement().getValue()).isEqualTo("seclabel:dis:2");
 		profiles = meta.getProfile();
-		assertThat(profiles.size()).isEqualTo(1);
+		assertThat(profiles).hasSize(1);
 		assertThat(profiles.get(0).getValue()).isEqualTo("http://profile/2");
 
 	}
@@ -2013,7 +2013,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertThat(resultsP.size().intValue()).isEqualTo(1);
 
 		List<IBaseResource> results = resultsP.getResources(0, resultsP.size());
-		assertThat(results.size()).isEqualTo(2);
+		assertThat(results).hasSize(2);
 		assertThat(results.get(0).getClass()).isEqualTo(Organization.class);
 		assertThat(ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.get((IResource) results.get(0))).isEqualTo(BundleEntrySearchModeEnum.MATCH);
 		assertThat(results.get(1).getClass()).isEqualTo(Patient.class);
@@ -2090,7 +2090,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		IBundleProvider found = myObservationDao.search(pm);
 
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
-		assertThat(list.size()).isEqualTo(4);
+		assertThat(list).hasSize(4);
 		assertThat(list.get(0)).isEqualTo(oid3);
 		assertThat(list.get(1)).isEqualTo(oid1);
 		assertThat(list.get(2)).isEqualTo(oid4);
@@ -2129,21 +2129,21 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testtestSortByDate"));
 		pm.setSort(new SortSpec(Patient.SP_BIRTHDATE));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertThat(actual.size()).isEqualTo(4);
+		assertThat(actual).hasSize(4);
 		assertThat(actual).containsExactly(id1, id2, id3, id4);
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testtestSortByDate"));
 		pm.setSort(new SortSpec(Patient.SP_BIRTHDATE).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertThat(actual.size()).isEqualTo(4);
+		assertThat(actual).hasSize(4);
 		assertThat(actual).containsExactly(id1, id2, id3, id4);
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", "testtestSortByDate"));
 		pm.setSort(new SortSpec(Patient.SP_BIRTHDATE).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertThat(actual.size()).isEqualTo(4);
+		assertThat(actual).hasSize(4);
 		assertThat(actual).containsExactly(id3, id2, id1, id4);
 
 	}
@@ -2181,21 +2181,21 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(BaseResource.SP_RES_ID));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertThat(actual.size()).isEqualTo(5);
+		assertThat(actual).hasSize(5);
 		assertThat(actual).containsExactly(id1, id2, id3, id4, idMethodName);
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(BaseResource.SP_RES_ID).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertThat(actual.size()).isEqualTo(5);
+		assertThat(actual).hasSize(5);
 		assertThat(actual).containsExactly(id1, id2, id3, id4, idMethodName);
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(BaseResource.SP_RES_ID).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertThat(actual.size()).isEqualTo(5);
+		assertThat(actual).hasSize(5);
 		assertThat(actual).containsExactly(idMethodName, id4, id3, id2, id1);
 	}
 
@@ -2313,19 +2313,19 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		SearchParameterMap pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(Observation.SP_VALUE_QUANTITY));
 		List<IIdType> actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(pm));
-		assertThat(actual.size()).isEqualTo(4);
+		assertThat(actual).hasSize(4);
 		assertThat(actual).containsExactly(id1, id2, id3, id4);
 
 		pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(Observation.SP_VALUE_QUANTITY, SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(pm));
-		assertThat(actual.size()).isEqualTo(4);
+		assertThat(actual).hasSize(4);
 		assertThat(actual).containsExactly(id1, id2, id3, id4);
 
 		pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(Observation.SP_VALUE_QUANTITY, SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myObservationDao.search(pm));
-		assertThat(actual.size()).isEqualTo(4);
+		assertThat(actual).hasSize(4);
 		assertThat(actual).containsExactly(id4, id3, id2, id1);
 
 	}
@@ -2370,7 +2370,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(Patient.SP_ORGANIZATION));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertThat(actual.size()).isEqualTo(4);
+		assertThat(actual).hasSize(4);
 		assertThat(actual.subList(0, 2)).containsExactlyInAnyOrder(id1, id3);
 		assertThat(actual.subList(2, 4)).containsExactlyInAnyOrder(id2, id4);
 
@@ -2378,7 +2378,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(Patient.SP_ORGANIZATION).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertThat(actual.size()).isEqualTo(4);
+		assertThat(actual).hasSize(4);
 		assertThat(actual.subList(0, 2)).containsExactlyInAnyOrder(id1, id3);
 		assertThat(actual.subList(2, 4)).containsExactlyInAnyOrder(id2, id4);
 
@@ -2386,7 +2386,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
 		pm.setSort(new SortSpec(Patient.SP_ORGANIZATION).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertThat(actual.size()).isEqualTo(4);
+		assertThat(actual).hasSize(4);
 		assertThat(actual.subList(0, 2)).containsExactlyInAnyOrder(id2, id4);
 		assertThat(actual.subList(2, 4)).containsExactlyInAnyOrder(id1, id3);
 	}
@@ -2421,21 +2421,21 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", string));
 		pm.setSort(new SortSpec(Patient.SP_FAMILY));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertThat(actual.size()).isEqualTo(4);
+		assertThat(actual).hasSize(4);
 		assertThat(actual).containsExactly(id1, id2, id3, id4);
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", string));
 		pm.setSort(new SortSpec(Patient.SP_FAMILY).setOrder(SortOrderEnum.ASC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertThat(actual.size()).isEqualTo(4);
+		assertThat(actual).hasSize(4);
 		assertThat(actual).containsExactly(id1, id2, id3, id4);
 
 		pm = new SearchParameterMap();
 		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", string));
 		pm.setSort(new SortSpec(Patient.SP_FAMILY).setOrder(SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertThat(actual.size()).isEqualTo(4);
+		assertThat(actual).hasSize(4);
 		assertThat(actual).containsExactly(id3, id2, id1, id4);
 	}
 
@@ -2537,7 +2537,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		pm.add(Patient.SP_IDENTIFIER, sp);
 		pm.setSort(new SortSpec(Patient.SP_IDENTIFIER));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertThat(actual.size()).isEqualTo(4);
+		assertThat(actual).hasSize(4);
 		assertThat(actual).containsExactly(id1, id2, id3, id4);
 
 		pm = new SearchParameterMap();
@@ -2549,7 +2549,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		pm.add(Patient.SP_IDENTIFIER, sp);
 		pm.setSort(new SortSpec(Patient.SP_IDENTIFIER, SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertThat(actual.size()).isEqualTo(4);
+		assertThat(actual).hasSize(4);
 		assertThat(actual).containsExactly(id4, id3, id2, id1);
 
 	}
@@ -2576,13 +2576,13 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		SearchParameterMap pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(ConceptMap.SP_DEPENDSON));
 		List<IIdType> actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(pm));
-		assertThat(actual.size()).isEqualTo(4);
+		assertThat(actual).hasSize(4);
 		assertThat(actual).containsExactly(id1, id2, id3, id4);
 
 		pm = new SearchParameterMap();
 		pm.setSort(new SortSpec(Encounter.SP_LENGTH, SortOrderEnum.DESC));
 		actual = toUnqualifiedVersionlessIds(myConceptMapDao.search(pm));
-		assertThat(actual.size()).isEqualTo(4);
+		assertThat(actual).hasSize(4);
 		assertThat(actual).containsExactly(id4, id3, id2, id1);
 
 	}
@@ -2663,10 +2663,10 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myOrganizationDao.create(org, mySrd);
 
 		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam("P")), null);
-		assertThat(val.size()).isEqualTo(initial + 0);
+		assertThat(val).hasSize(initial + 0);
 
 		val = myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH))), null);
-		assertThat(val.size()).isEqualTo(initial + 1);
+		assertThat(val).hasSize(initial + 1);
 
 		try {
 			myOrganizationDao.searchForIds(new SearchParameterMap("name", new StringParam(str.substring(0, ResourceIndexedSearchParamString.MAX_LENGTH + 1))), null);
@@ -2716,7 +2716,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		List<BaseCodingDt> secLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved);
 		sortCodings(secLabels);
-		assertThat(secLabels.size()).isEqualTo(2);
+		assertThat(secLabels).hasSize(2);
 		assertThat(secLabels.get(0).getSystemElement().getValue()).isEqualTo("seclabel:sys:1");
 		assertThat(secLabels.get(0).getCodeElement().getValue()).isEqualTo("seclabel:code:1");
 		assertThat(secLabels.get(0).getDisplayElement().getValue()).isEqualTo("seclabel:dis:1");
@@ -2725,12 +2725,12 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertThat(secLabels.get(1).getDisplayElement().getValue()).isEqualTo("seclabel:dis:2");
 		profiles = ResourceMetadataKeyEnum.PROFILES.get(retrieved);
 		profiles = sortIds(profiles);
-		assertThat(profiles.size()).isEqualTo(2);
+		assertThat(profiles).hasSize(2);
 		assertThat(profiles.get(0).getValue()).isEqualTo("http://profile/1");
 		assertThat(profiles.get(1).getValue()).isEqualTo("http://profile/2");
 
 		List<Patient> search = toList(myPatientDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Patient.SP_IDENTIFIER, patient.getIdentifierFirstRep())));
-		assertThat(search.size()).isEqualTo(1);
+		assertThat(search).hasSize(1);
 		retrieved = search.get(0);
 
 		published = (TagList) retrieved.getResourceMetadata().get(ResourceMetadataKeyEnum.TAG_LIST);
@@ -2744,7 +2744,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		secLabels = ResourceMetadataKeyEnum.SECURITY_LABELS.get(retrieved);
 		sortCodings(secLabels);
-		assertThat(secLabels.size()).isEqualTo(2);
+		assertThat(secLabels).hasSize(2);
 		assertThat(secLabels.get(0).getSystemElement().getValue()).isEqualTo("seclabel:sys:1");
 		assertThat(secLabels.get(0).getCodeElement().getValue()).isEqualTo("seclabel:code:1");
 		assertThat(secLabels.get(0).getDisplayElement().getValue()).isEqualTo("seclabel:dis:1");
@@ -2754,7 +2754,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 		profiles = ResourceMetadataKeyEnum.PROFILES.get(retrieved);
 		profiles = sortIds(profiles);
-		assertThat(profiles.size()).isEqualTo(2);
+		assertThat(profiles).hasSize(2);
 		assertThat(profiles.get(0).getValue()).isEqualTo("http://profile/1");
 		assertThat(profiles.get(1).getValue()).isEqualTo("http://profile/2");
 
@@ -2778,10 +2778,10 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		myOrganizationDao.create(org, mySrd);
 
 		val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(subStr1, subStr2)), null);
-		assertThat(val.size()).isEqualTo(initial);
+		assertThat(val).hasSize(initial);
 
 		val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new IdentifierDt(longStr1, longStr2)), null);
-		assertThat(val.size()).isEqualTo(initial + 1);
+		assertThat(val).hasSize(initial + 1);
 	}
 
 	@Test

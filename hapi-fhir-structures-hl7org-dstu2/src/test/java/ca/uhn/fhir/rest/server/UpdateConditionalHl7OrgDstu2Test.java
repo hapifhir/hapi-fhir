@@ -31,9 +31,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class UpdateConditionalHl7OrgDstu2Test {
 	private static String ourLastConditionalUrl;
@@ -79,13 +77,13 @@ public class UpdateConditionalHl7OrgDstu2Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(null, status.getFirstHeader("location"));
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
-		
-		assertNull(ourLastId);
-		assertNull(ourLastIdParam);
-		assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertThat(status.getFirstHeader("location")).isEqualTo(null);
+		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
+
+		assertThat(ourLastId).isNull();
+		assertThat(ourLastIdParam).isNull();
+		assertThat(ourLastConditionalUrl).isEqualTo("Patient?identifier=system%7C001");
 
 	}
 
@@ -106,13 +104,13 @@ public class UpdateConditionalHl7OrgDstu2Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(null, status.getFirstHeader("location"));
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
-		
-		assertEquals("Patient/2", new IdType(ourLastId).toUnqualified().getValue());
-		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
-		assertNull(ourLastConditionalUrl);
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertThat(status.getFirstHeader("location")).isEqualTo(null);
+		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
+
+		assertThat(new IdType(ourLastId).toUnqualified().getValue()).isEqualTo("Patient/2");
+		assertThat(ourLastIdParam.toUnqualified().getValue()).isEqualTo("Patient/2");
+		assertThat(ourLastConditionalUrl).isNull();
 
 	}
 
@@ -131,10 +129,10 @@ public class UpdateConditionalHl7OrgDstu2Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertTrue(ourLastRequestWasSearch);
-		assertNull(ourLastId);
-		assertNull(ourLastIdParam);
-		assertNull(ourLastConditionalUrl);
+		assertThat(ourLastRequestWasSearch).isTrue();
+		assertThat(ourLastId).isNull();
+		assertThat(ourLastIdParam).isNull();
+		assertThat(ourLastConditionalUrl).isNull();
 
 	}
 

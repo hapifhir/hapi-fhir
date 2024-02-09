@@ -74,11 +74,11 @@ public interface IMdmMetricSvcTest {
 
 		Map<MdmMatchResultEnum, Map<MdmLinkSourceEnum, Long>> map = results.getMatchTypeToLinkToCountMap();
 		// See OUR_BASIC_STATE
-		assertThat(map.size()).isEqualTo(3);
+		assertThat(map).hasSize(3);
 		for (MdmMatchResultEnum matchResult : new MdmMatchResultEnum[] {
 			MdmMatchResultEnum.MATCH, MdmMatchResultEnum.NO_MATCH, MdmMatchResultEnum.POSSIBLE_MATCH
 		}) {
-			assertThat(map.containsKey(matchResult)).isTrue();
+			assertThat(map).containsKey(matchResult);
 			Map<MdmLinkSourceEnum, Long> source2Count = map.get(matchResult);
 			assertThat(source2Count).isNotNull();
 			for (MdmLinkSourceEnum ls : MdmLinkSourceEnum.values()) {
@@ -177,7 +177,7 @@ public interface IMdmMetricSvcTest {
 
 		Map<String, Long> actual = actualMetrics.getScoreCounts();
 		Map<String, Long> expected = expectedMetrics.getScoreCounts();
-		assertThat(actual.size()).isEqualTo(expected.size());
+		assertThat(actual).hasSize(expected.size());
 		for (String score : expected.keySet()) {
 			assertThat(actual.containsKey(score))
 					.as(String.format("Score of %s is not in results", score))

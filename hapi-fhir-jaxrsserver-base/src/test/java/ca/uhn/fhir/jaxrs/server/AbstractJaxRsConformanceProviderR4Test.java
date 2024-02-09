@@ -65,8 +65,8 @@ public class AbstractJaxRsConformanceProviderR4Test {
 		providers.put(TestJaxRsMockPatientRestProviderR4.class, new TestJaxRsMockPatientRestProviderR4());
 		Response response = createConformanceProvider(providers).conformance();
 		assertThat(response.getStatus()).isEqualTo(Constants.STATUS_HTTP_200_OK);
-		assertThat(response.getEntity().toString().contains("\"type\": \"Patient\"")).isTrue();
-		assertThat(response.getEntity().toString().contains("\"someCustomOperation")).isTrue();
+		assertThat(response.getEntity().toString()).contains("\"type\": \"Patient\"");
+		assertThat(response.getEntity().toString()).contains("\"someCustomOperation");
 		System.out.println(response);
 		System.out.println(response.getEntity());
 	}
@@ -79,8 +79,8 @@ public class AbstractJaxRsConformanceProviderR4Test {
 		Response response = createConformanceProvider(providers).conformance();
 		assertThat(response.getStatus()).isEqualTo(Constants.STATUS_HTTP_200_OK);
 		System.out.println(response.getEntity());
-		assertThat(response.getEntity().toString().contains(" <type value=\"Patient\"/>")).isTrue();
-		assertThat(response.getEntity().toString().contains("\"someCustomOperation")).isTrue();
+		assertThat(response.getEntity().toString()).contains(" <type value=\"Patient\"/>");
+		assertThat(response.getEntity().toString()).contains("\"someCustomOperation");
 		System.out.println(response.getEntity());
 	}
 

@@ -31,7 +31,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SummaryParamDstu2Test {
 
@@ -65,14 +64,14 @@ public class SummaryParamDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertThat(status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase());
 		assertThat(responseContent).doesNotContain("<Bundle");
 		assertThat(responseContent, (containsString("<Patien")));
 		assertThat(responseContent).doesNotContain("<div>THE DIV</div>");
 		assertThat(responseContent, (containsString("family")));
 		assertThat(responseContent, (containsString("maritalStatus")));
-		assertEquals(SummaryEnum.DATA, ourLastSummary);
+		assertThat(ourLastSummary).isEqualTo(SummaryEnum.DATA);
 	}
 
 
@@ -84,13 +83,13 @@ public class SummaryParamDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertThat(status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase());
 		assertThat(responseContent).doesNotContain("<Bundle");
 		assertThat(responseContent).doesNotContain("<Medic");
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">THE DIV</div>", responseContent);
+		assertThat(responseContent).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">THE DIV</div>");
 		assertThat(responseContent).doesNotContain("efer");
-		assertEquals(SummaryEnum.TEXT, ourLastSummary);
+		assertThat(ourLastSummary).isEqualTo(SummaryEnum.TEXT);
 	}
 
 	@Test
@@ -101,11 +100,11 @@ public class SummaryParamDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertThat(status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase());
 		assertThat(responseContent).doesNotContain("<Bundle");
 		assertThat(responseContent).doesNotContain("<Patien");
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT</div>", responseContent);
+		assertThat(responseContent).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT</div>");
 		assertThat(responseContent).doesNotContain("family");
 		assertThat(responseContent).doesNotContain("maritalStatus");
 	}
@@ -118,14 +117,14 @@ public class SummaryParamDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertThat(status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase());
 		assertThat(responseContent).doesNotContain("<Bundle");
 		assertThat(responseContent, (containsString("<Patien")));
 		assertThat(responseContent).doesNotContain("<div>THE DIV</div>");
 		assertThat(responseContent, (containsString("family")));
 		assertThat(responseContent).doesNotContain("maritalStatus");
-		assertEquals(SummaryEnum.TRUE, ourLastSummary);
+		assertThat(ourLastSummary).isEqualTo(SummaryEnum.TRUE);
 	}
 
 	@Test
@@ -136,13 +135,13 @@ public class SummaryParamDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent, (containsString("<total value=\"1\"/>")));
 		assertThat(responseContent).doesNotContain("entry");
 		assertThat(responseContent).doesNotContain("THE DIV");
 		assertThat(responseContent).doesNotContain("family");
 		assertThat(responseContent).doesNotContain("maritalStatus");
-		assertEquals(SummaryEnum.COUNT, ourLastSummary);
+		assertThat(ourLastSummary).isEqualTo(SummaryEnum.COUNT);
 	}
 
 	@Test
@@ -153,12 +152,12 @@ public class SummaryParamDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent).contains("<Patient");
 		assertThat(responseContent).doesNotContain("THE DIV");
 		assertThat(responseContent).contains("family");
 		assertThat(responseContent).contains("maritalStatus");
-		assertEquals(SummaryEnum.DATA, ourLastSummary);
+		assertThat(ourLastSummary).isEqualTo(SummaryEnum.DATA);
 	}
 
 	@Test
@@ -169,12 +168,12 @@ public class SummaryParamDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent).contains("<Patient");
 		assertThat(responseContent).contains("THE DIV");
 		assertThat(responseContent).contains("family");
 		assertThat(responseContent).contains("maritalStatus");
-		assertEquals(SummaryEnum.FALSE, ourLastSummary);
+		assertThat(ourLastSummary).isEqualTo(SummaryEnum.FALSE);
 	}
 
 	@Test
@@ -185,13 +184,13 @@ public class SummaryParamDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent, (containsString("<total value=\"1\"/>")));
 		assertThat(responseContent, (containsString("entry")));
 		assertThat(responseContent, (containsString("THE DIV")));
 		assertThat(responseContent).doesNotContain("family");
 		assertThat(responseContent).doesNotContain("maritalStatus");
-		assertEquals(SummaryEnum.TEXT, ourLastSummary);
+		assertThat(ourLastSummary).isEqualTo(SummaryEnum.TEXT);
 	}
 
 	@Test
@@ -202,7 +201,7 @@ public class SummaryParamDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent, (containsString("<total value=\"1\"/>")));
 		assertThat(responseContent, (containsString("entry")));
 		assertThat(responseContent, (containsString(">TEXT<")));
@@ -218,7 +217,7 @@ public class SummaryParamDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent, (containsString("<total value=\"1\"/>")));
 		assertThat(responseContent, (containsString("entry")));
 		assertThat(responseContent, (containsString("THE DIV")));
@@ -235,12 +234,12 @@ public class SummaryParamDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent).contains("<Patient");
 		assertThat(responseContent).doesNotContain("THE DIV");
 		assertThat(responseContent).contains("family");
 		assertThat(responseContent).doesNotContain("maritalStatus");
-		assertEquals(SummaryEnum.TRUE, ourLastSummary);
+		assertThat(ourLastSummary).isEqualTo(SummaryEnum.TRUE);
 	}
 
 	@Test
@@ -251,7 +250,7 @@ public class SummaryParamDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 		assertThat(responseContent).contains("Can not combine _summary=text with other values for _summary");
 	}
 

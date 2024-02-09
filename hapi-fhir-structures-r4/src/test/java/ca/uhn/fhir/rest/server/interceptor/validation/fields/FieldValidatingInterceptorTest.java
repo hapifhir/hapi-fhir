@@ -14,7 +14,9 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import static ca.uhn.fhir.rest.server.interceptor.validation.fields.FieldValidatingInterceptor.VALIDATION_DISABLED_HEADER;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -56,7 +58,7 @@ class FieldValidatingInterceptorTest {
 		person.addTelecom().setSystem(ContactPoint.ContactPointSystem.EMAIL).setValue("EMAIL");
 
 		myInterceptor.handleRequest(request, person);
-		assertEquals("EMAIL", person.getTelecom().get(0).getValue());
+		assertThat(person.getTelecom().get(0).getValue()).isEqualTo("EMAIL");
 	}
 
 	@Test
@@ -84,12 +86,12 @@ class FieldValidatingInterceptorTest {
 		ourLog.debug("Resource looks like {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(person));
 
 		ContactPoint invalidEmail = person.getTelecomFirstRep();
-		assertTrue(invalidEmail.hasExtension());
-		assertEquals("true", invalidEmail.getExtensionString(IValidator.VALIDATION_EXTENSION_URL));
+		assertThat(invalidEmail.hasExtension()).isTrue();
+		assertThat(invalidEmail.getExtensionString(IValidator.VALIDATION_EXTENSION_URL)).isEqualTo("true");
 
 		ContactPoint validEmail = person.getTelecom().get(1);
-		assertTrue(validEmail.hasExtension());
-		assertEquals("false", validEmail.getExtensionString(IValidator.VALIDATION_EXTENSION_URL));
+		assertThat(validEmail.hasExtension()).isTrue();
+		assertThat(validEmail.getExtensionString(IValidator.VALIDATION_EXTENSION_URL)).isEqualTo("false");
 	}
 
 	@Test

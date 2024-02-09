@@ -61,7 +61,7 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		IBundleProvider search = myPatientDao.search(params, mySrd);
 		assertThat(search instanceof PersistedJpaBundleProvider).as(search.getClass().toString()).isTrue();
 		List<IBaseResource> found = search.getResources(0, 100);
-		assertThat(found.size()).isEqualTo(3);
+		assertThat(found).hasSize(3);
 		assertThat(showedCounter.get()).isEqualTo(3);
 
 		// Delete and expunge one
@@ -72,7 +72,7 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		// Next search should return only the non-expunged ones
 		params = new SearchParameterMap();
 		found = myPatientDao.search(params, mySrd).getResources(0, 100);
-		assertThat(found.size()).isEqualTo(2);
+		assertThat(found).hasSize(2);
 		assertThat(showedCounter.get()).isEqualTo(2);
 	}
 
@@ -105,7 +105,7 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		IBundleProvider search = myPatientDao.search(params, mySrd);
 		assertThat(search instanceof SimpleBundleProvider).as(search.getClass().toString()).isTrue();
 		List<IBaseResource> found = search.getResources(0, 100);
-		assertThat(found.size()).isEqualTo(3);
+		assertThat(found).hasSize(3);
 		assertThat(showedCounter.get()).isEqualTo(3);
 
 		// Delete and expunge one
@@ -116,7 +116,7 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		// Next search should return only the non-expunged ones
 		params = new SearchParameterMap();
 		found = myPatientDao.search(params, mySrd).getResources(0, 100);
-		assertThat(found.size()).isEqualTo(2);
+		assertThat(found).hasSize(2);
 		assertThat(showedCounter.get()).isEqualTo(2);
 	}
 

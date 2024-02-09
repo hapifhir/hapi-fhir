@@ -15,8 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import javax.net.ssl.SSLHandshakeException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -31,11 +30,11 @@ public class ApacheRestfulClientFactoryTest extends BaseFhirVersionParameterized
 
 		HttpUriRequest request = new HttpGet(fhirVersionParams.getPatientEndpoint());
 		HttpResponse response = client.execute(request);
-		assertEquals(200, response.getStatusLine().getStatusCode());
+		assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		String json = EntityUtils.toString(response.getEntity());
 		IBaseResource bundle = fhirVersionParams.parseResource(json);
-		assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
+		assertThat(bundle.getStructureFhirVersionEnum()).isEqualTo(fhirVersionParams.getFhirVersion());
 	}
 
 	@ParameterizedTest
@@ -50,7 +49,7 @@ public class ApacheRestfulClientFactoryTest extends BaseFhirVersionParameterized
 			unauthenticatedClient.execute(request);
 			fail("");		}
 		catch(Exception e){
-			assertEquals(SSLHandshakeException.class, e.getClass());
+			assertThat(e.getClass()).isEqualTo(SSLHandshakeException.class);
 		}
 	}
 
@@ -62,7 +61,7 @@ public class ApacheRestfulClientFactoryTest extends BaseFhirVersionParameterized
 		FhirContext context = fhirVersionParams.getFhirContext();
 		context.setRestfulClientFactory(new ApacheRestfulClientFactory(context));
 		IBaseResource bundle = context.newRestfulGenericClient(base).search().forResource("Patient").execute();
-		assertEquals(theFhirVersion, bundle.getStructureFhirVersionEnum());
+		assertThat(bundle.getStructureFhirVersionEnum()).isEqualTo(theFhirVersion);
 	}
 
 	@ParameterizedTest
@@ -75,8 +74,8 @@ public class ApacheRestfulClientFactoryTest extends BaseFhirVersionParameterized
 		try {
 			context.newRestfulGenericClient(secureBase).search().forResource("Patient").execute();
 			fail("");		} catch (Exception e) {
-			assertTrue(e.getMessage().contains("HAPI-1357: Failed to retrieve the server metadata statement during client initialization"));
-			assertEquals(SSLHandshakeException.class, e.getCause().getCause().getClass());
+			assertThat(e.getMessage()).contains("HAPI-1357: Failed to retrieve the server metadata statement during client initialization");
+			assertThat(e.getCause().getCause().getClass()).isEqualTo(SSLHandshakeException.class);
 		}
 	}
 }

@@ -1324,6 +1324,6 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		IBundleProvider search = myPractitionerRoleDao.search(spMap);
 		actual = search.getResources(0, 100);
 
-		assertThat(actual.size()).isEqualTo(5);
+		assertThat(actual).hasSize(5);
 	}
 }

@@ -7,8 +7,7 @@ import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class XhtmlNodeTest {
 
@@ -25,8 +24,8 @@ public class XhtmlNodeTest {
 	public void testParseRsquo() {
 		XhtmlNode dt = new XhtmlNode();
 		dt.setValueAsString("It&rsquo;s January again");
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">It’s January again</div>", dt.getValueAsString());
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">It’s January again</div>", new XhtmlNode().setValue(dt.getValue()).getValueAsString());
+		assertThat(dt.getValueAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">It’s January again</div>");
+		assertThat(new XhtmlNode().setValue(dt.getValue()).getValueAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">It’s January again</div>");
 	}
 
 	/**
@@ -36,8 +35,8 @@ public class XhtmlNodeTest {
 	public void testLangAttributePreserved() {
 		XhtmlNode dt = new XhtmlNode();
 		dt.setValueAsString("<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en-US\">help i'm a bug</div>");
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en-US\">help i'm a bug</div>", dt.getValueAsString());
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en-US\">help i'm a bug</div>", new XhtmlNode().setValue(dt.getValue()).getValueAsString());
+		assertThat(dt.getValueAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en-US\">help i'm a bug</div>");
+		assertThat(new XhtmlNode().setValue(dt.getValue()).getValueAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en-US\">help i'm a bug</div>");
 	}
 
 	/**
@@ -55,9 +54,9 @@ public class XhtmlNodeTest {
 		
 		ExplanationOfBenefit copy1 = ourCtx.newXmlParser().parseResource(ExplanationOfBenefit.class, input);
 		ExplanationOfBenefit copy2 = ourCtx.newXmlParser().parseResource(ExplanationOfBenefit.class, input);
-		
-		assertTrue(copy1.equalsDeep(copy2));
-		assertTrue(copy1.equalsShallow(copy2));
+
+		assertThat(copy1.equalsDeep(copy2)).isTrue();
+		assertThat(copy1.equalsShallow(copy2)).isTrue();
 		
 	}
 	

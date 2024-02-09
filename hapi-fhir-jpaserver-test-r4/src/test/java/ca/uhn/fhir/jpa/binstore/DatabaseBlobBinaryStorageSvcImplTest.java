@@ -51,9 +51,9 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread().size()).isEqualTo(1);
-		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).isEmpty();
+		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread()).hasSize(1);
+		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).isEmpty();
 
 		myCaptureQueriesListener.clear();
 
@@ -105,9 +105,9 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread().size()).isEqualTo(1);
-		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).isEmpty();
+		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread()).hasSize(1);
+		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).isEmpty();
 
 		myCaptureQueriesListener.clear();
 

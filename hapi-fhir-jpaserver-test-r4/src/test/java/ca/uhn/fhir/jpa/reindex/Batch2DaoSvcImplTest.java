@@ -108,7 +108,7 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 	}
 
 	private static void assertIdsEqual(List<IIdType> expectedResourceIds, List<? extends IIdType> actualResourceIds) {
-		assertThat(actualResourceIds.size()).isEqualTo(expectedResourceIds.size());
+		assertThat(actualResourceIds).hasSize(expectedResourceIds.size());
 
 		for (int index = 0; index < expectedResourceIds.size(); index++) {
 			final IIdType expectedIdType = expectedResourceIds.get(index);

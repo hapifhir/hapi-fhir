@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.timeout;
@@ -81,10 +81,10 @@ public class ResponseSizeCapturingInterceptorTest {
 		}).when(myConsumer).accept(any());
 
 		resource = ourServerRule.getFhirClient().read().resource(Patient.class).withId(id).execute();
-		assertEquals(true, resource.getActive());
+		assertThat(resource.getActive()).isEqualTo(true);
 
 		verify(myConsumer, timeout(10000).times(1)).accept(myResultCaptor.capture());
-		assertEquals(100, myResultCaptor.getValue().getWrittenChars());
+		assertThat(myResultCaptor.getValue().getWrittenChars()).isEqualTo(100);
 	}
 
 

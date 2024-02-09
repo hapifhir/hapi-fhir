@@ -52,7 +52,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class AuthorizationInterceptorDstu3Test {
 
@@ -199,7 +199,7 @@ public class AuthorizationInterceptorDstu3Test {
 		httpPost.setEntity(createFhirResourceEntity(requestBundle));
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		String resp = extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 	}
 

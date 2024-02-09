@@ -32,8 +32,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ETagServerR4Test {
 
@@ -77,7 +76,7 @@ public class ETagServerR4Test {
 	  HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2");
 	  httpGet.addHeader(Constants.HEADER_IF_NONE_MATCH, "\"222\"");
 	  HttpResponse status = ourClient.execute(httpGet);
-	  assertEquals(Constants.STATUS_HTTP_304_NOT_MODIFIED, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_304_NOT_MODIFIED);
   }
 
   @Test
@@ -89,14 +88,14 @@ public class ETagServerR4Test {
     String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
     IOUtils.closeQuietly(status.getEntity().getContent());
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
     Identifier dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifier().get(0);
-    assertEquals("2", dt.getSystemElement().getValueAsString());
-    assertEquals("3", dt.getValue());
+		assertThat(dt.getSystemElement().getValueAsString()).isEqualTo("2");
+		assertThat(dt.getValue()).isEqualTo("3");
 
     Header cl = status.getFirstHeader(Constants.HEADER_ETAG_LC);
-    assertNotNull(cl);
-    assertEquals("W/\"222\"", cl.getValue());
+		assertThat(cl).isNotNull();
+		assertThat(cl.getValue()).isEqualTo("W/\"222\"");
   }
 
   @Test
@@ -109,11 +108,11 @@ public class ETagServerR4Test {
     HttpResponse status = ourClient.execute(httpGet);
     IOUtils.closeQuietly(status.getEntity().getContent());
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
     Header cl = status.getFirstHeader(Constants.HEADER_ETAG_LC);
-    assertNotNull(cl);
-    assertEquals("W/\"222\"", cl.getValue());
+		assertThat(cl).isNotNull();
+		assertThat(cl.getValue()).isEqualTo("W/\"222\"");
   }
 
   @Test
@@ -125,14 +124,14 @@ public class ETagServerR4Test {
     String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
     IOUtils.closeQuietly(status.getEntity().getContent());
 
-    assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
     Identifier dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifier().get(0);
-    assertEquals("2", dt.getSystemElement().getValueAsString());
-    assertEquals("3", dt.getValue());
+		assertThat(dt.getSystemElement().getValueAsString()).isEqualTo("2");
+		assertThat(dt.getValue()).isEqualTo("3");
 
     Header cl = status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
-    assertNotNull(cl);
-    assertEquals("Sun, 25 Nov 2012 02:34:45 GMT", cl.getValue());
+		assertThat(cl).isNotNull();
+		assertThat(cl.getValue()).isEqualTo("Sun, 25 Nov 2012 02:34:45 GMT");
   }
 
   @Test
@@ -148,8 +147,8 @@ public class ETagServerR4Test {
     http.addHeader(Constants.HEADER_IF_MATCH, "\"221\"");
     CloseableHttpResponse status = ourClient.execute(http);
     IOUtils.closeQuietly(status.getEntity().getContent());
-    assertEquals(200, status.getStatusLine().getStatusCode());
-    assertEquals("Patient/2/_history/221", ourLastId.toUnqualified().getValue());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertThat(ourLastId.toUnqualified().getValue()).isEqualTo("Patient/2/_history/221");
 
   }
 
@@ -166,8 +165,8 @@ public class ETagServerR4Test {
     http.addHeader(Constants.HEADER_IF_MATCH, "\"222\"");
     CloseableHttpResponse status = ourClient.execute(http);
     IOUtils.closeQuietly(status.getEntity().getContent());
-    assertEquals(Constants.STATUS_HTTP_412_PRECONDITION_FAILED, status.getStatusLine().getStatusCode());
-    assertEquals("Patient/2/_history/222", ourLastId.toUnqualified().getValue());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_412_PRECONDITION_FAILED);
+		assertThat(ourLastId.toUnqualified().getValue()).isEqualTo("Patient/2/_history/222");
   }
 
   @Test
@@ -182,7 +181,7 @@ public class ETagServerR4Test {
     http.setEntity(new StringEntity(resBody, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
     HttpResponse status = ourClient.execute(http);
     IOUtils.closeQuietly(status.getEntity().getContent());
-    assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
   }
 

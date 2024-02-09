@@ -26,8 +26,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ServeMediaResourceRawInterceptorTest {
 
@@ -68,7 +66,7 @@ public class ServeMediaResourceRawInterceptorTest {
 
 		HttpGet get = new HttpGet(myReadUrl);
 		try (CloseableHttpResponse response = ourClient.execute(get)) {
-			assertEquals("application/fhir+json;charset=utf-8", response.getEntity().getContentType().getValue());
+			assertThat(response.getEntity().getContentType().getValue()).isEqualTo("application/fhir+json;charset=utf-8");
 			String contents = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(contents).contains("\"resourceType\"");
 		}
@@ -83,9 +81,9 @@ public class ServeMediaResourceRawInterceptorTest {
 		HttpGet get = new HttpGet(myReadUrl);
 		get.addHeader(Constants.HEADER_ACCEPT, "image/png");
 		try (CloseableHttpResponse response = ourClient.execute(get)) {
-			assertEquals("image/png", response.getEntity().getContentType().getValue());
+			assertThat(response.getEntity().getContentType().getValue()).isEqualTo("image/png");
 			byte[] contents = IOUtils.toByteArray(response.getEntity().getContent());
-			assertArrayEquals(new byte[]{2, 3, 4, 5, 6, 7, 8}, contents);
+			assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
 		}
 	}
 
@@ -97,7 +95,7 @@ public class ServeMediaResourceRawInterceptorTest {
 		HttpGet get = new HttpGet(myReadUrl);
 		get.addHeader(Constants.HEADER_ACCEPT, "image/png");
 		try (CloseableHttpResponse response = ourClient.execute(get)) {
-			assertEquals("application/fhir+json;charset=utf-8", response.getEntity().getContentType().getValue());
+			assertThat(response.getEntity().getContentType().getValue()).isEqualTo("application/fhir+json;charset=utf-8");
 		}
 	}
 
@@ -109,9 +107,9 @@ public class ServeMediaResourceRawInterceptorTest {
 
 		HttpGet get = new HttpGet(myReadUrl + "?_output=data");
 		try (CloseableHttpResponse response = ourClient.execute(get)) {
-			assertEquals("image/png", response.getEntity().getContentType().getValue());
+			assertThat(response.getEntity().getContentType().getValue()).isEqualTo("image/png");
 			byte[] contents = IOUtils.toByteArray(response.getEntity().getContent());
-			assertArrayEquals(new byte[]{2, 3, 4, 5, 6, 7, 8}, contents);
+			assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
 		}
 	}
 

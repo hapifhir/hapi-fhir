@@ -145,7 +145,7 @@ public class ReductionStepDataSinkTest {
 			myDataSink.accept(chunkData);
 			fail("Expected exception to be thrown");
 		} catch (JobExecutionFailedException ex) {
-			assertThat(ex.getMessage().contains("No instance found with Id " + INSTANCE_ID)).isTrue();
+			assertThat(ex.getMessage()).contains("No instance found with Id " + INSTANCE_ID);
 		} catch (Exception anyOtherEx) {
 			fail("Unexpected exception", anyOtherEx);
 		}

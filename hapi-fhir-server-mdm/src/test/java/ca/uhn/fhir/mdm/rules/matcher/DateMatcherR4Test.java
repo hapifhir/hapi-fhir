@@ -11,8 +11,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DateMatcherR4Test extends BaseMatcherR4Test {
 
@@ -36,20 +35,20 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 		Date sameYear = sameYearCal.getTime();
 		Date otherYear = otherYearCal.getTime();
 
-		assertTrue(dateMatch(date, date, TemporalPrecisionEnum.DAY));
-		assertFalse(dateMatch(date, sameMonth, TemporalPrecisionEnum.DAY));
-		assertFalse(dateMatch(date, sameYear, TemporalPrecisionEnum.DAY));
-		assertFalse(dateMatch(date, otherYear, TemporalPrecisionEnum.DAY));
+		assertThat(dateMatch(date, date, TemporalPrecisionEnum.DAY)).isTrue();
+		assertThat(dateMatch(date, sameMonth, TemporalPrecisionEnum.DAY)).isFalse();
+		assertThat(dateMatch(date, sameYear, TemporalPrecisionEnum.DAY)).isFalse();
+		assertThat(dateMatch(date, otherYear, TemporalPrecisionEnum.DAY)).isFalse();
 
-		assertTrue(dateMatch(date, date, TemporalPrecisionEnum.MONTH));
-		assertTrue(dateMatch(date, sameMonth, TemporalPrecisionEnum.MONTH));
-		assertFalse(dateMatch(date, sameYear, TemporalPrecisionEnum.MONTH));
-		assertFalse(dateMatch(date, otherYear, TemporalPrecisionEnum.MONTH));
+		assertThat(dateMatch(date, date, TemporalPrecisionEnum.MONTH)).isTrue();
+		assertThat(dateMatch(date, sameMonth, TemporalPrecisionEnum.MONTH)).isTrue();
+		assertThat(dateMatch(date, sameYear, TemporalPrecisionEnum.MONTH)).isFalse();
+		assertThat(dateMatch(date, otherYear, TemporalPrecisionEnum.MONTH)).isFalse();
 
-		assertTrue(dateMatch(date, date, TemporalPrecisionEnum.YEAR));
-		assertTrue(dateMatch(date, sameMonth, TemporalPrecisionEnum.YEAR));
-		assertTrue(dateMatch(date, sameYear, TemporalPrecisionEnum.YEAR));
-		assertFalse(dateMatch(date, otherYear, TemporalPrecisionEnum.YEAR));
+		assertThat(dateMatch(date, date, TemporalPrecisionEnum.YEAR)).isTrue();
+		assertThat(dateMatch(date, sameMonth, TemporalPrecisionEnum.YEAR)).isTrue();
+		assertThat(dateMatch(date, sameYear, TemporalPrecisionEnum.YEAR)).isTrue();
+		assertThat(dateMatch(date, otherYear, TemporalPrecisionEnum.YEAR)).isFalse();
 	}
 
 	private boolean dateMatch(Date theDate, Date theSameMonth, TemporalPrecisionEnum theTheDay) {
@@ -73,26 +72,26 @@ public class DateMatcherR4Test extends BaseMatcherR4Test {
 
 		// Same precision
 
-		assertTrue(dateTimeMatch(date, date, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.DAY));
-		assertTrue(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.DAY));
-		assertTrue(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.DAY));
+		assertThat(dateTimeMatch(date, date, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.DAY)).isTrue();
+		assertThat(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.DAY)).isTrue();
+		assertThat(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.DAY)).isTrue();
 
-		assertTrue(dateTimeMatch(date, date, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.SECOND));
-		assertTrue(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.SECOND));
-		assertFalse(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.SECOND));
+		assertThat(dateTimeMatch(date, date, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.SECOND)).isTrue();
+		assertThat(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.SECOND)).isTrue();
+		assertThat(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.SECOND)).isFalse();
 
-		assertTrue(dateTimeMatch(date, date, TemporalPrecisionEnum.MILLI, TemporalPrecisionEnum.MILLI));
-		assertFalse(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.MILLI, TemporalPrecisionEnum.MILLI));
-		assertFalse(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.MILLI, TemporalPrecisionEnum.MILLI));
+		assertThat(dateTimeMatch(date, date, TemporalPrecisionEnum.MILLI, TemporalPrecisionEnum.MILLI)).isTrue();
+		assertThat(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.MILLI, TemporalPrecisionEnum.MILLI)).isFalse();
+		assertThat(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.MILLI, TemporalPrecisionEnum.MILLI)).isFalse();
 
 		// Different precision matches by coarser precision
-		assertTrue(dateTimeMatch(date, date, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.DAY));
-		assertTrue(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.DAY));
-		assertTrue(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.DAY));
+		assertThat(dateTimeMatch(date, date, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.DAY)).isTrue();
+		assertThat(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.DAY)).isTrue();
+		assertThat(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.SECOND, TemporalPrecisionEnum.DAY)).isTrue();
 
-		assertTrue(dateTimeMatch(date, date, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.SECOND));
-		assertTrue(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.SECOND));
-		assertTrue(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.SECOND));
+		assertThat(dateTimeMatch(date, date, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.SECOND)).isTrue();
+		assertThat(dateTimeMatch(date, sameSecond, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.SECOND)).isTrue();
+		assertThat(dateTimeMatch(date, sameDay, TemporalPrecisionEnum.DAY, TemporalPrecisionEnum.SECOND)).isTrue();
 
 
 	}

@@ -52,7 +52,7 @@ public class PagingIteratorTest {
 
 		String next = myPagingIterator.next();
 		assertThat(next).isNotNull();
-		assertThat(next.isEmpty()).isFalse();
+		assertThat(next).isNotEmpty();
 	}
 
 	@Test
@@ -81,7 +81,7 @@ public class PagingIteratorTest {
 			myPagingIterator.next();
 			fail("");
 		} catch (NoSuchElementException ex) {
-			assertThat(ex.getMessage().contains("Nothing to fetch")).isTrue();
+			assertThat(ex.getMessage()).contains("Nothing to fetch");
 		}
 	}
 }

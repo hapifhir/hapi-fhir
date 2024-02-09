@@ -14,7 +14,7 @@ class HapiFhirLocalContainerEntityManagerFactoryBeanTest {
 
 		myBean.addHibernateHook("theKey", "theHookClass");
 
-		assertThat(myBean.getJpaPropertyMap().get("theKey")).isEqualTo("theHookClass");
+		assertThat(myBean.getJpaPropertyMap()).containsEntry("theKey", "theHookClass");
 	}
 
 	@Test
@@ -24,7 +24,7 @@ class HapiFhirLocalContainerEntityManagerFactoryBeanTest {
 
 		myBean.addHibernateHook("theKey", "theHookClass");
 
-		assertThat(myBean.getJpaPropertyMap().get("theKey")).isEqualTo("hook1,hook2,theHookClass");
+		assertThat(myBean.getJpaPropertyMap()).containsEntry("theKey", "hook1,hook2,theHookClass");
 	}
 
 }

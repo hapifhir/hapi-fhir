@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CreatePackageCommandTest extends BaseTest {
 
@@ -111,11 +111,11 @@ public class CreatePackageCommandTest extends BaseTest {
 			  }
 			}
 			""";
-		assertEquals(expectedPackageJson.trim(), packageJsonContents.trim());
+		assertThat(packageJsonContents.trim()).isEqualTo(expectedPackageJson.trim());
 
 		// Try parsing the module again to make sure we can
 		NpmPackage loadedPackage = NpmPackage.fromPackage(new FileInputStream(igArchive));
-		assertEquals("com.example.ig", loadedPackage.name());
+		assertThat(loadedPackage.name()).isEqualTo("com.example.ig");
 	}
 
 	@Test
@@ -162,11 +162,11 @@ public class CreatePackageCommandTest extends BaseTest {
 			  "fhirVersions" : ["4.0.1"]
 			}
 			""";
-		assertEquals(expectedPackageJson.trim(), packageJsonContents.trim());
+		assertThat(packageJsonContents.trim()).isEqualTo(expectedPackageJson.trim());
 
 		// Try parsing the module again to make sure we can
 		NpmPackage loadedPackage = NpmPackage.fromPackage(new FileInputStream(igArchive));
-		assertEquals("com.example.ig", loadedPackage.name());
+		assertThat(loadedPackage.name()).isEqualTo("com.example.ig");
 
 	}
 

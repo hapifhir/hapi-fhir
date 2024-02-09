@@ -9,7 +9,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TransactionServerTest {
 
@@ -36,7 +36,7 @@ public class TransactionServerTest {
 		input.setType(Bundle.BundleType.TRANSACTION);
 		Bundle output = myServerRule.getFhirClient().transaction().withBundle(input).execute();
 
-		assertEquals("ABC", output.getIdElement().getIdPart());
+		assertThat(output.getIdElement().getIdPart()).isEqualTo("ABC");
 
 	}
 

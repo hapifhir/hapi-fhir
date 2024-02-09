@@ -22,11 +22,7 @@ import static ca.uhn.fhir.rest.server.interceptor.validation.address.AddressVali
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidatingInterceptor.PROPERTY_VALIDATOR_CLASS;
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL;
 import static ca.uhn.fhir.rest.server.interceptor.validation.address.impl.BaseRestfulValidator.PROPERTY_SERVICE_KEY;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -62,23 +58,22 @@ class AddressValidatingInterceptorTest {
 		address.setCountry("Canada");
 		interceptor.validateAddress(address, ourCtx);
 
-		assertTrue(address.hasExtension());
-		assertEquals("true", address.getExtensionFirstRep().getValueAsPrimitive().getValueAsString());
-		assertEquals("E",
-			address.getExtensionByUrl(IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL).getValueAsPrimitive().getValueAsString());
+		assertThat(address.hasExtension()).isTrue();
+		assertThat(address.getExtensionFirstRep().getValueAsPrimitive().getValueAsString()).isEqualTo("true");
+		assertThat(address.getExtensionByUrl(IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL).getValueAsPrimitive().getValueAsString()).isEqualTo("E");
 
-		assertEquals("100 Somewhere, Burloak", address.getText());
-		assertEquals(1, address.getLine().size());
-		assertEquals("100 Somewhere", address.getLine().get(0).getValueAsString());
-		assertEquals("Burloak", address.getCity());
-		assertEquals("A0A0A0", address.getPostalCode());
-		assertEquals("Canada", address.getCountry());
+		assertThat(address.getText()).isEqualTo("100 Somewhere, Burloak");
+		assertThat(address.getLine()).hasSize(1);
+		assertThat(address.getLine().get(0).getValueAsString()).isEqualTo("100 Somewhere");
+		assertThat(address.getCity()).isEqualTo("Burloak");
+		assertThat(address.getPostalCode()).isEqualTo("A0A0A0");
+		assertThat(address.getCountry()).isEqualTo("Canada");
 	}
 
 	@Test
 	void start() throws Exception {
 		AddressValidatingInterceptor interceptor = new AddressValidatingInterceptor(new Properties());
-		assertNull(interceptor.getAddressValidator());
+		assertThat(interceptor.getAddressValidator()).isNull();
 
 		Properties props = new Properties();
 		props.setProperty(PROPERTY_VALIDATOR_CLASS, "RandomService");
@@ -90,7 +85,7 @@ class AddressValidatingInterceptorTest {
 
 		props.setProperty(PROPERTY_VALIDATOR_CLASS, TestAddressValidator.class.getName());
 		interceptor = new AddressValidatingInterceptor(props);
-		assertNotNull(interceptor.getAddressValidator());
+		assertThat(interceptor.getAddressValidator()).isNotNull();
 	}
 
 	@Test
@@ -147,8 +142,8 @@ class AddressValidatingInterceptorTest {
 		Address address = new Address();
 		myInterceptor.validateAddress(address, ourCtx);
 		Extension ext = assertValidationErrorExtension(address);
-		assertTrue(ext.hasExtension());
-		assertEquals("error", ext.getExtensionFirstRep().getUrl());
+		assertThat(ext.hasExtension()).isTrue();
+		assertThat(ext.getExtensionFirstRep().getUrl()).isEqualTo("error");
 	}
 
 	@Test
@@ -165,12 +160,12 @@ class AddressValidatingInterceptorTest {
 		Address addressToValidate = new Address();
 		myInterceptor.validateAddress(addressToValidate, ourCtx);
 
-		assertNotNull(res.toString());
-		assertTrue(addressToValidate.hasExtension());
-		assertNotNull(addressToValidate.getExtensionByUrl("MY_URL"));
-		assertFalse(address.hasExtension());
-		assertEquals(address.getCity(), addressToValidate.getCity());
-		assertTrue(address.getLine().get(0).equalsDeep(addressToValidate.getLine().get(0)));
+		assertThat(res.toString()).isNotNull();
+		assertThat(addressToValidate.hasExtension()).isTrue();
+		assertThat(addressToValidate.getExtensionByUrl("MY_URL")).isNotNull();
+		assertThat(address.hasExtension()).isFalse();
+		assertThat(addressToValidate.getCity()).isEqualTo(address.getCity());
+		assertThat(address.getLine().get(0).equalsDeep(addressToValidate.getLine().get(0))).isTrue();
 	}
 
 	@Test
@@ -184,15 +179,15 @@ class AddressValidatingInterceptorTest {
 	}
 
 	private Extension assertValidationErrorExtension(Address theAddress) {
-		assertTrue(theAddress.hasExtension());
-		assertEquals(1, theAddress.getExtension().size());
-		assertEquals(IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL, theAddress.getExtensionFirstRep().getUrl());
+		assertThat(theAddress.hasExtension()).isTrue();
+		assertThat(theAddress.getExtension()).hasSize(1);
+		assertThat(theAddress.getExtensionFirstRep().getUrl()).isEqualTo(IAddressValidator.ADDRESS_VALIDATION_EXTENSION_URL);
 		return theAddress.getExtensionFirstRep();
 	}
 
 	private void assertValidationErrorValue(Address theAddress, String theValidationResult) {
 		Extension ext = assertValidationErrorExtension(theAddress);
-		assertEquals(theValidationResult, ext.getValueAsPrimitive().getValueAsString());
+		assertThat(ext.getValueAsPrimitive().getValueAsString()).isEqualTo(theValidationResult);
 	}
 
 	@Test
@@ -252,9 +247,9 @@ class AddressValidatingInterceptorTest {
 		myInterceptor.resourcePreUpdate(myRequestDetails, null, person);
 
 		Extension ext = assertValidationErrorExtension(address);
-		assertNotNull(ext);
-		assertNull(ext.getValue());
-		assertTrue(ext.hasExtension());
+		assertThat(ext).isNotNull();
+		assertThat(ext.getValue()).isNull();
+		assertThat(ext.hasExtension()).isTrue();
 
 	}
 

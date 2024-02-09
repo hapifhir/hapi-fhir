@@ -83,7 +83,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertThat(ourContentTypes.size()).isEqualTo(1);
+		assertThat(ourContentTypes).hasSize(1);
 		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 	}
 
@@ -108,7 +108,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertThat(ourContentTypes.size()).isEqualTo(1);
+		assertThat(ourContentTypes).hasSize(1);
 		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_XML_NEW);
 	}
 
@@ -128,7 +128,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertThat(ourContentTypes.size()).isEqualTo(1);
+		assertThat(ourContentTypes).hasSize(1);
 		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_XML_NEW);
 	}
 
@@ -155,7 +155,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		ourObservationListener.clear();
 		mySubscriptionAfterDelivery.awaitExpected();
 
-		assertThat(ourContentTypes.size()).isEqualTo(0);
+		assertThat(ourContentTypes).isEmpty();
 	}
 
 
@@ -183,7 +183,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		mySubscriptionResourceMatched.awaitExpected();
 		ourObservationListener.awaitExpected();
 
-		assertThat(ourContentTypes.size()).isEqualTo(2);
+		assertThat(ourContentTypes).hasSize(2);
 		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_XML_NEW);
 	}
 

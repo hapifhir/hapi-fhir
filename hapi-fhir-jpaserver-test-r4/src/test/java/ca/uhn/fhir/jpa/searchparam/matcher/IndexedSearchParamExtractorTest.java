@@ -36,6 +36,6 @@ public class IndexedSearchParamExtractorTest extends BaseJpaR4Test {
 
 		ResourceIndexedSearchParams result = mySrv.extractIndexedSearchParams(encounter, mySrd);
 		// red-green before the fix, the size was 1
-		assertThat(result.myLinks.size()).isEqualTo(2);
+		assertThat(result.myLinks).hasSize(2);
 	}
 }

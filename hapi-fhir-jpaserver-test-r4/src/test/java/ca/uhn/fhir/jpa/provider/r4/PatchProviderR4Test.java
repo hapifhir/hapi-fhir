@@ -68,10 +68,10 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		Patient resultingResource = (Patient) outcome.getResource();
-		assertThat(resultingResource.getIdentifier().size()).isEqualTo(1);
+		assertThat(resultingResource.getIdentifier()).hasSize(1);
 
 		resultingResource = myClient.read().resource(Patient.class).withId(id).execute();
-		assertThat(resultingResource.getIdentifier().size()).isEqualTo(1);
+		assertThat(resultingResource.getIdentifier()).hasSize(1);
 	}
 
 	@Test
@@ -304,7 +304,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id = myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 
 		OperationOutcome delOutcome = (OperationOutcome) myClient.delete().resourceById(id).execute().getOperationOutcome();
-		assertThat(delOutcome.getIssue().get(0).getDiagnostics().contains("Successfully deleted")).isTrue();
+		assertThat(delOutcome.getIssue().get(0).getDiagnostics()).contains("Successfully deleted");
 
 		Parameters patch = new Parameters();
 		Parameters.ParametersParameterComponent operation = patch.addParameter();

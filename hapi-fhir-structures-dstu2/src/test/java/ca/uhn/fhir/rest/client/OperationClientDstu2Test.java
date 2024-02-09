@@ -37,7 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -88,18 +88,18 @@ public class OperationClientDstu2Test {
 		int idx = 0;
 
 		Parameters response = client.opInstance(new IdDt("222"), new StringDt("PARAM1str"), new Patient().setActive(true));
-		assertEquals("FOO", response.getParameter().get(0).getName());
+		assertThat(response.getParameter().get(0).getName()).isEqualTo("FOO");
 		HttpPost value = (HttpPost) capt.getAllValues().get(idx);
 		String requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
 		IOUtils.closeQuietly(((HttpPost) value).getEntity().getContent());
 		ourLog.info(requestBody);
 		Parameters request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
-		assertEquals("http://foo/Patient/222/$OP_INSTANCE", value.getURI().toASCIIString());
-		assertEquals(2, request.getParameter().size());
-		assertEquals("PARAM1", request.getParameter().get(0).getName());
-		assertEquals("PARAM1str", ((StringDt) request.getParameter().get(0).getValue()).getValue());
-		assertEquals("PARAM2", request.getParameter().get(1).getName());
-		assertEquals(Boolean.TRUE, ((Patient) request.getParameter().get(1).getResource()).getActive());
+		assertThat(value.getURI().toASCIIString()).isEqualTo("http://foo/Patient/222/$OP_INSTANCE");
+		assertThat(request.getParameter()).hasSize(2);
+		assertThat(request.getParameter().get(0).getName()).isEqualTo("PARAM1");
+		assertThat(((StringDt) request.getParameter().get(0).getValue()).getValue()).isEqualTo("PARAM1str");
+		assertThat(request.getParameter().get(1).getName()).isEqualTo("PARAM2");
+		assertThat(((Patient) request.getParameter().get(1).getResource()).getActive()).isEqualTo(Boolean.TRUE);
 		idx++;
 	}
 
@@ -128,18 +128,18 @@ public class OperationClientDstu2Test {
 		int idx = 0;
 
 		Bundle response = client.opInstanceWithBundleReturn(new IdDt("222"), new StringDt("PARAM1str"), new Patient().setActive(true));
-		assertEquals(100, response.getTotal().intValue());
+		assertThat(response.getTotal().intValue()).isEqualTo(100);
 		HttpPost value = (HttpPost) capt.getAllValues().get(idx);
 		String requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
 		IOUtils.closeQuietly(((HttpPost) value).getEntity().getContent());
 		ourLog.info(requestBody);
 		Parameters request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
-		assertEquals("http://foo/Patient/222/$OP_INSTANCE_WITH_BUNDLE_RETURN", value.getURI().toASCIIString());
-		assertEquals(2, request.getParameter().size());
-		assertEquals("PARAM1", request.getParameter().get(0).getName());
-		assertEquals("PARAM1str", ((StringDt) request.getParameter().get(0).getValue()).getValue());
-		assertEquals("PARAM2", request.getParameter().get(1).getName());
-		assertEquals(Boolean.TRUE, ((Patient) request.getParameter().get(1).getResource()).getActive());
+		assertThat(value.getURI().toASCIIString()).isEqualTo("http://foo/Patient/222/$OP_INSTANCE_WITH_BUNDLE_RETURN");
+		assertThat(request.getParameter()).hasSize(2);
+		assertThat(request.getParameter().get(0).getName()).isEqualTo("PARAM1");
+		assertThat(((StringDt) request.getParameter().get(0).getValue()).getValue()).isEqualTo("PARAM1str");
+		assertThat(request.getParameter().get(1).getName()).isEqualTo("PARAM2");
+		assertThat(((Patient) request.getParameter().get(1).getResource()).getActive()).isEqualTo(Boolean.TRUE);
 		idx++;
 	}
 
@@ -165,40 +165,40 @@ public class OperationClientDstu2Test {
 		int idx = 0;
 
 		Parameters response = client.opServer(new StringDt("PARAM1str"), new Patient().setActive(true));
-		assertEquals("FOO", response.getParameter().get(0).getName());
+		assertThat(response.getParameter().get(0).getName()).isEqualTo("FOO");
 		HttpPost value = (HttpPost) capt.getAllValues().get(idx);
 		String requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
 		IOUtils.closeQuietly(((HttpPost) value).getEntity().getContent());
 		ourLog.info(requestBody);
 		Parameters request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
-		assertEquals("http://foo/$OP_SERVER", value.getURI().toASCIIString());
-		assertEquals(2, request.getParameter().size());
-		assertEquals("PARAM1", request.getParameter().get(0).getName());
-		assertEquals("PARAM1str", ((StringDt) request.getParameter().get(0).getValue()).getValue());
-		assertEquals("PARAM2", request.getParameter().get(1).getName());
-		assertEquals(Boolean.TRUE, ((Patient) request.getParameter().get(1).getResource()).getActive());
+		assertThat(value.getURI().toASCIIString()).isEqualTo("http://foo/$OP_SERVER");
+		assertThat(request.getParameter()).hasSize(2);
+		assertThat(request.getParameter().get(0).getName()).isEqualTo("PARAM1");
+		assertThat(((StringDt) request.getParameter().get(0).getValue()).getValue()).isEqualTo("PARAM1str");
+		assertThat(request.getParameter().get(1).getName()).isEqualTo("PARAM2");
+		assertThat(((Patient) request.getParameter().get(1).getResource()).getActive()).isEqualTo(Boolean.TRUE);
 		idx++;
 
 		response = client.opServer(null, new Patient().setActive(true));
-		assertEquals("FOO", response.getParameter().get(0).getName());
+		assertThat(response.getParameter().get(0).getName()).isEqualTo("FOO");
 		value = (HttpPost) capt.getAllValues().get(idx);
 		requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
 		IOUtils.closeQuietly(((HttpPost) value).getEntity().getContent());
 		ourLog.info(requestBody);
 		request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
-		assertEquals(1, request.getParameter().size());
-		assertEquals("PARAM2", request.getParameter().get(0).getName());
-		assertEquals(Boolean.TRUE, ((Patient) request.getParameter().get(0).getResource()).getActive());
+		assertThat(request.getParameter()).hasSize(1);
+		assertThat(request.getParameter().get(0).getName()).isEqualTo("PARAM2");
+		assertThat(((Patient) request.getParameter().get(0).getResource()).getActive()).isEqualTo(Boolean.TRUE);
 		idx++;
 
 		response = client.opServer(null, null);
-		assertEquals("FOO", response.getParameter().get(0).getName());
+		assertThat(response.getParameter().get(0).getName()).isEqualTo("FOO");
 		value = (HttpPost) capt.getAllValues().get(idx);
 		requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
 		IOUtils.closeQuietly(((HttpPost) value).getEntity().getContent());
 		ourLog.info(requestBody);
 		request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
-		assertEquals(0, request.getParameter().size());
+		assertThat(request.getParameter()).isEmpty();
 		idx++;
 
 	}
@@ -225,57 +225,57 @@ public class OperationClientDstu2Test {
 		int idx = 0;
 
 		Parameters response = client.opServerListParam(new Patient().setActive(true), Arrays.asList(new StringDt("PARAM3str1"), new StringDt("PARAM3str2")));
-		assertEquals("FOO", response.getParameter().get(0).getName());
+		assertThat(response.getParameter().get(0).getName()).isEqualTo("FOO");
 		HttpPost value = (HttpPost) capt.getAllValues().get(idx);
 		String requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
 		IOUtils.closeQuietly(((HttpPost) value).getEntity().getContent());
 		ourLog.info(requestBody);
 		Parameters request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
-		assertEquals("http://foo/$OP_SERVER_LIST_PARAM", value.getURI().toASCIIString());
-		assertEquals(3, request.getParameter().size());
-		assertEquals("PARAM2", request.getParameter().get(0).getName());
-		assertEquals(Boolean.TRUE, ((Patient) request.getParameter().get(0).getResource()).getActive());
-		assertEquals("PARAM3", request.getParameter().get(1).getName());
-		assertEquals("PARAM3str1", ((StringDt) request.getParameter().get(1).getValue()).getValue());
-		assertEquals("PARAM3", request.getParameter().get(2).getName());
-		assertEquals("PARAM3str2", ((StringDt) request.getParameter().get(2).getValue()).getValue());
+		assertThat(value.getURI().toASCIIString()).isEqualTo("http://foo/$OP_SERVER_LIST_PARAM");
+		assertThat(request.getParameter()).hasSize(3);
+		assertThat(request.getParameter().get(0).getName()).isEqualTo("PARAM2");
+		assertThat(((Patient) request.getParameter().get(0).getResource()).getActive()).isEqualTo(Boolean.TRUE);
+		assertThat(request.getParameter().get(1).getName()).isEqualTo("PARAM3");
+		assertThat(((StringDt) request.getParameter().get(1).getValue()).getValue()).isEqualTo("PARAM3str1");
+		assertThat(request.getParameter().get(2).getName()).isEqualTo("PARAM3");
+		assertThat(((StringDt) request.getParameter().get(2).getValue()).getValue()).isEqualTo("PARAM3str2");
 		idx++;
 
 		response = client.opServerListParam(null, Arrays.asList(new StringDt("PARAM3str1"), new StringDt("PARAM3str2")));
-		assertEquals("FOO", response.getParameter().get(0).getName());
+		assertThat(response.getParameter().get(0).getName()).isEqualTo("FOO");
 		value = (HttpPost) capt.getAllValues().get(idx);
 		requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
 		IOUtils.closeQuietly(((HttpPost) value).getEntity().getContent());
 		ourLog.info(requestBody);
 		request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
-		assertEquals("http://foo/$OP_SERVER_LIST_PARAM", value.getURI().toASCIIString());
-		assertEquals(2, request.getParameter().size());
-		assertEquals("PARAM3", request.getParameter().get(0).getName());
-		assertEquals("PARAM3str1", ((StringDt) request.getParameter().get(0).getValue()).getValue());
-		assertEquals("PARAM3", request.getParameter().get(1).getName());
-		assertEquals("PARAM3str2", ((StringDt) request.getParameter().get(1).getValue()).getValue());
+		assertThat(value.getURI().toASCIIString()).isEqualTo("http://foo/$OP_SERVER_LIST_PARAM");
+		assertThat(request.getParameter()).hasSize(2);
+		assertThat(request.getParameter().get(0).getName()).isEqualTo("PARAM3");
+		assertThat(((StringDt) request.getParameter().get(0).getValue()).getValue()).isEqualTo("PARAM3str1");
+		assertThat(request.getParameter().get(1).getName()).isEqualTo("PARAM3");
+		assertThat(((StringDt) request.getParameter().get(1).getValue()).getValue()).isEqualTo("PARAM3str2");
 		idx++;
 
 		response = client.opServerListParam(null, new ArrayList<>());
-		assertEquals("FOO", response.getParameter().get(0).getName());
+		assertThat(response.getParameter().get(0).getName()).isEqualTo("FOO");
 		value = (HttpPost) capt.getAllValues().get(idx);
 		requestBody = IOUtils.toString(value.getEntity().getContent());
 		IOUtils.closeQuietly(((HttpPost) value).getEntity().getContent());
 		ourLog.info(requestBody);
 		request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
-		assertEquals("http://foo/$OP_SERVER_LIST_PARAM", value.getURI().toASCIIString());
-		assertEquals(0, request.getParameter().size());
+		assertThat(value.getURI().toASCIIString()).isEqualTo("http://foo/$OP_SERVER_LIST_PARAM");
+		assertThat(request.getParameter()).isEmpty();
 		idx++;
 
 		response = client.opServerListParam(null, null);
-		assertEquals("FOO", response.getParameter().get(0).getName());
+		assertThat(response.getParameter().get(0).getName()).isEqualTo("FOO");
 		value = (HttpPost) capt.getAllValues().get(idx);
 		requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
 		IOUtils.closeQuietly(((HttpPost) value).getEntity().getContent());
 		ourLog.info(requestBody);
 		request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
-		assertEquals("http://foo/$OP_SERVER_LIST_PARAM", value.getURI().toASCIIString());
-		assertEquals(0, request.getParameter().size());
+		assertThat(value.getURI().toASCIIString()).isEqualTo("http://foo/$OP_SERVER_LIST_PARAM");
+		assertThat(request.getParameter()).isEmpty();
 		idx++;
 
 	}
@@ -302,18 +302,18 @@ public class OperationClientDstu2Test {
 		int idx = 0;
 
 		Parameters response = client.opType(new StringDt("PARAM1str"), new Patient().setActive(true));
-		assertEquals("FOO", response.getParameter().get(0).getName());
+		assertThat(response.getParameter().get(0).getName()).isEqualTo("FOO");
 		HttpPost value = (HttpPost) capt.getAllValues().get(idx);
 		String requestBody = IOUtils.toString(((HttpPost) value).getEntity().getContent());
 		IOUtils.closeQuietly(((HttpPost) value).getEntity().getContent());
 		ourLog.info(requestBody);
 		Parameters request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
-		assertEquals("http://foo/Patient/$OP_TYPE", value.getURI().toASCIIString());
-		assertEquals(2, request.getParameter().size());
-		assertEquals("PARAM1", request.getParameter().get(0).getName());
-		assertEquals("PARAM1str", ((StringDt) request.getParameter().get(0).getValue()).getValue());
-		assertEquals("PARAM2", request.getParameter().get(1).getName());
-		assertEquals(Boolean.TRUE, ((Patient) request.getParameter().get(1).getResource()).getActive());
+		assertThat(value.getURI().toASCIIString()).isEqualTo("http://foo/Patient/$OP_TYPE");
+		assertThat(request.getParameter()).hasSize(2);
+		assertThat(request.getParameter().get(0).getName()).isEqualTo("PARAM1");
+		assertThat(((StringDt) request.getParameter().get(0).getValue()).getValue()).isEqualTo("PARAM1str");
+		assertThat(request.getParameter().get(1).getName()).isEqualTo("PARAM2");
+		assertThat(((Patient) request.getParameter().get(1).getResource()).getActive()).isEqualTo(Boolean.TRUE);
 		idx++;
 	}
 

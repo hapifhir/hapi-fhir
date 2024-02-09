@@ -74,7 +74,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.execute();
 
 		assertThat(outcome.getTotalElement().getValue()).isEqualTo(new Integer(104));
-		assertThat(outcome.getEntry().size()).isEqualTo(0);
+		assertThat(outcome.getEntry()).isEmpty();
 	}
 
 	/**
@@ -91,7 +91,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.execute();
 
 		assertThat(outcome.getTotalElement().getValue()).isEqualTo(new Integer(104));
-		assertThat(outcome.getEntry().size()).isEqualTo(10);
+		assertThat(outcome.getEntry()).hasSize(10);
 	}
 
 	/**
@@ -109,7 +109,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.execute();
 
 		assertThat(outcome.getTotalElement().getValue()).isEqualTo(new Integer(104));
-		assertThat(outcome.getEntry().size()).isEqualTo(10);
+		assertThat(outcome.getEntry()).hasSize(10);
 	}
 
 	/**
@@ -127,7 +127,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.execute();
 
 		assertThat(outcome.getTotalElement().getValue()).isEqualTo(new Integer(0));
-		assertThat(outcome.getEntry().size()).isEqualTo(0);
+		assertThat(outcome.getEntry()).isEmpty();
 	}
 
 	/**
@@ -144,7 +144,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.execute();
 
 		assertThat(outcome.getTotalElement().getValue()).isEqualTo(null);
-		assertThat(outcome.getEntry().size()).isEqualTo(10);
+		assertThat(outcome.getEntry()).hasSize(10);
 	}
 
 	/**
@@ -164,7 +164,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.execute();
 
 		assertThat(outcome.getTotalElement().getValue()).isEqualTo(null);
-		assertThat(outcome.getEntry().size()).isEqualTo(10);
+		assertThat(outcome.getEntry()).hasSize(10);
 	}
 
 

@@ -20,7 +20,7 @@ public class CommonResourceSupertypeScannerTest {
   public void testBaseClass() {
     scanner.register(DemoPatient.class);
 
-		assertThat(scanner.getLowestCommonSuperclass().get()).isEqualTo(DemoPatient.class);
+		assertThat(scanner.getLowestCommonSuperclass()).contains(DemoPatient.class);
   }
   
   @Test
@@ -28,7 +28,7 @@ public class CommonResourceSupertypeScannerTest {
     scanner.register(DemoPatient.class);
     scanner.register(DemoPatientTripleSub.class);
 
-		assertThat(scanner.getLowestCommonSuperclass().get()).isEqualTo(DemoPatient.class);
+		assertThat(scanner.getLowestCommonSuperclass()).contains(DemoPatient.class);
   }
   
   @Test
@@ -38,7 +38,7 @@ public class CommonResourceSupertypeScannerTest {
     scanner.register(DemoPatientSubSubTwo.class);
     scanner.register(DemoPatientTripleSub.class);
 
-		assertThat(scanner.getLowestCommonSuperclass().get()).isEqualTo(DemoPatientSub.class);
+		assertThat(scanner.getLowestCommonSuperclass()).contains(DemoPatientSub.class);
   }
   
   @Test
@@ -46,14 +46,14 @@ public class CommonResourceSupertypeScannerTest {
     scanner.register(DemoPatientTripleSub.class);
     scanner.register(DemoPatientSubSubTwo.class);
 
-		assertThat(scanner.getLowestCommonSuperclass().get()).isEqualTo(DemoPatientSub.class);
+		assertThat(scanner.getLowestCommonSuperclass()).contains(DemoPatientSub.class);
   }
   
   @Test
   public void testOnlySubtype() {
     scanner.register(DemoPatientTripleSub.class);
 
-		assertThat(scanner.getLowestCommonSuperclass().get()).isEqualTo(DemoPatientTripleSub.class);
+		assertThat(scanner.getLowestCommonSuperclass()).contains(DemoPatientTripleSub.class);
   }
   
   @Test

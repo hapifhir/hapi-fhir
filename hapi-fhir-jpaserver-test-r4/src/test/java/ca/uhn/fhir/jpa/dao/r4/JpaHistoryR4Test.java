@@ -182,7 +182,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		assertThat(history.size()).isEqualTo(null);
 
 		// Simulate the server actually loading the resources
-		assertThat(history.getResources(0, 999).size()).isEqualTo(20);
+		assertThat(history.getResources(0, 999)).hasSize(20);
 
 		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
@@ -251,7 +251,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 			Runnable task = () -> {
 				IBundleProvider history = mySystemDao.history(null, null, null, new SystemRequestDetails());
 				assertThat(history.sizeOrThrowNpe()).isEqualTo(20);
-				assertThat(history.getResources(0, 999).size()).isEqualTo(20);
+				assertThat(history.getResources(0, 999)).hasSize(20);
 			};
 			List<Future<?>> futures = new ArrayList<>();
 			for (int i = 0; i < 20; i++) {

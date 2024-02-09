@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchWithIncludesDstu3Test {
 
@@ -48,7 +47,7 @@ public class SearchWithIncludesDstu3Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		// Response should include both the patient, and the organization that was referred to
 		// by a linked resource

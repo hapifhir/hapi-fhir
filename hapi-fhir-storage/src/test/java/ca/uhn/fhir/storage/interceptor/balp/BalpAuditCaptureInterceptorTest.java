@@ -116,7 +116,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 	private static void assertSubType(AuditEvent theAuditEvent, String theSubType) {
 		assertThat(theAuditEvent.getSubtypeFirstRep().getSystem()).isEqualTo(CS_RESTFUL_INTERACTION);
 		assertThat(theAuditEvent.getSubtypeFirstRep().getCode()).isEqualTo(theSubType);
-		assertThat(theAuditEvent.getSubtype().size()).isEqualTo(1);
+		assertThat(theAuditEvent.getSubtype()).hasSize(1);
 	}
 
 	private static void assertAuditEventValidatesAgainstBalpProfile(AuditEvent auditEvent) {
@@ -502,7 +502,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertThat(outcome.getEntry().size()).isEqualTo(2);
+		assertThat(outcome.getEntry()).hasSize(2);
 
 		verify(myAuditEventSink, times(2)).recordAuditEvent(myAuditEventCaptor.capture());
 
@@ -534,7 +534,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertThat(outcome.getEntry().size()).isEqualTo(10);
+		assertThat(outcome.getEntry()).hasSize(10);
 
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
@@ -571,7 +571,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertThat(outcome.getEntry().size()).isEqualTo(5);
+		assertThat(outcome.getEntry()).hasSize(5);
 
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
@@ -610,7 +610,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertThat(outcome.getEntry().size()).isEqualTo(5);
+		assertThat(outcome.getEntry()).hasSize(5);
 
 		verify(myAuditEventSink, times(2)).recordAuditEvent(myAuditEventCaptor.capture());
 		verifyNoMoreInteractions(myAuditEventSink);
@@ -656,7 +656,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertThat(outcome.getEntry().size()).isEqualTo(10);
+		assertThat(outcome.getEntry()).hasSize(10);
 
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
@@ -691,7 +691,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertThat(outcome.getEntry().size()).isEqualTo(10);
+		assertThat(outcome.getEntry()).hasSize(10);
 
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 

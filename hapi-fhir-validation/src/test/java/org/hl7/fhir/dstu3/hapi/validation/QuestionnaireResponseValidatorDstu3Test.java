@@ -61,8 +61,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.BOOLEAN;
 import static org.hl7.fhir.dstu3.model.Questionnaire.QuestionnaireItemType.CHOICE;
 import static org.hl7.fhir.dstu3.model.QuestionnaireResponse.QuestionnaireResponseStatus.COMPLETED;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyString;
@@ -262,7 +260,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code0"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
-		assertEquals(0, errors.getMessages().size(), errors.toString());
+		assertThat(errors.getMessages().size()).as(errors.toString()).isEqualTo(0);
 
 		// Bad code
 
@@ -363,7 +361,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ourLog.info(errors.toString());
 		assertThat(errors.toString()).contains("Definition for item link0 does not contain a type");
-		assertEquals(1, errors.getMessages().size());
+		assertThat(errors.getMessages()).hasSize(1);
 	}
 
 	@Test
@@ -712,9 +710,8 @@ public class QuestionnaireResponseValidatorDstu3Test {
 
 		ValidationResult errors = myVal.validateWithResult(qr);
 		assertThat(errors.toString()).doesNotContain("No issues");
-		assertTrue(
-			errors.getMessages().stream().filter(vm -> vm.getMessage().contains("Structural Error"))
-				.anyMatch(vm -> vm.getMessage().contains("link1")), "Must contain structural error about misplaced link1 item");
+		assertThat(errors.getMessages().stream().filter(vm -> vm.getMessage().contains("Structural Error"))
+			.anyMatch(vm -> vm.getMessage().contains("link1"))).as("Must contain structural error about misplaced link1 item").isTrue();
 	}
 
 	@Test
@@ -1013,14 +1010,14 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
 		assertThat(errors.getMessages()).hasSize(1);
-		assertEquals(ResultSeverityEnum.WARNING, errors.getMessages().get(0).getSeverity());
+		assertThat(errors.getMessages().get(0).getSeverity()).isEqualTo(ResultSeverityEnum.WARNING);
 
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
 		assertThat(errors.getMessages()).hasSize(1);
-		assertEquals(ResultSeverityEnum.ERROR, errors.getMessages().get(0).getSeverity());
+		assertThat(errors.getMessages().get(0).getSeverity()).isEqualTo(ResultSeverityEnum.ERROR);
 	}
 
 	@Test
@@ -1072,7 +1069,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode("code0"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
-		assertEquals(0, errors.getMessages().size(), errors.toString());
+		assertThat(errors.getMessages().size()).as(errors.toString()).isEqualTo(0);
 
 		// Bad code
 
@@ -1094,7 +1091,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem(null).setCode("code1"));
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
-		assertEquals(2, errors.getMessages().size());
+		assertThat(errors.getMessages()).hasSize(2);
 		assertThat(errors.getMessages().get(0).getMessage()).contains("A code with no system has no defined meaning. A system should be provided");
 		assertThat(errors.getMessages().get(0).getLocationString()).contains("QuestionnaireResponse.item[0].answer[0]");
 		assertThat(errors.getMessages().get(1).getMessage()).contains("The code provided code1 in the system null) is not in the options value set (ValueSet[http://somevalueset]) in the questionnaire: Validation failed");
@@ -1107,7 +1104,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertEquals(2, errors.getMessages().size());
+		assertThat(errors.getMessages()).hasSize(2);
 		assertThat(errors.getMessages().get(0).getMessage()).contains("A code with no system has no defined meaning. A system should be provided");
 		assertThat(errors.getMessages().get(0).getLocationString()).contains("QuestionnaireResponse.item[0].answer[0]");
 		assertThat(errors.getMessages().get(1).getMessage()).contains("The code provided code1 in the system null) is not in the options value set (ValueSet[http://somevalueset]) in the questionnaire: Validation failed");

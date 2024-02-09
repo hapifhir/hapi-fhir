@@ -33,9 +33,8 @@ import org.mockito.stubbing.Answer;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -94,18 +93,18 @@ public class GenericClientR4BTest {
 
 		MethodOutcome outcome = client.create().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
-		assertEquals(2, myAnswerCount);
-		assertNotNull(outcome.getOperationOutcome());
-		assertNotNull(outcome.getResource());
+		assertThat(myAnswerCount).isEqualTo(2);
+		assertThat(outcome.getOperationOutcome()).isNotNull();
+		assertThat(outcome.getResource()).isNotNull();
 
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", ((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
+		assertThat(((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>");
+		assertThat(((Patient) outcome.getResource()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>");
 
-		assertEquals(myAnswerCount, capt.getAllValues().size());
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals(Constants.CT_FHIR_JSON_NEW, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertThat(capt.getAllValues()).hasSize(myAnswerCount);
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient");
+		assertThat(capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 
-		assertEquals("http://foo.com/base/Patient/222/_history/3", capt.getAllValues().get(1).getURI().toASCIIString());
+		assertThat(capt.getAllValues().get(1).getURI().toASCIIString()).isEqualTo("http://foo.com/base/Patient/222/_history/3");
 	}
 
 	@Test
@@ -127,11 +126,11 @@ public class GenericClientR4BTest {
 
 		assertThat(response.getNameFirstRep().getFamily(), StringContains.containsString("Cardinal"));
 
-		assertEquals("http://foo.com/Patient/123/_history/2333", response.getIdElement().getValue());
+		assertThat(response.getIdElement().getValue()).isEqualTo("http://foo.com/Patient/123/_history/2333");
 
 		InstantType lm = response.getMeta().getLastUpdatedElement();
 		lm.setTimeZoneZulu(true);
-		assertEquals("1995-11-15T04:58:08.000Z", lm.getValueAsString());
+		assertThat(lm.getValueAsString()).isEqualTo("1995-11-15T04:58:08.000Z");
 
 	}
 

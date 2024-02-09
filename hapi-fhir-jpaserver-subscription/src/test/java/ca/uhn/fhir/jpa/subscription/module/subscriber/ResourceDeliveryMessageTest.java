@@ -18,8 +18,8 @@ public class ResourceDeliveryMessageTest {
 		String encoded = new ObjectMapper().writeValueAsString(msg);
 
 		msg = new ObjectMapper().readValue(encoded, ResourceDeliveryMessage.class);
-		assertThat(msg.getAttribute("foo1").get()).isEqualTo("bar");
-		assertThat(msg.getAttribute("foo2").get()).isEqualTo("baz");
+		assertThat(msg.getAttribute("foo1")).contains("bar");
+		assertThat(msg.getAttribute("foo2")).contains("baz");
 		assertThat(msg.getAttribute("foo3").isPresent()).isEqualTo(false);
 	}
 

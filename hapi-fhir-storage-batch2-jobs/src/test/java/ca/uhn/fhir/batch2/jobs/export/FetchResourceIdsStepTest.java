@@ -140,16 +140,16 @@ public class FetchResourceIdsStepTest {
 			.accept(resultCaptor.capture());
 
 		List<ResourceIdList> results = resultCaptor.getAllValues();
-		assertThat(results.size()).isEqualTo(parameters.getResourceTypes().size());
+		assertThat(results).hasSize(parameters.getResourceTypes().size());
 		for (ResourceIdList idList: results) {
 			String resourceType = idList.getResourceType();
-			assertThat(parameters.getResourceTypes().contains(resourceType)).isTrue();
+			assertThat(parameters.getResourceTypes()).contains(resourceType);
 
 			if (resourceType.equals("Patient")) {
-				assertThat(idList.getIds().size()).isEqualTo(patientIds.size());
+				assertThat(idList.getIds()).hasSize(patientIds.size());
 			}
 			else if (resourceType.equals("Observation")) {
-				assertThat(idList.getIds().size()).isEqualTo(observationIds.size());
+				assertThat(idList.getIds()).hasSize(observationIds.size());
 			}
 			else {
 				// we shouldn't have others

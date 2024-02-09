@@ -21,7 +21,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class OperationDuplicateServerDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
@@ -46,15 +46,15 @@ public class OperationDuplicateServerDstu2Test {
 			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/metadata?_pretty=true");
 			HttpResponse status = ourClient.execute(httpGet);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			String response = IOUtils.toString(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info(response);
 
 			Conformance resp = ourCtx.newXmlParser().parseResource(Conformance.class, response);
-			assertEquals(1, resp.getRest().get(0).getOperation().size());
-			assertEquals("myoperation", resp.getRest().get(0).getOperation().get(0).getName());
-			assertEquals("OperationDefinition/OrganizationPatient-ts-myoperation", resp.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
+			assertThat(resp.getRest().get(0).getOperation()).hasSize(1);
+			assertThat(resp.getRest().get(0).getOperation().get(0).getName()).isEqualTo("myoperation");
+			assertThat(resp.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue()).isEqualTo("OperationDefinition/OrganizationPatient-ts-myoperation");
 		}
 
 		// OperationDefinition
@@ -62,17 +62,17 @@ public class OperationDuplicateServerDstu2Test {
 			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true");
 			HttpResponse status = ourClient.execute(httpGet);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			String response = IOUtils.toString(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info(response);
 
 			OperationDefinition resp = ourCtx.newXmlParser().parseResource(OperationDefinition.class, response);
-			assertEquals(true, resp.getSystemElement().getValue().booleanValue());
-			assertEquals("myoperation", resp.getCode());
-			assertEquals(true, resp.getIdempotent().booleanValue());
-			assertEquals(2, resp.getType().size());
-			assertEquals(1, resp.getParameter().size());
+			assertThat(resp.getSystemElement().getValue().booleanValue()).isEqualTo(true);
+			assertThat(resp.getCode()).isEqualTo("myoperation");
+			assertThat(resp.getIdempotent().booleanValue()).isEqualTo(true);
+			assertThat(resp.getType()).hasSize(2);
+			assertThat(resp.getParameter()).hasSize(1);
 		}
 	}
 

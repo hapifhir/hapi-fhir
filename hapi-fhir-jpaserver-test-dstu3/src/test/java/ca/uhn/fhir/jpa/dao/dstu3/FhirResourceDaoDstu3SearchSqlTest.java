@@ -80,7 +80,7 @@ public class FhirResourceDaoDstu3SearchSqlTest extends BaseJpaDstu3Test {
 
 			List<IBaseResource> resources = outcome.getResources(i, i + 300);
 			ourLog.info("Batch {}-{} returned {} resources", i, i+300, resources.size());
-			assertThat(resources.size()).isEqualTo(300);
+			assertThat(resources).hasSize(300);
 
 			List<SqlQuery> query = myCaptureQueriesListener.getSelectQueries();
 			for (SqlQuery next : query) {

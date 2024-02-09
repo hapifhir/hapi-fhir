@@ -12,7 +12,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class NumericSimilarityR4Test extends StringSimilarityR4Test {
 	private static final HapiStringSimilarity NUMERIC_JARO_WINKLER = new HapiNumericSimilarity(new JaroWinkler());
@@ -30,11 +30,11 @@ public class NumericSimilarityR4Test extends StringSimilarityR4Test {
 		"(416) 967-1111, 4169671111,"
 	})
 	public void testNumericSimilarity_withExactMatches(String theLeft, String theRight) {
-		assertEquals(1.0, similarity(NUMERIC_JARO_WINKLER, theLeft, theRight));
-		assertEquals(1.0, similarity(NUMERIC_COSINE, theLeft, theRight));
-		assertEquals(1.0, similarity(NUMERIC_JACCARD, theLeft, theRight));
-		assertEquals(1.0, similarity(NUMERIC_LEVENSCHTEIN, theLeft, theRight));
-		assertEquals(1.0, similarity(NUMERIC_SORENSEN_DICE, theLeft, theRight));
+		assertThat(similarity(NUMERIC_JARO_WINKLER, theLeft, theRight)).isEqualTo(1.0);
+		assertThat(similarity(NUMERIC_COSINE, theLeft, theRight)).isEqualTo(1.0);
+		assertThat(similarity(NUMERIC_JACCARD, theLeft, theRight)).isEqualTo(1.0);
+		assertThat(similarity(NUMERIC_LEVENSCHTEIN, theLeft, theRight)).isEqualTo(1.0);
+		assertThat(similarity(NUMERIC_SORENSEN_DICE, theLeft, theRight)).isEqualTo(1.0);
 	}
 
 	@ParameterizedTest
@@ -45,11 +45,11 @@ public class NumericSimilarityR4Test extends StringSimilarityR4Test {
 		"1231231234, (123) 123-1234, 1231234321,"
 	})
 	public void testNumericSimilarity_givesSameResultAsStringSimilarity(String theLeft, String theLeftWithNonNumerics, String theRight) {
-		assertEquals(similarity(JARO_WINKLER, theLeft, theRight), similarity(NUMERIC_JARO_WINKLER, theLeftWithNonNumerics, theRight));
-		assertEquals(similarity(COSINE, theLeft, theRight), similarity(NUMERIC_COSINE, theLeftWithNonNumerics, theRight));
-		assertEquals(similarity(JACCARD, theLeft, theRight), similarity(NUMERIC_JACCARD, theLeftWithNonNumerics, theRight));
-		assertEquals(similarity(LEVENSCHTEIN, theLeft, theRight), similarity(NUMERIC_LEVENSCHTEIN, theLeftWithNonNumerics, theRight));
-		assertEquals(similarity(SORENSEN_DICE, theLeft, theRight), similarity(NUMERIC_SORENSEN_DICE, theLeftWithNonNumerics, theRight));
+		assertThat(similarity(NUMERIC_JARO_WINKLER, theLeftWithNonNumerics, theRight)).isEqualTo(similarity(JARO_WINKLER, theLeft, theRight));
+		assertThat(similarity(NUMERIC_COSINE, theLeftWithNonNumerics, theRight)).isEqualTo(similarity(COSINE, theLeft, theRight));
+		assertThat(similarity(NUMERIC_JACCARD, theLeftWithNonNumerics, theRight)).isEqualTo(similarity(JACCARD, theLeft, theRight));
+		assertThat(similarity(NUMERIC_LEVENSCHTEIN, theLeftWithNonNumerics, theRight)).isEqualTo(similarity(LEVENSCHTEIN, theLeft, theRight));
+		assertThat(similarity(NUMERIC_SORENSEN_DICE, theLeftWithNonNumerics, theRight)).isEqualTo(similarity(SORENSEN_DICE, theLeft, theRight));
 	}
 
 	private double similarity(IMdmFieldSimilarity theSimilarity, String theLeft, String theRight) {

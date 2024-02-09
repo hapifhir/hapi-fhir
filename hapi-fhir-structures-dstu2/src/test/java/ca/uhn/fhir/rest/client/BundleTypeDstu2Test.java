@@ -32,7 +32,6 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -79,7 +78,7 @@ public class BundleTypeDstu2Test {
 
 		HttpUriRequest value = capt.getValue();
 
-		assertTrue(value instanceof HttpPost, "Expected request of type POST on long params list");
+		assertThat(value instanceof HttpPost).as("Expected request of type POST on long params list").isTrue();
 		HttpPost post = (HttpPost) value;
 		String body = IOUtils.toString(post.getEntity().getContent());
 		IOUtils.closeQuietly(post.getEntity().getContent());

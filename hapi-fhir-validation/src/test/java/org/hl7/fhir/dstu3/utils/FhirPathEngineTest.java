@@ -20,9 +20,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FhirPathEngineTest extends BaseValidationTestWithInlineMocks {
 
@@ -36,8 +34,8 @@ public class FhirPathEngineTest extends BaseValidationTestWithInlineMocks {
 		obs.setValue(new StringType("FOO"));
 
 		List<Base> value = ourEngine.evaluate(obs, "Observation.value.as(String)");
-		assertEquals(1, value.size());
-		assertEquals("FOO", ((StringType) value.get(0)).getValue());
+		assertThat(value).hasSize(1);
+		assertThat(((StringType) value.get(0)).getValue()).isEqualTo("FOO");
 	}
 
 	@Test
@@ -53,8 +51,8 @@ public class FhirPathEngineTest extends BaseValidationTestWithInlineMocks {
 		o.setSpecimen(new Reference("#FOO"));
 
 		List<Base> value = ourEngine.evaluate(o, "Observation.specimen.resolve().receivedTime");
-		assertEquals(1, value.size());
-		assertEquals("2011-01-01", ((DateTimeType) value.get(0)).getValueAsString());
+		assertThat(value).hasSize(1);
+		assertThat(((DateTimeType) value.get(0)).getValueAsString()).isEqualTo("2011-01-01");
 	}
 
 	@Test
@@ -63,7 +61,7 @@ public class FhirPathEngineTest extends BaseValidationTestWithInlineMocks {
 		patient.setDeceased(new BooleanType());
 		List<Base> eval = ourEngine.evaluate(patient, "Patient.deceased.exists()");
 		ourLog.info(eval.toString());
-		assertFalse(((BooleanType) eval.get(0)).getValue());
+		assertThat(((BooleanType) eval.get(0)).getValue()).isFalse();
 	}
 
 	@Test
@@ -72,7 +70,7 @@ public class FhirPathEngineTest extends BaseValidationTestWithInlineMocks {
 		patient.setDeceased(new BooleanType(false));
 		List<Base> eval = ourEngine.evaluate(patient, "Patient.deceased.exists()");
 		ourLog.info(eval.toString());
-		assertTrue(((BooleanType) eval.get(0)).getValue());
+		assertThat(((BooleanType) eval.get(0)).getValue()).isTrue();
 	}
 
 	@AfterAll

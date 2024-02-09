@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BaseCommandTest {
 
@@ -20,7 +20,7 @@ public class BaseCommandTest {
 			System.setIn(new ByteArrayInputStream("A VALUE\n".getBytes()));
 
 			String value = new MyBaseCommand().read();
-			assertEquals("A VALUE", value);
+			assertThat(value).isEqualTo("A VALUE");
 
 		} finally {
 			System.setIn(stdin);

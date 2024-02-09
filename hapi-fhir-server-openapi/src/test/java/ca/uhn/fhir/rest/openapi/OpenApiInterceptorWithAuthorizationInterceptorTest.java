@@ -29,8 +29,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class OpenApiInterceptorWithAuthorizationInterceptorTest {
 
@@ -82,10 +81,10 @@ public class OpenApiInterceptorWithAuthorizationInterceptorTest {
 			resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", response.getStatusLine());
 			ourLog.debug("Response: {}", resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 		}
 
 		OpenAPI parsed = Yaml.mapper().readValue(resp, OpenAPI.class);
-		assertNotNull(parsed.getPaths().get("/Patient").getPost());
+		assertThat(parsed.getPaths().get("/Patient").getPost()).isNotNull();
 	}
 }

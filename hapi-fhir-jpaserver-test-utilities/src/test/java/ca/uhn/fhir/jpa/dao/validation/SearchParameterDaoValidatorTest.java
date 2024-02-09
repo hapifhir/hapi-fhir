@@ -126,8 +126,8 @@ public class SearchParameterDaoValidatorTest {
             mySvc.validate(sp);
 			fail("");
         } catch (UnprocessableEntityException ex) {
-			assertThat(ex.getMessage().startsWith("HAPI-2347: ")).isTrue();
-			assertThat(ex.getMessage().contains("Invalid component search parameter type: REFERENCE in component.definition: http://example.org/SearchParameter/observation-patient")).isTrue();
+					assertThat(ex.getMessage()).startsWith("HAPI-2347: ");
+					assertThat(ex.getMessage()).contains("Invalid component search parameter type: REFERENCE in component.definition: http://example.org/SearchParameter/observation-patient");
         }
     }
 
@@ -166,8 +166,8 @@ public class SearchParameterDaoValidatorTest {
             mySvc.validate(sp);
 			fail("");
         } catch (UnprocessableEntityException ex) {
-			assertThat(ex.getMessage().startsWith("HAPI-2347: ")).isTrue();
-			assertThat(ex.getMessage().contains("Invalid component search parameter type: URI in component.definition: http://example.org/SearchParameter/component-value-canonical")).isTrue();
+					assertThat(ex.getMessage()).startsWith("HAPI-2347: ");
+					assertThat(ex.getMessage()).contains("Invalid component search parameter type: URI in component.definition: http://example.org/SearchParameter/component-value-canonical");
         }
     }
 

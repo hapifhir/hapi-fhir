@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -76,7 +75,7 @@ public class SearchPreferHandlingInterceptorTest {
 	public void testSearchWithUnknownResourceType() throws IOException {
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
 			try (CloseableHttpResponse result = client.execute(new HttpGet("http://localhost:" + myPort + "/BadResource?foo=bar"))) {
-				assertEquals(404, result.getStatusLine().getStatusCode());
+				assertThat(result.getStatusLine().getStatusCode()).isEqualTo(404);
 				String response = IOUtils.toString(result.getEntity().getContent(), StandardCharsets.UTF_8);
 				assertThat(response).contains("Unknown resource type 'BadResource' - Server knows how to handle: [Patient]");
 			}
@@ -131,8 +130,8 @@ public class SearchPreferHandlingInterceptorTest {
 			.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_LENIENT)
 			.encodedJson()
 			.execute();
-		assertEquals(200, outcome.getTotal());
-		assertEquals("http://localhost:" + myPort + "/Patient?_format=json&_pretty=true&identifier=BLAH", outcome.getLink(Constants.LINK_SELF).getUrl());
+		assertThat(outcome.getTotal()).isEqualTo(200);
+		assertThat(outcome.getLink(Constants.LINK_SELF).getUrl()).isEqualTo("http://localhost:" + myPort + "/Patient?_format=json&_pretty=true&identifier=BLAH");
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {

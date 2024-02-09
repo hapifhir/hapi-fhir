@@ -93,12 +93,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.fail;
 
 import static org.mockito.Mockito.when;
@@ -121,8 +115,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.accept("application/json")
 			.execute();
-		assertEquals("http://example.com/fhir/Device", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals("application/json", capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
+		assertThat(UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString())).isEqualTo("http://example.com/fhir/Device");
+		assertThat(capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue()).isEqualTo("application/json");
 		idx++;
 
 		// Empty accept value
@@ -133,8 +127,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.accept("")
 			.execute();
-		assertEquals("http://example.com/fhir/Device?_format=xml", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
+		assertThat(UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString())).isEqualTo("http://example.com/fhir/Device?_format=xml");
+		assertThat(capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue()).isEqualTo(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY);
 		idx++;
 
 		// Null accept value
@@ -145,8 +139,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.accept(null)
 			.execute();
-		assertEquals("http://example.com/fhir/Device?_format=xml", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY, capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue());
+		assertThat(UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString())).isEqualTo("http://example.com/fhir/Device?_format=xml");
+		assertThat(capt.getAllValues().get(idx).getFirstHeader(Constants.HEADER_ACCEPT).getValue()).isEqualTo(Constants.HEADER_ACCEPT_VALUE_XML_NON_LEGACY);
 		idx++;
 	}
 
@@ -181,16 +175,16 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		ourLog.info(Arrays.asList(capt.getAllValues().get(0).getAllHeaders()).toString());
 
-		assertEquals("http://example.com/fhir/Binary", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Binary");
 		validateUserAgent(capt);
 
-		assertEquals("application/fhir+json;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertThat(capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", "")).isEqualTo("application/fhir+json;charset=utf-8");
+		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue()).isEqualTo(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
 		Binary output = ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt));
-		assertEquals(Constants.CT_FHIR_JSON, output.getContentType());
+		assertThat(output.getContentType()).isEqualTo(Constants.CT_FHIR_JSON);
 
 		Patient outputPt = (Patient) ourCtx.newJsonParser().parseResource(new String(output.getContent(), StandardCharsets.UTF_8));
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">A PATIENT</div>", outputPt.getText().getDivAsString());
+		assertThat(outputPt.getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">A PATIENT</div>");
 	}
 
 	@Test
@@ -220,12 +214,12 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		ourLog.info(Arrays.asList(capt.getAllValues().get(0).getAllHeaders()).toString());
 
-		assertEquals("http://example.com/fhir/Binary", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Binary");
 		validateUserAgent(capt);
 
-		assertEquals("application/fhir+json;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
-		assertArrayEquals(new byte[]{0, 1, 2, 3, 4}, ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt)).getContent());
+		assertThat(capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", "")).isEqualTo("application/fhir+json;charset=utf-8");
+		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue()).isEqualTo(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
+		assertThat(ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt)).getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 
 	}
 
@@ -243,13 +237,13 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		try {
 			client.read().resource(Patient.class).withId("1").execute();
 			fail("");		} catch (FhirClientConnectionException e) {
-			assertEquals(Msg.code(1360) + "java.lang.IllegalStateException", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1360) + "java.lang.IllegalStateException");
 		}
 
 		try {
 			client.read().resource(Patient.class).withId("1").execute();
 			fail("");		} catch (RuntimeException e) {
-			assertEquals("java.lang.RuntimeException", e.toString());
+			assertThat(e.toString()).isEqualTo("java.lang.RuntimeException");
 		}
 
 		try {
@@ -282,7 +276,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("foo=bar", capt.getAllValues().get(0).getFirstHeader("Cookie").getValue());
+		assertThat(capt.getAllValues().get(0).getFirstHeader("Cookie").getValue()).isEqualTo("foo=bar");
 	}
 
 	@Test
@@ -323,18 +317,18 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		MethodOutcome outcome = client.create().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
-		assertEquals(2, myAnswerCount);
-		assertNotNull(outcome.getOperationOutcome());
-		assertNotNull(outcome.getResource());
+		assertThat(myAnswerCount).isEqualTo(2);
+		assertThat(outcome.getOperationOutcome()).isNotNull();
+		assertThat(outcome.getResource()).isNotNull();
 
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", ((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
+		assertThat(((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>");
+		assertThat(((Patient) outcome.getResource()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>");
 
-		assertEquals(myAnswerCount, capt.getAllValues().size());
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals(Constants.CT_FHIR_JSON_NEW, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertThat(capt.getAllValues()).hasSize(myAnswerCount);
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient");
+		assertThat(capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 
-		assertEquals("http://foo.com/base/Patient/222/_history/3", capt.getAllValues().get(1).getURI().toASCIIString());
+		assertThat(capt.getAllValues().get(1).getURI().toASCIIString()).isEqualTo("http://foo.com/base/Patient/222/_history/3");
 	}
 
 	@Test
@@ -369,14 +363,14 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		MethodOutcome outcome = client.create().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
-		assertEquals(1, myAnswerCount);
-		assertNull(outcome.getOperationOutcome());
-		assertNotNull(outcome.getResource());
+		assertThat(myAnswerCount).isEqualTo(1);
+		assertThat(outcome.getOperationOutcome()).isNull();
+		assertThat(outcome.getResource()).isNotNull();
 
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
+		assertThat(((Patient) outcome.getResource()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>");
 
-		assertEquals(myAnswerCount, capt.getAllValues().size());
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(capt.getAllValues()).hasSize(myAnswerCount);
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient");
 	}
 
 	@Test
@@ -412,10 +406,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.delete()
 			.resourceById(new IdType("Patient/222"))
 			.execute();
-		assertNotNull(outcome);
-		assertEquals(1, capt.getAllValues().size());
-		assertEquals("http://example.com/fhir/Patient/222", capt.getAllValues().get(myAnswerCount - 1).getURI().toASCIIString());
-		assertEquals("DELETE", capt.getAllValues().get(myAnswerCount - 1).getMethod());
+		assertThat(outcome).isNotNull();
+		assertThat(capt.getAllValues()).hasSize(1);
+		assertThat(capt.getAllValues().get(myAnswerCount - 1).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/222");
+		assertThat(capt.getAllValues().get(myAnswerCount - 1).getMethod()).isEqualTo("DELETE");
 
 		// NONE Cascading delete
 		outcome = client
@@ -423,10 +417,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.resourceById(new IdType("Patient/222"))
 			.cascade(DeleteCascadeModeEnum.NONE)
 			.execute();
-		assertNotNull(outcome);
-		assertEquals(2, capt.getAllValues().size());
-		assertEquals("http://example.com/fhir/Patient/222", capt.getAllValues().get(myAnswerCount - 1).getURI().toASCIIString());
-		assertEquals("DELETE", capt.getAllValues().get(myAnswerCount - 1).getMethod());
+		assertThat(outcome).isNotNull();
+		assertThat(capt.getAllValues()).hasSize(2);
+		assertThat(capt.getAllValues().get(myAnswerCount - 1).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/222");
+		assertThat(capt.getAllValues().get(myAnswerCount - 1).getMethod()).isEqualTo("DELETE");
 
 		// DELETE Cascading delete
 		outcome = client
@@ -434,10 +428,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.resourceById(new IdType("Patient/222"))
 			.cascade(DeleteCascadeModeEnum.DELETE)
 			.execute();
-		assertNotNull(outcome);
-		assertEquals(myAnswerCount, capt.getAllValues().size());
-		assertEquals("http://example.com/fhir/Patient/222?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE, capt.getAllValues().get(myAnswerCount - 1).getURI().toASCIIString());
-		assertEquals("DELETE", capt.getAllValues().get(myAnswerCount - 1).getMethod());
+		assertThat(outcome).isNotNull();
+		assertThat(capt.getAllValues()).hasSize(myAnswerCount);
+		assertThat(capt.getAllValues().get(myAnswerCount - 1).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/222?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE);
+		assertThat(capt.getAllValues().get(myAnswerCount - 1).getMethod()).isEqualTo("DELETE");
 
 		// DELETE Cascading delete on search URL
 		outcome = client
@@ -445,10 +439,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.resourceConditionalByUrl("Patient?identifier=sys|val")
 			.cascade(DeleteCascadeModeEnum.DELETE)
 			.execute();
-		assertNotNull(outcome);
-		assertEquals(myAnswerCount, capt.getAllValues().size());
-		assertEquals("http://example.com/fhir/Patient?identifier=sys%7Cval&" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE, capt.getAllValues().get(myAnswerCount - 1).getURI().toASCIIString());
-		assertEquals("DELETE", capt.getAllValues().get(myAnswerCount - 1).getMethod());
+		assertThat(outcome).isNotNull();
+		assertThat(capt.getAllValues()).hasSize(myAnswerCount);
+		assertThat(capt.getAllValues().get(myAnswerCount - 1).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient?identifier=sys%7Cval&" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE);
+		assertThat(capt.getAllValues().get(myAnswerCount - 1).getMethod()).isEqualTo("DELETE");
 	}
 
 	@Test
@@ -473,9 +467,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(1, resp.getEntry().size());
-		assertEquals(CustomTypeR4Test.MyCustomPatient.class, resp.getEntry().get(0).getResource().getClass());
-		assertEquals("http://example.com/fhir/Patient/_history", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(resp.getEntry()).hasSize(1);
+		assertThat(resp.getEntry().get(0).getResource().getClass()).isEqualTo(CustomTypeR4Test.MyCustomPatient.class);
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/_history");
 	}
 
 	@Test
@@ -502,9 +496,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.preferResponseType(MyCustomPatient.class)
 			.execute();
 
-		assertEquals(1, resp.getEntry().size());
-		assertEquals(CustomTypeR4Test.MyCustomPatient.class, resp.getEntry().get(0).getResource().getClass());
-		assertEquals("http://foo/next", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(resp.getEntry()).hasSize(1);
+		assertThat(resp.getEntry().get(0).getResource().getClass()).isEqualTo(CustomTypeR4Test.MyCustomPatient.class);
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://foo/next");
 
 		resp = client
 			.loadPage()
@@ -512,9 +506,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.preferResponseTypes(toTypeList(MyCustomPatient.class))
 			.execute();
 
-		assertEquals(1, resp.getEntry().size());
-		assertEquals(CustomTypeR4Test.MyCustomPatient.class, resp.getEntry().get(0).getResource().getClass());
-		assertEquals("http://foo/next", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(resp.getEntry()).hasSize(1);
+		assertThat(resp.getEntry().get(0).getResource().getClass()).isEqualTo(CustomTypeR4Test.MyCustomPatient.class);
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://foo/next");
 	}
 
 	@Test
@@ -547,9 +541,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.preferResponseType(MyCustomPatient.class)
 			.execute();
 
-		assertEquals(1, resp.getParameter().size());
-		assertEquals(CustomTypeR4Test.MyCustomPatient.class, resp.getParameter().get(0).getResource().getClass());
-		assertEquals("http://example.com/fhir/$foo", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(resp.getParameter()).hasSize(1);
+		assertThat(resp.getParameter().get(0).getResource().getClass()).isEqualTo(CustomTypeR4Test.MyCustomPatient.class);
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/$foo");
 
 		resp = client
 			.operation()
@@ -558,9 +552,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.withNoParameters(Parameters.class)
 			.execute();
 
-		assertEquals(1, resp.getParameter().size());
-		assertEquals(CustomTypeR4Test.MyCustomPatient.class, resp.getParameter().get(0).getResource().getClass());
-		assertEquals("http://example.com/fhir/Patient/$foo", capt.getAllValues().get(1).getURI().toASCIIString());
+		assertThat(resp.getParameter()).hasSize(1);
+		assertThat(resp.getParameter().get(0).getResource().getClass()).isEqualTo(CustomTypeR4Test.MyCustomPatient.class);
+		assertThat(capt.getAllValues().get(1).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/$foo");
 	}
 
 	@Test
@@ -585,9 +579,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(1, resp.getEntry().size());
-		assertEquals(CustomTypeR4Test.MyCustomPatient.class, resp.getEntry().get(0).getResource().getClass());
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(resp.getEntry()).hasSize(1);
+		assertThat(resp.getEntry().get(0).getResource().getClass()).isEqualTo(CustomTypeR4Test.MyCustomPatient.class);
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient");
 	}
 
 	@Test
@@ -626,17 +620,17 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://testForceConformanceCapabilityStatement.com/fhir");
 
 		client.read().resource("Patient").withId("1").execute();
-		assertEquals(2, capt.getAllValues().size());
-		assertEquals("http://testForceConformanceCapabilityStatement.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals("http://testForceConformanceCapabilityStatement.com/fhir/Patient/1", capt.getAllValues().get(1).getURI().toASCIIString());
+		assertThat(capt.getAllValues()).hasSize(2);
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://testForceConformanceCapabilityStatement.com/fhir/metadata");
+		assertThat(capt.getAllValues().get(1).getURI().toASCIIString()).isEqualTo("http://testForceConformanceCapabilityStatement.com/fhir/Patient/1");
 
 		client.read().resource("Patient").withId("1").execute();
-		assertEquals(3, capt.getAllValues().size());
-		assertEquals("http://testForceConformanceCapabilityStatement.com/fhir/Patient/1", capt.getAllValues().get(2).getURI().toASCIIString());
+		assertThat(capt.getAllValues()).hasSize(3);
+		assertThat(capt.getAllValues().get(2).getURI().toASCIIString()).isEqualTo("http://testForceConformanceCapabilityStatement.com/fhir/Patient/1");
 
 		client.forceConformanceCheck();
-		assertEquals(4, capt.getAllValues().size());
-		assertEquals("http://testForceConformanceCapabilityStatement.com/fhir/metadata", capt.getAllValues().get(3).getURI().toASCIIString());
+		assertThat(capt.getAllValues()).hasSize(4);
+		assertThat(capt.getAllValues().get(3).getURI().toASCIIString()).isEqualTo("http://testForceConformanceCapabilityStatement.com/fhir/metadata");
 	}
 
 	@Test
@@ -674,18 +668,18 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://testForceConformance.com/fhir");
 
 		client.read().resource("Patient").withId("1").execute();
-		assertEquals(2, capt.getAllValues().size());
-		assertEquals("http://testForceConformance.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals("http://testForceConformance.com/fhir/Patient/1", capt.getAllValues().get(1).getURI().toASCIIString());
+		assertThat(capt.getAllValues()).hasSize(2);
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://testForceConformance.com/fhir/metadata");
+		assertThat(capt.getAllValues().get(1).getURI().toASCIIString()).isEqualTo("http://testForceConformance.com/fhir/Patient/1");
 
 		client.read().resource("Patient").withId("1").execute();
-		assertEquals(3, capt.getAllValues().size());
-		assertEquals("http://testForceConformance.com/fhir/Patient/1", capt.getAllValues().get(2).getURI().toASCIIString());
+		assertThat(capt.getAllValues()).hasSize(3);
+		assertThat(capt.getAllValues().get(2).getURI().toASCIIString()).isEqualTo("http://testForceConformance.com/fhir/Patient/1");
 
 		myAnswerCount = 0;
 		client.forceConformanceCheck();
-		assertEquals(4, capt.getAllValues().size());
-		assertEquals("http://testForceConformance.com/fhir/metadata", capt.getAllValues().get(3).getURI().toASCIIString());
+		assertThat(capt.getAllValues()).hasSize(4);
+		assertThat(capt.getAllValues().get(3).getURI().toASCIIString()).isEqualTo("http://testForceConformance.com/fhir/metadata");
 	}
 
 	@Test
@@ -717,8 +711,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.at(new DateRangeParam().setLowerBound("2011").setUpperBound("2018"))
 			.execute();
 
-		assertEquals(0, outcome.getTotal());
-		assertEquals("http://example.com/fhir/_history?_at=ge2011&_at=le2018", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(outcome.getTotal()).isEqualTo(0);
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/_history?_at=ge2011&_at=le2018");
 	}
 
 
@@ -751,8 +745,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(0, outcome.getTotal());
-		assertEquals("http://example.com/fhir/Patient/_history", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(outcome.getTotal()).isEqualTo(0);
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/_history");
 	}
 
 	@Test
@@ -773,8 +767,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		try {
 			client.read().resource(Patient.class).withId("1").execute();
 			fail("");		} catch (UnclassifiedServerFailureException e) {
-			assertEquals("ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException: HTTP 499 Wacky Message", e.toString());
-			assertEquals("HELLO", e.getResponseBody());
+			assertThat(e.toString()).isEqualTo("ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException: HTTP 499 Wacky Message");
+			assertThat(e.getResponseBody()).isEqualTo("HELLO");
 		}
 
 	}
@@ -797,7 +791,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		try {
 			client.read().resource(Patient.class).withId("1").execute();
 			fail("");		} catch (NotImplementedOperationException e) {
-			assertEquals("HTTP 501 Not Implemented", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 501 Not Implemented");
 		}
 
 	}
@@ -822,7 +816,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(idx).getURI().toString());
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).isEqualTo("http://example.com/fhir/Patient");
 		idx++;
 
 		client
@@ -832,7 +826,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Encounter", capt.getAllValues().get(idx).getURI().toString());
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).isEqualTo("http://example.com/fhir/Encounter");
 		idx++;
 
 		client
@@ -842,7 +836,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Observation", capt.getAllValues().get(idx).getURI().toString());
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).isEqualTo("http://example.com/fhir/Observation");
 		idx++;
 
 	}
@@ -878,17 +872,17 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.withParameters(inputParams)
 			.execute();
 
-		assertEquals("name", result.getParameterFirstRep().getName());
-		assertEquals("false", ((IPrimitiveType<?>) result.getParameterFirstRep().getValue()).getValueAsString());
+		assertThat(result.getParameterFirstRep().getName()).isEqualTo("name");
+		assertThat(((IPrimitiveType<?>) result.getParameterFirstRep().getValue()).getValueAsString()).isEqualTo("false");
 
-		assertEquals("http://example.com/fhir/Patient/123/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/123/$opname");
 		validateUserAgent(capt);
 
-		assertEquals("application/fhir+json;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertThat(capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", "")).isEqualTo("application/fhir+json;charset=utf-8");
+		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue()).isEqualTo(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
 		Parameters output = ourCtx.newJsonParser().parseResource(Parameters.class, extractBodyAsString(capt));
-		assertEquals("name", output.getParameterFirstRep().getName());
-		assertEquals("true", ((IPrimitiveType<?>) output.getParameterFirstRep().getValue()).getValueAsString());
+		assertThat(output.getParameterFirstRep().getName()).isEqualTo("name");
+		assertThat(((IPrimitiveType<?>) output.getParameterFirstRep().getValue()).getValueAsString()).isEqualTo("true");
 	}
 
 	@Test
@@ -922,17 +916,17 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.withParameters(inputParams)
 			.execute();
 
-		assertEquals("name", result.getParameterFirstRep().getName());
-		assertEquals("false", ((IPrimitiveType<?>) result.getParameterFirstRep().getValue()).getValueAsString());
+		assertThat(result.getParameterFirstRep().getName()).isEqualTo("name");
+		assertThat(((IPrimitiveType<?>) result.getParameterFirstRep().getValue()).getValueAsString()).isEqualTo("false");
 
-		assertEquals("http://example.com/fhir/Patient/123/_history/456/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/123/_history/456/$opname");
 		validateUserAgent(capt);
 
-		assertEquals("application/fhir+json;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertThat(capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", "")).isEqualTo("application/fhir+json;charset=utf-8");
+		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue()).isEqualTo(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
 		Parameters output = ourCtx.newJsonParser().parseResource(Parameters.class, extractBodyAsString(capt));
-		assertEquals("name", output.getParameterFirstRep().getName());
-		assertEquals("true", ((IPrimitiveType<?>) output.getParameterFirstRep().getValue()).getValueAsString());
+		assertThat(output.getParameterFirstRep().getName()).isEqualTo("name");
+		assertThat(((IPrimitiveType<?>) output.getParameterFirstRep().getValue()).getValueAsString()).isEqualTo("true");
 	}
 
 	@Test
@@ -966,17 +960,17 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.withParameters(inputParams)
 			.execute();
 
-		assertEquals("name", result.getParameterFirstRep().getName());
-		assertEquals("false", ((IPrimitiveType<?>) result.getParameterFirstRep().getValue()).getValueAsString());
+		assertThat(result.getParameterFirstRep().getName()).isEqualTo("name");
+		assertThat(((IPrimitiveType<?>) result.getParameterFirstRep().getValue()).getValueAsString()).isEqualTo("false");
 
-		assertEquals("http://example.com/fhir/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/$opname");
 		validateUserAgent(capt);
 
-		assertEquals("application/fhir+json;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertThat(capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", "")).isEqualTo("application/fhir+json;charset=utf-8");
+		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue()).isEqualTo(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
 		Parameters output = ourCtx.newJsonParser().parseResource(Parameters.class, extractBodyAsString(capt));
-		assertEquals("name", output.getParameterFirstRep().getName());
-		assertEquals("true", ((IPrimitiveType<?>) output.getParameterFirstRep().getValue()).getValueAsString());
+		assertThat(output.getParameterFirstRep().getName()).isEqualTo("name");
+		assertThat(((IPrimitiveType<?>) output.getParameterFirstRep().getValue()).getValueAsString()).isEqualTo("true");
 	}
 
 	/**
@@ -1011,12 +1005,12 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnMethodOutcome()
 			.execute();
 
-		assertEquals(Binary.class, result.getResource().getClass());
+		assertThat(result.getResource().getClass()).isEqualTo(Binary.class);
 		Binary binary = (Binary) result.getResource();
-		assertEquals(respString, new String(binary.getContent(), Charsets.UTF_8));
-		assertEquals("text/html", binary.getContentType());
+		assertThat(new String(binary.getContent(), Charsets.UTF_8)).isEqualTo(respString);
+		assertThat(binary.getContentType()).isEqualTo("text/html");
 
-		assertEquals("http://example.com/fhir/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/$opname");
 	}
 
 	@Test
@@ -1046,10 +1040,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnResourceType(Binary.class)
 			.execute();
 
-		assertEquals(respString, new String(binary.getContent(), Charsets.UTF_8));
-		assertEquals("text/html", binary.getContentType());
+		assertThat(new String(binary.getContent(), Charsets.UTF_8)).isEqualTo(respString);
+		assertThat(binary.getContentType()).isEqualTo("text/html");
 
-		assertEquals("http://example.com/fhir/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/$opname");
 	}
 
 
@@ -1085,11 +1079,11 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnMethodOutcome()
 			.execute();
 
-		assertEquals(Binary.class, result.getResource().getClass());
+		assertThat(result.getResource().getClass()).isEqualTo(Binary.class);
 		Binary binary = (Binary) result.getResource();
-		assertEquals("application/weird-numbers", binary.getContentType());
-		assertArrayEquals(respBytes, binary.getContent());
-		assertEquals("http://example.com/fhir/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(binary.getContentType()).isEqualTo("application/weird-numbers");
+		assertThat(binary.getContent()).containsExactly(respBytes);
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/$opname");
 	}
 
 	@Test
@@ -1123,17 +1117,17 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.withParameters(inputParams)
 			.execute();
 
-		assertEquals("name", result.getParameterFirstRep().getName());
-		assertEquals("false", ((IPrimitiveType<?>) result.getParameterFirstRep().getValue()).getValueAsString());
+		assertThat(result.getParameterFirstRep().getName()).isEqualTo("name");
+		assertThat(((IPrimitiveType<?>) result.getParameterFirstRep().getValue()).getValueAsString()).isEqualTo("false");
 
-		assertEquals("http://example.com/fhir/Patient/$opname", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/$opname");
 		validateUserAgent(capt);
 
-		assertEquals("application/fhir+json;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertThat(capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", "")).isEqualTo("application/fhir+json;charset=utf-8");
+		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue()).isEqualTo(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
 		Parameters output = ourCtx.newJsonParser().parseResource(Parameters.class, extractBodyAsString(capt));
-		assertEquals("name", output.getParameterFirstRep().getName());
-		assertEquals("true", ((IPrimitiveType<?>) output.getParameterFirstRep().getValue()).getValueAsString());
+		assertThat(output.getParameterFirstRep().getName()).isEqualTo("name");
+		assertThat(((IPrimitiveType<?>) output.getParameterFirstRep().getValue()).getValueAsString()).isEqualTo("true");
 	}
 
 	@Test
@@ -1147,7 +1141,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 				.withId("Patient/123")
 				.execute();
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1386) +"Unable to determine encoding of patch", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1386) + "Unable to determine encoding of patch");
 		}
 	}
 
@@ -1180,10 +1174,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.and(Patient.FAMILY.matches().value("TEST2"))
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?name=TEST&family=TEST2", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
-		assertEquals(patch, extractBodyAsString(capt));
-		assertEquals(Constants.CT_JSON_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		assertThat(UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString())).isEqualTo("http://example.com/fhir/Patient?name=TEST&family=TEST2");
+		assertThat(capt.getAllValues().get(0).getRequestLine().getMethod()).isEqualTo("PATCH");
+		assertThat(extractBodyAsString(capt)).isEqualTo(patch);
+		assertThat(capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_JSON_PATCH);
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
@@ -1219,10 +1213,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.and(Patient.FAMILY.matches().value("TEST2"))
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?name=TEST&family=TEST2", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
-		assertEquals(patch, extractBodyAsString(capt));
-		assertEquals(Constants.CT_JSON_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		assertThat(UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString())).isEqualTo("http://example.com/fhir/Patient?name=TEST&family=TEST2");
+		assertThat(capt.getAllValues().get(0).getRequestLine().getMethod()).isEqualTo("PATCH");
+		assertThat(extractBodyAsString(capt)).isEqualTo(patch);
+		assertThat(capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_JSON_PATCH);
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
@@ -1257,10 +1251,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.conditionalByUrl("Patient?foo=bar")
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?foo=bar", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
-		assertEquals(patch, extractBodyAsString(capt));
-		assertEquals(Constants.CT_JSON_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		assertThat(UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString())).isEqualTo("http://example.com/fhir/Patient?foo=bar");
+		assertThat(capt.getAllValues().get(0).getRequestLine().getMethod()).isEqualTo("PATCH");
+		assertThat(extractBodyAsString(capt)).isEqualTo(patch);
+		assertThat(capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_JSON_PATCH);
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
@@ -1295,10 +1289,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.withId("Patient/123")
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient/123", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
-		assertEquals(patch, extractBodyAsString(capt));
-		assertEquals(Constants.CT_JSON_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		assertThat(UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString())).isEqualTo("http://example.com/fhir/Patient/123");
+		assertThat(capt.getAllValues().get(0).getRequestLine().getMethod()).isEqualTo("PATCH");
+		assertThat(extractBodyAsString(capt)).isEqualTo(patch);
+		assertThat(capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_JSON_PATCH);
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
@@ -1333,10 +1327,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.withId(new IdType("http://localhost/fhir/Patient/123/_history/234"))
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient/123", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
-		assertEquals(patch, extractBodyAsString(capt));
-		assertEquals(Constants.CT_JSON_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		assertThat(UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString())).isEqualTo("http://example.com/fhir/Patient/123");
+		assertThat(capt.getAllValues().get(0).getRequestLine().getMethod()).isEqualTo("PATCH");
+		assertThat(extractBodyAsString(capt)).isEqualTo(patch);
+		assertThat(capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_JSON_PATCH);
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
@@ -1371,10 +1365,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.withId("Patient/123")
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient/123", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals("PATCH", capt.getAllValues().get(0).getRequestLine().getMethod());
-		assertEquals(patch, extractBodyAsString(capt));
-		assertEquals(Constants.CT_XML_PATCH, capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", ""));
+		assertThat(UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString())).isEqualTo("http://example.com/fhir/Patient/123");
+		assertThat(capt.getAllValues().get(0).getRequestLine().getMethod()).isEqualTo("PATCH");
+		assertThat(extractBodyAsString(capt)).isEqualTo(patch);
+		assertThat(capt.getAllValues().get(idx).getFirstHeader("Content-Type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_XML_PATCH);
 		idx++;
 
 		OperationOutcome oo = (OperationOutcome) outcome.getOperationOutcome();
@@ -1394,7 +1388,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		bundle.addEntry().setResource(patient);
 
 		final String encoded = p.encodeResourceToString(bundle);
-		assertEquals("{\"resourceType\":\"Bundle\",\"id\":\"BUNDLE1\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"PATIENT1\",\"name\":[{\"family\":\"PATIENT1\"}]}}]}", encoded);
+		assertThat(encoded).isEqualTo("{\"resourceType\":\"Bundle\",\"id\":\"BUNDLE1\",\"entry\":[{\"resource\":{\"resourceType\":\"Patient\",\"id\":\"PATIENT1\",\"name\":[{\"family\":\"PATIENT1\"}]}}]}");
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -1418,10 +1412,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.execute();
 
 		HttpPut httpRequest = (HttpPut) capt.getValue();
-		assertEquals("http://example.com/fhir/Bundle/BUNDLE1", httpRequest.getURI().toASCIIString());
+		assertThat(httpRequest.getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Bundle/BUNDLE1");
 
 		String requestString = IOUtils.toString(httpRequest.getEntity().getContent(), StandardCharsets.UTF_8);
-		assertEquals(encoded, requestString);
+		assertThat(requestString).isEqualTo(encoded);
 	}
 
 	@Test
@@ -1437,9 +1431,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		bundle.addEntry().setResource(patient);
 
 		final String encoded = p.encodeResourceToString(bundle);
-		assertEquals(
-			"<Bundle xmlns=\"http://hl7.org/fhir\"><id value=\"BUNDLE1\"/><entry><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"PATIENT1\"/><name><family value=\"PATIENT1\"/></name></Patient></resource></entry></Bundle>",
-			encoded);
+		assertThat(encoded).isEqualTo("<Bundle xmlns=\"http://hl7.org/fhir\"><id value=\"BUNDLE1\"/><entry><resource><Patient xmlns=\"http://hl7.org/fhir\"><id value=\"PATIENT1\"/><name><family value=\"PATIENT1\"/></name></Patient></resource></entry></Bundle>");
 
 		ArgumentCaptor<HttpUriRequest> capt = ArgumentCaptor.forClass(HttpUriRequest.class);
 		when(myHttpClient.execute(capt.capture())).thenReturn(myHttpResponse);
@@ -1463,10 +1455,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.execute();
 
 		HttpPut httpRequest = (HttpPut) capt.getValue();
-		assertEquals("http://example.com/fhir/Bundle/BUNDLE1", httpRequest.getURI().toASCIIString());
+		assertThat(httpRequest.getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Bundle/BUNDLE1");
 
 		String requestString = IOUtils.toString(httpRequest.getEntity().getContent(), StandardCharsets.UTF_8);
-		assertEquals(encoded, requestString);
+		assertThat(requestString).isEqualTo(encoded);
 	}
 
 	@Test
@@ -1484,9 +1476,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		try {
 			client.read().resource("Patient").withId("123").elementsSubset("name", "identifier").execute();
 			fail("");		} catch (FhirClientConnectionException e) {
-			assertEquals(
-				Msg.code(1359) + "Failed to parse response from server when performing GET to URL http://example.com/fhir/Patient/123?_elements=identifier%2Cname - ca.uhn.fhir.parser.DataFormatException: "+ Msg.code(1838) +  "Invalid JSON content detected, missing required element: 'resourceType'",
-				e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1359) + "Failed to parse response from server when performing GET to URL http://example.com/fhir/Patient/123?_elements=identifier%2Cname - ca.uhn.fhir.parser.DataFormatException: " + Msg.code(1838) + "Invalid JSON content detected, missing required element: 'resourceType'");
 		}
 	}
 
@@ -1513,7 +1503,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		try {
 			client.read().resource(Patient.class).withId("1").execute();
 			fail("");		} catch (NonFhirResponseException e) {
-			assertEquals("Response contains no Content-Type", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Response contains no Content-Type");
 		}
 
 		// Patient resp = client.read().resource(Patient.class).withId("1").execute();
@@ -1543,7 +1533,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		try {
 			client.read().resource(Patient.class).withId("1").execute();
 			fail("");		} catch (NonFhirResponseException e) {
-			assertEquals("Response contains non FHIR Content-Type 'text/plain' : <Patient xmlns=\"http://hl7.org/fhir\"><name><family value=\"FAM\"/></name></Patient>", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Response contains non FHIR Content-Type 'text/plain' : <Patient xmlns=\"http://hl7.org/fhir\"><name><family value=\"FAM\"/></name></Patient>");
 		}
 
 		// Patient resp = client.read().resource(Patient.class).withId("1").execute();
@@ -1565,8 +1555,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/EpisodeOfCare?patient=123&_revinclude=Encounter%3Aepisode-of-care&_revinclude%3Aiterate=Observation%3Aencounter",
-			capt.getAllValues().get(idx).getURI().toString());
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).isEqualTo("http://example.com/fhir/EpisodeOfCare?patient=123&_revinclude=Encounter%3Aepisode-of-care&_revinclude%3Aiterate=Observation%3Aencounter");
 		idx++;
 
 	}
@@ -1584,8 +1573,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Device?url=http://foo.com", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
-		assertEquals("http://example.com/fhir/Device?url=http%3A%2F%2Ffoo.com", capt.getAllValues().get(idx).getURI().toString());
+		assertThat(UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString())).isEqualTo("http://example.com/fhir/Device?url=http://foo.com");
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).isEqualTo("http://example.com/fhir/Device?url=http%3A%2F%2Ffoo.com");
 		idx++;
 
 		client.search()
@@ -1594,7 +1583,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Device?url=http://foo.com", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertThat(UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString())).isEqualTo("http://example.com/fhir/Device?url=http://foo.com");
 		idx++;
 
 	}
@@ -1620,8 +1609,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?foo=2001", capt.getValue().getURI().toString());
-		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient?foo=2001");
+		assertThat(response.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
 
 	}
 
@@ -1649,8 +1638,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?foo%3Aexact=Smith", capt.getValue().getURI().toString());
-		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient?foo%3Aexact=Smith");
+		assertThat(response.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
 
 	}
 
@@ -1670,8 +1659,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?identifier=SYS%7CVAL1%2CSYS%7CVAL2%2CSYS%7CVAL3A%5C%2CB", capt.getAllValues().get(idx).getURI().toString());
-		assertEquals("http://example.com/fhir/Patient?identifier=SYS|VAL1,SYS|VAL2,SYS|VAL3A\\,B", UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString()));
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).isEqualTo("http://example.com/fhir/Patient?identifier=SYS%7CVAL1%2CSYS%7CVAL2%2CSYS%7CVAL3A%5C%2CB");
+		assertThat(UrlUtil.unescape(capt.getAllValues().get(idx).getURI().toString())).isEqualTo("http://example.com/fhir/Patient?identifier=SYS|VAL1,SYS|VAL2,SYS|VAL3A\\,B");
 		idx++;
 
 	}
@@ -1693,9 +1682,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://foo");
 		Bundle response = (Bundle) client.search().forResource(Patient.class).execute();
 
-		assertEquals("http://foo/Patient", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://foo/Patient");
 		Patient patient = (Patient) response.getEntry().get(0).getResource();
-		assertEquals("PRP1660", patient.getIdentifier().get(0).getValueElement().getValue());
+		assertThat(patient.getIdentifier().get(0).getValueElement().getValue()).isEqualTo("PRP1660");
 
 	}
 
@@ -1714,7 +1703,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.where(Patient.NAME.matches().value((String) null))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(idx).getURI().toString());
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).isEqualTo("http://example.com/fhir/Patient");
 		idx++;
 	}
 
@@ -1751,9 +1740,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(0, outcome.getTotal());
-		assertEquals("http://example.com/fhir/Patient?param1=val1a%2Cval1b&param1=%3Chtml%3E", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals("http://example.com/fhir/Patient?param1=val1a,val1b&param1=<html>", UrlUtil.unescape(capt.getAllValues().get(0).getURI().toASCIIString()));
+		assertThat(outcome.getTotal()).isEqualTo(0);
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient?param1=val1a%2Cval1b&param1=%3Chtml%3E");
+		assertThat(UrlUtil.unescape(capt.getAllValues().get(0).getURI().toASCIIString())).isEqualTo("http://example.com/fhir/Patient?param1=val1a,val1b&param1=<html>");
 	}
 
 	/**
@@ -1787,7 +1776,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.sort().ascending("address")
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals("http://example.com/fhir/Patient?_sort=address", capt.getAllValues().get(idx++).getURI().toASCIIString());
+		assertThat(capt.getAllValues().get(idx++).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient?_sort=address");
 
 		client
 			.search()
@@ -1795,7 +1784,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.sort().descending("address")
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals("http://example.com/fhir/Patient?_sort=-address", capt.getAllValues().get(idx++).getURI().toASCIIString());
+		assertThat(capt.getAllValues().get(idx++).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient?_sort=-address");
 
 		client
 			.search()
@@ -1805,7 +1794,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.sort().descending(Patient.BIRTHDATE)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals("http://example.com/fhir/Patient?_sort=-address%2Cname%2C-birthdate", capt.getAllValues().get(idx++).getURI().toASCIIString());
+		assertThat(capt.getAllValues().get(idx++).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient?_sort=-address%2Cname%2C-birthdate");
 
 	}
 
@@ -1848,9 +1837,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.sort().defaultOrder("DDEF")
 			.execute();
 
-		assertEquals(0, outcome.getTotal());
-		assertEquals("http://example.com/fhir/Patient?_sort=AASC%2C-BDESC%2CCASC%2CDDEF", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals("http://example.com/fhir/Patient?_sort=AASC,-BDESC,CASC,DDEF", UrlUtil.unescape(capt.getAllValues().get(0).getURI().toASCIIString()));
+		assertThat(outcome.getTotal()).isEqualTo(0);
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient?_sort=AASC%2C-BDESC%2CCASC%2CDDEF");
+		assertThat(UrlUtil.unescape(capt.getAllValues().get(0).getURI().toASCIIString())).isEqualTo("http://example.com/fhir/Patient?_sort=AASC,-BDESC,CASC,DDEF");
 	}
 
 	@Test
@@ -1861,28 +1850,28 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		try {
 			client.transaction().withBundle("FOO");
 			fail("");		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1395) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1395) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)");
 		}
 
 		// Create
 		try {
 			client.create().resource("FOO").execute();
 			fail("");		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1368) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1368) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)");
 		}
 
 		// Update
 		try {
 			client.update().resource("FOO").execute();
 			fail("");		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1368) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1368) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)");
 		}
 
 		// Validate
 		try {
 			client.validate().resource("FOO").execute();
 			fail("");		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1368) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1368) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)");
 		}
 
 	}
@@ -1906,9 +1895,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		builder.addTransactionCreateEntry(new Patient().setActive(true));
 
 		IBaseBundle outcome = client.transaction().withBundle(builder.getBundle()).execute();
-		assertNull(outcome);
+		assertThat(outcome).isNull();
 
-		assertEquals("http://example.com/fhir", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir");
 
 	}
 
@@ -1942,11 +1931,11 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		ourLog.info(Arrays.asList(capt.getAllValues().get(0).getAllHeaders()).toString());
 
-		assertEquals("http://example.com/fhir/Patient/111", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/111");
 		validateUserAgent(capt);
 
-		assertEquals("application/fhir+json;charset=utf-8", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", ""));
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
+		assertThat(capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue().toLowerCase().replace(" ", "")).isEqualTo("application/fhir+json;charset=utf-8");
+		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue()).isEqualTo(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
 		String body = extractBodyAsString(capt);
 		assertThat(body).contains("\"id\":\"111\"");
 	}
@@ -1990,16 +1979,16 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		MethodOutcome outcome = client.update().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
-		assertEquals(2, myAnswerCount);
-		assertNotNull(outcome.getOperationOutcome());
-		assertNotNull(outcome.getResource());
+		assertThat(myAnswerCount).isEqualTo(2);
+		assertThat(outcome.getOperationOutcome()).isNotNull();
+		assertThat(outcome.getResource()).isNotNull();
 
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", ((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
+		assertThat(((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>");
+		assertThat(((Patient) outcome.getResource()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>");
 
-		assertEquals(myAnswerCount, capt.getAllValues().size());
-		assertEquals("http://example.com/fhir/Patient/222", capt.getAllValues().get(0).getURI().toASCIIString());
-		assertEquals("http://foo.com/base/Patient/222/_history/3", capt.getAllValues().get(1).getURI().toASCIIString());
+		assertThat(capt.getAllValues()).hasSize(myAnswerCount);
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/222");
+		assertThat(capt.getAllValues().get(1).getURI().toASCIIString()).isEqualTo("http://foo.com/base/Patient/222/_history/3");
 	}
 
 	@Test
@@ -2035,14 +2024,14 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		MethodOutcome outcome = client.update().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
-		assertEquals(1, myAnswerCount);
-		assertNull(outcome.getOperationOutcome());
-		assertNotNull(outcome.getResource());
+		assertThat(myAnswerCount).isEqualTo(1);
+		assertThat(outcome.getOperationOutcome()).isNull();
+		assertThat(outcome.getResource()).isNotNull();
 
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
+		assertThat(((Patient) outcome.getResource()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>");
 
-		assertEquals(myAnswerCount, capt.getAllValues().size());
-		assertEquals("http://example.com/fhir/Patient/222", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(capt.getAllValues()).hasSize(myAnswerCount);
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/222");
 	}
 
 	@Test
@@ -2073,12 +2062,12 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		ourLog.info(Arrays.asList(capt.getAllValues().get(0).getAllHeaders()).toString());
 
-		assertEquals("http://example.com/fhir/Binary", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Binary");
 		validateUserAgent(capt);
 
-		assertEquals("application/foo", capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue());
-		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY, capt.getAllValues().get(0).getHeaders("Accept")[0].getValue());
-		assertArrayEquals(new byte[]{0, 1, 2, 3, 4}, extractBodyAsByteArray(capt));
+		assertThat(capt.getAllValues().get(0).getHeaders("Content-Type")[0].getValue()).isEqualTo("application/foo");
+		assertThat(capt.getAllValues().get(0).getHeaders("Accept")[0].getValue()).isEqualTo(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_NON_LEGACY);
+		assertThat(extractBodyAsByteArray(capt)).containsExactly(new byte[]{0, 1, 2, 3, 4});
 
 	}
 
@@ -2104,7 +2093,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		client.capabilities().ofType(CapabilityStatement.class).execute();
-		assertEquals("http://example.com/fhir/metadata", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/metadata");
 		validateUserAgent(capt);
 	}
 
@@ -2165,8 +2154,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		MethodOutcome outcome = client.validate().resource(pt).execute();
 
-		assertNotNull(outcome.getOperationOutcome());
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", ((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
+		assertThat(outcome.getOperationOutcome()).isNotNull();
+		assertThat(((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>");
 
 	}
 
@@ -2192,11 +2181,11 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		MyPatientWithExtensions read = client.read().resource(MyPatientWithExtensions.class).withId(new IdType("1")).execute();
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", read.getText().getDivAsString());
+		assertThat(read.getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>");
 
 		// Ensure that we haven't overridden the default type for the name
-		assertFalse(MyPatientWithExtensions.class.isAssignableFrom(Patient.class));
-		assertFalse(Patient.class.isAssignableFrom(MyPatientWithExtensions.class));
+		assertThat(MyPatientWithExtensions.class.isAssignableFrom(Patient.class)).isFalse();
+		assertThat(Patient.class.isAssignableFrom(MyPatientWithExtensions.class)).isFalse();
 		Patient pt = new Patient();
 		pt.getText().setDivAsString("A PATIENT");
 		IParser parser = ourCtx.newXmlParser();
@@ -2231,8 +2220,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		Bundle bundle = client.search().forResource(MyPatientWithExtensions.class).returnBundle(Bundle.class).execute();
 
-		assertEquals(1, bundle.getEntry().size());
-		assertEquals(MyPatientWithExtensions.class, bundle.getEntry().get(0).getResource().getClass());
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getEntry().get(0).getResource().getClass()).isEqualTo(MyPatientWithExtensions.class);
 	}
 
 
@@ -2256,9 +2245,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.cacheControl(new CacheControlDirective().setNoStore(true))
 			.execute();
 
-		assertEquals("http://example.com/fhir/Observation", capt.getValue().getURI().toString());
-		assertEquals(1, capt.getValue().getHeaders("Cache-Control").length);
-		assertEquals("no-store", capt.getValue().getHeaders("Cache-Control")[0].getValue());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Observation");
+		assertThat(capt.getValue().getHeaders("Cache-Control").length).isEqualTo(1);
+		assertThat(capt.getValue().getHeaders("Cache-Control")[0].getValue()).isEqualTo("no-store");
 	}
 
 	@SuppressWarnings("unused")
@@ -2281,9 +2270,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.cacheControl(new CacheControlDirective().setNoStore(true).setMaxResults(100))
 			.execute();
 
-		assertEquals("http://example.com/fhir/Observation", capt.getValue().getURI().toString());
-		assertEquals(1, capt.getValue().getHeaders("Cache-Control").length);
-		assertEquals("no-store, max-results=100", capt.getValue().getHeaders("Cache-Control")[0].getValue());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Observation");
+		assertThat(capt.getValue().getHeaders("Cache-Control").length).isEqualTo(1);
+		assertThat(capt.getValue().getHeaders("Cache-Control")[0].getValue()).isEqualTo("no-store, max-results=100");
 	}
 
 	@SuppressWarnings("unused")
@@ -2306,9 +2295,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.cacheControl(new CacheControlDirective().setNoStore(true).setNoCache(true))
 			.execute();
 
-		assertEquals("http://example.com/fhir/Observation", capt.getValue().getURI().toString());
-		assertEquals(1, capt.getValue().getHeaders("Cache-Control").length);
-		assertEquals("no-cache, no-store", capt.getValue().getHeaders("Cache-Control")[0].getValue());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Observation");
+		assertThat(capt.getValue().getHeaders("Cache-Control").length).isEqualTo(1);
+		assertThat(capt.getValue().getHeaders("Cache-Control")[0].getValue()).isEqualTo("no-cache, no-store");
 	}
 
 	private Patient createPatientP1() {
@@ -2334,11 +2323,11 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
 		MethodOutcome resp = client.create().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).execute();
-		assertTrue(resp.getCreated());
+		assertThat(resp.getCreated()).isTrue();
 
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		resp = client.create().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).execute();
-		assertNull(resp.getCreated());
+		assertThat(resp.getCreated()).isNull();
 
 		ourLog.info("lastRequest: {}", ((GenericClient) client).getLastRequest());
 		ourLog.info("lastResponse: {}", ((GenericClient) client).getLastResponse());
@@ -2402,8 +2391,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		int count = 0;
 		client.create().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).execute();
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length).isEqualTo(1);
+		assertThat(capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(extractBody(capt, count)).contains("value=\"John\"");
 		count++;
 
@@ -2413,8 +2402,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.resource(resourceAsString)
 			.execute();
 
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length).isEqualTo(1);
+		assertThat(capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).isEqualTo(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(extractBody(capt, count)).contains("[\"John\"]");
 		count++;
 
@@ -2423,14 +2412,14 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		 */
 
 		client.create().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).encodedJson().execute();
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length).isEqualTo(1);
+		assertThat(capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).isEqualTo(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(extractBody(capt, count)).contains("[\"John\"]");
 		count++;
 
 		client.create().resource(ourCtx.newJsonParser().encodeResourceToString(p1)).encodedXml().execute();
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length).isEqualTo(1);
+		assertThat(capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(extractBody(capt, count)).contains("value=\"John\"");
 
 	}
@@ -2451,16 +2440,16 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		MethodOutcome outcome = client.create().resource(p1).withAdditionalHeader("myHeaderName", "myHeaderValue").execute();
-		assertEquals("44", outcome.getId().getIdPart());
-		assertEquals("22", outcome.getId().getVersionIdPart());
+		assertThat(outcome.getId().getIdPart()).isEqualTo("44");
+		assertThat(outcome.getId().getVersionIdPart()).isEqualTo("22");
 
 		int count = 0;
 
-		assertEquals("http://example.com/fhir/Patient", capt.getValue().getURI().toString());
-		assertEquals("POST", capt.getValue().getMethod());
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
-		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient");
+		assertThat(capt.getValue().getMethod()).isEqualTo("POST");
+		assertThat(capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length).isEqualTo(1);
+		assertThat(capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).isEqualTo(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
+		assertThat(capt.getValue().getFirstHeader("myHeaderName").getValue()).isEqualTo("myHeaderValue");
 		count++;
 
 		/*
@@ -2468,18 +2457,18 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		 */
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), StandardCharsets.UTF_8));
 		client.create().resource(p1).execute();
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(1).getURI().toString());
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(capt.getAllValues().get(1).getURI().toString()).isEqualTo("http://example.com/fhir/Patient");
+		assertThat(capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length).isEqualTo(1);
+		assertThat(capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).isEqualTo(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		count++;
 
 		String resourceText = "<Patient xmlns=\"http://hl7.org/fhir\">    </Patient>";
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), StandardCharsets.UTF_8));
 		client.create().resource(resourceText).execute();
-		assertEquals("http://example.com/fhir/Patient", capt.getAllValues().get(2).getURI().toString());
-		assertEquals(resourceText, IOUtils.toString(((HttpPost) capt.getAllValues().get(2)).getEntity().getContent()));
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(capt.getAllValues().get(2).getURI().toString()).isEqualTo("http://example.com/fhir/Patient");
+		assertThat(IOUtils.toString(((HttpPost) capt.getAllValues().get(2)).getEntity().getContent())).isEqualTo(resourceText);
+		assertThat(capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length).isEqualTo(1);
+		assertThat(capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		count++;
 	}
 
@@ -2499,13 +2488,13 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 
 		MethodOutcome outcome = client.create().resource(p1).execute();
-		assertEquals("44", outcome.getId().getIdPart());
-		assertEquals("22", outcome.getId().getVersionIdPart());
+		assertThat(outcome.getId().getIdPart()).isEqualTo("44");
+		assertThat(outcome.getId().getVersionIdPart()).isEqualTo("22");
 
-		assertEquals("http://example.com/fhir/Patient", capt.getValue().getURI().toString());
-		assertEquals("POST", capt.getValue().getMethod());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient");
+		assertThat(capt.getValue().getMethod()).isEqualTo("POST");
 		Header catH = capt.getValue().getFirstHeader("Category");
-		assertNull(catH);
+		assertThat(catH).isNull();
 	}
 
 	/**
@@ -2529,8 +2518,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		int count = 0;
 		client.create().resource(org).prettyPrint().encodedXml().execute();
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length).isEqualTo(1);
+		assertThat(capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(extractBody(capt, count)).contains("<name value=\"測試醫院\"/>");
 		count++;
 
@@ -2558,10 +2547,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.execute();
 
 		oo = (OperationOutcome) outcome.getOperationOutcome();
-		assertEquals("http://example.com/fhir/Patient/123", capt.getValue().getURI().toString());
-		assertEquals("DELETE", capt.getValue().getMethod());
-		assertEquals("testDelete01", oo.getIssueFirstRep().getLocation().get(0).getValue());
-		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient/123");
+		assertThat(capt.getValue().getMethod()).isEqualTo("DELETE");
+		assertThat(oo.getIssueFirstRep().getLocation().get(0).getValue()).isEqualTo("testDelete01");
+		assertThat(capt.getValue().getFirstHeader("myHeaderName").getValue()).isEqualTo("myHeaderValue");
 
 	}
 
@@ -2590,7 +2579,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 				.encodedJson()
 				.execute();
 		} catch (FhirClientConnectionException e) {
-			assertEquals(500, e.getStatusCode());
+			assertThat(e.getStatusCode()).isEqualTo(500);
 			assertThat(e.getMessage()).contains("Failed to parse response from server when performing DELETE to URL");
 		}
 
@@ -2619,10 +2608,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.execute();
 
 		oo = (OperationOutcome) outcome.getOperationOutcome();
-		assertEquals("http://example.com/fhir/Patient/123", capt.getValue().getURI().toString());
-		assertEquals("DELETE", capt.getValue().getMethod());
-		assertEquals("testDelete01", oo.getIssueFirstRep().getLocation().get(0).getValue());
-		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient/123");
+		assertThat(capt.getValue().getMethod()).isEqualTo("DELETE");
+		assertThat(oo.getIssueFirstRep().getLocation().get(0).getValue()).isEqualTo("testDelete01");
+		assertThat(capt.getValue().getFirstHeader("myHeaderName").getValue()).isEqualTo("myHeaderValue");
 
 	}
 
@@ -2650,9 +2639,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.withAdditionalHeader("myHeaderName", "myHeaderValue")
 			.execute();
-		assertEquals("http://example.com/fhir/_history", capt.getAllValues().get(idx).getURI().toString());
-		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
-		assertEquals(1, response.getEntry().size());
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).isEqualTo("http://example.com/fhir/_history");
+		assertThat(capt.getValue().getFirstHeader("myHeaderName").getValue()).isEqualTo("myHeaderValue");
+		assertThat(response.getEntry()).hasSize(1);
 		idx++;
 
 		response = client
@@ -2662,10 +2651,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.withAdditionalHeader("myHeaderName", "myHeaderValue1")
 			.withAdditionalHeader("myHeaderName", "myHeaderValue2")
 			.execute();
-		assertEquals("http://example.com/fhir/Patient/_history", capt.getAllValues().get(idx).getURI().toString());
-		assertEquals(1, response.getEntry().size());
-		assertEquals("myHeaderValue1", capt.getValue().getHeaders("myHeaderName")[0].getValue());
-		assertEquals("myHeaderValue2", capt.getValue().getHeaders("myHeaderName")[1].getValue());
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).isEqualTo("http://example.com/fhir/Patient/_history");
+		assertThat(response.getEntry()).hasSize(1);
+		assertThat(capt.getValue().getHeaders("myHeaderName")[0].getValue()).isEqualTo("myHeaderValue1");
+		assertThat(capt.getValue().getHeaders("myHeaderName")[1].getValue()).isEqualTo("myHeaderValue2");
 		idx++;
 
 		response = client
@@ -2673,8 +2662,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.onInstance(new IdType("Patient", "123"))
 			.andReturnBundle(Bundle.class)
 			.execute();
-		assertEquals("http://example.com/fhir/Patient/123/_history", capt.getAllValues().get(idx).getURI().toString());
-		assertEquals(1, response.getEntry().size());
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).isEqualTo("http://example.com/fhir/Patient/123/_history");
+		assertThat(response.getEntry()).hasSize(1);
 		idx++;
 	}
 
@@ -2686,12 +2675,12 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		try {
 			client.meta();
 			fail("");		} catch (IllegalStateException e) {
-			assertEquals("Can not call $meta operations on a DSTU1 client", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Can not call $meta operations on a DSTU1 client");
 		}
 		try {
 			client.operation();
 			fail("");		} catch (IllegalStateException e) {
-			assertEquals("Operations are only supported in FHIR DSTU2 and later. This client was created using a context configured for DSTU1", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Operations are only supported in FHIR DSTU2 and later. This client was created using a context configured for DSTU1");
 		}
 	}
 
@@ -2715,7 +2704,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.andReturnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/page1", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/page1");
 	}
 
 	@Test
@@ -2736,7 +2725,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.usingMethod(PagingHttpMethodEnum.POST)
 			.execute();
 
-		assertEquals("POST", capt.getValue().getMethod());
+		assertThat(capt.getValue().getMethod()).isEqualTo("POST");
 	}
 
 	@Test
@@ -2758,10 +2747,10 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
 
 		client.search().forResource("Patient").where(Patient.NAME.isMissing(true)).returnBundle(Bundle.class).execute();
-		assertEquals("http://example.com/fhir/Patient?name%3Amissing=true", capt.getValue().getRequestLine().getUri());
+		assertThat(capt.getValue().getRequestLine().getUri()).isEqualTo("http://example.com/fhir/Patient?name%3Amissing=true");
 
 		client.search().forResource("Patient").where(Patient.NAME.isMissing(false)).returnBundle(Bundle.class).execute();
-		assertEquals("http://example.com/fhir/Patient?name%3Amissing=false", capt.getValue().getRequestLine().getUri());
+		assertThat(capt.getValue().getRequestLine().getUri()).isEqualTo("http://example.com/fhir/Patient?name%3Amissing=false");
 	}
 
 	@Test
@@ -2789,7 +2778,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		client.operation().onType(MessageHeader.class).named("$process-message").withParameters(parameters).execute();
 
-		assertEquals("http://example.com/fhir/MessageHeader/$process-message", capt.getAllValues().get(count).getURI().toString());
+		assertThat(capt.getAllValues().get(count).getURI().toString()).isEqualTo("http://example.com/fhir/MessageHeader/$process-message");
 		String requestContent = IOUtils.toString(((HttpPost) capt.getAllValues().get(count)).getEntity().getContent(), Charsets.UTF_8);
 		assertThat(requestContent).contains("{\"resourceType\":\"Parameters\"");
 		count++;
@@ -2821,11 +2810,11 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		assertThat(response.getNameFirstRep().getFamily(), StringContains.containsString("Cardinal"));
 
-		assertEquals("http://foo.com/Patient/123/_history/2333", response.getIdElement().getValue());
+		assertThat(response.getIdElement().getValue()).isEqualTo("http://foo.com/Patient/123/_history/2333");
 
 		InstantType lm = response.getMeta().getLastUpdatedElement();
 		lm.setTimeZoneZulu(true);
-		assertEquals("1995-11-15T04:58:08.000Z", lm.getValueAsString());
+		assertThat(lm.getValueAsString()).isEqualTo("1995-11-15T04:58:08.000Z");
 
 	}
 
@@ -2851,27 +2840,27 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		Patient response = client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 		assertThat(response.getNameFirstRep().getFamily(), StringContains.containsString("Cardinal"));
-		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count++).getURI().toString());
+		assertThat(capt.getAllValues().get(count++).getURI().toString()).isEqualTo("http://example.com/fhir/Patient/1234");
 
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 		response = (Patient) client.read().resource("Patient").withId("1234").execute();
 		assertThat(response.getNameFirstRep().getFamily(), StringContains.containsString("Cardinal"));
-		assertEquals("http://example.com/fhir/Patient/1234", capt.getAllValues().get(count++).getURI().toString());
+		assertThat(capt.getAllValues().get(count++).getURI().toString()).isEqualTo("http://example.com/fhir/Patient/1234");
 
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 		response = (Patient) client.read().resource("Patient").withId(567L).execute();
 		assertThat(response.getNameFirstRep().getFamily(), StringContains.containsString("Cardinal"));
-		assertEquals("http://example.com/fhir/Patient/567", capt.getAllValues().get(count++).getURI().toString());
+		assertThat(capt.getAllValues().get(count++).getURI().toString()).isEqualTo("http://example.com/fhir/Patient/567");
 
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 		response = client.read().resource(Patient.class).withIdAndVersion("1234", "22").execute();
 		assertThat(response.getNameFirstRep().getFamily(), StringContains.containsString("Cardinal"));
-		assertEquals("http://example.com/fhir/Patient/1234/_history/22", capt.getAllValues().get(count++).getURI().toString());
+		assertThat(capt.getAllValues().get(count++).getURI().toString()).isEqualTo("http://example.com/fhir/Patient/1234/_history/22");
 
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 		response = client.read().resource(Patient.class).withUrl("http://foo/Patient/22").execute();
 		assertThat(response.getNameFirstRep().getFamily(), StringContains.containsString("Cardinal"));
-		assertEquals("http://foo/Patient/22", capt.getAllValues().get(count++).getURI().toString());
+		assertThat(capt.getAllValues().get(count++).getURI().toString()).isEqualTo("http://foo/Patient/22");
 
 	}
 
@@ -2898,7 +2887,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.withUrl(new IdType("http://somebase.com/path/to/base/Patient/1234"))
 			.execute();
 		assertThat(response.getNameFirstRep().getFamily(), StringContains.containsString("Cardinal"));
-		assertEquals("http://somebase.com/path/to/base/Patient/1234", capt.getAllValues().get(0).getURI().toString());
+		assertThat(capt.getAllValues().get(0).getURI().toString()).isEqualTo("http://somebase.com/path/to/base/Patient/1234");
 
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 		response = client
@@ -2907,7 +2896,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.withUrl(new IdType("http://somebase.com/path/to/base/Patient/1234/_history/222"))
 			.execute();
 		assertThat(response.getNameFirstRep().getFamily(), StringContains.containsString("Cardinal"));
-		assertEquals("http://somebase.com/path/to/base/Patient/1234/_history/222", capt.getAllValues().get(1).getURI().toString());
+		assertThat(capt.getAllValues().get(1).getURI().toString()).isEqualTo("http://somebase.com/path/to/base/Patient/1234/_history/222");
 
 	}
 
@@ -2931,7 +2920,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/?name=james", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/?name=james");
 
 	}
 
@@ -2957,13 +2946,13 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient/_search", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient/_search");
 
 		HttpEntityEnclosingRequestBase enc = (HttpEntityEnclosingRequestBase) capt.getValue();
 		UrlEncodedFormEntity ent = (UrlEncodedFormEntity) enc.getEntity();
 		String string = IOUtils.toString(ent.getContent());
 		ourLog.info(string);
-		assertEquals("name=" + longValue, string);
+		assertThat(string).isEqualTo("name=" + longValue);
 	}
 
 	@Test
@@ -2988,11 +2977,11 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://foo/Patient/123/fooCompartment?birthdate=ge2011-01-02", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://foo/Patient/123/fooCompartment?birthdate=ge2011-01-02");
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 
-		assertEquals("PRP1660", BundleUtil.toListOfResourcesOfType(ourCtx, response, Patient.class).get(0).getIdentifier().get(0).getValue());
+		assertThat(BundleUtil.toListOfResourcesOfType(ourCtx, response, Patient.class).get(0).getIdentifier().get(0).getValue()).isEqualTo("PRP1660");
 
 		try {
 			client
@@ -3030,7 +3019,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://foo/Observation?" + Observation.SP_CODE_VALUE_DATE + "=" + UrlUtil.escapeUrlParam("FOO\\$BAR$2001-01-01"), capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://foo/Observation?" + Observation.SP_CODE_VALUE_DATE + "=" + UrlUtil.escapeUrlParam("FOO\\$BAR$2001-01-01"));
 
 	}
 
@@ -3068,8 +3057,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?birthdate=le2012-01-22&birthdate=gt2011-01-01&_include=Patient%3Aorganization&_sort=birthdate%2C-name%2Caddress&_count=123&_format=json",
-			capt.getAllValues().get(idx++).getURI().toString());
+		assertThat(capt.getAllValues().get(idx++).getURI().toString()).isEqualTo("http://example.com/fhir/Patient?birthdate=le2012-01-22&birthdate=gt2011-01-01&_include=Patient%3Aorganization&_sort=birthdate%2C-name%2Caddress&_count=123&_format=json");
 
 		response = client.search()
 			.forResource(Patient.class)
@@ -3084,8 +3072,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?birthdate=le2012-01-22&birthdate=gt2011-01-01&_include=Patient%3Aorganization&_sort=birthdate%2C-name%2Caddress&_count=123&_format=json",
-			capt.getAllValues().get(idx++).getURI().toString());
+		assertThat(capt.getAllValues().get(idx++).getURI().toString()).isEqualTo("http://example.com/fhir/Patient?birthdate=le2012-01-22&birthdate=gt2011-01-01&_include=Patient%3Aorganization&_sort=birthdate%2C-name%2Caddress&_count=123&_format=json");
 
 		response = client.search()
 			.forResource(Patient.class)
@@ -3096,7 +3083,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.execute();
 
 		String comma = "%2C";
-		assertEquals("http://example.com/fhir/Patient?birthdate=le2012-01-22" + comma + "gt2020-01-01&birthdate=gt2011-01-01&_format=json", capt.getAllValues().get(idx++).getURI().toString());
+		assertThat(capt.getAllValues().get(idx++).getURI().toString()).isEqualTo("http://example.com/fhir/Patient?birthdate=le2012-01-22" + comma + "gt2020-01-01&birthdate=gt2011-01-01&_format=json");
 	}
 
 	@SuppressWarnings("unused")
@@ -3119,7 +3106,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Observation?value-quantity=gt123%7Cfoo%7Cbar", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Observation?value-quantity=gt123%7Cfoo%7Cbar");
 	}
 
 	@SuppressWarnings("unused")
@@ -3143,7 +3130,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?_profile=http%3A%2F%2F1&_profile=http%3A%2F%2F2", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient?_profile=http%3A%2F%2F1&_profile=http%3A%2F%2F2");
 
 	}
 
@@ -3167,7 +3154,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?length=123%7C%7C", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient?length=123%7C%7C");
 
 	}
 
@@ -3191,7 +3178,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?general-practitioner.name=ORG0", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient?general-practitioner.name=ORG0");
 
 	}
 
@@ -3215,7 +3202,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?general-practitioner=123", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient?general-practitioner=123");
 
 	}
 
@@ -3240,7 +3227,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?_security=urn%3Afoo%7C123&_security=urn%3Abar%7C456", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient?_security=urn%3Afoo%7C123&_security=urn%3Abar%7C456");
 
 	}
 
@@ -3264,7 +3251,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?name=james", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient?name=james");
 
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 		response = client.search()
@@ -3273,7 +3260,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?name=" + UrlUtil.escapeUrlParam("AAA,BBB,C\\,C"), capt.getAllValues().get(1).getURI().toString());
+		assertThat(capt.getAllValues().get(1).getURI().toString()).isEqualTo("http://example.com/fhir/Patient?name=" + UrlUtil.escapeUrlParam("AAA,BBB,C\\,C"));
 
 	}
 
@@ -3296,28 +3283,28 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.where(Patient.NAME.contains().value("FOO"))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals("http://example.com/fhir/Patient?name%3Acontains=FOO", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient?name%3Acontains=FOO");
 
 		response = client.search()
 			.forResource("Patient")
 			.where(Patient.NAME.contains().values("FOO", "BAR"))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals("http://example.com/fhir/Patient?name%3Acontains=FOO%2CBAR", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient?name%3Acontains=FOO%2CBAR");
 
 		response = client.search()
 			.forResource("Patient")
 			.where(Patient.NAME.contains().values(Arrays.asList("FOO", "BAR")))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals("http://example.com/fhir/Patient?name%3Acontains=FOO%2CBAR", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient?name%3Acontains=FOO%2CBAR");
 
 		response = client.search()
 			.forResource("Patient")
 			.where(Patient.NAME.contains().value(new StringType("FOO")))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals("http://example.com/fhir/Patient?name%3Acontains=FOO", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient?name%3Acontains=FOO");
 	}
 
 	@SuppressWarnings("unused")
@@ -3340,7 +3327,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?name%3Aexact=james", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient?name%3Aexact=james");
 
 	}
 
@@ -3366,8 +3353,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?_tag=urn%3Afoo%7C123&_tag=urn%3Abar%7C456", capt.getValue().getURI().toString());
-		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient?_tag=urn%3Afoo%7C123&_tag=urn%3Abar%7C456");
+		assertThat(capt.getValue().getFirstHeader("myHeaderName").getValue()).isEqualTo("myHeaderValue");
 
 	}
 
@@ -3392,8 +3379,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?identifier=http%3A%2F%2Fexample.com%2Ffhir%7CZZZ", capt.getValue().getURI().toString());
-		assertEquals("myHeaderValue", capt.getValue().getFirstHeader("myHeaderName").getValue());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient?identifier=http%3A%2F%2Fexample.com%2Ffhir%7CZZZ");
+		assertThat(capt.getValue().getFirstHeader("myHeaderName").getValue()).isEqualTo("myHeaderValue");
 
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 		response = client.search()
@@ -3402,7 +3389,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?identifier=ZZZ", capt.getAllValues().get(1).getURI().toString());
+		assertThat(capt.getAllValues().get(1).getURI().toString()).isEqualTo("http://example.com/fhir/Patient?identifier=ZZZ");
 
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(msg), StandardCharsets.UTF_8));
 		response = client.search()
@@ -3411,7 +3398,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?identifier=" + UrlUtil.escapeUrlParam("A|B,C|D"), capt.getAllValues().get(2).getURI().toString());
+		assertThat(capt.getAllValues().get(2).getURI().toString()).isEqualTo("http://example.com/fhir/Patient?identifier=" + UrlUtil.escapeUrlParam("A|B,C|D"));
 
 	}
 
@@ -3446,8 +3433,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		String wantValue = "1|2";
 		String url = capt.getAllValues().get(index).getURI().toString();
 		assertThat(url).startsWith(wantPrefix);
-		assertEquals(wantValue, UrlUtil.unescape(url.substring(wantPrefix.length())));
-		assertEquals(UrlUtil.escapeUrlParam(wantValue), url.substring(wantPrefix.length()));
+		assertThat(UrlUtil.unescape(url.substring(wantPrefix.length()))).isEqualTo(wantValue);
+		assertThat(url.substring(wantPrefix.length())).isEqualTo(UrlUtil.escapeUrlParam(wantValue));
 		index++;
 
 		response = client.search()
@@ -3458,8 +3445,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		wantValue = "1\\,2|3\\,4";
 		url = capt.getAllValues().get(index).getURI().toString();
 		assertThat(url).startsWith(wantPrefix);
-		assertEquals(wantValue, UrlUtil.unescape(url.substring(wantPrefix.length())));
-		assertEquals(UrlUtil.escapeUrlParam(wantValue), url.substring(wantPrefix.length()));
+		assertThat(UrlUtil.unescape(url.substring(wantPrefix.length()))).isEqualTo(wantValue);
+		assertThat(url.substring(wantPrefix.length())).isEqualTo(UrlUtil.escapeUrlParam(wantValue));
 		index++;
 	}
 
@@ -3489,21 +3476,21 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.where(Patient.IDENTIFIER.hasSystemWithAnyCode("urn:foo"))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals("http://example.com/fhir/Patient?identifier=urn%3Afoo%7C", capt.getAllValues().get(idx++).getURI().toString());
+		assertThat(capt.getAllValues().get(idx++).getURI().toString()).isEqualTo("http://example.com/fhir/Patient?identifier=urn%3Afoo%7C");
 
 		response = client.search()
 			.forResource("Patient")
 			.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:foo", null))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals("http://example.com/fhir/Patient?identifier=urn%3Afoo%7C", capt.getAllValues().get(idx++).getURI().toString());
+		assertThat(capt.getAllValues().get(idx++).getURI().toString()).isEqualTo("http://example.com/fhir/Patient?identifier=urn%3Afoo%7C");
 
 		response = client.search()
 			.forResource("Patient")
 			.where(Patient.IDENTIFIER.exactly().systemAndCode("urn:foo", ""))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals("http://example.com/fhir/Patient?identifier=urn%3Afoo%7C", capt.getAllValues().get(idx++).getURI().toString());
+		assertThat(capt.getAllValues().get(idx++).getURI().toString()).isEqualTo("http://example.com/fhir/Patient?identifier=urn%3Afoo%7C");
 	}
 
 	@SuppressWarnings("unused")
@@ -3556,7 +3543,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient/_search?name=james", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient/_search?name=james");
 	}
 
 	@SuppressWarnings("unused")
@@ -3580,13 +3567,13 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient/_search", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient/_search");
 
 		HttpEntityEnclosingRequestBase enc = (HttpEntityEnclosingRequestBase) capt.getValue();
 		UrlEncodedFormEntity ent = (UrlEncodedFormEntity) enc.getEntity();
 		String string = IOUtils.toString(ent.getContent());
 		ourLog.info(string);
-		assertEquals("name=james", string);
+		assertThat(string).isEqualTo("name=james");
 	}
 
 	@Test
@@ -3608,7 +3595,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(1, response.getEntry().size());
+		assertThat(response.getEntry()).hasSize(1);
 	}
 
 	@SuppressWarnings("unused")
@@ -3632,7 +3619,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?_format=json&_pretty=true", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient?_format=json&_pretty=true");
 
 	}
 
@@ -3660,7 +3647,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.execute();
 
 		assertThat(capt.getValue().getURI().toString()).contains("%3A");
-		assertEquals("http://example.com/fhir/Patient?name=NE\\,NE,NE\\,NE&name=NE\\\\NE&name:exact=E\\$E&name:exact=E\\|E", UrlUtil.unescape(capt.getValue().getURI().toString()));
+		assertThat(UrlUtil.unescape(capt.getValue().getURI().toString())).isEqualTo("http://example.com/fhir/Patient?name=NE\\,NE,NE\\,NE&name=NE\\\\NE&name:exact=E\\$E&name:exact=E\\|E");
 	}
 
 	@SuppressWarnings("unused")
@@ -3684,8 +3671,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 				.returnBundle(Bundle.class)
 				.execute();
 			fail("");		} catch (InternalErrorException e) {
-			assertEquals(e.getMessage(), "HTTP 500 INTERNAL ERRORS: Server Issues!");
-			assertEquals(e.getResponseBody(), "Server Issues!");
+			assertThat("HTTP 500 INTERNAL ERRORS: Server Issues!").isEqualTo(e.getMessage());
+			assertThat("Server Issues!").isEqualTo(e.getResponseBody());
 		}
 
 	}
@@ -3733,7 +3720,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Patient?_revinclude=Provenance%3Atarget&_format=json", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient?_revinclude=Provenance%3Atarget&_format=json");
 
 	}
 
@@ -3764,7 +3751,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.resource(Patient.class)
 			.withId(new IdType("Patient/1234"))
 			.execute();
-		assertEquals("http://example.com/fhir/Patient/1234?_format=json", capt.getAllValues().get(count).getURI().toString());
+		assertThat(capt.getAllValues().get(count).getURI().toString()).isEqualTo("http://example.com/fhir/Patient/1234?_format=json");
 		count++;
 
 	}
@@ -3788,9 +3775,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.withBundle(input)
 			.execute();
 
-		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
-		assertEquals(input.getEntry().get(0).getResource().getId(), response.getEntry().get(0).getResource().getId());
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir");
+		assertThat(response.getEntry().get(0).getResource().getId()).isEqualTo(input.getEntry().get(0).getResource().getId());
+		assertThat(capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).isEqualTo(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 
 	}
 
@@ -3814,9 +3801,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.encodedXml()
 			.execute();
 
-		assertEquals("http://example.com/fhir", capt.getValue().getURI().toString());
-		assertEquals(input.getEntry().get(0).getResource().getId(), response.getEntry().get(0).getResource().getId());
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir");
+		assertThat(response.getEntry().get(0).getResource().getId()).isEqualTo(input.getEntry().get(0).getResource().getId());
+		assertThat(capt.getAllValues().get(0).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 
 	}
 
@@ -3842,41 +3829,41 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			// should happen because no ID set
 		}
 
-		assertEquals(0, capt.getAllValues().size());
+		assertThat(capt.getAllValues()).isEmpty();
 
 		p1.setId("44");
 		client.update().resource(p1).execute();
 
 		int count = 0;
 
-		assertEquals(1, capt.getAllValues().size());
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(capt.getAllValues()).hasSize(1);
+		assertThat(capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length).isEqualTo(1);
+		assertThat(capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).isEqualTo(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		count++;
 
 		MethodOutcome outcome = client.update().resource(p1).execute();
-		assertEquals("44", outcome.getId().getIdPart());
-		assertEquals("22", outcome.getId().getVersionIdPart());
+		assertThat(outcome.getId().getIdPart()).isEqualTo("44");
+		assertThat(outcome.getId().getVersionIdPart()).isEqualTo("22");
 
-		assertEquals(2, capt.getAllValues().size());
+		assertThat(capt.getAllValues()).hasSize(2);
 
-		assertEquals("http://example.com/fhir/Patient/44", capt.getValue().getURI().toString());
-		assertEquals("PUT", capt.getValue().getMethod());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient/44");
+		assertThat(capt.getValue().getMethod()).isEqualTo("PUT");
 
 		/*
 		 * Try fluent options
 		 */
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), StandardCharsets.UTF_8));
 		client.update().resource(p1).withId("123").execute();
-		assertEquals(3, capt.getAllValues().size());
-		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(2).getURI().toString());
+		assertThat(capt.getAllValues()).hasSize(3);
+		assertThat(capt.getAllValues().get(2).getURI().toString()).isEqualTo("http://example.com/fhir/Patient/123");
 
 		String resourceText = "<Patient xmlns=\"http://hl7.org/fhir\">    </Patient>";
 		when(myHttpResponse.getEntity().getContent()).thenReturn(new ReaderInputStream(new StringReader(""), StandardCharsets.UTF_8));
 		client.update().resource(resourceText).withId("123").execute();
-		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(3).getURI().toString());
-		assertEquals(resourceText, IOUtils.toString(((HttpPut) capt.getAllValues().get(3)).getEntity().getContent()));
-		assertEquals(4, capt.getAllValues().size());
+		assertThat(capt.getAllValues().get(3).getURI().toString()).isEqualTo("http://example.com/fhir/Patient/123");
+		assertThat(IOUtils.toString(((HttpPut) capt.getAllValues().get(3)).getEntity().getContent())).isEqualTo(resourceText);
+		assertThat(capt.getAllValues()).hasSize(4);
 
 	}
 
@@ -3898,14 +3885,14 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		int count = 0;
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).withId("1").execute();
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length).isEqualTo(1);
+		assertThat(capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(extractBody(capt, count)).contains("value=\"John\"");
 		count++;
 
 		client.update().resource(ourCtx.newJsonParser().encodeResourceToString(p1)).withId("1").execute();
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length).isEqualTo(1);
+		assertThat(capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).isEqualTo(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(extractBody(capt, count)).contains("[\"John\"]");
 		count++;
 
@@ -3914,14 +3901,14 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		 */
 
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).withId("1").encodedJson().execute();
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length).isEqualTo(1);
+		assertThat(capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).isEqualTo(EncodingEnum.JSON.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(extractBody(capt, count)).contains("[\"John\"]");
 		count++;
 
 		client.update().resource(ourCtx.newJsonParser().encodeResourceToString(p1)).withId("1").encodedXml().execute();
-		assertEquals(1, capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length);
-		assertEquals(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8, capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
+		assertThat(capt.getAllValues().get(count).getHeaders(Constants.HEADER_CONTENT_TYPE).length).isEqualTo(1);
+		assertThat(capt.getAllValues().get(count).getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).isEqualTo(EncodingEnum.XML.getResourceContentTypeNonLegacy() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(extractBody(capt, count)).contains("value=\"John\"");
 		count++;
 	}
@@ -3951,7 +3938,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.execute();
 
 		assertThat(response.getNameFirstRep().getFamily(), StringContains.containsString("Cardinal"));
-		assertEquals("http://somebase.com/path/to/base/Patient/1234/_history/2222", capt.getAllValues().get(0).getURI().toString());
+		assertThat(capt.getAllValues().get(0).getURI().toString()).isEqualTo("http://somebase.com/path/to/base/Patient/1234/_history/2222");
 
 	}
 
@@ -3975,9 +3962,9 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		p1.addName().setFamily("Smith").addGiven("John");
 
 		MethodOutcome resp = client.validate(p1);
-		assertEquals("http://example.com/fhir/Patient/$validate", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient/$validate");
 		oo = (OperationOutcome) resp.getOperationOutcome();
-		assertEquals("OOOK", oo.getIssueFirstRep().getDiagnostics());
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo("OOOK");
 
 	}
 

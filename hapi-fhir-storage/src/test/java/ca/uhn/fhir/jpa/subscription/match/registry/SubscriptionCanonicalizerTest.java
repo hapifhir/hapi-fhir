@@ -45,7 +45,7 @@ class SubscriptionCanonicalizerTest {
 
 		CanonicalSubscription canonicalSubscription = testedSC.canonicalize(subscription);
 
-		assertThat(canonicalSubscription.getTags().get("http://foo")).isEqualTo("baz");
+		assertThat(canonicalSubscription.getTags()).containsEntry("http://foo", "baz");
 	}
 
 	@Test
@@ -237,9 +237,9 @@ class SubscriptionCanonicalizerTest {
 	}
 
 	private void verifyStandardSubscriptionParameters(CanonicalSubscription theCanonicalSubscription) {
-		assertThat(theCanonicalSubscription.getTags().size()).isEqualTo(2);
-		assertThat(theCanonicalSubscription.getTags().get("http://a")).isEqualTo("b");
-		assertThat(theCanonicalSubscription.getTags().get("http://d")).isEqualTo("e");
+		assertThat(theCanonicalSubscription.getTags()).hasSize(2);
+		assertThat(theCanonicalSubscription.getTags()).containsEntry("http://a", "b");
+		assertThat(theCanonicalSubscription.getTags()).containsEntry("http://d", "e");
 		assertThat(theCanonicalSubscription.getIdPart()).isEqualTo("testId");
 		assertThat(theCanonicalSubscription.getIdElementString()).isEqualTo("testId");
 	}

@@ -33,7 +33,6 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
@@ -89,7 +88,7 @@ public class BulkGroupExportWithIndexedSearchParametersTest extends BaseJpaTest 
 
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 
-		assertNotNull(startResponse);
+		assertThat(startResponse).isNotNull();
 
 		// Run a scheduled pass to build the export
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());

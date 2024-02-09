@@ -106,7 +106,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		
-		assertThat(output.getEntry().size()).isEqualTo(50);
+		assertThat(output.getEntry()).hasSize(50);
 		List<BundleEntryComponent> bundleEntries = output.getEntry();
 
 		int i=0;
@@ -150,7 +150,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		
-		assertThat(output.getEntry().size()).isEqualTo(50);
+		assertThat(output.getEntry()).hasSize(50);
 		List<BundleEntryComponent> bundleEntries = output.getEntry();
 
 		int i=0;
@@ -183,7 +183,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		
-		assertThat(output.getEntry().size()).isEqualTo(8);
+		assertThat(output.getEntry()).hasSize(8);
 		
 		List<BundleEntryComponent> bundleEntries = output.getEntry();
 
@@ -253,7 +253,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		
-		assertThat(output.getEntry().size()).isEqualTo(7);
+		assertThat(output.getEntry()).hasSize(7);
 		
 		List<BundleEntryComponent> bundleEntries = output.getEntry();
 

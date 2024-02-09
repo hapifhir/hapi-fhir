@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchWithServerAddressStrategyDstu3Test {
 
@@ -46,7 +45,7 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent).contains("<given value=\"FAMILY\"");
 		assertThat(responseContent).contains("<fullUrl value=\"" + ourServer.getBaseUrl() + "/Patient/1\"/>");
 	}
@@ -60,7 +59,7 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent).contains("<given value=\"FAMILY\"");
 		assertThat(responseContent).contains("<fullUrl value=\"" + ourServer.getBaseUrl() + "/Patient/1\"/>");
 		
@@ -71,7 +70,7 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent).contains("<given value=\"FAMILY\"");
 		assertThat(responseContent).contains("<fullUrl value=\"http://foo.com/Patient/1\"/>");
 
@@ -82,7 +81,7 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent).contains("<given value=\"FAMILY\"");
 		assertThat(responseContent).contains("<fullUrl value=\"https://foo.com/Patient/1\"/>");
 
@@ -94,7 +93,7 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent).contains("<given value=\"FAMILY\"");
 		assertThat(responseContent).contains("<fullUrl value=\"https://foo.com/Patient/1\"/>");
 
@@ -109,7 +108,7 @@ public class SearchWithServerAddressStrategyDstu3Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent).contains("<given value=\"FAMILY\"");
 		assertThat(responseContent).contains("<fullUrl value=\"http://example.com/fhir/base/Patient/1\"/>");
 	}

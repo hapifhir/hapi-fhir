@@ -62,7 +62,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 		ourLog.info("Output:{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 
 		List<Parameters.ParametersParameterComponent> sections = outcome.getParameters("MissingIndexes");
-		assertThat(sections.size()).isEqualTo(1);
+		assertThat(sections).hasSize(1);
 
 		List<String> indexInstances = sections
 			.get(0)
@@ -346,7 +346,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 	@Nonnull
 	private static List<Parameters.ParametersParameterComponent> findIndexes(Parameters theResponse, String theParamName, int theExpectedSize, String theSectionName) {
 		List<Parameters.ParametersParameterComponent> indexes = theResponse.getParameters(theSectionName);
-		assertThat(indexes.size()).isEqualTo(1);
+		assertThat(indexes).hasSize(1);
 
 		List<Parameters.ParametersParameterComponent> indexInstances = indexes
 			.get(0)
@@ -355,7 +355,7 @@ public class InstanceReindexServiceImplR5Test extends BaseJpaR5Test {
 			.filter(t -> t.getName().equals(theParamName))
 			.toList();
 
-		assertThat(indexInstances.size()).isEqualTo(theExpectedSize);
+		assertThat(indexInstances).hasSize(theExpectedSize);
 		return indexInstances;
 	}
 

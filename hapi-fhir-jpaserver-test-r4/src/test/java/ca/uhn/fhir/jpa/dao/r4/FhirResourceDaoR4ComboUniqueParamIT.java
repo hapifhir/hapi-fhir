@@ -676,7 +676,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		myStorageSettings.setReindexThreadCount(1);
 
 		List<RuntimeSearchParam> uniqueSearchParams = mySearchParamRegistry.getActiveComboSearchParams("Observation");
-		assertThat(uniqueSearchParams.size()).isEqualTo(0);
+		assertThat(uniqueSearchParams).isEmpty();
 
 		Patient pt1 = new Patient();
 		pt1.setActive(true);
@@ -705,8 +705,8 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		createUniqueObservationSubjectDateCode();
 
 		uniqueSearchParams = mySearchParamRegistry.getActiveComboSearchParams("Observation");
-		assertThat(uniqueSearchParams.size()).isEqualTo(1);
-		assertThat(uniqueSearchParams.get(0).getComponents().size()).isEqualTo(3);
+		assertThat(uniqueSearchParams).hasSize(1);
+		assertThat(uniqueSearchParams.get(0).getComponents()).hasSize(3);
 
 		executeReindex();
 
@@ -719,7 +719,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 			myResourceIndexedCompositeStringUniqueDao.deleteAll();
 		});
 
-		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Observation").size()).isEqualTo(1);
+		assertThat(mySearchParamRegistry.getActiveComboSearchParams("Observation")).hasSize(1);
 
 		executeReindex();
 
@@ -1271,7 +1271,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
 		Collections.sort(uniques);
 
-		assertThat(uniques.size()).isEqualTo(3);
+		assertThat(uniques).hasSize(3);
 		assertThat(uniques.get(0).getResource().getIdDt().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/" + id1.getIdPart());
 		assertThat(uniques.get(0).getIndexString()).isEqualTo("Patient?name=FAMILY1&organization=Organization%2FORG");
 
@@ -1519,9 +1519,9 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		createUniqueBirthdateAndGenderSps();
 		List<RuntimeSearchParam> params = mySearchParamRegistry.getActiveComboSearchParams("Patient");
 
-		assertThat(params.size()).isEqualTo(1);
+		assertThat(params).hasSize(1);
 		assertThat(params.get(0).getComboSearchParamType()).isEqualTo(ComboSearchParamType.UNIQUE);
-		assertThat(params.get(0).getComponents().size()).isEqualTo(2);
+		assertThat(params.get(0).getComponents()).hasSize(2);
 
 		// Should be alphabetical order
 		List<RuntimeSearchParam> compositeParams = JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, params.get(0));

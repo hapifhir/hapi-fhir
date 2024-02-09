@@ -127,7 +127,7 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 
 	private Patient getGoldenFor(Patient thePatient) {
 		Optional<? extends IMdmLink> patientALink = myMdmLinkDaoSvc.findMdmLinkBySource(thePatient);
-		assertThat(patientALink.isPresent()).isTrue();
+		assertThat(patientALink).isPresent();
 		Patient golden = (Patient) myMdmResourceDaoSvc.readGoldenResourceByPid(patientALink.get().getGoldenResourcePersistenceId(), "Patient");
 		assertThat(golden).isNotNull();
 		return golden;

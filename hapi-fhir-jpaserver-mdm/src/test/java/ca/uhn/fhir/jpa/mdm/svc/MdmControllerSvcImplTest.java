@@ -152,7 +152,7 @@ public class MdmControllerSvcImplTest extends BaseLinkR4Test {
 			new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(1)), null);
 		myCaptureQueriesListener.logSelectQueries();
 
-		assertThat(resultPage.getContent().size()).isEqualTo(1);
+		assertThat(resultPage.getContent()).hasSize(1);
 		assertThat(resultPage.getContent().get(0).getSourceId()).isEqualTo(patient.getIdElement().getResourceType() + "/" + patient.getIdElement().getIdPart());
 
 		Mockito.verify(myRequestPartitionHelperSvc, Mockito.atLeastOnce()).validateHasPartitionPermissions(any(), eq("Patient"), argThat(new PartitionIdMatcher(requestPartitionId)));

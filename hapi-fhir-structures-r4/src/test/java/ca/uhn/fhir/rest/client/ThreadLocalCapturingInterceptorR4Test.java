@@ -35,7 +35,7 @@ import java.io.InputStream;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
@@ -116,9 +116,9 @@ public class ThreadLocalCapturingInterceptorR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals("http://example.com/fhir/Device?_format=json", interceptor.getRequestForCurrentThread().getUri());
-		assertEquals(200, interceptor.getResponseForCurrentThread().getStatus());
-		assertEquals(msg, IOUtils.toString(interceptor.getResponseForCurrentThread().createReader()));
+		assertThat(interceptor.getRequestForCurrentThread().getUri()).isEqualTo("http://example.com/fhir/Device?_format=json");
+		assertThat(interceptor.getResponseForCurrentThread().getStatus()).isEqualTo(200);
+		assertThat(IOUtils.toString(interceptor.getResponseForCurrentThread().createReader())).isEqualTo(msg);
 	}
 
 
@@ -154,9 +154,9 @@ public class ThreadLocalCapturingInterceptorR4Test {
 			// good
 		}
 
-		assertEquals("http://example.com/fhir/Device?_format=json", interceptor.getRequestForCurrentThread().getUri());
-		assertEquals(400, interceptor.getResponseForCurrentThread().getStatus());
-		assertEquals(msg, IOUtils.toString(interceptor.getResponseForCurrentThread().createReader()));
+		assertThat(interceptor.getRequestForCurrentThread().getUri()).isEqualTo("http://example.com/fhir/Device?_format=json");
+		assertThat(interceptor.getResponseForCurrentThread().getStatus()).isEqualTo(400);
+		assertThat(IOUtils.toString(interceptor.getResponseForCurrentThread().createReader())).isEqualTo(msg);
 	}
 
 

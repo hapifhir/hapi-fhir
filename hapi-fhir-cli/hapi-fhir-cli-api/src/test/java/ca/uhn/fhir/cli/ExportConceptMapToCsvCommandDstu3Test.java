@@ -22,8 +22,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ExportConceptMapToCsvCommandDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExportConceptMapToCsvCommandDstu3Test.class);
@@ -97,7 +97,7 @@ public class ExportConceptMapToCsvCommandDstu3Test {
 
 		ourLog.info("Going to read file: {}", FILE);
 		String result = IOUtils.toString(new FileInputStream(FILE), Charsets.UTF_8);
-		assertEquals(expected, result);
+		assertThat(result).isEqualTo(expected);
 
 		FileUtils.deleteQuietly(new File(FILE));
 	}

@@ -38,8 +38,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class GraphQLR4RawTest {
 
@@ -74,12 +72,12 @@ public class GraphQLR4RawTest {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertEquals("{\"foo\"}", responseContent);
+			assertThat(responseContent).isEqualTo("{\"foo\"}");
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
-			assertEquals("Patient/123", ourLastId.getValue());
-			assertEquals("{name{family,given}}", ourLastQuery);
+			assertThat(ourLastId.getValue()).isEqualTo("Patient/123");
+			assertThat(ourLastQuery).isEqualTo("{name{family,given}}");
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -97,7 +95,7 @@ public class GraphQLR4RawTest {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(404, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
 			assertThat(responseContent).contains("Unknown resource type");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -119,12 +117,12 @@ public class GraphQLR4RawTest {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertEquals("{\"foo\"}", responseContent);
+			assertThat(responseContent).isEqualTo("{\"foo\"}");
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
-			assertEquals("Patient/123", ourLastId.getValue());
-			assertEquals("{name{family,given}}", ourLastQuery);
+			assertThat(ourLastId.getValue()).isEqualTo("Patient/123");
+			assertThat(ourLastQuery).isEqualTo("{name{family,given}}");
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -146,13 +144,13 @@ public class GraphQLR4RawTest {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertEquals("{\"foo\"}", responseContent);
+			assertThat(responseContent).isEqualTo("{\"foo\"}");
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
-			assertEquals("Patient/123", ourLastId.getValue());
-			assertEquals("{name{family,given}}", ourLastQuery);
-			assertEquals("Patient", ourLastResourceType);
+			assertThat(ourLastId.getValue()).isEqualTo("Patient/123");
+			assertThat(ourLastQuery).isEqualTo("{name{family,given}}");
+			assertThat(ourLastResourceType).isEqualTo("Patient");
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -174,13 +172,13 @@ public class GraphQLR4RawTest {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertEquals("{\"foo\"}", responseContent);
+			assertThat(responseContent).isEqualTo("{\"foo\"}");
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
-			assertNull(ourLastId);
-			assertNull(ourLastResourceType);
-			assertEquals("{PatientList(date: \"2022\") {name{family,given}}}", ourLastQuery);
+			assertThat(ourLastId).isNull();
+			assertThat(ourLastResourceType).isNull();
+			assertThat(ourLastQuery).isEqualTo("{PatientList(date: \"2022\") {name{family,given}}}");
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -199,12 +197,12 @@ public class GraphQLR4RawTest {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertEquals("{\"foo\"}", responseContent);
+			assertThat(responseContent).isEqualTo("{\"foo\"}");
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
-			assertEquals(null, ourLastId);
-			assertEquals("{name{family,given}}", ourLastQuery);
+			assertThat(ourLastId).isEqualTo(null);
+			assertThat(ourLastQuery).isEqualTo("{name{family,given}}");
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());

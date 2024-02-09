@@ -172,7 +172,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		myPatientDao.create(p2, mySrd);
 
 		List<JpaPid> ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2AAA")), null);
-		assertThat(ids.size()).isEqualTo(1);
+		assertThat(ids).hasSize(1);
 		assertThat(JpaPid.toLongList(ids)).containsExactly(p1id.getIdPartAsLong());
 
 		// Update the name
@@ -181,10 +181,10 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		IIdType p1id2 = update2.getId();
 
 		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2AAA")), null);
-		assertThat(ids.size()).isEqualTo(0);
+		assertThat(ids).isEmpty();
 
 		ids = myPatientDao.searchForIds(new SearchParameterMap(Patient.SP_GIVEN, new StringDt("testUpdateMaintainsSearchParamsDstu2BBB")), null);
-		assertThat(ids.size()).isEqualTo(2);
+		assertThat(ids).hasSize(2);
 
 		// Make sure vreads work
 		p1 = myPatientDao.read(p1id, mySrd);
@@ -243,7 +243,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
 			List<IdDt> tl = ResourceMetadataKeyEnum.PROFILES.get(patient);
-			assertThat(tl.size()).isEqualTo(1);
+			assertThat(tl).hasSize(1);
 			assertThat(tl.get(0).getValue()).isEqualTo("http://foo/bar");
 		}
 
@@ -268,7 +268,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
 			List<IdDt> tl = ResourceMetadataKeyEnum.PROFILES.get(patient);
-			assertThat(tl.size()).isEqualTo(1);
+			assertThat(tl).hasSize(1);
 			assertThat(tl.get(0).getValue()).isEqualTo("http://foo/bar");
 		}
 
@@ -289,7 +289,7 @@ public class FhirResourceDaoDstu2UpdateTest extends BaseJpaDstu2Test {
 		{
 			Patient patient = myPatientDao.read(id, mySrd);
 			List<IdDt> tl = ResourceMetadataKeyEnum.PROFILES.get(patient);
-			assertThat(tl.size()).isEqualTo(1);
+			assertThat(tl).hasSize(1);
 			assertThat(tl.get(0).getValue()).isEqualTo("http://foo/baz");
 		}
 

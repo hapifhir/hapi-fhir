@@ -609,8 +609,8 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		ValueSet valueSet = myValueSetDao.expand(vs, options);
 
 		assertThat(valueSet).isNotNull();
-		assertThat(valueSet.getExpansion().getContains().size()).isEqualTo(1);
-		assertThat(valueSet.getExpansion().getContains().get(0).getContains().size()).isEqualTo(2);
+		assertThat(valueSet.getExpansion().getContains()).hasSize(1);
+		assertThat(valueSet.getExpansion().getContains().get(0).getContains()).hasSize(2);
 	}
 
 

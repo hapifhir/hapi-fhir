@@ -52,7 +52,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		install(namingSystem);
 
-		assertThat(myNamingSystemDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources().size()).isEqualTo(1);
+		assertThat(myNamingSystemDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources()).hasSize(1);
 	}
 
 	@Test
@@ -120,7 +120,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		final List<TermValueSet> all2 = myTermValueSetDao.findAll();
 
-		assertThat(all2.size()).isEqualTo(2);
+		assertThat(all2).hasSize(2);
 
 		final TermValueSet termValueSet1 = all2.get(0);
 		final TermValueSet termValueSet2 = all2.get(1);
@@ -130,7 +130,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		final List<ValueSet> allValueSets = getAllValueSets();
 
-		assertThat(allValueSets.size()).isEqualTo(2);
+		assertThat(allValueSets).hasSize(2);
 
 		final ValueSet actualValueSet1 = allValueSets.get(0);
 
@@ -151,7 +151,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	private List<ValueSet> getAllValueSets() {
 		final List<IBaseResource> allResources = myValueSetDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources();
 
-		assertThat(allResources.isEmpty()).isFalse();
+		assertThat(allResources).isNotEmpty();
 		assertThat(allResources.get(0) instanceof ValueSet).isTrue();
 
 		return allResources.stream()
@@ -163,7 +163,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	private ValueSet getFirstValueSet() {
 		final List<IBaseResource> allResources = myValueSetDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources();
 
-		assertThat(allResources.size()).isEqualTo(1);
+		assertThat(allResources).hasSize(1);
 
 		final IBaseResource resource1 = allResources.get(0);
 		assertThat(resource1 instanceof ValueSet).isTrue();
@@ -175,7 +175,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	private TermValueSet getFirstTermValueSet() {
 		final List<TermValueSet> all2 = myTermValueSetDao.findAll();
 
-		assertThat(all2.size()).isEqualTo(1);
+		assertThat(all2).hasSize(1);
 
 		return all2.get(0);
 	}

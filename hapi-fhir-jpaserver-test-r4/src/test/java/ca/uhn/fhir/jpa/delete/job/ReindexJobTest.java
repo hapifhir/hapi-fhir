@@ -395,7 +395,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		assertThat(myJob.getStatus()).isEqualTo(StatusEnum.COMPLETED);
 		assertThat(myJob.getWarningMessages()).isNotNull();
-		assertThat(myJob.getWarningMessages().contains("Failed to reindex resource because unique search parameter " + searchParameter.getEntity().getIdDt().toVersionless().toString())).isTrue();
+		assertThat(myJob.getWarningMessages()).contains("Failed to reindex resource because unique search parameter " + searchParameter.getEntity().getIdDt().toVersionless().toString());
 	}
 
 	@Test
@@ -457,7 +457,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 	@Test
 	public void testReindex_withReindexingUponSearchParameterChangeEnabled_reindexJobCompleted() {
 		List<JobInstance> jobInstances = myJobPersistence.fetchInstancesByJobDefinitionId(ReindexAppCtx.JOB_REINDEX, 10, 0);
-		assertThat(jobInstances.size()).isEqualTo(0);
+		assertThat(jobInstances).isEmpty();
 
 		// make sure the resources auto-reindex after the search parameter update is enabled
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(true);
@@ -468,7 +468,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// check that reindex job was created
 		jobInstances = myJobPersistence.fetchInstancesByJobDefinitionId(ReindexAppCtx.JOB_REINDEX, 10, 0);
-		assertThat(jobInstances.size()).isEqualTo(1);
+		assertThat(jobInstances).hasSize(1);
 
 		// check that the job is completed (not stuck in QUEUED status)
 		myBatch2JobHelper.awaitJobCompletion(jobInstances.get(0).getInstanceId());

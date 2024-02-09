@@ -215,7 +215,7 @@ public class WorkChunkProcessorTest {
 			runExceptionThrowingTest(new RuntimeException(msg));
 			fail("Expected Exception to be thrown");
 		} catch (JobStepFailedException jobStepFailedException) {
-			assertThat(jobStepFailedException.getMessage().contains(msg)).isTrue();
+			assertThat(jobStepFailedException.getMessage()).contains(msg);
 		}
 	}
 
@@ -264,7 +264,7 @@ public class WorkChunkProcessorTest {
 				processedOutcomeSuccessfully = output.isSuccessful();
 			} catch (JobStepFailedException ex) {
 				ourLog.info("Caught error:", ex);
-				assertThat(ex.getMessage().contains(errorMsg)).isTrue();
+				assertThat(ex.getMessage()).contains(errorMsg);
 				counter++;
 			}
 			/*

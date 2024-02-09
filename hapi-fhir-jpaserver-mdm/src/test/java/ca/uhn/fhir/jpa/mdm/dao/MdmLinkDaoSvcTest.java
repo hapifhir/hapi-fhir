@@ -230,7 +230,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions = myMdmLinkDaoSvc.findMdmLinkHistory(mdmHistorySearchParameters);
 
 		// verify
-		assertThat(actualMdmLinkRevisions.size()).isEqualTo(1);
+		assertThat(actualMdmLinkRevisions).hasSize(1);
 		MdmLink actualMdmLink = actualMdmLinkRevisions.get(0).getMdmLink();
 		assertThat(actualMdmLink.getGoldenResourcePersistenceId().getId().toString()).isEqualTo(goldenPatientId);
 		assertThat(actualMdmLink.getSourcePersistenceId().getId().toString()).isEqualTo(sourcePatientId);
@@ -450,7 +450,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 	private void assertMdmRevisionsEqual(List<MdmLinkWithRevision<MdmLink>> expectedMdmLinkRevisions, List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions) {
 		assertThat(actualMdmLinkRevisions).isNotNull();
 
-		assertThat(actualMdmLinkRevisions.size()).isEqualTo(expectedMdmLinkRevisions.size());
+		assertThat(actualMdmLinkRevisions).hasSize(expectedMdmLinkRevisions.size());
 
 		for (int index = 0; index < expectedMdmLinkRevisions.size(); index++) {
 			final MdmLinkWithRevision<MdmLink> expectedMdmLinkRevision = expectedMdmLinkRevisions.get(index);

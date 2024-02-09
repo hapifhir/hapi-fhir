@@ -58,8 +58,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -106,13 +104,13 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertEquals(2, ((OperationOutcome) result.toOperationOutcome()).getIssue().size());
+		assertThat(((OperationOutcome) result.toOperationOutcome()).getIssue()).hasSize(2);
 		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
 
 		try {
 			parser.parseResource(encoded);
 			fail("");		} catch (DataFormatException e) {
-			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"birthDate\"] Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"birthDate\"] Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"");
 		}
 	}
 
@@ -137,7 +135,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertEquals(2, ((OperationOutcome) result.toOperationOutcome()).getIssue().size());
+		assertThat(((OperationOutcome) result.toOperationOutcome()).getIssue()).hasSize(2);
 		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
 
 	}
@@ -180,7 +178,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
 
 		assertThat(output.getMessages().get(0).getMessage()).contains("None of the codings provided are in the value set 'Marital Status Codes'");
-		assertEquals(ResultSeverityEnum.WARNING, output.getMessages().get(0).getSeverity());
+		assertThat(output.getMessages().get(0).getSeverity()).isEqualTo(ResultSeverityEnum.WARNING);
 	}
 
 	@Test
@@ -195,8 +193,8 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 
 		ValidationResult output = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(0, all.size());
-		assertEquals(0, output.getMessages().size());
+		assertThat(all).isEmpty();
+		assertThat(output.getMessages()).isEmpty();
 	}
 
 	@Test
@@ -217,8 +215,8 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 
 		ValidationResult output = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
-		assertEquals(0, all.size());
-		assertEquals(0, output.getMessages().size());
+		assertThat(all).isEmpty();
+		assertThat(output.getMessages()).isEmpty();
 
 	}
 
@@ -252,7 +250,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 
 		ValidationResult result = validator.validateWithResult(input);
 		// we should get some results, not an exception
-		assertEquals(4, result.getMessages().size());
+		assertThat(result.getMessages()).hasSize(4);
 	}
 
 	@Test
@@ -307,7 +305,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String ooencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(ooencoded);
 
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 	}
 
 	/**
@@ -390,7 +388,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String ooencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(ooencoded);
 
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 
 		assertThat(ooencoded).contains("Unknown extension http://foo");
 	}
@@ -436,7 +434,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(encoded);
 
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 
 		assertThat(messageString).contains("valueReference");
 		assertThat(messageString).doesNotContain("valueResource");
@@ -487,7 +485,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(encoded);
 
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 
 		assertThat(messageString).contains("valueReference");
 		assertThat(messageString).doesNotContain("valueResource");

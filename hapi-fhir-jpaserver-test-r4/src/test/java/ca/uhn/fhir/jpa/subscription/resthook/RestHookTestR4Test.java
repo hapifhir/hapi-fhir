@@ -100,7 +100,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForActivatedSubscriptionCount(1);
 
 		Subscription subscription = mySubscriptionDao.read(id, mySrd);
-		assertThat(subscription.getMeta().getTag().size()).isEqualTo(1);
+		assertThat(subscription.getMeta().getTag()).hasSize(1);
 		assertThat(subscription.getMeta().getTag().get(0).getCode()).isEqualTo("DATABASE");
 
 		mySubscriptionDao.delete(id, mySrd);
@@ -111,7 +111,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForActivatedSubscriptionCount(1);
 
 		subscription = mySubscriptionDao.read(id, mySrd);
-		assertThat(subscription.getMeta().getTag().size()).isEqualTo(1);
+		assertThat(subscription.getMeta().getTag()).hasSize(1);
 		assertThat(subscription.getMeta().getTag().get(0).getCode()).isEqualTo("IN_MEMORY");
 	}
 
@@ -720,8 +720,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		ourObservationProvider.waitForUpdateCount(5);
 
 		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
-		assertThat(observation1.getId().isEmpty()).isFalse();
-		assertThat(observation2.getId().isEmpty()).isFalse();
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	@Test
@@ -800,8 +800,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		ourObservationProvider.waitForUpdateCount(5);
 
 		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
-		assertThat(observation1.getId().isEmpty()).isFalse();
-		assertThat(observation2.getId().isEmpty()).isFalse();
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	@Test
@@ -874,8 +874,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		ourObservationProvider.waitForUpdateCount(5);
 
 		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
-		assertThat(observation1.getId().isEmpty()).isFalse();
-		assertThat(observation2.getId().isEmpty()).isFalse();
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	@Test
@@ -1296,7 +1296,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			ourTransactionProvider.waitForTransactionCount(1);
 
 			Bundle xact = ourTransactionProvider.getTransactions().get(0);
-			assertThat(xact.getEntry().size()).isEqualTo(2);
+			assertThat(xact.getEntry()).hasSize(2);
 		}
 
 	}
@@ -1309,9 +1309,9 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		Bundle bundle = createAndDispatchTopicSubscription(payloadContent);
 
 		// verify Bundle size
-		assertThat(bundle.getEntry().size()).isEqualTo(1);
+		assertThat(bundle.getEntry()).hasSize(1);
 		List<Resource> resources = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Resource.class);
-		assertThat(resources.size()).isEqualTo(1);
+		assertThat(resources).hasSize(1);
 
 		// verify SubscriptionStatus.notificationEvent.focus
 		Optional<Parameters.ParametersParameterComponent> focus = getNotificationEventFocus(resources);
@@ -1326,13 +1326,13 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		Bundle bundle = createAndDispatchTopicSubscription(payloadContent);
 
 		// verify Bundle size
-		assertThat(bundle.getEntry().size()).isEqualTo(2);
+		assertThat(bundle.getEntry()).hasSize(2);
 		List<Resource> resources = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Resource.class);
-		assertThat(resources.size()).isEqualTo(1);
+		assertThat(resources).hasSize(1);
 
 		// verify SubscriptionStatus.notificationEvent.focus
 		Optional<Parameters.ParametersParameterComponent> focus = getNotificationEventFocus(resources);
-		assertThat(focus.isPresent()).isTrue();
+		assertThat(focus).isPresent();
 		assertThat(((Reference) focus.get().getValue()).getReference()).isEqualTo(TEST_PATIENT_ID);
 
 		// verify Patient Entry
@@ -1350,13 +1350,13 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		Bundle bundle = createAndDispatchTopicSubscription(payloadContent);
 
 		// verify Bundle size
-		assertThat(bundle.getEntry().size()).isEqualTo(2);
+		assertThat(bundle.getEntry()).hasSize(2);
 		List<Resource> resources = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Resource.class);
-		assertThat(resources.size()).isEqualTo(2);
+		assertThat(resources).hasSize(2);
 
 		// verify SubscriptionStatus.notificationEvent.focus
 		Optional<Parameters.ParametersParameterComponent> focus = getNotificationEventFocus(resources);
-		assertThat(focus.isPresent()).isTrue();
+		assertThat(focus).isPresent();
 		assertThat(((Reference) focus.get().getValue()).getReference()).isEqualTo(PATIENT_REFERENCE);
 
 		// verify Patient Entry

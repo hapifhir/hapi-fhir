@@ -69,7 +69,7 @@ class JobQuerySvcTest extends BaseBatch2Test {
 
 		// Verify
 
-		assertThat(outcome.size()).isEqualTo(1);
+		assertThat(outcome).hasSize(1);
 
 	}
 

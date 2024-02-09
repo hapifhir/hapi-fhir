@@ -34,7 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SearchPostDstu3Test {
 
@@ -90,14 +90,14 @@ public class SearchPostDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertEquals("search", ourLastMethod);
-			assertEquals(null, ourLastSortSpec);
-			assertEquals(1, ourLastName.getValuesAsQueryTokens().size());
-			assertEquals(1, ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
-			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
+			assertThat(ourLastMethod).isEqualTo("search");
+			assertThat(ourLastSortSpec).isEqualTo(null);
+			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
+			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
+			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
+			assertThat(status.getEntity().getContentType().getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -121,14 +121,14 @@ public class SearchPostDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertEquals("search", ourLastMethod);
-			assertEquals(null, ourLastSortSpec);
-			assertEquals(1, ourLastName.getValuesAsQueryTokens().size());
-			assertEquals(1, ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
-			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals(Constants.CT_FHIR_XML_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
+			assertThat(ourLastMethod).isEqualTo("search");
+			assertThat(ourLastSortSpec).isEqualTo(null);
+			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
+			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
+			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
+			assertThat(status.getEntity().getContentType().getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_XML_NEW);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -154,14 +154,14 @@ public class SearchPostDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertEquals("search", ourLastMethod);
-			assertEquals(null, ourLastSortSpec);
-			assertEquals(1, ourLastName.getValuesAsQueryTokens().size());
-			assertEquals(1, ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
-			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
+			assertThat(ourLastMethod).isEqualTo("search");
+			assertThat(ourLastSortSpec).isEqualTo(null);
+			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
+			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
+			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
+			assertThat(status.getEntity().getContentType().getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -187,14 +187,14 @@ public class SearchPostDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertEquals("search", ourLastMethod);
-			assertEquals(null, ourLastSortSpec);
-			assertEquals(1, ourLastName.getValuesAsQueryTokens().size());
-			assertEquals(1, ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().size());
-			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals(Constants.CT_FHIR_XML_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
+			assertThat(ourLastMethod).isEqualTo("search");
+			assertThat(ourLastSortSpec).isEqualTo(null);
+			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
+			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
+			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
+			assertThat(status.getEntity().getContentType().getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_XML_NEW);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}

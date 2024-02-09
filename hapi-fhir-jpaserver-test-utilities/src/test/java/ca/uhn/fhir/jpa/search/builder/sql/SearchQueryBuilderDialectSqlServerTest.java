@@ -27,7 +27,7 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		assertThat(sql.endsWith("ORDER BY -t1.SP_VALUE_LOW DESC offset 0 rows fetch first ? rows only")).as(sql).isTrue();
 
 		assertThat(StringUtils.countMatches(sql, "?")).isEqualTo(3);
-		assertThat(generatedSql.getBindVariables().size()).isEqualTo(3);
+		assertThat(generatedSql.getBindVariables()).hasSize(3);
 	}
 
 	@Nonnull
@@ -49,7 +49,7 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		assertThat(sql.endsWith("order by @@version offset ? rows fetch next ? rows only")).as(sql).isTrue();
 
 		assertThat(StringUtils.countMatches(sql, "?")).isEqualTo(3);
-		assertThat(generatedSql.getBindVariables().size()).isEqualTo(3);
+		assertThat(generatedSql.getBindVariables()).hasSize(3);
 	}
 
 	@Test
@@ -65,7 +65,7 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		assertThat(sql.endsWith("order by @@version offset 0 rows fetch first ? rows only")).as(sql).isTrue();
 
 		assertThat(StringUtils.countMatches(sql, "?")).isEqualTo(2);
-		assertThat(generatedSql.getBindVariables().size()).isEqualTo(2);
+		assertThat(generatedSql.getBindVariables()).hasSize(2);
 	}
 
 	@Nonnull

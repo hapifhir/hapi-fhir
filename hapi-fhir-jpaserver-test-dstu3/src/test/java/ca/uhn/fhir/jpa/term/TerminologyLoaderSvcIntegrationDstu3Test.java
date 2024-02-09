@@ -157,20 +157,20 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
 		Optional<Coding> propertyValue = findProperty(parameters, "SCALE_TYP");
-		assertThat(propertyValue.isPresent()).isTrue();
+		assertThat(propertyValue).isPresent();
 		assertThat(propertyValue.get().getSystem()).isEqualTo(ITermLoaderSvc.LOINC_URI);
 		assertThat(propertyValue.get().getCode()).isEqualTo("LP7753-9");
 		assertThat(propertyValue.get().getDisplay()).isEqualTo("Qn");
 
 		propertyValue = findProperty(parameters, "COMPONENT");
-		assertThat(propertyValue.isPresent()).isTrue();
+		assertThat(propertyValue).isPresent();
 
 		Optional<StringType> propertyValueString = findProperty(parameters, "ORDER_OBS");
-		assertThat(propertyValueString.isPresent()).isTrue();
+		assertThat(propertyValueString).isPresent();
 		assertThat(propertyValueString.get().getValue()).isEqualTo("Observation");
 
 		propertyValueString = findProperty(parameters, "CLASSTYPE");
-		assertThat(propertyValueString.isPresent()).isTrue();
+		assertThat(propertyValueString).isPresent();
 		assertThat(propertyValueString.get().getValue()).isEqualTo("2");
 
 	}
@@ -187,7 +187,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
 		Optional<Coding> propertyValue = findProperty(parameters, "COMPONENT");
-		assertThat(propertyValue.isPresent()).isTrue();
+		assertThat(propertyValue).isPresent();
 		assertThat(propertyValue.get().getSystem()).isEqualTo(ITermLoaderSvc.LOINC_URI);
 		assertThat(propertyValue.get().getCode()).isEqualTo("LP31101-6");
 		assertThat(propertyValue.get().getDisplay()).isEqualTo("R' wave amplitude.lead I");
@@ -206,7 +206,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters));
 
 		Optional<Coding> propertyValueCoding = findProperty(parameters, "SCALE_TYP");
-		assertThat(propertyValueCoding.isPresent()).isTrue();
+		assertThat(propertyValueCoding).isPresent();
 		assertThat(propertyValueCoding.get().getSystem()).isEqualTo(ITermLoaderSvc.LOINC_URI);
 		assertThat(propertyValueCoding.get().getCode()).isEqualTo("LP7753-9");
 		assertThat(propertyValueCoding.get().getDisplay()).isEqualTo("Qn");

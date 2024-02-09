@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -43,7 +43,7 @@ public class SnapshotGeneratorR4Test extends BaseValidationTestWithInlineMocks {
 
 		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(snapshot));
 
-		assertEquals(54, snapshot.getSnapshot().getElement().size());
+		assertThat(snapshot.getSnapshot().getElement()).hasSize(54);
 	}
 
 

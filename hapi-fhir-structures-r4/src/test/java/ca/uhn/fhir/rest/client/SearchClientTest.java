@@ -39,9 +39,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -87,13 +84,13 @@ public class SearchClientTest {
 
 		List<Encounter> found = client.searchByList(params, includes);
 
-		assertEquals(1, found.size());
+		assertThat(found).hasSize(1);
 
 		Encounter encounter = found.get(0);
-		assertNotNull(encounter.getSubject().getReference());
+		assertThat(encounter.getSubject().getReference()).isNotNull();
 		HttpUriRequest value = capt.getValue();
 
-		assertTrue(value instanceof HttpPost, "Expected request of type POST on long params list");
+		assertThat(value instanceof HttpPost).as("Expected request of type POST on long params list").isTrue();
 		HttpPost post = (HttpPost) value;
 		String body = IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8);
 		ourLog.info(body);
@@ -106,13 +103,13 @@ public class SearchClientTest {
 		paramsAndList.addAnd(params);
 		found = client.searchByList(paramsAndList, includes);
 
-		assertEquals(1, found.size());
+		assertThat(found).hasSize(1);
 
 		encounter = found.get(0);
-		assertNotNull(encounter.getSubject().getReference());
+		assertThat(encounter.getSubject().getReference()).isNotNull();
 		value = capt.getAllValues().get(1);
 
-		assertTrue(value instanceof HttpPost, "Expected request of type POST on long params list");
+		assertThat(value instanceof HttpPost).as("Expected request of type POST on long params list").isTrue();
 		post = (HttpPost) value;
 		body = IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8);
 		ourLog.info(body);
@@ -133,10 +130,10 @@ public class SearchClientTest {
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		List<Encounter> found = client.search();
-		assertEquals(1, found.size());
+		assertThat(found).hasSize(1);
 
 		Encounter encounter = found.get(0);
-		assertNotNull(encounter.getSubject().getReference());
+		assertThat(encounter.getSubject().getReference()).isNotNull();
 	}
 
 	private String createBundle() {

@@ -17,8 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DeleteConditionalR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DeleteConditionalR4Test.class);
@@ -57,9 +56,9 @@ public class DeleteConditionalR4Test {
 			.resourceConditionalByType(Patient.class)
 			.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("SOMESYS", "SOMEID")).execute();
 
-		assertTrue(ourLastRequestWasDelete);
-		assertEquals(null, ourLastIdParam);
-		assertEquals("Patient?identifier=SOMESYS%7CSOMEID", ourLastConditionalUrl);
+		assertThat(ourLastRequestWasDelete).isTrue();
+		assertThat(ourLastIdParam).isEqualTo(null);
+		assertThat(ourLastConditionalUrl).isEqualTo("Patient?identifier=SOMESYS%7CSOMEID");
 
 	}
 

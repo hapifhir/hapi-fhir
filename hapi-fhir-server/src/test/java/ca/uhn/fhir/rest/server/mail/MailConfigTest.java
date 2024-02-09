@@ -3,12 +3,8 @@ package ca.uhn.fhir.rest.server.mail;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MailConfigTest {
 
@@ -38,7 +34,7 @@ public class MailConfigTest {
 		// execute
 		final String actual = fixture.getSmtpHostname();
 		// validate
-		assertEquals(SMTP_HOST_NAME, actual);
+		assertThat(actual).isEqualTo(SMTP_HOST_NAME);
 	}
 
 	@Test
@@ -46,7 +42,7 @@ public class MailConfigTest {
 		// execute
 		final int actual = fixture.getSmtpPort();
 		// validate
-		assertEquals(SMTP_PORT, actual);
+		assertThat(actual).isEqualTo(SMTP_PORT);
 	}
 
 	@Test
@@ -54,7 +50,7 @@ public class MailConfigTest {
 		// execute
 		final String actual = fixture.getSmtpUsername();
 		// validate
-		assertEquals(SMTP_USERNAME, actual);
+		assertThat(actual).isEqualTo(SMTP_USERNAME);
 	}
 
 	@Test
@@ -62,7 +58,7 @@ public class MailConfigTest {
 		// execute
 		final String actual = fixture.getSmtpPassword();
 		// validate
-		assertEquals(SMTP_PASSWORD, actual);
+		assertThat(actual).isEqualTo(SMTP_PASSWORD);
 	}
 
 	@Test
@@ -70,7 +66,7 @@ public class MailConfigTest {
 		// execute
 		final boolean actual = fixture.isSmtpUseStartTLS();
 		// validate
-		assertTrue(actual);
+		assertThat(actual).isTrue();
 	}
 
 	@Test
@@ -78,31 +74,31 @@ public class MailConfigTest {
 		// setup
 		final MailConfig other = withMainConfig();
 		// execute & validate
-		assertEquals(fixture, fixture);
-		assertSame(fixture, fixture);
-		assertEquals(fixture, other);
+		assertThat(fixture).isEqualTo(fixture);
+		assertThat(fixture).isSameAs(fixture);
+		assertThat(other).isEqualTo(fixture);
 		assertNotSame(fixture, other);
-		assertEquals(fixture.hashCode(), other.hashCode());
-		assertNotEquals(fixture.toString(), other.toString());
-		assertNotEquals(fixture, null);
+		assertThat(other.hashCode()).isEqualTo(fixture.hashCode());
+		assertThat(other.toString()).isNotEqualTo(fixture.toString());
+		assertThat(null).isNotEqualTo(fixture);
 	}
 
 	@Test
 	public void testSetSmtpUsername() {
 		// execute & validate
-		assertEquals("xyz", fixture.setSmtpUsername("xyz").getSmtpUsername());
-		assertNull(fixture.setSmtpUsername(null).getSmtpUsername());
-		assertNull(fixture.setSmtpUsername("").getSmtpUsername());
-		assertNull(fixture.setSmtpUsername("  ").getSmtpUsername());
+		assertThat(fixture.setSmtpUsername("xyz").getSmtpUsername()).isEqualTo("xyz");
+		assertThat(fixture.setSmtpUsername(null).getSmtpUsername()).isNull();
+		assertThat(fixture.setSmtpUsername("").getSmtpUsername()).isNull();
+		assertThat(fixture.setSmtpUsername("  ").getSmtpUsername()).isNull();
 	}
 
 	@Test
 	public void testSetSmtpPassword() {
 		// execute & validate
-		assertEquals("xyz", fixture.setSmtpPassword("xyz").getSmtpPassword());
-		assertNull(fixture.setSmtpPassword(null).getSmtpPassword());
-		assertNull(fixture.setSmtpPassword("").getSmtpPassword());
-		assertNull(fixture.setSmtpPassword("  ").getSmtpPassword());
+		assertThat(fixture.setSmtpPassword("xyz").getSmtpPassword()).isEqualTo("xyz");
+		assertThat(fixture.setSmtpPassword(null).getSmtpPassword()).isNull();
+		assertThat(fixture.setSmtpPassword("").getSmtpPassword()).isNull();
+		assertThat(fixture.setSmtpPassword("  ").getSmtpPassword()).isNull();
 	}
 
 }

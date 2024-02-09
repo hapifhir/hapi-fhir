@@ -87,7 +87,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		assertThat(getNumberOfParametersByName(respParams, "match")).isEqualTo(1);
 		param = getParametersByName(respParams, "match").get(0);
 
-		assertThat(param.getPart().size()).isEqualTo(3);
+		assertThat(param.getPart()).hasSize(3);
 		
 		ParametersParameterComponent part = getPartByName(param, "concept");
 		Coding coding = (Coding) part.getValue();
@@ -171,7 +171,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 
 		assertThat(getNumberOfParametersByName(respParams, "match")).isEqualTo(1);
 		param = getParametersByName(respParams, "match").get(0);
-		assertThat(param.getPart().size()).isEqualTo(3);
+		assertThat(param.getPart()).hasSize(3);
 		ParametersParameterComponent part = getPartByName(param, "equivalence");
 		assertThat(((CodeType) part.getValue()).getCode()).isEqualTo("equivalent");
 		part = getPartByName(param, "concept");

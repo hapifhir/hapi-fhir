@@ -53,8 +53,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.CoreMatchers.either;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.inOrder;
@@ -122,14 +120,14 @@ public class InterceptorDstu3Test {
 			HttpPost post = new HttpPost(ourServer.getBaseUrl() + "/Patient/$postOperation");
 			post.setEntity(new StringEntity(input, ContentType.create("application/fhir+json", Constants.CHARSET_UTF8)));
 			try (CloseableHttpResponse status = ourClient.execute(post)) {
-				assertEquals(200, status.getStatusLine().getStatusCode());
+				assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 				IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			}
 		} finally {
 			ourServer.unregisterInterceptor(interceptor);
 		}
 
-		assertNotNull(resource.get());
+		assertThat(resource.get()).isNotNull();
 	}
 
 
@@ -153,8 +151,8 @@ public class InterceptorDstu3Test {
 			try (CloseableHttpResponse status = ourClient.execute(get)) {
 				String response = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
 				assertThat(response).contains("NAME1");
-				assertEquals(202, status.getStatusLine().getStatusCode());
-				assertEquals("Accepted", status.getStatusLine().getReasonPhrase());
+				assertThat(status.getStatusLine().getStatusCode()).isEqualTo(202);
+				assertThat(status.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
 			}
 
 		} finally {
@@ -206,8 +204,8 @@ public class InterceptorDstu3Test {
 		order.verify(myInterceptor1, times(1)).incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
 		order.verify(myInterceptor2, times(1)).incomingRequestPreHandled(nullable(RestOperationTypeEnum.class), nullable(RequestDetails.class));
 
-		assertEquals(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, opTypeCapt.getValue());
-		assertNotNull(arTypeCapt.getValue().getResource());
+		assertThat(opTypeCapt.getValue()).isEqualTo(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
+		assertThat(arTypeCapt.getValue().getResource()).isNotNull();
 	}
 
 	@Test
@@ -249,7 +247,7 @@ public class InterceptorDstu3Test {
 		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			assertEquals(201, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
 			IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		}
 
@@ -263,8 +261,8 @@ public class InterceptorDstu3Test {
 		verify(myInterceptor1, times(1)).incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
 		verify(myInterceptor1, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), resourceCapt.capture());
 
-		assertEquals(1, resourceCapt.getAllValues().size());
-		assertEquals(null, resourceCapt.getAllValues().get(0));
+		assertThat(resourceCapt.getAllValues()).hasSize(1);
+		assertThat(resourceCapt.getAllValues().get(0)).isEqualTo(null);
 //		assertEquals("", rdCapt.getAllValues().get(0).get)
 	}
 
@@ -297,8 +295,8 @@ public class InterceptorDstu3Test {
 		order.verify(myInterceptor1, times(1)).incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
 		order.verify(myInterceptor1, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), resourceCapt.capture());
 
-		assertEquals(1, resourceCapt.getAllValues().size());
-		assertEquals(OperationOutcome.class, resourceCapt.getAllValues().get(0).getClass());
+		assertThat(resourceCapt.getAllValues()).hasSize(1);
+		assertThat(resourceCapt.getAllValues().get(0).getClass()).isEqualTo(OperationOutcome.class);
 	}
 
 	@SuppressWarnings("deprecation")

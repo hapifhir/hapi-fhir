@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ModelParseTest {
 	static final Logger ourLog = LoggerFactory.getLogger(ModelParseTest.class);
@@ -36,13 +36,13 @@ public class ModelParseTest {
 
 		// then
 		List<? extends IBaseCoding> tags = bundleOut.getMeta().getTag();
-		assertEquals(1, tags.size(), "tag is present");
+		assertThat(tags.size()).as("tag is present").isEqualTo(1);
 		IBaseCoding tagOut = tags.get(0);
-		assertEquals("code", tagOut.getCode());
-		assertEquals("display", tagOut.getDisplay());
-		assertEquals("oid:123", tagOut.getSystem());
-		assertEquals("v1", tagOut.getVersion());
-		assertEquals(true, tagOut.getUserSelected());
+		assertThat(tagOut.getCode()).isEqualTo("code");
+		assertThat(tagOut.getDisplay()).isEqualTo("display");
+		assertThat(tagOut.getSystem()).isEqualTo("oid:123");
+		assertThat(tagOut.getVersion()).isEqualTo("v1");
+		assertThat(tagOut.getUserSelected()).isEqualTo(true);
 	}
 
 	@ParameterizedTest
@@ -64,13 +64,13 @@ public class ModelParseTest {
 
 		// then
 		List<? extends IBaseCoding> labels = bundleOut.getMeta().getSecurity();
-		assertEquals(1, labels.size(), "security is present");
+		assertThat(labels.size()).as("security is present").isEqualTo(1);
 		IBaseCoding codingOut = labels.get(0);
-		assertEquals("code", codingOut.getCode());
-		assertEquals("display", codingOut.getDisplay());
-		assertEquals("oid:123", codingOut.getSystem());
-		assertEquals("v1", codingOut.getVersion());
-		assertEquals(true, codingOut.getUserSelected());
+		assertThat(codingOut.getCode()).isEqualTo("code");
+		assertThat(codingOut.getDisplay()).isEqualTo("display");
+		assertThat(codingOut.getSystem()).isEqualTo("oid:123");
+		assertThat(codingOut.getVersion()).isEqualTo("v1");
+		assertThat(codingOut.getUserSelected()).isEqualTo(true);
 	}
 
 	public static List<IParser> getParsers() {

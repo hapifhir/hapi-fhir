@@ -29,8 +29,8 @@ import org.junit.jupiter.api.Test;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -118,7 +118,7 @@ public class ServerInvalidDefinitionR4Test extends BaseR4ServerTest {
 		try {
 			startServer(provider);
 			fail("");		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(288) + "Failure scanning class MyProvider: "+ Msg.code(404) + "@OperationParam detected on method that is not annotated with @Operation: public java.util.List<org.hl7.fhir.instance.model.api.IBaseResource> ca.uhn.fhir.rest.server.ServerInvalidDefinitionR4Test$2MyProvider.search(org.hl7.fhir.r4.model.StringType,org.hl7.fhir.r4.model.StringType)", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(288) + "Failure scanning class MyProvider: " + Msg.code(404) + "@OperationParam detected on method that is not annotated with @Operation: public java.util.List<org.hl7.fhir.instance.model.api.IBaseResource> ca.uhn.fhir.rest.server.ServerInvalidDefinitionR4Test$2MyProvider.search(org.hl7.fhir.r4.model.StringType,org.hl7.fhir.r4.model.StringType)");
 		}
 	}
 
@@ -199,7 +199,7 @@ public class ServerInvalidDefinitionR4Test extends BaseR4ServerTest {
 		try {
 			rs.init(MockServletUtil.createServletConfig());
 			fail("");		} catch (ServletException e) {
-			assertEquals(Msg.code(297) + "Failed to initialize FHIR Restful server: "+ Msg.code(288) + "Failure scanning class PlainProviderWithExtendedOperationOnNoType: "+ Msg.code(425) + "@Operation method is an instance level method (it has an @IdParam parameter) but is not marked as global() and is not declared in a resource provider: everything", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(297) + "Failed to initialize FHIR Restful server: " + Msg.code(288) + "Failure scanning class PlainProviderWithExtendedOperationOnNoType: " + Msg.code(425) + "@Operation method is an instance level method (it has an @IdParam parameter) but is not marked as global() and is not declared in a resource provider: everything");
 		}
 
 	}

@@ -7,9 +7,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.io.IOException;
 import java.net.URL;
@@ -80,7 +77,7 @@ public class XmlParserR4Test extends BaseTest {
 
 		Appointment input = parser.parseResource(Appointment.class, output);
 
-		assertNotNull(input.getMeta().getExtensionByUrl("http://example-source-team.com"));
+		assertThat(input.getMeta().getExtensionByUrl("http://example-source-team.com")).isNotNull();
 	}
 
 
@@ -120,13 +117,13 @@ public class XmlParserR4Test extends BaseTest {
 
 		ourLog.info("Input: {}", auditEvent);
 		AuditEvent ae = ourCtx.newXmlParser().parseResource(AuditEvent.class, auditEvent);
-		assertEquals("#A", ae.getContained().get(0).getId());
-		assertEquals("#B", ae.getContained().get(1).getId());
-		assertEquals("#B", ae.getEntity().get(0).getWhat().getReference());
-		assertEquals("#A", ae.getEntity().get(1).getWhat().getReference());
+		assertThat(ae.getContained().get(0).getId()).isEqualTo("#A");
+		assertThat(ae.getContained().get(1).getId()).isEqualTo("#B");
+		assertThat(ae.getEntity().get(0).getWhat().getReference()).isEqualTo("#B");
+		assertThat(ae.getEntity().get(1).getWhat().getReference()).isEqualTo("#A");
 
 		String serialized = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(ae);
-		assertEquals(auditEvent, serialized);
+		assertThat(serialized).isEqualTo(auditEvent);
 
 	}
 
@@ -145,7 +142,7 @@ public class XmlParserR4Test extends BaseTest {
 		ourLog.info(encoded);
 
 		int idx = encoded.indexOf(sectionText);
-		assertNotEquals(-1, idx);
+		assertThat(idx).isNotEqualTo(-1);
 	}
 
 	@Test
@@ -170,8 +167,8 @@ public class XmlParserR4Test extends BaseTest {
 		));
 
 		input = ourCtx.newXmlParser().parseResource(Bundle.class, encoded);
-		assertEquals("urn:uuid:0.0.0.0", input.getEntry().get(0).getFullUrl());
-		assertEquals("MessageHeader/1.1.1.1", input.getEntry().get(0).getResource().getId());
+		assertThat(input.getEntry().get(0).getFullUrl()).isEqualTo("urn:uuid:0.0.0.0");
+		assertThat(input.getEntry().get(0).getResource().getId()).isEqualTo("MessageHeader/1.1.1.1");
 
 	}
 
@@ -181,9 +178,9 @@ public class XmlParserR4Test extends BaseTest {
 		String text = Resources.toString(url, Charsets.UTF_8);
 
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, text);
-		
-		assertEquals("12346", getPatientIdValue(bundle, 0));
-		assertEquals("12345", getPatientIdValue(bundle, 1));
+
+		assertThat(getPatientIdValue(bundle, 0)).isEqualTo("12346");
+		assertThat(getPatientIdValue(bundle, 1)).isEqualTo("12345");
 	}
 
 	private String getPatientIdValue(Bundle input, int entry) {
@@ -209,7 +206,7 @@ public class XmlParserR4Test extends BaseTest {
 		DecimalType object = new DecimalType("123.456000");
 		String expected = "123.456000";
 		String actual = ourCtx.newXmlParser().encodeToString(object);
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Test
@@ -219,7 +216,7 @@ public class XmlParserR4Test extends BaseTest {
 		p.setActive(true);
 		String expected = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"123\"/><active value=\"true\"/></Patient>";
 		String actual = ourCtx.newXmlParser().encodeToString(p);
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Test
@@ -230,7 +227,7 @@ public class XmlParserR4Test extends BaseTest {
 
 		String expected = "<element><extension url=\"http://foo\"><valueString value=\"bar\"/></extension><family value=\"Simpson\"/><given value=\"Homer\"/><given value=\"Jay\"/></element>";
 		String actual = ourCtx.newXmlParser().encodeToString(name);
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Test
@@ -241,7 +238,7 @@ public class XmlParserR4Test extends BaseTest {
 
 		String expected = "<element><language><text value=\"English\"/></language><preferred value=\"true\"/></element>";
 		String actual = ourCtx.newXmlParser().encodeToString(communication);
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 
@@ -279,7 +276,7 @@ public class XmlParserR4Test extends BaseTest {
 			"</AuditEvent>";
 		AuditEvent ae = ourCtx.newXmlParser().parseResource(AuditEvent.class, auditEvent);
 		String auditEventAsString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(ae);
-		assertEquals(auditEvent, auditEventAsString);
+		assertThat(auditEventAsString).isEqualTo(auditEvent);
 	}
 	
 	/**
@@ -304,7 +301,7 @@ public class XmlParserR4Test extends BaseTest {
 				"</Parameters>";
 		Parameters pa = ourCtx.newXmlParser().parseResource(Parameters.class, parameters);
 		String parameteresAsString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(pa);
-		assertEquals(parameters, parameteresAsString);
+		assertThat(parameteresAsString).isEqualTo(parameters);
 	}
 
 
@@ -353,10 +350,10 @@ public class XmlParserR4Test extends BaseTest {
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle);
 
 		Bundle parsedBundle = ourCtx.newXmlParser().parseResource(Bundle.class, encoded);
-		assertEquals("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7", parsedBundle.getEntry().get(0).getFullUrl());
-		assertEquals("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7", parsedBundle.getEntry().get(0).getResource().getId());
-		assertEquals("urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb", parsedBundle.getEntry().get(1).getFullUrl());
-		assertEquals("urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb", parsedBundle.getEntry().get(1).getResource().getId());
+		assertThat(parsedBundle.getEntry().get(0).getFullUrl()).isEqualTo("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7");
+		assertThat(parsedBundle.getEntry().get(0).getResource().getId()).isEqualTo("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7");
+		assertThat(parsedBundle.getEntry().get(1).getFullUrl()).isEqualTo("urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb");
+		assertThat(parsedBundle.getEntry().get(1).getResource().getId()).isEqualTo("urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb");
 	}
 
 

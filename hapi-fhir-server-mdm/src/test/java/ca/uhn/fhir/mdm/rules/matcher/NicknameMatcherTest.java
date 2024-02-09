@@ -6,9 +6,10 @@ import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.NicknameMatcher;
 import ca.uhn.fhir.mdm.rules.matcher.models.IMdmFieldMatcher;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 class NicknameMatcherTest {
 	IMdmFieldMatcher matcher;
@@ -22,23 +23,23 @@ class NicknameMatcherTest {
 
 	@Test
 	public void testMatches() {
-		Assertions.assertTrue(match("Ken", "ken"));
-		Assertions.assertTrue(match("ken", "Ken"));
-		Assertions.assertTrue(match("Ken", "Ken"));
-		Assertions.assertTrue(match("Kenneth", "Ken"));
-		Assertions.assertTrue(match("Kenneth", "Kenny"));
-		Assertions.assertTrue(match("Ken", "Kenneth"));
-		Assertions.assertTrue(match("Kenny", "Kenneth"));
-		Assertions.assertTrue(match("Jim", "Jimmy"));
-		Assertions.assertTrue(match("Jimmy", "Jim"));
-		Assertions.assertTrue(match("Jim", "James"));
-		Assertions.assertTrue(match("Jimmy", "James"));
-		Assertions.assertTrue(match("James", "Jimmy"));
-		Assertions.assertTrue(match("James", "Jim"));
+		assertThat(match("Ken", "ken")).isTrue();
+		assertThat(match("ken", "Ken")).isTrue();
+		assertThat(match("Ken", "Ken")).isTrue();
+		assertThat(match("Kenneth", "Ken")).isTrue();
+		assertThat(match("Kenneth", "Kenny")).isTrue();
+		assertThat(match("Ken", "Kenneth")).isTrue();
+		assertThat(match("Kenny", "Kenneth")).isTrue();
+		assertThat(match("Jim", "Jimmy")).isTrue();
+		assertThat(match("Jimmy", "Jim")).isTrue();
+		assertThat(match("Jim", "James")).isTrue();
+		assertThat(match("Jimmy", "James")).isTrue();
+		assertThat(match("James", "Jimmy")).isTrue();
+		assertThat(match("James", "Jim")).isTrue();
 
-		Assertions.assertFalse(match("Ken", "Bob"));
+		assertThat(match("Ken", "Bob")).isFalse();
 		// These aren't nickname matches.  If you want matches like these use a phonetic matcher
-		Assertions.assertFalse(match("Allen", "Allan"));
+		assertThat(match("Allen", "Allan")).isFalse();
 	}
 
 	private boolean match(String theFirst, String theSecond) {

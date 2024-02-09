@@ -20,7 +20,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class BundleBuilderR4Test {
@@ -50,12 +50,12 @@ public class BundleBuilderR4Test {
 		Bundle bundle = (Bundle) builder.getBundle();
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
-		assertEquals(1, bundle.getEntry().size());
-		assertSame(patch, bundle.getEntry().get(0).getResource());
-		assertEquals("http://foo/Patient/123", bundle.getEntry().get(0).getFullUrl());
-		assertEquals("Patient/123", bundle.getEntry().get(0).getRequest().getUrl());
-		assertEquals(Bundle.HTTPVerb.PATCH, bundle.getEntry().get(0).getRequest().getMethod());
+		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.TRANSACTION);
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patch);
+		assertThat(bundle.getEntry().get(0).getFullUrl()).isEqualTo("http://foo/Patient/123");
+		assertThat(bundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Patient/123");
+		assertThat(bundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.PATCH);
 
 	}
 
@@ -73,12 +73,12 @@ public class BundleBuilderR4Test {
 		Bundle bundle = (Bundle) builder.getBundle();
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
-		assertEquals(1, bundle.getEntry().size());
-		assertSame(patch, bundle.getEntry().get(0).getResource());
-		assertEquals(null, bundle.getEntry().get(0).getFullUrl());
-		assertEquals("Patient?identifier=http://foo|123", bundle.getEntry().get(0).getRequest().getUrl());
-		assertEquals(Bundle.HTTPVerb.PATCH, bundle.getEntry().get(0).getRequest().getMethod());
+		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.TRANSACTION);
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patch);
+		assertThat(bundle.getEntry().get(0).getFullUrl()).isEqualTo(null);
+		assertThat(bundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Patient?identifier=http://foo|123");
+		assertThat(bundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.PATCH);
 
 	}
 
@@ -94,20 +94,20 @@ public class BundleBuilderR4Test {
 		Bundle bundle = (Bundle) builder.getBundle();
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
-		assertEquals(1, bundle.getEntry().size());
-		assertSame(patient, bundle.getEntry().get(0).getResource());
-		assertEquals("http://foo/Patient/123", bundle.getEntry().get(0).getFullUrl());
-		assertEquals("Patient/123", bundle.getEntry().get(0).getRequest().getUrl());
-		assertEquals(Bundle.HTTPVerb.PUT, bundle.getEntry().get(0).getRequest().getMethod());
+		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.TRANSACTION);
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patient);
+		assertThat(bundle.getEntry().get(0).getFullUrl()).isEqualTo("http://foo/Patient/123");
+		assertThat(bundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Patient/123");
+		assertThat(bundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.PUT);
 	}
 
 	@Test
 	public void testNewPrimitive() {
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		IPrimitiveType<Date> datePrimitive = builder.newPrimitive("instant", myCheckDate);
-		assertNotNull(datePrimitive);
-		assertEquals(myCheckDate, datePrimitive.getValue());
+		assertThat(datePrimitive).isNotNull();
+		assertThat(datePrimitive.getValue()).isEqualTo(myCheckDate);
 	}
 
 	@Test
@@ -123,9 +123,9 @@ public class BundleBuilderR4Test {
 		Bundle bundle = (Bundle) builder.getBundle();
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		assertEquals(Bundle.BundleType.SEARCHSET, bundle.getType());
-		assertEquals(uuid, bundle.getId());
-		assertEquals(myCheckDate, bundle.getMeta().getLastUpdated());
+		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.SEARCHSET);
+		assertThat(bundle.getId()).isEqualTo(uuid);
+		assertThat(bundle.getMeta().getLastUpdated()).isEqualTo(myCheckDate);
 	}
 
 
@@ -141,22 +141,22 @@ public class BundleBuilderR4Test {
 		Bundle bundle = (Bundle) builder.getBundle();
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
-		assertEquals(1, bundle.getEntry().size());
-		assertSame(patient, bundle.getEntry().get(0).getResource());
-		assertEquals("http://foo/Patient/123", bundle.getEntry().get(0).getFullUrl());
-		assertEquals("Patient?active=true", bundle.getEntry().get(0).getRequest().getUrl());
-		assertEquals(Bundle.HTTPVerb.PUT, bundle.getEntry().get(0).getRequest().getMethod());
+		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.TRANSACTION);
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patient);
+		assertThat(bundle.getEntry().get(0).getFullUrl()).isEqualTo("http://foo/Patient/123");
+		assertThat(bundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Patient?active=true");
+		assertThat(bundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.PUT);
 	}
 
 	@Test
 	public void testSearchHandling() {
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		IBase entry = builder.addEntry();
-		assertNotNull(entry);
+		assertThat(entry).isNotNull();
 
 		IBase search = builder.addSearch(entry);
-		assertNotNull(entry);
+		assertThat(entry).isNotNull();
 
 		builder.setSearchField(search, "mode", "match");
 		builder.setSearchField(search, "score", builder.newPrimitive("decimal", BigDecimal.ONE));
@@ -164,10 +164,10 @@ public class BundleBuilderR4Test {
 		Bundle bundle = (Bundle) builder.getBundle();
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		assertEquals(1, bundle.getEntry().size());
-		assertNotNull(bundle.getEntry().get(0).getSearch());
-		assertEquals(Bundle.SearchEntryMode.MATCH, bundle.getEntry().get(0).getSearch().getMode());
-		assertEquals(BigDecimal.ONE, bundle.getEntry().get(0).getSearch().getScore());
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getEntry().get(0).getSearch()).isNotNull();
+		assertThat(bundle.getEntry().get(0).getSearch().getMode()).isEqualTo(Bundle.SearchEntryMode.MATCH);
+		assertThat(bundle.getEntry().get(0).getSearch().getScore()).isEqualTo(BigDecimal.ONE);
 	}
 
 	@Test
@@ -183,7 +183,7 @@ public class BundleBuilderR4Test {
 		Bundle bundle = (Bundle) builder.getBundle();
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 	}
 
 	@Test
@@ -197,12 +197,12 @@ public class BundleBuilderR4Test {
 		Bundle bundle = (Bundle) builder.getBundle();
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
-		assertEquals(1, bundle.getEntry().size());
-		assertSame(patient, bundle.getEntry().get(0).getResource());
-		assertEquals(null, bundle.getEntry().get(0).getFullUrl());
-		assertEquals("Patient", bundle.getEntry().get(0).getRequest().getUrl());
-		assertEquals(Bundle.HTTPVerb.POST, bundle.getEntry().get(0).getRequest().getMethod());
+		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.TRANSACTION);
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patient);
+		assertThat(bundle.getEntry().get(0).getFullUrl()).isEqualTo(null);
+		assertThat(bundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Patient");
+		assertThat(bundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.POST);
 	}
 
 	@Test
@@ -218,18 +218,18 @@ public class BundleBuilderR4Test {
 
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
-		assertEquals(2, bundle.getEntry().size());
+		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.TRANSACTION);
+		assertThat(bundle.getEntry()).hasSize(2);
 
 		//Check the IBaseresource style entry
-		assertNull(bundle.getEntry().get(0).getResource());
-		assertEquals("Patient/123", bundle.getEntry().get(0).getRequest().getUrl());
-		assertEquals(Bundle.HTTPVerb.DELETE, bundle.getEntry().get(0).getRequest().getMethod());
+		assertThat(bundle.getEntry().get(0).getResource()).isNull();
+		assertThat(bundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Patient/123");
+		assertThat(bundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.DELETE);
 
 		//Check the resourcetype + id style entry.
-		assertNull(bundle.getEntry().get(1).getResource());
-		assertEquals("Patient/123", bundle.getEntry().get(1).getRequest().getUrl());
-		assertEquals(Bundle.HTTPVerb.DELETE, bundle.getEntry().get(1).getRequest().getMethod());
+		assertThat(bundle.getEntry().get(1).getResource()).isNull();
+		assertThat(bundle.getEntry().get(1).getRequest().getUrl()).isEqualTo("Patient/123");
+		assertThat(bundle.getEntry().get(1).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.DELETE);
 
 
 
@@ -246,13 +246,13 @@ public class BundleBuilderR4Test {
 		Bundle bundle = (Bundle) builder.getBundle();
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-		assertEquals(Bundle.BundleType.TRANSACTION, bundle.getType());
-		assertEquals(1, bundle.getEntry().size());
-		assertSame(patient, bundle.getEntry().get(0).getResource());
-		assertEquals(null, bundle.getEntry().get(0).getFullUrl());
-		assertEquals("Patient", bundle.getEntry().get(0).getRequest().getUrl());
-		assertEquals("Patient?active=true", bundle.getEntry().get(0).getRequest().getIfNoneExist());
-		assertEquals(Bundle.HTTPVerb.POST, bundle.getEntry().get(0).getRequest().getMethod());
+		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.TRANSACTION);
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patient);
+		assertThat(bundle.getEntry().get(0).getFullUrl()).isEqualTo(null);
+		assertThat(bundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Patient");
+		assertThat(bundle.getEntry().get(0).getRequest().getIfNoneExist()).isEqualTo("Patient?active=true");
+		assertThat(bundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.POST);
 	}
 
 }

@@ -47,9 +47,6 @@ import java.util.Set;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.contains;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 
 public class InterceptorUserDataMapDstu2Test {
 
@@ -90,7 +87,7 @@ public class InterceptorUserDataMapDstu2Test {
 
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=foo");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 		}
 
 		await().until(() -> myMapCheckMethods, contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "preProcessOutgoingException", "handleException", "processingCompleted"));
@@ -111,13 +108,13 @@ public class InterceptorUserDataMapDstu2Test {
 	}
 
 	private void updateMapUsing(Map<Object, Object> theUserData, String theMethod) {
-		assertNotNull(theUserData);
+		assertThat(theUserData).isNotNull();
 		if (myMap == null) {
 			myMap = theUserData;
 			myMap.put(myKey, myValue);
 		} else {
-			assertSame(myMap, theUserData);
-			assertEquals(myValue, myMap.get(myKey));
+			assertThat(theUserData).isSameAs(myMap);
+			assertThat(myMap).containsEntry(myKey, myValue);
 		}
 		myMapCheckMethods.add(theMethod);
 	}

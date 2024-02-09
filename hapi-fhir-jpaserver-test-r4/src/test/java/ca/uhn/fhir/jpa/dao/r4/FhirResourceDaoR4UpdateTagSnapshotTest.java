@@ -28,7 +28,7 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		myPatientDao.update(p, mySrd);
 
 		p = myPatientDao.read(new IdType("A"), mySrd);
-		assertThat(p.getMeta().getTag().size()).isEqualTo(2);
+		assertThat(p.getMeta().getTag()).hasSize(2);
 
 		p = new Patient();
 		p.setId("A");
@@ -40,7 +40,7 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		p = myPatientDao.read(new IdType("A"), mySrd);
 		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
 		assertThat(p.getActive()).isEqualTo(true);
-		assertThat(p.getMeta().getTag().size()).isEqualTo(1);
+		assertThat(p.getMeta().getTag()).hasSize(1);
 	}
 
 	@Test
@@ -61,7 +61,7 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		p = myPatientDao.read(new IdType("A"), mySrd);
 		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("1");
 		assertThat(p.getActive()).isEqualTo(true);
-		assertThat(p.getMeta().getTag().size()).isEqualTo(2);
+		assertThat(p.getMeta().getTag()).hasSize(2);
 		assertThat(p.getMeta().getTag().get(0).getSystem()).isEqualTo("urn:foo");
 		assertThat(p.getMeta().getTag().get(0).getCode())
 			.satisfiesAnyOf(
@@ -89,7 +89,7 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		p = myPatientDao.read(new IdType("A"), mySrd);
 		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
 		assertThat(p.getActive()).isEqualTo(true);
-		assertThat(p.getMeta().getTag().size()).isEqualTo(1);
+		assertThat(p.getMeta().getTag()).hasSize(1);
 		assertThat(p.getMeta().getTag().get(0).getSystem()).isEqualTo("urn:foo");
 		assertThat(p.getMeta().getTag().get(0).getCode()).isEqualTo("bar");
 		assertThat(p.getMeta().getTag().get(0).getDisplay()).isEqualTo("baz");
@@ -111,7 +111,7 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		p = myPatientDao.read(new IdType("A"), mySrd);
 		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("1");
 		assertThat(p.getActive()).isEqualTo(true);
-		assertThat(p.getMeta().getTag().size()).isEqualTo(1);
+		assertThat(p.getMeta().getTag()).hasSize(1);
 		assertThat(p.getMeta().getTag().get(0).getSystem()).isEqualTo("urn:foo");
 		assertThat(p.getMeta().getTag().get(0).getCode()).isEqualTo("bar");
 		assertThat(p.getMeta().getTag().get(0).getDisplay()).isEqualTo("baz");
@@ -134,7 +134,7 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 
 		p = myPatientDao.read(new IdType("A"), mySrd);
 		assertThat(p.getActive()).isEqualTo(true);
-		assertThat(p.getMeta().getTag().size()).isEqualTo(0);
+		assertThat(p.getMeta().getTag()).isEmpty();
 		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
 	}
 
@@ -154,7 +154,7 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 
 		p = myPatientDao.read(new IdType("A"), mySrd);
 		assertThat(p.getActive()).isEqualTo(true);
-		assertThat(p.getMeta().getTag().size()).isEqualTo(1);
+		assertThat(p.getMeta().getTag()).hasSize(1);
 		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
 	}
 

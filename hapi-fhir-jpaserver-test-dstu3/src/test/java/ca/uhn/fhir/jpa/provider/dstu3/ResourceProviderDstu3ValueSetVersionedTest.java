@@ -319,7 +319,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		loadAndPersistCodeSystemAndValueSet();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		Slice<TermValueSet> page = runInTransaction(()->myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED));
-		assertThat(page.getContent().size()).isEqualTo(2);
+		assertThat(page.getContent()).hasSize(2);
 
 		// Verify v1 ValueSet
 		Parameters respParam = myClient
@@ -415,7 +415,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		Slice<TermValueSet> page = runInTransaction(()->myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED));
-		assertThat(page.getContent().size()).isEqualTo(2);
+		assertThat(page.getContent()).hasSize(2);
 
 		// Validate ValueSet v1
 		Parameters respParam = myClient
@@ -582,7 +582,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		Slice<TermValueSet> page = runInTransaction(()->myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 10), TermValueSetPreExpansionStatusEnum.EXPANDED));
-		assertThat(page.getContent().size()).isEqualTo(2);
+		assertThat(page.getContent()).hasSize(2);
 
 		// Check expansion of multi-versioned ValueSet with version 1
 		Parameters respParam = myClient
@@ -885,7 +885,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 			.execute();
 
 		// Canonical expand should only return most recently updated version, v2.
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -922,7 +922,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 
 		// Update the CodeSystem Version and Codes
 		cs = new CodeSystem();
@@ -947,7 +947,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 	}
 
 

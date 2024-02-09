@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 
@@ -51,7 +50,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(req);
 		try {
 			ourLog.info(status.toString());
-			assertEquals(405, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(405);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -60,22 +59,22 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 	@Test	
 	public void testHeadJsonWithInvalidPatient() throws Exception {	
 		HttpHead httpGet = new HttpHead(ourServer.getBaseUrl() + "/Patient/123");	
-		HttpResponse status = ourClient.execute(httpGet);	
-		assertEquals(null, status.getEntity());	
- 		ourLog.info(status.toString());	
-			
-		assertEquals(404, status.getStatusLine().getStatusCode());
+		HttpResponse status = ourClient.execute(httpGet);
+		assertThat(status.getEntity()).isEqualTo(null);	
+ 		ourLog.info(status.toString());
+
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
 		assertThat(status.getFirstHeader("x-powered-by").getValue()).contains("HAPI");	
 	}
 	
 	@Test	
 	public void testHeadJsonWithValidPatient() throws Exception {	
 		HttpHead httpGet = new HttpHead(ourServer.getBaseUrl() + "/Patient/1");	
-		HttpResponse status = ourClient.execute(httpGet);	
-		assertEquals(null, status.getEntity());	
- 		ourLog.info(status.toString());	
-			
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		HttpResponse status = ourClient.execute(httpGet);
+		assertThat(status.getEntity()).isEqualTo(null);	
+ 		ourLog.info(status.toString());
+
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(status.getFirstHeader("x-powered-by").getValue()).contains("HAPI");	
 	}
 	
@@ -92,7 +91,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(req);
 		try {
 			ourLog.info(status.toString());
-			assertEquals(405, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(405);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -111,7 +110,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(req);
 		try {
 			ourLog.info(status.toString());
-			assertEquals(501, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(501);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -123,8 +122,8 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		
-		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 	}
 	
 	@AfterAll

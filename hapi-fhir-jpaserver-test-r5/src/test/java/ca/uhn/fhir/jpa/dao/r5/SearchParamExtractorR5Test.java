@@ -46,6 +46,6 @@ public class SearchParamExtractorR5Test {
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractor.extractSearchParamDates(appointment);
 
 		//We find one, and the lexer doesn't explode.
-		assertThat(dates.size()).isEqualTo(1);
+		assertThat(dates).hasSize(1);
 	}
 }

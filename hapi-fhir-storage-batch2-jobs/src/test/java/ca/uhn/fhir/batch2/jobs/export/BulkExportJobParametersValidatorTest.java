@@ -53,7 +53,7 @@ public class BulkExportJobParametersValidatorTest {
 
 		// verify
 		assertThat(result).isNotNull();
-		assertThat(result.isEmpty()).isTrue();
+		assertThat(result).isEmpty();
 	}
 
 
@@ -69,7 +69,7 @@ public class BulkExportJobParametersValidatorTest {
 
 		// verify
 		assertThat(errors).isNotNull();
-		assertThat(errors.size()).isEqualTo(1);
+		assertThat(errors).hasSize(1);
 		assertThat("Export ID does not conform to the current blob storage implementation's limitations.").isEqualTo(errors.get(0));
 	}
 
@@ -86,7 +86,7 @@ public class BulkExportJobParametersValidatorTest {
 
 		// verify
 		assertThat(errors).isNotNull();
-		assertThat(errors.size()).isEqualTo(0);
+		assertThat(errors).isEmpty();
 	}
 	@Test
 	public void validate_validParametersForPatient_returnsEmptyList() {
@@ -103,7 +103,7 @@ public class BulkExportJobParametersValidatorTest {
 
 		// verify
 		assertThat(result).isNotNull();
-		assertThat(result.isEmpty()).isTrue();
+		assertThat(result).isEmpty();
 	}
 
 	@Test
@@ -119,8 +119,8 @@ public class BulkExportJobParametersValidatorTest {
 
 		// verify
 		assertThat(result).isNotNull();
-		assertThat(result.isEmpty()).isFalse();
-		assertThat(result.get(0).contains("Resource type " + resourceType + " is not a supported resource type")).isTrue();
+		assertThat(result).isNotEmpty();
+		assertThat(result.get(0)).contains("Resource type " + resourceType + " is not a supported resource type");
 	}
 
 	@Test
@@ -140,7 +140,7 @@ public class BulkExportJobParametersValidatorTest {
 
 		// verify
 		assertThat(result).isNotNull();
-		assertThat(result.isEmpty()).isTrue();
+		assertThat(result).isEmpty();
 	}
 
 	@Test
@@ -154,8 +154,8 @@ public class BulkExportJobParametersValidatorTest {
 
 		// verify
 		assertThat(result).isNotNull();
-		assertThat(result.isEmpty()).isFalse();
-		assertThat(result.contains("Group export requires a group id, but none provided.")).isTrue();
+		assertThat(result).isNotEmpty();
+		assertThat(result).contains("Group export requires a group id, but none provided.");
 	}
 
 	@Test
@@ -169,7 +169,7 @@ public class BulkExportJobParametersValidatorTest {
 
 		// verify
 		assertThat(results).isNotNull();
-		assertThat(results.size()).isEqualTo(0);
+		assertThat(results).isEmpty();
 	}
 
 	@Test
@@ -185,8 +185,8 @@ public class BulkExportJobParametersValidatorTest {
 
 		// validate
 		assertThat(errors).isNotNull();
-		assertThat(errors.isEmpty()).isFalse();
-		assertThat(errors.contains("Bulk export of Binary resources is forbidden")).isTrue();
+		assertThat(errors).isNotEmpty();
+		assertThat(errors).contains("Bulk export of Binary resources is forbidden");
 	}
 
 	@Test
@@ -201,7 +201,7 @@ public class BulkExportJobParametersValidatorTest {
 
 		// validate
 		assertThat(errors).isNotNull();
-		assertThat(errors.isEmpty()).isFalse();
-		assertThat(errors.contains("The only allowed format for Bulk Export is currently " + Constants.CT_FHIR_NDJSON)).isTrue();
+		assertThat(errors).isNotEmpty();
+		assertThat(errors).contains("The only allowed format for Bulk Export is currently " + Constants.CT_FHIR_NDJSON);
 	}
 }

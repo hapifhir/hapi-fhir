@@ -65,7 +65,7 @@ public class BaseBatchJobParametersTest {
 		if (theParams.isExpectedToWork()) {
 			parameters.setUserData(key, testValue);
 			assertThat(parameters.getUserData().isEmpty()).isFalse();
-			assertThat(parameters.getUserData().get(key)).isEqualTo(testValue);
+			assertThat(parameters.getUserData()).containsEntry(key, testValue);
 		} else {
 			try {
 				parameters.setUserData(key, testValue);
@@ -102,7 +102,7 @@ public class BaseBatchJobParametersTest {
 
 		// test
 		parameters.setUserData(key, "test");
-		assertThat(parameters.getUserData().containsKey(key)).isTrue();
+		assertThat(parameters.getUserData()).containsKey(key);
 
 		parameters.setUserData(key, null);
 		assertThat(parameters.getUserData().containsKey(key)).isFalse();

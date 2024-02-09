@@ -33,8 +33,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -80,17 +79,17 @@ public class TransactionClientTest {
 
     client.transaction(resources);
 
-    assertEquals(HttpPost.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpPost.class);
     HttpPost post = (HttpPost) capt.getValue();
-    assertEquals("http://foo", post.getURI().toString());
+		assertThat(post.getURI().toString()).isEqualTo("http://foo");
 
     Bundle bundle = ctx.newJsonParser().parseResource(Bundle.class, new InputStreamReader(post.getEntity().getContent()));
     ourLog.debug(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-    assertEquals(2, bundle.getEntry().size());
-    assertEquals("Patient/testPersistWithSimpleLinkP01", bundle.getEntry().get(0).getResource().getIdElement().getValue());
+		assertThat(bundle.getEntry()).hasSize(2);
+		assertThat(bundle.getEntry().get(0).getResource().getIdElement().getValue()).isEqualTo("Patient/testPersistWithSimpleLinkP01");
 
-    assertTrue(bundle.getEntry().get(1).getResource().getIdElement().isEmpty());
+		assertThat(bundle.getEntry().get(1).getResource().getIdElement().isEmpty()).isTrue();
 
   }
 
@@ -119,17 +118,17 @@ public class TransactionClientTest {
 
     client.transaction(transactionBundle);
 
-    assertEquals(HttpPost.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpPost.class);
     HttpPost post = (HttpPost) capt.getValue();
-    assertEquals("http://foo", post.getURI().toString());
+		assertThat(post.getURI().toString()).isEqualTo("http://foo");
 
     Bundle bundle = ctx.newJsonParser().parseResource(Bundle.class, new InputStreamReader(post.getEntity().getContent()));
     ourLog.debug(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
-    assertEquals(2, bundle.getEntry().size());
-    assertEquals("http://foo/Patient/testPersistWithSimpleLinkP01", bundle.getEntry().get(0).getResource().getIdElement().getValue());
+		assertThat(bundle.getEntry()).hasSize(2);
+		assertThat(bundle.getEntry().get(0).getResource().getIdElement().getValue()).isEqualTo("http://foo/Patient/testPersistWithSimpleLinkP01");
 
-    assertTrue(bundle.getEntry().get(1).getResource().getIdElement().isEmpty());
+		assertThat(bundle.getEntry().get(1).getResource().getIdElement().isEmpty()).isTrue();
 
   }
 

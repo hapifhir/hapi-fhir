@@ -18,8 +18,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DeleteConditionalDstu3Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
@@ -62,9 +61,9 @@ public class DeleteConditionalDstu3Test {
 			.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("SOMESYS","SOMEID"))
 			.execute();
 
-		assertTrue(ourLastRequestWasDelete);
-		assertEquals(null, ourLastIdParam);
-		assertEquals("Patient?identifier=SOMESYS%7CSOMEID", ourLastConditionalUrl);
+		assertThat(ourLastRequestWasDelete).isTrue();
+		assertThat(ourLastIdParam).isEqualTo(null);
+		assertThat(ourLastConditionalUrl).isEqualTo("Patient?identifier=SOMESYS%7CSOMEID");
 
 	}
 

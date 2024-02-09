@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.Map;
 
 import static ca.uhn.fhir.rest.server.interceptor.s13n.StandardizingInterceptor.STANDARDIZATION_DISABLED_HEADER;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -58,8 +58,8 @@ class StandardizingInterceptorTest {
 
 		myInterceptor.resourcePreUpdate(myRequestDetails, null, p);
 
-		assertEquals("John MacDouglas1", p.getName().get(0).getNameAsSingleString());
-		assertEquals("Jim O'Brian", p.getName().get(1).getNameAsSingleString());
+		assertThat(p.getName().get(0).getNameAsSingleString()).isEqualTo("John MacDouglas1");
+		assertThat(p.getName().get(1).getNameAsSingleString()).isEqualTo("Jim O'Brian");
 	}
 
 	@Test
@@ -89,7 +89,7 @@ class StandardizingInterceptorTest {
 
 		myInterceptor.resourcePreUpdate(myRequestDetails, null, p);
 
-		assertEquals("name non'normalized", p.getName().get(0).getNameAsSingleString());
+		assertThat(p.getName().get(0).getNameAsSingleString()).isEqualTo("name non'normalized");
 	}
 
 	@Test
@@ -100,7 +100,7 @@ class StandardizingInterceptorTest {
 
 		myInterceptor.resourcePreUpdate(myRequestDetails, null, p);
 
-		assertEquals(" Email@email.com", p.getTelecom().get(0).getValue(), "Expected email to remain the same");
-		assertEquals("123-456-7890", p.getTelecom().get(1).getValue());
+		assertThat(p.getTelecom().get(0).getValue()).as("Expected email to remain the same").isEqualTo(" Email@email.com");
+		assertThat(p.getTelecom().get(1).getValue()).isEqualTo("123-456-7890");
 	}
 }

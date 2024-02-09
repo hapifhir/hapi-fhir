@@ -107,7 +107,7 @@ public class JdbcDriverTest {
 			""";
 		JdbcTemplate jdbcTemplate = new JdbcTemplate(myDs);
 		List<Map<String, Object>> outcome = jdbcTemplate.query(input, new ColumnMapRowMapper());
-		assertThat(outcome.size()).isEqualTo(2);
+		assertThat(outcome).hasSize(2);
 
 		String expectedAuthHeader = Constants.HEADER_AUTHORIZATION_VALPREFIX_BASIC + Base64Utils.encodeToString((SOME_USERNAME + ":" + SOME_PASSWORD).getBytes(StandardCharsets.UTF_8));
 		String actual = ourHeaderCaptureInterceptor.getCapturedHeaders().get(0).get(Constants.HEADER_AUTHORIZATION).get(0);

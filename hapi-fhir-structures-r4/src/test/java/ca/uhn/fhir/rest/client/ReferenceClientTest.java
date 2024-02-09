@@ -28,7 +28,7 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -62,9 +62,9 @@ public class ReferenceClientTest {
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.search(new ReferenceParam("123"));
 
-		assertEquals(HttpGet.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
 		HttpGet get = (HttpGet) capt.getValue();
-		assertEquals("http://foo/Patient?general-practitioner=123", get.getURI().toString());
+		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient?general-practitioner=123");
 	}
 
 	@Test
@@ -78,9 +78,9 @@ public class ReferenceClientTest {
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.search(new ReferenceParam("chain", "123"));
 
-		assertEquals(HttpGet.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
 		HttpGet get = (HttpGet) capt.getValue();
-		assertEquals("http://foo/Patient?general-practitioner.chain=123", get.getURI().toString());
+		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient?general-practitioner.chain=123");
 	}
 	
 	@Test
@@ -94,9 +94,9 @@ public class ReferenceClientTest {
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.search(new ReferenceParam("Organization", "chain", "123"));
 
-		assertEquals(HttpGet.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
 		HttpGet get = (HttpGet) capt.getValue();
-		assertEquals("http://foo/Patient?general-practitioner%3AOrganization.chain=123", get.getURI().toString());
+		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient?general-practitioner%3AOrganization.chain=123");
 	}
 	
 	@Test
@@ -110,9 +110,9 @@ public class ReferenceClientTest {
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.search(new ReferenceParam("Organization", null, "123"));
 
-		assertEquals(HttpGet.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
 		HttpGet get = (HttpGet) capt.getValue();
-		assertEquals("http://foo/Patient?general-practitioner=Organization%2F123", get.getURI().toString());
+		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient?general-practitioner=Organization%2F123");
 	}
 
 	private String createBundle() {

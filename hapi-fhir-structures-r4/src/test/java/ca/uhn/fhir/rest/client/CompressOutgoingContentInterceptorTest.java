@@ -20,7 +20,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CompressOutgoingContentInterceptorTest {
 
@@ -48,9 +48,9 @@ public class CompressOutgoingContentInterceptorTest {
 
 		client.create().resource(p).execute();
 
-		assertEquals("FAMILY", p.getName().get(0).getFamily());
-		assertEquals("gzip", ourLastReq);
-		assertEquals("gzip", ourLastResponseEncoding);
+		assertThat(p.getName().get(0).getFamily()).isEqualTo("FAMILY");
+		assertThat(ourLastReq).isEqualTo("gzip");
+		assertThat(ourLastResponseEncoding).isEqualTo("gzip");
 	}
 
 

@@ -297,7 +297,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		SubscriptionTriggeringSvcImpl svc = ProxyUtil.getSingletonTarget(mySubscriptionTriggeringSvc, SubscriptionTriggeringSvcImpl.class);
 		assertThat(svc.getActiveJobCount()).isEqualTo(0);
 
-		assertThat(ourCreatedPatients.size()).isEqualTo(0);
+		assertThat(ourCreatedPatients).isEmpty();
 		await().until(() -> ourUpdatedPatients.size() == 3);
 
 	}
@@ -535,7 +535,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			List<String> resubmittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
 
 			assertThat(resubmittedPatientIds.size() == submittedPatientIds.size()).isTrue();
-			assertThat(resubmittedPatientIds.containsAll(submittedPatientIds)).isTrue();
+			assertThat(resubmittedPatientIds).containsAll(submittedPatientIds);
 
 		}
 
@@ -574,7 +574,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 			List<String> resubmittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
 
 			assertThat(resubmittedPatientIds.size() == expectedPatientIds.size()).isTrue();
-			assertThat(resubmittedPatientIds.containsAll(expectedPatientIds)).isTrue();
+			assertThat(resubmittedPatientIds).containsAll(expectedPatientIds);
 		}
 	}
 

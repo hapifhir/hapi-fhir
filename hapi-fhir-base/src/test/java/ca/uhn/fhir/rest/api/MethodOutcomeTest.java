@@ -33,8 +33,8 @@ class MethodOutcomeTest {
 
 		Optional<String> firstHeader = myMethodOutcome.getFirstResponseHeader("some-header");
 
-		assertThat(firstHeader.isPresent()).isTrue();
-		assertThat(firstHeader.get()).isEqualTo("value1");
+		assertThat(firstHeader).isPresent();
+		assertThat(firstHeader).contains("value1");
 	}
 
 }

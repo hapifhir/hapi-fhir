@@ -9,9 +9,7 @@ import ca.uhn.fhir.util.TestUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * See #391
@@ -31,15 +29,15 @@ public class TestOutcomeTest {
 		IParser parser = FhirContext.forDstu2().newXmlParser();
 		String outcomeString = parser.setPrettyPrint(true).encodeResourceToString(outcome);		
 		ourLog.info(outcomeString);
-		
-		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\">" + 
-				"<meta>" + 
-				"<profile value=\"http://hl7.org/fhir/profiles/custom-operation-outcome\"/>" + 
-				"</meta>" + 
-				"<extension url=\"#someElement2\">" + 
-				"<valueString value=\"testText\"/>" + 
-				"</extension>" + 
-				"</OperationOutcome>", parser.setPrettyPrint(false).encodeResourceToString(outcome));
+
+		assertThat(parser.setPrettyPrint(false).encodeResourceToString(outcome)).isEqualTo("<OperationOutcome xmlns=\"http://hl7.org/fhir\">" +
+			"<meta>" +
+			"<profile value=\"http://hl7.org/fhir/profiles/custom-operation-outcome\"/>" +
+			"</meta>" +
+			"<extension url=\"#someElement2\">" +
+			"<valueString value=\"testText\"/>" +
+			"</extension>" +
+			"</OperationOutcome>");
 		
 		CustomOperationOutcome parsedOutcome = parser.parseResource(CustomOperationOutcome.class, outcomeString);
 		ourLog.info(outcomeString);
@@ -58,9 +56,9 @@ public class TestOutcomeTest {
 		String xmlResource = jsonParser.encodeResourceToString(outcome);
 		TestOutcome operationOutcome = jsonParser.parseResource(TestOutcome.class, xmlResource);
 
-		assertNotNull(operationOutcome.getElement());
-		assertTrue(operationOutcome.getElement() instanceof BoundCodeDt);
-		assertEquals(outcome.getElement(), operationOutcome.getElement());
+		assertThat(operationOutcome.getElement()).isNotNull();
+		assertThat(operationOutcome.getElement() instanceof BoundCodeDt).isTrue();
+		assertThat(operationOutcome.getElement()).isEqualTo(outcome.getElement());
 	}
 
 	@Test
@@ -73,9 +71,9 @@ public class TestOutcomeTest {
 		String xmlResource = xmlParser.encodeResourceToString(outcome);
 		TestOutcome operationOutcome = xmlParser.parseResource(TestOutcome.class, xmlResource);
 
-		assertNotNull(operationOutcome.getElement());
-		assertTrue(operationOutcome.getElement() instanceof BoundCodeDt);
-		assertEquals(outcome.getElement(), operationOutcome.getElement());
+		assertThat(operationOutcome.getElement()).isNotNull();
+		assertThat(operationOutcome.getElement() instanceof BoundCodeDt).isTrue();
+		assertThat(operationOutcome.getElement()).isEqualTo(outcome.getElement());
 	}
 
 	@AfterAll

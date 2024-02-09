@@ -39,15 +39,15 @@ class ConnectionPoolInfoProviderTest {
 		@Test
 		void testGetMaxWaitMillis() {
 			Optional<Long> resOpt = tested.getMaxWaitMillis();
-			assertThat(resOpt.isPresent()).isTrue();
-			assertThat(resOpt.get()).isEqualTo(MAX_WAIT_MILLIS);
+			assertThat(resOpt).isPresent();
+			assertThat(resOpt).contains(MAX_WAIT_MILLIS);
 		}
 
 		@Test
 		void testGetMaxConnectionSize() {
 			Optional<Integer> resOpt = tested.getTotalConnectionSize();
-			assertThat(resOpt.isPresent()).isTrue();
-			assertThat(resOpt.get()).isEqualTo(MAX_CONNECTIONS_TOTAL);
+			assertThat(resOpt).isPresent();
+			assertThat(resOpt).contains(MAX_CONNECTIONS_TOTAL);
 		}
 
 	}

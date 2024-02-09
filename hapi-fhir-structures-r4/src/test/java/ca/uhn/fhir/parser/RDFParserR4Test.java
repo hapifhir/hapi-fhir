@@ -7,7 +7,8 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class RDFParserR4Test {
@@ -20,7 +21,7 @@ public class RDFParserR4Test {
 		DecimalType object = new DecimalType("123.456000");
 		String expected = "123.456000";
 		String actual = ourCtx.newRDFParser().encodeToString(object);
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Test
@@ -43,7 +44,7 @@ public class RDFParserR4Test {
 			""";
 
 		String actual = ourCtx.newRDFParser().encodeToString(p);
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 	@Test
@@ -52,8 +53,7 @@ public class RDFParserR4Test {
 		name.setFamily("Simpson").addGiven("Homer").addGiven("Jay");
 		name.addExtension("http://foo", new StringType("bar"));
 
-		assertEquals("HAPI-2363: This parser does not support encoding non-resource values",
-			assertThrows(InternalErrorException.class, ()->ourCtx.newRDFParser().encodeToString(name)).getMessage());
+		assertThat(assertThrows(InternalErrorException.class, () -> ourCtx.newRDFParser().encodeToString(name)).getMessage()).isEqualTo("HAPI-2363: This parser does not support encoding non-resource values");
 	}
 
 	@Test
@@ -62,8 +62,7 @@ public class RDFParserR4Test {
 		communication.setPreferred(true);
 		communication.getLanguage().setText("English");
 
-		assertEquals("HAPI-2363: This parser does not support encoding non-resource values",
-			assertThrows(InternalErrorException.class, ()->ourCtx.newRDFParser().encodeToString(communication)).getMessage());
+		assertThat(assertThrows(InternalErrorException.class, () -> ourCtx.newRDFParser().encodeToString(communication)).getMessage()).isEqualTo("HAPI-2363: This parser does not support encoding non-resource values");
 	}
 
 }

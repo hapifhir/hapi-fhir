@@ -99,10 +99,6 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.test.utilities.server.MockServletUtil.createServletConfig;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.withSettings;
@@ -192,13 +188,13 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertEquals(2, conformance.getRest().get(0).getResource().size());
+		assertThat(conformance.getRest().get(0).getResource()).hasSize(2);
 		CapabilityStatementRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
-		assertEquals("Patient", res.getType());
+		assertThat(res.getType()).isEqualTo("Patient");
 
-		assertTrue(res.getConditionalCreate());
-		assertEquals(ConditionalDeleteStatus.MULTIPLE, res.getConditionalDelete());
-		assertTrue(res.getConditionalUpdate());
+		assertThat(res.getConditionalCreate()).isTrue();
+		assertThat(res.getConditionalDelete()).isEqualTo(ConditionalDeleteStatus.MULTIPLE);
+		assertThat(res.getConditionalUpdate()).isTrue();
 	}
 
 	@Test
@@ -242,13 +238,13 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		validate(conformance);
 
 		CapabilityStatementRestResourceComponent patient = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		assertEquals(1, patient.getOperation().size());
-		assertEquals("everything", patient.getOperation().get(0).getName());
-		assertEquals("http://localhost/baseR4/OperationDefinition/Patient-i-everything", patient.getOperation().get(0).getDefinition());
+		assertThat(patient.getOperation()).hasSize(1);
+		assertThat(patient.getOperation().get(0).getName()).isEqualTo("everything");
+		assertThat(patient.getOperation().get(0).getDefinition()).isEqualTo("http://localhost/baseR4/OperationDefinition/Patient-i-everything");
 
 		OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
 		validate(opDef);
-		assertEquals("everything", opDef.getCode());
+		assertThat(opDef.getCode()).isEqualTo("everything");
 		assertThat(opDef.getSystem()).isEqualTo(false);
 		assertThat(opDef.getType()).isEqualTo(false);
 		assertThat(opDef.getInstance()).isEqualTo(true);
@@ -273,8 +269,8 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		String conf = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
 		ourLog.info(conf);
 
-		assertEquals("everything", opDef.getCode());
-		assertEquals(false, opDef.getAffectsState());
+		assertThat(opDef.getCode()).isEqualTo("everything");
+		assertThat(opDef.getAffectsState()).isEqualTo(false);
 	}
 
 	@Test
@@ -313,12 +309,12 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
-				assertEquals("The patient's identifier", param.getDescription());
+				assertThat(param.getDescription()).isEqualTo("The patient's identifier");
 				found = true;
 			}
 		}
 
-		assertTrue(found);
+		assertThat(found).isTrue();
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = validate(conformance);
 
@@ -342,11 +338,11 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		validate(conformance);
 
 		CapabilityStatementRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
-		assertEquals("Patient", res.getType());
+		assertThat(res.getType()).isEqualTo("Patient");
 
-		assertNull(res.getConditionalCreateElement().getValue());
-		assertNull(res.getConditionalDeleteElement().getValue());
-		assertNull(res.getConditionalUpdateElement().getValue());
+		assertThat(res.getConditionalCreateElement().getValue()).isNull();
+		assertThat(res.getConditionalDeleteElement().getValue()).isNull();
+		assertThat(res.getConditionalUpdateElement().getValue()).isNull();
 	}
 
 	@Test
@@ -368,19 +364,19 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(operationId, requestDetails);
 		validate(opDef);
 		Set<String> types = toStrings(opDef.getResource());
-		assertEquals("someOp", opDef.getCode());
-		assertEquals(true, opDef.getInstance());
-		assertEquals(false, opDef.getSystem());
+		assertThat(opDef.getCode()).isEqualTo("someOp");
+		assertThat(opDef.getInstance()).isEqualTo(true);
+		assertThat(opDef.getSystem()).isEqualTo(false);
 		assertThat(types).containsExactlyInAnyOrder("Patient", "Encounter");
-		assertEquals(2, opDef.getParameter().size());
-		assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
-		assertEquals("date", opDef.getParameter().get(0).getType());
-		assertEquals("Start description", opDef.getParameter().get(0).getDocumentation());
+		assertThat(opDef.getParameter()).hasSize(2);
+		assertThat(opDef.getParameter().get(0).getName()).isEqualTo("someOpParam1");
+		assertThat(opDef.getParameter().get(0).getType()).isEqualTo("date");
+		assertThat(opDef.getParameter().get(0).getDocumentation()).isEqualTo("Start description");
 
 		List<Extension> exampleExtensions = opDef.getParameter().get(0).getExtensionsByUrl(HapiExtensions.EXT_OP_PARAMETER_EXAMPLE_VALUE);
-		assertEquals(2, exampleExtensions.size());
-		assertEquals("2001", exampleExtensions.get(0).getValueAsPrimitive().getValueAsString());
-		assertEquals("2002", exampleExtensions.get(1).getValueAsPrimitive().getValueAsString());
+		assertThat(exampleExtensions).hasSize(2);
+		assertThat(exampleExtensions.get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("2001");
+		assertThat(exampleExtensions.get(1).getValueAsPrimitive().getValueAsString()).isEqualTo("2002");
 	}
 
 	/**
@@ -402,12 +398,12 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		validate(conformance);
 
 		CapabilityStatementRestResourceComponent patient = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		assertEquals(2, patient.getOperation().size());
+		assertThat(patient.getOperation()).hasSize(2);
 		assertThat(toOperationNames(patient.getOperation())).containsExactlyInAnyOrder("someOp", "validate");
 		assertThat(toOperationDefinitions(patient.getOperation())).containsExactlyInAnyOrder("http://localhost/baseR4/OperationDefinition/EncounterPatient-i-someOp", "http://localhost/baseR4/OperationDefinition/EncounterPatient-i-validate");
 
 		CapabilityStatementRestResourceComponent encounter = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Encounter")).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		assertEquals(2, encounter.getOperation().size());
+		assertThat(encounter.getOperation()).hasSize(2);
 		assertThat(toOperationNames(encounter.getOperation())).containsExactlyInAnyOrder("someOp", "validate");
 		assertThat(toOperationDefinitions(encounter.getOperation())).as(toOperationDefinitions(encounter.getOperation()).toString()).containsExactlyInAnyOrder("http://localhost/baseR4/OperationDefinition/EncounterPatient-i-someOp", "http://localhost/baseR4/OperationDefinition/EncounterPatient-i-validate");
 
@@ -417,28 +413,28 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 			validate(opDef);
 			ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
-			assertEquals("someOp", opDef.getCode());
-			assertEquals(true, opDef.getInstance());
-			assertEquals(false, opDef.getSystem());
+			assertThat(opDef.getCode()).isEqualTo("someOp");
+			assertThat(opDef.getInstance()).isEqualTo(true);
+			assertThat(opDef.getSystem()).isEqualTo(false);
 			assertThat(types).containsExactlyInAnyOrder("Patient", "Encounter");
-			assertEquals(2, opDef.getParameter().size());
-			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
-			assertEquals("date", opDef.getParameter().get(0).getType());
-			assertEquals("someOpParam2", opDef.getParameter().get(1).getName());
-			assertEquals("Resource", opDef.getParameter().get(1).getType());
+			assertThat(opDef.getParameter()).hasSize(2);
+			assertThat(opDef.getParameter().get(0).getName()).isEqualTo("someOpParam1");
+			assertThat(opDef.getParameter().get(0).getType()).isEqualTo("date");
+			assertThat(opDef.getParameter().get(1).getName()).isEqualTo("someOpParam2");
+			assertThat(opDef.getParameter().get(1).getType()).isEqualTo("Resource");
 		}
 		{
 			OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType("OperationDefinition/EncounterPatient-i-validate"), createRequestDetails(rs));
 			validate(opDef);
 			ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
-			assertEquals("validate", opDef.getCode());
-			assertEquals(true, opDef.getInstance());
-			assertEquals(false, opDef.getSystem());
+			assertThat(opDef.getCode()).isEqualTo("validate");
+			assertThat(opDef.getInstance()).isEqualTo(true);
+			assertThat(opDef.getSystem()).isEqualTo(false);
 			assertThat(types).containsExactlyInAnyOrder("Patient", "Encounter");
-			assertEquals(1, opDef.getParameter().size());
-			assertEquals("resource", opDef.getParameter().get(0).getName());
-			assertEquals("Resource", opDef.getParameter().get(0).getType());
+			assertThat(opDef.getParameter()).hasSize(1);
+			assertThat(opDef.getParameter().get(0).getName()).isEqualTo("resource");
+			assertThat(opDef.getParameter().get(0).getType()).isEqualTo("Resource");
 		}
 	}
 
@@ -478,17 +474,17 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 
 		CapabilityStatementRestComponent rest = conformance.getRest().get(0);
 		CapabilityStatementRestResourceComponent res = rest.getResource().get(0);
-		assertEquals("DiagnosticReport", res.getType());
+		assertThat(res.getType()).isEqualTo("DiagnosticReport");
 
-		assertEquals("subject.identifier", res.getSearchParam().get(0).getName());
+		assertThat(res.getSearchParam().get(0).getName()).isEqualTo("subject.identifier");
 //		assertEquals("identifier", res.getSearchParam().get(0).getChain().get(0).getValue());
 
-		assertEquals(DiagnosticReport.SP_CODE, res.getSearchParam().get(1).getName());
+		assertThat(res.getSearchParam().get(1).getName()).isEqualTo(DiagnosticReport.SP_CODE);
 
-		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(2).getName());
+		assertThat(res.getSearchParam().get(2).getName()).isEqualTo(DiagnosticReport.SP_DATE);
 
-		assertEquals(1, res.getSearchInclude().size());
-		assertEquals("DiagnosticReport.result", res.getSearchInclude().get(0).getValue());
+		assertThat(res.getSearchInclude()).hasSize(1);
+		assertThat(res.getSearchInclude().get(0).getValue()).isEqualTo("DiagnosticReport.result");
 	}
 
 	@Test
@@ -555,7 +551,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 				found = true;
 			}
 		}
-		assertTrue(found);
+		assertThat(found).isTrue();
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = validate(conformance);
@@ -605,11 +601,11 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(25);
-				assertEquals("The organization at which this person is a patient", param.getDescription());
+				assertThat(param.getDescription()).isEqualTo("The organization at which this person is a patient");
 				found = true;
 			}
 		}
-		assertTrue(found);
+		assertThat(found).isTrue();
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = validate(conformance);
@@ -637,11 +633,11 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
-				assertEquals("The organization at which this person is a patient", param.getDescription());
+				assertThat(param.getDescription()).isEqualTo("The organization at which this person is a patient");
 				found = true;
 			}
 		}
-		assertTrue(found);
+		assertThat(found).isTrue();
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = validate(conformance);
@@ -691,7 +687,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		conformanceWithType.setId("");
 		String confWithType = validate(conformanceWithType);
 
-		assertEquals(confNoType, confWithType);
+		assertThat(confWithType).isEqualTo(confNoType);
 		assertThat(confNoType).contains("<date value=\"2011-02-22T11:22:33Z\"/>");
 	}
 
@@ -763,7 +759,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		validate(opDef);
 
 		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().get(0);
-		assertEquals("DiagnosticReport", resource.getType());
+		assertThat(resource.getType()).isEqualTo("DiagnosticReport");
 		List<String> searchParamNames = resource.getSearchParam().stream().map(t -> t.getName()).collect(Collectors.toList());
 		assertThat(searchParamNames).containsExactlyInAnyOrder("patient.birthdate", "patient.family", "patient.given", "date");
 	}
@@ -806,35 +802,35 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		// On Patient Resource
 		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
 		CapabilityStatementRestResourceOperationComponent graphQlOperation = resource.getOperation().stream().filter(t -> t.getName().equals("graphql")).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		assertEquals("graphql", graphQlOperation.getName());
-		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-graphql", graphQlOperation.getDefinition());
-		assertEquals("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.", graphQlOperation.getDocumentation());
+		assertThat(graphQlOperation.getName()).isEqualTo("graphql");
+		assertThat(graphQlOperation.getDefinition()).isEqualTo("http://localhost/baseR4/OperationDefinition/Global-is-graphql");
+		assertThat(graphQlOperation.getDocumentation()).isEqualTo("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.");
 
 		// On Patient Resource
 		resource = opDef.getRest().get(0).getResource().stream().filter(t -> t.getType().equals("Observation")).findFirst().orElseThrow(() -> new IllegalArgumentException());
 		graphQlOperation = resource.getOperation().stream().filter(t -> t.getName().equals("graphql")).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		assertEquals("graphql", graphQlOperation.getName());
-		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-graphql", graphQlOperation.getDefinition());
-		assertEquals("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.", graphQlOperation.getDocumentation());
+		assertThat(graphQlOperation.getName()).isEqualTo("graphql");
+		assertThat(graphQlOperation.getDefinition()).isEqualTo("http://localhost/baseR4/OperationDefinition/Global-is-graphql");
+		assertThat(graphQlOperation.getDocumentation()).isEqualTo("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.");
 
 		// At Server Level
 		CapabilityStatementRestComponent rest = opDef.getRest().get(0);
 		graphQlOperation = rest.getOperation().stream().filter(t -> t.getName().equals("graphql")).findAny().orElseThrow(() -> new IllegalArgumentException());
-		assertEquals("graphql", graphQlOperation.getName());
-		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-graphql", graphQlOperation.getDefinition());
-		assertEquals("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.", graphQlOperation.getDocumentation());
+		assertThat(graphQlOperation.getName()).isEqualTo("graphql");
+		assertThat(graphQlOperation.getDefinition()).isEqualTo("http://localhost/baseR4/OperationDefinition/Global-is-graphql");
+		assertThat(graphQlOperation.getDocumentation()).isEqualTo("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.");
 
 		// Fetch OperationDefinition
 		IdType id = new IdType("http://localhost/baseR4/OperationDefinition/Global-is-graphql");
 		RequestDetails requestDetails = createRequestDetails(rs);
 		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(id, requestDetails);
-		assertEquals("Graphql", operationDefinition.getName());
-		assertEquals("graphql", operationDefinition.getCode());
-		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-graphql", operationDefinition.getUrl());
-		assertEquals("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.", operationDefinition.getDescription());
-		assertTrue(operationDefinition.getSystem());
-		assertFalse(operationDefinition.getType());
-		assertTrue(operationDefinition.getInstance());
+		assertThat(operationDefinition.getName()).isEqualTo("Graphql");
+		assertThat(operationDefinition.getCode()).isEqualTo("graphql");
+		assertThat(operationDefinition.getUrl()).isEqualTo("http://localhost/baseR4/OperationDefinition/Global-is-graphql");
+		assertThat(operationDefinition.getDescription()).isEqualTo("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.");
+		assertThat(operationDefinition.getSystem()).isTrue();
+		assertThat(operationDefinition.getType()).isFalse();
+		assertThat(operationDefinition.getInstance()).isTrue();
 	}
 
 	@Test
@@ -898,28 +894,28 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		// On Patient Resource
 		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
 		CapabilityStatementRestResourceOperationComponent operation = resource.getOperation().stream().filter(t -> t.getName().equals("diff")).findFirst().orElseThrow(() -> new IllegalArgumentException());
-		assertEquals("diff", operation.getName());
-		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-diff", operation.getDefinition());
-		assertEquals("This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.", operation.getDocumentation());
+		assertThat(operation.getName()).isEqualTo("diff");
+		assertThat(operation.getDefinition()).isEqualTo("http://localhost/baseR4/OperationDefinition/Global-is-diff");
+		assertThat(operation.getDocumentation()).isEqualTo("This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.");
 
 		// At Server Level
 		CapabilityStatementRestComponent rest = opDef.getRest().get(0);
 		operation = rest.getOperation().stream().filter(t -> t.getName().equals("diff")).findAny().orElse(null);
-		assertEquals("diff", operation.getName());
-		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-diff", operation.getDefinition());
-		assertEquals("This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.", operation.getDocumentation());
+		assertThat(operation.getName()).isEqualTo("diff");
+		assertThat(operation.getDefinition()).isEqualTo("http://localhost/baseR4/OperationDefinition/Global-is-diff");
+		assertThat(operation.getDocumentation()).isEqualTo("This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.");
 
 		// Fetch OperationDefinition
 		IdType id = new IdType("http://localhost/baseR4/OperationDefinition/Global-is-diff");
 		RequestDetails requestDetails = createRequestDetails(rs);
 		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(id, requestDetails);
-		assertEquals("Diff", operationDefinition.getName());
-		assertEquals("diff", operationDefinition.getCode());
-		assertEquals("http://localhost/baseR4/OperationDefinition/Global-is-diff", operationDefinition.getUrl());
-		assertEquals("This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.", operationDefinition.getDescription());
-		assertTrue(operationDefinition.getSystem());
-		assertFalse(operationDefinition.getType());
-		assertTrue(operationDefinition.getInstance());
+		assertThat(operationDefinition.getName()).isEqualTo("Diff");
+		assertThat(operationDefinition.getCode()).isEqualTo("diff");
+		assertThat(operationDefinition.getUrl()).isEqualTo("http://localhost/baseR4/OperationDefinition/Global-is-diff");
+		assertThat(operationDefinition.getDescription()).isEqualTo("This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.");
+		assertThat(operationDefinition.getSystem()).isTrue();
+		assertThat(operationDefinition.getType()).isFalse();
+		assertThat(operationDefinition.getInstance()).isTrue();
 	}
 
 	@Test
@@ -976,28 +972,28 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		// On Patient Resource
 		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
 		List<CapabilityStatementRestResourceOperationComponent> expungeResourceOperations = resource.getOperation().stream().filter(t -> t.getName().equals("expunge")).collect(Collectors.toList());
-		assertEquals(1, expungeResourceOperations.size());
+		assertThat(expungeResourceOperations).hasSize(1);
 		CapabilityStatementRestResourceOperationComponent operation = expungeResourceOperations.get(0);
-		assertEquals("expunge", operation.getName());
-		assertEquals("http://localhost/baseR4/OperationDefinition/Patient-it-expunge", operation.getDefinition());
-		assertEquals("This is the expunge operation", operation.getDocumentation());
+		assertThat(operation.getName()).isEqualTo("expunge");
+		assertThat(operation.getDefinition()).isEqualTo("http://localhost/baseR4/OperationDefinition/Patient-it-expunge");
+		assertThat(operation.getDocumentation()).isEqualTo("This is the expunge operation");
 
 		// At Server Level
 		CapabilityStatementRestComponent rest = opDef.getRest().get(0);
 		operation = rest.getOperation().stream().filter(t -> t.getName().equals("expunge")).findAny().orElse(null);
-		assertNull(operation);
+		assertThat(operation).isNull();
 
 		// Fetch OperationDefinition
 		IdType id = new IdType("http://localhost/baseR4/OperationDefinition/Patient-it-expunge");
 		RequestDetails requestDetails = createRequestDetails(rs);
 		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(id, requestDetails);
-		assertEquals("Expunge", operationDefinition.getName());
-		assertEquals("expunge", operationDefinition.getCode());
-		assertEquals("http://localhost/baseR4/OperationDefinition/Patient-it-expunge", operationDefinition.getUrl());
-		assertEquals("This is the expunge operation", operationDefinition.getDescription());
-		assertFalse(operationDefinition.getSystem());
-		assertTrue(operationDefinition.getType());
-		assertTrue(operationDefinition.getInstance());
+		assertThat(operationDefinition.getName()).isEqualTo("Expunge");
+		assertThat(operationDefinition.getCode()).isEqualTo("expunge");
+		assertThat(operationDefinition.getUrl()).isEqualTo("http://localhost/baseR4/OperationDefinition/Patient-it-expunge");
+		assertThat(operationDefinition.getDescription()).isEqualTo("This is the expunge operation");
+		assertThat(operationDefinition.getSystem()).isFalse();
+		assertThat(operationDefinition.getType()).isTrue();
+		assertThat(operationDefinition.getInstance()).isTrue();
 
 	}
 
@@ -1038,7 +1034,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		validate(opDef);
 
 		CapabilityStatementRestResourceComponent resource = opDef.getRest().get(0).getResource().get(0);
-		assertEquals("DiagnosticReport", resource.getType());
+		assertThat(resource.getType()).isEqualTo("DiagnosticReport");
 		List<String> searchParamNames = resource.getSearchParam().stream().map(t -> t.getName()).collect(Collectors.toList());
 		assertThat(searchParamNames).containsExactlyInAnyOrder("date", "_lastUpdated");
 	}
@@ -1078,7 +1074,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		assertThat(operationDefinition.getType()).isEqualTo(false);
 		assertThat(operationDefinition.getInstance()).isEqualTo(false);
 		List<OperationDefinitionParameterComponent> parameters = operationDefinition.getParameter();
-		assertThat(parameters.size()).isEqualTo(1);
+		assertThat(parameters).hasSize(1);
 		OperationDefinitionParameterComponent param = parameters.get(0);
 		assertThat(param.getName()).isEqualTo(NamedQueryPlainProvider.SP_QUANTITY);
 		assertThat(param.getType()).isEqualTo("string");
@@ -1117,7 +1113,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		assertThat(operationDefinition.getType()).isEqualTo(true);
 		assertThat(operationDefinition.getInstance()).isEqualTo(false);
 		List<OperationDefinitionParameterComponent> parameters = operationDefinition.getParameter();
-		assertThat(parameters.size()).isEqualTo(1);
+		assertThat(parameters).hasSize(1);
 		OperationDefinitionParameterComponent param = parameters.get(0);
 		assertThat(param.getName()).isEqualTo(NamedQueryResourceProvider.SP_PARAM);
 		assertThat(param.getType()).isEqualTo("string");
@@ -1147,12 +1143,12 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 
 		CapabilityStatementRestResourceComponent patient = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
 		List<CapabilityStatementRestResourceOperationComponent> operations = patient.getOperation();
-		assertThat(operations.size()).isEqualTo(1);
+		assertThat(operations).hasSize(1);
 		assertThat(operations.get(0).getName()).isEqualTo(TypeLevelOperationProvider.OPERATION_NAME);
 
 		OperationDefinition opDef = (OperationDefinition) sc.readOperationDefinition(new IdType(operations.get(0).getDefinition()), createRequestDetails(rs));
 		validate(opDef);
-		assertEquals(TypeLevelOperationProvider.OPERATION_NAME, opDef.getCode());
+		assertThat(opDef.getCode()).isEqualTo(TypeLevelOperationProvider.OPERATION_NAME);
 		assertThat(opDef.getSystem()).isEqualTo(false);
 		assertThat(opDef.getType()).isEqualTo(true);
 		assertThat(opDef.getInstance()).isEqualTo(false);
@@ -1314,12 +1310,12 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		rs.init(createServletConfig());
 
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
-		assertEquals(2, conformance.getRest().get(0).getResource().size());
+		assertThat(conformance.getRest().get(0).getResource()).hasSize(2);
 		List<CapabilityStatementRestResourceOperationComponent> res = conformance.getRest().get(0).getResource().get(1).getOperation();
-		assertEquals(1, res.size());
+		assertThat(res).hasSize(1);
 		CapabilityStatementRestResourceOperationComponent operationComponent = res.get(0);
-		assertEquals("everything", operationComponent.getName());
-		assertEquals("http://hl7.org/fhir/OperationDefinition/Patient-everything", operationComponent.getDefinition());
+		assertThat(operationComponent.getName()).isEqualTo("everything");
+		assertThat(operationComponent.getDefinition()).isEqualTo("http://hl7.org/fhir/OperationDefinition/Patient-everything");
 	}
 
 	private List<String> toOperationIdParts(List<CapabilityStatementRestResourceOperationComponent> theOperation) {
@@ -1355,7 +1351,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		String outcome = myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info("Outcome: {}", outcome);
 
-		assertTrue(result.isSuccessful(), outcome);
+		assertThat(result.isSuccessful()).as(outcome).isTrue();
 		List<OperationOutcome.OperationOutcomeIssueComponent> warningsAndErrors = operationOutcome
 			.getIssue()
 			.stream()

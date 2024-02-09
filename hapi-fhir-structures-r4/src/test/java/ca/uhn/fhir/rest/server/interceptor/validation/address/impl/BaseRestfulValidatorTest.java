@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.assertj.core.api.Assertions.fail;
 
 import static org.mockito.Mockito.*;
@@ -23,7 +22,7 @@ class BaseRestfulValidatorTest {
 		when(responseEntity.getBody()).thenReturn("{}");
 
 		TestRestfulValidator val = spy(new TestRestfulValidator(responseEntity));
-		assertNotNull(val.isValid(new Address(), FhirContext.forR4()));
+		assertThat(val.isValid(new Address(), FhirContext.forR4())).isNotNull();
 
 		verify(val, times(1)).getResponseEntity(any(IBase.class), any(FhirContext.class));
 		verify(val, times(1)).getValidationResult(any(), any(), any());
@@ -36,7 +35,7 @@ class BaseRestfulValidatorTest {
 
 		TestRestfulValidator val = new TestRestfulValidator(responseEntity);
 		try {
-			assertNotNull(val.isValid(new Address(), FhirContext.forR4()));
+			assertThat(val.isValid(new Address(), FhirContext.forR4())).isNotNull();
 			fail("");		} catch (Exception e) {
 		}
 	}

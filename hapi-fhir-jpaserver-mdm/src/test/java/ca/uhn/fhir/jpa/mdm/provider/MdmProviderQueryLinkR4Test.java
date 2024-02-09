@@ -208,7 +208,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 
 		private Long extractCreated(Parameters.ParametersParameterComponent theParamComponent) {
 			Optional<IBase> opt = ParametersUtil.getParameterPartValue(myFhirContext, theParamComponent, "linkUpdated");
-			assertThat(opt.isPresent()).isTrue();
+			assertThat(opt).isPresent();
 			DecimalType createdDateDt = (DecimalType) opt.get();
 			return createdDateDt.getValue().longValue();
 		}
@@ -216,7 +216,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 
 		private Double extractScore(Parameters.ParametersParameterComponent theParamComponent) {
 			Optional<IBase> opt = ParametersUtil.getParameterPartValue(myFhirContext, theParamComponent, "score");
-			assertThat(opt.isPresent()).isTrue();
+			assertThat(opt).isPresent();
 			DecimalType scoreIntegerDt = (DecimalType) opt.get();
 			assertThat(scoreIntegerDt.getValue()).isNotNull();
 			return scoreIntegerDt.getValue().doubleValue();
@@ -295,11 +295,11 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 			assertThat(mdmLink.size()).isLessThanOrEqualTo(2);
 
 			List<Parameters.ParametersParameterComponent> selfUrl = getParametersByName(result, "self");
-			assertThat(selfUrl.size()).isEqualTo(1);
+			assertThat(selfUrl).hasSize(1);
 			//We have stopped finding patients, make sure theres no next page
 			if (StringUtils.isEmpty(sourceResourceIds)) {
 				List<Parameters.ParametersParameterComponent> nextUrl= getParametersByName(result, "next");
-				assertThat(nextUrl.size()).isEqualTo(0);
+				assertThat(nextUrl).isEmpty();
 				break;
 			}
 			offset += count;
@@ -427,7 +427,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 		assertThat(list).as("All duplicate resources with " + RESOURCE_TYPE_PATIENT + " type found").hasSize(1);
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
 		assertMdmLink(2, part, myGoldenResource1Id.getValue(), myGoldenResource2Id.getValue(), MdmMatchResultEnum.POSSIBLE_DUPLICATE, "false", "false", null);
-		assertThat(myGoldenResource1Id.toString().contains("Patient")).isTrue();
+		assertThat(myGoldenResource1Id.toString()).contains("Patient");
 		assertResponseDuplicateCount(list.size(), result);
 	}
 

@@ -15,8 +15,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class PrimitiveTypeEqualsPredicateTest {
 
@@ -70,28 +69,28 @@ class PrimitiveTypeEqualsPredicateTest {
 
 	@Test
 	public void testNegativeMatchOnTheSameType() {
-		assertFalse(cut.test(myPositiveTest1, myNegativeTest));
-		assertFalse(cut.test(myNegativeTest, myPositiveTest1));
+		assertThat(cut.test(myPositiveTest1, myNegativeTest)).isFalse();
+		assertThat(cut.test(myNegativeTest, myPositiveTest1)).isFalse();
 	}
 
 	@Test
 	public void testNegativeMatchOnDifferentTypes() {
 		Person person = new Person();
 		person.addName().addGiven("John");
-		assertFalse(cut.test(myNegativeTest, person));
+		assertThat(cut.test(myNegativeTest, person)).isFalse();
 	}
 
 	@Test
 	public void testNulls() {
-		assertTrue(cut.test(null, null));
-		assertFalse(cut.test(myPositiveTest1, null));
-		assertFalse(cut.test(null, myPositiveTest1));
+		assertThat(cut.test(null, null)).isTrue();
+		assertThat(cut.test(myPositiveTest1, null)).isFalse();
+		assertThat(cut.test(null, myPositiveTest1)).isFalse();
 	}
 
 	@Test
 	public void testPositiveMatchOnTheSameType() {
-		assertTrue(cut.test(myPositiveTest1, myPositiveTest2));
-		assertTrue(cut.test(myPositiveTest1, myPositiveTest1));
+		assertThat(cut.test(myPositiveTest1, myPositiveTest2)).isTrue();
+		assertThat(cut.test(myPositiveTest1, myPositiveTest1)).isTrue();
 	}
 
 }

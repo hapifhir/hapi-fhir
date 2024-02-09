@@ -11,8 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CaptureResourceSourceFromHeaderInterceptorTest {
 
@@ -42,7 +41,7 @@ public class CaptureResourceSourceFromHeaderInterceptorTest {
 		ourServerRule.getFhirClient().create().resource(resource).execute();
 
 		Patient stored = myPatientProviderRule.getStoredResources().get(0);
-		assertNull(stored.getMeta().getSource());
+		assertThat(stored.getMeta().getSource()).isNull();
 	}
 
 	@Test
@@ -54,7 +53,7 @@ public class CaptureResourceSourceFromHeaderInterceptorTest {
 		ourServerRule.getFhirClient().create().resource(resource).execute();
 
 		Patient stored = myPatientProviderRule.getStoredResources().get(0);
-		assertEquals("http://source", stored.getMeta().getSource());
+		assertThat(stored.getMeta().getSource()).isEqualTo("http://source");
 	}
 
 	@Test
@@ -70,7 +69,7 @@ public class CaptureResourceSourceFromHeaderInterceptorTest {
 			.execute();
 
 		Patient stored = myPatientProviderRule.getStoredResources().get(0);
-		assertEquals("http://header", stored.getMeta().getSource());
+		assertThat(stored.getMeta().getSource()).isEqualTo("http://header");
 	}
 
 	@Test
@@ -87,7 +86,7 @@ public class CaptureResourceSourceFromHeaderInterceptorTest {
 			.execute();
 
 		Patient stored = myPatientProviderRule.getStoredResources().get(0);
-		assertEquals("http://header", stored.getMeta().getSource());
+		assertThat(stored.getMeta().getSource()).isEqualTo("http://header");
 	}
 
 	@Test
@@ -98,7 +97,7 @@ public class CaptureResourceSourceFromHeaderInterceptorTest {
 			.forResource(Patient.class)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals(0, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).isEmpty();
 	}
 
 }

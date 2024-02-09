@@ -26,7 +26,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -116,7 +115,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 
 		myCaptureQueriesListener.clear();
 		List<String> results = toUnqualifiedVersionlessIdValues(myObservationDao.observationsLastN(params, mockSrd(), null));
-		assertEquals(75, results.size());
+		assertThat(results).hasSize(75);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		List<String> queries = myCaptureQueriesListener
 			.getSelectQueriesForCurrentThread()
@@ -128,7 +127,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 
 		// 3 queries to actually perform the search
 		// 1 query to lookup up Search from cache, and 2 chunked queries to retrieve resources by PID.
-		assertEquals(6, queries.size());
+		assertThat(queries).hasSize(6);
 
 		// The first chunked query should have a full complement of PIDs
 		StringBuilder firstQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");

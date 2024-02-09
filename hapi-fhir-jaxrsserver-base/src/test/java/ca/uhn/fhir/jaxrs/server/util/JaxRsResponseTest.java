@@ -82,8 +82,8 @@ public class JaxRsResponseTest {
 		assertThat(result.getStatus()).isEqualTo(200);
 		assertThat(result.getHeaderString(Constants.HEADER_CONTENT_TYPE)).isEqualTo("application/json+fhir; charset=UTF-8");
 		System.out.println(result.getEntity().toString());
-		assertThat(result.getEntity().toString().contains("resourceType\": \"Patient")).isTrue();
-		assertThat(result.getEntity().toString().contains("15")).isTrue();
+		assertThat(result.getEntity().toString()).contains("resourceType\": \"Patient");
+		assertThat(result.getEntity().toString()).contains("15");
 
 	}
 
@@ -95,8 +95,8 @@ public class JaxRsResponseTest {
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), createPatient(), theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);
 		assertThat(result.getStatus()).isEqualTo(200);
 		assertThat(result.getHeaderString(Constants.HEADER_CONTENT_TYPE)).isEqualTo("application/xml+fhir; charset=UTF-8");
-		assertThat(result.getEntity().toString().contains("<Patient")).isTrue();
-		assertThat(result.getEntity().toString().contains("15")).isTrue();
+		assertThat(result.getEntity().toString()).contains("<Patient");
+		assertThat(result.getEntity().toString()).contains("15");
 	}
 
 	@Test

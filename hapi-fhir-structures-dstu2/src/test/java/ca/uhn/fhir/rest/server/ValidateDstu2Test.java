@@ -28,9 +28,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ValidateDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
@@ -78,7 +78,7 @@ public class ValidateDstu2Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(resp, stringContainsInOrder("<OperationOutcome"));
 	}
@@ -97,10 +97,10 @@ public class ValidateDstu2Test {
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(ourLastResourceBody, stringContainsInOrder("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001"));
-		assertEquals(EncodingEnum.JSON, ourLastEncoding);
+		assertThat(ourLastEncoding).isEqualTo(EncodingEnum.JSON);
 
 	}
 
@@ -123,11 +123,11 @@ public class ValidateDstu2Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(resp, stringContainsInOrder("<OperationOutcome"));
-		assertEquals("http://foo", ourLastProfile);
-		assertEquals(ValidationModeEnum.CREATE, ourLastMode);
+		assertThat(ourLastProfile).isEqualTo("http://foo");
+		assertThat(ourLastMode).isEqualTo(ValidationModeEnum.CREATE);
 	}
 
 	@Test
@@ -150,7 +150,7 @@ public class ValidateDstu2Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(resp, stringContainsInOrder("<OperationOutcome", "FOOBAR"));
 	}

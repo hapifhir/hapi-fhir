@@ -86,8 +86,8 @@ public class JaxRsMethodBindingsTest {
 			new TestDoubleSearchProvider();
 			fail("");
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage().contains("search1")).isTrue();
-			assertThat(e.getMessage().contains("search2")).isTrue();
+			assertThat(e.getMessage()).contains("search1");
+			assertThat(e.getMessage()).contains("search2");
 		}
 	}
 

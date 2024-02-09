@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class StructureMapTest extends BaseValidationTestWithInlineMocks {
 
@@ -290,7 +290,7 @@ public class StructureMapTest extends BaseValidationTestWithInlineMocks {
 		StructureMapUtilities scu = new StructureMapUtilities(hapiContext, maps, null, null);
 		List<StructureDefinition> result = scu.analyse(null, map).getProfiles();
 
-		assertEquals(1, result.size());
+		assertThat(result).hasSize(1);
 
 		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.get(0)));
 	}

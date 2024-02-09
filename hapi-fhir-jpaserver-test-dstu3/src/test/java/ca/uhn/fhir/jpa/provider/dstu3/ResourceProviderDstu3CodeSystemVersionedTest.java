@@ -432,7 +432,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("subsumes");
 
@@ -450,7 +450,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("subsumes");
 
@@ -468,7 +468,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("subsumes");
 
@@ -489,7 +489,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("subsumed-by");
 
@@ -507,7 +507,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("subsumed-by");
 
@@ -525,7 +525,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("subsumed-by");
 	}
@@ -545,7 +545,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("not-subsumed");
 
@@ -563,7 +563,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("not-subsumed");
 
@@ -581,7 +581,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("not-subsumed");
 
@@ -618,7 +618,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("subsumes");
 
@@ -634,7 +634,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("subsumes");
 
@@ -650,7 +650,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("subsumes");
 
@@ -671,7 +671,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("subsumed-by");
 
@@ -687,7 +687,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		 resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("subsumed-by");
 
@@ -703,7 +703,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("subsumed-by");
 
@@ -723,7 +723,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("not-subsumed");
 
@@ -739,7 +739,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("not-subsumed");
 
@@ -755,7 +755,7 @@ public class ResourceProviderDstu3CodeSystemVersionedTest extends BaseResourcePr
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
 		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("not-subsumed");
 

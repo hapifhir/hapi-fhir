@@ -210,7 +210,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
 			String resourceTypeInFile = file.getKey();
 			List<String> binaryIds = file.getValue();
-			assertThat(binaryIds.size()).isEqualTo(1);
+			assertThat(binaryIds).hasSize(1);
 			for (String binaryId : binaryIds) {
 				Binary binary = myBinaryDao.read(new IdType(binaryId));
 				assertThat(binary.getContentType()).isEqualTo(Constants.CT_FHIR_NDJSON);

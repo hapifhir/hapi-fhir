@@ -79,7 +79,7 @@ class MdmSubscriptionLoaderR5Test {
         SubscriptionTopic subscriptionTopic = subscriptionTopicCaptor.getValue();
 		assertThat(subscriptionTopic).isNotNull();
 		assertThat(subscriptionTopic.getId()).isEqualTo("mdm-subscription-topic");
-		assertThat(subscriptionTopic.getResourceTrigger().size()).isEqualTo(1);
+		assertThat(subscriptionTopic.getResourceTrigger()).hasSize(1);
 		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent triggerComponent = subscriptionTopic.getResourceTrigger().get(0);
 		assertThat(triggerComponent.getResource()).isEqualTo("Patient");
 

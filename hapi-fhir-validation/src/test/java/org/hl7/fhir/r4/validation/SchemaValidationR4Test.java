@@ -19,7 +19,6 @@ import java.security.CodeSource;
 import java.text.MessageFormat;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class SchemaValidationR4Test extends BaseValidationTestWithInlineMocks {
 	private static final Logger ourLog = LoggerFactory.getLogger(SchemaValidationR4Test.class);
@@ -75,7 +74,7 @@ public class SchemaValidationR4Test extends BaseValidationTestWithInlineMocks {
 		 * DocumentBuilderFactory implementation: com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl loaded from: Java Runtime
 		 */
 
-		assertFalse(result.isSuccessful());
+		assertThat(result.isSuccessful()).isFalse();
 		assertThat(encoded).contains("passwd");
 		assertThat(encoded).contains("accessExternalDTD");
 	}

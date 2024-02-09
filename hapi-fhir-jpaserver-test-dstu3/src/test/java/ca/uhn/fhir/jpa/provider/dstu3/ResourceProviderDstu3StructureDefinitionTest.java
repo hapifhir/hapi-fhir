@@ -29,7 +29,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 			.withParameter(Parameters.class, "definition", sd)
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertThat(response.getSnapshot().getElement().size()).isEqualTo(54);
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 
@@ -45,7 +45,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 			.withNoParameters(Parameters.class)
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertThat(response.getSnapshot().getElement().size()).isEqualTo(54);
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 
@@ -61,7 +61,7 @@ public class ResourceProviderDstu3StructureDefinitionTest extends BaseResourcePr
 			.withParameter(Parameters.class, "url", new StringType("http://hl7.org/fhir/StructureDefinition/MyPatient421"))
 			.returnResourceType(StructureDefinition.class)
 			.execute();
-		assertThat(response.getSnapshot().getElement().size()).isEqualTo(54);
+		assertThat(response.getSnapshot().getElement()).hasSize(54);
 	}
 
 	@Test

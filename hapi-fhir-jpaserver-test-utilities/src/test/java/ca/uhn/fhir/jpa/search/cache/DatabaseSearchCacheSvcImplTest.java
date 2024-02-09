@@ -45,7 +45,7 @@ public class DatabaseSearchCacheSvcImplTest {
 
 		Search search = new Search();
 		Optional<Search> outcome = mySvc.tryToMarkSearchAsInProgress(search, RequestPartitionId.allPartitions());
-		assertThat(outcome.isPresent()).isTrue();
+		assertThat(outcome).isPresent();
 
 		verify(mySearchDao, times(1)).save(any());
 		assertThat(updated.getStatus()).isEqualTo(SearchStatusEnum.LOADING);

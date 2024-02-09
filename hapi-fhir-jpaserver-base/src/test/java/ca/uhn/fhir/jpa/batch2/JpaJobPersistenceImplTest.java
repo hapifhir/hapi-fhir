@@ -136,7 +136,7 @@ class JpaJobPersistenceImplTest {
 		List<JobInstance> retInstances = mySvc.fetchInstances(req, pageStart, pageSize);
 
 		// verify
-		assertThat(retInstances.size()).isEqualTo(instances.size());
+		assertThat(retInstances).hasSize(instances.size());
 		assertThat(retInstances.get(0).getInstanceId()).isEqualTo(instances.get(0).getId());
 		assertThat(retInstances.get(1).getInstanceId()).isEqualTo(instances.get(1).getId());
 
@@ -167,7 +167,7 @@ class JpaJobPersistenceImplTest {
 		Optional<JobInstance> retInstance = mySvc.fetchInstance(entity.getId());
 
 		// verify
-		assertThat(retInstance.isPresent()).isTrue();
+		assertThat(retInstance).isPresent();
 		assertThat(retInstance.get().getInstanceId()).isEqualTo(instance.getInstanceId());
 	}
 

@@ -785,8 +785,8 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertThat(map.get("_id").size()).isEqualTo(1);
-		assertThat(map.get("_id").get(0).size()).isEqualTo(2);
+		assertThat(map.get("_id")).hasSize(1);
+		assertThat(map.get("_id").get(0)).hasSize(2);
 		assertThat(((TokenParam) map.get("_id").get(0).get(0)).getSystem()).isNull();
 		assertThat(((TokenParam) map.get("_id").get(0).get(0)).getValue()).isEqualTo("123");
 		assertThat(((TokenParam) map.get("_id").get(0).get(1)).getSystem()).isNull();
@@ -812,8 +812,8 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertThat(map.get("_id").size()).isEqualTo(1);
-		assertThat(map.get("_id").get(0).size()).isEqualTo(2);
+		assertThat(map.get("_id")).hasSize(1);
+		assertThat(map.get("_id").get(0)).hasSize(2);
 		assertThat(((TokenParam) map.get("_id").get(0).get(0)).getSystem()).isNull();
 		assertThat(((TokenParam) map.get("_id").get(0).get(0)).getValue()).isEqualTo("HOMER0");
 		assertThat(((TokenParam) map.get("_id").get(0).get(1)).getSystem()).isNull();
@@ -900,8 +900,8 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertThat(map.get("_lastUpdated").size()).isEqualTo(1);
-		assertThat(map.get("_lastUpdated").get(0).size()).isEqualTo(2);
+		assertThat(map.get("_lastUpdated")).hasSize(1);
+		assertThat(map.get("_lastUpdated").get(0)).hasSize(2);
 		assertThat(((DateParam) map.get("_lastUpdated").get(0).get(0)).getPrefix()).isEqualTo(ParamPrefixEnum.LESSTHAN);
 		assertThat(((DateParam) map.get("_lastUpdated").get(0).get(0)).getValueAsString()).isEqualTo("2021");
 		assertThat(((DateParam) map.get("_lastUpdated").get(0).get(1)).getPrefix()).isEqualTo(ParamPrefixEnum.GREATERTHAN);
@@ -923,8 +923,8 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertThat(map.get("active").size()).isEqualTo(1);
-		assertThat(map.get("active").get(0).size()).isEqualTo(1);
+		assertThat(map.get("active")).hasSize(1);
+		assertThat(map.get("active").get(0)).hasSize(1);
 		assertThat(((TokenParam) map.get("active").get(0).get(0)).getSystem()).isNull();
 		assertThat(((TokenParam) map.get("active").get(0).get(0)).getValue()).isEqualTo("true");
 	}
@@ -944,8 +944,8 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		verify(observationDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertThat(map.get("value-quantity").size()).isEqualTo(1);
-		assertThat(map.get("value-quantity").get(0).size()).isEqualTo(1);
+		assertThat(map.get("value-quantity")).hasSize(1);
+		assertThat(map.get("value-quantity").get(0)).hasSize(1);
 		assertThat(((QuantityParam) map.get("value-quantity").get(0).get(0)).getValue().toString()).isEqualTo("500");
 		assertThat(((QuantityParam) map.get("value-quantity").get(0).get(0)).getPrefix()).isEqualTo(ParamPrefixEnum.LESSTHAN);
 		assertThat(((QuantityParam) map.get("value-quantity").get(0).get(0)).getSystem()).isEqualTo("http://unitsofmeasure.org");
@@ -967,8 +967,8 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertThat(map.get("name").size()).isEqualTo(1);
-		assertThat(map.get("name").get(0).size()).isEqualTo(1);
+		assertThat(map.get("name")).hasSize(1);
+		assertThat(map.get("name").get(0)).hasSize(1);
 		assertThat(((StringParam) map.get("name").get(0).get(0)).getValue()).isEqualTo("abc");
 	}
 
@@ -987,8 +987,8 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertThat(map.get("name").size()).isEqualTo(1);
-		assertThat(map.get("name").get(0).size()).isEqualTo(1);
+		assertThat(map.get("name")).hasSize(1);
+		assertThat(map.get("name").get(0)).hasSize(1);
 		assertThat(((StringParam) map.get("name").get(0).get(0)).getValue()).isEqualTo("abc");
 		assertThat(((StringParam) map.get("name").get(0).get(0)).isExact()).isTrue();
 	}
@@ -1011,8 +1011,8 @@ public class HfqlExecutorTest extends BaseHfqlExecutorTest {
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertThat(map.get("name").size()).isEqualTo(2);
-		assertThat(map.get("name").get(0).size()).isEqualTo(2);
+		assertThat(map.get("name")).hasSize(2);
+		assertThat(map.get("name").get(0)).hasSize(2);
 		assertThat(((StringParam) map.get("name").get(0).get(0)).getValue()).isEqualTo("A");
 		assertThat(((StringParam) map.get("name").get(0).get(1)).getValue()).isEqualTo("B,B");
 		assertThat(((StringParam) map.get("name").get(1).get(0)).getValue()).isEqualTo("C");

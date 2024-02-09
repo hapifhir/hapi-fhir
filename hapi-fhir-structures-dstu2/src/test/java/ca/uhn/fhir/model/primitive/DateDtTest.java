@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class DateDtTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateDtTest.class);
@@ -50,10 +50,10 @@ public class DateDtTest {
 		cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 		cal.set(1990, Calendar.JANUARY, 5, 0, 0, 0);
 		DateDt dateDt = new DateDt(cal);
-		assertEquals("1990-01-05", dateDt.getValueAsString());
+		assertThat(dateDt.getValueAsString()).isEqualTo("1990-01-05");
 
 		dateDt = new DateDt(1990, 0, 5);
-		assertEquals("1990-01-05", dateDt.getValueAsString());
+		assertThat(dateDt.getValueAsString()).isEqualTo("1990-01-05");
 	}
 	
 	

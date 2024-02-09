@@ -30,9 +30,8 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.assertj.core.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
@@ -123,7 +122,7 @@ public class ExceptionHandlingTest {
 		try {
         client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 			fail("");		} catch (InternalErrorException e) {
-			assertEquals("HTTP 500 Internal Error", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 500 Internal Error");
 			assertThat(e.getResponseBody(), StringContains.containsString("value=\"foo\""));
 		}
 
@@ -148,8 +147,8 @@ public class ExceptionHandlingTest {
 			fail("");		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
 			assertThat(e.getMessage(), StringContains.containsString("Help I'm a bug"));
-			assertNotNull(e.getOperationOutcome());
-			assertEquals("Help I'm a bug", ((OperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
+			assertThat(e.getOperationOutcome()).isNotNull();
+			assertThat(((OperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("Help I'm a bug");
 		}
 
 	}
@@ -173,8 +172,8 @@ public class ExceptionHandlingTest {
 			fail("");		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
 			assertThat(e.getMessage(), StringContains.containsString("Help I'm a bug"));
-			assertNotNull(e.getOperationOutcome());
-			assertEquals("Help I'm a bug", ((OperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
+			assertThat(e.getOperationOutcome()).isNotNull();
+			assertThat(((OperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("Help I'm a bug");
 		}
 
 	}

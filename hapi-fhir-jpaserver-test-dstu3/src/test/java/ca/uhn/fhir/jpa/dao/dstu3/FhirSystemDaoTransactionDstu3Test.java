@@ -68,7 +68,7 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 		Bundle bundle = createInputTransactionWithSize(theSize);
 		Bundle response = mySystemDao.transaction(null, bundle);
 
-		assertThat(response.getEntry().size()).isEqualTo(theSize);
+		assertThat(response.getEntry()).hasSize(theSize);
 		assertThat(response.getEntry().get(0).getResponse().getStatus()).isEqualTo("201 Created");
 		assertThat(response.getEntry().get(theSize - 1).getResponse().getStatus()).isEqualTo("201 Created");
 	}

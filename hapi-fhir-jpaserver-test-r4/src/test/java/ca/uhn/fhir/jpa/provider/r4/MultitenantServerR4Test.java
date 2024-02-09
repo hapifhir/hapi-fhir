@@ -340,7 +340,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	}
 
 	private void assertContainsSingleForcedId(Collection<Object[]> forcedIds, String patientId){
-		assertThat(forcedIds.size()).isEqualTo(1);
+		assertThat(forcedIds).hasSize(1);
 		assertThat(forcedIds.stream().toList().get(0)[2]).isEqualTo(patientId);
 	}
 
@@ -465,7 +465,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		Bundle result = myClient.transaction().withBundle(transactioBundle).execute();
 
 		// verify
-		assertThat(result.getEntry().size()).isEqualTo(1);
+		assertThat(result.getEntry()).hasSize(1);
 		Patient retrievedPatient = (Patient) result.getEntry().get(0).getResource();
 		assertThat(retrievedPatient).isNotNull();
 		assertThat(retrievedPatient.getName().get(0).getFamily()).isEqualTo("Family");

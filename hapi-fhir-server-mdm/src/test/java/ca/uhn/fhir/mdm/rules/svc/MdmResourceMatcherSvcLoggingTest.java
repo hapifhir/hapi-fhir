@@ -11,8 +11,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -50,11 +49,11 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 		MemoryAppender memoryAppender = createAndAssignMemoryAppender(logger);
 
 		MdmMatchOutcome result = myMdmResourceMatcherSvc.match(myJohn, myJohny);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
 		//this test assumes, that the defined algorithm for calculating scores doesn't change
-		assertTrue(memoryAppender.contains("No match: Matcher patient-last did not match (score: 0.4", Level.TRACE));
-		assertTrue(memoryAppender.contains("Match: Successfully matched matcher patient-given with score 0.8", Level.TRACE));
+		assertThat(memoryAppender.contains("No match: Matcher patient-last did not match (score: 0.4", Level.TRACE)).isTrue();
+		assertThat(memoryAppender.contains("Match: Successfully matched matcher patient-given with score 0.8", Level.TRACE)).isTrue();
 	}
 
 	@Test
@@ -66,10 +65,10 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 		MemoryAppender memoryAppender = createAndAssignMemoryAppender(logger);
 
 		MdmMatchOutcome result = myMdmResourceMatcherSvc.match(myJohn, someoneElse);
-		assertNotNull(result);
+		assertThat(result).isNotNull();
 
-		assertTrue(memoryAppender.contains("NO_MATCH Patient/", Level.DEBUG));
-		assertTrue(memoryAppender.contains("Field matcher results:\npatient-given: NO\npatient-last: YES", Level.TRACE));
+		assertThat(memoryAppender.contains("NO_MATCH Patient/", Level.DEBUG)).isTrue();
+		assertThat(memoryAppender.contains("Field matcher results:\npatient-given: NO\npatient-last: YES", Level.TRACE)).isTrue();
 	}
 
 	protected Patient buildSomeoneElse() {

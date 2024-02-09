@@ -23,6 +23,6 @@ public class QuestionnaireResponseOperationsProviderTest extends BaseCrR4TestSer
 		var result = (Bundle) myQuestionnaireResponseExtractProvider.extract(null, questionnaireResponse, requestDetails);
 
 		assertThat(result).isNotNull();
-		assertThat(result.getEntry().size()).isEqualTo(5);
+		assertThat(result.getEntry()).hasSize(5);
 	}
 }

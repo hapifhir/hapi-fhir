@@ -16,8 +16,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -44,9 +43,9 @@ public class PropertyDstu3Test extends BaseValidationTestWithInlineMocks {
         final ElementDefinition ed = sd.getSnapshot().getElement().get(1);
         property = new Property(workerContext, ed, sd);
         final List<Property> result = property.getChildProperties("id", null);
-        assertFalse(result.isEmpty());
-        assertEquals(3, result.size());
-        assertEquals("id.id", result.get(0).getDefinition().getPath());
+			assertThat(result).isNotEmpty();
+			assertThat(result).hasSize(3);
+			assertThat(result.get(0).getDefinition().getPath()).isEqualTo("id.id");
     }
 
     @Test
@@ -54,9 +53,9 @@ public class PropertyDstu3Test extends BaseValidationTestWithInlineMocks {
         final ElementDefinition ed = sd.getSnapshot().getElement().get(23);
         property = new Property(workerContext, ed, sd);
         final List<Property> result = property.getChildProperties("birthdate", null);
-        assertFalse(result.isEmpty());
-        assertEquals(3, result.size());
-        assertEquals("date.id", result.get(0).getDefinition().getPath());
+			assertThat(result).isNotEmpty();
+			assertThat(result).hasSize(3);
+			assertThat(result.get(0).getDefinition().getPath()).isEqualTo("date.id");
     }
 
     @Test
@@ -66,7 +65,7 @@ public class PropertyDstu3Test extends BaseValidationTestWithInlineMocks {
 			property = new Property(workerContext, ed, sd);
 			property.getChildProperties("birthdate", null);
 			fail("");		} catch (Error e) {
-    		assertEquals("types == 0, and no children found", e.getMessage());
+				assertThat(e.getMessage()).isEqualTo("types == 0, and no children found");
 		}
     }
 }

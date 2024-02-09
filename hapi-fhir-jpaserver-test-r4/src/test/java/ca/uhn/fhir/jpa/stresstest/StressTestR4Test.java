@@ -192,7 +192,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			searchResult = fhirClient.loadPage().next(searchResult).execute();
 		}
 
-		assertThat(ids.size()).isEqualTo(resourceCount);
+		assertThat(ids).hasSize(resourceCount);
 	}
 
 	@Disabled("Stress test")
@@ -237,8 +237,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			ourLog.info("Loading page {} - Have {} results: {}", pageIndex++, ids.size(), resultBundle.getLink("next").getUrl());
 			resultBundle = myClient.loadPage().next(resultBundle).execute();
 		}
-		assertThat(ids.size()).isEqualTo(count);
-		assertThat(Sets.newHashSet(ids).size()).isEqualTo(count);
+		assertThat(ids).hasSize(count);
+		assertThat(Sets.newHashSet(ids)).hasSize(count);
 
 		// Load from DAOs
 		ids = new ArrayList<>();
@@ -250,8 +250,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
 			results = myPagingProvider.retrieveResultList(null, results.getUuid());
 		}
-		assertThat(ids.size()).isEqualTo(count);
-		assertThat(Sets.newHashSet(ids).size()).isEqualTo(count);
+		assertThat(ids).hasSize(count);
+		assertThat(Sets.newHashSet(ids)).hasSize(count);
 
 		// Load from DAOs starting half way through
 		ids = new ArrayList<>();
@@ -263,8 +263,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
 			results = myPagingProvider.retrieveResultList(null, results.getUuid());
 		}
-		assertThat(ids.size()).isEqualTo(count - 1000);
-		assertThat(Sets.newHashSet(ids).size()).isEqualTo(count - 1000);
+		assertThat(ids).hasSize(count - 1000);
+		assertThat(Sets.newHashSet(ids)).hasSize(count - 1000);
 	}
 
 	@Disabled("Stress test")
@@ -298,8 +298,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			ourLog.info("Loading page {} - Have {} results: {}", pageIndex++, ids.size(), resultBundle.getLink("next").getUrl());
 			resultBundle = myClient.loadPage().next(resultBundle).execute();
 		}
-		assertThat(ids.size()).isEqualTo(count);
-		assertThat(Sets.newHashSet(ids).size()).isEqualTo(count);
+		assertThat(ids).hasSize(count);
+		assertThat(Sets.newHashSet(ids)).hasSize(count);
 
 	}
 
@@ -340,7 +340,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myDiagnosticReportDao.search(map, mySrd);
 		List<IBaseResource> resultsAndIncludes = results.getResources(0, 999999);
-		assertThat(resultsAndIncludes.size()).isEqualTo(1001);
+		assertThat(resultsAndIncludes).hasSize(1001);
 
 		// Using focused includes
 		map = new SearchParameterMap();
@@ -349,7 +349,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		map.setLoadSynchronous(true);
 		results = myDiagnosticReportDao.search(map, mySrd);
 		resultsAndIncludes = results.getResources(0, 999999);
-		assertThat(resultsAndIncludes.size()).isEqualTo(1001);
+		assertThat(resultsAndIncludes).hasSize(1001);
 	}
 
 	@Disabled("Stress test")

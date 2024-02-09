@@ -23,9 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CreateBinaryDstu3Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
@@ -57,9 +55,9 @@ public class CreateBinaryDstu3Test {
 		post.addHeader("Content-Type", "application/foo");
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
-			assertEquals("application/foo", ourLastBinary.getContentType());
-			assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourLastBinary.getContent());
-			assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourLastBinaryBytes);
+			assertThat(ourLastBinary.getContentType()).isEqualTo("application/foo");
+			assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
+			assertThat(ourLastBinaryBytes).containsExactly(new byte[]{0, 1, 2, 3, 4});
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -81,8 +79,8 @@ public class CreateBinaryDstu3Test {
 		post.addHeader("Content-Type", Constants.CT_FHIR_JSON);
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
-			assertEquals("application/foo", ourLastBinary.getContentType());
-			assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourLastBinary.getContent());
+			assertThat(ourLastBinary.getContentType()).isEqualTo("application/foo");
+			assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -104,10 +102,10 @@ public class CreateBinaryDstu3Test {
 		post.addHeader("Content-Type", Constants.CT_FHIR_JSON);
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
-			assertEquals("application/xml+fhir", ourLastBinary.getContentType());
-			assertArrayEquals(b.getContent(), ourLastBinary.getContent());
-			assertEquals(encoded, ourLastBinaryString);
-			assertArrayEquals(encoded.getBytes("UTF-8"), ourLastBinaryBytes);
+			assertThat(ourLastBinary.getContentType()).isEqualTo("application/xml+fhir");
+			assertThat(ourLastBinary.getContent()).containsExactly(b.getContent());
+			assertThat(ourLastBinaryString).isEqualTo(encoded);
+			assertThat(ourLastBinaryBytes).containsExactly(encoded.getBytes("UTF-8"));
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -119,8 +117,8 @@ public class CreateBinaryDstu3Test {
 		post.setEntity(new ByteArrayEntity(new byte[] { 0, 1, 2, 3, 4 }));
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
-			assertNull(ourLastBinary.getContentType());
-			assertArrayEquals(new byte[] { 0, 1, 2, 3, 4 }, ourLastBinary.getContent());
+			assertThat(ourLastBinary.getContentType()).isNull();
+			assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 		} finally {
 			IOUtils.closeQuietly(status);
 		}

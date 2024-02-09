@@ -419,7 +419,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 			fail("");
 		} catch (final ResourceNotFoundException e) {
 			assertThat(e.getStatusCode()).isEqualTo(ResourceNotFoundException.STATUS_CODE);
-			assertThat(e.getMessage().contains("999955541264")).isTrue();
+			assertThat(e.getMessage()).contains("999955541264");
 		}
 	}
 

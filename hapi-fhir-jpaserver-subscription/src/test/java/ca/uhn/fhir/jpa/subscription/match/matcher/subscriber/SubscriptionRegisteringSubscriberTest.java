@@ -79,7 +79,7 @@ public class SubscriptionRegisteringSubscriberTest {
 		ResourceOperationJsonMessage message = new ResourceOperationJsonMessage();
 		mySubscriptionRegisteringSubscriber.handleMessage(message);
 		String expectedMessage = String.format("Received message of unexpected type on matching channel: %s", message);
-		assertThat(output.getOut().contains(expectedMessage)).isTrue();
+		assertThat(output.getOut()).contains(expectedMessage);
 	}
 
 	@Test

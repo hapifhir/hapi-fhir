@@ -16,7 +16,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReadHl7OrgDstu2Test {
 
@@ -42,7 +41,7 @@ public class ReadHl7OrgDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent).contains("p1ReadValue");
 		assertThat(responseContent).contains("p1ReadId");
 	}
@@ -57,7 +56,7 @@ public class ReadHl7OrgDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent).contains("p1ReadValue");
 		assertThat(responseContent).contains("p1ReadId");
 	}

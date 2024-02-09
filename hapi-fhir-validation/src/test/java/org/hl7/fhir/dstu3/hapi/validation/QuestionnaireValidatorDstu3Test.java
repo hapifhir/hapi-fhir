@@ -28,7 +28,6 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -139,7 +138,7 @@ public class QuestionnaireValidatorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info(errors.toString());
 		assertThat(errors.isSuccessful()).isEqualTo(true);
 		assertThat(errors.getMessages()).hasSize(1);
-		assertEquals(errors.getMessages().get(0).getSeverity(), ResultSeverityEnum.INFORMATION);
+		assertThat(ResultSeverityEnum.INFORMATION).isEqualTo(errors.getMessages().get(0).getSeverity());
 		assertThat(errors.getMessages().get(0).getMessage()).startsWith("Unknown extension " + extensionUrl);
 
 		myInstanceVal.setCustomExtensionDomains(Collections.singletonList(extensionUrl));

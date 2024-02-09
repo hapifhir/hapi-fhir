@@ -5,7 +5,7 @@ import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceUtilTest {
 
@@ -23,7 +23,7 @@ public class ResourceUtilTest {
 
 		ResourceUtil.removeNarrative(FhirContext.forR4(), bundle);
 
-		assertNull(((Patient) bundle.getEntry().get(0).getResource()).getText().getDiv().getValueAsString());
+		assertThat(((Patient) bundle.getEntry().get(0).getResource()).getText().getDiv().getValueAsString()).isNull();
 	}
 
 }

@@ -52,9 +52,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -98,11 +95,11 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		ourLog.info(conf);
 
 		ConformanceRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
-		assertEquals("Patient", res.getType());
-		
-		assertTrue(res.getConditionalCreate());
-		assertEquals(ConditionalDeleteStatus.SINGLE, res.getConditionalDelete());
-		assertTrue(res.getConditionalUpdate());
+		assertThat(res.getType()).isEqualTo("Patient");
+
+		assertThat(res.getConditionalCreate()).isTrue();
+		assertThat(res.getConditionalDelete()).isEqualTo(ConditionalDeleteStatus.SINGLE);
+		assertThat(res.getConditionalUpdate()).isTrue();
 	}
 	
 	@Test
@@ -121,9 +118,9 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 
-		assertEquals(1, conformance.getRest().get(0).getOperation().size());
-		assertEquals("$everything", conformance.getRest().get(0).getOperation().get(0).getName());
-		assertEquals("OperationDefinition/Patient-i-everything", conformance.getRest().get(0).getOperation().get(0).getDefinition().getReference());
+		assertThat(conformance.getRest().get(0).getOperation()).hasSize(1);
+		assertThat(conformance.getRest().get(0).getOperation().get(0).getName()).isEqualTo("$everything");
+		assertThat(conformance.getRest().get(0).getOperation().get(0).getDefinition().getReference()).isEqualTo("OperationDefinition/Patient-i-everything");
 	}
 
 	
@@ -143,8 +140,8 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
 		ourLog.info(conf);
 
-		assertEquals("$everything", opDef.getCode());
-		assertEquals(true, opDef.getIdempotent());
+		assertThat(opDef.getCode()).isEqualTo("$everything");
+		assertThat(opDef.getIdempotent()).isEqualTo(true);
 	}
 
 	@Test
@@ -184,12 +181,12 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
-				assertEquals("The patient's identifier", param.getDescription());
+				assertThat(param.getDescription()).isEqualTo("The patient's identifier");
 				found = true;
 			}
 		}
 
-		assertTrue(found);
+		assertThat(found).isTrue();
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -215,11 +212,11 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		ourLog.info(conf);
 
 		ConformanceRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
-		assertEquals("Patient", res.getType());
-		
-		assertNull(res.getConditionalCreateElement().getValue());
-		assertNull(res.getConditionalDeleteElement().getValue());
-		assertNull(res.getConditionalUpdateElement().getValue());
+		assertThat(res.getType()).isEqualTo("Patient");
+
+		assertThat(res.getConditionalCreateElement().getValue()).isNull();
+		assertThat(res.getConditionalDeleteElement().getValue()).isNull();
+		assertThat(res.getConditionalUpdateElement().getValue()).isNull();
 	}
 
 	@Test
@@ -240,11 +237,11 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
-				assertEquals("The patient's identifier (MRN or other card number)", param.getDescription());
+				assertThat(param.getDescription()).isEqualTo("The patient's identifier (MRN or other card number)");
 				found = true;
 			}
 		}
-		assertTrue(found);
+		assertThat(found).isTrue();
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -272,17 +269,17 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		ConformanceRestComponent rest = conformance.getRest().get(0);
 		ConformanceRestResourceComponent res = rest.getResource().get(0);
-		assertEquals("DiagnosticReport", res.getType());
+		assertThat(res.getType()).isEqualTo("DiagnosticReport");
 
-		assertEquals(DiagnosticReport.SP_SUBJECT, res.getSearchParam().get(0).getName());
-		assertEquals("identifier", res.getSearchParam().get(0).getChain().get(0).getValue());
+		assertThat(res.getSearchParam().get(0).getName()).isEqualTo(DiagnosticReport.SP_SUBJECT);
+		assertThat(res.getSearchParam().get(0).getChain().get(0).getValue()).isEqualTo("identifier");
 
-		assertEquals(DiagnosticReport.SP_CODE, res.getSearchParam().get(1).getName());
+		assertThat(res.getSearchParam().get(1).getName()).isEqualTo(DiagnosticReport.SP_CODE);
 
-		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(2).getName());
+		assertThat(res.getSearchParam().get(2).getName()).isEqualTo(DiagnosticReport.SP_DATE);
 
-		assertEquals(1, res.getSearchInclude().size());
-		assertEquals("DiagnosticReport.result", res.getSearchInclude().get(0).getValue());
+		assertThat(res.getSearchInclude()).hasSize(1);
+		assertThat(res.getSearchInclude().get(0).getValue()).isEqualTo("DiagnosticReport.result");
 	}
 
 	@Test
@@ -343,11 +340,11 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
-				assertEquals("The patient's identifier (MRN or other card number)", param.getDescription());
+				assertThat(param.getDescription()).isEqualTo("The patient's identifier (MRN or other card number)");
 				found = true;
 			}
 		}
-		assertTrue(found);
+		assertThat(found).isTrue();
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -409,7 +406,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
-		assertTrue(ourCtx.newValidator().validateWithResult(conformance).isSuccessful());
+		assertThat(ourCtx.newValidator().validateWithResult(conformance).isSuccessful()).isTrue();
 	}
 
 	public static class ConditionalProvider implements IResourceProvider {

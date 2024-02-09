@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -17,8 +17,8 @@ public class ModelR4Test {
 
 	@Test
 	public void testbase64BinaryName() {
-		assertEquals("base64Binary", ourCtx.getElementDefinition("base64binary").getName());
-		assertEquals("base64Binary", ourCtx.getElementDefinition("base64Binary").getName());
+		assertThat(ourCtx.getElementDefinition("base64binary").getName()).isEqualTo("base64Binary");
+		assertThat(ourCtx.getElementDefinition("base64Binary").getName()).isEqualTo("base64Binary");
 	}
 
 	@Test
@@ -37,7 +37,7 @@ public class ModelR4Test {
 	public void testCompositeRuntimeSearchParamHasComponents() {
 		RuntimeSearchParam searchParam = ourCtx.getResourceDefinition("Observation").getSearchParam("code-value-concept");
 		ourLog.info("Have params: {}", searchParam.getComponents().toString());
-		assertEquals(2, searchParam.getComponents().size());
+		assertThat(searchParam.getComponents()).hasSize(2);
 	}
 
 }

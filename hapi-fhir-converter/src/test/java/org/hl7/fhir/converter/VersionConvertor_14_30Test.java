@@ -1,6 +1,6 @@
 package org.hl7.fhir.converter;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_14_30;
 import org.hl7.fhir.dstu3.model.Questionnaire;
@@ -17,8 +17,8 @@ public class VersionConvertor_14_30Test {
 		
 		org.hl7.fhir.dstu3.model.Questionnaire output = (Questionnaire) VersionConvertorFactory_14_30.convertResource(input);
 		String context = output.getTitle();
-		
-		assertEquals("My title", context);
+
+		assertThat(context).isEqualTo("My title");
 	}
 	
 }

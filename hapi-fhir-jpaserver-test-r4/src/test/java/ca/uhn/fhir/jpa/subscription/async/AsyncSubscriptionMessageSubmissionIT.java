@@ -128,7 +128,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 
 
 	private IBaseResource fetchSingleResourceFromSubscriptionTerminalEndpoint() {
-		assertThat(myQueueConsumerHandler.getMessages().size()).isEqualTo(1);
+		assertThat(myQueueConsumerHandler.getMessages()).hasSize(1);
 		ResourceModifiedJsonMessage resourceModifiedJsonMessage = myQueueConsumerHandler.getMessages().get(0);
 		ResourceModifiedMessage payload = resourceModifiedJsonMessage.getPayload();
 		String payloadString = payload.getPayloadString();

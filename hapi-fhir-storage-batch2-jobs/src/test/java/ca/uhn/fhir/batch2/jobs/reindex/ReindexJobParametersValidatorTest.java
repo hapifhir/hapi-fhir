@@ -27,8 +27,8 @@ public class ReindexJobParametersValidatorTest {
 		List<String> errors = runTestWithUrl("Patient," + theWhiteSpaceChar + "Practitioner");
 
 		// verify
-		assertThat(errors.isEmpty()).isFalse();
-		assertThat(errors.get(0).contains("Invalid URL. URL cannot contain spaces")).isTrue();
+		assertThat(errors).isNotEmpty();
+		assertThat(errors.get(0)).contains("Invalid URL. URL cannot contain spaces");
 	}
 
 	private List<String> runTestWithUrl(String theUrl) {

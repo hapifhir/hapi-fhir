@@ -203,19 +203,16 @@ public class WriteBinaryStepTest {
 			myFinalStep.run(input, sink);
 			fail("");
 		} catch (JobExecutionFailedException ex) {
-			assertThat(ex.getMessage().contains("Failure to process resource of type")).isTrue();
+			assertThat(ex.getMessage()).contains("Failure to process resource of type");
 		}
 
 		// verify
 		ArgumentCaptor<ILoggingEvent> logCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender).doAppend(logCaptor.capture());
-		assertThat(logCaptor.getValue().getFormattedMessage()
-				.contains(
-						"Failure to process resource of type "
-								+ expandedResources.getResourceType()
-								+ " : "
-								+ testException
-				)).isTrue();
+		assertThat(logCaptor.getValue().getFormattedMessage()).contains("Failure to process resource of type "
+			+ expandedResources.getResourceType()
+			+ " : "
+			+ testException);
 
 		verify(sink, never())
 			.accept(any(BulkExportBinaryFileId.class));

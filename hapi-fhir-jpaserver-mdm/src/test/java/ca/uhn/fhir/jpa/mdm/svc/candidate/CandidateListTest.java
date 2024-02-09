@@ -113,6 +113,6 @@ public class CandidateListTest {
 		// tests
 		assertThat(candidateList.size()).isEqualTo(size);
 		List<MatchedGoldenResourceCandidate> candidates = candidateList.getCandidates();
-		assertThat(candidates.size()).isEqualTo(size);
+		assertThat(candidates).hasSize(size);
 	}
 }

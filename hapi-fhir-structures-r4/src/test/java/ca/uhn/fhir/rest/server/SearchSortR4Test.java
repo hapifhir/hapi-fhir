@@ -23,7 +23,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SearchSortR4Test {
 
@@ -55,20 +55,20 @@ public class SearchSortR4Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("search", ourLastMethod);
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertThat(ourLastMethod).isEqualTo("search");
 
-			assertEquals("param1", ourLastSortSpec.getParamName());
-			assertEquals(SortOrderEnum.ASC, ourLastSortSpec.getOrder());
+			assertThat(ourLastSortSpec.getParamName()).isEqualTo("param1");
+			assertThat(ourLastSortSpec.getOrder()).isEqualTo(SortOrderEnum.ASC);
 
-			assertEquals("param2", ourLastSortSpec.getChain().getParamName());
-			assertEquals(SortOrderEnum.DESC, ourLastSortSpec.getChain().getOrder());
+			assertThat(ourLastSortSpec.getChain().getParamName()).isEqualTo("param2");
+			assertThat(ourLastSortSpec.getChain().getOrder()).isEqualTo(SortOrderEnum.DESC);
 
-			assertEquals("param3", ourLastSortSpec.getChain().getChain().getParamName());
-			assertEquals(SortOrderEnum.ASC, ourLastSortSpec.getChain().getChain().getOrder());
+			assertThat(ourLastSortSpec.getChain().getChain().getParamName()).isEqualTo("param3");
+			assertThat(ourLastSortSpec.getChain().getChain().getOrder()).isEqualTo(SortOrderEnum.ASC);
 
-			assertEquals("param4", ourLastSortSpec.getChain().getChain().getChain().getParamName());
-			assertEquals(SortOrderEnum.DESC, ourLastSortSpec.getChain().getChain().getChain().getOrder());
+			assertThat(ourLastSortSpec.getChain().getChain().getChain().getParamName()).isEqualTo("param4");
+			assertThat(ourLastSortSpec.getChain().getChain().getChain().getOrder()).isEqualTo(SortOrderEnum.DESC);
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());

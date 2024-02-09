@@ -28,7 +28,6 @@ import java.util.Map;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.oneOf;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchDefaultMethodDstu3Test {
 
@@ -65,12 +64,12 @@ public class SearchDefaultMethodDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			assertThat(ourLastMethod, oneOf("search01", "search02", "search03"));
-			assertEquals(null, ourLastParam1);
-			assertEquals(null, ourLastParam2);
-			assertEquals(null, ourLastAdditionalParams);
+			assertThat(ourLastParam1).isEqualTo(null);
+			assertThat(ourLastParam2).isEqualTo(null);
+			assertThat(ourLastAdditionalParams).isEqualTo(null);
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -85,13 +84,13 @@ public class SearchDefaultMethodDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			assertThat(ourLastParam1.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-			assertEquals("val1", ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals(null, ourLastParam2);
-			assertEquals(null, ourLastAdditionalParams);
+			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val1");
+			assertThat(ourLastParam2).isEqualTo(null);
+			assertThat(ourLastAdditionalParams).isEqualTo(null);
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -106,17 +105,17 @@ public class SearchDefaultMethodDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			assertThat(ourLastParam1.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-			assertEquals("val1", ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val1");
 
 			assertThat(ourLastParam2.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-			assertEquals("val2", ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val2");
 
-			assertEquals(null, ourLastAdditionalParams);
+			assertThat(ourLastAdditionalParams).isEqualTo(null);
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -131,21 +130,21 @@ public class SearchDefaultMethodDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertEquals("search03", ourLastMethod);
+			assertThat(ourLastMethod).isEqualTo("search03");
 
 			assertThat(ourLastParam1.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-			assertEquals("val1", ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val1");
 
 			assertThat(ourLastParam2.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-			assertEquals("val2", ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val2");
 
 			ourLog.info(ourLastAdditionalParams.toString());
-			assertEquals(1, ourLastAdditionalParams.size());
-			assertEquals("val3", ourLastAdditionalParams.get("param3").get(0));
+			assertThat(ourLastAdditionalParams).hasSize(1);
+			assertThat(ourLastAdditionalParams.get("param3").get(0)).isEqualTo("val3");
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -160,22 +159,22 @@ public class SearchDefaultMethodDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertEquals("search03", ourLastMethod);
+			assertThat(ourLastMethod).isEqualTo("search03");
 
 			assertThat(ourLastParam1.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-			assertEquals("val1", ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val1");
 
 			assertThat(ourLastParam2.getValuesAsQueryTokens()).as(ourLastParam2.toString()).hasSize(2);
 			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-			assertEquals("val2", ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-			assertEquals("val2e", ourLastParam2.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getValue());
+			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val2");
+			assertThat(ourLastParam2.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val2e");
 
 			ourLog.info(ourLastAdditionalParams.toString());
-			assertEquals(1, ourLastAdditionalParams.size());
-			assertEquals("val3", ourLastAdditionalParams.get("param3").get(0));
+			assertThat(ourLastAdditionalParams).hasSize(1);
+			assertThat(ourLastAdditionalParams.get("param3").get(0)).isEqualTo("val3");
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());

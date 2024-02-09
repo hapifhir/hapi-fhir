@@ -122,7 +122,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 			.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(response0.getEntry().size()).isEqualTo(1);
+		assertThat(response0.getEntry()).hasSize(1);
 
 		// Perform the search again (should return the same)
 		Bundle response1 = myClient.search()
@@ -130,7 +130,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 			.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(response1.getEntry().size()).isEqualTo(1);
+		assertThat(response1.getEntry()).hasSize(1);
 		assertThat(response1.getId()).isEqualTo(response0.getId());
 
 		// Pretend the search was errored out
@@ -142,7 +142,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 			.where(org.hl7.fhir.r4.model.Patient.NAME.matches().value("Hello"))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(response3.getEntry().size()).isEqualTo(1);
+		assertThat(response3.getEntry()).hasSize(1);
 		assertThat(response3.getId()).isNotEqualTo(response0.getId());
 
 	}
@@ -183,7 +183,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 			.returnBundle(Bundle.class)
 			.count(1)
 			.execute();
-		assertThat(response0.getEntry().size()).isEqualTo(1);
+		assertThat(response0.getEntry()).hasSize(1);
 
 		// Make sure it works for now
 		myClient.loadPage().next(response0).execute();
@@ -237,7 +237,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		myCaptureQueriesListener.logSelectQueries();
 
 		assertThat(output.getTotal()).isEqualTo(2);
-		assertThat(output.getEntry().size()).isEqualTo(0);
+		assertThat(output.getEntry()).isEmpty();
 	}
 
 	@Test
@@ -329,7 +329,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
-		assertThat(found.getEntry().size()).isEqualTo(4);
+		assertThat(found.getEntry()).hasSize(4);
 		assertThat(list.get(0)).isEqualTo(oid3);
 		assertThat(list.get(1)).isEqualTo(oid1);
 		assertThat(list.get(2)).isEqualTo(oid4);

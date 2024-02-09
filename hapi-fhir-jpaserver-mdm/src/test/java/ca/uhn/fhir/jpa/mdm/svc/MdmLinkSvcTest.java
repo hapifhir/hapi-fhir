@@ -169,8 +169,8 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient2, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 
 		List<MdmLink> targets = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenPatient);
-		assertThat(targets.isEmpty()).isFalse();
-		assertThat(targets.size()).isEqualTo(2);
+		assertThat(targets).isNotEmpty();
+		assertThat(targets).hasSize(2);
 
 		//TODO GGG update this test once we decide what has to happen here. There is no more "syncing links"
 		//assertEquals(patient1.getIdElement().toVersionless().getValue(), sourcePatient.getLinkFirstRep().getTarget().getReference());
@@ -196,8 +196,8 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient1, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 		List<? extends IMdmLink> targets = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenPatient);
-		assertThat(targets.isEmpty()).isFalse();
-		assertThat(targets.size()).isEqualTo(1);
+		assertThat(targets).isNotEmpty();
+		assertThat(targets).hasSize(1);
 		assertThat(targets.get(0).getPartitionId().getPartitionId()).isEqualTo(requestPartitionId.getFirstPartitionIdOrNull());
 	}
 }

@@ -544,7 +544,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		include.addConcept().setCode("ZZZZ");
 
 		ValueSet expansion = myValueSetDao.expand(vs, null);
-		assertThat(expansion.getExpansion().getContains().size()).isEqualTo(0);
+		assertThat(expansion.getExpansion().getContains()).isEmpty();
 	}
 
 	@Test
@@ -650,7 +650,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		ValueSet result = myValueSetDao.expand(vs, null);
 		logAndValidateValueSet(result);
 
-		assertThat(result.getExpansion().getContains().size()).isEqualTo(0);
+		assertThat(result.getExpansion().getContains()).isEmpty();
 
 		myTerminologyDeferredStorageSvc.setProcessDeferred(true);
 		myTerminologyDeferredStorageSvc.saveDeferred();
@@ -668,7 +668,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		result = myValueSetDao.expand(vs, null);
 		logAndValidateValueSet(result);
 
-		assertThat(result.getExpansion().getContains().size()).isEqualTo(4);
+		assertThat(result.getExpansion().getContains()).hasSize(4);
 
 		String encoded = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
 		assertThat(encoded).containsIgnoringCase("<code value=\"childAAB\"/>");

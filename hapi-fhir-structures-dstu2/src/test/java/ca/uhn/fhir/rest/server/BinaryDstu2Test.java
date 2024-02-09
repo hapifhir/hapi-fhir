@@ -34,9 +34,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -71,12 +68,12 @@ public class BinaryDstu2Test {
 
 			ourLog.info(responseContent);
 
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 			assertThat(response.getFirstHeader("content-type").getValue()).startsWith(Constants.CT_FHIR_XML + ";");
 
 			Binary bin = ourCtx.newXmlParser().parseResource(Binary.class, responseContent);
-			assertEquals("foo", bin.getContentType());
-			assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
+			assertThat(bin.getContentType()).isEqualTo("foo");
+			assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 		}
 	}
 
@@ -89,12 +86,12 @@ public class BinaryDstu2Test {
 
 			ourLog.info(responseContent);
 
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 			assertThat(response.getFirstHeader("content-type").getValue()).startsWith(Constants.CT_FHIR_JSON + ";");
 
 			Binary bin = ourCtx.newJsonParser().parseResource(Binary.class, responseContent);
-			assertEquals("foo", bin.getContentType());
-			assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
+			assertThat(bin.getContentType()).isEqualTo("foo");
+			assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 		}
 	}
 
@@ -105,10 +102,10 @@ public class BinaryDstu2Test {
 		http.setEntity(new ByteArrayEntity(new byte[]{1, 2, 3, 4}, ContentType.create("foo/bar", "UTF-8")));
 
 		try (CloseableHttpResponse response = ourClient.execute(http)) {
-			assertEquals(201, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
 
-			assertEquals("foo/bar; charset=UTF-8", ourLast.getContentType());
-			assertArrayEquals(new byte[]{1, 2, 3, 4}, ourLast.getContent());
+			assertThat(ourLast.getContentType()).isEqualTo("foo/bar; charset=UTF-8");
+			assertThat(ourLast.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 		}
 	}
 
@@ -124,9 +121,9 @@ public class BinaryDstu2Test {
 		http.setEntity(new StringEntity(stringContent, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
 		try (CloseableHttpResponse response = ourClient.execute(http)) {
-			assertEquals(201, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
 
-			assertEquals("text/plain", ourLast.getContentType().replace(" ", "").toLowerCase());
+			assertThat(ourLast.getContentType().replace(" ", "").toLowerCase()).isEqualTo("text/plain");
 		}
 	}
 
@@ -150,10 +147,10 @@ public class BinaryDstu2Test {
 		try (CloseableHttpResponse status = ourClient.execute(http)) {
 			byte[] responseContent = IOUtils.toByteArray(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals("foo", status.getFirstHeader("content-type").getValue());
-			assertEquals("Attachment;", status.getFirstHeader("Content-Disposition").getValue()); // This is a security requirement!
-			assertArrayEquals(new byte[]{1, 2, 3, 4}, responseContent);
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertThat(status.getFirstHeader("content-type").getValue()).isEqualTo("foo");
+			assertThat(status.getFirstHeader("Content-Disposition").getValue()).isEqualTo("Attachment;"); // This is a security requirement!
+			assertThat(responseContent).containsExactly(new byte[]{1, 2, 3, 4});
 		}
 	}
 
@@ -166,10 +163,10 @@ public class BinaryDstu2Test {
 		try (CloseableHttpResponse status = ourClient.execute(http)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase());
-			assertNull(status.getFirstHeader("Content-Disposition"));
-			assertEquals("{\"resourceType\":\"Binary\",\"id\":\"1\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", responseContent);
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertThat(status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase()).isEqualTo(Constants.CT_FHIR_JSON + ";charset=utf-8");
+			assertThat(status.getFirstHeader("Content-Disposition")).isNull();
+			assertThat(responseContent).isEqualTo("{\"resourceType\":\"Binary\",\"id\":\"1\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}");
 		}
 	}
 
@@ -179,16 +176,16 @@ public class BinaryDstu2Test {
 		try (CloseableHttpResponse response = ourClient.execute(http)) {
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", response.getFirstHeader("content-type").getValue().replace(" ", "").replace("UTF", "utf"));
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertThat(response.getFirstHeader("content-type").getValue().replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_FHIR_JSON + ";charset=utf-8");
 
 			ourLog.info(responseContent);
 
 			Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 			Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
-			assertEquals("text/plain", bin.getContentType());
-			assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
+			assertThat(bin.getContentType()).isEqualTo("text/plain");
+			assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 		}
 	}
 
@@ -198,16 +195,16 @@ public class BinaryDstu2Test {
 		try (CloseableHttpResponse response = ourClient.execute(http)) {
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", response.getFirstHeader("content-type").getValue().replace(" ", "").replace("UTF", "utf"));
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertThat(response.getFirstHeader("content-type").getValue().replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_FHIR_XML + ";charset=utf-8");
 
 			ourLog.info(responseContent);
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
-			assertEquals("text/plain", bin.getContentType());
-			assertArrayEquals(new byte[]{1, 2, 3, 4}, bin.getContent());
+			assertThat(bin.getContentType()).isEqualTo("text/plain");
+			assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 		}
 	}
 

@@ -24,7 +24,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -51,7 +50,7 @@ public class ServerFeaturesDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent).contains("<Conformance");
 
 		/*
@@ -63,7 +62,7 @@ public class ServerFeaturesDstu2Test {
 		responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent).contains("<Conformance");
 
 	}
@@ -80,7 +79,7 @@ public class ServerFeaturesDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info(responseContent);
-		assertEquals(404, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
 	}
 
 	/**
@@ -94,7 +93,7 @@ public class ServerFeaturesDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info(responseContent);
-		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 	}
 
 	/**
@@ -108,7 +107,7 @@ public class ServerFeaturesDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		ourLog.info(responseContent);
-		assertEquals(405, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(405);
 	}
 
 	@Test
@@ -118,7 +117,7 @@ public class ServerFeaturesDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent).contains("resourceType\":\"Conformance");
 	}
 
@@ -126,11 +125,11 @@ public class ServerFeaturesDstu2Test {
 	public void testHeadJson() throws Exception {
 		HttpHead httpGet = new HttpHead(ourServer.getBaseUrl() + "/Patient/123");
 		HttpResponse status = ourClient.execute(httpGet);
-		assertEquals(null, status.getEntity());
+		assertThat(status.getEntity()).isEqualTo(null);
 
 		ourLog.info(status.toString());
-		
-		assertEquals(200, status.getStatusLine().getStatusCode());
+
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(status.getFirstHeader("x-powered-by").getValue()).contains("HAPI");
 	}
 
@@ -140,7 +139,7 @@ public class ServerFeaturesDstu2Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(responseContent).contains("PRP1");
 
 		Collection<IResourceProvider> originalProviders = new ArrayList<>(ourServer.getRestfulServer().getResourceProviders());
@@ -157,7 +156,7 @@ public class ServerFeaturesDstu2Test {
 			status = ourClient.execute(httpGet);
 			responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(status.getEntity().getContent());
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			assertThat(responseContent).contains("PRP2");
 
 		} finally {

@@ -16,8 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.annotation.Nonnull;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 public class StringMatcherR4Test extends BaseMatcherR4Test {
@@ -50,91 +49,91 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 	public void testNamadega() {
 		String left = LEFT_NAME;
 		String right = RIGHT_NAME;
-		assertTrue(match(MatchTypeEnum.COLOGNE, left, right));
-		assertTrue(match(MatchTypeEnum.DOUBLE_METAPHONE, left, right));
-		assertTrue(match(MatchTypeEnum.MATCH_RATING_APPROACH, left, right));
-		assertTrue(match(MatchTypeEnum.METAPHONE, left, right));
-		assertTrue(match(MatchTypeEnum.SOUNDEX, left, right));
+		assertThat(match(MatchTypeEnum.COLOGNE, left, right)).isTrue();
+		assertThat(match(MatchTypeEnum.DOUBLE_METAPHONE, left, right)).isTrue();
+		assertThat(match(MatchTypeEnum.MATCH_RATING_APPROACH, left, right)).isTrue();
+		assertThat(match(MatchTypeEnum.METAPHONE, left, right)).isTrue();
+		assertThat(match(MatchTypeEnum.SOUNDEX, left, right)).isTrue();
 
-		assertFalse(match(MatchTypeEnum.CAVERPHONE1, left, right));
-		assertFalse(match(MatchTypeEnum.CAVERPHONE2, left, right));
-		assertFalse(match(MatchTypeEnum.NYSIIS, left, right));
-		assertFalse(match(MatchTypeEnum.REFINED_SOUNDEX, left, right));
-		assertFalse(match(MatchTypeEnum.STRING, left, right));
-		assertFalse(match(MatchTypeEnum.SUBSTRING, left, right));
+		assertThat(match(MatchTypeEnum.CAVERPHONE1, left, right)).isFalse();
+		assertThat(match(MatchTypeEnum.CAVERPHONE2, left, right)).isFalse();
+		assertThat(match(MatchTypeEnum.NYSIIS, left, right)).isFalse();
+		assertThat(match(MatchTypeEnum.REFINED_SOUNDEX, left, right)).isFalse();
+		assertThat(match(MatchTypeEnum.STRING, left, right)).isFalse();
+		assertThat(match(MatchTypeEnum.SUBSTRING, left, right)).isFalse();
 	}
 
 	@Test
 	public void testNumeric() {
-		assertTrue(match(MatchTypeEnum.NUMERIC, "4169671111", "(416) 967-1111"));
-		assertFalse(match(MatchTypeEnum.NUMERIC, "5169671111", "(416) 967-1111"));
-		assertFalse(match(MatchTypeEnum.NUMERIC, "4169671111", "(416) 967-1111x123"));
+		assertThat(match(MatchTypeEnum.NUMERIC, "4169671111", "(416) 967-1111")).isTrue();
+		assertThat(match(MatchTypeEnum.NUMERIC, "5169671111", "(416) 967-1111")).isFalse();
+		assertThat(match(MatchTypeEnum.NUMERIC, "4169671111", "(416) 967-1111x123")).isFalse();
 	}
 
 	@Test
 	public void testMetaphone() {
-		assertTrue(match(MatchTypeEnum.METAPHONE, "Durie", "dury"));
-		assertTrue(match(MatchTypeEnum.METAPHONE, "Balo", "ballo"));
-		assertTrue(match(MatchTypeEnum.METAPHONE, "Hans Peter", "Hanspeter"));
-		assertTrue(match(MatchTypeEnum.METAPHONE, "Lawson", "Law son"));
+		assertThat(match(MatchTypeEnum.METAPHONE, "Durie", "dury")).isTrue();
+		assertThat(match(MatchTypeEnum.METAPHONE, "Balo", "ballo")).isTrue();
+		assertThat(match(MatchTypeEnum.METAPHONE, "Hans Peter", "Hanspeter")).isTrue();
+		assertThat(match(MatchTypeEnum.METAPHONE, "Lawson", "Law son")).isTrue();
 
-		assertFalse(match(MatchTypeEnum.METAPHONE, "Allsop", "Allsob"));
-		assertFalse(match(MatchTypeEnum.METAPHONE, "Gevne", "Geve"));
-		assertFalse(match(MatchTypeEnum.METAPHONE, "Bruce", "Bruch"));
-		assertFalse(match(MatchTypeEnum.METAPHONE, "Smith", "Schmidt"));
-		assertFalse(match(MatchTypeEnum.METAPHONE, "Jyothi", "Jyoti"));
+		assertThat(match(MatchTypeEnum.METAPHONE, "Allsop", "Allsob")).isFalse();
+		assertThat(match(MatchTypeEnum.METAPHONE, "Gevne", "Geve")).isFalse();
+		assertThat(match(MatchTypeEnum.METAPHONE, "Bruce", "Bruch")).isFalse();
+		assertThat(match(MatchTypeEnum.METAPHONE, "Smith", "Schmidt")).isFalse();
+		assertThat(match(MatchTypeEnum.METAPHONE, "Jyothi", "Jyoti")).isFalse();
 	}
 
 	@Test
 	public void testDoubleMetaphone() {
-		assertTrue(match(MatchTypeEnum.DOUBLE_METAPHONE, "Durie", "dury"));
-		assertTrue(match(MatchTypeEnum.DOUBLE_METAPHONE, "Balo", "ballo"));
-		assertTrue(match(MatchTypeEnum.DOUBLE_METAPHONE, "Hans Peter", "Hanspeter"));
-		assertTrue(match(MatchTypeEnum.DOUBLE_METAPHONE, "Lawson", "Law son"));
-		assertTrue(match(MatchTypeEnum.DOUBLE_METAPHONE, "Allsop", "Allsob"));
+		assertThat(match(MatchTypeEnum.DOUBLE_METAPHONE, "Durie", "dury")).isTrue();
+		assertThat(match(MatchTypeEnum.DOUBLE_METAPHONE, "Balo", "ballo")).isTrue();
+		assertThat(match(MatchTypeEnum.DOUBLE_METAPHONE, "Hans Peter", "Hanspeter")).isTrue();
+		assertThat(match(MatchTypeEnum.DOUBLE_METAPHONE, "Lawson", "Law son")).isTrue();
+		assertThat(match(MatchTypeEnum.DOUBLE_METAPHONE, "Allsop", "Allsob")).isTrue();
 
-		assertFalse(match(MatchTypeEnum.DOUBLE_METAPHONE, "Gevne", "Geve"));
-		assertFalse(match(MatchTypeEnum.DOUBLE_METAPHONE, "Bruce", "Bruch"));
-		assertFalse(match(MatchTypeEnum.DOUBLE_METAPHONE, "Smith", "Schmidt"));
-		assertFalse(match(MatchTypeEnum.DOUBLE_METAPHONE, "Jyothi", "Jyoti"));
+		assertThat(match(MatchTypeEnum.DOUBLE_METAPHONE, "Gevne", "Geve")).isFalse();
+		assertThat(match(MatchTypeEnum.DOUBLE_METAPHONE, "Bruce", "Bruch")).isFalse();
+		assertThat(match(MatchTypeEnum.DOUBLE_METAPHONE, "Smith", "Schmidt")).isFalse();
+		assertThat(match(MatchTypeEnum.DOUBLE_METAPHONE, "Jyothi", "Jyoti")).isFalse();
 	}
 
 	@Test
 	public void testNormalizeCase() {
-		assertTrue(match(MatchTypeEnum.STRING, "joe", "JoE"));
-		assertTrue(match(MatchTypeEnum.STRING, "MCTAVISH", "McTavish"));
+		assertThat(match(MatchTypeEnum.STRING, "joe", "JoE")).isTrue();
+		assertThat(match(MatchTypeEnum.STRING, "MCTAVISH", "McTavish")).isTrue();
 
-		assertFalse(match(MatchTypeEnum.STRING, "joey", "joe"));
-		assertFalse(match(MatchTypeEnum.STRING, "joe", "joey"));
+		assertThat(match(MatchTypeEnum.STRING, "joey", "joe")).isFalse();
+		assertThat(match(MatchTypeEnum.STRING, "joe", "joey")).isFalse();
 	}
 
 	@Test
 	public void testExactString() {
 		myMdmMatcherJson.setExact(true);
 
-		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("Jilly"), new StringType("Jilly"), myMdmMatcherJson));
+		assertThat(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("Jilly"), new StringType("Jilly"), myMdmMatcherJson)).isTrue();
 
-		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("MCTAVISH"), new StringType("McTavish"), myMdmMatcherJson));
-		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("Durie"), new StringType("dury"), myMdmMatcherJson));
+		assertThat(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("MCTAVISH"), new StringType("McTavish"), myMdmMatcherJson)).isFalse();
+		assertThat(getFieldMatcher(MatchTypeEnum.STRING).matches(new StringType("Durie"), new StringType("dury"), myMdmMatcherJson)).isFalse();
 	}
 
 	@Test
 	public void testExactBoolean() {
 		myMdmMatcherJson.setExact(true);
 
-		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(true), new BooleanType(true), myMdmMatcherJson));
+		assertThat(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(true), new BooleanType(true), myMdmMatcherJson)).isTrue();
 
-		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(true), new BooleanType(false), myMdmMatcherJson));
-		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(false), new BooleanType(true), myMdmMatcherJson));
+		assertThat(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(true), new BooleanType(false), myMdmMatcherJson)).isFalse();
+		assertThat(getFieldMatcher(MatchTypeEnum.STRING).matches(new BooleanType(false), new BooleanType(true), myMdmMatcherJson)).isFalse();
 	}
 
 	@Test
 	public void testExactDateString() {
 		myMdmMatcherJson.setExact(true);
 
-		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(new DateType("1965-08-09"), new DateType("1965-08-09"), myMdmMatcherJson));
+		assertThat(getFieldMatcher(MatchTypeEnum.STRING).matches(new DateType("1965-08-09"), new DateType("1965-08-09"), myMdmMatcherJson)).isTrue();
 
-		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(new DateType("1965-08-09"), new DateType("1965-09-08"), myMdmMatcherJson));
+		assertThat(getFieldMatcher(MatchTypeEnum.STRING).matches(new DateType("1965-08-09"), new DateType("1965-09-08"), myMdmMatcherJson)).isFalse();
 	}
 
 
@@ -148,49 +147,49 @@ public class StringMatcherR4Test extends BaseMatcherR4Test {
 
 		myMdmMatcherJson.setExact(true);
 
-		assertTrue(getFieldMatcher(MatchTypeEnum.STRING).matches(male, male, myMdmMatcherJson));
+		assertThat(getFieldMatcher(MatchTypeEnum.STRING).matches(male, male, myMdmMatcherJson)).isTrue();
 
-		assertFalse(getFieldMatcher(MatchTypeEnum.STRING).matches(male, female, myMdmMatcherJson));
+		assertThat(getFieldMatcher(MatchTypeEnum.STRING).matches(male, female, myMdmMatcherJson)).isFalse();
 	}
 
 	@Test
 	public void testSoundex() {
-		assertTrue(match(MatchTypeEnum.SOUNDEX, "Gail", "Gale"));
-		assertTrue(match(MatchTypeEnum.SOUNDEX, "John", "Jon"));
-		assertTrue(match(MatchTypeEnum.SOUNDEX, "Thom", "Tom"));
+		assertThat(match(MatchTypeEnum.SOUNDEX, "Gail", "Gale")).isTrue();
+		assertThat(match(MatchTypeEnum.SOUNDEX, "John", "Jon")).isTrue();
+		assertThat(match(MatchTypeEnum.SOUNDEX, "Thom", "Tom")).isTrue();
 
-		assertFalse(match(MatchTypeEnum.SOUNDEX, "Fred", "Frank"));
-		assertFalse(match(MatchTypeEnum.SOUNDEX, "Thomas", "Tom"));
+		assertThat(match(MatchTypeEnum.SOUNDEX, "Fred", "Frank")).isFalse();
+		assertThat(match(MatchTypeEnum.SOUNDEX, "Thomas", "Tom")).isFalse();
 	}
 
 
 	@Test
 	public void testCaverphone1() {
-		assertTrue(match(MatchTypeEnum.CAVERPHONE1, "Gail", "Gael"));
-		assertTrue(match(MatchTypeEnum.CAVERPHONE1, "John", "Jon"));
+		assertThat(match(MatchTypeEnum.CAVERPHONE1, "Gail", "Gael")).isTrue();
+		assertThat(match(MatchTypeEnum.CAVERPHONE1, "John", "Jon")).isTrue();
 
-		assertFalse(match(MatchTypeEnum.CAVERPHONE1, "Gail", "Gale"));
-		assertFalse(match(MatchTypeEnum.CAVERPHONE1, "Fred", "Frank"));
-		assertFalse(match(MatchTypeEnum.CAVERPHONE1, "Thomas", "Tom"));
+		assertThat(match(MatchTypeEnum.CAVERPHONE1, "Gail", "Gale")).isFalse();
+		assertThat(match(MatchTypeEnum.CAVERPHONE1, "Fred", "Frank")).isFalse();
+		assertThat(match(MatchTypeEnum.CAVERPHONE1, "Thomas", "Tom")).isFalse();
 	}
 
 	@Test
 	public void testCaverphone2() {
-		assertTrue(match(MatchTypeEnum.CAVERPHONE2, "Gail", "Gael"));
-		assertTrue(match(MatchTypeEnum.CAVERPHONE2, "John", "Jon"));
-		assertTrue(match(MatchTypeEnum.CAVERPHONE2, "Gail", "Gale"));
+		assertThat(match(MatchTypeEnum.CAVERPHONE2, "Gail", "Gael")).isTrue();
+		assertThat(match(MatchTypeEnum.CAVERPHONE2, "John", "Jon")).isTrue();
+		assertThat(match(MatchTypeEnum.CAVERPHONE2, "Gail", "Gale")).isTrue();
 
-		assertFalse(match(MatchTypeEnum.CAVERPHONE2, "Fred", "Frank"));
-		assertFalse(match(MatchTypeEnum.CAVERPHONE2, "Thomas", "Tom"));
+		assertThat(match(MatchTypeEnum.CAVERPHONE2, "Fred", "Frank")).isFalse();
+		assertThat(match(MatchTypeEnum.CAVERPHONE2, "Thomas", "Tom")).isFalse();
 	}
 
 	@Test
 	public void testNormalizeSubstring() {
-		assertTrue(match(MatchTypeEnum.SUBSTRING, "BILLY", "Bill"));
-		assertTrue(match(MatchTypeEnum.SUBSTRING, "Bill", "Billy"));
-		assertTrue(match(MatchTypeEnum.SUBSTRING, "FRED", "Frederik"));
+		assertThat(match(MatchTypeEnum.SUBSTRING, "BILLY", "Bill")).isTrue();
+		assertThat(match(MatchTypeEnum.SUBSTRING, "Bill", "Billy")).isTrue();
+		assertThat(match(MatchTypeEnum.SUBSTRING, "FRED", "Frederik")).isTrue();
 
-		assertFalse(match(MatchTypeEnum.SUBSTRING, "Fred", "Friederik"));
+		assertThat(match(MatchTypeEnum.SUBSTRING, "Fred", "Friederik")).isFalse();
 	}
 
 	private boolean match(MatchTypeEnum theMatcher, String theLeft, String theRight) {

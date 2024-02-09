@@ -137,7 +137,7 @@ public class WebTest {
 		HtmlPage searchResultPage = searchButton.click();
 		HtmlTable controlsTable = searchResultPage.getHtmlElementById("resultControlsTable");
 		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
-		assertThat(controlRows.size()).isEqualTo(5);
+		assertThat(controlRows).hasSize(5);
 		assertThat(controlRows.get(0).getCell(0).asNormalizedText()).isEqualTo("Read Update $summary $validate");
 		assertThat(controlRows.get(0).getCell(1).asNormalizedText()).isEqualTo("Patient/A0/_history/1");
 		assertThat(controlRows.get(4).getCell(1).asNormalizedText()).isEqualTo("Patient/A4/_history/1");
@@ -161,7 +161,7 @@ public class WebTest {
 		HtmlPage searchResultPage = historyButton.click();
 		HtmlTable controlsTable = searchResultPage.getHtmlElementById("resultControlsTable");
 		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
-		assertThat(controlRows.size()).isEqualTo(5);
+		assertThat(controlRows).hasSize(5);
 		ourLog.info(controlRows.get(0).asXml());
 		assertThat(controlRows.get(0).getCell(1).asNormalizedText()).isEqualTo("Patient/A4/_history/1");
 		assertThat(controlRows.get(4).getCell(1).asNormalizedText()).isEqualTo("Patient/A0/_history/1");

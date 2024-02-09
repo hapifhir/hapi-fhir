@@ -11,9 +11,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-
 @ExtendWith(MockitoExtension.class)
 class ResourceBindingTest {
 	@Mock
@@ -34,8 +31,8 @@ class ResourceBindingTest {
 
 		// verify
 		List<BaseMethodBinding> list = myResourceBinding.getMethodBindings();
-		assertNotEquals(first, second);
-		assertEquals(second, list.get(0));
-		assertEquals(first, list.get(1));
+		assertThat(second).isNotEqualTo(first);
+		assertThat(list.get(0)).isEqualTo(second);
+		assertThat(list.get(1)).isEqualTo(first);
 	}
 }

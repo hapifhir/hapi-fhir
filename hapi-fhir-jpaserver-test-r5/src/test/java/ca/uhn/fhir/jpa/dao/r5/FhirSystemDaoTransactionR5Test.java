@@ -97,7 +97,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
 		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
-		assertThat(output.getEntry().size()).isEqualTo(4);
+		assertThat(output.getEntry()).hasSize(4);
 
 		IdType patientId = new IdType(output.getEntry().get(1).getResponse().getLocation());
 		IdType observationId = new IdType(output.getEntry().get(2).getResponse().getLocation());
@@ -153,7 +153,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
 		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
-		assertThat(output.getEntry().size()).isEqualTo(4);
+		assertThat(output.getEntry()).hasSize(4);
 
 		patientId = new IdType(output.getEntry().get(1).getResponse().getLocation());
 		observationId = new IdType(output.getEntry().get(2).getResponse().getLocation());
@@ -205,7 +205,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
 		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
-		assertThat(output.getEntry().size()).isEqualTo(3);
+		assertThat(output.getEntry()).hasSize(3);
 
 		patientId = new IdType(output.getEntry().get(1).getResponse().getLocation());
 		observationId = new IdType(output.getEntry().get(2).getResponse().getLocation());
@@ -266,7 +266,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
 		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
-		assertThat(output.getEntry().size()).isEqualTo(4);
+		assertThat(output.getEntry()).hasSize(4);
 
 		runInTransaction(() -> {
 			assertEquals(5, myResourceTableDao.count());
@@ -303,7 +303,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
 		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
-		assertThat(output.getEntry().size()).isEqualTo(4);
+		assertThat(output.getEntry()).hasSize(4);
 
 		runInTransaction(() -> {
 			assertEquals(9, myResourceTableDao.count());
@@ -385,7 +385,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
 		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
-		assertThat(output.getEntry().size()).isEqualTo(1);
+		assertThat(output.getEntry()).hasSize(1);
 
 		runInTransaction(() -> {
 			assertEquals(2, myResourceTableDao.count());
@@ -442,7 +442,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertThat(createdPatient.getIdentifierFirstRep().getSystem()).isEqualTo("http://system");
 		assertThat(createdPatient.getActive()).isTrue();
 
-		assertThat(output.getEntry().size()).isEqualTo(2);
+		assertThat(output.getEntry()).hasSize(2);
 	}
 
 
@@ -520,7 +520,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		Bundle input = loadResourceFromClasspath(Bundle.class, "docref-test-bundle.json");
 		Bundle output = mySystemDao.transaction(mySrd, input);
-		assertThat(output.getEntry().size()).isEqualTo(1);
+		assertThat(output.getEntry()).hasSize(1);
 	}
 
 

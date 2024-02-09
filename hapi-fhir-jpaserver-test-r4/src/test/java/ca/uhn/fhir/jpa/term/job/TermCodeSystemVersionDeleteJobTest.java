@@ -157,7 +157,7 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 				Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 			}
 		);
-		assertThat(thrown.getMessage().contains("Invalid code system version PID 0")).isTrue();
+		assertThat(thrown.getMessage()).contains("Invalid code system version PID 0");
 	}
 
 

@@ -7,7 +7,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirValidatorTest {
 	FhirContext ourFhirContext = FhirContext.forR4Cached();
@@ -26,11 +25,11 @@ public class FhirValidatorTest {
 		Patient patientWithoutContained = (Patient)validator.withoutContainedResources(patient);
 
 		// check
-		assertEquals("bob", patientWithoutContained.getNameFirstRep().getGivenAsSingleString());
+		assertThat(patientWithoutContained.getNameFirstRep().getGivenAsSingleString()).isEqualTo("bob");
 		assertThat(patientWithoutContained.getContained()).hasSize(0);
 
-		assertEquals("bob", patient.getNameFirstRep().getGivenAsSingleString());
+		assertThat(patient.getNameFirstRep().getGivenAsSingleString()).isEqualTo("bob");
 		assertThat(patient.getContained()).hasSize(1);
-		assertEquals("heavy", ((Observation)patient.getContained().get(0)).getValue().toString());
+		assertThat(((Observation) patient.getContained().get(0)).getValue().toString()).isEqualTo("heavy");
 	}
 }

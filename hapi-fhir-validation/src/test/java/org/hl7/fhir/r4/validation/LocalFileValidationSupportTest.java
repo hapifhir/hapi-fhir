@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class LocalFileValidationSupportTest extends BaseValidationTestWithInlineMocks {
 
@@ -25,7 +25,7 @@ public class LocalFileValidationSupportTest extends BaseValidationTestWithInline
 		localFileValidationSupport.loadFile(patientProfile);
 		StructureDefinition structureDefinition = (StructureDefinition) localFileValidationSupport.fetchStructureDefinition("https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient");
 
-		assertEquals(structureDefinition.getName(), "Profile_MII_Patient_PatientIn");
+		assertThat("Profile_MII_Patient_PatientIn").isEqualTo(structureDefinition.getName());
 	}
 
 }

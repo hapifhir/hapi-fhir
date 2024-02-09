@@ -215,7 +215,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(results.getEntry().size()).isEqualTo(1);
+		assertThat(results.getEntry()).hasSize(1);
 
 	}
 
@@ -248,7 +248,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 
 		// Assert
-		assertThat(returnedBundle.getEntry().size()).isEqualTo(0);
+		assertThat(returnedBundle.getEntry()).isEmpty();
 	}
 
 	@Test
@@ -273,7 +273,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		List<String> foundPatients = toUnqualifiedVersionlessIdValues(searchResultBundle);
 
-		assertThat(foundPatients.size()).isEqualTo(1);
+		assertThat(foundPatients).hasSize(1);
 
 		assertThat(expectedPatientId.getValue()).isEqualTo(foundPatients.get(0));
 
@@ -423,7 +423,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Basic basic = myClient.read().resource(Basic.class).withId(id).execute();
 		List<Extension> exts = basic.getExtensionsByUrl("http://localhost:1080/hapi-fhir-jpaserver-example/baseDstu2/StructureDefinition/DateID");
-		assertThat(exts.size()).isEqualTo(1);
+		assertThat(exts).hasSize(1);
 	}
 
 	private List<String> searchAndReturnUnqualifiedIdValues(String uri) throws IOException {
@@ -563,7 +563,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.where(QuestionnaireResponse.SUBJECT.hasChainedProperty("Patient", Patient.FAMILY.matches().value("SMITH")))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(resp.getEntry().size()).isEqualTo(1);
+		assertThat(resp.getEntry()).hasSize(1);
 
 		// Qualified With an invalid name
 		try {
@@ -640,10 +640,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.totalMode(SearchTotalModeEnum.ACCURATE)
 			.count(10).returnBundle(Bundle.class).execute();
 		assertThat(found.getTotal()).isEqualTo(100);
-		assertThat(found.getEntry().size()).isEqualTo(10);
+		assertThat(found.getEntry()).hasSize(10);
 
 		found = myClient.search().forResource(Organization.class).where(Organization.NAME.matches().value("rpdstu2_testCountParam_01")).count(50).returnBundle(Bundle.class).execute();
-		assertThat(found.getEntry().size()).isEqualTo(50);
+		assertThat(found.getEntry()).hasSize(50);
 
 	}
 
@@ -1053,8 +1053,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertThat(res.getEntry().size()).isEqualTo(3);
-		assertThat(genResourcesOfType(res, Encounter.class).size()).isEqualTo(1);
+		assertThat(res.getEntry()).hasSize(3);
+		assertThat(genResourcesOfType(res, Encounter.class)).hasSize(1);
 		assertThat(genResourcesOfType(res, Encounter.class).get(0).getIdElement().toUnqualifiedVersionless()).isEqualTo(e1id.toUnqualifiedVersionless());
 
 	}
@@ -2005,7 +2005,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Bundle inputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, inputString);
 		inputBundle.setType(BundleType.TRANSACTION);
 
-		assertThat(inputBundle.getEntry().size()).isEqualTo(53);
+		assertThat(inputBundle.getEntry()).hasSize(53);
 
 		Set<String> allIds = new TreeSet<String>();
 		for (BundleEntryComponent nextEntry : inputBundle.getEntry()) {
@@ -2015,7 +2015,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			allIds.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
 
-		assertThat(allIds.size()).isEqualTo(53);
+		assertThat(allIds).hasSize(53);
 
 		mySystemDao.transaction(mySrd, inputBundle);
 
@@ -2120,7 +2120,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		for (int i = 1; i < 77; i++) {
 			assertThat(ids).contains("A" + StringUtils.leftPad(Integer.toString(i), 2, '0'));
 		}
-		assertThat(ids.size()).isEqualTo(77);
+		assertThat(ids).hasSize(77);
 	}
 
 	@Test
@@ -2139,7 +2139,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.returnResourceType(Bundle.class)
 			.execute();
 
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 	}
 
 	// private void delete(String theResourceType, String theParamName, String theParamValue) {
@@ -2330,16 +2330,16 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myClient.update().resource(patient).execute();
 
 		Bundle history = myClient.history().onInstance(id).andReturnBundle(Bundle.class).prettyPrint().summaryMode(SummaryEnum.DATA).execute();
-		assertThat(history.getEntry().size()).isEqualTo(3);
+		assertThat(history.getEntry()).hasSize(3);
 		assertThat(history.getEntry().get(0).getResource().getId()).isEqualTo(id.withVersion("3").getValue());
-		assertThat(((Patient) history.getEntry().get(0).getResource()).getName().size()).isEqualTo(1);
+		assertThat(((Patient) history.getEntry().get(0).getResource()).getName()).hasSize(1);
 
 		assertThat(history.getEntry().get(1).getRequest().getMethodElement().getValue()).isEqualTo(HTTPVerb.DELETE);
 		assertThat(history.getEntry().get(1).getRequest().getUrl()).isEqualTo("Patient/" + id.getIdPart() + "/_history/2");
 		assertThat(history.getEntry().get(1).getResource()).isEqualTo(null);
 
 		assertThat(history.getEntry().get(2).getResource().getId()).isEqualTo(id.withVersion("1").getValue());
-		assertThat(((Patient) history.getEntry().get(2).getResource()).getName().size()).isEqualTo(1);
+		assertThat(((Patient) history.getEntry().get(2).getResource()).getName()).hasSize(1);
 
 		try {
 			myBundleDao.validate(history, null, null, null, null, null, mySrd);
@@ -2463,7 +2463,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myClient.create().resource(p).execute();
 
 		Bundle b = myClient.search().forResource("Patient").include(Patient.INCLUDE_ORGANIZATION).returnBundle(Bundle.class).execute();
-		assertThat(b.getEntry().size()).isEqualTo(1);
+		assertThat(b.getEntry()).hasSize(1);
 	}
 
 	@Test
@@ -2513,17 +2513,17 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			IIdType id = myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
 
 			Meta meta = myClient.meta().get(Meta.class).fromResource(id).execute();
-			assertThat(meta.getTag().size()).isEqualTo(0);
+			assertThat(meta.getTag()).isEmpty();
 
 			Meta inMeta = new Meta();
 			inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
 			meta = myClient.meta().add().onResource(id).meta(inMeta).execute();
-			assertThat(meta.getTag().size()).isEqualTo(1);
+			assertThat(meta.getTag()).hasSize(1);
 
 			inMeta = new Meta();
 			inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
 			meta = myClient.meta().delete().onResource(id).meta(inMeta).execute();
-			assertThat(meta.getTag().size()).isEqualTo(0);
+			assertThat(meta.getTag()).isEmpty();
 		} finally {
 			myRestServer.unregisterInterceptor(validatingInterceptor);
 		}
@@ -2598,7 +2598,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.useHttpGet()
 			.execute();
 
-		assertThat(response.getEntry().size()).isEqualTo(10);
+		assertThat(response.getEntry()).hasSize(10);
 		if (response.getTotalElement().getValueAsString() != null) {
 			assertThat(response.getTotalElement().getValueAsString()).isEqualTo("21");
 		}
@@ -2609,7 +2609,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String nextUrl = response.getLink("next").getUrl();
 		response = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 
-		assertThat(response.getEntry().size()).isEqualTo(10);
+		assertThat(response.getEntry()).hasSize(10);
 		if (response.getTotalElement().getValueAsString() != null) {
 			assertThat(response.getTotalElement().getValueAsString()).isEqualTo("21");
 		}
@@ -2621,7 +2621,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		nextUrl = response.getLink("next").getUrl();
 		response = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 		assertThat(response.getTotalElement().getValueAsString()).isEqualTo("21");
 		assertThat(response.getLink("next")).isEqualTo(null);
 
@@ -2655,7 +2655,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.useHttpGet()
 			.execute();
 
-		assertThat(response.getEntry().size()).isEqualTo(10);
+		assertThat(response.getEntry()).hasSize(10);
 		assertThat(response.getTotalElement().getValue()).isEqualTo(null);
 		assertThat(response.getLink("next")).isEqualTo(null);
 	}
@@ -2792,7 +2792,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		IIdType newId = myClient.create().resource(p1).execute().getId();
 
 		Patient actual = myClient.read(Patient.class, new UriDt(newId.getValue()));
-		assertThat(actual.getContained().size()).isEqualTo(1);
+		assertThat(actual.getContained()).hasSize(1);
 
 		//@formatter:off
 		Bundle b = myClient
@@ -2803,7 +2803,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		//@formatter:on
-		assertThat(b.getEntry().size()).isEqualTo(1);
+		assertThat(b.getEntry()).hasSize(1);
 
 	}
 
@@ -2887,7 +2887,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry()).hasSize(1);
 		assertThat(actual.getEntry().get(0).getFullUrl()).isEqualTo(myServerBase + "/Patient/" + p1Id.getIdPart());
 		assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(p1Id.getIdPart());
 		assertThat(actual.getEntry().get(0).getSearch().getModeElement().getValue()).isEqualTo(SearchEntryMode.MATCH);
@@ -2910,7 +2910,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		//@formatter:on
-		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry()).hasSize(1);
 		assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(p1Id.getIdPart());
 
 	}
@@ -3101,7 +3101,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.where(Patient.ORGANIZATION.hasId(o1id.getIdPart()))
 			.encodedJson().prettyPrint().returnBundle(Bundle.class).execute();
 		//@formatter:on
-		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry()).hasSize(1);
 		assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(p1Id.getIdPart());
 
 		//@formatter:off
@@ -3110,7 +3110,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.where(Patient.ORGANIZATION.hasId(o1id.getValue()))
 			.encodedJson().prettyPrint().returnBundle(Bundle.class).execute();
 		//@formatter:on
-		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry()).hasSize(1);
 		assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(p1Id.getIdPart());
 
 	}
@@ -3285,7 +3285,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		for (int i = 0; i < 100; i++) {
 			Bundle bundle = myClient.search().forResource(Patient.class).where(Patient.NAME.matches().value("testSearchPagingKeepsOldSearches")).count(5).returnBundle(Bundle.class).execute();
 			assertThat(isNotBlank(bundle.getLink("next").getUrl())).isTrue();
-			assertThat(bundle.getEntry().size()).isEqualTo(5);
+			assertThat(bundle.getEntry()).hasSize(5);
 			linkNext.add(bundle.getLink("next").getUrl());
 		}
 
@@ -3293,7 +3293,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		for (String nextLink : linkNext) {
 			ourLog.info("Fetching index {}", index++);
 			Bundle b = myClient.fetchResourceFromUrl(Bundle.class, nextLink);
-			assertThat(b.getEntry().size()).isEqualTo(5);
+			assertThat(b.getEntry()).hasSize(5);
 		}
 	}
 
@@ -3553,7 +3553,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		//@formatter:on
 
 		patient = (Patient) response.getEntry().get(0).getResource();
-		assertThat(patient.getMeta().getTag().size()).isEqualTo(1);
+		assertThat(patient.getMeta().getTag()).hasSize(1);
 	}
 
 	@Test
@@ -3584,7 +3584,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertThat(response.getEntry().size()).isEqualTo(2);
+		assertThat(response.getEntry()).hasSize(2);
 	}
 
 	@Test
@@ -3608,7 +3608,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
 			String respString = IOUtils.toString(resp.getEntity().getContent(), Constants.CHARSET_UTF8);
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, respString);
-			assertThat(bundle.getEntry().size()).isEqualTo(1);
+			assertThat(bundle.getEntry()).hasSize(1);
 		}
 	}
 
@@ -3634,7 +3634,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertThat(found.getEntry().size()).isEqualTo(2);
+		assertThat(found.getEntry()).hasSize(2);
 		assertThat(found.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
 		assertThat(found.getEntry().get(0).getSearch().getMode()).isEqualTo(SearchEntryMode.MATCH);
 		assertThat(found.getEntry().get(1).getResource().getClass()).isEqualTo(Organization.class);
@@ -3665,7 +3665,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertThat(found.getEntry().size()).isEqualTo(2);
+		assertThat(found.getEntry()).hasSize(2);
 		assertThat(found.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
 		assertThat(found.getEntry().get(0).getSearch().getMode()).isEqualTo(SearchEntryMode.MATCH);
 		assertThat(found.getEntry().get(1).getResource().getClass()).isEqualTo(Organization.class);
@@ -3810,7 +3810,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.debug("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 		
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
-		assertThat(found.getEntry().size()).isEqualTo(4);
+		assertThat(found.getEntry()).hasSize(4);
 		assertThat(list.get(0)).isEqualTo(oid3);
 		assertThat(list.get(1)).isEqualTo(oid1);
 		assertThat(list.get(2)).isEqualTo(oid4);
@@ -4442,7 +4442,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 		//@formatter:on
 
-		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry()).hasSize(1);
 		assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(p1Id.getIdPart());
 
 	}

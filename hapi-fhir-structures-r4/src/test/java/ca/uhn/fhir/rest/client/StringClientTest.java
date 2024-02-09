@@ -28,7 +28,7 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -62,9 +62,9 @@ public class StringClientTest {
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.searchWithParam(new StringParam("hello"));
 
-		assertEquals(HttpGet.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
 		HttpGet get = (HttpGet) capt.getValue();
-		assertEquals("http://foo/Patient?withParam=hello", get.getURI().toString());
+		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient?withParam=hello");
 	}
 
 	@Test
@@ -78,9 +78,9 @@ public class StringClientTest {
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.searchWithoutParam("hello");
 
-		assertEquals(HttpGet.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
 		HttpGet get = (HttpGet) capt.getValue();
-		assertEquals("http://foo/Patient?withoutParam=hello", get.getURI().toString());
+		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient?withoutParam=hello");
 	}
 
 	@Test
@@ -94,9 +94,9 @@ public class StringClientTest {
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.searchWithParam(new StringParam("hello", true));
 
-		assertEquals(HttpGet.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
 		HttpGet get = (HttpGet) capt.getValue();
-		assertEquals("http://foo/Patient?withParam%3Aexact=hello", get.getURI().toString());
+		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient?withParam%3Aexact=hello");
 	}
 
 

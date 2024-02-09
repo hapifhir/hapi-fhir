@@ -300,7 +300,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 		assertThat(ss.getEventsSinceSubscriptionStartElement().getValueAsString()).isEqualTo(theExpectedEventNumber.toString());
 
 		List<SubscriptionStatus.SubscriptionStatusNotificationEventComponent> notificationEvents = ss.getNotificationEvent();
-		assertThat(notificationEvents.size()).isEqualTo(1);
+		assertThat(notificationEvents).hasSize(1);
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent = notificationEvents.get(0);
 		assertThat(notificationEvent.getEventNumber()).isEqualTo(theExpectedEventNumber);
 		assertThat(notificationEvent.getFocus().getReferenceElement()).isEqualTo(sentResource.getIdElement().toUnqualifiedVersionless());

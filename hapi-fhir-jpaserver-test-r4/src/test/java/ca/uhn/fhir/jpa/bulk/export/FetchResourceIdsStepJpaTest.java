@@ -71,7 +71,7 @@ public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
 		// Verify
 		verify(mySink, times(1)).accept(myResourceIdListCaptor.capture());
 		ResourceIdList idList = myResourceIdListCaptor.getAllValues().get(0);
-		assertThat(idList.getIds().size()).isEqualTo(10);
+		assertThat(idList.getIds()).hasSize(10);
 	}
 
 

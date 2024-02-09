@@ -136,7 +136,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		}
 
 		Bundle execute = (Bundle) myClient.transaction().withBundle(builder.getBundle()).execute();
-		assertThat(execute.getEntry().size()).isEqualTo(20);
+		assertThat(execute.getEntry()).hasSize(20);
 
 		myInterceptorRegistry.unregisterInterceptor(myBinaryStorageInterceptor);
 	}
@@ -276,7 +276,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			.count(15)
 			.execute();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
-		assertThat(resources.size()).isEqualTo(15);
+		assertThat(resources).hasSize(15);
 		assertThat(consentService.getSeeCount()).isEqualTo(16);
 		resources.forEach(t -> {
 			assertEquals(null, ((Observation) t).getSubject().getReference());
@@ -288,7 +288,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			.next(result)
 			.execute();
 		resources = BundleUtil.toListOfResources(myFhirContext, result);
-		assertThat(resources.size()).isEqualTo(15);
+		assertThat(resources).hasSize(15);
 		assertThat(consentService.getSeeCount()).isEqualTo(32);
 		resources.forEach(t -> {
 			assertEquals(null, ((Observation) t).getSubject().getReference());
@@ -305,7 +305,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("1"))).execute();
 		Bundle response = myClient.search().forResource(Patient.class).count(1).accept("application/fhir+json; fhirVersion=3.0").returnBundle(Bundle.class).execute();
 
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 		assertThat(response.getTotalElement().getValue()).isNull();
 
 	}
@@ -594,7 +594,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		String searchId = response.getIdElement().getIdPart();
 
 		// 2 results returned, but no total since it's stripped
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 		assertThat(response.getTotalElement().getValue()).isNull();
 
 		StopWatch sw = new StopWatch();
@@ -613,7 +613,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		// Load next page
 		response = myClient.loadPage().next(response).execute();
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 		assertThat(response.getTotalElement().getValue()).isNull();
 
 		runInTransaction(() -> {
@@ -648,12 +648,12 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		Bundle response = myClient.search().forResource(Patient.class).count(1).returnBundle(Bundle.class).execute();
 		String searchId = response.getIdElement().getIdPart();
 
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 		assertThat(response.getTotalElement().getValue()).isNull();
 
 		// Load next page
 		response = myClient.loadPage().next(response).execute();
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 		assertThat(response.getTotalElement().getValue()).isNull();
 
 		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.

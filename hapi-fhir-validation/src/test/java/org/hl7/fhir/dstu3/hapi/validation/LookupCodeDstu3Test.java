@@ -41,8 +41,7 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.context.support.IValidationSupport.BaseConceptProperty;
 import static ca.uhn.fhir.context.support.IValidationSupport.CodingConceptProperty;
 import static ca.uhn.fhir.context.support.IValidationSupport.StringConceptProperty;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class LookupCodeDstu3Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
@@ -112,24 +111,24 @@ public class LookupCodeDstu3Test {
 		}
 
 		public void verifyProperty(BaseConceptProperty theConceptProperty, String theExpectedPropertName, IBaseDatatype theExpectedValue) {
-			assertEquals(theExpectedPropertName, theConceptProperty.getPropertyName());
+			assertThat(theConceptProperty.getPropertyName()).isEqualTo(theExpectedPropertName);
 			String type = theConceptProperty.getType();
 			switch (type) {
 				case IValidationSupport.TYPE_STRING -> {
-					assertTrue(theExpectedValue instanceof StringType);
+					assertThat(theExpectedValue instanceof StringType).isTrue();
 					StringType stringValue = (StringType) theExpectedValue;
-					assertTrue(theConceptProperty instanceof StringConceptProperty);
+					assertThat(theConceptProperty instanceof StringConceptProperty).isTrue();
 					StringConceptProperty stringConceptProperty = (StringConceptProperty) theConceptProperty;
-					assertEquals(stringValue.getValue(), stringConceptProperty.getValue());
+					assertThat(stringConceptProperty.getValue()).isEqualTo(stringValue.getValue());
 				}
 				case IValidationSupport.TYPE_CODING -> {
-					assertTrue(theExpectedValue instanceof Coding);
+					assertThat(theExpectedValue instanceof Coding).isTrue();
 					Coding coding = (Coding) theExpectedValue;
-					assertTrue(theConceptProperty instanceof CodingConceptProperty);
+					assertThat(theConceptProperty instanceof CodingConceptProperty).isTrue();
 					CodingConceptProperty codingConceptProperty = (CodingConceptProperty) theConceptProperty;
-					assertEquals(coding.getCode(), codingConceptProperty.getCode());
-					assertEquals(coding.getSystem(), codingConceptProperty.getCodeSystem());
-					assertEquals(coding.getDisplay(), codingConceptProperty.getDisplay());
+					assertThat(codingConceptProperty.getCode()).isEqualTo(coding.getCode());
+					assertThat(codingConceptProperty.getCodeSystem()).isEqualTo(coding.getSystem());
+					assertThat(codingConceptProperty.getDisplay()).isEqualTo(coding.getDisplay());
 				}
 				default ->
 					throw new InternalErrorException(Msg.code(2451) + "Property type " + type + " is not supported.");

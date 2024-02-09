@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ModelInstantiationTest {
 
@@ -25,7 +25,7 @@ public class ModelInstantiationTest {
 
 	@Test
 	public void testBinaryIsBaseBinary() {
-		assertTrue(IBaseBinary.class.isAssignableFrom(Binary.class));
+		assertThat(IBaseBinary.class.isAssignableFrom(Binary.class)).isTrue();
 	}
 	
 	@SuppressWarnings("unchecked")

@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class Dstu2BundleFactoryTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Dstu2BundleFactoryTest.class);
@@ -95,15 +95,15 @@ public class Dstu2BundleFactoryTest {
 	public void whenIncludeIsAsterisk_bundle_shouldContainAllReferencedResources() throws Exception {
 		Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes(new String("*")));
 
-		assertEquals(6, bundle.getEntry().size());
-		assertEquals(2, numberOfEntriesOfType(bundle, Specimen.class));
+		assertThat(bundle.getEntry()).hasSize(6);
+		assertThat(numberOfEntriesOfType(bundle, Specimen.class)).isEqualTo(2);
 	}
 
 	@Test
 	public void whenIncludeIsNull_bundle_shouldOnlyContainPrimaryResource() throws Exception {
 		Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, null);
-		assertEquals(1, bundle.getEntry().size());
-		assertEquals(1, numberOfEntriesOfType(bundle, DiagnosticReport.class));
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(numberOfEntriesOfType(bundle, DiagnosticReport.class)).isEqualTo(1);
 	}
 
 	@Test
@@ -111,9 +111,9 @@ public class Dstu2BundleFactoryTest {
 		Set<Include> includes = includes(DiagnosticReport.INCLUDE_SUBJECT.getValue());
 		Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes);
 
-		assertEquals(2, bundle.getEntry().size());
-		assertEquals(1, numberOfEntriesOfType(bundle, DiagnosticReport.class));
-		assertEquals(1, numberOfEntriesOfType(bundle, Patient.class));
+		assertThat(bundle.getEntry()).hasSize(2);
+		assertThat(numberOfEntriesOfType(bundle, DiagnosticReport.class)).isEqualTo(1);
+		assertThat(numberOfEntriesOfType(bundle, Patient.class)).isEqualTo(1);
 	}
 	
 	@Test
@@ -121,30 +121,30 @@ public class Dstu2BundleFactoryTest {
 		Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes(DiagnosticReport.INCLUDE_RESULT.getValue(), Observation.INCLUDE_SPECIMEN.getValue()));
 
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
-		
-		assertEquals(3, bundle.getEntry().size());
-		assertEquals(1, numberOfEntriesOfType(bundle, DiagnosticReport.class));
-		assertEquals(1, numberOfEntriesOfType(bundle, Observation.class));
-		assertEquals(1, numberOfEntriesOfType(bundle, Specimen.class));
+
+		assertThat(bundle.getEntry()).hasSize(3);
+		assertThat(numberOfEntriesOfType(bundle, DiagnosticReport.class)).isEqualTo(1);
+		assertThat(numberOfEntriesOfType(bundle, Observation.class)).isEqualTo(1);
+		assertThat(numberOfEntriesOfType(bundle, Specimen.class)).isEqualTo(1);
 		List<Specimen> specimens = getResourcesOfType(bundle, Specimen.class);
-		assertEquals(1, specimens.size());
-		assertEquals("1", specimens.get(0).getId().getIdPart());
+		assertThat(specimens).hasSize(1);
+		assertThat(specimens.get(0).getId().getIdPart()).isEqualTo("1");
 	}
 
 	@Test
 	public void whenAChainedResourceIsIncludedButItsParentIsNot_bundle_shouldNotContainTheChainedResource() throws Exception {
 		Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes(Observation.INCLUDE_SPECIMEN.getValue()));
 
-		assertEquals(1, bundle.getEntry().size());
-		assertEquals(1, numberOfEntriesOfType(bundle, DiagnosticReport.class));
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(numberOfEntriesOfType(bundle, DiagnosticReport.class)).isEqualTo(1);
 	}
 
 	@Test
 	public void whenBundleInclusionRuleSetToResourcePresence_bundle_shouldContainAllResources() throws Exception {
 		Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE, null);
 
-		assertEquals(6, bundle.getEntry().size());
-		assertEquals(2, numberOfEntriesOfType(bundle, Specimen.class));
+		assertThat(bundle.getEntry()).hasSize(6);
+		assertThat(numberOfEntriesOfType(bundle, Specimen.class)).isEqualTo(2);
 	}
 
 	Bundle makeBundle(BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes) {

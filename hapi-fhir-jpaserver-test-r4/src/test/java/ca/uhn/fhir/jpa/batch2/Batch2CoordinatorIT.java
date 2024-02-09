@@ -163,14 +163,14 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 			while (iterator.hasNext()) {
 				JobInstance next = iterator.next();
-				assertThat(jobIds.contains(next.getInstanceId())).isTrue();
+				assertThat(jobIds).contains(next);
 				fetched.add(next.getInstanceId());
 			}
 
 			pageIndex++;
 		} while (page.hasNext());
 
-		assertThat(fetched.size()).isEqualTo(maxJobsToSave);
+		assertThat(fetched).hasSize(maxJobsToSave);
 	}
 
 	@Test
@@ -221,7 +221,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		final List<JobInstance> jobInstances = myJobPersistence.fetchInstances(10, 0);
 
-		assertThat(jobInstances.size()).isEqualTo(1);
+		assertThat(jobInstances).hasSize(1);
 
 		final JobInstance jobInstance = jobInstances.get(0);
 
@@ -356,7 +356,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		// verify
 		Optional<JobInstance> instanceOp = myJobPersistence.fetchInstance(instanceId);
-		assertThat(instanceOp.isPresent()).isTrue();
+		assertThat(instanceOp).isPresent();
 		int secondStepCalls = secondStepInt.get();
 		assertThat(secondStepCalls).isEqualTo(2);
 		JobInstance instance = instanceOp.get();
@@ -364,14 +364,12 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		assertThat(instance.getReport()).isNotNull();
 
 		for (int i = 0; i < secondStepInt.get(); i++) {
-			assertThat(instance.getReport().contains(
-				testInfo + i
-			)).isTrue();
+			assertThat(instance.getReport()).contains(testInfo + i);
 		}
 
 		final List<JobInstance> jobInstances = myJobPersistence.fetchInstances(10, 0);
 
-		assertThat(jobInstances.size()).isEqualTo(1);
+		assertThat(jobInstances).hasSize(1);
 
 		final JobInstance jobInstance = jobInstances.get(0);
 

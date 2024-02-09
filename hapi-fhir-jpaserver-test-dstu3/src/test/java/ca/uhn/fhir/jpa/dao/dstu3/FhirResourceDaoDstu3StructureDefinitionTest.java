@@ -20,12 +20,12 @@ public class FhirResourceDaoDstu3StructureDefinitionTest extends BaseJpaDstu3Tes
 	@Test
 	public void testGenerateSnapshot() throws IOException {
 		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/dstu3/profile-differential-patient-dstu3.json");
-		assertThat(sd.getSnapshot().getElement().size()).isEqualTo(0);
+		assertThat(sd.getSnapshot().getElement()).isEmpty();
 
 		StructureDefinition output = myStructureDefinitionDao.generateSnapshot(sd, "http://foo", null, "THE BEST PROFILE");
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertThat(output.getSnapshot().getElement().size()).isEqualTo(54);
+		assertThat(output.getSnapshot().getElement()).hasSize(54);
 	}
 
 

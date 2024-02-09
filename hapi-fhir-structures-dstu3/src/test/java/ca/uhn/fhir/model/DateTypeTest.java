@@ -9,7 +9,6 @@ import java.util.Calendar;
 import java.util.TimeZone;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DateTypeTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DateTypeTest.class);
@@ -33,22 +32,22 @@ public class DateTypeTest {
 		try {
 			new DateType(1974, 12, 25);
 		} catch (IllegalArgumentException e) {
-			assertEquals("theMonth must be between 0 and 11", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("theMonth must be between 0 and 11");
 		}
 		try {
 			new DateType(1974, -1, 25);
 		} catch (IllegalArgumentException e) {
-			assertEquals("theMonth must be between 0 and 11", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("theMonth must be between 0 and 11");
 		}
 		try {
 			new DateType(1974, 2, 0);
 		} catch (IllegalArgumentException e) {
-			assertEquals("theDay must be between 1 and 31", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("theDay must be between 1 and 31");
 		}
 		try {
 			new DateType(1974, 2, 32);
 		} catch (IllegalArgumentException e) {
-			assertEquals("theDay must be between 1 and 31", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("theDay must be between 1 and 31");
 		}
 		new DateType(1974, 1, 31);
 	}
@@ -85,10 +84,10 @@ public class DateTypeTest {
 		cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 		cal.set(1990, Calendar.JANUARY, 5, 0, 0, 0);
 		DateType dateDt = new DateType(cal);
-		assertEquals("1990-01-05", dateDt.getValueAsString());
+		assertThat(dateDt.getValueAsString()).isEqualTo("1990-01-05");
 
 		dateDt = new DateType(1990, 0, 5);
-		assertEquals("1990-01-05", dateDt.getValueAsString());
+		assertThat(dateDt.getValueAsString()).isEqualTo("1990-01-05");
 	}
 
 }

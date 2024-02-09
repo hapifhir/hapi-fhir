@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RuleTargetTest {
 
@@ -21,7 +20,7 @@ class RuleTargetTest {
 
 		Map<String, String[]> storedParams = target.getSearchParams();
 		assertThat(storedParams.keySet()).hasSize(2);
-		assertEquals("Patient/123", storedParams.get("subject")[0]);
-		assertEquals("Practioner/456", storedParams.get("performer")[0]);
+		assertThat(storedParams.get("subject")[0]).isEqualTo("Patient/123");
+		assertThat(storedParams.get("performer")[0]).isEqualTo("Practioner/456");
 	}
 }

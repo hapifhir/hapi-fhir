@@ -61,9 +61,9 @@ public class SchemaMigratorTest extends BaseTest {
 			assertThat(e.getCause().getCause().getClass()).isEqualTo(org.springframework.jdbc.BadSqlGrammarException.class);
 			MigrationResult failedResult = e.getResult();
 			assertThat(failedResult.changes).isEqualTo(0);
-			assertThat(failedResult.succeededTasks.size()).isEqualTo(0);
-			assertThat(failedResult.failedTasks.size()).isEqualTo(1);
-			assertThat(failedResult.executedStatements.size()).isEqualTo(0);
+			assertThat(failedResult.succeededTasks).isEmpty();
+			assertThat(failedResult.failedTasks).hasSize(1);
+			assertThat(failedResult.executedStatements).isEmpty();
 
 			assertThat(myHapiMigrationDao.findAll()).hasSize(1);
 		}
@@ -71,9 +71,9 @@ public class SchemaMigratorTest extends BaseTest {
 
 		MigrationResult result = schemaMigrator.migrate();
 		assertThat(result.changes).isEqualTo(0);
-		assertThat(result.succeededTasks.size()).isEqualTo(1);
-		assertThat(result.failedTasks.size()).isEqualTo(0);
-		assertThat(result.executedStatements.size()).isEqualTo(1);
+		assertThat(result.succeededTasks).hasSize(1);
+		assertThat(result.failedTasks).isEmpty();
+		assertThat(result.executedStatements).hasSize(1);
 
 		List<HapiMigrationEntity> entities = myHapiMigrationDao.findAll();
 		assertThat(entities).hasSize(2);

@@ -23,7 +23,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class SearchHasParamDstu3Test {
 
@@ -54,14 +54,14 @@ public class SearchHasParamDstu3Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("search", ourLastMethod);
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertThat(ourLastMethod).isEqualTo("search");
 		
 		HasParam param = ourLastParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
-		assertEquals("Encounter", param.getTargetResourceType());
-		assertEquals("patient", param.getReferenceFieldName());
-		assertEquals("type", param.getParameterName());
-		assertEquals("SURG", param.getParameterValue());
+		assertThat(param.getTargetResourceType()).isEqualTo("Encounter");
+		assertThat(param.getReferenceFieldName()).isEqualTo("patient");
+		assertThat(param.getParameterName()).isEqualTo("type");
+		assertThat(param.getParameterValue()).isEqualTo("SURG");
 	}
 
 	@AfterAll

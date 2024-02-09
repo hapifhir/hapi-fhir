@@ -267,7 +267,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		assertThat(parammodified).isNotEqualTo(paramdefault);
 		String encodedDefault = paramdefault.encode(testString);
 		String encodedMod = parammodified.encode(testString);
-		assertThat(encodedMod.length()).isEqualTo(modifiedLength);
+		assertThat(encodedMod).hasSize(modifiedLength);
 		assertThat(encodedMod.length()).isNotEqualTo(encodedDefault.length());
 	}
 

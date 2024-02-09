@@ -2,9 +2,8 @@ package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
 class NoiseCharactersTest {
 
@@ -13,7 +12,7 @@ class NoiseCharactersTest {
 	@Test
 	public void testInit() {
 		myFilter.initializeFromClasspath();
-		assertTrue(myFilter.getSize() > 0);
+		assertThat(myFilter.getSize() > 0).isTrue();
 
 		myFilter = new NoiseCharacters();
 	}
@@ -23,8 +22,8 @@ class NoiseCharactersTest {
 		myFilter.add("#x0487");
 
 		char check = (char) Integer.parseInt("487", 16);
-		assertTrue(myFilter.isNoise(check));
-		assertFalse(myFilter.isNoise('A'));
+		assertThat(myFilter.isNoise(check)).isTrue();
+		assertThat(myFilter.isNoise('A')).isFalse();
 	}
 
 	@Test
@@ -32,13 +31,13 @@ class NoiseCharactersTest {
 		myFilter.addRange("#x0487-#x0489");
 
 		char check = (char) Integer.parseInt("487", 16);
-		assertTrue(myFilter.isNoise(check));
+		assertThat(myFilter.isNoise(check)).isTrue();
 		check = (char) Integer.parseInt("488", 16);
-		assertTrue(myFilter.isNoise(check));
+		assertThat(myFilter.isNoise(check)).isTrue();
 		check = (char) Integer.parseInt("489", 16);
-		assertTrue(myFilter.isNoise(check));
+		assertThat(myFilter.isNoise(check)).isTrue();
 
-		assertFalse(myFilter.isNoise('A'));
+		assertThat(myFilter.isNoise('A')).isFalse();
 	}
 
 	@Test
@@ -46,13 +45,13 @@ class NoiseCharactersTest {
 		myFilter.addRange("#x0487-#xA489");
 
 		char check = (char) Integer.parseInt("487", 16);
-		assertTrue(myFilter.isNoise(check));
+		assertThat(myFilter.isNoise(check)).isTrue();
 		check = (char) Integer.parseInt("488", 16);
-		assertTrue(myFilter.isNoise(check));
+		assertThat(myFilter.isNoise(check)).isTrue();
 		check = (char) Integer.parseInt("489", 16);
-		assertTrue(myFilter.isNoise(check));
+		assertThat(myFilter.isNoise(check)).isTrue();
 
-		assertFalse(myFilter.isNoise('A'));
+		assertThat(myFilter.isNoise('A')).isFalse();
 	}
 
 	@Test
@@ -61,7 +60,7 @@ class NoiseCharactersTest {
 			, "#x0001 - #x - #x0000", "#x0000 #x0022"};
 
 		for (String i : invalidPatterns) {
-			assertThrows(IllegalArgumentException.class, () -> {
+			assertThatExceptionOfType(IllegalArgumentException.class).isThrownBy(() -> {
 				myFilter.add(i);
 			});
 		}

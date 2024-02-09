@@ -20,8 +20,6 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -45,13 +43,13 @@ public class CapturingInterceptorTest {
 		interceptor.interceptResponse(expectedResponse);
 		interceptor.interceptRequest(expectedRequest);
 
-		assertEquals(expectedRequest, interceptor.getLastRequest());
-		assertEquals(expectedResponse, interceptor.getLastResponse());
+		assertThat(interceptor.getLastRequest()).isEqualTo(expectedRequest);
+		assertThat(interceptor.getLastResponse()).isEqualTo(expectedResponse);
 
 		interceptor.clear();
 
-		assertNull(interceptor.getLastRequest());
-		assertNull(interceptor.getLastResponse());
+		assertThat(interceptor.getLastRequest()).isNull();
+		assertThat(interceptor.getLastResponse()).isNull();
 	}
 
 	@Test
@@ -61,7 +59,7 @@ public class CapturingInterceptorTest {
 		CapturingInterceptor interceptor = new CapturingInterceptor();
 		interceptor.interceptRequest(expectedRequest);
 
-		assertEquals(expectedRequest, interceptor.getLastRequest());
+		assertThat(interceptor.getLastRequest()).isEqualTo(expectedRequest);
 	}
 
 	@Test
@@ -72,7 +70,7 @@ public class CapturingInterceptorTest {
 		CapturingInterceptor interceptor = new CapturingInterceptor();
 		interceptor.interceptResponse(expectedResponse);
 
-		assertEquals(expectedResponse, interceptor.getLastResponse());
+		assertThat(interceptor.getLastResponse()).isEqualTo(expectedResponse);
 		verify(expectedResponse).bufferEntity();
 	}
 
@@ -87,7 +85,7 @@ public class CapturingInterceptorTest {
 		interceptor.interceptResponse(expectedResponse);
 		IHttpResponse actualResponse = interceptor.getLastResponse();
 
-		assertEquals(expectedResponse, actualResponse);
+		assertThat(actualResponse).isEqualTo(expectedResponse);
 		assertThat("Some content").isEqualTo(IOUtils.toString(actualResponse.createReader()));
 		verify(expectedResponse).bufferEntity();
 
@@ -106,7 +104,7 @@ public class CapturingInterceptorTest {
 		interceptor.interceptResponse(expectedResponse);
 		IHttpResponse actualResponse = interceptor.getLastResponse();
 
-		assertEquals(expectedResponse, actualResponse);
+		assertThat(actualResponse).isEqualTo(expectedResponse);
 		verify(expectedResponse).bufferEntity();
 	}
 
@@ -121,8 +119,8 @@ public class CapturingInterceptorTest {
 			interceptor.interceptResponse(response);
 		});
 
-		assertEquals(Msg.code(1404) + "Unable to buffer the entity for capturing", exception.getMessage());
-		assertEquals(expectedCause, exception.getCause());
+		assertThat(exception.getMessage()).isEqualTo(Msg.code(1404) + "Unable to buffer the entity for capturing");
+		assertThat(exception.getCause()).isEqualTo(expectedCause);
 
 	}
 
@@ -137,7 +135,7 @@ public class CapturingInterceptorTest {
 		interceptor.interceptResponse(expectedResponse);
 		IHttpResponse actualResponse = interceptor.getLastResponse();
 
-		assertEquals(expectedResponse, actualResponse);
+		assertThat(actualResponse).isEqualTo(expectedResponse);
 		assertThat("Some content").isEqualTo(IOUtils.toString(actualResponse.createReader()));
 		verify(expectedResponse, times(0)).bufferEntity();
 

@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Disabled
 public class ClientConnectionReuseTest {
@@ -53,7 +53,7 @@ public class ClientConnectionReuseTest {
 		}
 		ourLog.info("Invoked {} counts in {}", reps, sw);
 
-		assertEquals(1, ourServer.getConnectionsOpenedCount());
+		assertThat(ourServer.getConnectionsOpenedCount()).isEqualTo(1);
 	}
 
 	@ParameterizedTest()
@@ -71,7 +71,7 @@ public class ClientConnectionReuseTest {
 		}
 		ourLog.info("Invoked {} counts in {}", reps, sw);
 
-		assertEquals(1, ourServer.getConnectionsOpenedCount());
+		assertThat(ourServer.getConnectionsOpenedCount()).isEqualTo(1);
 	}
 
 	@ParameterizedTest()
@@ -88,7 +88,7 @@ public class ClientConnectionReuseTest {
 		}
 		ourLog.info("Invoked {} counts in {}", reps, sw);
 
-		assertEquals(1, ourServer.getConnectionsOpenedCount());
+		assertThat(ourServer.getConnectionsOpenedCount()).isEqualTo(1);
 	}
 
 

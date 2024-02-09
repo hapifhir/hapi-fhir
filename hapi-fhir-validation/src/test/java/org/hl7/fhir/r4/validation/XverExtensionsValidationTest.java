@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.function.Predicate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class XverExtensionsValidationTest extends BaseValidationTestWithInlineMocks {
 	private static final FhirContext ourCtx = FhirContext.forR4();
@@ -34,7 +34,7 @@ public class XverExtensionsValidationTest extends BaseValidationTestWithInlineMo
 
 		ValidationResult validationResult = validator.validateWithResult(med_req);
 
-		assertEquals(0, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertThat(validationResult.getMessages().stream().filter(errorMessagePredicate()).count()).isEqualTo(0);
 	}
 
 
@@ -46,7 +46,7 @@ public class XverExtensionsValidationTest extends BaseValidationTestWithInlineMo
 
 		ValidationResult validationResult = validator.validateWithResult(med_req);
 
-		assertEquals(0, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertThat(validationResult.getMessages().stream().filter(errorMessagePredicate()).count()).isEqualTo(0);
 	}
 
 	@Test
@@ -58,9 +58,9 @@ public class XverExtensionsValidationTest extends BaseValidationTestWithInlineMo
 
 		ValidationResult validationResult = validator.validateWithResult(med_req);
 
-		assertEquals(1, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertThat(validationResult.getMessages().stream().filter(errorMessagePredicate()).count()).isEqualTo(1);
 		SingleValidationMessage errorMessage = validationResult.getMessages().stream().filter(errorMessagePredicate()).findFirst().get();
-		assertEquals("Extension_EXT_Type", errorMessage.getMessageId());
+		assertThat(errorMessage.getMessageId()).isEqualTo("Extension_EXT_Type");
 	}
 
 	@Nonnull

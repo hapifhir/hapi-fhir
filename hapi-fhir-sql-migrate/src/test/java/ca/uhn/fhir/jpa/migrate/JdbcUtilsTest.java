@@ -106,9 +106,9 @@ public class JdbcUtilsTest {
 		Set<String> indexNames = JdbcUtils.getIndexNames(myConnectionProperties, "TEST_TABLE");
 
 		// verify
-		assertThat(indexNames.size()).isEqualTo(3);
-		assertThat(indexNames.contains("IDX_1")).isTrue();
-		assertThat(indexNames.contains("IDX_2")).isTrue();
-		assertThat(indexNames.contains("IDX_3")).isTrue();
+		assertThat(indexNames).hasSize(3);
+		assertThat(indexNames).contains("IDX_1");
+		assertThat(indexNames).contains("IDX_2");
+		assertThat(indexNames).contains("IDX_3");
 	}
 }

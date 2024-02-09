@@ -43,7 +43,7 @@ public class ValueSetTestUtil {
 	public String extractExpansionMessage(IBaseResource theValueSet) {
 		ValueSet outcome = myCanonicalizer.valueSetToCanonical(theValueSet);
 		List<Extension> extensions = outcome.getMeta().getExtensionsByUrl(EXT_VALUESET_EXPANSION_MESSAGE);
-		assertThat(extensions.size()).isEqualTo(1);
+		assertThat(extensions).hasSize(1);
 		String expansionMessage = extensions.get(0).getValueAsPrimitive().getValueAsString();
 		return expansionMessage;
 	}

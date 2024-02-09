@@ -119,7 +119,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 			.addInclude(Patient.INCLUDE_LINK);
 		IBundleProvider search = myPatientDao.search(params, mySrd);
 		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly(patient2Id.getValue(), patient1Id.getValue());
-		assertThat(search.getAllResources().size()).isEqualTo(2);
+		assertThat(search.getAllResources()).hasSize(2);
 		search.getAllResources().forEach(p -> assertTrue(((Patient) p).getActive()));
 	}
 
@@ -146,7 +146,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 
 		// Verify
 		assertThat(toUnqualifiedVersionlessIdValues(search)).containsExactly(patient2Id.getValue(), patient1Id.getValue());
-		assertThat(search.getAllResources().size()).isEqualTo(2);
+		assertThat(search.getAllResources()).hasSize(2);
 		search.getAllResources().forEach(p -> assertTrue(((Patient) p).getActive()));
 	}
 

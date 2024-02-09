@@ -22,7 +22,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,9 +42,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker
@@ -89,7 +85,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(expandQuery)) {
 
 			// then
-			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_200_OK);
 			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ValueSet valueSet = myFhirContext.newXmlParser().parseResource(ValueSet.class, text);
 			ourLog.info("testAutocompleteDirectionExisting {}", text);
@@ -147,12 +143,12 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			.useHttpGet()
 			.execute();
 
-		assertEquals(1, respParam.getParameter().size(), "Expected only 1 observation for blood count code");
+		assertThat(respParam.getParameter().size()).as("Expected only 1 observation for blood count code").isEqualTo(1);
 		Bundle bundle = (Bundle) respParam.getParameter().get(0).getResource();
 		Observation observation = (Observation) bundle.getEntryFirstRep().getResource();
 
-		assertEquals("Patient/p-123", observation.getSubject().getReference());
-		assertTrue(observation.getCode().getCodingFirstRep().getDisplay().contains("Erythrocytes"));
+		assertThat(observation.getSubject().getReference()).isEqualTo("Patient/p-123");
+		assertThat(observation.getCode().getCodingFirstRep().getDisplay()).contains("Erythrocytes");
 
 	}
 
@@ -167,13 +163,13 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(countQuery)) {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 			// then
-			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_200_OK);
 			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);
-			assertEquals(10, bundle.getTotal(), "Expected total 10 observations matching query");
-			assertEquals(5, bundle.getEntry().size(), "Expected 5 observation entries to match page size");
-			assertTrue(bundle.getLink("next").hasRelation());
-			Assertions.assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(bundle.getTotal()).as("Expected total 10 observations matching query").isEqualTo(10);
+			assertThat(bundle.getEntry().size()).as("Expected 5 observation entries to match page size").isEqualTo(5);
+			assertThat(bundle.getLink("next").hasRelation()).isTrue();
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 		}
 	}
 
@@ -187,14 +183,14 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.clear();
 		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(countQuery)) {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_200_OK);
 			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);
-			assertEquals(10, bundle.getTotal(), "Expected total 10 observations matching query");
-			assertEquals(0, bundle.getEntry().size(), "Expected no entries in bundle");
-			assertNull(bundle.getLink("next"), "Expected no 'next' link");
-			assertNull(bundle.getLink("prev"), "Expected no 'prev' link");
-			Assertions.assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size(), "we build the bundle with no sql");
+			assertThat(bundle.getTotal()).as("Expected total 10 observations matching query").isEqualTo(10);
+			assertThat(bundle.getEntry().size()).as("Expected no entries in bundle").isEqualTo(0);
+			assertThat(bundle.getLink("next")).as("Expected no 'next' link").isNull();
+			assertThat(bundle.getLink("prev")).as("Expected no 'prev' link").isNull();
+			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 		}
 
 	}

@@ -36,8 +36,8 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 		getMigrator().migrate();
 
 		List<Map<String, Object>> output = executeQuery("SELECT PID FROM SOMETABLE");
-		assertThat(output.size()).isEqualTo(1);
-		assertThat(output.get(0).get("PID")).isEqualTo(123L);
+		assertThat(output).hasSize(1);
+		assertThat(output.get(0)).containsEntry("PID", 123L);
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
@@ -57,7 +57,7 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 		getMigrator().migrate();
 
 		List<Map<String, Object>> output = executeQuery("SELECT PID FROM SOMETABLE");
-		assertThat(output.size()).isEqualTo(0);
+		assertThat(output).isEmpty();
 	}
 
 
@@ -79,10 +79,10 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 
 		List<Map<String, Object>> output = executeQuery("SELECT PID FROM SOMETABLE");
 		if (theTestDatabaseDetails.get().getDriverType() == DriverTypeEnum.H2_EMBEDDED) {
-			assertThat(output.size()).isEqualTo(1);
-			assertThat(output.get(0).get("PID")).isEqualTo(123L);
+			assertThat(output).hasSize(1);
+			assertThat(output.get(0)).containsEntry("PID", 123L);
 		} else {
-			assertThat(output.size()).isEqualTo(0);
+			assertThat(output).isEmpty();
 		}
 	}
 
@@ -109,15 +109,15 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 		List<Map<String, Object>> output = executeQuery("SELECT PID,TEXTCOL FROM SOMETABLE");
 		//Then
 		if (theTestDatabaseDetails.get().getDriverType() == DriverTypeEnum.H2_EMBEDDED) {
-			assertThat(output.size()).isEqualTo(1);
-			assertThat(output.get(0).get("PID")).isEqualTo(123L);
-			assertThat(output.get(0).get("TEXTCOL")).isEqualTo("abc");
+			assertThat(output).hasSize(1);
+			assertThat(output.get(0)).containsEntry("PID", 123L);
+			assertThat(output.get(0)).containsEntry("TEXTCOL", "abc");
 		} else if (theTestDatabaseDetails.get().getDriverType() == DriverTypeEnum.DERBY_EMBEDDED) {
-			assertThat(output.size()).isEqualTo(1);
-			assertThat(output.get(0).get("PID")).isEqualTo(456L);
-			assertThat(output.get(0).get("TEXTCOL")).isEqualTo("def");
+			assertThat(output).hasSize(1);
+			assertThat(output.get(0)).containsEntry("PID", 456L);
+			assertThat(output.get(0)).containsEntry("TEXTCOL", "def");
 		} else {
-			assertThat(output.size()).isEqualTo(0);
+			assertThat(output).isEmpty();
 		}
 	}
 
@@ -137,7 +137,7 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 
 		List<Map<String, Object>> output = executeQuery("SELECT PID,TEXTCOL FROM SOMETABLE");
 
-		assertThat(output.size()).isEqualTo(0);
+		assertThat(output).isEmpty();
 	}
 
 	@ParameterizedTest()
@@ -148,7 +148,7 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 
 		final List<Map<String, Object>> outputPreMigrate = executeQuery("SELECT PID,TEXTCOL FROM SOMETABLE");
 
-		assertThat(outputPreMigrate.isEmpty()).isTrue();
+		assertThat(outputPreMigrate).isEmpty();
 
 		final String someFakeUpdateSql = "INSERT INTO SOMETABLE (PID, TEXTCOL) VALUES (123, 'abc')";
 		final String someReason = "I dont feel like it!";
@@ -171,11 +171,11 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 		final List<Map<String, Object>> outputPostMigrate = executeQuery("SELECT PID,TEXTCOL FROM SOMETABLE");
 
 		if (theIsExecutionExpected) {
-			assertThat(outputPostMigrate.size()).isEqualTo(1);
-			assertThat(outputPostMigrate.get(0).get("PID")).isEqualTo(123L);
-			assertThat(outputPostMigrate.get(0).get("TEXTCOL")).isEqualTo("abc");
+			assertThat(outputPostMigrate).hasSize(1);
+			assertThat(outputPostMigrate.get(0)).containsEntry("PID", 123L);
+			assertThat(outputPostMigrate.get(0)).containsEntry("TEXTCOL", "abc");
 		} else {
-			assertThat(outputPreMigrate.isEmpty()).isTrue();
+			assertThat(outputPreMigrate).isEmpty();
 		}
 	}
 
@@ -187,7 +187,7 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 
 		final List<Map<String, Object>> outputPreMigrate = executeQuery("SELECT PID,TEXTCOL FROM SOMETABLE");
 
-		assertThat(outputPreMigrate.isEmpty()).isTrue();
+		assertThat(outputPreMigrate).isEmpty();
 
 		final String someFakeUpdateSql = "INSERT INTO SOMETABLE (PID, TEXTCOL) VALUES (123, 'abc')";
 		final String someFakeSelectSql = "UPDATE SOMETABLE SET PID = 1";
@@ -215,7 +215,7 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 
 		final List<Map<String, Object>> outputPreMigrate = executeQuery("SELECT PID,TEXTCOL FROM SOMETABLE");
 
-		assertThat(outputPreMigrate.size()).isEqualTo(2);
+		assertThat(outputPreMigrate).hasSize(2);
 
 		final String someFakeUpdateSql = "INSERT INTO SOMETABLE (PID, TEXTCOL) VALUES (789, 'xyz')";
 		final String someFakeSelectSql = "SELECT PID != 0 FROM SOMETABLE";

@@ -17,9 +17,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.empty;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CapabilityStatementCacheR4Test {
 
@@ -38,10 +38,10 @@ public class CapabilityStatementCacheR4Test {
 		CapabilityStatement response3 = myServerExtension.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
 		CapabilityStatement response4 = myServerExtension.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
 
-		assertEquals(response.getId(), response2.getId());
+		assertThat(response2.getId()).isEqualTo(response.getId());
 
 		List<String> threadNames = Thread.getAllStackTraces().keySet().stream().map(t -> t.getName()).filter(t -> t.startsWith(ConformanceMethodBinding.CACHE_THREAD_PREFIX)).sorted().collect(Collectors.toList());
-		assertEquals(1, threadNames.size());
+		assertThat(threadNames).hasSize(1);
 
 		// Shut down the server
 		myServerExtension.stopServer();

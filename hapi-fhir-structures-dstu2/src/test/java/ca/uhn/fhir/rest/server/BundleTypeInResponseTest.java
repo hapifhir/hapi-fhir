@@ -20,7 +20,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -46,13 +46,13 @@ public class BundleTypeInResponseTest {
 		HttpResponse status = ourClient.execute(httpGet);
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		
 		ourLog.info(responseContent);
 		
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-		assertEquals(1, bundle.getEntry().size());
-		assertEquals(BundleTypeEnum.SEARCH_RESULTS, bundle.getTypeElement().getValueAsEnum());
+		assertThat(bundle.getEntry()).hasSize(1);
+		assertThat(bundle.getTypeElement().getValueAsEnum()).isEqualTo(BundleTypeEnum.SEARCH_RESULTS);
 	}
 
 

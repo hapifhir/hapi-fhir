@@ -31,12 +31,12 @@ public class Icd10LoaderTest {
 		assertThat(codeSystemVersion.getCodeSystemVersionId()).isEqualTo("2022-tree-expanded");
 
 		List<TermConcept> rootConcepts = new ArrayList<>(codeSystemVersion.getConcepts());
-		assertThat(rootConcepts.size()).isEqualTo(2);
+		assertThat(rootConcepts).hasSize(2);
 		TermConcept chapterA = rootConcepts.get(0);
 		assertThat(chapterA.getCode()).isEqualTo("A");
 		assertThat(chapterA.getDisplay()).isEqualTo("Fruit");
 		Collection<TermConceptProperty> properties = chapterA.getProperties();
-		assertThat(properties.size()).isEqualTo(2);
+		assertThat(properties).hasSize(2);
 		assertThat(chapterA.getStringProperty("inclusion")).isEqualTo("Include fruit");
 		assertThat(chapterA.getStringProperty("exclusion")).isEqualTo("Things that are not fruit");
 

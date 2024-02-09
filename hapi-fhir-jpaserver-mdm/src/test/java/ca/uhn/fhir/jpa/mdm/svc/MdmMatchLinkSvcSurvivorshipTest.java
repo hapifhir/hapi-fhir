@@ -118,7 +118,7 @@ public class MdmMatchLinkSvcSurvivorshipTest extends BaseMdmR4Test {
 		}
 
 		Optional<MdmLink> linkop = myMdmLinkDaoSvc.findMdmLinkBySource(r);
-		assertThat(linkop.isPresent()).isTrue();
+		assertThat(linkop).isPresent();
 		MdmLink link = linkop.get();
 		JpaPid gpid = link.getGoldenResourcePersistenceId();
 
@@ -126,9 +126,9 @@ public class MdmMatchLinkSvcSurvivorshipTest extends BaseMdmR4Test {
 
 		// we should have a link for each resource all linked
 		// to the same golden resource
-		assertThat(myMdmLinkDaoSvc.findMdmLinksByGoldenResource(golden).size()).isEqualTo(resourceCount);
-		assertThat(golden.getAddress().size()).isEqualTo(1);
-		assertThat(golden.getTelecom().size()).isEqualTo(1);
+		assertThat(myMdmLinkDaoSvc.findMdmLinksByGoldenResource(golden)).hasSize(resourceCount);
+		assertThat(golden.getAddress()).hasSize(1);
+		assertThat(golden.getTelecom()).hasSize(1);
 		assertThat(golden.getTelecom().get(0).getValue()).isEqualTo(r.getTelecom().get(0).getValue());
 
 		// test

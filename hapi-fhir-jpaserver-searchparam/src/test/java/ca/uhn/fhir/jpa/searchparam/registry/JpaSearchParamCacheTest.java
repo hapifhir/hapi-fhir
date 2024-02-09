@@ -35,8 +35,8 @@ public class JpaSearchParamCacheTest {
 		setActiveComboSearchParams(RESOURCE_TYPE, List.of(unique1, unique2, nonUnique1, nonUnique2));
 
 		List<RuntimeSearchParam> result = myJpaSearchParamCache.getActiveComboSearchParams(RESOURCE_TYPE);
-		assertThat(result.size()).isEqualTo(4);
-		assertThat(result.containsAll(List.of(unique1, unique2, nonUnique1, nonUnique2))).isTrue();
+		assertThat(result).hasSize(4);
+		assertThat(result).containsAll(List);
 	}
 
 	@Test
@@ -47,8 +47,8 @@ public class JpaSearchParamCacheTest {
 		setActiveComboSearchParams(RESOURCE_TYPE, List.of(unique1, unique2, nonUnique));
 
 		List<RuntimeSearchParam> result = myJpaSearchParamCache.getActiveComboSearchParams(RESOURCE_TYPE, ComboSearchParamType.UNIQUE);
-		assertThat(result.size()).isEqualTo(2);
-		assertThat(result.containsAll(List.of(unique1, unique2))).isTrue();
+		assertThat(result).hasSize(2);
+		assertThat(result).containsAll(List);
 	}
 
 	@Test
@@ -59,8 +59,8 @@ public class JpaSearchParamCacheTest {
 		setActiveComboSearchParams(RESOURCE_TYPE, List.of(nonUnique1, nonUnique2, unique));
 
 		List<RuntimeSearchParam> result = myJpaSearchParamCache.getActiveComboSearchParams(RESOURCE_TYPE, ComboSearchParamType.NON_UNIQUE);
-		assertThat(result.size()).isEqualTo(2);
-		assertThat(result.containsAll(List.of(nonUnique1, nonUnique2))).isTrue();
+		assertThat(result).hasSize(2);
+		assertThat(result).containsAll(List);
 	}
 
 	@Test
@@ -74,7 +74,7 @@ public class JpaSearchParamCacheTest {
 		setActiveComboSearchParams(RESOURCE_TYPE, List.of(sp1, sp2));
 
 		Optional<RuntimeSearchParam> found = myJpaSearchParamCache.getActiveComboSearchParamById(RESOURCE_TYPE, id1);
-		assertThat(found.isPresent()).isTrue();
+		assertThat(found).isPresent();
 		assertThat(found.get().getId()).isEqualTo(id1);
 	}
 

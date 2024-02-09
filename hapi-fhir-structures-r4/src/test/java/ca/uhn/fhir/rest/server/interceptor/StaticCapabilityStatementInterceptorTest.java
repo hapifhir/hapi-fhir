@@ -11,7 +11,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class StaticCapabilityStatementInterceptorTest {
 
@@ -31,7 +31,7 @@ public class StaticCapabilityStatementInterceptorTest {
 		try {
 
 			CapabilityStatement cs = myRestfulServer.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
-			assertEquals("Help I'm a Bug", cs.getSoftware().getName());
+			assertThat(cs.getSoftware().getName()).isEqualTo("Help I'm a Bug");
 
 		} finally {
 			myRestfulServer.getRestfulServer().unregisterInterceptor(interceptor);

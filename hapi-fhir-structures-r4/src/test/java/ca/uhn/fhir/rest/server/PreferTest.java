@@ -28,8 +28,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class PreferTest {
 
@@ -73,12 +71,12 @@ public class PreferTest {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(Constants.STATUS_HTTP_201_CREATED, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_201_CREATED);
 		assertThat(responseContent).isNullOrEmpty();
 		// assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), not(containsString("fhir")));
-		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE)).isNull();
+		assertThat(status.getFirstHeader("location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 
@@ -103,11 +101,11 @@ public class PreferTest {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(Constants.STATUS_HTTP_201_CREATED, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_201_CREATED);
 		assertThat(responseContent).contains("DIAG");
-		assertEquals("application/xml+fhir;charset=utf-8", status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().toLowerCase().replace(" ", ""));
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().toLowerCase().replace(" ", "")).isEqualTo("application/xml+fhir;charset=utf-8");
+		assertThat(status.getFirstHeader("location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 
@@ -128,11 +126,11 @@ public class PreferTest {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(Constants.STATUS_HTTP_201_CREATED, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_201_CREATED);
 		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).contains(Constants.CT_FHIR_XML);
-		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"001\"/><meta><versionId value=\"002\"/></meta><identifier><value value=\"002\"/></identifier></Patient>", responseContent);
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		assertThat(responseContent).isEqualTo("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"001\"/><meta><versionId value=\"002\"/></meta><identifier><value value=\"002\"/></identifier></Patient>");
+		assertThat(status.getFirstHeader("location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 
@@ -152,9 +150,9 @@ public class PreferTest {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
+		assertThat(status.getFirstHeader("location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 

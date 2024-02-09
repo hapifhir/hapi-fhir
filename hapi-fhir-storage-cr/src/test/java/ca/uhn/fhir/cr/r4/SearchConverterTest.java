@@ -114,8 +114,8 @@ class SearchConverterTest {
 	@Test
 	void separateParameterTypesShouldSeparateSearchAndResultParams() {
 		myFixture.separateParameterTypes(withParamList());
-		assertThat(myFixture.separatedSearchParameters.size()).isEqualTo(2);
-		assertThat(myFixture.separatedResultParameters.size()).isEqualTo(3);
+		assertThat(myFixture.separatedSearchParameters).hasSize(2);
+		assertThat(myFixture.separatedResultParameters).hasSize(3);
 	}
 
 	@Test

@@ -21,9 +21,9 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class UnclassifiedServerExceptionDstu3Test {
 
@@ -54,7 +54,7 @@ public class UnclassifiedServerExceptionDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
-			assertEquals(477, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(477);
 			//assertEquals("SOME MESSAGE", status.getStatusLine().getReasonPhrase());
 			assertThat(responseContent, stringContainsInOrder("business-rule"));
 		} finally {

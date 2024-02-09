@@ -274,7 +274,7 @@ public class FhirPatchApplyR4Test {
 
 		svc.apply(patient, patch);
 
-		assertThat(patient.getIdentifier().size()).isEqualTo(1);
+		assertThat(patient.getIdentifier()).hasSize(1);
 
 		assertThat(ourCtx.newJsonParser().encodeResourceToString(patient)).isEqualTo("{\"resourceType\":\"Patient\",\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}],\"active\":true}");
 
@@ -311,7 +311,7 @@ public class FhirPatchApplyR4Test {
 
 		svc.apply(patient, patch);
 
-		assertThat(patient.getExtension().size()).isEqualTo(2);
+		assertThat(patient.getExtension()).hasSize(2);
 
 		assertThat(ourCtx.newJsonParser().encodeResourceToString(patient)).isEqualTo("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"url1\",\"extension\":[{\"url\":\"text\",\"valueString\":\"first text\"},{\"url\":\"code\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"sys\",\"code\":\"123\",\"display\":\"Abc\"}]}}]},{\"url\":\"url3\",\"extension\":[{\"url\":\"text\",\"valueString\":\"third text\"},{\"url\":\"code\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"sys\",\"code\":\"345\",\"display\":\"Ghi\"}]}},{\"url\":\"detail\",\"valueInteger\":12}]}],\"active\":true}");
 

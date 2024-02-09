@@ -20,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -55,17 +54,17 @@ public class ReadMethodBindingTest {
 		// Read
 		ReadMethodBinding binding = createBinding(new MyProvider());
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123"));
-		assertEquals(MethodMatchEnum.EXACT, binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertThat(binding.incomingServerRequestMatchesMethod(myRequestDetails)).isEqualTo(MethodMatchEnum.EXACT);
 
 		// VRead
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123/_history/123"));
-		assertEquals(MethodMatchEnum.NONE, binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertThat(binding.incomingServerRequestMatchesMethod(myRequestDetails)).isEqualTo(MethodMatchEnum.NONE);
 
 		// Type history
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123"));
 		when(myRequestDetails.getResourceName()).thenReturn("Patient");
 		when(myRequestDetails.getOperation()).thenReturn("_history");
-		assertEquals(MethodMatchEnum.NONE, binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertThat(binding.incomingServerRequestMatchesMethod(myRequestDetails)).isEqualTo(MethodMatchEnum.NONE);
 
 	}
 
@@ -88,27 +87,27 @@ public class ReadMethodBindingTest {
 		ReadMethodBinding binding = createBinding(new MyProvider());
 		when(myRequestDetails.getResourceName()).thenReturn("Observation");
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Observation/123"));
-		assertEquals(MethodMatchEnum.NONE, binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertThat(binding.incomingServerRequestMatchesMethod(myRequestDetails)).isEqualTo(MethodMatchEnum.NONE);
 
 		// Read
 		when(myRequestDetails.getResourceName()).thenReturn("Patient");
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123"));
-		assertEquals(MethodMatchEnum.EXACT, binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertThat(binding.incomingServerRequestMatchesMethod(myRequestDetails)).isEqualTo(MethodMatchEnum.EXACT);
 
 		// VRead
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123/_history/123"));
 		when(myRequestDetails.getOperation()).thenReturn("_history");
-		assertEquals(MethodMatchEnum.EXACT, binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertThat(binding.incomingServerRequestMatchesMethod(myRequestDetails)).isEqualTo(MethodMatchEnum.EXACT);
 
 		// Some other operation
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123/_history/123"));
 		when(myRequestDetails.getOperation()).thenReturn("$foo");
-		assertEquals(MethodMatchEnum.NONE, binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertThat(binding.incomingServerRequestMatchesMethod(myRequestDetails)).isEqualTo(MethodMatchEnum.NONE);
 
 		// History operation
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123"));
 		when(myRequestDetails.getOperation()).thenReturn("_history");
-		assertEquals(MethodMatchEnum.NONE, binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertThat(binding.incomingServerRequestMatchesMethod(myRequestDetails)).isEqualTo(MethodMatchEnum.NONE);
 
 	}
 
@@ -129,7 +128,7 @@ public class ReadMethodBindingTest {
 		when(myRequestDetails.getId()).thenReturn(new IdDt("Patient/123"));
 
 		ReadMethodBinding binding = createBinding(new MyProvider());
-		assertEquals(MethodMatchEnum.NONE, binding.incomingServerRequestMatchesMethod(myRequestDetails));
+		assertThat(binding.incomingServerRequestMatchesMethod(myRequestDetails)).isEqualTo(MethodMatchEnum.NONE);
 	}
 
 	public ReadMethodBinding createBinding(Object theProvider) throws NoSuchMethodException {

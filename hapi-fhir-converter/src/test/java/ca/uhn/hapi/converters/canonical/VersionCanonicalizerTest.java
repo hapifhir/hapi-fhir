@@ -19,8 +19,6 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.ExtensionUtil.getExtensionPrimitiveValues;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class VersionCanonicalizerTest {
 	@Nested
@@ -79,8 +77,8 @@ class VersionCanonicalizerTest {
 		public void testToCanonical_Coding_ConvertSuccessful() {
 			IBaseCoding coding = new CodingDt("dstuSystem", "dstuCode");
 			Coding convertedCoding = ourCanonicalizer.codingToCanonical(coding);
-			assertEquals("dstuCode", convertedCoding.getCode());
-			assertEquals("dstuSystem", convertedCoding.getSystem());
+			assertThat(convertedCoding.getCode()).isEqualTo("dstuCode");
+			assertThat(convertedCoding.getSystem()).isEqualTo("dstuSystem");
 		}
 
 		@Test
@@ -88,7 +86,7 @@ class VersionCanonicalizerTest {
 			SearchParameter inputR5 = new SearchParameter();
 			inputR5.setUrl("http://foo");
 			ca.uhn.fhir.model.dstu2.resource.SearchParameter outputDstu2 = (ca.uhn.fhir.model.dstu2.resource.SearchParameter) ourCanonicalizer.searchParameterFromCanonical(inputR5);
-			assertEquals("http://foo", outputDstu2.getUrl());
+			assertThat(outputDstu2.getUrl()).isEqualTo("http://foo");
 		}
 
 		@Test
@@ -96,7 +94,7 @@ class VersionCanonicalizerTest {
 			CapabilityStatement inputR5 = new CapabilityStatement();
 			inputR5.setUrl("http://foo");
 			Conformance conformance = (Conformance) ourCanonicalizer.capabilityStatementFromCanonical(inputR5);
-			assertEquals("http://foo", conformance.getUrl());
+			assertThat(conformance.getUrl()).isEqualTo("http://foo");
 		}
 
 		@Test
@@ -104,7 +102,7 @@ class VersionCanonicalizerTest {
 			StructureDefinition inputR5 = new StructureDefinition();
 			inputR5.setId("123");
 			ca.uhn.fhir.model.dstu2.resource.StructureDefinition structureDefinition = (ca.uhn.fhir.model.dstu2.resource.StructureDefinition) ourCanonicalizer.structureDefinitionFromCanonical(inputR5);
-			assertEquals("StructureDefinition/123", structureDefinition.getId().getValue());
+			assertThat(structureDefinition.getId().getValue()).isEqualTo("StructureDefinition/123");
 		}
 
 		@Test
@@ -112,8 +110,8 @@ class VersionCanonicalizerTest {
 			org.hl7.fhir.r4.model.Parameters inputR4 = new Parameters();
 			inputR4.setParameter("paramA", "1");
 			ca.uhn.fhir.model.dstu2.resource.Parameters parameters = (ca.uhn.fhir.model.dstu2.resource.Parameters) ourCanonicalizer.parametersFromCanonical(inputR4);
-			assertNotNull(parameters.getParameter());
-			assertEquals("paramA", parameters.getParameter().get(0).getName());
+			assertThat(parameters.getParameter()).isNotNull();
+			assertThat(parameters.getParameter().get(0).getName()).isEqualTo("paramA");
 		}
 	}
 }

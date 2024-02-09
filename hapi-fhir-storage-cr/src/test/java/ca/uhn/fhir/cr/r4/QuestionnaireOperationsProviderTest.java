@@ -60,7 +60,7 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 			requestDetails);
 
 		assertThat(result).isNotNull();
-		assertThat(result.getEntry().size()).isEqualTo(11);
-		assertThat(result.getEntry().get(0).getResource().fhirType().equals(Enumerations.FHIRAllTypes.QUESTIONNAIRE.toCode())).isTrue();
+		assertThat(result.getEntry()).hasSize(11);
+		assertThat(result.getEntry().get(0).getResource().fhirType()).isEqualTo(Enumerations.FHIRAllTypes.QUESTIONNAIRE);
 	}
 }

@@ -55,7 +55,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 		assertThat(result.isEmpty()).isFalse();
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
-		assertThat(resources.size()).isEqualTo(790);
+		assertThat(resources).hasSize(790);
 		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
 		assertThat(resources.get(789).getIdElement().getValueAsString()).isEqualTo("799");
 	}
@@ -78,7 +78,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 		IBundleProvider result = mySynchronousSearchSvc.executeQuery("Patient", params, RequestPartitionId.allPartitions());
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
-		assertThat(resources.size()).isEqualTo(10);
+		assertThat(resources).hasSize(10);
 		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("20");
 	}
 
@@ -101,7 +101,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 		IBundleProvider result = mySynchronousSearchSvc.executeQuery("Patient", params,   RequestPartitionId.allPartitions());
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
-		assertThat(resources.size()).isEqualTo(100);
+		assertThat(resources).hasSize(100);
 		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
 		assertThat(resources.get(99).getIdElement().getValueAsString()).isEqualTo("109");
 	}

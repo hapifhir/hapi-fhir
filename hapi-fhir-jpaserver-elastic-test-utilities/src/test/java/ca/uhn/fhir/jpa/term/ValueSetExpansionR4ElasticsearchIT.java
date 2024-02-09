@@ -55,7 +55,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.anyCollection;
@@ -201,7 +200,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		include = vs.getCompose().addInclude();
 		include.setSystem(CS_URL);
 		ValueSet outcome = myTermSvc.expandValueSet(null, vs);
-		assertEquals(109, outcome.getExpansion().getContains().size());
+		assertThat(outcome.getExpansion().getContains()).hasSize(109);
 
 	}
 
@@ -251,7 +250,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		// exception is swallowed in pre-expansion process, so let's check the ValueSet was successfully expanded
 		Slice<TermValueSet> page = runInTransaction(() ->
 			myTermValueSetDao.findByExpansionStatus(PageRequest.of(0, 1), TermValueSetPreExpansionStatusEnum.EXPANDED));
-		assertEquals(1, page.getContent().size());
+		assertThat(page.getContent()).hasSize(1);
 	}
 
 

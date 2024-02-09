@@ -27,7 +27,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -70,13 +70,13 @@ public class ExceptionInterceptorMethodTest {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=throwUnprocessableEntityException");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			ourLog.info(IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8));
-			assertEquals(422, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(422);
 		}
 
 		ArgumentCaptor<BaseServerResponseException> captor = ArgumentCaptor.forClass(BaseServerResponseException.class);
 		verify(myInterceptor, times(1)).handleException(any(RequestDetails.class), captor.capture(), any(HttpServletRequest.class), any(HttpServletResponse.class));
 
-		assertEquals(UnprocessableEntityException.class, captor.getValue().getClass());
+		assertThat(captor.getValue().getClass()).isEqualTo(UnprocessableEntityException.class);
 	}
 
 	@Test
@@ -98,8 +98,8 @@ public class ExceptionInterceptorMethodTest {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
-			assertEquals(405, status.getStatusLine().getStatusCode());
-			assertEquals("HELP IM A BUG", responseContent);
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(405);
+			assertThat(responseContent).isEqualTo("HELP IM A BUG");
 		}
 
 	}

@@ -4,23 +4,23 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class VectorMatchResultMapTest {
 	@Test
 	public void splitFieldMatchNames() {
 		{
 			String[] result = VectorMatchResultMap.splitFieldMatchNames("a,b");
-			assertEquals(2, result.length);
-			assertEquals("a", result[0]);
-			assertEquals("b", result[1]);
+			assertThat(result.length).isEqualTo(2);
+			assertThat(result[0]).isEqualTo("a");
+			assertThat(result[1]).isEqualTo("b");
 		}
 
 		{
 			String[] result = VectorMatchResultMap.splitFieldMatchNames("a,  b");
-			assertEquals(2, result.length);
-			assertEquals("a", result[0]);
-			assertEquals("b", result[1]);
+			assertThat(result.length).isEqualTo(2);
+			assertThat(result[0]).isEqualTo("a");
+			assertThat(result[1]).isEqualTo("b");
 		}
 	}
 
@@ -35,8 +35,8 @@ public class VectorMatchResultMapTest {
 		mdmRulesJson.putMatchResult("given", MdmMatchResultEnum.POSSIBLE_MATCH);
 
 		VectorMatchResultMap map = new VectorMatchResultMap(mdmRulesJson);
-		assertEquals(MdmMatchResultEnum.POSSIBLE_MATCH, map.get(1L));
-		assertEquals(MdmMatchResultEnum.MATCH, map.get(3L));
-		assertEquals(MdmMatchResultEnum.MATCH, map.get(7L));
+		assertThat(map.get(1L)).isEqualTo(MdmMatchResultEnum.POSSIBLE_MATCH);
+		assertThat(map.get(3L)).isEqualTo(MdmMatchResultEnum.MATCH);
+		assertThat(map.get(7L)).isEqualTo(MdmMatchResultEnum.MATCH);
 	}
 }

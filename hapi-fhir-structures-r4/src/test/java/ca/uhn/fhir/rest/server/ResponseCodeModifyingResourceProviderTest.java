@@ -18,7 +18,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import jakarta.servlet.ServletRequest;
 
 import static ca.uhn.fhir.rest.api.Constants.STATUS_HTTP_202_ACCEPTED;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResponseCodeModifyingResourceProviderTest {
 
@@ -42,14 +42,14 @@ public class ResponseCodeModifyingResourceProviderTest {
 	@Test
 	public void testCreatePatientReturnsModifiedResponseCode() {
 		MethodOutcome outcome = myClient.create().resource(myPatient).execute();
-		assertEquals(CUSTOM_RESPONSE_CODE, outcome.getResponseStatusCode());
+		assertThat(outcome.getResponseStatusCode()).isEqualTo(CUSTOM_RESPONSE_CODE);
 	}
 
 	@Test
 	public void testUpdatePatientReturnsModifiedResponseCode() {
 		myPatient.setId("1");
 		MethodOutcome outcome = myClient.update().resource(myPatient).execute();
-		assertEquals(CUSTOM_RESPONSE_CODE, outcome.getResponseStatusCode());
+		assertThat(outcome.getResponseStatusCode()).isEqualTo(CUSTOM_RESPONSE_CODE);
 	}
 
 	class TestResponseCodeModifyingPatientProvider implements IResourceProvider {

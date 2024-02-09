@@ -267,7 +267,7 @@ public class GenericClientDstu3IT {
 		assertThat(outcome.getOperationOutcome()).isNull();
 		assertThat(outcome.getResource()).isNotNull();
 
-		assertThat(capt.getAllValues().size()).isEqualTo(1);
+		assertThat(capt.getAllValues()).hasSize(1);
 		assertThat(((Patient) outcome.getResource()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>");
 		assertThat(capt.getAllValues().get(0).url().toString()).isEqualTo("http://example.com/fhir/Patient?_format=json");
 	}

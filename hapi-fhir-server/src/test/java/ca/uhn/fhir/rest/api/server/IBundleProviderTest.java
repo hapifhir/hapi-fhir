@@ -7,9 +7,7 @@ import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
@@ -19,10 +17,10 @@ public class IBundleProviderTest {
 	@Test
 	public void testIsEmptyDefaultMethod_SizePopulated() {
 		SimpleBundleProvider provider = new SimpleBundleProvider();
-		assertTrue(provider.isEmpty());
+		assertThat(provider.isEmpty()).isTrue();
 
 		provider = new SimpleBundleProvider(Lists.newArrayList(mock(IBaseResource.class)));
-		assertFalse(provider.isEmpty());
+		assertThat(provider.isEmpty()).isFalse();
 	}
 
 	@Test
@@ -33,7 +31,7 @@ public class IBundleProviderTest {
 				return null;
 			}
 		};
-		assertTrue(provider.isEmpty());
+		assertThat(provider.isEmpty()).isTrue();
 
 		provider = new SimpleBundleProvider(Lists.newArrayList(mock(IBaseResource.class))) {
 			@Override
@@ -41,7 +39,7 @@ public class IBundleProviderTest {
 				return null;
 			}
 		};
-		assertFalse(provider.isEmpty());
+		assertThat(provider.isEmpty()).isFalse();
 	}
 
 	@Test
@@ -55,7 +53,7 @@ public class IBundleProviderTest {
 		try {
 			provider.getAllResources();
 			fail("");		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(464) + "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(464) + "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.");
 		}
 	}
 }

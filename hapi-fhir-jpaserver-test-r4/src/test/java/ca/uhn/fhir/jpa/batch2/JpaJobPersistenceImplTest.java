@@ -383,7 +383,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// then
 		ArrayList<WorkChunk> chunks = new ArrayList<>();
 		Iterators.addAll(chunks, workChunks);
-		assertThat(chunks.size()).isEqualTo(3);
+		assertThat(chunks).hasSize(3);
 
 		{
 			WorkChunk workChunk = chunks.get(0);
@@ -437,7 +437,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, myWorkChunkRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStatus()));
 
 		WorkChunk chunk = mySvc.onWorkChunkDequeue(id).orElseThrow(IllegalArgumentException::new);
-		assertThat(chunk.getInstanceId().length()).isEqualTo(36);
+		assertThat(chunk.getInstanceId()).hasSize(36);
 		assertThat(chunk.getJobDefinitionId()).isEqualTo(JOB_DEFINITION_ID);
 		assertThat(chunk.getJobDefinitionVersion()).isEqualTo(JOB_DEF_VER);
 		assertThat(chunk.getStatus()).isEqualTo(WorkChunkStatusEnum.IN_PROGRESS);
@@ -565,7 +565,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		});
 
 		List<WorkChunk> chunks = ImmutableList.copyOf(mySvc.fetchAllWorkChunksIterator(instanceId, true));
-		assertThat(chunks.size()).isEqualTo(1);
+		assertThat(chunks).hasSize(1);
 		assertThat(chunks.get(0).getErrorCount()).isEqualTo(2);
 	}
 
@@ -623,7 +623,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		while (reducedChunks.hasNext()) {
 			WorkChunk reducedChunk = reducedChunks.next();
-			assertThat(chunkIds.contains(reducedChunk.getId())).isTrue();
+			assertThat(chunkIds).contains(reducedChunk);
 			assertThat(reducedChunk.getStatus()).isEqualTo(WorkChunkStatusEnum.COMPLETED);
 		}
 	}

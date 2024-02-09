@@ -154,7 +154,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			.byUrl("QuestionnaireResponse?_id=" + qrIdType.toUnqualifiedVersionless()  + "&_include=QuestionnaireResponse:questionnaire")
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(results.getEntry().size()).isEqualTo(2);
+		assertThat(results.getEntry()).hasSize(2);
 
 		List<String> expectedIds = new ArrayList<>();
 		expectedIds.add(qrIdType.getValue());

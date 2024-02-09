@@ -371,14 +371,14 @@ chunk3, LAST, QUEUED
 
 	private void assertError(String theExpectedErrorMessage) {
 		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(TEST_INSTANCE_ID);
-		assertThat(instance.isPresent()).isTrue();
+		assertThat(instance).isPresent();
 		assertThat(instance.get().getErrorMessage()).isEqualTo(theExpectedErrorMessage);
 	}
 
 
 	private void assertCurrentGatedStep(String theNextStepId) {
 		Optional<JobInstance> instance = myJobPersistence.fetchInstance(TEST_INSTANCE_ID);
-		assertThat(instance.isPresent()).isTrue();
+		assertThat(instance).isPresent();
 		assertThat(instance.get().getCurrentGatedStepId()).isEqualTo(theNextStepId);
 	}
 
@@ -439,7 +439,7 @@ chunk3, LAST, QUEUED
 
 	private void assertInstanceStatus(StatusEnum theInProgress) {
 		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(TEST_INSTANCE_ID);
-		assertThat(instance.isPresent()).isTrue();
+		assertThat(instance).isPresent();
 		assertThat(instance.get().getStatus()).isEqualTo(theInProgress);
 	}
 	@Nonnull

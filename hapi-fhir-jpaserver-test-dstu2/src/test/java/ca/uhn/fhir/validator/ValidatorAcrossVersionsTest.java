@@ -47,7 +47,7 @@ public class ValidatorAcrossVersionsTest {
 		ValidationResult result = val.validateWithResult(resp);
 		ourLog.debug(ctxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 
-		assertThat(result.getMessages().size()).isEqualTo(2);
+		assertThat(result.getMessages()).hasSize(2);
 		assertThat(result.getMessages().get(0).getMessage()).isEqualTo("QuestionnaireResponse.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse)");
 		assertThat(result.getMessages().get(1).getMessage()).isEqualTo("No questionnaire is identified, so no validation can be performed against the base questionnaire");
 	}

@@ -26,9 +26,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -38,7 +36,7 @@ public class ModelDstu3Test {
 
 	@Test
 	public void testElementHasInterface() {
-		assertTrue(IBaseElement.class.isAssignableFrom(Element.class));
+		assertThat(IBaseElement.class.isAssignableFrom(Element.class)).isTrue();
 	}
 	
 	/**
@@ -52,19 +50,19 @@ public class ModelDstu3Test {
 
 	@Test
 	public void testbase64BinaryName() {
-		assertEquals("base64Binary", ourCtx.getElementDefinition("base64binary").getName());
-		assertEquals("base64Binary", ourCtx.getElementDefinition("base64Binary").getName());
+		assertThat(ourCtx.getElementDefinition("base64binary").getName()).isEqualTo("base64Binary");
+		assertThat(ourCtx.getElementDefinition("base64Binary").getName()).isEqualTo("base64Binary");
 	}
 
 	@Test
 	public void testModelBindings() {
 		FhirTerser t = ourCtx.newTerser();
 		RuntimeResourceDefinition def = ourCtx.getResourceDefinition(Patient.class);
-		assertEquals("http://hl7.org/fhir/ValueSet/administrative-gender", ((BaseRuntimeDeclaredChildDefinition)def.getChildByName("gender")).getBindingValueSet());
-		assertEquals("http://hl7.org/fhir/ValueSet/link-type", ((BaseRuntimeDeclaredChildDefinition)t.getDefinition(Patient.class, "Patient.link.type")).getBindingValueSet());
+		assertThat(((BaseRuntimeDeclaredChildDefinition) def.getChildByName("gender")).getBindingValueSet()).isEqualTo("http://hl7.org/fhir/ValueSet/administrative-gender");
+		assertThat(((BaseRuntimeDeclaredChildDefinition) t.getDefinition(Patient.class, "Patient.link.type")).getBindingValueSet()).isEqualTo("http://hl7.org/fhir/ValueSet/link-type");
 
 		def = ourCtx.getResourceDefinition(Appointment.class);
-		assertEquals("http://hl7.org/fhir/ValueSet/appointmentstatus", ((BaseRuntimeDeclaredChildDefinition)def.getChildByName("status")).getBindingValueSet());
+		assertThat(((BaseRuntimeDeclaredChildDefinition) def.getChildByName("status")).getBindingValueSet()).isEqualTo("http://hl7.org/fhir/ValueSet/appointmentstatus");
 	}
 
 	/**
@@ -75,7 +73,7 @@ public class ModelDstu3Test {
 		Practitioner p = new Practitioner();
 		PractitionerQualificationComponent qualification = p.addQualification();
 		CodeableConcept roleField = qualification.getCode();
-		assertEquals(CodeableConcept.class, roleField.getClass());
+		assertThat(roleField.getClass()).isEqualTo(CodeableConcept.class);
 	}
 
 	@AfterAll
@@ -99,7 +97,7 @@ public class ModelDstu3Test {
 		try {
 			ourCtx.newXmlParser().encodeResourceToString(p);
 		} catch (ClassCastException e) {
-			assertEquals(Msg.code(1748) + "Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1748) + "Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase");
 		}
 	}
 	
@@ -125,32 +123,32 @@ public class ModelDstu3Test {
 		Patient patient2 = context.newJsonParser().parseResource(Patient.class,
 		        context.newJsonParser().encodeResourceToString(patient1));
 
-		assertTrue(patient1.equalsDeep(patient2));
-		assertTrue(patient1.equalsShallow(patient2));
+		assertThat(patient1.equalsDeep(patient2)).isTrue();
+		assertThat(patient1.equalsShallow(patient2)).isTrue();
 
 		Patient patient3 = new Patient();
 		patient3.setBirthDate(date)
 		        .setGender(Enumerations.AdministrativeGender.MALE)
 		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").setFamily("family");
 
-		assertTrue(patient1.equalsDeep(patient3));
-		assertTrue(patient1.equalsShallow(patient3));
+		assertThat(patient1.equalsDeep(patient3)).isTrue();
+		assertThat(patient1.equalsShallow(patient3)).isTrue();
 
 		Patient patient4 = new Patient();
 		patient4.setBirthDate(date)
 		        .setGender(Enumerations.AdministrativeGender.MALE)
 		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").setFamily("family2");
 
-		assertTrue(patient1.equalsShallow(patient4));
-		assertFalse(patient1.equalsDeep(patient4));
+		assertThat(patient1.equalsShallow(patient4)).isTrue();
+		assertThat(patient1.equalsDeep(patient4)).isFalse();
 
 		Patient patient5 = new Patient();
 		patient5.setBirthDate(date)
 		        .setGender(Enumerations.AdministrativeGender.FEMALE)
 		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").setFamily("family2");
 
-		assertFalse(patient1.equalsShallow(patient5));
-		assertFalse(patient1.equalsDeep(patient5));
+		assertThat(patient1.equalsShallow(patient5)).isFalse();
+		assertThat(patient1.equalsDeep(patient5)).isFalse();
 
 	}
 

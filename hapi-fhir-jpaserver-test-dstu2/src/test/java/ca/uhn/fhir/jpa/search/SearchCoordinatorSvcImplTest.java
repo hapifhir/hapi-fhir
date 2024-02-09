@@ -201,14 +201,14 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		assertThat(result.size()).isEqualTo(790);
 
 		List<IBaseResource> resources = result.getResources(0, 100000);
-		assertThat(resources.size()).isEqualTo(790);
+		assertThat(resources).hasSize(790);
 		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
 		assertThat(resources.get(789).getIdElement().getValueAsString()).isEqualTo("799");
 
 		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
 		verify(mySearchCacheSvc, atLeastOnce()).save(searchCaptor.capture(), any());
 
-		assertThat(allResults.size()).isEqualTo(790);
+		assertThat(allResults).hasSize(790);
 		assertThat(allResults.get(0).getId()).isEqualTo(10);
 		assertThat(allResults.get(789).getId()).isEqualTo(799);
 
@@ -282,7 +282,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		List<IBaseResource> resources;
 
 		resources = result.getResources(0, 30);
-		assertThat(resources.size()).isEqualTo(30);
+		assertThat(resources).hasSize(30);
 		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
 		assertThat(resources.get(29).getIdElement().getValueAsString()).isEqualTo("39");
 
@@ -333,7 +333,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 				ourLog.info("About to pull the first resource");
 				List<JpaPid> resources = mySvc.getResources(searchId, 0, 1, null, null);
 				ourLog.info("Done pulling the first resource");
-				assertThat(resources.size()).isEqualTo(1);
+				assertThat(resources).hasSize(1);
 			} finally {
 				completionLatch.countDown();
 			}
@@ -393,7 +393,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		resources = result.getResources(0, 10);
 		assertThat(result.size()).isEqualTo(790);
-		assertThat(resources.size()).isEqualTo(10);
+		assertThat(resources).hasSize(10);
 		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
 		assertThat(resources.get(9).getIdElement().getValueAsString()).isEqualTo("19");
 
@@ -421,7 +421,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		assertThat(Objects.requireNonNull(result.size()).intValue()).isEqualTo(90);
 
 		List<IBaseResource> resources = result.getResources(0, 30);
-		assertThat(resources.size()).isEqualTo(30);
+		assertThat(resources).hasSize(30);
 		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
 		assertThat(resources.get(29).getIdElement().getValueAsString()).isEqualTo("39");
 
@@ -479,7 +479,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		 */
 		provider = newPersistedJpaBundleProvider(uuid);
 		resources = provider.getResources(10, 20);
-		assertThat(resources.size()).isEqualTo(10);
+		assertThat(resources).hasSize(10);
 		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("20");
 		assertThat(resources.get(9).getIdElement().getValueAsString()).isEqualTo("29");
 
@@ -493,7 +493,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		provider.setStorageSettingsForUnitTest(new JpaStorageSettings());
 		provider.setRequestPartitionId(RequestPartitionId.defaultPartition());
 		resources = provider.getResources(20, 40);
-		assertThat(resources.size()).isEqualTo(20);
+		assertThat(resources).hasSize(20);
 		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("30");
 		assertThat(resources.get(19).getIdElement().getValueAsString()).isEqualTo("49");
 

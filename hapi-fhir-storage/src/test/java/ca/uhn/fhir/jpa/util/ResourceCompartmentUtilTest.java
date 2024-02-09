@@ -49,8 +49,8 @@ class ResourceCompartmentUtilTest {
 		Optional<String> oCompartment = ResourceCompartmentUtil.getResourceCompartment(
 			myResource, myCompartmentSearchParams, mySearchParamExtractor);
 
-		assertThat(oCompartment.isPresent()).isTrue();
-		assertThat(oCompartment.get()).isEqualTo("P01");
+		assertThat(oCompartment).isPresent();
+		assertThat(oCompartment).contains("P01");
 	}
 
 	@Test
@@ -60,7 +60,7 @@ class ResourceCompartmentUtilTest {
 
 		List<RuntimeSearchParam> result = ResourceCompartmentUtil.getPatientCompartmentSearchParams(myRuntimeResourceDefinition);
 
-		assertThat(result.size()).isEqualTo(2);
+		assertThat(result).hasSize(2);
 	}
 
 	@Nested
@@ -100,8 +100,8 @@ class ResourceCompartmentUtilTest {
 
 			Optional<String> result = ResourceCompartmentUtil.getPatientCompartmentIdentity(myResource, myFhirContext, mySearchParamExtractor);
 
-			assertThat(result.isPresent()).isTrue();
-			assertThat(result.get()).isEqualTo("Abc");
+			assertThat(result).isPresent();
+			assertThat(result).contains("Abc");
 		}
 
 		@Test
@@ -122,8 +122,8 @@ class ResourceCompartmentUtilTest {
 				// execute
 				Optional<String> result = ResourceCompartmentUtil.getPatientCompartmentIdentity(myResource, myFhirContext, mySearchParamExtractor);
 
-			assertThat(result.isPresent()).isTrue();
-			assertThat(result.get()).isEqualTo("P01");
+			assertThat(result).isPresent();
+			assertThat(result).contains("P01");
 //			}
 		}
 	}

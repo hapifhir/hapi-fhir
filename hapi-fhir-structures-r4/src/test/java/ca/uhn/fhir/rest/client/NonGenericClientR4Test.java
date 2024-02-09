@@ -42,7 +42,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -93,9 +93,9 @@ public class NonGenericClientR4Test {
 
 		IClientWithCustomType client = ourCtx.newRestfulClient(IClientWithCustomType.class, "http://example.com/fhir");
 		List<MyPatientWithExtensions> list = client.search();
-		
-		assertEquals(1, list.size());
-		assertEquals(MyPatientWithExtensions.class, list.get(0).getClass());
+
+		assertThat(list).hasSize(1);
+		assertThat(list.get(0).getClass()).isEqualTo(MyPatientWithExtensions.class);
 	}
 	
 	@Test
@@ -120,7 +120,7 @@ public class NonGenericClientR4Test {
 
 		IClientWithCustomType client = ourCtx.newRestfulClient(IClientWithCustomType.class, "http://example.com/fhir");
 		MyPatientWithExtensions read = client.read(new IdType("1"));
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>", read.getText().getDivAsString());
+		assertThat(read.getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>");
 	}
 	
 	@Test
@@ -150,18 +150,18 @@ public class NonGenericClientR4Test {
 		int idx = 0;
 		MethodOutcome outcome = client.validate(patient, null, null);
 		String resp = ourCtx.newXmlParser().encodeResourceToString(outcome.getOperationOutcome());
-		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div></text></OperationOutcome>", resp);
-		assertEquals("http://example.com/fhir/$validate", capt.getAllValues().get(idx).getURI().toString());
+		assertThat(resp).isEqualTo("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div></text></OperationOutcome>");
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).isEqualTo("http://example.com/fhir/$validate");
 		String request = extractBodyAsString(capt,idx);
-		assertEquals("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"family\":\"FAM\"}]}}]}", request);
+		assertThat(request).isEqualTo("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"family\":\"FAM\"}]}}]}");
 
 		idx = 1;
 		outcome = client.validate(patient, ValidationModeEnum.CREATE, "http://foo");
 		resp = ourCtx.newXmlParser().encodeResourceToString(outcome.getOperationOutcome());
-		assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div></text></OperationOutcome>", resp);
-		assertEquals("http://example.com/fhir/$validate", capt.getAllValues().get(idx).getURI().toString());
+		assertThat(resp).isEqualTo("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div></text></OperationOutcome>");
+		assertThat(capt.getAllValues().get(idx).getURI().toString()).isEqualTo("http://example.com/fhir/$validate");
 		request = extractBodyAsString(capt,idx);
-		assertEquals("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"family\":\"FAM\"}]}},{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"profile\",\"valueString\":\"http://foo\"}]}", request);
+		assertThat(request).isEqualTo("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"family\":\"FAM\"}]}},{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"profile\",\"valueString\":\"http://foo\"}]}");
 	}
 
 

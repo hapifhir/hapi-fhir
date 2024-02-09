@@ -2,7 +2,7 @@ package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class TextStandardizerTest {
 
@@ -10,15 +10,15 @@ class TextStandardizerTest {
 
 	@Test
 	public void testCleanNoiseCharacters() {
-		assertEquals("public", myStandardizer.standardize("\u0070\u0075\u0062\u006c\u0069\u0063\u0020\u0020\u0020\u0020"));
-		assertEquals("textÃ#", myStandardizer.standardize("\t\r\ntext┴\t┬\t├\t─\t┼!\\\\Ã #% \n"));
-		assertEquals("nbsp", myStandardizer.standardize("nbsp \u00A0"));
+		assertThat(myStandardizer.standardize("\u0070\u0075\u0062\u006c\u0069\u0063\u0020\u0020\u0020\u0020")).isEqualTo("public");
+		assertThat(myStandardizer.standardize("\t\r\ntext┴\t┬\t├\t─\t┼!\\\\Ã #% \n")).isEqualTo("textÃ#");
+		assertThat(myStandardizer.standardize("nbsp \u00A0")).isEqualTo("nbsp");
 	}
 
 	@Test
 	public void testCleanBaseAscii() {
 		for (int i = 0; i < 31; i++) {
-			assertEquals("", myStandardizer.standardize(Character.toString((char) i)));
+			assertThat(myStandardizer.standardize(Character.toString((char) i))).isEqualTo("");
 		}
 	}
 
@@ -28,7 +28,7 @@ class TextStandardizerTest {
 			if (!myStandardizer.isNoiseCharacter(i) || myStandardizer.isTranslate(i)) {
 				continue;
 			}
-			assertEquals("", myStandardizer.standardize(Character.toString((char) i)), String.format("Expected char #%s to be filtered out", i));
+			assertThat(myStandardizer.standardize(Character.toString((char) i))).as(String.format("Expected char #%s to be filtered out", i)).isEqualTo("");
 		}
 	}
 
@@ -51,7 +51,7 @@ class TextStandardizerTest {
 			"𐒠𐒡𐒢𐒣𐒤𐒥𐒦𐒧𐒨𐒩", "𐒠𐒡𐒢𐒣𐒤𐒥𐒦𐒧𐒨𐒩"};
 
 		for (int i = 0; i < testLiterals.length; i += 2) {
-			assertEquals(testLiterals[i + 1], myStandardizer.standardize(testLiterals[i]));
+			assertThat(myStandardizer.standardize(testLiterals[i])).isEqualTo(testLiterals[i + 1]);
 		}
 	}
 }

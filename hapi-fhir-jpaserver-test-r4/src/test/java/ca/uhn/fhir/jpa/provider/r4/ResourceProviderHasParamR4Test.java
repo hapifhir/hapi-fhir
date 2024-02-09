@@ -433,7 +433,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("uri = " + uri);
 		
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids.size()).isEqualTo(2);
+		assertThat(ids).hasSize(2);
 	}
 	
 	@Test
@@ -480,7 +480,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$lt180");
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertThat(ids.size()).isEqualTo(0);
+		assertThat(ids).isEmpty();
 	}
 	
 	@Test

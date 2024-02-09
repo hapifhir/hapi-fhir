@@ -38,9 +38,6 @@ import java.io.IOException;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirPathFilterInterceptorR4Test {
 
@@ -153,7 +150,7 @@ public class FhirPathFilterInterceptorR4Test {
 		try (CloseableHttpResponse response = myHttpClient.execute(request)) {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
-			assertEquals(400, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
 			assertThat(responseText).contains("left operand to * can only have 1 value, but has 8 values");
 		}
 
@@ -211,13 +208,13 @@ public class FhirPathFilterInterceptorR4Test {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
 			IBaseResource resource = ourCtx.newJsonParser().parseResource(responseText);
-			assertTrue(resource instanceof Parameters);
+			assertThat(resource instanceof Parameters).isTrue();
 			Parameters parameters = (Parameters)resource;
 			Parameters.ParametersParameterComponent parameterComponent = parameters.getParameter("result");
-			assertNotNull(parameterComponent);
-			assertEquals(2, parameterComponent.getPart().size());
+			assertThat(parameterComponent).isNotNull();
+			assertThat(parameterComponent.getPart()).hasSize(2);
 			Parameters.ParametersParameterComponent resultComponent = parameterComponent.getPart().get(1);
-			assertEquals("result", resultComponent.getName());
+			assertThat(resultComponent.getName()).isEqualTo("result");
 			assertThat(responseText).contains(expectedResult);
 		}
 

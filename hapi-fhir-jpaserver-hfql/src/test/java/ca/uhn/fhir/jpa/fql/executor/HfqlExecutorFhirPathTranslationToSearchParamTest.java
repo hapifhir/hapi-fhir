@@ -52,8 +52,8 @@ public class HfqlExecutorFhirPathTranslationToSearchParamTest extends BaseHfqlEx
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
 		if (theShouldConvert) {
-			assertThat(map.get("_id").size()).isEqualTo(1);
-			assertThat(map.get("_id").get(0).size()).isEqualTo(1);
+			assertThat(map.get("_id")).hasSize(1);
+			assertThat(map.get("_id").get(0)).hasSize(1);
 			assertThat(((TokenParam) map.get("_id").get(0).get(0)).getSystem()).isNull();
 			assertThat(((TokenParam) map.get("_id").get(0).get(0)).getValue()).isEqualTo("ABC123");
 		} else {
@@ -90,8 +90,8 @@ public class HfqlExecutorFhirPathTranslationToSearchParamTest extends BaseHfqlEx
 
 		verify(patientDao, times(1)).search(mySearchParameterMapCaptor.capture(), any());
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
-		assertThat(map.get("_lastUpdated").size()).isEqualTo(1);
-		assertThat(map.get("_lastUpdated").get(0).size()).isEqualTo(1);
+		assertThat(map.get("_lastUpdated")).hasSize(1);
+		assertThat(map.get("_lastUpdated").get(0)).hasSize(1);
 		assertThat(((DateParam) map.get("_lastUpdated").get(0).get(0)).getValueAsString()).isEqualTo(theExpectedParamValue);
 		assertThat(((DateParam) map.get("_lastUpdated").get(0).get(0)).getPrefix()).isEqualTo(theExpectedParamPrefix);
 	}

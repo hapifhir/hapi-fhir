@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -82,7 +81,7 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 			.include(Patient.INCLUDE_ORGANIZATION)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals(1, results.getEntry().size());
+		assertThat(results.getEntry()).hasSize(1);
 	}
 
 	/**
@@ -144,7 +143,7 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 			.revInclude(Patient.INCLUDE_ORGANIZATION)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals(1, results.getEntry().size());
+		assertThat(results.getEntry()).hasSize(1);
 	}
 
 

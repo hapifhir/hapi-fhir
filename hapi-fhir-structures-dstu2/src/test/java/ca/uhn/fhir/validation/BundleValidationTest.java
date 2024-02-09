@@ -12,8 +12,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * @author Bill de Beaubien on 11/30/2015.
@@ -30,8 +29,8 @@ public class BundleValidationTest {
 		validator.setValidateAgainstStandardSchematron(true);
 
 		ValidationResult result = validator.validateWithResult(appointment);
-		assertFalse(result.isSuccessful());
-		assertEquals(1, result.getMessages().size());
+		assertThat(result.isSuccessful()).isFalse();
+		assertThat(result.getMessages()).hasSize(1);
 		for (SingleValidationMessage singleValidationMessage : result.getMessages()) {
 			System.out.println(singleValidationMessage.getMessage());
 		}
@@ -51,8 +50,8 @@ public class BundleValidationTest {
 		validator.setValidateAgainstStandardSchematron(true);
 
 		ValidationResult result = validator.validateWithResult(bundle);
-		assertFalse(result.isSuccessful(), "Validation should have failed");
-		assertEquals(1, result.getMessages().size());
+		assertThat(result.isSuccessful()).as("Validation should have failed").isFalse();
+		assertThat(result.getMessages()).hasSize(1);
 		for (SingleValidationMessage singleValidationMessage : result.getMessages()) {
 			System.out.println(singleValidationMessage.getMessage());
 		}

@@ -185,8 +185,8 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu3Test ext
 		waitForSize(5, ourUpdatedObservations);
 
 		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
-		assertThat(observation1.getId().isEmpty()).isFalse();
-		assertThat(observation2.getId().isEmpty()).isFalse();
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	@Test
@@ -258,8 +258,8 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsDstu3Test ext
 		waitForSize(5, ourUpdatedObservations);
 
 		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
-		assertThat(observation1.getId().isEmpty()).isFalse();
-		assertThat(observation2.getId().isEmpty()).isFalse();
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	@BeforeAll

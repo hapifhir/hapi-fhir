@@ -457,12 +457,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		try {
 			verifyBulkExportResults(options, ids, new ArrayList<>());
 
-			assertThat(valueSet.isEmpty()).isFalse();
-			assertThat(valueSet.size()).isEqualTo(ids.size());
+			assertThat(valueSet).isNotEmpty();
+			assertThat(valueSet).hasSize(ids.size());
 			for (String id : valueSet) {
 				// should start with our value from the key-value pairs
-				assertThat(id.startsWith(value)).isTrue();
-				assertThat(ids.contains(id.substring(value.length()))).isTrue();
+				assertThat(id).startsWith(value);
+				assertThat(ids).contains(id);
 			}
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
@@ -1042,7 +1042,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		JobInstance finalJobInstance = verifyBulkExportResults(options, expectedIds, List.of());
 		BulkExportJobResults results = JsonUtil.deserialize(finalJobInstance.getReport(), BulkExportJobResults.class);
 		List<String> binaryIds = results.getResourceTypeToBinaryIds().values().stream().flatMap(Collection::stream).toList();
-		assertThat(binaryIds.size()).isEqualTo(2);
+		assertThat(binaryIds).hasSize(2);
 		for (String next : binaryIds) {
 			Binary binary = myBinaryDao.read(new IdType(next), new SystemRequestDetails());
 			assertThat(binary.getSecurityContext().getIdentifier().getSystem()).isEqualTo("http://foo");

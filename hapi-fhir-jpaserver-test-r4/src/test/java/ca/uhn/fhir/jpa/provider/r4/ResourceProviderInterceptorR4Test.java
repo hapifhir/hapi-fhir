@@ -435,7 +435,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(bundle.getEntry().isEmpty()).isTrue();
+		assertThat(bundle.getEntry()).isEmpty();
 
 		SearchParameter searchParameter = createSearchParameter();
 

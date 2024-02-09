@@ -1,9 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -31,18 +28,18 @@ public class CorsInterceptorTest {
 			"X-Correlation-Id"));
 		CorsInterceptor corsInterceptor = new CorsInterceptor(corsConfiguration);
 
-		assertSame(corsConfiguration, corsInterceptor.getConfig());
-		assertNull(corsConfiguration.getAllowCredentials());
-		assertNotNull(corsConfiguration.getAllowedHeaders());
-		assertNotNull(corsConfiguration.getAllowedMethods());
-		assertNotNull(corsConfiguration.getAllowedOrigins());
-		assertNotNull(corsConfiguration.getExposedHeaders());
-		assertEquals(Long.valueOf(1800L),corsConfiguration.getMaxAge());
-		assertNotNull(corsConfiguration.checkHeaders(Collections.singletonList("Content-Type")));
-		assertNotNull(corsConfiguration.checkHeaders(Collections.singletonList("Authorization")));
-		assertNotNull(corsConfiguration.checkHeaders(Arrays.asList("Authorization", "Content-Type")));
-		assertNotNull(corsConfiguration.checkHttpMethod(HttpMethod.GET));
-		assertNotNull(corsConfiguration.checkOrigin("http://clinfhir.com"));
+		assertThat(corsInterceptor.getConfig()).isSameAs(corsConfiguration);
+		assertThat(corsConfiguration.getAllowCredentials()).isNull();
+		assertThat(corsConfiguration.getAllowedHeaders()).isNotNull();
+		assertThat(corsConfiguration.getAllowedMethods()).isNotNull();
+		assertThat(corsConfiguration.getAllowedOrigins()).isNotNull();
+		assertThat(corsConfiguration.getExposedHeaders()).isNotNull();
+		assertThat(corsConfiguration.getMaxAge()).isEqualTo(Long.valueOf(1800L));
+		assertThat(corsConfiguration.checkHeaders(Collections.singletonList("Content-Type"))).isNotNull();
+		assertThat(corsConfiguration.checkHeaders(Collections.singletonList("Authorization"))).isNotNull();
+		assertThat(corsConfiguration.checkHeaders(Arrays.asList("Authorization", "Content-Type"))).isNotNull();
+		assertThat(corsConfiguration.checkHttpMethod(HttpMethod.GET)).isNotNull();
+		assertThat(corsConfiguration.checkOrigin("http://clinfhir.com")).isNotNull();
 
 		ourLog.info("Custom CorsConfiguration:  allowCredentials = {};  allowedHeaders = {};  " +
 			"allowedMethods = {};  allowedOrigins = {};  exposedHeaders = {};  maxAge = {}",
@@ -59,17 +56,17 @@ public class CorsInterceptorTest {
 		CorsInterceptor corsInterceptor = new CorsInterceptor();
 		CorsConfiguration corsConfiguration = corsInterceptor.getConfig();
 
-		assertNull(corsConfiguration.getAllowCredentials());
-		assertNotNull(corsConfiguration.getAllowedHeaders());
-		assertNotNull(corsConfiguration.getAllowedMethods());
-		assertNotNull(corsConfiguration.getAllowedOrigins());
-		assertNotNull(corsConfiguration.getExposedHeaders());
-		assertNull(corsConfiguration.getMaxAge());
-		assertNotNull(corsConfiguration.checkHeaders(Collections.singletonList("Content-Type")));
+		assertThat(corsConfiguration.getAllowCredentials()).isNull();
+		assertThat(corsConfiguration.getAllowedHeaders()).isNotNull();
+		assertThat(corsConfiguration.getAllowedMethods()).isNotNull();
+		assertThat(corsConfiguration.getAllowedOrigins()).isNotNull();
+		assertThat(corsConfiguration.getExposedHeaders()).isNotNull();
+		assertThat(corsConfiguration.getMaxAge()).isNull();
+		assertThat(corsConfiguration.checkHeaders(Collections.singletonList("Content-Type"))).isNotNull();
 //		assertNotNull(corsConfiguration.checkHeaders(Arrays.asList(new String[] {"Authorization"})));
-		assertNotNull(corsConfiguration.checkHeaders(Arrays.asList("Authorization", "Content-Type")));
-		assertNotNull(corsConfiguration.checkHttpMethod(HttpMethod.GET));
-		assertNotNull(corsConfiguration.checkOrigin("http://clinfhir.com"));
+		assertThat(corsConfiguration.checkHeaders(Arrays.asList("Authorization", "Content-Type"))).isNotNull();
+		assertThat(corsConfiguration.checkHttpMethod(HttpMethod.GET)).isNotNull();
+		assertThat(corsConfiguration.checkOrigin("http://clinfhir.com")).isNotNull();
 
 		ourLog.info("Default CorsConfiguration:  allowCredentials = {};  allowedHeaders = {};  " +
 			"allowedMethods = {};  allowedOrigins = {};  exposedHeaders = {};  maxAge = {}",

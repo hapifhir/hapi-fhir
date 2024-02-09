@@ -48,8 +48,6 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
@@ -83,9 +81,9 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setLogExceptions(true);
-		assertTrue(interceptor.isLogExceptions());
+		assertThat(interceptor.isLogExceptions()).isTrue();
 		interceptor.setErrorMessageFormat("ERROR - ${requestVerb} ${requestUrl}");
-		assertEquals("ERROR - ${requestVerb} ${requestUrl}", interceptor.getErrorMessageFormat());
+		assertThat(interceptor.getErrorMessageFormat()).isEqualTo("ERROR - ${requestVerb} ${requestUrl}");
 
 		ourServer.getInterceptorService().registerInterceptor(interceptor);
 
@@ -139,7 +137,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertEquals("extended-operation-instance - $everything - Patient/123", captor.getValue());
+		assertThat(captor.getValue()).isEqualTo("extended-operation-instance - $everything - Patient/123");
 	}
 
 
@@ -160,7 +158,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertEquals("read -  - Patient/1 - ", captor.getValue());
+		assertThat(captor.getValue()).isEqualTo("read -  - Patient/1 - ");
 	}
 
 	@Test
@@ -180,7 +178,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertEquals(Constants.REQUEST_ID_LENGTH, captor.getValue().length());
+		assertThat(captor.getValue()).hasSize(Constants.REQUEST_ID_LENGTH);
 	}
 
 	@Test
@@ -245,7 +243,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertEquals("read -  - Patient/1 - ", captor.getValue());
+		assertThat(captor.getValue()).isEqualTo("read -  - Patient/1 - ");
 	}
 
 	@Test
@@ -272,7 +270,7 @@ public class LoggingInterceptorDstu2Test {
 		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertEquals("create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>", captor.getValue());
+		assertThat(captor.getValue()).isEqualTo("create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>");
 	}
 
 	@Test
@@ -302,7 +300,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertEquals("ERROR - create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>", captor.getValue());
+		assertThat(captor.getValue()).isEqualTo("ERROR - create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>");
 	}
 
 	@Test
@@ -323,7 +321,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertEquals("extended-operation-server - $everything - ", captor.getValue());
+		assertThat(captor.getValue()).isEqualTo("extended-operation-server - $everything - ");
 	}
 
 	@Test
@@ -344,7 +342,7 @@ public class LoggingInterceptorDstu2Test {
 		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertEquals("extended-operation-type - $everything - Patient", captor.getValue());
+		assertThat(captor.getValue()).isEqualTo("extended-operation-type - $everything - Patient");
 	}
 
 	@Test

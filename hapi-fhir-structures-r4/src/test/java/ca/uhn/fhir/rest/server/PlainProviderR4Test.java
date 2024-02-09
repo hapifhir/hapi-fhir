@@ -40,9 +40,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class PlainProviderR4Test {
 
@@ -70,9 +69,9 @@ public class PlainProviderR4Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-		assertEquals(3, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(3);
 		
 		assertThat(provider.myLastSince.getValueAsString(), StringStartsWith.startsWith("2012-01-02T00:01:02"));
 		assertThat(provider.myLastCount.getValueAsString(), IsEqual.equalTo("12"));
@@ -80,20 +79,20 @@ public class PlainProviderR4Test {
 		status = ourClient.execute(new HttpGet(baseUri + "/_history?&_count=12"));
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-		assertEquals(3, bundle.getEntry().size());
-		assertNull(provider.myLastSince);
+		assertThat(bundle.getEntry()).hasSize(3);
+		assertThat(provider.myLastSince).isNull();
 		assertThat(provider.myLastCount.getValueAsString(), IsEqual.equalTo("12"));
 		
 		status =ourClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02"));
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-		assertEquals(3, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(3);
 		assertThat(provider.myLastSince.getValueAsString(), StringStartsWith.startsWith("2012-01-02T00:01:02"));
-		assertNull(provider.myLastCount);
+		assertThat(provider.myLastCount).isNull();
 	}
 
 	@Test
@@ -105,11 +104,11 @@ public class PlainProviderR4Test {
 		CloseableHttpResponse status = ourClient.execute(new HttpGet(baseUri + "/_history"));
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-		assertEquals(3, bundle.getEntry().size());
-		assertNull(provider.myLastSince);
-		assertNull(provider.myLastCount);
+		assertThat(bundle.getEntry()).hasSize(3);
+		assertThat(provider.myLastSince).isNull();
+		assertThat(provider.myLastCount).isNull();
 		
 	}
 
@@ -126,15 +125,15 @@ public class PlainProviderR4Test {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info("Response was:\n{}", responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
-			assertEquals(1, bundle.getEntry().size());
+			assertThat(bundle.getEntry()).hasSize(1);
 
 			Patient patient = (Patient) bundle.getEntry().get(0).getResource();
-			assertEquals("PatientOne", patient.getName().get(0).getGiven().get(0).getValue());
+			assertThat(patient.getName().get(0).getGiven().get(0).getValue()).isEqualTo("PatientOne");
 
-			assertEquals(uri.replace(":hapitest:", "%3Ahapitest%3A"), bundle.getLink("self").getUrl());
+			assertThat(bundle.getLink("self").getUrl()).isEqualTo(uri.replace(":hapitest:", "%3Ahapitest%3A"));
 		}
 
 	}

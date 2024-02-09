@@ -240,7 +240,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 	public void testJobsAreRegisteredWithJobRegistry() {
 		Optional<JobDefinition<?>> jobDefinitionOp = myJobDefinitionRegistry.getLatestJobDefinition(BULK_IMPORT_JOB_NAME);
 
-		assertThat(jobDefinitionOp.isPresent()).isTrue();
+		assertThat(jobDefinitionOp).isPresent();
 	}
 
 	@Interceptor

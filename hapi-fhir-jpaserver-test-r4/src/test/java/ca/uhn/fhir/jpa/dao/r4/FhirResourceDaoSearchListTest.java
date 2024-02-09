@@ -60,7 +60,7 @@ public class FhirResourceDaoSearchListTest extends BaseJpaR4Test {
 		assertThat(ids).hasSize(theExpectedPatientIds.length);
 
 		for(IIdType patientId: theExpectedPatientIds) {
-			assertThat(ids.contains(patientId)).isTrue();
+			assertThat(ids).contains(patientId);
 
 			//assertThat(patientId, contains(ids));
 		}

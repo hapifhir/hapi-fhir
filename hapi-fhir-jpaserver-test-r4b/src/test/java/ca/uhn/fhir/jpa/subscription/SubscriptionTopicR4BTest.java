@@ -90,7 +90,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 
 		Bundle receivedBundle = ourTestSystemProvider.getLastInput();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
-		assertThat(resources.size()).isEqualTo(2);
+		assertThat(resources).hasSize(2);
 
 		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
 		validateSubscriptionStatus(subscription, sentEncounter, ss);
@@ -121,7 +121,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 
 		Bundle receivedBundle = ourTestSystemProvider.getLastInput();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
-		assertThat(resources.size()).isEqualTo(2);
+		assertThat(resources).hasSize(2);
 
 		SubscriptionStatus ss = (SubscriptionStatus) resources.get(0);
 		validateSubscriptionStatus(subscription, sentEncounter, ss);
@@ -138,7 +138,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		assertThat(ss.getEventsSinceSubscriptionStartElement().getValueAsString()).isEqualTo("1");
 
 		List<SubscriptionStatus.SubscriptionStatusNotificationEventComponent> notificationEvents = ss.getNotificationEvent();
-		assertThat(notificationEvents.size()).isEqualTo(1);
+		assertThat(notificationEvents).hasSize(1);
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent = notificationEvents.get(0);
 		assertThat(notificationEvent.getEventNumber()).isEqualTo("1");
 		assertThat(notificationEvent.getFocus().getReferenceElement()).isEqualTo(sentEncounter.getIdElement().toUnqualifiedVersionless());

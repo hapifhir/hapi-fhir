@@ -5,10 +5,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class OperationOutcomeUtilTest {
 
@@ -18,13 +15,13 @@ public class OperationOutcomeUtilTest {
 	public void testHasIssueTrue() {
 		OperationOutcome oo =new OperationOutcome();
 		oo.addIssue().setDiagnostics("foo");
-		assertTrue(OperationOutcomeUtil.hasIssues(myCtx, oo));
+		assertThat(OperationOutcomeUtil.hasIssues(myCtx, oo)).isTrue();
 	}
 
 	@Test
 	public void testHasIssueFalse() {
 		OperationOutcome oo =new OperationOutcome();
-		assertFalse(OperationOutcomeUtil.hasIssues(myCtx, oo));
+		assertThat(OperationOutcomeUtil.hasIssues(myCtx, oo)).isFalse();
 	}
 
 	@Test
@@ -34,14 +31,14 @@ public class OperationOutcomeUtilTest {
 		OperationOutcomeUtil.addLocationToIssue(myCtx, issue, null);
 		OperationOutcomeUtil.addLocationToIssue(myCtx, issue, "");
 		OperationOutcomeUtil.addLocationToIssue(myCtx, issue, "line 3");
-		assertEquals("{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"throttled\",\"diagnostics\":\"Help i'm a bug\",\"location\":[\"/Patient\",\"line 3\"]}]}", myCtx.newJsonParser().encodeResourceToString(oo));
+		assertThat(myCtx.newJsonParser().encodeResourceToString(oo)).isEqualTo("{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"throttled\",\"diagnostics\":\"Help i'm a bug\",\"location\":[\"/Patient\",\"line 3\"]}]}");
 	}
 
 	@Test
 	public void testAddIssueWithMessageId() {
 		OperationOutcome oo = (OperationOutcome) OperationOutcomeUtil.newInstance(myCtx);
 		OperationOutcomeUtil.addIssueWithMessageId(myCtx, oo, "error", "message", "messageID", "location", "processing");
-		assertNotNull(oo.getIssueFirstRep().getDetails(), "OO.issue.details is empty");
+		assertThat(oo.getIssueFirstRep().getDetails()).as("OO.issue.details is empty").isNotNull();
 	}
 
 	@Test
@@ -51,7 +48,7 @@ public class OperationOutcomeUtilTest {
 		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.ERROR);
 		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
 
-		assertFalse(OperationOutcomeUtil.hasIssuesOfSeverity(myCtx, oo, OperationOutcome.IssueSeverity.FATAL.toCode()));
+		assertThat(OperationOutcomeUtil.hasIssuesOfSeverity(myCtx, oo, OperationOutcome.IssueSeverity.FATAL.toCode())).isFalse();
 	}
 
 	@Test
@@ -62,6 +59,6 @@ public class OperationOutcomeUtilTest {
 		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.FATAL);
 		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
 
-		assertTrue(OperationOutcomeUtil.hasIssuesOfSeverity(myCtx, oo, OperationOutcome.IssueSeverity.FATAL.toCode()));
+		assertThat(OperationOutcomeUtil.hasIssuesOfSeverity(myCtx, oo, OperationOutcome.IssueSeverity.FATAL.toCode())).isTrue();
 	}
 }

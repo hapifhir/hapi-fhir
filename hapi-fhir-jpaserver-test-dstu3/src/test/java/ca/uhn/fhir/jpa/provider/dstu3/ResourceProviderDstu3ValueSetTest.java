@@ -242,8 +242,8 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		assertThat(codes).containsExactlyInAnyOrder("50015-7");
 
 
-		assertThat(outcome.getCompose().getInclude().size()).isEqualTo(1);
-		assertThat(outcome.getCompose().getExclude().size()).isEqualTo(1);
+		assertThat(outcome.getCompose().getInclude()).hasSize(1);
+		assertThat(outcome.getCompose().getExclude()).hasSize(1);
 		assertThat(outcome.getExpansion().getTotal()).isEqualTo(1);
 
 	}

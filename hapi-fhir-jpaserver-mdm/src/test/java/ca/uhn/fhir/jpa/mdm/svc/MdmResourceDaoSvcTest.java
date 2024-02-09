@@ -52,7 +52,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myPatientDao.update(badSourcePatient);
 
 		Optional<IAnyResource> foundGoldenResource = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");
-		assertThat(foundGoldenResource.isPresent()).isTrue();
+		assertThat(foundGoldenResource).isPresent();
 		assertThat(foundGoldenResource.get().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
@@ -65,7 +65,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myPatientDao.update(badSourcePatient);
 
 		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");
-		assertThat(foundSourcePatient.isPresent()).isTrue();
+		assertThat(foundSourcePatient).isPresent();
 		assertThat(foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
@@ -81,7 +81,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myPatientDao.update(goodSourcePatient, systemRequestDetails);
 
 		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient", requestPartitionId);
-		assertThat(foundSourcePatient.isPresent()).isTrue();
+		assertThat(foundSourcePatient).isPresent();
 		assertThat(foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
@@ -126,13 +126,13 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			assertThat(result).isNotNull();
 			assertThat(result.isEmpty()).isFalse();
 			List<IBaseResource> resources = result.getAllResources();
-			assertThat(resources.size()).isEqualTo(resourceCount);
+			assertThat(resources).hasSize(resourceCount);
 			int count = 0;
 			for (IBaseResource resource : resources) {
 				String id = idPrefaces[count++];
 				assertThat(resource instanceof Patient).isTrue();
 				Patient patient = (Patient) resource;
-				assertThat(patient.getId().contains(id)).isTrue();
+				assertThat(patient.getId()).contains(id);
 			}
 
 			// ensure single id works too
@@ -144,10 +144,10 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			// verify 2
 			assertThat(result).isNotNull();
 			resources = result.getAllResources();
-			assertThat(resources.size()).isEqualTo(1);
+			assertThat(resources).hasSize(1);
 			assertThat(result.getAllResources().get(0) instanceof Patient).isTrue();
 			Patient patient = (Patient) result.getAllResources().get(0);
-			assertThat(patient.getId().contains(firstId.getValue())).isTrue();
+			assertThat(patient.getId()).contains(firstId);
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}

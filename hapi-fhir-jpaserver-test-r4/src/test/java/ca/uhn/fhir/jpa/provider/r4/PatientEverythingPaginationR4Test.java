@@ -82,7 +82,7 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 
 		// first page
 		List<Patient> patientsFirstPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
-		assertThat(patientsFirstPage.size()).isEqualTo(50);
+		assertThat(patientsFirstPage).hasSize(50);
 
 		String nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
 
@@ -92,7 +92,7 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 		assertThat(page2).isNotNull();
 		List<Patient> patientsPage2 = BundleUtil.toListOfResourcesOfType(myFhirContext, page2, Patient.class);
 
-		assertThat(patientsPage2.size()).isEqualTo(4);
+		assertThat(patientsPage2).hasSize(4);
 	}
 
 	@ParameterizedTest
@@ -128,7 +128,7 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 
 			// first page
 			List<Patient> patientsPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
-			assertThat(patientsPage.size()).isEqualTo(defaultPageSize);
+			assertThat(patientsPage).hasSize(defaultPageSize);
 
 			for (Patient p : patientsPage) {
 				assertThat(ids.add(p.getId())).isTrue();
@@ -146,14 +146,14 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 				}
 				nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
 				if (nextUrl != null) {
-					assertThat(patientsPage.size()).isEqualTo(defaultPageSize);
+					assertThat(patientsPage).hasSize(defaultPageSize);
 				} else {
-					assertThat(patientsPage.size()).isEqualTo(4);
+					assertThat(patientsPage).hasSize(4);
 				}
 			} while (nextUrl != null);
 
 			// ensure we found everything
-			assertThat(ids.size()).isEqualTo(total);
+			assertThat(ids).hasSize(total);
 		} finally {
 			// set it back, just in case
 			myStorageSettings.setSearchPreFetchThresholds(previousPrefetchThreshold);

@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchWithGenericListDstu2Test {
 
@@ -56,8 +55,8 @@ public class SearchWithGenericListDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals("searchByIdentifier", ourLastMethod);
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertThat(ourLastMethod).isEqualTo("searchByIdentifier");
 		assertThat(responseContent).contains("<family value=\"FAMILY\"");
 		assertThat(responseContent).contains("<fullUrl value=\"" + ourServer.getBaseUrl() + "/Patient/1\"/>");
 	}

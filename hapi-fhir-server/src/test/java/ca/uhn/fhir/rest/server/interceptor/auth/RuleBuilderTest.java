@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 public class RuleBuilderTest {
@@ -29,13 +27,13 @@ public class RuleBuilderTest {
 		builder.allow().write().instances(Lists.newArrayList(new IdDt("Patient/WRITE-3"), new IdDt("Patient/WRITE-4")));
 		List<IAuthRule> list = builder.build();
 
-		assertEquals(2, list.size());
+		assertThat(list).hasSize(2);
 
-		assertEquals(RuleImplOp.class, list.get(0).getClass());
+		assertThat(list.get(0).getClass()).isEqualTo(RuleImplOp.class);
 		RuleImplOp allowRead = (RuleImplOp) list.get(0);
 		assertThat(allowRead.getAppliesToInstances()).containsExactly(new IdDt("Patient/READ-1"), new IdDt("Patient/READ-2"), new IdDt("Patient/READ-3"), new IdDt("Patient/READ-4"));
 
-		assertEquals(RuleImplOp.class, list.get(1).getClass());
+		assertThat(list.get(1).getClass()).isEqualTo(RuleImplOp.class);
 		RuleImplOp allowWrite = (RuleImplOp) list.get(1);
 		assertThat(allowWrite.getAppliesToInstances()).containsExactly(new IdDt("Patient/WRITE-1"), new IdDt("Patient/WRITE-2"), new IdDt("Patient/WRITE-3"), new IdDt("Patient/WRITE-4"));
 	}
@@ -47,9 +45,9 @@ public class RuleBuilderTest {
 		builder.allow().read().allResources().inCompartment("Patient", new IdDt("Patient/lob2patient"));
 		List<IAuthRule> list = builder.build();
 
-		assertEquals(1, list.size());
+		assertThat(list).hasSize(1);
 
-		assertEquals(RuleImplOp.class, list.get(0).getClass());
+		assertThat(list.get(0).getClass()).isEqualTo(RuleImplOp.class);
 	}
 
 	@Test
@@ -59,9 +57,9 @@ public class RuleBuilderTest {
 		builder.allow().read().allResources().inCompartmentWithFilter("Patient", new IdDt("Patient/lob2patient"), "code=bar");
 		List<IAuthRule> list = builder.build();
 
-		assertEquals(2, list.size());
+		assertThat(list).hasSize(2);
 
-		assertEquals(RuleImplOp.class, list.get(0).getClass());
+		assertThat(list.get(0).getClass()).isEqualTo(RuleImplOp.class);
 	}
 
 	@Test
@@ -86,8 +84,8 @@ public class RuleBuilderTest {
 		builder.allow().bulkExport().patientExportOnPatient("Patient/pat1").withResourceTypes(resourceTypes);
 		builder.allow().bulkExport().patientExportOnPatient("Patient/pat2").withResourceTypes(resourceTypes);
 		List<IAuthRule> rules = builder.build();
-		assertEquals(rules.size(),1);
-		assertTrue(rules.get(0) instanceof RuleBulkExportImpl);
+		assertThat(1).isEqualTo(rules.size());
+		assertThat(rules.get(0) instanceof RuleBulkExportImpl).isTrue();
 	}
 
 	@Test

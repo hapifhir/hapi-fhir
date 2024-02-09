@@ -225,7 +225,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Basic basic = myClient.read().resource(Basic.class).withId(id).execute();
 		List<ExtensionDt> exts = basic.getUndeclaredExtensionsByUrl("http://localhost:1080/hapi-fhir-jpaserver-example/baseDstu2/StructureDefinition/DateID");
-		assertThat(exts.size()).isEqualTo(1);
+		assertThat(exts).hasSize(1);
 	}
 
 	@Test
@@ -321,7 +321,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		assertThat(found.getTotalElement().getValue().intValue()).isEqualTo(100);
-		assertThat(found.getEntry().size()).isEqualTo(10);
+		assertThat(found.getEntry()).hasSize(10);
 
 		found = myClient
 			.search()
@@ -330,7 +330,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.count(50)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(found.getEntry().size()).isEqualTo(50);
+		assertThat(found.getEntry()).hasSize(50);
 
 	}
 
@@ -612,8 +612,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(res));
 
-		assertThat(res.getEntry().size()).isEqualTo(3);
-		assertThat(BundleUtil.toListOfResourcesOfType(myFhirContext, res, Encounter.class).size()).isEqualTo(1);
+		assertThat(res.getEntry()).hasSize(3);
+		assertThat(BundleUtil.toListOfResourcesOfType(myFhirContext, res, Encounter.class)).hasSize(1);
 		assertThat(BundleUtil.toListOfResourcesOfType(myFhirContext, res, Encounter.class).get(0).getIdElement().toUnqualifiedVersionless()).isEqualTo(e1id.toUnqualifiedVersionless());
 
 	}
@@ -1469,16 +1469,16 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		ca.uhn.fhir.model.dstu2.resource.Bundle history = myClient.history().onInstance(id).andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class).prettyPrint().summaryMode(SummaryEnum.DATA)
 			.execute();
-		assertThat(history.getEntry().size()).isEqualTo(3);
+		assertThat(history.getEntry()).hasSize(3);
 		assertThat(history.getEntry().get(0).getResource().getId()).isEqualTo(id.withVersion("3"));
-		assertThat(((Patient) history.getEntry().get(0).getResource()).getName().size()).isEqualTo(1);
+		assertThat(((Patient) history.getEntry().get(0).getResource()).getName()).hasSize(1);
 
 		assertThat(history.getEntry().get(1).getResource().getId()).isEqualTo(id.withVersion("2"));
 		assertThat(history.getEntry().get(1).getRequest().getMethodElement().getValueAsEnum()).isEqualTo(HTTPVerbEnum.DELETE);
-		assertThat(((Patient) history.getEntry().get(1).getResource()).getName().size()).isEqualTo(0);
+		assertThat(((Patient) history.getEntry().get(1).getResource()).getName()).isEmpty();
 
 		assertThat(history.getEntry().get(2).getResource().getId()).isEqualTo(id.withVersion("1"));
-		assertThat(((Patient) history.getEntry().get(2).getResource()).getName().size()).isEqualTo(1);
+		assertThat(((Patient) history.getEntry().get(2).getResource()).getName()).hasSize(1);
 	}
 
 	/**
@@ -1564,17 +1564,17 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		IIdType id = myClient.create().resource(pt).execute().getId().toUnqualifiedVersionless();
 
 		MetaDt meta = myClient.meta().get(MetaDt.class).fromResource(id).execute();
-		assertThat(meta.getTag().size()).isEqualTo(0);
+		assertThat(meta.getTag()).isEmpty();
 
 		MetaDt inMeta = new MetaDt();
 		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
 		meta = myClient.meta().add().onResource(id).meta(inMeta).execute();
-		assertThat(meta.getTag().size()).isEqualTo(1);
+		assertThat(meta.getTag()).hasSize(1);
 
 		inMeta = new MetaDt();
 		inMeta.addTag().setSystem("urn:system1").setCode("urn:code1");
 		meta = myClient.meta().delete().onResource(id).meta(inMeta).execute();
-		assertThat(meta.getTag().size()).isEqualTo(0);
+		assertThat(meta.getTag()).isEmpty();
 
 	}
 
@@ -1620,7 +1620,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.useHttpGet()
 			.execute();
 
-		assertThat(response.getEntry().size()).isEqualTo(10);
+		assertThat(response.getEntry()).hasSize(10);
 		assertThat(response.getLink("next").getUrl()).isNotEmpty();
 
 		// Load page 2
@@ -1628,7 +1628,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		String nextUrl = response.getLink("next").getUrl();
 		response = myClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, nextUrl);
 
-		assertThat(response.getEntry().size()).isEqualTo(10);
+		assertThat(response.getEntry()).hasSize(10);
 		assertThat(response.getLink("next").getUrl()).isNotEmpty();
 
 		// Load page 3
@@ -1637,7 +1637,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		nextUrl = response.getLink("next").getUrl();
 		response = myClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, nextUrl);
 
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 //		assertEquals(21, response.getTotal().intValue());
 //		assertEquals(null, response.getLink("next"));
 
@@ -1645,7 +1645,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		response = myClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, nextUrl);
 
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 		assertThat(response.getTotal().intValue()).isEqualTo(21);
 		assertThat(response.getLink("next")).isEqualTo(null);
 	}
@@ -1680,7 +1680,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.useHttpGet()
 				.execute();
 
-			assertThat(response.getEntry().size()).isEqualTo(10);
+			assertThat(response.getEntry()).hasSize(10);
 			assertThat(response.getTotalElement().getValue()).isEqualTo(null);
 			assertThat(response.getLink("next")).isEqualTo(null);
 
@@ -1782,7 +1782,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		IIdType newId = myClient.create().resource(p1).execute().getId();
 
 		Patient actual = myClient.read(Patient.class, (UriDt) newId);
-		assertThat(actual.getContained().getContainedResources().size()).isEqualTo(1);
+		assertThat(actual.getContained().getContainedResources()).hasSize(1);
 		assertThat(actual.getText().getDiv().getValueAsString()).contains("<td>Identifier</td><td>testSaveAndRetrieveWithContained01</td>");
 
 		Bundle b = myClient
@@ -1792,7 +1792,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.prettyPrint()
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(b.getEntry().size()).isEqualTo(1);
+		assertThat(b.getEntry()).hasSize(1);
 
 	}
 
@@ -1870,7 +1870,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.execute();
 		//@formatter:on
 
-		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry()).hasSize(1);
 		assertThat(actual.getEntry().get(0).getFullUrl()).isEqualTo(myServerBase + "/Patient/" + p1Id.getIdPart());
 		assertThat(actual.getEntry().get(0).getResource().getId().getIdPart()).isEqualTo(p1Id.getIdPart());
 		assertThat(actual.getEntry().get(0).getSearch().getModeElement().getValueAsEnum()).isEqualTo(SearchEntryModeEnum.MATCH);
@@ -1891,7 +1891,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.prettyPrint()
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry()).hasSize(1);
 		assertThat(actual.getEntry().get(0).getResource().getId().getIdPart()).isEqualTo(p1Id.getIdPart());
 
 	}
@@ -1955,7 +1955,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.prettyPrint()
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry()).hasSize(1);
 		assertThat(actual.getEntry().get(0).getResource().getId().getIdPart()).isEqualTo(p1Id.getIdPart());
 
 		actual = myClient
@@ -1966,7 +1966,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.prettyPrint()
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry()).hasSize(1);
 		assertThat(actual.getEntry().get(0).getResource().getId().getIdPart()).isEqualTo(p1Id.getIdPart());
 
 	}
@@ -2152,7 +2152,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(found.getEntry().size()).isEqualTo(2);
+		assertThat(found.getEntry()).hasSize(2);
 		assertThat(found.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
 		assertThat(found.getEntry().get(0).getSearch().getModeElement().getValueAsEnum()).isEqualTo(SearchEntryModeEnum.MATCH);
 		assertThat(found.getEntry().get(0).getResource().getText().getDiv().getValueAsString()).contains("<table class=\"hapiPropertyTable");
@@ -2182,7 +2182,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(found.getEntry().size()).isEqualTo(2);
+		assertThat(found.getEntry()).hasSize(2);
 		assertThat(found.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
 		assertThat(found.getEntry().get(0).getSearch().getModeElement().getValueAsEnum()).isEqualTo(SearchEntryModeEnum.MATCH);
 		assertThat(found.getEntry().get(0).getResource().getText().getDiv().getValueAsString()).contains("<table class=\"hapiPropertyTable");
@@ -2264,7 +2264,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		ourLog.debug("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 		
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
-		assertThat(found.getEntry().size()).isEqualTo(4);
+		assertThat(found.getEntry()).hasSize(4);
 		assertThat(list.get(0)).isEqualTo(oid3);
 		assertThat(list.get(1)).isEqualTo(oid1);
 		assertThat(list.get(2)).isEqualTo(oid4);
@@ -2382,7 +2382,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(b.getEntry().size()).isEqualTo(2);
+		assertThat(b.getEntry()).hasSize(2);
 
 	}
 
@@ -2748,7 +2748,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry()).hasSize(1);
 		assertThat(actual.getEntry().get(0).getResource().getId().getIdPart()).isEqualTo(p1Id.getIdPart());
 
 	}

@@ -22,7 +22,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlineMocks {
 
@@ -85,7 +84,7 @@ public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlin
 		for (Map.Entry<String, byte[]> entry : EXPECTED_BINARIES_MAP.entrySet()) {
 			byte[] expectedBytes = entry.getValue();
 			byte[] actualBytes = npmPackageSupport.fetchBinary(entry.getKey());
-			assertArrayEquals(expectedBytes, actualBytes);
+			assertThat(actualBytes).containsExactly(expectedBytes);
 		}
 	}
 }

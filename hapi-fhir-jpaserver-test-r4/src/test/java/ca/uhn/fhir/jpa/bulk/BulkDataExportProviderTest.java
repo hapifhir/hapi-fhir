@@ -213,12 +213,12 @@ public class BulkDataExportProviderTest {
 		}
 
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
-		assertThat(params.getResourceTypes().size()).isEqualTo(2);
-		assertThat(params.getResourceTypes().contains(patientResource)).isTrue();
-		assertThat(params.getResourceTypes().contains(practitionerResource)).isTrue();
+		assertThat(params.getResourceTypes()).hasSize(2);
+		assertThat(params.getResourceTypes()).contains(patientResource);
+		assertThat(params.getResourceTypes()).contains(practitionerResource);
 		assertThat(params.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 		assertThat(params.getSince()).isNotNull();
-		assertThat(params.getFilters().contains(filter)).isTrue();
+		assertThat(params.getFilters()).contains(filter);
 		assertThat(params.getPostFetchFilterUrls()).containsExactly("Patient?_tag=foo");
 	}
 
@@ -442,7 +442,7 @@ public class BulkDataExportProviderTest {
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
 			BulkExportResponseJson responseJson = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-			assertThat(responseJson.getOutput().size()).isEqualTo(3);
+			assertThat(responseJson.getOutput()).hasSize(3);
 			assertThat(responseJson.getOutput().get(0).getType()).isEqualTo("Patient");
 			assertThat(responseJson.getOutput().get(0).getUrl()).isEqualTo(myBaseUriForPoll + "/Binary/111");
 			assertThat(responseJson.getOutput().get(1).getType()).isEqualTo("Patient");
@@ -1040,7 +1040,7 @@ public class BulkDataExportProviderTest {
 			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
 			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
 			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myServer.getPort(), A_JOB_ID));
-			assertThat(IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8).isEmpty()).isTrue();
+			assertThat(IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8)).isEmpty();
 		}
 
 		final BulkExportJobParameters params = verifyJobStartAndReturnParameters();

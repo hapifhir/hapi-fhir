@@ -31,8 +31,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -68,13 +66,13 @@ public class ResourceValidatorDstu2_1Test extends BaseValidationTestWithInlineMo
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertEquals(2, ((OperationOutcome)result.toOperationOutcome()).getIssue().size());
+		assertThat(((OperationOutcome) result.toOperationOutcome()).getIssue()).hasSize(2);
 		assertThat(resultString, StringContains.containsString("cvc-pattern-valid"));
 		
 		try {
 			parser.parseResource(encoded);
 			fail("");		} catch (DataFormatException e) {
-			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"birthDate\"] Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"birthDate\"] Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"");
 		}
 	}
 
@@ -146,7 +144,7 @@ public class ResourceValidatorDstu2_1Test extends BaseValidationTestWithInlineMo
 		String ooencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(ooencoded);
 
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 	}
 
 	/**

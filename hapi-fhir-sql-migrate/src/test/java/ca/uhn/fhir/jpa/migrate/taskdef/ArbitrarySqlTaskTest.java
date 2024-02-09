@@ -53,11 +53,11 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 
 
 		List<Map<String, Object>> rows = executeQuery("select * from HFJ_RES_PARAM_PRESENT order by PID asc");
-		assertThat(rows.size()).isEqualTo(2);
-		assertThat(rows.get(0).get("PID")).isEqualTo(100L);
-		assertThat(rows.get(0).get("HASH_PRESENT")).isEqualTo(-844694102L);
-		assertThat(rows.get(1).get("PID")).isEqualTo(101L);
-		assertThat(rows.get(1).get("HASH_PRESENT")).isEqualTo(1197628431L);
+		assertThat(rows).hasSize(2);
+		assertThat(rows.get(0)).containsEntry("PID", 100L);
+		assertThat(rows.get(0)).containsEntry("HASH_PRESENT", -844694102L);
+		assertThat(rows.get(1)).containsEntry("PID", 101L);
+		assertThat(rows.get(1)).containsEntry("HASH_PRESENT", 1197628431L);
 
 	}
 
@@ -89,7 +89,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		executeSql("insert into TEST_UPDATE_TASK (PID, RES_TYPE, PARAM_NAME) values (1, 'Patient', 'identifier')");
 
 		List<Map<String, Object>> rows = executeQuery("select * from TEST_UPDATE_TASK");
-		assertThat(rows.size()).isEqualTo(1);
+		assertThat(rows).hasSize(1);
 
 		BaseMigrationTasks<VersionEnum> migrator = new BaseMigrationTasks<VersionEnum>() {
 		};
@@ -102,7 +102,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		getMigrator().migrate();
 
 		rows = executeQuery("select * from TEST_UPDATE_TASK");
-		assertThat(rows.size()).isEqualTo(0);
+		assertThat(rows).isEmpty();
 
 	}
 
@@ -117,7 +117,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		executeSql("insert into TEST_UPDATE_TASK (PID, RES_TYPE, PARAM_NAME) values (1, 'Encounter', 'identifier')");
 
 		List<Map<String, Object>> rows = executeQuery("select * from TEST_UPDATE_TASK");
-		assertThat(rows.size()).isEqualTo(2);
+		assertThat(rows).hasSize(2);
 
 		BaseMigrationTasks<VersionEnum> migrator = new BaseMigrationTasks<VersionEnum>() {
 		};
@@ -132,7 +132,7 @@ public class ArbitrarySqlTaskTest extends BaseTest {
 		getMigrator().migrate();
 
 		rows = executeQuery("select * from TEST_UPDATE_TASK");
-		assertThat(rows.size()).isEqualTo(0);
+		assertThat(rows).isEmpty();
 
 	}
 

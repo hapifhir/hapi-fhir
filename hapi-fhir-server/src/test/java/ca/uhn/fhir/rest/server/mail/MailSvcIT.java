@@ -15,6 +15,7 @@ import javax.mail.internet.MimeMessage;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.fail;
@@ -44,11 +45,11 @@ public class MailSvcIT {
 		fixture.sendMail(email);
 		// validate
 		boolean condition = ourGreenMail.waitForIncomingEmail(5000, 1);
-		assertTrue(condition);
+		assertThat(condition).isTrue();
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
-		assertEquals(1, receivedMessages.length);
-		assertEquals(SUBJECT, receivedMessages[0].getSubject());
-		assertEquals(BODY, GreenMailUtil.getBody(receivedMessages[0]));
+		assertThat(receivedMessages.length).isEqualTo(1);
+		assertThat(receivedMessages[0].getSubject()).isEqualTo(SUBJECT);
+		assertThat(GreenMailUtil.getBody(receivedMessages[0])).isEqualTo(BODY);
 	}
 
 	@Test
@@ -58,15 +59,15 @@ public class MailSvcIT {
 		// execute
 		fixture.sendMail(emails);
 		// validate
-		assertTrue(ourGreenMail.waitForIncomingEmail(15000, emails.size()));
+		assertThat(ourGreenMail.waitForIncomingEmail(15000, emails.size())).isTrue();
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
-		assertEquals(emails.size(), receivedMessages.length);
-		assertEquals(SUBJECT, receivedMessages[0].getSubject());
-		assertEquals(BODY, GreenMailUtil.getBody(receivedMessages[0]));
-		assertEquals(SUBJECT, receivedMessages[1].getSubject());
-		assertEquals(BODY, GreenMailUtil.getBody(receivedMessages[1]));
-		assertEquals(SUBJECT, receivedMessages[2].getSubject());
-		assertEquals(BODY, GreenMailUtil.getBody(receivedMessages[2]));
+		assertThat(receivedMessages.length).isEqualTo(emails.size());
+		assertThat(receivedMessages[0].getSubject()).isEqualTo(SUBJECT);
+		assertThat(GreenMailUtil.getBody(receivedMessages[0])).isEqualTo(BODY);
+		assertThat(receivedMessages[1].getSubject()).isEqualTo(SUBJECT);
+		assertThat(GreenMailUtil.getBody(receivedMessages[1])).isEqualTo(BODY);
+		assertThat(receivedMessages[2].getSubject()).isEqualTo(SUBJECT);
+		assertThat(GreenMailUtil.getBody(receivedMessages[2])).isEqualTo(BODY);
 	}
 
 	@Test
@@ -78,9 +79,9 @@ public class MailSvcIT {
 		fixture.sendMail(email);
 
 		// validate
-		assertTrue(ourGreenMail.waitForIncomingEmail(5000, 0));
+		assertThat(ourGreenMail.waitForIncomingEmail(5000, 0)).isTrue();
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
-		assertEquals(0, receivedMessages.length);
+		assertThat(receivedMessages.length).isEqualTo(0);
 	}
 
 	@Test
@@ -95,7 +96,7 @@ public class MailSvcIT {
 				assertEquals("Invalid TO address: " + email, e.getMessage());
 			});
 		// validate
-		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 0));
+		assertThat(ourGreenMail.waitForIncomingEmail(1000, 0)).isTrue();
 	}
 
 	private MailConfig withMailConfig() {

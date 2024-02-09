@@ -304,7 +304,7 @@ public class MdmMatchLinkSvcTest {
 			assertThat(read.getNameFirstRep().getGivenAsSingleString()).isEqualTo(patient.getNameFirstRep().getGivenAsSingleString());
 			assertThat(read.getBirthDateElement().toHumanDisplay()).isEqualTo(patient.getBirthDateElement().toHumanDisplay());
 			assertThat(read.getTelecomFirstRep().getValue()).isEqualTo(patient.getTelecomFirstRep().getValue());
-			assertThat(read.getPhoto().size()).isEqualTo(patient.getPhoto().size());
+			assertThat(read.getPhoto()).hasSize(patient.getPhoto().size());
 			assertThat(read.getPhotoFirstRep().getData()).isEqualTo(patient.getPhotoFirstRep().getData());
 			assertThat(read.getGender()).isEqualTo(patient.getGender());
 		}
@@ -595,12 +595,12 @@ public class MdmMatchLinkSvcTest {
 
 			// golden record now contains HAPI-generated EID and HAPI tag
 			assertThat(MdmResourceUtil.isMdmManaged(janeGoldenResourcePatient)).isTrue();
-			assertThat(myEidHelper.getHapiEid(janeGoldenResourcePatient).isEmpty()).isFalse();
+			assertThat(myEidHelper.getHapiEid(janeGoldenResourcePatient)).isNotEmpty();
 
 			// original checks - verifies that EIDs are assigned
 			assertThat(janePatient != janeGoldenResourcePatient).as("Resource must not be identical").isTrue();
-			assertThat(janePatient.getIdentifier().isEmpty()).isFalse();
-			assertThat(janeGoldenResourcePatient.getIdentifier().isEmpty()).isFalse();
+			assertThat(janePatient.getIdentifier()).isNotEmpty();
+			assertThat(janeGoldenResourcePatient.getIdentifier()).isNotEmpty();
 
 			CanonicalEID janeId = myEidHelper.getHapiEid(janePatient).get(0);
 			CanonicalEID janeGoldenResourceId = myEidHelper.getHapiEid(janeGoldenResourcePatient).get(0);
@@ -787,7 +787,7 @@ public class MdmMatchLinkSvcTest {
 
 			// Ensure both links are POSSIBLE_MATCH and both have a score value
 			List<? extends IMdmLink> janetPatientLinks = runInTransaction(() -> myMdmLinkDaoSvc.findMdmLinksBySourceResource(incomingJanePatient));
-			assertThat(janetPatientLinks.size()).isEqualTo(2);
+			assertThat(janetPatientLinks).hasSize(2);
 			janetPatientLinks.forEach(l -> {
 				assertEquals(MdmMatchResultEnum.POSSIBLE_MATCH, l.getMatchResult());
 				assertNotNull(l.getScore());
@@ -846,14 +846,14 @@ public class MdmMatchLinkSvcTest {
 
 			// verify
 			List<IBaseResource> grs = getAllGoldenPatients();
-			assertThat(grs.size()).isEqualTo(2);
-			assertThat(myMdmLinkDaoSvc.getPossibleDuplicates().size()).isEqualTo(0);
+			assertThat(grs).hasSize(2);
+			assertThat(myMdmLinkDaoSvc.getPossibleDuplicates()).isEmpty();
 
 			List<MdmLink> links = new ArrayList<>();
 			for (IBaseResource gr : grs) {
 				links.addAll(getAllMdmLinks((Patient)gr));
 			}
-			assertThat(links.size()).isEqualTo(2);
+			assertThat(links).hasSize(2);
 			Set<Long> ids = new HashSet<>();
 			for (MdmLink link : links) {
 				JpaPid pid = link.getSourcePersistenceId();

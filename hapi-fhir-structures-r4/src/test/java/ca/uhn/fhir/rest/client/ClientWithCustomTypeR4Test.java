@@ -32,7 +32,7 @@ import java.io.StringReader;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -87,13 +87,13 @@ public class ClientWithCustomTypeR4Test {
 
     HttpUriRequest request = capt.getAllValues().get(0);
 
-    assertEquals("http://example.com/fhir/Patient/123", request.getURI().toASCIIString());
-    assertEquals("GET", request.getMethod());
+		assertThat(request.getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/123");
+		assertThat(request.getMethod()).isEqualTo("GET");
 
-    assertEquals(1, value.getName().size());
-    assertEquals("FAMILY", value.getName().get(0).getFamily());
-    assertEquals("STRINGVAL", value.getStringExt().getValue());
-    assertEquals("2011-01-02", value.getDateExt().getValueAsString());
+		assertThat(value.getName()).hasSize(1);
+		assertThat(value.getName().get(0).getFamily()).isEqualTo("FAMILY");
+		assertThat(value.getStringExt().getValue()).isEqualTo("STRINGVAL");
+		assertThat(value.getDateExt().getValueAsString()).isEqualTo("2011-01-02");
 
   }
 
@@ -129,9 +129,9 @@ public class ClientWithCustomTypeR4Test {
     ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
     List<IBaseResource> response = client.getPatientByDobWithGenericResourceReturnType(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 
-    assertEquals("http://foo/Patient?birthdate=ge2011-01-02", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://foo/Patient?birthdate=ge2011-01-02");
     ExtendedPatient patientResp = (ExtendedPatient) response.get(0);
-    assertEquals("PRP1660", patientResp.getIdentifier().get(0).getValue());
+		assertThat(patientResp.getIdentifier().get(0).getValue()).isEqualTo("PRP1660");
 
   }
 
@@ -167,9 +167,9 @@ public class ClientWithCustomTypeR4Test {
     ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
     List<IAnyResource> response = client.getPatientByDobWithGenericResourceReturnType2(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 
-    assertEquals("http://foo/Patient?birthdate=ge2011-01-02", capt.getValue().getURI().toString());
+		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://foo/Patient?birthdate=ge2011-01-02");
     ExtendedPatient patientResp = (ExtendedPatient) response.get(0);
-    assertEquals("PRP1660", patientResp.getIdentifier().get(0).getValue());
+		assertThat(patientResp.getIdentifier().get(0).getValue()).isEqualTo("PRP1660");
 
   }
 

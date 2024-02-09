@@ -127,7 +127,7 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 			context.newRestfulGenericClient(secureBase).search().forResource("Patient").execute();
 			fail("");
 		} catch (Exception e) {
-			assertThat(e.getMessage().contains("HAPI-1357: Failed to retrieve the server metadata statement during client initialization")).isTrue();
+			assertThat(e.getMessage()).contains("HAPI-1357: Failed to retrieve the server metadata statement during client initialization");
 			assertThat(e.getCause().getCause().getClass()).isEqualTo(SSLHandshakeException.class);
 		}
 	}

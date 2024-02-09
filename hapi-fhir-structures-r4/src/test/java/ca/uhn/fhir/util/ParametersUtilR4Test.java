@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ParametersUtilR4Test {
 	private static final String TEST_PERSON_ID = "Person/32768";
@@ -29,7 +27,7 @@ public class ParametersUtilR4Test {
 		ParametersUtil.addParameterToParameters(ourFhirContext, parameters, "someDate", "date", "2019");
 
 		String encoded = ourFhirContext.newJsonParser().encodeResourceToString(parameters);
-		assertEquals("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"someString\",\"valueString\":\"someStringValue\"},{\"name\":\"someDate\",\"valueDate\":\"2019\"}]}", encoded);
+		assertThat(encoded).isEqualTo("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"someString\",\"valueString\":\"someStringValue\"},{\"name\":\"someDate\",\"valueDate\":\"2019\"}]}");
 	}
 
 	@Test
@@ -61,8 +59,8 @@ public class ParametersUtilR4Test {
 			.setValue(new IntegerType(123));
 
 		Optional<Integer> value = ParametersUtil.getNamedParameterValueAsInteger(FhirContext.forR4(), p, "foo");
-		assertTrue(value.isPresent());
-		assertEquals(123, value.get().intValue());
+		assertThat(value).isPresent();
+		assertThat(value.get().intValue()).isEqualTo(123);
 	}
 
 	@Test
@@ -92,6 +90,6 @@ public class ParametersUtilR4Test {
 		// verify
 		String expected = BigDecimal.valueOf(decimalValue).toPlainString();
 		List<String> results = ParametersUtil.getNamedParameterPartAsString(ourFhirContext, parameters, "link", "linkCreated");
-		assertEquals(expected, results.get(0));
+		assertThat(results.get(0)).isEqualTo(expected);
 	}
 }

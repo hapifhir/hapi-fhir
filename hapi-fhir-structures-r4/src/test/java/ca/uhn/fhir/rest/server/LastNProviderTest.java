@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class LastNProviderTest extends BaseR4ServerTest {
 
@@ -46,19 +46,19 @@ public class LastNProviderTest extends BaseR4ServerTest {
 			.byUrl(ourServer.getBaseUrl() + "/Observation/$lastn?subject=Patient/123&category=http://terminology.hl7.org/CodeSystem/observation-category|laboratory,http://terminology.hl7.org/CodeSystem/observation-category|vital-signs&code=http://loinc.org|1111-1,http://loinc.org|2222-2&max=15")
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals("abc123", response.getIdElement().getIdPart());
-		assertEquals("Patient/123", myLastSubject.getReferenceElement().getValue());
-		assertEquals(2, myLastCategories.size());
-		assertEquals("http://terminology.hl7.org/CodeSystem/observation-category", myLastCategories.get(0).getSystem());
-		assertEquals("laboratory", myLastCategories.get(0).getCode());
-		assertEquals("http://terminology.hl7.org/CodeSystem/observation-category", myLastCategories.get(1).getSystem());
-		assertEquals("vital-signs", myLastCategories.get(1).getCode());
-		assertEquals(2, myLastCodes.size());
-		assertEquals("http://loinc.org", myLastCodes.get(0).getSystem());
-		assertEquals("1111-1", myLastCodes.get(0).getCode());
-		assertEquals("http://loinc.org", myLastCodes.get(1).getSystem());
-		assertEquals("2222-2", myLastCodes.get(1).getCode());
-		assertEquals(15, myLastMax.getValue().intValue());
+		assertThat(response.getIdElement().getIdPart()).isEqualTo("abc123");
+		assertThat(myLastSubject.getReferenceElement().getValue()).isEqualTo("Patient/123");
+		assertThat(myLastCategories).hasSize(2);
+		assertThat(myLastCategories.get(0).getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/observation-category");
+		assertThat(myLastCategories.get(0).getCode()).isEqualTo("laboratory");
+		assertThat(myLastCategories.get(1).getSystem()).isEqualTo("http://terminology.hl7.org/CodeSystem/observation-category");
+		assertThat(myLastCategories.get(1).getCode()).isEqualTo("vital-signs");
+		assertThat(myLastCodes).hasSize(2);
+		assertThat(myLastCodes.get(0).getSystem()).isEqualTo("http://loinc.org");
+		assertThat(myLastCodes.get(0).getCode()).isEqualTo("1111-1");
+		assertThat(myLastCodes.get(1).getSystem()).isEqualTo("http://loinc.org");
+		assertThat(myLastCodes.get(1).getCode()).isEqualTo("2222-2");
+		assertThat(myLastMax.getValue().intValue()).isEqualTo(15);
 	}
 
 

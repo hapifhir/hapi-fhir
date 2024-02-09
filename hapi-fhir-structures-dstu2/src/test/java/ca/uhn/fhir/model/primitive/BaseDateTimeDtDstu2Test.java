@@ -25,14 +25,10 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.endsWith;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -57,16 +53,16 @@ public class BaseDateTimeDtDstu2Test {
 		ourLog.info("Expected: " + "1960-09-07T00:44:25.012");
 		ourLog.info("Actual:   " + encoded);
 
-		assertEquals("1960-09-07T00:44:25.012Z", encoded);
+		assertThat(encoded).isEqualTo("1960-09-07T00:44:25.012Z");
 
 		type = new InstantDt(encoded);
-		assertEquals(1960, type.getYear().intValue());
-		assertEquals(8, type.getMonth().intValue()); // 0-indexed unlike LocalDateTime.of
-		assertEquals(7, type.getDay().intValue());
-		assertEquals(0, type.getHour().intValue());
-		assertEquals(44, type.getMinute().intValue());
-		assertEquals(25, type.getSecond().intValue());
-		assertEquals(12, type.getMillis().intValue());
+		assertThat(type.getYear().intValue()).isEqualTo(1960);
+		assertThat(type.getMonth().intValue()).isEqualTo(8); // 0-indexed unlike LocalDateTime.of
+		assertThat(type.getDay().intValue()).isEqualTo(7);
+		assertThat(type.getHour().intValue()).isEqualTo(0);
+		assertThat(type.getMinute().intValue()).isEqualTo(44);
+		assertThat(type.getSecond().intValue()).isEqualTo(25);
+		assertThat(type.getMillis().intValue()).isEqualTo(12);
 
 	}
 
@@ -98,15 +94,15 @@ public class BaseDateTimeDtDstu2Test {
 		InstantDt dt;
 		dt = new InstantDt(new Date(millis));
 		dt.setTimeZoneZulu(true);
-		assertEquals(expected, dt.getValueAsString());
+		assertThat(dt.getValueAsString()).isEqualTo(expected);
 
-		assertEquals(millis % 1000, dt.getMillis().longValue());
-		assertEquals((millis % 1000) * BaseDateTimeDt.NANOS_PER_MILLIS, dt.getNanos().longValue());
+		assertThat(dt.getMillis().longValue()).isEqualTo(millis % 1000);
+		assertThat(dt.getNanos().longValue()).isEqualTo((millis % 1000) * BaseDateTimeDt.NANOS_PER_MILLIS);
 
 		dt = new InstantDt();
 		dt.setTimeZone(TimeZone.getTimeZone("GMT+0:00"));
 		dt.setValue(new Date(millis));
-		assertEquals(expected.replace("Z", "+00:00"), dt.getValueAsString());
+		assertThat(dt.getValueAsString()).isEqualTo(expected.replace("Z", "+00:00"));
 	}
 
 
@@ -114,82 +110,82 @@ public class BaseDateTimeDtDstu2Test {
 	public void testSetPartialsYearFromExisting() {
 		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
 		dt.setYear(2016);
-		assertEquals(2016, dt.getYear().intValue());
+		assertThat(dt.getYear().intValue()).isEqualTo(2016);
 		String valueAsString = dt.getValueAsString();
 		ourLog.info(valueAsString);
-		assertEquals("2016-03-11T15:44:13.27564757855254768473697463986328969635-08:00", valueAsString);
+		assertThat(valueAsString).isEqualTo("2016-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
 	}
 
 	@Test
 	public void testSetPartialsMonthFromExisting() {
 		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
 		dt.setMonth(3);
-		assertEquals(3, dt.getMonth().intValue());
+		assertThat(dt.getMonth().intValue()).isEqualTo(3);
 		String valueAsString = dt.getValueAsString();
 		ourLog.info(valueAsString);
-		assertEquals("2011-04-11T15:44:13.27564757855254768473697463986328969635-08:00", valueAsString);
+		assertThat(valueAsString).isEqualTo("2011-04-11T15:44:13.27564757855254768473697463986328969635-08:00");
 	}
 
 	@Test
 	public void testSetPartialsDayFromExisting() {
 		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
 		dt.setDay(15);
-		assertEquals(15, dt.getDay().intValue());
+		assertThat(dt.getDay().intValue()).isEqualTo(15);
 		String valueAsString = dt.getValueAsString();
 		ourLog.info(valueAsString);
-		assertEquals("2011-03-15T15:44:13.27564757855254768473697463986328969635-08:00", valueAsString);
+		assertThat(valueAsString).isEqualTo("2011-03-15T15:44:13.27564757855254768473697463986328969635-08:00");
 	}
 
 	@Test
 	public void testSetPartialsHourFromExisting() {
 		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
 		dt.setHour(23);
-		assertEquals(23, dt.getHour().intValue());
+		assertThat(dt.getHour().intValue()).isEqualTo(23);
 		String valueAsString = dt.getValueAsString();
 		ourLog.info(valueAsString);
-		assertEquals("2011-03-11T23:44:13.27564757855254768473697463986328969635-08:00", valueAsString);
+		assertThat(valueAsString).isEqualTo("2011-03-11T23:44:13.27564757855254768473697463986328969635-08:00");
 	}
 
 	@Test
 	public void testSetPartialsMinuteFromExisting() {
 		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
 		dt.setMinute(54);
-		assertEquals(54, dt.getMinute().intValue());
+		assertThat(dt.getMinute().intValue()).isEqualTo(54);
 		String valueAsString = dt.getValueAsString();
 		ourLog.info(valueAsString);
-		assertEquals("2011-03-11T15:54:13.27564757855254768473697463986328969635-08:00", valueAsString);
+		assertThat(valueAsString).isEqualTo("2011-03-11T15:54:13.27564757855254768473697463986328969635-08:00");
 	}
 
 	@Test
 	public void testSetPartialsSecondFromExisting() {
 		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
 		dt.setSecond(1);
-		assertEquals(1, dt.getSecond().intValue());
+		assertThat(dt.getSecond().intValue()).isEqualTo(1);
 		String valueAsString = dt.getValueAsString();
 		ourLog.info(valueAsString);
-		assertEquals("2011-03-11T15:44:01.27564757855254768473697463986328969635-08:00", valueAsString);
+		assertThat(valueAsString).isEqualTo("2011-03-11T15:44:01.27564757855254768473697463986328969635-08:00");
 	}
 
 	@Test
 	public void testSetPartialsMillisFromExisting() {
 		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
 		dt.setMillis(12);
-		assertEquals(12, dt.getMillis().intValue());
-		assertEquals(12 * BaseDateTimeDt.NANOS_PER_MILLIS, dt.getNanos().longValue());
+		assertThat(dt.getMillis().intValue()).isEqualTo(12);
+		assertThat(dt.getNanos().longValue()).isEqualTo(12 * BaseDateTimeDt.NANOS_PER_MILLIS);
 		String valueAsString = dt.getValueAsString();
 		ourLog.info(valueAsString);
-		assertEquals("2011-03-11T15:44:13.012-08:00", valueAsString);
+		assertThat(valueAsString).isEqualTo("2011-03-11T15:44:13.012-08:00");
 	}
 
 	@Test
 	public void testSetPartialsNanosFromExisting() {
 		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
 		dt.setNanos(100000000L);
-		assertEquals(100000000L, dt.getNanos().longValue());
-		assertEquals(100, dt.getMillis().intValue());
+		assertThat(dt.getNanos().longValue()).isEqualTo(100000000L);
+		assertThat(dt.getMillis().intValue()).isEqualTo(100);
 		String valueAsString = dt.getValueAsString();
 		ourLog.info(valueAsString);
-		assertEquals("2011-03-11T15:44:13.100-08:00", valueAsString);
+		assertThat(valueAsString).isEqualTo("2011-03-11T15:44:13.100-08:00");
 	}
 
 	@Test
@@ -200,31 +196,31 @@ public class BaseDateTimeDtDstu2Test {
 		try {
 			dt.setNanos(BaseDateTimeDt.NANOS_PER_SECOND);
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1884) + "Value 1000000000 is not between allowable range: 0 - 999999999", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1884) + "Value 1000000000 is not between allowable range: 0 - 999999999");
 		}
 	}
 
 	@Test
 	public void testGetPartials() {
 		InstantDt dt = new InstantDt("2011-03-11T15:44:13.27564757855254768473697463986328969635-08:00");
-		assertEquals(2011, dt.getYear().intValue());
-		assertEquals(2, dt.getMonth().intValue());
-		assertEquals(11, dt.getDay().intValue());
-		assertEquals(15, dt.getHour().intValue());
-		assertEquals(44, dt.getMinute().intValue());
-		assertEquals(13, dt.getSecond().intValue());
-		assertEquals(275, dt.getMillis().intValue());
-		assertEquals(275647578L, dt.getNanos().longValue());
+		assertThat(dt.getYear().intValue()).isEqualTo(2011);
+		assertThat(dt.getMonth().intValue()).isEqualTo(2);
+		assertThat(dt.getDay().intValue()).isEqualTo(11);
+		assertThat(dt.getHour().intValue()).isEqualTo(15);
+		assertThat(dt.getMinute().intValue()).isEqualTo(44);
+		assertThat(dt.getSecond().intValue()).isEqualTo(13);
+		assertThat(dt.getMillis().intValue()).isEqualTo(275);
+		assertThat(dt.getNanos().longValue()).isEqualTo(275647578L);
 
 		dt = new InstantDt();
-		assertEquals(null, dt.getYear());
-		assertEquals(null, dt.getMonth());
-		assertEquals(null, dt.getDay());
-		assertEquals(null, dt.getHour());
-		assertEquals(null, dt.getMinute());
-		assertEquals(null, dt.getSecond());
-		assertEquals(null, dt.getMillis());
-		assertEquals(null, dt.getNanos());
+		assertThat(dt.getYear()).isEqualTo(null);
+		assertThat(dt.getMonth()).isEqualTo(null);
+		assertThat(dt.getDay()).isEqualTo(null);
+		assertThat(dt.getHour()).isEqualTo(null);
+		assertThat(dt.getMinute()).isEqualTo(null);
+		assertThat(dt.getSecond()).isEqualTo(null);
+		assertThat(dt.getMillis()).isEqualTo(null);
+		assertThat(dt.getNanos()).isEqualTo(null);
 	}
 
 	@BeforeEach
@@ -238,7 +234,7 @@ public class BaseDateTimeDtDstu2Test {
 		DateTimeDt dt = new DateTimeDt(new Date(816411488000L));
 		// assertEquals("1995-11-14T23:58:08", dt.getValueAsString());
 		dt.setTimeZoneZulu(true);
-		assertEquals("1995-11-15T04:58:08Z", dt.getValueAsString());
+		assertThat(dt.getValueAsString()).isEqualTo("1995-11-15T04:58:08Z");
 	}
 
 	/**
@@ -299,15 +295,15 @@ public class BaseDateTimeDtDstu2Test {
 		Condition c = new Condition();
 		c.setDateRecorded(new DateDt());
 		c.getDateRecordedElement().setValueAsString("2001-01-02T11:13:33");
-		assertEquals(TemporalPrecisionEnum.SECOND, c.getDateRecordedElement().getPrecision());
+		assertThat(c.getDateRecordedElement().getPrecision()).isEqualTo(TemporalPrecisionEnum.SECOND);
 
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(c);
 		assertThat(encoded).contains("value=\"2001-01-02T11:13:33\"");
 
 		c = ourCtx.newXmlParser().parseResource(Condition.class, encoded);
 
-		assertEquals("2001-01-02T11:13:33", c.getDateRecordedElement().getValueAsString());
-		assertEquals(TemporalPrecisionEnum.SECOND, c.getDateRecordedElement().getPrecision());
+		assertThat(c.getDateRecordedElement().getValueAsString()).isEqualTo("2001-01-02T11:13:33");
+		assertThat(c.getDateRecordedElement().getPrecision()).isEqualTo(TemporalPrecisionEnum.SECOND);
 
 		ValidationResult outcome = ourCtx.newValidator().validateWithResult(c);
 		String outcomeStr = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toOperationOutcome());
@@ -379,20 +375,20 @@ public class BaseDateTimeDtDstu2Test {
 		dt.setTimeZone(TimeZone.getTimeZone("GMT-0:00"));
 
 		String val = dt.getValueAsString();
-		assertEquals("2011-01-01T16:00:00+00:00", val);
+		assertThat(val).isEqualTo("2011-01-01T16:00:00+00:00");
 	}
 
 	@Test
 	public void testGetValueAsCalendar() {
-		assertNull(new InstantDt().getValueAsCalendar());
+		assertThat(new InstantDt().getValueAsCalendar()).isNull();
 
 		InstantDt dt = new InstantDt("2011-01-03T07:11:22.002-08:00");
 		GregorianCalendar cal = dt.getValueAsCalendar();
 
-		assertEquals(2011, cal.get(Calendar.YEAR));
-		assertEquals(7, cal.get(Calendar.HOUR_OF_DAY));
-		assertEquals(2, cal.get(Calendar.MILLISECOND));
-		assertEquals("GMT-08:00", cal.getTimeZone().getID());
+		assertThat(cal.get(Calendar.YEAR)).isEqualTo(2011);
+		assertThat(cal.get(Calendar.HOUR_OF_DAY)).isEqualTo(7);
+		assertThat(cal.get(Calendar.MILLISECOND)).isEqualTo(2);
+		assertThat(cal.getTimeZone().getID()).isEqualTo("GMT-08:00");
 	}
 
 	@Test
@@ -410,7 +406,7 @@ public class BaseDateTimeDtDstu2Test {
 		DateTimeDt dt = new DateTimeDt("2014-03-06T22:09:58.9121174+04:30");
 
 		myDateInstantParser.setTimeZone(TimeZone.getTimeZone("GMT"));
-		assertEquals("2014-03-06 17:39:58.912", myDateInstantParser.format(dt.getValue()));
+		assertThat(myDateInstantParser.format(dt.getValue())).isEqualTo("2014-03-06 17:39:58.912");
 	}
 
 	@Test
@@ -422,10 +418,10 @@ public class BaseDateTimeDtDstu2Test {
 		DateTimeDt date = new DateTimeDt();
 		date.setValue(cal.getTime(), TemporalPrecisionEnum.MINUTE);
 		date.setTimeZone(TimeZone.getTimeZone("EST"));
-		assertEquals("1990-01-02T21:22-05:00", date.getValueAsString());
+		assertThat(date.getValueAsString()).isEqualTo("1990-01-02T21:22-05:00");
 
 		date.setTimeZoneZulu(true);
-		assertEquals("1990-01-03T02:22Z", date.getValueAsString());
+		assertThat(date.getValueAsString()).isEqualTo("1990-01-03T02:22Z");
 	}
 
 	@Test
@@ -433,7 +429,7 @@ public class BaseDateTimeDtDstu2Test {
 		InstantDt now = InstantDt.withCurrentTime();
 		Thread.sleep(100);
 		InstantDt then = InstantDt.withCurrentTime();
-		assertTrue(now.getValue().before(then.getValue()));
+		assertThat(now.getValue().before(then.getValue())).isTrue();
 	}
 
 	@Test
@@ -446,11 +442,11 @@ public class BaseDateTimeDtDstu2Test {
 		DateTimeDt dt = new DateTimeDt();
 		dt.setValueAsString("2013-02-03");
 
-		assertEquals("2013-02-03", myDateInstantParser.format(dt.getValue()).substring(0, 10));
-		assertEquals("2013-02-03", dt.getValueAsString());
-		assertEquals(false, dt.isTimeZoneZulu());
-		assertNull(dt.getTimeZone());
-		assertEquals(TemporalPrecisionEnum.DAY, dt.getPrecision());
+		assertThat(myDateInstantParser.format(dt.getValue()).substring(0, 10)).isEqualTo("2013-02-03");
+		assertThat(dt.getValueAsString()).isEqualTo("2013-02-03");
+		assertThat(dt.isTimeZoneZulu()).isEqualTo(false);
+		assertThat(dt.getTimeZone()).isNull();
+		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.DAY);
 	}
 
 	/**
@@ -478,7 +474,7 @@ public class BaseDateTimeDtDstu2Test {
 		dt2.setTimeZoneZulu(true);
 		String string = dt2.getValueAsString();
 
-		assertEquals("2015-06-22T19:44:32.831Z", string);
+		assertThat(string).isEqualTo("2015-06-22T19:44:32.831Z");
 	}
 
 	@Test
@@ -502,7 +498,7 @@ public class BaseDateTimeDtDstu2Test {
 	@Test
 	public void testParseIgnoresLeadingAndTrailingSpace() {
 		DateTimeDt dt = new DateTimeDt("  2014-10-11T12:11:00Z      ");
-		assertEquals("2014-10-11 10:11:00.000-0200", myDateInstantZoneParser.format(dt.getValue()));
+		assertThat(myDateInstantZoneParser.format(dt.getValue())).isEqualTo("2014-10-11 10:11:00.000-0200");
 	}
 
 	@Test
@@ -510,13 +506,13 @@ public class BaseDateTimeDtDstu2Test {
 		try {
 			new DateTimeDt("2010-01-01T00:00:00.1234-09:00Z");
 			fail("");		} catch (DataFormatException e) {
-			assertEquals(Msg.code(1882) + "Invalid date/time format: \"2010-01-01T00:00:00.1234-09:00Z\"", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1882) + "Invalid date/time format: \"2010-01-01T00:00:00.1234-09:00Z\"");
 		}
 	}
 
 	@Test
 	public void testParseMalformatted() throws DataFormatException {
-		assertThrows(DataFormatException.class, () -> {
+		assertThatExceptionOfType(DataFormatException.class).isThrownBy(() -> {
 			new DateTimeDt("20120102");
 		});
 	}
@@ -526,11 +522,11 @@ public class BaseDateTimeDtDstu2Test {
 		InstantDt dt = new InstantDt();
 		dt.setValueAsString("2013-02-03T11:22:33.234");
 
-		assertEquals("2013-02-03 11:22:33.234", myDateInstantParser.format(dt.getValue()).substring(0, 23));
-		assertEquals("2013-02-03T11:22:33.234", dt.getValueAsString());
-		assertEquals(false, dt.isTimeZoneZulu());
-		assertNull(dt.getTimeZone());
-		assertEquals(TemporalPrecisionEnum.MILLI, dt.getPrecision());
+		assertThat(myDateInstantParser.format(dt.getValue()).substring(0, 23)).isEqualTo("2013-02-03 11:22:33.234");
+		assertThat(dt.getValueAsString()).isEqualTo("2013-02-03T11:22:33.234");
+		assertThat(dt.isTimeZoneZulu()).isEqualTo(false);
+		assertThat(dt.getTimeZone()).isNull();
+		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.MILLI);
 	}
 
 	@Test
@@ -538,11 +534,11 @@ public class BaseDateTimeDtDstu2Test {
 		InstantDt dt = new InstantDt();
 		dt.setValueAsString("2013-02-03T11:22:33.234-02:00");
 
-		assertEquals("2013-02-03 11:22:33.234-0200", myDateInstantZoneParser.format(dt.getValue()));
-		assertEquals("2013-02-03T11:22:33.234-02:00", dt.getValueAsString());
-		assertEquals(false, dt.isTimeZoneZulu());
-		assertEquals(TimeZone.getTimeZone("GMT-02:00"), dt.getTimeZone());
-		assertEquals(TemporalPrecisionEnum.MILLI, dt.getPrecision());
+		assertThat(myDateInstantZoneParser.format(dt.getValue())).isEqualTo("2013-02-03 11:22:33.234-0200");
+		assertThat(dt.getValueAsString()).isEqualTo("2013-02-03T11:22:33.234-02:00");
+		assertThat(dt.isTimeZoneZulu()).isEqualTo(false);
+		assertThat(dt.getTimeZone()).isEqualTo(TimeZone.getTimeZone("GMT-02:00"));
+		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.MILLI);
 	}
 
 	@Test
@@ -550,11 +546,11 @@ public class BaseDateTimeDtDstu2Test {
 		InstantDt dt = new InstantDt();
 		dt.setValueAsString("2013-02-03T11:22:33.234Z");
 
-		assertEquals("2013-02-03 09:22:33.234-0200", myDateInstantZoneParser.format(dt.getValue()));
-		assertEquals("2013-02-03T11:22:33.234Z", dt.getValueAsString());
-		assertEquals(true, dt.isTimeZoneZulu());
-		assertEquals("GMT", dt.getTimeZone().getID());
-		assertEquals(TemporalPrecisionEnum.MILLI, dt.getPrecision());
+		assertThat(myDateInstantZoneParser.format(dt.getValue())).isEqualTo("2013-02-03 09:22:33.234-0200");
+		assertThat(dt.getValueAsString()).isEqualTo("2013-02-03T11:22:33.234Z");
+		assertThat(dt.isTimeZoneZulu()).isEqualTo(true);
+		assertThat(dt.getTimeZone().getID()).isEqualTo("GMT");
+		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.MILLI);
 	}
 
 	@Test
@@ -563,17 +559,17 @@ public class BaseDateTimeDtDstu2Test {
 		dt.setValueAsString("2013-02");
 
 		ourLog.info("Date: {}", dt.getValue());
-		assertEquals("2013-02", dt.getValueAsString());
-		assertEquals(false, dt.isTimeZoneZulu());
-		assertNull(dt.getTimeZone());
-		assertEquals(TemporalPrecisionEnum.MONTH, dt.getPrecision());
+		assertThat(dt.getValueAsString()).isEqualTo("2013-02");
+		assertThat(dt.isTimeZoneZulu()).isEqualTo(false);
+		assertThat(dt.getTimeZone()).isNull();
+		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.MONTH);
 
-		assertEquals("2013-02", myDateInstantParser.format(dt.getValue()).substring(0, 7));
+		assertThat(myDateInstantParser.format(dt.getValue()).substring(0, 7)).isEqualTo("2013-02");
 	}
 
 	@Test
 	public void testParseMonthNoDashes() throws DataFormatException {
-		assertThrows(DataFormatException.class, () -> {
+		assertThatExceptionOfType(DataFormatException.class).isThrownBy(() -> {
 			DateTimeDt dt = new DateTimeDt();
 			dt.setValueAsString("201302");
 		});
@@ -585,7 +581,7 @@ public class BaseDateTimeDtDstu2Test {
 		try {
 			dt.setValueAsString("2013-02-03T11:22");
 			fail("");		} catch (DataFormatException e) {
-			assertEquals(e.getMessage(), Msg.code(1885) + "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22");
+			assertThat(Msg.code(1885) + "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22").isEqualTo(e.getMessage());
 		}
 	}
 
@@ -595,7 +591,7 @@ public class BaseDateTimeDtDstu2Test {
 		try {
 			dt.setValueAsString("2013-02-03T11:22Z");
 			fail("");		} catch (DataFormatException e) {
-			assertEquals(e.getMessage(), Msg.code(1885) + "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22Z");
+			assertThat(Msg.code(1885) + "Invalid date/time string (datatype DateTimeDt does not support MINUTE precision): 2013-02-03T11:22Z").isEqualTo(e.getMessage());
 		}
 	}
 
@@ -604,11 +600,11 @@ public class BaseDateTimeDtDstu2Test {
 		DateTimeDt dt = new DateTimeDt();
 		dt.setValueAsString("2013-02-03T11:22:33");
 
-		assertEquals("2013-02-03 11:22:33", myDateInstantParser.format(dt.getValue()).substring(0, 19));
-		assertEquals("2013-02-03T11:22:33", dt.getValueAsString());
-		assertEquals(false, dt.isTimeZoneZulu());
-		assertNull(dt.getTimeZone());
-		assertEquals(TemporalPrecisionEnum.SECOND, dt.getPrecision());
+		assertThat(myDateInstantParser.format(dt.getValue()).substring(0, 19)).isEqualTo("2013-02-03 11:22:33");
+		assertThat(dt.getValueAsString()).isEqualTo("2013-02-03T11:22:33");
+		assertThat(dt.isTimeZoneZulu()).isEqualTo(false);
+		assertThat(dt.getTimeZone()).isNull();
+		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.SECOND);
 	}
 
 	@Test
@@ -616,10 +612,10 @@ public class BaseDateTimeDtDstu2Test {
 		DateTimeDt dt = new DateTimeDt();
 		dt.setValueAsString("2013-02-03T11:22:33Z");
 
-		assertEquals("2013-02-03T11:22:33Z", dt.getValueAsString());
-		assertEquals(true, dt.isTimeZoneZulu());
-		assertEquals("GMT", dt.getTimeZone().getID());
-		assertEquals(TemporalPrecisionEnum.SECOND, dt.getPrecision());
+		assertThat(dt.getValueAsString()).isEqualTo("2013-02-03T11:22:33Z");
+		assertThat(dt.isTimeZoneZulu()).isEqualTo(true);
+		assertThat(dt.getTimeZone().getID()).isEqualTo("GMT");
+		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.SECOND);
 	}
 
 	@Test
@@ -627,10 +623,10 @@ public class BaseDateTimeDtDstu2Test {
 		DateTimeDt dt = new DateTimeDt();
 		dt.setValueAsString("2013-02-03T11:22:33-02:00");
 
-		assertEquals("2013-02-03T11:22:33-02:00", dt.getValueAsString());
-		assertEquals(false, dt.isTimeZoneZulu());
-		assertEquals(TimeZone.getTimeZone("GMT-02:00"), dt.getTimeZone());
-		assertEquals(TemporalPrecisionEnum.SECOND, dt.getPrecision());
+		assertThat(dt.getValueAsString()).isEqualTo("2013-02-03T11:22:33-02:00");
+		assertThat(dt.isTimeZoneZulu()).isEqualTo(false);
+		assertThat(dt.getTimeZone()).isEqualTo(TimeZone.getTimeZone("GMT-02:00"));
+		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.SECOND);
 	}
 
 	@Test
@@ -639,13 +635,13 @@ public class BaseDateTimeDtDstu2Test {
 
 		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00-09:00");
 
-		assertEquals("2010-01-01T00:00:00-09:00", dt.getValueAsString());
-		assertEquals("2010-01-01 04:00:00.000", myDateInstantParser.format(dt.getValue()));
-		assertEquals("GMT-09:00", dt.getTimeZone().getID());
-		assertEquals(-32400000L, dt.getTimeZone().getRawOffset());
+		assertThat(dt.getValueAsString()).isEqualTo("2010-01-01T00:00:00-09:00");
+		assertThat(myDateInstantParser.format(dt.getValue())).isEqualTo("2010-01-01 04:00:00.000");
+		assertThat(dt.getTimeZone().getID()).isEqualTo("GMT-09:00");
+		assertThat(dt.getTimeZone().getRawOffset()).isEqualTo(-32400000L);
 
 		dt.setTimeZoneZulu(true);
-		assertEquals("2010-01-01T09:00:00Z", dt.getValueAsString());
+		assertThat(dt.getValueAsString()).isEqualTo("2010-01-01T09:00:00Z");
 	}
 
 	@Test
@@ -654,13 +650,13 @@ public class BaseDateTimeDtDstu2Test {
 
 		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00.1-09:00");
 
-		assertEquals("2010-01-01T00:00:00.1-09:00", dt.getValueAsString());
-		assertEquals("2010-01-01 04:00:00.100", myDateInstantParser.format(dt.getValue()));
-		assertEquals("GMT-09:00", dt.getTimeZone().getID());
-		assertEquals(-32400000L, dt.getTimeZone().getRawOffset());
+		assertThat(dt.getValueAsString()).isEqualTo("2010-01-01T00:00:00.1-09:00");
+		assertThat(myDateInstantParser.format(dt.getValue())).isEqualTo("2010-01-01 04:00:00.100");
+		assertThat(dt.getTimeZone().getID()).isEqualTo("GMT-09:00");
+		assertThat(dt.getTimeZone().getRawOffset()).isEqualTo(-32400000L);
 
 		dt.setTimeZoneZulu(true);
-		assertEquals("2010-01-01T09:00:00.100Z", dt.getValueAsString());
+		assertThat(dt.getValueAsString()).isEqualTo("2010-01-01T09:00:00.100Z");
 	}
 
 	@Test
@@ -669,13 +665,13 @@ public class BaseDateTimeDtDstu2Test {
 
 		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00.12-09:00");
 
-		assertEquals("2010-01-01T00:00:00.12-09:00", dt.getValueAsString());
-		assertEquals("2010-01-01 04:00:00.120", myDateInstantParser.format(dt.getValue()));
-		assertEquals("GMT-09:00", dt.getTimeZone().getID());
-		assertEquals(-32400000L, dt.getTimeZone().getRawOffset());
+		assertThat(dt.getValueAsString()).isEqualTo("2010-01-01T00:00:00.12-09:00");
+		assertThat(myDateInstantParser.format(dt.getValue())).isEqualTo("2010-01-01 04:00:00.120");
+		assertThat(dt.getTimeZone().getID()).isEqualTo("GMT-09:00");
+		assertThat(dt.getTimeZone().getRawOffset()).isEqualTo(-32400000L);
 
 		dt.setTimeZoneZulu(true);
-		assertEquals("2010-01-01T09:00:00.120Z", dt.getValueAsString());
+		assertThat(dt.getValueAsString()).isEqualTo("2010-01-01T09:00:00.120Z");
 	}
 
 	@Test
@@ -684,13 +680,13 @@ public class BaseDateTimeDtDstu2Test {
 
 		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00.123-09:00");
 
-		assertEquals("2010-01-01T00:00:00.123-09:00", dt.getValueAsString());
-		assertEquals("2010-01-01 04:00:00.123", myDateInstantParser.format(dt.getValue()));
-		assertEquals("GMT-09:00", dt.getTimeZone().getID());
-		assertEquals(-32400000L, dt.getTimeZone().getRawOffset());
+		assertThat(dt.getValueAsString()).isEqualTo("2010-01-01T00:00:00.123-09:00");
+		assertThat(myDateInstantParser.format(dt.getValue())).isEqualTo("2010-01-01 04:00:00.123");
+		assertThat(dt.getTimeZone().getID()).isEqualTo("GMT-09:00");
+		assertThat(dt.getTimeZone().getRawOffset()).isEqualTo(-32400000L);
 
 		dt.setTimeZoneZulu(true);
-		assertEquals("2010-01-01T09:00:00.123Z", dt.getValueAsString());
+		assertThat(dt.getValueAsString()).isEqualTo("2010-01-01T09:00:00.123Z");
 	}
 
 	@Test
@@ -699,13 +695,13 @@ public class BaseDateTimeDtDstu2Test {
 
 		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00.1234-09:00");
 
-		assertEquals("2010-01-01T00:00:00.1234-09:00", dt.getValueAsString());
-		assertEquals("2010-01-01 04:00:00.123", myDateInstantParser.format(dt.getValue()));
-		assertEquals("GMT-09:00", dt.getTimeZone().getID());
-		assertEquals(-32400000L, dt.getTimeZone().getRawOffset());
+		assertThat(dt.getValueAsString()).isEqualTo("2010-01-01T00:00:00.1234-09:00");
+		assertThat(myDateInstantParser.format(dt.getValue())).isEqualTo("2010-01-01 04:00:00.123");
+		assertThat(dt.getTimeZone().getID()).isEqualTo("GMT-09:00");
+		assertThat(dt.getTimeZone().getRawOffset()).isEqualTo(-32400000L);
 
 		dt.setTimeZoneZulu(true);
-		assertEquals("2010-01-01T09:00:00.1234Z", dt.getValueAsString());
+		assertThat(dt.getValueAsString()).isEqualTo("2010-01-01T09:00:00.1234Z");
 	}
 
 	@Test
@@ -714,13 +710,13 @@ public class BaseDateTimeDtDstu2Test {
 
 		DateTimeDt dt = new DateTimeDt("2010-01-01T00:00:00.12345-09:00");
 
-		assertEquals("2010-01-01T00:00:00.12345-09:00", dt.getValueAsString());
-		assertEquals("2010-01-01 04:00:00.123", myDateInstantParser.format(dt.getValue()));
-		assertEquals("GMT-09:00", dt.getTimeZone().getID());
-		assertEquals(-32400000L, dt.getTimeZone().getRawOffset());
+		assertThat(dt.getValueAsString()).isEqualTo("2010-01-01T00:00:00.12345-09:00");
+		assertThat(myDateInstantParser.format(dt.getValue())).isEqualTo("2010-01-01 04:00:00.123");
+		assertThat(dt.getTimeZone().getID()).isEqualTo("GMT-09:00");
+		assertThat(dt.getTimeZone().getRawOffset()).isEqualTo(-32400000L);
 
 		dt.setTimeZoneZulu(true);
-		assertEquals("2010-01-01T09:00:00.12345Z", dt.getValueAsString());
+		assertThat(dt.getValueAsString()).isEqualTo("2010-01-01T09:00:00.12345Z");
 	}
 
 	@Test
@@ -728,11 +724,11 @@ public class BaseDateTimeDtDstu2Test {
 		DateTimeDt dt = new DateTimeDt();
 		dt.setValueAsString("2013");
 
-		assertEquals("2013", myDateInstantParser.format(dt.getValue()).substring(0, 4));
-		assertEquals("2013", dt.getValueAsString());
-		assertEquals(false, dt.isTimeZoneZulu());
-		assertNull(dt.getTimeZone());
-		assertEquals(TemporalPrecisionEnum.YEAR, dt.getPrecision());
+		assertThat(myDateInstantParser.format(dt.getValue()).substring(0, 4)).isEqualTo("2013");
+		assertThat(dt.getValueAsString()).isEqualTo("2013");
+		assertThat(dt.isTimeZoneZulu()).isEqualTo(false);
+		assertThat(dt.getTimeZone()).isNull();
+		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.YEAR);
 	}
 
 	/**
@@ -763,7 +759,7 @@ public class BaseDateTimeDtDstu2Test {
 
 		DateDt date = new DateDt();
 		date.setValue(time);
-		assertEquals("2012-01-02", date.getValueAsString());
+		assertThat(date.getValueAsString()).isEqualTo("2012-01-02");
 	}
 
 	/**
@@ -779,7 +775,7 @@ public class BaseDateTimeDtDstu2Test {
 
 		DateDt date = new DateDt();
 		date.setValue(time, TemporalPrecisionEnum.DAY);
-		assertEquals("2012-01-02", date.getValueAsString());
+		assertThat(date.getValueAsString()).isEqualTo("2012-01-02");
 	}
 
 	@Test
@@ -787,11 +783,11 @@ public class BaseDateTimeDtDstu2Test {
 		InstantDt i = new InstantDt();
 		i.setValueAsString("2014-06-20T20:22:09Z");
 
-		assertNotNull(i.getValue());
-		assertNotNull(i.getValueAsString());
+		assertThat(i.getValue()).isNotNull();
+		assertThat(i.getValueAsString()).isNotNull();
 
-		assertEquals(1403295729000L, i.getValue().getTime());
-		assertEquals("2014-06-20T20:22:09Z", i.getValueAsString());
+		assertThat(i.getValue().getTime()).isEqualTo(1403295729000L);
+		assertThat(i.getValueAsString()).isEqualTo("2014-06-20T20:22:09Z");
 	}
 
 	@Test
@@ -808,7 +804,7 @@ public class BaseDateTimeDtDstu2Test {
 		dt.setValueAsString(input);
 		Date date = dt.getValue();
 
-		assertEquals(expected, date.getTime() % 1000);
+		assertThat(date.getTime() % 1000).isEqualTo(expected);
 	}
 
 	private void verifyFails(String input) {

@@ -24,7 +24,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class HttpProxyTest {
 	private static FhirContext ourCtx;
@@ -86,7 +86,7 @@ public class HttpProxyTest {
 			IdType id = new IdType("Patient", "123");
 			client.read().resource(Patient.class).withId(id).execute();
 
-			assertEquals("Basic dXNlcm5hbWU6cGFzc3dvcmQ=", myAuthHeader);
+			assertThat(myAuthHeader).isEqualTo("Basic dXNlcm5hbWU6cGFzc3dvcmQ=");
 			
 		} finally {
 			JettyUtil.closeServer(server);

@@ -28,10 +28,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -87,12 +83,12 @@ public class HeaderPassthroughOptionTest {
 		final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
 		testedCommand.run(commandLine);
 
-		assertNotNull(myCapturingInterceptor.getLastRequest());
+		assertThat(myCapturingInterceptor.getLastRequest()).isNotNull();
 		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
-		assertFalse(allHeaders.isEmpty());
+		assertThat(allHeaders.isEmpty()).isFalse();
 
-		assertTrue(allHeaders.containsKey(headerKey1));
-		assertEquals(1, allHeaders.get(headerKey1).size());
+		assertThat(allHeaders).containsKey(headerKey1);
+		assertThat(allHeaders.get(headerKey1)).hasSize(1);
 
 		assertThat(allHeaders.get(headerKey1)).contains(headerValue1);
 	}
@@ -118,16 +114,16 @@ public class HeaderPassthroughOptionTest {
 		final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
 		testedCommand.run(commandLine);
 
-		assertNotNull(myCapturingInterceptor.getLastRequest());
+		assertThat(myCapturingInterceptor.getLastRequest()).isNotNull();
 		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
-		assertFalse(allHeaders.isEmpty());
-		assertEquals(2, allHeaders.get(headerKey1).size());
+		assertThat(allHeaders.isEmpty()).isFalse();
+		assertThat(allHeaders.get(headerKey1)).hasSize(2);
 
-		assertTrue(allHeaders.containsKey(headerKey1));
-		assertEquals(2, allHeaders.get(headerKey1).size());
+		assertThat(allHeaders).containsKey(headerKey1);
+		assertThat(allHeaders.get(headerKey1)).hasSize(2);
 
-		assertEquals(headerValue1, allHeaders.get(headerKey1).get(0));
-		assertEquals(headerValue2, allHeaders.get(headerKey1).get(1));
+		assertThat(allHeaders.get(headerKey1).get(0)).isEqualTo(headerValue1);
+		assertThat(allHeaders.get(headerKey1).get(1)).isEqualTo(headerValue2);
 	}
 
 	@Test
@@ -152,16 +148,16 @@ public class HeaderPassthroughOptionTest {
 		final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
 		testedCommand.run(commandLine);
 
-		assertNotNull(myCapturingInterceptor.getLastRequest());
+		assertThat(myCapturingInterceptor.getLastRequest()).isNotNull();
 		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
-		assertFalse(allHeaders.isEmpty());
+		assertThat(allHeaders.isEmpty()).isFalse();
 
-		assertTrue(allHeaders.containsKey(headerKey1));
-		assertEquals(1, allHeaders.get(headerKey1).size());
+		assertThat(allHeaders).containsKey(headerKey1);
+		assertThat(allHeaders.get(headerKey1)).hasSize(1);
 		assertThat(allHeaders.get(headerKey1)).contains(headerValue1);
 
-		assertTrue(allHeaders.containsKey(headerKey2));
-		assertEquals(1, allHeaders.get(headerKey2).size());
+		assertThat(allHeaders).containsKey(headerKey2);
+		assertThat(allHeaders.get(headerKey2)).hasSize(1);
 		assertThat(allHeaders.get(headerKey2)).contains(headerValue2);
 	}
 

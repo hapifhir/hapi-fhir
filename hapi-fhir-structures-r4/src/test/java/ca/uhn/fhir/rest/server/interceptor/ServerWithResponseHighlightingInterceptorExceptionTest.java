@@ -24,7 +24,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ServerWithResponseHighlightingInterceptorExceptionTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerWithResponseHighlightingInterceptorExceptionTest.class);
@@ -47,7 +46,7 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 		assertThat(responseContent).contains("<diagnostics value=\"AAABBB\"/>");
 	}
 
@@ -60,7 +59,7 @@ public class ServerWithResponseHighlightingInterceptorExceptionTest {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertEquals(500, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(500);
 		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(389) + "Failed to call access method: java.lang.Error: AAABBB\"/>");
 	}
 

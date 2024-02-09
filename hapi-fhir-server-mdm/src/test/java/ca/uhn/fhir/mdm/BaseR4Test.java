@@ -17,7 +17,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
+
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,14 +63,14 @@ public abstract class BaseR4Test {
 	}
 
 	protected void assertMatch(MdmMatchResultEnum theExpectedMatchEnum, MdmMatchOutcome theMatchResult) {
-		assertEquals(theExpectedMatchEnum, theMatchResult.getMatchResultEnum());
+		assertThat(theMatchResult.getMatchResultEnum()).isEqualTo(theExpectedMatchEnum);
 	}
 
 	protected void assertMatchResult(MdmMatchResultEnum theExpectedMatchEnum, long theExpectedVector, double theExpectedScore, boolean theExpectedNewGoldenResource, boolean theExpectedEidMatch, MdmMatchOutcome theMatchResult) {
-		assertEquals(theExpectedScore, theMatchResult.getScore(), 0.001);
-		assertEquals(theExpectedVector, theMatchResult.getVector());
-		assertEquals(theExpectedEidMatch, theMatchResult.isEidMatch());
-		assertEquals(theExpectedNewGoldenResource, theMatchResult.isCreatedNewResource());
-		assertEquals(theExpectedMatchEnum, theMatchResult.getMatchResultEnum());
+		assertThat(theMatchResult.getScore()).isCloseTo(theExpectedScore, within(0.001));
+		assertThat(theMatchResult.getVector()).isEqualTo(theExpectedVector);
+		assertThat(theMatchResult.isEidMatch()).isEqualTo(theExpectedEidMatch);
+		assertThat(theMatchResult.isCreatedNewResource()).isEqualTo(theExpectedNewGoldenResource);
+		assertThat(theMatchResult.getMatchResultEnum()).isEqualTo(theExpectedMatchEnum);
 	}
 }

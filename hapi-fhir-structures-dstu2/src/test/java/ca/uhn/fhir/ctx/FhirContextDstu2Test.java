@@ -25,8 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -41,7 +40,7 @@ public class FhirContextDstu2Test {
 			FhirContext ctx = FhirContext.forDstu2();
 			ctx.getResourceDefinition("InvalidResource");
 			fail("");		} catch (DataFormatException e) {
-			assertEquals(Msg.code(1684) + "Unknown resource name \"InvalidResource\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1684) + "Unknown resource name \"InvalidResource\" (this name is not known in FHIR version \"DSTU2\")");
 		}
 	}
 
@@ -49,7 +48,7 @@ public class FhirContextDstu2Test {
 	@Test
 	public void testAutoDetectVersion() {
 		FhirContext ctx = new FhirContext();
-		assertEquals(FhirVersionEnum.DSTU2, ctx.getVersion().getVersion());
+		assertThat(ctx.getVersion().getVersion()).isEqualTo(FhirVersionEnum.DSTU2);
 	}
 
 	@Test
@@ -59,7 +58,7 @@ public class FhirContextDstu2Test {
 		BaseRuntimeChildDatatypeDefinition genderChild = (BaseRuntimeChildDatatypeDefinition) patientType.getChildByName(childName);
 		ourLog.trace(genderChild.getClass().getName());
 
-		assertEquals(AdministrativeGenderEnum.class, genderChild.getBoundEnumType());
+		assertThat(genderChild.getBoundEnumType()).isEqualTo(AdministrativeGenderEnum.class);
 	}
 
 	@Test
@@ -69,7 +68,7 @@ public class FhirContextDstu2Test {
 		BaseRuntimeChildDatatypeDefinition genderChild = (BaseRuntimeChildDatatypeDefinition) patientType.getChildByName(childName);
 		ourLog.trace(genderChild.getClass().getName());
 
-		assertEquals(MaritalStatusCodesEnum.class, genderChild.getBoundEnumType());
+		assertThat(genderChild.getBoundEnumType()).isEqualTo(MaritalStatusCodesEnum.class);
 	}
 
 	@Test
@@ -163,13 +162,13 @@ public class FhirContextDstu2Test {
 				});
 			}
 			// wait until all threads are ready
-			assertTrue(allExecutorThreadsReady.await(runnables.size() * 1000L, TimeUnit.MILLISECONDS), "Timeout initializing threads! Perform long lasting initializations before passing runnables to assertConcurrent");
+			assertThat(allExecutorThreadsReady.await(runnables.size() * 1000L, TimeUnit.MILLISECONDS)).as("Timeout initializing threads! Perform long lasting initializations before passing runnables to assertConcurrent").isTrue();
 			// start all test runners
 			afterInitBlocker.countDown();
-			assertTrue(allDone.await(maxTimeoutSeconds, TimeUnit.SECONDS), message + " timeout! More than" + maxTimeoutSeconds + "seconds");
+			assertThat(allDone.await(maxTimeoutSeconds, TimeUnit.SECONDS)).as(message + " timeout! More than" + maxTimeoutSeconds + "seconds").isTrue();
 		} finally {
 			threadPool.shutdownNow();
 		}
-		assertTrue(exceptions.isEmpty(), message + "failed with exception(s)" + exceptions);
+		assertThat(exceptions.isEmpty()).as(message + "failed with exception(s)" + exceptions).isTrue();
 	}
 }

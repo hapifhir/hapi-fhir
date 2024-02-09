@@ -9,7 +9,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class SchemaValidationDstu3Test extends BaseValidationTestWithInlineMocks {
 
@@ -53,7 +52,7 @@ public class SchemaValidationDstu3Test extends BaseValidationTestWithInlineMocks
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(encoded);
 
-		assertFalse(result.isSuccessful());
+		assertThat(result.isSuccessful()).isFalse();
 		assertThat(encoded).contains("passwd");
 		assertThat(encoded).contains("accessExternalDTD");
 	}

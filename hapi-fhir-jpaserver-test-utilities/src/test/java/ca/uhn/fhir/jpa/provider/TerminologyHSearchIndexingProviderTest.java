@@ -48,11 +48,11 @@ public class TerminologyHSearchIndexingProviderTest {
 
 		assertThat(retVal).isNotNull();
 		Optional<String> successValueOpt = ParametersUtil.getNamedParameterValueAsString(myContext, retVal, RESP_PARAM_SUCCESS);
-		assertThat(successValueOpt.isPresent()).isTrue();
-		assertThat(successValueOpt.get()).isEqualTo("false");
+		assertThat(successValueOpt).isPresent();
+		assertThat(successValueOpt).contains("false");
 		Optional<String> msgOpt = ParametersUtil.getNamedParameterValueAsString(myContext, retVal, "message");
-		assertThat(msgOpt.isPresent()).isTrue();
-		assertThat(msgOpt.get()).isEqualTo("Freetext service is not configured. Operation didn't run.");
+		assertThat(msgOpt).isPresent();
+		assertThat(msgOpt).contains("Freetext service is not configured. Operation didn't run.");
 	}
 
 
@@ -64,11 +64,11 @@ public class TerminologyHSearchIndexingProviderTest {
 
 		assertThat(retVal).isNotNull();
 		Optional<String> successValueOpt = ParametersUtil.getNamedParameterValueAsString(myContext, retVal, RESP_PARAM_SUCCESS);
-		assertThat(successValueOpt.isPresent()).isTrue();
-		assertThat(successValueOpt.get()).isEqualTo("false");
+		assertThat(successValueOpt).isPresent();
+		assertThat(successValueOpt).contains("false");
 		Optional<String> msgOpt = ParametersUtil.getNamedParameterValueAsString(myContext, retVal, "message");
-		assertThat(msgOpt.isPresent()).isTrue();
-		assertThat(msgOpt.get()).isEqualTo("Operation was cancelled because other terminology background tasks are currently running. Try again in a few minutes.");
+		assertThat(msgOpt).isPresent();
+		assertThat(msgOpt).contains("Operation was cancelled because other terminology background tasks are currently running. Try again in a few minutes.");
 	}
 
 
@@ -80,8 +80,8 @@ public class TerminologyHSearchIndexingProviderTest {
 
 		assertThat(retVal).isNotNull();
 		Optional<String> successValueOpt = ParametersUtil.getNamedParameterValueAsString(myContext, retVal, RESP_PARAM_SUCCESS);
-		assertThat(successValueOpt.isPresent()).isTrue();
-		assertThat(successValueOpt.get()).isEqualTo("true");
+		assertThat(successValueOpt).isPresent();
+		assertThat(successValueOpt).contains("true");
 	}
 
 
@@ -93,8 +93,8 @@ public class TerminologyHSearchIndexingProviderTest {
 		InternalErrorException thrown = assertThrows(InternalErrorException.class,
 			() -> testedProvider.reindexTerminology(myRequestDetails));
 
-		assertThat(thrown.getMessage().startsWith(Msg.code(2072) + "Re-creating terminology freetext indexes " +
-			"failed with exception: " + exceptionMsg)).isTrue();
+		assertThat(thrown.getMessage()).startsWith(Msg.code(2072) + "Re-creating terminology freetext indexes " +
+			"failed with exception: " + exceptionMsg);
 	}
 
 

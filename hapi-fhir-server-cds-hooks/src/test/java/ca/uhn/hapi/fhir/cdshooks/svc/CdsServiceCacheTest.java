@@ -39,12 +39,12 @@ class CdsServiceCacheTest {
 		// execute
 		myFixture.registerDynamicService(TEST_KEY, serviceFunction, cdsServiceJson, true, MODULE_ID);
 		// validate
-		assertThat(myFixture.myServiceMap.size()).isEqualTo(1);
+		assertThat(myFixture.myServiceMap).hasSize(1);
 		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.myServiceMap.get(TEST_KEY);
 		assertThat(cdsMethod.getFunction()).isEqualTo(serviceFunction);
 		assertThat(cdsMethod.getCdsServiceJson()).isEqualTo(cdsServiceJson);
 		assertThat(cdsMethod.isAllowAutoFhirClientPrefetch()).isTrue();
-		assertThat(myFixture.myCdsServiceJson.getServices().size()).isEqualTo(1);
+		assertThat(myFixture.myCdsServiceJson.getServices()).hasSize(1);
 		assertThat(myFixture.myCdsServiceJson.getServices().get(0)).isEqualTo(cdsServiceJson);
 	}
 
@@ -60,12 +60,12 @@ class CdsServiceCacheTest {
 		myFixture.registerDynamicService(TEST_KEY, serviceFunction, cdsServiceJson, true, MODULE_ID);
 		myFixture.registerDynamicService(TEST_KEY, serviceFunction2, cdsServiceJson2, false, MODULE_ID);
 		// validate
-		assertThat(myFixture.myServiceMap.size()).isEqualTo(1);
+		assertThat(myFixture.myServiceMap).hasSize(1);
 		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.myServiceMap.get(TEST_KEY);
 		assertThat(cdsMethod.getFunction()).isEqualTo(serviceFunction);
 		assertThat(cdsMethod.getCdsServiceJson()).isEqualTo(cdsServiceJson);
 		assertThat(cdsMethod.isAllowAutoFhirClientPrefetch()).isTrue();
-		assertThat(myFixture.myCdsServiceJson.getServices().size()).isEqualTo(1);
+		assertThat(myFixture.myCdsServiceJson.getServices()).hasSize(1);
 		assertThat(myFixture.myCdsServiceJson.getServices().get(0)).isEqualTo(cdsServiceJson);
 		assertThat(myLogCapture.getLogEvents(), contains(eventWithLevelAndMessageContains(Level.ERROR, expectedLogMessage)));
 	}
@@ -83,7 +83,7 @@ class CdsServiceCacheTest {
 		assertThat(cdsMethod.getFunction()).isEqualTo(serviceFunction);
 		assertThat(cdsMethod.getCdsServiceJson()).isEqualTo(cdsServiceJson);
 		assertThat(cdsMethod.isAllowAutoFhirClientPrefetch()).isTrue();
-		assertThat(myFixture.myCdsServiceJson.getServices().isEmpty()).isTrue();
+		assertThat(myFixture.myCdsServiceJson.getServices()).isEmpty();
 	}
 
 	@Test

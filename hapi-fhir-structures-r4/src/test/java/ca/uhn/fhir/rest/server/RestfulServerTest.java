@@ -28,7 +28,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,33 +51,33 @@ public class RestfulServerTest {
 		MyProvider2 provider2 = new MyProvider2();
 		myRestfulServer.registerProvider(provider2);
 
-		assertFalse(myRestfulServer.getProviderMethodBindings(provider).isEmpty());
-		assertFalse(myRestfulServer.getProviderMethodBindings(provider2).isEmpty());
+		assertThat(myRestfulServer.getProviderMethodBindings(provider)).isNotEmpty();
+		assertThat(myRestfulServer.getProviderMethodBindings(provider2)).isNotEmpty();
 
 		myRestfulServer.unregisterProvider(provider);
-		assertTrue(myRestfulServer.getProviderMethodBindings(provider).isEmpty());
-		assertFalse(myRestfulServer.getProviderMethodBindings(provider2).isEmpty());
+		assertThat(myRestfulServer.getProviderMethodBindings(provider)).isEmpty();
+		assertThat(myRestfulServer.getProviderMethodBindings(provider2)).isNotEmpty();
 	}
 
 	@Test
 	public void testRegisterProviders() {
 		//test register Plain Provider
 		myRestfulServer.registerProvider(new MyClassWithRestInterface());
-		assertEquals(1, myRestfulServer.getResourceProviders().size());
+		assertThat(myRestfulServer.getResourceProviders()).hasSize(1);
 		Object plainProvider = myRestfulServer.getResourceProviders().get(0);
-		assertTrue(plainProvider instanceof MyClassWithRestInterface);
+		assertThat(plainProvider instanceof MyClassWithRestInterface).isTrue();
 
 		//test register Resource Provider
 		myRestfulServer.registerProvider(new MyResourceProvider());
-		assertEquals(2, myRestfulServer.getResourceProviders().size());
+		assertThat(myRestfulServer.getResourceProviders()).hasSize(2);
 		IResourceProvider resourceProvider = myRestfulServer.getResourceProviders().get(1);
-		assertTrue(resourceProvider instanceof MyResourceProvider);
+		assertThat(resourceProvider instanceof MyResourceProvider).isTrue();
 
 		//test unregister providers
 		myRestfulServer.unregisterProvider(plainProvider);
-		assertFalse(myRestfulServer.getResourceProviders().isEmpty());
+		assertThat(myRestfulServer.getResourceProviders()).isNotEmpty();
 		myRestfulServer.unregisterProvider(resourceProvider);
-		assertTrue(myRestfulServer.getResourceProviders().isEmpty());
+		assertThat(myRestfulServer.getResourceProviders()).isEmpty();
 	}
 
 	@Test
@@ -83,7 +85,7 @@ public class RestfulServerTest {
 		try {
 			myRestfulServer.registerProvider(new MyClassWithoutRestInterface());
 			fail("");		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(289) + "Did not find any annotated RESTful methods on provider class ca.uhn.fhir.rest.server.RestfulServerTest$MyClassWithoutRestInterface", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(289) + "Did not find any annotated RESTful methods on provider class ca.uhn.fhir.rest.server.RestfulServerTest$MyClassWithoutRestInterface");
 		}
 	}
 

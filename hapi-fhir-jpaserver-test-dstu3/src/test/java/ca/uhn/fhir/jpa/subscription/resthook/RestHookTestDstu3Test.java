@@ -413,8 +413,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForSize(5, ourUpdatedObservations);
 
 		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
-		assertThat(observation1.getId().isEmpty()).isFalse();
-		assertThat(observation2.getId().isEmpty()).isFalse();
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	@Test
@@ -493,8 +493,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForSize(5, ourUpdatedObservations);
 
 		assertThat(subscription2.getId()).isNotEqualTo(subscription1.getId());
-		assertThat(observation1.getId().isEmpty()).isFalse();
-		assertThat(observation2.getId().isEmpty()).isFalse();
+		assertThat(observation1.getId()).isNotEmpty();
+		assertThat(observation2.getId()).isNotEmpty();
 	}
 
 	@Test
@@ -566,7 +566,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		assertThat(subscriptionOrig.getStatus()).isEqualTo(Subscription.SubscriptionStatus.REQUESTED);
 		List<Coding> tags = subscriptionOrig.getMeta().getTag();
-		assertThat(tags.size()).isEqualTo(1);
+		assertThat(tags).hasSize(1);
 		Coding tag = tags.get(0);
 		assertThat(tag.getSystem()).isEqualTo(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY);
 		assertThat(tag.getCode()).isEqualTo(SubscriptionMatchingStrategy.IN_MEMORY.toString());
@@ -584,7 +584,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		List<Coding> tags;
 		Coding tag;
 		tags = theSubscription.getMeta().getTag();
-		assertThat(tags.size()).isEqualTo(1);
+		assertThat(tags).hasSize(1);
 		tag = tags.get(0);
 		assertThat(tag.getSystem()).isEqualTo(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY);
 		assertThat(tag.getCode()).isEqualTo(SubscriptionMatchingStrategy.IN_MEMORY.toString());
@@ -599,7 +599,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		IdType subscriptionId = subscriptionOrig.getIdElement();
 
 		List<Coding> tags = subscriptionOrig.getMeta().getTag();
-		assertThat(tags.size()).isEqualTo(1);
+		assertThat(tags).hasSize(1);
 		Coding tag = tags.get(0);
 		assertThat(tag.getSystem()).isEqualTo(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY);
 		assertThat(tag.getCode()).isEqualTo(SubscriptionMatchingStrategy.DATABASE.toString());
@@ -611,7 +611,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		Subscription subscription = myClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
 		assertThat(subscription.getStatus()).isEqualTo(Subscription.SubscriptionStatus.ACTIVE);
 		tags = subscription.getMeta().getTag();
-		assertThat(tags.size()).isEqualTo(1);
+		assertThat(tags).hasSize(1);
 		tag = tags.get(0);
 		assertThat(tag.getSystem()).isEqualTo(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY);
 		assertThat(tag.getCode()).isEqualTo(SubscriptionMatchingStrategy.DATABASE.toString());

@@ -14,8 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ModelSerializationDstu3Test {
 
@@ -28,10 +27,10 @@ public class ModelSerializationDstu3Test {
 	public void testBoundCodeableConceptSerialization() {
 		AdministrativeGender maritalStatus = AdministrativeGender.MALE;
 		byte[] bytes = SerializationUtils.serialize(maritalStatus);
-		assertTrue(bytes.length > 0);
+		assertThat(bytes.length > 0).isTrue();
 
 		AdministrativeGender deserialized = SerializationUtils.deserialize(bytes);
-		assertEquals(AdministrativeGender.MALE, deserialized);
+		assertThat(deserialized).isEqualTo(AdministrativeGender.MALE);
 	}
 
 	@AfterAll
@@ -50,22 +49,22 @@ public class ModelSerializationDstu3Test {
 		/*
 		 * Make sure the binder still works for Code
 		 */
-		assertEquals(AdministrativeGender.MALE, out.getGender());
+		assertThat(out.getGender()).isEqualTo(AdministrativeGender.MALE);
 		out.getGenderElement().setValueAsString("female");
-		assertEquals(AdministrativeGender.FEMALE, out.getGender());
+		assertThat(out.getGender()).isEqualTo(AdministrativeGender.FEMALE);
 
 	}
 
 	@SuppressWarnings("unchecked")
 	private <T extends IBaseResource> T testIsSerializable(T theObject) {
 		byte[] bytes = SerializationUtils.serialize(theObject);
-		assertTrue(bytes.length > 0);
+		assertThat(bytes.length > 0).isTrue();
 
 		IBaseResource obj = SerializationUtils.deserialize(bytes);
-		assertTrue(obj != null);
+		assertThat(obj != null).isTrue();
 
 		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
-		assertEquals(p.encodeResourceToString(theObject), p.encodeResourceToString(obj));
+		assertThat(p.encodeResourceToString(obj)).isEqualTo(p.encodeResourceToString(theObject));
 
 		return (T) obj;
 	}

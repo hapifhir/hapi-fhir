@@ -207,7 +207,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 
 		List<PartitionEntity> actual = myPartitionConfigSvc.listPartitions();
 
-		assertThat(actual.size()).isEqualTo(2);
+		assertThat(actual).hasSize(2);
 		assertThat(actual.stream().anyMatch(item -> "PARTITION-1".equals(item.getName()))).isTrue();
 		assertThat(actual.stream().anyMatch(item -> "PARTITION-2".equals(item.getName()))).isTrue();
 	}

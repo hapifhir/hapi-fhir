@@ -31,9 +31,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ReadR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ReadR4Test.class);
@@ -59,9 +59,9 @@ public class ReadR4Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was:\n{}", responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(null, status.getFirstHeader(Constants.HEADER_LOCATION));
-			assertEquals("http://localhost:" + myPort + "/Patient/2/_history/2", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertThat(status.getFirstHeader(Constants.HEADER_LOCATION)).isEqualTo(null);
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo("http://localhost:" + myPort + "/Patient/2/_history/2");
 
 			assertThat(responseContent, stringContainsInOrder(
 				"<Patient xmlns=\"http://hl7.org/fhir\">",
@@ -86,9 +86,9 @@ public class ReadR4Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was:\n{}", responseContent);
 
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertEquals(null, status.getFirstHeader(Constants.HEADER_LOCATION));
-			assertEquals("http://localhost:" + myPort + "/Patient/2/_history/2", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertThat(status.getFirstHeader(Constants.HEADER_LOCATION)).isEqualTo(null);
+			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo("http://localhost:" + myPort + "/Patient/2/_history/2");
 
 			assertThat(responseContent, stringContainsInOrder(
 				"<Patient xmlns=\"http://hl7.org/fhir\">",
@@ -113,7 +113,7 @@ public class ReadR4Test {
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_contained=both&_format=xml&_pretty=true");
 		status = ourClient.execute(httpGet);
 		try (InputStream inputStream = status.getEntity().getContent()) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
 			assertThat(responseContent, stringContainsInOrder(
@@ -130,7 +130,7 @@ public class ReadR4Test {
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_containedType=contained&_format=xml&_pretty=true");
 		status = ourClient.execute(httpGet);
 		try (InputStream inputStream = status.getEntity().getContent()) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
 			assertThat(responseContent, stringContainsInOrder(
@@ -147,7 +147,7 @@ public class ReadR4Test {
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_count=10&_format=xml&_pretty=true");
 		status = ourClient.execute(httpGet);
 		try (InputStream inputStream = status.getEntity().getContent()) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
 			assertThat(responseContent, stringContainsInOrder(
@@ -164,7 +164,7 @@ public class ReadR4Test {
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_include=Patient:organization&_format=xml&_pretty=true");
 		status = ourClient.execute(httpGet);
 		try (InputStream inputStream = status.getEntity().getContent()) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
 			assertThat(responseContent, stringContainsInOrder(
@@ -181,7 +181,7 @@ public class ReadR4Test {
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_revinclude=Provenance:target&_format=xml&_pretty=true");
 		status = ourClient.execute(httpGet);
 		try (InputStream inputStream = status.getEntity().getContent()) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
 			assertThat(responseContent, stringContainsInOrder(
@@ -198,7 +198,7 @@ public class ReadR4Test {
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_sort=family&_format=xml&_pretty=true");
 		status = ourClient.execute(httpGet);
 		try (InputStream inputStream = status.getEntity().getContent()) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
 			assertThat(responseContent, stringContainsInOrder(
@@ -215,7 +215,7 @@ public class ReadR4Test {
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2?_total=accurate&_format=xml&_pretty=true");
 		status = ourClient.execute(httpGet);
 		try (InputStream inputStream = status.getEntity().getContent()) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
 			assertThat(responseContent, stringContainsInOrder(
@@ -242,7 +242,7 @@ public class ReadR4Test {
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2");
 		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()));
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(304, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(304);
 		}
 
 		// Fixture was last modified at 2012-01-01T12:12:12Z
@@ -251,7 +251,7 @@ public class ReadR4Test {
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2");
 		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue()));
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(304, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(304);
 		}
 
 		// Fixture was last modified at 2012-01-01T12:12:12Z
@@ -260,7 +260,7 @@ public class ReadR4Test {
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient/2");
 		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()));
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		}
 
 	}

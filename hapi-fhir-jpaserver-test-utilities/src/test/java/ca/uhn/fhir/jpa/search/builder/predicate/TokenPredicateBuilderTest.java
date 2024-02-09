@@ -80,7 +80,7 @@ public class TokenPredicateBuilderTest {
 
 		// verify
 		List<ILoggingEvent> logList = myListAppender.list;
-		assertThat(logList.size()).isEqualTo(2);
+		assertThat(logList).hasSize(2);
 		assertThat(logList.get(0).getFormattedMessage()).contains(theLongSystem);
 		assertThat(logList.get(1).getFormattedMessage()).contains(theLongValue);
 	}

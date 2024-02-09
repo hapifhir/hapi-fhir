@@ -191,7 +191,7 @@ public class ResourceModifiedSubmitterSvcTest {
 		verify(myListAppender).doAppend(loggingCaptor.capture());
 		ILoggingEvent event = loggingCaptor.getValue();
 		assertThat(event).isNotNull();
-		assertThat(event.getThrowableProxy().getMessage().contains(exceptionString)).isTrue();
+		assertThat(event.getThrowableProxy().getMessage()).contains(exceptionString);
 	}
 
 	@Test

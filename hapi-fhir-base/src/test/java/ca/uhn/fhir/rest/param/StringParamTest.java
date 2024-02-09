@@ -156,9 +156,9 @@ public class StringParamTest {
 			.collect(Collectors.toList());
 
 		if (theWasLogged) {
-			assertThat(warningLogs.size()).isEqualTo(1);
+			assertThat(warningLogs).hasSize(1);
 		} else {
-			assertThat(warningLogs.isEmpty()).isTrue();
+			assertThat(warningLogs).isEmpty();
 		}
 	}
 	

@@ -254,7 +254,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 	private void validateValueExpand(String currentVersion, Collection<String> theAllVersions) {
 		// for CS ver = null, VS ver = null
 		ValueSet vs = myValueSetDao.expandByIdentifier(VS_NO_VERSIONED_ON_UPLOAD, null);
-		assertThat(vs.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(vs.getExpansion().getContains()).hasSize(1);
 
 		// version was added prefixing code display to validate
 		assertThat(vs.getExpansion().getContains().iterator().next().getDisplay()).isEqualTo(prefixWithVersion(currentVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY));
@@ -263,7 +263,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		// for CS ver = null, VS ver != null
 		ValueSet vs1 = myValueSetDao.expandByIdentifier(
 			VS_VERSIONED_ON_UPLOAD + "|" + VS_ANSWER_LIST_VERSION, null);
-		assertThat(vs1.getExpansion().getContains().size()).isEqualTo(3);
+		assertThat(vs1.getExpansion().getContains()).hasSize(3);
 
 		assertThat(vs1.getExpansion().getContains().iterator().next().getDisplay()).isEqualTo(prefixWithVersion(currentVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY));
 
@@ -333,7 +333,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		ValueSet vs2 = myValueSetDao.expandByIdentifier(
 			VS_NO_VERSIONED_ON_UPLOAD + "|" + theVersion, null);
-		assertThat(vs2.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(vs2.getExpansion().getContains()).hasSize(1);
 
 		// version was added before code display to validate
 		assertThat(vs2.getExpansion().getContains().iterator().next().getDisplay()).isEqualTo(prefixWithVersion(theVersion, VS_NO_VERSIONED_ON_UPLOAD_FIRST_DISPLAY));
@@ -343,7 +343,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		ValueSet vs3 = myValueSetDao.expandByIdentifier(
 			VS_VERSIONED_ON_UPLOAD + "|" + VS_ANSWER_LIST_VERSION + "-" + theVersion, null);
-		assertThat(vs3.getExpansion().getContains().size()).isEqualTo(3);
+		assertThat(vs3.getExpansion().getContains()).hasSize(3);
 
 		// version was added before code display to validate
 		assertThat(vs3.getExpansion().getContains().iterator().next().getDisplay()).isEqualTo(prefixWithVersion(theVersion, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY));
@@ -357,7 +357,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		int expectedResultQty = theExpectedIdVersions.size() + 1;  // + 1 because an extra null version (the current) is always present
 		IBundleProvider noUploadVerResult = myValueSetIFhirResourceDao.search(paramsNoUploadVer, mockRequestDetails, mockServletResponse);
 		List<IBaseResource> noUploadVerValueSets = noUploadVerResult.getAllResources();
-		assertThat(noUploadVerValueSets.size()).isEqualTo(expectedResultQty);
+		assertThat(noUploadVerValueSets).hasSize(expectedResultQty);
 
 		matchUnqualifiedIds(noUploadVerValueSets, theExpectedIdVersions);
 
@@ -367,7 +367,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		paramsUploadVer.add("version", new TokenParam(VS_ANSWER_LIST_VERSION));
 		IBundleProvider uploadVerResult = myValueSetIFhirResourceDao.search(paramsUploadVer, mockRequestDetails, mockServletResponse);
 		List<IBaseResource> uploadVerValueSets = uploadVerResult.getAllResources();
-		assertThat(uploadVerValueSets.size()).isEqualTo(1);
+		assertThat(uploadVerValueSets).hasSize(1);
 
 		assertThat(uploadVerValueSets.get(0).getIdElement().getIdPart()).isEqualTo(VS_VERSIONED_ON_UPLOAD_ID);
 		assertThat(((ValueSet) uploadVerValueSets.get(0)).getVersion()).isEqualTo(VS_ANSWER_LIST_VERSION);
@@ -390,7 +390,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		IBundleProvider uploadNoVerResult = myValueSetIFhirResourceDao.search(paramsUploadNoVer, mockRequestDetails, mockServletResponse);
 		List<IBaseResource> uploadNoVerValueSets = uploadNoVerResult.getAllResources();
-		assertThat(uploadNoVerValueSets.size()).isEqualTo(1);
+		assertThat(uploadNoVerValueSets).hasSize(1);
 
 		ValueSet loadNoVersionValueSet = (ValueSet) uploadNoVerValueSets.get(0);
 		String expectedLoadNoVersionUnqualifiedId = VS_NO_VERSIONED_ON_UPLOAD_ID + (theVersion == null ? "" : "-" + theVersion);
@@ -404,7 +404,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		IBundleProvider uploadVerResult = myValueSetIFhirResourceDao.search(paramsUploadVer, mockRequestDetails, mockServletResponse);
 		List<IBaseResource> uploadVerValueSets = uploadVerResult.getAllResources();
-		assertThat(uploadVerValueSets.size()).isEqualTo(1);
+		assertThat(uploadVerValueSets).hasSize(1);
 
 		ValueSet loadVersionValueSet = (ValueSet) uploadVerValueSets.get(0);
 		String expectedLoadVersionUnqualifiedId = VS_VERSIONED_ON_UPLOAD_ID + (theVersion == null ? "" : "-" + theVersion);
@@ -483,12 +483,12 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		// current TermVSs with no upload version have null version
 		Optional<TermValueSet> noUploadCurrentVsOpt = getCurrentTermValueSet(VS_NO_VERSIONED_ON_UPLOAD);
-		assertThat(noUploadCurrentVsOpt.isPresent()).isTrue();
+		assertThat(noUploadCurrentVsOpt).isPresent();
 		assertThat(noUploadCurrentVsOpt.get().getVersion()).isNull();
 
 		// current VSs with upload version have upload-version with no version append
 		Optional<TermValueSet> uploadCurrentVsOpt = getCurrentTermValueSet(VS_VERSIONED_ON_UPLOAD);
-		assertThat(uploadCurrentVsOpt.isPresent()).isTrue();
+		assertThat(uploadCurrentVsOpt).isPresent();
 		assertThat(uploadCurrentVsOpt.get().getVersion()).isEqualTo(VS_ANSWER_LIST_VERSION);
 
 	}
@@ -590,7 +590,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 		int expectedResultQty = theExpectedIdVersions.size() + 1;  // + 1 because an extra null version (the current) is always present
 		IBundleProvider result = myValueSetIFhirResourceDao.search(params, mockRequestDetails, mockServletResponse);
 		List<IBaseResource> valueSets = result.getAllResources();
-		assertThat(valueSets.size()).isEqualTo(expectedResultQty);
+		assertThat(valueSets).hasSize(expectedResultQty);
 
 		matchUnqualifiedIds(valueSets, theExpectedIdVersions);
 
@@ -605,7 +605,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 		IBundleProvider result = myValueSetIFhirResourceDao.search(paramsUploadNoVer, mockRequestDetails, mockServletResponse);
 		List<IBaseResource> valueSets = result.getAllResources();
-		assertThat(valueSets.size()).isEqualTo(1);
+		assertThat(valueSets).hasSize(1);
 
 		ValueSet loadNoVersionValueSet = (ValueSet) valueSets.get(0);
 		String expectedUnqualifiedId = LOINC_ALL_VALUESET_ID + "-" + theVersion;
@@ -617,7 +617,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 	private void validateValueExpandLoincAllVS(String currentVersion, Collection<String> theAllVersions) {
 		ValueSet vs = myValueSetDao.expandByIdentifier(LOINC_ALL_VS_URL, null);
-		assertThat(vs.getExpansion().getContains().isEmpty()).isFalse();
+		assertThat(vs.getExpansion().getContains()).isNotEmpty();
 
 		// version was added prefixing to some code display to validate
 		checkContainsElementVersion(vs, currentVersion);
@@ -631,9 +631,9 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 			.filter(c -> c.getCode().equals(VS_VERSIONED_ON_UPLOAD_FIRST_CODE))
 			.map(ValueSet.ValueSetExpansionContainsComponent::getDisplay)
 			.findAny();
-		assertThat(vsContainsDisplay.isPresent()).isTrue();
+		assertThat(vsContainsDisplay).isPresent();
 		String expectedDisplay = prefixWithVersion(version, VS_VERSIONED_ON_UPLOAD_FIRST_DISPLAY);
-		assertThat(vsContainsDisplay.get()).isEqualTo(expectedDisplay);
+		assertThat(vsContainsDisplay).contains(expectedDisplay);
 	}
 
 
@@ -657,7 +657,7 @@ public class TerminologySvcImplCurrentVersionR4Test extends BaseJpaR4Test {
 
 	private void validateValueExpandLoincAllVsForVersion(String theVersion) {
 		ValueSet vs = myValueSetDao.expandByIdentifier(LOINC_ALL_VS_URL + "|" + theVersion, null);
-		assertThat(vs.getExpansion().getContains().size()).isEqualTo(ALL_VS_QTY);
+		assertThat(vs.getExpansion().getContains()).hasSize(ALL_VS_QTY);
 
 		// version was added before code display to validate
 		checkContainsElementVersion(vs, theVersion);

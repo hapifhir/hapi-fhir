@@ -170,7 +170,7 @@ public class ExpandResourcesStepTest {
 		verify(sink)
 			.accept(expandedCaptor.capture());
 		ExpandedResourcesList expandedResources = expandedCaptor.getValue();
-		assertThat(expandedResources.getStringifiedResources().size()).isEqualTo(resources.size());
+		assertThat(expandedResources.getStringifiedResources()).hasSize(resources.size());
 		// we'll only verify a single element
 		// but we want to make sure it's as compact as possible
 		String stringifiedElement = expandedResources.getStringifiedResources().get(0);

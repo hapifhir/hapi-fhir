@@ -629,7 +629,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			.execute();
 
 		List<String> foundResources = toUnqualifiedVersionlessIdValues(result);
-		assertThat(foundResources.size()).isEqualTo(1);
+		assertThat(foundResources).hasSize(1);
 		assertThat(foundResources).containsExactly(patId.getValue());
 	}
 

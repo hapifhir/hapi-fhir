@@ -77,7 +77,7 @@ public class CdsCrServiceR4Test extends BaseCrTest {
 		final CdsServiceResponseJson cdsServiceResponseJson = new CdsCrServiceR4(requestDetails, repository, myCdsConfigService).encodeResponse(responseBundle);
 
 		assertThat(cdsServiceResponseJson.getServiceActions().size() == 1).isTrue();
-		assertThat(cdsServiceResponseJson.getServiceActions().get(0).getType().equals(ActionType.CREATE.toCode())).isTrue();
+		assertThat(cdsServiceResponseJson.getServiceActions().get(0).getType()).isEqualTo(ActionType.CREATE);
 		assertThat(cdsServiceResponseJson.getServiceActions().get(0).getResource()).isNotNull();
 	}
 }

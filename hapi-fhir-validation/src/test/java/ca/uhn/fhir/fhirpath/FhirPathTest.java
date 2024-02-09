@@ -17,7 +17,6 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirPathTest extends BaseValidationTestWithInlineMocks {
 
@@ -27,7 +26,7 @@ public class FhirPathTest extends BaseValidationTestWithInlineMocks {
 		IBaseResource resource = createPatientResourceWithTwoNames(theFhirContext);
 		IFhirPath fp = theFhirContext.newFhirPath();
 		List<IBase> names = fp.evaluate(resource, "Patient.name", IBase.class);
-		assertEquals(2, names.size());
+		assertThat(names).hasSize(2);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -38,7 +37,7 @@ public class FhirPathTest extends BaseValidationTestWithInlineMocks {
 
 		IFhirPath fp = theFhirContext.newFluentPath();
 		List<IBase> names = fp.evaluate(p, "Patient.name", IBase.class);
-		assertEquals(2, names.size());
+		assertThat(names).hasSize(2);
 	}
 
 	@ParameterizedTest
@@ -48,7 +47,7 @@ public class FhirPathTest extends BaseValidationTestWithInlineMocks {
 
 		IFhirPath fp = theFhirContext.newFhirPath();
 		List<HumanName> names = fp.evaluate(p, "Patient.nameFOO", HumanName.class);
-		assertEquals(0, names.size());
+		assertThat(names).isEmpty();
 	}
 
 	@ParameterizedTest

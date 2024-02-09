@@ -184,7 +184,7 @@ public class InterceptorServiceTest {
 			// good
 		}
 
-		assertThat(svc.getGlobalInterceptorsForUnitTest().size()).isEqualTo(initialSize);
+		assertThat(svc.getGlobalInterceptorsForUnitTest()).hasSize(initialSize);
 
 	}
 
@@ -205,7 +205,7 @@ public class InterceptorServiceTest {
 		MyTestInterceptorManual myInterceptorManual = new MyTestInterceptorManual();
 		svc.registerInterceptor(myInterceptorManual);
 		List<Object> globalInterceptors = svc.getGlobalInterceptorsForUnitTest();
-		assertThat(globalInterceptors.size()).isEqualTo(3);
+		assertThat(globalInterceptors).hasSize(3);
         assertInstanceOf(MyTestInterceptorOne.class, globalInterceptors.get(0), globalInterceptors.get(0).getClass().toString());
         assertInstanceOf(MyTestInterceptorManual.class, globalInterceptors.get(1), globalInterceptors.get(1).getClass().toString());
         assertInstanceOf(MyTestInterceptorTwo.class, globalInterceptors.get(2), globalInterceptors.get(2).getClass().toString());
@@ -213,7 +213,7 @@ public class InterceptorServiceTest {
 		// Try to register again (should have no effect
 		svc.registerInterceptor(myInterceptorManual);
 		globalInterceptors = svc.getGlobalInterceptorsForUnitTest();
-		assertThat(globalInterceptors.size()).isEqualTo(3);
+		assertThat(globalInterceptors).hasSize(3);
         assertInstanceOf(MyTestInterceptorOne.class, globalInterceptors.get(0), globalInterceptors.get(0).getClass().toString());
         assertInstanceOf(MyTestInterceptorManual.class, globalInterceptors.get(1), globalInterceptors.get(1).getClass().toString());
         assertInstanceOf(MyTestInterceptorTwo.class, globalInterceptors.get(2), globalInterceptors.get(2).getClass().toString());
@@ -227,7 +227,7 @@ public class InterceptorServiceTest {
 		// Finally, unregister it
 		svc.unregisterInterceptor(myInterceptorManual);
 		globalInterceptors = svc.getGlobalInterceptorsForUnitTest();
-		assertThat(globalInterceptors.size()).isEqualTo(2);
+		assertThat(globalInterceptors).hasSize(2);
         assertInstanceOf(MyTestInterceptorOne.class, globalInterceptors.get(0), globalInterceptors.get(0).getClass().toString());
         assertInstanceOf(MyTestInterceptorTwo.class, globalInterceptors.get(1), globalInterceptors.get(1).getClass().toString());
 

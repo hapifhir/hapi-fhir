@@ -11,9 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -54,20 +52,20 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 			myMdmRulesJson
 		);
 
-		assertFalse(myComparator.match(myJohn, myJohny).match);
+		assertThat(myComparator.match(myJohn, myJohny).match).isFalse();
 
 		myJohn.getName().clear();
 		myJohny.getName().clear();
 
-		assertTrue(myComparator.match(myJohn, myJohny).match);
+		assertThat(myComparator.match(myJohn, myJohny).match).isTrue();
 
 		myJohn = buildJohn();
 		myJohny.getName().clear();
-		assertFalse(myComparator.match(myJohn, myJohny).match);
+		assertThat(myComparator.match(myJohn, myJohny).match).isFalse();
 
 		myJohn.getName().clear();
 		myJohny = buildJohny();
-		assertFalse(myComparator.match(myJohn, myJohny).match);
+		assertThat(myComparator.match(myJohn, myJohny).match).isFalse();
 	}
 
 	@Test
@@ -75,7 +73,7 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 		Patient patient = new Patient();
 		patient.setActive(true);
 
-		assertFalse(myComparator.match(patient, myJohny).match);
+		assertThat(myComparator.match(patient, myJohny).match).isFalse();
 	}
 
 	@Test
@@ -86,12 +84,12 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 		try {
 			myComparator.match(encounter, myJohny);
 			fail("");		} catch (IllegalArgumentException e) {
-			assertEquals("Expecting resource type Patient got resource type Encounter", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Expecting resource type Patient got resource type Encounter");
 		}
 		try {
 			myComparator.match(myJohn, encounter);
 			fail("");		} catch (IllegalArgumentException e) {
-			assertEquals("Expecting resource type Patient got resource type Encounter", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Expecting resource type Patient got resource type Encounter");
 		}
 	}
 
@@ -100,6 +98,6 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 	// and falls through to similarity check
 	@Test
 	public void testMatch() {
-		assertTrue(myComparator.match(myJohn, myJohny).match);
+		assertThat(myComparator.match(myJohn, myJohny).match).isTrue();
 	}
 }

@@ -86,9 +86,9 @@ public class DropTableTest extends BaseTest {
 
 		MigrationResult result = getMigrator().migrate();
 		assertThat(result.changes).isEqualTo(0);
-		assertThat(result.executedStatements.size()).isEqualTo(1);
-		assertThat(result.succeededTasks.size()).isEqualTo(1);
-		assertThat(result.failedTasks.size()).isEqualTo(0);
+		assertThat(result.executedStatements).hasSize(1);
+		assertThat(result.succeededTasks).hasSize(1);
+		assertThat(result.failedTasks).isEmpty();
 
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), not(hasItem("SOMETABLE")));
 	}

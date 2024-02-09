@@ -48,7 +48,7 @@ public class ITestDataBuilderTest {
 			myTDB.createObservation(
 				myTDB.withEffectiveDate("2020-01-01T12:34:56"));
 
-			assertThat(myCreatedList.size()).isEqualTo(1);
+			assertThat(myCreatedList).hasSize(1);
 			Observation o = (Observation) myCreatedList.get(0);
 
 			assertThat(o.getEffectiveDateTimeType().getValueAsString()).isEqualTo("2020-01-01T12:34:56");
@@ -62,7 +62,7 @@ public class ITestDataBuilderTest {
 				myTDB.withObservationCode("http://example.com", "a-code-value", "a code description")
 			);
 
-			assertThat(myCreatedList.size()).isEqualTo(1);
+			assertThat(myCreatedList).hasSize(1);
 			Observation o = (Observation) myCreatedList.get(0);
 
 			CodeableConcept codeable = o.getCode();
@@ -81,7 +81,7 @@ public class ITestDataBuilderTest {
 			myTDB.createObservation(
 				myTDB.withQuantityAtPath("valueQuantity", 200, "hulla", "bpm"));
 
-			assertThat(myCreatedList.size()).isEqualTo(1);
+			assertThat(myCreatedList).hasSize(1);
 			Observation o = (Observation) myCreatedList.get(0);
 
 			Quantity valueQuantity = o.getValueQuantity();
@@ -108,10 +108,10 @@ public class ITestDataBuilderTest {
 					myTDB.withQuantityAtPath("valueQuantity", 1000000, "hulla", "sik"))
 			);
 
-			assertThat(myCreatedList.size()).isEqualTo(1);
+			assertThat(myCreatedList).hasSize(1);
 			Observation o = (Observation) myCreatedList.get(0);
 
-			assertThat(o.getComponent().size()).isEqualTo(2);
+			assertThat(o.getComponent()).hasSize(2);
 			Observation.ObservationComponentComponent secondComponent = o.getComponent().get(1);
 
 			assertThat(secondComponent.getCode().getCoding().get(0).getCode()).isEqualTo("yet-another-code-value");
@@ -127,9 +127,9 @@ public class ITestDataBuilderTest {
 			myTDB.withGroupMember("Patient/123")
 		);
 
-		assertThat(myCreatedList.size()).isEqualTo(1);
+		assertThat(myCreatedList).hasSize(1);
 		Group g = (Group) myCreatedList.get(0);
-		assertThat(g.getMember().size()).isEqualTo(1);
+		assertThat(g.getMember()).hasSize(1);
 		assertThat(g.getMember().get(0).hasEntity()).isTrue();
 		assertThat(g.getMember().get(0).getEntity().getReference()).isEqualTo("Patient/123");
 	}

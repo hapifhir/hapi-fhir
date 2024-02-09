@@ -24,7 +24,7 @@ import org.mockito.internal.stubbing.defaultanswers.ReturnsDeepStubs;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -79,7 +79,7 @@ public class BearerTokenAuthInterceptorTest {
 		client.getPatientById(new IdType("111"));
 
 		HttpUriRequest req = capt.getValue();
-		assertEquals("Bearer mytoken", req.getFirstHeader("Authorization").getValue());
+		assertThat(req.getFirstHeader("Authorization").getValue()).isEqualTo("Bearer mytoken");
 	}
 
 	@BeforeAll

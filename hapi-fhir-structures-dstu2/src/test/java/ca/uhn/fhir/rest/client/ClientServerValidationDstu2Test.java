@@ -34,10 +34,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -102,16 +98,16 @@ public class ClientServerValidationDstu2Test {
 		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
 		client.registerInterceptor(new BasicAuthInterceptor("USER", "PASS"));
 		Patient pt = (Patient) client.read(new UriDt("http://foo/Patient/123"));
-		assertEquals("FAM", pt.getNameFirstRep().getFamilyAsSingleString());
+		assertThat(pt.getNameFirstRep().getFamilyAsSingleString()).isEqualTo("FAM");
 
-		assertEquals(2, capt.getAllValues().size());
+		assertThat(capt.getAllValues()).hasSize(2);
 
 		Header auth = capt.getAllValues().get(0).getFirstHeader("Authorization");
-		assertNotNull(auth);
-		assertEquals("Basic VVNFUjpQQVNT", auth.getValue());
+		assertThat(auth).isNotNull();
+		assertThat(auth.getValue()).isEqualTo("Basic VVNFUjpQQVNT");
 		auth = capt.getAllValues().get(1).getFirstHeader("Authorization");
-		assertNotNull(auth);
-		assertEquals("Basic VVNFUjpQQVNT", auth.getValue());
+		assertThat(auth).isNotNull();
+		assertThat(auth.getValue()).isEqualTo("Basic VVNFUjpQQVNT");
 	}
 
 	@Test
@@ -149,19 +145,19 @@ public class ClientServerValidationDstu2Test {
 
 		client.forceConformanceCheck();
 
-		assertEquals(1, capt.getAllValues().size());
+		assertThat(capt.getAllValues()).hasSize(1);
 
 		Patient pt = (Patient) client.read(new UriDt("http://foo/Patient/123"));
-		assertEquals("FAM", pt.getNameFirstRep().getFamilyAsSingleString());
+		assertThat(pt.getNameFirstRep().getFamilyAsSingleString()).isEqualTo("FAM");
 
-		assertEquals(2, capt.getAllValues().size());
+		assertThat(capt.getAllValues()).hasSize(2);
 
 		Header auth = capt.getAllValues().get(0).getFirstHeader("Authorization");
-		assertNotNull(auth);
-		assertEquals("Basic VVNFUjpQQVNT", auth.getValue());
+		assertThat(auth).isNotNull();
+		assertThat(auth.getValue()).isEqualTo("Basic VVNFUjpQQVNT");
 		auth = capt.getAllValues().get(1).getFirstHeader("Authorization");
-		assertNotNull(auth);
-		assertEquals("Basic VVNFUjpQQVNT", auth.getValue());
+		assertThat(auth).isNotNull();
+		assertThat(auth.getValue()).isEqualTo("Basic VVNFUjpQQVNT");
 	}
 
 	@Test
@@ -215,9 +211,9 @@ public class ClientServerValidationDstu2Test {
 		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
 
 		// don't load the conformance until the first time the client is actually used
-		assertTrue(myFirstResponse);
+		assertThat(myFirstResponse).isTrue();
 		client.read(new UriDt("http://foo/Patient/123"));
-		assertFalse(myFirstResponse);
+		assertThat(myFirstResponse).isFalse();
 		myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/123"));
 		myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/123"));
 
@@ -255,9 +251,9 @@ public class ClientServerValidationDstu2Test {
 		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
 
 		// don't load the conformance until the first time the client is actually used
-		assertTrue(myFirstResponse);
+		assertThat(myFirstResponse).isTrue();
 		client.read(new UriDt("http://foo/Patient/123"));
-		assertFalse(myFirstResponse);
+		assertThat(myFirstResponse).isFalse();
 		myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/123"));
 		myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/123"));
 

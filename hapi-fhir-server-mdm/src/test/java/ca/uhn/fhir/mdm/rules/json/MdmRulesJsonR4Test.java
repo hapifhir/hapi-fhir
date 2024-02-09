@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.util.Collections;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -46,31 +45,31 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 		String json = JsonUtil.serialize(myRules);
 		ourLog.info(json);
 		MdmRulesJson rulesDeser = JsonUtil.deserialize(json, MdmRulesJson.class);
-		assertEquals(2, rulesDeser.size());
-		assertEquals(MdmMatchResultEnum.MATCH, rulesDeser.getMatchResult(myBothNameFields));
+		assertThat(rulesDeser.size()).isEqualTo(2);
+		assertThat(rulesDeser.getMatchResult(myBothNameFields)).isEqualTo(MdmMatchResultEnum.MATCH);
 		MdmFieldMatchJson second = rulesDeser.get(1);
-		assertEquals("name.family", second.getResourcePath());
-		assertEquals(MdmSimilarityEnum.JARO_WINKLER, second.getSimilarity().getAlgorithm());
+		assertThat(second.getResourcePath()).isEqualTo("name.family");
+		assertThat(second.getSimilarity().getAlgorithm()).isEqualTo(MdmSimilarityEnum.JARO_WINKLER);
 	}
 
 	@Test
 	public void testMatchResultMap() {
-		assertEquals(MdmMatchResultEnum.MATCH, myRules.getMatchResult(3L));
+		assertThat(myRules.getMatchResult(3L)).isEqualTo(MdmMatchResultEnum.MATCH);
 	}
 
 	@Test
 	public void getVector() {
 		VectorMatchResultMap vectorMatchResultMap = myRules.getVectorMatchResultMapForUnitTest();
-		assertEquals(1, vectorMatchResultMap.getVector(PATIENT_GIVEN));
-		assertEquals(2, vectorMatchResultMap.getVector(PATIENT_FAMILY));
-		assertEquals(3, vectorMatchResultMap.getVector(String.join(",", PATIENT_GIVEN, PATIENT_FAMILY)));
-		assertEquals(3, vectorMatchResultMap.getVector(String.join(", ", PATIENT_GIVEN, PATIENT_FAMILY)));
-		assertEquals(3, vectorMatchResultMap.getVector(String.join(",  ", PATIENT_GIVEN, PATIENT_FAMILY)));
-		assertEquals(3, vectorMatchResultMap.getVector(String.join(", \n ", PATIENT_GIVEN, PATIENT_FAMILY)));
+		assertThat(vectorMatchResultMap.getVector(PATIENT_GIVEN)).isEqualTo(1);
+		assertThat(vectorMatchResultMap.getVector(PATIENT_FAMILY)).isEqualTo(2);
+		assertThat(vectorMatchResultMap.getVector(String.join(",", PATIENT_GIVEN, PATIENT_FAMILY))).isEqualTo(3);
+		assertThat(vectorMatchResultMap.getVector(String.join(", ", PATIENT_GIVEN, PATIENT_FAMILY))).isEqualTo(3);
+		assertThat(vectorMatchResultMap.getVector(String.join(",  ", PATIENT_GIVEN, PATIENT_FAMILY))).isEqualTo(3);
+		assertThat(vectorMatchResultMap.getVector(String.join(", \n ", PATIENT_GIVEN, PATIENT_FAMILY))).isEqualTo(3);
 		try {
 			vectorMatchResultMap.getVector("bad");
 			fail("");		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(1523) + "There is no matchField with name bad", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1523) + "There is no matchField with name bad");
 		}
 	}
 

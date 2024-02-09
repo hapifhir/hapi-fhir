@@ -831,7 +831,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		Bundle inputBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, inputString);
 		inputBundle.setType(Bundle.BundleType.TRANSACTION);
 
-		assertThat(inputBundle.getEntry().size()).isEqualTo(53);
+		assertThat(inputBundle.getEntry()).hasSize(53);
 
 		Set<String> allIds = new TreeSet<>();
 		for (Bundle.BundleEntryComponent nextEntry : inputBundle.getEntry()) {
@@ -840,7 +840,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			allIds.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		}
 
-		assertThat(allIds.size()).isEqualTo(53);
+		assertThat(allIds).hasSize(53);
 
 		mySystemDao.transaction(mySrd, inputBundle);
 
@@ -957,7 +957,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		// TODO KHS this fails intermittently with 53 instead of 77.
 		// This can happen if a previous test set mySearchCoordinatorSvcImpl.setSyncSizeForUnitTests to a lower value
-		assertThat(ids.size()).isEqualTo(LARGE_NUMBER);
+		assertThat(ids).hasSize(LARGE_NUMBER);
 		for (int i = 1; i < LARGE_NUMBER; i++) {
 			assertThat(ids).as(ids.size() + " ids: " + ids).contains("A" + StringUtils.leftPad(Integer.toString(i), 2, '0'));
 		}
@@ -973,7 +973,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		Bundle response = executeEverythingOperationOnInstance(id);
 
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 	}
 
 	@Test
@@ -1030,7 +1030,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			.useHttpGet()
 			.execute();
 
-		assertThat(response.getEntry().size()).isEqualTo(10);
+		assertThat(response.getEntry()).hasSize(10);
 		if (response.getTotalElement().getValueAsString() != null) {
 			assertThat(response.getTotalElement().getValueAsString()).isEqualTo("21");
 		}
@@ -1041,7 +1041,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		String nextUrl = response.getLink("next").getUrl();
 		response = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 
-		assertThat(response.getEntry().size()).isEqualTo(10);
+		assertThat(response.getEntry()).hasSize(10);
 		if (response.getTotalElement().getValueAsString() != null) {
 			assertThat(response.getTotalElement().getValueAsString()).isEqualTo("21");
 		}
@@ -1053,7 +1053,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		nextUrl = response.getLink("next").getUrl();
 		response = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 
-		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getEntry()).hasSize(1);
 		assertThat(response.getTotalElement().getValueAsString()).isEqualTo("21");
 		assertThat(response.getLink("next")).isEqualTo(null);
 
@@ -1088,7 +1088,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			.useHttpGet()
 			.execute();
 
-		assertThat(response.getEntry().size()).isEqualTo(10);
+		assertThat(response.getEntry()).hasSize(10);
 		assertThat(response.getTotalElement().getValue()).isEqualTo(null);
 		assertThat(response.getLink("next")).isEqualTo(null);
 	}

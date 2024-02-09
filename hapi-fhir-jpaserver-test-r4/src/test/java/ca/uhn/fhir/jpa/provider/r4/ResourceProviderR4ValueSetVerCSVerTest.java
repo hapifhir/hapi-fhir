@@ -838,7 +838,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 
 		// Canonical expand should only return most recently updated version, v2.
-		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter()).hasSize(1);
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
@@ -875,7 +875,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 
 		// Update the CodeSystem Version and Codes
 		cs = new CodeSystem();
@@ -900,7 +900,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.returnResourceType(ValueSet.class)
 			.execute();
 		ourLog.debug("Expanded: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
-		assertThat(expanded.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(expanded.getExpansion().getContains()).hasSize(1);
 	}
 
 

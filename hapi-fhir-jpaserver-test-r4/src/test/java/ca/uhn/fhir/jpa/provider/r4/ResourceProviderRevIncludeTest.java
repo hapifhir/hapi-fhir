@@ -142,7 +142,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 
 		//Ensure that the revincludes are included in the query list of the sql trace.
 		//TODO GGG/KHS reduce this to something less than 6 by smarter iterating and getting the resource types earlier when needed.
-		assertThat(sqlCapturingInterceptor.getQueryList().size()).isEqualTo(5);
+		assertThat(sqlCapturingInterceptor.getQueryList()).hasSize(5);
 		myInterceptorRegistry.unregisterInterceptor(sqlCapturingInterceptor);
 	}
 
@@ -170,7 +170,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 			.execute();
 
 		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, bundle);
-		assertThat(foundResources.size()).isEqualTo(3);
+		assertThat(foundResources).hasSize(3);
 		assertThat(foundResources.get(0).getIdElement().getIdPart()).isEqualTo(detectedIssueId.getIdPart());
 		assertThat(foundResources.get(1).getIdElement().getIdPart()).isEqualTo(practitionerId.getIdPart());
 		assertThat(foundResources.get(2).getIdElement().getIdPart()).isEqualTo(practitionerRoleId.getIdPart());
@@ -207,7 +207,7 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 			.execute();
 
 		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, bundle);
-		assertThat(foundResources.size()).isEqualTo(4);
+		assertThat(foundResources).hasSize(4);
 		assertThat(foundResources.get(0).getIdElement().getIdPart()).isEqualTo(episodeOfCareId.getIdPart());
 		assertThat(foundResources.get(1).getIdElement().getIdPart()).isEqualTo(encounterId.getIdPart());
 		assertThat(foundResources.get(2).getIdElement().getIdPart()).isEqualTo(taskId.getIdPart());

@@ -61,7 +61,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		Patient newJane = buildJanePatient();
 
 		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
-		assertThat(result.size()).isEqualTo(1);
+		assertThat(result).hasSize(1);
 	}
 
 	@Test
@@ -88,7 +88,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			nick.getNameFirstRep().addGiven("Bill");
 			nick.getNameFirstRep().setFamily("Shatner");
 			Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Practitioner", nick, RequestPartitionId.allPartitions());
-			assertThat(result.size()).isEqualTo(1);
+			assertThat(result).hasSize(1);
 		}
 
 		{
@@ -97,7 +97,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			noMatch.getNameFirstRep().addGiven("Bob");
 			noMatch.getNameFirstRep().setFamily("Shatner");
 			Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Practitioner", noMatch, RequestPartitionId.allPartitions());
-			assertThat(result.size()).isEqualTo(0);
+			assertThat(result).isEmpty();
 		}
 	}
 
@@ -112,7 +112,7 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		Patient newJane = buildJaneWithBirthday(today);
 
 		Collection<IAnyResource> result = myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
-		assertThat(result.size()).isEqualTo(1);
+		assertThat(result).hasSize(1);
 	}
 
 	@Test

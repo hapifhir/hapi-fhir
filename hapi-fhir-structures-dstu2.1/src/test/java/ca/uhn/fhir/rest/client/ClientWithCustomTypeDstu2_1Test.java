@@ -28,7 +28,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.nio.charset.Charset;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -96,13 +96,13 @@ public class ClientWithCustomTypeDstu2_1Test {
 
 		HttpUriRequest request = capt.getAllValues().get(0);
 
-		assertEquals("http://example.com/fhir/Patient/123", request.getURI().toASCIIString());
-		assertEquals("GET", request.getMethod());
+		assertThat(request.getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/123");
+		assertThat(request.getMethod()).isEqualTo("GET");
 
-		assertEquals(1, value.getName().size());
-		assertEquals("FAMILY", value.getName().get(0).getFamilyAsSingleString());
-		assertEquals("STRINGVAL", value.getStringExt().getValue());
-		assertEquals("2011-01-02", value.getDateExt().getValueAsString());
+		assertThat(value.getName()).hasSize(1);
+		assertThat(value.getName().get(0).getFamilyAsSingleString()).isEqualTo("FAMILY");
+		assertThat(value.getStringExt().getValue()).isEqualTo("STRINGVAL");
+		assertThat(value.getDateExt().getValueAsString()).isEqualTo("2011-01-02");
 		
 	}
 

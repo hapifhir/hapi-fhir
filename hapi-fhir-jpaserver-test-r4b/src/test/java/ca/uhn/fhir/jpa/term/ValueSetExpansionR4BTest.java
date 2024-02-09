@@ -42,8 +42,8 @@ public class ValueSetExpansionR4BTest extends BaseJpaR4BTest {
 		ValueSet expandedValueSet = myValueSetDao.expand(id, new ValueSetExpansionOptions(), mySrd);
 
 		// check expansion size and include CodeSystem version
-		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(7);
-		assertThat(expandedValueSet.getCompose().getInclude().size()).isEqualTo(1);
+		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(7);
+		assertThat(expandedValueSet.getCompose().getInclude()).hasSize(1);
 		assertThat(expandedValueSet.getCompose().getInclude().get(0).getVersion()).isEqualTo(expectedCodeSystemVersion);
 	}
 

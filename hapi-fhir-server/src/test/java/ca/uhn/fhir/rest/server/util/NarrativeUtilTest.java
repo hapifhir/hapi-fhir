@@ -3,7 +3,7 @@ package ca.uhn.fhir.rest.server.util;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class NarrativeUtilTest {
 
@@ -23,7 +23,7 @@ public class NarrativeUtilTest {
 	})
 	public void testValidateIsCaseInsensitive(String theHtml, String theExpected) {
 		String output = NarrativeUtil.sanitizeHtmlFragment(fixNull(theHtml));
-		assertEquals(fixNull(theExpected), fixNull(output));
+		assertThat(fixNull(output)).isEqualTo(fixNull(theExpected));
 	}
 
 	private String fixNull(String theExpected) {

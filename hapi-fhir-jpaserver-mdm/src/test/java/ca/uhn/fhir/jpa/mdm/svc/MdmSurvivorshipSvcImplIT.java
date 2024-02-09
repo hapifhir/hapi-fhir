@@ -22,12 +22,12 @@ class MdmSurvivorshipSvcImplIT extends BaseMdmR4Test {
 		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(p1, p2, new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE));
 
 		assertThat(p2.hasIdElement()).isFalse();
-		assertThat(p2.getIdentifier().isEmpty()).isTrue();
+		assertThat(p2.getIdentifier()).isEmpty();
 		assertThat(p2.getMeta().isEmpty()).isTrue();
 
 		assertThat(p1.getNameFirstRep().equalsDeep(p2.getNameFirstRep())).isTrue();
 		assertThat(p2.getBirthDate()).isNull();
-		assertThat(p2.getTelecom().size()).isEqualTo(p1.getTelecom().size());
+		assertThat(p2.getTelecom()).hasSize(p1.getTelecom().size());
 		assertThat(p2.getTelecomFirstRep().equalsDeep(p1.getTelecomFirstRep())).isTrue();
 	}
 
@@ -41,15 +41,15 @@ class MdmSurvivorshipSvcImplIT extends BaseMdmR4Test {
 		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(p1, p2, new MdmTransactionContext(MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES));
 
 		assertThat(p2.hasIdElement()).isFalse();
-		assertThat(p2.getIdentifier().isEmpty()).isFalse();
+		assertThat(p2.getIdentifier()).isNotEmpty();
 		assertThat(p2.getMeta().isEmpty()).isTrue();
 
-		assertThat(p2.getName().size()).isEqualTo(2);
+		assertThat(p2.getName()).hasSize(2);
 		assertThat(p2.getName().get(0).getNameAsSingleString()).isEqualTo(p2Name);
 		assertThat(p2.getName().get(1).getNameAsSingleString()).isEqualTo(p1Name);
 		assertThat(p2.getBirthDate()).isNull();
 
-		assertThat(p1.getTelecom().size()).isEqualTo(p1.getTelecom().size());
+		assertThat(p1.getTelecom()).hasSize(p1.getTelecom().size());
 		assertThat(p2.getTelecomFirstRep().equalsDeep(p1.getTelecomFirstRep())).isTrue();
 	}
 }

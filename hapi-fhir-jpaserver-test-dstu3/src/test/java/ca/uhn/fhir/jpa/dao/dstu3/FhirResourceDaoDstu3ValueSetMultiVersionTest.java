@@ -86,7 +86,7 @@ public class FhirResourceDaoDstu3ValueSetMultiVersionTest extends BaseJpaDstu3Te
 		assertThat(runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrl(PageRequest.of(0, 10), URL_MY_VALUE_SET).size())).isEqualTo(3);
 
 		Optional<TermValueSet> optionalTermValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndNullVersion(URL_MY_VALUE_SET));
-		assertThat(optionalTermValueSet.isPresent()).isTrue();
+		assertThat(optionalTermValueSet).isPresent();
 		Long nullVersion_resid = ((ResourceTable)myValueSets.get(ValueSetVersions.NULL).getEntity()).getId();
 		assertThat(nullVersion_resid).isNotNull();
 		assertThat(optionalTermValueSet.get().getResource()).isNotNull();
@@ -94,7 +94,7 @@ public class FhirResourceDaoDstu3ValueSetMultiVersionTest extends BaseJpaDstu3Te
 		assertThat(optionalTermValueSet.get().getName()).isEqualTo("ValueSet_noVersion");
 
 		optionalTermValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v1"));
-		assertThat(optionalTermValueSet.isPresent()).isTrue();
+		assertThat(optionalTermValueSet).isPresent();
 		Long v1Version_resid = ((ResourceTable)myValueSets.get(ValueSetVersions.V1).getEntity()).getId();
 		assertThat(v1Version_resid).isNotNull();
 		assertThat(optionalTermValueSet.get().getResource()).isNotNull();
@@ -102,7 +102,7 @@ public class FhirResourceDaoDstu3ValueSetMultiVersionTest extends BaseJpaDstu3Te
 		assertThat(optionalTermValueSet.get().getName()).isEqualTo("ValueSet_v1");
 
 		optionalTermValueSet = runInTransaction(()->myTermValueSetDao.findTermValueSetByUrlAndVersion(URL_MY_VALUE_SET, "v2"));
-		assertThat(optionalTermValueSet.isPresent()).isTrue();
+		assertThat(optionalTermValueSet).isPresent();
 		Long v2Version_resid = ((ResourceTable)myValueSets.get(ValueSetVersions.V2).getEntity()).getId();
 		assertThat(v2Version_resid).isNotNull();
 		assertThat(optionalTermValueSet.get().getResource()).isNotNull();

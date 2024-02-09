@@ -100,7 +100,7 @@ public class ValueSetExpansionWithHierarchyR4Test extends BaseTermR4Test {
       myValueSetDao.create(theValueSet, mySrd);
       myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
       Optional<TermValueSet> optionalTermValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(theValueSet.getUrl()));
-	   assertThat(optionalTermValueSet.isPresent()).isTrue();
+		 assertThat(optionalTermValueSet).isPresent();
       TermValueSet expandedTermValueSet = optionalTermValueSet.get();
 	   assertThat(expandedTermValueSet.getExpansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED);
 	   assertThat(expandedTermValueSet.getTotalConcepts()).isEqualTo(theExpectedConceptExpansionCount);

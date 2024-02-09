@@ -155,7 +155,7 @@ public class PatientReindexTestHelper {
 	private void validatePersistedPatients(int theExpectedNumPatients, long theExpectedVersion) {
 		RequestDetails requestDetails = new SystemRequestDetails();
 		List<IBaseResource> resources = myPatientDao.search(SearchParameterMap.newSynchronous(), requestDetails).getAllResources();
-		assertThat(resources.size()).isEqualTo(theExpectedNumPatients);
+		assertThat(resources).hasSize(theExpectedNumPatients);
 		for(IBaseResource resource : resources){
 			assertThat(resource.getClass()).isEqualTo(Patient.class);
 			Patient patient = (Patient) resource;

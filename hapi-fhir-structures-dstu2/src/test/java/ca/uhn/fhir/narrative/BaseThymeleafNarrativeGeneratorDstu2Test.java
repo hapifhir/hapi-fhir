@@ -2,7 +2,7 @@ package ca.uhn.fhir.narrative;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BaseThymeleafNarrativeGeneratorDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseThymeleafNarrativeGeneratorDstu2Test.class);
@@ -55,7 +55,7 @@ public class BaseThymeleafNarrativeGeneratorDstu2Test {
 
 		ourLog.info(actual);
 
-		assertEquals(expected, actual);
+		assertThat(actual).isEqualTo(expected);
 	}
 
 

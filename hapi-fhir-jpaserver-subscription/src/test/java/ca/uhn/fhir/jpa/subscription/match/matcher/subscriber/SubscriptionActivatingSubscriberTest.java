@@ -118,7 +118,7 @@ public class SubscriptionActivatingSubscriberTest {
 		Mockito.verify(myAppender, Mockito.times(totalInfoLogs))
 			.doAppend(appenderCaptor.capture());
 		List<ILoggingEvent> events = appenderCaptor.getAllValues();
-		assertThat(events.size()).isEqualTo(totalInfoLogs);
-		assertThat(events.get(0).getMessage().contains(exceptionMsg)).isTrue();
+		assertThat(events).hasSize(totalInfoLogs);
+		assertThat(events.get(0).getMessage()).contains(exceptionMsg);
 	}
 }

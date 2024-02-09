@@ -731,7 +731,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		Organization org = (Organization) p.getManagingOrganization().getResource();
 		assertThat(org.getId()).isEqualTo("#1");
-		assertThat(org.getMeta().getTag().size()).isEqualTo(1);
+		assertThat(org.getMeta().getTag()).hasSize(1);
 
 	}
 
@@ -792,7 +792,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setValue(new BigDecimal("0.012"))
 			.setUnits("m")
 		);
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)).size()).isEqualTo(1);
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).hasSize(1);
 	}
 
 	@Test
@@ -845,7 +845,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY_NRML t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
-		assertThat(ids.size()).isEqualTo(1);
+		assertThat(ids).hasSize(1);
 
 		// Try with non-normalized value
 		myCaptureQueriesListener.clear();
@@ -858,7 +858,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY_NRML t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
-		assertThat(ids.size()).isEqualTo(1);
+		assertThat(ids).hasSize(1);
 
 		// Try with no units value
 		myCaptureQueriesListener.clear();
@@ -869,7 +869,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
-		assertThat(ids.size()).isEqualTo(1);
+		assertThat(ids).hasSize(1);
 	}
 
 	@Test
@@ -918,7 +918,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		List<IBaseResource> resources = found.getResources(0, found.sizeOrThrowNpe());
 
-		assertThat(ids.size()).isEqualTo(1);
+		assertThat(ids).hasSize(1);
 
 		ourLog.debug("Observation2: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
 
@@ -961,7 +961,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setValue(new BigDecimal("957412345"))
 			.setUnits("g.m-3")
 		);
-		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)).size()).isEqualTo(1);
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map))).hasSize(1);
 	}
 
 	@Test
@@ -1006,7 +1006,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '95.7412345'");
-		assertThat(ids.size()).isEqualTo(1);
+		assertThat(ids).hasSize(1);
 
 	}
 
@@ -1061,7 +1061,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
-		assertThat(ids.size()).isEqualTo(0);
+		assertThat(ids).isEmpty();
 
 		// Try with non-normalized value
 		myCaptureQueriesListener.clear();
@@ -1074,7 +1074,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
-		assertThat(ids.size()).isEqualTo(1);
+		assertThat(ids).hasSize(1);
 
 		// Try with no units value
 		myCaptureQueriesListener.clear();
@@ -1085,7 +1085,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
-		assertThat(ids.size()).isEqualTo(1);
+		assertThat(ids).hasSize(1);
 	}
 
 	@Test
@@ -1191,7 +1191,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
-		assertThat(ids.size()).isEqualTo(0);
+		assertThat(ids).isEmpty();
 
 		// Try with non-normalized value
 		myCaptureQueriesListener.clear();
@@ -1204,7 +1204,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
-		assertThat(ids.size()).isEqualTo(1);
+		assertThat(ids).hasSize(1);
 
 		// Try with no units value
 		myCaptureQueriesListener.clear();
@@ -1215,7 +1215,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
-		assertThat(ids.size()).isEqualTo(1);
+		assertThat(ids).hasSize(1);
 	}
 
 }

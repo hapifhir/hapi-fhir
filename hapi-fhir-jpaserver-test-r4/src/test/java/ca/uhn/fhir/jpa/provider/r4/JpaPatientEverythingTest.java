@@ -148,7 +148,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 			IBundleProvider outcome = myPatientDao.patientInstanceEverything(null, request, params, new IdType(patientId));
 			List<IBaseResource> resources = outcome.getResources(0, pageSize);
 			actualResourceIds.addAll(resources.stream().map(t -> t.getIdElement().toUnqualifiedVersionless().getValue()).toList());
-			assertThat(actualResourceIds.size()).isEqualTo(expectedEverythingSize);
+					assertThat(actualResourceIds).hasSize(expectedEverythingSize);
 		}
 
         // Try with an HTTP call
@@ -175,7 +175,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
                 }
             }
 
-			assertThat(actualResourceIds.size()).isEqualTo(expectedEverythingSize);
+					assertThat(actualResourceIds).hasSize(expectedEverythingSize);
         }
     }
 
@@ -1812,15 +1812,15 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         for (Bundle.BundleEntryComponent entry : inputBundle.getEntry()) {
             resourceTypes.add(entry.getResource().getResourceType().name());
         }
-		// there are 2 practitioners in the bundle
-		assertThat(resourceTypes.size()).isEqualTo(4);
+			// there are 2 practitioners in the bundle
+			assertThat(resourceTypes).hasSize(4);
 
         // pre-seed the resources
         Bundle responseBundle = myClient.transaction()
                 .withBundle(inputBundle)
                 .execute();
 		assertThat(responseBundle).isNotNull();
-		assertThat(responseBundle.getEntry().size()).isEqualTo(resourceCount);
+			assertThat(responseBundle.getEntry()).hasSize(resourceCount);
 
         IIdType patientId = null;
         for (Bundle.BundleEntryComponent entry : responseBundle.getEntry()) {
@@ -1842,9 +1842,9 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
                     .returnResourceType(Bundle.class)
                     .execute();
 			assertThat(response).isNotNull();
-			assertThat(response.getEntry().size()).isEqualTo(resourceCount);
+					assertThat(response.getEntry()).hasSize(resourceCount);
             for (Bundle.BundleEntryComponent entry : response.getEntry()) {
-				assertThat(resourceTypes.contains(entry.getResource().getResourceType().name())).isTrue();
+							assertThat(resourceTypes).contains(entry.getResource().getResourceType());
             }
         }
 
@@ -1860,9 +1860,9 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
                     .returnResourceType(Bundle.class)
                     .execute();
 			assertThat(response).isNotNull();
-			assertThat(response.getEntry().size()).isEqualTo(resourceCount);
+					assertThat(response.getEntry()).hasSize(resourceCount);
             for (Bundle.BundleEntryComponent entry : response.getEntry()) {
-				assertThat(resourceTypes.contains(entry.getResource().getResourceType().name())).isTrue();
+							assertThat(resourceTypes).contains(entry.getResource().getResourceType());
             }
         }
     }

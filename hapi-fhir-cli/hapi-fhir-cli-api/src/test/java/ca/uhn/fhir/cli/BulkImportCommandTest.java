@@ -46,7 +46,6 @@ import java.util.zip.GZIPOutputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.timeout;
@@ -127,9 +126,9 @@ public class BulkImportCommandTest {
 		BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
 
 		// Reverse order because Patient should be first
-		assertEquals(2, jobParameters.getNdJsonUrls().size());
-		assertEquals(fileContents2, fetchFile(jobParameters.getNdJsonUrls().get(0)));
-		assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
+		assertThat(jobParameters.getNdJsonUrls()).hasSize(2);
+		assertThat(fetchFile(jobParameters.getNdJsonUrls().get(0))).isEqualTo(fileContents2);
+		assertThat(fetchFile(jobParameters.getNdJsonUrls().get(1))).isEqualTo(fileContents1);
 	}
 
 	@Test
@@ -169,9 +168,9 @@ public class BulkImportCommandTest {
 		BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
 
 		// Reverse order because Patient should be first
-		assertEquals(2, jobParameters.getNdJsonUrls().size());
-		assertEquals(fileContents2, fetchFile(jobParameters.getNdJsonUrls().get(0)));
-		assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
+		assertThat(jobParameters.getNdJsonUrls()).hasSize(2);
+		assertThat(fetchFile(jobParameters.getNdJsonUrls().get(0))).isEqualTo(fileContents2);
+		assertThat(fetchFile(jobParameters.getNdJsonUrls().get(1))).isEqualTo(fileContents1);
 	}
 
 	@Test
@@ -211,9 +210,9 @@ public class BulkImportCommandTest {
 			BulkImportJobParameters jobParameters = startRequest.getParameters(BulkImportJobParameters.class);
 
 			// Reverse order because Patient should be first
-			assertEquals(2, jobParameters.getNdJsonUrls().size());
-			assertEquals(fileContents2, fetchFile(jobParameters.getNdJsonUrls().get(0)));
-			assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
+			assertThat(jobParameters.getNdJsonUrls()).hasSize(2);
+			assertThat(fetchFile(jobParameters.getNdJsonUrls().get(0))).isEqualTo(fileContents2);
+			assertThat(fetchFile(jobParameters.getNdJsonUrls().get(1))).isEqualTo(fileContents1);
 		}
 		catch(InternalErrorException e) {
 			ourLog.error(e.getMessage());
@@ -223,7 +222,7 @@ public class BulkImportCommandTest {
 	private String fetchFile(String url) throws IOException {
 		String outcome;
 		try (CloseableHttpResponse response = myHttpClientExtension.getClient().execute(new HttpGet(url))) {
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 			outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 		}
 		return outcome;

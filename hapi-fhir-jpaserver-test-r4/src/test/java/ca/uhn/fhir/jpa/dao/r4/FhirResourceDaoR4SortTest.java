@@ -255,7 +255,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		ids = toUnqualifiedVersionlessIds(myPatientDao.search(map));
 		ourLog.info("** Got IDs: {}", ids);
 		assertThat(ids).as(ids.toString()).containsExactly(pid2, pid4, pid5, pid3, pid1);
-		assertThat(ids.size()).isEqualTo(5);
+		assertThat(ids).hasSize(5);
 
 	}
 

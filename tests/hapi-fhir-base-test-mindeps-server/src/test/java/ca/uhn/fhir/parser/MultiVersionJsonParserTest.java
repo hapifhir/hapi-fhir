@@ -1,6 +1,6 @@
 package ca.uhn.fhir.parser;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -24,7 +24,7 @@ public class MultiVersionJsonParserTest {
 		try {
 			FhirContext.forDstu3().newJsonParser().encodeResourceToString(p);
 			fail("");		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(1829) + "This parser is for FHIR version DSTU3 - Can not encode a structure for version DSTU2", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1829) + "This parser is for FHIR version DSTU3 - Can not encode a structure for version DSTU2");
 		}
 	}
 

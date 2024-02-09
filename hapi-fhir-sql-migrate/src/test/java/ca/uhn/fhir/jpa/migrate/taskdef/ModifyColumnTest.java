@@ -39,7 +39,7 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL")).isEqualTo(new JdbcUtils.ColumnType(ColumnTypeEnum.STRING, 250));
-		assertThat(task.getExecutedStatements().size()).isEqualTo(1);
+		assertThat(task.getExecutedStatements()).hasSize(1);
 
 		// Make sure additional migrations don't crash
 		getMigrator().migrate();
@@ -65,7 +65,7 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().migrate();
 
 		assertThat(JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL")).isEqualTo(new JdbcUtils.ColumnType(ColumnTypeEnum.STRING, 300));
-		assertThat(task.getExecutedStatements().size()).isEqualTo(1);
+		assertThat(task.getExecutedStatements()).hasSize(1);
 
 		// Make sure additional migrations don't crash
 		getMigrator().migrate();
@@ -91,7 +91,7 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().addTask(task);
 		getMigrator().migrate();
 
-		assertThat(task.getExecutedStatements().size()).isEqualTo(0);
+		assertThat(task.getExecutedStatements()).isEmpty();
 		assertThat(JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL")).isEqualTo(new JdbcUtils.ColumnType(ColumnTypeEnum.STRING, 255));
 
 		// Make sure additional migrations don't crash
@@ -341,7 +341,7 @@ public class ModifyColumnTest extends BaseTest {
 		getMigrator().addTask(task);
 		getMigrator().migrate();
 
-		assertThat(task.getExecutedStatements().size()).isEqualTo(1);
+		assertThat(task.getExecutedStatements()).hasSize(1);
 		assertThat(JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "TEXTCOL")).isEqualTo(new JdbcUtils.ColumnType(ColumnTypeEnum.STRING, 10));
 
 		// Make sure additional migrations don't crash

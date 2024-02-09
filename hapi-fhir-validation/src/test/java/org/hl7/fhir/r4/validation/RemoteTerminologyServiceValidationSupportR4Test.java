@@ -52,11 +52,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidationTestWithInlineMocks {
 	private static final String DISPLAY = "DISPLAY";
@@ -106,7 +101,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	@Test
 	public void testValidateCode_withBlankCode_returnsNull() {
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, "", DISPLAY, VALUE_SET_URL);
-		assertNull(outcome);
+		assertThat(outcome).isNull();
 	}
 
 	@Test
@@ -114,17 +109,17 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		createNextValueSetReturnParameters(true, DISPLAY, null);
 
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
-		assertNotNull(outcome);
-		assertEquals(CODE, outcome.getCode());
-		assertEquals(DISPLAY, outcome.getDisplay());
-		assertNull(outcome.getSeverity());
-		assertNull(outcome.getMessage());
+		assertThat(outcome).isNotNull();
+		assertThat(outcome.getCode()).isEqualTo(CODE);
+		assertThat(outcome.getDisplay()).isEqualTo(DISPLAY);
+		assertThat(outcome.getSeverity()).isNull();
+		assertThat(outcome.getMessage()).isNull();
 
-		assertEquals(CODE, myValueSetProvider.myLastCode.getCode());
-		assertEquals(DISPLAY, myValueSetProvider.myLastDisplay.getValue());
-		assertEquals(CODE_SYSTEM, myValueSetProvider.myLastSystem.getValue());
-		assertEquals(VALUE_SET_URL, myValueSetProvider.myLastUrl.getValue());
-		assertNull(myValueSetProvider.myLastValueSet);
+		assertThat(myValueSetProvider.myLastCode.getCode()).isEqualTo(CODE);
+		assertThat(myValueSetProvider.myLastDisplay.getValue()).isEqualTo(DISPLAY);
+		assertThat(myValueSetProvider.myLastSystem.getValue()).isEqualTo(CODE_SYSTEM);
+		assertThat(myValueSetProvider.myLastUrl.getValue()).isEqualTo(VALUE_SET_URL);
+		assertThat(myValueSetProvider.myLastValueSet).isNull();
 	}
 
 	@Test
@@ -136,7 +131,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		mySvc.fetchValueSet(VALUE_SET_URL);
 
 		// then
-		assertEquals(SummaryEnum.FALSE, myValueSetProvider.myLastSummaryParam);
+		assertThat(myValueSetProvider.myLastSummaryParam).isEqualTo(SummaryEnum.FALSE);
 	}
 
 	@Test
@@ -144,17 +139,17 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		createNextValueSetReturnParameters(false, null, ERROR_MESSAGE);
 
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
-		assertNotNull(outcome);
-		assertNull(outcome.getCode());
-		assertNull(outcome.getDisplay());
-		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
-		assertEquals(ERROR_MESSAGE, outcome.getMessage());
+		assertThat(outcome).isNotNull();
+		assertThat(outcome.getCode()).isNull();
+		assertThat(outcome.getDisplay()).isNull();
+		assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.ERROR);
+		assertThat(outcome.getMessage()).isEqualTo(ERROR_MESSAGE);
 
-		assertEquals(CODE, myValueSetProvider.myLastCode.getCode());
-		assertEquals(DISPLAY, myValueSetProvider.myLastDisplay.getValue());
-		assertEquals(CODE_SYSTEM, myValueSetProvider.myLastSystem.getValue());
-		assertEquals(VALUE_SET_URL, myValueSetProvider.myLastUrl.getValue());
-		assertNull(myValueSetProvider.myLastValueSet);
+		assertThat(myValueSetProvider.myLastCode.getCode()).isEqualTo(CODE);
+		assertThat(myValueSetProvider.myLastDisplay.getValue()).isEqualTo(DISPLAY);
+		assertThat(myValueSetProvider.myLastSystem.getValue()).isEqualTo(CODE_SYSTEM);
+		assertThat(myValueSetProvider.myLastUrl.getValue()).isEqualTo(VALUE_SET_URL);
+		assertThat(myValueSetProvider.myLastValueSet).isNull();
 	}
 
 	@Test
@@ -167,14 +162,14 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		myCodeSystemProvider.myNextValidationResult.setMessage(SUCCESS_MESSAGE);
 
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, null);
-		assertNotNull(outcome);
-		assertEquals(CODE, outcome.getCode());
-		assertEquals(DISPLAY, outcome.getDisplay());
-		assertNull(outcome.getSeverity());
-		assertNull(outcome.getMessage());
+		assertThat(outcome).isNotNull();
+		assertThat(outcome.getCode()).isEqualTo(CODE);
+		assertThat(outcome.getDisplay()).isEqualTo(DISPLAY);
+		assertThat(outcome.getSeverity()).isNull();
+		assertThat(outcome.getMessage()).isNull();
 
-		assertEquals(CODE, myCodeSystemProvider.myCode.getCode());
-		assertEquals(CODE_SYSTEM, myCodeSystemProvider.mySystemUrl.getValueAsString());
+		assertThat(myCodeSystemProvider.myCode.getCode()).isEqualTo(CODE);
+		assertThat(myCodeSystemProvider.mySystemUrl.getValueAsString()).isEqualTo(CODE_SYSTEM);
 	}
 
 
@@ -186,17 +181,17 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		valueSet.setUrl(VALUE_SET_URL);
 
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, DISPLAY, valueSet);
-		assertNotNull(outcome);
-		assertEquals(CODE, outcome.getCode());
-		assertEquals(DISPLAY, outcome.getDisplay());
-		assertNull(outcome.getSeverity());
-		assertNull(outcome.getMessage());
+		assertThat(outcome).isNotNull();
+		assertThat(outcome.getCode()).isEqualTo(CODE);
+		assertThat(outcome.getDisplay()).isEqualTo(DISPLAY);
+		assertThat(outcome.getSeverity()).isNull();
+		assertThat(outcome.getMessage()).isNull();
 
-		assertEquals(CODE, myValueSetProvider.myLastCode.getCode());
-		assertEquals(DISPLAY, myValueSetProvider.myLastDisplay.getValue());
-		assertEquals(CODE_SYSTEM, myValueSetProvider.myLastSystem.getValue());
-		assertEquals(VALUE_SET_URL, myValueSetProvider.myLastUrl.getValueAsString());
-		assertNull(myValueSetProvider.myLastValueSet);
+		assertThat(myValueSetProvider.myLastCode.getCode()).isEqualTo(CODE);
+		assertThat(myValueSetProvider.myLastDisplay.getValue()).isEqualTo(DISPLAY);
+		assertThat(myValueSetProvider.myLastSystem.getValue()).isEqualTo(CODE_SYSTEM);
+		assertThat(myValueSetProvider.myLastUrl.getValueAsString()).isEqualTo(VALUE_SET_URL);
+		assertThat(myValueSetProvider.myLastValueSet).isNull();
 	}
 
 	/**
@@ -210,7 +205,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		valueSet.setUrl(VALUE_SET_URL);
 
 		IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null, new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
-		assertNull(outcome);
+		assertThat(outcome).isNull();
 	}
 
 	@Test
@@ -253,20 +248,20 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 
 		TranslateConceptResults results = mySvc.translateConcept(request);
 
-		assertNotNull(results);
-		assertTrue(results.getResult());
-		assertEquals(results.getResults().size(), 2);
+		assertThat(results).isNotNull();
+		assertThat(results.getResult()).isTrue();
+		assertThat(2).isEqualTo(results.getResults().size());
 		for(TranslateConceptResult result : results.getResults()) {
-			assertEquals(singleResult, result);
+			assertThat(result).isEqualTo(singleResult);
 		}
 
-		assertTrue(codeableConcept.equalsDeep(myConceptMapProvider.myLastCodeableConcept));
-		assertEquals(TARGET_SYSTEM, myConceptMapProvider.myLastTargetCodeSystem.getValue());
-		assertEquals(CONCEPT_MAP_URL, myConceptMapProvider.myLastConceptMapUrl.getValue());
-		assertEquals(CONCEPT_MAP_VERSION, myConceptMapProvider.myLastConceptMapVersion.getValue());
-		assertEquals(SOURCE_VALUE_SET_URL, myConceptMapProvider.myLastSourceValueSet.getValue());
-		assertEquals(TARGET_VALUE_SET_URL, myConceptMapProvider.myLastTargetValueSet.getValue());
-		assertEquals(REVERSE, myConceptMapProvider.myLastReverse.getValue());
+		assertThat(codeableConcept.equalsDeep(myConceptMapProvider.myLastCodeableConcept)).isTrue();
+		assertThat(myConceptMapProvider.myLastTargetCodeSystem.getValue()).isEqualTo(TARGET_SYSTEM);
+		assertThat(myConceptMapProvider.myLastConceptMapUrl.getValue()).isEqualTo(CONCEPT_MAP_URL);
+		assertThat(myConceptMapProvider.myLastConceptMapVersion.getValue()).isEqualTo(CONCEPT_MAP_VERSION);
+		assertThat(myConceptMapProvider.myLastSourceValueSet.getValue()).isEqualTo(SOURCE_VALUE_SET_URL);
+		assertThat(myConceptMapProvider.myLastTargetValueSet.getValue()).isEqualTo(TARGET_VALUE_SET_URL);
+		assertThat(myConceptMapProvider.myLastReverse.getValue()).isEqualTo(REVERSE);
 	}
 
 	@Test
@@ -278,17 +273,17 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		IValidationSupport.TranslateCodeRequest request = new IValidationSupport.TranslateCodeRequest(codings, null);
 
 		TranslateConceptResults results = mySvc.translateConcept(request);
-		assertNotNull(results);
-		assertFalse(results.getResult());
-		assertEquals(results.getResults().size(), 0);
+		assertThat(results).isNotNull();
+		assertThat(results.getResult()).isFalse();
+		assertThat(0).isEqualTo(results.getResults().size());
 
-		assertNull(myConceptMapProvider.myLastCodeableConcept);
-		assertNull(myConceptMapProvider.myLastTargetCodeSystem);
-		assertNull(myConceptMapProvider.myLastConceptMapUrl);
-		assertNull(myConceptMapProvider.myLastConceptMapVersion);
-		assertNull(myConceptMapProvider.myLastSourceValueSet);
-		assertNull(myConceptMapProvider.myLastTargetValueSet);
-		assertNull(myConceptMapProvider.myLastReverse);
+		assertThat(myConceptMapProvider.myLastCodeableConcept).isNull();
+		assertThat(myConceptMapProvider.myLastTargetCodeSystem).isNull();
+		assertThat(myConceptMapProvider.myLastConceptMapUrl).isNull();
+		assertThat(myConceptMapProvider.myLastConceptMapVersion).isNull();
+		assertThat(myConceptMapProvider.myLastSourceValueSet).isNull();
+		assertThat(myConceptMapProvider.myLastTargetValueSet).isNull();
+		assertThat(myConceptMapProvider.myLastReverse).isNull();
 	}
 
 	@Test
@@ -300,7 +295,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		mySvc.fetchCodeSystem("http://loinc.org");
 
 		// then
-		assertEquals(SummaryEnum.FALSE, myCodeSystemProvider.myLastSummaryParam);
+		assertThat(myCodeSystemProvider.myLastSummaryParam).isEqualTo(SummaryEnum.FALSE);
 	}
 
 
@@ -333,7 +328,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 				new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 
 			// validate service doesn't do early return (as when no code system is present)
-			assertNotNull(outcome);
+			assertThat(outcome).isNotNull();
 		}
 
 
@@ -352,7 +347,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 				IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
 					new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 
-				assertNull(outcome);
+				assertThat(outcome).isNull();
 			}
 
 
@@ -372,7 +367,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 				IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
 					new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 
-				assertNull(outcome);
+				assertThat(outcome).isNull();
 			}
 
 
@@ -399,8 +394,8 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 				IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
 					new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 
-				assertNotNull(outcome);
-				assertEquals(systemUrl2, requestInterceptor.getCapturedSystemParameter());
+				assertThat(outcome).isNotNull();
+				assertThat(requestInterceptor.getCapturedSystemParameter()).isEqualTo(systemUrl2);
 			}
 
 
@@ -429,8 +424,8 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 				IValidationSupport.CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
 					new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 
-				assertNotNull(outcome);
-				assertEquals(systemUrl2 + "|" + system2Version, requestInterceptor.getCapturedSystemParameter());
+				assertThat(outcome).isNotNull();
+				assertThat(requestInterceptor.getCapturedSystemParameter()).isEqualTo(systemUrl2 + "|" + system2Version);
 			}
 
 
@@ -452,7 +447,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 						Parameters params = parser.parseResource(Parameters.class, content);
 						List<String> systemValues = ParametersUtil.getNamedParameterValuesAsString(
 							ourCtx, params, "system");
-						assertEquals(1, systemValues.size());
+						assertThat(systemValues).hasSize(1);
 						capturedSystemParameter = systemValues.get(0);
 					}
 				} catch (IOException theE) {
@@ -474,8 +469,8 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		myValueSetProvider.myNextReturnValueSets = new ArrayList<>();
 
 		boolean outcome = mySvc.isValueSetSupported(null, "http://loinc.org/VS");
-		assertFalse(outcome);
-		assertEquals("http://loinc.org/VS", myValueSetProvider.myLastUrlParam.getValue());
+		assertThat(outcome).isFalse();
+		assertThat(myValueSetProvider.myLastUrlParam.getValue()).isEqualTo("http://loinc.org/VS");
 	}
 
 	@Test
@@ -484,8 +479,8 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		myValueSetProvider.myNextReturnValueSets.add((ValueSet) new ValueSet().setId("ValueSet/123"));
 
 		boolean outcome = mySvc.isValueSetSupported(null, "http://loinc.org/VS");
-		assertTrue(outcome);
-		assertEquals("http://loinc.org/VS", myValueSetProvider.myLastUrlParam.getValue());
+		assertThat(outcome).isTrue();
+		assertThat(myValueSetProvider.myLastUrlParam.getValue()).isEqualTo("http://loinc.org/VS");
 	}
 
 	@Test
@@ -493,8 +488,8 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		myCodeSystemProvider.myNextReturnCodeSystems = new ArrayList<>();
 
 		boolean outcome = mySvc.isCodeSystemSupported(null, "http://loinc.org");
-		assertFalse(outcome);
-		assertEquals("http://loinc.org", myCodeSystemProvider.myLastUrlParam.getValue());
+		assertThat(outcome).isFalse();
+		assertThat(myCodeSystemProvider.myLastUrlParam.getValue()).isEqualTo("http://loinc.org");
 	}
 
 	@Test
@@ -503,8 +498,8 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		myCodeSystemProvider.myNextReturnCodeSystems.add((CodeSystem) new CodeSystem().setId("CodeSystem/123"));
 
 		boolean outcome = mySvc.isCodeSystemSupported(null, "http://loinc.org");
-		assertTrue(outcome);
-		assertEquals("http://loinc.org", myCodeSystemProvider.myLastUrlParam.getValue());
+		assertThat(outcome).isTrue();
+		assertThat(myCodeSystemProvider.myLastUrlParam.getValue()).isEqualTo("http://loinc.org");
 	}
 
 	private void createNextValueSetReturnParameters(boolean theResult, String theDisplay, String theMessage) {

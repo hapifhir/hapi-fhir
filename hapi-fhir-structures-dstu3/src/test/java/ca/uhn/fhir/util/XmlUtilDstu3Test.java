@@ -17,8 +17,7 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.transform.TransformerException;
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -85,17 +84,17 @@ public class XmlUtilDstu3Test {
 			initialLen = output.length();
 			output = output.replace("\n ", "\n");
 		} while (output.length() != initialLen);
-		assertEquals("<document>\n" +
+		assertThat(output).isEqualTo("<document>\n" +
 			"<tag id=\"1\"/>\n" +
-			"</document>\n", output);
+			"</document>\n");
 	}
 
 	@Test
 	public void testApplyUnsupportedFeature() throws IOException, SAXException {
-		assertNotNull(XmlUtil.parseDocument("<document></document>"));
+		assertThat(XmlUtil.parseDocument("<document></document>")).isNotNull();
 
 		XmlUtil.setThrowExceptionForUnitTest(new ParserConfigurationException("AA"));
-		assertNotNull(XmlUtil.parseDocument("<document></document>"));
+		assertThat(XmlUtil.parseDocument("<document></document>")).isNotNull();
 	}
 
 	@AfterAll

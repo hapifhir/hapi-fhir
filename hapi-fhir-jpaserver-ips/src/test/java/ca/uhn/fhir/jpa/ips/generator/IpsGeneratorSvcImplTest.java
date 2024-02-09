@@ -188,7 +188,7 @@ public class IpsGeneratorSvcImplTest {
 		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
 
 		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
-		assertThat(tables.size()).isEqualTo(1);
+		assertThat(tables).hasSize(1);
 		HtmlTable table = (HtmlTable) tables.get(0);
 		int onsetIndex = 6;
 		assertThat(table.getHeader().getRows().get(0).getCell(onsetIndex).asNormalizedText()).isEqualTo("Onset");
@@ -223,7 +223,7 @@ public class IpsGeneratorSvcImplTest {
 		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
 
 		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
-		assertThat(tables.size()).isEqualTo(1);
+		assertThat(tables).hasSize(1);
 	}
 
 	@Test
@@ -258,7 +258,7 @@ public class IpsGeneratorSvcImplTest {
 		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
 
 		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
-		assertThat(tables.size()).isEqualTo(2);
+		assertThat(tables).hasSize(2);
 		HtmlTable table = (HtmlTable) tables.get(1);
 		HtmlTableRow row = table.getBodies().get(0).getRows().get(0);
 		assertThat(row.getCell(0).asNormalizedText()).isEqualTo("Tylenol");
@@ -294,7 +294,7 @@ public class IpsGeneratorSvcImplTest {
 		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
 
 		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
-		assertThat(tables.size()).isEqualTo(2);
+		assertThat(tables).hasSize(2);
 		HtmlTable table = (HtmlTable) tables.get(0);
 		HtmlTableRow row = table.getBodies().get(0).getRows().get(0);
 		assertThat(row.getCell(0).asNormalizedText()).isEqualTo("");
@@ -378,9 +378,9 @@ public class IpsGeneratorSvcImplTest {
 		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
 
 		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
-		assertThat(tables.size()).isEqualTo(2);
+		assertThat(tables).hasSize(2);
 		HtmlTable table = (HtmlTable) tables.get(1);
-		assertThat(table.getBodies().get(0).getRows().size()).isEqualTo(2);
+		assertThat(table.getBodies().get(0).getRows()).hasSize(2);
 	}
 
 	@Test
@@ -418,7 +418,7 @@ public class IpsGeneratorSvcImplTest {
 		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
 
 		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
-		assertThat(tables.size()).isEqualTo(1);
+		assertThat(tables).hasSize(1);
 		HtmlTable table = (HtmlTable) tables.get(0);
 		HtmlTableRow row = table.getBodies().get(0).getRows().get(0);
 		assertThat(row.getCell(0).asNormalizedText()).isEqualTo("Pacemaker");
@@ -465,7 +465,7 @@ public class IpsGeneratorSvcImplTest {
 		ourLog.info("Narrative:\n{}", narrativeHtml.asXml());
 
 		DomNodeList<DomElement> tables = narrativeHtml.getElementsByTagName("table");
-		assertThat(tables.size()).isEqualTo(1);
+		assertThat(tables).hasSize(1);
 		HtmlTable table = (HtmlTable) tables.get(0);
 		HtmlTableRow row = table.getBodies().get(0).getRows().get(0);
 		assertThat(row.getCell(0).asNormalizedText()).isEqualTo("SpikeVax");
@@ -543,10 +543,10 @@ public class IpsGeneratorSvcImplTest {
 		Composition composition = (Composition) outcome.getEntry().get(0).getResource();
 		Composition.SectionComponent problemListSection = findSection(composition, IpsSectionEnum.PROBLEM_LIST);
 		assertThat(problemListSection.getEntry().get(0).getReference()).isEqualTo(addedCondition.getId());
-		assertThat(problemListSection.getEntry().size()).isEqualTo(1);
+		assertThat(problemListSection.getEntry()).hasSize(1);
 		Composition.SectionComponent illnessHistorySection = findSection(composition, IpsSectionEnum.ILLNESS_HISTORY);
 		assertThat(illnessHistorySection.getEntry().get(0).getReference()).isEqualTo(addedCondition2.getId());
-		assertThat(illnessHistorySection.getEntry().size()).isEqualTo(1);
+		assertThat(illnessHistorySection.getEntry()).hasSize(1);
 	}
 
 	@Test

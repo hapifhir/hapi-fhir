@@ -29,9 +29,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ValidateDstu3Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
@@ -81,7 +81,7 @@ public class ValidateDstu3Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(resp, stringContainsInOrder("<OperationOutcome"));
 	}
@@ -104,7 +104,7 @@ public class ValidateDstu3Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 	}
 
 	@Test
@@ -125,7 +125,7 @@ public class ValidateDstu3Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(400, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 		assertThat(resp, stringContainsInOrder("Invalid mode value: &quot;AAA&quot;"));
 	}
@@ -147,8 +147,8 @@ public class ValidateDstu3Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(null, ourLastPatient);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(ourLastPatient).isEqualTo(null);
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 	}
 
 	@Test
@@ -162,12 +162,12 @@ public class ValidateDstu3Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(resp, stringContainsInOrder("<OperationOutcome", "FOOBAR"));
-		assertEquals(null, ourLastPatient);
-		assertEquals("Patient", ourLastId.getResourceType());
-		assertEquals("123", ourLastId.getIdPart());
+		assertThat(ourLastPatient).isEqualTo(null);
+		assertThat(ourLastId.getResourceType()).isEqualTo("Patient");
+		assertThat(ourLastId.getIdPart()).isEqualTo("123");
 	}
 
 	@Test
@@ -184,10 +184,10 @@ public class ValidateDstu3Test {
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(ourLastResourceBody, stringContainsInOrder("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001"));
-		assertEquals(EncodingEnum.JSON, ourLastEncoding);
+		assertThat(ourLastEncoding).isEqualTo(EncodingEnum.JSON);
 
 	}
 
@@ -211,11 +211,11 @@ public class ValidateDstu3Test {
 		ourLog.info(resp);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(resp, stringContainsInOrder("<OperationOutcome"));
-		assertEquals("http://foo", ourLastProfile);
-		assertEquals(ValidationModeEnum.CREATE, ourLastMode);
+		assertThat(ourLastProfile).isEqualTo("http://foo");
+		assertThat(ourLastMode).isEqualTo(ValidationModeEnum.CREATE);
 	}
 
 	@Test
@@ -238,7 +238,7 @@ public class ValidateDstu3Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(resp, stringContainsInOrder("<OperationOutcome", "FOOBAR"));
 	}

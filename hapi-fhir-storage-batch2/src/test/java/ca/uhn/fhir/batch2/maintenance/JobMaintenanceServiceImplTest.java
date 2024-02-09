@@ -135,7 +135,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		String assumedRoleLogText = String.format("Job definition %s for instance %s is currently unavailable", JOB_DEFINITION_ID,  instance.getInstanceId());
 		List<ILoggingEvent> fetchedCredentialLogs = myLogCapture.filterLoggingEventsWithMessageEqualTo(assumedRoleLogText);
-		assertThat(fetchedCredentialLogs.size()).isEqualTo(1);
+		assertThat(fetchedCredentialLogs).hasSize(1);
 
 		verify(myJobPersistence, never()).updateInstance(any(), any());
 	}

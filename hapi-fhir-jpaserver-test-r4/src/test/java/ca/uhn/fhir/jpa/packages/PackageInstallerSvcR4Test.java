@@ -248,7 +248,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			.setVersion("0.12.0")
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertThat(outcome.getResourcesInstalled().get("CodeSystem")).isEqualTo(1);
+		assertThat(outcome.getResourcesInstalled()).containsEntry("CodeSystem", 1);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -318,7 +318,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertThat(outcome.getResourcesInstalled().get("CodeSystem")).isEqualTo(1);
+		assertThat(outcome.getResourcesInstalled()).containsEntry("CodeSystem", 1);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -417,7 +417,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-organizations").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		spec.setInstallResourceTypes(resourceList);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertThat(outcome.getResourcesInstalled().get("Organization")).isEqualTo(3);
+		assertThat(outcome.getResourcesInstalled()).containsEntry("Organization", 3);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -457,7 +457,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		spec.setInstallResourceTypes(resourceList);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertThat(outcome.getResourcesInstalled().get("Organization")).isEqualTo(3);
+		assertThat(outcome.getResourcesInstalled()).containsEntry("Organization", 3);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -526,7 +526,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		spec.setInstallResourceTypes(resourceList);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 		ourLog.info("Outcome: {}", outcome);
-		assertThat(outcome.getResourcesInstalled().get("ImplementationGuide")).isEqualTo(1);
+		assertThat(outcome.getResourcesInstalled()).containsEntry("ImplementationGuide", 1);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -563,11 +563,11 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		outcome = myPackageInstallerSvc.install(spec);
-		assertThat(outcome.getResourcesInstalled().get("CodeSystem")).isEqualTo(1);
+		assertThat(outcome.getResourcesInstalled()).containsEntry("CodeSystem", 1);
 
 		myPackageInstallerSvc.install(spec);
 		outcome = myPackageInstallerSvc.install(spec);
-		assertThat(outcome.getResourcesInstalled().get("CodeSystem")).isEqualTo(null);
+		assertThat(outcome.getResourcesInstalled()).containsEntry("CodeSystem", null);
 
 		// Ensure that we loaded the contents
 		IBundleProvider searchResult = myCodeSystemDao.search(SearchParameterMap.newSynchronous("url", new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system")));
@@ -588,11 +588,11 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		outcome = myPackageInstallerSvc.install(spec);
-		assertThat(outcome.getResourcesInstalled().get("CodeSystem")).isEqualTo(1);
+		assertThat(outcome.getResourcesInstalled()).containsEntry("CodeSystem", 1);
 
 		myPackageInstallerSvc.install(spec);
 		outcome = myPackageInstallerSvc.install(spec);
-		assertThat(outcome.getResourcesInstalled().get("CodeSystem")).isEqualTo(null);
+		assertThat(outcome.getResourcesInstalled()).containsEntry("CodeSystem", null);
 
 		// Ensure that we loaded the contents
 		IBundleProvider searchResult = myCodeSystemDao.search(SearchParameterMap.newSynchronous("url", new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system")));
@@ -916,7 +916,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-logical-structuredefinition").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertThat(outcome.getResourcesInstalled().get("StructureDefinition")).isEqualTo(2);
+		assertThat(outcome.getResourcesInstalled()).containsEntry("StructureDefinition", 2);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -953,7 +953,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-logical-structuredefinition").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertThat(outcome.getResourcesInstalled().get("StructureDefinition")).isEqualTo(2);
+		assertThat(outcome.getResourcesInstalled()).containsEntry("StructureDefinition", 2);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();

@@ -18,11 +18,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport.createConceptProperty;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -56,7 +53,7 @@ public interface ILookupCodeTest {
 			try {
 				getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
 				fail("");			} catch (InternalErrorException e) {
-				assertTrue(e.getMessage().contains(getInvalidValueErrorCode() + ": Property type " + getCodeSystemProvider().getPropertyValue().fhirType() + " is not supported"));
+				assertThat(e.getMessage()).contains(getInvalidValueErrorCode() + ": Property type " + getCodeSystemProvider().getPropertyValue().fhirType() + " is not supported");
 			}
 		}
 
@@ -66,7 +63,7 @@ public interface ILookupCodeTest {
 			try {
 				RemoteTerminologyServiceValidationSupport.createConceptProperty("property", getCodeSystemProvider().getPropertyValue());
 				fail("");			} catch (InternalErrorException e) {
-				assertTrue(e.getMessage().contains(getInvalidValueErrorCodeForConvert() + ": Property type " + getCodeSystemProvider().getPropertyValue().fhirType() + " is not supported"));
+				assertThat(e.getMessage()).contains(getInvalidValueErrorCodeForConvert() + ": Property type " + getCodeSystemProvider().getPropertyValue().fhirType() + " is not supported");
 			}
 		}
 	}
@@ -88,7 +85,7 @@ public interface ILookupCodeTest {
 			try {
 				getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, ""));
 				fail("");			} catch (IllegalArgumentException e) {
-				assertEquals("theCode must be provided", e.getMessage());
+				assertThat(e.getMessage()).isEqualTo("theCode must be provided");
 			}
 		}
 
@@ -105,7 +102,7 @@ public interface ILookupCodeTest {
 			try {
 				getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
 				fail("");			} catch (InternalErrorException e) {
-				assertTrue(e.getMessage().contains("HAPI-1739: Don't know how to handle "));
+				assertThat(e.getMessage()).contains("HAPI-1739: Don't know how to handle ");
 			}
 		}
 
@@ -123,9 +120,9 @@ public interface ILookupCodeTest {
 			LookupCodeResult outcome = getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, List.of(propertyName)));
 
 			// verify
-			assertNotNull(outcome);
+			assertThat(outcome).isNotNull();
 			Optional<IValidationSupport.BaseConceptProperty> propertyOptional = outcome.getProperties().stream().findFirst().filter(a -> propertyName.equals(a.getPropertyName()));
-			assertFalse(propertyOptional.isPresent());
+			assertThat(propertyOptional.isPresent()).isFalse();
 		}
 
 		@Test
@@ -142,13 +139,13 @@ public interface ILookupCodeTest {
 			LookupCodeResult outcome = getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
 
 			// verify
-			assertNotNull(outcome);
-			assertEquals(CODE, getCodeSystemProvider().getCode());
-			assertEquals(CODE_SYSTEM, getCodeSystemProvider().getSystem());
-			assertEquals(result.getCodeSystemDisplayName(), outcome.getCodeSystemDisplayName());
-			assertEquals(result.getCodeDisplay(), outcome.getCodeDisplay());
-			assertEquals(result.getCodeSystemVersion(), outcome.getCodeSystemVersion());
-			assertEquals(result.isCodeIsAbstract(), outcome.isCodeIsAbstract());
+			assertThat(outcome).isNotNull();
+			assertThat(getCodeSystemProvider().getCode()).isEqualTo(CODE);
+			assertThat(getCodeSystemProvider().getSystem()).isEqualTo(CODE_SYSTEM);
+			assertThat(outcome.getCodeSystemDisplayName()).isEqualTo(result.getCodeSystemDisplayName());
+			assertThat(outcome.getCodeDisplay()).isEqualTo(result.getCodeDisplay());
+			assertThat(outcome.getCodeSystemVersion()).isEqualTo(result.getCodeSystemVersion());
+			assertThat(outcome.isCodeIsAbstract()).isEqualTo(result.isCodeIsAbstract());
 		}
 
 		@ParameterizedTest
@@ -170,16 +167,16 @@ public interface ILookupCodeTest {
 			LookupCodeResult outcome = getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, List.of(propertyName)));
 
 			// verify
-			assertNotNull(outcome);
-			assertEquals(CODE, getCodeSystemProvider().getCode());
-			assertEquals(CODE_SYSTEM, getCodeSystemProvider().getSystem());
-			assertEquals(result.getCodeSystemDisplayName(), outcome.getCodeSystemDisplayName());
-			assertEquals(result.getCodeDisplay(), outcome.getCodeDisplay());
-			assertEquals(result.getCodeSystemVersion(), outcome.getCodeSystemVersion());
-			assertEquals(result.isCodeIsAbstract(), outcome.isCodeIsAbstract());
+			assertThat(outcome).isNotNull();
+			assertThat(getCodeSystemProvider().getCode()).isEqualTo(CODE);
+			assertThat(getCodeSystemProvider().getSystem()).isEqualTo(CODE_SYSTEM);
+			assertThat(outcome.getCodeSystemDisplayName()).isEqualTo(result.getCodeSystemDisplayName());
+			assertThat(outcome.getCodeDisplay()).isEqualTo(result.getCodeDisplay());
+			assertThat(outcome.getCodeSystemVersion()).isEqualTo(result.getCodeSystemVersion());
+			assertThat(outcome.isCodeIsAbstract()).isEqualTo(result.isCodeIsAbstract());
 
 			Optional<IValidationSupport.BaseConceptProperty> propertyOptional = outcome.getProperties().stream().findFirst().filter(a -> propertyName.equals(a.getPropertyName()));
-			assertTrue(propertyOptional.isPresent());
+			assertThat(propertyOptional).isPresent();
 			IValidationSupport.BaseConceptProperty outputProperty = propertyOptional.get();
 
 			verifyProperty(outputProperty, propertyName, thePropertyValue);
@@ -197,17 +194,17 @@ public interface ILookupCodeTest {
 			LookupCodeResult outcome = getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
 
 			// verify
-			assertNotNull(outcome);
+			assertThat(outcome).isNotNull();
 
 			Collection<IValidationSupport.ConceptDesignation> designations = outcome.getDesignations();
-			assertEquals(1, designations.size());
+			assertThat(designations).hasSize(1);
 
 			IValidationSupport.ConceptDesignation designation = designations.iterator().next();
-			assertEquals(theConceptDesignation.getValue(), designation.getValue());
-			assertEquals(theConceptDesignation.getLanguage(), designation.getLanguage());
-			assertEquals(theConceptDesignation.getUseCode(), designation.getUseCode());
-			assertEquals(theConceptDesignation.getUseSystem(), designation.getUseSystem());
-			assertEquals(theConceptDesignation.getUseDisplay(), designation.getUseDisplay());
+			assertThat(designation.getValue()).isEqualTo(theConceptDesignation.getValue());
+			assertThat(designation.getLanguage()).isEqualTo(theConceptDesignation.getLanguage());
+			assertThat(designation.getUseCode()).isEqualTo(theConceptDesignation.getUseCode());
+			assertThat(designation.getUseSystem()).isEqualTo(theConceptDesignation.getUseSystem());
+			assertThat(designation.getUseDisplay()).isEqualTo(theConceptDesignation.getUseDisplay());
 		}
 
 		@Test
@@ -227,18 +224,18 @@ public interface ILookupCodeTest {
 			LookupCodeResult outcome = getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
 
 			// verify
-			assertNotNull(outcome);
+			assertThat(outcome).isNotNull();
 
 			Collection<IValidationSupport.ConceptDesignation> designations = outcome.getDesignations();
-			assertEquals(2, designations.size());
+			assertThat(designations).hasSize(2);
 
 			for (IValidationSupport.ConceptDesignation designation : designations) {
 				IValidationSupport.ConceptDesignation expectedDesignation = code1.equals(designation.getUseCode()) ? designation1 : designation2;
-				assertEquals(expectedDesignation.getValue(), designation.getValue());
-				assertEquals(expectedDesignation.getLanguage(), designation.getLanguage());
-				assertEquals(expectedDesignation.getUseCode(), designation.getUseCode());
-				assertEquals(expectedDesignation.getUseSystem(), designation.getUseSystem());
-				assertEquals(expectedDesignation.getUseDisplay(), designation.getUseDisplay());
+				assertThat(designation.getValue()).isEqualTo(expectedDesignation.getValue());
+				assertThat(designation.getLanguage()).isEqualTo(expectedDesignation.getLanguage());
+				assertThat(designation.getUseCode()).isEqualTo(expectedDesignation.getUseCode());
+				assertThat(designation.getUseSystem()).isEqualTo(expectedDesignation.getUseSystem());
+				assertThat(designation.getUseDisplay()).isEqualTo(expectedDesignation.getUseDisplay());
 			}
 		}
 	}

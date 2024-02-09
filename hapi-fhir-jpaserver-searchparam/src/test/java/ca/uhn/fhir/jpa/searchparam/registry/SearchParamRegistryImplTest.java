@@ -282,7 +282,7 @@ public class SearchParamRegistryImplTest {
 		RuntimeSearchParam converted = activeSearchParams.get("foo");
 		assertThat(converted).isNotNull();
 
-		assertThat(converted.getExtensions("http://foo").size()).isEqualTo(1);
+		assertThat(converted.getExtensions("http://foo")).hasSize(1);
 		IPrimitiveType<?> value = (IPrimitiveType<?>) converted.getExtensions("http://foo").get(0).getValue();
 		assertThat(value.getValueAsString()).isEqualTo("FOO");
 	}

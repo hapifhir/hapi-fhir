@@ -45,7 +45,7 @@ public class ListR4Test extends BaseResourceProviderR4Test {
 			.whereMap(Collections.singletonMap("_list", Collections.singletonList(list.getIdPart())))
 			.execute();
 
-		assertThat(results.getEntry().size()).isEqualTo(1);
+		assertThat(results.getEntry()).hasSize(1);
 		assertThat(results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(orgInList.toUnqualifiedVersionless().getValue());
 	}
 
@@ -57,7 +57,7 @@ public class ListR4Test extends BaseResourceProviderR4Test {
 			.and(Organization.IDENTIFIER.hasSystemWithAnyCode(identifierSystem))
 			.execute();
 
-		assertThat(results.getEntry().size()).isEqualTo(1);
+		assertThat(results.getEntry()).hasSize(1);
 		assertThat(results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(orgInList.toUnqualifiedVersionless().getValue());
 	}
 
@@ -68,7 +68,7 @@ public class ListR4Test extends BaseResourceProviderR4Test {
 			.whereMap(Collections.singletonMap("_list", Collections.singletonList(list.getIdPart())))
 			.execute();
 
-		assertThat(results.getEntry().size()).isEqualTo(1);
+		assertThat(results.getEntry()).hasSize(1);
 		assertThat(results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(practitionerInList.toUnqualifiedVersionless().getValue());
 	}
 }

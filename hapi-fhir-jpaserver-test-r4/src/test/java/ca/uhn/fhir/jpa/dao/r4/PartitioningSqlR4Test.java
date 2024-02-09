@@ -167,7 +167,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
-		assertThat(selectQueries.size()).isEqualTo(2);
+		assertThat(selectQueries).hasSize(2);
 		// Look up the partition
 		assertThat(selectQueries.get(0).getSql(true, false).toLowerCase()).contains(" from hfj_partition ");
 		// Look up the referenced subject/patient
@@ -2080,7 +2080,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myCaptureQueriesListener.clear();
 		IBundleProvider outcome = myPractitionerDao.search(params, mySrd);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread(1);
-		assertThat(outcome.getResources(0, 1).size()).isEqualTo(1);
+		assertThat(outcome.getResources(0, 1)).hasSize(1);
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
@@ -2899,7 +2899,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(2);
 		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
-		assertThat(output.getEntry().size()).isEqualTo(input.getEntry().size());
+		assertThat(output.getEntry()).hasSize(input.getEntry().size());
 
 		runInTransaction(()->{
 			assertEquals(437, myResourceTableDao.count());
@@ -2926,7 +2926,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
 		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
-		assertThat(output.getEntry().size()).isEqualTo(input.getEntry().size());
+		assertThat(output.getEntry()).hasSize(input.getEntry().size());
 
 		runInTransaction(()->{
 			assertEquals(437, myResourceTableDao.count());
@@ -2970,7 +2970,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids).containsExactly(id.withVersion("2").getValue(), id.withVersion("1").getValue());
 
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(3);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(3);
 
 		// Resolve resource
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
@@ -3026,7 +3026,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids).containsExactly(id.withVersion("2").getValue(), id.withVersion("1").getValue());
 
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(3);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(3);
 
 		// Fetch history resource
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
@@ -3091,7 +3091,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids).containsExactly(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue());
 
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 
 		// Count
 		ourLog.info("SQL:{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
@@ -3123,7 +3123,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids).containsExactly(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue());
 
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 
 		// Count
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
@@ -3201,7 +3201,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<String> ids = toUnqualifiedIdValues(results);
 		assertThat(ids).containsExactly(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue());
 
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 
 		// Count
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false).toUpperCase();
@@ -3234,7 +3234,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertThat(ids).containsExactly(id1B.withVersion("1").getValue(), id1A.withVersion("1").getValue());
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread()).hasSize(2);
 
 		// Resolve resource
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true).toUpperCase();

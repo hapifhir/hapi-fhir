@@ -45,7 +45,7 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 				.returnBundle(Bundle.class)
 				.execute();
 
-			assertThat(actual.getEntry().size()).isEqualTo(1);
+			assertThat(actual.getEntry()).hasSize(1);
 			assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(locId.getIdPart());
 		}
 		{ // Outside the box
@@ -65,7 +65,7 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 				.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
-			assertThat(actual.getEntry().size()).isEqualTo(0);
+			assertThat(actual.getEntry()).isEmpty();
 		}
 	}
 
@@ -93,7 +93,7 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry()).hasSize(1);
 		assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(prId.getIdPart());
 	}
 
@@ -128,7 +128,7 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 				.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
-			assertThat(actual.getEntry().size()).isEqualTo(1);
+			assertThat(actual.getEntry()).hasSize(1);
 			assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(prId.getIdPart());
 		}
 
@@ -149,7 +149,7 @@ public class ResourceProviderDstu3DistanceTest extends BaseResourceProviderDstu3
 				.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
-			assertThat(actual.getEntry().size()).isEqualTo(0);
+			assertThat(actual.getEntry()).isEmpty();
 		}
 	}
 }

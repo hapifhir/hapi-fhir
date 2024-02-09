@@ -16,9 +16,7 @@ import org.springframework.core.type.filter.AssignableTypeFilter;
 
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -35,9 +33,9 @@ public class ExceptionPropertiesTest {
 		test(new FhirClientInappropriateForServerException(new Exception()));
 		test(new FhirClientInappropriateForServerException("", new Exception()));
 
-		assertEquals("Resource Patient/123 is gone/deleted", new ResourceGoneException(new IdDt("Patient/123")).getMessage());
-		assertEquals("FOO", new ResourceGoneException("FOO", new OperationOutcome()).getMessage());
-		assertEquals("Resource of type Practitioner with ID Patient/123 is gone/deleted", new ResourceGoneException(Practitioner.class, new IdType("Patient/123")).getMessage());
+		assertThat(new ResourceGoneException(new IdDt("Patient/123")).getMessage()).isEqualTo("Resource Patient/123 is gone/deleted");
+		assertThat(new ResourceGoneException("FOO", new OperationOutcome()).getMessage()).isEqualTo("FOO");
+		assertThat(new ResourceGoneException(Practitioner.class, new IdType("Patient/123")).getMessage()).isEqualTo("Resource of type Practitioner with ID Patient/123 is gone/deleted");
 	}
 
 	private void test(Exception theE) {
@@ -54,13 +52,13 @@ public class ExceptionPropertiesTest {
 		ClassPathScanningCandidateComponentProvider scanner = new ClassPathScanningCandidateComponentProvider(false);
 		scanner.addIncludeFilter(new AssignableTypeFilter(BaseServerResponseException.class));
 		Set<BeanDefinition> classes = scanner.findCandidateComponents(BaseServerResponseException.class.getPackage().getName());
-		assertTrue(classes.size() > 5, classes.toString());
+		assertThat(classes.size() > 5).as(classes.toString()).isTrue();
 
 		for (BeanDefinition classInfo : classes) {
 			ourLog.info("Scanning {}", classInfo.getBeanClassName());
 
 			Class<?> next = Class.forName(classInfo.getBeanClassName());
-			assertNotNull(next);
+			assertThat(next).isNotNull();
 
 			if (next == getClass()) {
 				continue;
@@ -76,14 +74,14 @@ public class ExceptionPropertiesTest {
 				continue;
 			}
 
-			assertTrue(BaseServerResponseException.isExceptionTypeRegistered(next), "Type " + next + " is not registered");
+			assertThat(BaseServerResponseException.isExceptionTypeRegistered(next)).as("Type " + next + " is not registered").isTrue();
 
 			if (next == AuthenticationException.class) {
 				continue;
 			}
 
 			try {
-				assertNotNull(next.getConstructor(String.class, IBaseOperationOutcome.class));
+				assertThat(next.getConstructor(String.class, IBaseOperationOutcome.class)).isNotNull();
 			} catch (NoSuchMethodException e) {
 				fail(classInfo.getBeanClassName() + " has no constructor with params: (String, IBaseOperationOutcome)");
 			}

@@ -36,7 +36,7 @@ public class FhirPatchDiffR4Test {
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(2);
+		assertThat(diff.getParameter()).hasSize(2);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.identifier[0].system");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("system-1");
@@ -61,7 +61,7 @@ public class FhirPatchDiffR4Test {
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.deceased");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("2020-05-16");
@@ -83,7 +83,7 @@ public class FhirPatchDiffR4Test {
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.deceased");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("true");
@@ -105,7 +105,7 @@ public class FhirPatchDiffR4Test {
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("insert");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.active.extension");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "index")).isEqualTo("0");
@@ -128,7 +128,7 @@ public class FhirPatchDiffR4Test {
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("delete");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.active.extension[0]");
 
@@ -149,7 +149,7 @@ public class FhirPatchDiffR4Test {
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.active.extension[0].value");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("a new value");
@@ -172,7 +172,7 @@ public class FhirPatchDiffR4Test {
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("insert");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.name[0].extension");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "index")).isEqualTo("0");
@@ -195,7 +195,7 @@ public class FhirPatchDiffR4Test {
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("delete");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.name[0].extension[0]");
 
@@ -216,7 +216,7 @@ public class FhirPatchDiffR4Test {
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.name[0].extension[0].value");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("a new value");
@@ -240,7 +240,7 @@ public class FhirPatchDiffR4Test {
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
-		assertThat(diff.getParameter().size()).isEqualTo(2);
+		assertThat(diff.getParameter()).hasSize(2);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.id");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("456");
@@ -267,7 +267,7 @@ public class FhirPatchDiffR4Test {
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.meta.versionId");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("3");
@@ -289,7 +289,7 @@ public class FhirPatchDiffR4Test {
 		Parameters diff = (Parameters) svc.diff(oldValue, newValue);
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.text.div");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">456</div>");
@@ -311,7 +311,7 @@ public class FhirPatchDiffR4Test {
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("insert");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "index")).isEqualTo("1");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.identifier");
@@ -333,7 +333,7 @@ public class FhirPatchDiffR4Test {
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(2);
+		assertThat(diff.getParameter()).hasSize(2);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("insert");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.contact");
 		assertThat(extractPartValue(diff, 0, "operation", "value", IBase.class)).isEqualTo(null);
@@ -361,7 +361,7 @@ public class FhirPatchDiffR4Test {
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.active");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("false");
@@ -383,7 +383,7 @@ public class FhirPatchDiffR4Test {
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.active");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("false");
@@ -405,7 +405,7 @@ public class FhirPatchDiffR4Test {
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.active");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("false");
@@ -427,7 +427,7 @@ public class FhirPatchDiffR4Test {
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.active");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("false");
@@ -447,7 +447,7 @@ public class FhirPatchDiffR4Test {
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertThat(diff.getParameter().size()).isEqualTo(1);
+		assertThat(diff.getParameter()).hasSize(1);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("delete");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.identifier[1]");
 

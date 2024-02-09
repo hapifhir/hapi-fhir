@@ -82,7 +82,7 @@ class ResourceIdListStepTest {
 		int expectedBatchCount = (int) Math.ceil((float) theListSize / ResourceIdListStep.MAX_BATCH_OF_IDS);
 		verify(myDataSink, times(expectedBatchCount)).accept(myDataCaptor.capture());
 		final List<ResourceIdListWorkChunkJson> allDataChunks = myDataCaptor.getAllValues();
-		assertThat(allDataChunks.size()).isEqualTo(expectedBatchCount);
+		assertThat(allDataChunks).hasSize(expectedBatchCount);
 
 		// Ensure that all chunks except the very last one are MAX_BATCH_OF_IDS in length
 		for (int i = 0; i < expectedBatchCount - 1; i++) {

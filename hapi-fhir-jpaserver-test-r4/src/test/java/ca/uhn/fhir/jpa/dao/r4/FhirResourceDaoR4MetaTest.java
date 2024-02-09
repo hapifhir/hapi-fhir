@@ -70,7 +70,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 
 		patient = myPatientDao.read(id, mySrd);
 		assertThat(patient.getActive()).isTrue();
-		assertThat(patient.getMeta().getExtensionsByUrl("http://foo").size()).isEqualTo(1);
+		assertThat(patient.getMeta().getExtensionsByUrl("http://foo")).hasSize(1);
 		assertThat(patient.getMeta().getExtensionByUrl("http://foo").getValueAsPrimitive().getValueAsString()).isEqualTo("hello");
 	}
 
@@ -97,7 +97,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		patient = (Patient) bundle.getEntryFirstRep().getResource();
 		assertThat(patient.getActive()).isTrue();
-		assertThat(patient.getMeta().getExtensionsByUrl("http://foo").size()).isEqualTo(1);
+		assertThat(patient.getMeta().getExtensionsByUrl("http://foo")).hasSize(1);
 		assertThat(patient.getMeta().getVersionId()).isEqualTo("22");
 		assertThat(patient.getMeta().getProfile().get(0).getValue()).isEqualTo("http://foo");
 		assertThat(patient.getMeta().getExtensionByUrl("http://foo").getValueAsPrimitive().getValueAsString()).isEqualTo("hello");
@@ -141,14 +141,14 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		IIdType pid2 = myPatientDao.create(patient2, mySrd).getId();
 
 		patient1 = myPatientDao.read(pid1, mySrd);
-		assertThat(patient1.getMeta().getTag().size()).isEqualTo(1);
-		assertThat(patient1.getMeta().getSecurity().size()).isEqualTo(0);
+		assertThat(patient1.getMeta().getTag()).hasSize(1);
+		assertThat(patient1.getMeta().getSecurity()).isEmpty();
 		assertThat(patient1.getMeta().getTagFirstRep().getSystem()).isEqualTo("http://foo");
 		assertThat(patient1.getMeta().getTagFirstRep().getCode()).isEqualTo("bar");
 
 		patient2 = myPatientDao.read(pid2, mySrd);
-		assertThat(patient2.getMeta().getTag().size()).isEqualTo(0);
-		assertThat(patient2.getMeta().getSecurity().size()).isEqualTo(1);
+		assertThat(patient2.getMeta().getTag()).isEmpty();
+		assertThat(patient2.getMeta().getSecurity()).hasSize(1);
 		assertThat(patient2.getMeta().getSecurityFirstRep().getSystem()).isEqualTo("http://foo");
 		assertThat(patient2.getMeta().getSecurityFirstRep().getCode()).isEqualTo("bar");
 	}
@@ -239,7 +239,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 
 			// Update the patient to create a ResourceHistoryTag record
 			final List<Coding> tagsFromDbPatient = retrievedPatient.getMeta().getTag();
-			assertThat(tagsFromDbPatient.size()).isEqualTo(1);
+			assertThat(tagsFromDbPatient).hasSize(1);
 
 			tagsFromDbPatient.get(0)
 				.setCode(expectedCode2)

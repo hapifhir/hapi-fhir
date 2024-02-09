@@ -73,7 +73,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs);
-		assertThat(tokens.size()).isEqualTo(1);
+		assertThat(tokens).hasSize(1);
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
 		assertThat(token.getParamName()).isEqualTo("category");
 		assertThat(token.getSystem()).isEqualTo("SYSTEM");
@@ -104,7 +104,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(sp);
-		assertThat(tokens.size()).isEqualTo(1);
+		assertThat(tokens).hasSize(1);
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
 		assertThat(token.getParamName()).isEqualTo("context-type");
 		assertThat(token.getSystem()).isEqualTo("http://system");
@@ -123,7 +123,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.filter(t -> t.getParamName().equals("code"))
 			.sorted(comparing(o -> o.getClass().getName()).reversed())
 			.collect(Collectors.toList());
-		assertThat(tokens.size()).isEqualTo(2);
+		assertThat(tokens).hasSize(2);
 
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
 		assertThat(token.getParamName()).isEqualTo("code");
@@ -152,7 +152,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.filter(t -> t.getParamName().equals("code"))
 			.sorted(comparing(o -> o.getClass().getName()).reversed())
 			.collect(Collectors.toList());
-		assertThat(tokens.size()).isEqualTo(1);
+		assertThat(tokens).hasSize(1);
 
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
 		assertThat(token.getParamName()).isEqualTo("code");
@@ -176,7 +176,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.filter(t -> t.getParamName().equals("code"))
 			.sorted(comparing(o -> o.getClass().getName()).reversed())
 			.collect(Collectors.toList());
-		assertThat(tokens.size()).isEqualTo(1);
+		assertThat(tokens).hasSize(1);
 
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
 		assertThat(token.getParamName()).isEqualTo("code");
@@ -205,7 +205,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.filter(t -> t.getParamName().equals("code"))
 			.sorted(comparing(o -> o.getClass().getName()).reversed())
 			.collect(Collectors.toList());
-		assertThat(tokens.size()).isEqualTo(2);
+		assertThat(tokens).hasSize(2);
 
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
 		assertThat(token.getParamName()).isEqualTo("code");
@@ -227,7 +227,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Encounter", "location");
 		assertThat(param).isNotNull();
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(enc, false);
-		assertThat(links.size()).isEqualTo(1);
+		assertThat(links).hasSize(1);
 		assertThat(links.iterator().next().getSearchParamName()).isEqualTo("location");
 		assertThat(links.iterator().next().getPath()).isEqualTo("Encounter.location.location");
 		assertThat(((Reference) links.iterator().next().getRef()).getReference()).isEqualTo("Location/123");
@@ -242,7 +242,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Consent", Consent.SP_SOURCE_REFERENCE);
 		assertThat(param).isNotNull();
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(consent, false);
-		assertThat(links.size()).isEqualTo(1);
+		assertThat(links).hasSize(1);
 		assertThat(links.iterator().next().getPath()).isEqualTo("Consent.source");
 		assertThat(((Reference) links.iterator().next().getRef()).getReference()).isEqualTo("Consent/999");
 	}
@@ -257,7 +257,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Patient", Patient.SP_IDENTIFIER);
 		assertThat(param).isNotNull();
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> params = extractor.extractSearchParamTokens(p, param);
-		assertThat(params.size()).isEqualTo(1);
+		assertThat(params).hasSize(1);
 		ResourceIndexedSearchParamToken paramValue = (ResourceIndexedSearchParamToken) params.iterator().next();
 		assertThat(paramValue.getParamName()).isEqualTo("identifier");
 		assertThat(paramValue.getSystem()).isEqualTo("sys");
@@ -277,7 +277,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(patient, false);
-		assertThat(links.size()).isEqualTo(1);
+		assertThat(links).hasSize(1);
 
 	}
 
@@ -294,7 +294,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		Set<ResourceIndexedSearchParamQuantity> links = extractor.extractSearchParamQuantity(o1);
 		ourLog.info("Links:\n  {}", links.stream().map(t -> t.toString()).collect(Collectors.joining("\n  ")));
-		assertThat(links.size()).isEqualTo(4);
+		assertThat(links).hasSize(4);
 	}
 
 	@Test
@@ -312,7 +312,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(storageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		Set<ResourceIndexedSearchParamQuantityNormalized> links = extractor.extractSearchParamQuantityNormalized(o1);
 		ourLog.info("Links:\n  {}", links.stream().map(t -> t.toString()).collect(Collectors.joining("\n  ")));
-		assertThat(links.size()).isEqualTo(2);
+		assertThat(links).hasSize(2);
 
 	}
 
@@ -334,7 +334,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(storageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		List<String> list = extractor.extractParamValuesAsStrings(existingCodeSp, o1);
 
-		assertThat(list.size()).isEqualTo(2);
+		assertThat(list).hasSize(2);
 	}
 
 	@Test

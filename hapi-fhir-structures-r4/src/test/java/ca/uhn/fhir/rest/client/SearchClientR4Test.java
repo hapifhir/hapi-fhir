@@ -46,7 +46,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.TimeZone;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -113,15 +113,15 @@ public class SearchClientR4Test {
 
     Bundle matches = client.getMatchesReturnBundle(new StringParam("smith"), 100);
 
-    assertEquals(1, matches.getEntry().size());
+		assertThat(matches.getEntry()).hasSize(1);
     BundleEntryComponent entry = matches.getEntry().get(0);
-    assertEquals("Sample Clinic", ((Location) entry.getResource()).getName());
+		assertThat(((Location) entry.getResource()).getName()).isEqualTo("Sample Clinic");
 
     List<Extension> ext = entry.getSearch().getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/algorithmic-match");
-    assertEquals(1, ext.size());
+		assertThat(ext).hasSize(1);
 
     HttpGet value = (HttpGet) capt.getValue();
-    assertEquals("http://localhost:8081/hapi-fhir/fhir/Location?_query=match&name=smith&_count=100", value.getURI().toString());
+		assertThat(value.getURI().toString()).isEqualTo("http://localhost:8081/hapi-fhir/fhir/Location?_query=match&name=smith&_count=100");
   }
 
   @Test
@@ -145,7 +145,7 @@ public class SearchClientR4Test {
     IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:8081/hapi-fhir/fhir");
 
     CapabilityStatement actual = client.capabilities().ofType(CapabilityStatement.class).execute();
-    assertEquals("FOO", actual.getName());
+		assertThat(actual.getName()).isEqualTo("FOO");
   }
 
   /**
@@ -169,11 +169,11 @@ public class SearchClientR4Test {
     ILocationClient client = ourCtx.newRestfulClient(ILocationClient.class, "http://localhost:8081/hapi-fhir/fhir");
 
     List<Location> matches = client.getMatches(new StringParam("smith"), 100);
-    assertEquals(1, matches.size());
-    assertEquals("Sample Clinic", matches.get(0).getName());
+		assertThat(matches).hasSize(1);
+		assertThat(matches.get(0).getName()).isEqualTo("Sample Clinic");
 
     HttpGet value = (HttpGet) capt.getValue();
-    assertEquals("http://localhost:8081/hapi-fhir/fhir/Location?_query=match&name=smith&_count=100", value.getURI().toString());
+		assertThat(value.getURI().toString()).isEqualTo("http://localhost:8081/hapi-fhir/fhir/Location?_query=match&name=smith&_count=100");
   }
 
   @Test
@@ -204,12 +204,10 @@ public class SearchClientR4Test {
       int idx = 0;
 
       client.search("STRING1", new StringType("STRING2"), date, cal);
-      assertEquals("http://localhost/fhir/Bundle?stringParam=STRING1&stringTypeParam=STRING2&dateParam=1970-10-04T10:23:55.986-04:00&calParam=1970-10-04T10:23:55.986-04:00",
-          UrlUtil.unescape(((HttpGet) capt.getAllValues().get(idx++)).getURI().toString()));
+			assertThat(UrlUtil.unescape(((HttpGet) capt.getAllValues().get(idx++)).getURI().toString())).isEqualTo("http://localhost/fhir/Bundle?stringParam=STRING1&stringTypeParam=STRING2&dateParam=1970-10-04T10:23:55.986-04:00&calParam=1970-10-04T10:23:55.986-04:00");
 
       client.search(null, null, null, null);
-      assertEquals("http://localhost/fhir/Bundle",
-          UrlUtil.unescape(((HttpGet) capt.getAllValues().get(idx++)).getURI().toString()));
+			assertThat(UrlUtil.unescape(((HttpGet) capt.getAllValues().get(idx++)).getURI().toString())).isEqualTo("http://localhost/fhir/Bundle");
     } finally {
       TimeZone.setDefault(tz);
     }
@@ -238,10 +236,10 @@ public class SearchClientR4Test {
     int idx = 0;
 
     client.search(new SortSpec("param1", SortOrderEnum.ASC));
-    assertEquals("http://localhost/fhir/Bundle?_sort=param1", ((HttpGet) capt.getAllValues().get(idx++)).getURI().toString());
+		assertThat(((HttpGet) capt.getAllValues().get(idx++)).getURI().toString()).isEqualTo("http://localhost/fhir/Bundle?_sort=param1");
 
     client.search(new SortSpec("param1", SortOrderEnum.ASC).setChain(new SortSpec("param2", SortOrderEnum.DESC)));
-    assertEquals("http://localhost/fhir/Bundle?_sort=param1%2C-param2", ((HttpGet) capt.getAllValues().get(idx++)).getURI().toString());
+		assertThat(((HttpGet) capt.getAllValues().get(idx++)).getURI().toString()).isEqualTo("http://localhost/fhir/Bundle?_sort=param1%2C-param2");
   }
 
   @AfterAll

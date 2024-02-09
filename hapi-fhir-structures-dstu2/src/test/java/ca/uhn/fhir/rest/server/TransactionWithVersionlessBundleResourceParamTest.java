@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TransactionWithVersionlessBundleResourceParamTest {
 
@@ -70,15 +70,15 @@ public class TransactionWithVersionlessBundleResourceParamTest {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		ourLog.info(responseContent);
 
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-		assertEquals(1, bundle.getEntry().size());
+		assertThat(bundle.getEntry()).hasSize(1);
 
 		Entry entry0 = bundle.getEntry().get(0);
-		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
+		assertThat(entry0.getResponse().getLocation()).isEqualTo("Patient/81/_history/91");
 
 	}
 	

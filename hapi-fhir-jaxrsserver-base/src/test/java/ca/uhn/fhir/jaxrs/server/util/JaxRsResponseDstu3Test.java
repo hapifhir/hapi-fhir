@@ -46,8 +46,8 @@ public class JaxRsResponseDstu3Test {
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), bundle, theSummaryMode, 200, theAddContentLocationHeader, respondGzip, request);
 		assertThat(result.getStatus()).isEqualTo(200);
 		assertThat(result.getHeaderString(Constants.HEADER_CONTENT_TYPE)).isEqualTo(Constants.CT_FHIR_JSON_NEW + Constants.CHARSET_UTF8_CTSUFFIX);
-		assertThat(result.getEntity().toString().contains("Patient")).isTrue();
-		assertThat(result.getEntity().toString().contains("15")).isTrue();
+		assertThat(result.getEntity().toString()).contains("Patient");
+		assertThat(result.getEntity().toString()).contains("15");
 	}
 
 	@Test
@@ -104,8 +104,8 @@ public class JaxRsResponseDstu3Test {
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), createPatient(), theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);
 		assertThat(result.getStatus()).isEqualTo(200);
 		assertThat(result.getHeaderString(Constants.HEADER_CONTENT_TYPE)).isEqualTo(Constants.CT_FHIR_JSON_NEW + "; charset=UTF-8");
-		assertThat(result.getEntity().toString().contains("resourceType\": \"Patient")).isTrue();
-		assertThat(result.getEntity().toString().contains("15")).isTrue();
+		assertThat(result.getEntity().toString()).contains("resourceType\": \"Patient");
+		assertThat(result.getEntity().toString()).contains("15");
 		
 	}
 	
@@ -122,8 +122,8 @@ public class JaxRsResponseDstu3Test {
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), createPatient(), theSummaryMode, 200, addContentLocationHeader, respondGzip, this.request);
 		assertThat(result.getStatus()).isEqualTo(200);
 		assertThat(result.getHeaderString(Constants.HEADER_CONTENT_TYPE)).isEqualTo("application/fhir+xml; charset=UTF-8");
-		assertThat(result.getEntity().toString().contains("<Patient")).isTrue();
-		assertThat(result.getEntity().toString().contains("15")).isTrue();
+		assertThat(result.getEntity().toString()).contains("<Patient");
+		assertThat(result.getEntity().toString()).contains("15");
 	}
 	
 	@Test

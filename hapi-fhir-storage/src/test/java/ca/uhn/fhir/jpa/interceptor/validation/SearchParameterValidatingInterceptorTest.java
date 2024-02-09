@@ -169,7 +169,7 @@ public class SearchParameterValidatingInterceptorTest {
 			mySearchParamValidatingInterceptor.resourcePreUpdate(null, newSearchParam, myRequestDetails);
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage().contains("2125")).isTrue();
+			assertThat(e.getMessage()).contains("2125");
 		}
 	}
 

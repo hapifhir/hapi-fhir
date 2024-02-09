@@ -31,7 +31,6 @@ import static ca.uhn.fhir.jpa.migrate.HapiMigrationLock.LOCK_PID;
 import static ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc.LOCK_TYPE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.fail;
 
 import static org.slf4j.LoggerFactory.getLogger;
@@ -89,7 +88,7 @@ public class HapiClearMigrationLockCommandTest extends ConsoleOutputCapturingBas
 		App.main(args);
 		int afterClearMigrationCount = dao.findAll().size();
 		int removedRows = beforeClearMigrationCount - afterClearMigrationCount;
-		assertEquals(0, removedRows);
+		assertThat(removedRows).isEqualTo(0);
 		assertThat(getConsoleOutput()).contains("Did not successfully remove lock entry. [uuid=" + lockUUID + "]");
 	}
 	@Test
@@ -113,7 +112,7 @@ public class HapiClearMigrationLockCommandTest extends ConsoleOutputCapturingBas
 		int afterClearMigrationCount = dao.findAll().size();
 		int removedRows = beforeClearMigrationCount - afterClearMigrationCount;
 
-		assertEquals(1, removedRows);
+		assertThat(removedRows).isEqualTo(1);
 		assertThat(getConsoleOutput()).contains("Successfully removed lock entry. [uuid=" + lockUUID + "]");
 	}
 

@@ -5,8 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -18,7 +17,7 @@ class ServletRequestDetailsTest {
 		servletRequestDetails.setServletRequest(httpRequest);
 		when(httpRequest.getHeader(Constants.HEADER_REWRITE_HISTORY)).thenReturn("true");
 		servletRequestDetails.setServletRequest(httpRequest);
-		assertTrue(servletRequestDetails.isRewriteHistory());
+		assertThat(servletRequestDetails.isRewriteHistory()).isTrue();
 	}
 
 	@Test
@@ -28,7 +27,7 @@ class ServletRequestDetailsTest {
 		servletRequestDetails.setServletRequest(httpRequest);
 		when(httpRequest.getHeader(Constants.HEADER_REWRITE_HISTORY)).thenReturn(null);
 		servletRequestDetails.setServletRequest(httpRequest);
-		assertFalse(servletRequestDetails.isRewriteHistory());
+		assertThat(servletRequestDetails.isRewriteHistory()).isFalse();
 	}
 
 	@Test
@@ -38,7 +37,7 @@ class ServletRequestDetailsTest {
 		servletRequestDetails.setServletRequest(httpRequest);
 		when(httpRequest.getHeader(Constants.HEADER_REWRITE_HISTORY)).thenReturn("false");
 		servletRequestDetails.setServletRequest(httpRequest);
-		assertFalse(servletRequestDetails.isRewriteHistory());
+		assertThat(servletRequestDetails.isRewriteHistory()).isFalse();
 	}
 
 }

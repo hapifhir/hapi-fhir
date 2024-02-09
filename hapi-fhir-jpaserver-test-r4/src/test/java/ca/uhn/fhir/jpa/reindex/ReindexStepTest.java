@@ -63,7 +63,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 		// Verify
 		assertThat(outcome.getRecordsProcessed()).isEqualTo(2);
-		assertThat(myCaptureQueriesListener.logSelectQueries().size()).isEqualTo(6);
+		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(6);
 		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
 		myCaptureQueriesListener.logUpdateQueries();
 		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
@@ -94,7 +94,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 		// Verify
 		assertThat(outcome.getRecordsProcessed()).isEqualTo(2);
-		assertThat(myCaptureQueriesListener.logSelectQueries().size()).isEqualTo(8);
+		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(8);
 		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
@@ -127,7 +127,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 		// Verify
 		assertThat(outcome.getRecordsProcessed()).isEqualTo(2);
-		assertThat(myCaptureQueriesListener.logSelectQueries().size()).isEqualTo(6);
+		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(6);
 		// name, family, phonetic, deceased, active
 		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(5);
 		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
@@ -195,7 +195,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 		// Verify
 		assertThat(outcome.getRecordsProcessed()).isEqualTo(2);
-		assertThat(myCaptureQueriesListener.logSelectQueries().size()).isEqualTo(10);
+		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(10);
 		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(4);
 		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
@@ -240,7 +240,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 		// Verify
 		assertThat(outcome.getRecordsProcessed()).isEqualTo(4);
-		assertThat(myCaptureQueriesListener.logSelectQueries().size()).isEqualTo(9);
+		assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(9);
 		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(5);
 		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(2);
 		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);

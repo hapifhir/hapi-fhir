@@ -185,8 +185,8 @@ class ResponseBundleBuilderTest {
 
 		// verify
 		// no next link
-		assertThat(bundle.getLink().size()).isEqualTo(1);
-		assertThat(bundle.getEntry().size()).isEqualTo(DEFAULT_PAGE_SIZE);
+		assertThat(bundle.getLink()).hasSize(1);
+		assertThat(bundle.getEntry()).hasSize(DEFAULT_PAGE_SIZE);
 	}
 
 	@ParameterizedTest
@@ -526,7 +526,7 @@ class ResponseBundleBuilderTest {
 		assertThat(theBundle.getType()).isEqualTo(SEARCHSET);
 		assertThat(theBundle.getTotalElement().getValue()).isEqualTo(theExpectedTotal);
 		List<Bundle.BundleEntryComponent> entries = theBundle.getEntry();
-		assertThat(entries.size()).isEqualTo(theExpectedEntryCount);
+		assertThat(entries).hasSize(theExpectedEntryCount);
 		if (theFirstId != null) {
 			assertThat(entries.get(0).getResource().getId()).isEqualTo(theFirstId);
 		}

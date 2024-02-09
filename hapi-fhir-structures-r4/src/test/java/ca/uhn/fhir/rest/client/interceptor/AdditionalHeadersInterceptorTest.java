@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -69,9 +68,9 @@ public class AdditionalHeadersInterceptorTest {
 
 		client.search().forResource("Patient").returnBundle(Bundle.class).execute();
 
-		assertEquals(HttpGet.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
 		HttpGet get = (HttpGet) capt.getValue();
-		assertEquals("http://foo/Patient", get.getURI().toString());
+		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient");
 	}
 
 	@Test
@@ -95,9 +94,9 @@ public class AdditionalHeadersInterceptorTest {
 
 		client.search().forResource("Patient").returnBundle(Bundle.class).execute();
 
-		assertEquals(HttpGet.class, capt.getValue().getClass());
+		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
 		HttpGet get = (HttpGet) capt.getValue();
-		assertEquals("http://foo/Patient", get.getURI().toString());
+		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient");
 
 		assertThat(Arrays.stream(get.getHeaders("X-0")).map(Object::toString).collect(Collectors.toList())).containsExactly("X-0: X-0-VAL");
 		assertThat(Arrays.stream(get.getHeaders("X-1")).map(Object::toString).collect(Collectors.toList())).containsExactly("X-1: X-1-VAL");

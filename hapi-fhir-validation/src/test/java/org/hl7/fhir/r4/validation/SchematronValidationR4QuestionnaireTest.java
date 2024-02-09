@@ -17,9 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Added for #870 - Can be enabled when the FHIR sources are fixed
@@ -52,7 +49,7 @@ public class SchematronValidationR4QuestionnaireTest {
 		ourLog.info(inputXml);
 
 		ValidationResult result = validateSchematron(resource);
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 	}
 
 	@Test
@@ -75,7 +72,7 @@ public class SchematronValidationR4QuestionnaireTest {
 		ourLog.info(inputXml);
 
 		ValidationResult result = validateSchematron(resource);
-		assertTrue(result.isSuccessful());
+		assertThat(result.isSuccessful()).isTrue();
 	}
 
 	@Test
@@ -99,8 +96,8 @@ public class SchematronValidationR4QuestionnaireTest {
 		ourLog.info(inputXml);
 
 		ValidationResult result = validateSchematron(resource);
-		assertFalse(result.isSuccessful());
-		assertEquals(1, result.getMessages().size());
+		assertThat(result.isSuccessful()).isFalse();
+		assertThat(result.getMessages()).hasSize(1);
 		assertThat(result.getMessages().get(0).getMessage()).contains("que-7");
 	}
 

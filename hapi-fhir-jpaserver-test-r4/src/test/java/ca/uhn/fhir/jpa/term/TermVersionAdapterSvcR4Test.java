@@ -58,7 +58,7 @@ class TermVersionAdapterSvcR4Test {
 			InvalidParameterException.class,
 			() -> testedClass.createOrUpdateCodeSystem(codeSystem, new ServletRequestDetails()));
 
-		assertThat(thrown.getMessage().contains("'loinc' CodeSystem must have an 'ID' element")).isTrue();
+		assertThat(thrown.getMessage()).contains("'loinc' CodeSystem must have an 'ID' element");
 	}
 
 

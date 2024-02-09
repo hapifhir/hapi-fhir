@@ -48,7 +48,6 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -160,8 +159,8 @@ public class UploadTerminologyCommandTest {
 		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(1, listOfDescriptors.size());
-		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
+		assertThat(listOfDescriptors).hasSize(1);
+		assertThat(listOfDescriptors.get(0).getFilename()).isEqualTo("file:/files.zip");
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
@@ -200,8 +199,8 @@ public class UploadTerminologyCommandTest {
 		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(2, listOfDescriptors.size());
-		assertEquals("concepts.csv", listOfDescriptors.get(0).getFilename());
+		assertThat(listOfDescriptors).hasSize(2);
+		assertThat(listOfDescriptors.get(0).getFilename()).isEqualTo("concepts.csv");
 		String uploadFile = IOUtils.toString(listOfDescriptors.get(0).getInputStream(), Charsets.UTF_8);
 		assertThat(uploadFile).as(uploadFile).contains("\"CODE\",\"Display\"");
 	}
@@ -303,7 +302,7 @@ public class UploadTerminologyCommandTest {
 		verify(myTermLoaderSvc, times(1)).loadDeltaAdd(eq("http://foo"), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(1, listOfDescriptors.size());
+		assertThat(listOfDescriptors).hasSize(1);
 		assertThat(listOfDescriptors.get(0).getFilename()).matches("^file:.*temp.*\\.zip$");
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
@@ -354,8 +353,8 @@ public class UploadTerminologyCommandTest {
 		verify(myTermLoaderSvc, times(1)).loadDeltaRemove(eq("http://foo"), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(1, listOfDescriptors.size());
-		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
+		assertThat(listOfDescriptors).hasSize(1);
+		assertThat(listOfDescriptors.get(0).getFilename()).isEqualTo("file:/files.zip");
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
@@ -385,8 +384,8 @@ public class UploadTerminologyCommandTest {
 		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(1, listOfDescriptors.size());
-		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
+		assertThat(listOfDescriptors).hasSize(1);
+		assertThat(listOfDescriptors.get(0).getFilename()).isEqualTo("file:/files.zip");
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
@@ -419,7 +418,7 @@ public class UploadTerminologyCommandTest {
 		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(1, listOfDescriptors.size());
+		assertThat(listOfDescriptors).hasSize(1);
 		assertThat(listOfDescriptors.get(0).getFilename()).matches(".*\\.zip$");
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
@@ -452,7 +451,7 @@ public class UploadTerminologyCommandTest {
 		verify(myTermLoaderSvc, times(1)).loadCustom(any(), myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(1, listOfDescriptors.size());
+		assertThat(listOfDescriptors).hasSize(1);
 		assertThat(listOfDescriptors.get(0).getFilename()).matches(".*\\.zip$");
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
@@ -494,7 +493,7 @@ public class UploadTerminologyCommandTest {
 		verify(myTermLoaderSvc, times(1)).loadIcd10cm(myDescriptorListCaptor.capture(), any());
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
-		assertEquals(1, listOfDescriptors.size());
+		assertThat(listOfDescriptors).hasSize(1);
 		assertThat(listOfDescriptors.get(0).getFilename()).matches("^file:.*files.*\\.zip$");
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}

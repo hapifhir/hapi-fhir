@@ -313,7 +313,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		}
 
 		public void assertNoRemainingIds() {
-			assertThat(myCreateRequestPartitionIds.size()).isEqualTo(0);
+			assertThat(myCreateRequestPartitionIds).isEmpty();
 		}
 
 	}
