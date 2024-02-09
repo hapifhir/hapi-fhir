@@ -1630,9 +1630,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		code = "BLAH";
 		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
 		assertThat(outcome.isOk()).isFalse();
-		assertThat(outcome.getCode()).isEqualTo(null);
-		assertThat(outcome.getDisplay()).isEqualTo(null);
-		assertThat(outcome.getCodeSystemVersion()).isEqualTo(null);
+		assertThat(outcome.getCode()).isNull();
+		assertThat(outcome.getDisplay()).isNull();
+		assertThat(outcome.getCodeSystemVersion()).isNull();
 
 		// Calculate pre-expansions
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
@@ -1675,9 +1675,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		code = "BLAH";
 		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
 		assertThat(outcome.isOk()).isFalse();
-		assertThat(outcome.getCode()).isEqualTo(null);
-		assertThat(outcome.getDisplay()).isEqualTo(null);
-		assertThat(outcome.getCodeSystemVersion()).isEqualTo(null);
+		assertThat(outcome.getCode()).isNull();
+		assertThat(outcome.getDisplay()).isNull();
+		assertThat(outcome.getCodeSystemVersion()).isNull();
 	}
 
 

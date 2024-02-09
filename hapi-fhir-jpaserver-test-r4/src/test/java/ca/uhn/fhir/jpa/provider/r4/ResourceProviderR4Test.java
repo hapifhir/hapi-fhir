@@ -583,7 +583,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Bundle nextPageBundle = myClient.loadPage().byUrl(linkNext).andReturnBundle(Bundle.class).execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(nextPageBundle));
-		assertThat(nextPageBundle.getLink("next")).isEqualTo(null);
+		assertThat(nextPageBundle.getLink("next")).isNull();
 	}
 
 	@Test
@@ -2401,7 +2401,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertThat(history.getEntry().get(1).getRequest().getMethodElement().getValue()).isEqualTo(HTTPVerb.DELETE);
 		assertThat(history.getEntry().get(1).getRequest().getUrl()).isEqualTo("Patient/" + id.getIdPart() + "/_history/2");
-		assertThat(history.getEntry().get(1).getResource()).isEqualTo(null);
+		assertThat(history.getEntry().get(1).getResource()).isNull();
 
 		assertThat(history.getEntry().get(2).getResource().getId()).isEqualTo(id.withVersion("1").getValue());
 		assertThat(((Patient) history.getEntry().get(2).getResource()).getName()).hasSize(1);

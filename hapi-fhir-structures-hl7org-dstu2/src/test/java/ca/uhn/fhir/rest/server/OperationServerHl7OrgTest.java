@@ -195,7 +195,7 @@ public class OperationServerHl7OrgTest {
 
 		assertThat(ourLastMethod).isEqualTo("$OP_SERVER_LIST_PARAM");
 		assertThat(ourLastParam2.getActive()).isEqualTo(true);
-		assertThat(ourLastParam1).isEqualTo(null);
+		assertThat(ourLastParam1).isNull();
 		assertThat(ourLastParam3).hasSize(2);
 		assertThat(ourLastParam3.get(0).getValue()).isEqualTo("PARAM3val1");
 		assertThat(ourLastParam3.get(1).getValue()).isEqualTo("PARAM3val2");

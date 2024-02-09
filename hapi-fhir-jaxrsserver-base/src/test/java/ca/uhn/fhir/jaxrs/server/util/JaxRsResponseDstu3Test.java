@@ -75,8 +75,8 @@ public class JaxRsResponseDstu3Test {
 		boolean theAddContentLocationHeader = false;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theSummaryMode, 200, theAddContentLocationHeader, respondGzip, this.request);
 		assertThat(result.getStatus()).isEqualTo(200);
-		assertThat(result.getHeaderString(Constants.HEADER_CONTENT_TYPE)).isEqualTo(null);
-		assertThat(result.getEntity()).isEqualTo(null);
+		assertThat(result.getHeaderString(Constants.HEADER_CONTENT_TYPE)).isNull();
+		assertThat(result.getEntity()).isNull();
 	}
 	
 	@Test
@@ -133,7 +133,7 @@ public class JaxRsResponseDstu3Test {
 		boolean respondGzip = true;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), null, theSummaryMode, 204, addContentLocationHeader, respondGzip, this.request);
 		assertThat(result.getStatus()).isEqualTo(204);
-		assertThat(result.getHeaderString(Constants.HEADER_CONTENT_TYPE)).isEqualTo(null);
+		assertThat(result.getHeaderString(Constants.HEADER_CONTENT_TYPE)).isNull();
 	}
 
 	private Bundle getSinglePatientResource() {

@@ -24,11 +24,11 @@ class ResourceOperationMessageTest {
 		jsonMessage = mapper.readValue(serialized, ResourceOperationJsonMessage.class);
 
 		assertThat(jsonMessage.getHapiHeaders().getRetryCount()).isEqualTo(0);
-		assertThat(jsonMessage.getHapiHeaders().getFirstFailureTimestamp()).isEqualTo(null);
-		assertThat(jsonMessage.getHapiHeaders().getLastFailureTimestamp()).isEqualTo(null);
+		assertThat(jsonMessage.getHapiHeaders().getFirstFailureTimestamp()).isNull();
+		assertThat(jsonMessage.getHapiHeaders().getLastFailureTimestamp()).isNull();
 
 		assertThat(jsonMessage.getHeaders().get(RETRY_COUNT_KEY)).isEqualTo(0);
-		assertThat(jsonMessage.getHeaders().get(FIRST_FAILURE_KEY)).isEqualTo(null);
-		assertThat(jsonMessage.getHeaders().get(LAST_FAILURE_KEY)).isEqualTo(null);
+		assertThat(jsonMessage.getHeaders().get(FIRST_FAILURE_KEY)).isNull();
+		assertThat(jsonMessage.getHeaders().get(LAST_FAILURE_KEY)).isNull();
 	}
 }

@@ -53,7 +53,7 @@ public class ReadTest {
 			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class,responseContent).getIdentifierFirstRep();
 
 			assertThat(dt.getSystemElement().getValueAsString()).isEqualTo("1");
-			assertThat(dt.getValueElement().getValueAsString()).isEqualTo(null);
+			assertThat(dt.getValueElement().getValueAsString()).isNull();
 			
 			org.apache.http.Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
 			assertThat(cl).isNotNull();

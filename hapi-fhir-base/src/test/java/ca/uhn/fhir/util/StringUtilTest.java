@@ -29,7 +29,7 @@ public class StringUtilTest {
 		assertThat(StringUtil.normalizeStringForSearchIndexing("TEST teSt")).isEqualTo("TEST TEST");
 		assertThat(StringUtil.normalizeStringForSearchIndexing("åéîøü")).isEqualTo("AEIØU");
 		assertThat(StringUtil.normalizeStringForSearchIndexing("杨浩")).isEqualTo("杨浩");
-		assertThat(StringUtil.normalizeStringForSearchIndexing(null)).isEqualTo(null);
+		assertThat(StringUtil.normalizeStringForSearchIndexing(null)).isNull();
 	}
 
 	@Test
@@ -55,7 +55,7 @@ public class StringUtilTest {
 
 	@Test
 	public void testChompCharacter() {
-		assertThat(StringUtil.chompCharacter(null, '/')).isEqualTo(null);
+		assertThat(StringUtil.chompCharacter(null, '/')).isNull();
 		assertThat(StringUtil.chompCharacter("", '/')).isEqualTo("");
 		assertThat(StringUtil.chompCharacter("/", '/')).isEqualTo("");
 		assertThat(StringUtil.chompCharacter("a/", '/')).isEqualTo("a");

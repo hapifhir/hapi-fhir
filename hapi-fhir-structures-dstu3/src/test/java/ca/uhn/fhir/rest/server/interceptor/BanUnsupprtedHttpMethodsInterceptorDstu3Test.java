@@ -60,7 +60,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 	public void testHeadJsonWithInvalidPatient() throws Exception {	
 		HttpHead httpGet = new HttpHead(ourServer.getBaseUrl() + "/Patient/123");	
 		HttpResponse status = ourClient.execute(httpGet);
-		assertThat(status.getEntity()).isEqualTo(null);	
+		assertThat(status.getEntity()).isNull();	
  		ourLog.info(status.toString());
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
@@ -71,7 +71,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 	public void testHeadJsonWithValidPatient() throws Exception {	
 		HttpHead httpGet = new HttpHead(ourServer.getBaseUrl() + "/Patient/1");	
 		HttpResponse status = ourClient.execute(httpGet);
-		assertThat(status.getEntity()).isEqualTo(null);	
+		assertThat(status.getEntity()).isNull();	
  		ourLog.info(status.toString());
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);

@@ -74,13 +74,12 @@ public class MailConfigTest {
 		// setup
 		final MailConfig other = withMainConfig();
 		// execute & validate
-		assertThat(fixture).isEqualTo(fixture);
+		assertThat(fixture).isEqualTo(fixture).isNotNull();
 		assertThat(fixture).isSameAs(fixture);
 		assertThat(other).isEqualTo(fixture);
 		assertNotSame(fixture, other);
 		assertThat(other.hashCode()).isEqualTo(fixture.hashCode());
 		assertThat(other.toString()).isNotEqualTo(fixture.toString());
-		assertThat(null).isNotEqualTo(fixture);
 	}
 
 	@Test

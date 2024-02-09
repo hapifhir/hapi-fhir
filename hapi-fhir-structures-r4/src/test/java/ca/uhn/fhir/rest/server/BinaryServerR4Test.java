@@ -77,7 +77,7 @@ public class 	BinaryServerR4Test {
 			assertThat(status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue()).isEqualTo("Patient/1");
 			assertThat(status.getFirstHeader(Constants.HEADER_ETAG).getValue()).isEqualTo("W/\"222\"");
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(ourServer.getBaseUrl() + "/Binary/A/_history/222");
-			assertThat(status.getFirstHeader(Constants.HEADER_LOCATION)).isEqualTo(null);
+			assertThat(status.getFirstHeader(Constants.HEADER_LOCATION)).isNull();
 
 			byte[] content = IOUtils.toByteArray(status.getEntity().getContent());
 			assertThat(content).containsExactly(new byte[]{0, 1, 2, 3, 4});
@@ -106,7 +106,7 @@ public class 	BinaryServerR4Test {
 			assertThat(status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue()).isEqualTo("Patient/1");
 			assertThat(status.getFirstHeader(Constants.HEADER_ETAG).getValue()).isEqualTo("W/\"222\"");
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(ourServer.getBaseUrl() + "/Binary/A/_history/222");
-			assertThat(status.getFirstHeader(Constants.HEADER_LOCATION)).isEqualTo(null);
+			assertThat(status.getFirstHeader(Constants.HEADER_LOCATION)).isNull();
 
 			String content = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(content).isEqualTo("{\"resourceType\":\"Binary\",\"id\":\"A\",\"meta\":{\"versionId\":\"222\"},\"contentType\":\"application/foo\",\"securityContext\":{\"reference\":\"Patient/1\"},\"data\":\"AAECAwQ=\"}");

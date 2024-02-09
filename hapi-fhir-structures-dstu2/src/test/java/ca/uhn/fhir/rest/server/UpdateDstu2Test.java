@@ -104,7 +104,7 @@ public class UpdateDstu2Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(status.getFirstHeader("location")).isEqualTo(null);
+		assertThat(status.getFirstHeader("location")).isNull();
 		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 		assertThat(ourLastId.getValue()).isNull();
@@ -132,7 +132,7 @@ public class UpdateDstu2Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(status.getFirstHeader("location")).isEqualTo(null);
+		assertThat(status.getFirstHeader("location")).isNull();
 		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 		assertThat(ourLastId.toUnqualified().getValue()).isEqualTo("Patient/2");

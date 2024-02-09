@@ -267,9 +267,9 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		code = "BLAH";
 		outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, null, valueSetUrl);
 		assertThat(outcome.isOk()).isFalse();
-		assertThat(outcome.getCode()).isEqualTo(null);
-		assertThat(outcome.getDisplay()).isEqualTo(null);
-		assertThat(outcome.getCodeSystemVersion()).isEqualTo(null);
+		assertThat(outcome.getCode()).isNull();
+		assertThat(outcome.getDisplay()).isNull();
+		assertThat(outcome.getCodeSystemVersion()).isNull();
 	}
 
 

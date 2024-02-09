@@ -110,7 +110,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		meta = mySystemDao.metaGetOperation(mySrd);
 		published = meta.getTag();
 		assertThat(published).hasSize(2);
-		assertThat(published.get(0).getSystem()).isEqualTo(null);
+		assertThat(published.get(0).getSystem()).isNull();
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
 		assertThat(published.get(1).getSystem()).isEqualTo("http://foo");
@@ -1661,7 +1661,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 
 		app2 = myAppointmentDao.read(id2, mySrd);
 		assertThat(app2.getParticipant().get(0).getActor().getDisplay().getValue()).isEqualTo("NO REF");
-		assertThat(app2.getParticipant().get(0).getActor().getReference().getValue()).isEqualTo(null);
+		assertThat(app2.getParticipant().get(0).getActor().getReference().getValue()).isNull();
 		assertThat(app2.getParticipant().get(1).getActor().getDisplay().getValue()).isEqualTo("YES REF");
 		assertThat(app2.getParticipant().get(1).getActor().getReference().getValue()).isEqualTo(id0.toUnqualifiedVersionless().getValue());
 	}

@@ -1977,7 +1977,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		IBundleProvider values = myPatientDao.search(map);
-		assertThat(values.size()).isEqualTo(null);
+		assertThat(values.size()).isNull();
 		assertThat(values.getResources(0, 1000)).hasSize(5);
 	}
 

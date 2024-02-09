@@ -40,16 +40,16 @@ public class UcumServiceUtilTest {
 	public void testInvalidCanonicalForm() {
 
 		//-- invalid url
-		assertThat(UcumServiceUtil.getCanonicalForm("url", new BigDecimal(2.5), "cm")).isEqualTo(null);
+		assertThat(UcumServiceUtil.getCanonicalForm("url", new BigDecimal(2.5), "cm")).isNull();
 
 		//-- missing value
-		assertThat(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, null, "dm")).isEqualTo(null);
+		assertThat(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, null, "dm")).isNull();
 
 		//-- missing code
-		assertThat(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), null)).isEqualTo(null);
+		assertThat(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), null)).isNull();
 
 		//-- invalid codes
-		assertThat(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), "xyz")).isEqualTo(null);
+		assertThat(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), "xyz")).isNull();
 
 	}
 	

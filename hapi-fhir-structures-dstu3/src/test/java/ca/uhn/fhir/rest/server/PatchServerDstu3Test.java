@@ -100,7 +100,7 @@ public class PatchServerDstu3Test {
 
 		assertThat(ourLastMethod).isEqualTo("patientPatch");
 		assertThat(ourLastConditional).isEqualTo("Patient?_id=123");
-		assertThat(ourLastId).isEqualTo(null);
+		assertThat(ourLastId).isNull();
 		assertThat(ourLastBody).isEqualTo(requestContents);
 		assertThat(ourLastPatchType).isEqualTo(PatchTypeEnum.JSON_PATCH);
 	}

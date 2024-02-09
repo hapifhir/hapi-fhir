@@ -149,7 +149,7 @@ public class HfqlRestProviderTest {
 
 			verify(myFqlExecutor, times(1)).executeContinuation(any(), myStatementCaptor.capture(), myOffsetCaptor.capture(), myLimitCaptor.capture(), notNull());
 			assertThat(myStatementCaptor.getValue()).isEqualTo(continuation);
-			assertThat(myLimitCaptor.getValue()).isEqualTo(null);
+			assertThat(myLimitCaptor.getValue()).isNull();
 			assertThat(myOffsetCaptor.getValue()).isEqualTo(99);
 		}
 	}

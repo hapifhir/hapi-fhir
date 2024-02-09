@@ -186,8 +186,8 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).as(toUnqualifiedVersionlessIdValues(outcome).toString()).containsExactlyInAnyOrder("Patient/A0", "Patient/A1", "Patient/A2", "Patient/A3", "Patient/A4", "Patient/A5", "Patient/A6", "Patient/A7", "Patient/A8");
 		assertThat(outcome.size()).isEqualTo(9);
-		assertThat(outcome.getCurrentPageOffset()).isEqualTo(null);
-		assertThat(outcome.getCurrentPageSize()).isEqualTo(null);
+		assertThat(outcome.getCurrentPageOffset()).isNull();
+		assertThat(outcome.getCurrentPageSize()).isNull();
 
 	}
 

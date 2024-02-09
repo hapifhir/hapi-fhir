@@ -42,7 +42,7 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 	public void testGetNativeClient_noProxySet_defaultHasNoProxySet() throws Exception {
 		OkHttpClient actualNativeClient = (OkHttpClient) clientFactory.getNativeClient();
 
-		assertThat(actualNativeClient.proxy()).isEqualTo(null);
+		assertThat(actualNativeClient.proxy()).isNull();
 	}
 
 	@Test

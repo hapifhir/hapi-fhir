@@ -509,18 +509,18 @@ public class JsonParserDstu2Test {
 		assertThat(name.getElementSpecificId()).isEqualTo("nameid");
 		assertThat(name.getFamily()).hasSize(3);
 
-		assertThat(name.getFamily().get(0).getValue()).isEqualTo(null);
+		assertThat(name.getFamily().get(0).getValue()).isNull();
 		assertThat(name.getFamily().get(1).getValue()).isEqualTo("V1");
-		assertThat(name.getFamily().get(2).getValue()).isEqualTo(null);
+		assertThat(name.getFamily().get(2).getValue()).isNull();
 
 		assertThat(name.getFamily().get(0).getElementSpecificId()).isEqualTo("f0");
 		assertThat(name.getFamily().get(1).getElementSpecificId()).isEqualTo("f1");
-		assertThat(name.getFamily().get(2).getElementSpecificId()).isEqualTo(null);
+		assertThat(name.getFamily().get(2).getElementSpecificId()).isNull();
 
 		assertThat(name.getFamily().get(0).getAllUndeclaredExtensions()).hasSize(1);
 		assertThat(name.getFamily().get(0).getAllUndeclaredExtensions().get(0).getUrl()).isEqualTo("http://foo");
 		assertThat(((StringDt) name.getFamily().get(0).getAllUndeclaredExtensions().get(0).getValue()).getValue()).isEqualTo("FOOEXT0");
-		assertThat(name.getFamily().get(0).getAllUndeclaredExtensions().get(0).getElementSpecificId()).isEqualTo(null);
+		assertThat(name.getFamily().get(0).getAllUndeclaredExtensions().get(0).getElementSpecificId()).isNull();
 
 		assertThat(name.getFamily().get(1).getAllUndeclaredExtensions()).hasSize(1);
 		assertThat(name.getFamily().get(1).getAllUndeclaredExtensions().get(0).getUrl()).isEqualTo("http://foo");
@@ -530,7 +530,7 @@ public class JsonParserDstu2Test {
 		assertThat(name.getFamily().get(2).getAllUndeclaredExtensions()).hasSize(1);
 		assertThat(name.getFamily().get(2).getAllUndeclaredExtensions().get(0).getUrl()).isEqualTo("http://foo");
 		assertThat(((StringDt) name.getFamily().get(2).getAllUndeclaredExtensions().get(0).getValue()).getValue()).isEqualTo("FOOEXT3");
-		assertThat(name.getFamily().get(2).getAllUndeclaredExtensions().get(0).getElementSpecificId()).isEqualTo(null);
+		assertThat(name.getFamily().get(2).getAllUndeclaredExtensions().get(0).getElementSpecificId()).isNull();
 
 	}
 
@@ -1589,7 +1589,7 @@ public class JsonParserDstu2Test {
 		ourLog.info(encoded);
 
 		assertThat(parsed.getEntry().get(0).getResource().getId().getValue()).isEqualTo("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57");
-		assertThat(parsed.getEntry().get(0).getResource().getId().getBaseUrl()).isEqualTo(null);
+		assertThat(parsed.getEntry().get(0).getResource().getId().getBaseUrl()).isNull();
 		assertThat(parsed.getEntry().get(0).getResource().getId().getIdPart()).isEqualTo("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57");
 		assertThat(encoded, not(containsString("\"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\"")));
 	}
@@ -1760,11 +1760,11 @@ public class JsonParserDstu2Test {
 		QuestionnaireResponse qr = parser.parseResource(QuestionnaireResponse.class, input);
 
 		assertThat(qr.getIdElement().getValue()).isEqualTo("QuestionnaireResponse/123");
-		assertThat(qr.getAuthored()).isEqualTo(null);
-		assertThat(qr.getAuthoredElement().getValue()).isEqualTo(null);
-		assertThat(qr.getAuthoredElement().getValueAsString()).isEqualTo(null);
-		assertThat(qr.getGroup().getLinkId()).isEqualTo(null);
-		assertThat(qr.getGroup().getLinkIdElement().getValue()).isEqualTo(null);
+		assertThat(qr.getAuthored()).isNull();
+		assertThat(qr.getAuthoredElement().getValue()).isNull();
+		assertThat(qr.getAuthoredElement().getValueAsString()).isNull();
+		assertThat(qr.getGroup().getLinkId()).isNull();
+		assertThat(qr.getGroup().getLinkIdElement().getValue()).isNull();
 	}
 
 	/**
@@ -1783,7 +1783,7 @@ public class JsonParserDstu2Test {
 		parser.setParserErrorHandler(new LenientErrorHandler());
 		Patient parsed = (Patient) parser.parseResource(input);
 		assertThat(parsed.getAllUndeclaredExtensions()).hasSize(1);
-		assertThat(parsed.getAllUndeclaredExtensions().get(0).getUrl()).isEqualTo(null);
+		assertThat(parsed.getAllUndeclaredExtensions().get(0).getUrl()).isNull();
 		assertThat(parsed.getAllUndeclaredExtensions().get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("2011-01-02T11:13:15");
 
 		try {
@@ -1812,7 +1812,7 @@ public class JsonParserDstu2Test {
 		parser.setParserErrorHandler(new LenientErrorHandler());
 		Patient parsed = (Patient) parser.parseResource(input);
 		assertThat(parsed.getAllUndeclaredExtensions()).hasSize(1);
-		assertThat(parsed.getAllUndeclaredExtensions().get(0).getUrl()).isEqualTo(null);
+		assertThat(parsed.getAllUndeclaredExtensions().get(0).getUrl()).isNull();
 		assertThat(parsed.getAllUndeclaredExtensions().get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("2011-01-02T11:13:15");
 
 		try {
@@ -1990,8 +1990,8 @@ public class JsonParserDstu2Test {
 		//@formatter:on
 
 		Patient patient = ourCtx.newJsonParser().parseResource(Patient.class, input);
-		assertThat(patient.getId().getValue()).isEqualTo(null);
-		assertThat(patient.getGenderElement().getValueAsEnum()).isEqualTo(null);
+		assertThat(patient.getId().getValue()).isNull();
+		assertThat(patient.getGenderElement().getValueAsEnum()).isNull();
 		assertThat(patient.getNameFirstRep().getFamilyAsSingleString()).isEqualTo("FAMILY");
 	}
 

@@ -299,14 +299,14 @@ public class BaseDateTimeTypeDstu3Test {
 		assertThat(dt.getNanos().longValue()).isEqualTo(275647578L);
 
 		dt = new InstantType();
-		assertThat(dt.getYear()).isEqualTo(null);
-		assertThat(dt.getMonth()).isEqualTo(null);
-		assertThat(dt.getDay()).isEqualTo(null);
-		assertThat(dt.getHour()).isEqualTo(null);
-		assertThat(dt.getMinute()).isEqualTo(null);
-		assertThat(dt.getSecond()).isEqualTo(null);
-		assertThat(dt.getMillis()).isEqualTo(null);
-		assertThat(dt.getNanos()).isEqualTo(null);
+		assertThat(dt.getYear()).isNull();
+		assertThat(dt.getMonth()).isNull();
+		assertThat(dt.getDay()).isNull();
+		assertThat(dt.getHour()).isNull();
+		assertThat(dt.getMinute()).isNull();
+		assertThat(dt.getSecond()).isNull();
+		assertThat(dt.getMillis()).isNull();
+		assertThat(dt.getNanos()).isNull();
 	}
 
 	@Test

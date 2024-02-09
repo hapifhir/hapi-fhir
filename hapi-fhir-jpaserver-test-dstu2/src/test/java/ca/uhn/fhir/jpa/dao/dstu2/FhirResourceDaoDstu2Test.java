@@ -1816,7 +1816,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		meta = myPatientDao.metaGetOperation(MetaDt.class, mySrd);
 		List<CodingDt> published = meta.getTag();
 		assertThat(published).hasSize(2);
-		assertThat(published.get(0).getSystem()).isEqualTo(null);
+		assertThat(published.get(0).getSystem()).isNull();
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
 		assertThat(published.get(1).getSystem()).isEqualTo("http://foo");
@@ -1939,7 +1939,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		meta = myPatientDao.metaGetOperation(MetaDt.class, mySrd);
 		List<CodingDt> published = meta.getTag();
 		assertThat(published).hasSize(2);
-		assertThat(published.get(0).getSystem()).isEqualTo(null);
+		assertThat(published.get(0).getSystem()).isNull();
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
 		assertThat(published.get(1).getSystem()).isEqualTo("http://foo");
@@ -2709,7 +2709,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		assertThat(published.size()).isEqualTo(2);
 		assertThat(published.get(0).getTerm()).isEqualTo("Dog");
 		assertThat(published.get(0).getLabel()).isEqualTo("Puppies");
-		assertThat(published.get(0).getScheme()).isEqualTo(null);
+		assertThat(published.get(0).getScheme()).isNull();
 		assertThat(published.get(1).getTerm()).isEqualTo("Cat");
 		assertThat(published.get(1).getLabel()).isEqualTo("Kittens");
 		assertThat(published.get(1).getScheme()).isEqualTo("http://foo");
@@ -2737,7 +2737,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 		sort(published);
 		assertThat(published.get(0).getTerm()).isEqualTo("Dog");
 		assertThat(published.get(0).getLabel()).isEqualTo("Puppies");
-		assertThat(published.get(0).getScheme()).isEqualTo(null);
+		assertThat(published.get(0).getScheme()).isNull();
 		assertThat(published.get(1).getTerm()).isEqualTo("Cat");
 		assertThat(published.get(1).getLabel()).isEqualTo("Kittens");
 		assertThat(published.get(1).getScheme()).isEqualTo("http://foo");

@@ -262,7 +262,7 @@ public class InterceptorDstu3Test {
 		verify(myInterceptor1, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), resourceCapt.capture());
 
 		assertThat(resourceCapt.getAllValues()).hasSize(1);
-		assertThat(resourceCapt.getAllValues().get(0)).isEqualTo(null);
+		assertThat(resourceCapt.getAllValues().get(0)).isNull();
 //		assertEquals("", rdCapt.getAllValues().get(0).get)
 	}
 

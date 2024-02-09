@@ -178,7 +178,7 @@ public class IncludeTest {
 		assertThat(new Include("Patient:careProvider", true).withType("Practitioner").isRecurse()).isEqualTo(true);
 		assertThat(new Include("Patient:careProvider:Organization", true).withType("Practitioner").isLocked()).isEqualTo(false);
 		assertThat(new Include("Patient:careProvider", true).withType("Practitioner").getParamTargetType()).isEqualTo("Practitioner");
-		assertThat(new Include("Patient:careProvider", true).getParamTargetType()).isEqualTo(null);
+		assertThat(new Include("Patient:careProvider", true).getParamTargetType()).isNull();
 
 		assertThat(new Include("Patient:careProvider:Organization", true).withType("Practitioner").getValue()).isEqualTo("Patient:careProvider:Practitioner");
 		assertThat(new Include("Patient:careProvider:Organization", true).toLocked().withType("Practitioner").isLocked()).isEqualTo(true);

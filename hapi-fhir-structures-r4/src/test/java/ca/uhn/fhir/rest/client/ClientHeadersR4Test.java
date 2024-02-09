@@ -71,7 +71,7 @@ public class ClientHeadersR4Test {
 			.execute();
 
 		assertThat(ourHeaders.get(Constants.HEADER_ACCEPT).get(0)).isEqualTo("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9");
-		assertThat(ourParams.get(Constants.PARAM_FORMAT)).isEqualTo(null);
+		assertThat(ourParams.get(Constants.PARAM_FORMAT)).isNull();
 	}
 
 	@Test
@@ -98,7 +98,7 @@ public class ClientHeadersR4Test {
 			.execute();
 
 		assertThat(ourHeaders.get(Constants.HEADER_ACCEPT).get(0)).isEqualTo("application/fhir+json;q=1.0, application/json+fhir;q=0.9");
-		assertThat(ourParams.get(Constants.PARAM_FORMAT)).isEqualTo(null);
+		assertThat(ourParams.get(Constants.PARAM_FORMAT)).isNull();
 	}
 
 	@Test

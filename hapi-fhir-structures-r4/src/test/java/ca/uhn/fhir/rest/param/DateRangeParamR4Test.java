@@ -138,12 +138,12 @@ public class DateRangeParamR4Test {
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(ourLastDateRange.getLowerBound().getValueAsString()).isEqualTo("2012-01-01");
-		assertThat(ourLastDateRange.getUpperBound()).isEqualTo(null);
+		assertThat(ourLastDateRange.getUpperBound()).isNull();
 
 		assertThat(ourLastDateRange.getLowerBoundAsInstant()).isEqualTo(parseLowerForDatePrecision("2012-01-02 00:00:00.0000"));
-		assertThat(ourLastDateRange.getUpperBoundAsInstant()).isEqualTo(null);
+		assertThat(ourLastDateRange.getUpperBoundAsInstant()).isNull();
 		assertThat(ourLastDateRange.getLowerBound().getPrefix()).isEqualTo(ParamPrefixEnum.GREATERTHAN);
-		assertThat(ourLastDateRange.getUpperBound()).isEqualTo(null);
+		assertThat(ourLastDateRange.getUpperBound()).isNull();
 	}
 
 	@Test
@@ -153,12 +153,12 @@ public class DateRangeParamR4Test {
 		consumeResponse(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-		assertThat(ourLastDateRange.getLowerBound()).isEqualTo(null);
+		assertThat(ourLastDateRange.getLowerBound()).isNull();
 		assertThat(ourLastDateRange.getUpperBound().getValueAsString()).isEqualTo("2012-01-01");
 
-		assertThat(ourLastDateRange.getLowerBoundAsInstant()).isEqualTo(null);
+		assertThat(ourLastDateRange.getLowerBoundAsInstant()).isNull();
 		assertThat(ourLastDateRange.getUpperBoundAsInstant()).isEqualTo(parseUpperForDatePrecision("2012-01-02 00:00:00.0000"));
-		assertThat(ourLastDateRange.getLowerBound()).isEqualTo(null);
+		assertThat(ourLastDateRange.getLowerBound()).isNull();
 		assertThat(ourLastDateRange.getUpperBound().getPrefix()).isEqualTo(ParamPrefixEnum.LESSTHAN);
 	}
 
@@ -170,12 +170,12 @@ public class DateRangeParamR4Test {
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(ourLastDateRange.getLowerBound().getValueAsString()).isEqualTo("2012-01-01");
-		assertThat(ourLastDateRange.getUpperBound()).isEqualTo(null);
+		assertThat(ourLastDateRange.getUpperBound()).isNull();
 
 		assertThat(ourLastDateRange.getLowerBoundAsInstant()).isEqualTo(parseLowerForDatePrecision("2012-01-01 00:00:00.0000"));
-		assertThat(ourLastDateRange.getUpperBoundAsInstant()).isEqualTo(null);
+		assertThat(ourLastDateRange.getUpperBoundAsInstant()).isNull();
 		assertThat(ourLastDateRange.getLowerBound().getPrefix()).isEqualTo(ParamPrefixEnum.GREATERTHAN_OR_EQUALS);
-		assertThat(ourLastDateRange.getUpperBound()).isEqualTo(null);
+		assertThat(ourLastDateRange.getUpperBound()).isNull();
 	}
 
 	@Test
@@ -185,12 +185,12 @@ public class DateRangeParamR4Test {
 		consumeResponse(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-		assertThat(ourLastDateRange.getLowerBound()).isEqualTo(null);
+		assertThat(ourLastDateRange.getLowerBound()).isNull();
 		assertThat(ourLastDateRange.getUpperBound().getValueAsString()).isEqualTo("2012-01-01");
 
-		assertThat(ourLastDateRange.getLowerBoundAsInstant()).isEqualTo(null);
+		assertThat(ourLastDateRange.getLowerBoundAsInstant()).isNull();
 		assertThat(ourLastDateRange.getUpperBoundAsInstant()).isEqualTo(parseUpperForDatePrecision("2012-01-03 00:00:00.0000"));
-		assertThat(ourLastDateRange.getLowerBound()).isEqualTo(null);
+		assertThat(ourLastDateRange.getLowerBound()).isNull();
 		assertThat(ourLastDateRange.getUpperBound().getPrefix()).isEqualTo(ParamPrefixEnum.LESSTHAN_OR_EQUALS);
 	}
 
@@ -276,9 +276,9 @@ public class DateRangeParamR4Test {
 		assertThat(create("2011-01-01").getUpperBoundAsInstant()).isEqualTo(parseUpperForDatePrecision("2011-01-03 00:00:00.0000"));
 
 		assertThat(create("ge2011-01-01").getLowerBoundAsInstant()).isEqualTo(parseLowerForDatePrecision("2011-01-01 00:00:00.0000"));
-		assertThat(create("ge2011-01-01").getUpperBoundAsInstant()).isEqualTo(null);
+		assertThat(create("ge2011-01-01").getUpperBoundAsInstant()).isNull();
 
-		assertThat(create("le2011-01-01").getLowerBoundAsInstant()).isEqualTo(null);
+		assertThat(create("le2011-01-01").getLowerBoundAsInstant()).isNull();
 		assertThat(create("le2011-01-01").getUpperBoundAsInstant()).isEqualTo(parseUpperForDatePrecision("2011-01-03 00:00:00.0000"));
 	}
 

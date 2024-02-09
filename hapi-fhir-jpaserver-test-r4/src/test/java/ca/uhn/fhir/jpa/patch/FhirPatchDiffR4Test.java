@@ -336,7 +336,7 @@ public class FhirPatchDiffR4Test {
 		assertThat(diff.getParameter()).hasSize(2);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("insert");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.contact");
-		assertThat(extractPartValue(diff, 0, "operation", "value", IBase.class)).isEqualTo(null);
+		assertThat(extractPartValue(diff, 0, "operation", "value", IBase.class)).isNull();
 		assertThat(extractPartValuePrimitive(diff, 1, "operation", "type")).isEqualTo("insert");
 		assertThat(extractPartValuePrimitive(diff, 1, "operation", "path")).isEqualTo("Patient.contact[0].name");
 		assertThat(extractPartValue(diff, 1, "operation", "value", HumanName.class).getFamily()).isEqualTo("My Family");

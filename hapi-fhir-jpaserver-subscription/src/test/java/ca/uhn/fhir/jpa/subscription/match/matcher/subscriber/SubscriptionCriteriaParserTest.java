@@ -31,8 +31,8 @@ public class SubscriptionCriteriaParserTest {
 		String expression = "[*]";
 		SubscriptionCriteriaParser.SubscriptionCriteria criteria = SubscriptionCriteriaParser.parse(expression);
 		assertThat(criteria.getType()).isEqualTo(SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION);
-		assertThat(criteria.getCriteria()).isEqualTo(null);
-		assertThat(criteria.getApplicableResourceTypes()).isEqualTo(null);
+		assertThat(criteria.getCriteria()).isNull();
+		assertThat(criteria.getApplicableResourceTypes()).isNull();
 		assertThat(criteria.toString()).isEqualTo("SubscriptionCriteriaParser.SubscriptionCriteria[type=STARTYPE_EXPRESSION]");
 	}
 
@@ -41,7 +41,7 @@ public class SubscriptionCriteriaParserTest {
 		String expression = "[Patient   , Observation]";
 		SubscriptionCriteriaParser.SubscriptionCriteria criteria = SubscriptionCriteriaParser.parse(expression);
 		assertThat(criteria.getType()).isEqualTo(SubscriptionCriteriaParser.TypeEnum.MULTITYPE_EXPRESSION);
-		assertThat(criteria.getCriteria()).isEqualTo(null);
+		assertThat(criteria.getCriteria()).isNull();
 		assertThat(criteria.getApplicableResourceTypes()).containsExactlyInAnyOrder("Patient", "Observation");
 		assertThat(criteria.toString()).isEqualTo("SubscriptionCriteriaParser.SubscriptionCriteria[type=MULTITYPE_EXPRESSION,applicableResourceTypes=[Observation, Patient]]");
 	}

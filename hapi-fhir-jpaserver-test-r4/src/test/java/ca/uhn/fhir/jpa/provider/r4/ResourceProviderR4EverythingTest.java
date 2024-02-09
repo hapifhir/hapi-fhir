@@ -887,7 +887,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			}
 		}
 
-		assertThat(responseBundle.getLink("next")).isEqualTo(null);
+		assertThat(responseBundle.getLink("next")).isNull();
 
 		assertThat(idsSet).contains("List/A161444");
 		assertThat(idsSet).contains("List/A161468");
@@ -1055,7 +1055,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		assertThat(response.getEntry()).hasSize(1);
 		assertThat(response.getTotalElement().getValueAsString()).isEqualTo("21");
-		assertThat(response.getLink("next")).isEqualTo(null);
+		assertThat(response.getLink("next")).isNull();
 
 	}
 
@@ -1089,8 +1089,8 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			.execute();
 
 		assertThat(response.getEntry()).hasSize(10);
-		assertThat(response.getTotalElement().getValue()).isEqualTo(null);
-		assertThat(response.getLink("next")).isEqualTo(null);
+		assertThat(response.getTotalElement().getValue()).isNull();
+		assertThat(response.getLink("next")).isNull();
 	}
 
 	@Test

@@ -335,11 +335,11 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
-		assertThat(results.size()).isEqualTo(null);
+		assertThat(results.size()).isNull();
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
 		assertThat(ids.get(9)).isEqualTo("Patient/PT00009");
-		assertThat(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size()).isEqualTo(null);
+		assertThat(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size()).isNull();
 
 		// Try the same query again. This time we'll request _total=accurate as well
 		// which means the total should be calculated no matter what.

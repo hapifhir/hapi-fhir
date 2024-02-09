@@ -89,7 +89,7 @@ public class SearchCountParamDstu2Test {
 			ourLog.info(responseContent);
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			assertThat(ourLastMethod).isEqualTo("searchWithNoCountParam");
-			assertThat(ourLastParam).isEqualTo(null);
+			assertThat(ourLastParam).isNull();
 			
 			//@formatter:off
 			assertThat(responseContent, stringContainsInOrder(

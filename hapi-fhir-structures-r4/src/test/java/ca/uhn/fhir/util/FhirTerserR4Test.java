@@ -228,8 +228,8 @@ public class FhirTerserR4Test {
 		myCtx.newTerser().containResources(bundle, FhirTerser.OptionsEnum.MODIFY_RESOURCE);
 
 		assertThat(mr.getContained()).isEmpty();
-		assertThat(mr.getRequester().getReference()).isEqualTo(null);
-		assertThat(mr.getMedicationReference().getReference()).isEqualTo(null);
+		assertThat(mr.getRequester().getReference()).isNull();
+		assertThat(mr.getMedicationReference().getReference()).isNull();
 
 	}
 

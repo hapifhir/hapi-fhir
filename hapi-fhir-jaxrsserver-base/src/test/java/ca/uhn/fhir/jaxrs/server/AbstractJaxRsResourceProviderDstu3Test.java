@@ -382,8 +382,8 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
 		client.update().resource(createPatient(1)).conditional().where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
 
-		assertThat(patientCaptor.getValue().getIdElement().getIdPart()).isEqualTo(null);
-		assertThat(patientCaptor.getValue().getIdElement().getVersionIdPart()).isEqualTo(null);
+		assertThat(patientCaptor.getValue().getIdElement().getIdPart()).isNull();
+		assertThat(patientCaptor.getValue().getIdElement().getVersionIdPart()).isNull();
 		assertThat(conditionalCaptor.getValue()).isEqualTo("Patient?identifier=2&_format=json");
 	}
 

@@ -16,7 +16,7 @@ public class SimpleRequestHeaderInterceptorTest {
 	public void testParseComnpleteHeaderNameOnly(){
 		SimpleRequestHeaderInterceptor i = new SimpleRequestHeaderInterceptor("Authorization");
 		assertThat(i.getHeaderName()).isEqualTo("Authorization");
-		assertThat(i.getHeaderValue()).isEqualTo(null);
+		assertThat(i.getHeaderValue()).isNull();
 	}
 
 }

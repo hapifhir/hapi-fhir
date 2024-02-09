@@ -9,7 +9,7 @@ public class SimpleBundleProviderTest {
 	@Test
 	public void testPreferredPageSize() {
 		SimpleBundleProvider p = new SimpleBundleProvider();
-		assertThat(p.preferredPageSize()).isEqualTo(null);
+		assertThat(p.preferredPageSize()).isNull();
 
 		p.setPreferredPageSize(100);
 		assertThat(p.preferredPageSize().intValue()).isEqualTo(100);

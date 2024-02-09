@@ -2062,7 +2062,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			}
 		}
 
-		assertThat(responseBundle.getLink("next")).isEqualTo(null);
+		assertThat(responseBundle.getLink("next")).isNull();
 
 		assertThat(idsSet).contains("List/A161444");
 		assertThat(idsSet).contains("List/A161468");
@@ -2336,7 +2336,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		assertThat(history.getEntry().get(1).getRequest().getMethodElement().getValue()).isEqualTo(HTTPVerb.DELETE);
 		assertThat(history.getEntry().get(1).getRequest().getUrl()).isEqualTo("Patient/" + id.getIdPart() + "/_history/2");
-		assertThat(history.getEntry().get(1).getResource()).isEqualTo(null);
+		assertThat(history.getEntry().get(1).getResource()).isNull();
 
 		assertThat(history.getEntry().get(2).getResource().getId()).isEqualTo(id.withVersion("1").getValue());
 		assertThat(((Patient) history.getEntry().get(2).getResource()).getName()).hasSize(1);
@@ -2623,7 +2623,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		assertThat(response.getEntry()).hasSize(1);
 		assertThat(response.getTotalElement().getValueAsString()).isEqualTo("21");
-		assertThat(response.getLink("next")).isEqualTo(null);
+		assertThat(response.getLink("next")).isNull();
 
 	}
 
@@ -2656,8 +2656,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 
 		assertThat(response.getEntry()).hasSize(10);
-		assertThat(response.getTotalElement().getValue()).isEqualTo(null);
-		assertThat(response.getLink("next")).isEqualTo(null);
+		assertThat(response.getTotalElement().getValue()).isNull();
+		assertThat(response.getLink("next")).isNull();
 	}
 
 	@Test

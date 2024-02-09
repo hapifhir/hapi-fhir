@@ -142,7 +142,7 @@ public class SearchNarrowingInterceptorTest {
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).size()).isEqualTo(1);
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getModifier()).isEqualTo(TokenParamModifier.NOT_IN);
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("http://myvs");
-		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo(null);
+		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isNull();
 		assertThat(ourLastSubjectParam).isNull();
 		assertThat(ourLastPerformerParam).isNull();
 		assertThat(ourLastPatientParam).isNull();
@@ -164,7 +164,7 @@ public class SearchNarrowingInterceptorTest {
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).size()).isEqualTo(1);
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getModifier()).isEqualTo(TokenParamModifier.IN);
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("http://myvs");
-		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo(null);
+		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isNull();
 		assertThat(ourLastSubjectParam).isNull();
 		assertThat(ourLastPerformerParam).isNull();
 		assertThat(ourLastPatientParam).isNull();
@@ -238,11 +238,11 @@ public class SearchNarrowingInterceptorTest {
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).size()).isEqualTo(1);
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getModifier()).isEqualTo(TokenParamModifier.IN);
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("http://othervs");
-		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo(null);
+		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isNull();
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(1).size()).isEqualTo(1);
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getModifier()).isEqualTo(TokenParamModifier.IN);
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("http://myvs");
-		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo(null);
+		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getSystem()).isNull();
 		assertThat(ourLastSubjectParam).isNull();
 		assertThat(ourLastPerformerParam).isNull();
 		assertThat(ourLastPatientParam).isNull();
@@ -260,7 +260,7 @@ public class SearchNarrowingInterceptorTest {
 			.execute();
 
 		assertThat(ourLastHitMethod).isEqualTo("Observation.search");
-		assertThat(ourLastCodeParam).isEqualTo(null);
+		assertThat(ourLastCodeParam).isNull();
 	}
 
 	@Test

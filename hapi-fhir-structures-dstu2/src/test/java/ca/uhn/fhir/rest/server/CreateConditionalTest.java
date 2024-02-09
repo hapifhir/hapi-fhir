@@ -109,8 +109,8 @@ public class CreateConditionalTest {
 		assertThat(status.getFirstHeader("location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
-		assertThat(ourLastId.toUnqualified().getValue()).isEqualTo(null);
-		assertThat(ourLastIdParam).isEqualTo(null);
+		assertThat(ourLastId.toUnqualified().getValue()).isNull();
+		assertThat(ourLastIdParam).isNull();
 		assertThat(ourLastConditionalUrl).isNull();
 
 	}

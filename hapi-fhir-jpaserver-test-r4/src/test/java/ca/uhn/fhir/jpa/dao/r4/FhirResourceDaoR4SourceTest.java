@@ -104,7 +104,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		myPatientDao.update(pt0);
 
 		pt0 = myPatientDao.read(pt0id.withVersion("2"));
-		assertThat(pt0.getMeta().getSource()).isEqualTo(null);
+		assertThat(pt0.getMeta().getSource()).isNull();
 
 	}
 
@@ -119,14 +119,14 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		pt0 = myPatientDao.read(pt0id);
-		assertThat(pt0.getMeta().getSource()).isEqualTo(null);
+		assertThat(pt0.getMeta().getSource()).isNull();
 
 		pt0.getMeta().setSource("urn:source:1");
 		pt0.setActive(false);
 		myPatientDao.update(pt0);
 
 		pt0 = myPatientDao.read(pt0id.withVersion("2"));
-		assertThat(pt0.getMeta().getSource()).isEqualTo(null);
+		assertThat(pt0.getMeta().getSource()).isNull();
 
 		// Search without source param
 		SearchParameterMap params = new SearchParameterMap();

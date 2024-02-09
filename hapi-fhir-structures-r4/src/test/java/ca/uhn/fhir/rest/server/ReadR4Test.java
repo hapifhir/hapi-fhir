@@ -60,7 +60,7 @@ public class ReadR4Test {
 			ourLog.info("Response was:\n{}", responseContent);
 
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(status.getFirstHeader(Constants.HEADER_LOCATION)).isEqualTo(null);
+			assertThat(status.getFirstHeader(Constants.HEADER_LOCATION)).isNull();
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo("http://localhost:" + myPort + "/Patient/2/_history/2");
 
 			assertThat(responseContent, stringContainsInOrder(
@@ -87,7 +87,7 @@ public class ReadR4Test {
 			ourLog.info("Response was:\n{}", responseContent);
 
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(status.getFirstHeader(Constants.HEADER_LOCATION)).isEqualTo(null);
+			assertThat(status.getFirstHeader(Constants.HEADER_LOCATION)).isNull();
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo("http://localhost:" + myPort + "/Patient/2/_history/2");
 
 			assertThat(responseContent, stringContainsInOrder(

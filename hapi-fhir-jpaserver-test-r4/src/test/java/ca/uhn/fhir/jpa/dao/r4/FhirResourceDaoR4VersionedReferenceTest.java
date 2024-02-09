@@ -272,7 +272,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			p.setActive(true);
 			IIdType patientId = myPatientDao.create(p).getId().toUnqualified();
 			assertThat(patientId.getVersionIdPart()).isEqualTo("1");
-			assertThat(patientId.getBaseUrl()).isEqualTo(null);
+			assertThat(patientId.getBaseUrl()).isNull();
 			String patientIdString = patientId.getValue();
 
 			// Create - put an unversioned reference in the subject
@@ -593,7 +593,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		p.setActive(true);
 		IIdType patientId = myPatientDao.create(p).getId().toUnqualified();
 		assertThat(patientId.getVersionIdPart()).isEqualTo("1");
-		assertThat(patientId.getBaseUrl()).isEqualTo(null);
+		assertThat(patientId.getBaseUrl()).isNull();
 		String patientIdString = patientId.getValue();
 
 		Observation observation = new Observation();
@@ -618,7 +618,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		IIdType patientId = myPatientDao.update(p).getId().toUnqualified();
 
 		assertThat(patientId.getVersionIdPart()).isEqualTo("2");
-		assertThat(patientId.getBaseUrl()).isEqualTo(null);
+		assertThat(patientId.getBaseUrl()).isNull();
 
 		Observation observation = new Observation();
 		observation.getSubject().setReference(patientId.withVersion("1").getValue());

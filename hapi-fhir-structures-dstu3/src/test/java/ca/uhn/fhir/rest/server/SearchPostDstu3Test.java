@@ -93,7 +93,7 @@ public class SearchPostDstu3Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			assertThat(ourLastMethod).isEqualTo("search");
-			assertThat(ourLastSortSpec).isEqualTo(null);
+			assertThat(ourLastSortSpec).isNull();
 			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
@@ -124,7 +124,7 @@ public class SearchPostDstu3Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			assertThat(ourLastMethod).isEqualTo("search");
-			assertThat(ourLastSortSpec).isEqualTo(null);
+			assertThat(ourLastSortSpec).isNull();
 			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
@@ -157,7 +157,7 @@ public class SearchPostDstu3Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			assertThat(ourLastMethod).isEqualTo("search");
-			assertThat(ourLastSortSpec).isEqualTo(null);
+			assertThat(ourLastSortSpec).isNull();
 			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
@@ -190,7 +190,7 @@ public class SearchPostDstu3Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			assertThat(ourLastMethod).isEqualTo("search");
-			assertThat(ourLastSortSpec).isEqualTo(null);
+			assertThat(ourLastSortSpec).isNull();
 			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");

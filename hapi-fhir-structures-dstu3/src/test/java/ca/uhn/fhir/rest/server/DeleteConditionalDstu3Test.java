@@ -62,7 +62,7 @@ public class DeleteConditionalDstu3Test {
 			.execute();
 
 		assertThat(ourLastRequestWasDelete).isTrue();
-		assertThat(ourLastIdParam).isEqualTo(null);
+		assertThat(ourLastIdParam).isNull();
 		assertThat(ourLastConditionalUrl).isEqualTo("Patient?identifier=SOMESYS%7CSOMEID");
 
 	}

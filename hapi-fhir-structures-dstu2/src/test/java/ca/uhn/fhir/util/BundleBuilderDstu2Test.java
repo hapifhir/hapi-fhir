@@ -147,7 +147,7 @@ public class BundleBuilderDstu2Test {
 		assertThat(bundle.getTypeElement().getValueAsEnum()).isEqualTo(BundleTypeEnum.TRANSACTION);
 		assertThat(bundle.getEntry()).hasSize(1);
 		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patient);
-		assertThat(bundle.getEntry().get(0).getFullUrl()).isEqualTo(null);
+		assertThat(bundle.getEntry().get(0).getFullUrl()).isNull();
 		assertThat(bundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Patient");
 		assertThat(bundle.getEntry().get(0).getRequest().getMethodElement().getValueAsEnum()).isEqualTo(HTTPVerbEnum.POST);
 	}
@@ -195,7 +195,7 @@ public class BundleBuilderDstu2Test {
 		assertThat(bundle.getTypeElement().getValueAsEnum()).isEqualTo(BundleTypeEnum.TRANSACTION);
 		assertThat(bundle.getEntry()).hasSize(1);
 		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patient);
-		assertThat(bundle.getEntry().get(0).getFullUrl()).isEqualTo(null);
+		assertThat(bundle.getEntry().get(0).getFullUrl()).isNull();
 		assertThat(bundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Patient");
 		assertThat(bundle.getEntry().get(0).getRequest().getIfNoneExist()).isEqualTo("Patient?active=true");
 		assertThat(bundle.getEntry().get(0).getRequest().getMethodElement().getValueAsEnum()).isEqualTo(HTTPVerbEnum.POST);

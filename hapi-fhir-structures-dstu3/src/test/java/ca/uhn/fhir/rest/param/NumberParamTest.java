@@ -43,7 +43,7 @@ public class NumberParamTest {
 	public void testNoQualifier() {
 		NumberParam p = new NumberParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "5.4");
-		assertThat(p.getPrefix()).isEqualTo(null);
+		assertThat(p.getPrefix()).isNull();
 		assertThat(p.getValue().toPlainString()).isEqualTo("5.4");
 		assertThat(p.getValueAsQueryToken(ourCtx)).isEqualTo("5.4");
 	}
@@ -56,7 +56,7 @@ public class NumberParamTest {
 	public void testNegativeNumber() {
 		NumberParam p = new NumberParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "-5.4");
-		assertThat(p.getPrefix()).isEqualTo(null);
+		assertThat(p.getPrefix()).isNull();
 		assertThat(p.getValue().toPlainString()).isEqualTo("-5.4");
 		assertThat(p.getValue()).isEqualTo(new BigDecimal("-5.4"));
 		assertThat(p.getValueAsQueryToken(ourCtx)).isEqualTo("-5.4");

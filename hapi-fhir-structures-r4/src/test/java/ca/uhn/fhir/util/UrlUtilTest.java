@@ -92,7 +92,7 @@ public class UrlUtilTest {
 		assertThat(UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde").getResourceType()).isEqualTo("ConceptMap");
 		assertThat(UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde").getResourceType()).isEqualTo("ConceptMap");
 		assertThat(UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde").getResourceId()).isEqualTo("ussgfht-loincde");
-		assertThat(UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde?").getParams()).isEqualTo(null);
+		assertThat(UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde?").getParams()).isNull();
 		assertThat(UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde?a=b").getParams()).isEqualTo("a=b");
 
 		assertThat(UrlUtil.parseUrl("ConceptMap/ussgfht-loincde?a=b").getParams()).isEqualTo("a=b");

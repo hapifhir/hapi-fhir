@@ -48,7 +48,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		IBundleProvider history = myPatientDao.history(null, null, null, new SystemRequestDetails());
 
 		// Simulate the server requesting the Bundle.total value
-		assertThat(history.size()).isEqualTo(null);
+		assertThat(history.size()).isNull();
 
 		// Simulate the server actually loading the resources
 		history.getResources(0, 10);
@@ -179,7 +179,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		IBundleProvider history = myPatientDao.history(null, new Date(), null, new SystemRequestDetails());
 
 		// No count since there is an offset
-		assertThat(history.size()).isEqualTo(null);
+		assertThat(history.size()).isNull();
 
 		// Simulate the server actually loading the resources
 		assertThat(history.getResources(0, 999)).hasSize(20);

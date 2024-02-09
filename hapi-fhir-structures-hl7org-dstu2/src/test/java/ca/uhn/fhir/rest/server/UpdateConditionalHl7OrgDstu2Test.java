@@ -78,7 +78,7 @@ public class UpdateConditionalHl7OrgDstu2Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(status.getFirstHeader("location")).isEqualTo(null);
+		assertThat(status.getFirstHeader("location")).isNull();
 		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 		assertThat(ourLastId).isNull();
@@ -105,7 +105,7 @@ public class UpdateConditionalHl7OrgDstu2Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(status.getFirstHeader("location")).isEqualTo(null);
+		assertThat(status.getFirstHeader("location")).isNull();
 		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 		assertThat(new IdType(ourLastId).toUnqualified().getValue()).isEqualTo("Patient/2");

@@ -161,7 +161,7 @@ public class XmlParserDstu2_1Test {
 		parser.setParserErrorHandler(new LenientErrorHandler());
 		Patient parsed = (Patient) parser.parseResource(input);
 		assertThat(parsed.getExtension()).hasSize(1);
-		assertThat(parsed.getExtension().get(0).getUrl()).isEqualTo(null);
+		assertThat(parsed.getExtension().get(0).getUrl()).isNull();
 		assertThat(((PrimitiveType<?>) parsed.getExtension().get(0).getValue()).getValueAsString()).isEqualTo("2011-01-02T11:13:15");
 
 		try {
@@ -192,7 +192,7 @@ public class XmlParserDstu2_1Test {
 		parser.setParserErrorHandler(new LenientErrorHandler());
 		Patient parsed = (Patient) parser.parseResource(input);
 		assertThat(parsed.getModifierExtension()).hasSize(1);
-		assertThat(parsed.getModifierExtension().get(0).getUrl()).isEqualTo(null);
+		assertThat(parsed.getModifierExtension().get(0).getUrl()).isNull();
 		assertThat(((PrimitiveType<?>) parsed.getModifierExtension().get(0).getValue()).getValueAsString()).isEqualTo("2011-01-02T11:13:15");
 
 		try {
@@ -715,18 +715,18 @@ public class XmlParserDstu2_1Test {
 		assertThat(name.getId()).isEqualTo("nameid");
 		assertThat(name.getGiven()).hasSize(3);
 
-		assertThat(name.getGiven().get(0).getValue()).isEqualTo(null);
+		assertThat(name.getGiven().get(0).getValue()).isNull();
 		assertThat(name.getGiven().get(1).getValue()).isEqualTo("V1");
-		assertThat(name.getGiven().get(2).getValue()).isEqualTo(null);
+		assertThat(name.getGiven().get(2).getValue()).isNull();
 
 		assertThat(name.getGiven().get(0).getId()).isEqualTo("f0");
 		assertThat(name.getGiven().get(1).getId()).isEqualTo("f1");
-		assertThat(name.getGiven().get(2).getId()).isEqualTo(null);
+		assertThat(name.getGiven().get(2).getId()).isNull();
 
 		assertThat(name.getGiven().get(0).getExtension()).hasSize(1);
 		assertThat(name.getGiven().get(0).getExtension().get(0).getUrl()).isEqualTo("http://foo");
 		assertThat(((StringType) name.getGiven().get(0).getExtension().get(0).getValue()).getValue()).isEqualTo("FOOEXT0");
-		assertThat(name.getGiven().get(0).getExtension().get(0).getId()).isEqualTo(null);
+		assertThat(name.getGiven().get(0).getExtension().get(0).getId()).isNull();
 
 		assertThat(name.getGiven().get(1).getExtension()).hasSize(1);
 		assertThat(name.getGiven().get(1).getExtension().get(0).getUrl()).isEqualTo("http://foo");
@@ -736,7 +736,7 @@ public class XmlParserDstu2_1Test {
 		assertThat(name.getGiven().get(2).getExtension()).hasSize(1);
 		assertThat(name.getGiven().get(2).getExtension().get(0).getUrl()).isEqualTo("http://foo");
 		assertThat(((StringType) name.getGiven().get(2).getExtension().get(0).getValue()).getValue()).isEqualTo("FOOEXT3");
-		assertThat(name.getGiven().get(2).getExtension().get(0).getId()).isEqualTo(null);
+		assertThat(name.getGiven().get(2).getExtension().get(0).getId()).isNull();
 
 	}
 
@@ -1965,7 +1965,7 @@ public class XmlParserDstu2_1Test {
 		List<Extension> exts = bd.getExtensionsByUrl("http://my.fancy.extension.url");
 		assertThat(exts).hasSize(1);
 		Extension ext = exts.get(0);
-		assertThat(ext.getValue()).isEqualTo(null);
+		assertThat(ext.getValue()).isNull();
 
 		exts = ext.getExtensionsByUrl("http://my.fancy.extension.url");
 		assertThat(exts).hasSize(1);
@@ -2272,7 +2272,7 @@ public class XmlParserDstu2_1Test {
 		extList = extList.get(0).getExtensionsByUrl("http://aaa.ch/fhir/Patient#mangedcare-aaa-id");
 		Extension ext = extList.get(0);
 		IdType value = (IdType) ext.getValue();
-		assertThat(value).isEqualTo(null);
+		assertThat(value).isNull();
 	}
 
 	/**

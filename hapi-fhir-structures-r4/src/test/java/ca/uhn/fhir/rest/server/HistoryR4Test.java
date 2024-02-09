@@ -131,7 +131,7 @@ public class HistoryR4Test {
 				assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			}
 
-			assertThat(ourLastAt).isEqualTo(null);
+			assertThat(ourLastAt).isNull();
 			assertThat(ourLastSince.getValueAsString()).isEqualTo("2005");
 			assertThat(ourLastSince2.getValueAsString()).isEqualTo("2005");
 			assertThat(DateTimeType.class.equals(ourLastSince2.getClass())).isTrue();

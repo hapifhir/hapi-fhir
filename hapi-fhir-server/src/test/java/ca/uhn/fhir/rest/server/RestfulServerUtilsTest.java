@@ -55,14 +55,14 @@ public class RestfulServerUtilsTest {
 	@Test
 	public void testParsePreferAsync() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "respond-async");
-		assertThat(header.getReturn()).isEqualTo(null);
+		assertThat(header.getReturn()).isNull();
 		assertThat(header.getRespondAsync()).isTrue();
 	}
 
 	@Test
 	public void testParseHandlingLenient() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "handling=lenient");
-		assertThat(header.getReturn()).isEqualTo(null);
+		assertThat(header.getReturn()).isNull();
 		assertThat(header.getRespondAsync()).isFalse();
 		assertThat(header.getHanding()).isEqualTo(PreferHandlingEnum.LENIENT);
 	}

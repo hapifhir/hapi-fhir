@@ -143,7 +143,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(outcome.getTotalElement().getValue()).isEqualTo(null);
+		assertThat(outcome.getTotalElement().getValue()).isNull();
 		assertThat(outcome.getEntry()).hasSize(10);
 	}
 
@@ -163,7 +163,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(outcome.getTotalElement().getValue()).isEqualTo(null);
+		assertThat(outcome.getTotalElement().getValue()).isNull();
 		assertThat(outcome.getEntry()).hasSize(10);
 	}
 

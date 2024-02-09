@@ -40,7 +40,7 @@ public class ResourceCountCacheTest {
 		// Cache is initialized on startup
 		ResourceCountCache cache = new ResourceCountCache(myFetcher);
 		cache.setCacheMillis(500);
-		assertThat(cache.get()).isEqualTo(null);
+		assertThat(cache.get()).isNull();
 
 		// Not time to update yet
 		cache.update();
@@ -71,18 +71,18 @@ public class ResourceCountCacheTest {
 		 * No matter how long we wait it should never load...
 		 */
 
-		assertThat(cache.get()).isEqualTo(null);
+		assertThat(cache.get()).isNull();
 
 		cache.update();
-		assertThat(cache.get()).isEqualTo(null);
+		assertThat(cache.get()).isNull();
 
 		ResourceCountCache.setNowForUnitTest(start + 400);
 		cache.update();
-		assertThat(cache.get()).isEqualTo(null);
+		assertThat(cache.get()).isNull();
 
 		ResourceCountCache.setNowForUnitTest(start + 80000);
 		cache.update();
-		assertThat(cache.get()).isEqualTo(null);
+		assertThat(cache.get()).isNull();
 
 	}
 

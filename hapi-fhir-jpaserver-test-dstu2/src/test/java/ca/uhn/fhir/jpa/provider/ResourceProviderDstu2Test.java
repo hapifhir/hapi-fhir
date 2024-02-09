@@ -1647,7 +1647,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		assertThat(response.getEntry()).hasSize(1);
 		assertThat(response.getTotal().intValue()).isEqualTo(21);
-		assertThat(response.getLink("next")).isEqualTo(null);
+		assertThat(response.getLink("next")).isNull();
 	}
 
 	@Test
@@ -1681,8 +1681,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.execute();
 
 			assertThat(response.getEntry()).hasSize(10);
-			assertThat(response.getTotalElement().getValue()).isEqualTo(null);
-			assertThat(response.getLink("next")).isEqualTo(null);
+			assertThat(response.getTotalElement().getValue()).isNull();
+			assertThat(response.getLink("next")).isNull();
 
 		} finally {
 			myServer.getRestfulServer().setPagingProvider(previousPagingProvider);

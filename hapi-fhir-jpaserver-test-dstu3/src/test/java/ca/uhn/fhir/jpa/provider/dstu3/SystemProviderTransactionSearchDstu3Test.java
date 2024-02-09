@@ -146,7 +146,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		assertThat(output.getEntry()).hasSize(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
 		assertThat(respBundle.getEntry()).hasSize(5);
-		assertThat(respBundle.getLink("next")).isEqualTo(null);
+		assertThat(respBundle.getLink("next")).isNull();
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 	}
@@ -249,7 +249,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		assertThat(output.getEntry()).hasSize(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
 		assertThat(respBundle.getEntry()).hasSize(5);
-		assertThat(respBundle.getLink("next")).isEqualTo(null);
+		assertThat(respBundle.getLink("next")).isNull();
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 	}

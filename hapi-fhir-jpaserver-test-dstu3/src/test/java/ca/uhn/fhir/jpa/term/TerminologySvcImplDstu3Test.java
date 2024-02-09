@@ -268,7 +268,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		ValueSet.ValueSetExpansionContainsComponent concept = outcome.getExpansion().getContains().get(0);
 		assertThat(concept.getCode()).isEqualTo("childAAB");
 		assertThat(concept.getSystem()).isEqualTo("http://example.com/my_code_system");
-		assertThat(concept.getDisplay()).isEqualTo(null);
+		assertThat(concept.getDisplay()).isNull();
 		assertThat(concept.getDesignation().get(0).getUse().getSystem()).isEqualTo("D1S");
 		assertThat(concept.getDesignation().get(0).getUse().getCode()).isEqualTo("D1C");
 		assertThat(concept.getDesignation().get(0).getUse().getDisplay()).isEqualTo("D1D");
@@ -1807,7 +1807,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		ValueSet.ValueSetExpansionContainsComponent concept = outcome.getExpansion().getContains().get(0);
 		assertThat(concept.getCode()).isEqualTo("childAAB");
 		assertThat(concept.getSystem()).isEqualTo("http://example.com/my_code_system");
-		assertThat(concept.getDisplay()).isEqualTo(null);
+		assertThat(concept.getDisplay()).isNull();
 		assertThat(concept.getDesignation().get(0).getLanguage()).isEqualTo("D1L");
 		assertThat(concept.getDesignation().get(0).getUse().getSystem()).isEqualTo("D1S");
 		assertThat(concept.getDesignation().get(0).getUse().getCode()).isEqualTo("D1C");

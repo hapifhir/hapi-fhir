@@ -614,7 +614,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		// Make sure we can fetch the package by ID and Version
 		NpmPackage pkg = myPackageCacheManager.loadPackage("UK.Core.r4", "1.1.0");
-		assertThat(pkg.description()).isEqualTo(null);
+		assertThat(pkg.description()).isNull();
 		assertThat(pkg.name()).isEqualTo("UK.Core.r4");
 
 	}
@@ -857,8 +857,8 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.11.1").getVersion()).isEqualTo("0.11.1");
 		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.12.0").getVersion()).isEqualTo("0.12.0");
 		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "latest").getVersion()).isEqualTo("0.12.0");
-		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "1.2.3")).isEqualTo(null);
-		assertThat(myPackageCacheManager.loadPackageContents("foo", "1.2.3")).isEqualTo(null);
+		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "1.2.3")).isNull();
+		assertThat(myPackageCacheManager.loadPackageContents("foo", "1.2.3")).isNull();
 	}
 
 

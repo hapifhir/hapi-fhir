@@ -20,8 +20,8 @@ class ExtensionUtilTest {
 		parent.addExtension("child3", new Quantity(123));
 
 		assertThat(ExtensionUtil.extractChildPrimitiveExtensionValue(parent, "child2")).isEqualTo("false");
-		assertThat(ExtensionUtil.extractChildPrimitiveExtensionValue(parent, "unknown")).isEqualTo(null);
-		assertThat(ExtensionUtil.extractChildPrimitiveExtensionValue(parent, "child3")).isEqualTo(null);
+		assertThat(ExtensionUtil.extractChildPrimitiveExtensionValue(parent, "unknown")).isNull();
+		assertThat(ExtensionUtil.extractChildPrimitiveExtensionValue(parent, "child3")).isNull();
 
 	}
 

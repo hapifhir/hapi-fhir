@@ -125,7 +125,7 @@ public class ServerFeaturesDstu2Test {
 	public void testHeadJson() throws Exception {
 		HttpHead httpGet = new HttpHead(ourServer.getBaseUrl() + "/Patient/123");
 		HttpResponse status = ourClient.execute(httpGet);
-		assertThat(status.getEntity()).isEqualTo(null);
+		assertThat(status.getEntity()).isNull();
 
 		ourLog.info(status.toString());
 

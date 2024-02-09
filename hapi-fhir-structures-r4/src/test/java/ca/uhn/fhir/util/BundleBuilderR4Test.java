@@ -76,7 +76,7 @@ public class BundleBuilderR4Test {
 		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.TRANSACTION);
 		assertThat(bundle.getEntry()).hasSize(1);
 		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patch);
-		assertThat(bundle.getEntry().get(0).getFullUrl()).isEqualTo(null);
+		assertThat(bundle.getEntry().get(0).getFullUrl()).isNull();
 		assertThat(bundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Patient?identifier=http://foo|123");
 		assertThat(bundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.PATCH);
 
@@ -200,7 +200,7 @@ public class BundleBuilderR4Test {
 		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.TRANSACTION);
 		assertThat(bundle.getEntry()).hasSize(1);
 		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patient);
-		assertThat(bundle.getEntry().get(0).getFullUrl()).isEqualTo(null);
+		assertThat(bundle.getEntry().get(0).getFullUrl()).isNull();
 		assertThat(bundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Patient");
 		assertThat(bundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.POST);
 	}
@@ -249,7 +249,7 @@ public class BundleBuilderR4Test {
 		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.TRANSACTION);
 		assertThat(bundle.getEntry()).hasSize(1);
 		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patient);
-		assertThat(bundle.getEntry().get(0).getFullUrl()).isEqualTo(null);
+		assertThat(bundle.getEntry().get(0).getFullUrl()).isNull();
 		assertThat(bundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Patient");
 		assertThat(bundle.getEntry().get(0).getRequest().getIfNoneExist()).isEqualTo("Patient?active=true");
 		assertThat(bundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.POST);

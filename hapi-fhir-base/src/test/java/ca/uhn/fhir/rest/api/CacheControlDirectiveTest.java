@@ -25,7 +25,7 @@ public class CacheControlDirectiveTest {
 		ccd.parse(values);
 		assertThat(ccd.isNoCache()).isTrue();
 		assertThat(ccd.isNoStore()).isTrue();
-		assertThat(ccd.getMaxResults()).isEqualTo(null);
+		assertThat(ccd.getMaxResults()).isNull();
 	}
 
 	@Test
@@ -45,7 +45,7 @@ public class CacheControlDirectiveTest {
 		ccd.parse(values);
 		assertThat(ccd.isNoCache()).isFalse();
 		assertThat(ccd.isNoStore()).isTrue();
-		assertThat(ccd.getMaxResults()).isEqualTo(null);
+		assertThat(ccd.getMaxResults()).isNull();
 	}
 
 	@Test

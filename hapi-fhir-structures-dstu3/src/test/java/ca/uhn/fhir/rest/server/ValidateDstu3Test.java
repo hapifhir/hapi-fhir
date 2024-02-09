@@ -147,7 +147,7 @@ public class ValidateDstu3Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(ourLastPatient).isEqualTo(null);
+		assertThat(ourLastPatient).isNull();
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 	}
 
@@ -165,7 +165,7 @@ public class ValidateDstu3Test {
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(resp, stringContainsInOrder("<OperationOutcome", "FOOBAR"));
-		assertThat(ourLastPatient).isEqualTo(null);
+		assertThat(ourLastPatient).isNull();
 		assertThat(ourLastId.getResourceType()).isEqualTo("Patient");
 		assertThat(ourLastId.getIdPart()).isEqualTo("123");
 	}

@@ -27,7 +27,7 @@ public class ReflectionUtilTest {
 
 	@Test
 	public void testNewInstanceOrReturnNullWrong1() {
-		assertThat(ReflectionUtil.newInstanceOrReturnNull("foo.Foo", List.class)).isEqualTo(null);
+		assertThat(ReflectionUtil.newInstanceOrReturnNull("foo.Foo", List.class)).isNull();
 	}
 
 	@Test

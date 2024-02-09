@@ -28,10 +28,10 @@ public class IdTypeDstu3Test {
 	public void testBaseUrlFoo1() {
 		IdType id = new IdType("http://my.org/foo");
 		assertThat(id.getValueAsString()).isEqualTo("http://my.org/foo");
-		assertThat(id.getIdPart()).isEqualTo(null);
+		assertThat(id.getIdPart()).isNull();
 		assertThat(id.toUnqualified().getValueAsString()).isEqualTo("foo");
 		assertThat(id.toUnqualifiedVersionless().getValueAsString()).isEqualTo("foo");
-		assertThat(id.getVersionIdPart()).isEqualTo(null);
+		assertThat(id.getVersionIdPart()).isNull();
 		assertThat(id.getResourceType()).isEqualTo("foo");
 		assertThat(id.getBaseUrl()).isEqualTo("http://my.org");
 
@@ -47,7 +47,7 @@ public class IdTypeDstu3Test {
 		assertThat(id.getIdPart()).isEqualTo("foo");
 		assertThat(id.toUnqualified().getValueAsString()).isEqualTo("c/foo");
 		assertThat(id.toUnqualifiedVersionless().getValueAsString()).isEqualTo("c/foo");
-		assertThat(id.getVersionIdPart()).isEqualTo(null);
+		assertThat(id.getVersionIdPart()).isNull();
 		assertThat(id.getResourceType()).isEqualTo("c");
 		assertThat(id.getBaseUrl()).isEqualTo("http://my.org/a/b");
 
@@ -71,7 +71,7 @@ public class IdTypeDstu3Test {
 	public void testComplicatedLocal() {
 		IdType id = new IdType("#Patient/cid:Patient-72/_history/1");
 		assertThat(id.isLocal()).isTrue();
-		assertThat(id.getBaseUrl()).isEqualTo(null);
+		assertThat(id.getBaseUrl()).isNull();
 		assertThat(id.getResourceType()).isNull();
 		assertThat(id.getVersionIdPart()).isNull();
 		assertThat(id.getIdPart()).isEqualTo("#Patient/cid:Patient-72/_history/1");
@@ -91,7 +91,7 @@ public class IdTypeDstu3Test {
 	@Test
 	public void testConstructorsWithNullArguments() {
 		IdType id = new IdType(null, null, null);
-		assertThat(id.getValue()).isEqualTo(null);
+		assertThat(id.getValue()).isNull();
 	}
 
 	@Test
@@ -114,15 +114,15 @@ public class IdTypeDstu3Test {
 	@Test
 	public void testDetectLocalBase() {
 		assertThat(new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getValue()).isEqualTo("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57");
-		assertThat(new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl()).isEqualTo(null);
+		assertThat(new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl()).isNull();
 		assertThat(new IdType("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart()).isEqualTo("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57");
 
 		assertThat(new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getValue()).isEqualTo("cid:180f219f-97a8-486d-99d9-ed631fe4fc57");
-		assertThat(new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl()).isEqualTo(null);
+		assertThat(new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl()).isNull();
 		assertThat(new IdType("cid:180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart()).isEqualTo("cid:180f219f-97a8-486d-99d9-ed631fe4fc57");
 
 		assertThat(new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getValue()).isEqualTo("#180f219f-97a8-486d-99d9-ed631fe4fc57");
-		assertThat(new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl()).isEqualTo(null);
+		assertThat(new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getBaseUrl()).isNull();
 		assertThat(new IdType("#180f219f-97a8-486d-99d9-ed631fe4fc57").getIdPart()).isEqualTo("#180f219f-97a8-486d-99d9-ed631fe4fc57");
 	}
 
@@ -138,7 +138,7 @@ public class IdTypeDstu3Test {
 		assertThat(rr.getBaseUrl()).isEqualTo("http://foo/fhir");
 
 		rr = new IdType("Organization/123/_history/123");
-		assertThat(rr.getBaseUrl()).isEqualTo(null);
+		assertThat(rr.getBaseUrl()).isNull();
 
 	}
 
@@ -149,9 +149,9 @@ public class IdTypeDstu3Test {
 		assertThat(id.getIdPart()).isEqualTo("#foo");
 		assertThat(id.toUnqualified().getValueAsString()).isEqualTo("#foo");
 		assertThat(id.toUnqualifiedVersionless().getValueAsString()).isEqualTo("#foo");
-		assertThat(id.getVersionIdPart()).isEqualTo(null);
-		assertThat(id.getResourceType()).isEqualTo(null);
-		assertThat(id.getBaseUrl()).isEqualTo(null);
+		assertThat(id.getVersionIdPart()).isNull();
+		assertThat(id.getResourceType()).isNull();
+		assertThat(id.getBaseUrl()).isNull();
 
 		assertThat(id.withResourceType("Patient").getValue()).isEqualTo("#foo");
 		assertThat(id.withServerBase("http://foo", "Patient").getValue()).isEqualTo("#foo");
@@ -165,9 +165,9 @@ public class IdTypeDstu3Test {
 		assertThat(id.getIdPart()).isEqualTo("foo");
 		assertThat(id.toUnqualified().getValueAsString()).isEqualTo("foo");
 		assertThat(id.toUnqualifiedVersionless().getValueAsString()).isEqualTo("foo");
-		assertThat(id.getVersionIdPart()).isEqualTo(null);
-		assertThat(id.getResourceType()).isEqualTo(null);
-		assertThat(id.getBaseUrl()).isEqualTo(null);
+		assertThat(id.getVersionIdPart()).isNull();
+		assertThat(id.getResourceType()).isNull();
+		assertThat(id.getBaseUrl()).isNull();
 
 		assertThat(id.withResourceType("Patient").getValue()).isEqualTo("Patient/foo");
 		assertThat(id.withServerBase("http://foo", "Patient").getValue()).isEqualTo("http://foo/Patient/foo");
@@ -181,9 +181,9 @@ public class IdTypeDstu3Test {
 		assertThat(id.getIdPart()).isEqualTo("urn:oid:1.2.3.4");
 		assertThat(id.toUnqualified().getValueAsString()).isEqualTo("urn:oid:1.2.3.4");
 		assertThat(id.toUnqualifiedVersionless().getValueAsString()).isEqualTo("urn:oid:1.2.3.4");
-		assertThat(id.getVersionIdPart()).isEqualTo(null);
-		assertThat(id.getResourceType()).isEqualTo(null);
-		assertThat(id.getBaseUrl()).isEqualTo(null);
+		assertThat(id.getVersionIdPart()).isNull();
+		assertThat(id.getResourceType()).isNull();
+		assertThat(id.getBaseUrl()).isNull();
 
 		assertThat(id.withResourceType("Patient").getValue()).isEqualTo("urn:oid:1.2.3.4");
 		assertThat(id.withServerBase("http://foo", "Patient").getValue()).isEqualTo("urn:oid:1.2.3.4");
@@ -216,7 +216,7 @@ public class IdTypeDstu3Test {
 		Reference ref = actual.getManagingOrganization();
 		assertThat(ref.getReferenceElement().getResourceType()).isEqualTo("Organization");
 		assertThat(ref.getReferenceElement().getIdPart()).isEqualTo("123");
-		assertThat(ref.getReferenceElement().getVersionIdPart()).isEqualTo(null);
+		assertThat(ref.getReferenceElement().getVersionIdPart()).isNull();
 
 	}
 
@@ -229,7 +229,7 @@ public class IdTypeDstu3Test {
 
 		Patient actual = parseAndEncode(patient);
 		Reference ref = actual.getManagingOrganization();
-		assertThat(ref.getReferenceElement().getResourceType()).isEqualTo(null);
+		assertThat(ref.getReferenceElement().getResourceType()).isNull();
 		assertThat(ref.getReferenceElement().getIdPart()).isEqualTo("123");
 
 	}
@@ -243,7 +243,7 @@ public class IdTypeDstu3Test {
 
 		Patient actual = parseAndEncode(patient);
 		Reference ref = actual.getManagingOrganization();
-		assertThat(ref.getReferenceElement().getResourceType()).isEqualTo(null);
+		assertThat(ref.getReferenceElement().getResourceType()).isNull();
 		assertThat(ref.getReferenceElement().getIdPart()).isEqualTo("123");
 
 	}
@@ -285,9 +285,9 @@ public class IdTypeDstu3Test {
 
 		Patient actual = parseAndEncode(patient);
 		Reference ref = actual.getManagingOrganization();
-		assertThat(ref.getReferenceElement().getResourceType()).isEqualTo(null);
+		assertThat(ref.getReferenceElement().getResourceType()).isNull();
 		assertThat(ref.getReferenceElement().getIdPart()).isEqualTo("123");
-		assertThat(ref.getReferenceElement().getVersionIdPart()).isEqualTo(null);
+		assertThat(ref.getReferenceElement().getVersionIdPart()).isNull();
 
 	}
 
@@ -298,9 +298,9 @@ public class IdTypeDstu3Test {
 		assertThat(id.getIdPart()).isEqualTo("urn:uuid:1234-5678");
 		assertThat(id.toUnqualified().getValueAsString()).isEqualTo("urn:uuid:1234-5678");
 		assertThat(id.toUnqualifiedVersionless().getValueAsString()).isEqualTo("urn:uuid:1234-5678");
-		assertThat(id.getVersionIdPart()).isEqualTo(null);
-		assertThat(id.getResourceType()).isEqualTo(null);
-		assertThat(id.getBaseUrl()).isEqualTo(null);
+		assertThat(id.getVersionIdPart()).isNull();
+		assertThat(id.getResourceType()).isNull();
+		assertThat(id.getBaseUrl()).isNull();
 
 		assertThat(id.withResourceType("Patient").getValue()).isEqualTo("urn:uuid:1234-5678");
 		assertThat(id.withServerBase("http://foo", "Patient").getValue()).isEqualTo("urn:uuid:1234-5678");

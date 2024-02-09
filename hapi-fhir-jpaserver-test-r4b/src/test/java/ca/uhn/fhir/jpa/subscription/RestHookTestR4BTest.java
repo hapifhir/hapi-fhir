@@ -484,7 +484,7 @@ public class RestHookTestR4BTest extends BaseSubscriptionsR4BTest {
 		idElement = ourObservationProvider.getResourceUpdates().get(1).getIdElement();
 		assertThat(idElement.getIdPart()).isEqualTo(observation2.getIdElement().getIdPart());
 		// Now VersionId is stripped
-		assertThat(idElement.getVersionIdPart()).isEqualTo(null);
+		assertThat(idElement.getVersionIdPart()).isNull();
 	}
 
 	@Test

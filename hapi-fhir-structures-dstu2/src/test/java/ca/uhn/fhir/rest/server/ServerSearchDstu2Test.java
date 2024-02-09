@@ -123,7 +123,7 @@ public class ServerSearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(ourLastMethod).isEqualTo(null);
+		assertThat(ourLastMethod).isNull();
 	}
 
 	@AfterAll

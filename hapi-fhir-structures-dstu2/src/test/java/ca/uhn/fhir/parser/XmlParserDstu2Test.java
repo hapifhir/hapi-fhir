@@ -174,7 +174,7 @@ public class XmlParserDstu2Test {
 		parser.setParserErrorHandler(new LenientErrorHandler());
 		Patient parsed = (Patient) parser.parseResource(input);
 		assertThat(parsed.getAllUndeclaredExtensions()).hasSize(1);
-		assertThat(parsed.getAllUndeclaredExtensions().get(0).getUrl()).isEqualTo(null);
+		assertThat(parsed.getAllUndeclaredExtensions().get(0).getUrl()).isNull();
 		assertThat(parsed.getAllUndeclaredExtensions().get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("2011-01-02T11:13:15");
 
 		try {
@@ -204,7 +204,7 @@ public class XmlParserDstu2Test {
 		parser.setParserErrorHandler(new LenientErrorHandler());
 		Patient parsed = (Patient) parser.parseResource(input);
 		assertThat(parsed.getAllUndeclaredExtensions()).hasSize(1);
-		assertThat(parsed.getAllUndeclaredExtensions().get(0).getUrl()).isEqualTo(null);
+		assertThat(parsed.getAllUndeclaredExtensions().get(0).getUrl()).isNull();
 		assertThat(parsed.getAllUndeclaredExtensions().get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("2011-01-02T11:13:15");
 
 		try {
@@ -995,18 +995,18 @@ public class XmlParserDstu2Test {
 		assertThat(name.getElementSpecificId()).isEqualTo("nameid");
 		assertThat(name.getFamily()).hasSize(3);
 
-		assertThat(name.getFamily().get(0).getValue()).isEqualTo(null);
+		assertThat(name.getFamily().get(0).getValue()).isNull();
 		assertThat(name.getFamily().get(1).getValue()).isEqualTo("V1");
-		assertThat(name.getFamily().get(2).getValue()).isEqualTo(null);
+		assertThat(name.getFamily().get(2).getValue()).isNull();
 
 		assertThat(name.getFamily().get(0).getElementSpecificId()).isEqualTo("f0");
 		assertThat(name.getFamily().get(1).getElementSpecificId()).isEqualTo("f1");
-		assertThat(name.getFamily().get(2).getElementSpecificId()).isEqualTo(null);
+		assertThat(name.getFamily().get(2).getElementSpecificId()).isNull();
 
 		assertThat(name.getFamily().get(0).getAllUndeclaredExtensions()).hasSize(1);
 		assertThat(name.getFamily().get(0).getAllUndeclaredExtensions().get(0).getUrl()).isEqualTo("http://foo");
 		assertThat(((StringDt) name.getFamily().get(0).getAllUndeclaredExtensions().get(0).getValue()).getValue()).isEqualTo("FOOEXT0");
-		assertThat(name.getFamily().get(0).getAllUndeclaredExtensions().get(0).getElementSpecificId()).isEqualTo(null);
+		assertThat(name.getFamily().get(0).getAllUndeclaredExtensions().get(0).getElementSpecificId()).isNull();
 
 		assertThat(name.getFamily().get(1).getAllUndeclaredExtensions()).hasSize(1);
 		assertThat(name.getFamily().get(1).getAllUndeclaredExtensions().get(0).getUrl()).isEqualTo("http://foo");
@@ -1016,7 +1016,7 @@ public class XmlParserDstu2Test {
 		assertThat(name.getFamily().get(2).getAllUndeclaredExtensions()).hasSize(1);
 		assertThat(name.getFamily().get(2).getAllUndeclaredExtensions().get(0).getUrl()).isEqualTo("http://foo");
 		assertThat(((StringDt) name.getFamily().get(2).getAllUndeclaredExtensions().get(0).getValue()).getValue()).isEqualTo("FOOEXT3");
-		assertThat(name.getFamily().get(2).getAllUndeclaredExtensions().get(0).getElementSpecificId()).isEqualTo(null);
+		assertThat(name.getFamily().get(2).getAllUndeclaredExtensions().get(0).getElementSpecificId()).isNull();
 
 	}
 
@@ -2350,7 +2350,7 @@ public class XmlParserDstu2Test {
 		List<ExtensionDt> exts = bd.getUndeclaredExtensionsByUrl("http://my.fancy.extension.url");
 		assertThat(exts).hasSize(1);
 		ExtensionDt ext = exts.get(0);
-		assertThat(ext.getValue()).isEqualTo(null);
+		assertThat(ext.getValue()).isNull();
 
 		exts = ext.getUndeclaredExtensionsByUrl("http://my.fancy.extension.url");
 		assertThat(exts).hasSize(1);

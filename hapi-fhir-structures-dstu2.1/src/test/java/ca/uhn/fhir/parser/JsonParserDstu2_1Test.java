@@ -350,18 +350,18 @@ public class JsonParserDstu2_1Test {
 		assertThat(name.getId()).isEqualTo("nameid");
 		assertThat(name.getGiven()).hasSize(3);
 
-		assertThat(name.getGiven().get(0).getValue()).isEqualTo(null);
+		assertThat(name.getGiven().get(0).getValue()).isNull();
 		assertThat(name.getGiven().get(1).getValue()).isEqualTo("V1");
-		assertThat(name.getGiven().get(2).getValue()).isEqualTo(null);
+		assertThat(name.getGiven().get(2).getValue()).isNull();
 
 		assertThat(name.getGiven().get(0).getId()).isEqualTo("f0");
 		assertThat(name.getGiven().get(1).getId()).isEqualTo("f1");
-		assertThat(name.getGiven().get(2).getId()).isEqualTo(null);
+		assertThat(name.getGiven().get(2).getId()).isNull();
 
 		assertThat(name.getGiven().get(0).getExtension()).hasSize(1);
 		assertThat(name.getGiven().get(0).getExtension().get(0).getUrl()).isEqualTo("http://foo");
 		assertThat(((StringType) name.getGiven().get(0).getExtension().get(0).getValue()).getValue()).isEqualTo("FOOEXT0");
-		assertThat(name.getGiven().get(0).getExtension().get(0).getId()).isEqualTo(null);
+		assertThat(name.getGiven().get(0).getExtension().get(0).getId()).isNull();
 
 		assertThat(name.getGiven().get(1).getExtension()).hasSize(1);
 		assertThat(name.getGiven().get(1).getExtension().get(0).getUrl()).isEqualTo("http://foo");
@@ -371,7 +371,7 @@ public class JsonParserDstu2_1Test {
 		assertThat(name.getGiven().get(2).getExtension()).hasSize(1);
 		assertThat(name.getGiven().get(2).getExtension().get(0).getUrl()).isEqualTo("http://foo");
 		assertThat(((StringType) name.getGiven().get(2).getExtension().get(0).getValue()).getValue()).isEqualTo("FOOEXT3");
-		assertThat(name.getGiven().get(2).getExtension().get(0).getId()).isEqualTo(null);
+		assertThat(name.getGiven().get(2).getExtension().get(0).getId()).isNull();
 
 	}
 
@@ -925,7 +925,7 @@ public class JsonParserDstu2_1Test {
 		assertThat(bundle.getEntry().get(0).getId()).isEqualTo("123");
 
 		condition = (Condition) bundle.getEntry().get(0).getResource();
-		assertThat(condition.getId()).isEqualTo(null);
+		assertThat(condition.getId()).isNull();
 	}
 
 	@Test
@@ -1120,8 +1120,8 @@ public class JsonParserDstu2_1Test {
 		parser.setParserErrorHandler(errorHandler);
 		Patient parsed = parser.parseResource(Patient.class, res);
 
-		assertThat(parsed.getGenderElement().getValue()).isEqualTo(null);
-		assertThat(parsed.getGenderElement().getValueAsString()).isEqualTo(null);
+		assertThat(parsed.getGenderElement().getValue()).isNull();
+		assertThat(parsed.getGenderElement().getValueAsString()).isNull();
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
 		verify(errorHandler, times(1)).invalidValue(any(IParseLocation.class), eq(""), msgCaptor.capture());
@@ -1140,7 +1140,7 @@ public class JsonParserDstu2_1Test {
 		parser.setParserErrorHandler(errorHandler);
 		Patient parsed = parser.parseResource(Patient.class, res);
 
-		assertThat(parsed.getGenderElement().getValue()).isEqualTo(null);
+		assertThat(parsed.getGenderElement().getValue()).isNull();
 		assertThat(parsed.getGenderElement().getValueAsString()).isEqualTo("foo");
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
@@ -1160,7 +1160,7 @@ public class JsonParserDstu2_1Test {
 		parser.setParserErrorHandler(errorHandler);
 		Observation parsed = parser.parseResource(Observation.class, res);
 
-		assertThat(parsed.getValueDateTimeType().getValue()).isEqualTo(null);
+		assertThat(parsed.getValueDateTimeType().getValue()).isNull();
 		assertThat(parsed.getValueDateTimeType().getValueAsString()).isEqualTo("foo");
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
@@ -1405,7 +1405,7 @@ public class JsonParserDstu2_1Test {
 		ourLog.info(encoded);
 
 		assertThat(parsed.getEntry().get(0).getResource().getIdElement().getValue()).isEqualTo("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57");
-		assertThat(parsed.getEntry().get(0).getResource().getIdElement().getBaseUrl()).isEqualTo(null);
+		assertThat(parsed.getEntry().get(0).getResource().getIdElement().getBaseUrl()).isNull();
 		assertThat(parsed.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57");
 		assertThat(encoded).doesNotContain("\"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\"");
 	}
@@ -1570,7 +1570,7 @@ public class JsonParserDstu2_1Test {
 		parser.setParserErrorHandler(new LenientErrorHandler());
 		Patient parsed = (Patient) parser.parseResource(input);
 		assertThat(parsed.getExtension()).hasSize(1);
-		assertThat(parsed.getExtension().get(0).getUrl()).isEqualTo(null);
+		assertThat(parsed.getExtension().get(0).getUrl()).isNull();
 		assertThat(((PrimitiveType<?>) parsed.getExtension().get(0).getValue()).getValueAsString()).isEqualTo("2011-01-02T11:13:15");
 
 		try {
@@ -1599,7 +1599,7 @@ public class JsonParserDstu2_1Test {
 		parser.setParserErrorHandler(new LenientErrorHandler());
 		Patient parsed = (Patient) parser.parseResource(input);
 		assertThat(parsed.getModifierExtension()).hasSize(1);
-		assertThat(parsed.getModifierExtension().get(0).getUrl()).isEqualTo(null);
+		assertThat(parsed.getModifierExtension().get(0).getUrl()).isNull();
 		assertThat(((PrimitiveType<?>) parsed.getModifierExtension().get(0).getValue()).getValueAsString()).isEqualTo("2011-01-02T11:13:15");
 
 		try {

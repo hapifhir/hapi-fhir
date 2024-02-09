@@ -388,7 +388,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.elementsSubset("status")
 			.execute();
 		assertThat(response.getStatus()).isEqualTo(ObservationStatus.FINAL);
-		assertThat(response.getSubject().getReference()).isEqualTo(null);
+		assertThat(response.getSubject().getReference()).isNull();
 
 		// Read a non-allowed observation
 		try {

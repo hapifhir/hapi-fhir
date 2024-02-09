@@ -356,7 +356,7 @@ public class OpenApiInterceptorTest {
 		public void testRemoveTrailingSlashWithNullUrl() {
 			OpenApiInterceptor interceptor = new OpenApiInterceptor();
 			String url = interceptor.removeTrailingSlash(null);
-			assertThat(url).isEqualTo(null);
+			assertThat(url).isNull();
 		}
 
 		@Test

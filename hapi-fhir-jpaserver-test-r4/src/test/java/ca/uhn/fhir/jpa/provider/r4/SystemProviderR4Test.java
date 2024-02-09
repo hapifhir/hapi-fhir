@@ -386,7 +386,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
 		resp = myClient.transaction().withBundle(req).execute();
-		assertThat(resp.getEntry().get(0).getResource()).isEqualTo(null);
+		assertThat(resp.getEntry().get(0).getResource()).isNull();
 		assertThat(resp.getEntry().get(0).getResponse().getStatus()).isEqualTo("201 Created");
 
 		// Prefer return=minimal
@@ -396,7 +396,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
 		resp = myClient.transaction().withBundle(req).execute();
-		assertThat(resp.getEntry().get(0).getResource()).isEqualTo(null);
+		assertThat(resp.getEntry().get(0).getResource()).isNull();
 		assertThat(resp.getEntry().get(0).getResponse().getStatus()).isEqualTo("201 Created");
 
 		// Prefer return=representation

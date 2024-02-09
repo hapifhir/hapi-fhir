@@ -175,7 +175,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		myPatientDao.update(pt0);
 
 		pt0 = myPatientDao.read(pt0id.withVersion("2"));
-		assertThat(pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE)).isEqualTo(null);
+		assertThat(pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE)).isNull();
 
 	}
 
@@ -190,14 +190,14 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		pt0 = myPatientDao.read(pt0id);
-		assertThat(pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE)).isEqualTo(null);
+		assertThat(pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE)).isNull();
 
 		pt0.getMeta().addExtension(HapiExtensions.EXT_META_SOURCE, new StringType("urn:source:1"));
 		pt0.setActive(false);
 		myPatientDao.update(pt0);
 
 		pt0 = myPatientDao.read(pt0id.withVersion("2"));
-		assertThat(pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE)).isEqualTo(null);
+		assertThat(pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE)).isNull();
 
 		// Search without source param
 		SearchParameterMap params = new SearchParameterMap();

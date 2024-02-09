@@ -41,7 +41,7 @@ public class ReferenceParamTest {
 		assertThat(rp.getResourceType()).isEqualTo("Location");
 		assertThat(rp.getIdPart()).isEqualTo("123");
 		assertThat(rp.getValue()).isEqualTo("Location/123");
-		assertThat(rp.getQueryParameterQualifier()).isEqualTo(null);
+		assertThat(rp.getQueryParameterQualifier()).isNull();
 
 	}
 
@@ -53,7 +53,7 @@ public class ReferenceParamTest {
 		assertThat(rp.getResourceType()).isEqualTo("d");
 		assertThat(rp.getIdPart()).isEqualTo("e");
 		assertThat(rp.getValue()).isEqualTo("http://a.b/c/d/e");
-		assertThat(rp.getQueryParameterQualifier()).isEqualTo(null);
+		assertThat(rp.getQueryParameterQualifier()).isNull();
 
 	}
 
@@ -62,7 +62,7 @@ public class ReferenceParamTest {
 
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ".name", "FOO");
-		assertThat(rp.getResourceType()).isEqualTo(null);
+		assertThat(rp.getResourceType()).isNull();
 		assertThat(rp.getIdPart()).isEqualTo("FOO");
 		assertThat(rp.getValue()).isEqualTo("FOO");
 		assertThat(rp.getQueryParameterQualifier()).isEqualTo(".name");
@@ -75,7 +75,7 @@ public class ReferenceParamTest {
 
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ".name", "Patient/1233");
-		assertThat(rp.getResourceType()).isEqualTo(null);
+		assertThat(rp.getResourceType()).isNull();
 		assertThat(rp.getIdPart()).isEqualTo("Patient/1233");
 		assertThat(rp.getValue()).isEqualTo("Patient/1233");
 		assertThat(rp.getQueryParameterQualifier()).isEqualTo(".name");
@@ -88,7 +88,7 @@ public class ReferenceParamTest {
 
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ".name", "http://something.strange/a/b/c");
-		assertThat(rp.getResourceType()).isEqualTo(null);
+		assertThat(rp.getResourceType()).isNull();
 		assertThat(rp.getIdPart()).isEqualTo("http://something.strange/a/b/c");
 		assertThat(rp.getValue()).isEqualTo("http://something.strange/a/b/c");
 		assertThat(rp.getQueryParameterQualifier()).isEqualTo(".name");
@@ -104,7 +104,7 @@ public class ReferenceParamTest {
 		assertThat(rp.getResourceType()).isEqualTo("Location");
 		assertThat(rp.getIdPart()).isEqualTo("123");
 		assertThat(rp.getValue()).isEqualTo("123");
-		assertThat(rp.getQueryParameterQualifier()).isEqualTo(null);
+		assertThat(rp.getQueryParameterQualifier()).isNull();
 
 	}
 
@@ -120,7 +120,7 @@ public class ReferenceParamTest {
 		assertThat(rp.getResourceType()).isEqualTo("Patient");
 		assertThat(rp.getIdPart()).isEqualTo("123");
 		assertThat(rp.getValue()).isEqualTo("Patient/123");
-		assertThat(rp.getQueryParameterQualifier()).isEqualTo(null);
+		assertThat(rp.getQueryParameterQualifier()).isNull();
 
 	}
 
@@ -132,7 +132,7 @@ public class ReferenceParamTest {
 		assertThat(rp.getResourceType()).isEqualTo("Patient");
 		assertThat(rp.getIdPart()).isEqualTo("123");
 		assertThat(rp.getValue()).isEqualTo("Patient/123");
-		assertThat(rp.getQueryParameterQualifier()).isEqualTo(null);
+		assertThat(rp.getQueryParameterQualifier()).isNull();
 
 	}
 
@@ -145,7 +145,7 @@ public class ReferenceParamTest {
 		assertThat(rp.getResourceType()).isEqualTo("Location");
 		assertThat(rp.getIdPart()).isEqualTo("http://a.b/c/d/e");
 		assertThat(rp.getValue()).isEqualTo("http://a.b/c/d/e");
-		assertThat(rp.getQueryParameterQualifier()).isEqualTo(null);
+		assertThat(rp.getQueryParameterQualifier()).isNull();
 
 	}
 
@@ -217,7 +217,7 @@ public class ReferenceParamTest {
 
 		assertThat(rp.isIdPartValidLong()).isTrue();
 		assertThat(rp.getIdPart()).isEqualTo("123");
-		assertThat(rp.getResourceType(ourCtx)).isEqualTo(null);
+		assertThat(rp.getResourceType(ourCtx)).isNull();
 	}
 
 	@Test
@@ -244,7 +244,7 @@ public class ReferenceParamTest {
 		rp.setValue("123");
 
 		assertThat(rp.getIdPart()).isEqualTo("123");
-		assertThat(rp.getResourceType(ourCtx)).isEqualTo(null);
+		assertThat(rp.getResourceType(ourCtx)).isNull();
 	}
 
 	@Test

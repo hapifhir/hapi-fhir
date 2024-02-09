@@ -468,7 +468,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		// First pass (resource doesn't already exist)
 
 		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalUpdateOnSameResource(myFhirContext));
-		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).isEqualTo(null);
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).isNull();
 		assertThat(outcome.getEntry().get(0).getResponse().getStatus()).isEqualTo("204 No Content");
 		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/1");
 		assertThat(outcome.getEntry().get(1).getResponse().getStatus()).isEqualTo("201 Created");
@@ -485,7 +485,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalUpdateOnSameResource(myFhirContext));
 		myCaptureQueriesListener.logUpdateQueries();
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).isEqualTo(null);
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).isNull();
 		assertThat(outcome.getEntry().get(0).getResponse().getStatus()).isEqualTo("204 No Content");
 		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/2");
 		assertThat(outcome.getEntry().get(1).getResponse().getStatus()).isEqualTo("201 Created");
@@ -502,7 +502,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalUpdateOnSameResource(myFhirContext));
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).isEqualTo(null);
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).isNull();
 		assertThat(outcome.getEntry().get(0).getResponse().getStatus()).isEqualTo("204 No Content");
 		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/3");
 		assertThat(outcome.getEntry().get(1).getResponse().getStatus()).isEqualTo("201 Created");
@@ -558,7 +558,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		// First pass (resource doesn't already exist)
 
 		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(myFhirContext));
-		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).isEqualTo(null);
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).isNull();
 		assertThat(outcome.getEntry().get(0).getResponse().getStatus()).isEqualTo("204 No Content");
 		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/1");
 		assertThat(outcome.getEntry().get(1).getResponse().getStatus()).isEqualTo("201 Created");
@@ -575,7 +575,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(myFhirContext));
 		myCaptureQueriesListener.logUpdateQueries();
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).isEqualTo(null);
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).isNull();
 		assertThat(outcome.getEntry().get(0).getResponse().getStatus()).isEqualTo("204 No Content");
 		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/1");
 		assertThat(outcome.getEntry().get(1).getResponse().getStatus()).isEqualTo("201 Created");
@@ -594,7 +594,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		outcome = mySystemDao.transaction(mySrd, createBundleWithConditionalDeleteAndConditionalCreateOnSameResource(myFhirContext));
 		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).isEqualTo(null);
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).isNull();
 		assertThat(outcome.getEntry().get(0).getResponse().getStatus()).isEqualTo("204 No Content");
 		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).endsWith("_history/1");
 		assertThat(outcome.getEntry().get(1).getResponse().getStatus()).isEqualTo("201 Created");
@@ -620,7 +620,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		// First pass (resource doesn't already exist)
 
 		outcome = mySystemDao.transaction(mySrd, createBundleWithDeleteAndUpdateOnSameResource(myFhirContext));
-		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).isEqualTo(null);
+		assertThat(outcome.getEntry().get(0).getResponse().getLocation()).isNull();
 		assertThat(outcome.getEntry().get(0).getResponse().getStatus()).isEqualTo("204 No Content");
 		assertThat(outcome.getEntry().get(1).getResponse().getLocation()).isEqualTo("Patient/P/_history/1");
 		assertThat(outcome.getEntry().get(1).getResponse().getStatus()).isEqualTo("201 Created");

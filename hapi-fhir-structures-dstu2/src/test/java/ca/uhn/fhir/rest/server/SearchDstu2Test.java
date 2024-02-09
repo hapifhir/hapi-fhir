@@ -372,7 +372,7 @@ public class SearchDstu2Test {
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(ourLastRef.getIdPart()).isEqualTo("123");
-		assertThat(ourLastRef.getResourceType()).isEqualTo(null);
+		assertThat(ourLastRef.getResourceType()).isNull();
 	}
 
 	@Test

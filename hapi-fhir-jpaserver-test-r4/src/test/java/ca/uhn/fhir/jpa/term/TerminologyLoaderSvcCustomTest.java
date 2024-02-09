@@ -141,7 +141,7 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		assertThat(set.getRootConcepts().get(0).getChildren()).hasSize(2);
 		assertThat(set.getRootConcepts().get(0).getChildren().get(0).getChild().getCode()).isEqualTo("HB");
 		assertThat(set.getRootConcepts().get(0).getChildren().get(0).getChild().getDisplay()).isEqualTo("Hemoglobin");
-		assertThat(set.getRootConcepts().get(0).getChildren().get(0).getChild().getSequence()).isEqualTo(null);
+		assertThat(set.getRootConcepts().get(0).getChildren().get(0).getChild().getSequence()).isNull();
 		assertThat(set.getRootConcepts().get(0).getChildren().get(1).getChild().getCode()).isEqualTo("NEUT");
 		assertThat(set.getRootConcepts().get(0).getChildren().get(1).getChild().getDisplay()).isEqualTo("Neutrophils");
 

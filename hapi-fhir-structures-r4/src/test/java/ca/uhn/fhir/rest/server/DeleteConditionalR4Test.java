@@ -57,7 +57,7 @@ public class DeleteConditionalR4Test {
 			.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("SOMESYS", "SOMEID")).execute();
 
 		assertThat(ourLastRequestWasDelete).isTrue();
-		assertThat(ourLastIdParam).isEqualTo(null);
+		assertThat(ourLastIdParam).isNull();
 		assertThat(ourLastConditionalUrl).isEqualTo("Patient?identifier=SOMESYS%7CSOMEID");
 
 	}

@@ -109,7 +109,7 @@ public class SearchCountParamDstu3Test {
 			ourLog.info(responseContent);
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			assertThat(ourLastMethod).isEqualTo("searchWithNoCountParam");
-			assertThat(ourLastParam).isEqualTo(null);
+			assertThat(ourLastParam).isNull();
 
 			assertThat(responseContent, stringContainsInOrder(
 				"<link>",

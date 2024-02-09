@@ -403,7 +403,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertThat(workChunk.getEndTime()).isNull();
 			assertThat(workChunk.getErrorMessage()).isNull();
 			assertThat(workChunk.getErrorCount()).isEqualTo(0);
-			assertThat(workChunk.getRecordsProcessed()).isEqualTo(null);
+			assertThat(workChunk.getRecordsProcessed()).isNull();
 		}
 
 		{
@@ -411,7 +411,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertThat(workChunk1.getStatus()).isEqualTo(WorkChunkStatusEnum.ERRORED);
 			assertThat(workChunk1.getErrorMessage()).isEqualTo("Our error message");
 			assertThat(workChunk1.getErrorCount()).isEqualTo(1);
-			assertThat(workChunk1.getRecordsProcessed()).isEqualTo(null);
+			assertThat(workChunk1.getRecordsProcessed()).isNull();
 			assertThat(workChunk1.getEndTime()).isNotNull();
 		}
 

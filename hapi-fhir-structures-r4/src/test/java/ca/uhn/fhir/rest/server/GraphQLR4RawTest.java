@@ -201,7 +201,7 @@ public class GraphQLR4RawTest {
 
 			assertThat(responseContent).isEqualTo("{\"foo\"}");
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
-			assertThat(ourLastId).isEqualTo(null);
+			assertThat(ourLastId).isNull();
 			assertThat(ourLastQuery).isEqualTo("{name{family,given}}");
 
 		} finally {
