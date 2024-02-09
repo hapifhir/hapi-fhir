@@ -30,9 +30,6 @@ import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsNot.not;
-import static org.hamcrest.text.IsEmptyString.emptyString;
 
 public class UpdateDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateDstu3Test.class);
@@ -72,7 +69,7 @@ public class UpdateDstu3Test {
 		ourLog.info("Response was:\n{}", responseContent);
 		ourLog.info("Response was:\n{}", status);
 
-		assertThat(responseContent, is(not(emptyString())));
+		assertThat(responseContent).isNotEmpty();
 
 		Patient actualPatient = (Patient) ourCtx.newXmlParser().parseResource(responseContent);
 		assertThat(actualPatient.getIdElement().getIdPart()).isEqualTo(patient.getIdElement().getIdPart());

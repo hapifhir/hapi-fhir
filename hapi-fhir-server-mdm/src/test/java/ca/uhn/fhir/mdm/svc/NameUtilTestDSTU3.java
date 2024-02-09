@@ -11,10 +11,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
-import static org.hamcrest.core.Is.is;
-import static org.hamcrest.core.IsEqual.equalTo;
 
 public class NameUtilTestDSTU3 {
 
@@ -28,12 +24,12 @@ public class NameUtilTestDSTU3 {
 		patient.getNameFirstRep().getGiven().add(new StringType("given2"));
 		FhirTerser terser = myFhirContext.newTerser();
 		List<IBase> names = terser.getValues(patient, "name", IBase.class);
-		assertThat(names, hasSize(1));
+		assertThat(names).hasSize(1);
 		IBase name = names.get(0);
 
 		{
 			String familyName = NameUtil.extractFamilyName(myFhirContext, name);
-			assertThat(familyName, is(equalTo("family")));
+			assertThat(familyName).isEqualTo("family");
 		}
 
 		{
