@@ -23,6 +23,10 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Type;
@@ -33,6 +37,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.provider.Arguments;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -80,9 +85,8 @@ public class LookupCodeR4Test {
 
 		@BeforeEach
 		public void before() {
-			// TODO: use another type when "code" is added to the supported types
 			myMySimplePropertyCodeSystemProvider.myPropertyName = "somePropertyName";
-			myMySimplePropertyCodeSystemProvider.myPropertyValue = new CodeType("someCode");
+			myMySimplePropertyCodeSystemProvider.myPropertyValue = new IdType(123);
 			ourRestfulServerExtension.getRestfulServer().registerProvider(myMySimplePropertyCodeSystemProvider);
 		}
 	}
@@ -113,8 +117,13 @@ public class LookupCodeR4Test {
 			String type = theConceptProperty.getType();
 			switch (type) {
 				case IValidationSupport.TYPE_STRING -> {
-					assertTrue(theExpectedValue instanceof StringType);
-					StringType stringValue = (StringType) theExpectedValue;
+					if (!(theExpectedValue instanceof StringType stringValue)) {
+						// TODO: workaround for unsupported types, remove this when rest of the types are supported
+						IValidationSupport.StringConceptProperty stringConceptProperty = (IValidationSupport.StringConceptProperty) theConceptProperty;
+						assertEquals(theExpectedValue.toString(), stringConceptProperty.getValue());
+						break;
+					}
+					// StringType stringValue = (StringType) theExpectedValue;
 					assertTrue(theConceptProperty instanceof IValidationSupport.StringConceptProperty);
 					IValidationSupport.StringConceptProperty stringConceptProperty = (IValidationSupport.StringConceptProperty) theConceptProperty;
 					assertEquals(stringValue.getValue(), stringConceptProperty.getValue());
@@ -147,11 +156,14 @@ public class LookupCodeR4Test {
 		public Stream<Arguments> getPropertyValues() {
 			return Stream.of(
 				Arguments.arguments(new StringType("value")),
-				Arguments.arguments(new Coding("code", "system", "display"))
+				Arguments.arguments(new Coding("code", "system", "display")),
+				Arguments.arguments(new CodeType("code")),
+				Arguments.arguments(new BooleanType(true)),
+				Arguments.arguments(new IntegerType(1)),
+				Arguments.arguments(new DecimalType(1.1)),
+				Arguments.arguments(new DateTimeType(Calendar.getInstance()))
 			);
 		}
-
-
 
 		public Stream<Arguments> getDesignations() {
 			return Stream.of(
