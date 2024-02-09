@@ -5,6 +5,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseCardJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseJson;
+import ca.uhn.test.util.LogEventIterableAssert;
 import ca.uhn.test.util.LogbackCaptureTestExtension;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -17,7 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import jakarta.annotation.Nonnull;
 import java.util.function.Function;
 
-import static ca.uhn.test.util.LogbackCaptureTestExtension.eventWithLevelAndMessageContains;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -67,7 +67,8 @@ class CdsServiceCacheTest {
 		assertThat(cdsMethod.isAllowAutoFhirClientPrefetch()).isTrue();
 		assertThat(myFixture.myCdsServiceJson.getServices()).hasSize(1);
 		assertThat(myFixture.myCdsServiceJson.getServices().get(0)).isEqualTo(cdsServiceJson);
-		assertThat(myLogCapture.getLogEvents(), contains(eventWithLevelAndMessageContains(Level.ERROR, expectedLogMessage)));
+		LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasEventWithLevelAndMessageContains(Level.ERROR, expectedLogMessage);
+
 	}
 
 	@Test
@@ -94,7 +95,7 @@ class CdsServiceCacheTest {
 		final ICdsMethod actual = myFixture.unregisterServiceMethod(TEST_KEY, MODULE_ID);
 		// validate
 		assertThat(actual).isNull();
-		assertThat(myLogCapture.getLogEvents(), contains(eventWithLevelAndMessageContains(Level.ERROR, expectedLogMessage)));
+		LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasEventWithLevelAndMessageContains(Level.ERROR, expectedLogMessage);
 	}
 
 	@Nonnull

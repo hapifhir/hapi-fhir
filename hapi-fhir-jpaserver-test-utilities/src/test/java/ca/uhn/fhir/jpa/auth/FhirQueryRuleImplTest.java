@@ -12,9 +12,9 @@ import ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import ca.uhn.test.util.LogEventIterableAssert;
 import ca.uhn.test.util.LogbackCaptureTestExtension;
 import ch.qos.logback.classic.Level;
-import org.hamcrest.MatcherAssert;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,10 +31,7 @@ import java.util.HashSet;
 import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildMatched;
 import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildUnmatched;
 import static ca.uhn.fhir.rest.server.interceptor.auth.IAuthorizationSearchParamMatcher.MatchResult.buildUnsupported;
-import static ca.uhn.test.util.LogbackCaptureTestExtension.eventWithLevelAndMessageContains;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
 import static org.mockito.Mockito.when;
 
 // TODO: Is there a better home for this test? It can't live in hapi-fhir-server since we need a real FhirContext for the compartment checks.
@@ -273,8 +270,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 			// then
 			assertThat(verdict).isNull();
-			MatcherAssert.assertThat(myLogCapture.getLogEvents(),
-				hasItem(eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
+			LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasEventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX");
 		}
 
 		@Test
@@ -289,8 +285,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 			// then
 			assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
-			MatcherAssert.assertThat(myLogCapture.getLogEvents(),
-				hasItem(eventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX")));
+			LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasEventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX");
 		}
 
 		/**
@@ -309,8 +304,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 			// then
 			assertThat(verdict).isNull();
-			MatcherAssert.assertThat(myLogCapture.getLogEvents(),
-				hasItem(eventWithLevelAndMessageContains(Level.WARN, "No matcher provided")));
+			LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasEventWithLevelAndMessageContains(Level.WARN, "no matcher provided");
 		}
 
 	}

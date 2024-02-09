@@ -6,9 +6,9 @@ import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
 import ca.uhn.fhir.test.utilities.TlsAuthenticationTestHelper;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.test.util.LogEventIterableAssert;
 import ca.uhn.test.util.LogbackCaptureTestExtension;
 import ch.qos.logback.classic.Logger;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,10 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.function.Consumer;
 
 import static ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider.RESP_PARAM_SUCCESS;
-import static ca.uhn.test.util.LogbackCaptureTestExtension.eventWithMessageContains;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
 import static org.assertj.core.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -72,7 +69,7 @@ class ReindexTerminologyCommandTest {
 		);
 		runAppWithStartupHook(args, getLoggingStartupHook());
 
-		assertThat(myAppLogCapture.getLogEvents(), Matchers.not(hasItem(eventWithMessageContains("FAILURE"))));
+		LogEventIterableAssert.assertThat(myAppLogCapture.getLogEvents()).hasNoFailureMessages();
 	}
 
 
@@ -91,7 +88,8 @@ class ReindexTerminologyCommandTest {
 		);
 		try {
 			App.main(args);
-			fail("");		} catch (Error e) {
+			fail("");
+		} catch (Error e) {
 			assertThat(e.getMessage()).contains("Missing required option: v");
 		}
 	}
@@ -112,7 +110,8 @@ class ReindexTerminologyCommandTest {
 				},
 				null, theIncludeTls, myRestServerR4Helper
 			));
-			fail("");		} catch (Error e) {
+			fail("");
+		} catch (Error e) {
 			assertThat(e.getMessage()).contains("Missing required option: t");
 		}
 	}
@@ -133,8 +132,8 @@ class ReindexTerminologyCommandTest {
 		);
 		runAppWithStartupHook(args, getLoggingStartupHook());
 
-		assertThat(myAppLogCapture.getLogEvents(), hasItem(eventWithMessageContains("FAILURE")));
-		assertThat(myAppLogCapture.getLogEvents(), hasItem(eventWithMessageContains("Internal error. Command result unknown. Check system logs for details")));
+		LogEventIterableAssert.assertThat(myAppLogCapture.getLogEvents()).hasAtLeastOneFailureMessage();
+		LogEventIterableAssert.assertThat(myAppLogCapture.getLogEvents()).hasAtLeastOneEventWithMessage("Internal error. Command result unknown. Check system logs for details");
 	}
 
 	@ParameterizedTest
@@ -157,8 +156,8 @@ class ReindexTerminologyCommandTest {
 		);
 		runAppWithStartupHook(args, getLoggingStartupHook());
 
-		assertThat(myAppLogCapture.getLogEvents(), hasItem(eventWithMessageContains("FAILURE")));
-		assertThat(myAppLogCapture.getLogEvents(), hasItem(eventWithMessageContains("Freetext service is not configured. Operation didn't run.")));
+		LogEventIterableAssert.assertThat(myAppLogCapture.getLogEvents()).hasAtLeastOneFailureMessage();
+		LogEventIterableAssert.assertThat(myAppLogCapture.getLogEvents()).hasAtLeastOneEventWithMessage("Freetext service is not configured. Operation didn't run.");
 	}
 
 	static void runAppWithStartupHook(String[] args, Consumer<BaseApp> startupHook) {
