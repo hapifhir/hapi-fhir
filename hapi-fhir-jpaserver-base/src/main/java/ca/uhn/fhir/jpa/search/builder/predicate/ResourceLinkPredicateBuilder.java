@@ -45,12 +45,10 @@ import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParam
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceMetaParams;
-import ca.uhn.fhir.jpa.searchparam.registry.SearchParamRegistryImpl;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -61,10 +59,8 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
-import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -88,7 +84,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -267,17 +262,20 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 	private void validModifierUse(RequestDetails theRequest, String theResourceType) {
 		final Set<String> keys = theRequest.getParameters().keySet();
-		final List<String> nonMatching = theRequest.getParameters()
-			.keySet()
-			.stream()
-			.filter(mod -> !VALID_MODIFIERS.contains(mod))
-			.distinct()
-			.collect(Collectors.toUnmodifiableList());
+		final List<String> nonMatching = theRequest.getParameters().keySet().stream()
+				.filter(mod -> !VALID_MODIFIERS.contains(mod))
+				.distinct()
+				.collect(Collectors.toUnmodifiableList());
 
-		if (! nonMatching.isEmpty()) {
+		if (!nonMatching.isEmpty()) {
 			final String msg = getFhirContext()
-				.getLocalizer()
-				.getMessageSanitized(SearchCoordinatorSvcImpl.class, "invalidUseOfSearchIdentifier", nonMatching, theResourceType, VALID_MODIFIERS);
+					.getLocalizer()
+					.getMessageSanitized(
+							SearchCoordinatorSvcImpl.class,
+							"invalidUseOfSearchIdentifier",
+							nonMatching,
+							theResourceType,
+							VALID_MODIFIERS);
 			throw new InvalidRequestException(Msg.code(2498) + msg);
 		}
 	}
