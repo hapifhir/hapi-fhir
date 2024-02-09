@@ -55,6 +55,7 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -75,7 +76,6 @@ import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -169,7 +169,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -204,14 +203,11 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.assertj.core.api.Assertions.fail;
-
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
@@ -2671,7 +2667,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				nextUrl = nextLink.getUrl();
 
 				// make sure we're always requesting 10
-				assertThat(nextUrl).contains(String);
+				assertThat(nextUrl).contains(String.format("_count=%d", requestedAmount));
 
 				// get next batch
 				bundle = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
@@ -2760,7 +2756,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				nextUrl = nextLink.getUrl();
 
 				// make sure we're always requesting 10
-				assertThat(nextUrl).contains(String);
+				assertThat(nextUrl).contains(String.format("_count=%d", requestedAmount));
 
 				// get next batch
 				bundle = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
@@ -2824,7 +2820,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				nextUrl = nextLink.getUrl();
 
 				// make sure we're always requesting 10
-				assertThat(nextUrl).contains(String);
+				assertThat(nextUrl).contains(String.format("_count=%d", requestedAmount));
 
 				// get next batch
 				bundle = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
