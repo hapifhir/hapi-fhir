@@ -342,7 +342,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 						assertThat(theEvent.getResourceTypes()).hasSize(resourceTypes.size());
 
 						for (IPrimitiveType<String> resourceName : resourceTypes) {
-							assertThat(theEvent.getResourceTypes()).contains(resourceName);
+							assertThat(theEvent.getResourceTypes()).contains(resourceName.getValue());
 						}
 					} else {
 						// null or empty resource types means all

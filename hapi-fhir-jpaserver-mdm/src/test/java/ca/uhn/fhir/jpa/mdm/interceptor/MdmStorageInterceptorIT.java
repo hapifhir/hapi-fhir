@@ -48,7 +48,6 @@ import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS;
 import static ca.uhn.fhir.mdm.api.MdmConstants.SYSTEM_MDM_MANAGED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
 
 import static org.slf4j.LoggerFactory.getLogger;
 

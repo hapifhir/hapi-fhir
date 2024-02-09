@@ -46,7 +46,7 @@ class MdmResourceUtilTest {
 		assertThat(tags).hasSize(2);
 		for (Coding code : tags) {
 			assertThat(code.getSystem()).isEqualTo(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS);
-			assertThat(codes).contains(code);
+			assertThat(codes).contains(code.getCode());
 		}
 	}
 }

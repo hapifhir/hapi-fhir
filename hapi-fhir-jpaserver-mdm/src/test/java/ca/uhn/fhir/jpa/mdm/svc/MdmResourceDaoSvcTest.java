@@ -147,7 +147,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			assertThat(resources).hasSize(1);
 			assertThat(result.getAllResources().get(0) instanceof Patient).isTrue();
 			Patient patient = (Patient) result.getAllResources().get(0);
-			assertThat(patient.getId()).contains(firstId);
+			assertThat(patient.getId()).contains(firstId.getValue());
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}

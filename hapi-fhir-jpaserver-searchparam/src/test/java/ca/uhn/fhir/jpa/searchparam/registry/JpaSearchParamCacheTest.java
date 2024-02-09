@@ -36,7 +36,7 @@ public class JpaSearchParamCacheTest {
 
 		List<RuntimeSearchParam> result = myJpaSearchParamCache.getActiveComboSearchParams(RESOURCE_TYPE);
 		assertThat(result).hasSize(4);
-		assertThat(result).containsAll(List);
+		assertThat(result).containsAll(List.of(unique1, unique2, nonUnique1, nonUnique2));
 	}
 
 	@Test
@@ -48,7 +48,7 @@ public class JpaSearchParamCacheTest {
 
 		List<RuntimeSearchParam> result = myJpaSearchParamCache.getActiveComboSearchParams(RESOURCE_TYPE, ComboSearchParamType.UNIQUE);
 		assertThat(result).hasSize(2);
-		assertThat(result).containsAll(List);
+		assertThat(result).containsAll(List.of(unique1, unique2));
 	}
 
 	@Test
@@ -60,7 +60,7 @@ public class JpaSearchParamCacheTest {
 
 		List<RuntimeSearchParam> result = myJpaSearchParamCache.getActiveComboSearchParams(RESOURCE_TYPE, ComboSearchParamType.NON_UNIQUE);
 		assertThat(result).hasSize(2);
-		assertThat(result).containsAll(List);
+		assertThat(result).containsAll(List.of(nonUnique1, nonUnique2));
 	}
 
 	@Test

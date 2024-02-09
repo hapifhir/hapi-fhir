@@ -165,7 +165,7 @@ class TerserUtilTest {
 		TerserUtil.mergeAllFields(ourFhirContext, p1, p2);
 
 		assertThat(p2.hasDeceased()).isTrue();
-		assertThat(p2.getDeceased()).isEqualTo(new BooleanType(true));
+		assertThat(p2.getDeceased().primitiveValue()).isEqualTo("true");
 		assertThat(p2.getExtension()).hasSize(2);
 	}
 

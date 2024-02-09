@@ -23,7 +23,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.assertj.core.api.Assertions.fail;
 
 
 public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {

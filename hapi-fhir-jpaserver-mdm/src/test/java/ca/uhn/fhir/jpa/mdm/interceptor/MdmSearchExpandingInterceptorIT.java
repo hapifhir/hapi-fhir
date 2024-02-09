@@ -215,7 +215,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		List<String> resourceIds = outcome.getAllResourceIds();
 		// check the patients - first 4 ids
 		for (int i = 0; i < resourceIds.size() - 1; i++) {
-			assertThat(resourceIds).contains(expectedIds);
+			assertThat(resourceIds).contains(expectedIds.get(i));
 		}
 	}
 
