@@ -7,7 +7,8 @@ import java.util.Properties;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 class ConfigLoaderTest {
 
@@ -27,8 +28,7 @@ class ConfigLoaderTest {
 
 		try {
 			ConfigLoader.loadResourceContent("blah");
-			fail();
-		} catch (Exception e) {
+			fail("");		} catch (Exception e) {
 		}
 	}
 

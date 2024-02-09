@@ -9,7 +9,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class XmlUtilTest {
 
@@ -18,8 +19,7 @@ public class XmlUtilTest {
 		XmlUtil.setThrowExceptionForUnitTest(new Error("FOO ERROR"));
 		try {
 			XmlUtil.newInputFactory();
-			fail();
-		} catch (Exception e) {
+			fail("");		} catch (Exception e) {
 			assertEquals(Msg.code(1753) + "Unable to initialize StAX - XML processing is disabled", e.getMessage());
 		}
 	}
@@ -29,8 +29,7 @@ public class XmlUtilTest {
 		XmlUtil.setThrowExceptionForUnitTest(new Error("FOO ERROR"));
 		try {
 			XmlUtil.newOutputFactory();
-			fail();
-		} catch (Exception e) {
+			fail("");		} catch (Exception e) {
 			assertEquals(Msg.code(1754) + "Unable to initialize StAX - XML processing is disabled", e.getMessage());
 		}
 	}

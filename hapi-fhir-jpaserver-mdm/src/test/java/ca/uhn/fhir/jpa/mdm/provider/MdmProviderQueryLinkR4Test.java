@@ -39,7 +39,8 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmProviderQueryLinkR4Test.class);

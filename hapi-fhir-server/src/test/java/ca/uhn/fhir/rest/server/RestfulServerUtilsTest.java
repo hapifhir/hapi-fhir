@@ -31,7 +31,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -117,8 +118,7 @@ public class RestfulServerUtilsTest {
 		if (theExpectedMaxRounds != null && theExpectedMaxRounds == -1) {
 			try {
 				RestfulServerUtils.extractDeleteCascadeParameter(myRequestDetails);
-				fail();
-			} catch (InvalidRequestException e) {
+				fail("");			} catch (InvalidRequestException e) {
 				// good
 			}
 		} else {

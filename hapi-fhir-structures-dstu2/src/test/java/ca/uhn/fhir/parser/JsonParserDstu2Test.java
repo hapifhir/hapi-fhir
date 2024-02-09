@@ -90,7 +90,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.nullable;
 import static org.mockito.Mockito.times;
@@ -1795,8 +1796,7 @@ public class JsonParserDstu2Test {
 			parser = ourCtx.newJsonParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(input);
-			fail();
-		} catch (DataFormatException e) {
+			fail("");		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'extension'", e.getMessage());
 		}
 
@@ -1825,8 +1825,7 @@ public class JsonParserDstu2Test {
 			parser = ourCtx.newJsonParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(input);
-			fail();
-		} catch (DataFormatException e) {
+			fail("");		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'modifierExtension'", e.getMessage());
 		}
 
@@ -2079,8 +2078,7 @@ public class JsonParserDstu2Test {
 		IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
 		try {
 			jsonParser.parseResource(input);
-			fail();
-		} catch (DataFormatException e) {
+			fail("");		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1843) + "Missing required element 'resourceType' from JSON resource object, unable to parse", e.getMessage());
 		}
 	}
@@ -2108,8 +2106,7 @@ public class JsonParserDstu2Test {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/invalid_metadata.json"), StandardCharsets.UTF_8);
 		try {
 			ourCtx.newJsonParser().parseResource(Conformance.class, input);
-			fail();
-		} catch (DataFormatException e) {
+			fail("");		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1841) + "Syntax error parsing JSON FHIR structure: Expected ARRAY at element 'modifierExtension', found 'OBJECT'", e.getMessage());
 		}
 	}

@@ -156,7 +156,8 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
 public class FhirResourceDaoR4Test extends BaseJpaR4Test {

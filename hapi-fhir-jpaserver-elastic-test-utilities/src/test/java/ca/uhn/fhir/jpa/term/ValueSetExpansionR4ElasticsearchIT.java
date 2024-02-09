@@ -56,7 +56,8 @@ import static org.awaitility.Awaitility.await;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_ALL_VALUESET_ID;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -190,8 +191,7 @@ public class ValueSetExpansionR4ElasticsearchIT extends BaseJpaTest {
 		include.setSystem(CS_URL);
 		try {
 			myTermSvc.expandValueSet(null, vs);
-			fail();
-		} catch (InternalErrorException e) {
+			fail("");		} catch (InternalErrorException e) {
 			assertThat(e.getMessage()).contains(Msg.code(832) + "Expansion of ValueSet produced too many codes (maximum 50) - Operation aborted!");
 		}
 

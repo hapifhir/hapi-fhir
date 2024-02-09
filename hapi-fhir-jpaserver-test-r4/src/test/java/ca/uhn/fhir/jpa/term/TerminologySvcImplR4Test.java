@@ -41,7 +41,8 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplR4Test.class);

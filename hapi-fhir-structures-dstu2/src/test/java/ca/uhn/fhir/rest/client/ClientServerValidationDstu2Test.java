@@ -38,7 +38,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -180,8 +181,7 @@ public class ClientServerValidationDstu2Test {
 		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
 		try {
 			client.read().resource(Patient.class).withId("123").execute();
-			fail();
-		} catch (AuthenticationException e) {
+			fail("");		} catch (AuthenticationException e) {
 			// good
 		}
 	}
@@ -284,8 +284,7 @@ public class ClientServerValidationDstu2Test {
 		myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		try {
 			myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/123"));
-			fail();
-		} catch (FhirClientInappropriateForServerException e) {
+			fail("");		} catch (FhirClientInappropriateForServerException e) {
 			String out = e.toString();
 			String want = "The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"" + wrongFhirVersion + "\" which corresponds to DSTU3, but this client is configured to use DSTU2 (via the FhirContext)";
 			ourLog.info(out);

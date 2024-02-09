@@ -125,7 +125,8 @@ import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.Mockito.mock;
 
 @ContextConfiguration(classes = TestHSearchAddInConfig.NoFT.class)

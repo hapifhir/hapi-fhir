@@ -121,7 +121,8 @@ import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 

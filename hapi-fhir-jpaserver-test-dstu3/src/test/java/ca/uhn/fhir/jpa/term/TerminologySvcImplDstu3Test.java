@@ -45,7 +45,8 @@ import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LO
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcImplDstu3Test.class);

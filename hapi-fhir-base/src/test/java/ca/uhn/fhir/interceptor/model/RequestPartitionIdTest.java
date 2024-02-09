@@ -21,7 +21,7 @@ public class RequestPartitionIdTest {
 	@Test
 	public void testEquals() {
 		assertThat(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1))).isEqualTo(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
-		assertThat(null).isNotEqualTo(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
+		assertThat(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1))).isNotNull();
 		assertThat("123").isNotEqualTo(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
 	}
 

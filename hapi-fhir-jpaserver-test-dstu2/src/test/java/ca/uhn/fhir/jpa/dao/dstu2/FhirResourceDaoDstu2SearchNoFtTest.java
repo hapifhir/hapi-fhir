@@ -96,7 +96,8 @@ import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.Mockito.mock;
 
 @SuppressWarnings("unchecked")

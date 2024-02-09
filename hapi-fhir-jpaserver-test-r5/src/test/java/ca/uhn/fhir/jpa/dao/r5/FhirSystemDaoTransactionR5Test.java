@@ -27,7 +27,8 @@ import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.Mockito.when;
 
 public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {

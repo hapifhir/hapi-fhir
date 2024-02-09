@@ -13,7 +13,8 @@ import java.util.Map;
 
 import static ca.uhn.fhir.rest.server.interceptor.s13n.StandardizingInterceptor.STANDARDIZATION_DISABLED_HEADER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -66,8 +67,7 @@ class StandardizingInterceptorTest {
 		try {
 			myInterceptor.resourcePreCreate(myRequestDetails, null);
 		} catch (Exception e) {
-			fail();
-		}
+			fail("");		}
 	}
 
 	@Test
@@ -76,8 +76,7 @@ class StandardizingInterceptorTest {
 
 		try {
 			myInterceptor.resourcePreCreate(myRequestDetails, new Person());
-			fail();
-		} catch (Exception e) {
+			fail("");		} catch (Exception e) {
 		}
 	}
 

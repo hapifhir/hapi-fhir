@@ -9,7 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class SubscriptionStrategyEvaluatorTest extends BaseSubscriptionDstu3Test {
 	@Autowired

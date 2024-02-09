@@ -40,7 +40,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 @SuppressWarnings({"unchecked", "Duplicates"})
 public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {

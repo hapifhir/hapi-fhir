@@ -26,7 +26,8 @@ import java.io.File;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class ImportCsvToConceptMapCommandR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ImportCsvToConceptMapCommandR4Test.class);
@@ -466,8 +467,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 				},
 				"-t", true, myRestServerR4Helper
 			));
-			fail();
-		} catch (Error e) {
+			fail("");		} catch (Error e) {
 			assertTrue(e.getMessage().contains("Missing required option: s"));
 		}
 	}

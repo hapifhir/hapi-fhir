@@ -25,7 +25,8 @@ import static ca.uhn.test.util.LogbackCaptureTestExtension.eventWithMessageConta
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
@@ -90,8 +91,7 @@ class ReindexTerminologyCommandTest {
 		);
 		try {
 			App.main(args);
-			fail();
-		} catch (Error e) {
+			fail("");		} catch (Error e) {
 			assertThat(e.getMessage()).contains("Missing required option: v");
 		}
 	}
@@ -112,8 +112,7 @@ class ReindexTerminologyCommandTest {
 				},
 				null, theIncludeTls, myRestServerR4Helper
 			));
-			fail();
-		} catch (Error e) {
+			fail("");		} catch (Error e) {
 			assertThat(e.getMessage()).contains("Missing required option: t");
 		}
 	}

@@ -11,7 +11,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 @ExtendWith(MockitoExtension.class)
 public class SimplePreResourceShowDetailsTest {
@@ -26,8 +27,7 @@ public class SimplePreResourceShowDetailsTest {
 		try {
 			SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(myResource1);
 			details.setResource(-1, myResource2);
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail("");		} catch (IllegalArgumentException e) {
 			assertEquals("Invalid index -1 - theIndex must not be < 0", e.getMessage());
 		}
 	}
@@ -37,8 +37,7 @@ public class SimplePreResourceShowDetailsTest {
 		try {
 			SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(myResource1);
 			details.setResource(2, myResource2);
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail("");		} catch (IllegalArgumentException e) {
 			assertEquals("Invalid index {} - theIndex must be < 2", e.getMessage());
 		}
 	}

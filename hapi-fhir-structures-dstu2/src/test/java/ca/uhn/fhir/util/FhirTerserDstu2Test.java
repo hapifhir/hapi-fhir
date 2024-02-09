@@ -36,7 +36,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -90,8 +91,7 @@ public class FhirTerserDstu2Test {
 
 		try {
 			ourCtx.newTerser().cloneInto(source, target, false);
-			fail();
-		} catch (DataFormatException e) {
+			fail("");		} catch (DataFormatException e) {
 			// good
 		}
 }
@@ -135,8 +135,7 @@ public class FhirTerserDstu2Test {
 
 		try {
 			ourCtx.newTerser().cloneInto(source, target, false);
-			fail();
-		} catch (DataFormatException e) {
+			fail("");		} catch (DataFormatException e) {
 			// good
 		}
 

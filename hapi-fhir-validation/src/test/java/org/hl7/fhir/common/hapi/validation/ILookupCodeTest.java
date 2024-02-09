@@ -23,7 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public interface ILookupCodeTest {
 	String DISPLAY = "DISPLAY";
@@ -54,8 +55,7 @@ public interface ILookupCodeTest {
 			// test and verify
 			try {
 				getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
-				fail();
-			} catch (InternalErrorException e) {
+				fail("");			} catch (InternalErrorException e) {
 				assertTrue(e.getMessage().contains(getInvalidValueErrorCode() + ": Property type " + getCodeSystemProvider().getPropertyValue().fhirType() + " is not supported"));
 			}
 		}
@@ -65,8 +65,7 @@ public interface ILookupCodeTest {
 			// test and verify
 			try {
 				RemoteTerminologyServiceValidationSupport.createConceptProperty("property", getCodeSystemProvider().getPropertyValue());
-				fail();
-			} catch (InternalErrorException e) {
+				fail("");			} catch (InternalErrorException e) {
 				assertTrue(e.getMessage().contains(getInvalidValueErrorCodeForConvert() + ": Property type " + getCodeSystemProvider().getPropertyValue().fhirType() + " is not supported"));
 			}
 		}
@@ -88,8 +87,7 @@ public interface ILookupCodeTest {
 		default void testLookupCode_forCodeSystemWithBlankCode_throwsException() {
 			try {
 				getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, ""));
-				fail();
-			} catch (IllegalArgumentException e) {
+				fail("");			} catch (IllegalArgumentException e) {
 				assertEquals("theCode must be provided", e.getMessage());
 			}
 		}
@@ -106,8 +104,7 @@ public interface ILookupCodeTest {
 
 			try {
 				getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
-				fail();
-			} catch (InternalErrorException e) {
+				fail("");			} catch (InternalErrorException e) {
 				assertTrue(e.getMessage().contains("HAPI-1739: Don't know how to handle "));
 			}
 		}

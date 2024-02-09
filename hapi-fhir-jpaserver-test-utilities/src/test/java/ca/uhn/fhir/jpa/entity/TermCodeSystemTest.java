@@ -11,9 +11,8 @@ public class TermCodeSystemTest {
 		TermCodeSystem cs1 = new TermCodeSystem().setCodeSystemUri("http://foo");
 		TermCodeSystem cs2 = new TermCodeSystem().setCodeSystemUri("http://foo");
 		TermCodeSystem cs3 = new TermCodeSystem().setCodeSystemUri("http://foo2");
-		assertThat(cs2).isEqualTo(cs1);
+		assertThat(cs2).isEqualTo(cs1).isNotNull();
 		assertThat(cs3).isNotEqualTo(cs1);
-		assertThat(null).isNotEqualTo(cs1);
 		assertThat("").isNotEqualTo(cs1);
 	}
 

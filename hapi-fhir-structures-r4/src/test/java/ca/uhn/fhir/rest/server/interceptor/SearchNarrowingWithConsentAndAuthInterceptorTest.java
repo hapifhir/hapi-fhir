@@ -48,7 +48,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -454,8 +455,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 				.withNoParameters(Parameters.class)
 				.returnResourceType(Bundle.class)
 				.execute();
-			fail();
-		} catch (ForbiddenOperationException e) {
+			fail("");		} catch (ForbiddenOperationException e) {
 
 			// Verify
 			assertThat(e.getMessage()).contains("Access denied by");

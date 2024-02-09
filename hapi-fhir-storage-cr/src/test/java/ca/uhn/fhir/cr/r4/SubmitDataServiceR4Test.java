@@ -15,6 +15,9 @@ import org.opencds.cqf.fhir.utility.search.Searches;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class SubmitDataServiceR4Test extends BaseCrR4TestServer {
 
 	@Autowired

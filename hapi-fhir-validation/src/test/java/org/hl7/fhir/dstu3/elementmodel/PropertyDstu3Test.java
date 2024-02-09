@@ -18,7 +18,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 /**
  * Created by axemj on 14/07/2017.
@@ -64,8 +65,7 @@ public class PropertyDstu3Test extends BaseValidationTestWithInlineMocks {
 			final ElementDefinition ed = sd.getSnapshot().getElement().get(7);
 			property = new Property(workerContext, ed, sd);
 			property.getChildProperties("birthdate", null);
-			fail();
-		} catch (Error e) {
+			fail("");		} catch (Error e) {
     		assertEquals("types == 0, and no children found", e.getMessage());
 		}
     }

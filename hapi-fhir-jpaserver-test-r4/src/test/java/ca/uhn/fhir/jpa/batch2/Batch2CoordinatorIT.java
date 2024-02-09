@@ -54,7 +54,8 @@ import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(Batch2CoordinatorIT.class);

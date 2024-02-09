@@ -81,7 +81,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -1549,14 +1550,12 @@ public class JsonParserDstu2_1Test {
 	public void testParseInvalid() {
 		try {
 			ourCtx.newJsonParser().parseResource("FOO");
-			fail();
-		} catch (DataFormatException e) {
+			fail("");		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: " + Msg.code(1859) + "Content does not appear to be FHIR JSON, first non-whitespace character was: 'F' (must be '{')", e.getMessage());
 		}
 		try {
 			ourCtx.newJsonParser().parseResource("[\"aaa\"]");
-			fail();
-		} catch (DataFormatException e) {
+			fail("");		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: " + Msg.code(1859) + "Content does not appear to be FHIR JSON, first non-whitespace character was: '[' (must be '{')", e.getMessage());
 		}
 
@@ -1587,8 +1586,7 @@ public class JsonParserDstu2_1Test {
 			parser = ourCtx.newJsonParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(input);
-			fail();
-		} catch (DataFormatException e) {
+			fail("");		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'extension'", e.getMessage());
 		}
 
@@ -1617,8 +1615,7 @@ public class JsonParserDstu2_1Test {
 			parser = ourCtx.newJsonParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(input);
-			fail();
-		} catch (DataFormatException e) {
+			fail("");		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'modifierExtension'", e.getMessage());
 		}
 
@@ -1728,8 +1725,7 @@ public class JsonParserDstu2_1Test {
 		IParser jsonParser = ourCtx.newJsonParser().setPrettyPrint(true);
 		try {
 			jsonParser.parseResource(input);
-			fail();
-		} catch (DataFormatException e) {
+			fail("");		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1843) + "Missing required element 'resourceType' from JSON resource object, unable to parse", e.getMessage());
 		}
 	}
@@ -1754,15 +1750,13 @@ public class JsonParserDstu2_1Test {
 
 		try {
 			p.parseResource(encoded.replace("Observation", "observation"));
-			fail();
-		} catch (DataFormatException e) {
+			fail("");		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1815) + "Unknown resource type 'observation': Resource names are case sensitive, found similar name: 'Observation'", e.getMessage());
 		}
 
 		try {
 			p.parseResource(encoded.replace("valueSampledData", "valueSampleddata"));
-			fail();
-		} catch (DataFormatException e) {
+			fail("");		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1825) + "Unknown element 'valueSampleddata' found during parse", e.getMessage());
 		}
 	}
@@ -1798,8 +1792,7 @@ public class JsonParserDstu2_1Test {
 		String input = IOUtils.toString(getClass().getResourceAsStream("/invalid_metadata.json"));
 		try {
 			ourCtx.newJsonParser().parseResource(Conformance.class, input);
-			fail();
-		} catch (DataFormatException e) {
+			fail("");		} catch (DataFormatException e) {
 			assertEquals("Syntax error parsing JSON FHIR structure: Expected ARRAY at element 'modifierExtension', found 'OBJECT'", e.getMessage());
 		}
 	}

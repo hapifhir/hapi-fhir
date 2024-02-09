@@ -28,7 +28,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class ClientHeadersR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ClientHeadersR4Test.class);
@@ -138,8 +139,7 @@ public class ClientHeadersR4Test {
 		protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
 
 			if (ourHeaders != null) {
-				fail();
-			}
+				fail("");			}
 			ourHeaders = new HashMap<>();
 			ourParams = new HashMap<>(req.getParameterMap());
 			ourMethod = req.getMethod();

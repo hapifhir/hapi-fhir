@@ -18,7 +18,8 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 
@@ -49,8 +50,7 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 				.where(Patient.NAME.matches().value("foo"))
 				.include(Patient.INCLUDE_ORGANIZATION)
 				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
+			fail("");		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("this server does not know how to handle GET operation[Patient] with parameters [[_include, name]]");
 		}
 	}
@@ -112,8 +112,7 @@ public class ServerMethodSelectionR4Test extends BaseR4ServerTest {
 				.where(Patient.NAME.matches().value("foo"))
 				.revInclude(Patient.INCLUDE_ORGANIZATION)
 				.execute();
-			fail();
-		} catch (InvalidRequestException e) {
+			fail("");		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("this server does not know how to handle GET operation[Patient] with parameters [[_revinclude, name]]");
 		}
 	}

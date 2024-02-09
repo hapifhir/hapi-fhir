@@ -16,11 +16,12 @@ public class TagTest {
 		Tag tag3 = new Tag().setScheme("scheme2").setTerm("term").setLabel("label");
 		Tag tag4 = new Tag().setScheme("scheme").setTerm("term2").setLabel("label");
 
-		assertThat(tag1).isEqualTo(tag1);
+		assertThat(tag1)
+			.isEqualTo(tag1)
+			.isNotNull();
 		assertThat(tag2).isEqualTo(tag1);
 		assertThat(tag3).isNotEqualTo(tag1);
 		assertThat(tag4).isNotEqualTo(tag1);
-		assertThat(null).isNotEqualTo(tag1);
 		assertThat("").isNotEqualTo(tag1);
 	}
 

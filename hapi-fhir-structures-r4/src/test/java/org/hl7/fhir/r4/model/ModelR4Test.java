@@ -7,7 +7,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class ModelR4Test {
 
@@ -27,8 +28,7 @@ public class ModelR4Test {
 		new InstantType("2019-01-01T00:00:00.000Z");
 		try {
 			new InstantType("2019-01-01T00:00Z");
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail("");		} catch (IllegalArgumentException e) {
 			// good
 		}
 	}

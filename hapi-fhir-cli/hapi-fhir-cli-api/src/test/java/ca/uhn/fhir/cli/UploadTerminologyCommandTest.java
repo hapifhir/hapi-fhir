@@ -49,7 +49,8 @@ import java.util.zip.ZipOutputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
@@ -235,8 +236,7 @@ public class UploadTerminologyCommandTest {
 				},
 				"-t", theIncludeTls, myBaseRestServerHelper
 			));
-			fail();
-		} catch (Error e) {
+			fail("");		} catch (Error e) {
 			assertThat(e.toString()).contains("HTTP 400 Bad Request: " + Msg.code(362) + "Request has parameter codeSystem of type Patient but method expects type CodeSystem");
 		}
 	}
@@ -260,8 +260,7 @@ public class UploadTerminologyCommandTest {
 				"-t", theIncludeTls, myBaseRestServerHelper
 			));
 
-			fail();
-		} catch (Error e) {
+			fail("");		} catch (Error e) {
 			assertThat(e.toString()).contains("Don't know how to handle file:");
 		}
 	}
@@ -324,8 +323,7 @@ public class UploadTerminologyCommandTest {
 				},
 				"-t", theIncludeTls, myBaseRestServerHelper
 			));
-			fail();
-		} catch (Error e) {
+			fail("");		} catch (Error e) {
 			assertThat(e.toString().replace('\\', '/')).contains("FileNotFoundException: target/concepts.csv/foo.csv");
 		}
 	}

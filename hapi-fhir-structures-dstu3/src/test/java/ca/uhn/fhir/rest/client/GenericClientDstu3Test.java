@@ -76,7 +76,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -241,8 +242,7 @@ public class GenericClientDstu3Test {
 				.withBody(patch)
 				.withId(new IdType("234"))
 				.execute();
-			fail();
-		} catch (NullPointerException e) {
+			fail("");		} catch (NullPointerException e) {
 			assertEquals("theId must not be blank and must contain a resource type and ID (e.g. \"Patient/123\"), found: 234", e.getMessage());
 		}
 
@@ -252,8 +252,7 @@ public class GenericClientDstu3Test {
 				.withBody(patch)
 				.withId("234")
 				.execute();
-			fail();
-		} catch (NullPointerException e) {
+			fail("");		} catch (NullPointerException e) {
 			assertEquals("theId must not be blank and must contain a resource type and ID (e.g. \"Patient/123\"), found: 234", e.getMessage());
 		}
 
@@ -521,22 +520,19 @@ public class GenericClientDstu3Test {
 
 		try {
 			client.read().resource(Patient.class).withId("1").execute();
-			fail();
-		} catch (FhirClientConnectionException e) {
+			fail("");		} catch (FhirClientConnectionException e) {
 			assertEquals(Msg.code(1360) + "java.lang.IllegalStateException", e.getMessage());
 		}
 
 		try {
 			client.read().resource(Patient.class).withId("1").execute();
-			fail();
-		} catch (RuntimeException e) {
+			fail("");		} catch (RuntimeException e) {
 			assertEquals("java.lang.RuntimeException", e.toString());
 		}
 
 		try {
 			client.read().resource(Patient.class).withId("1").execute();
-			fail();
-		} catch (FhirClientConnectionException e) {
+			fail("");		} catch (FhirClientConnectionException e) {
 			assertThat(e.getMessage()).contains("java.io.IOException");
 		}
 	}
@@ -915,8 +911,7 @@ public class GenericClientDstu3Test {
 
 		try {
 			client.read().resource(Patient.class).withId("1").execute();
-			fail();
-		} catch (UnclassifiedServerFailureException e) {
+			fail("");		} catch (UnclassifiedServerFailureException e) {
 			assertEquals("ca.uhn.fhir.rest.server.exceptions.UnclassifiedServerFailureException: HTTP 499 Wacky Message", e.toString());
 			assertEquals("HELLO", e.getResponseBody());
 		}
@@ -940,8 +935,7 @@ public class GenericClientDstu3Test {
 
 		try {
 			client.read().resource(Patient.class).withId("1").execute();
-			fail();
-		} catch (NotImplementedOperationException e) {
+			fail("");		} catch (NotImplementedOperationException e) {
 			assertEquals("HTTP 501 Not Implemented", e.getMessage());
 		}
 
@@ -1094,8 +1088,7 @@ public class GenericClientDstu3Test {
 
 		try {
 			client.read().resource("Patient").withId("123").elementsSubset("name", "identifier").execute();
-			fail();
-		} catch (FhirClientConnectionException e) {
+			fail("");		} catch (FhirClientConnectionException e) {
 			assertEquals(
 					Msg.code(1359) + "Failed to parse response from server when performing GET to URL http://example.com/fhir/Patient/123?_elements=identifier%2Cname - ca.uhn.fhir.parser.DataFormatException: " + Msg.code(1838) +  "Invalid JSON content detected, missing required element: 'resourceType'",
 					e.getMessage());
@@ -1124,8 +1117,7 @@ public class GenericClientDstu3Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		try {
 			client.read().resource(Patient.class).withId("1").execute();
-			fail();
-		} catch (NonFhirResponseException e) {
+			fail("");		} catch (NonFhirResponseException e) {
 			assertEquals("Response contains no Content-Type", e.getMessage());
 		}
 
@@ -1155,8 +1147,7 @@ public class GenericClientDstu3Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient("http://example.com/fhir");
 		try {
 			client.read().resource(Patient.class).withId("1").execute();
-			fail();
-		} catch (NonFhirResponseException e) {
+			fail("");		} catch (NonFhirResponseException e) {
 			assertEquals("Response contains non FHIR Content-Type 'text/plain' : <Patient xmlns=\"http://hl7.org/fhir\"><name><family value=\"FAM\"/></name></Patient>", e.getMessage());
 		}
 
@@ -1632,32 +1623,28 @@ public class GenericClientDstu3Test {
 		// Transaction
 		try {
 			client.transaction().withBundle("FOO");
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail("");		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1395) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
 		}
 
 		// Create
 		try {
 			client.create().resource("FOO").execute();
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail("");		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1368) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
 		}
 
 		// Update
 		try {
 			client.update().resource("FOO").execute();
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail("");		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1368) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
 		}
 
 		// Validate
 		try {
 			client.validate().resource("FOO").execute();
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail("");		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(1368) + "Unable to determing encoding of request (body does not appear to be valid XML or JSON)", e.getMessage());
 		}
 

@@ -10,7 +10,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.Mockito.mock;
 
 public class IBundleProviderTest {
@@ -53,8 +54,7 @@ public class IBundleProviderTest {
 		};
 		try {
 			provider.getAllResources();
-			fail();
-		} catch (ConfigurationException e) {
+			fail("");		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(464) + "Attempt to request all resources from an asynchronous search result.  The SearchParameterMap for this search probably should have been synchronous.", e.getMessage());
 		}
 	}

@@ -33,7 +33,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -116,16 +117,14 @@ public class HashMapResourceProviderTest {
 		// Vread gone version
 		try {
 			ourRestServer.getFhirClient().read().resource("Patient").withId(id.withVersion("2")).execute();
-			fail();
-		} catch (ResourceGoneException e) {
+			fail("");		} catch (ResourceGoneException e) {
 			// good
 		}
 
 		// Read (non vread) gone version
 		try {
 			ourRestServer.getFhirClient().read().resource("Patient").withId(id.toUnqualifiedVersionless()).execute();
-			fail();
-		} catch (ResourceGoneException e) {
+			fail("");		} catch (ResourceGoneException e) {
 			// good
 		}
 
@@ -332,8 +331,7 @@ public class HashMapResourceProviderTest {
 		assertFalse(p.getActive());
 		try {
 			ourRestServer.getFhirClient().read().resource("Patient").withId(id.withVersion("3")).execute();
-			fail();
-		} catch (ResourceNotFoundException e) {
+			fail("");		} catch (ResourceNotFoundException e) {
 			// good
 		}
 	}

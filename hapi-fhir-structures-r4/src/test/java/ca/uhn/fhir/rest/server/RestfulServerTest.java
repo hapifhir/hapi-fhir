@@ -82,8 +82,7 @@ public class RestfulServerTest {
 	public void testFailRegisterInterfaceProviderWithoutRestfulMethod() {
 		try {
 			myRestfulServer.registerProvider(new MyClassWithoutRestInterface());
-			fail();
-		} catch (ConfigurationException e) {
+			fail("");		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(289) + "Did not find any annotated RESTful methods on provider class ca.uhn.fhir.rest.server.RestfulServerTest$MyClassWithoutRestInterface", e.getMessage());
 		}
 	}

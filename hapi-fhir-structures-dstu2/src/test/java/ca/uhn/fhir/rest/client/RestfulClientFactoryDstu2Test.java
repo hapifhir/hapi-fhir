@@ -21,7 +21,8 @@ import org.mockito.Mockito;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
@@ -65,8 +66,7 @@ public class RestfulClientFactoryDstu2Test {
 		
 		try {
 			cf.validateServerBase("http://localhost:9999", client, baseClient);
-			fail();
-		} catch (ResourceNotFoundException e) {
+			fail("");		} catch (ResourceNotFoundException e) {
 			// ok
 		}
 		

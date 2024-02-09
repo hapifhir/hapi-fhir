@@ -48,7 +48,7 @@ public class JaxRsMethodBindingsTest {
 			}
 		}
 		new TestFindPatientProvider();
-		assertThat(new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass()).isEqualTo(__P__.<error><java.lang.Class<ca.uhn.fhir.jaxrs.server.util.JaxRsMethodBindingsTest.1TestFindPatientProvider>>/*__p1__*/p();
+		assertThat(new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass()).isEqualTo(TestFindPatientProvider.class);
 	}
 
 	@Test
@@ -65,8 +65,8 @@ public class JaxRsMethodBindingsTest {
 				return null;
 			}
 		}
-		assertThat(new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass()).isEqualTo(__P__.<error><java.lang.Class<ca.uhn.fhir.jaxrs.server.util.JaxRsMethodBindingsTest.2TestFindPatientProvider>>/*__p1__*/p();
-		assertThat(new TestUpdatePatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getDeclaringClass()).isEqualTo(__P__.<error><java.lang.Class<ca.uhn.fhir.jaxrs.server.util.JaxRsMethodBindingsTest.1TestUpdatePatientProvider>>/*__p1__*/p();
+		assertThat(new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass()).isEqualTo(TestFindPatientProvider.class);
+		assertThat(new TestUpdatePatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getDeclaringClass()).isEqualTo(TestFindPatientProvider.class);
 	}
 
 	@Test

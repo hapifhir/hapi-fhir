@@ -18,6 +18,8 @@ import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 	protected static final StringType NO_MATCH_RESULT = new StringType(MdmMatchResultEnum.NO_MATCH.name());
 	protected static final StringType MATCH_RESULT = new StringType(MdmMatchResultEnum.MATCH.name());

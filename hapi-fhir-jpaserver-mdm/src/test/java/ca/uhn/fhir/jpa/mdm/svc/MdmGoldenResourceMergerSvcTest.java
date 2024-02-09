@@ -42,7 +42,8 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmGoldenResourceMergerSvcTest.class);

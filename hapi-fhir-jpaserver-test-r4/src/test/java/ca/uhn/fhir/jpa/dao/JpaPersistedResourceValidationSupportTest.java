@@ -40,6 +40,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.function.Function;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;

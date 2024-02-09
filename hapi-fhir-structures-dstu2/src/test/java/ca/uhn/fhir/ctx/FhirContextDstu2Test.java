@@ -27,7 +27,8 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class FhirContextDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirContextDstu2Test.class);
@@ -39,8 +40,7 @@ public class FhirContextDstu2Test {
 		try {
 			FhirContext ctx = FhirContext.forDstu2();
 			ctx.getResourceDefinition("InvalidResource");
-			fail();
-		} catch (DataFormatException e) {
+			fail("");		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1684) + "Unknown resource name \"InvalidResource\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 	}

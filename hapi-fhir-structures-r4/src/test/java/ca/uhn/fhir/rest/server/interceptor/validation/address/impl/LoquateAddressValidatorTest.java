@@ -26,7 +26,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -149,8 +150,7 @@ class LoquateAddressValidatorTest {
 	public void testInvalidInit() {
 		try {
 			new LoquateAddressValidator(new Properties());
-			fail();
-		} catch (Exception e) {
+			fail("");		} catch (Exception e) {
 		}
 	}
 
@@ -159,8 +159,7 @@ class LoquateAddressValidatorTest {
 		try {
 			AddressValidationResult res = myValidator.getValidationResult(new AddressValidationResult(),
 				new ObjectMapper().readTree(RESPONSE_INVALID), ourCtx);
-			fail();
-		} catch (Exception e) {
+			fail("");		} catch (Exception e) {
 		}
 	}
 
@@ -169,8 +168,7 @@ class LoquateAddressValidatorTest {
 		try {
 			assertEquals(clear(REQUEST), clear(myValidator.getRequestBody(ourCtx, getAddress())));
 		} catch (JsonProcessingException e) {
-			fail();
-		}
+			fail("");		}
 	}
 
 	private String clear(String theString) {
@@ -195,8 +193,7 @@ class LoquateAddressValidatorTest {
 		try {
 			val.getResponseEntity(address, ourCtx);
 		} catch (Exception e) {
-			fail();
-		}
+			fail("");		}
 
 		verify(template, times(1)).postForEntity(any(String.class), any(HttpEntity.class), eq(String.class));
 	}

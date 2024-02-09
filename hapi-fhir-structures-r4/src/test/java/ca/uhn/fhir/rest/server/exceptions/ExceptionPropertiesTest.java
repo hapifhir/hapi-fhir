@@ -19,7 +19,8 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class ExceptionPropertiesTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ExceptionPropertiesTest.class);

@@ -30,7 +30,8 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 

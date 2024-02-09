@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Patient;
@@ -29,8 +30,7 @@ public class ClientTest {
 		ITransactionTyped<Bundle> transaction = client.transaction().withBundle(bundle);
 		try {
 			Bundle result = transaction.encodedJson().execute();
-			fail();
-		} catch (FhirClientConnectionException e) {
+			fail("");		} catch (FhirClientConnectionException e) {
 			// good
 		}
 	}

@@ -41,7 +41,8 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4MetaTest.class);

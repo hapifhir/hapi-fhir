@@ -41,9 +41,8 @@ public class ResourceIndexedSearchParamTokenTest {
 			.setValue("AAA");
 		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();
-		assertThat(val1).isEqualTo(val1);
+		assertThat(val1).isEqualTo(val1).isNotNull();
 		assertThat(val2).isEqualTo(val1);
-		assertThat(null).isNotEqualTo(val1);
 		assertThat("").isNotEqualTo(val1);
 	}
 

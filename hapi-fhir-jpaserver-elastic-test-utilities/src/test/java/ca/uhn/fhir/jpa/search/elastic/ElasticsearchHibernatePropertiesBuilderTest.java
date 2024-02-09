@@ -11,7 +11,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Properties;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.Mockito.spy;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,8 +35,7 @@ class ElasticsearchHibernatePropertiesBuilderTest {
 		try {
 			myPropertiesBuilder.setHosts(protocolHost)
 				.apply(new Properties());
-			fail();
-		} catch (ConfigurationException e ) {
+			fail("");		} catch (ConfigurationException e ) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(2139) + failureMessage);
 		}
 

@@ -48,7 +48,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 /**
  * A test to poke at our job framework and induce errors.

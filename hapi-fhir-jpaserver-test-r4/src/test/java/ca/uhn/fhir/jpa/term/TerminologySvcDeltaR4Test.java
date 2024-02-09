@@ -36,7 +36,8 @@ import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(TerminologySvcDeltaR4Test.class);

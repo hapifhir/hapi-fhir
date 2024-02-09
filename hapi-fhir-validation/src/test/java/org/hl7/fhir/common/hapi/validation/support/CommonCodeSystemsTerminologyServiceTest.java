@@ -36,7 +36,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestWithInlineMocks {
 
@@ -291,8 +292,7 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	public void testGetCodeSystemUrl_forDSTU3_throwsException() {
 		try {
 			CommonCodeSystemsTerminologyService.getCodeSystemUrl(myCtx, new org.hl7.fhir.dstu3.model.CodeSystem());
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail("");		} catch (IllegalArgumentException e) {
 			assertEquals(Msg.code(696) + "Can not handle version: DSTU3", e.getMessage());
 		}
 	}

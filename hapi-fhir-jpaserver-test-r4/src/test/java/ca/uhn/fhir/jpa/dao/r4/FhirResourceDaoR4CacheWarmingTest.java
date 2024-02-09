@@ -22,7 +22,8 @@ import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4CacheWarmingTest.class);

@@ -13,7 +13,7 @@ public class ResourceMetadataKeyEnumTest {
 
 	@Test
 	public void testEquals() {
-		assertThat(null).isNotEqualTo(ResourceMetadataKeyEnum.PROFILES);
+		assertThat(ResourceMetadataKeyEnum.PROFILES).isNotNull();
 		assertThat("").isNotEqualTo(ResourceMetadataKeyEnum.PROFILES);
 		assertThat(ResourceMetadataKeyEnum.PUBLISHED).isNotEqualTo(ResourceMetadataKeyEnum.PROFILES);
 		assertThat(ResourceMetadataKeyEnum.PROFILES).isEqualTo(ResourceMetadataKeyEnum.PROFILES);
@@ -23,7 +23,7 @@ public class ResourceMetadataKeyEnumTest {
 	@Test
 	public void testExtensionResourceEquals() {
 		assertThat(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://bar")).isNotEqualTo(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo"));
-		assertThat(null).isNotEqualTo(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo"));
+		assertThat(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo")).isNotNull();
 		assertThat("").isNotEqualTo(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo"));
 		assertThat(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo")).isEqualTo(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo"));
 

@@ -42,7 +42,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class BundleUtilTest {
 
@@ -282,8 +283,7 @@ public class BundleUtilTest {
 		bundleEntryComponent.getRequest().setMethod(POST).setUrl("Observation");
 		try {
 			BundleUtil.sortEntriesIntoProcessingOrder(ourCtx, b);
-			fail();
-		} catch (IllegalStateException ignored) {
+			fail("");		} catch (IllegalStateException ignored) {
 
 		}
 	}

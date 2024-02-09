@@ -40,7 +40,8 @@ import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")

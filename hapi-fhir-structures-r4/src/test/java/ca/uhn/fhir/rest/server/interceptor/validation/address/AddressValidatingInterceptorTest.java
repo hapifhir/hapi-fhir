@@ -27,7 +27,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -83,8 +84,7 @@ class AddressValidatingInterceptorTest {
 		props.setProperty(PROPERTY_VALIDATOR_CLASS, "RandomService");
 		try {
 			new AddressValidatingInterceptor(props);
-			fail();
-		} catch (Exception e) {
+			fail("");		} catch (Exception e) {
 			// expected
 		}
 
@@ -98,15 +98,13 @@ class AddressValidatingInterceptorTest {
 		try {
 			myInterceptor.handleRequest(null, null);
 		} catch (Exception ex) {
-			fail();
-		}
+			fail("");		}
 
 		try {
 			myInterceptor.setAddressValidator(null);
 			myInterceptor.handleRequest(null, null);
 		} catch (Exception ex) {
-			fail();
-		}
+			fail("");		}
 	}
 
 	@BeforeEach

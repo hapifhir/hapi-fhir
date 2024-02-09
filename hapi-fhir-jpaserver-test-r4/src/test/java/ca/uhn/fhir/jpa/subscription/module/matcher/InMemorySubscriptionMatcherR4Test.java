@@ -87,7 +87,8 @@ import java.util.TimeZone;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.NoFT.class})

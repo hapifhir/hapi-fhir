@@ -29,7 +29,8 @@ import java.nio.charset.Charset;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -117,8 +118,7 @@ public class ETagClientTest {
         .resource(Patient.class)
         .withId(new IdDt("Patient/1234"))
         .execute();
-      fail();
-    } catch (NotModifiedException e) {
+      fail("");    } catch (NotModifiedException e) {
       // good!
     }
     //@formatter:on
@@ -198,8 +198,7 @@ public class ETagClientTest {
         .resource(getResource())
         .withId(new IdDt("Patient/1234/_history/9876"))
         .execute();
-      fail();
-    } catch (PreconditionFailedException e) {
+      fail("");    } catch (PreconditionFailedException e) {
       // good
     }
     //@formatter:on
@@ -216,8 +215,7 @@ public class ETagClientTest {
         .update()
         .resource(resource)
         .execute();
-      fail();
-    } catch (PreconditionFailedException e) {
+      fail("");    } catch (PreconditionFailedException e) {
       // good
     }
     //@formatter:on

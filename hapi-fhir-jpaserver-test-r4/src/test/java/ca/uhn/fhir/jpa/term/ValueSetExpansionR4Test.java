@@ -56,7 +56,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class ValueSetExpansionR4Test extends BaseTermR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetExpansionR4Test.class);

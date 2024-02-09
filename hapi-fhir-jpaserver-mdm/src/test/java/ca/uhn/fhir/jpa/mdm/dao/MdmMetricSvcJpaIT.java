@@ -33,7 +33,8 @@ import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 @ContextConfiguration(classes = {
 	MdmMetricSvcJpaIT.TestConfig.class

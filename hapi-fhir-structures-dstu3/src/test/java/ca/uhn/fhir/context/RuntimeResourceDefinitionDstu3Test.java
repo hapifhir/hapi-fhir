@@ -8,7 +8,8 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class RuntimeResourceDefinitionDstu3Test {
 
@@ -23,8 +24,7 @@ public class RuntimeResourceDefinitionDstu3Test {
 	public void testAsClassWrong() {
 		try {
 			ourCtx.getResourceDefinition("Bundle").getImplementingClass(Patient.class);
-			fail();
-		} catch (ConfigurationException e) {
+			fail("");		} catch (ConfigurationException e) {
 			assertEquals(Msg.code(1732) + "Unable to convert class org.hl7.fhir.dstu3.model.Bundle to class org.hl7.fhir.dstu3.model.Patient", e.getMessage());
 		}
 	}

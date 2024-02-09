@@ -40,7 +40,8 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class IncludeTest {
 
@@ -185,20 +186,17 @@ public class IncludeTest {
 
 		try {
 			new Include("").withType("Patient");
-			fail();
-		} catch (IllegalStateException e) {
+			fail("");		} catch (IllegalStateException e) {
 			// good
 		}
 		try {
 			new Include("Patient").withType("Patient");
-			fail();
-		} catch (IllegalStateException e) {
+			fail("");		} catch (IllegalStateException e) {
 			// good
 		}
 		try {
 			new Include("Patient:").withType("Patient");
-			fail();
-		} catch (IllegalStateException e) {
+			fail("");		} catch (IllegalStateException e) {
 			// good
 		}
 	}

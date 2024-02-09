@@ -23,7 +23,8 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsNot.not;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 /**
  * Created by Sebastien Riviere on 31/07/2017.

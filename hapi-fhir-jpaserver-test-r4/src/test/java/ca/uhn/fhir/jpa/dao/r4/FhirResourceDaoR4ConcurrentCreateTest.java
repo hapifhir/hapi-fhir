@@ -39,7 +39,8 @@ import java.util.stream.Collectors;
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 

@@ -32,7 +32,8 @@ import static ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc.LOCK_TYPE;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class HapiClearMigrationLockCommandTest extends ConsoleOutputCapturingBaseTest {
@@ -65,8 +66,7 @@ public class HapiClearMigrationLockCommandTest extends ConsoleOutputCapturingBas
 		int beforeClearMigrationCount = dao.findAll().size();
 		try {
 			App.main(args);
-			fail();
-		} catch (CommandFailureException e) {
+			fail("");		} catch (CommandFailureException e) {
 			assertThat(e.getMessage()).contains("HAPI-2152: Internal error: on unlocking, a competing lock was found");
 		}
 	}

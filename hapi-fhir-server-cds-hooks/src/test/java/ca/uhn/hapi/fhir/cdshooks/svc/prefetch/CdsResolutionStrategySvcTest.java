@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 class CdsResolutionStrategySvcTest {
 	private static final String TEST_FHIR_SERVER = "http://example.com/fhir";
 	private final DaoRegistry myDaoRegistry = new DaoRegistry();

@@ -2565,8 +2565,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertThat(resp.getEntry().size()).isEqualTo(1);
 		assertThat(resp.getEntry().get(0).getResponse().getStatus()).isEqualTo("204 No Content");
 
-		// fail();
-		// } catch (ResourceNotFoundException e) {
+		// fail("");		// } catch (ResourceNotFoundException e) {
 		// assertThat(e.getMessage(), containsString("resource matching URL \"Patient?"));
 		// }
 	}

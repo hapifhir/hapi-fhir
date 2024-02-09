@@ -86,7 +86,8 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
@@ -1370,8 +1371,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertThat(resp.getEntry().size()).isEqualTo(1);
 		assertThat(resp.getEntry().get(0).getResponse().getStatus()).isEqualTo("204 No Content");
 
-		// fail();
-		// } catch (ResourceNotFoundException e) {
+		// fail("");		// } catch (ResourceNotFoundException e) {
 		// assertThat(e.getMessage(), containsString("resource matching URL \"Patient?"));
 		// }
 	}

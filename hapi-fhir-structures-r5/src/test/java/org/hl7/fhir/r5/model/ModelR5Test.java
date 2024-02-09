@@ -7,7 +7,8 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class ModelR5Test {
 
@@ -26,8 +27,7 @@ public class ModelR5Test {
 		new InstantType("2019-01-01T00:00:00.000Z");
 		try {
 			new InstantType("2019-01-01T00:00Z");
-			fail();
-		} catch (IllegalArgumentException e) {
+			fail("");		} catch (IllegalArgumentException e) {
 			// good
 		}
 	}

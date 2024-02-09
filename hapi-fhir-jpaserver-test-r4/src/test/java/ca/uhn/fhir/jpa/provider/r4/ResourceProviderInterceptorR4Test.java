@@ -58,7 +58,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;

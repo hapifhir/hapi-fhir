@@ -56,7 +56,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 
@@ -352,8 +353,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		ourClient.transaction().withBundle(bundle).prettyPrint().execute();
 		// try {
-		// fail();
-		// } catch (InvalidRequestException e) {
+		// fail("");		// } catch (InvalidRequestException e) {
 		// OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
 		// assertEquals("Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
 		// assertEquals("processing", oo.getIssue().get(0).getCode());

@@ -31,7 +31,8 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProviderR4Test {
 

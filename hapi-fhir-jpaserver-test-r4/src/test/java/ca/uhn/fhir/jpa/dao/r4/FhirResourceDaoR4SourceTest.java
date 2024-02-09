@@ -25,7 +25,8 @@ import org.junit.jupiter.api.Test;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings({"Duplicates"})

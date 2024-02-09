@@ -25,7 +25,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 public class ModelDstu2Test {
 
@@ -83,8 +84,7 @@ public class ModelDstu2Test {
 		new InstantDt("2019-01-01T00:00:00.000Z");
 		try {
 			new InstantDt("2019-01-01T00:00Z");
-			fail();
-		} catch (DataFormatException e) {
+			fail("");		} catch (DataFormatException e) {
 			// good
 		}
 	}

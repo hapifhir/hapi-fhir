@@ -33,7 +33,8 @@ import java.nio.charset.Charset;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -114,8 +115,7 @@ public class ClientServerValidationTestHl7OrgDstu2 {
 		myCtx.getRestfulClientFactory().setServerValidationMode(ServerValidationModeEnum.ONCE);
 		try {
 			myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/1"));
-			fail();
-		} catch (FhirClientInappropriateForServerException e) {
+			fail("");		} catch (FhirClientInappropriateForServerException e) {
 			assertThat(e.toString()).contains("The server at base URL \"http://foo/metadata\" returned a conformance statement indicating that it supports FHIR version \"3.0.2\" which corresponds to DSTU3, but this client is configured to use DSTU2_HL7ORG (via the FhirContext)");
 		}
 	}

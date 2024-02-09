@@ -74,7 +74,8 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 
 
 public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {

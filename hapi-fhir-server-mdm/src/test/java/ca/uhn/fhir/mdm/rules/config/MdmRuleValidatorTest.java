@@ -14,7 +14,8 @@ import org.springframework.core.io.Resource;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,8 +35,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
    public void testValidate() throws IOException {
 		try {
 			setMdmRuleJson("bad-rules-bad-url.json");
-			fail();
-		} catch (ConfigurationException e){
+			fail("");		} catch (ConfigurationException e){
 			assertThat(e.getMessage()).isEqualTo(Msg.code(1519) + "Enterprise Identifier System (eidSystem) must be a valid URI");
 		}
    }
@@ -44,8 +44,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	public void testNonExistentMatchField() throws IOException {
 		try {
 			setMdmRuleJson("bad-rules-missing-name.json");
-			fail();
-		} catch (ConfigurationException e) {
+			fail("");		} catch (ConfigurationException e) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(1523) + "There is no matchField with name foo");
 		}
 	}
@@ -54,8 +53,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	public void testSimilarityHasThreshold() throws IOException {
 		try {
 			setMdmRuleJson("bad-rules-missing-threshold.json");
-			fail();
-		} catch (ConfigurationException e) {
+			fail("");		} catch (ConfigurationException e) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(1514) + "MatchField given-name similarity COSINE requires a matchThreshold");
 		}
 	}
@@ -64,8 +62,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	public void testMatcherBadPath() throws IOException {
 		try {
 			setMdmRuleJson("bad-rules-bad-path.json");
-			fail();
-		} catch (ConfigurationException e) {
+			fail("");		} catch (ConfigurationException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(1517) + "MatchField given-name resourceType Patient has invalid path 'name.first'.  " + Msg.code(1700) + "Unknown child name 'first' in element HumanName");
 		}
 	}
@@ -74,8 +71,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	public void testMatcherBadFhirPath() throws IOException {
 		try {
 			setMdmRuleJson("bad-rules-bad-fhirpath.json");
-			fail();
-		} catch (ConfigurationException e) {
+			fail("");		} catch (ConfigurationException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(1518) + "MatchField [given-name] resourceType [Patient] has failed FHIRPath evaluation.  Error in ?? at 1, 1: The name blurst is not a valid function name");
 		}
 	}
@@ -84,8 +80,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	public void testBadRulesMissingBothPaths() throws IOException {
 		try {
 			setMdmRuleJson("bad-rules-no-path.json");
-			fail();
-		} catch (ConfigurationException e) {
+			fail("");		} catch (ConfigurationException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(1516) + "MatchField [given-name] resourceType [Patient] has defined neither a resourcePath or a fhirPath. You must define one of the two.");
 		}
 	}
@@ -94,8 +89,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	public void testBadRulesBothPathsFilled() throws IOException {
 		try {
 			setMdmRuleJson("bad-rules-both-paths.json");
-			fail();
-		} catch (ConfigurationException e) {
+			fail("");		} catch (ConfigurationException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(1515) + "MatchField [given-name] resourceType [Patient] has defined both a resourcePath and a fhirPath. You must define one of the two.");
 		}
 	}
@@ -104,8 +98,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	public void testMatcherBadSearchParam() throws IOException {
 		try {
 			setMdmRuleJson("bad-rules-bad-searchparam.json");
-			fail();
-		} catch (ConfigurationException e) {
+			fail("");		} catch (ConfigurationException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(1511) + "Error in candidateSearchParams: Patient does not have a search parameter called 'foo'");
 		}
 	}
@@ -114,8 +107,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	public void testMatcherBadFilter() throws IOException {
 		try {
 			setMdmRuleJson("bad-rules-bad-filter.json");
-			fail();
-		} catch (ConfigurationException e) {
+			fail("");		} catch (ConfigurationException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(1511) + "Error in candidateFilterSearchParams: Patient does not have a search parameter called 'foo'");
 		}
 	}
@@ -124,8 +116,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	public void testInvalidMdmType() throws IOException {
 		try {
 			setMdmRuleJson("bad-rules-missing-mdm-types.json");
-			fail();
-		} catch (ConfigurationException e) {
+			fail("");		} catch (ConfigurationException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(1509) + "mdmTypes must be set to a list of resource types.");
 		}
 	}
@@ -134,8 +125,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	public void testMatcherduplicateName() throws IOException {
 		try {
 			setMdmRuleJson("bad-rules-duplicate-name.json");
-			fail();
-		} catch (ConfigurationException e) {
+			fail("");		} catch (ConfigurationException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(1512) + "Two MatchFields have the same name 'foo'");
 		}
 	}
@@ -144,8 +134,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	public void testInvalidPath() throws IOException {
 		try {
 			setMdmRuleJson("bad-rules-invalid-path.json");
-			fail();
-		} catch (ConfigurationException e) {
+			fail("");		} catch (ConfigurationException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(1517) + "MatchField name-prefix resourceType Organization has invalid path");
 		}
 	}
