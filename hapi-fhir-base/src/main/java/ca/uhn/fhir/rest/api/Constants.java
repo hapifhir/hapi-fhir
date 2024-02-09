@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -232,6 +233,8 @@ public class Constants {
 	public static final String PARAMQUALIFIER_NICKNAME = ":nickname";
 	public static final String PARAMQUALIFIER_TOKEN_OF_TYPE = ":of-type";
 	public static final String PARAMQUALIFIER_TOKEN_NOT = ":not";
+	public static final String PARAMQUALIFIER_TOKEN_IDENTIFIER = ":identifier";
+
 	public static final int STATUS_HTTP_200_OK = 200;
 	public static final int STATUS_HTTP_201_CREATED = 201;
 	public static final int STATUS_HTTP_204_NO_CONTENT = 204;
@@ -314,6 +317,8 @@ public class Constants {
 	public static final String PARAMQUALIFIER_TOKEN_NOT_IN = ":not-in";
 	public static final String PARAMQUALIFIER_TOKEN_ABOVE = ":above";
 	public static final String PARAMQUALIFIER_TOKEN_BELOW = ":below";
+
+	public static final List<String> VALID_MODIFIERS = List.of(PARAMQUALIFIER_STRING_CONTAINS, PARAMQUALIFIER_STRING_EXACT, PARAMQUALIFIER_TOKEN_IN, PARAM_INCLUDE_QUALIFIER_ITERATE, PARAMQUALIFIER_MISSING, PARAMQUALIFIER_TOKEN_NOT_IN, PARAMQUALIFIER_TOKEN_OF_TYPE, PARAMQUALIFIER_TOKEN_TEXT);
 	/**
 	 * The number of characters in a UUID (36)
 	 */
