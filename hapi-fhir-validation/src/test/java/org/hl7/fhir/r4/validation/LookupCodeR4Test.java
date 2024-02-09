@@ -2,17 +2,14 @@ package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.ILookupCodeTest.ILookupCodeSupportedPropertyTest;
-import org.hl7.fhir.common.hapi.validation.ILookupCodeTest.ILookupCodeUnsupportedPropertyTypeTest;
 import org.hl7.fhir.common.hapi.validation.ILookupCodeTest.IMyCodeSystemProvider;
 import org.hl7.fhir.common.hapi.validation.ILookupCodeTest.IMySimpleCodeSystemProvider;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
@@ -25,7 +22,7 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DecimalType;
-import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
@@ -59,40 +56,6 @@ public class LookupCodeR4Test {
 
 	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	@Nested
-	class LookupCodeUnsupportedPropertyTypeR4Test implements ILookupCodeUnsupportedPropertyTypeTest {
-		private final MySimplePropertyCodeSystemProviderR4 myMySimplePropertyCodeSystemProvider = new MySimplePropertyCodeSystemProviderR4();
-
-		@Override
-		public IMySimpleCodeSystemProvider getCodeSystemProvider() {
-			return myMySimplePropertyCodeSystemProvider;
-		}
-
-		@Override
-		public RemoteTerminologyServiceValidationSupport getService() {
-			return mySvc;
-		}
-
-		@Override
-		public String getInvalidValueErrorCode() {
-			return "HAPI-2452";
-		}
-
-
-		@Override
-		public String getInvalidValueErrorCodeForConvert() {
-			return "HAPI-2453";
-		}
-
-		@BeforeEach
-		public void before() {
-			myMySimplePropertyCodeSystemProvider.myPropertyName = "somePropertyName";
-			myMySimplePropertyCodeSystemProvider.myPropertyValue = new IdType(123);
-			ourRestfulServerExtension.getRestfulServer().registerProvider(myMySimplePropertyCodeSystemProvider);
-		}
-	}
-
-	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-	@Nested
 	class ILookupCodeSupportedPropertyR4Test implements ILookupCodeSupportedPropertyTest {
 		private final MyCodeSystemProviderR4 myCodeSystemProvider = new MyCodeSystemProviderR4();
 
@@ -118,7 +81,7 @@ public class LookupCodeR4Test {
 			switch (type) {
 				case IValidationSupport.TYPE_STRING -> {
 					if (!(theExpectedValue instanceof StringType stringValue)) {
-						// TODO: workaround for unsupported types, remove this when rest of the types are supported
+						// TODO: remove this branch to test other property types as per FHIR spec https://github.com/hapifhir/hapi-fhir/issues/5699
 						IValidationSupport.StringConceptProperty stringConceptProperty = (IValidationSupport.StringConceptProperty) theConceptProperty;
 						assertEquals(theExpectedValue.toString(), stringConceptProperty.getValue());
 						break;
@@ -137,8 +100,10 @@ public class LookupCodeR4Test {
 					assertEquals(coding.getSystem(), codingConceptProperty.getCodeSystem());
 					assertEquals(coding.getDisplay(), codingConceptProperty.getDisplay());
 				}
-				default ->
-					throw new InternalErrorException(Msg.code(2451) + "Property type " + type + " is not supported.");
+				default -> {
+					IValidationSupport.StringConceptProperty stringConceptProperty = (IValidationSupport.StringConceptProperty) theConceptProperty;
+					assertEquals(theExpectedValue.toString(), stringConceptProperty.getValue());
+				}
 			}
 		}
 
@@ -155,13 +120,26 @@ public class LookupCodeR4Test {
 
 		public Stream<Arguments> getPropertyValues() {
 			return Stream.of(
+				// FHIR R4 spec types
 				Arguments.arguments(new StringType("value")),
 				Arguments.arguments(new Coding("code", "system", "display")),
 				Arguments.arguments(new CodeType("code")),
 				Arguments.arguments(new BooleanType(true)),
 				Arguments.arguments(new IntegerType(1)),
+				Arguments.arguments(new DateTimeType(Calendar.getInstance())),
 				Arguments.arguments(new DecimalType(1.1)),
-				Arguments.arguments(new DateTimeType(Calendar.getInstance()))
+				// other types will also not fail for Remote Terminology
+				Arguments.arguments(new InstantType(Calendar.getInstance())),
+				Arguments.arguments(new Type() {
+					@Override
+					protected Type typedCopy() {
+						return this;
+					}
+					@Override
+					public String toString() {
+						return "randomType";
+					}
+				})
 			);
 		}
 

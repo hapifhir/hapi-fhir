@@ -4,17 +4,14 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.ConceptDesignation;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.ILookupCodeTest.ILookupCodeSupportedPropertyTest;
-import org.hl7.fhir.common.hapi.validation.ILookupCodeTest.ILookupCodeUnsupportedPropertyTypeTest;
 import org.hl7.fhir.common.hapi.validation.ILookupCodeTest.IMyCodeSystemProvider;
 import org.hl7.fhir.common.hapi.validation.ILookupCodeTest.IMySimpleCodeSystemProvider;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
@@ -22,7 +19,6 @@ import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.Coding;
-import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.Parameters.ParametersParameterComponent;
 import org.hl7.fhir.dstu3.model.StringType;
@@ -32,6 +28,7 @@ import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DecimalType;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -64,39 +61,6 @@ public class LookupCodeDstu3Test {
 
 	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 	@Nested
-	class LookupCodeUnsupportedPropertyTypeDstu3Test implements ILookupCodeUnsupportedPropertyTypeTest {
-		private final MySimplePropertyCodeSystemProviderDstu3 myMySimplePropertyCodeSystemProvider = new MySimplePropertyCodeSystemProviderDstu3();
-
-		@Override
-		public IMySimpleCodeSystemProvider getCodeSystemProvider() {
-			return myMySimplePropertyCodeSystemProvider;
-		}
-
-		@Override
-		public RemoteTerminologyServiceValidationSupport getService() {
-			return mySvc;
-		}
-
-		@Override
-		public String getInvalidValueErrorCode() {
-			return "HAPI-2450";
-		}
-
-		@Override
-		public String getInvalidValueErrorCodeForConvert() {
-			return "HAPI-2451";
-		}
-
-		@BeforeEach
-		public void before() {
-			myMySimplePropertyCodeSystemProvider.myPropertyName = "somePropertyName";
-			myMySimplePropertyCodeSystemProvider.myPropertyValue = new IdType(123);
-			ourRestfulServerExtension.getRestfulServer().registerProvider(myMySimplePropertyCodeSystemProvider);
-		}
-	}
-
-	@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-	@Nested
 	class ILookupCodeSupportedPropertyDstu3Test implements ILookupCodeSupportedPropertyTest {
 		private final MyCodeSystemProviderDstu3 myCodeSystemProvider = new MyCodeSystemProviderDstu3();
 
@@ -121,7 +85,7 @@ public class LookupCodeDstu3Test {
 			switch (type) {
 				case IValidationSupport.TYPE_STRING -> {
 					if (!(theExpectedValue instanceof StringType stringValue)) {
-						// TODO: workaround for unsupported types, remove this branch when rest of the types are supported
+						// TODO: remove this branch to test other property types as per FHIR spec https://github.com/hapifhir/hapi-fhir/issues/5699
 						IValidationSupport.StringConceptProperty stringConceptProperty = (IValidationSupport.StringConceptProperty) theConceptProperty;
 						assertEquals(theExpectedValue.toString(), stringConceptProperty.getValue());
 						break;
@@ -140,8 +104,10 @@ public class LookupCodeDstu3Test {
 					assertEquals(coding.getSystem(), codingConceptProperty.getCodeSystem());
 					assertEquals(coding.getDisplay(), codingConceptProperty.getDisplay());
 				}
-				default ->
-					throw new InternalErrorException(Msg.code(2451) + "Property type " + type + " is not supported.");
+				default -> {
+					IValidationSupport.StringConceptProperty stringConceptProperty = (IValidationSupport.StringConceptProperty) theConceptProperty;
+					assertEquals(theExpectedValue.toString(), stringConceptProperty.getValue());
+				}
 			}
 		}
 
@@ -158,13 +124,27 @@ public class LookupCodeDstu3Test {
 
 		public Stream<Arguments> getPropertyValues() {
 			return Stream.of(
+				// FHIR DSTU3 spec types
 				Arguments.arguments(new StringType("value")),
 				Arguments.arguments(new Coding("code", "system", "display")),
 				Arguments.arguments(new CodeType("code")),
 				Arguments.arguments(new BooleanType(true)),
 				Arguments.arguments(new IntegerType(1)),
+				Arguments.arguments(new DateTimeType(Calendar.getInstance())),
+				// other types will also not fail for Remote Terminology
 				Arguments.arguments(new DecimalType(1.1)),
-				Arguments.arguments(new DateTimeType(Calendar.getInstance()))
+				Arguments.arguments(new InstantType(Calendar.getInstance())),
+				Arguments.arguments(new Type() {
+					@Override
+					protected Type typedCopy() {
+						return this;
+					}
+
+					@Override
+					public String toString() {
+						return "randomType";
+					}
+				})
 			);
 		}
 
