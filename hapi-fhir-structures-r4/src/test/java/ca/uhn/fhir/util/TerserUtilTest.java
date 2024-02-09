@@ -2,8 +2,10 @@ package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBackboneElement;
 import org.hl7.fhir.r4.model.Address;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Claim;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
@@ -163,7 +165,7 @@ class TerserUtilTest {
 		TerserUtil.mergeAllFields(ourFhirContext, p1, p2);
 
 		assertThat(p2.hasDeceased()).isTrue();
-		assertThat("true").isEqualTo(p2.getDeceased());
+		assertThat(p2.getDeceased()).isEqualTo(new BooleanType(true));
 		assertThat(p2.getExtension()).hasSize(2);
 	}
 
@@ -651,20 +653,20 @@ class TerserUtilTest {
 
 	@Test
 	public void testNewElement() {
-		assertThat(TerserUtil.newElement(ourFhirContext, "string")).isNotNull();
+		assertThat((IBase)TerserUtil.newElement(ourFhirContext, "string")).isNotNull();
 		assertThat(((PrimitiveType) TerserUtil.newElement(ourFhirContext, "integer", "1")).getValue()).isEqualTo(1);
 
-		assertThat(TerserUtil.newElement(ourFhirContext, "string")).isNotNull();
+		assertThat((IBase)TerserUtil.newElement(ourFhirContext, "string")).isNotNull();
 		assertThat(((PrimitiveType) TerserUtil.newElement(ourFhirContext, "integer")).getValue()).isNull();
 
-		assertThat(TerserUtil.newElement(ourFhirContext, "string", null)).isNotNull();
+		assertThat((IBase)TerserUtil.newElement(ourFhirContext, "string", null)).isNotNull();
 		assertThat(((PrimitiveType) TerserUtil.newElement(ourFhirContext, "integer", null)).getValue()).isNull();
 	}
 
 	@Test
 	public void testNewResource() {
-		assertThat(TerserUtil.newResource(ourFhirContext, "Patient")).isNotNull();
-		assertThat(TerserUtil.newResource(ourFhirContext, "Patient", null)).isNotNull();
+		assertThat((IBase)TerserUtil.newResource(ourFhirContext, "Patient")).isNotNull();
+		assertThat((IBase)TerserUtil.newResource(ourFhirContext, "Patient", null)).isNotNull();
 	}
 
 	@Test

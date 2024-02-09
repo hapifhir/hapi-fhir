@@ -14,10 +14,9 @@ public class TokenParamTest {
 		TokenParam tokenParam1 = new TokenParam("foo", "bar");
 		TokenParam tokenParam2 = new TokenParam("foo", "bar");
 		TokenParam tokenParam3 = new TokenParam("foo", "baz");
-		assertThat(tokenParam1).isEqualTo(tokenParam1);
+		assertThat(tokenParam1).isEqualTo(tokenParam1).isNotNull();
 		assertThat(tokenParam2).isEqualTo(tokenParam1);
 		assertThat(tokenParam3).isNotEqualTo(tokenParam1);
-		assertThat(null).isNotEqualTo(tokenParam1);
 		assertThat("").isNotEqualTo(tokenParam1);
 	}
 
