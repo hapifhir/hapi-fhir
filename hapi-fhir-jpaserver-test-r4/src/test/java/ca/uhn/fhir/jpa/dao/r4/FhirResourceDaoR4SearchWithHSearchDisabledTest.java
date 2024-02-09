@@ -49,8 +49,7 @@ import java.util.List;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.NoFT.class})
@@ -117,9 +116,9 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		map.add(ca.uhn.fhir.rest.api.Constants.PARAM_CONTENT, new StringParam(methodName));
 		try {
 			myOrganizationDao.search(map).size();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _content", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _content");
 		}
 	}
 
@@ -149,9 +148,9 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		map.add(ca.uhn.fhir.rest.api.Constants.PARAM_TEXT, new StringParam(methodName));
 		try {
 			myOrganizationDao.search(map).size();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _text", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _text");
 		}
 	}
 
@@ -174,14 +173,14 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		// Explicit expand
 		ValueSet outcome = myValueSetDao.expand(vs, null);
 		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertEquals("CODEA", outcome.getExpansion().getContains().get(0).getCode());
+		assertThat(outcome.getExpansion().getContains().get(0).getCode()).isEqualTo("CODEA");
 
 		// Deferred expand
 		IIdType id = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		outcome = myValueSetDao.expand(id, null, mySrd);
 		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertEquals("CODEA", outcome.getExpansion().getContains().get(0).getCode());
+		assertThat(outcome.getExpansion().getContains().get(0).getCode()).isEqualTo("CODEA");
 	}
 
 
@@ -208,7 +207,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		try {
 			myValueSetDao.expand(vs, null);
 		} catch (NullPointerException e) {
-			assertEquals("", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("");
 		}
 	}
 
@@ -242,7 +241,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 
 		// Non Pre-Expanded
 		ValueSet outcome = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		assertEquals("ValueSet \"ValueSet.url[http://vs]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.", outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
+		assertThat(outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE)).isEqualTo("ValueSet \"ValueSet.url[http://vs]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.");
 		assertThat(myValueSetTestUtil.toCodes(outcome)).as(myValueSetTestUtil.toCodes(outcome).toString()).containsExactly("code5", "code4", "code3", "code2", "code1");
 
 
@@ -279,8 +278,8 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		map.add("code", new TokenParam("http://fooVS").setModifier(TokenParamModifier.IN));
 		IBundleProvider results = myObservationDao.search(map);
 		List<IBaseResource> resultsList = results.getResources(0, 10);
-		assertEquals(1, resultsList.size());
-		assertEquals(obs1id, resultsList.get(0).getIdElement().toUnqualifiedVersionless().getValue());
+		assertThat(resultsList.size()).isEqualTo(1);
+		assertThat(resultsList.get(0).getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(obs1id);
 
 	}
 
@@ -298,7 +297,7 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
 		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
-		assertEquals(6, expansion.getExpansion().getContains().size());
+		assertThat(expansion.getExpansion().getContains().size()).isEqualTo(6);
 
 	}
 
@@ -322,12 +321,12 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 		ValueSet expansion = myValueSetDao.expandByIdentifier("http://ccim.on.ca/fhir/iar/ValueSet/iar-citizenship-status", null);
 		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 
-		assertEquals(5, expansion.getExpansion().getContains().size());
+		assertThat(expansion.getExpansion().getContains().size()).isEqualTo(5);
 
 		ValueSet expansion2 = myValueSetDao.expandByIdentifier("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", null);
 		ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion2));
 
-		assertEquals(22, expansion2.getExpansion().getContains().size());
+		assertThat(expansion2.getExpansion().getContains().size()).isEqualTo(22);
 
 	}
 

@@ -10,8 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 public class JsonPatchUtilsTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(JsonPatchUtilsTest.class);
@@ -32,7 +31,7 @@ public class JsonPatchUtilsTest extends BaseJpaR4Test {
 
 		try {
 			JsonPatchUtils.apply(myFhirContext, new Observation(), patchText);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			ourLog.info(e.toString());
 			assertThat(e.toString()).contains("was expecting double-quote to start field name");
@@ -57,7 +56,7 @@ public class JsonPatchUtilsTest extends BaseJpaR4Test {
 
 		try {
 			JsonPatchUtils.apply(myFhirContext, new Observation(), patchText);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			ourLog.info(e.toString());
 			assertThat(e.toString()).contains("missing type id property 'op'");
@@ -106,9 +105,9 @@ public class JsonPatchUtilsTest extends BaseJpaR4Test {
 		Observation toUpdate = new Observation();
 		try {
 			JsonPatchUtils.apply(myFhirContext, toUpdate, patchText);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1271) + "Failed to apply JSON patch to Observation: " + Msg.code(1825) + "Unknown element 'derivedFromXXX' found during parse", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1271) + "Failed to apply JSON patch to Observation: " + Msg.code(1825) + "Unknown element 'derivedFromXXX' found during parse");
 		}
 
 	}

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -216,9 +217,9 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 		IBundleProvider codeSystems = myCodeSystemDao.search(SearchParameterMap.newSynchronous());
-		assertEquals(1, codeSystems.size());
+		assertThat(codeSystems.size()).isEqualTo(1);
 		CodeSystem codeSystem = (CodeSystem) codeSystems.getResources(0, 1).get(0);
-		assertEquals("LOINC Code System (Testing Copy)", codeSystem.getTitle());
+		assertThat(codeSystem.getTitle()).isEqualTo("LOINC Code System (Testing Copy)");
 	}
 
 

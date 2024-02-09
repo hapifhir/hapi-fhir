@@ -39,10 +39,8 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices.SEARCH_ID_PARAM;
 import static ca.uhn.fhir.jpa.graphql.DaoRegistryGraphQLStorageServices.SEARCH_OFFSET_PARAM;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {TestR4Config.class})
@@ -82,8 +80,8 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 		List<IBaseResource> result = new ArrayList<>();
 		mySvc.listResources(mySrd, "Appointment", Collections.singletonList(argument), result);
 
-		assertFalse(result.isEmpty());
-		assertTrue(result.stream().anyMatch((it) -> it.getIdElement().getIdPart().equals("hapi-1")));
+		assertThat(result.isEmpty()).isFalse();
+		assertThat(result.stream().anyMatch((it) -> it.getIdElement().getIdPart().equals("hapi-1"))).isTrue();
 	}
 
 	@Test
@@ -95,8 +93,8 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 		List<IBaseResource> result = new ArrayList<>();
 		mySvc.listResources(mySrd, "Appointment", Collections.singletonList(argument), result);
 
-		assertFalse(result.isEmpty());
-		assertTrue(result.stream().anyMatch((it) -> it.getIdElement().getIdPart().equals("hapi-1")));
+		assertThat(result.isEmpty()).isFalse();
+		assertThat(result.stream().anyMatch((it) -> it.getIdElement().getIdPart().equals("hapi-1"))).isTrue();
 	}
 
 	@Test
@@ -109,8 +107,8 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 		List<IBaseResource> result = new ArrayList<>();
 		mySvc.listResources(mySrd, "Appointment", Collections.singletonList(argument), result);
 
-		assertFalse(result.isEmpty());
-		assertTrue(result.stream().anyMatch((it) -> it.getIdElement().getIdPart().equals("hapi-1")));
+		assertThat(result.isEmpty()).isFalse();
+		assertThat(result.stream().anyMatch((it) -> it.getIdElement().getIdPart().equals("hapi-1"))).isTrue();
 	}
 
 	@Test
@@ -122,7 +120,7 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 			mySvc.listResources(mySrd, "Appointment", Collections.singletonList(argument), result);
 			fail("InvalidRequestException should be thrown.");
 		} catch (InvalidRequestException e) {
-			assertTrue(e.getMessage().contains("Unknown GraphQL argument \"test\"."));
+			assertThat(e.getMessage().contains("Unknown GraphQL argument \"test\".")).isTrue();
 		}
 	}
 
@@ -145,10 +143,10 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 		List<IBaseResource> result = new ArrayList<>();
 		mySvc.listResources(mySrd, "Patient", Collections.singletonList(argument), result);
 
-		assertFalse(result.isEmpty());
+		assertThat(result.isEmpty()).isFalse();
 
 		List<String> expectedId = Arrays.asList("hapi-123", "hapi-124");
-		assertTrue(result.stream().allMatch((it) -> expectedId.contains(it.getIdElement().getIdPart())));
+		assertThat(result.stream().allMatch((it) -> expectedId.contains(it.getIdElement().getIdPart()))).isTrue();
 	}
 
 	@Test
@@ -168,11 +166,11 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 		when(mySrd.getServer().getDefaultPageSize()).thenReturn(5);
 		mySvc.listResources(mySrd, "Patient", Collections.singletonList(argument), result);
 
-		assertFalse(result.isEmpty());
-		assertEquals(5, result.size());
+		assertThat(result.isEmpty()).isFalse();
+		assertThat(result.size()).isEqualTo(5);
 
 		List<String> expectedId = Arrays.asList("hapi-1", "hapi-2", "hapi-0", "hapi-3", "hapi-4");
-		assertTrue(result.stream().allMatch((it) -> expectedId.contains(it.getIdElement().getIdPart())));
+		assertThat(result.stream().allMatch((it) -> expectedId.contains(it.getIdElement().getIdPart()))).isTrue();
 
 		//_offset=5
 		List<IBaseResource> result2 = new ArrayList<>();
@@ -181,11 +179,11 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 		when(mySrd.getParameters()).thenReturn(parametersMap);
 		mySvc.listResources(mySrd, "Patient", Collections.singletonList(argument), result2);
 
-		assertFalse(result2.isEmpty());
-		assertEquals(5, result2.size());
+		assertThat(result2.isEmpty()).isFalse();
+		assertThat(result2.size()).isEqualTo(5);
 
 		List<String> expectedId2 = Arrays.asList("hapi-5", "hapi-6", "hapi-7", "hapi-8", "hapi-9");
-		assertTrue(result2.stream().allMatch((it) -> expectedId2.contains(it.getIdElement().getIdPart())));
+		assertThat(result2.stream().allMatch((it) -> expectedId2.contains(it.getIdElement().getIdPart()))).isTrue();
 	}
 
 	@Test
@@ -196,8 +194,8 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 		IBaseBundle bundle = mySvc.search(mySrd, "Patient", arguments);
 
 		List<String> result = toUnqualifiedVersionlessIdValues(bundle);
-		assertEquals(1, result.size());
-		assertEquals("Patient/hapi-1", result.get(0));
+		assertThat(result.size()).isEqualTo(1);
+		assertThat(result.get(0)).isEqualTo("Patient/hapi-1");
 	}
 
 	@Test
@@ -210,7 +208,7 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 		IBaseBundle bundle = mySvc.search(mySrd, "Patient", arguments);
 
 		Optional<String> nextUrl = Optional.ofNullable(BundleUtil.getLinkUrlOfType(myFhirContext, bundle, "next"));
-		assertTrue(nextUrl.isPresent());
+		assertThat(nextUrl.isPresent()).isTrue();
 
 		List<NameValuePair> params = URLEncodedUtils.parse(new URI(nextUrl.get()), StandardCharsets.UTF_8);
 		Optional<String> cursorId = params.stream()
@@ -222,8 +220,8 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 			.map(NameValuePair::getValue)
 			.findAny();
 
-		assertTrue(cursorId.isPresent());
-		assertTrue(cursorOffset.isPresent());
+		assertThat(cursorId.isPresent()).isTrue();
+		assertThat(cursorOffset.isPresent()).isTrue();
 
 		List<Argument> nextArguments = Arrays.asList(
 			new Argument(SEARCH_ID_PARAM, new StringValue(cursorId.get())),
@@ -231,7 +229,7 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 		);
 
 		Optional<IBaseBundle> nextBundle = Optional.ofNullable(mySvc.search(mySrd, "Patient", nextArguments));
-		assertTrue(nextBundle.isPresent());
+		assertThat(nextBundle.isPresent()).isTrue();
 	}
 
 	@Test
@@ -244,7 +242,7 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 			mySvc.search(mySrd, "Patient", arguments);
 			fail("InvalidRequestException should be thrown.");
 		} catch (InvalidRequestException e) {
-			assertTrue(e.getMessage().contains("GraphQL Cursor \"invalid-search-id\" does not exist and may have expired"));
+			assertThat(e.getMessage().contains("GraphQL Cursor \"invalid-search-id\" does not exist and may have expired")).isTrue();
 		}
 	}
 }

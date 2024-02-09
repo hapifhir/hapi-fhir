@@ -37,12 +37,12 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ReindexJobTest extends BaseJpaR4Test {
@@ -125,7 +125,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 			}
 		});
 		Patient patient = myPatientDao.read(patientId, mySrd);
-		assertTrue(patient.getActive());
+		assertThat(patient.getActive()).isTrue();
 
 	}
 
@@ -178,7 +178,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 			}
 		});
 		Patient patient = myPatientDao.read(patientId, mySrd);
-		assertTrue(patient.getActive());
+		assertThat(patient.getActive()).isTrue();
 
 	}
 
@@ -264,11 +264,11 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
 		JobInstance outcome = myBatch2JobHelper.awaitJobCompletion(startResponse);
-		assertEquals(10, outcome.getCombinedRecordsProcessed());
+		assertThat(outcome.getCombinedRecordsProcessed()).isEqualTo(10);
 
 		try {
 			myPatientDao.read(patientId, mySrd);
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -288,7 +288,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		myReindexTestHelper.createAlleleSearchParameter();
 
-		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
+		assertThat(myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size()).isEqualTo(2);
 		// The search param value is on the observation, but it hasn't been indexed yet
 		assertThat(myReindexTestHelper.getAlleleObservationIds()).hasSize(0);
 
@@ -304,12 +304,12 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		myBatch2JobHelper.awaitJobCompletion(res);
 
 		// validate
-		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
+		assertThat(myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size()).isEqualTo(2);
 
 		// Now one of them should be indexed
 		List<String> alleleObservationIds = myReindexTestHelper.getAlleleObservationIds();
 		assertThat(alleleObservationIds).hasSize(1);
-		assertEquals(obsFinalId.getIdPart(), alleleObservationIds.get(0));
+		assertThat(alleleObservationIds.get(0)).isEqualTo(obsFinalId.getIdPart());
 
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(reindexPropertyCache);
 	}
@@ -362,7 +362,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		myReindexTestHelper.createAlleleSearchParameter();
 		mySearchParamRegistry.forceRefresh();
 
-		assertEquals(50, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
+		assertThat(myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size()).isEqualTo(50);
 		// The search param value is on the observation, but it hasn't been indexed yet
 		assertThat(myReindexTestHelper.getAlleleObservationIds()).hasSize(0);
 
@@ -374,7 +374,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		myBatch2JobHelper.awaitJobCompletion(startResponse);
 
 		// validate
-		assertEquals(50, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
+		assertThat(myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size()).isEqualTo(50);
 		// Now all of them should be indexed
 		assertThat(myReindexTestHelper.getAlleleObservationIds()).hasSize(50);
 	}
@@ -392,9 +392,9 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
 		JobInstance myJob = myBatch2JobHelper.awaitJobCompletion(startResponse);
 
-		assertEquals(StatusEnum.COMPLETED, myJob.getStatus());
-		assertNotNull(myJob.getWarningMessages());
-		assertTrue(myJob.getWarningMessages().contains("Failed to reindex resource because unique search parameter " + searchParameter.getEntity().getIdDt().toVersionless().toString()));
+		assertThat(myJob.getStatus()).isEqualTo(StatusEnum.COMPLETED);
+		assertThat(myJob.getWarningMessages()).isNotNull();
+		assertThat(myJob.getWarningMessages().contains("Failed to reindex resource because unique search parameter " + searchParameter.getEntity().getIdDt().toVersionless().toString())).isTrue();
 	}
 
 	@Test
@@ -421,8 +421,8 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// Verify
 
-		assertEquals(StatusEnum.COMPLETED, outcome.getStatus());
-		assertNull(outcome.getErrorMessage());
+		assertThat(outcome.getStatus()).isEqualTo(StatusEnum.COMPLETED);
+		assertThat(outcome.getErrorMessage()).isNull();
 	}
 
 	@Test
@@ -449,14 +449,14 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// Verify
 
-		assertEquals(StatusEnum.FAILED, outcome.getStatus());
-		assertEquals("java.lang.Error: foo message", outcome.getErrorMessage());
+		assertThat(outcome.getStatus()).isEqualTo(StatusEnum.FAILED);
+		assertThat(outcome.getErrorMessage()).isEqualTo("java.lang.Error: foo message");
 	}
 
 	@Test
 	public void testReindex_withReindexingUponSearchParameterChangeEnabled_reindexJobCompleted() {
 		List<JobInstance> jobInstances = myJobPersistence.fetchInstancesByJobDefinitionId(ReindexAppCtx.JOB_REINDEX, 10, 0);
-		assertEquals(0, jobInstances.size());
+		assertThat(jobInstances.size()).isEqualTo(0);
 
 		// make sure the resources auto-reindex after the search parameter update is enabled
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(true);
@@ -467,7 +467,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// check that reindex job was created
 		jobInstances = myJobPersistence.fetchInstancesByJobDefinitionId(ReindexAppCtx.JOB_REINDEX, 10, 0);
-		assertEquals(1, jobInstances.size());
+		assertThat(jobInstances.size()).isEqualTo(1);
 
 		// check that the job is completed (not stuck in QUEUED status)
 		myBatch2JobHelper.awaitJobCompletion(jobInstances.get(0).getInstanceId());

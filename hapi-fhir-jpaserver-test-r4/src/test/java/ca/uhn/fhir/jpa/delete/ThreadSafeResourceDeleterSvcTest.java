@@ -31,7 +31,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 	private static final String PATIENT1_ID = "a1";
@@ -83,11 +83,11 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 		conflictList.add(buildDeleteConflict(patient1Id, orgId));
 		conflictList.add(buildDeleteConflict(patient2Id, orgId));
 
-		assertEquals(2, countPatients());
+		assertThat(countPatients()).isEqualTo(2);
 		myHapiTransactionService.execute(mySrd, myTransactionDetails, status -> myThreadSafeResourceDeleterSvc.delete(mySrd, conflictList, myTransactionDetails));
 
-		assertEquals(0, countPatients());
-		assertEquals(1, countOrganizations());
+		assertThat(countPatients()).isEqualTo(0);
+		assertThat(countOrganizations()).isEqualTo(1);
 	}
 
 	@Test
@@ -102,7 +102,7 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 		conflictList.add(buildDeleteConflict(patient1Id, orgId));
 		conflictList.add(buildDeleteConflict(patient2Id, orgId));
 
-		assertEquals(2, countPatients());
+		assertThat(countPatients()).isEqualTo(2);
 		final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
 		myCascadeDeleteInterceptor.setExpectedCount(1);
@@ -121,10 +121,10 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 		myCascadeDeleteInterceptor.release("first");
 
 		// future.get() returns total number of resources deleted, which in this case is 1
-		assertEquals(1, future.get());
+		assertThat(future.get()).isEqualTo(1);
 
-		assertEquals(0, countPatients());
-		assertEquals(1, countOrganizations());
+		assertThat(countPatients()).isEqualTo(0);
+		assertThat(countOrganizations()).isEqualTo(1);
 	}
 
 	@Test
@@ -139,7 +139,7 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 		conflictList.add(buildDeleteConflict(patient1Id, orgId));
 		conflictList.add(buildDeleteConflict(patient2Id, orgId));
 
-		assertEquals(2, countPatients());
+		assertThat(countPatients()).isEqualTo(2);
 		final ExecutorService executorService = Executors.newSingleThreadExecutor();
 
 		myCascadeDeleteInterceptor.setExpectedCount(1);
@@ -170,10 +170,10 @@ public class ThreadSafeResourceDeleterSvcTest extends BaseJpaR4Test {
 		myCascadeDeleteInterceptor.release("third");
 
 		// future.get() returns total number of resources deleted, which in this case is 2
-		assertEquals(2, future.get());
+		assertThat(future.get()).isEqualTo(2);
 
-		assertEquals(0, countPatients());
-		assertEquals(1, countOrganizations());
+		assertThat(countPatients()).isEqualTo(0);
+		assertThat(countOrganizations()).isEqualTo(1);
 	}
 
 	private void updatePatient(IIdType patient2Id) {

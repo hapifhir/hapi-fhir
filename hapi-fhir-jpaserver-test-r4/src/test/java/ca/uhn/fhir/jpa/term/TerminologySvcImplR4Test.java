@@ -36,12 +36,11 @@ import java.util.Set;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class TerminologySvcImplR4Test extends BaseTermR4Test {
@@ -78,9 +77,9 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			runInTransaction(() -> {
 				myConceptMapDao.create(conceptMap);
 			});
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(838) + "ConceptMap[url='http://example.com/my_concept_map'] contains at least one group without a value in ConceptMap.group.source", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(838) + "ConceptMap[url='http://example.com/my_concept_map'] contains at least one group without a value in ConceptMap.group.source");
 		}
 
 	}
@@ -103,9 +102,9 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			runInTransaction(() -> {
 				myConceptMapDao.create(conceptMap);
 			});
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(839) + "ConceptMap[url='http://example.com/my_concept_map'] contains at least one group without a value in ConceptMap.group.target", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(839) + "ConceptMap[url='http://example.com/my_concept_map'] contains at least one group without a value in ConceptMap.group.target");
 		}
 
 	}
@@ -127,9 +126,9 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			runInTransaction(() -> {
 				myConceptMapDao.create(conceptMap);
 			});
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1766) + "ConceptMap has no value for ConceptMap.url", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1766) + "ConceptMap has no value for ConceptMap.url");
 		}
 
 	}
@@ -221,9 +220,9 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		try {
 			loadAndPersistCodeSystem();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(848) + "Can not create multiple CodeSystem resources with CodeSystem.url \"http://acme.org\", already have one with resource ID: CodeSystem/" + myExtensionalCsId.getIdPart(), e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(848) + "Can not create multiple CodeSystem resources with CodeSystem.url \"http://acme.org\", already have one with resource ID: CodeSystem/" + myExtensionalCsId.getIdPart());
 		}
 	}
 
@@ -237,9 +236,9 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		try {
 			loadAndPersistValueSet(HttpVerb.POST);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(902) + "Can not create multiple ValueSet resources with ValueSet.url \"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2\", already have one with resource ID: ValueSet/" + myExtensionalVsId.getIdPart(), e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(902) + "Can not create multiple ValueSet resources with ValueSet.url \"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2\", already have one with resource ID: ValueSet/" + myExtensionalVsId.getIdPart());
 		}
 
 	}
@@ -250,10 +249,10 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		createCodeSystem();
 
 		IValidationSupport.CodeValidationResult validation = myTermSvc.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "ParentWithNoChildrenA", null, null);
-		assertTrue(validation.isOk());
+		assertThat(validation.isOk()).isTrue();
 
 		validation = myTermSvc.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "ZZZZZZZ", null, null);
-		assertFalse(validation.isOk());
+		assertThat(validation.isOk()).isFalse();
 	}
 
 	@Test
@@ -271,37 +270,37 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
-		assertNull(result);
+		assertThat(result).isNull();
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "BOGUS", null, null, null);
-		assertFalse(result.isOk());
+		assertThat(result.isOk()).isFalse();
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "11378-7", null, null, null);
-		assertFalse(result.isOk());
+		assertThat(result.isOk()).isFalse();
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", null, null, null);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 
 		Coding coding = new Coding("http://acme.org", "11378-7", "Systolic blood pressure at First encounter");
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, coding, null);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(new Coding("BOGUS", "BOGUS", "BOGUS"));
 		codeableConcept.addCoding(coding);
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, codeableConcept);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 	}
 
 	@Test
@@ -319,38 +318,38 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		IValidationSupport.CodeValidationResult result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, null);
-		assertNull(result);
+		assertThat(result).isNull();
 
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "BOGUS", null, null, null);
-		assertFalse(result.isOk());
+		assertThat(result.isOk()).isFalse();
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, "11378-7", null, null, null);
-		assertFalse(result.isOk());
+		assertThat(result.isOk()).isFalse();
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", null, null, null);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 
 		Coding coding = new Coding("http://acme.org", "11378-7", "Systolic blood pressure at First encounter");
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, coding, null);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(new Coding("BOGUS", "BOGUS", "BOGUS"));
 		codeableConcept.addCoding(coding);
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, codeableConcept);
-		assertTrue(result.isOk());
-		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertThat(result.isOk()).isTrue();
+		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
 	}
 
 	@Test
@@ -490,10 +489,10 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		ConceptValidationOptions options = new ConceptValidationOptions();
 
 		outcome = myValidationSupport.validateCode(context, options, CS_URL, "A1002", null, null);
-		assertTrue(outcome.isOk());
+		assertThat(outcome.isOk()).isTrue();
 
 		outcome = myValidationSupport.validateCode(context, options, CS_URL, "A1003", null, null);
-		assertFalse(outcome.isOk());
+		assertThat(outcome.isOk()).isFalse();
 
 	}
 

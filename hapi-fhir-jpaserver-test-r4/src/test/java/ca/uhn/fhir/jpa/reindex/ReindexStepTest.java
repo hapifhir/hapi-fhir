@@ -62,14 +62,14 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
 
 		// Verify
-		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(6, myCaptureQueriesListener.logSelectQueries().size());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertThat(outcome.getRecordsProcessed()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.logSelectQueries().size()).isEqualTo(6);
+		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
 		myCaptureQueriesListener.logUpdateQueries();
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.getCommitCount()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.getRollbackCount()).isEqualTo(0);
 	}
 
 
@@ -93,13 +93,13 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
 
 		// Verify
-		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(8, myCaptureQueriesListener.logSelectQueries().size());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+		assertThat(outcome.getRecordsProcessed()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.logSelectQueries().size()).isEqualTo(8);
+		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.getCommitCount()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.getRollbackCount()).isEqualTo(0);
 	}
 
 
@@ -126,14 +126,14 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
 
 		// Verify
-		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(6, myCaptureQueriesListener.logSelectQueries().size());
+		assertThat(outcome.getRecordsProcessed()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.logSelectQueries().size()).isEqualTo(6);
 		// name, family, phonetic, deceased, active
-		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(5);
+		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.getCommitCount()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.getRollbackCount()).isEqualTo(0);
 	}
 
 
@@ -194,13 +194,13 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
 
 		// Verify
-		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(10, myCaptureQueriesListener.logSelectQueries().size());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+		assertThat(outcome.getRecordsProcessed()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.logSelectQueries().size()).isEqualTo(10);
+		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(4);
+		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.getCommitCount()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.getRollbackCount()).isEqualTo(0);
 
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(markResourcesForReindexingUponSearchParameterChange);
 	}
@@ -239,13 +239,13 @@ public class ReindexStepTest extends BaseJpaR4Test {
 		RunOutcome outcome = myReindexStep.doReindex(data, myDataSink, "index-id", "chunk-id", new ReindexJobParameters());
 
 		// Verify
-		assertEquals(4, outcome.getRecordsProcessed());
-		assertEquals(9, myCaptureQueriesListener.logSelectQueries().size());
-		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.getCommitCount());
-		assertEquals(0, myCaptureQueriesListener.getRollbackCount());
+		assertThat(outcome.getRecordsProcessed()).isEqualTo(4);
+		assertThat(myCaptureQueriesListener.logSelectQueries().size()).isEqualTo(9);
+		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(5);
+		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.getCommitCount()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.getRollbackCount()).isEqualTo(0);
 
 		verify(myDataSink, times(1)).recoveredError(myErrorCaptor.capture());
 		String message = myErrorCaptor.getValue();

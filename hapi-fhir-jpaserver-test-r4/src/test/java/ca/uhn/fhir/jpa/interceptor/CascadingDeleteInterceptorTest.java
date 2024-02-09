@@ -34,8 +34,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -145,7 +144,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		verify(mockResourceDao).read(any(IIdType.class), theRequestDetailsCaptor.capture());
 		List<RequestDetails> capturedRequestDetailsParam = theRequestDetailsCaptor.getAllValues();
 		for (RequestDetails requestDetails : capturedRequestDetailsParam) {
-			assertNotNull(requestDetails);
+			assertThat(requestDetails).isNotNull();
 		}
 	}
 
@@ -155,7 +154,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 
 		try {
 			myClient.delete().resourceById(myPatientId).execute();
-			fail();
+			fail("");
 		} catch (ResourceVersionConflictException e) {
 			// good
 			ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
@@ -170,7 +169,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 
 		try {
 			myPatientDao.delete(myPatientId);
-			fail();
+			fail("");
 		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage()).contains("because at least one resource has a reference to this resource");
 		} finally {
@@ -186,7 +185,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 
 		try {
 			myClient.delete().resourceById(myPatientId).execute();
-			fail();
+			fail("");
 		} catch (ResourceVersionConflictException e) {
 			String output = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome());
 			ourLog.info(output);
@@ -207,7 +206,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		HttpDelete delete = new HttpDelete(myServerBase + "/" + myPatientId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
 		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", deleteResponse);
 			assertThat(deleteResponse).contains("Cascaded delete to ");
@@ -216,7 +215,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		try {
 			ourLog.info("Reading {}", myPatientId);
 			myClient.read().resource(Patient.class).withId(myPatientId).execute();
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -239,7 +238,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
 			try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
 				String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-				assertEquals(200, response.getStatusLine().getStatusCode(), deleteResponse);
+				assertThat(response.getStatusLine().getStatusCode()).as(deleteResponse).isEqualTo(200);
 				ourLog.info("Response: {}", deleteResponse);
 				assertThat(deleteResponse).contains("Cascaded delete to ");
 			}
@@ -247,7 +246,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 			try {
 				ourLog.info("Reading {}", myPatientId);
 				myClient.read().resource(Patient.class).withId(myPatientId).execute();
-				fail();
+				fail("");
 			} catch (ResourceGoneException e) {
 				// good
 			}
@@ -278,7 +277,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			assertEquals(200, response.getStatusLine().getStatusCode(), deleteResponse);
+			assertThat(response.getStatusLine().getStatusCode()).as(deleteResponse).isEqualTo(200);
 			ourLog.info("Response: {}", deleteResponse);
 			assertThat(deleteResponse).contains("Cascaded delete to ");
 		}
@@ -286,14 +285,14 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		try {
 			ourLog.info("Reading {}", o0id);
 			myClient.read().resource(Organization.class).withId(o0id).execute();
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
 		try {
 			ourLog.info("Reading {}", o1id);
 			myClient.read().resource(Organization.class).withId(o1id).execute();
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -313,7 +312,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		delete.addHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE);
 		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
 		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", deleteResponse);
 			assertThat(deleteResponse).contains("Cascaded delete to ");
@@ -322,7 +321,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		try {
 			ourLog.info("Reading {}", myPatientId);
 			myClient.read().resource(Patient.class).withId(myPatientId).execute();
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}

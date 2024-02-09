@@ -13,7 +13,6 @@ import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
@@ -65,8 +64,8 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		List<JpaPid> ids = mySearchDao.search("Patient", params, SystemRequestDetails.newSystemRequestAllPartitions());
 
 		// verify results
-		Assertions.assertEquals(1, ids.size());
-		Assertions.assertEquals(id1, ids.get(0).getId());
+		assertThat(ids.size()).isEqualTo(1);
+		assertThat(ids.get(0).getId()).isEqualTo(id1);
 	}
 
 	@Test
@@ -89,10 +88,9 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		IBundleProvider ret = myPatientDao.search(map);
 
 		// only one should be returned
-		Assertions.assertEquals(1, ret.size());
+		assertThat(ret.size()).isEqualTo(1);
 		Patient retPatient = (Patient) ret.getAllResources().get(0);
-		Assertions.assertEquals(patient.getName().get(0).getFamily(),
-			retPatient.getName().get(0).getFamily());
+		assertThat(retPatient.getName().get(0).getFamily()).isEqualTo(patient.getName().get(0).getFamily());
 	}
 
 	@Test

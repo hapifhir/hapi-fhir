@@ -30,9 +30,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceProviderR4Test {
@@ -197,7 +196,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		startRequest.setParameters(options);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 
-		assertNotNull(startResponse);
+		assertThat(startResponse).isNotNull();
 
 		// Run a scheduled pass to build the export
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
@@ -210,10 +209,10 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
 			String resourceTypeInFile = file.getKey();
 			List<String> binaryIds = file.getValue();
-			assertEquals(1, binaryIds.size());
+			assertThat(binaryIds.size()).isEqualTo(1);
 			for (String binaryId : binaryIds) {
 				Binary binary = myBinaryDao.read(new IdType(binaryId));
-				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
+				assertThat(binary.getContentType()).isEqualTo(Constants.CT_FHIR_NDJSON);
 				String contents = new String(binary.getContent(), Constants.CHARSET_UTF8);
 				ourLog.info("Next contents for type {} :\n{}", binary.getResourceType(), contents);
 				if ("Observation".equals(resourceTypeInFile)) {
@@ -221,7 +220,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 						assertThat(contents).contains(code);
 					}
 				} else {
-					fail(resourceTypeInFile);
+					fail("", resourceTypeInFile);
 				}
 			}
 		}

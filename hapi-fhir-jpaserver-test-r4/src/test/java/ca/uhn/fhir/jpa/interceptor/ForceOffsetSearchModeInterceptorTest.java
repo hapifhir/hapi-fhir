@@ -11,8 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4Test {
 
@@ -56,14 +54,14 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 			.execute();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).as(toUnqualifiedVersionlessIdValues(outcome).toString()).containsExactlyInAnyOrder("Patient/A0", "Patient/A1", "Patient/A2", "Patient/A3", "Patient/A4");
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertThat(myCaptureQueriesListener.countSelectQueries()).isEqualTo(2);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false)).contains("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0");
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false)).contains("fetch first '6' rows only");
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.countCommits());
-		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
 		assertThat(outcome.getLink("next").getUrl()).contains("Patient?_count=5&_offset=5&active=true");
 
@@ -79,17 +77,17 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 			.execute();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).as(toUnqualifiedVersionlessIdValues(outcome).toString()).containsExactlyInAnyOrder("Patient/A5", "Patient/A6", "Patient/A7", "Patient/A8", "Patient/A9");
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertThat(myCaptureQueriesListener.countSelectQueries()).isEqualTo(2);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false)).contains("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0");
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false)).contains("fetch next '6' rows only");
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false)).contains("offset '5'");
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.countCommits());
-		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
-		assertNull(outcome.getLink("next"));
+		assertThat(outcome.getLink("next")).isNull();
 	}
 
 	@Test
@@ -114,7 +112,7 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 
 		assertThat(secondPageBundle.getEntry()).hasSize(5);
 
-		assertNull(secondPageBundle.getLink("next"));
+		assertThat(secondPageBundle.getLink("next")).isNull();
 	}
 
 
@@ -138,17 +136,17 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 			.execute();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).as(toUnqualifiedVersionlessIdValues(outcome).toString()).containsExactlyInAnyOrder("Patient/A0", "Patient/A1", "Patient/A2", "Patient/A3", "Patient/A4", "Patient/A5", "Patient/A6");
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertThat(myCaptureQueriesListener.countSelectQueries()).isEqualTo(2);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false)).contains("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0");
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false)).contains("fetch first '8' rows only");
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.countCommits());
-		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
 		assertThat(outcome.getLink(Constants.LINK_NEXT).getUrl()).contains("Patient?_count=7&_offset=7&active=true");
-		assertNull(outcome.getLink(Constants.LINK_PREVIOUS));
+		assertThat(outcome.getLink(Constants.LINK_PREVIOUS)).isNull();
 
 		// Second page
 
@@ -159,14 +157,14 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 			.execute();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).as(toUnqualifiedVersionlessIdValues(outcome).toString()).containsExactlyInAnyOrder("Patient/A7", "Patient/A8", "Patient/A9");
 		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
+		assertThat(myCaptureQueriesListener.countSelectQueries()).isEqualTo(2);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false)).contains("SELECT t0.RES_ID FROM HFJ_SPIDX_TOKEN t0");
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false)).contains("fetch next '8' rows only");
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.countCommits());
-		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
 		assertThat(outcome.getLink(Constants.LINK_PREVIOUS).getUrl()).contains("Patient?_count=7&_offset=0&active=true");
 
@@ -187,9 +185,9 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 		IBundleProvider outcome = myPatientDao.search(params, mySrd);
 
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).as(toUnqualifiedVersionlessIdValues(outcome).toString()).containsExactlyInAnyOrder("Patient/A0", "Patient/A1", "Patient/A2", "Patient/A3", "Patient/A4", "Patient/A5", "Patient/A6", "Patient/A7", "Patient/A8");
-		assertEquals(9, outcome.size());
-		assertEquals(null, outcome.getCurrentPageOffset());
-		assertEquals(null, outcome.getCurrentPageSize());
+		assertThat(outcome.size()).isEqualTo(9);
+		assertThat(outcome.getCurrentPageOffset()).isEqualTo(null);
+		assertThat(outcome.getCurrentPageSize()).isEqualTo(null);
 
 	}
 
@@ -207,9 +205,9 @@ public class ForceOffsetSearchModeInterceptorTest extends BaseResourceProviderR4
 		IBundleProvider outcome = myPatientDao.search(params, mySrd);
 
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).as(toUnqualifiedVersionlessIdValues(outcome).toString()).containsExactlyInAnyOrder("Patient/A0", "Patient/A1", "Patient/A2", "Patient/A3", "Patient/A4");
-		assertNull(outcome.size());
-		assertEquals(0, outcome.getCurrentPageOffset());
-		assertEquals(5, outcome.getCurrentPageSize());
+		assertThat(outcome.size()).isNull();
+		assertThat(outcome.getCurrentPageOffset()).isEqualTo(0);
+		assertThat(outcome.getCurrentPageSize()).isEqualTo(5);
 
 	}
 }

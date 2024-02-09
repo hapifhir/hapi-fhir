@@ -59,9 +59,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProviderR4Test {
@@ -118,9 +117,9 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 		try {
 			myClient.create().resource(sp).execute();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(1112) + "SearchParameter.status is missing or invalid", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 422 Unprocessable Entity: " + Msg.code(1112) + "SearchParameter.status is missing or invalid");
 		}
 	}
 
@@ -135,9 +134,9 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 
 		try {
 			myClient.create().resource(sp).execute();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(1120) + "SearchParameter.expression value \"Patient\" is invalid due to missing/incorrect path", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 422 Unprocessable Entity: " + Msg.code(1120) + "SearchParameter.expression value \"Patient\" is invalid due to missing/incorrect path");
 		}
 	}
 
@@ -152,10 +151,10 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = extractSearchParams(conformance, "Patient");
 
 		CapabilityStatementRestResourceSearchParamComponent param = map.get("foo");
-		assertNull(param);
+		assertThat(param).isNull();
 
 		param = map.get("gender");
-		assertNotNull(param);
+		assertThat(param).isNotNull();
 
 		TransactionTemplate txTemplate = newTxTemplate();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -204,10 +203,10 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		map = extractSearchParams(conformance, "Patient");
 
 		param = map.get("foo");
-		assertEquals("foo", param.getName());
+		assertThat(param.getName()).isEqualTo("foo");
 
 		param = map.get("gender");
-		assertNull(param);
+		assertThat(param).isNull();
 
 	}
 
@@ -285,7 +284,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), Constants.CHARSET_UTF8);
 			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			assertThat(resp).contains("<fullUrl value=\"http://localhost:" + myPort + "/fhir/context/Practitioner/");
 		} finally {
@@ -398,7 +397,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		mySearchParameterDao.create(fooSp, mySrd);
 
 		mySearchParamRegistry.forceRefresh();
-		assertNotNull(mySearchParamRegistry.getActiveSearchParam("Patient", "foo"));
+		assertThat(mySearchParamRegistry.getActiveSearchParam("Patient", "foo")).isNotNull();
 
 		Patient pat = new Patient();
 		pat.setGender(AdministrativeGender.MALE);
@@ -578,7 +577,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				assertEquals(SearchStatusEnum.FINISHED, search.getStatus(), message);
 			});
 
-			assertEquals(200, foundCount);
+			assertThat(foundCount).isEqualTo(200);
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
@@ -629,7 +628,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			.execute();
 
 		List<String> foundResources = toUnqualifiedVersionlessIdValues(result);
-		assertEquals(1, foundResources.size());
+		assertThat(foundResources.size()).isEqualTo(1);
 		assertThat(foundResources).containsExactly(patId.getValue());
 	}
 

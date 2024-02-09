@@ -39,8 +39,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourceProviderR4Test {
 
@@ -112,7 +111,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		qr1.addItem().setLinkId("link1").addAnswer().setValue(new DecimalType(123));
 		try {
 			myClient.create().resource(qr1).execute();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(myFhirContext.newJsonParser().encodeResourceToString(e.getOperationOutcome())).contains("Answer value must be of the type string");
 		}
@@ -165,7 +164,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			.map(Bundle.BundleEntryComponent::getResource)
 			.map(resource -> resource.getIdElement().toUnqualifiedVersionless().toString())
 			.collect(Collectors.toList());
-		assertEquals(expectedIds, actualIds);
+		assertThat(actualIds).isEqualTo(expectedIds);
 	}
 
 	@Test
@@ -217,7 +216,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertEquals(201, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
 			String newIdString = response.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/QuestionnaireResponse/");
 			id2 = new IdType(newIdString);
@@ -246,7 +245,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
 			assertThat(responseString).contains("No resource supplied for $validate operation");
-			assertEquals(400, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -267,7 +266,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -288,7 +287,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
 			assertThat(responseString).contains("Resource has no ID");
-			assertEquals(422, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(422);
 		} finally {
 			IOUtils.closeQuietly(response);
 		}

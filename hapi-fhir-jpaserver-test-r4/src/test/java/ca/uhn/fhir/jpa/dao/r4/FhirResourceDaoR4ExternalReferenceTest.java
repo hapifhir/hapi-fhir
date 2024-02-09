@@ -17,8 +17,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 
@@ -41,9 +40,9 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 		p.getManagingOrganization().setReference("Organization/FOO");
 		try {
 			myPatientDao.create(p, mySrd);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1094) + "Resource Organization/FOO not found, specified in path: Patient.managingOrganization", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1094) + "Resource Organization/FOO not found, specified in path: Patient.managingOrganization");
 		}
 	}
 
@@ -58,9 +57,9 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 		p.getManagingOrganization().setReference("http://example.com/base/Organization/FOO");
 		try {
 			myPatientDao.create(p, mySrd);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(507) + "Resource contains external reference to URL \"http://example.com/base/Organization/FOO\" but this server is not configured to allow external references", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(507) + "Resource contains external reference to URL \"http://example.com/base/Organization/FOO\" but this server is not configured to allow external references");
 		}
 	}
 
@@ -103,7 +102,7 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 		IIdType pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = myPatientDao.read(pid, mySrd);
-		assertEquals("Organization/FOO", p.getManagingOrganization().getReference());
+		assertThat(p.getManagingOrganization().getReference()).isEqualTo("Organization/FOO");
 
 		SearchParameterMap map;
 
@@ -142,7 +141,7 @@ public class FhirResourceDaoR4ExternalReferenceTest extends BaseJpaR4Test {
 		IIdType pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = myPatientDao.read(pid, mySrd);
-		assertEquals("Organization/FOO", p.getManagingOrganization().getReference());
+		assertThat(p.getManagingOrganization().getReference()).isEqualTo("Organization/FOO");
 
 		SearchParameterMap map;
 

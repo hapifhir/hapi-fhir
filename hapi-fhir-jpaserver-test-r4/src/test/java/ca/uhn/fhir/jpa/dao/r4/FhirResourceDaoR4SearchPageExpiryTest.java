@@ -36,9 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import static ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl.SEARCH_CLEANUP_JOB_INTERVAL_MILLIS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -114,7 +112,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			searchUuid2 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid2);
 		}
-		assertEquals(searchUuid1, searchUuid2);
+		assertThat(searchUuid2).isEqualTo(searchUuid1);
 
 		ca.uhn.fhir.util.TestUtil.sleepAtLeast(reuseCachedSearchResultsForMillis + 1);
 
@@ -129,7 +127,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			searchUuid3 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid3);
 		}
-		assertNotEquals(searchUuid1, searchUuid3);
+		assertThat(searchUuid3).isNotEqualTo(searchUuid1);
 
 		// Search just got used so it shouldn't be deleted
 
@@ -289,7 +287,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			searchUuid2 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid2);
 		}
-		assertEquals(searchUuid1, searchUuid2);
+		assertThat(searchUuid2).isEqualTo(searchUuid1);
 
 		ca.uhn.fhir.util.TestUtil.sleepAtLeast(reuseCachedSearchResultsForMillis + 1);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();
@@ -305,7 +303,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			searchUuid3 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid3);
 		}
-		assertNotEquals(searchUuid1, searchUuid3);
+		assertThat(searchUuid3).isNotEqualTo(searchUuid1);
 
 		waitForSearchToSave(searchUuid3);
 
@@ -379,7 +377,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 				ca.uhn.fhir.util.TestUtil.sleepAtLeast(100);
 			}
 		}
-		assertNotNull(search, "Search " + bundleProvider.getUuid() + " not found on disk after 10 seconds");
+		assertThat(search).as("Search " + bundleProvider.getUuid() + " not found on disk after 10 seconds").isNotNull();
 
 
 		myStorageSettings.setExpireSearchResults(false);

@@ -65,10 +65,9 @@ import java.util.concurrent.Future;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @TestPropertySource(properties = {
 	"max_db_connections=10"
@@ -193,7 +192,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			searchResult = fhirClient.loadPage().next(searchResult).execute();
 		}
 
-		assertEquals(resourceCount, ids.size());
+		assertThat(ids.size()).isEqualTo(resourceCount);
 	}
 
 	@Disabled("Stress test")
@@ -238,8 +237,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			ourLog.info("Loading page {} - Have {} results: {}", pageIndex++, ids.size(), resultBundle.getLink("next").getUrl());
 			resultBundle = myClient.loadPage().next(resultBundle).execute();
 		}
-		assertEquals(count, ids.size());
-		assertEquals(count, Sets.newHashSet(ids).size());
+		assertThat(ids.size()).isEqualTo(count);
+		assertThat(Sets.newHashSet(ids).size()).isEqualTo(count);
 
 		// Load from DAOs
 		ids = new ArrayList<>();
@@ -251,8 +250,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
 			results = myPagingProvider.retrieveResultList(null, results.getUuid());
 		}
-		assertEquals(count, ids.size());
-		assertEquals(count, Sets.newHashSet(ids).size());
+		assertThat(ids.size()).isEqualTo(count);
+		assertThat(Sets.newHashSet(ids).size()).isEqualTo(count);
 
 		// Load from DAOs starting half way through
 		ids = new ArrayList<>();
@@ -264,8 +263,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			ids.addAll(toUnqualifiedVersionlessIdValues(resultsAndIncludes));
 			results = myPagingProvider.retrieveResultList(null, results.getUuid());
 		}
-		assertEquals(count - 1000, ids.size());
-		assertEquals(count - 1000, Sets.newHashSet(ids).size());
+		assertThat(ids.size()).isEqualTo(count - 1000);
+		assertThat(Sets.newHashSet(ids).size()).isEqualTo(count - 1000);
 	}
 
 	@Disabled("Stress test")
@@ -299,8 +298,8 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 			ourLog.info("Loading page {} - Have {} results: {}", pageIndex++, ids.size(), resultBundle.getLink("next").getUrl());
 			resultBundle = myClient.loadPage().next(resultBundle).execute();
 		}
-		assertEquals(count, ids.size());
-		assertEquals(count, Sets.newHashSet(ids).size());
+		assertThat(ids.size()).isEqualTo(count);
+		assertThat(Sets.newHashSet(ids).size()).isEqualTo(count);
 
 	}
 
@@ -341,7 +340,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		map.setLoadSynchronous(true);
 		IBundleProvider results = myDiagnosticReportDao.search(map, mySrd);
 		List<IBaseResource> resultsAndIncludes = results.getResources(0, 999999);
-		assertEquals(1001, resultsAndIncludes.size());
+		assertThat(resultsAndIncludes.size()).isEqualTo(1001);
 
 		// Using focused includes
 		map = new SearchParameterMap();
@@ -350,7 +349,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		map.setLoadSynchronous(true);
 		results = myDiagnosticReportDao.search(map, mySrd);
 		resultsAndIncludes = results.getResources(0, 999999);
-		assertEquals(1001, resultsAndIncludes.size());
+		assertThat(resultsAndIncludes.size()).isEqualTo(1001);
 	}
 
 	@Disabled("Stress test")
@@ -545,7 +544,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		myClient.transaction().withBundle(input).execute();
 
 		try (CloseableHttpResponse getMeta = ourHttpClient.execute(new HttpGet(myServerBase + "/metadata"))) {
-			assertEquals(200, getMeta.getStatusLine().getStatusCode());
+			assertThat(getMeta.getStatusLine().getStatusCode()).isEqualTo(200);
 		}
 
 		List<BaseTask> tasks = Lists.newArrayList();
@@ -657,7 +656,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		int total = 0;
 		for (BaseTask next : tasks) {
 			if (next.getError() != null) {
-				fail(next.getError().toString());
+				fail("", next.getError().toString());
 			}
 			total += next.getTaskCount();
 		}
@@ -680,7 +679,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					getResp = ourHttpClient.execute(get);
 					try {
 						String respBundleString = IOUtils.toString(getResp.getEntity().getContent(), Charsets.UTF_8);
-						assertEquals(200, getResp.getStatusLine().getStatusCode(), respBundleString);
+						assertThat(getResp.getStatusLine().getStatusCode()).as(respBundleString).isEqualTo(200);
 						respBundle = myFhirContext.newJsonParser().parseResource(Bundle.class, respBundleString);
 						myTaskCount++;
 					} finally {
@@ -692,7 +691,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					get.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
 					getResp = ourHttpClient.execute(get);
 					try {
-						assertEquals(200, getResp.getStatusLine().getStatusCode());
+						assertThat(getResp.getStatusLine().getStatusCode()).isEqualTo(200);
 						myTaskCount++;
 					} finally {
 						IOUtils.closeQuietly(getResp);

@@ -18,7 +18,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -71,7 +71,7 @@ public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
 		// Verify
 		verify(mySink, times(1)).accept(myResourceIdListCaptor.capture());
 		ResourceIdList idList = myResourceIdListCaptor.getAllValues().get(0);
-		assertEquals(10, idList.getIds().size());
+		assertThat(idList.getIds().size()).isEqualTo(10);
 	}
 
 

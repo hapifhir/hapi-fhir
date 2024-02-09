@@ -58,11 +58,9 @@ import java.util.HashMap;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -79,7 +77,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	public void after() throws Exception {
 		super.after();
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
-		assertFalse(myPartitionSettings.isAllowUnqualifiedCrossPartitionReference());
+		assertThat(myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()).isFalse();
 	}
 
 	@Test
@@ -87,8 +85,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		myTenantClientInterceptor.setTenantId(TENANT_A);
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 
-		assertEquals("HAPI FHIR Server", cs.getSoftware().getName());
-		assertEquals(myServerBase + "/TENANT-A/metadata", myCapturingInterceptor.getLastRequest().getUri());
+		assertThat(cs.getSoftware().getName()).isEqualTo("HAPI FHIR Server");
+		assertThat(myCapturingInterceptor.getLastRequest().getUri()).isEqualTo(myServerBase + "/TENANT-A/metadata");
 	}
 
 	@Test
@@ -110,7 +108,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		myTenantClientInterceptor.setTenantId(TENANT_A);
 		Patient response = myClient.read().resource(Patient.class).withId(idA).execute();
-		assertTrue(response.getActive());
+		assertThat(response.getActive()).isTrue();
 
 		// Update resource (should remain in correct partition)
 
@@ -119,12 +117,12 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Now read back
 
 		response = myClient.read().resource(Patient.class).withId(idA.withVersion("2")).execute();
-		assertFalse(response.getActive());
+		assertThat(response.getActive()).isFalse();
 
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		try {
 			myClient.read().resource(Patient.class).withId(idA).execute();
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -148,7 +146,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		myTenantClientInterceptor.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 		Patient response = myClient.read().resource(Patient.class).withId(idA).execute();
-		assertTrue(response.getActive());
+		assertThat(response.getActive()).isTrue();
 
 		// Update resource (should remain in correct partition)
 
@@ -157,14 +155,14 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Now read back
 
 		response = myClient.read().resource(Patient.class).withId(idA.withVersion("2")).execute();
-		assertFalse(response.getActive());
+		assertThat(response.getActive()).isFalse();
 
 		// Try reading from wrong partition
 
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		try {
 			myClient.read().resource(Patient.class).withId(idA).execute();
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -341,8 +339,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	}
 
 	private void assertContainsSingleForcedId(Collection<Object[]> forcedIds, String patientId){
-		assertEquals(1, forcedIds.size());
-		assertEquals(patientId, forcedIds.stream().toList().get(0)[2]);
+		assertThat(forcedIds.size()).isEqualTo(1);
+		assertThat(forcedIds.stream().toList().get(0)[2]).isEqualTo(patientId);
 	}
 
 	private void deletePatient(String tenantId, IIdType patientId){
@@ -374,7 +372,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		patientA.setActive(true);
 		try {
 			myClient.create().resource(patientA).execute();
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			assertThat(e.getMessage()).contains("Partition name \"TENANT-ZZZ\" is not valid");
 		}
@@ -445,7 +443,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setTenantId(TENANT_B);
 		Patient patient1 = myPatientDao.read(new IdType("Patient/1234a"), requestDetails);
-		assertEquals("Family", patient1.getName().get(0).getFamily());
+		assertThat(patient1.getName().get(0).getFamily()).isEqualTo("Family");
 	}
 
 	@ParameterizedTest
@@ -466,10 +464,10 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		Bundle result = myClient.transaction().withBundle(transactioBundle).execute();
 
 		// verify
-		assertEquals(1, result.getEntry().size());
+		assertThat(result.getEntry().size()).isEqualTo(1);
 		Patient retrievedPatient = (Patient) result.getEntry().get(0).getResource();
-		assertNotNull(retrievedPatient);
-		assertEquals("Family", retrievedPatient.getName().get(0).getFamily());
+		assertThat(retrievedPatient).isNotNull();
+		assertThat(retrievedPatient.getName().get(0).getFamily()).isEqualTo("Family");
 	}
 
 	@Test
@@ -499,23 +497,23 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		myTenantClientInterceptor.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 		Patient response = myClient.read().resource(Patient.class).withId(idA).execute();
-		assertTrue(response.getActive());
+		assertThat(response.getActive()).isTrue();
 
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		response = myClient.read().resource(Patient.class).withId(idB).execute();
-		assertFalse(response.getActive());
+		assertThat(response.getActive()).isFalse();
 
 		// Read back using DAO
 
 		requestDetails = new SystemRequestDetails();
 		requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 		response = myPatientDao.read(idA, requestDetails);
-		assertTrue(response.getActive());
+		assertThat(response.getActive()).isTrue();
 
 		requestDetails = new SystemRequestDetails();
 		requestDetails.setTenantId(TENANT_B);
 		response = myPatientDao.read(idB, requestDetails);
-		assertFalse(response.getActive());
+		assertThat(response.getActive()).isFalse();
 
 	}
 
@@ -527,9 +525,9 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		requestDetails.setTenantId(TENANT_B);
 		try {
 			myPatientDao.update((Patient) patientA, requestDetails);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(2079) + "Resource " + ((Patient) patientA).getResourceType() + "/" + ((Patient) patientA).getIdElement().getIdPart() + " is not known", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(2079) + "Resource " + ((Patient) patientA).getResourceType() + "/" + ((Patient) patientA).getIdElement().getIdPart() + " is not known");
 		}
 	}
 
@@ -563,23 +561,23 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		myTenantClientInterceptor.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 		Patient response = myClient.read().resource(Patient.class).withId(idA).execute();
-		assertTrue(response.getActive());
+		assertThat(response.getActive()).isTrue();
 
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		response = myClient.read().resource(Patient.class).withId(idB).execute();
-		assertFalse(response.getActive());
+		assertThat(response.getActive()).isFalse();
 
 		// Read back using DAO
 
 		requestDetails = new SystemRequestDetails();
 		requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 		response = myPatientDao.read(idA, requestDetails);
-		assertTrue(response.getActive());
+		assertThat(response.getActive()).isTrue();
 
 		requestDetails = new SystemRequestDetails();
 		requestDetails.setTenantId(TENANT_B);
 		response = myPatientDao.read(idB, requestDetails);
-		assertFalse(response.getActive());
+		assertThat(response.getActive()).isFalse();
 
 	}
 
@@ -636,9 +634,9 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			RequestDetails requestDetails = new SystemRequestDetails();
 			requestDetails.setTenantId(TENANT_A);
 			mySystemDao.transaction(requestDetails, input);
-			fail();
+			fail("");
 		} catch (MethodNotAllowedException e) {
-			assertEquals(Msg.code(531) + "Can not call transaction GET methods from this context", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(531) + "Can not call transaction GET methods from this context");
 		}
 
 	}

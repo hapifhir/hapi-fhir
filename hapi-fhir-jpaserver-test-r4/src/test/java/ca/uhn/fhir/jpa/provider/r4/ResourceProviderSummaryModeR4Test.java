@@ -16,7 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.AopTestUtils;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings("Duplicates")
 public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Test {
@@ -73,8 +73,8 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(new Integer(104), outcome.getTotalElement().getValue());
-		assertEquals(0, outcome.getEntry().size());
+		assertThat(outcome.getTotalElement().getValue()).isEqualTo(new Integer(104));
+		assertThat(outcome.getEntry().size()).isEqualTo(0);
 	}
 
 	/**
@@ -90,8 +90,8 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(new Integer(104), outcome.getTotalElement().getValue());
-		assertEquals(10, outcome.getEntry().size());
+		assertThat(outcome.getTotalElement().getValue()).isEqualTo(new Integer(104));
+		assertThat(outcome.getEntry().size()).isEqualTo(10);
 	}
 
 	/**
@@ -108,8 +108,8 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(new Integer(104), outcome.getTotalElement().getValue());
-		assertEquals(10, outcome.getEntry().size());
+		assertThat(outcome.getTotalElement().getValue()).isEqualTo(new Integer(104));
+		assertThat(outcome.getEntry().size()).isEqualTo(10);
 	}
 
 	/**
@@ -126,8 +126,8 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(new Integer(0), outcome.getTotalElement().getValue());
-		assertEquals(0, outcome.getEntry().size());
+		assertThat(outcome.getTotalElement().getValue()).isEqualTo(new Integer(0));
+		assertThat(outcome.getEntry().size()).isEqualTo(0);
 	}
 
 	/**
@@ -143,8 +143,8 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(null, outcome.getTotalElement().getValue());
-		assertEquals(10, outcome.getEntry().size());
+		assertThat(outcome.getTotalElement().getValue()).isEqualTo(null);
+		assertThat(outcome.getEntry().size()).isEqualTo(10);
 	}
 
 	/**
@@ -163,8 +163,8 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(null, outcome.getTotalElement().getValue());
-		assertEquals(10, outcome.getEntry().size());
+		assertThat(outcome.getTotalElement().getValue()).isEqualTo(null);
+		assertThat(outcome.getEntry().size()).isEqualTo(10);
 	}
 
 

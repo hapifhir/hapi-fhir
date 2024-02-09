@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class Batch2DaoSvcImplTest extends BaseJpaR4Test {
@@ -59,21 +59,21 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 				() -> mySubject.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, RequestPartitionId.defaultPartition(), "")
 					.visitStream(Stream::toList));
 
-		assertEquals("HAPI-2422: this should never happen: URL is missing a '?'", exception.getMessage());
+		assertThat(exception.getMessage()).isEqualTo("HAPI-2422: this should never happen: URL is missing a '?'");
 	}
 
 	@Test
 	void fetchResourcesByUrlSingleQuestionMark() {
 		final IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> mySubject.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, RequestPartitionId.defaultPartition(), "?").visitStream(Stream::toList));
 
-		assertEquals("theResourceName must not be blank", exception.getMessage());
+		assertThat(exception.getMessage()).isEqualTo("theResourceName must not be blank");
 	}
 
 	@Test
 	void fetchResourcesByUrlNonsensicalResource() {
 		final DataFormatException exception = assertThrows(DataFormatException.class, () -> mySubject.fetchResourceIdStream(PREVIOUS_MILLENNIUM, TOMORROW, RequestPartitionId.defaultPartition(), "Banana?_expunge=true").visitStream(Stream::toList));
 
-		assertEquals("HAPI-1684: Unknown resource name \"Banana\" (this name is not known in FHIR version \"R4\")", exception.getMessage());
+		assertThat(exception.getMessage()).isEqualTo("HAPI-1684: Unknown resource name \"Banana\" (this name is not known in FHIR version \"R4\")");
 	}
 
 	@ParameterizedTest
@@ -108,14 +108,14 @@ class Batch2DaoSvcImplTest extends BaseJpaR4Test {
 	}
 
 	private static void assertIdsEqual(List<IIdType> expectedResourceIds, List<? extends IIdType> actualResourceIds) {
-		assertEquals(expectedResourceIds.size(), actualResourceIds.size());
+		assertThat(actualResourceIds.size()).isEqualTo(expectedResourceIds.size());
 
 		for (int index = 0; index < expectedResourceIds.size(); index++) {
 			final IIdType expectedIdType = expectedResourceIds.get(index);
 			final IIdType actualIdType = actualResourceIds.get(index);
 
-			assertEquals(expectedIdType.getResourceType(), actualIdType.getResourceType());
-			assertEquals(expectedIdType.getIdPartAsLong(), actualIdType.getIdPartAsLong());
+			assertThat(actualIdType.getResourceType()).isEqualTo(expectedIdType.getResourceType());
+			assertThat(actualIdType.getIdPartAsLong()).isEqualTo(expectedIdType.getIdPartAsLong());
 		}
 	}
 

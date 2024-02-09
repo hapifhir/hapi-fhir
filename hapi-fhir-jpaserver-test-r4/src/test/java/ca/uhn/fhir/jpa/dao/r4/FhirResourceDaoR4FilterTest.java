@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -41,8 +40,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 @SuppressWarnings({"Duplicates"})
 public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
@@ -71,9 +69,9 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		map.add(Constants.PARAM_FILTER, new StringParam("name eq smith))"));
 		try {
 			myPatientDao.search(map);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1221) + "Error parsing _filter syntax: " + Msg.code(1056) + "Expression did not terminate at 13", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1221) + "Error parsing _filter syntax: " + Msg.code(1056) + "Expression did not terminate at 13");
 		}
 	}
 
@@ -228,7 +226,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.search(map);
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1222) + "_filter parameter is disabled on this server", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1222) + "_filter parameter is disabled on this server");
 		}
 	}
 
@@ -1256,7 +1254,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.search(map);
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1206) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1206) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]");
 		}
 	}
 
@@ -1326,6 +1324,6 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		IBundleProvider search = myPractitionerRoleDao.search(spMap);
 		actual = search.getResources(0, 100);
 
-		assertEquals(5, actual.size());
+		assertThat(actual.size()).isEqualTo(5);
 	}
 }

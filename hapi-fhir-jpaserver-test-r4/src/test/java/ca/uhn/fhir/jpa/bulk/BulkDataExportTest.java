@@ -83,14 +83,11 @@ import java.util.stream.Stream;
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsInlineTest.createSearchParameterForInlineSecurity;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -459,12 +456,12 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		try {
 			verifyBulkExportResults(options, ids, new ArrayList<>());
 
-			assertFalse(valueSet.isEmpty());
-			assertEquals(ids.size(), valueSet.size());
+			assertThat(valueSet.isEmpty()).isFalse();
+			assertThat(valueSet.size()).isEqualTo(ids.size());
 			for (String id : valueSet) {
 				// should start with our value from the key-value pairs
-				assertTrue(id.startsWith(value));
-				assertTrue(ids.contains(id.substring(value.length())));
+				assertThat(id.startsWith(value)).isTrue();
+				assertThat(ids.contains(id.substring(value.length()))).isTrue();
 			}
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
@@ -787,14 +784,14 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try(CloseableHttpResponse postResponse = mySender.execute(post)){
 			ourLog.info("Response: {}",postResponse);
-			assertEquals(202, postResponse.getStatusLine().getStatusCode());
-			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
+			assertThat(postResponse.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(postResponse.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
 
 			try(CloseableHttpResponse getResponse = mySender.execute(get)){
 				ourLog.info("Get Response: {}", getResponse);
-				assertEquals(202, getResponse.getStatusLine().getStatusCode());
-				assertEquals("Accepted", getResponse.getStatusLine().getReasonPhrase());
-				assertEquals(postResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue(), getResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+				assertThat(getResponse.getStatusLine().getStatusCode()).isEqualTo(202);
+				assertThat(getResponse.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+				assertThat(getResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(postResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 			}
 		}
 		myInterceptorRegistry.unregisterInterceptor(newInterceptor);
@@ -961,7 +958,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		JobInstance finalJobInstance = verifyBulkExportResults(options, expectedIds, List.of());
-		assertEquals(40, finalJobInstance.getCombinedRecordsProcessed());
+		assertThat(finalJobInstance.getCombinedRecordsProcessed()).isEqualTo(40);
 	}
 
 	@Test
@@ -981,7 +978,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		JobInstance finalJobInstance = verifyBulkExportResults(options, expectedIds, List.of());
-		assertEquals(40, finalJobInstance.getCombinedRecordsProcessed());
+		assertThat(finalJobInstance.getCombinedRecordsProcessed()).isEqualTo(40);
 	}
 
 
@@ -1018,7 +1015,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 			JobInstance finalJobInstance = verifyBulkExportResults(options, expectedIds, List.of());
-			assertEquals(10, finalJobInstance.getCombinedRecordsProcessed());
+			assertThat(finalJobInstance.getCombinedRecordsProcessed()).isEqualTo(10);
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof BoysOnlyInterceptor);
@@ -1044,11 +1041,11 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		JobInstance finalJobInstance = verifyBulkExportResults(options, expectedIds, List.of());
 		BulkExportJobResults results = JsonUtil.deserialize(finalJobInstance.getReport(), BulkExportJobResults.class);
 		List<String> binaryIds = results.getResourceTypeToBinaryIds().values().stream().flatMap(Collection::stream).toList();
-		assertEquals(2, binaryIds.size());
+		assertThat(binaryIds.size()).isEqualTo(2);
 		for (String next : binaryIds) {
 			Binary binary = myBinaryDao.read(new IdType(next), new SystemRequestDetails());
-			assertEquals("http://foo", binary.getSecurityContext().getIdentifier().getSystem());
-			assertEquals("bar", binary.getSecurityContext().getIdentifier().getValue());
+			assertThat(binary.getSecurityContext().getIdentifier().getSystem()).isEqualTo("http://foo");
+			assertThat(binary.getSecurityContext().getIdentifier().getValue()).isEqualTo("bar");
 		}
 	}
 
@@ -1056,8 +1053,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	private JobInstance verifyBulkExportResults(BulkExportJobParameters theOptions, List<String> theContainedList, List<String> theExcludedList) {
 		Batch2JobStartResponse startResponse = startNewJob(theOptions);
 
-		assertNotNull(startResponse);
-		assertFalse(startResponse.isUsesCachedResult());
+		assertThat(startResponse).isNotNull();
+		assertThat(startResponse.isUsesCachedResult()).isFalse();
 
 		// Run a scheduled pass to build the export
 		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 120);
@@ -1084,7 +1081,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 				assertThat(nextBinaryIdPart).matches("[a-zA-Z0-9]{32}");
 
 				Binary binary = myBinaryDao.read(new IdType(nextBinaryId));
-				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
+				assertThat(binary.getContentType()).isEqualTo(Constants.CT_FHIR_NDJSON);
 
 				String nextNdJsonFileContent = new String(binary.getContent(), Constants.CHARSET_UTF8);
 				try (var iter = new LineIterator(new StringReader(nextNdJsonFileContent))) {
@@ -1102,7 +1099,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 						}
 					});
 				} catch (IOException e) {
-					fail(e.toString());
+					fail("", e.toString());
 				}
 			}
 		}
@@ -1125,7 +1122,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Test
 		try {
 			startNewJob(options);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -1142,7 +1139,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Test
 		try {
 			startNewJob(options);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -1159,7 +1156,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Test
 		try {
 			startNewJob(options);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -1176,7 +1173,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Test
 		try {
 			startNewJob(options);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 
 			// Verify
@@ -1193,7 +1190,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		// Test
 		try {
 			startNewJob(options);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 
 			// Verify

@@ -13,8 +13,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 
@@ -46,14 +46,14 @@ public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 		IIdType id = mySubscriptionDao.create(s).getId().toUnqualified();
 
 		s = mySubscriptionDao.read(id);
-		assertEquals("FOO", s.getCriteria());
+		assertThat(s.getCriteria()).isEqualTo("FOO");
 
 		s.setStatus(Subscription.SubscriptionStatus.REQUESTED);
 		try {
 			mySubscriptionDao.update(s);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(13) + "Subscription.criteria contains invalid/unsupported resource type: FOO", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(13) + "Subscription.criteria contains invalid/unsupported resource type: FOO");
 		}
 	}
 

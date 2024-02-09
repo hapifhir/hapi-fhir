@@ -25,9 +25,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
@@ -54,12 +52,12 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 
 	@Test
 	public void testRegisterListener() throws InterruptedException {
-		assertEquals(0, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(0);
 
 		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, SearchParameterMap.newSynchronous(), myMaleTestCallback, TEST_REFRESH_INTERVAL);
 
 		Patient patient = createPatientWithInitLatch(null, myMaleTestCallback);
-		assertEquals(1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(1);
 
 		IdDt patientId = new IdDt(patient.getIdElement().toUnqualifiedVersionless());
 
@@ -72,8 +70,8 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		myMaleTestCallback.awaitExpected();
 
 		assertResult(result, 0, 1, 0);
-		assertEquals(2L, myMaleTestCallback.getUpdateResourceId().getVersionIdPartAsLong());
-		assertEquals(1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myMaleTestCallback.getUpdateResourceId().getVersionIdPartAsLong()).isEqualTo(2L);
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(1);
 
 		// Calling forceRefresh with no changes does not call listener
 		result = cache.forceRefresh();
@@ -84,8 +82,8 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		result = cache.forceRefresh();
 		assertResult(result, 0, 0, 1);
 		myMaleTestCallback.awaitExpected();
-		assertEquals(patientId, myMaleTestCallback.getDeletedResourceId());
-		assertEquals(0, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myMaleTestCallback.getDeletedResourceId()).isEqualTo(patientId);
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(0);
 	}
 
 	@Test
@@ -94,16 +92,16 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 			SearchParameterMap map = new SearchParameterMap();
 			map.setLastUpdated(new DateRangeParam("1965", "1970"));
 			myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, map, myMaleTestCallback, TEST_REFRESH_INTERVAL);
-			fail();
+			fail("");
 		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(482) + "SearchParameterMap SearchParameterMap[] cannot be evaluated in-memory: Parameter: <_lastUpdated> Reason: Standard parameters not supported.  Only search parameter maps that can be evaluated in-memory may be registered.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(482) + "SearchParameterMap SearchParameterMap[] cannot be evaluated in-memory: Parameter: <_lastUpdated> Reason: Standard parameters not supported.  Only search parameter maps that can be evaluated in-memory may be registered.");
 		}
 	}
 
 	private void assertResult(ResourceChangeResult theResult, long theExpectedCreated, long theExpectedUpdated, long theExpectedDeleted) {
-		assertEquals(theExpectedCreated, theResult.created, "created results");
-		assertEquals(theExpectedUpdated, theResult.updated, "updated results");
-		assertEquals(theExpectedDeleted, theResult.deleted, "deleted results");
+		assertThat(theResult.created).as("created results").isEqualTo(theExpectedCreated);
+		assertThat(theResult.updated).as("updated results").isEqualTo(theExpectedUpdated);
+		assertThat(theResult.deleted).as("deleted results").isEqualTo(theExpectedDeleted);
 	}
 
 	private void assertEmptyResult(ResourceChangeResult theResult) {
@@ -123,8 +121,8 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		List<IIdType> resourceIds = theTestCallback.getInitResourceIds();
 		assertThat(resourceIds).hasSize(1);
 		IIdType resourceId = resourceIds.get(0);
-		assertEquals(patientId.toString(), resourceId.toString());
-		assertEquals(1L, resourceId.getVersionIdPartAsLong());
+		assertThat(resourceId.toString()).isEqualTo(patientId.toString());
+		assertThat(resourceId.getVersionIdPartAsLong()).isEqualTo(1L);
 
 		return patient;
 	}
@@ -150,7 +148,7 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		assertResult(result, 1, 0, 0);
 		List<HookParams> calledWith = myMaleTestCallback.awaitExpected();
 		ResourceChangeEvent resourceChangeEvent = (ResourceChangeEvent) PointcutLatch.getLatchInvocationParameter(calledWith);
-		assertEquals(patientId, resourceChangeEvent.getCreatedResourceIds().get(0));
+		assertThat(resourceChangeEvent.getCreatedResourceIds().get(0)).isEqualTo(patientId);
 	}
 
 	@Test
@@ -169,8 +167,8 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		IIdType patientIdFemale = new IdDt(myPatientDao.create(patientFemale).getId());
 		ResourceChangeResult result = cache.forceRefresh();
 		assertEmptyResult(result);
-		assertNotNull(patientIdFemale.toString());
-		assertNull(myMaleTestCallback.getResourceChangeEvent());
+		assertThat(patientIdFemale.toString()).isNotNull();
+		assertThat(myMaleTestCallback.getResourceChangeEvent()).isNull();
 	}
 
 	@Test
@@ -198,8 +196,8 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		IIdType patientIdFemale = new IdDt(myPatientDao.create(patientFemale).getId());
 		ResourceChangeResult result = cache.forceRefresh();
 		assertEmptyResult(result);
-		assertNotNull(patientIdFemale.toString());
-		assertNull(myMaleTestCallback.getResourceChangeEvent());
+		assertThat(patientIdFemale.toString()).isNotNull();
+		assertThat(myMaleTestCallback.getResourceChangeEvent()).isNull();
 
 		// Pretend we're on a different process in the cluster and so our cache doesn't have the cache yet
 		myResourceChangeListenerRegistry.clearCachesForUnitTest();
@@ -209,35 +207,35 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		assertResult(result, 1, 0, 0);
 		List<HookParams> calledWith = myMaleTestCallback.awaitExpected();
 		ResourceChangeEvent resourceChangeEvent = (ResourceChangeEvent) PointcutLatch.getLatchInvocationParameter(calledWith);
-		assertEquals(patientIdMale, resourceChangeEvent.getCreatedResourceIds().get(0));
+		assertThat(resourceChangeEvent.getCreatedResourceIds().get(0)).isEqualTo(patientIdMale);
 	}
 
 	@Test
 	public void twoListenersSameMap() throws InterruptedException {
-		assertEquals(0, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(0);
 
 		SearchParameterMap searchParameterMap = createSearchParameterMap(Enumerations.AdministrativeGender.MALE);
 		IResourceChangeListenerCache cache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, searchParameterMap, myMaleTestCallback, TEST_REFRESH_INTERVAL);
-		assertEquals(0, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(0);
 
 		createPatientWithInitLatch(Enumerations.AdministrativeGender.MALE, myMaleTestCallback);
-		assertEquals(1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(1);
 
 		TestCallback otherTestCallback = new TestCallback("OTHER_MALE");
 		IResourceChangeListenerCache otherCache = myResourceChangeListenerRegistry.registerResourceResourceChangeListener(RESOURCE_NAME, searchParameterMap, otherTestCallback, TEST_REFRESH_INTERVAL);
 
-		assertEquals(1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(1);
 
 		otherTestCallback.setInitExpectedCount(1);
 		otherCache.forceRefresh();
 		otherTestCallback.awaitInitExpected();
-		assertEquals(2, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(2);
 
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(myMaleTestCallback);
-		assertEquals(1, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(1);
 
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(otherTestCallback);
-		assertEquals(0, myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest());
+		assertThat(myResourceChangeListenerRegistry.getResourceVersionCacheSizeForUnitTest()).isEqualTo(0);
 	}
 
 	private SearchParameterMap createSearchParameterMap(Enumerations.AdministrativeGender theGender) {

@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.when;
 
@@ -64,7 +64,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		IBundleProvider result = myPatientDao.search(params);
 		assertThat(toUnqualifiedVersionlessIdValues(result)).containsExactlyInAnyOrder(pt0id.getValue());
 		pt0 = (Patient) result.getResources(0, 1).get(0);
-		assertEquals("urn:source:0#a_request_id", pt0.getMeta().getSource());
+		assertThat(pt0.getMeta().getSource()).isEqualTo("urn:source:0#a_request_id");
 	}
 
 	@Test
@@ -96,14 +96,14 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		pt0 = myPatientDao.read(pt0id);
-		assertEquals("urn:source:0", pt0.getMeta().getSource());
+		assertThat(pt0.getMeta().getSource()).isEqualTo("urn:source:0");
 
 		pt0.getMeta().setSource(null);
 		pt0.setActive(false);
 		myPatientDao.update(pt0);
 
 		pt0 = myPatientDao.read(pt0id.withVersion("2"));
-		assertEquals(null, pt0.getMeta().getSource());
+		assertThat(pt0.getMeta().getSource()).isEqualTo(null);
 
 	}
 
@@ -118,14 +118,14 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		pt0 = myPatientDao.read(pt0id);
-		assertEquals(null, pt0.getMeta().getSource());
+		assertThat(pt0.getMeta().getSource()).isEqualTo(null);
 
 		pt0.getMeta().setSource("urn:source:1");
 		pt0.setActive(false);
 		myPatientDao.update(pt0);
 
 		pt0 = myPatientDao.read(pt0id.withVersion("2"));
-		assertEquals(null, pt0.getMeta().getSource());
+		assertThat(pt0.getMeta().getSource()).isEqualTo(null);
 
 		// Search without source param
 		SearchParameterMap params = new SearchParameterMap();
@@ -141,7 +141,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.search(params);
 		} catch (InvalidRequestException e) {
-			assertEquals(e.getMessage(), Msg.code(1216) + "The _source parameter is disabled on this server");
+			assertThat(Msg.code(1216) + "The _source parameter is disabled on this server").isEqualTo(e.getMessage());
 		}
 	}
 
@@ -165,7 +165,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 			myCaptureQueriesListener.clear();
 			IBundleProvider result = myPatientDao.search(map);
 			myCaptureQueriesListener.logSelectQueries();
-			assertEquals(0, result.size());
+			assertThat(result.size()).isEqualTo(0);
 		}
 
 	}
@@ -179,9 +179,9 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 			SearchParameterMap searchParameter = SearchParameterMap.newSynchronous();
 			searchParameter.add(Constants.PARAM_SOURCE, uriParam);
 			myPatientDao.search(searchParameter);
-			fail();
+			fail("");
 		} catch (MethodNotAllowedException e) {
-			assertEquals(Msg.code(2417) + ":contains modifier is disabled on this server", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(2417) + ":contains modifier is disabled on this server");
 		}
 	}
 

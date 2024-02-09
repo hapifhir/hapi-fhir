@@ -34,7 +34,6 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
@@ -130,7 +129,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 				.forEach(entry -> {
 			assertThat(entry.getFullUrl()).isEqualTo(entry.getResource().getIdElement().toVersionless().toString());
 				});
-		assertNull(bundle.getLink("next"));
+		assertThat(bundle.getLink("next")).isNull();
 
 		Set<String> actual = new HashSet<>();
 		for (Bundle.BundleEntryComponent nextEntry : bundle.getEntry()) {

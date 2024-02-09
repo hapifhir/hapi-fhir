@@ -72,7 +72,7 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 		try {
 			mySvc.createNewJob(job, Lists.newArrayList(file1));
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1766) + "Job File Contents mode must not be null", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1766) + "Job File Contents mode must not be null");
 		}
 	}
 
@@ -86,7 +86,7 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 		try {
 			mySvc.createNewJob(job, Lists.newArrayList(file1));
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Job File Processing mode must not be null", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Job File Processing mode must not be null");
 		}
 	}
 
@@ -97,7 +97,7 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 		try {
 			mySvc.addFilesToJob("ABCDEFG", Lists.newArrayList(file3));
 		} catch (InvalidRequestException e) {
-			assertEquals("Unknown bijob id: ABCDEFG", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Unknown bijob id: ABCDEFG");
 		}
 	}
 
@@ -117,7 +117,7 @@ public class BulkDataImportSvcImplTest extends BaseJpaR4Test {
 		try {
 			mySvc.addFilesToJob("ABCDEFG", Lists.newArrayList(file3));
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1769) + "bijob id ABCDEFG has status RUNNING and can not be added to", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1769) + "bijob id ABCDEFG has status RUNNING and can not be added to");
 		}
 	}
 

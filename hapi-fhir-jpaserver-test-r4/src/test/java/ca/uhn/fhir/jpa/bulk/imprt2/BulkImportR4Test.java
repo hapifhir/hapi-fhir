@@ -38,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
@@ -244,11 +245,11 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		JobInstance instance = myJobCoordinator.getInstance(instanceId);
 		ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));
-		assertEquals(1, instance.getErrorCount());
-		assertEquals(StatusEnum.FAILED, instance.getStatus());
-		assertNotNull(instance.getCreateTime());
-		assertNotNull(instance.getStartTime());
-		assertNotNull(instance.getEndTime());
+		assertThat(instance.getErrorCount()).isEqualTo(1);
+		assertThat(instance.getStatus()).isEqualTo(StatusEnum.FAILED);
+		assertThat(instance.getCreateTime()).isNotNull();
+		assertThat(instance.getStartTime()).isNotNull();
+		assertThat(instance.getEndTime()).isNotNull();
 		assertThat(instance.getErrorMessage()).contains("Unknown resource name \"Foo\"");
 	}
 
@@ -313,11 +314,11 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		try {
 			myJobCoordinator.startInstance(request);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertEquals("HAPI-2065: No parameters supplied", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-2065: No parameters supplied");
 
 		}
 	}
@@ -334,14 +335,14 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		try {
 			myJobCoordinator.startInstance(request);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 
 			// Verify
 			String expected = """
 				HAPI-2039: Failed to validate parameters for job of type BULK_IMPORT_PULL:\s
 				 * myNdJsonUrls - At least one NDJSON URL must be provided""";
-			assertEquals(expected, e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(expected);
 
 		}
 	}
@@ -361,14 +362,14 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		try {
 			myJobCoordinator.startInstance(request);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 
 			// Verify
 			String expected = """
 				HAPI-2039: Failed to validate parameters for job of type BULK_IMPORT_PULL:\s
 				 * myNdJsonUrls[0].<list element> - Must be a valid URL""";
-			assertEquals(expected, e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(expected);
 
 		}
 	}

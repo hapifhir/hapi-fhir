@@ -37,11 +37,9 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -70,9 +68,9 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		IIdType id = myPatientDao.create(patient, mySrd).getId();
 
 		patient = myPatientDao.read(id, mySrd);
-		assertTrue(patient.getActive());
-		assertEquals(1, patient.getMeta().getExtensionsByUrl("http://foo").size());
-		assertEquals("hello", patient.getMeta().getExtensionByUrl("http://foo").getValueAsPrimitive().getValueAsString());
+		assertThat(patient.getActive()).isTrue();
+		assertThat(patient.getMeta().getExtensionsByUrl("http://foo").size()).isEqualTo(1);
+		assertThat(patient.getMeta().getExtensionByUrl("http://foo").getValueAsPrimitive().getValueAsString()).isEqualTo("hello");
 	}
 
 	/**
@@ -97,11 +95,11 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		bundle = myBundleDao.read(id, mySrd);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		patient = (Patient) bundle.getEntryFirstRep().getResource();
-		assertTrue(patient.getActive());
-		assertEquals(1, patient.getMeta().getExtensionsByUrl("http://foo").size());
-		assertEquals("22", patient.getMeta().getVersionId());
-		assertEquals("http://foo", patient.getMeta().getProfile().get(0).getValue());
-		assertEquals("hello", patient.getMeta().getExtensionByUrl("http://foo").getValueAsPrimitive().getValueAsString());
+		assertThat(patient.getActive()).isTrue();
+		assertThat(patient.getMeta().getExtensionsByUrl("http://foo").size()).isEqualTo(1);
+		assertThat(patient.getMeta().getVersionId()).isEqualTo("22");
+		assertThat(patient.getMeta().getProfile().get(0).getValue()).isEqualTo("http://foo");
+		assertThat(patient.getMeta().getExtensionByUrl("http://foo").getValueAsPrimitive().getValueAsString()).isEqualTo("hello");
 	}
 
 	/**
@@ -142,16 +140,16 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		IIdType pid2 = myPatientDao.create(patient2, mySrd).getId();
 
 		patient1 = myPatientDao.read(pid1, mySrd);
-		assertEquals(1, patient1.getMeta().getTag().size());
-		assertEquals(0, patient1.getMeta().getSecurity().size());
-		assertEquals("http://foo", patient1.getMeta().getTagFirstRep().getSystem());
-		assertEquals("bar", patient1.getMeta().getTagFirstRep().getCode());
+		assertThat(patient1.getMeta().getTag().size()).isEqualTo(1);
+		assertThat(patient1.getMeta().getSecurity().size()).isEqualTo(0);
+		assertThat(patient1.getMeta().getTagFirstRep().getSystem()).isEqualTo("http://foo");
+		assertThat(patient1.getMeta().getTagFirstRep().getCode()).isEqualTo("bar");
 
 		patient2 = myPatientDao.read(pid2, mySrd);
-		assertEquals(0, patient2.getMeta().getTag().size());
-		assertEquals(1, patient2.getMeta().getSecurity().size());
-		assertEquals("http://foo", patient2.getMeta().getSecurityFirstRep().getSystem());
-		assertEquals("bar", patient2.getMeta().getSecurityFirstRep().getCode());
+		assertThat(patient2.getMeta().getTag().size()).isEqualTo(0);
+		assertThat(patient2.getMeta().getSecurity().size()).isEqualTo(1);
+		assertThat(patient2.getMeta().getSecurityFirstRep().getSystem()).isEqualTo("http://foo");
+		assertThat(patient2.getMeta().getSecurityFirstRep().getCode()).isEqualTo("bar");
 	}
 
 	/**
@@ -172,8 +170,8 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 
 		// then
 		var tag = patientReadback.getMeta().getTag().get(0);
-		assertNotNull(tag);
-		assertNull(tag.getUserSelectedElement().asStringValue());
+		assertThat(tag).isNotNull();
+		assertThat(tag.getUserSelectedElement().asStringValue()).isNull();
 	}
 
 
@@ -228,8 +226,8 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 				.setSystem(expectedSystem1)
 				.setCode(expectedCode1)
 				.setDisplay(expectedDisplay1);
-			assertNull(newTag.getUserSelectedElement().asStringValue());
-			assertFalse(newTag.getUserSelected());
+			assertThat(newTag.getUserSelectedElement().asStringValue()).isNull();
+			assertThat(newTag.getUserSelected()).isFalse();
 			newTag.setVersion(expectedVersion1)
 				.setUserSelected(expectedUserSelected1);
 			savedPatient.setActive(true);
@@ -240,7 +238,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 
 			// Update the patient to create a ResourceHistoryTag record
 			final List<Coding> tagsFromDbPatient = retrievedPatient.getMeta().getTag();
-			assertEquals(1, tagsFromDbPatient.size());
+			assertThat(tagsFromDbPatient.size()).isEqualTo(1);
 
 			tagsFromDbPatient.get(0)
 				.setCode(expectedCode2)
@@ -366,16 +364,16 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 				next.get(5, TimeUnit.SECONDS);
 			} catch (Exception e) {
 				ourLog.error("Failure", e);
-				fail(e.toString());
+				fail("", e.toString());
 			}
 		}
 
 		runInTransaction(() -> ourLog.info("Tag definitions:\n * {}", myTagDefinitionDao.findAll().stream().map(TagDefinition::toString).collect(Collectors.joining("\n * "))));
 
 		IBundleProvider bundle = myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd);
-		assertEquals(10, bundle.sizeOrThrowNpe());
+		assertThat(bundle.sizeOrThrowNpe()).isEqualTo(10);
 		IBundleProvider tagBundle = myPatientDao.search(SearchParameterMap.newSynchronous(PARAM_TAG, new TokenParam("http://foo", "bar")), mySrd);
-		assertEquals(10, tagBundle.sizeOrThrowNpe());
+		assertThat(tagBundle.sizeOrThrowNpe()).isEqualTo(10);
 
 	}
 }

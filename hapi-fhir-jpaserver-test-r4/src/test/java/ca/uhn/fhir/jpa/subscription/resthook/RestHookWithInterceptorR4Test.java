@@ -40,9 +40,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 
@@ -114,10 +111,10 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 		ourObservationProvider.waitForCreateCount(0);
 		ourObservationProvider.waitForUpdateCount(1);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
-		assertEquals("Observation/A/_history/1", ourObservationProvider.getStoredResources().get(0).getId());
-		assertTrue(ourHitBeforeRestHookDelivery);
-		assertTrue(ourHitAfterRestHookDelivery);
+		assertThat(ourRestfulServer.getRequestContentTypes().get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+		assertThat(ourObservationProvider.getStoredResources().get(0).getId()).isEqualTo("Observation/A/_history/1");
+		assertThat(ourHitBeforeRestHookDelivery).isTrue();
+		assertThat(ourHitAfterRestHookDelivery).isTrue();
 	}
 
 	@Test
@@ -136,9 +133,9 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 		ourObservationProvider.waitForCreateCount(0);
 		ourObservationProvider.waitForUpdateCount(1);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
-		assertTrue(ourHitBeforeRestHookDelivery);
-		assertTrue(ourHitAfterRestHookDelivery);
+		assertThat(ourRestfulServer.getRequestContentTypes().get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+		assertThat(ourHitBeforeRestHookDelivery).isTrue();
+		assertThat(ourHitAfterRestHookDelivery).isTrue();
 		assertThat(ourRestfulServer.getRequestHeaders().get(0)).contains("X-Foo: Bar");
 	}
 
@@ -158,13 +155,13 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 			interceptor.getFinishedLatch().await(10, TimeUnit.SECONDS);
 			ResourceDeliveryMessage lastDelivery = interceptor.getLastDelivery();
-			assertTrue(lastDelivery.getAttribute("ATTR1").isPresent());
-			assertTrue(lastDelivery.getAttribute("ATTR2").isPresent());
-			assertTrue(lastDelivery.getAttribute("ATTRBLANK").isPresent());
-			assertEquals("Some value 1", lastDelivery.getAttribute("ATTR1").get());
-			assertEquals("Some value 2", lastDelivery.getAttribute("ATTR2").get());
-			assertEquals("", lastDelivery.getAttribute("ATTRBLANK").get());
-			assertEquals(false, lastDelivery.getAttribute("ATTRNONEXISTENT").isPresent());
+			assertThat(lastDelivery.getAttribute("ATTR1").isPresent()).isTrue();
+			assertThat(lastDelivery.getAttribute("ATTR2").isPresent()).isTrue();
+			assertThat(lastDelivery.getAttribute("ATTRBLANK").isPresent()).isTrue();
+			assertThat(lastDelivery.getAttribute("ATTR1").get()).isEqualTo("Some value 1");
+			assertThat(lastDelivery.getAttribute("ATTR2").get()).isEqualTo("Some value 2");
+			assertThat(lastDelivery.getAttribute("ATTRBLANK").get()).isEqualTo("");
+			assertThat(lastDelivery.getAttribute("ATTRNONEXISTENT").isPresent()).isEqualTo(false);
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
@@ -256,12 +253,12 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 			waitForQueueToDrain();
 			ourObservationProvider.waitForCreateCount(0);
 			ourObservationProvider.waitForUpdateCount(1);
-			assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+			assertThat(ourRestfulServer.getRequestContentTypes().get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 
-			assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
+			assertThat(ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart()).isEqualTo("1");
 
 			Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
-			assertNotNull(subscriptionTemp);
+			assertThat(subscriptionTemp).isNotNull();
 
 			subscriptionTemp.setCriteria(criteria1);
 			myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();

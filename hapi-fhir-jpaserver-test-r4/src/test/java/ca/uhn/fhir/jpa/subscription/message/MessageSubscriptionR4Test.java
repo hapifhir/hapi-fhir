@@ -27,7 +27,6 @@ import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -362,7 +361,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 			.map(IPersistedResourceModifiedMessage::getPersistedResourceModifiedMessagePk)
 			.collect(Collectors.toList());
 
-		Assertions.assertEquals(fetchedPks, compareToPks);
+		assertThat(compareToPks).isEqualTo(fetchedPks);
 
 	}
 }

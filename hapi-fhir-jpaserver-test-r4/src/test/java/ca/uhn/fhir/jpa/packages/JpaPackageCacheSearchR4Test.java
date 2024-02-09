@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 
@@ -63,18 +62,18 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 
 		NpmPackageSearchResultJson search = myPackageCacheManager.search(new PackageSearchSpec());
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
-		assertEquals(2, search.getTotal());
+		assertThat(search.getTotal()).isEqualTo(2);
 
-		assertEquals(2, search.getObjects().size());
-		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
-		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", search.getObjects().get(0).getPackage().getDescription());
-		assertEquals("0.12.0", search.getObjects().get(0).getPackage().getVersion());
-		assertEquals(3115, search.getObjects().get(0).getPackage().getBytes());
+		assertThat(search.getObjects().size()).isEqualTo(2);
+		assertThat(search.getObjects().get(0).getPackage().getName()).isEqualTo("hl7.fhir.uv.shorthand");
+		assertThat(search.getObjects().get(0).getPackage().getDescription()).isEqualTo("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)");
+		assertThat(search.getObjects().get(0).getPackage().getVersion()).isEqualTo("0.12.0");
+		assertThat(search.getObjects().get(0).getPackage().getBytes()).isEqualTo(3115);
 		assertThat(search.getObjects().get(0).getPackage().getFhirVersion()).as(search.getObjects().get(0).getPackage().getFhirVersion().toString()).containsExactly("4.0.1");
 
-		assertEquals("nictiz.fhir.nl.stu3.questionnaires", search.getObjects().get(1).getPackage().getName());
-		assertEquals("Nictiz NL package of FHIR STU3 conformance resources for MedMij information standard Questionnaires. Includes dependency on Zib2017 and SDC.\\n\\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)", search.getObjects().get(1).getPackage().getDescription());
-		assertEquals("1.0.2", search.getObjects().get(1).getPackage().getVersion());
+		assertThat(search.getObjects().get(1).getPackage().getName()).isEqualTo("nictiz.fhir.nl.stu3.questionnaires");
+		assertThat(search.getObjects().get(1).getPackage().getDescription()).isEqualTo("Nictiz NL package of FHIR STU3 conformance resources for MedMij information standard Questionnaires. Includes dependency on Zib2017 and SDC.\\n\\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)");
+		assertThat(search.getObjects().get(1).getPackage().getVersion()).isEqualTo("1.0.2");
 		assertThat(search.getObjects().get(0).getPackage().getFhirVersion()).as(search.getObjects().get(1).getPackage().getFhirVersion().toString()).containsExactly("4.0.1");
 
 	}
@@ -91,7 +90,7 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 		igInstaller.uninstall(spec);
 
 		// Assert
-		assertEquals(0, myPackageCacheManager.search(new PackageSearchSpec()).getTotal());
+		assertThat(myPackageCacheManager.search(new PackageSearchSpec()).getTotal()).isEqualTo(0);
 
 	}
 
@@ -120,11 +119,11 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
-		assertEquals(1, search.getTotal());
-		assertEquals(1, search.getObjects().size());
-		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
-		assertEquals("0.12.0", search.getObjects().get(0).getPackage().getVersion());
-		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", search.getObjects().get(0).getPackage().getDescription());
+		assertThat(search.getTotal()).isEqualTo(1);
+		assertThat(search.getObjects().size()).isEqualTo(1);
+		assertThat(search.getObjects().get(0).getPackage().getName()).isEqualTo("hl7.fhir.uv.shorthand");
+		assertThat(search.getObjects().get(0).getPackage().getVersion()).isEqualTo("0.12.0");
+		assertThat(search.getObjects().get(0).getPackage().getDescription()).isEqualTo("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)");
 		assertThat(search.getObjects().get(0).getPackage().getFhirVersion()).containsExactly("4.0.1");
 
 		// Non Matching URL
@@ -133,8 +132,8 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 		search = myPackageCacheManager.search(searchSpec);
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
-		assertEquals(0, search.getTotal());
-		assertEquals(0, search.getObjects().size());
+		assertThat(search.getTotal()).isEqualTo(0);
+		assertThat(search.getObjects().size()).isEqualTo(0);
 
 	}
 
@@ -158,9 +157,9 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		ourLog.info("Search results:\r{}", JsonUtil.serialize(search));
-		assertEquals(1, search.getTotal());
-		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
-		assertEquals("4.0.1", search.getObjects().get(0).getPackage().getFhirVersion().get(0));
+		assertThat(search.getTotal()).isEqualTo(1);
+		assertThat(search.getObjects().get(0).getPackage().getName()).isEqualTo("hl7.fhir.uv.shorthand");
+		assertThat(search.getObjects().get(0).getPackage().getFhirVersion().get(0)).isEqualTo("4.0.1");
 
 		// Matching FHIR version
 		myCaptureQueriesListener.clear();
@@ -170,8 +169,8 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
-		assertEquals(1, search.getTotal());
-		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
+		assertThat(search.getTotal()).isEqualTo(1);
+		assertThat(search.getObjects().get(0).getPackage().getName()).isEqualTo("hl7.fhir.uv.shorthand");
 
 		// Partial Matching FHIR version
 		myCaptureQueriesListener.clear();
@@ -181,8 +180,8 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
-		assertEquals(1, search.getTotal());
-		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
+		assertThat(search.getTotal()).isEqualTo(1);
+		assertThat(search.getObjects().get(0).getPackage().getName()).isEqualTo("hl7.fhir.uv.shorthand");
 
 		// Non Matching URL
 		searchSpec = new PackageSearchSpec();
@@ -190,8 +189,8 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 		search = myPackageCacheManager.search(searchSpec);
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
-		assertEquals(0, search.getTotal());
-		assertEquals(0, search.getObjects().size());
+		assertThat(search.getTotal()).isEqualTo(0);
+		assertThat(search.getObjects().size()).isEqualTo(0);
 
 	}
 
@@ -225,11 +224,11 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 		});
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
-		assertEquals(1, search.getTotal());
-		assertEquals(1, search.getObjects().size());
-		assertEquals("hl7.fhir.uv.shorthand", search.getObjects().get(0).getPackage().getName());
-		assertEquals("0.12.0", search.getObjects().get(0).getPackage().getVersion());
-		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", search.getObjects().get(0).getPackage().getDescription());
+		assertThat(search.getTotal()).isEqualTo(1);
+		assertThat(search.getObjects().size()).isEqualTo(1);
+		assertThat(search.getObjects().get(0).getPackage().getName()).isEqualTo("hl7.fhir.uv.shorthand");
+		assertThat(search.getObjects().get(0).getPackage().getVersion()).isEqualTo("0.12.0");
+		assertThat(search.getObjects().get(0).getPackage().getDescription()).isEqualTo("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)");
 		assertThat(search.getObjects().get(0).getPackage().getFhirVersion()).containsExactly("4.0.1");
 
 		// Non Matching URL
@@ -238,8 +237,8 @@ public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 		search = myPackageCacheManager.search(searchSpec);
 
 		ourLog.info("Search rersults:\r{}", JsonUtil.serialize(search));
-		assertEquals(0, search.getTotal());
-		assertEquals(0, search.getObjects().size());
+		assertThat(search.getTotal()).isEqualTo(0);
+		assertThat(search.getObjects().size()).isEqualTo(0);
 
 	}
 

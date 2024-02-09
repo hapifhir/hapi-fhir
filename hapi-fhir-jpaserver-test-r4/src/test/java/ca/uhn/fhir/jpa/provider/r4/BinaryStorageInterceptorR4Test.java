@@ -50,7 +50,6 @@ import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -196,7 +195,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Now read it back and make sure it was de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
-		assertEquals("application/octet-stream", output.getContentType());
+		assertThat(output.getContentType()).isEqualTo("application/octet-stream");
 		assertThat(SOME_BYTES).containsExactly(output.getData());
 	}
 
@@ -219,7 +218,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Now read it back and make sure it was de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
-		assertEquals("application/octet-stream", output.getContentType());
+		assertThat(output.getContentType()).isEqualTo("application/octet-stream");
 		assertThat(SOME_BYTES).containsExactly(output.getData());
 
 	}
@@ -243,7 +242,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Now read it back and make sure it was not  de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
-		assertEquals("application/octet-stream", output.getContentType());
+		assertThat(output.getContentType()).isEqualTo("application/octet-stream");
 		assertThat(output.getData()).isNull();;
 		assertThat(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID)).isNotNull();
 	}
@@ -266,7 +265,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Now read it back and make sure it was de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
-		assertEquals("application/octet-stream", output.getContentType());
+		assertThat(output.getContentType()).isEqualTo("application/octet-stream");
 		assertThat(FEW_BYTES).containsExactly(output.getData());
 
 	}
@@ -334,9 +333,9 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Now read it back and make sure it was de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
-		assertEquals("application/octet-stream", output.getContentType());
+		assertThat(output.getContentType()).isEqualTo("application/octet-stream");
 		assertThat(SOME_BYTES).containsExactly(output.getData());
-		assertNotNull(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue());
+		assertThat(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue()).isNotNull();
 	}
 
 
@@ -362,16 +361,16 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		binary.setContentType("application/octet-stream");
 		binary.setData(SOME_BYTES_2);
 		outcome = myBinaryDao.update(binary, mySrd);
-		assertEquals("2", outcome.getId().getVersionIdPart());
+		assertThat(outcome.getId().getVersionIdPart()).isEqualTo("2");
 
 		// Now read it back the first version
 		Binary output = myBinaryDao.read(id.withVersion("1"), mySrd);
-		assertEquals("application/octet-stream", output.getContentType());
+		assertThat(output.getContentType()).isEqualTo("application/octet-stream");
 		assertThat(SOME_BYTES).containsExactly(output.getData());
 
 		// Now read back the second version
 		output = myBinaryDao.read(id.withVersion("2"), mySrd);
-		assertEquals("application/octet-stream", output.getContentType());
+		assertThat(output.getContentType()).isEqualTo("application/octet-stream");
 		assertThat(SOME_BYTES_2).containsExactly(output.getData());
 
 	}
@@ -405,16 +404,16 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 			new StringType(binaryId)
 		);
 		outcome = myDocumentReferenceDao.update(docRef, mySrd);
-		assertEquals("2", outcome.getId().getVersionIdPart());
+		assertThat(outcome.getId().getVersionIdPart()).isEqualTo("2");
 
 		// Now read it back the first version
 		DocumentReference output = myDocumentReferenceDao.read(id.withVersion("1"), mySrd);
-		assertEquals("application/octet-stream", output.getContentFirstRep().getAttachment().getContentType());
+		assertThat(output.getContentFirstRep().getAttachment().getContentType()).isEqualTo("application/octet-stream");
 		assertThat(output.getContentFirstRep().getAttachment().getData()).containsExactly(SOME_BYTES);
 
 		// Now read back the second version
 		output = myDocumentReferenceDao.read(id.withVersion("2"), mySrd);
-		assertEquals("application/octet-stream", output.getContentFirstRep().getAttachment().getContentType());
+		assertThat(output.getContentFirstRep().getAttachment().getContentType()).isEqualTo("application/octet-stream");
 		assertThat(output.getContentFirstRep().getAttachment().getData()).containsExactly(SOME_BYTES);
 
 	}
@@ -450,22 +449,22 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
 		// Verify bundle response
-		assertEquals(3, output.getEntry().size());
+		assertThat(output.getEntry().size()).isEqualTo(3);
 		output.getEntry().forEach(entry -> assertEquals("201 Created", entry.getResponse().getStatus()));
 
 		// Read back and verify first DocumentReference and attachments
 		IIdType firstDocRef = new IdType(output.getEntry().get(1).getResponse().getLocation());
 		DocumentReference firstDoc = myDocumentReferenceDao.read(firstDocRef, mySrd);
-		assertEquals("application/octet-stream", firstDoc.getContentFirstRep().getAttachment().getContentType());
+		assertThat(firstDoc.getContentFirstRep().getAttachment().getContentType()).isEqualTo("application/octet-stream");
 		assertThat(firstDoc.getContentFirstRep().getAttachment().getData()).containsExactly(SOME_BYTES);
-		assertEquals("application/octet-stream", firstDoc.getContent().get(1).getAttachment().getContentType());
+		assertThat(firstDoc.getContent().get(1).getAttachment().getContentType()).isEqualTo("application/octet-stream");
 		assertThat(firstDoc.getContent().get(1).getAttachment().getData()).containsExactly(SOME_BYTES_2);
-		assertEquals("application/octet-stream", firstDoc.getContent().get(1).getAttachment().getContentType());
+		assertThat(firstDoc.getContent().get(1).getAttachment().getContentType()).isEqualTo("application/octet-stream");
 
 		// Read back and verify second DocumentReference and attachment
 		IIdType secondDocRef = new IdType(output.getEntry().get(2).getResponse().getLocation());
 		DocumentReference secondDoc = myDocumentReferenceDao.read(secondDocRef, mySrd);
-		assertEquals("application/octet-stream", secondDoc.getContentFirstRep().getAttachment().getContentType());
+		assertThat(secondDoc.getContentFirstRep().getAttachment().getContentType()).isEqualTo("application/octet-stream");
 		assertThat(secondDoc.getContentFirstRep().getAttachment().getData()).containsExactly(SOME_BYTES_3);
 	}
 
@@ -519,7 +518,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 			myDocumentReferenceDao.update(docRef, mySrd);
 			fail("Should not be able to update docRef");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1329) + "Illegal extension found in request payload - URL \"http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id\" and value \"12345-67890\"", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1329) + "Illegal extension found in request payload - URL \"http://hapifhir.io/fhir/StructureDefinition/externalized-binary-id\" and value \"12345-67890\"");
 		}
 	}
 
@@ -544,9 +543,9 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Now read it back and make sure it was de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
-		assertEquals("application/octet-stream", output.getContentType());
+		assertThat(output.getContentType()).isEqualTo("application/octet-stream");
 		assertThat(output.getData()).isNull();
-		assertNotNull(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue());
+		assertThat(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue()).isNotNull();
 
 	}
 

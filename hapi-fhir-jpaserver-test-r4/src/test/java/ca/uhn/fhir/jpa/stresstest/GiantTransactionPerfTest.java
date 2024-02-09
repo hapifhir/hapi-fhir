@@ -104,7 +104,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
@@ -292,9 +291,9 @@ public class GiantTransactionPerfTest {
 
 		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactly("ResourceTable");
 		assertThat(myEntityManager.myMergeCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactlyInAnyOrder("ResourceTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken");
-		assertEquals(1, myEntityManager.myFlushCount);
-		assertEquals(1, myResourceVersionSvc.myGetVersionMap);
-		assertEquals(1, myResourceHistoryTableDao.mySaveCount);
+		assertThat(myEntityManager.myFlushCount).isEqualTo(1);
+		assertThat(myResourceVersionSvc.myGetVersionMap).isEqualTo(1);
+		assertThat(myResourceHistoryTableDao.mySaveCount).isEqualTo(1);
 	}
 
 	@Test
@@ -328,9 +327,9 @@ public class GiantTransactionPerfTest {
 
 		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactly("ResourceTable");
 		assertThat(myEntityManager.myMergeCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactlyInAnyOrder("ResourceTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken");
-		assertEquals(1, myEntityManager.myFlushCount);
-		assertEquals(1, myResourceVersionSvc.myGetVersionMap);
-		assertEquals(1, myResourceHistoryTableDao.mySaveCount);
+		assertThat(myEntityManager.myFlushCount).isEqualTo(1);
+		assertThat(myResourceVersionSvc.myGetVersionMap).isEqualTo(1);
+		assertThat(myResourceHistoryTableDao.mySaveCount).isEqualTo(1);
 	}
 
 	private class MockResourceVersionSvc implements IResourceVersionSvc {

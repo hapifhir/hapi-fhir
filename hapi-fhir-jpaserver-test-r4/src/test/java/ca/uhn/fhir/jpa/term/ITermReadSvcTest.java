@@ -59,11 +59,8 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.term.TermReadSvcImpl.DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS;
 import static ca.uhn.fhir.jpa.term.TermReadSvcImpl.MAX_MASS_INDEXER_OBJECT_LOADING_THREADS;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -125,25 +122,25 @@ class ITermReadSvcTest {
 		@Test
 		void doesntStartWithGenericVSReturnsEmpty() {
 			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://boing.org");
-			assertFalse(vsIdOpt.isPresent());
+			assertThat(vsIdOpt.isPresent()).isFalse();
 		}
 
 		@Test
 		void doesntStartWithGenericVSPlusSlashReturnsEmpty() {
 			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://loinc.org/vs-no-slash-after-vs");
-			assertFalse(vsIdOpt.isPresent());
+			assertThat(vsIdOpt.isPresent()).isFalse();
 		}
 
 		@Test
 		void blankVsIdReturnsEmpty() {
 			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://loinc.org");
-			assertFalse(vsIdOpt.isPresent());
+			assertThat(vsIdOpt.isPresent()).isFalse();
 		}
 
 		@Test
 		void startsWithGenericPlusSlashPlusIdReturnsValid() {
 			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://loinc.org/vs/some-vs-id");
-			assertTrue(vsIdOpt.isPresent());
+			assertThat(vsIdOpt.isPresent()).isTrue();
 		}
 
 	}
@@ -155,19 +152,19 @@ class ITermReadSvcTest {
 		@Test
 		void doesntContainLoincReturnsFalse() {
 			boolean ret = TermReadSvcUtil.isLoincUnversionedCodeSystem("http://boing.org");
-			assertFalse(ret);
+			assertThat(ret).isFalse();
 		}
 
 		@Test
 		void hasVersionReturnsFalse() {
 			boolean ret = TermReadSvcUtil.isLoincUnversionedCodeSystem("http://boing.org|v2.68");
-			assertFalse(ret);
+			assertThat(ret).isFalse();
 		}
 
 		@Test
 		void containsLoincAndNoVersionReturnsTrue() {
 			boolean ret = TermReadSvcUtil.isLoincUnversionedCodeSystem("http://anything-plus-loinc.org");
-			assertTrue(ret);
+			assertThat(ret).isTrue();
 		}
 	}
 
@@ -177,25 +174,25 @@ class ITermReadSvcTest {
 		@Test
 		void notLoincReturnsFalse() {
 			boolean ret = TermReadSvcUtil.isLoincUnversionedValueSet("http://anything-but-loin-c.org");
-			assertFalse(ret);
+			assertThat(ret).isFalse();
 		}
 
 		@Test
 		void isLoincAndHasVersionReturnsFalse() {
 			boolean ret = TermReadSvcUtil.isLoincUnversionedValueSet("http://loinc.org|v2.67");
-			assertFalse(ret);
+			assertThat(ret).isFalse();
 		}
 
 		@Test
 		void isLoincNoVersionButEqualsLoincAllReturnsTrue() {
 			boolean ret = TermReadSvcUtil.isLoincUnversionedValueSet("http://loinc.org/vs");
-			assertTrue(ret);
+			assertThat(ret).isTrue();
 		}
 
 		@Test
 		void isLoincNoVersionStartsWithGenericValueSetPlusSlashPlusIdReturnsTrue() {
 			boolean ret = TermReadSvcUtil.isLoincUnversionedValueSet("http://loinc.org/vs/vs-id");
-			assertTrue(ret);
+			assertThat(ret).isTrue();
 		}
 
 	}
@@ -228,7 +225,7 @@ class ITermReadSvcTest {
 				.thenReturn(Collections.emptyList());
 
 			Optional<IBaseResource> result = testedClass.readCodeSystemByForcedId("a-cs-id");
-			assertFalse(result.isPresent());
+			assertThat(result.isPresent()).isFalse();
 		}
 
 		@Test
@@ -240,7 +237,7 @@ class ITermReadSvcTest {
 				NonUniqueResultException.class,
 				() -> testedClass.readCodeSystemByForcedId("a-cs-id"));
 
-			assertTrue(thrown.getMessage().contains("More than one CodeSystem is pointed by forcedId:"));
+			assertThat(thrown.getMessage().contains("More than one CodeSystem is pointed by forcedId:")).isTrue();
 		}
 
 		@Test
@@ -289,13 +286,13 @@ class ITermReadSvcTest {
 			String msg = ReflectionTestUtils.invokeMethod(
 				testedClass, "getTermConceptsFetchExceptionMsg", termConcepts, values);
 
-			assertNotNull(msg);
-			assertTrue(msg.contains("No TermConcept(s) were found"));
-			assertFalse(msg.contains(CODE_1));
-			assertTrue(msg.contains(CODE_2));
-			assertFalse(msg.contains(CODE_3));
-			assertFalse(msg.contains(CODE_4));
-			assertTrue(msg.contains(CODE_5));
+			assertThat(msg).isNotNull();
+			assertThat(msg.contains("No TermConcept(s) were found")).isTrue();
+			assertThat(msg.contains(CODE_1)).isFalse();
+			assertThat(msg.contains(CODE_2)).isTrue();
+			assertThat(msg.contains(CODE_3)).isFalse();
+			assertThat(msg.contains(CODE_4)).isFalse();
+			assertThat(msg.contains(CODE_5)).isTrue();
 		}
 
 		@Test
@@ -310,10 +307,10 @@ class ITermReadSvcTest {
 			String msg = ReflectionTestUtils.invokeMethod(
 				testedClass, "getTermConceptsFetchExceptionMsg", termConcepts, values);
 
-			assertNotNull(msg);
-			assertTrue(msg.contains("More TermConcepts were found than indicated codes"));
-			assertFalse(msg.contains("Queried codes: [" + CODE_3 + "]"));
-			assertTrue(msg.contains("Obtained TermConcept IDs, codes: [1, code-1; 3, code-3]"));
+			assertThat(msg).isNotNull();
+			assertThat(msg.contains("More TermConcepts were found than indicated codes")).isTrue();
+			assertThat(msg.contains("Queried codes: [" + CODE_3 + "]")).isFalse();
+			assertThat(msg.contains("Obtained TermConcept IDs, codes: [1, code-1; 3, code-3]")).isTrue();
 		}
 	}
 
@@ -366,7 +363,7 @@ class ITermReadSvcTest {
 
 				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
 
-				assertEquals(1, retMaxConnectionSize);
+				assertThat(retMaxConnectionSize).isEqualTo(1);
 			}
 
 			@Test
@@ -375,7 +372,7 @@ class ITermReadSvcTest {
 
 				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
 
-				assertEquals(5, retMaxConnectionSize);
+				assertThat(retMaxConnectionSize).isEqualTo(5);
 			}
 
 			@Test
@@ -384,7 +381,7 @@ class ITermReadSvcTest {
 
 				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
 
-				assertEquals(MAX_MASS_INDEXER_OBJECT_LOADING_THREADS, retMaxConnectionSize);
+				assertThat(retMaxConnectionSize).isEqualTo(MAX_MASS_INDEXER_OBJECT_LOADING_THREADS);
 			}
 
 		}
@@ -404,7 +401,7 @@ class ITermReadSvcTest {
 			void testDefaultWhenCantGetMaxConnections() {
 				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
 
-				assertEquals(DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS, retMaxConnectionSize);
+				assertThat(retMaxConnectionSize).isEqualTo(DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS);
 			}
 
 		}

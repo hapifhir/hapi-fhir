@@ -27,7 +27,6 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @ContextConfiguration(classes = {AsyncSubscriptionMessageSubmissionIT.SpringConfig.class})
 public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Test {
@@ -68,7 +67,7 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 
 	@Test
 	public void testSpringInjects_BeanOfTypeSubscriptionMatchingInterceptor_whenBeanDeclarationIsOverwrittenLocally(){
-		assertFalse(mySubscriptionMatcherInterceptor instanceof SynchronousSubscriptionMatcherInterceptor);
+		assertThat(mySubscriptionMatcherInterceptor instanceof SynchronousSubscriptionMatcherInterceptor).isFalse();
 	}
 
 	@Test

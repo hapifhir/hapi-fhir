@@ -54,9 +54,6 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static ca.uhn.fhir.batch2.jobs.importpull.BulkImportPullConfig.BULK_IMPORT_JOB_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -134,7 +131,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 			mySvc.markJobAsReadyForActivation(jobId);
 
 			ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
-			assertTrue(activateJobOutcome.isActivated);
+			assertThat(activateJobOutcome.isActivated).isTrue();
 
 			JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(activateJobOutcome.jobId,
 				60,
@@ -143,7 +140,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 			HashSet<StatusEnum> failed = new HashSet<>();
 			failed.add(StatusEnum.FAILED);
 			failed.add(StatusEnum.ERRORED);
-			assertTrue(failed.contains(instance.getStatus()), instance.getStatus() + " is the actual status");
+			assertThat(failed.contains(instance.getStatus())).as(instance.getStatus() + " is the actual status").isTrue();
 			String errorMsg = instance.getErrorMessage();
 			assertThat(errorMsg).contains("Too many errors");
 		} finally {
@@ -166,14 +163,14 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		mySvc.markJobAsReadyForActivation(jobId);
 
 		ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
-		assertTrue(activateJobOutcome.isActivated);
+		assertThat(activateJobOutcome.isActivated).isTrue();
 
 		JobInstance instance = myBatch2JobHelper.awaitJobCompletion(activateJobOutcome.jobId, 60);
-		assertNotNull(instance);
-		assertEquals(StatusEnum.COMPLETED, instance.getStatus());
+		assertThat(instance).isNotNull();
+		assertThat(instance.getStatus()).isEqualTo(StatusEnum.COMPLETED);
 
 		IBundleProvider searchResults = myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd);
-		assertEquals(transactionsPerFile * fileCount, searchResults.sizeOrThrowNpe());
+		assertThat(searchResults.sizeOrThrowNpe()).isEqualTo(transactionsPerFile * fileCount);
 	}
 
 	@Order(1)
@@ -196,10 +193,10 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 			mySvc.markJobAsReadyForActivation(jobId);
 
 			ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
-			assertTrue(activateJobOutcome.isActivated);
+			assertThat(activateJobOutcome.isActivated).isTrue();
 
 			JobInstance instance = myBatch2JobHelper.awaitJobCompletion(activateJobOutcome.jobId);
-			assertNotNull(instance);
+			assertThat(instance).isNotNull();
 
 			ArgumentCaptor<HookParams> paramsCaptor = ArgumentCaptor.forClass(HookParams.class);
 			verify(interceptor, times(50)).invoke(any(), paramsCaptor.capture());
@@ -243,7 +240,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 	public void testJobsAreRegisteredWithJobRegistry() {
 		Optional<JobDefinition<?>> jobDefinitionOp = myJobDefinitionRegistry.getLatestJobDefinition(BULK_IMPORT_JOB_NAME);
 
-		assertTrue(jobDefinitionOp.isPresent());
+		assertThat(jobDefinitionOp.isPresent()).isTrue();
 	}
 
 	@Interceptor

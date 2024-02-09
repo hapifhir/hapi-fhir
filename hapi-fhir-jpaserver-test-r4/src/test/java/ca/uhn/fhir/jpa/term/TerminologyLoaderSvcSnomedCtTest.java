@@ -26,10 +26,10 @@ import java.util.TreeSet;
 import java.util.zip.ZipOutputStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.verify;
@@ -142,7 +142,7 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 
 		try {
 			mySvc.loadSnomedCt(list(bos.toByteArray()), mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("Could not find the following mandatory files in input: ");
 		}

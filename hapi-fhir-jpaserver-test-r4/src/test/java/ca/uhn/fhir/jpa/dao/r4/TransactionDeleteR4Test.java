@@ -12,7 +12,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 
@@ -45,7 +45,7 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 
 		try {
 			mySystemDao.transaction(mySrd, b);
-			fail();
+			fail("");
 		} catch (ResourceVersionConflictException e) {
 			// good, transaction should not succeed because DiagnosticReport has a reference to the obs2
 		}
@@ -77,7 +77,7 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 			// transaction should succeed because the DiagnosticReport which references obs2 is also deleted
 			mySystemDao.transaction(mySrd, b);
 		} catch (ResourceVersionConflictException e) {
-			fail();
+			fail("");
 		}
 	}
 
@@ -112,7 +112,7 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 		myObservationDao.read(obs1id);
 		try {
 			myObservationDao.read(obs2id);
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -151,7 +151,7 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 		myDiagnosticReportDao.read(rptId);
 		try {
 			myObservationDao.read(obs1id);
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -187,7 +187,7 @@ public class TransactionDeleteR4Test extends BaseJpaR4SystemTest {
 		b.addEntry().setResource(rpt).getRequest().setMethod(Bundle.HTTPVerb.PUT).setUrl("DiagnosticReport?identifier=foo|IDENTIFIER");
 		try {
 			mySystemDao.transaction(mySrd, b);
-			fail();
+			fail("");
 		} catch (ResourceVersionConflictException e ) {
 			assertThat(e.getMessage()).matches(Msg.code(550) + Msg.code(515) + "Unable to delete Observation/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource DiagnosticReport/[0-9]+ in path DiagnosticReport.result");
 		}

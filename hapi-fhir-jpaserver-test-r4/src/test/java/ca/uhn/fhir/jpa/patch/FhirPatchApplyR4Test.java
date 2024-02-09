@@ -32,8 +32,6 @@ import jakarta.annotation.Nullable;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirPatchApplyR4Test {
 
@@ -57,7 +55,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1267) + "Unknown patch operation type: foo", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1267) + "Unknown patch operation type: foo");
 		}
 	}
 
@@ -86,7 +84,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1270) + "Invalid insert index 2 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1270) + "Invalid insert index 2 for path Patient.identifier - Only have 0 existing entries");
 		}
 	}
 
@@ -115,7 +113,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1270) + "Invalid insert index -1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1270) + "Invalid insert index -1 for path Patient.identifier - Only have 0 existing entries");
 		}
 	}
 
@@ -148,7 +146,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1268) + "Invalid move source index 2 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1268) + "Invalid move source index 2 for path Patient.identifier - Only have 0 existing entries");
 		}
 	}
 
@@ -181,7 +179,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1268) + "Invalid move source index -1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1268) + "Invalid move source index -1 for path Patient.identifier - Only have 0 existing entries");
 		}
 	}
 
@@ -215,7 +213,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1269) + "Invalid move destination index 1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1269) + "Invalid move destination index 1 for path Patient.identifier - Only have 0 existing entries");
 		}
 	}
 
@@ -249,7 +247,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1269) + "Invalid move destination index -1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1269) + "Invalid move destination index -1 for path Patient.identifier - Only have 0 existing entries");
 		}
 	}
 
@@ -276,9 +274,9 @@ public class FhirPatchApplyR4Test {
 
 		svc.apply(patient, patch);
 
-		assertEquals(1, patient.getIdentifier().size());
+		assertThat(patient.getIdentifier().size()).isEqualTo(1);
 
-		assertEquals("{\"resourceType\":\"Patient\",\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}],\"active\":true}", ourCtx.newJsonParser().encodeResourceToString(patient));
+		assertThat(ourCtx.newJsonParser().encodeResourceToString(patient)).isEqualTo("{\"resourceType\":\"Patient\",\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}],\"active\":true}");
 
 	}
 
@@ -313,9 +311,9 @@ public class FhirPatchApplyR4Test {
 
 		svc.apply(patient, patch);
 
-		assertEquals(2, patient.getExtension().size());
+		assertThat(patient.getExtension().size()).isEqualTo(2);
 
-		assertEquals("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"url1\",\"extension\":[{\"url\":\"text\",\"valueString\":\"first text\"},{\"url\":\"code\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"sys\",\"code\":\"123\",\"display\":\"Abc\"}]}}]},{\"url\":\"url3\",\"extension\":[{\"url\":\"text\",\"valueString\":\"third text\"},{\"url\":\"code\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"sys\",\"code\":\"345\",\"display\":\"Ghi\"}]}},{\"url\":\"detail\",\"valueInteger\":12}]}],\"active\":true}", ourCtx.newJsonParser().encodeResourceToString(patient));
+		assertThat(ourCtx.newJsonParser().encodeResourceToString(patient)).isEqualTo("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"url1\",\"extension\":[{\"url\":\"text\",\"valueString\":\"first text\"},{\"url\":\"code\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"sys\",\"code\":\"123\",\"display\":\"Abc\"}]}}]},{\"url\":\"url3\",\"extension\":[{\"url\":\"text\",\"valueString\":\"third text\"},{\"url\":\"code\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"sys\",\"code\":\"345\",\"display\":\"Ghi\"}]}},{\"url\":\"detail\",\"valueInteger\":12}]}],\"active\":true}");
 
 	}
 
@@ -408,7 +406,7 @@ public class FhirPatchApplyR4Test {
 		svc.apply(patient, patch);
 
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertEquals("{\"resourceType\":\"Questionnaire\",\"item\":[{\"linkId\":\"1\",\"code\":[{\"system\":\"https://smilecdr.com/fhir/document-type\",\"code\":\"CLINICAL\"}],\"text\":\"Test item\"},{\"linkId\":\"2\",\"code\":[{\"system\":\"http://smilecdr.com/fhir/document-type\",\"code\":\"ADMIN\"}],\"text\":\"Test Item 2\"}]}", ourCtx.newJsonParser().encodeResourceToString(patient));
+		assertThat(ourCtx.newJsonParser().encodeResourceToString(patient)).isEqualTo("{\"resourceType\":\"Questionnaire\",\"item\":[{\"linkId\":\"1\",\"code\":[{\"system\":\"https://smilecdr.com/fhir/document-type\",\"code\":\"CLINICAL\"}],\"text\":\"Test item\"},{\"linkId\":\"2\",\"code\":[{\"system\":\"http://smilecdr.com/fhir/document-type\",\"code\":\"ADMIN\"}],\"text\":\"Test Item 2\"}]}");
 	}
 
 	@Test
@@ -636,6 +634,6 @@ public class FhirPatchApplyR4Test {
 		svc.apply(patient, parameters);
 
 		new XmlExpectationsHelper().assertXmlEqual(theOutputResource, parser.encodeResourceToString(patient));
-		assertTrue(expectedPatient.equalsDeep(patient), theName);
+		assertThat(expectedPatient.equalsDeep(patient)).as(theName).isTrue();
 	}
 }

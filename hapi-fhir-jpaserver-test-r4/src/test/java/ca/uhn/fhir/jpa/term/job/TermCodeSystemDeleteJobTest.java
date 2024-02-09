@@ -71,12 +71,12 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_TOP2000
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
@@ -149,7 +149,7 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 		InvalidRequestException exception = assertThrows(InvalidRequestException.class, () -> {
 			myJobCoordinator.startInstance(request);
 		});
-		assertTrue(exception.getMessage().contains("Invalid Term Code System PID 0"), exception.getMessage());
+		assertThat(exception.getMessage().contains("Invalid Term Code System PID 0")).as(exception.getMessage()).isTrue();
 	}
 
 	private IIdType uploadLoincCodeSystem(String theVersion, boolean theMakeItCurrent) throws Exception {
@@ -158,9 +158,7 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 		myRequestDetails.getUserData().put(LOINC_CODESYSTEM_MAKE_CURRENT, theMakeItCurrent);
 		uploadProperties.put(LOINC_CODESYSTEM_MAKE_CURRENT.getCode(), Boolean.toString(theMakeItCurrent));
 
-		assertTrue(
-			theVersion == null || theVersion.equals("2.67") || theVersion.equals("2.68") || theVersion.equals("2.69"),
-			"Version supported are: 2.67, 2.68, 2.69 and null" );
+		assertThat(theVersion == null || theVersion.equals("2.67") || theVersion.equals("2.68") || theVersion.equals("2.69")).as("Version supported are: 2.67, 2.68, 2.69 and null").isTrue();
 
 		if (StringUtils.isBlank(theVersion)) {
 			uploadProperties.remove(LOINC_CODESYSTEM_VERSION.getCode());
@@ -227,7 +225,7 @@ public class TermCodeSystemDeleteJobTest extends BaseJpaR4Test {
 				return "/loinc-ver/v269/";
 		}
 
-		fail("Setup failed. Unexpected version: " + theVersion);
+		fail("", "Setup failed. Unexpected version: " + theVersion);
 		return null;
 	}
 }

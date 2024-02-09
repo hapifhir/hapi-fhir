@@ -11,7 +11,7 @@ import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class FhirResourceDaoR4SelectiveUpdateTest extends BaseJpaR4Test {
 
@@ -28,7 +28,7 @@ public class FhirResourceDaoR4SelectiveUpdateTest extends BaseJpaR4Test {
 			p.setActive(true);
 			p.addIdentifier().setSystem("http://foo").setValue("bar");
 			IIdType id = myPatientDao.create(p).getId().toUnqualified();
-			assertEquals("1", id.getVersionIdPart());
+			assertThat(id.getVersionIdPart()).isEqualTo("1");
 
 			// Update to add a preserved identifier
 			p = new Patient();
@@ -37,7 +37,7 @@ public class FhirResourceDaoR4SelectiveUpdateTest extends BaseJpaR4Test {
 			p.addIdentifier(new Identifier().setSystem("http://foo").setValue("bar"));
 			p.addIdentifier(new Identifier().setSystem(EUID_SYSTEM).setValue("123"));
 			id = myPatientDao.update(p).getId().toUnqualified();
-			assertEquals("2", id.getVersionIdPart());
+			assertThat(id.getVersionIdPart()).isEqualTo("2");
 
 			// Update to change something but include the preserved attribute
 			p = new Patient();
@@ -45,12 +45,12 @@ public class FhirResourceDaoR4SelectiveUpdateTest extends BaseJpaR4Test {
 			p.setActive(false);
 			p.addIdentifier(new Identifier().setSystem("http://foo").setValue("bar"));
 			id = myPatientDao.update(p).getId().toUnqualified();
-			assertEquals("3", id.getVersionIdPart());
+			assertThat(id.getVersionIdPart()).isEqualTo("3");
 
 			// Read it back
 			p = myPatientDao.read(id);
-			assertEquals(false, p.getActive());
-			assertEquals(2, p.getIdentifier().size());
+			assertThat(p.getActive()).isEqualTo(false);
+			assertThat(p.getIdentifier().size()).isEqualTo(2);
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);

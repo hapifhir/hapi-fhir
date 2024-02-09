@@ -15,7 +15,7 @@ import ca.uhn.fhir.test.BaseTest;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class SearchParameterMapTest extends BaseTest {
@@ -28,7 +28,7 @@ public class SearchParameterMapTest extends BaseTest {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("_has", new HasParam("Observation", "subject", "identifier", "urn:system|FOO"));
 		String criteria = params.toNormalizedQueryString(myContext);
-		assertEquals(criteria, "?_has:Observation:subject:identifier=urn%3Asystem%7CFOO");
+		assertThat("?_has:Observation:subject:identifier=urn%3Asystem%7CFOO").isEqualTo(criteria);
 	}
 
 	@Test
@@ -55,6 +55,6 @@ public class SearchParameterMapTest extends BaseTest {
 		String clonedQueryString = params2.toNormalizedQueryString(myContext);
 		ourLog.info("Cloned query string: {}", clonedQueryString);
 
-		assertEquals(originalQueryString, clonedQueryString);
+		assertThat(clonedQueryString).isEqualTo(originalQueryString);
 	}
 }

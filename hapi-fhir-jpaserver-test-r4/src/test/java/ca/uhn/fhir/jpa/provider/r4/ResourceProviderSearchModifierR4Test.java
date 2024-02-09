@@ -26,8 +26,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 
 public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4Test {
@@ -76,17 +76,17 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		
 		String uri = myServerBase + "/Observation?code:not=2345-3";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		
-		assertEquals(9, ids.size());
-		assertEquals(obsList.get(0).toString(), ids.get(0));
-		assertEquals(obsList.get(1).toString(), ids.get(1));
-		assertEquals(obsList.get(2).toString(), ids.get(2));
-		assertEquals(obsList.get(4).toString(), ids.get(3));
-		assertEquals(obsList.get(5).toString(), ids.get(4));
-		assertEquals(obsList.get(6).toString(), ids.get(5));
-		assertEquals(obsList.get(7).toString(), ids.get(6));
-		assertEquals(obsList.get(8).toString(), ids.get(7));
-		assertEquals(obsList.get(9).toString(), ids.get(8));
+
+		assertThat(ids.size()).isEqualTo(9);
+		assertThat(ids.get(0)).isEqualTo(obsList.get(0).toString());
+		assertThat(ids.get(1)).isEqualTo(obsList.get(1).toString());
+		assertThat(ids.get(2)).isEqualTo(obsList.get(2).toString());
+		assertThat(ids.get(3)).isEqualTo(obsList.get(4).toString());
+		assertThat(ids.get(4)).isEqualTo(obsList.get(5).toString());
+		assertThat(ids.get(5)).isEqualTo(obsList.get(6).toString());
+		assertThat(ids.get(6)).isEqualTo(obsList.get(7).toString());
+		assertThat(ids.get(7)).isEqualTo(obsList.get(8).toString());
+		assertThat(ids.get(8)).isEqualTo(obsList.get(9).toString());
 	}
 
 	@Test
@@ -96,11 +96,11 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		String uri = myServerBase + "/Observation?date=eb2023-02-02";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
-		assertEquals(10, ids.size());
+		assertThat(ids.size()).isEqualTo(10);
 
 		uri = myServerBase + "/Observation?date=sa2023-01-31";
 		ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertEquals(10, ids.size());
+		assertThat(ids.size()).isEqualTo(10);
 	}
 
 	@Test
@@ -110,15 +110,15 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		
 		String uri = myServerBase + "/Observation?code:not=2345-3&code:not=2345-7&code:not=2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		
-		assertEquals(7, ids.size());
-		assertEquals(obsList.get(0).toString(), ids.get(0));
-		assertEquals(obsList.get(1).toString(), ids.get(1));
-		assertEquals(obsList.get(2).toString(), ids.get(2));
-		assertEquals(obsList.get(4).toString(), ids.get(3));
-		assertEquals(obsList.get(5).toString(), ids.get(4));
-		assertEquals(obsList.get(6).toString(), ids.get(5));
-		assertEquals(obsList.get(8).toString(), ids.get(6));
+
+		assertThat(ids.size()).isEqualTo(7);
+		assertThat(ids.get(0)).isEqualTo(obsList.get(0).toString());
+		assertThat(ids.get(1)).isEqualTo(obsList.get(1).toString());
+		assertThat(ids.get(2)).isEqualTo(obsList.get(2).toString());
+		assertThat(ids.get(3)).isEqualTo(obsList.get(4).toString());
+		assertThat(ids.get(4)).isEqualTo(obsList.get(5).toString());
+		assertThat(ids.get(5)).isEqualTo(obsList.get(6).toString());
+		assertThat(ids.get(6)).isEqualTo(obsList.get(8).toString());
 	}
 	
 	@Test
@@ -130,9 +130,9 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		// slower than Observation?code:not=2345-3&code=2345-7&code:not=2345-9
 		String uri = myServerBase + "/Observation?code:not=2345-3&code=2345-7&code:not=2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		
-		assertEquals(1, ids.size());
-		assertEquals(obsList.get(7).toString(), ids.get(0));
+
+		assertThat(ids.size()).isEqualTo(1);
+		assertThat(ids.get(0)).isEqualTo(obsList.get(7).toString());
 	}
 	
 	@Test
@@ -142,15 +142,15 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		
 		String uri = myServerBase + "/Observation?code:not=2345-3,2345-7,2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		
-		assertEquals(7, ids.size());
-		assertEquals(obsList.get(0).toString(), ids.get(0));
-		assertEquals(obsList.get(1).toString(), ids.get(1));
-		assertEquals(obsList.get(2).toString(), ids.get(2));
-		assertEquals(obsList.get(4).toString(), ids.get(3));
-		assertEquals(obsList.get(5).toString(), ids.get(4));
-		assertEquals(obsList.get(6).toString(), ids.get(5));
-		assertEquals(obsList.get(8).toString(), ids.get(6));
+
+		assertThat(ids.size()).isEqualTo(7);
+		assertThat(ids.get(0)).isEqualTo(obsList.get(0).toString());
+		assertThat(ids.get(1)).isEqualTo(obsList.get(1).toString());
+		assertThat(ids.get(2)).isEqualTo(obsList.get(2).toString());
+		assertThat(ids.get(3)).isEqualTo(obsList.get(4).toString());
+		assertThat(ids.get(4)).isEqualTo(obsList.get(5).toString());
+		assertThat(ids.get(5)).isEqualTo(obsList.get(6).toString());
+		assertThat(ids.get(6)).isEqualTo(obsList.get(8).toString());
 	}
 	
 	@Test
@@ -160,16 +160,16 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		
 		String uri = myServerBase + "/Observation?code:not=2345-3";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		
-		assertEquals(8, ids.size());
-		assertEquals(obsList.get(0).toString(), ids.get(0));
-		assertEquals(obsList.get(1).toString(), ids.get(1));
-		assertEquals(obsList.get(4).toString(), ids.get(2));
-		assertEquals(obsList.get(5).toString(), ids.get(3));
-		assertEquals(obsList.get(6).toString(), ids.get(4));
-		assertEquals(obsList.get(7).toString(), ids.get(5));
-		assertEquals(obsList.get(8).toString(), ids.get(6));
-		assertEquals(obsList.get(9).toString(), ids.get(7));
+
+		assertThat(ids.size()).isEqualTo(8);
+		assertThat(ids.get(0)).isEqualTo(obsList.get(0).toString());
+		assertThat(ids.get(1)).isEqualTo(obsList.get(1).toString());
+		assertThat(ids.get(2)).isEqualTo(obsList.get(4).toString());
+		assertThat(ids.get(3)).isEqualTo(obsList.get(5).toString());
+		assertThat(ids.get(4)).isEqualTo(obsList.get(6).toString());
+		assertThat(ids.get(5)).isEqualTo(obsList.get(7).toString());
+		assertThat(ids.get(6)).isEqualTo(obsList.get(8).toString());
+		assertThat(ids.get(7)).isEqualTo(obsList.get(9).toString());
 	}
 	
 	@Test
@@ -179,15 +179,15 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		
 		String uri = myServerBase + "/Observation?code:not=2345-3&code:not=2345-4";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		
-		assertEquals(7, ids.size());
-		assertEquals(obsList.get(0).toString(), ids.get(0));
-		assertEquals(obsList.get(1).toString(), ids.get(1));
-		assertEquals(obsList.get(5).toString(), ids.get(2));
-		assertEquals(obsList.get(6).toString(), ids.get(3));
-		assertEquals(obsList.get(7).toString(), ids.get(4));
-		assertEquals(obsList.get(8).toString(), ids.get(5));
-		assertEquals(obsList.get(9).toString(), ids.get(6));
+
+		assertThat(ids.size()).isEqualTo(7);
+		assertThat(ids.get(0)).isEqualTo(obsList.get(0).toString());
+		assertThat(ids.get(1)).isEqualTo(obsList.get(1).toString());
+		assertThat(ids.get(2)).isEqualTo(obsList.get(5).toString());
+		assertThat(ids.get(3)).isEqualTo(obsList.get(6).toString());
+		assertThat(ids.get(4)).isEqualTo(obsList.get(7).toString());
+		assertThat(ids.get(5)).isEqualTo(obsList.get(8).toString());
+		assertThat(ids.get(6)).isEqualTo(obsList.get(9).toString());
 	}
 	
 	@Test
@@ -197,10 +197,10 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		
 		String uri = myServerBase + "/Observation?code:not=2345-3&code=2345-7&code:not=2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		
-		assertEquals(2, ids.size());
-		assertEquals(obsList.get(6).toString(), ids.get(0));
-		assertEquals(obsList.get(7).toString(), ids.get(1));
+
+		assertThat(ids.size()).isEqualTo(2);
+		assertThat(ids.get(0)).isEqualTo(obsList.get(6).toString());
+		assertThat(ids.get(1)).isEqualTo(obsList.get(7).toString());
 	}
 	
 	@Test
@@ -210,12 +210,12 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		
 		String uri = myServerBase + "/Observation?code:not=2345-3,2345-7,2345-9";
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		
-		assertEquals(4, ids.size());
-		assertEquals(obsList.get(0).toString(), ids.get(0));
-		assertEquals(obsList.get(1).toString(), ids.get(1));
-		assertEquals(obsList.get(4).toString(), ids.get(2));
-		assertEquals(obsList.get(5).toString(), ids.get(3));
+
+		assertThat(ids.size()).isEqualTo(4);
+		assertThat(ids.get(0)).isEqualTo(obsList.get(0).toString());
+		assertThat(ids.get(1)).isEqualTo(obsList.get(1).toString());
+		assertThat(ids.get(2)).isEqualTo(obsList.get(4).toString());
+		assertThat(ids.get(3)).isEqualTo(obsList.get(5).toString());
 	}
 
 	@Test
@@ -225,65 +225,65 @@ public class ResourceProviderSearchModifierR4Test extends BaseResourceProviderR4
 		try {
 			String uri = myServerBase + "/Patient?identifier:of-type=A";
 			myClient.search().byUrl(uri).execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) +  "Invalid parameter value for :of-type query", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query");
 		}
 
 		try {
 			String uri = myServerBase + "/Patient?identifier:of-type=A|B";
 			myClient.search().byUrl(uri).execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query");
 		}
 
 		try {
 			String uri = myServerBase + "/Patient?identifier:of-type=A|B|";
 			myClient.search().byUrl(uri).execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query");
 		}
 
 		try {
 			String uri = myServerBase + "/Patient?identifier:of-type=|B|C";
 			myClient.search().byUrl(uri).execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query");
 		}
 
 		try {
 			String uri = myServerBase + "/Patient?identifier:of-type=||C";
 			myClient.search().byUrl(uri).execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query");
 		}
 
 		try {
 			String uri = myServerBase + "/Patient?identifier:of-type=|B|";
 			myClient.search().byUrl(uri).execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query");
 		}
 
 		try {
 			String uri = myServerBase + "/Patient?identifier:of-type=A||";
 			myClient.search().byUrl(uri).execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(2014) + "Invalid parameter value for :of-type query");
 		}
 
 		try {
 			String uri = myServerBase + "/Patient?identifier:of-type=||";
 			myClient.search().byUrl(uri).execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(2013) + "Invalid parameter value for :of-type query");
 		}
 
 	}

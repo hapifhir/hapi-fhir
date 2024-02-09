@@ -32,8 +32,6 @@ import org.springframework.transaction.support.SimpleTransactionStatus;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
@@ -136,7 +134,7 @@ public class ResourceModifiedSubmitterSvcTest {
 		boolean processed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(resourceModified);
 
 		// verify
-		assertTrue(processed);
+		assertThat(processed).isTrue();
 
 		ArgumentCaptor<ILoggingEvent> logEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myListAppender, atLeast(2))
@@ -153,8 +151,8 @@ public class ResourceModifiedSubmitterSvcTest {
 				hasInflationException = true;
 			}
 		}
-		assertTrue(hasDeleteException);
-		assertTrue(hasInflationException);
+		assertThat(hasDeleteException).isTrue();
+		assertThat(hasInflationException).isTrue();
 	}
 
 	@Test
@@ -184,7 +182,7 @@ public class ResourceModifiedSubmitterSvcTest {
 		boolean processed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(resourceModified);
 
 		// then
-		assertTrue(processed);
+		assertThat(processed).isTrue();
 
 		// verify
 		verify(myChannelProducer)
@@ -192,8 +190,8 @@ public class ResourceModifiedSubmitterSvcTest {
 		ArgumentCaptor<ILoggingEvent> loggingCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myListAppender).doAppend(loggingCaptor.capture());
 		ILoggingEvent event = loggingCaptor.getValue();
-		assertNotNull(event);
-		assertTrue(event.getThrowableProxy().getMessage().contains(exceptionString));
+		assertThat(event).isNotNull();
+		assertThat(event.getThrowableProxy().getMessage().contains(exceptionString)).isTrue();
 	}
 
 	@Test

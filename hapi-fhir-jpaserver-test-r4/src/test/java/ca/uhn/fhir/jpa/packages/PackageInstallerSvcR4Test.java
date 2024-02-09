@@ -64,13 +64,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
@@ -163,7 +162,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		patient.setMeta(new Meta().addProfile("https://fhir.nhs.uk/R4/StructureDefinition/UKCore-Patient"));
 
 		ValidationResult validationResultBefore = validateWithResult(patient);
-		assertFalse(validationResultBefore.isSuccessful());
+		assertThat(validationResultBefore.isSuccessful()).isFalse();
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/UK.Core.r4-1.1.0.tgz");
 		myFakeNpmServlet.responses.put("/UK.Core.r4/1.1.0", bytes);
@@ -174,7 +173,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myPackageInstallerSvc.install(spec);
 
 		ValidationResult validationResultAfter = validateWithResult(patient);
-		assertTrue(validationResultAfter.isSuccessful());
+		assertThat(validationResultAfter.isSuccessful()).isTrue();
 	}
 
 	@Test
@@ -191,12 +190,12 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		patient.setMeta(new Meta().addProfile("https://fhir.nhs.uk/R4/StructureDefinition/UKCore-Patient"));
 
 		ValidationResult validationResultBefore = validateWithResult(patient);
-		assertTrue(validationResultBefore.isSuccessful());
+		assertThat(validationResultBefore.isSuccessful()).isTrue();
 
 		myPackageInstallerSvc.uninstall(spec);
 
 		ValidationResult validationResultAfter = validateWithResult(patient);
-		assertFalse(validationResultAfter.isSuccessful());
+		assertThat(validationResultAfter.isSuccessful()).isFalse();
 	}
 
 	@Test
@@ -212,12 +211,12 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		// Make sure we can fetch the package by ID and Version
 		NpmPackage pkg = myPackageCacheManager.loadPackage("nictiz.fhir.nl.stu3.questionnaires", "1.0.2");
-		assertEquals("Nictiz NL package of FHIR STU3 conformance resources for MedMij information standard Questionnaires. Includes dependency on Zib2017 and SDC.\\n\\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)", pkg.description());
+		assertThat(pkg.description()).isEqualTo("Nictiz NL package of FHIR STU3 conformance resources for MedMij information standard Questionnaires. Includes dependency on Zib2017 and SDC.\\n\\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)");
 
 		// Make sure we can fetch the package by ID
 		pkg = myPackageCacheManager.loadPackage("nictiz.fhir.nl.stu3.questionnaires", null);
-		assertEquals("1.0.2", pkg.version());
-		assertEquals("Nictiz NL package of FHIR STU3 conformance resources for MedMij information standard Questionnaires. Includes dependency on Zib2017 and SDC.\\n\\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)", pkg.description());
+		assertThat(pkg.version()).isEqualTo("1.0.2");
+		assertThat(pkg.description()).isEqualTo("Nictiz NL package of FHIR STU3 conformance resources for MedMij information standard Questionnaires. Includes dependency on Zib2017 and SDC.\\n\\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)");
 
 		// Fetch resource by URL
 		FhirContext fhirContext = FhirContext.forDstu3Cached();
@@ -233,7 +232,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		});
 
 		// This was saved but is the wrong version of FHIR for this server
-		assertNull(myNpmJpaValidationSupport.fetchStructureDefinition("http://fhir.de/StructureDefinition/condition-de-basis/0.2"));
+		assertThat(myNpmJpaValidationSupport.fetchStructureDefinition("http://fhir.de/StructureDefinition/condition-de-basis/0.2")).isNull();
 	}
 
 	@Test
@@ -248,19 +247,19 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			.setVersion("0.12.0")
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(1, outcome.getResourcesInstalled().get("CodeSystem"));
+		assertThat(outcome.getResourcesInstalled().get("CodeSystem")).isEqualTo(1);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
 
 		// Make sure we can fetch the package by ID and Version
 		NpmPackage pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.12.0");
-		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", pkg.description());
+		assertThat(pkg.description()).isEqualTo("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)");
 
 		// Make sure we can fetch the package by ID
 		pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", null);
-		assertEquals("0.12.0", pkg.version());
-		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", pkg.description());
+		assertThat(pkg.version()).isEqualTo("0.12.0");
+		assertThat(pkg.description()).isEqualTo("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)");
 
 		// Make sure DB rows were saved
 		runInTransaction(() -> {
@@ -318,19 +317,19 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(1, outcome.getResourcesInstalled().get("CodeSystem"));
+		assertThat(outcome.getResourcesInstalled().get("CodeSystem")).isEqualTo(1);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
 
 		// Make sure we can fetch the package by ID and Version
 		NpmPackage pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.12.0");
-		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", pkg.description());
+		assertThat(pkg.description()).isEqualTo("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)");
 
 		// Make sure we can fetch the package by ID
 		pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", null);
-		assertEquals("0.12.0", pkg.version());
-		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", pkg.description());
+		assertThat(pkg.version()).isEqualTo("0.12.0");
+		assertThat(pkg.description()).isEqualTo("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)");
 
 		// Make sure DB rows were saved
 		runInTransaction(() -> {
@@ -417,7 +416,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-organizations").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		spec.setInstallResourceTypes(resourceList);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(3, outcome.getResourcesInstalled().get("Organization"));
+		assertThat(outcome.getResourcesInstalled().get("Organization")).isEqualTo(3);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -457,7 +456,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 			.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		spec.setInstallResourceTypes(resourceList);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(3, outcome.getResourcesInstalled().get("Organization"));
+		assertThat(outcome.getResourcesInstalled().get("Organization")).isEqualTo(3);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -500,7 +499,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		spec.setInstallResourceTypes(resourceList);
 		try {
 			PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-			fail(outcome.toString());
+			fail("", outcome.toString());
 		} catch (ImplementationGuideInstallationException theE) {
 			assertThat(theE.getMessage()).contains("Resources in a package must have a url or identifier to be loaded by the package installer.");
 		}
@@ -526,7 +525,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		spec.setInstallResourceTypes(resourceList);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
 		ourLog.info("Outcome: {}", outcome);
-		assertEquals(1, outcome.getResourcesInstalled().get("ImplementationGuide"));
+		assertThat(outcome.getResourcesInstalled().get("ImplementationGuide")).isEqualTo(1);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -549,7 +548,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.onlydrafts").setVersion("0.11.1").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(0, outcome.getResourcesInstalled().size(), outcome.getResourcesInstalled().toString());
+		assertThat(outcome.getResourcesInstalled().size()).as(outcome.getResourcesInstalled().toString()).isEqualTo(0);
 	}
 
 	@Test
@@ -563,15 +562,15 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(1, outcome.getResourcesInstalled().get("CodeSystem"));
+		assertThat(outcome.getResourcesInstalled().get("CodeSystem")).isEqualTo(1);
 
 		myPackageInstallerSvc.install(spec);
 		outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(null, outcome.getResourcesInstalled().get("CodeSystem"));
+		assertThat(outcome.getResourcesInstalled().get("CodeSystem")).isEqualTo(null);
 
 		// Ensure that we loaded the contents
 		IBundleProvider searchResult = myCodeSystemDao.search(SearchParameterMap.newSynchronous("url", new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system")));
-		assertEquals(1, searchResult.sizeOrThrowNpe());
+		assertThat(searchResult.sizeOrThrowNpe()).isEqualTo(1);
 
 	}
 
@@ -588,15 +587,15 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("hl7.fhir.uv.shorthand").setVersion("0.12.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(1, outcome.getResourcesInstalled().get("CodeSystem"));
+		assertThat(outcome.getResourcesInstalled().get("CodeSystem")).isEqualTo(1);
 
 		myPackageInstallerSvc.install(spec);
 		outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(null, outcome.getResourcesInstalled().get("CodeSystem"));
+		assertThat(outcome.getResourcesInstalled().get("CodeSystem")).isEqualTo(null);
 
 		// Ensure that we loaded the contents
 		IBundleProvider searchResult = myCodeSystemDao.search(SearchParameterMap.newSynchronous("url", new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system")));
-		assertEquals(1, searchResult.sizeOrThrowNpe());
+		assertThat(searchResult.sizeOrThrowNpe()).isEqualTo(1);
 	}
 
 	@Test
@@ -614,8 +613,8 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		// Make sure we can fetch the package by ID and Version
 		NpmPackage pkg = myPackageCacheManager.loadPackage("UK.Core.r4", "1.1.0");
-		assertEquals(null, pkg.description());
-		assertEquals("UK.Core.r4", pkg.name());
+		assertThat(pkg.description()).isEqualTo(null);
+		assertThat(pkg.name()).isEqualTo("UK.Core.r4");
 
 	}
 
@@ -672,10 +671,10 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		NpmPackage pkg;
 
 		pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.11.x");
-		assertEquals("0.11.1", pkg.version());
+		assertThat(pkg.version()).isEqualTo("0.11.1");
 
 		pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.12.x");
-		assertEquals("0.12.0", pkg.version());
+		assertThat(pkg.version()).isEqualTo("0.12.0");
 
 	}
 
@@ -807,11 +806,11 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myPackageInstallerSvc.install(spec);
 
 		IBundleProvider spSearch = mySearchParameterDao.search(SearchParameterMap.newSynchronous("code", new TokenParam("network-id")), new SystemRequestDetails());
-		assertEquals(1, spSearch.sizeOrThrowNpe());
+		assertThat(spSearch.sizeOrThrowNpe()).isEqualTo(1);
 		SearchParameter sp = (SearchParameter) spSearch.getResources(0, 1).get(0);
-		assertEquals("network-id", sp.getCode());
-		assertEquals("2.1", sp.getVersion());
-		assertEquals(Enumerations.PublicationStatus.ACTIVE, sp.getStatus());
+		assertThat(sp.getCode()).isEqualTo("network-id");
+		assertThat(sp.getVersion()).isEqualTo("2.1");
+		assertThat(sp.getStatus()).isEqualTo(Enumerations.PublicationStatus.ACTIVE);
 
 		Organization org = new Organization();
 		org.setName("Hello");
@@ -824,18 +823,18 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		SearchParameterMap map = SearchParameterMap.newSynchronous("network-id", new ReferenceParam(orgId.getValue()));
 
 		spSearch = myPractitionerRoleDao.search(map, new SystemRequestDetails());
-		assertEquals(1, spSearch.sizeOrThrowNpe());
+		assertThat(spSearch.sizeOrThrowNpe()).isEqualTo(1);
 
 		// Install newer version
 		spec = new PackageInstallationSpec().setName("test-exchange.fhir.us.com").setVersion("2.1.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		myPackageInstallerSvc.install(spec);
 
 		spSearch = mySearchParameterDao.search(SearchParameterMap.newSynchronous("code", new TokenParam("network-id")));
-		assertEquals(1, spSearch.sizeOrThrowNpe());
+		assertThat(spSearch.sizeOrThrowNpe()).isEqualTo(1);
 		sp = (SearchParameter) spSearch.getResources(0, 1).get(0);
-		assertEquals("network-id", sp.getCode());
-		assertEquals(Enumerations.PublicationStatus.ACTIVE, sp.getStatus());
-		assertEquals("2.2", sp.getVersion());
+		assertThat(sp.getCode()).isEqualTo("network-id");
+		assertThat(sp.getStatus()).isEqualTo(Enumerations.PublicationStatus.ACTIVE);
+		assertThat(sp.getVersion()).isEqualTo("2.2");
 
 	}
 
@@ -851,14 +850,14 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myPackageInstallerSvc.install(spec);
 
 
-		assertArrayEquals(contents0111, myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.11.1").getBytes());
-		assertArrayEquals(contents0120, myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.12.0").getBytes());
-		assertArrayEquals(contents0120, myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "latest").getBytes());
-		assertEquals("0.11.1", myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.11.1").getVersion());
-		assertEquals("0.12.0", myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.12.0").getVersion());
-		assertEquals("0.12.0", myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "latest").getVersion());
-		assertEquals(null, myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "1.2.3"));
-		assertEquals(null, myPackageCacheManager.loadPackageContents("foo", "1.2.3"));
+		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.11.1").getBytes()).containsExactly(contents0111);
+		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.12.0").getBytes()).containsExactly(contents0120);
+		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "latest").getBytes()).containsExactly(contents0120);
+		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.11.1").getVersion()).isEqualTo("0.11.1");
+		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.12.0").getVersion()).isEqualTo("0.12.0");
+		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "latest").getVersion()).isEqualTo("0.12.0");
+		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "1.2.3")).isEqualTo(null);
+		assertThat(myPackageCacheManager.loadPackageContents("foo", "1.2.3")).isEqualTo(null);
 	}
 
 
@@ -916,7 +915,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-logical-structuredefinition").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(2, outcome.getResourcesInstalled().get("StructureDefinition"));
+		assertThat(outcome.getResourcesInstalled().get("StructureDefinition")).isEqualTo(2);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();
@@ -953,7 +952,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		PackageInstallationSpec spec = new PackageInstallationSpec().setName("test-logical-structuredefinition").setVersion("1.0.0").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		PackageInstallOutcomeJson outcome = myPackageInstallerSvc.install(spec);
-		assertEquals(2, outcome.getResourcesInstalled().get("StructureDefinition"));
+		assertThat(outcome.getResourcesInstalled().get("StructureDefinition")).isEqualTo(2);
 
 		// Be sure no further communication with the server
 		myServer.stopServer();

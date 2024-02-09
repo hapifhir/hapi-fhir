@@ -27,10 +27,10 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProviderR4Test {
@@ -79,7 +79,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 				.sorted()
 				.collect(Collectors.toList());
 			ourLog.info("System ops: {}", opNames);
-			assertEquals(opNames.stream().distinct().sorted().collect(Collectors.toList()), opNames);
+			assertThat(opNames).isEqualTo(opNames.stream().distinct().sorted().collect(Collectors.toList()));
 		}
 	}
 
@@ -95,7 +95,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 			.sorted()
 			.collect(Collectors.toList());
 		ourLog.info("System ops: {}", systemOpNames);
-		assertEquals(systemOpNames.stream().distinct().sorted().collect(Collectors.toList()), systemOpNames);
+		assertThat(systemOpNames).isEqualTo(systemOpNames.stream().distinct().sorted().collect(Collectors.toList()));
 	}
 
 	@Test
@@ -116,11 +116,11 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 
 		List<CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent> fooSearchParams = findSearchParams(cs, "Patient", "foo");
-		assertEquals(1, fooSearchParams.size());
-		assertEquals("foo", fooSearchParams.get(0).getName());
-		assertEquals("http://acme.com/foo", fooSearchParams.get(0).getDefinition());
-		assertEquals("This is a search param!", fooSearchParams.get(0).getDocumentation());
-		assertEquals(Enumerations.SearchParamType.TOKEN, fooSearchParams.get(0).getType());
+		assertThat(fooSearchParams.size()).isEqualTo(1);
+		assertThat(fooSearchParams.get(0).getName()).isEqualTo("foo");
+		assertThat(fooSearchParams.get(0).getDefinition()).isEqualTo("http://acme.com/foo");
+		assertThat(fooSearchParams.get(0).getDocumentation()).isEqualTo("This is a search param!");
+		assertThat(fooSearchParams.get(0).getType()).isEqualTo(Enumerations.SearchParamType.TOKEN);
 
 	}
 
@@ -129,11 +129,11 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 
 		List<CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent> fooSearchParams = findSearchParams(cs, "Patient", "_lastUpdated");
-		assertEquals(1, fooSearchParams.size());
-		assertEquals("_lastUpdated", fooSearchParams.get(0).getName());
-		assertEquals("http://hl7.org/fhir/SearchParameter/Resource-lastUpdated", fooSearchParams.get(0).getDefinition());
-		assertEquals("When the resource version last changed", fooSearchParams.get(0).getDocumentation());
-		assertEquals(Enumerations.SearchParamType.DATE, fooSearchParams.get(0).getType());
+		assertThat(fooSearchParams.size()).isEqualTo(1);
+		assertThat(fooSearchParams.get(0).getName()).isEqualTo("_lastUpdated");
+		assertThat(fooSearchParams.get(0).getDefinition()).isEqualTo("http://hl7.org/fhir/SearchParameter/Resource-lastUpdated");
+		assertThat(fooSearchParams.get(0).getDocumentation()).isEqualTo("When the resource version last changed");
+		assertThat(fooSearchParams.get(0).getType()).isEqualTo(Enumerations.SearchParamType.DATE);
 
 	}
 
@@ -308,7 +308,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 					}
 				}
 				if (!allSearchParamUrls.contains(nextSp.getDefinition())) {
-					fail("Invalid search parameter: " + nextSp.getName() + " has definition URL: " + nextSp.getDefinition());
+					fail("", "Invalid search parameter: " + nextSp.getName() + " has definition URL: " + nextSp.getDefinition());
 				}
 			}
 		}
@@ -318,7 +318,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 
 	@Nonnull
 	private List<String> findSupportedProfiles(CapabilityStatement theCapabilityStatement, String theResourceType) {
-		assertEquals(1, theCapabilityStatement.getRest().size());
+		assertThat(theCapabilityStatement.getRest().size()).isEqualTo(1);
 		return theCapabilityStatement
 			.getRest()
 			.get(0)
@@ -335,7 +335,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 
 	@Nonnull
 	private List<CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent> findSearchParams(CapabilityStatement theCapabilityStatement, String theResourceType, String theParamName) {
-		assertEquals(1, theCapabilityStatement.getRest().size());
+		assertThat(theCapabilityStatement.getRest().size()).isEqualTo(1);
 		return theCapabilityStatement
 			.getRest()
 			.get(0)

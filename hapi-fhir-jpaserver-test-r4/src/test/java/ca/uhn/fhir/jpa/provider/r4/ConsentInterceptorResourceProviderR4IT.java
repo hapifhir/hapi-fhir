@@ -69,6 +69,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -77,8 +78,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -160,7 +159,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertThat(returnedIdValues).hasSize(15);
-		assertEquals(myObservationIdsEvenOnly.subList(0, 15), returnedIdValues);
+		assertThat(returnedIdValues).isEqualTo(myObservationIdsEvenOnly.subList(0, 15));
 
 		// Fetch the next page
 		result = myClient
@@ -170,7 +169,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		resources = BundleUtil.toListOfResources(myFhirContext, result);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
 		assertThat(returnedIdValues).hasSize(10);
-		assertEquals(myObservationIdsEvenOnly.subList(15, 25), returnedIdValues);
+		assertThat(returnedIdValues).isEqualTo(myObservationIdsEvenOnly.subList(15, 25));
 	}
 
 	/**
@@ -192,35 +191,35 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		String context = "active consent - hide odd";
 		consentService.setTarget(new ConsentSvcCantSeeOddNumbered());
 		List<String> returnedIdValues = searchForObservations();
-		assertEquals(myObservationIdsEvenOnly.subList(0, 15), returnedIdValues);
+		assertThat(returnedIdValues).isEqualTo(myObservationIdsEvenOnly.subList(0, 15));
 		assertResponseIsNotFromCache(context, capture.getLastResponse());
 
 		// Perform a search and only allow odd
 		context = "active consent - hide even";
 		consentService.setTarget(new ConsentSvcCantSeeEvenNumbered());
 		returnedIdValues = searchForObservations();
-		assertEquals(myObservationIdsOddOnly.subList(0, 15), returnedIdValues);
+		assertThat(returnedIdValues).isEqualTo(myObservationIdsOddOnly.subList(0, 15));
 		assertResponseIsNotFromCache(context, capture.getLastResponse());
 
 		// Perform a search and allow all with a PROCEED
 		context = "active consent - PROCEED on cache";
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED));
 		returnedIdValues = searchForObservations();
-		assertEquals(myObservationIds.subList(0, 15), returnedIdValues);
+		assertThat(returnedIdValues).isEqualTo(myObservationIds.subList(0, 15));
 		assertResponseIsNotFromCache(context, capture.getLastResponse());
 
 		// Perform a search and allow all with an AUTHORIZED (no further checking)
 		context = "active consent - AUTHORIZED after a PROCEED";
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.AUTHORIZED));
 		returnedIdValues = searchForObservations();
-		assertEquals(myObservationIds.subList(0, 15), returnedIdValues);
+		assertThat(returnedIdValues).isEqualTo(myObservationIds.subList(0, 15));
 
 		// Perform a second search and allow all with an AUTHORIZED (no further checking)
 		// which means we should finally get one from the cache
 		context = "active consent - AUTHORIZED after AUTHORIZED";
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.AUTHORIZED));
 		returnedIdValues = searchForObservations();
-		assertEquals(myObservationIds.subList(0, 15), returnedIdValues);
+		assertThat(returnedIdValues).isEqualTo(myObservationIds.subList(0, 15));
 		assertResponseIsFromCache(context, capture.getLastResponse());
 
 		// Perform another search, now with an active consent interceptor that promises not to use canSeeResource.
@@ -228,7 +227,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		context = "active consent - canSeeResource disabled, after AUTHORIZED - should reuse cache";
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED, false));
 		returnedIdValues = searchForObservations();
-		assertEquals(myObservationIds.subList(0, 15), returnedIdValues);
+		assertThat(returnedIdValues).isEqualTo(myObservationIds.subList(0, 15));
 		assertResponseIsFromCache(context, capture.getLastResponse());
 
 		myClient.unregisterInterceptor(capture);
@@ -276,8 +275,8 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			.count(15)
 			.execute();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
-		assertEquals(15, resources.size());
-		assertEquals(16, consentService.getSeeCount());
+		assertThat(resources.size()).isEqualTo(15);
+		assertThat(consentService.getSeeCount()).isEqualTo(16);
 		resources.forEach(t -> {
 			assertEquals(null, ((Observation) t).getSubject().getReference());
 		});
@@ -288,8 +287,8 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			.next(result)
 			.execute();
 		resources = BundleUtil.toListOfResources(myFhirContext, result);
-		assertEquals(15, resources.size());
-		assertEquals(32, consentService.getSeeCount());
+		assertThat(resources.size()).isEqualTo(15);
+		assertThat(consentService.getSeeCount()).isEqualTo(32);
 		resources.forEach(t -> {
 			assertEquals(null, ((Observation) t).getSubject().getReference());
 		});
@@ -305,8 +304,8 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		myClient.create().resource(new Patient().setGender(Enumerations.AdministrativeGender.MALE).addName(new HumanName().setFamily("1"))).execute();
 		Bundle response = myClient.search().forResource(Patient.class).count(1).accept("application/fhir+json; fhirVersion=3.0").returnBundle(Bundle.class).execute();
 
-		assertEquals(1, response.getEntry().size());
-		assertNull(response.getTotalElement().getValue());
+		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getTotalElement().getValue()).isNull();
 
 	}
 
@@ -327,10 +326,10 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			.execute();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertEquals(myObservationIdsEvenOnlyBackwards.subList(0, 5), returnedIdValues);
+		assertThat(returnedIdValues).isEqualTo(myObservationIdsEvenOnlyBackwards.subList(0, 5));
 
 		// Per #2012
-		assertNull(result.getTotalElement().getValue());
+		assertThat(result.getTotalElement().getValue()).isNull();
 	}
 
 	@Test
@@ -346,13 +345,13 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		try {
 			myClient.read().resource("Observation").withId(new IdType(myObservationIdsOddOnly.get(0))).execute();
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
 		try {
 			myClient.read().resource("Observation").withId(new IdType(myObservationIdsOddOnly.get(1))).execute();
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -378,10 +377,10 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		try (CloseableHttpResponse status = ourHttpClient.execute(post)) {
 			String id = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
 			assertThat(id).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
-			assertEquals(201, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(responseString, blankOrNullString());
-			assertNull(status.getEntity().getContentType());
+			assertThat(status.getEntity().getContentType()).isNull();
 		}
 
 		// Accept output
@@ -392,8 +391,8 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		try (CloseableHttpResponse status = ourHttpClient.execute(post)) {
 			String id = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
 			assertThat(id).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
-			assertEquals(201, status.getStatusLine().getStatusCode());
-			assertNotNull(status.getEntity());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertThat(status.getEntity()).isNotNull();
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(responseString, not(blankOrNullString()));
 			assertThat(status.getEntity().getContentType().getValue().toLowerCase()).matches(".*json.*");
@@ -425,10 +424,10 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		try (CloseableHttpResponse status = ourHttpClient.execute(put)) {
 			String idVal = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
 			assertThat(idVal).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(responseString, blankOrNullString());
-			assertNull(status.getEntity().getContentType());
+			assertThat(status.getEntity().getContentType()).isNull();
 		}
 
 		// Accept output
@@ -443,8 +442,8 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		try (CloseableHttpResponse status = ourHttpClient.execute(put)) {
 			String idVal = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
 			assertThat(idVal).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertNotNull(status.getEntity());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertThat(status.getEntity()).isNotNull();
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(responseString, not(blankOrNullString()));
 			assertThat(status.getEntity().getContentType().getValue().toLowerCase()).matches(".*json.*");
@@ -468,12 +467,12 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			Bundle result = myFhirContext.newJsonParser().parseResource(Bundle.class, responseString);
 			List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
 			List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-			assertEquals(myObservationIdsOddOnly.subList(0, 5), returnedIdValues);
+			assertThat(returnedIdValues).isEqualTo(myObservationIdsOddOnly.subList(0, 5));
 		}
 
 	}
@@ -496,7 +495,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			assertThat(responseString).contains("\"family\":\"PATIENT_FAMILY\"");
 			assertThat(responseString).contains("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]");
 			assertThat(responseString).contains("\"name\":\"ORG_NAME\"");
@@ -526,7 +525,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertEquals(404, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
 			assertThat(responseString).doesNotContain("\"family\":\"PATIENT_FAMILY\"");
 			assertThat(responseString).doesNotContain("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]");
 			assertThat(responseString).doesNotContain("\"name\":\"ORG_NAME\"");
@@ -566,7 +565,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertEquals(404, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
 			assertThat(responseString).doesNotContain("\"family\":\"PATIENT_FAMILY\"");
 			assertThat(responseString).doesNotContain("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]");
 			assertThat(responseString).doesNotContain("\"name\":\"ORG_NAME\"");
@@ -594,8 +593,8 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		String searchId = response.getIdElement().getIdPart();
 
 		// 2 results returned, but no total since it's stripped
-		assertEquals(1, response.getEntry().size());
-		assertNull(response.getTotalElement().getValue());
+		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getTotalElement().getValue()).isNull();
 
 		StopWatch sw = new StopWatch();
 		while (true) {
@@ -607,14 +606,14 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 				break;
 			}
 			if (sw.getMillis() > 60000) {
-				fail("Status is still " + status);
+				fail("", "Status is still " + status);
 			}
 		}
 
 		// Load next page
 		response = myClient.loadPage().next(response).execute();
-		assertEquals(1, response.getEntry().size());
-		assertNull(response.getTotalElement().getValue());
+		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getTotalElement().getValue()).isNull();
 
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());
@@ -627,7 +626,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		String next = BundleUtil.getLinkUrlOfType(myFhirContext, response, "next");
 		if (next != null) {
 			response = myClient.loadPage().next(response).execute();
-			fail(myFhirContext.newJsonParser().encodeResourceToString(response));
+			fail("", myFhirContext.newJsonParser().encodeResourceToString(response));
 		}
 
 	}
@@ -648,16 +647,16 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		Bundle response = myClient.search().forResource(Patient.class).count(1).returnBundle(Bundle.class).execute();
 		String searchId = response.getIdElement().getIdPart();
 
-		assertEquals(1, response.getEntry().size());
-		assertNull(response.getTotalElement().getValue());
+		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getTotalElement().getValue()).isNull();
 
 		// Load next page
 		response = myClient.loadPage().next(response).execute();
-		assertEquals(1, response.getEntry().size());
-		assertNull(response.getTotalElement().getValue());
+		assertThat(response.getEntry().size()).isEqualTo(1);
+		assertThat(response.getTotalElement().getValue()).isNull();
 
 		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.
-		assertNotNull(BundleUtil.getLinkUrlOfType(myFhirContext, response, "next"));
+		assertThat(BundleUtil.getLinkUrlOfType(myFhirContext, response, "next")).isNotNull();
 
 		await()
 			.until(
@@ -688,7 +687,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		try {
 			myClient.search().forResource(Patient.class).where(new StringClientParam("INVALID_PARAM").matchesExactly().value("value")).returnBundle(Bundle.class).execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("INVALID_PARAM");
 		}
@@ -724,7 +723,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			assertThat(responseString).contains("\"family\":\"PATIENT_FAMILY\"");
 			assertThat(responseString).contains("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]");
 			assertThat(responseString).doesNotContain("\"name\":\"ORG_NAME\"");

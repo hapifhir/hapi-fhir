@@ -36,7 +36,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInRelativeOrder;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4SearchMissingTest.class);
@@ -60,7 +59,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.search(params);
 		} catch (MethodNotAllowedException e) {
-			assertEquals(Msg.code(985) + ":missing modifier is disabled on this server", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(985) + ":missing modifier is disabled on this server");
 		}
 	}
 
@@ -73,7 +72,7 @@ public class FhirResourceDaoR4SearchMissingTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.search(params);
 		} catch (MethodNotAllowedException e) {
-			assertEquals(Msg.code(985) + ":missing modifier is disabled on this server", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(985) + ":missing modifier is disabled on this server");
 		}
 	}
 

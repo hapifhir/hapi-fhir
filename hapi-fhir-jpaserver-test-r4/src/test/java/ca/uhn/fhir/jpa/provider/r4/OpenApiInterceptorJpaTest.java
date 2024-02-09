@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class OpenApiInterceptorJpaTest extends BaseResourceProviderR4Test {
 
@@ -33,7 +33,7 @@ public class OpenApiInterceptorJpaTest extends BaseResourceProviderR4Test {
 			String string = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(string);
 
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 		}
 
 		get = new HttpGet(myServerBase + "/api-docs");
@@ -41,7 +41,7 @@ public class OpenApiInterceptorJpaTest extends BaseResourceProviderR4Test {
 			String string = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(string);
 
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 		}
 	}
 

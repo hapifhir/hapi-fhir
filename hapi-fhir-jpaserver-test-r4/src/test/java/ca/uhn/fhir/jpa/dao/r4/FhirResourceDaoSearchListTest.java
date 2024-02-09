@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirResourceDaoSearchListTest extends BaseJpaR4Test {
 	@Autowired
@@ -61,7 +60,7 @@ public class FhirResourceDaoSearchListTest extends BaseJpaR4Test {
 		assertThat(ids).hasSize(theExpectedPatientIds.length);
 
 		for(IIdType patientId: theExpectedPatientIds) {
-			assertTrue(ids.contains(patientId));
+			assertThat(ids.contains(patientId)).isTrue();
 
 			//assertThat(patientId, contains(ids));
 		}

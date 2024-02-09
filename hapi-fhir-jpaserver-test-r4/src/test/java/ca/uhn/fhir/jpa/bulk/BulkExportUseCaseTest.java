@@ -79,14 +79,11 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -135,9 +132,9 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			HttpGet statusGet = new HttpGet(pollingLocation);
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export?_type=Patient&_exportId=im-an-export-identifier";
 			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
-				assertEquals(200, status.getStatusLine().getStatusCode());
+				assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-				assertTrue(isNotBlank(responseContent), responseContent);
+				assertThat(isNotBlank(responseContent)).as(responseContent).isTrue();
 
 				ourLog.info(responseContent);
 
@@ -244,9 +241,9 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			HttpGet statusGet = new HttpGet(pollingLocation);
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
 			try (CloseableHttpResponse status = ourHttpClient.execute(statusGet)) {
-				assertEquals(200, status.getStatusLine().getStatusCode());
+				assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 				String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-				assertTrue(isNotBlank(responseContent), responseContent);
+				assertThat(isNotBlank(responseContent)).as(responseContent).isTrue();
 
 				ourLog.info(responseContent);
 
@@ -294,10 +291,10 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
 				assertThat(result.getRequiresAccessToken()).isEqualTo(true);
 				assertThat(result.getTransactionTime()).isNotNull();
-				assertEquals(result.getOutput().size(), 3);
-				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList()).size());
-				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Observation")).collect(Collectors.toList()).size());
-				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Encounter")).collect(Collectors.toList()).size());
+				assertThat(3).isEqualTo(result.getOutput().size());
+				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList()).size()).isEqualTo(1);
+				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Observation")).collect(Collectors.toList()).size()).isEqualTo(1);
+				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Encounter")).collect(Collectors.toList()).size()).isEqualTo(1);
 
 				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
 				assertThat(responseContent).contains("\"error\" : [ ]");
@@ -333,9 +330,9 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
 				assertThat(result.getRequiresAccessToken()).isEqualTo(true);
 				assertThat(result.getTransactionTime()).isNotNull();
-				assertEquals(result.getOutput().size(), 1);
-				assertEquals(1, result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList()).size());
-				assertEquals(0, result.getOutput().stream().filter(o -> o.getType().equals("Binary")).collect(Collectors.toList()).size());
+				assertThat(1).isEqualTo(result.getOutput().size());
+				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList()).size()).isEqualTo(1);
+				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Binary")).collect(Collectors.toList()).size()).isEqualTo(0);
 
 				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
 				assertThat(responseContent).contains("\"error\" : [ ]");
@@ -454,7 +451,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			startRequest.setParameters(options);
 			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 
-			assertNotNull(startResponse);
+			assertThat(startResponse).isNotNull();
 
 			final String jobId = startResponse.getInstanceId();
 
@@ -480,12 +477,12 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			final Optional<JobInstance> optJobInstance = myJobPersistence.fetchInstance(jobId);
 
-			assertNotNull(optJobInstance);
-			assertTrue(optJobInstance.isPresent());
+			assertThat(optJobInstance).isNotNull();
+			assertThat(optJobInstance.isPresent()).isTrue();
 
 			final JobInstance jobInstance = optJobInstance.get();
 
-			assertEquals(patientCount, jobInstance.getCombinedRecordsProcessed());
+			assertThat(jobInstance.getCombinedRecordsProcessed()).isEqualTo(patientCount);
 		}
 
 		private void logContentTypeAndResponse(Header[] headers, String response) {
@@ -565,7 +562,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			}
 
 			int patientsCreated = myPatientDao.search(SearchParameterMap.newSynchronous(), details).size();
-			assertEquals(numPatients, patientsCreated);
+			assertThat(patientsCreated).isEqualTo(numPatients);
 
 			BulkExportJobParameters options = new BulkExportJobParameters();
 			options.setResourceTypes(Sets.newHashSet("Patient"));
@@ -595,10 +592,10 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			IParser jsonParser = myFhirContext.newJsonParser();
 			for (String url : binaryUrls) {
 				Binary binary = myClient.read().resource(Binary.class).withUrl(url).execute();
-				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
+				assertThat(binary.getContentType()).isEqualTo(Constants.CT_FHIR_NDJSON);
 				String resourceContents = new String(binary.getContent(), Constants.CHARSET_UTF8);
 				String resourceId = jsonParser.parseResource(resourceContents).getIdElement().getIdPart();
-				assertTrue(patientIds.contains(resourceId));
+				assertThat(patientIds.contains(resourceId)).isTrue();
 			}
 		}
 	}
@@ -1092,9 +1089,9 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			);
 
 			Map<String, List<IBaseResource>> stringListMap = convertJobResultsToResources(results);
-			assertFalse(stringListMap.containsKey("Organization"), String.join(",", stringListMap.keySet()));
-			assertFalse(stringListMap.containsKey("Patient"), String.join(",", stringListMap.keySet()));
-			assertTrue(stringListMap.containsKey("Encounter"), String.join(",", stringListMap.keySet()));
+			assertThat(stringListMap.containsKey("Organization")).as(String.join(",", stringListMap.keySet())).isFalse();
+			assertThat(stringListMap.containsKey("Patient")).as(String.join(",", stringListMap.keySet())).isFalse();
+			assertThat(stringListMap.containsKey("Encounter")).as(String.join(",", stringListMap.keySet())).isTrue();
 			assertThat(stringListMap.get("Encounter")).hasSize(2);
 		}
 
@@ -1407,7 +1404,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 	private String getBinaryContentsAsString(String theBinaryId) {
 		Binary binary = myBinaryDao.read(new IdType(theBinaryId));
-		assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
+		assertThat(binary.getContentType()).isEqualTo(Constants.CT_FHIR_NDJSON);
 		String contents = new String(binary.getContent(), Constants.CHARSET_UTF8);
 		return contents;
 	}
@@ -1479,8 +1476,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 				.execute();
 		}
-		assertNotNull(outcome);
-		assertEquals(202, outcome.getResponseStatusCode());
+		assertThat(outcome).isNotNull();
+		assertThat(outcome.getResponseStatusCode()).isEqualTo(202);
 		String pollLocation = null;
 		for (String header : outcome.getResponseHeaders().keySet()) {
 			// headers are in lowercase
@@ -1491,14 +1488,14 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				break;
 			}
 		}
-		assertNotNull(pollLocation);
+		assertThat(pollLocation).isNotNull();
 		UrlUtil.UrlParts parts = UrlUtil.parseUrl(pollLocation);
-		assertTrue(isNotBlank(parts.getParams()));
+		assertThat(isNotBlank(parts.getParams())).isTrue();
 		Map<String, String[]> queryParams = UrlUtil.parseQueryString(parts.getParams());
-		assertTrue(queryParams.containsKey(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID));
+		assertThat(queryParams.containsKey(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID)).isTrue();
 		String jobInstanceId = queryParams.get(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID)[0];
 
-		assertNotNull(jobInstanceId);
+		assertThat(jobInstanceId).isNotNull();
 
 		myBatch2JobHelper.awaitJobCompletion(jobInstanceId, 60);
 
@@ -1522,7 +1519,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		startRequest.setParameters(options);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 
-		assertNotNull(startResponse);
+		assertThat(startResponse).isNotNull();
 
 		// Run a scheduled pass to build the export
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
@@ -1534,10 +1531,10 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
 		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
 			List<String> binaryIds = file.getValue();
-			assertEquals(1, binaryIds.size());
+			assertThat(binaryIds.size()).isEqualTo(1);
 			for (String binaryId : binaryIds) {
 				Binary binary = myBinaryDao.read(new IdType(binaryId));
-				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
+				assertThat(binary.getContentType()).isEqualTo(Constants.CT_FHIR_NDJSON);
 				String contents = new String(binary.getContent(), Constants.CHARSET_UTF8);
 				ourLog.info("Next contents for type {} :\n{}", binary.getResourceType(), contents);
 				for (String containedString : theContainedList) {

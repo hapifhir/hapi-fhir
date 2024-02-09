@@ -11,8 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings({"unchecked", "deprecation"})
 public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
@@ -26,7 +25,7 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 	@Test
 	public void testGenerateSnapshot() throws IOException {
 		StructureDefinition differential = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-differential-patient-r4.json");
-		assertEquals(0, differential.getSnapshot().getElement().size());
+		assertThat(differential.getSnapshot().getElement().size()).isEqualTo(0);
 
 		// Create a validation chain that includes default validation support and a
 		// snapshot generator
@@ -43,7 +42,7 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 		StructureDefinition output = myStructureDefinitionDao.generateSnapshot(differential, url, webUrl, name);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals(54, output.getSnapshot().getElement().size());
+		assertThat(output.getSnapshot().getElement().size()).isEqualTo(54);
 	}
 
 
@@ -62,7 +61,7 @@ public class FhirResourceDaoR4StructureDefinitionTest extends BaseJpaR4Test {
 		StructureDefinition snapshotted = myStructureDefinitionDao.generateSnapshot(sd2, null, null, null);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(snapshotted));
 
-		assertTrue(snapshotted.getSnapshot().getElement().size() > 0);
+		assertThat(snapshotted.getSnapshot().getElement().size() > 0).isTrue();
 	}
 
 

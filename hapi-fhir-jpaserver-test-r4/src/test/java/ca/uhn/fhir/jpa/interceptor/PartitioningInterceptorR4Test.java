@@ -48,8 +48,8 @@ import java.util.function.Consumer;
 
 import static ca.uhn.fhir.jpa.dao.r4.PartitioningSqlR4Test.assertLocalDateFromDbMatches;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -140,10 +140,10 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		DaoMethodOutcome outcome = dao.update(subscription, dets);
 
 		// verify
-		assertNotNull(outcome);
-		assertEquals(id, outcome.getResource().getIdElement().getIdPart());
-		assertEquals(0, readIndex.get()); // should be no read interactions
-		assertEquals(1, writeIndex.get());
+		assertThat(outcome).isNotNull();
+		assertThat(outcome.getResource().getIdElement().getIdPart()).isEqualTo(id);
+		assertThat(readIndex.get()).isEqualTo(0); // should be no read interactions
+		assertThat(writeIndex.get()).isEqualTo(1);
 	}
 
 	@Test
@@ -186,9 +186,9 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		sd.setUrl("http://foo");
 		try {
 			myStructureDefinitionDao.create(sd, new ServletRequestDetails());
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1318) + "Resource type StructureDefinition can not be partitioned", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1318) + "Resource type StructureDefinition can not be partitioned");
 		}
 	}
 
@@ -201,9 +201,9 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			SearchParameterMap map = new SearchParameterMap();
 			map.setLoadSynchronous(true);
 			myPatientDao.search(map);
-			fail();
+			fail("");
 		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(1319) + "No interceptor provided a value for pointcut: STORAGE_PARTITION_IDENTIFY_READ", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1319) + "No interceptor provided a value for pointcut: STORAGE_PARTITION_IDENTIFY_READ");
 		}
 	}
 
@@ -226,7 +226,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);
-			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).isEqualTo(0);
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
@@ -261,7 +261,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);
-			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
+			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).isEqualTo(1);
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
@@ -305,14 +305,14 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 		public RequestPartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
-			assertNotNull(theResource);
+			assertThat(theResource).isNotNull();
 			RequestPartitionId retVal = myCreateRequestPartitionIds.remove(0);
 			ourLog.info("Returning partition for create: {}", retVal);
 			return retVal;
 		}
 
 		public void assertNoRemainingIds() {
-			assertEquals(0, myCreateRequestPartitionIds.size());
+			assertThat(myCreateRequestPartitionIds.size()).isEqualTo(0);
 		}
 
 	}
@@ -346,7 +346,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 		public RequestPartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
-			assertNotNull(theResource);
+			assertThat(theResource).isNotNull();
 			if (myObjectConsumer != null) {
 				myObjectConsumer.accept(theResource);
 			}

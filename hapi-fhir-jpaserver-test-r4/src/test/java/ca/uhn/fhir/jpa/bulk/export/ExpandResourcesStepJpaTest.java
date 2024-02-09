@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -64,7 +63,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 				p.getMeta().addTag().setSystem("http://dynamic").setCode("tag" + t).setUserSelected(true).setVersion("1");
 				return myPatientDao.create(p, mySrd).getId().getIdPartAsLong();
 			}).toList();
-		assertEquals(count, ids.size());
+		assertThat(ids.size()).isEqualTo(count);
 
 		ResourceIdList resourceList = new ResourceIdList();
 		resourceList.setResourceType("Patient");
@@ -85,17 +84,17 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 
 		verify(mySink, times(1)).accept(myWorkChunkCaptor.capture());
 		ExpandedResourcesList expandedResourceList = myWorkChunkCaptor.getValue();
-		assertEquals(10, expandedResourceList.getStringifiedResources().size());
+		assertThat(expandedResourceList.getStringifiedResources().size()).isEqualTo(10);
 		assertThat(expandedResourceList.getStringifiedResources().get(0)).contains("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}");
 		assertThat(expandedResourceList.getStringifiedResources().get(1)).contains("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}");
 
 		// Verify query counts
-		assertEquals(theExpectedSelectQueries, myCaptureQueriesListener.countSelectQueries());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(2, myCaptureQueriesListener.countCommits());
-		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+		assertThat(myCaptureQueriesListener.countSelectQueries()).isEqualTo(theExpectedSelectQueries);
+		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(2);
+		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
 	}
 

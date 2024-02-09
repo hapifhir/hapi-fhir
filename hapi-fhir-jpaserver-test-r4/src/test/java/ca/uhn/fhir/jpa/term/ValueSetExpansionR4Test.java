@@ -33,7 +33,6 @@ import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,11 +49,10 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -87,7 +85,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		myCaptureQueriesListener.clear();
 
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		assertEquals(24, expandedValueSet.getExpansion().getContains().size());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(24);
 
 		runInTransaction(() -> assertEquals(24, myTermValueSetConceptDao.count()));
 
@@ -96,7 +94,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		runInTransaction(() -> assertEquals(0, myTermValueSetConceptDao.count()));
 
 		expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
-		assertEquals(24, expandedValueSet.getExpansion().getContains().size());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(24);
 	}
 
 
@@ -111,7 +109,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		assertEquals(24, expandedValueSet.getExpansion().getTotal());
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(24);
 	}
 
 	@Test
@@ -130,7 +128,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		assertEquals(1, expandedValueSet.getExpansion().getTotal());
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(1);
 		assertThat(expandedValueSet.getExpansion().getContains().stream().map(t -> t.getDisplay()).collect(Collectors.toList())).containsExactlyInAnyOrder("Systolic blood pressure--inspiration");
 	}
 
@@ -150,7 +148,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), input);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		assertEquals(3, expandedValueSet.getExpansion().getTotal());
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(3);
 		assertThat(expandedValueSet.getExpansion().getContains().stream().map(t -> t.getDisplay()).collect(Collectors.toList())).containsExactlyInAnyOrder("Systolic blood pressure 1 hour minimum", "Systolic blood pressure 1 hour mean", "Systolic blood pressure 1 hour maximum");
 	}
 
@@ -173,8 +171,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertThat(myValueSetTestUtil.toCodes(expandedValueSet)).as(myValueSetTestUtil.toCodes(expandedValueSet).toString()).containsExactlyInAnyOrder("code9", "code90", "code91", "code92", "code93", "code94", "code95", "code96", "code97", "code98", "code99");
-		Assertions.assertEquals(11, expandedValueSet.getExpansion().getContains().size(), myValueSetTestUtil.toCodes(expandedValueSet).toString());
-		assertEquals(11, expandedValueSet.getExpansion().getTotal());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).as(myValueSetTestUtil.toCodes(expandedValueSet).toString()).isEqualTo(11);
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(11);
 
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
@@ -261,9 +259,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		//Ensure that the subsequent expansion with offset returns the same slice we are anticipating.
 		assertThat(myValueSetTestUtil.toCodes(expandedValueSet)).as(myValueSetTestUtil.toCodes(expandedValueSet).toString()).isEqualTo(expandedConceptCodes.subList(offset, offset + count));
-		Assertions.assertEquals(count, expandedValueSet.getExpansion().getContains().size(), myValueSetTestUtil.toCodes(expandedValueSet).toString());
-		assertEquals(offset + count, expandedValueSet.getExpansion().getTotal());
-		assertEquals(count, expandedValueSet.getExpansion().getContains().size());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).as(myValueSetTestUtil.toCodes(expandedValueSet).toString()).isEqualTo(count);
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(offset + count);
+		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(count);
 
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
@@ -324,8 +322,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertThat(myValueSetTestUtil.toCodes(expandedValueSet)).as(myValueSetTestUtil.toCodes(expandedValueSet).toString()).containsExactlyInAnyOrder("code9", "code91", "code92", "code93", "code94", "code95", "code96", "code97", "code98", "code99");
-		Assertions.assertEquals(10, expandedValueSet.getExpansion().getContains().size(), myValueSetTestUtil.toCodes(expandedValueSet).toString());
-		assertEquals(10, expandedValueSet.getExpansion().getTotal());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).as(myValueSetTestUtil.toCodes(expandedValueSet).toString()).isEqualTo(10);
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(10);
 
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
@@ -362,9 +360,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		options.setCount(4);
 		try {
 			myTermSvc.expandValueSet(options, input);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(887) + "ValueSet expansion can not combine \"offset\" with \"ValueSet.compose.exclude\" unless the ValueSet has been pre-expanded. ValueSet \"Unidentified ValueSet\" must be pre-expanded for this operation to work.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(887) + "ValueSet expansion can not combine \"offset\" with \"ValueSet.compose.exclude\" unless the ValueSet has been pre-expanded. ValueSet \"Unidentified ValueSet\" must be pre-expanded for this operation to work.");
 		}
 	}
 
@@ -421,8 +419,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		assertThat(myValueSetTestUtil.toCodes(expandedValueSet)).as(myValueSetTestUtil.toCodes(expandedValueSet).toString()).containsExactlyInAnyOrder("code9", "code90", "code91", "code92", "code93", "code94", "code95", "code96", "code97", "code98", "code99");
-		Assertions.assertEquals(11, expandedValueSet.getExpansion().getContains().size(), myValueSetTestUtil.toCodes(expandedValueSet).toString());
-		Assertions.assertEquals(11, expandedValueSet.getExpansion().getTotal(), myValueSetTestUtil.toCodes(expandedValueSet).toString());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).as(myValueSetTestUtil.toCodes(expandedValueSet).toString()).isEqualTo(11);
+		assertThat(expandedValueSet.getExpansion().getTotal()).as(myValueSetTestUtil.toCodes(expandedValueSet).toString()).isEqualTo(11);
 
 		// Make sure we used the pre-expanded version
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
@@ -436,22 +434,22 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// Expand
 		ValueSet expansion = myTermSvc.expandValueSet(new ValueSetExpansionOptions(), "http://hl7.org/fhir/ValueSet/administrative-gender");
 		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactlyInAnyOrder("male", "female", "other", "unknown");
-		Assertions.assertEquals("ValueSet with URL \"ValueSet.url[http://hl7.org/fhir/ValueSet/administrative-gender]\" was expanded using an in-memory expansion", myValueSetTestUtil.extractExpansionMessage(expansion));
+		assertThat(myValueSetTestUtil.extractExpansionMessage(expansion)).isEqualTo("ValueSet with URL \"ValueSet.url[http://hl7.org/fhir/ValueSet/administrative-gender]\" was expanded using an in-memory expansion");
 
 		// Validate Code - Good
 		String codeSystemUrl = "http://hl7.org/fhir/administrative-gender";
 		String valueSetUrl = "http://hl7.org/fhir/ValueSet/administrative-gender";
 		String code = "male";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/administrative-gender", outcome.getSourceDetails());
+		assertThat(outcome.isOk()).isTrue();
+		assertThat(outcome.getSourceDetails()).isEqualTo("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/administrative-gender");
 
 		// Validate Code - Bad
 		code = "AAA";
 		outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
-		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://hl7.org/fhir/administrative-gender#AAA' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/administrative-gender'", outcome.getMessage());
-		assertEquals("error", outcome.getSeverityCode());
+		assertThat(outcome.isOk()).isFalse();
+		assertThat(outcome.getMessage()).isEqualTo("Unknown code 'http://hl7.org/fhir/administrative-gender#AAA' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/administrative-gender'");
+		assertThat(outcome.getSeverityCode()).isEqualTo("error");
 
 	}
 
@@ -477,16 +475,16 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(3, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(3);
 		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread()).isEmpty();
 		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread()).isEmpty();
 		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread()).isEmpty();
 
-		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
-		assertEquals(0, expandedValueSet.getExpansion().getParameter().size());
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
+		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(myStorageSettings.getPreExpandValueSetsDefaultOffset());
+		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(0);
 
-		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getContains().size());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(codeSystem.getConcept().size());
 
 		ValueSet.ValueSetExpansionContainsComponent concept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
 		assertConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
@@ -518,7 +516,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		assertEquals(3, expandedValueSet.getExpansion().getContains().size());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(3);
 	}
 
 	@Test
@@ -536,11 +534,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
-		assertEquals(0, expandedValueSet.getExpansion().getParameter().size());
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
+		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(myStorageSettings.getPreExpandValueSetsDefaultOffset());
+		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(0);
 
-		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getContains().size());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(codeSystem.getConcept().size());
 
 		ValueSet.ValueSetExpansionContainsComponent concept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
 
@@ -554,10 +552,10 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet reexpandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(reexpandedValueSet));
 
-		assertEquals(codeSystem.getConcept().size(), reexpandedValueSet.getExpansion().getTotal());
-		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), reexpandedValueSet.getExpansion().getOffset());
-		assertEquals(0, reexpandedValueSet.getExpansion().getParameter().size());
-		assertEquals(codeSystem.getConcept().size(), reexpandedValueSet.getExpansion().getContains().size());
+		assertThat(reexpandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
+		assertThat(reexpandedValueSet.getExpansion().getOffset()).isEqualTo(myStorageSettings.getPreExpandValueSetsDefaultOffset());
+		assertThat(reexpandedValueSet.getExpansion().getParameter().size()).isEqualTo(0);
+		assertThat(reexpandedValueSet.getExpansion().getContains().size()).isEqualTo(codeSystem.getConcept().size());
 
 		concept = assertExpandedValueSetContainsConcept(reexpandedValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
 		assertConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
@@ -594,11 +592,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(null, valueSet);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
-		assertEquals(0, expandedValueSet.getExpansion().getParameter().size());
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
+		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(myStorageSettings.getPreExpandValueSetsDefaultOffset());
+		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(0);
 
-		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getContains().size());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(codeSystem.getConcept().size());
 
 		ValueSet.ValueSetExpansionContainsComponent concept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
 
@@ -639,14 +637,14 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
-		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
-		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
-		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
-		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
-		assertEquals(23, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
-		assertEquals(23, expandedValueSet.getExpansion().getContains().size());
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
+		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(myStorageSettings.getPreExpandValueSetsDefaultOffset());
+		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(2);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getName()).isEqualTo("offset");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(0);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(23);
+		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(23);
 
 		ValueSet.ValueSetExpansionContainsComponent concept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 1);
 		assertThat(concept.getDesignation().size()).isEqualTo(1);
@@ -678,15 +676,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
-		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
-		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
-		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
-		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
-		assertEquals(23, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
+		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(myStorageSettings.getPreExpandValueSetsDefaultOffset());
+		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(2);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getName()).isEqualTo("offset");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(0);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(23);
 
-		assertEquals(23, expandedValueSet.getExpansion().getContains().size());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(23);
 		//It is enough to test that the sublist returned is the correct one.
 		assertThat(myValueSetTestUtil.toCodes(expandedValueSet)).isEqualTo(expandedConceptCodes.subList(0, 23));
 	}
@@ -703,7 +701,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// If this ever fails, it just means that new codes have been added to the
 		// code system used by this test, so the numbers below may also need to be
 		// updated
-		assertEquals(24, codeSystem.getConcept().size());
+		assertThat(codeSystem.getConcept().size()).isEqualTo(24);
 
 		ValueSet valueSet = myValueSetDao.read(myExtensionalVsId);
 		ourLog.debug("ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(valueSet));
@@ -718,15 +716,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ourLog.info("Expanded ValueSet:\n" + expandedValueSetString);
 		assertThat(expandedValueSetString).contains("ValueSet was expanded using an expansion that was pre-calculated");
 
-		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
-		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
-		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
-		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
-		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
-		assertEquals(24, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
+		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(myStorageSettings.getPreExpandValueSetsDefaultOffset());
+		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(2);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getName()).isEqualTo("offset");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(0);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(24);
 
-		assertEquals(24, expandedValueSet.getExpansion().getContains().size());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(24);
 
 		ValueSet.ValueSetExpansionContainsComponent concept = assertExpandedValueSetContainsConcept(expandedValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
 
@@ -760,15 +758,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		String expanded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet);
 		ourLog.info("Expanded ValueSet:\n" + expanded);
 
-		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
-		assertEquals(2, expandedValueSet.getExpansion().getParameter().size(), expanded);
-		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName(), expanded);
-		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue(), expanded);
-		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName(), expanded);
-		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue(), expanded);
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
+		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(myStorageSettings.getPreExpandValueSetsDefaultOffset());
+		assertThat(expandedValueSet.getExpansion().getParameter().size()).as(expanded).isEqualTo(2);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getName()).as(expanded).isEqualTo("offset");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).as(expanded).isEqualTo(0);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getName()).as(expanded).isEqualTo("count");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).as(expanded).isEqualTo(0);
 
-		assertFalse(expandedValueSet.getExpansion().hasContains());
+		assertThat(expandedValueSet.getExpansion().hasContains()).isFalse();
 	}
 
 	@Test
@@ -791,15 +789,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(myStorageSettings.getPreExpandValueSetsDefaultOffset(), expandedValueSet.getExpansion().getOffset());
-		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
-		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
-		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
-		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
-		assertEquals(0, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
+		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(myStorageSettings.getPreExpandValueSetsDefaultOffset());
+		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(2);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getName()).isEqualTo("offset");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(0);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(0);
 
-		assertFalse(expandedValueSet.getExpansion().hasContains());
+		assertThat(expandedValueSet.getExpansion().hasContains()).isFalse();
 	}
 
 	@Test
@@ -822,15 +820,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(1, expandedValueSet.getExpansion().getOffset());
-		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
-		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
-		assertEquals(1, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
-		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
-		assertEquals(1000, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
+		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(1);
+		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(2);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getName()).isEqualTo("offset");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(1);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(1000);
 
-		assertEquals(codeSystem.getConcept().size() - expandedValueSet.getExpansion().getOffset(), expandedValueSet.getExpansion().getContains().size());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(codeSystem.getConcept().size() - expandedValueSet.getExpansion().getOffset());
 		assertThat(myValueSetTestUtil.toCodes(expandedValueSet)).isEqualTo(expandedConcepts.subList(1, expandedConcepts.size()));
 	}
 
@@ -854,15 +852,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(1, expandedValueSet.getExpansion().getOffset());
-		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
-		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
-		assertEquals(1, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
-		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
-		assertEquals(1000, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
+		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(1);
+		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(2);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getName()).isEqualTo("offset");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(1);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(1000);
 
-		assertEquals(codeSystem.getConcept().size() - expandedValueSet.getExpansion().getOffset(), expandedValueSet.getExpansion().getContains().size());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(codeSystem.getConcept().size() - expandedValueSet.getExpansion().getOffset());
 		assertThat(myValueSetTestUtil.toCodes(expandedValueSet)).isEqualTo(expandedConcepts.subList(1, expandedConcepts.size()));
 	}
 
@@ -888,15 +886,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(1, expandedValueSet.getExpansion().getOffset());
-		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
-		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
-		assertEquals(1, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
-		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
-		assertEquals(22, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
+		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(1);
+		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(2);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getName()).isEqualTo("offset");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(1);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(22);
 
-		assertEquals(22, expandedValueSet.getExpansion().getContains().size());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(22);
 
 		//It is enough to test that the sublist returned is the correct one.
 		assertThat(myValueSetTestUtil.toCodes(expandedValueSet)).isEqualTo(expandedConceptCodes.subList(1, 23));
@@ -908,8 +906,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet vs = new ValueSet();
 		vs.getCompose().addInclude().setSystem("http://unknown-system");
 		vs = myTermSvc.expandValueSet(new ValueSetExpansionOptions().setFailOnMissingCodeSystem(false), vs);
-		assertNotNull(vs);
-		assertEquals(0, vs.getExpansion().getContains().size());
+		assertThat(vs).isNotNull();
+		assertThat(vs.getExpansion().getContains().size()).isEqualTo(0);
 
 		// Store it
 		vs = new ValueSet();
@@ -922,9 +920,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// In memory expansion
 		try {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-			fail();
+			fail("");
 		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system");
 		}
 
 		// Try validating a code against this VS - This code isn't in a system that's included by the VS, so we know
@@ -933,16 +931,16 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		String valueSetUrl = "http://vs-with-invalid-cs";
 		String code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
-		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://invalid-cs#28571000087109' for in-memory expansion of ValueSet 'http://vs-with-invalid-cs'", outcome.getMessage());
-		assertEquals("error", outcome.getSeverityCode());
+		assertThat(outcome.isOk()).isFalse();
+		assertThat(outcome.getMessage()).isEqualTo("Unknown code 'http://invalid-cs#28571000087109' for in-memory expansion of ValueSet 'http://vs-with-invalid-cs'");
+		assertThat(outcome.getSeverityCode()).isEqualTo("error");
 
 		// Try validating a code that is in the missing CS that is imported by the VS
 		codeSystemUrl = "http://unknown-system";
 		outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
-		assertFalse(outcome.isOk());
-		assertEquals("Failed to expand ValueSet 'http://vs-with-invalid-cs' (in-memory). Could not validate code http://unknown-system#28571000087109. Error was: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", outcome.getMessage());
-		assertEquals("error", outcome.getSeverityCode());
+		assertThat(outcome.isOk()).isFalse();
+		assertThat(outcome.getMessage()).isEqualTo("Failed to expand ValueSet 'http://vs-with-invalid-cs' (in-memory). Could not validate code http://unknown-system#28571000087109. Error was: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system");
+		assertThat(outcome.getSeverityCode()).isEqualTo("error");
 
 		// Perform Pre-Expansion
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
@@ -955,9 +953,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		// Try expansion again
 		try {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-			fail();
+			fail("");
 		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system");
 		}
 
 	}
@@ -984,15 +982,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myTermSvc.expandValueSet(options, valueSet);
 		ourLog.debug("Expanded ValueSet:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expandedValueSet));
 
-		assertEquals(codeSystem.getConcept().size(), expandedValueSet.getExpansion().getTotal());
-		assertEquals(1, expandedValueSet.getExpansion().getOffset());
-		assertEquals(2, expandedValueSet.getExpansion().getParameter().size());
-		assertEquals("offset", expandedValueSet.getExpansion().getParameter().get(0).getName());
-		assertEquals(1, expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue());
-		assertEquals("count", expandedValueSet.getExpansion().getParameter().get(1).getName());
-		assertEquals(22, expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue());
+		assertThat(expandedValueSet.getExpansion().getTotal()).isEqualTo(codeSystem.getConcept().size());
+		assertThat(expandedValueSet.getExpansion().getOffset()).isEqualTo(1);
+		assertThat(expandedValueSet.getExpansion().getParameter().size()).isEqualTo(2);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getName()).isEqualTo("offset");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(0).getValueIntegerType().getValue().intValue()).isEqualTo(1);
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getName()).isEqualTo("count");
+		assertThat(expandedValueSet.getExpansion().getParameter().get(1).getValueIntegerType().getValue().intValue()).isEqualTo(22);
 
-		assertEquals(22, expandedValueSet.getExpansion().getContains().size());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(22);
 
 		//It is enough to test that the sublist returned is the correct one.
 		assertThat(myValueSetTestUtil.toCodes(expandedValueSet)).isEqualTo(expandedConceptCodes.subList(1, 23));
@@ -1013,9 +1011,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		// check valueSet and codeSystem versions
 		String expectedCodeSystemVersion = "4.0.1";
-		assertEquals(expectedCodeSystemVersion, taskCodeCs.getVersion());
-		assertEquals(expectedCodeSystemVersion, taskCodeVs.getVersion());
-		assertEquals(expectedCodeSystemVersion, taskCodeVs.getCompose().getInclude().get(0).getVersion());
+		assertThat(taskCodeCs.getVersion()).isEqualTo(expectedCodeSystemVersion);
+		assertThat(taskCodeVs.getVersion()).isEqualTo(expectedCodeSystemVersion);
+		assertThat(taskCodeVs.getCompose().getInclude().get(0).getVersion()).isEqualTo(expectedCodeSystemVersion);
 
 		myCodeSystemDao.create(taskCodeCs);
 		IIdType id = myValueSetDao.create(taskCodeVs).getId();
@@ -1023,9 +1021,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		ValueSet expandedValueSet = myValueSetDao.expand(id, new ValueSetExpansionOptions(), mySrd);
 
 		// check expansion size and include CodeSystem version
-		assertEquals(7, expandedValueSet.getExpansion().getContains().size());
-		assertEquals(1, expandedValueSet.getCompose().getInclude().size());
-		assertEquals(expectedCodeSystemVersion, expandedValueSet.getCompose().getInclude().get(0).getVersion());
+		assertThat(expandedValueSet.getExpansion().getContains().size()).isEqualTo(7);
+		assertThat(expandedValueSet.getCompose().getInclude().size()).isEqualTo(1);
+		assertThat(expandedValueSet.getCompose().getInclude().get(0).getVersion()).isEqualTo(expectedCodeSystemVersion);
 	}
 
 	private IBaseResource findResourceByFullUrlInBundle(Bundle thebundle, String theFullUrl) {
@@ -1033,7 +1031,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			.filter(entry -> theFullUrl.equals(entry.getFullUrl()))
 			.findFirst();
 		if (bundleEntry.isEmpty()) {
-			fail("Can't find resource: " + theFullUrl);
+			fail("", "Can't find resource: " + theFullUrl);
 		}
 		return bundleEntry.get().getResource();
 	}
@@ -1069,7 +1067,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		// Non Pre-Expanded
 		ValueSet outcome = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		assertEquals("ValueSet \"ValueSet.url[http://vs]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.", outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
+		assertThat(outcome.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE)).isEqualTo("ValueSet \"ValueSet.url[http://vs]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a scheduled task.");
 		assertThat(myValueSetTestUtil.toCodes(outcome)).as(myValueSetTestUtil.toCodes(outcome).toString()).containsExactly("code5", "code4", "code3", "code2", "code1");
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
@@ -1599,41 +1597,41 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		code = "28571000087109";
 		String display = null;
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
+		assertThat(outcome.isOk()).isTrue();
+		assertThat(outcome.getCode()).isEqualTo("28571000087109");
+		assertThat(outcome.getDisplay()).isEqualTo("MODERNA COVID-19 mRNA-1273");
+		assertThat(outcome.getCodeSystemVersion()).isEqualTo("0.17");
 
 		// Validate code - good code, bad display
 		codeSystemUrl = "http://snomed.info/sct";
 		code = "28571000087109";
 		display = "BLAH";
 		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode", outcome.getMessage());
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode", outcome.getSourceDetails());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
+		assertThat(outcome.isOk()).isTrue();
+		assertThat(outcome.getCode()).isEqualTo("28571000087109");
+		assertThat(outcome.getDisplay()).isEqualTo("MODERNA COVID-19 mRNA-1273");
+		assertThat(outcome.getMessage()).isEqualTo("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode");
+		assertThat(outcome.getSourceDetails()).isEqualTo("Code was validated against in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode");
+		assertThat(outcome.getCodeSystemVersion()).isEqualTo("0.17");
 
 		// Validate code - good code, good display
 		codeSystemUrl = "http://snomed.info/sct";
 		code = "28571000087109";
 		display = "MODERNA COVID-19 mRNA-1273";
 		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
+		assertThat(outcome.isOk()).isTrue();
+		assertThat(outcome.getCode()).isEqualTo("28571000087109");
+		assertThat(outcome.getDisplay()).isEqualTo("MODERNA COVID-19 mRNA-1273");
+		assertThat(outcome.getCodeSystemVersion()).isEqualTo("0.17");
 
 		// Validate code - bad code
 		codeSystemUrl = "http://snomed.info/sct";
 		code = "BLAH";
 		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertFalse(outcome.isOk());
-		assertEquals(null, outcome.getCode());
-		assertEquals(null, outcome.getDisplay());
-		assertEquals(null, outcome.getCodeSystemVersion());
+		assertThat(outcome.isOk()).isFalse();
+		assertThat(outcome.getCode()).isEqualTo(null);
+		assertThat(outcome.getDisplay()).isEqualTo(null);
+		assertThat(outcome.getCodeSystemVersion()).isEqualTo(null);
 
 		// Calculate pre-expansions
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
@@ -1644,10 +1642,10 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		code = "28571000087109";
 		display = null;
 		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
+		assertThat(outcome.isOk()).isTrue();
+		assertThat(outcome.getCode()).isEqualTo("28571000087109");
+		assertThat(outcome.getDisplay()).isEqualTo("MODERNA COVID-19 mRNA-1273");
+		assertThat(outcome.getCodeSystemVersion()).isEqualTo("0.17");
 		assertThat(outcome.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 
 		// Validate code - good code, bad display
@@ -1655,30 +1653,30 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		code = "28571000087109";
 		display = "BLAH";
 		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
-		assertEquals("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\"", outcome.getMessage());
+		assertThat(outcome.isOk()).isTrue();
+		assertThat(outcome.getCode()).isEqualTo("28571000087109");
+		assertThat(outcome.getDisplay()).isEqualTo("MODERNA COVID-19 mRNA-1273");
+		assertThat(outcome.getCodeSystemVersion()).isEqualTo("0.17");
+		assertThat(outcome.getMessage()).isEqualTo("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\"");
 
 		// Validate code - good code, good display
 		codeSystemUrl = "http://snomed.info/sct";
 		code = "28571000087109";
 		display = "MODERNA COVID-19 mRNA-1273";
 		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
+		assertThat(outcome.isOk()).isTrue();
+		assertThat(outcome.getCode()).isEqualTo("28571000087109");
+		assertThat(outcome.getDisplay()).isEqualTo("MODERNA COVID-19 mRNA-1273");
+		assertThat(outcome.getCodeSystemVersion()).isEqualTo("0.17");
 
 		// Validate code - bad code
 		codeSystemUrl = "http://snomed.info/sct";
 		code = "BLAH";
 		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertFalse(outcome.isOk());
-		assertEquals(null, outcome.getCode());
-		assertEquals(null, outcome.getDisplay());
-		assertEquals(null, outcome.getCodeSystemVersion());
+		assertThat(outcome.isOk()).isFalse();
+		assertThat(outcome.getCode()).isEqualTo(null);
+		assertThat(outcome.getDisplay()).isEqualTo(null);
+		assertThat(outcome.getCodeSystemVersion()).isEqualTo(null);
 	}
 
 
@@ -1723,9 +1721,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
 		code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
-		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'", outcome.getMessage());
-		assertEquals("error", outcome.getSeverityCode());
+		assertThat(outcome.isOk()).isFalse();
+		assertThat(outcome.getMessage()).isEqualTo("Unknown code 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'");
+		assertThat(outcome.getSeverityCode()).isEqualTo("error");
 
 		// Perform Pre-Expansion
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
@@ -1775,16 +1773,16 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		try {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17");
 		}
 
 		codeSystemUrl = "http://snomed.info/sct";
 		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
 		code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
-		assertFalse(outcome.isOk());
-		assertEquals("Unknown code 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'", outcome.getMessage());
-		assertEquals("error", outcome.getSeverityCode());
+		assertThat(outcome.isOk()).isFalse();
+		assertThat(outcome.getMessage()).isEqualTo("Unknown code 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'");
+		assertThat(outcome.getSeverityCode()).isEqualTo("error");
 
 		// Perform Pre-Expansion
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
@@ -1798,7 +1796,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		try {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17");
 		}
 	}
 
@@ -1830,16 +1828,16 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		String code;
 
 		ValueSet valueSet = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		assertNotNull(valueSet);
-		assertEquals(1, valueSet.getExpansion().getContains().size());
-		assertEquals("28571000087109", valueSet.getExpansion().getContains().get(0).getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", valueSet.getExpansion().getContains().get(0).getDisplay());
+		assertThat(valueSet).isNotNull();
+		assertThat(valueSet.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(valueSet.getExpansion().getContains().get(0).getCode()).isEqualTo("28571000087109");
+		assertThat(valueSet.getExpansion().getContains().get(0).getDisplay()).isEqualTo("MODERNA COVID-19 mRNA-1273");
 
 		codeSystemUrl = "http://snomed.info/sct";
 		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
 		code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
-		assertTrue(outcome.isOk());
+		assertThat(outcome.isOk()).isTrue();
 	}
 
 	@Test
@@ -1874,34 +1872,34 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
 		code = "28571000087109";
 		outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
+		assertThat(outcome.isOk()).isTrue();
+		assertThat(outcome.getDisplay()).isEqualTo("MODERNA COVID-19 mRNA-1273");
 
 		// Bad code
 		codeSystemUrl = "http://snomed.info/sct";
 		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
 		code = "123";
 		outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
-		assertFalse(outcome.isOk());
+		assertThat(outcome.isOk()).isFalse();
 
 		ValueSet valueSet = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		assertNotNull(valueSet);
-		assertEquals(1, valueSet.getExpansion().getContains().size());
+		assertThat(valueSet).isNotNull();
+		assertThat(valueSet.getExpansion().getContains().size()).isEqualTo(1);
 		ValueSet.ValueSetExpansionContainsComponent expansionCode = valueSet.getExpansion().getContains().get(0);
-		assertEquals("28571000087109", expansionCode.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", expansionCode.getDisplay());
-		assertEquals("http://snomed.info/sct/20611000087101/version/20210331", expansionCode.getVersion());
+		assertThat(expansionCode.getCode()).isEqualTo("28571000087109");
+		assertThat(expansionCode.getDisplay()).isEqualTo("MODERNA COVID-19 mRNA-1273");
+		assertThat(expansionCode.getVersion()).isEqualTo("http://snomed.info/sct/20611000087101/version/20210331");
 
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 
 		valueSet = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		assertNotNull(valueSet);
-		assertEquals(1, valueSet.getExpansion().getContains().size());
+		assertThat(valueSet).isNotNull();
+		assertThat(valueSet.getExpansion().getContains().size()).isEqualTo(1);
 		expansionCode = valueSet.getExpansion().getContains().get(0);
-		assertEquals("28571000087109", expansionCode.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", expansionCode.getDisplay());
-		assertEquals("http://snomed.info/sct/20611000087101/version/20210331", expansionCode.getVersion());
+		assertThat(expansionCode.getCode()).isEqualTo("28571000087109");
+		assertThat(expansionCode.getDisplay()).isEqualTo("MODERNA COVID-19 mRNA-1273");
+		assertThat(expansionCode.getVersion()).isEqualTo("http://snomed.info/sct/20611000087101/version/20210331");
 
 
 	}
@@ -1938,21 +1936,21 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
 		code = "28571000087109";
 		outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
+		assertThat(outcome.isOk()).isTrue();
+		assertThat(outcome.getDisplay()).isEqualTo("MODERNA COVID-19 mRNA-1273");
 
 		// Bad code
 		codeSystemUrl = "http://snomed.info/sct";
 		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
 		code = "123";
 		outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
-		assertFalse(outcome.isOk());
+		assertThat(outcome.isOk()).isFalse();
 
 		ValueSet valueSet = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		assertNotNull(valueSet);
-		assertEquals(1, valueSet.getExpansion().getContains().size());
-		assertEquals("28571000087109", valueSet.getExpansion().getContains().get(0).getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", valueSet.getExpansion().getContains().get(0).getDisplay());
+		assertThat(valueSet).isNotNull();
+		assertThat(valueSet.getExpansion().getContains().size()).isEqualTo(1);
+		assertThat(valueSet.getExpansion().getContains().get(0).getCode()).isEqualTo("28571000087109");
+		assertThat(valueSet.getExpansion().getContains().get(0).getDisplay()).isEqualTo("MODERNA COVID-19 mRNA-1273");
 	}
 
 	@Test
@@ -2035,12 +2033,12 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 
 		// Validate code that is good
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(vs.getUrlElement(), null, new StringType("B"), cs.getUrlElement(), null, null, null, mySrd);
-		assertEquals(true, outcome.isOk());
+		assertThat(outcome.isOk()).isEqualTo(true);
 		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated");
 
 		// Validate code that is bad
 		outcome = myValueSetDao.validateCode(vs.getUrlElement(), null, new StringType("A"), cs.getUrlElement(), null, null, null, mySrd);
-		assertEquals(false, outcome.isOk());
+		assertThat(outcome.isOk()).isEqualTo(false);
 		assertThat(outcome.getMessage()).contains("Code validation occurred using a ValueSet expansion that was pre-calculated");
 
 	}

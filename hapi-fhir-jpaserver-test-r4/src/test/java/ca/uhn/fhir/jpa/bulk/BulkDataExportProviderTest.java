@@ -72,8 +72,6 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -209,18 +207,18 @@ public class BulkDataExportProviderTest {
 				baseUrl = baseUrl + "/" + myPartitionName;
 			}
 
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(baseUrl + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(baseUrl + "/$export-poll-status?_jobId=" + A_JOB_ID);
 		}
 
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
-		assertEquals(2, params.getResourceTypes().size());
-		assertTrue(params.getResourceTypes().contains(patientResource));
-		assertTrue(params.getResourceTypes().contains(practitionerResource));
-		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
-		assertNotNull(params.getSince());
-		assertTrue(params.getFilters().contains(filter));
+		assertThat(params.getResourceTypes().size()).isEqualTo(2);
+		assertThat(params.getResourceTypes().contains(patientResource)).isTrue();
+		assertThat(params.getResourceTypes().contains(practitionerResource)).isTrue();
+		assertThat(params.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
+		assertThat(params.getSince()).isNotNull();
+		assertThat(params.getFilters().contains(filter)).isTrue();
 		assertThat(params.getPostFetchFilterUrls()).containsExactly("Patient?_tag=foo");
 	}
 
@@ -235,11 +233,11 @@ public class BulkDataExportProviderTest {
 		post.setEntity(new ResourceEntity(myCtx, input));
 
 		try (CloseableHttpResponse response = myClient.execute(post)) {
-			assertEquals(202, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
 		}
 
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
-		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
+		assertThat(params.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 
 
 	}
@@ -270,13 +268,13 @@ public class BulkDataExportProviderTest {
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myBaseUrl + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(myBaseUrl + "/$export-poll-status?_jobId=" + A_JOB_ID);
 		}
 
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
-		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
+		assertThat(params.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 		assertThat(params.getResourceTypes()).containsExactlyInAnyOrder("Patient", "Practitioner");
 		assertThat(params.getSince()).isNotNull();
 		assertThat(params.getFilters()).containsExactlyInAnyOrder("Patient?identifier=foo");
@@ -299,13 +297,13 @@ public class BulkDataExportProviderTest {
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 		}
 
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
-		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
+		assertThat(params.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 		assertThat(params.getResourceTypes()).containsExactlyInAnyOrder("Patient", "EpisodeOfCare");
 		assertThat(params.getSince()).isNull();
 		assertThat(params.getFilters()).containsExactlyInAnyOrder("Patient?_id=P999999990", "EpisodeOfCare?patient=P999999990");
@@ -334,9 +332,9 @@ public class BulkDataExportProviderTest {
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue()).isEqualTo("120");
 			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue()).contains("Build in progress - Status set to " + info.getStatus() + " at 20");
 		}
 	}
@@ -365,8 +363,8 @@ public class BulkDataExportProviderTest {
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
-			assertEquals(500, response.getStatusLine().getStatusCode());
-			assertEquals("Server Error", response.getStatusLine().getReasonPhrase());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(500);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Server Error");
 
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
@@ -437,20 +435,20 @@ public class BulkDataExportProviderTest {
 				myBaseUriForPoll = myBaseUriForPoll + "/" + myPartitionName;
 			}
 
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertEquals("OK", response.getStatusLine().getReasonPhrase());
-			assertEquals(Constants.CT_JSON, response.getEntity().getContentType().getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("OK");
+			assertThat(response.getEntity().getContentType().getValue()).isEqualTo(Constants.CT_JSON);
 
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
 			BulkExportResponseJson responseJson = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-			assertEquals(3, responseJson.getOutput().size());
-			assertEquals("Patient", responseJson.getOutput().get(0).getType());
-			assertEquals(myBaseUriForPoll + "/Binary/111", responseJson.getOutput().get(0).getUrl());
-			assertEquals("Patient", responseJson.getOutput().get(1).getType());
-			assertEquals(myBaseUriForPoll + "/Binary/222", responseJson.getOutput().get(1).getUrl());
-			assertEquals("Patient", responseJson.getOutput().get(2).getType());
-			assertEquals(myBaseUriForPoll + "/Binary/333", responseJson.getOutput().get(2).getUrl());
+			assertThat(responseJson.getOutput().size()).isEqualTo(3);
+			assertThat(responseJson.getOutput().get(0).getType()).isEqualTo("Patient");
+			assertThat(responseJson.getOutput().get(0).getUrl()).isEqualTo(myBaseUriForPoll + "/Binary/111");
+			assertThat(responseJson.getOutput().get(1).getType()).isEqualTo("Patient");
+			assertThat(responseJson.getOutput().get(1).getUrl()).isEqualTo(myBaseUriForPoll + "/Binary/222");
+			assertThat(responseJson.getOutput().get(2).getType()).isEqualTo("Patient");
+			assertThat(responseJson.getOutput().get(2).getUrl()).isEqualTo(myBaseUriForPoll + "/Binary/333");
 		}
 	}
 
@@ -493,8 +491,8 @@ public class BulkDataExportProviderTest {
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
-			assertEquals(403, response.getStatusLine().getStatusCode());
-			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(403);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Forbidden");
 		}
 	}
 
@@ -530,14 +528,14 @@ public class BulkDataExportProviderTest {
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertEquals("OK", response.getStatusLine().getReasonPhrase());
-			assertEquals(Constants.CT_JSON, response.getEntity().getContentType().getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("OK");
+			assertThat(response.getEntity().getContentType().getValue()).isEqualTo(Constants.CT_JSON);
 
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
 			BulkExportResponseJson responseJson = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-			assertEquals(msg, responseJson.getMsg());
+			assertThat(responseJson.getMsg()).isEqualTo(msg);
 		}
 	}
 
@@ -558,8 +556,8 @@ public class BulkDataExportProviderTest {
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response content: {}", responseContent);
 
-			assertEquals(404, response.getStatusLine().getStatusCode());
-			assertEquals(Constants.CT_FHIR_JSON_NEW, response.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(404);
+			assertThat(response.getEntity().getContentType().getValue().replaceAll(";.*", "").trim()).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 			assertThat(responseContent).contains("\"diagnostics\": \"Unknown job: AAA\"");
 		}
 	}
@@ -598,19 +596,19 @@ public class BulkDataExportProviderTest {
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID);
 		}
 
 		// verify
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 
-		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
+		assertThat(bp.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 		assertThat(bp.getResourceTypes()).containsExactlyInAnyOrder("Observation", "DiagnosticReport");
 		assertThat(bp.getSince()).isNotNull();
 		assertThat(bp.getFilters()).isNotNull();
-		assertEquals(GROUP_ID, bp.getGroupId());
+		assertThat(bp.getGroupId()).isEqualTo(GROUP_ID);
 		assertThat(bp.isExpandMdm()).isEqualTo(true);
 	}
 
@@ -635,17 +633,17 @@ public class BulkDataExportProviderTest {
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID);
 		}
 
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
-		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
+		assertThat(bp.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 		assertThat(bp.getResourceTypes()).containsExactlyInAnyOrder("Patient", "Practitioner");
 		assertThat(bp.getSince()).isNotNull();
 		assertThat(bp.getFilters()).isNotNull();
-		assertEquals(GROUP_ID, bp.getGroupId());
+		assertThat(bp.getGroupId()).isEqualTo(GROUP_ID);
 		assertThat(bp.isExpandMdm()).isEqualTo(true);
 	}
 
@@ -667,17 +665,17 @@ public class BulkDataExportProviderTest {
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
 
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID);
 		}
 
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
-		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
+		assertThat(bp.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 		assertThat(bp.getResourceTypes()).as(bp.getResourceTypes().toString()).containsExactlyInAnyOrder("DiagnosticReport", "Group", "Observation", "Device", "Patient", "Encounter");
 		assertThat(bp.getSince()).isNotNull();
 		assertThat(bp.getFilters()).isNotNull();
-		assertEquals(GROUP_ID, bp.getGroupId());
+		assertThat(bp.getGroupId()).isEqualTo(GROUP_ID);
 		assertThat(bp.isExpandMdm()).isEqualTo(false);
 	}
 
@@ -780,14 +778,14 @@ public class BulkDataExportProviderTest {
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
 
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 		}
 
 		// verify
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
-		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
+		assertThat(bp.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 		assertThat(bp.getResourceTypes()).containsExactlyInAnyOrder("Patient");
 		assertThat(bp.getFilters()).containsExactlyInAnyOrder("Patient?gender=male", "Patient?gender=female");
 	}
@@ -809,16 +807,16 @@ public class BulkDataExportProviderTest {
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 		}
 
 		// verify
 		Set<String> expectedResourceTypes = new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myCtx));
 		expectedResourceTypes.add("Device");
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
-		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
+		assertThat(bp.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 		assertThat(bp.getResourceTypes()).hasSameElementsAs(expectedResourceTypes);
 	}
 
@@ -845,13 +843,13 @@ public class BulkDataExportProviderTest {
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 		}
 
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
-		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
+		assertThat(bp.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 		assertThat(bp.getResourceTypes()).containsExactlyInAnyOrder("Immunization", "Observation");
 		assertThat(bp.getSince()).isNotNull();
 		assertThat(bp.getFilters()).containsExactlyInAnyOrder("Immunization?vaccine-code=foo");
@@ -879,14 +877,14 @@ public class BulkDataExportProviderTest {
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 		}
 
 		// verify
 		JobInstanceStartRequest parameters = verifyJobStart();
-		assertFalse(parameters.isUseCache());
+		assertThat(parameters.isUseCache()).isFalse();
 	}
 
 	@Test
@@ -912,14 +910,14 @@ public class BulkDataExportProviderTest {
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 		}
 
 		// verify
 		JobInstanceStartRequest parameters = verifyJobStart();
-		assertFalse(parameters.isUseCache());
+		assertThat(parameters.isUseCache()).isFalse();
 	}
 
 	@Test
@@ -983,8 +981,8 @@ public class BulkDataExportProviderTest {
 		try (CloseableHttpResponse response = myClient.execute(delete)) {
 			ourLog.info("Response: {}", response.toString());
 
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
 
 			verify(myJobCoordinator, times(1)).cancelInstance(A_JOB_ID);
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
@@ -1015,8 +1013,8 @@ public class BulkDataExportProviderTest {
 		try (CloseableHttpResponse response = myClient.execute(delete)) {
 			ourLog.info("Response: {}", response.toString());
 
-			assertEquals(404, response.getStatusLine().getStatusCode());
-			assertEquals("Not Found", response.getStatusLine().getReasonPhrase());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(404);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Not Found");
 
 			verify(myJobCoordinator, times(1)).cancelInstance(A_JOB_ID);
 			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
@@ -1039,14 +1037,14 @@ public class BulkDataExportProviderTest {
 
 		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
 			ourLog.info("Response: {}", response.toString());
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myServer.getPort(), A_JOB_ID), response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-			assertTrue(IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8).isEmpty());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myServer.getPort(), A_JOB_ID));
+			assertThat(IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8).isEmpty()).isTrue();
 		}
 
 		final BulkExportJobParameters params = verifyJobStartAndReturnParameters();
-		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
+		assertThat(params.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 	}
 
 	@Test
@@ -1069,7 +1067,7 @@ public class BulkDataExportProviderTest {
 		}
 
 		final BulkExportJobParameters params = verifyJobStartAndReturnParameters();
-		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
+		assertThat(params.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 	}
 
 	@Test
@@ -1091,7 +1089,7 @@ public class BulkDataExportProviderTest {
 
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
-			assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_404_NOT_FOUND);
 		}
 	}
 
@@ -1134,7 +1132,7 @@ public class BulkDataExportProviderTest {
 
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
-			assertEquals(Constants.STATUS_HTTP_202_ACCEPTED, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_202_ACCEPTED);
 		}
 	}
 
@@ -1152,7 +1150,7 @@ public class BulkDataExportProviderTest {
 
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
-			assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_400_BAD_REQUEST);
 		}
 	}
 
@@ -1165,9 +1163,9 @@ public class BulkDataExportProviderTest {
 		ourLog.info("Request: {}", post);
 		try (CloseableHttpResponse response = myClient.execute(post)) {
 			ourLog.info("Response: {}", response.toString());
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + theExpectedJobId, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(202);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + theExpectedJobId);
 		}
 	}
 
@@ -1187,8 +1185,8 @@ public class BulkDataExportProviderTest {
 		ourLog.info("Request: {}", url);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
-			assertEquals(403, response.getStatusLine().getStatusCode());
-			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(403);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Forbidden");
 		}
 
 	}
@@ -1218,8 +1216,8 @@ public class BulkDataExportProviderTest {
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try (CloseableHttpResponse response = myClient.execute(get)) {
 			ourLog.info("Response: {}", response.toString());
-			assertEquals(403, response.getStatusLine().getStatusCode());
-			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(403);
+			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Forbidden");
 		}
 
 	}

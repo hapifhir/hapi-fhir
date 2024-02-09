@@ -33,9 +33,9 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.security.InvalidParameterException;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.ValidationConstants.LOINC_LOW;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -58,7 +58,7 @@ class TermVersionAdapterSvcR4Test {
 			InvalidParameterException.class,
 			() -> testedClass.createOrUpdateCodeSystem(codeSystem, new ServletRequestDetails()));
 
-		assertTrue(thrown.getMessage().contains("'loinc' CodeSystem must have an 'ID' element"));
+		assertThat(thrown.getMessage().contains("'loinc' CodeSystem must have an 'ID' element")).isTrue();
 	}
 
 

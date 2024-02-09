@@ -32,9 +32,7 @@ import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.ourPro
 import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.propertyCode;
 import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.propertyCodeSystem;
 import static ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil.propertyDisplay;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderR4CodeSystemPropertiesTest extends BaseResourceProviderR4Test {
 	public static Stream<Arguments> parametersLookup() {
@@ -68,11 +66,11 @@ public class ResourceProviderR4CodeSystemPropertiesTest extends BaseResourceProv
 
 		// verify
 		if (theExpectedReturnedProperties.isEmpty()) {
-			assertFalse(parameters.hasParameter("property"));
+			assertThat(parameters.hasParameter("property")).isFalse();
 			return;
 		}
 
-		assertTrue(parameters.hasParameter("property"));
+		assertThat(parameters.hasParameter("property")).isTrue();
 		Iterator<ParametersParameterComponent> parameterPropertyIterator = parameters.getParameters("property").iterator();
 
 		Iterator<ConceptPropertyComponent> propertyIterator = concept.getProperty().stream()
@@ -81,19 +79,19 @@ public class ResourceProviderR4CodeSystemPropertiesTest extends BaseResourceProv
 		while (propertyIterator.hasNext()) {
 			ConceptPropertyComponent property = propertyIterator.next();
 
-			assertTrue(parameterPropertyIterator.hasNext());
+			assertThat(parameterPropertyIterator.hasNext()).isTrue();
 			ParametersParameterComponent parameter = parameterPropertyIterator.next();
 			Iterator<ParametersParameterComponent> parameterPartIterator = parameter.getPart().iterator();
 
 			parameter = parameterPartIterator.next();
-			assertEquals("code", parameter.getName());
-			assertEquals(property.getCode(), ((CodeType) parameter.getValue()).getValue());
+			assertThat(parameter.getName()).isEqualTo("code");
+			assertThat(((CodeType) parameter.getValue()).getValue()).isEqualTo(property.getCode());
 
 			parameter = parameterPartIterator.next();
-			assertEquals("value", parameter.getName());
-			assertTrue(property.getValue().equalsShallow(parameter.getValue()));
+			assertThat(parameter.getName()).isEqualTo("value");
+			assertThat(property.getValue().equalsShallow(parameter.getValue())).isTrue();
 
-			assertFalse(parameterPartIterator.hasNext());
+			assertThat(parameterPartIterator.hasNext()).isFalse();
 		}
 	}
 }

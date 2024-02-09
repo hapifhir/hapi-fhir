@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class Batch2JobInstanceRepositoryTest extends BaseJpaR4Test {
 
@@ -49,11 +49,11 @@ public class Batch2JobInstanceRepositoryTest extends BaseJpaR4Test {
 		Batch2JobInstanceEntity readBack = runInTransaction(() ->
 			myBatch2JobInstanceRepository.findById(jobId).orElseThrow());
 		if (theExpectedSuccessFlag) {
-			assertEquals(1, changeCount, "The change happened");
-			assertEquals(theTargetState, readBack.getStatus());
+			assertThat(changeCount).as("The change happened").isEqualTo(1);
+			assertThat(readBack.getStatus()).isEqualTo(theTargetState);
 		} else {
-			assertEquals(0, changeCount, "The change did not happened");
-			assertEquals(theCurrentState, readBack.getStatus());
+			assertThat(changeCount).as("The change did not happened").isEqualTo(0);
+			assertThat(readBack.getStatus()).isEqualTo(theCurrentState);
 		}
 
 	}

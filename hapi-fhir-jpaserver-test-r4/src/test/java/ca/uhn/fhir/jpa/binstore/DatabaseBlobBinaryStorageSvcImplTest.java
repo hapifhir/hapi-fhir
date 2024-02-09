@@ -22,12 +22,7 @@ import java.sql.Blob;
 import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -55,25 +50,25 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
-		assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		assertEquals(1, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
-		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread().size()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size()).isEqualTo(0);
 
 		myCaptureQueriesListener.clear();
 
 		assertThat(outcome.getBlobId()).matches("^[a-zA-Z0-9]{100}$");
-		assertEquals(16, outcome.getBytes());
+		assertThat(outcome.getBytes()).isEqualTo(16);
 
 		/*
 		 * Read back the details
 		 */
 
 		StoredDetails details = mySvc.fetchBlobDetails(resourceId, outcome.getBlobId());
-		assertEquals(16L, details.getBytes());
-		assertEquals(outcome.getBlobId(), details.getBlobId());
-		assertEquals("image/png", details.getContentType());
-		assertEquals("dc7197cfab936698bef7818975c185a9b88b71a0a0a2493deea487706ddf20cb", details.getHash());
-		assertNotNull(details.getPublished());
+		assertThat(details.getBytes()).isEqualTo(16L);
+		assertThat(details.getBlobId()).isEqualTo(outcome.getBlobId());
+		assertThat(details.getContentType()).isEqualTo("image/png");
+		assertThat(details.getHash()).isEqualTo("dc7197cfab936698bef7818975c185a9b88b71a0a0a2493deea487706ddf20cb");
+		assertThat(details.getPublished()).isNotNull();
 
 		/*
 		 * Read back the contents
@@ -82,8 +77,8 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();
 		mySvc.writeBlob(resourceId, outcome.getBlobId(), capture);
 
-		assertArrayEquals(SOME_BYTES, capture.toByteArray());
-		assertArrayEquals(SOME_BYTES, mySvc.fetchBlob(resourceId, outcome.getBlobId()));
+		assertThat(capture.toByteArray()).containsExactly(SOME_BYTES);
+		assertThat(mySvc.fetchBlob(resourceId, outcome.getBlobId())).containsExactly(SOME_BYTES);
 	}
 
 	@Test
@@ -105,28 +100,28 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		String contentType = "image/png";
 		IdType resourceId = new IdType("Binary/123");
 		StoredDetails outcome = mySvc.storeBlob(resourceId, "ABCDEFG", contentType, inputStream, new ServletRequestDetails());
-		assertEquals("ABCDEFG", outcome.getBlobId());
+		assertThat(outcome.getBlobId()).isEqualTo("ABCDEFG");
 
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
-		assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
-		assertEquals(1, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
-		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.getInsertQueriesForCurrentThread().size()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size()).isEqualTo(0);
 
 		myCaptureQueriesListener.clear();
 
-		assertEquals(16, outcome.getBytes());
+		assertThat(outcome.getBytes()).isEqualTo(16);
 
 		/*
 		 * Read back the details
 		 */
 
 		StoredDetails details = mySvc.fetchBlobDetails(resourceId, outcome.getBlobId());
-		assertEquals(16L, details.getBytes());
-		assertEquals(outcome.getBlobId(), details.getBlobId());
-		assertEquals("image/png", details.getContentType());
-		assertEquals("dc7197cfab936698bef7818975c185a9b88b71a0a0a2493deea487706ddf20cb", details.getHash());
-		assertNotNull(details.getPublished());
+		assertThat(details.getBytes()).isEqualTo(16L);
+		assertThat(details.getBlobId()).isEqualTo(outcome.getBlobId());
+		assertThat(details.getContentType()).isEqualTo("image/png");
+		assertThat(details.getHash()).isEqualTo("dc7197cfab936698bef7818975c185a9b88b71a0a0a2493deea487706ddf20cb");
+		assertThat(details.getPublished()).isNotNull();
 
 		/*
 		 * Read back the contents
@@ -135,21 +130,21 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();
 		mySvc.writeBlob(resourceId, outcome.getBlobId(), capture);
 
-		assertArrayEquals(SOME_BYTES, capture.toByteArray());
-		assertArrayEquals(SOME_BYTES, mySvc.fetchBlob(resourceId, outcome.getBlobId()));
+		assertThat(capture.toByteArray()).containsExactly(SOME_BYTES);
+		assertThat(mySvc.fetchBlob(resourceId, outcome.getBlobId())).containsExactly(SOME_BYTES);
 	}
 
 	@Test
 	public void testFetchBlobUnknown() throws IOException {
 		try {
 			mySvc.fetchBlob(new IdType("Patient/123"), "1111111");
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertEquals("Unknown blob ID: 1111111 for resource ID Patient/123", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Unknown blob ID: 1111111 for resource ID Patient/123");
 		}
 
 		StoredDetails details = mySvc.fetchBlobDetails(new IdType("Patient/123"), "1111111");
-		assertNull(details);
+		assertThat(details).isNull();
 	}
 
 
@@ -169,8 +164,8 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		mySvc.expungeBlob(resourceId, blobId);
 
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();
-		assertFalse(mySvc.writeBlob(resourceId, outcome.getBlobId(), capture));
-		assertEquals(0, capture.size());
+		assertThat(mySvc.writeBlob(resourceId, outcome.getBlobId(), capture)).isFalse();
+		assertThat(capture.size()).isEqualTo(0);
 
 	}
 
@@ -188,13 +183,13 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 
 		// Right ID
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();
-		assertTrue(mySvc.writeBlob(resourceId, outcome.getBlobId(), capture));
-		assertEquals(16, capture.size());
+		assertThat(mySvc.writeBlob(resourceId, outcome.getBlobId(), capture)).isTrue();
+		assertThat(capture.size()).isEqualTo(16);
 
 		// Wrong ID
 		capture = new ByteArrayOutputStream();
-		assertFalse(mySvc.writeBlob(new IdType("Patient/9999"), outcome.getBlobId(), capture));
-		assertEquals(0, capture.size());
+		assertThat(mySvc.writeBlob(new IdType("Patient/9999"), outcome.getBlobId(), capture)).isFalse();
+		assertThat(capture.size()).isEqualTo(0);
 
 	}
 
@@ -209,7 +204,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 
 		try {
 			svc.copyBlobToOutputStream(new ByteArrayOutputStream(), (mockInput));
-			fail();
+			fail("");
 		} catch (IOException e) {
 			assertThat(e.getMessage()).contains("FOO");
 		}
@@ -226,7 +221,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 
 		try {
 			svc.copyBlobToByteArray(mockInput);
-			fail();
+			fail("");
 		} catch (IOException e) {
 			assertThat(e.getMessage()).contains("FOO");
 		}

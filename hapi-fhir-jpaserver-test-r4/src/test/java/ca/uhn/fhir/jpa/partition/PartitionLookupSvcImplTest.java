@@ -16,7 +16,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -50,7 +50,7 @@ class PartitionLookupSvcImplTest {
 		when(myPartitionDao.findById(any())).thenReturn(Optional.empty());
 		for (int i = 0; i<10000; i++) {
 			int randomUnusedPartitionId = myPartitionLookupSvc.generateRandomUnusedPartitionId();
-			assertTrue(randomUnusedPartitionId >= 1);
+			assertThat(randomUnusedPartitionId >= 1).isTrue();
 		}
 	}
 }

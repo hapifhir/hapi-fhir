@@ -56,6 +56,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
 import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -90,7 +91,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.SCT_URI + "FOO"))
 				.andParameter(TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Did not find file matching concepts.csv");
 		}
@@ -159,9 +160,9 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.named("upload-external-code-system")
 				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType(ITermLoaderSvc.SCT_URI))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1138) + "No 'file' parameter, or package had no data", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1138) + "No 'file' parameter, or package had no data");
 		}
 	}
 
@@ -176,7 +177,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.named("upload-external-code-system")
 				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_FILE, new Attachment().setUrl("file.zip").setData(packageBytes))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Missing mandatory parameter: system");
 		}
@@ -554,7 +555,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_FILE, conceptsAttachment)
 				.prettyPrint()
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Missing mandatory parameter: system");
 		}
@@ -575,7 +576,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 				.withParameter(Parameters.class, TerminologyUploaderProvider.PARAM_SYSTEM, new UriType("http://foo/cs"))
 				.prettyPrint()
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Missing mandatory parameter: file");
 		}

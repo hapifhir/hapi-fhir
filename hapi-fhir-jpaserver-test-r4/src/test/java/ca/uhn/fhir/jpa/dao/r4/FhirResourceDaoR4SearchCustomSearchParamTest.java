@@ -73,11 +73,10 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
@@ -189,13 +188,13 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		IBundleProvider search;
 
 		search = myPatientDao.search(SearchParameterMap.newSynchronous("future-appointment-count", new NumberParam(1)));
-		assertEquals(1, search.size());
+		assertThat(search.size()).isEqualTo(1);
 
 		search = myPatientDao.search(SearchParameterMap.newSynchronous("future-appointment-count", new NumberParam("gt0")));
-		assertEquals(1, search.size());
+		assertThat(search.size()).isEqualTo(1);
 
 		search = myPatientDao.search(SearchParameterMap.newSynchronous("future-appointment-count", new NumberParam("lt0")));
-		assertEquals(0, search.size());
+		assertThat(search.size()).isEqualTo(0);
 	}
 
 	@Test
@@ -225,10 +224,10 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		IBundleProvider search;
 
 		search = myPatientDao.search(SearchParameterMap.newSynchronous("stripped-ssn", new StringParam(strippedValue)));
-		assertEquals(1, search.size());
+		assertThat(search.size()).isEqualTo(1);
 
 		search = myPatientDao.search(SearchParameterMap.newSynchronous("stripped-ssn", new StringParam(rawValue)));
-		assertEquals(0, search.size());
+		assertThat(search.size()).isEqualTo(0);
 	}
 
 	@Test
@@ -264,11 +263,11 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 			"fuzzymodified");
 
 		// verify the encoders are different!
-		assertNotEquals(paramdefault, parammodified);
+		assertThat(parammodified).isNotEqualTo(paramdefault);
 		String encodedDefault = paramdefault.encode(testString);
 		String encodedMod = parammodified.encode(testString);
-		assertEquals(modifiedLength, encodedMod.length());
-		assertNotEquals(encodedDefault.length(), encodedMod.length());
+		assertThat(encodedMod.length()).isEqualTo(modifiedLength);
+		assertThat(encodedMod.length()).isNotEqualTo(encodedDefault.length());
 	}
 
 	/**
@@ -362,7 +361,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		fooSp.addBase("Patient");
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).contains("The token : is not expected here");
 		}
@@ -381,9 +380,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1113) + "SearchParameter.base is missing", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1113) + "SearchParameter.base is missing");
 		}
 	}
 
@@ -400,9 +399,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Invalid SearchParameter.expression value \"PatientFoo.gender\": Unknown resource name \"PatientFoo\" (this name is not known in FHIR version \"R4\")", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Invalid SearchParameter.expression value \"PatientFoo.gender\": Unknown resource name \"PatientFoo\" (this name is not known in FHIR version \"R4\")");
 		}
 	}
 
@@ -417,9 +416,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1114) + "SearchParameter.expression is missing", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1114) + "SearchParameter.expression is missing");
 		}
 	}
 
@@ -436,9 +435,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals("Invalid SearchParameter.expression value \"gender\". Must start with a resource name.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Invalid SearchParameter.expression value \"gender\". Must start with a resource name.");
 		}
 	}
 
@@ -455,9 +454,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		fooSp.setStatus(null);
 		try {
 			mySearchParameterDao.create(fooSp, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1112) + "SearchParameter.status is missing or invalid", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1112) + "SearchParameter.status is missing or invalid");
 		}
 
 	}
@@ -479,7 +478,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 		List<JobInstance> finalJobs = myBatch2JobHelper.findJobsByDefinition(ReindexAppCtx.JOB_REINDEX);
 		List<JobInstance> newJobs = finalJobs.stream().filter(t -> !initialJobs.contains(t)).collect(Collectors.toList());
-		assertEquals(1, newJobs.size(), "number of jobs created");
+		assertThat(newJobs.size()).as("number of jobs created").isEqualTo(1);
 	}
 
 	@Test
@@ -627,7 +626,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		mySearchParamRegistry.forceRefresh();
 
 		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Patient", "family");
-		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, sp.getStatus());
+		assertThat(sp.getStatus()).isEqualTo(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
 	}
 
 
@@ -643,9 +642,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		memberSp.setStatus(Enumerations.PublicationStatus.RETIRED);
 		try {
 			mySearchParameterDao.create(memberSp, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1111) + "Can not override built-in search parameter Group:member because overriding is disabled on this server", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1111) + "Can not override built-in search parameter Group:member because overriding is disabled on this server");
 		}
 	}
 
@@ -772,7 +771,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		threadIdSp.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		try {
 			mySearchParameterDao.create(threadIdSp, mySrd);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage()).startsWith(Msg.code(1121) + "Invalid FHIRPath format for SearchParameter.expression \"Communication.payload[1].contentAttachment is not null\"");
 		}
@@ -1600,9 +1599,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foo", new TokenParam(null, "male"));
 		try {
 			myPatientDao.search(map).size();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]");
 		}
 
 		// Delete the param
@@ -1616,9 +1615,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foo", new TokenParam(null, "male"));
 		try {
 			myPatientDao.search(map).size();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]");
 		}
 	}
 
@@ -1693,9 +1692,9 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.add("foo", new TokenParam(null, "male"));
 		try {
 			myPatientDao.search(map).size();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1223) + "Unknown search parameter \"foo\" for resource type \"Patient\". Valid search parameters for this search are: [_content, _id, _lastUpdated, _profile, _security, _source, _tag, _text, active, address, address-city, address-country, address-postalcode, address-state, address-use, birthdate, death-date, deceased, email, family, gender, general-practitioner, given, identifier, language, link, name, organization, phone, phonetic, telecom]");
 		}
 
 		// Try with normal gender SP
@@ -1730,7 +1729,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		map.setLoadSynchronous(true);
 		map.add("product", new TokenParam(null, "1"));
 		IBundleProvider results = myChargeItemDao.search(map);
-		assertEquals(1, results.size().intValue());
+		assertThat(results.size().intValue()).isEqualTo(1);
 
 
 	}

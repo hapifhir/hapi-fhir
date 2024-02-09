@@ -33,6 +33,8 @@ import jakarta.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -213,8 +215,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 			.setTargetSystem(CS_URL_2);
 
 		TranslateConceptResults resp = myConceptMappingSvc.translate(translationRequest);
-		assertEquals(1, resp.size());
-		assertEquals("34567", resp.getResults().get(0).getCode());
+		assertThat(resp.size()).isEqualTo(1);
+		assertThat(resp.getResults().get(0).getCode()).isEqualTo("34567");
 	}
 
 	@Test
@@ -1177,9 +1179,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 		try {
 			createAndPersistConceptMap();
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(840) + "Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart(), e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(840) + "Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart());
 		}
 
 	}
@@ -1190,9 +1192,9 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 		try {
 			createAndPersistConceptMap("v1");
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(841) + "Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\" and ConceptMap.version \"v1\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart(), e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(841) + "Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\" and ConceptMap.version \"v1\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart());
 		}
 
 	}
@@ -1641,14 +1643,14 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 	}
 
 	private static void assertSameTranslationRequest(TranslationRequest expected, TranslationRequest actual) {
-		assertTrue(expected.getCodeableConcept().equalsDeep(actual.getCodeableConcept()));
-		assertEquals(expected.getConceptMapVersion(), actual.getConceptMapVersion());
-		assertEquals(expected.getUrl(), actual.getUrl());
-		assertEquals(expected.getSource(), actual.getSource());
-		assertEquals(expected.getTarget(), actual.getTarget());
-		assertEquals(expected.getTargetSystem(), actual.getTargetSystem());
-		assertEquals(expected.getResourceId(), actual.getResourceId());
-		assertEquals(expected.getReverseAsBoolean(), actual.getReverseAsBoolean());
+		assertThat(expected.getCodeableConcept().equalsDeep(actual.getCodeableConcept())).isTrue();
+		assertThat(actual.getConceptMapVersion()).isEqualTo(expected.getConceptMapVersion());
+		assertThat(actual.getUrl()).isEqualTo(expected.getUrl());
+		assertThat(actual.getSource()).isEqualTo(expected.getSource());
+		assertThat(actual.getTarget()).isEqualTo(expected.getTarget());
+		assertThat(actual.getTargetSystem()).isEqualTo(expected.getTargetSystem());
+		assertThat(actual.getResourceId()).isEqualTo(expected.getResourceId());
+		assertThat(actual.getReverseAsBoolean()).isEqualTo(expected.getReverseAsBoolean());
 	}
 
 	private void createAndPersistConceptMap() {

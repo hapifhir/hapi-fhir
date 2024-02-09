@@ -44,7 +44,6 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 
@@ -158,10 +157,10 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals(1, output.getEntry().size());
+		assertThat(output.getEntry().size()).isEqualTo(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
-		assertEquals(5, respBundle.getEntry().size());
-		assertEquals(null, respBundle.getLink("next"));
+		assertThat(respBundle.getEntry().size()).isEqualTo(5);
+		assertThat(respBundle.getLink("next")).isEqualTo(null);
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 	}
@@ -181,16 +180,16 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals(1, output.getEntry().size());
+		assertThat(output.getEntry().size()).isEqualTo(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
-		assertEquals(5, respBundle.getEntry().size());
+		assertThat(respBundle.getEntry().size()).isEqualTo(5);
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 
 		String nextPageLink = respBundle.getLink("next").getUrl();
 		output = ourClient.loadPage().byUrl(nextPageLink).andReturnBundle(Bundle.class).execute();
 		respBundle = output;
-		assertEquals(5, respBundle.getEntry().size());
+		assertThat(respBundle.getEntry().size()).isEqualTo(5);
 		actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(5, 10).toArray(new String[0]));
 	}
@@ -216,10 +215,10 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals(30, output.getEntry().size());
+		assertThat(output.getEntry().size()).isEqualTo(30);
 		for (int i = 0; i < 30; i++) {
 			Bundle respBundle = (Bundle) output.getEntry().get(i).getResource();
-			assertEquals(5, respBundle.getEntry().size());
+			assertThat(respBundle.getEntry().size()).isEqualTo(5);
 			assertThat(respBundle.getLink("next").getUrl()).isNotNull();
 			List<String> actualIds = toIds(respBundle);
 			assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
@@ -270,8 +269,8 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			.and(MedicationRequest.MEDICATION.hasChainedProperty(Medication.CODE.exactly().code("50580-0449-23")))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals(1, b.getEntry().size());
-		assertEquals("MedicationRequest/MR635079", b.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertThat(b.getEntry().size()).isEqualTo(1);
+		assertThat(b.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("MedicationRequest/MR635079");
 
 		b = new Bundle();
 		b.setType(BundleType.BATCH);
@@ -284,8 +283,8 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 		b = (Bundle) resp.getEntry().get(0).getResource();
-		assertEquals(1, b.getEntry().size());
-		assertEquals("MedicationRequest/MR635079", b.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertThat(b.getEntry().size()).isEqualTo(1);
+		assertThat(b.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("MedicationRequest/MR635079");
 	}
 
 	@Test
@@ -305,10 +304,10 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals(1, output.getEntry().size());
+		assertThat(output.getEntry().size()).isEqualTo(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
-		assertEquals(5, respBundle.getEntry().size());
-		assertEquals(null, respBundle.getLink("next"));
+		assertThat(respBundle.getEntry().size()).isEqualTo(5);
+		assertThat(respBundle.getLink("next")).isEqualTo(null);
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 	}
@@ -328,16 +327,16 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals(1, output.getEntry().size());
+		assertThat(output.getEntry().size()).isEqualTo(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
-		assertEquals(5, respBundle.getEntry().size());
+		assertThat(respBundle.getEntry().size()).isEqualTo(5);
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 
 		String nextPageLink = respBundle.getLink("next").getUrl();
 		output = ourClient.loadPage().byUrl(nextPageLink).andReturnBundle(Bundle.class).execute();
 		respBundle = output;
-		assertEquals(5, respBundle.getEntry().size());
+		assertThat(respBundle.getEntry().size()).isEqualTo(5);
 		actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(5, 10).toArray(new String[0]));
 	}
@@ -363,10 +362,10 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertEquals(30, output.getEntry().size());
+		assertThat(output.getEntry().size()).isEqualTo(30);
 		for (int i = 0; i < 30; i++) {
 			Bundle respBundle = (Bundle) output.getEntry().get(i).getResource();
-			assertEquals(5, respBundle.getEntry().size());
+			assertThat(respBundle.getEntry().size()).isEqualTo(5);
 			assertThat(respBundle.getLink("next").getUrl()).isNotNull();
 			List<String> actualIds = toIds(respBundle);
 			assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
@@ -398,7 +397,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		Bundle output = ourClient.transaction().withBundle(input).execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		Resource resource = output.getEntry().get(0).getResource();
-		assertEquals(2, resource.getChildByName("entry").getValues().size());
+		assertThat(resource.getChildByName("entry").getValues().size()).isEqualTo(2);
 	}
 
 	private List<String> toIds(Bundle theRespBundle) {

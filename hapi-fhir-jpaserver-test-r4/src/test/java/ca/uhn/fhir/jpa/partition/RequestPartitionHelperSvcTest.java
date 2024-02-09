@@ -14,7 +14,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,8 +48,8 @@ class RequestPartitionHelperSvcTest {
 		RequestPartitionId result = mySvc.determineReadPartitionForRequestForRead(srd, "Patient", new IdType("Patient/123"));
 
 		// verify
-		assertEquals(PARTITION_ID, result.getFirstPartitionIdOrNull());
-		assertEquals(PARTITION_NAME, result.getFirstPartitionNameOrNull());
+		assertThat(result.getFirstPartitionIdOrNull()).isEqualTo(PARTITION_ID);
+		assertThat(result.getFirstPartitionNameOrNull()).isEqualTo(PARTITION_NAME);
 	}
 
 	@Test
@@ -67,8 +67,8 @@ class RequestPartitionHelperSvcTest {
 		RequestPartitionId result = mySvc.determineCreatePartitionForRequest(srd, resource, "Patient");
 
 		// verify
-		assertEquals(PARTITION_ID, result.getFirstPartitionIdOrNull());
-		assertEquals(PARTITION_NAME, result.getFirstPartitionNameOrNull());
+		assertThat(result.getFirstPartitionIdOrNull()).isEqualTo(PARTITION_ID);
+		assertThat(result.getFirstPartitionNameOrNull()).isEqualTo(PARTITION_NAME);
 	}
 
 }

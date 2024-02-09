@@ -16,8 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourceProviderR4Test {
 
@@ -52,7 +51,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
 		// should be de-AT and default
-		assertEquals(2, designationList.size()); 
+		assertThat(designationList.size()).isEqualTo(2); 
 		verifyDesignationDeAT(designationList.get(0));
 		verifyDesignationNoLanguage(designationList.get(1));
 	}
@@ -78,7 +77,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
 		// should be default only
-		assertEquals(1, designationList.size()); 
+		assertThat(designationList.size()).isEqualTo(1); 
 		verifyDesignationNoLanguage(designationList.get(0));
 
 	}
@@ -102,7 +101,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
 		// designation should be fr-FR, De-AT and default
-		assertEquals(3, designationList.size()); 
+		assertThat(designationList.size()).isEqualTo(3); 
 		verifyDesignationfrFR(designationList.get(0));
 		verifyDesignationDeAT(designationList.get(1));
 		verifyDesignationNoLanguage(designationList.get(2));
@@ -131,7 +130,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		List<ParametersParameterComponent> designationList = getDesignations(parameterList);
 		// should be de-AT and default
-		assertEquals(2, designationList.size()); 
+		assertThat(designationList.size()).isEqualTo(2); 
 		verifyDesignationDeAT(designationList.get(0));
 		verifyDesignationNoLanguage(designationList.get(1));
 
@@ -154,7 +153,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		designationList = getDesignations(parameterList);
 		// should be default only
-		assertEquals(1, designationList.size()); 
+		assertThat(designationList.size()).isEqualTo(1); 
 		verifyDesignationNoLanguage(designationList.get(0));
 		
 		//-- third call with no language
@@ -175,7 +174,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		designationList = getDesignations(parameterList);
 		// designation should be fr-FR, De-AT and default
-		assertEquals(3, designationList.size()); 
+		assertThat(designationList.size()).isEqualTo(3); 
 		verifyDesignationfrFR(designationList.get(0));
 		verifyDesignationDeAT(designationList.get(1));
 		verifyDesignationNoLanguage(designationList.get(2));
@@ -199,40 +198,39 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 		verifyParameterList(parameterList);
 		designationList = getDesignations(parameterList);
 		// designation should be fr-FR, default
-		assertEquals(2, designationList.size()); 
+		assertThat(designationList.size()).isEqualTo(2); 
 		verifyDesignationfrFR(designationList.get(0));
 		verifyDesignationNoLanguage(designationList.get(1));
 	}
 	
 	
 	private void verifyParameterList(List<ParametersParameterComponent> parameterList) {
-		assertEquals("display", parameterList.get(0).getName());
-		assertEquals(("Systolic blood pressure 12 hour minimum"),
-				((StringType) parameterList.get(0).getValue()).getValue());
+		assertThat(parameterList.get(0).getName()).isEqualTo("display");
+		assertThat(((StringType) parameterList.get(0).getValue()).getValue()).isEqualTo(("Systolic blood pressure 12 hour minimum"));
 
-		assertEquals("abstract", parameterList.get(1).getName());
-		assertEquals(false, ((BooleanType) parameterList.get(1).getValue()).getValue());
+		assertThat(parameterList.get(1).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) parameterList.get(1).getValue()).getValue()).isEqualTo(false);
 	}
 	
 	private void verifyDesignationfrFR(ParametersParameterComponent designation) {
-		assertEquals("language", designation.getPart().get(0).getName());
-		assertEquals("fr-FR", designation.getPart().get(0).getValue().toString());
-		assertEquals("value", designation.getPart().get(2).getName());
-		assertEquals("fr-FR:Systolic blood pressure 12 hour minimum", designation.getPart().get(2).getValue().toString());
+		assertThat(designation.getPart().get(0).getName()).isEqualTo("language");
+		assertThat(designation.getPart().get(0).getValue().toString()).isEqualTo("fr-FR");
+		assertThat(designation.getPart().get(2).getName()).isEqualTo("value");
+		assertThat(designation.getPart().get(2).getValue().toString()).isEqualTo("fr-FR:Systolic blood pressure 12 hour minimum");
 	}
 	
 	private void verifyDesignationDeAT(ParametersParameterComponent designation) {
-		assertEquals("language", designation.getPart().get(0).getName());
-		assertEquals("de-AT", designation.getPart().get(0).getValue().toString());
-		assertEquals("value", designation.getPart().get(2).getName());
-		assertEquals("de-AT:Systolic blood pressure 12 hour minimum", designation.getPart().get(2).getValue().toString());
+		assertThat(designation.getPart().get(0).getName()).isEqualTo("language");
+		assertThat(designation.getPart().get(0).getValue().toString()).isEqualTo("de-AT");
+		assertThat(designation.getPart().get(2).getName()).isEqualTo("value");
+		assertThat(designation.getPart().get(2).getValue().toString()).isEqualTo("de-AT:Systolic blood pressure 12 hour minimum");
 	}
 	
 	private void verifyDesignationNoLanguage(ParametersParameterComponent designation) {
-		assertEquals("language", designation.getPart().get(0).getName());
-		assertNull(designation.getPart().get(0).getValue());
-		assertEquals("value", designation.getPart().get(2).getName());
-		assertEquals("Systolic blood pressure 12 hour minimum", designation.getPart().get(2).getValue().toString());
+		assertThat(designation.getPart().get(0).getName()).isEqualTo("language");
+		assertThat(designation.getPart().get(0).getValue()).isNull();
+		assertThat(designation.getPart().get(2).getName()).isEqualTo("value");
+		assertThat(designation.getPart().get(2).getValue().toString()).isEqualTo("Systolic blood pressure 12 hour minimum");
 	}
 	
 	private List<ParametersParameterComponent> getDesignations(List<ParametersParameterComponent> parameterList) {

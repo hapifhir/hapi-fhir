@@ -48,9 +48,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 /**
@@ -159,7 +156,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 			if (futures.size() > 1000) {
 				while (futures.size() > 500) {
 					// This should always return true, but it'll throw an exception if we failed
-					assertTrue(futures.remove(0).get());
+					assertThat(futures.remove(0).get()).isTrue();
 				}
 			}
 		}
@@ -168,13 +165,13 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 
 		// wait for completion to avoid stranding background tasks.
 		executorService.shutdown();
-		assertTrue(executorService.awaitTermination(60, TimeUnit.SECONDS), "Finished before timeout");
+		assertThat(executorService.awaitTermination(60, TimeUnit.SECONDS)).as("Finished before timeout").isTrue();
 
 		// verify that all requests succeeded
 		ourLog.info("All tasks complete.  Verify results.");
 		for (var next : futures) {
 			// This should always return true, but it'll throw an exception if we failed
-			assertTrue(next.get());
+			assertThat(next.get()).isTrue();
 		}
 
 		ourLog.info("Finished task execution");
@@ -198,7 +195,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 			for (var nextBinaryId : binaryIds) {
 
 				Binary binary = myBinaryDao.read(new IdType(nextBinaryId), mySrd);
-				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
+				assertThat(binary.getContentType()).isEqualTo(Constants.CT_FHIR_NDJSON);
 
 				String nextNdJsonFileContent = new String(binary.getContent(), Constants.CHARSET_UTF8);
 				ourLog.trace("Export job {} file {} contents: {}", theInstanceId, nextBinaryId, nextNdJsonFileContent);
@@ -242,7 +239,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		startRequest.setUseCache(false);
 		startRequest.setParameters(theOptions);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
-		assertNotNull(startResponse);
+		assertThat(startResponse).isNotNull();
 		return startResponse.getInstanceId();
 	}
 

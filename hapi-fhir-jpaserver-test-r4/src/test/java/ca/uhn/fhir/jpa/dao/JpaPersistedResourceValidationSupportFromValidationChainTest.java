@@ -30,7 +30,7 @@ import jakarta.annotation.Nonnull;
 import java.util.function.Predicate;
 
 import static ca.uhn.fhir.util.ClasspathUtil.loadResource;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,7 +74,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithBadLibrary);
 
-		assertEquals(10, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertThat(validationResult.getMessages().stream().filter(errorMessagePredicate()).count()).isEqualTo(10);
 	}
 
 	@Test
@@ -91,7 +91,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureOnly );
 
-		assertEquals(8, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertThat(validationResult.getMessages().stream().filter(errorMessagePredicate()).count()).isEqualTo(8);
 	}
 
 	@Test
@@ -105,7 +105,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureOnlyNoLibraryReference);
 
-		assertEquals(7, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertThat(validationResult.getMessages().stream().filter(errorMessagePredicate()).count()).isEqualTo(7);
 	}
 
 	@Test
@@ -120,7 +120,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithLibraryOnly);
 
-		assertEquals(2, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertThat(validationResult.getMessages().stream().filter(errorMessagePredicate()).count()).isEqualTo(2);
 	}
 
 	/*
@@ -148,7 +148,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureReportToReport);
 
-		assertEquals(29, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertThat(validationResult.getMessages().stream().filter(errorMessagePredicate()).count()).isEqualTo(29);
 	}
 
 	@Nonnull

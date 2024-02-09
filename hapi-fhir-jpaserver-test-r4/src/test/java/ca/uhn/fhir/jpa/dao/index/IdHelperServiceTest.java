@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,7 +27,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.when;
@@ -69,9 +67,9 @@ public class IdHelperServiceTest {
 			resourceType,
 			patientIdsToResolve);
 
-		Assertions.assertFalse(idToPid.isEmpty());
+		assertThat(idToPid.isEmpty()).isFalse();
 		for (String pid : patientIdsToResolve) {
-			Assertions.assertTrue(idToPid.containsKey(pid));
+			assertThat(idToPid.containsKey(pid)).isTrue();
 		}
 	}
 
@@ -110,9 +108,9 @@ public class IdHelperServiceTest {
 			resourceType,
 			patientIdsToResolve);
 
-		Assertions.assertFalse(map.isEmpty());
+		assertThat(map.isEmpty()).isFalse();
 		for (String id : patientIdsToResolve) {
-			Assertions.assertTrue(map.containsKey(id));
+			assertThat(map.containsKey(id)).isTrue();
 		}
 	}
 
@@ -141,12 +139,12 @@ public class IdHelperServiceTest {
 			patientIdsToResolve
 		);
 
-		Assertions.assertFalse(map.isEmpty());
+		assertThat(map.isEmpty()).isFalse();
 		for (String id : patientIdsToResolve) {
-			Assertions.assertTrue(map.containsKey(id));
+			assertThat(map.containsKey(id)).isTrue();
 		}
-		assertEquals(red, map.get("RED"));
-		assertEquals(blue, map.get("BLUE"));
+		assertThat(map.get("RED")).isEqualTo(red);
+		assertThat(map.get("BLUE")).isEqualTo(blue);
 	}
 
 	@Test
@@ -166,9 +164,9 @@ public class IdHelperServiceTest {
 		when(myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(any(), any(), any(), anyBoolean())).thenReturn(testForcedIdViews);
 
 		IResourceLookup<JpaPid> result = myHelperService.resolveResourceIdentity(partitionId, resourceType, resourceForcedId);
-		assertEquals(forcedIdView[0], result.getResourceType());
-		assertEquals(forcedIdView[1], result.getPersistentId().getId());
-		assertEquals(forcedIdView[3], result.getDeleted());
+		assertThat(result.getResourceType()).isEqualTo(forcedIdView[0]);
+		assertThat(result.getPersistentId().getId()).isEqualTo(forcedIdView[1]);
+		assertThat(result.getDeleted()).isEqualTo(forcedIdView[3]);
 	}
 
 	@Test
@@ -187,9 +185,9 @@ public class IdHelperServiceTest {
 		Map<String, JpaPid> result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, ids)
 			.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue()));
 		assertThat(result.keySet()).hasSize(3);
-		assertEquals(1L, result.get("A").getId());
-		assertEquals(2L, result.get("B").getId());
-		assertEquals(3L, result.get("C").getId());
+		assertThat(result.get("A").getId()).isEqualTo(1L);
+		assertThat(result.get("B").getId()).isEqualTo(2L);
+		assertThat(result.get("C").getId()).isEqualTo(3L);
 	}
 
 	@Test
@@ -202,6 +200,6 @@ public class IdHelperServiceTest {
 		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 		when(myMemoryCacheService.getThenPutAfterCommit(any(), any(), any())).thenReturn(jpaPid1);
 		JpaPid result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, id.toString());
-		assertEquals(id, result.getId());
+		assertThat(result.getId()).isEqualTo(id);
 	}
 }

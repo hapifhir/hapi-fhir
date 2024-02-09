@@ -17,9 +17,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * <p>Multitenant test version of {@link OverridePathBasedReferentialIntegrityForDeletesInterceptorTest}.</p>
@@ -48,7 +47,7 @@ public class MultitenantOverridePathBasedReferentialIntegrityForDeletesIntercept
 	@AfterEach
 	public void after() throws Exception {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
-		assertFalse(myPartitionSettings.isAllowUnqualifiedCrossPartitionReference());
+		assertThat(myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()).isFalse();
 
 		myInterceptorRegistry.unregisterInterceptor(mySvc);
 		mySvc.clearPaths();
@@ -78,14 +77,14 @@ public class MultitenantOverridePathBasedReferentialIntegrityForDeletesIntercept
 		// Make sure we're deleted
 		try {
 			myPatientDao.read(new IdType("Patient/P"), requestDetails);
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
 
 		// Search should still work
 		IBundleProvider searchOutcome = myAuditEventDao.search(SearchParameterMap.newSynchronous(AuditEvent.SP_AGENT, new ReferenceParam("Patient/P")), requestDetails);
-		assertEquals(1, searchOutcome.size());
+		assertThat(searchOutcome.size()).isEqualTo(1);
 	}
 
 	@Test
@@ -107,7 +106,7 @@ public class MultitenantOverridePathBasedReferentialIntegrityForDeletesIntercept
 		// Delete should proceed
 		try {
 			myPatientDao.delete(new IdType("Patient/P"), requestDetails);
-			fail();
+			fail("");
 		} catch (ResourceVersionConflictException e) {
 			// good
 		}

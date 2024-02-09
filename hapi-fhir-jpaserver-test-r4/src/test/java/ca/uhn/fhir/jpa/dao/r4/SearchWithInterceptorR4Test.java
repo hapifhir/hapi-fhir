@@ -15,8 +15,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @SuppressWarnings({"Duplicates"})
 public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
@@ -31,8 +29,8 @@ public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 		IAnonymousInterceptor interceptor = (pointcut, params) -> {
 			RequestDetails requestDetails = params.get(RequestDetails.class);
 			SqlQueryList sqlQueries = params.get(SqlQueryList.class);
-			assertNotNull(requestDetails);
-			assertNotNull(sqlQueries);
+			assertThat(requestDetails).isNotNull();
+			assertThat(sqlQueries).isNotNull();
 			SqlQueryList existing = (SqlQueryList) requestDetails.getUserData().get("QUERIES");
 			if (existing != null) {
 				existing.addAll(sqlQueries);
@@ -61,10 +59,10 @@ public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 
 			IBundleProvider results = myConditionDao.search(map, mySrd);
 			List<String> ids = toUnqualifiedVersionlessIdValues(results);
-			assertEquals(2, ids.size());
+			assertThat(ids.size()).isEqualTo(2);
 
 			SqlQueryList list = (SqlQueryList) mySrd.getUserData().get("QUERIES");
-			assertEquals(1, list.size());
+			assertThat(list.size()).isEqualTo(1);
 			String query = list.get(0).getSql(true, false);
 			ourLog.info("Query: {}", query);
 

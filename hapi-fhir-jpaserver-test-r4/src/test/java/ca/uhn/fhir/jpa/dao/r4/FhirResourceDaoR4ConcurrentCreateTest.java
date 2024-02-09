@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
@@ -197,7 +198,7 @@ public class FhirResourceDaoR4ConcurrentCreateTest extends BaseJpaR4Test {
 				DaoMethodOutcome outcome = myObservationDao.create(obs, "identifier=20210427133226.444%2B0800", requestDetails);
 			} catch (Throwable t) {
 				ourLog.info("create threw an exception {}", t.getMessage());
-				fail();
+				fail("");
 			}
 			return null;
 		};

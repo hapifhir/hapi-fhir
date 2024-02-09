@@ -13,8 +13,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class OverridePathBasedReferentialIntegrityForDeletesInterceptorTest extends BaseJpaR4Test {
 
@@ -44,7 +44,7 @@ public class OverridePathBasedReferentialIntegrityForDeletesInterceptorTest exte
 
 		try {
 			myPatientDao.delete(new IdType("Patient/P"));
-			fail();
+			fail("");
 		} catch (ResourceVersionConflictException e) {
 			// good
 		}
@@ -72,14 +72,14 @@ public class OverridePathBasedReferentialIntegrityForDeletesInterceptorTest exte
 		// Make sure we're deleted
 		try {
 			myPatientDao.read(new IdType("Patient/P"));
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
 
 		// Search should still work
 		IBundleProvider searchOutcome = myAuditEventDao.search(SearchParameterMap.newSynchronous(AuditEvent.SP_AGENT, new ReferenceParam("Patient/P")));
-		assertEquals(1, searchOutcome.size());
+		assertThat(searchOutcome.size()).isEqualTo(1);
 
 
 	}
@@ -103,7 +103,7 @@ public class OverridePathBasedReferentialIntegrityForDeletesInterceptorTest exte
 		// Delete should proceed
 		try {
 			myPatientDao.delete(new IdType("Patient/P"));
-			fail();
+			fail("");
 		} catch (ResourceVersionConflictException e) {
 			// good
 		}

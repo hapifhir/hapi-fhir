@@ -44,8 +44,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.NoFT.class})
@@ -72,7 +71,7 @@ public class SyntheaPerfTest extends BaseJpaTest {
 	@Disabled("Stress test")
 	@Test
 	public void testLoadSynthea() throws Exception {
-		assertEquals(100, TestR4Config.getMaxThreads());
+		assertThat(TestR4Config.getMaxThreads()).isEqualTo(100);
 
 		myStorageSettings.setResourceEncoding(ResourceEncodingEnum.JSON);
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
@@ -81,7 +80,7 @@ public class SyntheaPerfTest extends BaseJpaTest {
 		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
 		myStorageSettings.setInlineResourceTextBelowSize(4000);
 
-		assertTrue(myStorageSettings.isMassIngestionMode());
+		assertThat(myStorageSettings.isMassIngestionMode()).isTrue();
 
 		List<Path> files = Files
 			.list(FileSystems.getDefault().getPath(PATH_TO_SYNTHEA_OUTPUT))

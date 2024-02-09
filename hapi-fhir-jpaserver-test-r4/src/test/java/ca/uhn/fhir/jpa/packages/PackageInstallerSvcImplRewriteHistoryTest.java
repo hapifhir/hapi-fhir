@@ -8,8 +8,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PackageInstallerSvcImplRewriteHistoryTest extends BaseJpaR4Test {
 	public static final IIdType CONCEPT_MAP_TEST_ID = new IdDt("ConceptMap/PackageInstallerSvcImplRewriteHistoryTest");
@@ -24,7 +23,7 @@ public class PackageInstallerSvcImplRewriteHistoryTest extends BaseJpaR4Test {
 
 	@Test
 	void svc_notnull() {
-		assertNotNull(mySvc);
+		assertThat(mySvc).isNotNull();
 	}
 
 	@Test
@@ -42,7 +41,7 @@ public class PackageInstallerSvcImplRewriteHistoryTest extends BaseJpaR4Test {
 
 		// verify
 		ConceptMap readConceptMap = myConceptMapDao.read(CONCEPT_MAP_TEST_ID);
-		assertEquals(CONCEPT_MAP_TEST_ID.toString(), readConceptMap.getIdElement().toVersionless().toString());
+		assertThat(readConceptMap.getIdElement().toVersionless().toString()).isEqualTo(CONCEPT_MAP_TEST_ID.toString());
 
 	}
 }

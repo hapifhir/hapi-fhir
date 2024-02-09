@@ -7,7 +7,6 @@ import org.hl7.fhir.r4.model.Observation;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TolerantJsonParserR4Test {
 
@@ -26,7 +25,7 @@ public class TolerantJsonParserR4Test {
 		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		Observation obs = parser.parseResource(Observation.class, input);
 
-		assertEquals("0.5", obs.getValueQuantity().getValueElement().getValueAsString());
+		assertThat(obs.getValueQuantity().getValueElement().getValueAsString()).isEqualTo("0.5");
 	}
 
 	@Test
@@ -42,7 +41,7 @@ public class TolerantJsonParserR4Test {
 		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		Observation obs = parser.parseResource(Observation.class, input);
 
-		assertEquals("0.5", obs.getValueQuantity().getValueElement().getValueAsString());
+		assertThat(obs.getValueQuantity().getValueElement().getValueAsString()).isEqualTo("0.5");
 	}
 
 	@Test
@@ -58,7 +57,7 @@ public class TolerantJsonParserR4Test {
 		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		Observation obs = parser.parseResource(Observation.class, input);
 
-		assertEquals("0", obs.getValueQuantity().getValueElement().getValueAsString());
+		assertThat(obs.getValueQuantity().getValueElement().getValueAsString()).isEqualTo("0");
 	}
 
 	@Test

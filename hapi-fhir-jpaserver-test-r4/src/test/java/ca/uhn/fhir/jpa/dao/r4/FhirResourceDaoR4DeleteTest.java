@@ -22,10 +22,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4DeleteTest.class);
@@ -63,7 +62,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.read(id.toUnqualifiedVersionless());
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -72,7 +71,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.read(id.toUnqualifiedVersionless().withVersion("2"));
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -90,9 +89,9 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.delete(pId);
-			fail();
+			fail("");
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(966) + "Resource deletion is not permitted on this server", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(966) + "Resource deletion is not permitted on this server");
 		}
 	}
 
@@ -134,13 +133,13 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		// Nope, can't delete 'em!
 		try {
 			myOrganizationDao.delete(orgId1);
-			fail();
+			fail("");
 		} catch (ResourceVersionConflictException e) {
 			// good
 		}
 		try {
 			myOrganizationDao.delete(orgId2);
-			fail();
+			fail("");
 		} catch (ResourceVersionConflictException e) {
 			// good
 		}
@@ -162,13 +161,13 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 		// Make sure they were deleted
 		try {
 			myOrganizationDao.read(orgId1);
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
 		try {
 			myOrganizationDao.read(orgId2);
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -201,7 +200,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.read(id.toUnqualifiedVersionless());
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -210,7 +209,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 
 		try {
 			myPatientDao.read(id.toUnqualifiedVersionless().withVersion("2"));
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}

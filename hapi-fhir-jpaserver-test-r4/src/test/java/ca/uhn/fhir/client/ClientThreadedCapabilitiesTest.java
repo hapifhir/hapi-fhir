@@ -36,8 +36,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static java.util.stream.Collectors.toList;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 /**
  * Test supporting https://github.com/hapifhir/hapi-fhir/issues/3299
@@ -85,7 +85,7 @@ public class ClientThreadedCapabilitiesTest {
 		ourLog.info("Total elapsed time: {}", sw);
 
 		int metaClientRequestCount = ((CountingMetaClientInterceptor) myCountingMetaClientInterceptor).getCount();
-		assertEquals(1, metaClientRequestCount);
+		assertThat(metaClientRequestCount).isEqualTo(1);
 	}
 
 
@@ -113,7 +113,7 @@ public class ClientThreadedCapabilitiesTest {
 			} else {
 				// metadata request must always be first
 				if (counter.get() == 0) {
-					fail("A non-metadata request was executed before metadata request: " + theRequest.getUri() + " counter: " + counter.get());
+					fail("", "A non-metadata request was executed before metadata request: " + theRequest.getUri() + " counter: " + counter.get());
 				}
 			}
 		}

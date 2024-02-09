@@ -167,7 +167,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 		await().until(() -> myReceivedNames, contains("FAMILY3", "FAMILY1", "FAMILY1"));
 		ourLog.info("Got FAMILY1");
 
-		assertEquals(1, searchBlockingInterceptorFamily1.getHits());
+		assertThat(searchBlockingInterceptorFamily1.getHits()).isEqualTo(1);
 	}
 
 

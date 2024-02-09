@@ -67,16 +67,15 @@ import java.util.List;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ExpungeR4Test extends BaseResourceProviderR4Test {
@@ -119,7 +118,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	private void assertExpunged(IIdType theId) {
 		try {
 			getDao(theId).read(theId);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -128,7 +127,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	private void assertNotExpunged(IIdType theId) {
 		try {
 			getDao(theId).read(theId);
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -270,7 +269,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 				dao = myCodeSystemDao;
 				break;
 			default:
-				fail("Restype: " + theId.getResourceType());
+				fail("", "Restype: " + theId.getResourceType());
 				dao = myPatientDao;
 		}
 		return dao;
@@ -304,7 +303,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(delete)) {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response:\n{}", responseString);
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 		}
 
 		runInTransaction(() -> {
@@ -416,10 +415,10 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 			.setExpungeOldVersions(true), null);
 
 		// Verify
-		assertEquals(8, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
-		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
-		assertEquals(9, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread()).isEqualTo(8);
+		assertThat(myCaptureQueriesListener.countUpdateQueriesForCurrentThread()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countDeleteQueriesForCurrentThread()).isEqualTo(9);
 
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isEmpty());
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isEmpty());
@@ -435,9 +434,9 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 			myPatientDao.expunge(myTwoVersionPatientId.withVersion("2"), new ExpungeOptions()
 				.setExpungeDeletedResources(true)
 				.setExpungeOldVersions(true), null);
-			fail();
+			fail("");
 		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(969) + "Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(969) + "Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version");
 		}
 	}
 
@@ -607,7 +606,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 			.setExpungeEverything(true), null);
 
 		// Make sure the deleted resource entities count is correct
-		assertEquals(8, outcome.getDeletedCount());
+		assertThat(outcome.getDeletedCount()).isEqualTo(8);
 	}
 
 	@Test
@@ -639,9 +638,9 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		await().until(() -> runInTransaction(() -> mySearchResultDao.count() == 0));
 
 		PersistedJpaSearchFirstPageBundleProvider search = (PersistedJpaSearchFirstPageBundleProvider) myPatientDao.search(new SearchParameterMap());
-		assertEquals(PersistedJpaSearchFirstPageBundleProvider.class, search.getClass());
-		assertEquals(2, search.size().intValue());
-		assertEquals(2, search.getResources(0, 2).size());
+		assertThat(search.getClass()).isEqualTo(PersistedJpaSearchFirstPageBundleProvider.class);
+		assertThat(search.size().intValue()).isEqualTo(2);
+		assertThat(search.getResources(0, 2).size()).isEqualTo(2);
 
 		await().until(() -> runInTransaction(() -> mySearchEntityDao.count() == 1));
 		await().until(() -> runInTransaction(() -> mySearchResultDao.count() == 2));
@@ -686,7 +685,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		createStandardPatients();
 
 		IBundleProvider search = myPatientDao.search(new SearchParameterMap());
-		assertEquals(2, search.size().intValue());
+		assertThat(search.size().intValue()).isEqualTo(2);
 		List<IBaseResource> resources = search.getResources(0, 2);
 		myPatientDao.delete(resources.get(0).getIdElement());
 
@@ -724,17 +723,17 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		// Make sure read works
 		p = myPatientDao.read(new IdType("Patient/TEST"));
-		assertTrue(p.getActive());
+		assertThat(p.getActive()).isTrue();
 
 		// Make sure search by ID works
 		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous("_id", new TokenParam("Patient/TEST")));
 		p = (Patient) outcome.getResources(0, 1).get(0);
-		assertTrue(p.getActive());
+		assertThat(p.getActive()).isTrue();
 
 		// Make sure search by Reference works
 		outcome = myObservationDao.search(SearchParameterMap.newSynchronous(Observation.SP_SUBJECT, new ReferenceParam("Patient/TEST")));
 		obs = (Observation) outcome.getResources(0, 1).get(0);
-		assertEquals("OBS", obs.getIdElement().getIdPart());
+		assertThat(obs.getIdElement().getIdPart()).isEqualTo("OBS");
 
 		// Delete and expunge
 		myObservationDao.delete(new IdType("Observation/OBS"));
@@ -763,17 +762,17 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		// Make sure read works
 		p = myPatientDao.read(new IdType("Patient/TEST"));
-		assertTrue(p.getActive());
+		assertThat(p.getActive()).isTrue();
 
 		// Make sure search works
 		outcome = myPatientDao.search(SearchParameterMap.newSynchronous("_id", new TokenParam("Patient/TEST")));
 		p = (Patient) outcome.getResources(0, 1).get(0);
-		assertTrue(p.getActive());
+		assertThat(p.getActive()).isTrue();
 
 		// Make sure search by Reference works
 		outcome = myObservationDao.search(SearchParameterMap.newSynchronous(Observation.SP_SUBJECT, new ReferenceParam("Patient/TEST")));
 		obs = (Observation) outcome.getResources(0, 1).get(0);
-		assertEquals("OBS", obs.getIdElement().getIdPart());
+		assertThat(obs.getIdElement().getIdPart()).isEqualTo("OBS");
 
 		// Delete and expunge
 		myObservationDao.delete(new IdType("Observation/OBS"));
@@ -803,40 +802,40 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		try {
 			myPatientDao.expunge(myOneVersionPatientId,
 				new ExpungeOptions().setExpungeOldVersions(true), null);
-			fail();
+			fail("");
 		} catch (MethodNotAllowedException e) {
-			assertEquals("HAPI-0968: $expunge is not enabled on this server", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-0968: $expunge is not enabled on this server");
 		}
 
 		try {
 			myPatientDao.expunge(myOneVersionPatientId.toVersionless(),
 				new ExpungeOptions().setExpungeOldVersions(true), null);
-			fail();
+			fail("");
 		} catch (MethodNotAllowedException e) {
-			assertEquals("HAPI-0968: $expunge is not enabled on this server", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-0968: $expunge is not enabled on this server");
 		}
 
 		try {
 			myPatientDao.expunge(null,
 				new ExpungeOptions().setExpungeOldVersions(true), null);
-			fail();
+			fail("");
 		} catch (MethodNotAllowedException e) {
-			assertEquals("HAPI-0968: $expunge is not enabled on this server", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-0968: $expunge is not enabled on this server");
 		}
 
 		try {
 			mySystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), null);
-			fail();
+			fail("");
 		} catch (MethodNotAllowedException e) {
-			assertEquals("HAPI-2080: $expunge is not enabled on this server", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-2080: $expunge is not enabled on this server");
 		}
 
 		myStorageSettings.setExpungeEnabled(true);
 		try {
 			mySystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), null);
-			fail();
+			fail("");
 		} catch (MethodNotAllowedException e) {
-			assertEquals("HAPI-2081: Multiple delete is not enabled on this server", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HAPI-2081: Multiple delete is not enabled on this server");
 		}
 
 		// re-enable multi-delete for clean-up
@@ -856,7 +855,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		int expectedPatientHistoryRecords = 15; // 5 resources x 3 versions
 		int actualPatientHistoryRecords = myPatientDao.history(null, null, null, requestDetails).getAllResources().size();
-		assertEquals(expectedPatientHistoryRecords, actualPatientHistoryRecords);
+		assertThat(actualPatientHistoryRecords).isEqualTo(expectedPatientHistoryRecords);
 
 		int expungeLimit = numPatients;
 		ExpungeOptions expungeOptions = new ExpungeOptions()
@@ -871,7 +870,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		// Note that the limit used in ExpungeOptions is meant to be a rough throttle.
 		// We care that AT LEAST the specified number of resources are expunged and not if the limit is exceeded.
-		assertTrue(actualRemainingPatientHistoryRecords <= maximumRemainingPatientHistoryRecords);
+		assertThat(actualRemainingPatientHistoryRecords <= maximumRemainingPatientHistoryRecords).isTrue();
 	}
 
 	@Test
@@ -919,7 +918,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 			myCodeSystemDao.expunge(new ExpungeOptions()
 				.setExpungeDeletedResources(true)
 				.setExpungeOldVersions(true), null);
-			fail();
+			fail("");
 		} catch (PreconditionFailedException preconditionFailedException){
 			// verify
 			assertThat(preconditionFailedException.getMessage()).startsWith("HAPI-2415: The resource could not be expunged. It is likely due to unfinished asynchronous deletions, please try again later");
@@ -1007,14 +1006,14 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 	private void verifyOneVersionCodeSystemChildrenExpunged() {
 		List<TermCodeSystemVersion> myOneVersionCodeSystemVersions = myTermCodeSystemVersionDao.findByCodeSystemResourcePid(myOneVersionCodeSystemId.getIdPartAsLong());
-		assertEquals(0, myOneVersionCodeSystemVersions.size());
+		assertThat(myOneVersionCodeSystemVersions.size()).isEqualTo(0);
 		assertThat(myTermConceptDesignationDao.findAll()).isEmpty();
 		assertThat(myTermConceptPropertyDao.findAll()).isEmpty();
 		assertThat(myTermConceptParentChildLinkDao.findAll()).isEmpty();
 		List<TermConcept> existingCodeSystemConcepts = myTermConceptDao.findAll();
 		for (TermConcept tc : existingCodeSystemConcepts) {
 			if (tc.getCode().charAt(0) == 'C' || tc.getCode().charAt(0) == 'D') {
-				fail();
+				fail("");
 			}
 		}
 	}
@@ -1022,21 +1021,21 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	private void verifyTwoVersionCodeSystemV1AndChildrenStillThere() {
 		TermCodeSystem myTwoVersionCodeSystem = myTermCodeSystemDao.findByResourcePid(myTwoVersionCodeSystemIdV2.getIdPartAsLong());
 		TermCodeSystemVersion myTwoVersionCodeSystemVersion1 = verifyTermCodeSystemVersionExistsWithDisplayName("CS2-V1");
-		assertNotEquals(myTwoVersionCodeSystem.getCurrentVersion().getPid(), myTwoVersionCodeSystemVersion1.getPid());
+		assertThat(myTwoVersionCodeSystemVersion1.getPid()).isNotEqualTo(myTwoVersionCodeSystem.getCurrentVersion().getPid());
 		List<TermConcept> myTwoVersionCodeSystemVersion1Concepts = new ArrayList(myTwoVersionCodeSystemVersion1.getConcepts());
-		assertEquals(1, myTwoVersionCodeSystemVersion1Concepts.size());
+		assertThat(myTwoVersionCodeSystemVersion1Concepts.size()).isEqualTo(1);
 		TermConcept conceptE = myTwoVersionCodeSystemVersion1Concepts.get(0);
-		assertEquals("E", conceptE.getCode());
+		assertThat(conceptE.getCode()).isEqualTo("E");
 	}
 
 	private void verifyTwoVersionCodeSystemV2AndChildrenStillThere() {
 		TermCodeSystem myTwoVersionCodeSystem = myTermCodeSystemDao.findByResourcePid(myTwoVersionCodeSystemIdV2.getIdPartAsLong());
 		TermCodeSystemVersion myTwoVersionCodeSystemVersion2 = verifyTermCodeSystemVersionExistsWithDisplayName("CS2-V2");
-		assertEquals(myTwoVersionCodeSystem.getCurrentVersion().getPid(), myTwoVersionCodeSystemVersion2.getPid());
+		assertThat(myTwoVersionCodeSystemVersion2.getPid()).isEqualTo(myTwoVersionCodeSystem.getCurrentVersion().getPid());
 		List<TermConcept> myTwoVersionCodeSystemVersion2Concepts = new ArrayList(myTwoVersionCodeSystemVersion2.getConcepts());
-		assertEquals(1, myTwoVersionCodeSystemVersion2Concepts.size());
+		assertThat(myTwoVersionCodeSystemVersion2Concepts.size()).isEqualTo(1);
 		TermConcept conceptF = myTwoVersionCodeSystemVersion2Concepts.get(0);
-		assertEquals("F", conceptF.getCode());
+		assertThat(conceptF.getCode()).isEqualTo("F");
 	}
 
 	private TermCodeSystemVersion verifyTermCodeSystemVersionExistsWithDisplayName(String theDisplayName) {
@@ -1046,7 +1045,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 				return csv;
 			}
 		}
-		fail();
+		fail("");
 		return null;
 	}
 

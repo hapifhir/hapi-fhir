@@ -64,8 +64,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Test {
@@ -144,7 +143,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		try {
 			myClient.update().resource(obs).execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -175,16 +174,16 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		patient.addName().setFamily("Tester").addGiven("Raghad");
 		MethodOutcome output2 = myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|100").execute();
 
-		assertEquals(output1.getId().getIdPart(), output2.getId().getIdPart());
+		assertThat(output2.getId().getIdPart()).isEqualTo(output1.getId().getIdPart());
 
 		patient = new Patient();
 		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
 		patient.addName().setFamily("Tester").addGiven("Raghad");
 		try {
 			myClient.update().resource(patient).conditionalByUrl("Patient?identifier=http://uhn.ca/mrns|101").execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
-			assertEquals("HTTP 403 Forbidden: " + Msg.code(334) + "Access denied by default policy (no applicable rules)", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 403 Forbidden: " + Msg.code(334) + "Access denied by default policy (no applicable rules)");
 		}
 
 		patient = new Patient();
@@ -193,9 +192,9 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		patient.addName().setFamily("Tester").addGiven("Raghad");
 		try {
 			myClient.update().resource(patient).execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
-			assertEquals("HTTP 403 Forbidden: " + Msg.code(334) + "Access denied by default policy (no applicable rules)", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 403 Forbidden: " + Msg.code(334) + "Access denied by default policy (no applicable rules)");
 		}
 
 	}
@@ -264,9 +263,9 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 			try {
 				myClient.transaction().withBundle(request).execute();
-				fail();
+				fail("");
 			} catch (ForbiddenOperationException e) {
-				assertEquals("HTTP 403 Forbidden: " + Msg.code(334) + "Access denied by default policy (no applicable rules)", e.getMessage());
+				assertThat(e.getMessage()).isEqualTo("HTTP 403 Forbidden: " + Msg.code(334) + "Access denied by default policy (no applicable rules)");
 			}
 		}
 
@@ -285,9 +284,9 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 			try {
 				myClient.transaction().withBundle(request).execute();
-				fail();
+				fail("");
 			} catch (ForbiddenOperationException e) {
-				assertEquals("HTTP 403 Forbidden: " + Msg.code(334) + "Access denied by default policy (no applicable rules)", e.getMessage());
+				assertThat(e.getMessage()).isEqualTo("HTTP 403 Forbidden: " + Msg.code(334) + "Access denied by default policy (no applicable rules)");
 			}
 		}
 
@@ -329,7 +328,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl(id.getValue());
 			responseBundle = myClient.transaction().withBundle(bundle).execute();
 			patient = (Patient) responseBundle.getEntry().get(0).getResource();
-			assertEquals("Tester", patient.getNameFirstRep().getFamily());
+			assertThat(patient.getNameFirstRep().getFamily()).isEqualTo("Tester");
 
 			// Search
 			bundle = new Bundle();
@@ -338,7 +337,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			responseBundle = myClient.transaction().withBundle(bundle).execute();
 			responseBundle = (Bundle) responseBundle.getEntry().get(0).getResource();
 			patient = (Patient) responseBundle.getEntry().get(0).getResource();
-			assertEquals("Tester", patient.getNameFirstRep().getFamily());
+			assertThat(patient.getNameFirstRep().getFamily()).isEqualTo("Tester");
 
 		} finally {
 			myClient.unregisterInterceptor(interceptor);
@@ -377,8 +376,8 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		// Read (no masking)
 		response = myClient.read().resource(Observation.class).withId(observationId).execute();
-		assertEquals(ObservationStatus.FINAL, response.getStatus());
-		assertEquals(patientId.getValue(), response.getSubject().getReference());
+		assertThat(response.getStatus()).isEqualTo(ObservationStatus.FINAL);
+		assertThat(response.getSubject().getReference()).isEqualTo(patientId.getValue());
 
 		// Read (with _elements masking)
 		response = myClient
@@ -387,13 +386,13 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withId(observationId)
 			.elementsSubset("status")
 			.execute();
-		assertEquals(ObservationStatus.FINAL, response.getStatus());
-		assertEquals(null, response.getSubject().getReference());
+		assertThat(response.getStatus()).isEqualTo(ObservationStatus.FINAL);
+		assertThat(response.getSubject().getReference()).isEqualTo(null);
 
 		// Read a non-allowed observation
 		try {
 			myClient.read().resource(Observation.class).withId(observationId2).execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -481,14 +480,14 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		try {
 			myClient.read().resource(Observation.class).withId("Observation/B").execute();
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
 
 		try {
 			myClient.delete().resourceById(new IdType("Observation/C")).execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -529,7 +528,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		try {
 			myClient.delete().resourceById(obsNotInCompartmentId.toUnqualifiedVersionless()).execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -575,7 +574,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			bundle.setType(Bundle.BundleType.TRANSACTION);
 			bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl(obsNotInCompartmentId.toUnqualifiedVersionless().getValue());
 			myClient.transaction().withBundle(bundle).execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -604,13 +603,13 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		try {
 			myClient.delete().resourceById(id.toUnqualifiedVersionless()).execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
 
 		patient = myClient.read().resource(Patient.class).withId(id.toUnqualifiedVersionless()).execute();
-		assertEquals(id.getValue(), patient.getId());
+		assertThat(patient.getId()).isEqualTo(id.getValue());
 	}
 
 	@Test
@@ -646,7 +645,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 					.resourceById(patientId)
 					.withAdditionalHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE)
 					.execute();
-				fail();
+				fail("");
 			} catch (ForbiddenOperationException e) {
 				// good
 			}
@@ -731,7 +730,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 					.resourceById(patientId)
 					.withAdditionalHeader(Constants.HEADER_CASCADE, Constants.CASCADE_DELETE)
 					.execute();
-				fail();
+				fail("");
 			} catch (ForbiddenOperationException e) {
 				// good
 			}
@@ -754,7 +753,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		final IdType id;
 		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdType(newIdString);
@@ -771,7 +770,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		response = ourHttpClient.execute(post);
 		final IdType id2;
 		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id2 = new IdType(newIdString);
@@ -793,7 +792,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		HttpDelete delete = new HttpDelete(myServerBase + "/Patient?name=" + methodName);
 		response = ourHttpClient.execute(delete);
 		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 		} finally {
 			response.close();
 		}
@@ -801,7 +800,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		delete = new HttpDelete(myServerBase + "/Patient?name=FOOFOOFOO");
 		response = ourHttpClient.execute(delete);
 		try {
-			assertEquals(403, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(403);
 		} finally {
 			response.close();
 		}
@@ -830,14 +829,14 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Parameters diff;
 
 		diff = myClient.operation().onInstance("Patient/A").named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
-		assertEquals(1, diff.getParameter().size());
+		assertThat(diff.getParameter().size()).isEqualTo(1);
 
 		diff = myClient.operation().onInstanceVersion(new IdType("Patient/A/_history/2")).named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
-		assertEquals(1, diff.getParameter().size());
+		assertThat(diff.getParameter().size()).isEqualTo(1);
 
 		try {
 			myClient.operation().onInstance("Observation/B").named(ProviderConstants.DIFF_OPERATION_NAME).withNoParameters(Parameters.class).execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -872,7 +871,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withParameter(Parameters.class, ProviderConstants.DIFF_FROM_PARAMETER, new StringType("Patient/A"))
 			.andParameter(ProviderConstants.DIFF_TO_PARAMETER, new StringType("Patient/B"))
 			.execute();
-		assertEquals(2, diff.getParameter().size());
+		assertThat(diff.getParameter().size()).isEqualTo(2);
 
 		try {
 			myClient
@@ -882,7 +881,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				.withParameter(Parameters.class, ProviderConstants.DIFF_FROM_PARAMETER, new StringType("Observation/C"))
 				.andParameter(ProviderConstants.DIFF_TO_PARAMETER, new StringType("Observation/D"))
 				.execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -912,14 +911,14 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		httpGet = new HttpGet(myServerBase + "/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 			assertThat(resp).contains("MY_FAMILY");
 		}
 
 		httpGet = new HttpGet(myServerBase + "/Patient/B/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertEquals(403, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(403);
 		}
 
 	}
@@ -961,7 +960,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		request.addEntry().setResource(o).getRequest().setMethod(Bundle.HTTPVerb.POST);
 
 		Bundle resp = myClient.transaction().withBundle(request).execute();
-		assertEquals(2, resp.getEntry().size());
+		assertThat(resp.getEntry().size()).isEqualTo(2);
 
 
 	}
@@ -1003,7 +1002,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
-		assertNull(resp.getEntry().get(0).getResource());
+		assertThat(resp.getEntry().get(0).getResource()).isNull();
 
 		// return=OperationOutcome - should succeed
 		resp = myClient
@@ -1012,7 +1011,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
-		assertNull(resp.getEntry().get(0).getResource());
+		assertThat(resp.getEntry().get(0).getResource()).isNull();
 
 		// return=Representation - should fail
 		try {
@@ -1021,7 +1020,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				.withBundle(bundle)
 				.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
 				.execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -1114,7 +1113,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withBundle(bundle)
 			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
 			.execute();
-		assertEquals(3, resp.getEntry().size());
+		assertThat(resp.getEntry().size()).isEqualTo(3);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 	}
 
@@ -1148,7 +1147,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withNoParameters(Parameters.class)
 			.returnResourceType(Bundle.class)
 			.execute();
-		assertEquals(2, outcome.getEntry().size());
+		assertThat(outcome.getEntry().size()).isEqualTo(2);
 
 		// Add an Encounter, which will be returned by $everything but that hasn't been
 		// explicitly authorized
@@ -1165,7 +1164,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				.withNoParameters(Parameters.class)
 				.returnResourceType(Bundle.class)
 				.execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			assertThat(e.getMessage()).contains("Access denied by default policy");
 		}
@@ -1210,17 +1209,17 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		// Allowed
 		myClient.patch().withBody(patchBody).withId(oid1).execute();
 		obs1 = myClient.read().resource(Observation.class).withId(oid1.toUnqualifiedVersionless()).execute();
-		assertEquals(ObservationStatus.AMENDED, obs1.getStatus());
+		assertThat(obs1.getStatus()).isEqualTo(ObservationStatus.AMENDED);
 
 		// Denied
 		try {
 			myClient.patch().withBody(patchBody).withId(oid2).execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
 		obs2 = myClient.read().resource(Observation.class).withId(oid2.toUnqualifiedVersionless()).execute();
-		assertEquals(ObservationStatus.FINAL, obs2.getStatus());
+		assertThat(obs2.getStatus()).isEqualTo(ObservationStatus.FINAL);
 	}
 
 	/**
@@ -1275,7 +1274,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		// Observation with patient as the subject -> read access should be blocked
 		try {
 			myClient.read().resource(Observation.class).withId(oid2).execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -1313,17 +1312,17 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		{
 			String url = "/Patient?_id=" + p1id.getIdPart();
 			Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
-			assertEquals(1, result.getTotal());
+			assertThat(result.getTotal()).isEqualTo(1);
 		}
 		{
 			String url = "/Patient?_id=" + p2id.getIdPart();
 			Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
-			assertEquals(1, result.getTotal());
+			assertThat(result.getTotal()).isEqualTo(1);
 		}
 		{
 			String url = "/Patient?_id=" + p1id.getIdPart() + "," + p2id.getIdPart();
 			Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
-			assertEquals(2, result.getTotal());
+			assertThat(result.getTotal()).isEqualTo(2);
 		}
 	}
 
@@ -1376,23 +1375,23 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		{
 			String url = "/ExplanationOfBenefit?patient=" + p1id.getIdPart();
 			Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
-			assertEquals(1, result.getTotal());
+			assertThat(result.getTotal()).isEqualTo(1);
 		}
 		{
 			String url = "/ExplanationOfBenefit?patient=" + p2id.getIdPart();
 			Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
-			assertEquals(1, result.getTotal());
+			assertThat(result.getTotal()).isEqualTo(1);
 		}
 		{
 			String url = "/ExplanationOfBenefit?patient=" + p1id.getIdPart() + "," + p2id.getIdPart();
 			Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
-			assertEquals(2, result.getTotal());
+			assertThat(result.getTotal()).isEqualTo(2);
 		}
 		{
 			String url = "/ExplanationOfBenefit?patient=" + p1id.getIdPart() + "," + p3id.getIdPart();
 			try {
 				Bundle result = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
-				fail();
+				fail("");
 			} catch (ForbiddenOperationException e) {
 				assertThat(e.getMessage()).startsWith("HTTP 403 Forbidden: " + Msg.code(333) + "Access denied by rule");
 			}
@@ -1424,7 +1423,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 				.delete()
 				.resourceConditionalByUrl("Patient?name=Siobhan&_expunge=true")
 				.execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			// good
 		}

@@ -14,10 +14,10 @@ import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirResourceDaoR4InlineResourceModeTest extends BaseJpaR4Test {
 
@@ -53,7 +53,7 @@ public class FhirResourceDaoR4InlineResourceModeTest extends BaseJpaR4Test {
 
 
 	private void validatePatient(IBaseResource theRead) {
-		assertTrue(((Patient)theRead).getActive());
+		assertThat(((Patient) theRead).getActive()).isTrue();
 	}
 
 

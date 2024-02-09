@@ -13,7 +13,6 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,9 +49,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -309,22 +307,21 @@ public class BaseHapiFhirDaoTest {
 //			service.awaitTermination(threads, TimeUnit.SECONDS)
 //		);
 
-		Assertions.assertEquals(threads + 1, getSingleResultInt.get(), "Not enough gets " + getSingleResultInt.get());
-		Assertions.assertEquals(threads, persistInt.get(), "Not enough persists " + persistInt.get());
+		assertThat(getSingleResultInt.get()).as("Not enough gets " + getSingleResultInt.get()).isEqualTo(threads + 1);
+		assertThat(persistInt.get()).as("Not enough persists " + persistInt.get()).isEqualTo(threads);
 
 		// verify
-		Assertions.assertEquals(1, outcomes.size());
-		Assertions.assertEquals(threads, counter.get());
-		Assertions.assertEquals(0, errors.size(),
-			errors.values().stream().map(Throwable::getMessage)
-				.collect(Collectors.joining(", ")));
+		assertThat(outcomes.size()).isEqualTo(1);
+		assertThat(counter.get()).isEqualTo(threads);
+		assertThat(errors.size()).as(errors.values().stream().map(Throwable::getMessage)
+			.collect(Collectors.joining(", "))).isEqualTo(0);
 
 		// verify we logged some race conditions
 		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myAppender, Mockito.atLeastOnce())
 			.doAppend(captor.capture());
-		assertTrue(captor.getAllValues().get(0).getMessage()
-			.contains(raceConditionError));
+		assertThat(captor.getAllValues().get(0).getMessage()
+			.contains(raceConditionError)).isTrue();
 	}
 
 	@Test
@@ -365,26 +362,23 @@ public class BaseHapiFhirDaoTest {
 		// test
 		try {
 			myTestDao.getTagOrNull(transactionDetails, tagType, scheme, term, label, version, userSelected);
-			fail();
+			fail("");
 		} catch (Exception ex) {
 			// verify
-			assertTrue(ex.getMessage().contains("Tag get/create failed after 10 attempts with error(s): " + exMsg));
+			assertThat(ex.getMessage().contains("Tag get/create failed after 10 attempts with error(s): " + exMsg)).isTrue();
 
 			ArgumentCaptor<ILoggingEvent> appenderCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 			verify(myAppender, Mockito.times(10))
 				.doAppend(appenderCaptor.capture());
 			List<ILoggingEvent> events = appenderCaptor.getAllValues();
-			assertEquals(10, events.size());
+			assertThat(events.size()).isEqualTo(10);
 			for (int i = 0; i < 10; i++) {
 				String actualMsg = events.get(i).getMessage();
-				assertEquals(
-					"Tag read/write failed: "
-						+ exMsg
-						+ ". "
-						+ "This is not a failure on its own, "
-						+ "but could be useful information in the result of an actual failure.",
-					actualMsg
-				);
+				assertThat(actualMsg).isEqualTo("Tag read/write failed: "
+					+ exMsg
+					+ ". "
+					+ "This is not a failure on its own, "
+					+ "but could be useful information in the result of an actual failure.");
 			}
 		}
 	}
@@ -393,10 +387,10 @@ public class BaseHapiFhirDaoTest {
 
 	@Test
 	public void cleanProvenanceSourceUri() {
-		assertEquals("", MetaUtil.cleanProvenanceSourceUriOrEmpty(null));
-		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc"));
-		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#"));
-		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def"));
-		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def#ghi"));
+		assertThat(MetaUtil.cleanProvenanceSourceUriOrEmpty(null)).isEqualTo("");
+		assertThat(MetaUtil.cleanProvenanceSourceUriOrEmpty("abc")).isEqualTo("abc");
+		assertThat(MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#")).isEqualTo("abc");
+		assertThat(MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def")).isEqualTo("abc");
+		assertThat(MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def#ghi")).isEqualTo("abc");
 	}
 }

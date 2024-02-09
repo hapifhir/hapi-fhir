@@ -12,7 +12,6 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,12 +20,11 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings("Duplicates")
 public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenantResourceProviderR4Test implements ITestDataBuilder {
@@ -59,7 +57,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		try {
 			myClient.read().resource(Patient.class).withId(idB).execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -76,7 +74,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 
 		myTenantClientInterceptor.setTenantId(TENANT_A);
 		Patient p = myClient.read().resource(Patient.class).withId(idA).execute();
-		assertTrue(p.getActive());
+		assertThat(p.getActive()).isTrue();
 	}
 
 	@Test
@@ -91,7 +89,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		try {
 			myClient.read().resource(Patient.class).withId(idB).execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -107,7 +105,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 
 		myTenantClientInterceptor.setTenantId("DEFAULT");
 		Patient p = myClient.read().resource(Patient.class).withId(idA).execute();
-		assertTrue(p.getActive());
+		assertThat(p.getActive()).isTrue();
 	}
 
 	@Test
@@ -121,7 +119,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 		myTenantClientInterceptor.setTenantId(TENANT_A);
 		try {
 			myClient.read().resource(Patient.class).withId(idA).execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -146,7 +144,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			.include(IBaseResource.INCLUDE_ALL)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertEquals(2, output.getEntry().size());
+		assertThat(output.getEntry().size()).isEqualTo(2);
 	}
 
 	@Test
@@ -169,7 +167,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 				.include(IBaseResource.INCLUDE_ALL)
 				.returnBundle(Bundle.class)
 				.execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -221,7 +219,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 				.loadPage()
 				.next(bundle)
 				.execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
 			// good
 		}
@@ -250,8 +248,8 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			.returnBundle(Bundle.class)
 			.execute();
 
-		Assertions.assertTrue(patientBundle.hasLink());
-		Assertions.assertTrue(patientBundle.getLink().stream().anyMatch(link -> link.hasRelation() && link.getRelation().equals("next")));
+		assertThat(patientBundle.hasLink()).isTrue();
+		assertThat(patientBundle.getLink().stream().anyMatch(link -> link.hasRelation() && link.getRelation().equals("next"))).isTrue();
 		String nextLink = patientBundle.getLink().stream().filter(link -> link.hasRelation() && link.getRelation().equals("next")).findFirst().get().getUrl();
 		assertThat(nextLink, not(blankOrNullString()));
 
@@ -263,9 +261,9 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 
 		try {
 			Bundle resp2 = myClient.search().byUrl(nextLink).returnBundle(Bundle.class).execute();
-			fail();
+			fail("");
 		} catch (ForbiddenOperationException e) {
-			Assertions.assertEquals("HTTP 403 Forbidden: HAPI-0334: Access denied by default policy (no applicable rules)", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 403 Forbidden: HAPI-0334: Access denied by default policy (no applicable rules)");
 		}
 	}
 }

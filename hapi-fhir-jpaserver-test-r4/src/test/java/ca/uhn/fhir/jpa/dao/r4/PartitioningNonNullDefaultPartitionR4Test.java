@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -19,9 +18,8 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"unchecked", "ConstantConditions"})
 public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR4Test {
@@ -183,13 +181,13 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 
 		addReadDefaultPartition();
 		patient = myPatientDao.read(new IdType("Patient/" + id), mySrd);
-		assertTrue(patient.getActive());
+		assertThat(patient.getActive()).isTrue();
 
 		// Wrong partition
 		addReadPartition(2);
 		try {
 			myPatientDao.read(new IdType("Patient/" + id), mySrd);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}

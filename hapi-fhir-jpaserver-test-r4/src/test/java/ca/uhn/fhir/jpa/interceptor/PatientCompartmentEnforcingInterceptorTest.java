@@ -13,7 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class PatientCompartmentEnforcingInterceptorTest extends BaseJpaR4Test {
@@ -69,7 +69,7 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseJpaR4Test {
 		obs.getSubject().setReference("Patient/B");
 
 		InternalErrorException thrown = assertThrows(InternalErrorException.class, () -> myObservationDao.update(obs, new SystemRequestDetails()));
-		assertEquals("HAPI-2476: Resource compartment changed. Was a referenced Patient changed?", thrown.getMessage());
+		assertThat(thrown.getMessage()).isEqualTo("HAPI-2476: Resource compartment changed. Was a referenced Patient changed?");
 	}
 
 	@Test

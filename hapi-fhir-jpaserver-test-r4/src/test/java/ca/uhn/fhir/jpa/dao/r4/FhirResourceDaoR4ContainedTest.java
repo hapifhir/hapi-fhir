@@ -30,8 +30,8 @@ import org.junit.jupiter.api.Test;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4ContainedTest.class);
@@ -280,9 +280,9 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 		try {
 			IBundleProvider outcome = myObservationDao.search(map);
 			outcome.getResources(0, 1).get(0);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1214) + "Invalid parameter chain: subject.marital-status", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1214) + "Invalid parameter chain: subject.marital-status");
 		}
 		
 	}

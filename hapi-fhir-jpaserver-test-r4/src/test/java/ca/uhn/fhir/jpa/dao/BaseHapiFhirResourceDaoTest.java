@@ -29,7 +29,6 @@ import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,8 +47,8 @@ import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isNotNull;
@@ -137,9 +136,9 @@ class BaseHapiFhirResourceDaoTest {
 		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.NOT_ALLOWED);
 		try {
 			mySvc.validateResourceIdCreation(patient, sysRequest);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(959) + "failedToCreateWithClientAssignedIdNotAllowed", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(959) + "failedToCreateWithClientAssignedIdNotAllowed");
 		}
 	}
 
@@ -151,9 +150,9 @@ class BaseHapiFhirResourceDaoTest {
 		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC);
 		try {
 			mySvc.validateResourceIdCreation(patient, sysRequest);
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(960) + "failedToCreateWithClientAssignedNumericId", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(960) + "failedToCreateWithClientAssignedNumericId");
 		}
 	}
 
@@ -209,8 +208,8 @@ class BaseHapiFhirResourceDaoTest {
 		DaoMethodOutcome outcome = mySvc.delete(id, deleteConflicts, requestDetails, transactionDetails);
 
 		// verify
-		Assertions.assertNotNull(outcome);
-		Assertions.assertEquals(id.getValue(), outcome.getId().getValue());
+		assertThat(outcome).isNotNull();
+		assertThat(outcome.getId().getValue()).isEqualTo(id.getValue());
 	}
 
 	@Test
@@ -231,13 +230,13 @@ class BaseHapiFhirResourceDaoTest {
 		Mockito.verify(myJobCoordinator).startInstance(isNotNull(), requestCaptor.capture());
 
 		JobInstanceStartRequest actualRequest = requestCaptor.getValue();
-		assertNotNull(actualRequest);
-		assertNotNull(actualRequest.getParameters());
+		assertThat(actualRequest).isNotNull();
+		assertThat(actualRequest.getParameters()).isNotNull();
 		ReindexJobParameters actualParameters = actualRequest.getParameters(ReindexJobParameters.class);
 
-		assertEquals(2, actualParameters.getPartitionedUrls().size());
-		assertEquals("Patient?", actualParameters.getPartitionedUrls().get(0).getUrl());
-		assertEquals("Group?", actualParameters.getPartitionedUrls().get(1).getUrl());
+		assertThat(actualParameters.getPartitionedUrls().size()).isEqualTo(2);
+		assertThat(actualParameters.getPartitionedUrls().get(0).getUrl()).isEqualTo("Patient?");
+		assertThat(actualParameters.getPartitionedUrls().get(1).getUrl()).isEqualTo("Group?");
 	}
 
 	@Test
@@ -252,11 +251,11 @@ class BaseHapiFhirResourceDaoTest {
 		Mockito.verify(myJobCoordinator).startInstance(isNotNull(), requestCaptor.capture());
 
 		JobInstanceStartRequest actualRequest = requestCaptor.getValue();
-		assertNotNull(actualRequest);
-		assertNotNull(actualRequest.getParameters());
+		assertThat(actualRequest).isNotNull();
+		assertThat(actualRequest.getParameters()).isNotNull();
 		ReindexJobParameters actualParameters = actualRequest.getParameters(ReindexJobParameters.class);
 
-		assertEquals(0, actualParameters.getPartitionedUrls().size());
+		assertThat(actualParameters.getPartitionedUrls().size()).isEqualTo(0);
 	}
 
 	@ParameterizedTest
@@ -278,7 +277,7 @@ class BaseHapiFhirResourceDaoTest {
 		// verify
 		verify(myISearchBuilder).createQuery(mySearchParameterMapCaptor.capture(), any(), any(), any());
 		SearchParameterMap capturedSP = mySearchParameterMapCaptor.getValue();
-		assertEquals(capturedSP.getLoadSynchronousUpTo(), expectedSearchSize);
+		assertThat(expectedSearchSize).isEqualTo(capturedSP.getLoadSynchronousUpTo());
 	}
 
 	static Stream<Arguments> searchParameterMapProvider() {

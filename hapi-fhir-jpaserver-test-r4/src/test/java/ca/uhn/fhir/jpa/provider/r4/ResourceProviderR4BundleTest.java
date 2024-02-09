@@ -29,8 +29,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
@@ -70,7 +70,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
     ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(retBundle));
 
-		assertEquals("http://foo/", bundle.getEntry().get(0).getFullUrl());
+		assertThat(bundle.getEntry().get(0).getFullUrl()).isEqualTo("http://foo/");
 	}
 
 	@Test
@@ -85,7 +85,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 			.setResource(bundle);
 		try {
 			myClient.operation().onServer().named(JpaConstants.OPERATION_PROCESS_MESSAGE).withParameters(parameters).execute();
-			fail();
+			fail("");
 		} catch (NotImplementedOperationException e) {
 			assertThat(e.getMessage()).contains("This operation is not yet implemented on this server");
 		}
@@ -106,12 +106,12 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		
-		assertEquals(50, output.getEntry().size());
+		assertThat(output.getEntry().size()).isEqualTo(50);
 		List<BundleEntryComponent> bundleEntries = output.getEntry();
 
 		int i=0;
 		for (BundleEntryComponent bundleEntry : bundleEntries) {
-			assertEquals(ids.get(i++),  bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+			assertThat(bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(i++));
 		}
 
 	}
@@ -150,12 +150,12 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		
-		assertEquals(50, output.getEntry().size());
+		assertThat(output.getEntry().size()).isEqualTo(50);
 		List<BundleEntryComponent> bundleEntries = output.getEntry();
 
 		int i=0;
 		for (BundleEntryComponent bundleEntry : bundleEntries) {
-			assertEquals(ids.get(i++),  bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+			assertThat(bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(i++));
 		}
 
 
@@ -180,36 +180,36 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
-		
+
 		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		
-		assertEquals(8, output.getEntry().size());
+		assertThat(output.getEntry().size()).isEqualTo(8);
 		
 		List<BundleEntryComponent> bundleEntries = output.getEntry();
-		
+
 		// patient 1
-		assertEquals(ids.get(0), bundleEntries.get(0).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+		assertThat(bundleEntries.get(0).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(0));
 
 		// patient 10 - error outcomes
 			assertThat(((OperationOutcome) bundleEntries.get(1).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics()).contains("Patient/1000");
 
 		// patient 2
-		assertEquals(ids.get(1), bundleEntries.get(2).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+		assertThat(bundleEntries.get(2).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(1));
 
 		// patient 3
-		assertEquals(ids.get(2), bundleEntries.get(3).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+		assertThat(bundleEntries.get(3).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(2));
 
 		// patient 20 - error outcomes
 			assertThat(((OperationOutcome) bundleEntries.get(4).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics()).contains("Patient/2000");
 
 		// patient 4
-		assertEquals(ids.get(3), bundleEntries.get(5).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+		assertThat(bundleEntries.get(5).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(3));
 
 		// patient 30 - error outcomes
 			assertThat(((OperationOutcome) bundleEntries.get(6).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics()).contains("Patient/3000");
 
 		// patient 5
-		assertEquals(ids.get(4), bundleEntries.get(7).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+		assertThat(bundleEntries.get(7).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(4));
 
 	}
 	
@@ -250,33 +250,33 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
-		
+
 		//ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		
-		assertEquals(7, output.getEntry().size());
+		assertThat(output.getEntry().size()).isEqualTo(7);
 		
 		List<BundleEntryComponent> bundleEntries = output.getEntry();
-		
+
 		// patient 1
-		assertEquals(ids.get(0), bundleEntries.get(0).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+		assertThat(bundleEntries.get(0).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(0));
 
 		// patient create
 			assertThat(bundleEntries.get(1).getResponse().getStatus()).contains("201");
 
 		// patient 2
-		assertEquals(ids.get(1), bundleEntries.get(2).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+		assertThat(bundleEntries.get(2).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(1));
 
 		// patient 3
-		assertEquals(ids.get(2), bundleEntries.get(3).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+		assertThat(bundleEntries.get(3).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(2));
 
 		// condition create
 			assertThat(bundleEntries.get(4).getResponse().getStatus()).contains("201");
 
 		// patient 4
-		assertEquals(ids.get(3), bundleEntries.get(5).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+		assertThat(bundleEntries.get(5).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(3));
 
 		// patient 5
-		assertEquals(ids.get(4), bundleEntries.get(6).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
+		assertThat(bundleEntries.get(6).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(4));
 
 	}
 

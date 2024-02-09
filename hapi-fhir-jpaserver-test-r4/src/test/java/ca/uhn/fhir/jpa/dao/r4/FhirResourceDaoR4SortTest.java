@@ -24,7 +24,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SuppressWarnings({"unchecked", "deprecation"})
 public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
@@ -45,7 +44,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		criteriaUrl.setLastUpdated(range);
 		criteriaUrl.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
 		IBundleProvider results = myObservationDao.search(criteriaUrl);
-		assertEquals(0, results.size().intValue());
+		assertThat(results.size().intValue()).isEqualTo(0);
 	}
 
 	@Test
@@ -256,7 +255,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		ids = toUnqualifiedVersionlessIds(myPatientDao.search(map));
 		ourLog.info("** Got IDs: {}", ids);
 		assertThat(ids).as(ids.toString()).containsExactly(pid2, pid4, pid5, pid3, pid1);
-		assertEquals(5, ids.size());
+		assertThat(ids.size()).isEqualTo(5);
 
 	}
 

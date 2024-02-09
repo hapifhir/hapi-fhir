@@ -62,7 +62,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4WithDelayConfig.class})
@@ -178,12 +178,12 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 			} catch (Exception e) {
 				if (count >= 3) {
 					ourLog.error("Failed during expunge", e);
-					fail(e.toString());
+					fail("", e.toString());
 				} else {
 					try {
 						Thread.sleep(1000);
 					} catch (InterruptedException e2) {
-						fail(e2.toString());
+						fail("", e2.toString());
 					}
 				}
 			}
@@ -425,14 +425,14 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 		try {
 			ourLog.info("Reading {}", myPractitionerId);
 			myClient.read().resource(Practitioner.class).withId(myPractitionerId).execute();
-			fail();
+			fail("");
 		} catch (ResourceGoneException ignored) {
 			ourLog.info("Practitioner resource gone as expected");
 		}
 		try {
 			ourLog.info("Searching for encounters after deleting Practitioner");
 			myClient.read().resource(Encounter.class).withId("Encounter/test-enc-3").execute();
-			fail();
+			fail("");
 		} catch (ResourceGoneException ignored) {
 			ourLog.info("Encounter resource gone as expected after Practitioner deleted");
 		}
@@ -462,14 +462,14 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 		try {
 			ourLog.info("Reading {}", myOrganizationId);
 			myClient.read().resource(Organization.class).withId(myOrganizationId).execute();
-			fail();
+			fail("");
 		} catch (ResourceGoneException ignored) {
 			ourLog.info("Organization resource gone as expected");
 		}
 		try {
 			ourLog.info("Searching for encounters after deleting Organization");
 			myClient.read().resource(Encounter.class).withId("Encounter/test-enc-3").execute();
-			fail();
+			fail("");
 		} catch (ResourceGoneException ignored) {
 			ourLog.info("Encounter resource gone as expected after Organization deleted");
 		}

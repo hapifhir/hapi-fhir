@@ -36,7 +36,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourceProviderR4Test {
 
@@ -123,7 +123,7 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
 		waitForSize(1, ourUpdatedObservations);
-		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
+		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {

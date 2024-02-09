@@ -19,10 +19,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class PackageLoaderSvcIT {
@@ -59,8 +57,8 @@ public class PackageLoaderSvcIT {
 		NpmPackageData result = myPackageLoaderSvc.fetchPackageFromPackageSpec(id, versionId);
 
 		// verify fetched data
-		assertNotNull(result);
-		assertNotNull(result.getPackage());
+		assertThat(result).isNotNull();
+		assertThat(result.getPackage()).isNotNull();
 		NpmPackage npmPackage = result.getPackage();
 
 		// test parse resources
@@ -73,9 +71,9 @@ public class PackageLoaderSvcIT {
 		}
 
 		// verify fetched resources
-		assertFalse(resources.isEmpty());
-		assertEquals(1, resources.size());
-		assertEquals("SearchParameter", resources.get(0).fhirType());
+		assertThat(resources.isEmpty()).isFalse();
+		assertThat(resources.size()).isEqualTo(1);
+		assertThat(resources.get(0).fhirType()).isEqualTo("SearchParameter");
 	}
 
 	/**
@@ -95,25 +93,25 @@ public class PackageLoaderSvcIT {
 		// loadPackageFromCacheOnly
 		try {
 			myPackageLoaderSvc.loadPackageFromCacheOnly("id", "versionId");
-			fail();
+			fail("");
 		} catch (UnsupportedOperationException ex) {
-			assertTrue(ex.getMessage().contains("Cannot load from cache."));
+			assertThat(ex.getMessage().contains("Cannot load from cache.")).isTrue();
 		}
 
 		// addPackageToCache
 		try {
 			myPackageLoaderSvc.addPackageToCache("id", "version", Mockito.mock(InputStream.class), "description or url");
-			fail();
+			fail("");
 		} catch (UnsupportedOperationException ex) {
-			assertTrue(ex.getMessage().contains("Cannot add to cache."));
+			assertThat(ex.getMessage().contains("Cannot add to cache.")).isTrue();
 		}
 
 		// loadPackage
 		try {
 			myPackageLoaderSvc.loadPackage("id", "version");
-			fail();
+			fail("");
 		} catch (UnsupportedOperationException ex) {
-			assertTrue(ex.getMessage().contains("No packages are cached;"));
+			assertThat(ex.getMessage().contains("No packages are cached;")).isTrue();
 		}
 	}
 }

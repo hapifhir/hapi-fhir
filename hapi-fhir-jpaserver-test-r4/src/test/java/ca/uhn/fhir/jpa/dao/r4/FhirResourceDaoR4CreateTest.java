@@ -68,11 +68,11 @@ import java.util.stream.Collectors;
 
 import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4CreateTest.class);
@@ -136,7 +136,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		});
 
 		myCaptureQueriesListener.clear();
-		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous("patient", new ReferenceParam("Patient/A"))).sizeOrThrowNpe());
+		assertThat(myObservationDao.search(SearchParameterMap.newSynchronous("patient", new ReferenceParam("Patient/A"))).sizeOrThrowNpe()).isEqualTo(1);
 		myCaptureQueriesListener.logSelectQueries();
 	}
 
@@ -341,7 +341,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue("20210427133226.444+0800");
 		DaoMethodOutcome outcome = myObservationDao.create(obs, "identifier=20210427133226.444%2B0800", new SystemRequestDetails());
-		assertTrue(outcome.getCreated());
+		assertThat(outcome.getCreated()).isTrue();
 
 		logAllTokenIndexes();
 		myCaptureQueriesListener.clear();
@@ -349,7 +349,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		obs.addIdentifier().setValue("20210427133226.444+0800");
 		outcome = myObservationDao.create(obs, "identifier=20210427133226.444%2B0800", new SystemRequestDetails());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertFalse(outcome.getCreated());
+		assertThat(outcome.getCreated()).isFalse();
 	}
 
 	/**
@@ -361,9 +361,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		obs.addIdentifier().setValue("A+B");
 		try {
 			myObservationDao.create(obs, "identifier=A%20B", new SystemRequestDetails());
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
 		}
 	}
 
@@ -386,9 +386,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		try {
 			mySystemDao.transaction(new SystemRequestDetails(), (Bundle) bb.getBundle());
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
 		}
 	}
 
@@ -406,7 +406,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		Long expectedResId = outcome.getId().getIdPartAsLong();
 		String expectedNormalizedMatchUrl = obs.fhirType() + "?" + matchUrl;
 
-		assertTrue(outcome.getCreated());
+		assertThat(outcome.getCreated()).isTrue();
 		ResourceSearchUrlEntity searchUrlEntity = myResourceSearchUrlDao.findAll().get(0);
 		assertThat(searchUrlEntity).isNotNull();
 		assertThat(searchUrlEntity.getResourcePid()).isEqualTo(expectedResId);
@@ -453,7 +453,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertThat(id.getIdPart()).matches("[a-z0-9]{8}-.*");
 
 		p = myPatientDao.read(id);
-		assertEquals("FAM", p.getNameFirstRep().getFamily());
+		assertThat(p.getNameFirstRep().getFamily()).isEqualTo("FAM");
 
 	}
 
@@ -469,7 +469,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertThat(id.getIdPart()).matches("[a-z0-9]{8}-.*");
 
 		p = myPatientDao.read(id);
-		assertEquals("FAM", p.getNameFirstRep().getFamily());
+		assertThat(p.getNameFirstRep().getFamily()).isEqualTo("FAM");
 
 	}
 
@@ -485,14 +485,14 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		cs.setUrl("http://foo");
 		IIdType id = myCodeSystemDao.create(cs).getId();
 		cs = myCodeSystemDao.read(id);
-		assertEquals("http://foo", cs.getUrl());
+		assertThat(cs.getUrl()).isEqualTo("http://foo");
 
 		// purely numeric ID
 		cs.setId("123");
 		cs.setUrl("http://fooCS");
 		id = myCodeSystemDao.update(cs).getId();
 		cs = myCodeSystemDao.read(id);
-		assertEquals("http://fooCS", cs.getUrl());
+		assertThat(cs.getUrl()).isEqualTo("http://fooCS");
 	}
 
 	/**
@@ -505,7 +505,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		SampledData sampledData = new SampledData();
 		sampledData.setData("2 3 4 5 6");
 		o.setValue(sampledData);
-		assertTrue(myObservationDao.create(o).getCreated());
+		assertThat(myObservationDao.create(o).getCreated()).isTrue();
 	}
 
 	@Test
@@ -517,9 +517,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM");
 		try {
 			myPatientDao.update(p);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(959) + "No resource exists on this server resource with ID[AAA], and client-assigned IDs are not enabled.", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(959) + "No resource exists on this server resource with ID[AAA], and client-assigned IDs are not enabled.");
 		}
 	}
 
@@ -537,7 +537,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		// Read it back
 		p = myPatientDao.read(new IdType("Patient/" + firstClientAssignedId));
-		assertTrue(p.getActive());
+		assertThat(p.getActive()).isTrue();
 
 		// Now create a client assigned numeric ID
 		p = new Patient();
@@ -545,11 +545,11 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM");
 		IIdType id1 = myPatientDao.update(p).getId();
 
-		assertEquals(Long.toString(newId), id1.getIdPart());
-		assertEquals("1", id1.getVersionIdPart());
+		assertThat(id1.getIdPart()).isEqualTo(Long.toString(newId));
+		assertThat(id1.getVersionIdPart()).isEqualTo("1");
 
 		p = myPatientDao.read(id1);
-		assertEquals("FAM", p.getNameFirstRep().getFamily());
+		assertThat(p.getNameFirstRep().getFamily()).isEqualTo("FAM");
 
 		// Update it
 		p = new Patient();
@@ -557,11 +557,11 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM2");
 		id1 = myPatientDao.update(p).getId();
 
-		assertEquals(Long.toString(newId), id1.getIdPart());
-		assertEquals("2", id1.getVersionIdPart());
+		assertThat(id1.getIdPart()).isEqualTo(Long.toString(newId));
+		assertThat(id1.getVersionIdPart()).isEqualTo("2");
 
 		p = myPatientDao.read(id1);
-		assertEquals("FAM2", p.getNameFirstRep().getFamily());
+		assertThat(p.getNameFirstRep().getFamily()).isEqualTo("FAM2");
 
 		// Try to create another server-assigned. This should fail since we have a
 		// a conflict.
@@ -569,7 +569,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.setActive(false);
 		try {
 			myPatientDao.create(p);
-			fail();
+			fail("");
 		} catch (ResourceVersionConflictException e) {
 			// good
 		}
@@ -590,7 +590,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		// Read it back
 		p = myPatientDao.read(id0.toUnqualifiedVersionless());
-		assertTrue(p.getActive());
+		assertThat(p.getActive()).isTrue();
 
 		// Pick an ID that was already used as an internal PID
 		Long newId = runInTransaction(() -> myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromNewest(
@@ -605,12 +605,12 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM");
 		IIdType id1 = myPatientDao.update(p).getId();
 
-		assertEquals(Long.toString(newId), id1.getIdPart());
-		assertEquals("1", id1.getVersionIdPart());
+		assertThat(id1.getIdPart()).isEqualTo(Long.toString(newId));
+		assertThat(id1.getVersionIdPart()).isEqualTo("1");
 
 		// Read it back
 		p = myPatientDao.read(id1);
-		assertEquals("FAM", p.getNameFirstRep().getFamily());
+		assertThat(p.getNameFirstRep().getFamily()).isEqualTo("FAM");
 
 		// Update it
 		p = new Patient();
@@ -618,11 +618,11 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM2");
 		id1 = myPatientDao.update(p).getId();
 
-		assertEquals(Long.toString(newId), id1.getIdPart());
-		assertEquals("2", id1.getVersionIdPart());
+		assertThat(id1.getIdPart()).isEqualTo(Long.toString(newId));
+		assertThat(id1.getVersionIdPart()).isEqualTo("2");
 
 		p = myPatientDao.read(id1);
-		assertEquals("FAM2", p.getNameFirstRep().getFamily());
+		assertThat(p.getNameFirstRep().getFamily()).isEqualTo("FAM2");
 
 		// Try to create another server-assigned. This should fail since we have a
 		// a conflict.
@@ -643,9 +643,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo.com");
 		DaoMethodOutcome result = myStructureDefinitionDao.create(sd);
-		assertTrue(result.getCreated());
+		assertThat(result.getCreated()).isTrue();
 		StructureDefinition readSd = myStructureDefinitionDao.read(result.getId());
-		assertEquals("http://foo.com", readSd.getUrl());
+		assertThat(readSd.getUrl()).isEqualTo("http://foo.com");
 
 		logAllResources();
 		logAllResourceVersions();
@@ -665,7 +665,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		IBundleProvider bundle = myStructureDefinitionDao.search(map);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(1, bundle.size());
+		assertThat(bundle.size()).isEqualTo(1);
 	}
 
 	@Test
@@ -730,8 +730,8 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertThat(encoded).contains("#1");
 
 		Organization org = (Organization) p.getManagingOrganization().getResource();
-		assertEquals("#1", org.getId());
-		assertEquals(1, org.getMeta().getTag().size());
+		assertThat(org.getId()).isEqualTo("#1");
+		assertThat(org.getMeta().getTag().size()).isEqualTo(1);
 
 	}
 
@@ -748,9 +748,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		sp.addBase("Patient");
 		try {
 			mySearchParameterDao.update(sp);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertEquals(Msg.code(1111) + "Can not override built-in search parameter Patient:birthdate because overriding is disabled on this server", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1111) + "Can not override built-in search parameter Patient:birthdate because overriding is disabled on this server");
 		}
 
 	}
@@ -770,7 +770,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		ourLog.debug("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
-		assertTrue(myObservationDao.create(obs).getCreated());
+		assertThat(myObservationDao.create(obs).getCreated()).isTrue();
 
 		// Same value should be placed in both quantity tables
 		runInTransaction(() -> {
@@ -792,7 +792,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setValue(new BigDecimal("0.012"))
 			.setUnits("m")
 		);
-		assertEquals(1, toUnqualifiedVersionlessIdValues(myObservationDao.search(map)).size());
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)).size()).isEqualTo(1);
 	}
 
 	@Test
@@ -811,7 +811,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		ourLog.debug("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		myCaptureQueriesListener.clear();
-		assertTrue(myObservationDao.create(obs).getCreated());
+		assertThat(myObservationDao.create(obs).getCreated()).isTrue();
 		myCaptureQueriesListener.logInsertQueries();
 
 		// Original value should be in Quantity index, normalized should be in normalized table
@@ -845,7 +845,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY_NRML t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
-		assertEquals(1, ids.size());
+		assertThat(ids.size()).isEqualTo(1);
 
 		// Try with non-normalized value
 		myCaptureQueriesListener.clear();
@@ -858,7 +858,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY_NRML t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
-		assertEquals(1, ids.size());
+		assertThat(ids.size()).isEqualTo(1);
 
 		// Try with no units value
 		myCaptureQueriesListener.clear();
@@ -869,7 +869,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
-		assertEquals(1, ids.size());
+		assertThat(ids.size()).isEqualTo(1);
 	}
 
 	@Test
@@ -887,7 +887,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		ourLog.debug("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
-		assertTrue(myObservationDao.create(obs).getCreated());
+		assertThat(myObservationDao.create(obs).getCreated()).isTrue();
 
 		// Original value should be in Quantity index, normalized should be in normalized table
 		runInTransaction(() -> {
@@ -918,7 +918,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		List<IBaseResource> resources = found.getResources(0, found.sizeOrThrowNpe());
 
-		assertEquals(1, ids.size());
+		assertThat(ids.size()).isEqualTo(1);
 
 		ourLog.debug("Observation2: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resources.get(0)));
 
@@ -939,7 +939,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		ourLog.debug("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
-		assertTrue(myObservationDao.create(obs).getCreated());
+		assertThat(myObservationDao.create(obs).getCreated()).isTrue();
 
 		// Original value should be in Quantity index, normalized should be in normalized table
 		runInTransaction(() -> {
@@ -961,7 +961,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			.setValue(new BigDecimal("957412345"))
 			.setUnits("g.m-3")
 		);
-		assertEquals(1, toUnqualifiedVersionlessIdValues(myObservationDao.search(map)).size());
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(map)).size()).isEqualTo(1);
 	}
 
 	@Test
@@ -979,7 +979,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		ourLog.debug("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
-		assertTrue(myObservationDao.create(obs).getCreated());
+		assertThat(myObservationDao.create(obs).getCreated()).isTrue();
 
 		// The Quantity can't be normalized, it should be stored in the non normalized quantity table only
 		runInTransaction(() -> {
@@ -1006,7 +1006,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '95.7412345'");
-		assertEquals(1, ids.size());
+		assertThat(ids.size()).isEqualTo(1);
 
 	}
 
@@ -1027,7 +1027,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		ourLog.debug("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		myCaptureQueriesListener.clear();
-		assertTrue(myObservationDao.create(obs).getCreated());
+		assertThat(myObservationDao.create(obs).getCreated()).isTrue();
 		myCaptureQueriesListener.logInsertQueries();
 
 		// Original value should be in Quantity index, normalized should be in normalized table
@@ -1061,7 +1061,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
-		assertEquals(0, ids.size());
+		assertThat(ids.size()).isEqualTo(0);
 
 		// Try with non-normalized value
 		myCaptureQueriesListener.clear();
@@ -1074,7 +1074,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
-		assertEquals(1, ids.size());
+		assertThat(ids.size()).isEqualTo(1);
 
 		// Try with no units value
 		myCaptureQueriesListener.clear();
@@ -1085,7 +1085,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
-		assertEquals(1, ids.size());
+		assertThat(ids.size()).isEqualTo(1);
 	}
 
 	@Test
@@ -1135,7 +1135,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			for (Future<String> next : futures) {
 				String nextError = next.get();
 				if (StringUtils.isNotBlank(nextError)) {
-					fail(nextError);
+					fail("", nextError);
 				}
 			}
 
@@ -1160,7 +1160,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		ourLog.debug("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		myCaptureQueriesListener.clear();
-		assertTrue(myObservationDao.create(obs).getCreated());
+		assertThat(myObservationDao.create(obs).getCreated()).isTrue();
 		myCaptureQueriesListener.logInsertQueries();
 
 		// Original value should be in Quantity index, no normalized should be in normalized table
@@ -1191,7 +1191,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '1.2E-9'");
-		assertEquals(0, ids.size());
+		assertThat(ids.size()).isEqualTo(0);
 
 		// Try with non-normalized value
 		myCaptureQueriesListener.clear();
@@ -1204,7 +1204,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
-		assertEquals(1, ids.size());
+		assertThat(ids.size()).isEqualTo(1);
 
 		// Try with no units value
 		myCaptureQueriesListener.clear();
@@ -1215,7 +1215,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY t0");
 		assertThat(searchSql).contains("t0.SP_VALUE = '0.0000012'");
-		assertEquals(1, ids.size());
+		assertThat(ids.size()).isEqualTo(1);
 	}
 
 }

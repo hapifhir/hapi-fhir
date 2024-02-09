@@ -28,8 +28,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProviderR4Test {
 
@@ -108,14 +108,14 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals("SYSTEM NAME", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("2", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Parent A2", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("SYSTEM NAME");
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo("2");
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo("Parent A2");
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).getValue()).isEqualTo(false);
 
 		// With HTTP GET
 		respParam = myClient
@@ -130,14 +130,14 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("SYSTEM NAME"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals(("2"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Parent A2", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(("SYSTEM NAME"));
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo(("2"));
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo("Parent A2");
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).getValue()).isEqualTo(false);
 
 		// Test with version 1 specified.
 		respParam = myClient
@@ -152,14 +152,14 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals("SYSTEM NAME", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("1", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Parent A1", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("SYSTEM NAME");
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo("1");
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo("Parent A1");
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).getValue()).isEqualTo(false);
 
 		// With HTTP GET
 		respParam = myClient
@@ -175,14 +175,14 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("SYSTEM NAME"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals(("1"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Parent A1", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(("SYSTEM NAME"));
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo(("1"));
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo("Parent A1");
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).getValue()).isEqualTo(false);
 
 		// Test with version 2 specified.
 		respParam = myClient
@@ -197,14 +197,14 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals("SYSTEM NAME", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("2", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Parent A2", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("SYSTEM NAME");
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo("2");
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo("Parent A2");
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).getValue()).isEqualTo(false);
 
 		// With HTTP GET
 		respParam = myClient
@@ -220,14 +220,14 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("SYSTEM NAME"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals(("2"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Parent A2", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(("SYSTEM NAME"));
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo(("2"));
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo("Parent A2");
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).getValue()).isEqualTo(false);
 	}
 
 	@Test
@@ -244,14 +244,14 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals("v2.0203", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("2.9", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Accession ID", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("v2.0203");
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo("2.9");
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo("Accession ID");
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).getValue()).isEqualTo(false);
 
 		// Repeat with version specified.
 		respParam = myClient
@@ -266,14 +266,14 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals("v2.0203", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("2.9", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Accession ID", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo("v2.0203");
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo("2.9");
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo("Accession ID");
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).getValue()).isEqualTo(false);
 	}
 
 	@Test
@@ -287,7 +287,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 				.andParameter("system", new UriType("http://hl7.org/fhir/v2/0203"))
 				.andParameter("version", new StringType("2.8"))
 				.execute();
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			ourLog.info("Lookup failed as expected");
 		}
@@ -307,14 +307,14 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("2", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals(("Systolic blood pressure--expiration v2"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(("ACME Codes"));
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo("2");
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo(("Systolic blood pressure--expiration v2"));
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).getValue()).isEqualTo(false);
 
 		// Test with version 1 specified.
 		respParam = myClient
@@ -329,14 +329,14 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("1", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals(("Systolic blood pressure--expiration v1"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(("ACME Codes"));
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo("1");
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo(("Systolic blood pressure--expiration v1"));
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).getValue()).isEqualTo(false);
 
 		// Test with version 2 specified
 		respParam = myClient
@@ -351,14 +351,14 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("2", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals(("Systolic blood pressure--expiration v2"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(("ACME Codes"));
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo("2");
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo(("Systolic blood pressure--expiration v2"));
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).getValue()).isEqualTo(false);
 	}
 
 	@Test
@@ -372,7 +372,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 				.andParameter("system", new UriType("http://acme.org"))
 				.andParameter("version", new StringType("3"))
 				.execute();
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			ourLog.info("Lookup failed as expected");
 		}
@@ -391,14 +391,14 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("2",  ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals(("Systolic blood pressure--expiration v2"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(("ACME Codes"));
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo("2");
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo(("Systolic blood pressure--expiration v2"));
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).getValue()).isEqualTo(false);
 
 		// Test with version set to 1
 		respParam = myClient
@@ -411,14 +411,14 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("1",  ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals(("Systolic blood pressure--expiration v1"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(("ACME Codes"));
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo("1");
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo(("Systolic blood pressure--expiration v1"));
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).getValue()).isEqualTo(false);
 
 		// Test with version set to 2
 		respParam = myClient
@@ -431,14 +431,14 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("2",  ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals(("Systolic blood pressure--expiration v2"), ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
+		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(("ACME Codes"));
+		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("version");
+		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo("2");
+		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("display");
+		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo(("Systolic blood pressure--expiration v2"));
+		assertThat(respParam.getParameter().get(3).getName()).isEqualTo("abstract");
+		assertThat(((BooleanType) respParam.getParameter().get(3).getValue()).getValue()).isEqualTo(false);
 
 	}
 
@@ -457,9 +457,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.SUBSUMES.toCode());
 
 		// Test with version set to 1.
 		respParam = myClient
@@ -475,9 +475,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.SUBSUMES.toCode());
 
 		// Test with version set to 2.
 		respParam = myClient
@@ -493,9 +493,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.SUBSUMES.toCode());
 
 	}
 
@@ -514,9 +514,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode());
 
 		// Test with version set to 1.
 		respParam = myClient
@@ -532,9 +532,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode());
 
 		// Test with version set to 2.
 		respParam = myClient
@@ -550,9 +550,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode());
 	}
 
 	@Test
@@ -570,9 +570,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode());
 
 		// Test with version set to 1
 		respParam = myClient
@@ -588,9 +588,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode());
 
 		// Test with version set to 2
 		respParam = myClient
@@ -606,9 +606,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode());
 
 	}
 
@@ -622,9 +622,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 				.withParameter(Parameters.class, "codingA", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ChildAA").setVersion("1"))
 				.andParameter("codingB", new Coding().setSystem(SYSTEM_PARENTCHILD).setCode("ParentA").setVersion("2"))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(904) + "Unable to test subsumption across different code system versions", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(904) + "Unable to test subsumption across different code system versions");
 		}
 	}
 
@@ -643,9 +643,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.SUBSUMES.toCode());
 
 		// Test with version set to 1.
 		respParam = myClient
@@ -659,9 +659,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.SUBSUMES.toCode());
 
 		// Test with version set to 2.
 		respParam = myClient
@@ -675,9 +675,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.SUBSUMES.toCode());
 
 	}
 
@@ -696,9 +696,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode());
 
 		// Test with version set to 1.
 		respParam = myClient
@@ -712,9 +712,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		 resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode());
 
 		// Test with version set to 2.
 		respParam = myClient
@@ -728,9 +728,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.SUBSUMEDBY.toCode());
 
 	}
 
@@ -748,9 +748,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode());
 
 		// Test with version set to 1
 		respParam = myClient
@@ -764,9 +764,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode());
 
 		// Test with version set to 2
 		respParam = myClient
@@ -780,9 +780,9 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertEquals(1, respParam.getParameter().size());
-		assertEquals("outcome", respParam.getParameter().get(0).getName());
-		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
+		assertThat(respParam.getParameter().size()).isEqualTo(1);
+		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
+		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.NOTSUBSUMED.toCode());
 
 	}
 
@@ -790,7 +790,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 	public void testUpdateCodeSystemById() throws IOException {
 
 		CodeSystem initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id).execute();
-		assertEquals("Parent Child CodeSystem 1", initialCodeSystem.getName());
+		assertThat(initialCodeSystem.getName()).isEqualTo("Parent Child CodeSystem 1");
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 1");
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
 		HttpPut putRequest = new HttpPut(myServerBase + "/CodeSystem/" + parentChildCs1Id);
@@ -799,29 +799,29 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
 		myCaptureQueriesListener.logAllQueries();
 		try {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
 
 		CodeSystem updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id).execute();
-		assertEquals("Updated Parent Child CodeSystem 1", updatedCodeSystem.getName());
+		assertThat(updatedCodeSystem.getName()).isEqualTo("Updated Parent Child CodeSystem 1");
 
 		initialCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id).execute();
-		assertEquals("Parent Child CodeSystem 2", initialCodeSystem.getName());
+		assertThat(initialCodeSystem.getName()).isEqualTo("Parent Child CodeSystem 2");
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 2");
 		encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
 		putRequest = new HttpPut(myServerBase + "/CodeSystem/" + parentChildCs2Id);
 		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
 		resp = ourHttpClient.execute(putRequest);
 		try {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
 
 		updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id).execute();
-		assertEquals("Updated Parent Child CodeSystem 2", updatedCodeSystem.getName());
+		assertThat(updatedCodeSystem.getName()).isEqualTo("Updated Parent Child CodeSystem 2");
 	}
 
 

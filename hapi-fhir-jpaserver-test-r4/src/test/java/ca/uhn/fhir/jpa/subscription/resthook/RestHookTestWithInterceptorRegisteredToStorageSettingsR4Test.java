@@ -34,8 +34,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Test the rest-hook subscriptions
@@ -146,7 +145,7 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 		waitForSize(1, ourUpdatedObservations);
 
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
-		assertNotNull(subscriptionTemp);
+		assertThat(subscriptionTemp).isNotNull();
 
 		subscriptionTemp.setCriteria(criteria1);
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
@@ -195,9 +194,9 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		assertFalse(subscription1.getId().equals(subscription2.getId()));
-		assertFalse(observation1.getId().isEmpty());
-		assertFalse(observation2.getId().isEmpty());
+		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
+		assertThat(observation1.getId().isEmpty()).isFalse();
+		assertThat(observation2.getId().isEmpty()).isFalse();
 	}
 
 	// TODO KHS this test has been failing intermittently
@@ -220,7 +219,7 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 		waitForSize(1, ourUpdatedObservations);
 
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
-		assertNotNull(subscriptionTemp);
+		assertThat(subscriptionTemp).isNotNull();
 
 		subscriptionTemp.setCriteria(criteria1);
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
@@ -271,9 +270,9 @@ public class RestHookTestWithInterceptorRegisteredToStorageSettingsR4Test extend
 
 		ourLog.info("Have observations: {}", toUnqualifiedVersionlessIds(ourUpdatedObservations));
 
-		assertFalse(subscription1.getId().equals(subscription2.getId()));
-		assertFalse(observation1.getId().isEmpty());
-		assertFalse(observation2.getId().isEmpty());
+		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
+		assertThat(observation1.getId().isEmpty()).isFalse();
+		assertThat(observation2.getId().isEmpty()).isFalse();
 	}
 
 	@BeforeAll

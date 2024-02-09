@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class ListR4Test extends BaseResourceProviderR4Test {
 
@@ -45,8 +45,8 @@ public class ListR4Test extends BaseResourceProviderR4Test {
 			.whereMap(Collections.singletonMap("_list", Collections.singletonList(list.getIdPart())))
 			.execute();
 
-		assertEquals(1, results.getEntry().size());
-		assertEquals(orgInList.toUnqualifiedVersionless().getValue(), results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertThat(results.getEntry().size()).isEqualTo(1);
+		assertThat(results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(orgInList.toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
@@ -57,8 +57,8 @@ public class ListR4Test extends BaseResourceProviderR4Test {
 			.and(Organization.IDENTIFIER.hasSystemWithAnyCode(identifierSystem))
 			.execute();
 
-		assertEquals(1, results.getEntry().size());
-		assertEquals(orgInList.toUnqualifiedVersionless().getValue(), results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertThat(results.getEntry().size()).isEqualTo(1);
+		assertThat(results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(orgInList.toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
@@ -68,7 +68,7 @@ public class ListR4Test extends BaseResourceProviderR4Test {
 			.whereMap(Collections.singletonMap("_list", Collections.singletonList(list.getIdPart())))
 			.execute();
 
-		assertEquals(1, results.getEntry().size());
-		assertEquals(practitionerInList.toUnqualifiedVersionless().getValue(), results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue());
+		assertThat(results.getEntry().size()).isEqualTo(1);
+		assertThat(results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(practitionerInList.toUnqualifiedVersionless().getValue());
 	}
 }

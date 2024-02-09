@@ -25,8 +25,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ValidationMessageSuppressingInterceptorTest extends BaseResourceProviderR4Test {
 
@@ -88,7 +87,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 			Observation inputObs = loadResource(myFhirContext, Observation.class, "/r4/uscore/observation-pulseox.json");
 			try {
 				myClient.create().resource(inputObs).execute().getId().toUnqualifiedVersionless().getValue();
-				fail();
+				fail("");
 			} catch (UnprocessableEntityException e) {
 				String encode = encode(e.getOperationOutcome());
 				ourLog.info(encode);
@@ -126,8 +125,8 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 			Encounter encounter = new Encounter();
 			encounter.setSubject(new Reference("Patient/A"));
 			IIdType id = myEncounterDao.create(encounter).getId();
-			assertEquals("1", id.getVersionIdPart());
-			fail();
+			assertThat(id.getVersionIdPart()).isEqualTo("1");
+			fail("");
 		} catch (PreconditionFailedException e) {
 			String encode = encode(e.getOperationOutcome());
 			ourLog.info(encode);

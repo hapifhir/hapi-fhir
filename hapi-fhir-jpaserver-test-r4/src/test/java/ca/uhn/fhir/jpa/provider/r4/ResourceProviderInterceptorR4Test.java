@@ -55,11 +55,9 @@ import java.util.concurrent.TimeUnit;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.time.DateUtils.MILLIS_PER_SECOND;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.eq;
@@ -121,12 +119,12 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		verify(interceptor, timeout(10000).times(0)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FAILED), myParamsCaptor.capture());
 
 		SearchRuntimeDetails details = myParamsCaptor.getAllValues().get(0).get(SearchRuntimeDetails.class);
-		assertEquals(SearchStatusEnum.PASSCMPLET, details.getSearchStatus());
+		assertThat(details.getSearchStatus()).isEqualTo(SearchStatusEnum.PASSCMPLET);
 
 		// Load the next (and final) page
 		reset(interceptor);
 		results = myClient.loadPage().next(results).execute();
-		assertNotNull(results);
+		assertThat(results).isNotNull();
 		verify(interceptor, timeout(10000).times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED), myParamsCaptor.capture());
 		verify(interceptor, timeout(10000).times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE), myParamsCaptor.capture());
 		verify(interceptor, timeout(10000).times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE), myParamsCaptor.capture());
@@ -169,7 +167,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		 */
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
-		assertEquals(RestOperationTypeEnum.TRANSACTION, myParamsCaptor.getAllValues().get(0).get(RestOperationTypeEnum.class));
+		assertThat(myParamsCaptor.getAllValues().get(0).get(RestOperationTypeEnum.class)).isEqualTo(RestOperationTypeEnum.TRANSACTION);
 
 		verify(interceptor, times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED), myParamsCaptor.capture());
 		verify(interceptor, times(0)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED), myParamsCaptor.capture());
@@ -193,14 +191,14 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was: {}", resp);
-			assertEquals(201, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		}
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
-		assertEquals(RestOperationTypeEnum.CREATE, myParamsCaptor.getValue().get(RestOperationTypeEnum.class));
-		assertEquals("Patient", myParamsCaptor.getValue().get(RequestDetails.class).getResource().getIdElement().getResourceType());
+		assertThat(myParamsCaptor.getValue().get(RestOperationTypeEnum.class)).isEqualTo(RestOperationTypeEnum.CREATE);
+		assertThat(myParamsCaptor.getValue().get(RequestDetails.class).getResource().getIdElement().getResourceType()).isEqualTo("Patient");
 
 	}
 
@@ -227,7 +225,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		transaction(bundle);
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
-		assertEquals(RestOperationTypeEnum.TRANSACTION, myParamsCaptor.getValue().get(RestOperationTypeEnum.class));
+		assertThat(myParamsCaptor.getValue().get(RestOperationTypeEnum.class)).isEqualTo(RestOperationTypeEnum.TRANSACTION);
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED), myParamsCaptor.capture());
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED), myParamsCaptor.capture());
@@ -273,7 +271,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		Organization org = new Organization();
 		org.setName("orgName");
 		IIdType orgId = myClient.create().resource(org).execute().getId().toUnqualified();
-		assertNotNull(orgId.getVersionIdPartAsLong());
+		assertThat(orgId.getVersionIdPartAsLong()).isNotNull();
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -294,16 +292,16 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was: {}", resp);
-			assertEquals(201, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		}
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
-		assertEquals(RestOperationTypeEnum.CREATE, myParamsCaptor.getValue().get(RestOperationTypeEnum.class));
+		assertThat(myParamsCaptor.getValue().get(RestOperationTypeEnum.class)).isEqualTo(RestOperationTypeEnum.CREATE);
 
 		Patient patient = (Patient) myParamsCaptor.getValue().get(RequestDetails.class).getResource();
-		assertEquals(orgId.getValue(), patient.getManagingOrganization().getReference());
+		assertThat(patient.getManagingOrganization().getReference()).isEqualTo(orgId.getValue());
 
 	}
 
@@ -336,7 +334,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		transaction(bundle);
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
-		assertEquals(RestOperationTypeEnum.TRANSACTION, myParamsCaptor.getAllValues().get(0).get(RestOperationTypeEnum.class));
+		assertThat(myParamsCaptor.getAllValues().get(0).get(RestOperationTypeEnum.class)).isEqualTo(RestOperationTypeEnum.TRANSACTION);
 		verify(interceptor, times(0)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED), any());
 		verify(interceptor, times(0)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED), any());
 
@@ -348,7 +346,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		HttpPost post = new HttpPost(myServerBase + "/");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
-			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 		}
 	}
 
@@ -436,7 +434,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertTrue(bundle.getEntry().isEmpty());
+		assertThat(bundle.getEntry().isEmpty()).isTrue();
 
 		SearchParameter searchParameter = createSearchParameter();
 
@@ -446,7 +444,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			.resource(searchParameter)
 			.execute();
 
-		assertTrue(methodOutcome.getCreated());
+		assertThat(methodOutcome.getCreated()).isTrue();
 
 		// attempting to create an overlapping SearchParameter should fail
 		try {
@@ -455,7 +453,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 				.resource(searchParameter)
 				.execute();
 
-			fail();
+			fail("");
 		}catch (UnprocessableEntityException e){
 			// all is good
 			assertThat(e.getMessage()).contains("2196");
@@ -474,7 +472,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			.resource(searchParameter)
 			.execute();
 
-		assertTrue(methodOutcome.getCreated());
+		assertThat(methodOutcome.getCreated()).isTrue();
 		SearchParameter createdSearchParameter = (SearchParameter) methodOutcome.getResource();
 
 		createdSearchParameter.setUrl("newUrl");
@@ -483,7 +481,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			.resource(createdSearchParameter)
 			.execute();
 
-		assertNotNull(methodOutcome);
+		assertThat(methodOutcome).isNotNull();
 	}
 	@Test
 	public void testSearchParamValidationOnUpdateWithClientAssignedId() {
@@ -498,7 +496,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			.resource(searchParameter)
 			.execute();
 
-		assertTrue(methodOutcome.getCreated());
+		assertThat(methodOutcome.getCreated()).isTrue();
 		SearchParameter createdSearchParameter = (SearchParameter) methodOutcome.getResource();
 
 		createdSearchParameter.setUrl("newUrl");
@@ -507,7 +505,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			.resource(createdSearchParameter)
 			.execute();
 
-		assertNotNull(methodOutcome);
+		assertThat(methodOutcome).isNotNull();
 	}
 
 	@Test
@@ -524,7 +522,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		MethodOutcome methodOutcome = myClient
 			.update(defaultSearchParamId, defaultSearchParameter);
 
-		assertTrue(methodOutcome.getCreated());
+		assertThat(methodOutcome.getCreated()).isTrue();
 
 		SearchParameter overlappingSearchParameter = createSearchParameter();
 		overlappingSearchParameter.setId(overlappingSearchParamId);
@@ -532,7 +530,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 		try {
 			myClient.update(overlappingSearchParamId, overlappingSearchParameter);
-			fail();
+			fail("");
 		} catch (UnprocessableEntityException e){
 			// this is good
 			assertThat(e.getMessage()).contains("2196");

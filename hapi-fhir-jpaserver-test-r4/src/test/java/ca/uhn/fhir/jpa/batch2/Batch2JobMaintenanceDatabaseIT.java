@@ -48,8 +48,6 @@ import java.util.Optional;
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(Batch2JobMaintenanceDatabaseIT.class);
@@ -373,15 +371,15 @@ chunk3, LAST, QUEUED
 
 	private void assertError(String theExpectedErrorMessage) {
 		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(TEST_INSTANCE_ID);
-		assertTrue(instance.isPresent());
-		assertEquals(theExpectedErrorMessage, instance.get().getErrorMessage());
+		assertThat(instance.isPresent()).isTrue();
+		assertThat(instance.get().getErrorMessage()).isEqualTo(theExpectedErrorMessage);
 	}
 
 
 	private void assertCurrentGatedStep(String theNextStepId) {
 		Optional<JobInstance> instance = myJobPersistence.fetchInstance(TEST_INSTANCE_ID);
-		assertTrue(instance.isPresent());
-		assertEquals(theNextStepId, instance.get().getCurrentGatedStepId());
+		assertThat(instance.isPresent()).isTrue();
+		assertThat(instance.get().getCurrentGatedStepId()).isEqualTo(theNextStepId);
 	}
 
 	@Nonnull
@@ -441,8 +439,8 @@ chunk3, LAST, QUEUED
 
 	private void assertInstanceStatus(StatusEnum theInProgress) {
 		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(TEST_INSTANCE_ID);
-		assertTrue(instance.isPresent());
-		assertEquals(theInProgress, instance.get().getStatus());
+		assertThat(instance.isPresent()).isTrue();
+		assertThat(instance.get().getStatus()).isEqualTo(theInProgress);
 	}
 	@Nonnull
 	private static JobDefinition<? extends IModelJson> buildGatedJobDefinition(IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep, IJobStepWorker<TestJobParameters, FirstStepOutput, SecondStepOutput> theSecondStep, IJobStepWorker<TestJobParameters, SecondStepOutput, VoidModel> theLastStep) {

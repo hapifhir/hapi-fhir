@@ -20,7 +20,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
@@ -48,9 +49,9 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 		);
 		try {
 			cacheWarmingSvc.initCacheMap();
-			fail();
+			fail("");
 		} catch (DataFormatException e) {
-			assertEquals(Msg.code(1684) + "Unknown resource name \"BadResource\" (this name is not known in FHIR version \"R4\")", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1684) + "Unknown resource name \"BadResource\" (this name is not known in FHIR version \"R4\")");
 		}
 
 		myStorageSettings.setWarmCacheEntries(new ArrayList<>());
@@ -61,9 +62,9 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 		);
 		try {
 			cacheWarmingSvc.initCacheMap();
-			fail();
+			fail("");
 		} catch (ConfigurationException e) {
-			assertEquals(Msg.code(1172) + "Invalid warm cache URL (must have ? character)", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo(Msg.code(1172) + "Invalid warm cache URL (must have ? character)");
 		}
 
 
@@ -99,10 +100,10 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("smith"));
 		IBundleProvider result = myPatientDao.search(params);
-		assertEquals(PersistedJpaBundleProvider.class, result.getClass());
+		assertThat(result.getClass()).isEqualTo(PersistedJpaBundleProvider.class);
 
 		PersistedJpaBundleProvider resultCasted = (PersistedJpaBundleProvider) result;
-		assertEquals(SearchCacheStatusEnum.HIT, resultCasted.getCacheStatus());
+		assertThat(resultCasted.getCacheStatus()).isEqualTo(SearchCacheStatusEnum.HIT);
 	}
 
 }

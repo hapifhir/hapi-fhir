@@ -9,7 +9,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
@@ -29,7 +28,7 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		myPatientDao.update(p, mySrd);
 
 		p = myPatientDao.read(new IdType("A"), mySrd);
-		assertEquals(2, p.getMeta().getTag().size());
+		assertThat(p.getMeta().getTag().size()).isEqualTo(2);
 
 		p = new Patient();
 		p.setId("A");
@@ -39,9 +38,9 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		myPatientDao.update(p, mySrd);
 
 		p = myPatientDao.read(new IdType("A"), mySrd);
-		assertEquals("2", p.getIdElement().getVersionIdPart());
-		assertEquals(true, p.getActive());
-		assertEquals(1, p.getMeta().getTag().size());
+		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
+		assertThat(p.getActive()).isEqualTo(true);
+		assertThat(p.getMeta().getTag().size()).isEqualTo(1);
 	}
 
 	@Test
@@ -60,10 +59,10 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		myPatientDao.update(p, mySrd);
 
 		p = myPatientDao.read(new IdType("A"), mySrd);
-		assertEquals("1", p.getIdElement().getVersionIdPart());
-		assertEquals(true, p.getActive());
-		assertEquals(2, p.getMeta().getTag().size());
-		assertEquals("urn:foo", p.getMeta().getTag().get(0).getSystem());
+		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("1");
+		assertThat(p.getActive()).isEqualTo(true);
+		assertThat(p.getMeta().getTag().size()).isEqualTo(2);
+		assertThat(p.getMeta().getTag().get(0).getSystem()).isEqualTo("urn:foo");
 		assertThat(p.getMeta().getTag().get(0).getCode())
 			.satisfiesAnyOf(
 				arg -> assertThat(arg).isEqualTo("bar"),
@@ -88,12 +87,12 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		myPatientDao.update(p, mySrd);
 
 		p = myPatientDao.read(new IdType("A"), mySrd);
-		assertEquals("2", p.getIdElement().getVersionIdPart());
-		assertEquals(true, p.getActive());
-		assertEquals(1, p.getMeta().getTag().size());
-		assertEquals("urn:foo", p.getMeta().getTag().get(0).getSystem());
-		assertEquals("bar", p.getMeta().getTag().get(0).getCode());
-		assertEquals("baz", p.getMeta().getTag().get(0).getDisplay());
+		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
+		assertThat(p.getActive()).isEqualTo(true);
+		assertThat(p.getMeta().getTag().size()).isEqualTo(1);
+		assertThat(p.getMeta().getTag().get(0).getSystem()).isEqualTo("urn:foo");
+		assertThat(p.getMeta().getTag().get(0).getCode()).isEqualTo("bar");
+		assertThat(p.getMeta().getTag().get(0).getDisplay()).isEqualTo("baz");
 	}
 
 	@Test
@@ -110,12 +109,12 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		myPatientDao.update(p, mySrd);
 
 		p = myPatientDao.read(new IdType("A"), mySrd);
-		assertEquals("1", p.getIdElement().getVersionIdPart());
-		assertEquals(true, p.getActive());
-		assertEquals(1, p.getMeta().getTag().size());
-		assertEquals("urn:foo", p.getMeta().getTag().get(0).getSystem());
-		assertEquals("bar", p.getMeta().getTag().get(0).getCode());
-		assertEquals("baz", p.getMeta().getTag().get(0).getDisplay());
+		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("1");
+		assertThat(p.getActive()).isEqualTo(true);
+		assertThat(p.getMeta().getTag().size()).isEqualTo(1);
+		assertThat(p.getMeta().getTag().get(0).getSystem()).isEqualTo("urn:foo");
+		assertThat(p.getMeta().getTag().get(0).getCode()).isEqualTo("bar");
+		assertThat(p.getMeta().getTag().get(0).getDisplay()).isEqualTo("baz");
 	}
 
 	@Test
@@ -134,9 +133,9 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		myPatientDao.update(p, mySrd);
 
 		p = myPatientDao.read(new IdType("A"), mySrd);
-		assertEquals(true, p.getActive());
-		assertEquals(0, p.getMeta().getTag().size());
-		assertEquals("2", p.getIdElement().getVersionIdPart());
+		assertThat(p.getActive()).isEqualTo(true);
+		assertThat(p.getMeta().getTag().size()).isEqualTo(0);
+		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
 	}
 
 	@Test
@@ -154,9 +153,9 @@ public class FhirResourceDaoR4UpdateTagSnapshotTest extends BaseJpaR4Test {
 		myPatientDao.update(p, mySrd);
 
 		p = myPatientDao.read(new IdType("A"), mySrd);
-		assertEquals(true, p.getActive());
-		assertEquals(1, p.getMeta().getTag().size());
-		assertEquals("2", p.getIdElement().getVersionIdPart());
+		assertThat(p.getActive()).isEqualTo(true);
+		assertThat(p.getMeta().getTag().size()).isEqualTo(1);
+		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
 	}
 
 

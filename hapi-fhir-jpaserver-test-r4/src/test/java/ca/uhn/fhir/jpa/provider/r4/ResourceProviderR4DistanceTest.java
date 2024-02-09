@@ -19,8 +19,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.fail;
 
 public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 
@@ -52,8 +51,8 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.returnBundle(Bundle.class)
 				.execute();
 
-			assertEquals(1, actual.getEntry().size());
-			assertEquals(locId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertThat(actual.getEntry().size()).isEqualTo(1);
+			assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(locId.getIdPart());
 		}
 		{ // Outside the box
 			double tooSmallDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN / 2;
@@ -69,7 +68,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
-			assertEquals(0, actual.getEntry().size());
+			assertThat(actual.getEntry().size()).isEqualTo(0);
 		}
 	}
 
@@ -95,8 +94,8 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertEquals(1, actual.getEntry().size());
-		assertEquals(prId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
+		assertThat(actual.getEntry().size()).isEqualTo(1);
+		assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(prId.getIdPart());
 	}
 
 	@Test
@@ -127,8 +126,8 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
-			assertEquals(1, actual.getEntry().size());
-			assertEquals(prId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertThat(actual.getEntry().size()).isEqualTo(1);
+			assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(prId.getIdPart());
 		}
 
 		{ // Outside the box
@@ -145,7 +144,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.execute();
 			myCaptureQueriesListener.logSelectQueries();
 
-			assertEquals(0, actual.getEntry().size());
+			assertThat(actual.getEntry().size()).isEqualTo(0);
 		}
 	}
 
@@ -262,7 +261,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.byUrl(myServerBase + "/" + url)
 				.returnBundle(Bundle.class)
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Can not sort on coordinate parameter \"near\" unless this parameter is also specified as a search parameter");
 		}
@@ -289,7 +288,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.byUrl(myServerBase + "/" + url)
 				.returnBundle(Bundle.class)
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains("Can not sort on coordinate parameter \"near\" unless this parameter is also specified");
 		}
@@ -321,7 +320,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.byUrl(myServerBase + "/" + url)
 				.returnBundle(Bundle.class)
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage()).contains(theExpectedErrorMessageContains);
 		}

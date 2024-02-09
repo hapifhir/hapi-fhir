@@ -32,8 +32,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 
 public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
@@ -435,7 +433,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("uri = " + uri);
 		
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertEquals(2, ids.size());
+		assertThat(ids.size()).isEqualTo(2);
 	}
 	
 	@Test
@@ -482,7 +480,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		String uri = myServerBase + "/Patient?_has:Observation:subject:code-value-quantity=http://" + UrlUtil.escapeUrlParam("loinc.org|2345-7$lt180");
 		ourLog.info("uri = " + uri);
 		List<String> ids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
-		assertEquals(0, ids.size());
+		assertThat(ids.size()).isEqualTo(0);
 	}
 	
 	@Test
@@ -618,7 +616,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 				notInListQueries.add(query);
 		}
 
-		assertNotEquals(0, notInListQueries.size());
+		assertThat(notInListQueries.size()).isNotEqualTo(0);
 	}
 
 	public List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {

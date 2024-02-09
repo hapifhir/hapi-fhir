@@ -23,9 +23,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	private static final String PACKAGE_ID_1 = "package1";
@@ -54,7 +52,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		install(namingSystem);
 
-		assertEquals(1, myNamingSystemDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources().size());
+		assertThat(myNamingSystemDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources().size()).isEqualTo(1);
 	}
 
 	@Test
@@ -66,10 +64,10 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		final ValueSet actualValueSet1 = getFirstValueSet();
 
-		assertEquals("ValueSet/" + VALUE_SET_OID_FIRST, actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(FIRST_IG_URL_FIRST_OID, actualValueSet1.getUrl());
-		assertEquals(version1, actualValueSet1.getVersion());
-		assertEquals(copyright1, actualValueSet1.getCopyright());
+		assertThat(actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("ValueSet/" + VALUE_SET_OID_FIRST);
+		assertThat(actualValueSet1.getUrl()).isEqualTo(FIRST_IG_URL_FIRST_OID);
+		assertThat(actualValueSet1.getVersion()).isEqualTo(version1);
+		assertThat(actualValueSet1.getCopyright()).isEqualTo(copyright1);
 	}
 
 	@Test
@@ -82,14 +80,14 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		final TermValueSet termValueSet = getFirstTermValueSet();
 
-		assertEquals(FIRST_IG_URL_FIRST_OID, termValueSet.getUrl());
+		assertThat(termValueSet.getUrl()).isEqualTo(FIRST_IG_URL_FIRST_OID);
 
 		final ValueSet actualValueSet1 = getFirstValueSet();
 
-		assertEquals("ValueSet/" + VALUE_SET_OID_FIRST, actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(FIRST_IG_URL_FIRST_OID, actualValueSet1.getUrl());
-		assertEquals(version1, actualValueSet1.getVersion());
-		assertEquals(copyright1, actualValueSet1.getCopyright());
+		assertThat(actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("ValueSet/" + VALUE_SET_OID_FIRST);
+		assertThat(actualValueSet1.getUrl()).isEqualTo(FIRST_IG_URL_FIRST_OID);
+		assertThat(actualValueSet1.getVersion()).isEqualTo(version1);
+		assertThat(actualValueSet1.getCopyright()).isEqualTo(copyright1);
 	}
 
 	@Test
@@ -104,10 +102,10 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		final ValueSet actualValueSet1 = getFirstValueSet();
 
-		assertEquals("ValueSet/" + VALUE_SET_OID_FIRST, actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(FIRST_IG_URL_FIRST_OID, actualValueSet1.getUrl());
-		assertEquals(version2, actualValueSet1.getVersion());
-		assertEquals(copyright2, actualValueSet1.getCopyright());
+		assertThat(actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("ValueSet/" + VALUE_SET_OID_FIRST);
+		assertThat(actualValueSet1.getUrl()).isEqualTo(FIRST_IG_URL_FIRST_OID);
+		assertThat(actualValueSet1.getVersion()).isEqualTo(version2);
+		assertThat(actualValueSet1.getCopyright()).isEqualTo(copyright2);
 	}
 
 	@Test
@@ -122,39 +120,39 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		final List<TermValueSet> all2 = myTermValueSetDao.findAll();
 
-		assertEquals(2, all2.size());
+		assertThat(all2.size()).isEqualTo(2);
 
 		final TermValueSet termValueSet1 = all2.get(0);
 		final TermValueSet termValueSet2 = all2.get(1);
 
-		assertEquals(FIRST_IG_URL_FIRST_OID, termValueSet1.getUrl());
-		assertEquals(SECOND_IG_URL_SECOND_OID, termValueSet2.getUrl());
+		assertThat(termValueSet1.getUrl()).isEqualTo(FIRST_IG_URL_FIRST_OID);
+		assertThat(termValueSet2.getUrl()).isEqualTo(SECOND_IG_URL_SECOND_OID);
 
 		final List<ValueSet> allValueSets = getAllValueSets();
 
-		assertEquals(2, allValueSets.size());
+		assertThat(allValueSets.size()).isEqualTo(2);
 
 		final ValueSet actualValueSet1 = allValueSets.get(0);
 
-		assertEquals("ValueSet/" + VALUE_SET_OID_FIRST, actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(FIRST_IG_URL_FIRST_OID, actualValueSet1.getUrl());
-		assertEquals(version1, actualValueSet1.getVersion());
-		assertEquals(copyright1, actualValueSet1.getCopyright());
+		assertThat(actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("ValueSet/" + VALUE_SET_OID_FIRST);
+		assertThat(actualValueSet1.getUrl()).isEqualTo(FIRST_IG_URL_FIRST_OID);
+		assertThat(actualValueSet1.getVersion()).isEqualTo(version1);
+		assertThat(actualValueSet1.getCopyright()).isEqualTo(copyright1);
 
 		final ValueSet actualValueSet2 = allValueSets.get(1);
 
-		assertEquals("ValueSet/" + VALUE_SET_OID_SECOND, actualValueSet2.getIdElement().toUnqualifiedVersionless().getValue());
-		assertEquals(SECOND_IG_URL_SECOND_OID, actualValueSet2.getUrl());
-		assertEquals(version2, actualValueSet2.getVersion());
-		assertEquals(copyright2, actualValueSet2.getCopyright());
+		assertThat(actualValueSet2.getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("ValueSet/" + VALUE_SET_OID_SECOND);
+		assertThat(actualValueSet2.getUrl()).isEqualTo(SECOND_IG_URL_SECOND_OID);
+		assertThat(actualValueSet2.getVersion()).isEqualTo(version2);
+		assertThat(actualValueSet2.getCopyright()).isEqualTo(copyright2);
 	}
 
 	@Nonnull
 	private List<ValueSet> getAllValueSets() {
 		final List<IBaseResource> allResources = myValueSetDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources();
 
-		assertFalse(allResources.isEmpty());
-		assertTrue(allResources.get(0) instanceof ValueSet);
+		assertThat(allResources.isEmpty()).isFalse();
+		assertThat(allResources.get(0) instanceof ValueSet).isTrue();
 
 		return allResources.stream()
 			.map(ValueSet.class::cast)
@@ -165,10 +163,10 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	private ValueSet getFirstValueSet() {
 		final List<IBaseResource> allResources = myValueSetDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources();
 
-		assertEquals(1, allResources.size());
+		assertThat(allResources.size()).isEqualTo(1);
 
 		final IBaseResource resource1 = allResources.get(0);
-		assertTrue(resource1 instanceof ValueSet);
+		assertThat(resource1 instanceof ValueSet).isTrue();
 
 		return (ValueSet) resource1;
 	}
@@ -177,7 +175,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 	private TermValueSet getFirstTermValueSet() {
 		final List<TermValueSet> all2 = myTermValueSetDao.findAll();
 
-		assertEquals(1, all2.size());
+		assertThat(all2.size()).isEqualTo(1);
 
 		return all2.get(0);
 	}

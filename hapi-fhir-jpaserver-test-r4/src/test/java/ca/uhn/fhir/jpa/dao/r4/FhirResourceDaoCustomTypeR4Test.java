@@ -9,7 +9,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SuppressWarnings({ })
 public class FhirResourceDaoCustomTypeR4Test extends BaseJpaR4Test {
@@ -31,12 +31,12 @@ public class FhirResourceDaoCustomTypeR4Test extends BaseJpaR4Test {
 		IIdType id = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 		
 		CustomObservationR4 read = (CustomObservationR4) myObservationDao.read(id);
-		assertEquals("blue", read.getEyeColour().getValue());
+		assertThat(read.getEyeColour().getValue()).isEqualTo("blue");
 		
 		IBundleProvider found = myObservationDao.search(new SearchParameterMap());
-		assertEquals(1, found.size().intValue());
+		assertThat(found.size().intValue()).isEqualTo(1);
 		CustomObservationR4 search = (CustomObservationR4) found.getResources(0, 1).get(0);
-		assertEquals("blue", search.getEyeColour().getValue());
+		assertThat(search.getEyeColour().getValue()).isEqualTo("blue");
 		
 	}
 	

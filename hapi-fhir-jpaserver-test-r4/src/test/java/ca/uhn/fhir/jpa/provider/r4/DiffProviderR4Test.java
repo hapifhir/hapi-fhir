@@ -13,13 +13,12 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 
 public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
@@ -43,17 +42,17 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertEquals(2, diff.getParameter().size());
+		assertThat(diff.getParameter().size()).isEqualTo(2);
 
-		Assertions.assertEquals("replace", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type"));
-		Assertions.assertEquals("Patient.text.div", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path"));
-		Assertions.assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hapiPropertyTable\"><tbody></tbody></table></div>", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "previousValue"));
-		Assertions.assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\"><b>SMITH </b></div><table class=\"hapiPropertyTable\"><tbody></tbody></table></div>", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "value"));
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.text.div");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "previousValue")).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hapiPropertyTable\"><tbody></tbody></table></div>");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\"><b>SMITH </b></div><table class=\"hapiPropertyTable\"><tbody></tbody></table></div>");
 
-		Assertions.assertEquals("insert", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 1, "operation", "type"));
-		Assertions.assertEquals("Patient.name", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 1, "operation", "path"));
-		Assertions.assertEquals("0", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 1, "operation", "index"));
-		Assertions.assertEquals("SMITH", FhirPatchApplyR4Test.extractPartValue(diff, 1, "operation", "value", HumanName.class).getFamily());
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 1, "operation", "type")).isEqualTo("insert");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 1, "operation", "path")).isEqualTo("Patient.name");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 1, "operation", "index")).isEqualTo("0");
+		assertThat(FhirPatchApplyR4Test.extractPartValue(diff, 1, "operation", "value", HumanName.class).getFamily()).isEqualTo("SMITH");
 	}
 
 
@@ -74,25 +73,25 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertEquals(4, diff.getParameter().size());
+		assertThat(diff.getParameter().size()).isEqualTo(4);
 
-		Assertions.assertEquals("replace", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type"));
-		Assertions.assertEquals("Patient.meta.versionId", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path"));
-		Assertions.assertEquals("2", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "previousValue"));
-		Assertions.assertEquals("3", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "value"));
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.meta.versionId");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "previousValue")).isEqualTo("2");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("3");
 
-		Assertions.assertEquals("replace", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 1, "operation", "type"));
-		Assertions.assertEquals("Patient.meta.lastUpdated", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 1, "operation", "path"));
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 1, "operation", "type")).isEqualTo("replace");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 1, "operation", "path")).isEqualTo("Patient.meta.lastUpdated");
 
-		Assertions.assertEquals("replace", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 2, "operation", "type"));
-		Assertions.assertEquals("Patient.text.div", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 2, "operation", "path"));
-		Assertions.assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hapiPropertyTable\"><tbody></tbody></table></div>", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 2, "operation", "previousValue"));
-		Assertions.assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\"><b>SMITH </b></div><table class=\"hapiPropertyTable\"><tbody></tbody></table></div>", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 2, "operation", "value"));
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 2, "operation", "type")).isEqualTo("replace");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 2, "operation", "path")).isEqualTo("Patient.text.div");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 2, "operation", "previousValue")).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\"><table class=\"hapiPropertyTable\"><tbody></tbody></table></div>");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 2, "operation", "value")).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\"><div class=\"hapiHeaderText\"><b>SMITH </b></div><table class=\"hapiPropertyTable\"><tbody></tbody></table></div>");
 
-		Assertions.assertEquals("insert", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 3, "operation", "type"));
-		Assertions.assertEquals("Patient.name", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 3, "operation", "path"));
-		Assertions.assertEquals("0", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 3, "operation", "index"));
-		Assertions.assertEquals("SMITH", FhirPatchApplyR4Test.extractPartValue(diff, 3, "operation", "value", HumanName.class).getFamily());
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 3, "operation", "type")).isEqualTo("insert");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 3, "operation", "path")).isEqualTo("Patient.name");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 3, "operation", "index")).isEqualTo("0");
+		assertThat(FhirPatchApplyR4Test.extractPartValue(diff, 3, "operation", "value", HumanName.class).getFamily()).isEqualTo("SMITH");
 	}
 
 
@@ -117,12 +116,12 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertEquals(5, diff.getParameter().size());
+		assertThat(diff.getParameter().size()).isEqualTo(5);
 
-		Assertions.assertEquals("replace", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type"));
-		Assertions.assertEquals("Patient.meta.versionId", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path"));
-		Assertions.assertEquals("1", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "previousValue"));
-		Assertions.assertEquals("3", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "value"));
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.meta.versionId");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "previousValue")).isEqualTo("1");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("3");
 
 	}
 
@@ -141,11 +140,11 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertEquals(1, diff.getParameter().size());
+		assertThat(diff.getParameter().size()).isEqualTo(1);
 
-		Assertions.assertEquals("insert", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type"));
-		Assertions.assertEquals("Patient", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path"));
-		Assertions.assertEquals(true, FhirPatchApplyR4Test.extractPartValue(diff, 0, "operation", "value", Patient.class).getActive());
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("insert");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient");
+		assertThat(FhirPatchApplyR4Test.extractPartValue(diff, 0, "operation", "value", Patient.class).getActive()).isEqualTo(true);
 
 	}
 
@@ -167,12 +166,12 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertEquals(5, diff.getParameter().size());
+		assertThat(diff.getParameter().size()).isEqualTo(5);
 
-		Assertions.assertEquals("replace", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type"));
-		Assertions.assertEquals("Patient.meta.versionId", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path"));
-		Assertions.assertEquals("1", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "previousValue"));
-		Assertions.assertEquals("3", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "value"));
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.meta.versionId");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "previousValue")).isEqualTo("1");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("3");
 
 	}
 
@@ -194,12 +193,12 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertEquals(3, diff.getParameter().size());
+		assertThat(diff.getParameter().size()).isEqualTo(3);
 
-		Assertions.assertEquals("replace", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type"));
-		Assertions.assertEquals("Patient.id", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path"));
-		Assertions.assertEquals("A", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "previousValue"));
-		Assertions.assertEquals("B", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "value"));
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.id");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "previousValue")).isEqualTo("A");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("B");
 
 	}
 
@@ -223,12 +222,12 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(diff));
 
-		assertEquals(3, diff.getParameter().size());
+		assertThat(diff.getParameter().size()).isEqualTo(3);
 
-		Assertions.assertEquals("replace", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type"));
-		Assertions.assertEquals("Patient.id", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path"));
-		Assertions.assertEquals("A", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "previousValue"));
-		Assertions.assertEquals("B", FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "value"));
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("replace");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.id");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "previousValue")).isEqualTo("A");
+		assertThat(FhirPatchApplyR4Test.extractPartValuePrimitive(diff, 0, "operation", "value")).isEqualTo("B");
 
 	}
 
@@ -242,9 +241,9 @@ public class DiffProviderR4Test extends BaseResourceProviderR4Test {
 				.withParameter(Parameters.class, ProviderConstants.DIFF_FROM_PARAMETER, new IdType("Patient/123"))
 				.andParameter(ProviderConstants.DIFF_TO_PARAMETER, new IdType("Observation/456"))
 				.execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(1129) + "Unable to diff two resources of different types", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1129) + "Unable to diff two resources of different types");
 		}
 	}
 

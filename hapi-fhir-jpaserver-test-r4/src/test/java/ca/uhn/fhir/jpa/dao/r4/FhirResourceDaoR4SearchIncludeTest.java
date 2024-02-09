@@ -37,9 +37,9 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"unchecked", "Duplicates"})
@@ -105,7 +105,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			.addInclude(new Include("CarePlan.patient"));
 		try {
 			myCarePlanDao.search(map);
-			fail();
+			fail("");
 		} catch (Exception e) {
 			// good
 		}
@@ -118,7 +118,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			List<String> ids = toUnqualifiedVersionlessIdValues(results);
 			assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder("CarePlan/CP-1", "Patient/PAT-1");
 		} catch (Exception e) {
-			fail();
+			fail("");
 		}
 	}
 
@@ -161,7 +161,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		map.addRevInclude(new Include("Procedure:part-of"));
 		map.addInclude(new Include("Procedure:focalAccess").asRecursive());
 		IBundleProvider outcome = myProcedureDao.search(map, mySrd);
-		assertEquals(PersistedJpaSearchFirstPageBundleProvider.class, outcome.getClass());
+		assertThat(outcome.getClass()).isEqualTo(PersistedJpaSearchFirstPageBundleProvider.class);
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
 		assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder("Procedure/PRA8780542726", "Procedure/PRA8780542785", "BodyStructure/B51936689");
 
@@ -171,7 +171,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		map.addRevInclude(new Include("Procedure:part-of"));
 		map.addInclude(new Include("Procedure:focalAccess").asRecursive());
 		outcome = myProcedureDao.search(map, mySrd);
-		assertEquals(SimpleBundleProvider.class, outcome.getClass());
+		assertThat(outcome.getClass()).isEqualTo(SimpleBundleProvider.class);
 		ids = toUnqualifiedVersionlessIdValues(outcome);
 		assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder("Procedure/PRA8780542726", "Procedure/PRA8780542785", "BodyStructure/B51936689");
 	}
@@ -265,7 +265,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 				.setParameter("new_updated", Date.from(now.minus(1, ChronoUnit.HOURS)))
 				.setParameter("target_ids", List.of(groupId.getIdPartAsLong(), careTeam.getIdPartAsLong(), org.getIdPartAsLong()))
 				.executeUpdate());
-		assertEquals(3, updatedCount, "backdated the Organization, CareTeam and Group");
+		assertThat(updatedCount).as("backdated the Organization, CareTeam and Group").isEqualTo(3);
 
 
 		// when

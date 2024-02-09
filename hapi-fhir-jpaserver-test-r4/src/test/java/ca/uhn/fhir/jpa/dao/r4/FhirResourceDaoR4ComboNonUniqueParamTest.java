@@ -30,8 +30,6 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4ComboNonUniqueParamTest.class);
@@ -111,10 +109,10 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		createNamesAndGenderSp();
 
 		IIdType id1 = createPatient1();
-		assertNotNull(id1);
+		assertThat(id1).isNotNull();
 
 		IIdType id2 = createPatient2();
-		assertNotNull(id2);
+		assertThat(id2).isNotNull();
 
 		logAllNonUniqueIndexes();
 		runInTransaction(() -> {
@@ -142,7 +140,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 				found = true;
 			}
 		}
-		assertTrue(found, "Found expected sql");
+		assertThat(found).as("Found expected sql").isTrue();
 
 		logCapturedMessages();
 		assertThat(myMessages.toString()).contains("[INFO Using NON_UNIQUE index for query for search: Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1]");
@@ -153,7 +151,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		myPatientDao.delete(id1);
 
 		IIdType id3 = createPatient1();
-		assertNotNull(id3);
+		assertThat(id3).isNotNull();
 
 		params = SearchParameterMap.newSynchronous();
 		params.add("family", new StringParam("fAmIlY1|")); // weird casing to test normalization
@@ -173,16 +171,14 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		// Create a resource patching the unique SP
 		myCaptureQueriesListener.clear();
 		IIdType id1 = createPatient1();
-		assertNotNull(id1);
+		assertThat(id1).isNotNull();
 
-		assertEquals(0, myCaptureQueriesListener.countSelectQueries(),
-			String.join(",", "\n" + myCaptureQueriesListener.getSelectQueries().stream().map(q -> q.getThreadName()).collect(Collectors.toList()))
-		);
-		assertEquals(12, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.countCommits());
-		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+		assertThat(myCaptureQueriesListener.countSelectQueries()).as(String.join(",", "\n" + myCaptureQueriesListener.getSelectQueries().stream().map(q -> q.getThreadName()).collect(Collectors.toList()))).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(12);
+		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
 		runInTransaction(()->{
 			List<String> indexes = myResourceIndexedComboTokensNonUniqueDao
@@ -203,12 +199,12 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		myCaptureQueriesListener.clear();
 		myPatientDao.update(patient, mySrd);
 
-		assertEquals(6, myCaptureQueriesListener.countSelectQueries());
-		assertEquals(1, myCaptureQueriesListener.countInsertQueries());
-		assertEquals(5, myCaptureQueriesListener.countUpdateQueries());
-		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
-		assertEquals(1, myCaptureQueriesListener.countCommits());
-		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+		assertThat(myCaptureQueriesListener.countSelectQueries()).isEqualTo(6);
+		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(5);
+		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
+		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
+		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
 		runInTransaction(()->{
 			List<String> indexes = myResourceIndexedComboTokensNonUniqueDao
@@ -226,10 +222,10 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		createNamesAndGenderSp();
 
 		IIdType id1 = createPatient1();
-		assertNotNull(id1);
+		assertThat(id1).isNotNull();
 
 		IIdType id2 = createPatient2();
-		assertNotNull(id2);
+		assertThat(id2).isNotNull();
 
 		logAllNonUniqueIndexes();
 		runInTransaction(() -> {
@@ -252,7 +248,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertThat(actual).containsExactlyInAnyOrder(id1.toUnqualifiedVersionless().getValue());
 
 		String sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
-		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_IDX_CMB_TOK_NU t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_DATE t2 ON (t1.RES_ID = t2.RES_ID) WHERE ((t0.IDX_STRING = 'Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1') AND ((t2.HASH_IDENTITY = '5247847184787287691') AND ((t2.SP_VALUE_LOW_DATE_ORDINAL >= '20210202') AND (t2.SP_VALUE_HIGH_DATE_ORDINAL <= '20210202'))))", sql);
+		assertThat(sql).isEqualTo("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_IDX_CMB_TOK_NU t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_DATE t2 ON (t1.RES_ID = t2.RES_ID) WHERE ((t0.IDX_STRING = 'Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1') AND ((t2.HASH_IDENTITY = '5247847184787287691') AND ((t2.SP_VALUE_LOW_DATE_ORDINAL >= '20210202') AND (t2.SP_VALUE_HIGH_DATE_ORDINAL <= '20210202'))))");
 
 		logCapturedMessages();
 		assertThat(myMessages.toString()).contains("[INFO Using NON_UNIQUE index for query for search: Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1]");

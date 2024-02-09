@@ -18,8 +18,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 
@@ -41,7 +42,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 	private void assertExpunged(IIdType theId) {
 		try {
 			getDao(theId).read(theId);
-			fail();
+			fail("");
 		} catch (ResourceNotFoundException e) {
 			// good
 		}
@@ -120,7 +121,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 				dao = myOrganizationDao;
 				break;
 			default:
-				fail("Restype: " + theId.getResourceType());
+				fail("", "Restype: " + theId.getResourceType());
 				dao = myPatientDao;
 		}
 		return dao;
@@ -148,8 +149,8 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.withParameters(input)
 			.execute();
 
-		assertEquals("count", output.getParameter().get(0).getName());
-		assertEquals(1, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
+		assertThat(output.getParameter().get(0).getName()).isEqualTo("count");
+		assertThat(((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue()).isEqualTo(1);
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -187,9 +188,9 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 				.named("expunge")
 				.withParameters(input)
 				.execute();
-			fail();
+			fail("");
 		} catch (MethodNotAllowedException e){
-			assertEquals("HTTP 405 Method Not Allowed: " + Msg.code(968) + "$expunge is not enabled on this server", e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("HTTP 405 Method Not Allowed: " + Msg.code(968) + "$expunge is not enabled on this server");
 		}
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -260,8 +261,8 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.withParameters(input)
 			.execute();
 
-		assertEquals("count", output.getParameter().get(0).getName());
-		assertEquals(3, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
+		assertThat(output.getParameter().get(0).getName()).isEqualTo("count");
+		assertThat(((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue()).isEqualTo(3);
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -306,8 +307,8 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.withParameters(input)
 			.execute();
 
-		assertEquals("count", output.getParameter().get(0).getName());
-		assertEquals(1, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
+		assertThat(output.getParameter().get(0).getName()).isEqualTo("count");
+		assertThat(((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue()).isEqualTo(1);
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);

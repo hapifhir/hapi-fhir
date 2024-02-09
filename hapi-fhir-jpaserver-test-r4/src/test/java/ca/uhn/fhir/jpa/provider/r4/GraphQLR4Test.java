@@ -26,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import static ca.uhn.fhir.jpa.provider.GraphQLProviderTestUtil.DATA_PREFIX;
 import static ca.uhn.fhir.jpa.provider.GraphQLProviderTestUtil.DATA_SUFFIX;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class GraphQLR4Test extends BaseResourceProviderR4Test {
@@ -54,7 +53,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 				    "given":["GivenOnly1","GivenOnly2"]
 				  }]
 				}""";
-			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+			assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX));
 		}
 
 	}
@@ -74,7 +73,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
             {
 			    "birthDate": "1965-08-09"
 				}""";
-			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+			assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX));
 		}
 
 	}
@@ -93,7 +92,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 			try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 				String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info(resp);
-				assertEquals(200, response.getStatusLine().getStatusCode());
+				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
 				assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
 				assertThat(resp).doesNotContain("\"name\":\"Observation\",\"args\":[{\"name\":\"id\"");
@@ -119,7 +118,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 			try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 				String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info(resp);
-				assertEquals(200, response.getStatusLine().getStatusCode());
+				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 				assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
 				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
 				assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Query\",\"fields\":[{\"name\":\"PatientList\"");
@@ -146,7 +145,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 			try (CloseableHttpResponse response = ourHttpClient.execute(httpPost)) {
 				String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info("Response has size: {}", FileUtil.formatFileSize(resp.length()));
-				assertEquals(200, response.getStatusLine().getStatusCode());
+				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
 				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
 				assertThat(resp).contains("\"name\":\"Observation\",\"args\":[{\"name\":\"id\"");
@@ -181,9 +180,9 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 				}]
 				}
 				}""";
-			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX +
+			assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX +
 				expected +
-				DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+				DATA_SUFFIX));
 		}
 
 	}
@@ -215,7 +214,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 				    }]
 				  }]
 				}""";
-			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+			assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX));
 		}
 
 	}
@@ -254,9 +253,9 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 				/_history/1"
 				}]
 				}""";
-			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX +
+			assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX +
 				expected +
-				DATA_SUFFIX), TestUtil.stripWhitespace(resp));
+				DATA_SUFFIX));
 		}
 	}
 

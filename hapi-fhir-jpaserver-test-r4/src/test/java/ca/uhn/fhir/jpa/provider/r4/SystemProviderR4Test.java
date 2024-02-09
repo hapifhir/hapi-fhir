@@ -98,9 +98,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class SystemProviderR4Test extends BaseJpaR4Test {
@@ -220,10 +218,10 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
 			assertThat(response).doesNotContain("_format");
-			assertEquals(200, http.getStatusLine().getStatusCode());
+			assertThat(http.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			Bundle responseBundle = ourCtx.newXmlParser().parseResource(Bundle.class, response);
-			assertEquals(BundleType.SEARCHSET, responseBundle.getTypeElement().getValue());
+			assertThat(responseBundle.getTypeElement().getValue()).isEqualTo(BundleType.SEARCHSET);
 
 		} finally {
 			http.close();
@@ -253,7 +251,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
 			assertThat(response).contains("_format=json");
-			assertEquals(200, http.getStatusLine().getStatusCode());
+			assertThat(http.getStatusLine().getStatusCode()).isEqualTo(200);
 		} finally {
 			http.close();
 		}
@@ -266,7 +264,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		HttpGet get = new HttpGet(ourServerBase + "/Patient/$everything");
 		CloseableHttpResponse http = ourHttpClient.execute(get);
 		try {
-			assertEquals(200, http.getStatusLine().getStatusCode());
+			assertThat(http.getStatusLine().getStatusCode()).isEqualTo(200);
 		} finally {
 			http.close();
 		}
@@ -275,7 +273,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	@Test
 	public void testGetOperationDefinition() {
 		OperationDefinition op = myClient.read(OperationDefinition.class, "-s-get-resource-counts");
-		assertEquals("get-resource-counts", op.getCode());
+		assertThat(op.getCode()).isEqualTo("get-resource-counts");
 	}
 
 	@Test
@@ -285,7 +283,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		try {
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
-			assertEquals(200, http.getStatusLine().getStatusCode());
+			assertThat(http.getStatusLine().getStatusCode()).isEqualTo(200);
 		} finally {
 			IOUtils.closeQuietly(http);
 		}
@@ -295,7 +293,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		try {
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
-			assertEquals(200, http.getStatusLine().getStatusCode());
+			assertThat(http.getStatusLine().getStatusCode()).isEqualTo(200);
 		} finally {
 			IOUtils.closeQuietly(http);
 		}
@@ -311,7 +309,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		try {
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
-			assertEquals(200, http.getStatusLine().getStatusCode());
+			assertThat(http.getStatusLine().getStatusCode()).isEqualTo(200);
 		} finally {
 			IOUtils.closeQuietly(http);
 		}
@@ -322,7 +320,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		try {
 			String output = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
-			assertEquals(400, http.getStatusLine().getStatusCode());
+			assertThat(http.getStatusLine().getStatusCode()).isEqualTo(400);
 		} finally {
 			IOUtils.closeQuietly(http);
 		}
@@ -354,10 +352,10 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		Bundle resp = myClient.transaction().withBundle(req).execute();
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		assertEquals(1, resp.getEntry().size());
+		assertThat(resp.getEntry().size()).isEqualTo(1);
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
-		assertEquals(20, respSub.getTotal());
-		assertEquals(0, respSub.getEntry().size());
+		assertThat(respSub.getTotal()).isEqualTo(20);
+		assertThat(respSub.getEntry().size()).isEqualTo(0);
 	}
 
 	@Test
@@ -367,9 +365,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		myPatientDao.create(patient, mySrd);
 		Bundle resp1 = (Bundle) myClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp1));
-		assertEquals(1, resp1.getTotal());
+		assertThat(resp1.getTotal()).isEqualTo(1);
 		Bundle resp2 = (Bundle) myClient.search().byUrl("Patient?name=Unique762&_summary=count").execute();
-		assertEquals(1, resp2.getTotal());
+		assertThat(resp2.getTotal()).isEqualTo(1);
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp2));
 	}
 
@@ -387,8 +385,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
 		resp = myClient.transaction().withBundle(req).execute();
-		assertEquals(null, resp.getEntry().get(0).getResource());
-		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
+		assertThat(resp.getEntry().get(0).getResource()).isEqualTo(null);
+		assertThat(resp.getEntry().get(0).getResponse().getStatus()).isEqualTo("201 Created");
 
 		// Prefer return=minimal
 		mySimpleHeaderInterceptor.setHeaderName(Constants.HEADER_PREFER);
@@ -397,8 +395,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
 		resp = myClient.transaction().withBundle(req).execute();
-		assertEquals(null, resp.getEntry().get(0).getResource());
-		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
+		assertThat(resp.getEntry().get(0).getResource()).isEqualTo(null);
+		assertThat(resp.getEntry().get(0).getResponse().getStatus()).isEqualTo("201 Created");
 
 		// Prefer return=representation
 		mySimpleHeaderInterceptor.setHeaderName(Constants.HEADER_PREFER);
@@ -407,8 +405,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
 		resp = myClient.transaction().withBundle(req).execute();
-		assertEquals(Patient.class, resp.getEntry().get(0).getResource().getClass());
-		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
+		assertThat(resp.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
+		assertThat(resp.getEntry().get(0).getResponse().getStatus()).isEqualTo("201 Created");
 	}
 
 
@@ -428,7 +426,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			params.add("subject", new ReferenceParam("Patient1063259"));
 			params.setLoadSynchronous(true);
 			IBundleProvider result = myDiagnosticReportDao.search(params);
-			assertEquals(1, result.size().intValue());
+			assertThat(result.size().intValue()).isEqualTo(1);
 
 			deleteAllOfType("Binary");
 			deleteAllOfType("Location");
@@ -441,13 +439,13 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 			try {
 				myPatientDao.read(new IdType("Patient/Patient1063259"));
-				fail();
+				fail("");
 			} catch (ResourceGoneException e) {
 				// good
 			}
 
 			result = myDiagnosticReportDao.search(params);
-			assertEquals(0, result.size().intValue());
+			assertThat(result.size().intValue()).isEqualTo(0);
 
 		}
 
@@ -488,7 +486,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			assertThat(encoded).contains("transaction-response");
 
 			Bundle response = myFhirContext.newXmlParser().parseResource(Bundle.class, encoded);
-			assertEquals(3, response.getEntry().size());
+			assertThat(response.getEntry().size()).isEqualTo(3);
 
 		} finally {
 			IOUtils.closeQuietly(resp.getEntity().getContent());
@@ -496,7 +494,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		try {
 			myClient.read().resource(Patient.class).withId(id).execute();
-			fail();
+			fail("");
 		} catch (ResourceGoneException e) {
 			// good
 		}
@@ -565,9 +563,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		ourRestServer.getInterceptorService().registerInterceptor(interceptor2);
 		try {
 			myClient.transaction().withBundle(input).execute();
-			assertEquals(1, counter0.get());
-			assertEquals(1, counter1.get());
-			assertEquals(5, counter2.get());
+			assertThat(counter0.get()).isEqualTo(1);
+			assertThat(counter1.get()).isEqualTo(1);
+			assertThat(counter2.get()).isEqualTo(5);
 
 		} finally {
 			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor1);
@@ -611,9 +609,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}
 
-		assertEquals(2, output.getEntry().size());
-		assertEquals("A", new IdType(output.getEntry().get(0).getResponse().getLocation()).getIdPart());
-		assertEquals("B", new IdType(output.getEntry().get(1).getResponse().getLocation()).getIdPart());
+		assertThat(output.getEntry().size()).isEqualTo(2);
+		assertThat(new IdType(output.getEntry().get(0).getResponse().getLocation()).getIdPart()).isEqualTo("A");
+		assertThat(new IdType(output.getEntry().get(1).getResponse().getLocation()).getIdPart()).isEqualTo("B");
 	}
 
 
@@ -635,7 +633,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
 		IdType id1_1 = new IdType(resp.getEntry().get(0).getResponse().getLocation());
-		assertEquals("Provenance", id1_1.getResourceType());
+		assertThat(id1_1.getResourceType()).isEqualTo("Provenance");
 		IdType id1_2 = new IdType(resp.getEntry().get(1).getResponse().getLocation());
 		IdType id1_3 = new IdType(resp.getEntry().get(2).getResponse().getLocation());
 		IdType id1_4 = new IdType(resp.getEntry().get(3).getResponse().getLocation());
@@ -655,11 +653,11 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		IdType id2_3 = new IdType(resp.getEntry().get(2).getResponse().getLocation());
 		IdType id2_4 = new IdType(resp.getEntry().get(3).getResponse().getLocation());
 
-		assertNotEquals(id1_1.toVersionless(), id2_1.toVersionless());
-		assertEquals("Provenance", id2_1.getResourceType());
-		assertEquals(id1_2.toVersionless(), id2_2.toVersionless());
-		assertEquals(id1_3.toVersionless(), id2_3.toVersionless());
-		assertEquals(id1_4.toVersionless(), id2_4.toVersionless());
+		assertThat(id2_1.toVersionless()).isNotEqualTo(id1_1.toVersionless());
+		assertThat(id2_1.getResourceType()).isEqualTo("Provenance");
+		assertThat(id2_2.toVersionless()).isEqualTo(id1_2.toVersionless());
+		assertThat(id2_3.toVersionless()).isEqualTo(id1_3.toVersionless());
+		assertThat(id2_4.toVersionless()).isEqualTo(id1_4.toVersionless());
 	}
 
 	@Test
@@ -670,11 +668,11 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		ourLog.info(response);
 		Bundle bundleResp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
 		IdType id = new IdType(bundleResp.getEntry().get(0).getResponse().getLocation());
-		assertEquals("Patient", id.getResourceType());
-		assertTrue(id.hasIdPart());
-		assertTrue(id.isIdPartValidLong());
-		assertTrue(id.hasVersionIdPart());
-		assertTrue(id.isVersionIdPartValidLong());
+		assertThat(id.getResourceType()).isEqualTo("Patient");
+		assertThat(id.hasIdPart()).isTrue();
+		assertThat(id.isIdPartValidLong()).isTrue();
+		assertThat(id.hasVersionIdPart()).isTrue();
+		assertThat(id.isVersionIdPartValidLong()).isTrue();
 	}
 
 	@Test
@@ -683,11 +681,11 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 		try {
 			myClient.transaction().withBundle(bundle).prettyPrint().execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			OperationOutcome oo = (OperationOutcome) e.getOperationOutcome();
-			assertEquals(Msg.code(533) + "Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'", oo.getIssue().get(0).getDiagnostics());
-			assertEquals("processing", oo.getIssue().get(0).getCode().toCode());
+			assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(533) + "Invalid placeholder ID found: uri:uuid:bb0cd4bc-1839-4606-8c46-ba3069e69b1d - Must be of the form 'urn:uuid:[uuid]' or 'urn:oid:[oid]'");
+			assertThat(oo.getIssue().get(0).getCode().toCode()).isEqualTo("processing");
 		}
 	}
 
@@ -744,14 +742,14 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		Bundle resp = myClient.transaction().withBundle(req).execute();
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-		assertEquals(1, resp.getEntry().size());
+		assertThat(resp.getEntry().size()).isEqualTo(1);
 		Bundle respSub = (Bundle) resp.getEntry().get(0).getResource();
-		assertEquals("self", respSub.getLink().get(0).getRelation());
-		assertEquals(ourServerBase + "/Patient", respSub.getLink().get(0).getUrl());
-		assertEquals("next", respSub.getLink().get(1).getRelation());
+		assertThat(respSub.getLink().get(0).getRelation()).isEqualTo("self");
+		assertThat(respSub.getLink().get(0).getUrl()).isEqualTo(ourServerBase + "/Patient");
+		assertThat(respSub.getLink().get(1).getRelation()).isEqualTo("next");
 		assertThat(respSub.getLink().get(1).getUrl()).contains("/fhir/context?_getpages");
 		assertThat(respSub.getEntry().get(0).getFullUrl()).startsWith(ourServerBase + "/Patient/");
-		assertEquals(Patient.class, respSub.getEntry().get(0).getResource().getClass());
+		assertThat(respSub.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
 	}
 
 	@Test
@@ -765,7 +763,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		try {
 			myClient.transaction().withBundle(bundle).prettyPrint().execute();
-			fail();
+			fail("");
 		} catch (InvalidRequestException e) {
 			assertThat(e.toString()).contains("missing or invalid HTTP Verb");
 		}
@@ -899,7 +897,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 			myClient.transaction().withBundle(b).execute();
 
-			assertTrue(called.get());
+			assertThat(called.get()).isTrue();
 
 		} finally {
 			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor);
@@ -944,9 +942,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		IIdType diagDelId = myClient.create().resource(diagInactive).execute().getId();
 
 		// validate setup
-		assertEquals(14, getAllResourcesOfType("Patient").getTotal());
-		assertEquals(2, getAllResourcesOfType("Observation").getTotal());
-		assertEquals(2, getAllResourcesOfType("DiagnosticReport").getTotal());
+		assertThat(getAllResourcesOfType("Patient").getTotal()).isEqualTo(14);
+		assertThat(getAllResourcesOfType("Observation").getTotal()).isEqualTo(2);
+		assertThat(getAllResourcesOfType("DiagnosticReport").getTotal()).isEqualTo(2);
 
 		Parameters input = new Parameters();
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "Observation?subject.active=false");
@@ -970,18 +968,18 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		// validate
 
 		myBatch2JobHelper.awaitJobCompletion(jobId);
-		assertEquals(2, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
+		assertThat(myBatch2JobHelper.getCombinedRecordsProcessed(jobId)).isEqualTo(2);
 
 		// validate
 		Bundle obsBundle = getAllResourcesOfType("Observation");
 		List<Observation> observations = BundleUtil.toListOfResourcesOfType(myFhirContext, obsBundle, Observation.class);
 		assertThat(observations).hasSize(1);
-		assertEquals(oKeepId, observations.get(0).getIdElement());
+		assertThat(observations.get(0).getIdElement()).isEqualTo(oKeepId);
 
 		Bundle diagBundle = getAllResourcesOfType("DiagnosticReport");
 		List<DiagnosticReport> diags = BundleUtil.toListOfResourcesOfType(myFhirContext, diagBundle, DiagnosticReport.class);
 		assertThat(diags).hasSize(1);
-		assertEquals(dKeepId, diags.get(0).getIdElement());
+		assertThat(diags.get(0).getIdElement()).isEqualTo(dKeepId);
 	}
 
 	private Bundle getAllResourcesOfType(String theResourceName) {
