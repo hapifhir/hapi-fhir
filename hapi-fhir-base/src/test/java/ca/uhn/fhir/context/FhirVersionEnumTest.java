@@ -2,6 +2,8 @@ package ca.uhn.fhir.context;
 
 import org.junit.jupiter.api.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 public class FhirVersionEnumTest {
 
 	@Test
