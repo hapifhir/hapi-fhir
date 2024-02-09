@@ -12,7 +12,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
@@ -316,7 +315,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				break;
 			default:
 				conceptProperty = new StringConceptProperty(propertyName, value.toString());
-				// throw new InternalErrorException(Msg.code(2450) + "Property type " + fhirType + " is not supported.");
+				// throw new InternalErrorException(Msg.code(2450) + "Property type " + fhirType + " is not
+				// supported.");
 		}
 		return conceptProperty;
 	}
@@ -350,7 +350,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				break;
 			default:
 				conceptProperty = new StringConceptProperty(theName, theValue.toString());
-				// throw new InternalErrorException(Msg.code(2451) + "Property type " + fhirType + " is not supportedis not supported.");
+				// throw new InternalErrorException(Msg.code(2451) + "Property type " + fhirType + " is not supportedis
+				// not supported.");
 		}
 		return conceptProperty;
 	}
@@ -451,7 +452,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				break;
 			default:
 				conceptProperty = new StringConceptProperty(propertyName, value.toString());
-				// throw new InternalErrorException(Msg.code(2452) + "Property type " + fhirType + " is not supported.");
+				// throw new InternalErrorException(Msg.code(2452) + "Property type " + fhirType + " is not
+				// supported.");
 		}
 		return conceptProperty;
 	}
@@ -472,7 +474,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				break;
 			default:
 				conceptProperty = new StringConceptProperty(theName, theValue.toString());
-				// throw new InternalErrorException(Msg.code(2453) + "Property type " + fhirType + " is not supported.");
+				// throw new InternalErrorException(Msg.code(2453) + "Property type " + fhirType + " is not
+				// supported.");
 		}
 		return conceptProperty;
 	}
