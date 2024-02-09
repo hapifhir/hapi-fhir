@@ -145,7 +145,6 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.swing.text.html.Option;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -1966,7 +1965,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					Msg.code(984) + "Searching with _contained mode enabled is not enabled on this server");
 		}
 
-		ourLog.info("5071: request complete URL: {}", Optional.ofNullable(theRequest).map(RequestDetails::getCompleteUrl).orElse(null));
+		ourLog.info(
+				"5071: request complete URL: {}",
+				Optional.ofNullable(theRequest)
+						.map(RequestDetails::getCompleteUrl)
+						.orElse(null));
 		ourLog.info("5071: PRE-translate params: {}", theParams);
 		translateListSearchParams(theParams);
 		ourLog.info("5071: POST-translate params: {}", theParams);
