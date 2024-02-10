@@ -22,16 +22,18 @@ package ca.uhn.fhir.jpa.ips.jpa.section;
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
 import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.Procedure;
+import org.hl7.fhir.r4.model.DiagnosticReport;
 
-public class ProceduresJpaSectionSearchStrategy extends JpaSectionSearchStrategy<Procedure> {
+public class DiagnosticResultsJpaSectionSearchStrategyDiagnosticReport
+		extends JpaSectionSearchStrategy<DiagnosticReport> {
 
 	@SuppressWarnings("RedundantIfStatement")
 	@Override
 	public boolean shouldInclude(
-			@Nonnull IpsSectionContext<Procedure> theIpsSectionContext, @Nonnull Procedure theCandidate) {
-		if (theCandidate.getStatus() == Procedure.ProcedureStatus.ENTEREDINERROR
-				|| theCandidate.getStatus() == Procedure.ProcedureStatus.NOTDONE) {
+			@Nonnull IpsSectionContext theIpsSectionContext, @Nonnull DiagnosticReport theCandidate) {
+		if (theCandidate.getStatus() == DiagnosticReport.DiagnosticReportStatus.CANCELLED
+				|| theCandidate.getStatus() == DiagnosticReport.DiagnosticReportStatus.ENTEREDINERROR
+				|| theCandidate.getStatus() == DiagnosticReport.DiagnosticReportStatus.PRELIMINARY) {
 			return false;
 		}
 

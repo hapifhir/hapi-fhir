@@ -21,20 +21,19 @@ package ca.uhn.fhir.jpa.ips.jpa.section;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
 import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.ClinicalImpression;
 
-public class FunctionalStatusJpaSectionSearchStrategy extends JpaSectionSearchStrategy {
+public class FunctionalStatusJpaSectionSearchStrategy extends JpaSectionSearchStrategy<ClinicalImpression> {
 
 	@SuppressWarnings("RedundantIfStatement")
 	@Override
-	public boolean shouldInclude(IpsSectionContext theIpsSectionContext, IBaseResource theCandidate) {
-		if (theCandidate instanceof ClinicalImpression) {
-			ClinicalImpression clinicalImpression = (ClinicalImpression) theCandidate;
-			if (clinicalImpression.getStatus() == ClinicalImpression.ClinicalImpressionStatus.INPROGRESS
-					|| clinicalImpression.getStatus() == ClinicalImpression.ClinicalImpressionStatus.ENTEREDINERROR) {
-				return false;
-			}
+	public boolean shouldInclude(
+			@Nonnull IpsSectionContext<ClinicalImpression> theIpsSectionContext,
+			@Nonnull ClinicalImpression theCandidate) {
+		if (theCandidate.getStatus() == ClinicalImpression.ClinicalImpressionStatus.INPROGRESS
+				|| theCandidate.getStatus() == ClinicalImpression.ClinicalImpressionStatus.ENTEREDINERROR) {
+			return false;
 		}
 		return true;
 	}

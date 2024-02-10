@@ -25,23 +25,32 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.Observation;
 
-public class PlanOfCareJpaSectionSearchStrategy extends JpaSectionSearchStrategy<CarePlan> {
+public class DiagnosticResultsJpaSectionSearchStrategyObservation extends JpaSectionSearchStrategy<Observation> {
 
 	@Override
 	public void massageResourceSearch(
-			@Nonnull IpsSectionContext<CarePlan> theIpsSectionContext,
+			@Nonnull IpsSectionContext<Observation> theIpsSectionContext,
 			@Nonnull SearchParameterMap theSearchParameterMap) {
 		theSearchParameterMap.add(
-				CarePlan.SP_STATUS,
+				Observation.SP_CATEGORY,
 				new TokenOrListParam()
 						.addOr(new TokenParam(
-								CarePlan.CarePlanStatus.ACTIVE.getSystem(), CarePlan.CarePlanStatus.ACTIVE.toCode()))
-						.addOr(new TokenParam(
-								CarePlan.CarePlanStatus.ONHOLD.getSystem(), CarePlan.CarePlanStatus.ONHOLD.toCode()))
-						.addOr(new TokenParam(
-								CarePlan.CarePlanStatus.UNKNOWN.getSystem(),
-								CarePlan.CarePlanStatus.UNKNOWN.toCode())));
+								"http://terminology.hl7.org/CodeSystem/observation-category", "laboratory")));
+	}
+
+	@SuppressWarnings("RedundantIfStatement")
+	@Override
+	public boolean shouldInclude(
+			@Nonnull IpsSectionContext<Observation> theIpsSectionContext, @Nonnull Observation theCandidate) {
+		// code filtering not yet applied
+		if (theCandidate.getStatus() == Observation.ObservationStatus.CANCELLED
+				|| theCandidate.getStatus() == Observation.ObservationStatus.ENTEREDINERROR
+				|| theCandidate.getStatus() == Observation.ObservationStatus.PRELIMINARY) {
+			return false;
+		}
+
+		return true;
 	}
 }

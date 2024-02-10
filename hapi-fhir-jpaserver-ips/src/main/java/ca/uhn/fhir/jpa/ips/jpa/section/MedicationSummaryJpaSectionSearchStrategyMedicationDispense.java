@@ -25,23 +25,27 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import jakarta.annotation.Nonnull;
-import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.MedicationDispense;
 
-public class PlanOfCareJpaSectionSearchStrategy extends JpaSectionSearchStrategy<CarePlan> {
+public class MedicationSummaryJpaSectionSearchStrategyMedicationDispense
+		extends JpaSectionSearchStrategy<MedicationDispense> {
 
 	@Override
 	public void massageResourceSearch(
-			@Nonnull IpsSectionContext<CarePlan> theIpsSectionContext,
+			@Nonnull IpsSectionContext<MedicationDispense> theIpsSectionContext,
 			@Nonnull SearchParameterMap theSearchParameterMap) {
+		theSearchParameterMap.addInclude(MedicationDispense.INCLUDE_MEDICATION);
 		theSearchParameterMap.add(
-				CarePlan.SP_STATUS,
+				MedicationDispense.SP_STATUS,
 				new TokenOrListParam()
 						.addOr(new TokenParam(
-								CarePlan.CarePlanStatus.ACTIVE.getSystem(), CarePlan.CarePlanStatus.ACTIVE.toCode()))
+								MedicationDispense.MedicationDispenseStatus.INPROGRESS.getSystem(),
+								MedicationDispense.MedicationDispenseStatus.INPROGRESS.toCode()))
 						.addOr(new TokenParam(
-								CarePlan.CarePlanStatus.ONHOLD.getSystem(), CarePlan.CarePlanStatus.ONHOLD.toCode()))
+								MedicationDispense.MedicationDispenseStatus.UNKNOWN.getSystem(),
+								MedicationDispense.MedicationDispenseStatus.UNKNOWN.toCode()))
 						.addOr(new TokenParam(
-								CarePlan.CarePlanStatus.UNKNOWN.getSystem(),
-								CarePlan.CarePlanStatus.UNKNOWN.toCode())));
+								MedicationDispense.MedicationDispenseStatus.ONHOLD.getSystem(),
+								MedicationDispense.MedicationDispenseStatus.ONHOLD.toCode())));
 	}
 }

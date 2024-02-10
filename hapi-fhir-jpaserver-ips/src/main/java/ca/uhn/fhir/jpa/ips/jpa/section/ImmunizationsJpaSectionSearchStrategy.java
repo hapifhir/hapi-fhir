@@ -24,29 +24,25 @@ import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Immunization;
-import org.hl7.fhir.r4.model.ResourceType;
 
-public class ImmunizationsJpaSectionSearchStrategy extends JpaSectionSearchStrategy {
+public class ImmunizationsJpaSectionSearchStrategy extends JpaSectionSearchStrategy<Immunization> {
 
 	@Override
 	public void massageResourceSearch(
-			IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
-		if (ResourceType.Immunization.name().equals(theIpsSectionContext.getResourceType())) {
-			theSearchParameterMap.setSort(new SortSpec(Immunization.SP_DATE).setOrder(SortOrderEnum.DESC));
-			theSearchParameterMap.addInclude(Immunization.INCLUDE_MANUFACTURER);
-		}
+			@Nonnull IpsSectionContext<Immunization> theIpsSectionContext,
+			@Nonnull SearchParameterMap theSearchParameterMap) {
+		theSearchParameterMap.setSort(new SortSpec(Immunization.SP_DATE).setOrder(SortOrderEnum.DESC));
+		theSearchParameterMap.addInclude(Immunization.INCLUDE_MANUFACTURER);
 	}
 
 	@SuppressWarnings("RedundantIfStatement")
 	@Override
-	public boolean shouldInclude(IpsSectionContext theIpsSectionContext, IBaseResource theCandidate) {
-		if (theCandidate instanceof Immunization) {
-			Immunization immunization = (Immunization) theCandidate;
-			if (immunization.getStatus() == Immunization.ImmunizationStatus.ENTEREDINERROR) {
-				return false;
-			}
+	public boolean shouldInclude(
+			@Nonnull IpsSectionContext<Immunization> theIpsSectionContext, @Nonnull Immunization theCandidate) {
+		if (theCandidate.getStatus() == Immunization.ImmunizationStatus.ENTEREDINERROR) {
+			return false;
 		}
 
 		return true;

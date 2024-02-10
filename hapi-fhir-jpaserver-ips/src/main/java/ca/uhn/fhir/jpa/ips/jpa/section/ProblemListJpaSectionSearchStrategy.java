@@ -21,30 +21,25 @@ package ca.uhn.fhir.jpa.ips.jpa.section;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
 import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Condition;
 
-public class ProblemListJpaSectionSearchStrategy extends JpaSectionSearchStrategy {
-
-	@Override
-	public void massageResourceSearch(
-			IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {}
+public class ProblemListJpaSectionSearchStrategy extends JpaSectionSearchStrategy<Condition> {
 
 	@SuppressWarnings("RedundantIfStatement")
 	@Override
-	public boolean shouldInclude(IpsSectionContext theIpsSectionContext, IBaseResource theCandidate) {
-		if (theCandidate instanceof Condition) {
-			Condition prob = (Condition) theCandidate;
-			if (prob.getClinicalStatus()
-							.hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "inactive")
-					|| prob.getClinicalStatus()
-							.hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "resolved")
-					|| prob.getVerificationStatus()
-							.hasCoding(
-									"http://terminology.hl7.org/CodeSystem/condition-ver-status", "entered-in-error")) {
-				return false;
-			}
+	public boolean shouldInclude(
+			@Nonnull IpsSectionContext<Condition> theIpsSectionContext, @Nonnull Condition theCandidate) {
+		if (theCandidate
+						.getClinicalStatus()
+						.hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "inactive")
+				|| theCandidate
+						.getClinicalStatus()
+						.hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "resolved")
+				|| theCandidate
+						.getVerificationStatus()
+						.hasCoding("http://terminology.hl7.org/CodeSystem/condition-ver-status", "entered-in-error")) {
+			return false;
 		}
 
 		return true;

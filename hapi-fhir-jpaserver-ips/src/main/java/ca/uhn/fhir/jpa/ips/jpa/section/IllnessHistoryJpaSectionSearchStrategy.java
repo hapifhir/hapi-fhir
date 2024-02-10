@@ -21,33 +21,33 @@ package ca.uhn.fhir.jpa.ips.jpa.section;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
 import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Condition;
 
-public class IllnessHistoryJpaSectionSearchStrategy extends JpaSectionSearchStrategy {
+public class IllnessHistoryJpaSectionSearchStrategy extends JpaSectionSearchStrategy<Condition> {
 
 	@SuppressWarnings("RedundantIfStatement")
 	@Override
-	public boolean shouldInclude(IpsSectionContext theIpsSectionContext, IBaseResource theCandidate) {
-		if (theCandidate instanceof Condition) {
-			Condition prob = (Condition) theCandidate;
-			if (prob.getVerificationStatus()
-					.hasCoding("http://terminology.hl7.org/CodeSystem/condition-ver-status", "entered-in-error")) {
-				return false;
-			}
-
-			if (prob.getClinicalStatus()
-							.hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "inactive")
-					|| prob.getClinicalStatus()
-							.hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "resolved")
-					|| prob.getClinicalStatus()
-							.hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "remission")) {
-				return true;
-			} else {
-				return false;
-			}
+	public boolean shouldInclude(
+			@Nonnull IpsSectionContext<Condition> theIpsSectionContext, @Nonnull Condition theCandidate) {
+		if (theCandidate
+				.getVerificationStatus()
+				.hasCoding("http://terminology.hl7.org/CodeSystem/condition-ver-status", "entered-in-error")) {
+			return false;
 		}
 
-		return true;
+		if (theCandidate
+						.getClinicalStatus()
+						.hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "inactive")
+				|| theCandidate
+						.getClinicalStatus()
+						.hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "resolved")
+				|| theCandidate
+						.getClinicalStatus()
+						.hasCoding("http://terminology.hl7.org/CodeSystem/condition-clinical", "remission")) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }

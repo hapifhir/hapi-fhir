@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.ips.jpa;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 /**
@@ -29,7 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
  *
  * @since 7.2.0
  */
-public interface IJpaSectionSearchStrategy {
+public interface IJpaSectionSearchStrategy<T extends IBaseResource> {
 
 	/**
 	 * This method can manipulate the {@link SearchParameterMap} that will
@@ -48,7 +49,7 @@ public interface IJpaSectionSearchStrategy {
 	 * @param theSearchParameterMap The map to manipulate.
 	 */
 	default void massageResourceSearch(
-			IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
+			@Nonnull IpsSectionContext<T> theIpsSectionContext, @Nonnull SearchParameterMap theSearchParameterMap) {
 		// no action taken by default
 	}
 
@@ -61,7 +62,7 @@ public interface IJpaSectionSearchStrategy {
 	 * in an IPS section.
 	 * </p>
 	 */
-	default boolean shouldInclude(IpsSectionContext theIpsSectionContext, IBaseResource theCandidate) {
+	default boolean shouldInclude(@Nonnull IpsSectionContext<T> theIpsSectionContext, @Nonnull T theCandidate) {
 		return true;
 	}
 }

@@ -24,33 +24,29 @@ import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.ResourceType;
 
-public class SocialHistoryJpaSectionSearchStrategy extends JpaSectionSearchStrategy {
+public class SocialHistoryJpaSectionSearchStrategy extends JpaSectionSearchStrategy<Observation> {
 
 	@Override
 	public void massageResourceSearch(
-			IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
-		if (theIpsSectionContext.getResourceType().equals(ResourceType.Observation.name())) {
-			theSearchParameterMap.add(
-					Observation.SP_CATEGORY,
-					new TokenOrListParam()
-							.addOr(new TokenParam(
-									"http://terminology.hl7.org/CodeSystem/observation-category", "social-history")));
-		}
+			@Nonnull IpsSectionContext<Observation> theIpsSectionContext,
+			@Nonnull SearchParameterMap theSearchParameterMap) {
+		theSearchParameterMap.add(
+				Observation.SP_CATEGORY,
+				new TokenOrListParam()
+						.addOr(new TokenParam(
+								"http://terminology.hl7.org/CodeSystem/observation-category", "social-history")));
 	}
 
 	@SuppressWarnings("RedundantIfStatement")
 	@Override
-	public boolean shouldInclude(IpsSectionContext theIpsSectionContext, IBaseResource theCandidate) {
-		if (theCandidate instanceof Observation) {
-			// code filtering not yet applied
-			Observation observation = (Observation) theCandidate;
-			if (observation.getStatus() == Observation.ObservationStatus.PRELIMINARY) {
-				return false;
-			}
+	public boolean shouldInclude(
+			@Nonnull IpsSectionContext<Observation> theIpsSectionContext, @Nonnull Observation theCandidate) {
+		// code filtering not yet applied
+		if (theCandidate.getStatus() == Observation.ObservationStatus.PRELIMINARY) {
+			return false;
 		}
 
 		return true;

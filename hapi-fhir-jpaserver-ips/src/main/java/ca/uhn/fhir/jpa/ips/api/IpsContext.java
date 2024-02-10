@@ -58,7 +58,8 @@ public class IpsContext {
 		return mySubjectId;
 	}
 
-	public IpsSectionContext newSectionContext(Section theSection, String theResourceType) {
-		return new IpsSectionContext(mySubject, mySubjectId, theSection, theResourceType);
+	public <T extends IBaseResource> IpsSectionContext<T> newSectionContext(
+			Section theSection, Class<T> theResourceType) {
+		return new IpsSectionContext<>(mySubject, mySubjectId, theSection, theResourceType);
 	}
 }

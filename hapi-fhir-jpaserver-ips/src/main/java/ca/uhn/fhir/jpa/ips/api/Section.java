@@ -22,9 +22,9 @@ package ca.uhn.fhir.jpa.ips.api;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -35,7 +35,7 @@ public class Section {
 	private final String myTitle;
 	private final String mySectionCode;
 	private final String mySectionDisplay;
-	private final List<String> myResourceTypes;
+	private final List<Class<? extends IBaseResource>> myResourceTypes;
 	private final String myProfile;
 	private final INoInfoGenerator myNoInfoGenerator;
 
@@ -46,7 +46,7 @@ public class Section {
 			String theSectionSystem,
 			String theSectionCode,
 			String theSectionDisplay,
-			List<String> theResourceTypes,
+			List<Class<? extends IBaseResource>> theResourceTypes,
 			String theProfile,
 			INoInfoGenerator theNoInfoGenerator) {
 		myTitle = theTitle;
@@ -63,7 +63,7 @@ public class Section {
 		return myNoInfoGenerator;
 	}
 
-	public List<String> getResourceTypes() {
+	public List<Class<? extends IBaseResource>> getResourceTypes() {
 		return myResourceTypes;
 	}
 
@@ -128,7 +128,7 @@ public class Section {
 		private String mySectionSystem;
 		private String mySectionCode;
 		private String mySectionDisplay;
-		private List<String> myResourceTypes;
+		private List<Class<? extends IBaseResource>> myResourceTypes = new ArrayList<>();
 		private String myProfile;
 		private INoInfoGenerator myNoInfoGenerator;
 
@@ -143,7 +143,7 @@ public class Section {
 				String theSectionDisplay,
 				String theProfile,
 				INoInfoGenerator theNoInfoGenerator,
-				List<String> theResourceTypes) {
+				List<Class<? extends IBaseResource>> theResourceTypes) {
 			myTitle = theTitle;
 			mySectionSystem = theSectionSystem;
 			mySectionCode = theSectionCode;
@@ -177,9 +177,13 @@ public class Section {
 			return this;
 		}
 
-		public SectionBuilder withResourceTypes(String... theResourceTypes) {
-			Validate.isTrue(theResourceTypes.length > 0);
-			myResourceTypes = Arrays.asList(theResourceTypes);
+		/**
+		 * This method may be called multiple times if the section will contain multiple resource types
+		 */
+		public SectionBuilder withResourceType(Class<? extends IBaseResource> theResourceType) {
+			Validate.notNull(theResourceType, "theResourceType must not be null");
+			Validate.isTrue(!myResourceTypes.contains(theResourceType), "theResourceType has already been added");
+			myResourceTypes.add(theResourceType);
 			return this;
 		}
 

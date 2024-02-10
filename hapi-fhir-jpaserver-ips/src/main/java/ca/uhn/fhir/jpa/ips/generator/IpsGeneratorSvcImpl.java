@@ -63,6 +63,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 
 	public static final String RESOURCE_ENTRY_INCLUSION_TYPE = "RESOURCE_ENTRY_INCLUSION_TYPE";
+	public static final String URL_NARRATIVE_LINK = "http://hl7.org/fhir/StructureDefinition/narrativeLink";
 	private final List<IIpsGenerationStrategy> myGenerationStrategies;
 	private final FhirContext myFhirContext;
 
@@ -191,27 +192,16 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		ResourceInclusionCollection sectionResourceCollectionToPopulate = new ResourceInclusionCollection();
 		ISectionResourceSupplier resourceSupplier = theStrategy.getSectionResourceSupplier(theSection);
 
-		for (String nextResourceType : theSection.getResourceTypes()) {
-			IpsSectionContext ipsSectionContext = theIpsContext.newSectionContext(theSection, nextResourceType);
-
-			List<ISectionResourceSupplier.ResourceEntry> resources =
-					resourceSupplier.fetchResourcesForSection(theIpsContext, ipsSectionContext, theRequestDetails);
-			if (resources != null) {
-				for (ISectionResourceSupplier.ResourceEntry nextEntry : resources) {
-					IBaseResource resource = nextEntry.getResource();
-					Validate.isTrue(
-							resource.getIdElement().hasIdPart(),
-							"fetchResourcesForSection(..) returned resource(s) with no ID populated");
-					resource.setUserData(RESOURCE_ENTRY_INCLUSION_TYPE, nextEntry.getInclusionType());
-				}
-				addResourcesToIpsContents(
-						theStrategy,
-						theRequestDetails,
-						theIpsContext,
-						resources,
-						theGlobalResourceCollectionToPopulate,
-						sectionResourceCollectionToPopulate);
-			}
+		for (Class<? extends IBaseResource> nextResourceType : theSection.getResourceTypes()) {
+			determineInclusionsForSectionResourceType(
+					theStrategy,
+					theRequestDetails,
+					theIpsContext,
+					theGlobalResourceCollectionToPopulate,
+					theSection,
+					nextResourceType,
+					resourceSupplier,
+					sectionResourceCollectionToPopulate);
 		}
 
 		if (sectionResourceCollectionToPopulate.isEmpty() && theSection.getNoInfoGenerator() != null) {
@@ -272,6 +262,37 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 				theGlobalResourceCollectionToPopulate);
 	}
 
+	private <T extends IBaseResource> void determineInclusionsForSectionResourceType(
+			IIpsGenerationStrategy theStrategy,
+			RequestDetails theRequestDetails,
+			IpsContext theIpsContext,
+			ResourceInclusionCollection theGlobalResourceCollectionToPopulate,
+			Section theSection,
+			Class<T> nextResourceType,
+			ISectionResourceSupplier resourceSupplier,
+			ResourceInclusionCollection sectionResourceCollectionToPopulate) {
+		IpsSectionContext<T> ipsSectionContext = theIpsContext.newSectionContext(theSection, nextResourceType);
+
+		List<ISectionResourceSupplier.ResourceEntry> resources =
+				resourceSupplier.fetchResourcesForSection(theIpsContext, ipsSectionContext, theRequestDetails);
+		if (resources != null) {
+			for (ISectionResourceSupplier.ResourceEntry nextEntry : resources) {
+				IBaseResource resource = nextEntry.getResource();
+				Validate.isTrue(
+						resource.getIdElement().hasIdPart(),
+						"fetchResourcesForSection(..) returned resource(s) with no ID populated");
+				resource.setUserData(RESOURCE_ENTRY_INCLUSION_TYPE, nextEntry.getInclusionType());
+			}
+			addResourcesToIpsContents(
+					theStrategy,
+					theRequestDetails,
+					theIpsContext,
+					resources,
+					theGlobalResourceCollectionToPopulate,
+					sectionResourceCollectionToPopulate);
+		}
+	}
+
 	/**
 	 * Given a collection of resources that have been fetched, analyze them and add them as appropriate
 	 * to the collection that will be included in a given IPS section context.
@@ -293,7 +314,8 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 			}
 
 			IBaseResource nextCandidate = nextCandidateEntry.getResource();
-			boolean primaryResource = nextCandidateEntry.getInclusionType() == ISectionResourceSupplier.InclusionTypeEnum.PRIMARY_RESOURCE;
+			boolean primaryResource = nextCandidateEntry.getInclusionType()
+					== ISectionResourceSupplier.InclusionTypeEnum.PRIMARY_RESOURCE;
 
 			String originalResourceId =
 					nextCandidate.getIdElement().toUnqualifiedVersionless().getValue();
@@ -304,44 +326,71 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 					theGlobalResourcesCollectionToPopulate.getResourceByOriginalId(originalResourceId);
 
 			if (previouslyExistingResource != null) {
-				reuseAlreadyIncludedGlobalResourceInSectionCollection(theSectionResourceCollectionToPopulate, previouslyExistingResource, primaryResource, originalResourceId);
+				reuseAlreadyIncludedGlobalResourceInSectionCollection(
+						theSectionResourceCollectionToPopulate,
+						previouslyExistingResource,
+						primaryResource,
+						originalResourceId);
 			} else if (theGlobalResourcesCollectionToPopulate.hasResourceWithReplacementId(originalResourceId)) {
-				addResourceToSectionCollectionOnlyIfPrimary(theSectionResourceCollectionToPopulate, primaryResource, nextCandidate, originalResourceId);
+				addResourceToSectionCollectionOnlyIfPrimary(
+						theSectionResourceCollectionToPopulate, primaryResource, nextCandidate, originalResourceId);
 			} else {
-				addResourceToGlobalCollectionAndSectionCollection(theStrategy, theRequestDetails, theIpsContext, theGlobalResourcesCollectionToPopulate, theSectionResourceCollectionToPopulate, nextCandidate, originalResourceId, primaryResource);
+				addResourceToGlobalCollectionAndSectionCollection(
+						theStrategy,
+						theRequestDetails,
+						theIpsContext,
+						theGlobalResourcesCollectionToPopulate,
+						theSectionResourceCollectionToPopulate,
+						nextCandidate,
+						originalResourceId,
+						primaryResource);
 			}
 		}
 	}
 
-	private static void addResourceToSectionCollectionOnlyIfPrimary(ResourceInclusionCollection theSectionResourceCollectionToPopulate, boolean primaryResource, IBaseResource nextCandidate, String originalResourceId) {
+	private static void addResourceToSectionCollectionOnlyIfPrimary(
+			ResourceInclusionCollection theSectionResourceCollectionToPopulate,
+			boolean primaryResource,
+			IBaseResource nextCandidate,
+			String originalResourceId) {
 		if (primaryResource) {
-			theSectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(
-				nextCandidate, originalResourceId);
+			theSectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(nextCandidate, originalResourceId);
 		}
 	}
 
-	private void addResourceToGlobalCollectionAndSectionCollection(IIpsGenerationStrategy theStrategy, RequestDetails theRequestDetails, IpsContext theIpsContext, ResourceInclusionCollection theGlobalResourcesCollectionToPopulate, ResourceInclusionCollection theSectionResourceCollectionToPopulate, IBaseResource nextCandidate, String originalResourceId, boolean primaryResource) {
+	private void addResourceToGlobalCollectionAndSectionCollection(
+			IIpsGenerationStrategy theStrategy,
+			RequestDetails theRequestDetails,
+			IpsContext theIpsContext,
+			ResourceInclusionCollection theGlobalResourcesCollectionToPopulate,
+			ResourceInclusionCollection theSectionResourceCollectionToPopulate,
+			IBaseResource nextCandidate,
+			String originalResourceId,
+			boolean primaryResource) {
 		massageResourceId(theStrategy, theRequestDetails, theIpsContext, nextCandidate);
-		theGlobalResourcesCollectionToPopulate.addResourceIfNotAlreadyPresent(
-			nextCandidate, originalResourceId);
-		addResourceToSectionCollectionOnlyIfPrimary(theSectionResourceCollectionToPopulate, primaryResource, nextCandidate, originalResourceId);
+		theGlobalResourcesCollectionToPopulate.addResourceIfNotAlreadyPresent(nextCandidate, originalResourceId);
+		addResourceToSectionCollectionOnlyIfPrimary(
+				theSectionResourceCollectionToPopulate, primaryResource, nextCandidate, originalResourceId);
 	}
 
-	private static void reuseAlreadyIncludedGlobalResourceInSectionCollection(ResourceInclusionCollection theSectionResourceCollectionToPopulate, IBaseResource previouslyExistingResource, boolean primaryResource, String originalResourceId) {
+	private static void reuseAlreadyIncludedGlobalResourceInSectionCollection(
+			ResourceInclusionCollection theSectionResourceCollectionToPopulate,
+			IBaseResource previouslyExistingResource,
+			boolean primaryResource,
+			String originalResourceId) {
 		IBaseResource nextCandidate;
-		ISectionResourceSupplier.InclusionTypeEnum previouslyIncludedResourceInclusionType = (ISectionResourceSupplier.InclusionTypeEnum)
-				previouslyExistingResource.getUserData(RESOURCE_ENTRY_INCLUSION_TYPE);
+		ISectionResourceSupplier.InclusionTypeEnum previouslyIncludedResourceInclusionType =
+				(ISectionResourceSupplier.InclusionTypeEnum)
+						previouslyExistingResource.getUserData(RESOURCE_ENTRY_INCLUSION_TYPE);
 		if (previouslyIncludedResourceInclusionType != ISectionResourceSupplier.InclusionTypeEnum.PRIMARY_RESOURCE) {
 			if (primaryResource) {
 				previouslyExistingResource.setUserData(
-						RESOURCE_ENTRY_INCLUSION_TYPE,
-						ISectionResourceSupplier.InclusionTypeEnum.PRIMARY_RESOURCE);
+						RESOURCE_ENTRY_INCLUSION_TYPE, ISectionResourceSupplier.InclusionTypeEnum.PRIMARY_RESOURCE);
 			}
 		}
 
 		nextCandidate = previouslyExistingResource;
-		theSectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(
-				nextCandidate, originalResourceId);
+		theSectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(nextCandidate, originalResourceId);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -365,18 +414,23 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 				continue;
 			}
 
-			IBaseExtension<?, ?> narrativeLink = ((IBaseHasExtensions) next).addExtension();
-			narrativeLink.setUrl("http://hl7.org/fhir/StructureDefinition/narrativeLink");
-			String narrativeLinkValue =
-					theCompositionBuilder.getComposition().getIdElement().getValue()
-							+ "#"
-							+ myFhirContext.getResourceType(next)
-							+ "-"
-							+ next.getIdElement().getValue();
-			IPrimitiveType<String> narrativeLinkUri = (IPrimitiveType<String>)
-					requireNonNull(myFhirContext.getElementDefinition("url")).newInstance();
-			narrativeLinkUri.setValueAsString(narrativeLinkValue);
-			narrativeLink.setValue(narrativeLinkUri);
+			IBaseHasExtensions extensionHolder = (IBaseHasExtensions) next;
+			if (extensionHolder.getExtension().stream()
+					.noneMatch(t -> t.getUrl().equals(URL_NARRATIVE_LINK))) {
+				IBaseExtension<?, ?> narrativeLink = extensionHolder.addExtension();
+				narrativeLink.setUrl(URL_NARRATIVE_LINK);
+				String narrativeLinkValue =
+						theCompositionBuilder.getComposition().getIdElement().getValue()
+								+ "#"
+								+ myFhirContext.getResourceType(next)
+								+ "-"
+								+ next.getIdElement().getValue();
+				IPrimitiveType<String> narrativeLinkUri =
+						(IPrimitiveType<String>) requireNonNull(myFhirContext.getElementDefinition("url"))
+								.newInstance();
+				narrativeLinkUri.setValueAsString(narrativeLinkValue);
+				narrativeLink.setValue(narrativeLinkUri);
+			}
 
 			sectionBuilder.addEntry(next.getIdElement());
 		}

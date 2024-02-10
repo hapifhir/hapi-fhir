@@ -48,34 +48,38 @@ import java.util.stream.Collectors;
 public class JpaSectionResourceSupplier implements ISectionResourceSupplier {
 	public static final int CHUNK_SIZE = 10;
 
-	private final IJpaSectionSearchStrategy mySectionSearchStrategy;
+	private final JpaSectionSearchStrategyCollection mySectionSearchStrategyCollection;
 	private final DaoRegistry myDaoRegistry;
 	private final FhirContext myFhirContext;
 
 	public JpaSectionResourceSupplier(
-			@Nonnull IJpaSectionSearchStrategy theSectionSearchStrategy,
+			@Nonnull JpaSectionSearchStrategyCollection theSectionSearchStrategyCollection,
 			@Nonnull DaoRegistry theDaoRegistry,
 			@Nonnull FhirContext theFhirContext) {
-		Validate.notNull(theSectionSearchStrategy, "theSectionSearchStrategy must not be null");
+		Validate.notNull(theSectionSearchStrategyCollection, "theSectionSearchStrategyCollection must not be null");
 		Validate.notNull(theDaoRegistry, "theDaoRegistry must not be null");
 		Validate.notNull(theFhirContext, "theFhirContext must not be null");
-		mySectionSearchStrategy = theSectionSearchStrategy;
+		mySectionSearchStrategyCollection = theSectionSearchStrategyCollection;
 		myDaoRegistry = theDaoRegistry;
 		myFhirContext = theFhirContext;
 	}
 
 	@Nullable
 	@Override
-	public List<ResourceEntry> fetchResourcesForSection(
-			IpsContext theIpsContext, IpsSectionContext theIpsSectionContext, RequestDetails theRequestDetails) {
+	public <T extends IBaseResource> List<ResourceEntry> fetchResourcesForSection(
+			IpsContext theIpsContext, IpsSectionContext<T> theIpsSectionContext, RequestDetails theRequestDetails) {
+
+		IJpaSectionSearchStrategy<T> searchStrategy =
+				mySectionSearchStrategyCollection.getSearchStrategy(theIpsSectionContext.getResourceType());
+
 		SearchParameterMap searchParameterMap = new SearchParameterMap();
 
 		String subjectSp = determinePatientCompartmentSearchParameterName(theIpsSectionContext.getResourceType());
 		searchParameterMap.add(subjectSp, new ReferenceParam(theIpsContext.getSubjectId()));
 
-		mySectionSearchStrategy.massageResourceSearch(theIpsSectionContext, searchParameterMap);
+		searchStrategy.massageResourceSearch(theIpsSectionContext, searchParameterMap);
 
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theIpsSectionContext.getResourceType());
+		IFhirResourceDao<T> dao = myDaoRegistry.getResourceDao(theIpsSectionContext.getResourceType());
 		IBundleProvider searchResult = dao.search(searchParameterMap, theRequestDetails);
 
 		List<ResourceEntry> retVal = null;
@@ -87,7 +91,8 @@ public class JpaSectionResourceSupplier implements ISectionResourceSupplier {
 			}
 
 			for (IBaseResource next : resources) {
-				if (mySectionSearchStrategy.shouldInclude(theIpsSectionContext, next)) {
+				if (!next.getClass().isAssignableFrom(theIpsSectionContext.getResourceType())
+						|| searchStrategy.shouldInclude(theIpsSectionContext, (T) next)) {
 					if (retVal == null) {
 						retVal = new ArrayList<>();
 					}
@@ -103,7 +108,7 @@ public class JpaSectionResourceSupplier implements ISectionResourceSupplier {
 		return retVal;
 	}
 
-	private String determinePatientCompartmentSearchParameterName(String theResourceType) {
+	private String determinePatientCompartmentSearchParameterName(Class<? extends IBaseResource> theResourceType) {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceType);
 		Set<String> searchParams = resourceDef.getSearchParamsForCompartmentName("Patient").stream()
 				.map(RuntimeSearchParam::getName)

@@ -21,30 +21,24 @@ package ca.uhn.fhir.jpa.ips.jpa.section;
 
 import ca.uhn.fhir.jpa.ips.api.IpsSectionContext;
 import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.AllergyIntolerance;
 
-public class AllergyIntoleranceJpaSectionSearchStrategy extends JpaSectionSearchStrategy {
+public class AllergyIntoleranceJpaSectionSearchStrategy extends JpaSectionSearchStrategy<AllergyIntolerance> {
 
 	@Override
-	public boolean shouldInclude(IpsSectionContext theIpsSectionContext, IBaseResource theCandidate) {
-		if (theCandidate instanceof AllergyIntolerance) {
-			AllergyIntolerance allergyIntolerance = (AllergyIntolerance) theCandidate;
-			if (allergyIntolerance
-							.getClinicalStatus()
-							.hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "inactive")
-					|| allergyIntolerance
-							.getClinicalStatus()
-							.hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "resolved")
-					|| allergyIntolerance
-							.getVerificationStatus()
-							.hasCoding(
-									"http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
-									"entered-in-error")) {
-				return false;
-			}
-		}
-
-		return true;
+	public boolean shouldInclude(
+			@Nonnull IpsSectionContext theIpsSectionContext, @Nonnull AllergyIntolerance theCandidate) {
+		return !theCandidate
+						.getClinicalStatus()
+						.hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "inactive")
+				&& !theCandidate
+						.getClinicalStatus()
+						.hasCoding("http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical", "resolved")
+				&& !theCandidate
+						.getVerificationStatus()
+						.hasCoding(
+								"http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
+								"entered-in-error");
 	}
 }

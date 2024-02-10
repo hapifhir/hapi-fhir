@@ -22,18 +22,18 @@ package ca.uhn.fhir.jpa.ips.api;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-public class IpsSectionContext extends IpsContext {
+public class IpsSectionContext<T extends IBaseResource> extends IpsContext {
 
 	private final Section mySection;
-	private final String myResourceType;
+	private final Class<T> myResourceType;
 
-	IpsSectionContext(IBaseResource theSubject, IIdType theSubjectId, Section theSection, String theResourceType) {
+	IpsSectionContext(IBaseResource theSubject, IIdType theSubjectId, Section theSection, Class<T> theResourceType) {
 		super(theSubject, theSubjectId);
 		mySection = theSection;
 		myResourceType = theResourceType;
 	}
 
-	public String getResourceType() {
+	public Class<T> getResourceType() {
 		return myResourceType;
 	}
 

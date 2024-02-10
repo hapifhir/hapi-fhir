@@ -24,12 +24,16 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.ips.api.Section;
 import ca.uhn.fhir.jpa.ips.jpa.section.AdvanceDirectivesJpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.ips.jpa.section.AllergyIntoleranceJpaSectionSearchStrategy;
-import ca.uhn.fhir.jpa.ips.jpa.section.DiagnosticResultsJpaSectionSearchStrategy;
+import ca.uhn.fhir.jpa.ips.jpa.section.DiagnosticResultsJpaSectionSearchStrategyDiagnosticReport;
+import ca.uhn.fhir.jpa.ips.jpa.section.DiagnosticResultsJpaSectionSearchStrategyObservation;
 import ca.uhn.fhir.jpa.ips.jpa.section.FunctionalStatusJpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.ips.jpa.section.IllnessHistoryJpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.ips.jpa.section.ImmunizationsJpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.ips.jpa.section.MedicalDevicesJpaSectionSearchStrategy;
-import ca.uhn.fhir.jpa.ips.jpa.section.MedicationSummaryJpaSectionSearchStrategy;
+import ca.uhn.fhir.jpa.ips.jpa.section.MedicationSummaryJpaSectionSearchStrategyMedicationAdministration;
+import ca.uhn.fhir.jpa.ips.jpa.section.MedicationSummaryJpaSectionSearchStrategyMedicationDispense;
+import ca.uhn.fhir.jpa.ips.jpa.section.MedicationSummaryJpaSectionSearchStrategyMedicationRequest;
+import ca.uhn.fhir.jpa.ips.jpa.section.MedicationSummaryJpaSectionSearchStrategyMedicationStatement;
 import ca.uhn.fhir.jpa.ips.jpa.section.PlanOfCareJpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.ips.jpa.section.PregnancyJpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.ips.jpa.section.ProblemListJpaSectionSearchStrategy;
@@ -49,12 +53,26 @@ import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.AllergyIntolerance;
+import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.ClinicalImpression;
+import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.DeviceUseStatement;
+import org.hl7.fhir.r4.model.DiagnosticReport;
+import org.hl7.fhir.r4.model.Immunization;
+import org.hl7.fhir.r4.model.MedicationAdministration;
+import org.hl7.fhir.r4.model.MedicationDispense;
+import org.hl7.fhir.r4.model.MedicationRequest;
+import org.hl7.fhir.r4.model.MedicationStatement;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
-import org.hl7.fhir.r4.model.ResourceType;
+import org.hl7.fhir.r4.model.Procedure;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.thymeleaf.util.Validate;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.Function;
 
@@ -90,14 +108,6 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 	public static final String SECTION_SYSTEM_LOINC = ITermLoaderSvc.LOINC_URI;
 	private final List<Function<Section, Section>> myGlobalSectionCustomizers = new ArrayList<>();
 
-	public void setDaoRegistry(DaoRegistry theDaoRegistry) {
-		myDaoRegistry = theDaoRegistry;
-	}
-
-	public void setFhirContext(FhirContext theFhirContext) {
-		myFhirContext = theFhirContext;
-	}
-
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 
@@ -105,6 +115,14 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 	private FhirContext myFhirContext;
 
 	private boolean myInitialized;
+
+	public void setDaoRegistry(DaoRegistry theDaoRegistry) {
+		myDaoRegistry = theDaoRegistry;
+	}
+
+	public void setFhirContext(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+	}
 
 	/**
 	 * Subclasses may call this method to add customers that will customize every section
@@ -175,12 +193,17 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.withSectionSystem(SECTION_SYSTEM_LOINC)
 				.withSectionCode(SECTION_CODE_ALLERGY_INTOLERANCE)
 				.withSectionDisplay("Allergies and adverse reactions Document")
-				.withResourceTypes(ResourceType.AllergyIntolerance.name())
+				.withResourceType(AllergyIntolerance.class)
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionAllergies")
 				.withNoInfoGenerator(new AllergyIntoleranceNoInfoR4Generator())
 				.build();
-		addJpaSection(section, new AllergyIntoleranceJpaSectionSearchStrategy());
+
+		JpaSectionSearchStrategyCollection searchStrategyCollection = JpaSectionSearchStrategyCollection.newBuilder()
+				.addStrategy(AllergyIntolerance.class, new AllergyIntoleranceJpaSectionSearchStrategy())
+				.build();
+
+		addJpaSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionMedicationSummary() {
@@ -189,16 +212,27 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.withSectionSystem(SECTION_SYSTEM_LOINC)
 				.withSectionCode(SECTION_CODE_MEDICATION_SUMMARY)
 				.withSectionDisplay("History of Medication use Narrative")
-				.withResourceTypes(
-						ResourceType.MedicationStatement.name(),
-						ResourceType.MedicationRequest.name(),
-						ResourceType.MedicationAdministration.name(),
-						ResourceType.MedicationDispense.name())
+				.withResourceType(MedicationStatement.class)
+				.withResourceType(MedicationRequest.class)
+				.withResourceType(MedicationAdministration.class)
+				.withResourceType(MedicationDispense.class)
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionMedications")
 				.withNoInfoGenerator(new MedicationNoInfoR4Generator())
 				.build();
-		addJpaSection(section, new MedicationSummaryJpaSectionSearchStrategy());
+
+		JpaSectionSearchStrategyCollection searchStrategyCollection = JpaSectionSearchStrategyCollection.newBuilder()
+				.addStrategy(
+						MedicationAdministration.class,
+						new MedicationSummaryJpaSectionSearchStrategyMedicationAdministration())
+				.addStrategy(
+						MedicationDispense.class, new MedicationSummaryJpaSectionSearchStrategyMedicationDispense())
+				.addStrategy(MedicationRequest.class, new MedicationSummaryJpaSectionSearchStrategyMedicationRequest())
+				.addStrategy(
+						MedicationStatement.class, new MedicationSummaryJpaSectionSearchStrategyMedicationStatement())
+				.build();
+
+		addJpaSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionProblemList() {
@@ -207,12 +241,17 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.withSectionSystem(SECTION_SYSTEM_LOINC)
 				.withSectionCode(SECTION_CODE_PROBLEM_LIST)
 				.withSectionDisplay("Problem list - Reported")
-				.withResourceTypes(ResourceType.Condition.name())
+				.withResourceType(Condition.class)
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionProblems")
 				.withNoInfoGenerator(new ProblemNoInfoR4Generator())
 				.build();
-		addJpaSection(section, new ProblemListJpaSectionSearchStrategy());
+
+		JpaSectionSearchStrategyCollection searchStrategyCollection = JpaSectionSearchStrategyCollection.newBuilder()
+				.addStrategy(Condition.class, new ProblemListJpaSectionSearchStrategy())
+				.build();
+
+		addJpaSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionImmunizations() {
@@ -221,11 +260,16 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.withSectionSystem(SECTION_SYSTEM_LOINC)
 				.withSectionCode(SECTION_CODE_IMMUNIZATIONS)
 				.withSectionDisplay("History of Immunization Narrative")
-				.withResourceTypes(ResourceType.Immunization.name())
+				.withResourceType(Immunization.class)
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionImmunizations")
 				.build();
-		addJpaSection(section, new ImmunizationsJpaSectionSearchStrategy());
+
+		JpaSectionSearchStrategyCollection searchStrategyCollection = JpaSectionSearchStrategyCollection.newBuilder()
+				.addStrategy(Immunization.class, new ImmunizationsJpaSectionSearchStrategy())
+				.build();
+
+		addJpaSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionProcedures() {
@@ -234,11 +278,16 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.withSectionSystem(SECTION_SYSTEM_LOINC)
 				.withSectionCode(SECTION_CODE_PROCEDURES)
 				.withSectionDisplay("History of Procedures Document")
-				.withResourceTypes(ResourceType.Procedure.name())
+				.withResourceType(Procedure.class)
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionProceduresHx")
 				.build();
-		addJpaSection(section, new ProceduresJpaSectionSearchStrategy());
+
+		JpaSectionSearchStrategyCollection searchStrategyCollection = JpaSectionSearchStrategyCollection.newBuilder()
+				.addStrategy(Procedure.class, new ProceduresJpaSectionSearchStrategy())
+				.build();
+
+		addJpaSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionMedicalDevices() {
@@ -247,11 +296,16 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.withSectionSystem(SECTION_SYSTEM_LOINC)
 				.withSectionCode(SECTION_CODE_MEDICAL_DEVICES)
 				.withSectionDisplay("History of medical device use")
-				.withResourceTypes(ResourceType.DeviceUseStatement.name())
+				.withResourceType(DeviceUseStatement.class)
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionMedicalDevices")
 				.build();
-		addJpaSection(section, new MedicalDevicesJpaSectionSearchStrategy());
+
+		JpaSectionSearchStrategyCollection searchStrategyCollection = JpaSectionSearchStrategyCollection.newBuilder()
+				.addStrategy(DeviceUseStatement.class, new MedicalDevicesJpaSectionSearchStrategy())
+				.build();
+
+		addJpaSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionDiagnosticResults() {
@@ -260,11 +314,18 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.withSectionSystem(SECTION_SYSTEM_LOINC)
 				.withSectionCode(SECTION_CODE_DIAGNOSTIC_RESULTS)
 				.withSectionDisplay("Relevant diagnostic tests/laboratory data Narrative")
-				.withResourceTypes(ResourceType.DiagnosticReport.name(), ResourceType.Observation.name())
+				.withResourceType(DiagnosticReport.class)
+				.withResourceType(Observation.class)
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionResults")
 				.build();
-		addJpaSection(section, new DiagnosticResultsJpaSectionSearchStrategy());
+
+		JpaSectionSearchStrategyCollection searchStrategyCollection = JpaSectionSearchStrategyCollection.newBuilder()
+				.addStrategy(DiagnosticReport.class, new DiagnosticResultsJpaSectionSearchStrategyDiagnosticReport())
+				.addStrategy(Observation.class, new DiagnosticResultsJpaSectionSearchStrategyObservation())
+				.build();
+
+		addJpaSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionVitalSigns() {
@@ -273,11 +334,16 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.withSectionSystem(SECTION_SYSTEM_LOINC)
 				.withSectionCode(SECTION_CODE_VITAL_SIGNS)
 				.withSectionDisplay("Vital signs")
-				.withResourceTypes(ResourceType.Observation.name())
+				.withResourceType(Observation.class)
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionVitalSigns")
 				.build();
-		addJpaSection(section, new VitalSignsJpaSectionSearchStrategy());
+
+		JpaSectionSearchStrategyCollection searchStrategyCollection = JpaSectionSearchStrategyCollection.newBuilder()
+				.addStrategy(Observation.class, new VitalSignsJpaSectionSearchStrategy())
+				.build();
+
+		addJpaSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionPregnancy() {
@@ -286,11 +352,16 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.withSectionSystem(SECTION_SYSTEM_LOINC)
 				.withSectionCode(SECTION_CODE_PREGNANCY)
 				.withSectionDisplay("History of pregnancies Narrative")
-				.withResourceTypes(ResourceType.Observation.name())
+				.withResourceType(Observation.class)
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPregnancyHx")
 				.build();
-		addJpaSection(section, new PregnancyJpaSectionSearchStrategy());
+
+		JpaSectionSearchStrategyCollection searchStrategyCollection = JpaSectionSearchStrategyCollection.newBuilder()
+				.addStrategy(Observation.class, new PregnancyJpaSectionSearchStrategy())
+				.build();
+
+		addJpaSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionSocialHistory() {
@@ -299,11 +370,16 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.withSectionSystem(SECTION_SYSTEM_LOINC)
 				.withSectionCode(SECTION_CODE_SOCIAL_HISTORY)
 				.withSectionDisplay("Social history Narrative")
-				.withResourceTypes(ResourceType.Observation.name())
+				.withResourceType(Observation.class)
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionSocialHistory")
 				.build();
-		addJpaSection(section, new SocialHistoryJpaSectionSearchStrategy());
+
+		JpaSectionSearchStrategyCollection searchStrategyCollection = JpaSectionSearchStrategyCollection.newBuilder()
+				.addStrategy(Observation.class, new SocialHistoryJpaSectionSearchStrategy())
+				.build();
+
+		addJpaSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionIllnessHistory() {
@@ -312,11 +388,16 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.withSectionSystem(SECTION_SYSTEM_LOINC)
 				.withSectionCode(SECTION_CODE_ILLNESS_HISTORY)
 				.withSectionDisplay("History of Past illness Narrative")
-				.withResourceTypes(ResourceType.Condition.name())
+				.withResourceType(Condition.class)
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPastIllnessHx")
 				.build();
-		addJpaSection(section, new IllnessHistoryJpaSectionSearchStrategy());
+
+		JpaSectionSearchStrategyCollection searchStrategyCollection = JpaSectionSearchStrategyCollection.newBuilder()
+				.addStrategy(Condition.class, new IllnessHistoryJpaSectionSearchStrategy())
+				.build();
+
+		addJpaSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionFunctionalStatus() {
@@ -325,11 +406,16 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.withSectionSystem(SECTION_SYSTEM_LOINC)
 				.withSectionCode(SECTION_CODE_FUNCTIONAL_STATUS)
 				.withSectionDisplay("Functional status assessment note")
-				.withResourceTypes(ResourceType.ClinicalImpression.name())
+				.withResourceType(ClinicalImpression.class)
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionFunctionalStatus")
 				.build();
-		addJpaSection(section, new FunctionalStatusJpaSectionSearchStrategy());
+
+		JpaSectionSearchStrategyCollection searchStrategyCollection = JpaSectionSearchStrategyCollection.newBuilder()
+				.addStrategy(ClinicalImpression.class, new FunctionalStatusJpaSectionSearchStrategy())
+				.build();
+
+		addJpaSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionPlanOfCare() {
@@ -338,11 +424,16 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.withSectionSystem(SECTION_SYSTEM_LOINC)
 				.withSectionCode(SECTION_CODE_PLAN_OF_CARE)
 				.withSectionDisplay("Plan of care note")
-				.withResourceTypes(ResourceType.CarePlan.name())
+				.withResourceType(CarePlan.class)
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionPlanOfCare")
 				.build();
-		addJpaSection(section, new PlanOfCareJpaSectionSearchStrategy());
+
+		JpaSectionSearchStrategyCollection searchStrategyCollection = JpaSectionSearchStrategyCollection.newBuilder()
+				.addStrategy(CarePlan.class, new PlanOfCareJpaSectionSearchStrategy())
+				.build();
+
+		addJpaSection(section, searchStrategyCollection);
 	}
 
 	protected void addJpaSectionAdvanceDirectives() {
@@ -351,18 +442,36 @@ public class DefaultJpaIpsGenerationStrategy extends BaseIpsGenerationStrategy {
 				.withSectionSystem(SECTION_SYSTEM_LOINC)
 				.withSectionCode(SECTION_CODE_ADVANCE_DIRECTIVES)
 				.withSectionDisplay("Advance directives")
-				.withResourceTypes(ResourceType.Consent.name())
+				.withResourceType(Consent.class)
 				.withProfile(
 						"https://hl7.org/fhir/uv/ips/StructureDefinition-Composition-uv-ips-definitions.html#Composition.section:sectionAdvanceDirectives")
 				.build();
-		addJpaSection(section, new AdvanceDirectivesJpaSectionSearchStrategy());
+
+		JpaSectionSearchStrategyCollection searchStrategyCollection = JpaSectionSearchStrategyCollection.newBuilder()
+				.addStrategy(Consent.class, new AdvanceDirectivesJpaSectionSearchStrategy())
+				.build();
+
+		addJpaSection(section, searchStrategyCollection);
 	}
 
-	protected void addJpaSection(Section theSection, IJpaSectionSearchStrategy theSectionSearchStrategy) {
+	protected void addJpaSection(
+			Section theSection, JpaSectionSearchStrategyCollection theSectionSearchStrategyCollection) {
 		Section section = theSection;
 		for (var next : myGlobalSectionCustomizers) {
 			section = next.apply(section);
 		}
-		addSection(section, new JpaSectionResourceSupplier(theSectionSearchStrategy, myDaoRegistry, myFhirContext));
+
+		Validate.isTrue(
+				theSection.getResourceTypes().size()
+						== theSectionSearchStrategyCollection.getResourceTypes().size(),
+				"Search strategy types does not match section types");
+		Validate.isTrue(
+				new HashSet<>(theSection.getResourceTypes())
+						.containsAll(theSectionSearchStrategyCollection.getResourceTypes()),
+				"Search strategy types does not match section types");
+
+		addSection(
+				section,
+				new JpaSectionResourceSupplier(theSectionSearchStrategyCollection, myDaoRegistry, myFhirContext));
 	}
 }

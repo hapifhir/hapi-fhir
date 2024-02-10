@@ -24,13 +24,12 @@ import ca.uhn.fhir.jpa.ips.jpa.JpaSectionSearchStrategy;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import org.hl7.fhir.instance.model.api.IBaseResource;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Observation;
-import org.hl7.fhir.r4.model.ResourceType;
 
 import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 
-public class PregnancyJpaSectionSearchStrategy extends JpaSectionSearchStrategy {
+public class PregnancyJpaSectionSearchStrategy extends JpaSectionSearchStrategy<Observation> {
 
 	public static final String LOINC_CODE_PREGNANCY_STATUS = "82810-3";
 	public static final String LOINC_CODE_NUMBER_BIRTHS_LIVE = "11636-8";
@@ -45,33 +44,30 @@ public class PregnancyJpaSectionSearchStrategy extends JpaSectionSearchStrategy 
 
 	@Override
 	public void massageResourceSearch(
-			IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
-		if (theIpsSectionContext.getResourceType().equals(ResourceType.Observation.name())) {
-			theSearchParameterMap.add(
-					Observation.SP_CODE,
-					new TokenOrListParam()
-							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_PREGNANCY_STATUS))
-							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_BIRTHS_LIVE))
-							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_BIRTHS_PRETERM))
-							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_BIRTHS_STILL_LIVING))
-							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_BIRTHS_TERM))
-							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_BIRTHS_TOTAL))
-							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_ABORTIONS))
-							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_ABORTIONS_INDUCED))
-							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_ABORTIONS_SPONTANEOUS))
-							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_ECTOPIC_PREGNANCY)));
-		}
+			@Nonnull IpsSectionContext<Observation> theIpsSectionContext,
+			@Nonnull SearchParameterMap theSearchParameterMap) {
+		theSearchParameterMap.add(
+				Observation.SP_CODE,
+				new TokenOrListParam()
+						.addOr(new TokenParam(LOINC_URI, LOINC_CODE_PREGNANCY_STATUS))
+						.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_BIRTHS_LIVE))
+						.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_BIRTHS_PRETERM))
+						.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_BIRTHS_STILL_LIVING))
+						.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_BIRTHS_TERM))
+						.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_BIRTHS_TOTAL))
+						.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_ABORTIONS))
+						.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_ABORTIONS_INDUCED))
+						.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_ABORTIONS_SPONTANEOUS))
+						.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_ECTOPIC_PREGNANCY)));
 	}
 
 	@SuppressWarnings("RedundantIfStatement")
 	@Override
-	public boolean shouldInclude(IpsSectionContext theIpsSectionContext, IBaseResource theCandidate) {
-		if (theCandidate instanceof Observation) {
-			// code filtering not yet applied
-			Observation observation = (Observation) theCandidate;
-			if (observation.getStatus() == Observation.ObservationStatus.PRELIMINARY) {
-				return false;
-			}
+	public boolean shouldInclude(
+			@Nonnull IpsSectionContext<Observation> theIpsSectionContext, @Nonnull Observation theCandidate) {
+		// code filtering not yet applied
+		if (theCandidate.getStatus() == Observation.ObservationStatus.PRELIMINARY) {
+			return false;
 		}
 
 		return true;

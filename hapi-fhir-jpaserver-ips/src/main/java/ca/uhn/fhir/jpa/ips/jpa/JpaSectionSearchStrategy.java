@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.jpa.ips.jpa;
 
-public class JpaSectionSearchStrategy implements IJpaSectionSearchStrategy {
+import org.hl7.fhir.instance.model.api.IBaseResource;
+
+public class JpaSectionSearchStrategy<T extends IBaseResource> implements IJpaSectionSearchStrategy<T> {
 
 	// nothing for now, interface has default methods
 

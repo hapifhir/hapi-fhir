@@ -62,8 +62,8 @@ public interface ISectionResourceSupplier {
 	 * @return Returns a list of resources to add to the given section, or <code>null</code>.
 	 */
 	@Nullable
-	List<ResourceEntry> fetchResourcesForSection(
-			IpsContext theIpsContext, IpsSectionContext theSectionContext, RequestDetails theRequestDetails);
+	<T extends IBaseResource> List<ResourceEntry> fetchResourcesForSection(
+			IpsContext theIpsContext, IpsSectionContext<T> theSectionContext, RequestDetails theRequestDetails);
 
 	/**
 	 * This enum specifies how an individual {@link ResourceEntry resource entry} that
