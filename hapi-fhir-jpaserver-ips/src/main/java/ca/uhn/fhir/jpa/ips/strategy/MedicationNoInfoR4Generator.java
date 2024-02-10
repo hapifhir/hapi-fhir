@@ -40,9 +40,6 @@ public class MedicationNoInfoR4Generator implements INoInfoGenerator {
 								.setDisplay("No information about medications")))
 				.setSubject(new Reference(theSubjectId))
 				.setStatus(MedicationStatement.MedicationStatementStatus.UNKNOWN);
-		// .setEffective(new
-		// Period().addExtension().setUrl("http://hl7.org/fhir/StructureDefinition/data-absent-reason").setValue((new
-		// Coding().setCode("not-applicable"))))
 		return medication;
 	}
 }
