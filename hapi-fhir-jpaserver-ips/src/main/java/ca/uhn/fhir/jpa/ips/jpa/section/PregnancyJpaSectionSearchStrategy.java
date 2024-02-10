@@ -32,6 +32,17 @@ import static ca.uhn.fhir.jpa.term.api.ITermLoaderSvc.LOINC_URI;
 
 public class PregnancyJpaSectionSearchStrategy extends JpaSectionSearchStrategy {
 
+	public static final String LOINC_CODE_PREGNANCY_STATUS = "82810-3";
+	public static final String LOINC_CODE_NUMBER_BIRTHS_LIVE = "11636-8";
+	public static final String LOINC_CODE_NUMBER_BIRTHS_PRETERM = "11637-6";
+	public static final String LOINC_CODE_NUMBER_BIRTHS_STILL_LIVING = "11638-4";
+	public static final String LOINC_CODE_NUMBER_BIRTHS_TERM = "11639-2";
+	public static final String LOINC_CODE_NUMBER_BIRTHS_TOTAL = "11640-0";
+	public static final String LOINC_CODE_NUMBER_ABORTIONS = "11612-9";
+	public static final String LOINC_CODE_NUMBER_ABORTIONS_INDUCED = "11613-7";
+	public static final String LOINC_CODE_NUMBER_ABORTIONS_SPONTANEOUS = "11614-5";
+	public static final String LOINC_CODE_NUMBER_ECTOPIC_PREGNANCY = "33065-4";
+
 	@Override
 	public void massageResourceSearch(
 			IpsSectionContext theIpsSectionContext, SearchParameterMap theSearchParameterMap) {
@@ -39,16 +50,16 @@ public class PregnancyJpaSectionSearchStrategy extends JpaSectionSearchStrategy 
 			theSearchParameterMap.add(
 					Observation.SP_CODE,
 					new TokenOrListParam()
-							.addOr(new TokenParam(LOINC_URI, "82810-3"))
-							.addOr(new TokenParam(LOINC_URI, "11636-8"))
-							.addOr(new TokenParam(LOINC_URI, "11637-6"))
-							.addOr(new TokenParam(LOINC_URI, "11638-4"))
-							.addOr(new TokenParam(LOINC_URI, "11639-2"))
-							.addOr(new TokenParam(LOINC_URI, "11640-0"))
-							.addOr(new TokenParam(LOINC_URI, "11612-9"))
-							.addOr(new TokenParam(LOINC_URI, "11613-7"))
-							.addOr(new TokenParam(LOINC_URI, "11614-5"))
-							.addOr(new TokenParam(LOINC_URI, "33065-4")));
+							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_PREGNANCY_STATUS))
+							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_BIRTHS_LIVE))
+							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_BIRTHS_PRETERM))
+							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_BIRTHS_STILL_LIVING))
+							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_BIRTHS_TERM))
+							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_BIRTHS_TOTAL))
+							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_ABORTIONS))
+							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_ABORTIONS_INDUCED))
+							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_ABORTIONS_SPONTANEOUS))
+							.addOr(new TokenParam(LOINC_URI, LOINC_CODE_NUMBER_ECTOPIC_PREGNANCY)));
 		}
 	}
 

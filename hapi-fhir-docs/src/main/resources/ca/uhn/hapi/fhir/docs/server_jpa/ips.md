@@ -37,7 +37,7 @@ The IPS generator uses HAPI FHIR [Narrative Generation](/hapi-fhir/docs/model/na
 
 Narrative templates for individual sections will be supplied a Bundle resource containing only the matched resources for the individual section as entries (ie. the Composition itself will not be present and no other resources will be present). So, for example, when generating the _Allergies / Intolerances_ IPS section narrative, the input to the narrative generator will be a _Bundle_ resource containing only _AllergyIntolerance_ resources.
 
-The narrative properties file should contain definitions using the profile URL of the individual section (as defined in the [section registry](#section-registry)) as the `.profile` qualifier. For example:
+The narrative properties file should contain definitions using the profile URL of the individual section (as defined in the section definition within the generation strategy) as the `.profile` qualifier. For example:
 
 ```properties
 ips-allergyintolerance.resourceType=Bundle

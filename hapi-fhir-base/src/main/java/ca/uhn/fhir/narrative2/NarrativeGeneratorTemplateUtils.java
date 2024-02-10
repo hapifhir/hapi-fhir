@@ -26,6 +26,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * An instance of this class is added to the Thymeleaf context as a variable with
@@ -45,8 +46,8 @@ public class NarrativeGeneratorTemplateUtils {
 		List<Pair<String, IBaseResource>> entryResources =
 				BundleUtil.getBundleEntryUrlsAndResources(ctx, theBaseBundle);
 		return entryResources.stream()
-				.map(t -> t.getValue())
-				.filter(t -> t != null)
+				.map(Pair::getValue)
+				.filter(Objects::nonNull)
 				.anyMatch(t -> ctx.getResourceType(t).equals(theResourceType));
 	}
 }

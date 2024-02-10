@@ -39,9 +39,9 @@ import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
-import javax.sql.DataSource;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
+import javax.sql.DataSource;
 
 @Configuration
 @Import({CommonConfig.class, JpaR4Config.class, HapiJpaConfig.class})
@@ -203,8 +203,7 @@ public class TestR4Config {
 	}
 
 	@Bean
-	public IIpsGeneratorSvc ipsGeneratorSvc(
-			FhirContext theFhirContext, IIpsGenerationStrategy theGenerationStrategy) {
+	public IIpsGeneratorSvc ipsGeneratorSvc(FhirContext theFhirContext, IIpsGenerationStrategy theGenerationStrategy) {
 		return new IpsGeneratorSvcImpl(theFhirContext, theGenerationStrategy);
 	}
 

@@ -288,20 +288,12 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 			ResourceInclusionCollection theGlobalResourcesCollectionToPopulate,
 			ResourceInclusionCollection theSectionResourceCollectionToPopulate) {
 		for (ISectionResourceSupplier.ResourceEntry nextCandidateEntry : theCandidateResources) {
-			IBaseResource nextCandidate = nextCandidateEntry.getResource();
-
-			boolean primaryResource;
-			switch (nextCandidateEntry.getInclusionType()) {
-				case PRIMARY_RESOURCE:
-					primaryResource = true;
-					break;
-				case SECONDARY_RESOURCE:
-					primaryResource = false;
-					break;
-				default:
-				case EXCLUDE:
-					continue;
+			if (nextCandidateEntry.getInclusionType() == ISectionResourceSupplier.InclusionTypeEnum.EXCLUDE) {
+				continue;
 			}
+
+			IBaseResource nextCandidate = nextCandidateEntry.getResource();
+			boolean primaryResource = nextCandidateEntry.getInclusionType() == ISectionResourceSupplier.InclusionTypeEnum.PRIMARY_RESOURCE;
 
 			String originalResourceId =
 					nextCandidate.getIdElement().toUnqualifiedVersionless().getValue();
@@ -310,35 +302,46 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 			// include it twice
 			IBaseResource previouslyExistingResource =
 					theGlobalResourcesCollectionToPopulate.getResourceByOriginalId(originalResourceId);
-			if (previouslyExistingResource != null) {
-				ISectionResourceSupplier.InclusionTypeEnum inclusionType = (ISectionResourceSupplier.InclusionTypeEnum)
-						previouslyExistingResource.getUserData(RESOURCE_ENTRY_INCLUSION_TYPE);
-				if (inclusionType != ISectionResourceSupplier.InclusionTypeEnum.PRIMARY_RESOURCE) {
-					if (primaryResource) {
-						previouslyExistingResource.setUserData(
-								RESOURCE_ENTRY_INCLUSION_TYPE,
-								ISectionResourceSupplier.InclusionTypeEnum.PRIMARY_RESOURCE);
-					}
-				}
 
-				nextCandidate = previouslyExistingResource;
-				theSectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(
-						nextCandidate, originalResourceId);
+			if (previouslyExistingResource != null) {
+				reuseAlreadyIncludedGlobalResourceInSectionCollection(theSectionResourceCollectionToPopulate, previouslyExistingResource, primaryResource, originalResourceId);
 			} else if (theGlobalResourcesCollectionToPopulate.hasResourceWithReplacementId(originalResourceId)) {
-				if (primaryResource) {
-					theSectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(
-							nextCandidate, originalResourceId);
-				}
+				addResourceToSectionCollectionOnlyIfPrimary(theSectionResourceCollectionToPopulate, primaryResource, nextCandidate, originalResourceId);
 			} else {
-				massageResourceId(theStrategy, theRequestDetails, theIpsContext, nextCandidate);
-				theGlobalResourcesCollectionToPopulate.addResourceIfNotAlreadyPresent(
-						nextCandidate, originalResourceId);
-				if (primaryResource) {
-					theSectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(
-							nextCandidate, originalResourceId);
-				}
+				addResourceToGlobalCollectionAndSectionCollection(theStrategy, theRequestDetails, theIpsContext, theGlobalResourcesCollectionToPopulate, theSectionResourceCollectionToPopulate, nextCandidate, originalResourceId, primaryResource);
 			}
 		}
+	}
+
+	private static void addResourceToSectionCollectionOnlyIfPrimary(ResourceInclusionCollection theSectionResourceCollectionToPopulate, boolean primaryResource, IBaseResource nextCandidate, String originalResourceId) {
+		if (primaryResource) {
+			theSectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(
+				nextCandidate, originalResourceId);
+		}
+	}
+
+	private void addResourceToGlobalCollectionAndSectionCollection(IIpsGenerationStrategy theStrategy, RequestDetails theRequestDetails, IpsContext theIpsContext, ResourceInclusionCollection theGlobalResourcesCollectionToPopulate, ResourceInclusionCollection theSectionResourceCollectionToPopulate, IBaseResource nextCandidate, String originalResourceId, boolean primaryResource) {
+		massageResourceId(theStrategy, theRequestDetails, theIpsContext, nextCandidate);
+		theGlobalResourcesCollectionToPopulate.addResourceIfNotAlreadyPresent(
+			nextCandidate, originalResourceId);
+		addResourceToSectionCollectionOnlyIfPrimary(theSectionResourceCollectionToPopulate, primaryResource, nextCandidate, originalResourceId);
+	}
+
+	private static void reuseAlreadyIncludedGlobalResourceInSectionCollection(ResourceInclusionCollection theSectionResourceCollectionToPopulate, IBaseResource previouslyExistingResource, boolean primaryResource, String originalResourceId) {
+		IBaseResource nextCandidate;
+		ISectionResourceSupplier.InclusionTypeEnum previouslyIncludedResourceInclusionType = (ISectionResourceSupplier.InclusionTypeEnum)
+				previouslyExistingResource.getUserData(RESOURCE_ENTRY_INCLUSION_TYPE);
+		if (previouslyIncludedResourceInclusionType != ISectionResourceSupplier.InclusionTypeEnum.PRIMARY_RESOURCE) {
+			if (primaryResource) {
+				previouslyExistingResource.setUserData(
+						RESOURCE_ENTRY_INCLUSION_TYPE,
+						ISectionResourceSupplier.InclusionTypeEnum.PRIMARY_RESOURCE);
+			}
+		}
+
+		nextCandidate = previouslyExistingResource;
+		theSectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(
+				nextCandidate, originalResourceId);
 	}
 
 	@SuppressWarnings("unchecked")
