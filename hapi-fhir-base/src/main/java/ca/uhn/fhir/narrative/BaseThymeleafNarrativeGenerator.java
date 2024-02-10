@@ -25,7 +25,6 @@ import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.narrative2.BaseNarrativeGenerator;
 import ca.uhn.fhir.narrative2.INarrativeTemplate;
-import ca.uhn.fhir.narrative2.NarrativeGeneratorTemplateUtils;
 import ca.uhn.fhir.narrative2.TemplateTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import com.google.common.collect.Sets;
@@ -112,7 +111,6 @@ public abstract class BaseThymeleafNarrativeGenerator extends BaseNarrativeGener
 		context.setVariable("context", theTargetContext);
 		context.setVariable(
 				"fhirVersion", theFhirContext.getVersion().getVersion().name());
-		context.setVariable("narrativeUtil", NarrativeGeneratorTemplateUtils.INSTANCE);
 
 		return getTemplateEngine(theFhirContext).process(theTemplate.getTemplateName(), context);
 	}
