@@ -115,13 +115,6 @@ import java.util.Set;
 import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.assertj.core.api.Assertions.fail;
 
 
 public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
@@ -950,7 +943,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		ca.uhn.fhir.model.dstu2.resource.Bundle b = (ca.uhn.fhir.model.dstu2.resource.Bundle) output.getParameterFirstRep().getResource();
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 		assertThat(ids).containsExactlyInAnyOrder(patientId, encId, orgId1, orgId2, orgId1parent, locPId, locCId, obsId, devId);
-		assertThat(ids, not(containsInRelativeOrder(encUId)));
+		assertThat(ids).doesNotContain(encUId);
 
 		ourLog.info(ids.toString());
 	}
@@ -1276,7 +1269,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(o1Id, o2Id, p1Id, p2Id, c1Id, c2Id);
-		assertThat(ids, not(containsInRelativeOrder(c3Id)));
+		assertThat(ids).doesNotContain(c3Id);
 	}
 
 	// retest
@@ -1586,7 +1579,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(resp, stringContainsInOrder("THIS IS THE DESC"));
+			assertThat(resp).contains("THIS IS THE DESC");
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
