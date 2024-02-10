@@ -110,6 +110,7 @@ public class JpaStorageSettings extends StorageSettings {
 	private static final Integer DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE = 10000;
 
 	private static final boolean DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA = false;
+	private static final long DEFAULT_REST_DELETE_BY_URL_RESOURCE_ID_THRESHOLD = 10000;
 
 	/**
 	 * Do not change default of {@code 0}!
@@ -343,6 +344,13 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	private boolean myPreventInvalidatingConditionalMatchCriteria =
 			DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA;
+
+	/**
+	 * This setting helps to enforce a threshold in number of resolved resources for DELETE by URL REST calls
+	 *
+	 * @since 7.2.0
+	 */
+	private long myRestDeleteByUrlResourceIdThreshold = DEFAULT_REST_DELETE_BY_URL_RESOURCE_ID_THRESHOLD;
 
 	/**
 	 * Constructor
@@ -2425,6 +2433,14 @@ public class JpaStorageSettings extends StorageSettings {
 
 	public boolean isPreventInvalidatingConditionalMatchCriteria() {
 		return myPreventInvalidatingConditionalMatchCriteria;
+	}
+
+	public long getRestDeleteByUrlResourceIdThreshold() {
+		return myRestDeleteByUrlResourceIdThreshold;
+	}
+
+	public void setRestDeleteByUrlResourceIdThreshold(long theRestDeleteByUrlResourceIdThreshold) {
+		myRestDeleteByUrlResourceIdThreshold = theRestDeleteByUrlResourceIdThreshold;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

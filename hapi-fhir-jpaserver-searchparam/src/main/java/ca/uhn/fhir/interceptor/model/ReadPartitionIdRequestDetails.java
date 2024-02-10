@@ -116,7 +116,7 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 		} else if (theResourceType != null) {
 			op = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
 		} else {
-			op = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
+			op = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
 		}
 
 		return new ReadPartitionIdRequestDetails(theResourceType, op, null, null, null, null, theExtendedOperationName);

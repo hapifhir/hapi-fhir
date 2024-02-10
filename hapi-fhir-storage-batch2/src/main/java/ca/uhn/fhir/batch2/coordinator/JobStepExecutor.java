@@ -75,9 +75,10 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			return;
 		}
 
-		if (stepExecutorOutput.getDataSink().firstStepProducedNothing()) {
+		if (stepExecutorOutput.getDataSink().firstStepProducedNothing() && !myDefinition.isLastStepReduction()) {
 			ourLog.info(
-					"First step of job myInstance {} produced no work chunks, marking as completed and setting end date",
+					"First step of job myInstance {} produced no work chunks and last step is not a reduction, "
+							+ "marking as completed and setting end date",
 					myInstanceId);
 			myJobPersistence.updateInstance(myInstance.getInstanceId(), instance -> {
 				instance.setEndTime(new Date());

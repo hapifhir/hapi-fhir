@@ -251,9 +251,22 @@ public class BundleBuilder {
 	 * @param theResource The resource to create
 	 */
 	public CreateBuilder addTransactionCreateEntry(IBaseResource theResource) {
+		return addTransactionCreateEntry(theResource, null);
+	}
+
+	/**
+	 * Adds an entry containing an create (POST) request.
+	 * Also sets the Bundle.type value to "transaction" if it is not already set.
+	 *
+	 * @param theResource The resource to create
+	 * @param theFullUrl The fullUrl to attach to the entry.  If null, will default to the resource ID.
+	 */
+	public CreateBuilder addTransactionCreateEntry(IBaseResource theResource, @Nullable String theFullUrl) {
 		setBundleField("type", "transaction");
 
-		IBase request = addEntryAndReturnRequest(theResource);
+		IBase request = addEntryAndReturnRequest(
+				theResource,
+				theFullUrl != null ? theFullUrl : theResource.getIdElement().getValue());
 
 		String resourceType = myContext.getResourceType(theResource);
 
