@@ -192,9 +192,17 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		ResourceInclusionCollection sectionResourceCollectionToPopulate = new ResourceInclusionCollection();
 		ISectionResourceSupplier resourceSupplier = theStrategy.getSectionResourceSupplier(theSection);
 
-		determineInclusionsForSectionResourceTypes(theStrategy, theRequestDetails, theIpsContext, theGlobalResourceCollectionToPopulate, theSection, resourceSupplier, sectionResourceCollectionToPopulate);
+		determineInclusionsForSectionResourceTypes(
+				theStrategy,
+				theRequestDetails,
+				theIpsContext,
+				theGlobalResourceCollectionToPopulate,
+				theSection,
+				resourceSupplier,
+				sectionResourceCollectionToPopulate);
 
-		generateSectionNoInfoResourceIfNoInclusionsFound(theIpsContext, theGlobalResourceCollectionToPopulate, theSection, sectionResourceCollectionToPopulate);
+		generateSectionNoInfoResourceIfNoInclusionsFound(
+				theIpsContext, theGlobalResourceCollectionToPopulate, theSection, sectionResourceCollectionToPopulate);
 
 		/*
 		 * Update any references within the added candidates - This is important
@@ -216,7 +224,8 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 				theGlobalResourceCollectionToPopulate);
 	}
 
-	private void updateReferencesInInclusionsForSection(ResourceInclusionCollection theGlobalResourceCollectionToPopulate) {
+	private void updateReferencesInInclusionsForSection(
+			ResourceInclusionCollection theGlobalResourceCollectionToPopulate) {
 		for (IBaseResource nextResource : theGlobalResourceCollectionToPopulate.getResources()) {
 			List<ResourceReferenceInfo> references = myFhirContext.newTerser().getAllResourceReferences(nextResource);
 			for (ResourceReferenceInfo nextReference : references) {
@@ -244,7 +253,11 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		}
 	}
 
-	private static void generateSectionNoInfoResourceIfNoInclusionsFound(IpsContext theIpsContext, ResourceInclusionCollection theGlobalResourceCollectionToPopulate, Section theSection, ResourceInclusionCollection sectionResourceCollectionToPopulate) {
+	private static void generateSectionNoInfoResourceIfNoInclusionsFound(
+			IpsContext theIpsContext,
+			ResourceInclusionCollection theGlobalResourceCollectionToPopulate,
+			Section theSection,
+			ResourceInclusionCollection sectionResourceCollectionToPopulate) {
 		if (sectionResourceCollectionToPopulate.isEmpty() && theSection.getNoInfoGenerator() != null) {
 			IBaseResource noInfoResource = theSection.getNoInfoGenerator().generate(theIpsContext.getSubjectId());
 			String id = IdType.newRandomUuid().getValue();
@@ -260,17 +273,24 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		}
 	}
 
-	private void determineInclusionsForSectionResourceTypes(IIpsGenerationStrategy theStrategy, RequestDetails theRequestDetails, IpsContext theIpsContext, ResourceInclusionCollection theGlobalResourceCollectionToPopulate, Section theSection, ISectionResourceSupplier resourceSupplier, ResourceInclusionCollection sectionResourceCollectionToPopulate) {
+	private void determineInclusionsForSectionResourceTypes(
+			IIpsGenerationStrategy theStrategy,
+			RequestDetails theRequestDetails,
+			IpsContext theIpsContext,
+			ResourceInclusionCollection theGlobalResourceCollectionToPopulate,
+			Section theSection,
+			ISectionResourceSupplier resourceSupplier,
+			ResourceInclusionCollection sectionResourceCollectionToPopulate) {
 		for (Class<? extends IBaseResource> nextResourceType : theSection.getResourceTypes()) {
 			determineInclusionsForSectionResourceType(
-				theStrategy,
-				theRequestDetails,
-				theIpsContext,
-				theGlobalResourceCollectionToPopulate,
-				theSection,
+					theStrategy,
+					theRequestDetails,
+					theIpsContext,
+					theGlobalResourceCollectionToPopulate,
+					theSection,
 					nextResourceType,
-				resourceSupplier,
-				sectionResourceCollectionToPopulate);
+					resourceSupplier,
+					sectionResourceCollectionToPopulate);
 		}
 	}
 
