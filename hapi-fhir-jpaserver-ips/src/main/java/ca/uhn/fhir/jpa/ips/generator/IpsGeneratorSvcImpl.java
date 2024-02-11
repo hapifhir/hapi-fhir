@@ -192,31 +192,9 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		ResourceInclusionCollection sectionResourceCollectionToPopulate = new ResourceInclusionCollection();
 		ISectionResourceSupplier resourceSupplier = theStrategy.getSectionResourceSupplier(theSection);
 
-		for (Class<? extends IBaseResource> nextResourceType : theSection.getResourceTypes()) {
-			determineInclusionsForSectionResourceType(
-					theStrategy,
-					theRequestDetails,
-					theIpsContext,
-					theGlobalResourceCollectionToPopulate,
-					theSection,
-					nextResourceType,
-					resourceSupplier,
-					sectionResourceCollectionToPopulate);
-		}
+		determineInclusionsForSectionResourceTypes(theStrategy, theRequestDetails, theIpsContext, theGlobalResourceCollectionToPopulate, theSection, resourceSupplier, sectionResourceCollectionToPopulate);
 
-		if (sectionResourceCollectionToPopulate.isEmpty() && theSection.getNoInfoGenerator() != null) {
-			IBaseResource noInfoResource = theSection.getNoInfoGenerator().generate(theIpsContext.getSubjectId());
-			String id = IdType.newRandomUuid().getValue();
-			if (noInfoResource.getIdElement().isEmpty()) {
-				noInfoResource.setId(id);
-			}
-			noInfoResource.setUserData(
-					RESOURCE_ENTRY_INCLUSION_TYPE, ISectionResourceSupplier.InclusionTypeEnum.PRIMARY_RESOURCE);
-			theGlobalResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(
-					noInfoResource,
-					noInfoResource.getIdElement().toUnqualifiedVersionless().getValue());
-			sectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(noInfoResource, id);
-		}
+		generateSectionNoInfoResourceIfNoInclusionsFound(theIpsContext, theGlobalResourceCollectionToPopulate, theSection, sectionResourceCollectionToPopulate);
 
 		/*
 		 * Update any references within the added candidates - This is important
@@ -224,6 +202,21 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 		 * the summary, so we need to also update the references to those
 		 * resources.
 		 */
+		updateReferencesInInclusionsForSection(theGlobalResourceCollectionToPopulate);
+
+		if (sectionResourceCollectionToPopulate.isEmpty()) {
+			return;
+		}
+
+		addSection(
+				theStrategy,
+				theSection,
+				theCompositionBuilder,
+				sectionResourceCollectionToPopulate,
+				theGlobalResourceCollectionToPopulate);
+	}
+
+	private void updateReferencesInInclusionsForSection(ResourceInclusionCollection theGlobalResourceCollectionToPopulate) {
 		for (IBaseResource nextResource : theGlobalResourceCollectionToPopulate.getResources()) {
 			List<ResourceReferenceInfo> references = myFhirContext.newTerser().getAllResourceReferences(nextResource);
 			for (ResourceReferenceInfo nextReference : references) {
@@ -249,17 +242,36 @@ public class IpsGeneratorSvcImpl implements IIpsGeneratorSvc {
 				}
 			}
 		}
+	}
 
-		if (sectionResourceCollectionToPopulate.isEmpty()) {
-			return;
+	private static void generateSectionNoInfoResourceIfNoInclusionsFound(IpsContext theIpsContext, ResourceInclusionCollection theGlobalResourceCollectionToPopulate, Section theSection, ResourceInclusionCollection sectionResourceCollectionToPopulate) {
+		if (sectionResourceCollectionToPopulate.isEmpty() && theSection.getNoInfoGenerator() != null) {
+			IBaseResource noInfoResource = theSection.getNoInfoGenerator().generate(theIpsContext.getSubjectId());
+			String id = IdType.newRandomUuid().getValue();
+			if (noInfoResource.getIdElement().isEmpty()) {
+				noInfoResource.setId(id);
+			}
+			noInfoResource.setUserData(
+					RESOURCE_ENTRY_INCLUSION_TYPE, ISectionResourceSupplier.InclusionTypeEnum.PRIMARY_RESOURCE);
+			theGlobalResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(
+					noInfoResource,
+					noInfoResource.getIdElement().toUnqualifiedVersionless().getValue());
+			sectionResourceCollectionToPopulate.addResourceIfNotAlreadyPresent(noInfoResource, id);
 		}
+	}
 
-		addSection(
+	private void determineInclusionsForSectionResourceTypes(IIpsGenerationStrategy theStrategy, RequestDetails theRequestDetails, IpsContext theIpsContext, ResourceInclusionCollection theGlobalResourceCollectionToPopulate, Section theSection, ISectionResourceSupplier resourceSupplier, ResourceInclusionCollection sectionResourceCollectionToPopulate) {
+		for (Class<? extends IBaseResource> nextResourceType : theSection.getResourceTypes()) {
+			determineInclusionsForSectionResourceType(
 				theStrategy,
+				theRequestDetails,
+				theIpsContext,
+				theGlobalResourceCollectionToPopulate,
 				theSection,
-				theCompositionBuilder,
-				sectionResourceCollectionToPopulate,
-				theGlobalResourceCollectionToPopulate);
+					nextResourceType,
+				resourceSupplier,
+				sectionResourceCollectionToPopulate);
+		}
 	}
 
 	private <T extends IBaseResource> void determineInclusionsForSectionResourceType(

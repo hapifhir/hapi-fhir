@@ -114,7 +114,7 @@ public interface IIpsGenerationStrategy {
 	 * placeholder UUID to replace it with.
 	 * <p>
 	 * If you want to replace the native resource ID with a placeholder so as not
-	 * to leake the server-generated IDs, the recommended way is to
+	 * to leak the server-generated IDs, the recommended way is to
 	 * return <code>IdType.newRandomUuid()</code>
 	 * </p>
 	 *
