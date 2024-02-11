@@ -435,7 +435,7 @@ public class BundleBuilder {
 	 */
 	public void addCollectionEntry(IBaseResource theResource) {
 		setType("collection");
-		addEntryAndReturnRequest(theResource, theResource.getIdElement().getValue());
+		addEntryAndReturnRequest(theResource);
 	}
 
 	/**
@@ -443,7 +443,7 @@ public class BundleBuilder {
 	 */
 	public void addDocumentEntry(IBaseResource theResource) {
 		setType("document");
-		addEntryAndReturnRequest(theResource, theResource.getIdElement().getValue());
+		addEntryAndReturnRequest(theResource);
 	}
 
 	/**
@@ -473,6 +473,14 @@ public class BundleBuilder {
 		IBase searchInstance = mySearchDef.newInstance();
 		mySearchChild.getMutator().setValue(entry, searchInstance);
 		return (IBaseBackboneElement) searchInstance;
+	}
+
+	private IBase addEntryAndReturnRequest(IBaseResource theResource) {
+		IIdType id = theResource.getIdElement();
+		if (id.hasVersionIdPart()) {
+			id = id.toVersionless();
+		}
+		return addEntryAndReturnRequest(theResource, id.getValue());
 	}
 
 	private IBase addEntryAndReturnRequest(IBaseResource theResource, String theFullUrl) {
