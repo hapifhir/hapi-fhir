@@ -21,9 +21,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.not;
 
 public class ContextScanningDstu3Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
@@ -47,7 +44,7 @@ public class ContextScanningDstu3Test {
 		TreeSet<String> elementDefs = scannedElementNames(ctx);
 		ourLog.info("Have {} resource definitions: {}", ctx.getAllResourceDefinitions().size(), resDefs);
 		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);
-		assertThat(resDefs, not(containsInRelativeOrder("Observation")));
+		assertThat(resDefs).doesNotContain("Observation");
 		
 		IGenericClient client = ctx.newRestfulGenericClient(ourServer.getBaseUrl());
 		client.read().resource(Patient.class).withId("1").execute();
@@ -56,14 +53,14 @@ public class ContextScanningDstu3Test {
 		elementDefs = scannedElementNames(ctx);
 		ourLog.info("Have {} resource definitions: {}", ctx.getAllResourceDefinitions().size(), resDefs);
 		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);		
-		assertThat(resDefs, not(containsInRelativeOrder("Observation")));
+		assertThat(resDefs).doesNotContain("Observation");
 
 		client.read().resource(Observation.class).withId("1").execute();
 		resDefs = scannedResourceNames(ctx);
 		elementDefs = scannedElementNames(ctx);
 		ourLog.info("Have {} resource definitions: {}", ctx.getAllResourceDefinitions().size(), resDefs);
 		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);		
-		assertThat(resDefs, containsInRelativeOrder("Observation"));
+		assertThat(resDefs).doesNotContain("Observation");
 	}
 
 	public static void main(String[] args) {
@@ -101,8 +98,9 @@ public class ContextScanningDstu3Test {
 		TreeSet<String> elementDefs = scannedElementNames(ctx);
 		ourLog.info("Have {} resource definitions: {}", ctx.getAllResourceDefinitions().size(), resDefs);
 		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);
-		assertThat(resDefs, not(containsInRelativeOrder("Observation")));
-		
+		assertThat(resDefs).doesNotContain("Observation");
+
+
 		BaseRuntimeElementCompositeDefinition<?> compositeDef = (BaseRuntimeElementCompositeDefinition<?>) ctx.getElementDefinition("identifier");
 		assertThat(compositeDef.isSealed()).isFalse();
 		
@@ -113,7 +111,7 @@ public class ContextScanningDstu3Test {
 		elementDefs = scannedElementNames(ctx);
 		ourLog.info("Have {} resource definitions: {}", ctx.getAllResourceDefinitions().size(), resDefs);
 		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);		
-		assertThat(resDefs, not(containsInRelativeOrder("Observation")));
+		assertThat(resDefs).doesNotContain("Observation");
 		compositeDef = (BaseRuntimeElementCompositeDefinition<?>) ctx.getElementDefinition("identifier");
 		assertThat(compositeDef.isSealed()).isFalse();
 
@@ -122,7 +120,7 @@ public class ContextScanningDstu3Test {
 		elementDefs = scannedElementNames(ctx);
 		ourLog.info("Have {} resource definitions: {}", ctx.getAllResourceDefinitions().size(), resDefs);
 		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);		
-		assertThat(resDefs, containsInRelativeOrder("Observation"));		
+		assertThat(resDefs).doesNotContain("Observation");
 		compositeDef = (BaseRuntimeElementCompositeDefinition<?>) ctx.getElementDefinition("identifier");
 		assertThat(compositeDef.isSealed()).isTrue();
 	}

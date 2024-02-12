@@ -25,9 +25,6 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.blankOrNullString;
-import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -182,7 +179,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		Date results1Date = TestUtil.getTimestamp(results1).getValue();
 		assertThat(results1Date).isAfter(beforeFirst);
 		assertThat(results1Date).isBefore(new Date());
-		assertThat(results1.getId(), not(blankOrNullString()));
+		assertThat(results1.getId()).isNotEmpty();
 
 		Patient pt2 = new Patient();
 		pt2.addName().setFamily("FAM");

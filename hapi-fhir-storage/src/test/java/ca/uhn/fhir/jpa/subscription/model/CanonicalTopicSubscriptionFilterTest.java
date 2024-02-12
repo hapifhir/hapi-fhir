@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.subscription.model;
 
-import org.hamcrest.Matchers;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.junit.jupiter.api.Test;
 

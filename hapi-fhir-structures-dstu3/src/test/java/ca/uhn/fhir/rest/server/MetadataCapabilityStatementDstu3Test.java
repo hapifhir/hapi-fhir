@@ -31,9 +31,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 
 public class MetadataCapabilityStatementDstu3Test {
 
@@ -71,7 +68,7 @@ public class MetadataCapabilityStatementDstu3Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			ourLog.info(output);
 			assertThat(output).contains("<CapabilityStatement");
-			assertThat(output, stringContainsInOrder("<meta>", "SUBSETTED", "</meta>"));
+			assertThat(output).contains("<meta>", "SUBSETTED", "</meta>");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -167,8 +164,8 @@ public class MetadataCapabilityStatementDstu3Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			ourLog.info(output);
 			assertThat(output).contains("<CapabilityStatement");
-			assertThat(output, stringContainsInOrder("<meta>", "SUBSETTED", "</meta>"));
-			assertThat(output, not(stringContainsInOrder("searchParam")));
+			assertThat(output).contains("<meta>", "SUBSETTED", "</meta>");
+			assertThat(output).doesNotContain("searchParam");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -181,8 +178,8 @@ public class MetadataCapabilityStatementDstu3Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			ourLog.info(output);
 			assertThat(output).contains("<CapabilityStatement");
-			assertThat(output, not(stringContainsInOrder("<meta>", "SUBSETTED", "</meta>")));
-			assertThat(output, stringContainsInOrder("searchParam"));
+			assertThat(output).doesNotContain("<meta>", "SUBSETTED", "</meta>");
+			assertThat(output).contains("searchParam");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}

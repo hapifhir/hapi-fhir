@@ -30,8 +30,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 
 public class ValidateDstu3Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
@@ -83,7 +81,7 @@ public class ValidateDstu3Test {
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-		assertThat(resp, stringContainsInOrder("<OperationOutcome"));
+		assertThat(resp).contains("<OperationOutcome");
 	}
 
 	@Test
@@ -127,7 +125,7 @@ public class ValidateDstu3Test {
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
-		assertThat(resp, stringContainsInOrder("Invalid mode value: &quot;AAA&quot;"));
+		assertThat(resp).contains("Invalid mode value: &quot;AAA&quot;");
 	}
 
 	@Test
@@ -164,7 +162,7 @@ public class ValidateDstu3Test {
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-		assertThat(resp, stringContainsInOrder("<OperationOutcome", "FOOBAR"));
+		assertThat(resp).contains("<OperationOutcome", "FOOBAR");
 		assertThat(ourLastPatient).isNull();
 		assertThat(ourLastId.getResourceType()).isEqualTo("Patient");
 		assertThat(ourLastId.getIdPart()).isEqualTo("123");
@@ -186,7 +184,7 @@ public class ValidateDstu3Test {
 		HttpResponse status = ourClient.execute(httpPost);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-		assertThat(ourLastResourceBody, stringContainsInOrder("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001"));
+		assertThat(ourLastResourceBody).contains("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001");
 		assertThat(ourLastEncoding).isEqualTo(EncodingEnum.JSON);
 
 	}
@@ -213,7 +211,7 @@ public class ValidateDstu3Test {
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-		assertThat(resp, stringContainsInOrder("<OperationOutcome"));
+		assertThat(resp).contains("<OperationOutcome");
 		assertThat(ourLastProfile).isEqualTo("http://foo");
 		assertThat(ourLastMode).isEqualTo(ValidationModeEnum.CREATE);
 	}
@@ -240,7 +238,7 @@ public class ValidateDstu3Test {
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-		assertThat(resp, stringContainsInOrder("<OperationOutcome", "FOOBAR"));
+		assertThat(resp).contains("<OperationOutcome", "FOOBAR");
 	}
 
 	@AfterAll

@@ -43,8 +43,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
 
 public class OperationServerDstu3Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
@@ -97,7 +95,7 @@ public class OperationServerDstu3Test {
 		assertThat(ops.size()).isGreaterThan(1);
 
 		List<String> opNames = toOpNames(ops);
-		assertThat(opNames, containsInRelativeOrder("OP_TYPE"));
+		assertThat(opNames).contains("OP_TYPE");
 		
 //		OperationDefinition def = (OperationDefinition) ops.get(opNames.indexOf("OP_TYPE")).getDefinition().getResource();
 		OperationDefinition def = myFhirClient.read().resource(OperationDefinition.class).withId(ops.get(opNames.indexOf("OP_TYPE")).getDefinition().getReferenceElement()).execute();

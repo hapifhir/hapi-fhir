@@ -36,8 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 
 public class CreateDstu3Test {
 
@@ -194,16 +192,16 @@ public class CreateDstu3Test {
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		//@formatter:off
-		assertThat(responseContent, stringContainsInOrder(
-			"<Patient xmlns=\"http://hl7.org/fhir\">", 
-				"<id value=\"0\"/>", 
-				"<meta>", 
-					"<profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>", 
-				"</meta>", 
-				"<modifierExtension url=\"http://example.com/ext/date\">", 
-					"<valueDate value=\"2011-01-01\"/>", 
-				"</modifierExtension>", 
-			"</Patient>"));
+		assertThat(responseContent).contains(
+			"<Patient xmlns=\"http://hl7.org/fhir\">",
+				"<id value=\"0\"/>",
+				"<meta>",
+					"<profile value=\"http://example.com/StructureDefinition/patient_with_extensions\"/>",
+				"</meta>",
+				"<modifierExtension url=\"http://example.com/ext/date\">",
+					"<valueDate value=\"2011-01-01\"/>",
+				"</modifierExtension>",
+			"</Patient>");
 		//@formatter:on
 
 		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");

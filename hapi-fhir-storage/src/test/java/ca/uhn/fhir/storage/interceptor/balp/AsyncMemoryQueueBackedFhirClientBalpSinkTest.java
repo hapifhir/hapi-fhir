@@ -23,7 +23,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.equalTo;
 
 public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 
@@ -48,7 +47,7 @@ public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 				}
 			}
 
-			await().until(() -> myAuditEventProvider.getStoredResources().size(), equalTo(1000));
+			await().untilAsserted(() -> assertThat(myAuditEventProvider.getStoredResources().size()).isEqualTo(1000));
 
 		} finally {
 			sink.stop();

@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.Matchers.greaterThan;
 
 public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
@@ -120,7 +119,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		myTerminologyDeferredStorageSvc.saveDeferred();
 
-		await().until(() -> runInTransaction(() -> myTermConceptMapDao.count()), greaterThan(0L));
+		await().untilAsserted(() -> runInTransaction(() -> assertThat(myTermConceptMapDao.count()).isGreaterThan(0L)));
 	}
 
 	@Test

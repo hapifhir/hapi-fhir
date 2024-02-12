@@ -5,7 +5,6 @@ import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.collections.Transformer;
 import org.apache.commons.collections.map.LazyMap;
-import org.hamcrest.core.StringContains;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
 import org.hl7.fhir.dstu3.model.DateTimeType;
@@ -36,7 +35,6 @@ import java.util.Locale;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
 
 public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorDstu3Test.class);
@@ -72,7 +70,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		myGen.populateResourceNarrative(myCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>"));
+		assertThat(output).contains("<div class=\"hapiHeaderText\">joe john <b>BLOW </b></div>");
 
 	}
 
@@ -116,8 +114,8 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		customGen.populateResourceNarrative(myCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString("Some beautiful proze"));
-		assertThat(output, StringContains.containsString("UNTRANSLATED:other_text"));
+		assertThat(output).contains("Some beautiful proze");
+		assertThat(output).contains("UNTRANSLATED:other_text");
 	}
 
 	@Test
@@ -133,7 +131,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString(value.getCode().getTextElement().getValue()));
+		assertThat(output).contains(value.getCode().getTextElement().getValue());
 	}
 
 	@Test
@@ -199,7 +197,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>"));
+		assertThat(output).contains("<div class=\"hapiHeaderText\"> Some &amp; Diagnostic Report </div>");
 
 	}
 
@@ -263,7 +261,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu3Test {
 		String output = value.getText().getDiv().getValueAsString();
 
 		ourLog.info(output);
-		assertThat(output, StringContains.containsString("<div class=\"hapiHeaderText\"> Untitled Diagnostic Report </div>"));
+		assertThat(output).contains("<div class=\"hapiHeaderText\"> Untitled Diagnostic Report </div>");
 
 	}
 

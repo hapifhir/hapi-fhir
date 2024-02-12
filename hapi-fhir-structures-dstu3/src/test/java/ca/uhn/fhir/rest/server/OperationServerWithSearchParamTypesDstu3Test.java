@@ -44,8 +44,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -176,22 +174,22 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 		//@formatter:off
-		assertThat(conf, stringContainsInOrder(
+		assertThat(conf).contains(
 			"<type value=\"Patient\"/>",
-			"<operation>", 
+			"<operation>",
 			"<name value=\"andlist\"/>",
-			"</operation>" 
-		));
-		assertThat(conf, stringContainsInOrder(
+			"</operation>"
+		);
+		assertThat(conf).contains(
 			"<type value=\"Patient\"/>",
-			"<operation>", 
+			"<operation>",
 			"<name value=\"nonrepeating\"/>"
-		));
-		assertThat(conf, stringContainsInOrder(
+		);
+		assertThat(conf).contains(
 			"<type value=\"Patient\"/>",
-			"<operation>", 
+			"<operation>",
 			"<name value=\"orlist\"/>"
-		));
+		);
 		//@formatter:on
 		
 		/*
@@ -201,64 +199,64 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		String def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
-		assertThat(def, stringContainsInOrder(
-			"<parameter>", 
-			"<name value=\"valtok\"/>", 
-			"<use value=\"in\"/>", 
-			"<min value=\"0\"/>", 
-			"<max value=\"10\"/>", 
-			"<type value=\"string\"/>", 
-			"<searchType value=\"token\"/>", 
+		assertThat(def).contains(
+			"<parameter>",
+			"<name value=\"valtok\"/>",
+			"<use value=\"in\"/>",
+			"<min value=\"0\"/>",
+			"<max value=\"10\"/>",
+			"<type value=\"string\"/>",
+			"<searchType value=\"token\"/>",
 			"</parameter>"
-		));
+		);
 		//@formatter:on
 		
 		andListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-andlist-withnomax"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
-		assertThat(def, stringContainsInOrder(
-			"<parameter>", 
-			"<name value=\"valtok\"/>", 
-			"<use value=\"in\"/>", 
-			"<min value=\"0\"/>", 
-			"<max value=\"*\"/>", 
-			"<type value=\"string\"/>", 
-			"<searchType value=\"token\"/>", 
+		assertThat(def).contains(
+			"<parameter>",
+			"<name value=\"valtok\"/>",
+			"<use value=\"in\"/>",
+			"<min value=\"0\"/>",
+			"<max value=\"*\"/>",
+			"<type value=\"string\"/>",
+			"<searchType value=\"token\"/>",
 			"</parameter>"
-		));
+		);
 		//@formatter:on
 
 		OperationDefinition orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-orlist"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(orListDef);
 		ourLog.info(def);
 		//@formatter:off
-		assertThat(def, stringContainsInOrder(
-			"<parameter>", 
-			"<name value=\"valtok\"/>", 
-			"<use value=\"in\"/>", 
-			"<min value=\"0\"/>", 
-			"<max value=\"10\"/>", 
-			"<type value=\"string\"/>", 
-			"<searchType value=\"token\"/>", 
+		assertThat(def).contains(
+			"<parameter>",
+			"<name value=\"valtok\"/>",
+			"<use value=\"in\"/>",
+			"<min value=\"0\"/>",
+			"<max value=\"10\"/>",
+			"<type value=\"string\"/>",
+			"<searchType value=\"token\"/>",
 			"</parameter>"
-		));
+		);
 		//@formatter:on
 		
 		orListDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-t-orlist-withnomax"), createRequestDetails(rs));
 		def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(orListDef);
 		ourLog.info(def);
 		//@formatter:off
-		assertThat(def, stringContainsInOrder(
-			"<parameter>", 
-			"<name value=\"valtok\"/>", 
-			"<use value=\"in\"/>", 
-			"<min value=\"0\"/>", 
-			"<max value=\"*\"/>", 
-			"<type value=\"string\"/>", 
-			"<searchType value=\"token\"/>", 
+		assertThat(def).contains(
+			"<parameter>",
+			"<name value=\"valtok\"/>",
+			"<use value=\"in\"/>",
+			"<min value=\"0\"/>",
+			"<max value=\"*\"/>",
+			"<type value=\"string\"/>",
+			"<searchType value=\"token\"/>",
 			"</parameter>"
-		));
+		);
 		//@formatter:on
 
 	}

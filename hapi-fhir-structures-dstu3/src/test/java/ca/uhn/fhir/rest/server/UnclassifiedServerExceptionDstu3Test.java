@@ -22,8 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 
 public class UnclassifiedServerExceptionDstu3Test {
 
@@ -56,7 +54,7 @@ public class UnclassifiedServerExceptionDstu3Test {
 			ourLog.info(responseContent);
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(477);
 			//assertEquals("SOME MESSAGE", status.getStatusLine().getReasonPhrase());
-			assertThat(responseContent, stringContainsInOrder("business-rule"));
+			assertThat(responseContent).contains("business-rule");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
