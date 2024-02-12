@@ -20,7 +20,7 @@ package ca.uhn.fhir.cr.dstu3.plandefinition;
  * #L%
  */
 
-import ca.uhn.fhir.cr.dstu3.IPlanDefinitionProcessorFactory;
+import ca.uhn.fhir.cr.common.IPlanDefinitionProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -37,13 +37,14 @@ import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PlanDefinitionApplyProvider {
 	@Autowired
-	IPlanDefinitionProcessorFactory myDstu3PlanDefinitionProcessorFactory;
+	IPlanDefinitionProcessorFactory myPlanDefinitionProcessorFactory;
 
 	/**
 	 * Implements the <a href=
@@ -101,12 +102,11 @@ public class PlanDefinitionApplyProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myDstu3PlanDefinitionProcessorFactory
+		return myPlanDefinitionProcessorFactory
 				.create(theRequestDetails)
 				.apply(
-						theId,
-						new StringType(theCanonical),
-						thePlanDefinition,
+						Eithers.for3(
+								theCanonical == null ? null : new StringType(theCanonical), theId, thePlanDefinition),
 						theSubject,
 						theEncounter,
 						thePractitioner,
@@ -117,7 +117,7 @@ public class PlanDefinitionApplyProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData == null ? true : theUseServerData.booleanValue(),
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
 						theData,
 						null,
 						theDataEndpoint,
@@ -146,12 +146,11 @@ public class PlanDefinitionApplyProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myDstu3PlanDefinitionProcessorFactory
+		return myPlanDefinitionProcessorFactory
 				.create(theRequestDetails)
 				.apply(
-						null,
-						new StringType(theCanonical),
-						thePlanDefinition,
+						Eithers.for3(
+								theCanonical == null ? null : new StringType(theCanonical), null, thePlanDefinition),
 						theSubject,
 						theEncounter,
 						thePractitioner,
@@ -162,7 +161,7 @@ public class PlanDefinitionApplyProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData == null ? true : theUseServerData.booleanValue(),
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
 						theData,
 						null,
 						theDataEndpoint,

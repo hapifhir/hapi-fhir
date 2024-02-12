@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.cr.dstu3.questionnaire;
 
-import ca.uhn.fhir.cr.dstu3.IQuestionnaireProcessorFactory;
+import ca.uhn.fhir.cr.common.IQuestionnaireProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -29,11 +29,12 @@ import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.Questionnaire;
 import org.hl7.fhir.dstu3.model.StringType;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class QuestionnairePackageProvider {
 	@Autowired
-	IQuestionnaireProcessorFactory myDstu3QuestionnaireProcessorFactory;
+	IQuestionnaireProcessorFactory myQuestionnaireProcessorFactory;
 
 	/**
 	 * Implements a $package operation following the <a href=
@@ -52,9 +53,11 @@ public class QuestionnairePackageProvider {
 			@OperationParam(name = "canonical") String theCanonical,
 			@OperationParam(name = "usePut") String theIsPut,
 			RequestDetails theRequestDetails) {
-		return (Bundle) myDstu3QuestionnaireProcessorFactory
+		return (Bundle) myQuestionnaireProcessorFactory
 				.create(theRequestDetails)
-				.packageQuestionnaire(theId, new StringType(theCanonical), null, Boolean.parseBoolean(theIsPut));
+				.packageQuestionnaire(
+						Eithers.for3(theCanonical == null ? null : new StringType(theCanonical), theId, null),
+						Boolean.parseBoolean(theIsPut));
 	}
 
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
@@ -62,8 +65,10 @@ public class QuestionnairePackageProvider {
 			@OperationParam(name = "canonical") String theCanonical,
 			@OperationParam(name = "usePut") String theIsPut,
 			RequestDetails theRequestDetails) {
-		return (Bundle) myDstu3QuestionnaireProcessorFactory
+		return (Bundle) myQuestionnaireProcessorFactory
 				.create(theRequestDetails)
-				.packageQuestionnaire(null, new StringType(theCanonical), null, Boolean.parseBoolean(theIsPut));
+				.packageQuestionnaire(
+						Eithers.for3(theCanonical == null ? null : new StringType(theCanonical), null, null),
+						Boolean.parseBoolean(theIsPut));
 	}
 }

@@ -20,7 +20,7 @@ package ca.uhn.fhir.cr.r4.questionnaire;
  * #L%
  */
 
-import ca.uhn.fhir.cr.r4.IQuestionnaireProcessorFactory;
+import ca.uhn.fhir.cr.common.IQuestionnaireProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Endpoint;
@@ -35,11 +36,12 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class QuestionnairePopulateProvider {
 	@Autowired
-	IQuestionnaireProcessorFactory myR4QuestionnaireProcessorFactory;
+	IQuestionnaireProcessorFactory myQuestionnaireProcessorFactory;
 
 	/**
 	 * Implements a modified version of the <a href=
@@ -55,6 +57,7 @@ public class QuestionnairePopulateProvider {
 	 * @param theSubject             The subject(s) that is/are the target of the Questionnaire.
 	 * @param theParameters          Any input parameters defined in libraries referenced by the Questionnaire.
 	 * @param theBundle              Data to be made available during CQL evaluation.
+	 * @param theUseServerData       Whether to use data from the server performing the evaluation.
 	 * @param theDataEndpoint        An endpoint to use to access data referenced by retrieve operations in libraries
 	 *                               referenced by the Questionnaire.
 	 * @param theContentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the Questionnaire.
@@ -72,20 +75,23 @@ public class QuestionnairePopulateProvider {
 			@OperationParam(name = "subject") String theSubject,
 			@OperationParam(name = "parameters") Parameters theParameters,
 			@OperationParam(name = "bundle") Bundle theBundle,
+			@OperationParam(name = "useServerData") BooleanType theUseServerData,
 			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
 			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myR4QuestionnaireProcessorFactory
+		var monad =
+				Eithers.for3(theCanonical == null ? null : new CanonicalType(theCanonical), theId, theQuestionnaire);
+		return myQuestionnaireProcessorFactory
 				.create(theRequestDetails)
 				.prePopulate(
-						theId,
-						new CanonicalType(theCanonical),
-						theQuestionnaire,
+						Eithers.for3(
+								theCanonical == null ? null : new CanonicalType(theCanonical), theId, theQuestionnaire),
 						theSubject,
 						theParameters,
 						theBundle,
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
 						theDataEndpoint,
 						theContentEndpoint,
 						theTerminologyEndpoint);
@@ -98,20 +104,21 @@ public class QuestionnairePopulateProvider {
 			@OperationParam(name = "subject") String theSubject,
 			@OperationParam(name = "parameters") Parameters theParameters,
 			@OperationParam(name = "bundle") Bundle theBundle,
+			@OperationParam(name = "useServerData") BooleanType theUseServerData,
 			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
 			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myR4QuestionnaireProcessorFactory
+		return myQuestionnaireProcessorFactory
 				.create(theRequestDetails)
 				.prePopulate(
-						null,
-						new CanonicalType(theCanonical),
-						theQuestionnaire,
+						Eithers.for3(
+								theCanonical == null ? null : new CanonicalType(theCanonical), null, theQuestionnaire),
 						theSubject,
 						theParameters,
 						theBundle,
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
 						theDataEndpoint,
 						theContentEndpoint,
 						theTerminologyEndpoint);
@@ -129,6 +136,7 @@ public class QuestionnairePopulateProvider {
 	 * @param theSubject             The subject(s) that is/are the target of the Questionnaire.
 	 * @param theParameters          Any input parameters defined in libraries referenced by the Questionnaire.
 	 * @param theBundle              Data to be made available during CQL evaluation.
+	 * @param theUseServerData       Whether to use data from the server performing the evaluation.
 	 * @param theDataEndpoint        An endpoint to use to access data referenced by retrieve operations in libraries
 	 *                               referenced by the Questionnaire.
 	 * @param theContentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the Questionnaire.
@@ -146,20 +154,21 @@ public class QuestionnairePopulateProvider {
 			@OperationParam(name = "subject") String theSubject,
 			@OperationParam(name = "parameters") Parameters theParameters,
 			@OperationParam(name = "bundle") Bundle theBundle,
+			@OperationParam(name = "useServerData") BooleanType theUseServerData,
 			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
 			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return (QuestionnaireResponse) myR4QuestionnaireProcessorFactory
+		return (QuestionnaireResponse) myQuestionnaireProcessorFactory
 				.create(theRequestDetails)
 				.populate(
-						theId,
-						new CanonicalType(theCanonical),
-						theQuestionnaire,
+						Eithers.for3(
+								theCanonical == null ? null : new CanonicalType(theCanonical), theId, theQuestionnaire),
 						theSubject,
 						theParameters,
 						theBundle,
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
 						theDataEndpoint,
 						theContentEndpoint,
 						theTerminologyEndpoint);
@@ -172,20 +181,21 @@ public class QuestionnairePopulateProvider {
 			@OperationParam(name = "subject") String theSubject,
 			@OperationParam(name = "parameters") Parameters theParameters,
 			@OperationParam(name = "bundle") Bundle theBundle,
+			@OperationParam(name = "useServerData") BooleanType theUseServerData,
 			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
 			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return (QuestionnaireResponse) myR4QuestionnaireProcessorFactory
+		return (QuestionnaireResponse) myQuestionnaireProcessorFactory
 				.create(theRequestDetails)
 				.populate(
-						null,
-						new CanonicalType(theCanonical),
-						theQuestionnaire,
+						Eithers.for3(
+								theCanonical == null ? null : new CanonicalType(theCanonical), null, theQuestionnaire),
 						theSubject,
 						theParameters,
 						theBundle,
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
 						theDataEndpoint,
 						theContentEndpoint,
 						theTerminologyEndpoint);

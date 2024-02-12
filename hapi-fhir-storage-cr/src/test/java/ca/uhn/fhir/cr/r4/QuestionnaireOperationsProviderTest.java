@@ -28,7 +28,7 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 		var theSubject = "positive";
 		var parameters = new Parameters().addParameter("Service Request Id", "SleepStudy").addParameter("Service Request Id", "SleepStudy2");
 		var result = myQuestionnairePopulateProvider.populate(new IdType("Questionnaire", "ASLPA1"),
-			null, null, theSubject, parameters,
+			null, null, theSubject, parameters, null,
 			null, null, null, null,
 			requestDetails);
 
@@ -45,7 +45,7 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 		var theSubject = "positive";
 		var parameters = new Parameters().addParameter("Service Request Id", "SleepStudy").addParameter("Service Request Id", "SleepStudy2");
 		var result = myQuestionnairePopulateProvider.prepopulate(new IdType("Questionnaire", "ASLPA1"),
-			null, null, theSubject, parameters,
+			null, null, theSubject, parameters, null,
 			null, null, null, null,
 			requestDetails);
 

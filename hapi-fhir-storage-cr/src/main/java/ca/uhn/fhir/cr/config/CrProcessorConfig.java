@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.config.dstu3;
+package ca.uhn.fhir.cr.config;
 
 import ca.uhn.fhir.cr.common.IRepositoryFactory;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
@@ -27,30 +27,30 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CrProcessorConfig {
 	@Bean
-	ca.uhn.fhir.cr.dstu3.IActivityDefinitionProcessorFactory dstu3ActivityDefinitionProcessorFactory(
+	ca.uhn.fhir.cr.common.IActivityDefinitionProcessorFactory activityDefinitionProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.fhir.cr.activitydefinition.dstu3.ActivityDefinitionProcessor(
+		return rd -> new org.opencds.cqf.fhir.cr.activitydefinition.ActivityDefinitionProcessor(
 				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
 	@Bean
-	ca.uhn.fhir.cr.dstu3.IPlanDefinitionProcessorFactory dstu3PlanDefinitionProcessorFactory(
+	ca.uhn.fhir.cr.common.IPlanDefinitionProcessorFactory planDefinitionProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.fhir.cr.plandefinition.dstu3.PlanDefinitionProcessor(
+		return rd -> new org.opencds.cqf.fhir.cr.plandefinition.PlanDefinitionProcessor(
 				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
 	@Bean
-	ca.uhn.fhir.cr.dstu3.IQuestionnaireProcessorFactory dstu3QuestionnaireProcessorFactory(
+	ca.uhn.fhir.cr.common.IQuestionnaireProcessorFactory questionnaireProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.fhir.cr.questionnaire.dstu3.processor.QuestionnaireProcessor(
+		return rd -> new org.opencds.cqf.fhir.cr.questionnaire.QuestionnaireProcessor(
 				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 
 	@Bean
-	ca.uhn.fhir.cr.dstu3.IQuestionnaireResponseProcessorFactory dstu3QuestionnaireResponseProcessorFactory(
+	ca.uhn.fhir.cr.common.IQuestionnaireResponseProcessorFactory questionnaireResponseProcessorFactory(
 			IRepositoryFactory theRepositoryFactory, EvaluationSettings theEvaluationSettings) {
-		return rd -> new org.opencds.cqf.fhir.cr.questionnaireresponse.dstu3.QuestionnaireResponseProcessor(
+		return rd -> new org.opencds.cqf.fhir.cr.questionnaireresponse.QuestionnaireResponseProcessor(
 				theRepositoryFactory.create(rd), theEvaluationSettings);
 	}
 }

@@ -20,7 +20,7 @@ package ca.uhn.fhir.cr.dstu3.questionnaireresponse;
  * #L%
  */
 
-import ca.uhn.fhir.cr.dstu3.IQuestionnaireResponseProcessorFactory;
+import ca.uhn.fhir.cr.common.IQuestionnaireResponseProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -31,11 +31,14 @@ import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Parameters;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class QuestionnaireResponseExtractProvider {
 	@Autowired
-	IQuestionnaireResponseProcessorFactory myDstu3QuestionnaireResponseProcessorFactory;
+	IQuestionnaireResponseProcessorFactory myQuestionnaireResponseProcessorFactory;
 
 	/**
 	 * Implements the <a href=
@@ -53,20 +56,24 @@ public class QuestionnaireResponseExtractProvider {
 	public IBaseBundle extract(
 			@IdParam IdType theId,
 			@OperationParam(name = "questionnaire-response") QuestionnaireResponse theQuestionnaireResponse,
+			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "bundle") Bundle theBundle,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myDstu3QuestionnaireResponseProcessorFactory
+		return myQuestionnaireResponseProcessorFactory
 				.create(theRequestDetails)
-				.extract(theId, theQuestionnaireResponse, null, null, null);
+				.extract(Eithers.for2(theId, theQuestionnaireResponse), theParameters, theBundle);
 	}
 
 	@Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
 	public IBaseBundle extract(
 			@OperationParam(name = "questionnaire-response") QuestionnaireResponse theQuestionnaireResponse,
+			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "bundle") Bundle theBundle,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myDstu3QuestionnaireResponseProcessorFactory
+		return myQuestionnaireResponseProcessorFactory
 				.create(theRequestDetails)
-				.extract(null, theQuestionnaireResponse, null, null, null);
+				.extract(Eithers.for2(null, theQuestionnaireResponse), theParameters, theBundle);
 	}
 }

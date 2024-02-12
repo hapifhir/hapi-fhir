@@ -117,12 +117,12 @@ public class ProviderConstants {
 	public static final String CR_OPERATION_EVALUATE = "$evaluate";
 	public static final String CR_OPERATION_CQL = "$cql";
 	public static final String CR_OPERATION_APPLY = "$apply";
-
 	public static final String CR_OPERATION_R5_APPLY = "$r5.apply";
 	public static final String CR_OPERATION_PREPOPULATE = "$prepopulate";
 	public static final String CR_OPERATION_POPULATE = "$populate";
 	public static final String CR_OPERATION_EXTRACT = "$extract";
 	public static final String CR_OPERATION_PACKAGE = "$package";
+	public static final String CR_OPERATION_QUESTIONNAIRE = "$questionnaire";
 
 	/**
 	 * Operation name for the $meta operation

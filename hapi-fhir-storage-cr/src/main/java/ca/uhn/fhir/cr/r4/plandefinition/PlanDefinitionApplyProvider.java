@@ -20,7 +20,7 @@ package ca.uhn.fhir.cr.r4.plandefinition;
  * #L%
  */
 
-import ca.uhn.fhir.cr.r4.IPlanDefinitionProcessorFactory;
+import ca.uhn.fhir.cr.common.IPlanDefinitionProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -29,14 +29,22 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CanonicalType;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Endpoint;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.PlanDefinition;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PlanDefinitionApplyProvider {
 	@Autowired
-	IPlanDefinitionProcessorFactory myR4PlanDefinitionProcessorFactory;
+	IPlanDefinitionProcessorFactory myPlanDefinitionProcessorFactory;
 
 	/**
 	 * Implements the <a href=
@@ -96,12 +104,13 @@ public class PlanDefinitionApplyProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myR4PlanDefinitionProcessorFactory
+		return myPlanDefinitionProcessorFactory
 				.create(theRequestDetails)
 				.apply(
-						theId,
-						new CanonicalType(theCanonical),
-						thePlanDefinition,
+						Eithers.for3(
+								theCanonical == null ? null : new CanonicalType(theCanonical),
+								theId,
+								thePlanDefinition),
 						theSubject,
 						theEncounter,
 						thePractitioner,
@@ -112,7 +121,7 @@ public class PlanDefinitionApplyProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData == null ? true : theUseServerData.booleanValue(),
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
 						theData,
 						null,
 						theDataEndpoint,
@@ -141,12 +150,11 @@ public class PlanDefinitionApplyProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myR4PlanDefinitionProcessorFactory
+		return myPlanDefinitionProcessorFactory
 				.create(theRequestDetails)
 				.apply(
-						null,
-						new CanonicalType(theCanonical),
-						thePlanDefinition,
+						Eithers.for3(
+								theCanonical == null ? null : new CanonicalType(theCanonical), null, thePlanDefinition),
 						theSubject,
 						theEncounter,
 						thePractitioner,
@@ -157,7 +165,7 @@ public class PlanDefinitionApplyProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData == null ? true : theUseServerData.booleanValue(),
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
 						theData,
 						null,
 						theDataEndpoint,
@@ -223,12 +231,13 @@ public class PlanDefinitionApplyProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myR4PlanDefinitionProcessorFactory
+		return myPlanDefinitionProcessorFactory
 				.create(theRequestDetails)
 				.applyR5(
-						theId,
-						new CanonicalType(theCanonical),
-						thePlanDefinition,
+						Eithers.for3(
+								theCanonical == null ? null : new CanonicalType(theCanonical),
+								theId,
+								thePlanDefinition),
 						theSubject,
 						theEncounter,
 						thePractitioner,
@@ -239,7 +248,7 @@ public class PlanDefinitionApplyProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData == null ? true : theUseServerData.booleanValue(),
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
 						theData,
 						null,
 						theDataEndpoint,
@@ -268,12 +277,11 @@ public class PlanDefinitionApplyProvider {
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myR4PlanDefinitionProcessorFactory
+		return myPlanDefinitionProcessorFactory
 				.create(theRequestDetails)
 				.applyR5(
-						null,
-						new CanonicalType(theCanonical),
-						thePlanDefinition,
+						Eithers.for3(
+								theCanonical == null ? null : new CanonicalType(theCanonical), null, thePlanDefinition),
 						theSubject,
 						theEncounter,
 						thePractitioner,
@@ -284,7 +292,7 @@ public class PlanDefinitionApplyProvider {
 						theSetting,
 						theSettingContext,
 						theParameters,
-						theUseServerData == null ? true : theUseServerData.booleanValue(),
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
 						theData,
 						null,
 						theDataEndpoint,

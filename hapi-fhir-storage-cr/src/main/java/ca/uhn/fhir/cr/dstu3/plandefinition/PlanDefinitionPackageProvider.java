@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.cr.dstu3.plandefinition;
 
-import ca.uhn.fhir.cr.dstu3.IPlanDefinitionProcessorFactory;
+import ca.uhn.fhir.cr.common.IPlanDefinitionProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -31,11 +31,12 @@ import org.hl7.fhir.dstu3.model.PlanDefinition;
 import org.hl7.fhir.dstu3.model.StringType;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class PlanDefinitionPackageProvider {
 	@Autowired
-	IPlanDefinitionProcessorFactory mydstu3PlanDefinitionProcessorFactory;
+	IPlanDefinitionProcessorFactory myPlanDefinitionProcessorFactory;
 
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = PlanDefinition.class)
 	public IBaseBundle packagePlanDefinition(
@@ -44,9 +45,11 @@ public class PlanDefinitionPackageProvider {
 			@OperationParam(name = "usePut") String theIsPut,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return mydstu3PlanDefinitionProcessorFactory
+		return myPlanDefinitionProcessorFactory
 				.create(theRequestDetails)
-				.packagePlanDefinition(theId, new StringType(theCanonical), null, Boolean.parseBoolean(theIsPut));
+				.packagePlanDefinition(
+						Eithers.for3(theCanonical == null ? null : new StringType(theCanonical), theId, null),
+						Boolean.parseBoolean(theIsPut));
 	}
 
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = PlanDefinition.class)
@@ -56,12 +59,13 @@ public class PlanDefinitionPackageProvider {
 			@OperationParam(name = "usePut") String theIsPut,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return mydstu3PlanDefinitionProcessorFactory
+		return myPlanDefinitionProcessorFactory
 				.create(theRequestDetails)
 				.packagePlanDefinition(
-						new IdType("PlanDefinition", theId),
-						new StringType(theCanonical),
-						null,
+						Eithers.for3(
+								theCanonical == null ? null : new StringType(theCanonical),
+								theId == null ? null : new IdType(theId),
+								null),
 						Boolean.parseBoolean(theIsPut));
 	}
 }
