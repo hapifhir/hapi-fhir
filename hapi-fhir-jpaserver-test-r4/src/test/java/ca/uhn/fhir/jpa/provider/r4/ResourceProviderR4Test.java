@@ -7423,7 +7423,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		private static final String SYSTEM = "http://acme.org/fhir/identifier/mrn";
 		private static final String VALUE = "123456";
 		private IIdType myPatientId;
-		private IIdType myObservationId;
 
 		@BeforeEach
 		void beforeEach() {
@@ -7439,7 +7438,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			observation.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://loinc.org").setCode("15074-8").setDisplay("Glucose [Moles/volume] in Blood")));
 			observation.setSubject(new Reference(myPatientId.toUnqualifiedVersionless()).setIdentifier(new Identifier().setSystem(SYSTEM).setValue(VALUE)));
 
-			myObservationId = myClient.create().resource(observation).execute().getResource().getIdElement();
+			myClient.create().resource(observation).execute().getResource().getIdElement();
 		}
 
 		@Test

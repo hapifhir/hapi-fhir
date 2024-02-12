@@ -1965,24 +1965,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					Msg.code(984) + "Searching with _contained mode enabled is not enabled on this server");
 		}
 
-		ourLog.info(
-				"5071: request complete URL: {}",
-				Optional.ofNullable(theRequest)
-						.map(RequestDetails::getCompleteUrl)
-						.orElse(null));
-		ourLog.info("5071: PRE-translate params: {}", theParams);
 		translateListSearchParams(theParams);
-		ourLog.info("5071: POST-translate params: {}", theParams);
-
-		/*
-		 * 5071: request complete URL: http://localhost:8000/Observation?subject%3Aidentifier=226
-		 * 5071: PRE-translate params: SearchParameterMap[params={subject=[[ReferenceParam[value=226]]]}]
-		 * 5071: POST-translate params: SearchParameterMap[params={subject=[[ReferenceParam[value=226]]]}
-		 *
-		 * 5071: request complete URL: http://localhost:8000/Observation?subject%3Aidentifier=http%3A//acme.org/fhir/identifier/mrn%7C123456
-		 * 5071: PRE-translate params: SearchParameterMap[params={subject=[[ReferenceParam[value=http://acme.org/fhir/identifier/mrn|123456]]]}]
-		 * 5071: POST-translate params: SearchParameterMap[params={subject=[[ReferenceParam[value=http://acme.org/fhir/identifier/mrn|123456]]]}
-		 */
 
 		setOffsetAndCount(theParams, theRequest);
 

@@ -738,26 +738,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		/*
 		 * Now perform the search
 		 */
-		// LUKETODO:  identifier ID query:  SELECT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 WHERE ((t0.SRC_PATH = ?) AND
-		// (t0.TARGET_RESOURCE_ID = ?)) fetch first ? rows only
-		/*
-		0 = "Observation.subject"
-		1 = {Long@39335} 226
-		2 = {Integer@39278} 14
-		 */
-
-		// LUKETODO:  identifier identifier query: SELECT t0.SRC_RESOURCE_ID FROM HFJ_RES_LINK t0 INNER JOIN
-		// HFJ_RESOURCE t1 ON (t0.SRC_RESOURCE_ID = t1.RES_ID) WHERE ((t1.RES_TYPE = ?) AND (t1.RES_DELETED_AT IS NULL))
-		// fetch first ? rows only
-		/*
-		0 = "Observation"
-		1 = {Integer@37794} 14
-		 */
-
 		GeneratedSql generatedSql = sqlBuilder.generate(theOffset, myMaxResultsToFetch);
-
-		ourLog.info("SQL:\n[{}]\nparams:\n{}", generatedSql.getSql(), generatedSql.getBindVariables());
-
 		if (!generatedSql.isMatchNothing()) {
 			SearchQueryExecutor executor =
 					mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);
