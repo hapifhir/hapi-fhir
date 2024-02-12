@@ -118,14 +118,7 @@ import java.util.TreeSet;
 import static ca.uhn.fhir.test.utilities.CustomMatchersUtil.assertDoesNotContainAnyOf;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.assertj.core.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
 
@@ -1297,15 +1290,16 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLastUpdated(new DateRangeParam(beforeAny, beforeR2));
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients.toString(), patients, not(hasItem(id2)));
-			assertThat(patients.toString(), patients, (hasItems(id1a, id1b)));
+			assertThat(patients).doesNotContain(id2);
+			assertThat(patients).contains(id1a, id1b);
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLastUpdated(new DateRangeParam(null, beforeR2));
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, (hasItems(id1a, id1b)));
-			assertThat(patients, not(hasItem(id2)));
+			assertThat(patients).contains(id1a, id1b);
+			assertThat(patients).doesNotContain(id2);
+
 		}
 
 
@@ -1314,14 +1308,14 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			params.setLastUpdated(new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, beforeR2)));
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
 			CustomMatchersUtil.assertDoesNotContainAnyOf(patients, List.of(id1a, id1b));
-			assertThat(patients, (hasItems(id2)));
+			assertThat(patients).contains(id2);
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
 			params.setLastUpdated(new DateRangeParam(new DateParam(ParamPrefixEnum.LESSTHAN_OR_EQUALS, beforeR2)));
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, (hasItems(id1a, id1b)));
-			assertThat(patients, not(hasItem(id2)));
+			assertThat(patients).contains(id1a, id1b);
+			assertThat(patients).doesNotContain(id2);
 		}
 
 	}
@@ -1558,7 +1552,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		params.setLoadSynchronous(true);
 		params.add(Patient.SP_FAMILY, new StringParam(name));
 		patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-		assertThat(patients, not(hasItem(id)));
+		assertThat(patients).doesNotContain(id);
 
 	}
 
@@ -1961,7 +1955,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		params.add(Patient.SP_FAMILY, new StringParam("HELLO"));
 		patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
 		assertThat(patients).containsExactlyInAnyOrder(pid1);
-		assertThat(patients, not(hasItem(pid2)));
+		assertThat(patients).doesNotContain(pid2);
+
 	}
 
 	@Test
@@ -2053,7 +2048,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		IBundleProvider found = myPatientDao.search(params);
 		assertThat(toList(found)).hasSize(1);
 		assertThat(toUnqualifiedVersionlessIds(found)).containsExactly(longId);
-		assertThat(toUnqualifiedVersionlessIds(found), not(hasItem(shortId)));
+		assertThat(toUnqualifiedVersionlessIds(found)).doesNotContain(shortId);
 
 	}
 
@@ -2752,8 +2747,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			param.setMissing(false);
 			params.add(Patient.SP_BIRTHDATE, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, containsInRelativeOrder(notMissing));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
+			assertThat(patients).contains(notMissing);
+			assertThat(patients).doesNotContain(missing);
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -2762,8 +2757,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			param.setMissing(true);
 			params.add(Patient.SP_BIRTHDATE, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, containsInRelativeOrder(missing));
-			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+			assertThat(patients).contains(missing);
+			assertThat(patients).doesNotContain(notMissing);
 		}
 	}
 
@@ -2810,8 +2805,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			param.setMissing(false);
 			params.add(Observation.SP_VALUE_QUANTITY, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
-			assertThat(patients, containsInRelativeOrder(notMissing));
+			assertThat(patients).contains(notMissing);
+			assertThat(patients).doesNotContain(missing);
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -2820,8 +2815,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			param.setMissing(true);
 			params.add(Observation.SP_VALUE_QUANTITY, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
-			assertThat(patients, containsInRelativeOrder(missing));
-			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+			assertThat(patients).contains(missing);
+			assertThat(patients).doesNotContain(notMissing);
 		}
 	}
 
@@ -2851,8 +2846,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			param.setMissing(false);
 			params.add(Patient.SP_ORGANIZATION, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
-			assertThat(patients, containsInRelativeOrder(notMissing));
+			assertThat(patients).contains(notMissing);
+			assertThat(patients).doesNotContain(missing);
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -2861,9 +2856,9 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			param.setMissing(true);
 			params.add(Patient.SP_ORGANIZATION, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, containsInRelativeOrder(missing));
-			assertThat(patients, not(containsInRelativeOrder(notMissing)));
-			assertThat(patients, not(containsInRelativeOrder(orgId)));
+			assertThat(patients).contains(missing);
+			assertThat(patients).doesNotContain(notMissing);
+			assertThat(patients).doesNotContain(orgId);
 		}
 	}
 
@@ -2893,8 +2888,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			param.setMissing(false);
 			params.add(Patient.SP_FAMILY, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, not(containsInRelativeOrder(missing)));
-			assertThat(patients, containsInRelativeOrder(notMissing));
+			assertThat(patients).contains(notMissing);
+			assertThat(patients).doesNotContain(missing);
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -2903,8 +2898,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			param.setMissing(true);
 			params.add(Patient.SP_FAMILY, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myPatientDao.search(params));
-			assertThat(patients, containsInRelativeOrder(missing));
-			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+			assertThat(patients).contains(missing);
+			assertThat(patients).doesNotContain(notMissing);
 		}
 	}
 
@@ -3108,7 +3103,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			params.add("_tag", new TokenParam("urn:taglist", methodName + "1a").setModifier(TokenParamModifier.NOT));
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myOrganizationDao.search(params));
 			assertThat(patients).containsExactlyInAnyOrder(tag2id);
-			assertThat(patients, not(hasItem(tag1id)));
+			assertThat(patients).doesNotContain(tag1id);
 		}
 		{
 			// Non existant tag
@@ -3151,8 +3146,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			myCaptureQueriesListener.clear();
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread(0);
-			assertThat(patients, not(containsInRelativeOrder(missing)));
-			assertThat(patients, containsInRelativeOrder(notMissing));
+			assertThat(patients).doesNotContain(missing);
+			assertThat(patients).contains(notMissing);
 		}
 		{
 			SearchParameterMap params = new SearchParameterMap();
@@ -3161,8 +3156,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			param.setMissing(true);
 			params.add(Observation.SP_CODE, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
-			assertThat(patients, containsInRelativeOrder(missing));
-			assertThat(patients, not(containsInRelativeOrder(notMissing)));
+			assertThat(patients).doesNotContain(missing);
+			assertThat(patients).contains(notMissing);
 		}
 	}
 
@@ -3566,12 +3561,12 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(1);
 		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
 		String unformattedSql = myCaptureQueriesListener.getUpdateQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(unformattedSql, stringContainsInOrder(
+		assertThat(unformattedSql).contains(
 			"SRC_PATH='Observation.performer'",
 			"SRC_RESOURCE_ID='" + obsId.getIdPart() + "'",
 			"TARGET_RESOURCE_ID='" + prId.getIdPart() + "'",
 			"TARGET_RESOURCE_TYPE='Practitioner'"
-		));
+		);
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 	}
 

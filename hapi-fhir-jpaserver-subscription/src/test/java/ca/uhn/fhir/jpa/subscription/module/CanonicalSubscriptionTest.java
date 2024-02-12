@@ -9,7 +9,6 @@ import ca.uhn.fhir.util.HapiExtensions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.assertj.core.util.Lists;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
