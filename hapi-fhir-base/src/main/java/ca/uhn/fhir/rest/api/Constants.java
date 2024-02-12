@@ -318,7 +318,7 @@ public class Constants {
 	public static final String PARAMQUALIFIER_TOKEN_ABOVE = ":above";
 	public static final String PARAMQUALIFIER_TOKEN_BELOW = ":below";
 
-	public static final List<String> VALID_MODIFIERS = List.of(
+	public static final List<String> VALID_MODIFIERS = Collections.unmodifiableList(Arrays.asList(
 			PARAMQUALIFIER_STRING_CONTAINS,
 			PARAMQUALIFIER_STRING_EXACT,
 			PARAMQUALIFIER_TOKEN_IN,
@@ -326,7 +326,7 @@ public class Constants {
 			PARAMQUALIFIER_MISSING,
 			PARAMQUALIFIER_TOKEN_NOT_IN,
 			PARAMQUALIFIER_TOKEN_OF_TYPE,
-			PARAMQUALIFIER_TOKEN_TEXT);
+			PARAMQUALIFIER_TOKEN_TEXT));
 	/**
 	 * The number of characters in a UUID (36)
 	 */

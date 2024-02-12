@@ -265,7 +265,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 				.filter(mod -> mod.contains(":"))
 				.filter(mod -> !VALID_MODIFIERS.contains(mod))
 				.distinct()
-				.collect(Collectors.toList());
+				.collect(Collectors.toUnmodifiableList());
 
 		if (!nonMatching.isEmpty()) {
 			final String msg = getFhirContext()
