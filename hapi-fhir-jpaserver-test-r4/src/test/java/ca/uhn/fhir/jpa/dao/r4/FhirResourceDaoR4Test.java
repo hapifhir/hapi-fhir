@@ -59,8 +59,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.StringContains;
 import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -149,14 +147,8 @@ import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.greaterThan;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.assertj.core.api.Assertions.fail;
 
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
@@ -276,7 +268,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
 			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
-			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong()), not(greaterThan(0)));
+			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isLessThanOrEqualTo(0);
 		});
 	}
 
@@ -386,7 +378,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
 			assertTrue(tableOpt.isPresent());
 			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
-			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong()), not(greaterThan(0)));
+			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong())).isLessThanOrEqualTo(0);
 		});
 
 
@@ -461,7 +453,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		}
 		{
 			List<JpaPid> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
-			assertThat(JpaPid.toLongList(found), not(hasItem(id2.getIdPartAsLong())));
+			assertThat(JpaPid.toLongList(found)).doesNotContain(id2.getIdPartAsLong());
 		}
 	}
 
@@ -1236,7 +1228,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			myPatientDao.create(patient, mySrd);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), StringContains.containsString("99999 not found"));
+			assertThat(e.getMessage()).contains("99999 not found");
 		}
 
 	}
@@ -2431,7 +2423,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		IBundleProvider found = myPatientDao.search(new SearchParameterMap(Patient.SP_ORGANIZATION, new ReferenceParam("http://foo.com/identifier/1")).setLoadSynchronous(true));
 		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly(p1id);
-		assertThat(toUnqualifiedVersionlessIdValues(found), org.hamcrest.Matchers.not(org.hamcrest.Matchers.contains(p2id)));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).doesNotContain(p2id);
 	}
 
 	@Test

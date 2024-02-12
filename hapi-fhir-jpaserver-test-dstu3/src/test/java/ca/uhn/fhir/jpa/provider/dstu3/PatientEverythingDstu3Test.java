@@ -28,9 +28,6 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
 
 public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 
@@ -133,8 +130,8 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 		assertThat(actual).contains(encId2);
 		assertThat(actual).contains(myOrgId);
 		assertThat(actual).contains(myObsIds.toArray(new String[0]));
-		assertThat(actual, not(hasItem(myWrongPatId)));
-		assertThat(actual, not(hasItem(myWrongEnc1)));
+		assertThat(actual).doesNotContain(myWrongPatId);
+		assertThat(actual).doesNotContain(myWrongEnc1);
 	}
 
 	@Test
@@ -169,9 +166,8 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 		assertThat(actual).contains(encId2);
 		assertThat(actual).contains(myOrgId);
 		assertThat(actual).contains(myObsIds.toArray(new String[0]));
-		assertThat(actual, not(hasItem(myWrongPatId)));
-		assertThat(actual, not(hasItem(myWrongEnc1)));
-
+		assertThat(actual).doesNotContain(myWrongPatId);
+		assertThat(actual).doesNotContain(myWrongEnc1);
 	}
 
 	/**
@@ -197,8 +193,8 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 		assertThat(actual).contains(encId2);
 		assertThat(actual).contains(myOrgId);
 		assertThat(actual).contains(myObsIds.toArray(new String[0]));
-		assertThat(actual, not(hasItem(myWrongPatId)));
-		assertThat(actual, not(hasItem(myWrongEnc1)));
+		assertThat(actual).doesNotContain(myWrongPatId);
+		assertThat(actual).doesNotContain(myWrongEnc1);
 	}
 	
 	/**

@@ -195,18 +195,6 @@ import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsInRelativeOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasItems;
-import static org.hamcrest.Matchers.hasProperty;
-import static org.hamcrest.Matchers.lessThan;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.nullValue;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
@@ -386,9 +374,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			// then
 			assertThat(matched).hasSize(1);
-			assertThat(matched, hasItem(
-				hasProperty("uri", nullValue())
-			));
+			assertThat(matched).extracting(ResourceIndexedSearchParamUri::getUri).isNull();;
 		});
 	}
 
@@ -2031,25 +2017,6 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-	@Test
-	public void testContains() {
-		List<String> test = List.of("a", "b", "c");
-		String testString = "testAString";
-
-		//examined iterable must be of the same length as the specified collection of matchers
-		assertThat(test, not(contains("b"))); //replace with not(hasItem())
-
-		//examined Iterable yield at least one item that is matched
-		//it can contain "a", but it doesn't contain "d" so this passes
-		//really does "do not have one of these"
-		assertThat(test, not(hasItems("a", "d"))); //replace with individual calls to not(hasItem())
-		//MatchersUtil.assertDoesNotContainAnyOf(test, List.of("a", "d"));
-
-		//examined iterable must be of the same length as the specified collection of matchers
-		assertThat(test, not(containsInAnyOrder("a", "b"))); //replace with indiv calls to not(hasItem())
-	}
-
-
 	/**
 	 * See #872
 	 */
@@ -2959,7 +2926,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
 			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(resp, stringContainsInOrder("THIS IS THE DESC"));
+			assertThat(resp).contains("THIS IS THE DESC");
 		}
 	}
 
@@ -4027,8 +3994,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.execute();
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
-			assertThat(patients.toString(), patients, not(hasItem(id2)));
-			assertThat(patients.toString(), patients, (hasItems(id1a, id1b)));
+			assertThat(patients).doesNotContain(id2);
+			assertThat(patients).contains(id1a, id1b);
 		}
 		{
 			//@formatter:off
@@ -4040,8 +4007,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.execute();
 			//@formatter:on
 			List<IIdType> patients = toUnqualifiedVersionlessIds(found);
-			assertThat(patients, (hasItems(id1a, id1b)));
-			assertThat(patients, not(hasItem(id2)));
+			assertThat(patients).doesNotContain(id2);
+			assertThat(patients).contains(id1a, id1b);
 		}
 	}
 
@@ -4085,7 +4052,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids).containsExactly(oid1);
-			assertThat(ids, not(hasItem(oid2)));
+			assertThat(ids).doesNotContain(oid2);
 		}
 
 	}
@@ -4377,7 +4344,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		//-- check use normalized quantity table to search
 		String searchSql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
 		assertThat(searchSql).doesNotContain("HFJ_SPIDX_QUANTITY t0");
-		assertThat(searchSql, (containsString("HFJ_SPIDX_QUANTITY_NRML")));
+		assertThat(searchSql).contains("HFJ_SPIDX_QUANTITY_NRML");
 	}
 
 	@Test
@@ -4731,7 +4698,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.count(1)
 			.execute();
 
-		assertThat(sw.getMillis(), not(lessThan(1000L)));
+		assertThat(sw.getMillis()).isGreaterThanOrEqualTo(1000L);
 
 		assertThat(found.getTotalElement().getValue().intValue()).isEqualTo(10);
 		assertThat(found.getEntry()).hasSize(1);
@@ -5132,9 +5099,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			List<IIdType> list = toUnqualifiedVersionlessIds(found);
 			ourLog.info(methodName + ": " + list.toString());
 			ourLog.info("Wanted " + orgNotMissing + " and not " + deletedIdMissingFalse + " but got " + list.size() + ": " + list);
-			assertThat("Wanted " + orgNotMissing + " but got " + list.size() + ": " + list, list, containsInRelativeOrder(orgNotMissing));
-			assertThat(list, not(containsInRelativeOrder(deletedIdMissingFalse)));
-			assertThat(list, not(containsInRelativeOrder(orgMissing)));
+			assertThat(list).contains(orgNotMissing);
+			assertThat(list).doesNotContain(deletedIdMissingFalse);
+			assertThat(list).doesNotContain(orgMissing);
 		}
 
 		//@formatter:off
@@ -5150,9 +5117,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		ourLog.info(methodName + " found: " + list.toString() + " - Wanted " + orgMissing + " but not " + orgNotMissing);
-		assertThat(list, not(containsInRelativeOrder(orgNotMissing)));
-		assertThat(list, not(containsInRelativeOrder(deletedIdMissingTrue)));
-		assertThat("Wanted " + orgMissing + " but found: " + list, list, containsInRelativeOrder(orgMissing));
+		assertThat(list).doesNotContain(orgNotMissing);
+		assertThat(list).doesNotContain(deletedIdMissingTrue);
+		assertThat(list).contains(orgMissing);
 	}
 
 	@Test
@@ -5185,7 +5152,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 			assertThat(ids).containsExactly(id1.getValue());
-			assertThat(ids, not(hasItem(id2.getValue())));
+			assertThat(ids).doesNotContain(id2.getValue());
 		}
 
 	}
@@ -6077,7 +6044,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(resp);
 			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertThat(resp, stringContainsInOrder("The JSON property 'name' is a duplicate and will be ignored"));
+			assertThat(resp).contains("The JSON property 'name' is a duplicate and will be ignored");
 		} finally {
 			response.getEntity().getContent().close();
 			response.close();
@@ -6211,9 +6178,11 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 			assertThat(resp).doesNotContain("Resource has no id");
 			assertThat(resp).contains("<td>No issues detected during validation</td>");
-			assertThat(resp,
-				stringContainsInOrder("<issue>", "<severity value=\"information\"/>", "<code value=\"informational\"/>", "<diagnostics value=\"No issues detected during validation\"/>",
-					"</issue>"));
+			assertThat(resp).contains(
+				"<issue>",
+				"<severity value=\"information\"/>", "<code value=\"informational\"/>",
+				"<diagnostics value=\"No issues detected during validation\"/>",
+				"</issue>");
 		} finally {
 			response.getEntity().getContent().close();
 			response.close();
@@ -6263,9 +6232,9 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			ourLog.info(resp);
 			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 			//@formatter:off
-			assertThat(resp, stringContainsInOrder(
+			assertThat(resp).contains(
 				"<code value=\"11378-7\"/>",
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
+				"<display value=\"Systolic blood pressure at First encounter\"/>");
 			//@formatter:on
 		} finally {
 			response.getEntity().getContent().close();

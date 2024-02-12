@@ -45,8 +45,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.hamcrest.Matchers;
-import org.hamcrest.core.StringContains;
 import org.hl7.fhir.dstu3.model.Age;
 import org.hl7.fhir.dstu3.model.Attachment;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -111,12 +109,6 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.fail;
 
 
@@ -237,7 +229,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		}
 		{
 			List<JpaPid> found = myObservationDao.searchForIds(new SearchParameterMap(Observation.SP_DATE, new DateParam(">2016-01-02")), null);
-			assertThat(JpaPid.toLongList(found), not(hasItem(id2.getIdPartAsLong())));
+			assertThat(JpaPid.toLongList(found)).doesNotContain(id2.getIdPartAsLong());
 		}
 	}
 
@@ -576,9 +568,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 					myMethodOutcome = myPatientDao.create(pat, mySrd);
 					myExpectedId = myMethodOutcome.getId().getIdPart();
 				}
-				assertEquals("Patient/" + myExpectedId,
-					myMethodOutcome.getId().toUnqualifiedVersionless().getValue(),
-					"the method returns the id");
+				assertThat(myMethodOutcome.getId().toUnqualifiedVersionless().getValue()).as("the method returns the id").isEqualTo("Patient/" + myExpectedId);
 
 				// saving another resource in the same tx was causing a version bump.
 				// leaving it here to make sure that bug doesn't come back.
@@ -875,7 +865,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			myPatientDao.create(patient, mySrd);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage(), StringContains.containsString("99999 not found"));
+			assertThat(e.getMessage()).contains("99999 not found");
 		}
 
 	}
@@ -1969,7 +1959,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		IBundleProvider found = myPatientDao.search(new SearchParameterMap(Patient.SP_ORGANIZATION, new ReferenceParam("http://foo.com/identifier/1")).setLoadSynchronous(true));
 		assertThat(toUnqualifiedVersionlessIdValues(found)).containsExactly(p1id);
-		assertThat(toUnqualifiedVersionlessIdValues(found), org.hamcrest.Matchers.not(org.hamcrest.Matchers.contains(p2id)));
+		assertThat(toUnqualifiedVersionlessIdValues(found)).doesNotContain(p2id);
 	}
 
 	@Test

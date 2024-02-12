@@ -83,9 +83,6 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.endsWith;
 import static org.assertj.core.api.Assertions.fail;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -921,8 +918,8 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertThat(respEntry.getResponse().getStatus()).isEqualTo(Constants.STATUS_HTTP_201_CREATED + " Created");
 		String patientId = respEntry.getResponse().getLocation();
 		assertThat(patientId).doesNotEndWith("Patient/" + methodName + "/_history/1");
-		assertThat(patientId, (endsWith("/_history/1")));
-		assertThat(patientId, (containsString("Patient/")));
+		assertThat(patientId).endsWith("/_history/1");
+		assertThat(patientId).contains("Patient/");
 		assertThat(respEntry.getResponse().getEtag()).isEqualTo("1");
 
 		respEntry = resp.getEntry().get(1);
@@ -2106,7 +2103,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		BundleEntryComponent nextEntry = resp.getEntry().get(0);
 		assertThat(nextEntry.getResponse().getStatus()).isEqualTo("200 OK");
 
-		assertThat(nextEntry.getResponse().getLocation(), (containsString("test")));
+		assertThat(nextEntry.getResponse().getLocation()).contains("test");
 		assertThat(new IdType(nextEntry.getResponse().getLocation()).toVersionless()).isEqualTo(id.toVersionless());
 		assertThat(new IdType(nextEntry.getResponse().getLocation())).isNotEqualTo(id);
 		assertThat(nextEntry.getResponse().getLocation()).endsWith("/_history/2");

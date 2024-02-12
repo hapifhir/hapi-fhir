@@ -36,7 +36,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
@@ -81,10 +80,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
-import static org.assertj.core.api.Assertions.fail;
 
 
 
@@ -141,7 +136,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
 				assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
-				assertThat(result.getOutput(), not(empty()));
+				assertThat(result.getOutput()).isNotEmpty();
 				String binary_url = result.getOutput().get(0).getUrl();
 				Binary binaryResource = myClient.read().resource(Binary.class).withUrl(binary_url).execute();
 
@@ -207,7 +202,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
 				assertThat(result.getRequiresAccessToken()).isEqualTo(true);
 				assertThat(result.getTransactionTime()).isNotNull();
-				assertThat(result.getOutput(), not(empty()));
+				assertThat(result.getOutput()).isNotEmpty();
 
 				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
 				assertThat(responseContent).contains("\"error\" : [ ]");
@@ -252,7 +247,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
 				assertThat(result.getRequiresAccessToken()).isEqualTo(true);
 				assertThat(result.getTransactionTime()).isNotNull();
-				assertThat(result.getOutput(), not(empty()));
+				assertThat(result.getOutput()).isNotEmpty();
 
 				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
 				assertThat(responseContent).contains("\"error\" : [ ]");
