@@ -155,7 +155,7 @@ jobs:
              releaseType: stable
         - task: Maven@3
           env:
-             JAVA_HOME_11_X64: /usr/java/openjdk
+             JAVA_HOME_11_X64: /opt/java/openjdk
           displayName: Checkstyle Build
           inputs:
              mavenPomFile: 'hapi-fhir-checkstyle/pom.xml'
