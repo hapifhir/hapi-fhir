@@ -1,0 +1,26 @@
+---
+type: add
+issue: 5682
+title: "Several enhancements have been made to the International Patient Summary generator based on
+  feedback from implementers:
+  <ul>
+  <li>
+     New methods have been added to the <code>IIpsGenerationStrategy</code> allowing resources
+     for any or all sections to be fetched from a source other than the FHIR repository.
+  </li>
+  <li>
+     The <code>IpsSectionEnum</code> class has been removed and replaced in any user-facing APIs
+     with references to <code>SectionRegistry.Section</code>. This makes it much easier to
+     extend or replace the section registry with custom sections not defined in the universal
+     IPS implementation guide.  
+  </li>
+  <li>
+     Captions have been removed from narrative section tables, and replaced with H5 tags
+     directly above the table. This results in an easier to read display since the table
+     title will appear above the table instead of below it. 
+  </li>
+  <li>
+     The IPS narrative generator built in templates will now omit tables when the template
+     specified multiple tables and the specific table would have no resources.
+  </li>
+  </ul>"
