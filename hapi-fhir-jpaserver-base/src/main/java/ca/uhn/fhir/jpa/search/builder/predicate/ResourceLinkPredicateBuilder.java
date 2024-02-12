@@ -206,7 +206,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 							targetQualifiedUrls.add(dt.getValue());
 						}
 					} else {
-						validModifierUse(theRequest, theResourceType);
+						validateModifierUse(theRequest, theResourceType);
 						validateResourceTypeInReferenceParam(ref.getResourceType());
 						targetIds.add(dt);
 					}
@@ -260,9 +260,11 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		}
 	}
 
-	private void validModifierUse(RequestDetails theRequest, String theResourceType) {
+	private void validateModifierUse(RequestDetails theRequest, String theResourceType) {
 		final Set<String> keys = theRequest.getParameters().keySet();
+		ourLog.info("5071: keys: {} completeUrl:\n{}", keys, theRequest.getCompleteUrl());
 		final List<String> nonMatching = theRequest.getParameters().keySet().stream()
+				.filter(mod -> mod.contains(":"))
 				.filter(mod -> !VALID_MODIFIERS.contains(mod))
 				.distinct()
 				.collect(Collectors.toUnmodifiableList());
