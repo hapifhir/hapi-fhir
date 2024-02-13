@@ -20,9 +20,9 @@ import java.util.stream.Collectors;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class NpmSearchR4Test extends BaseJpaR4Test {
+public class JpaPackageCacheSearchR4Test extends BaseJpaR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(NpmSearchR4Test.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaPackageCacheSearchR4Test.class);
 	@Autowired
 	public IPackageInstallerSvc igInstaller;
 	@Autowired

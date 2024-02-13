@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5642
+title: "A non-superuser with correct permissions encounters HAPI-0339 when POSTING a transaction Bundle with a PATCH.
+        This has been fixed."

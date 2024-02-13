@@ -28,13 +28,13 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.quartz.JobKey;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.core.env.Environment;
@@ -177,7 +177,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 		values.forEach(t -> t.scheduleJobs(this));
 	}
 
-	@EventListener(ContextClosedEvent.class)
+	@PreDestroy
 	public void stop() {
 		ourLog.info("Shutting down task scheduler...");
 

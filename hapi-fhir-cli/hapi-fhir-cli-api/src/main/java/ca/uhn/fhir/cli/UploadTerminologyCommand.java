@@ -36,6 +36,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.StringUtils;
@@ -268,7 +269,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 
 		byte[] bytes = theBytes;
 		String fileName = theFileName;
-		String suffix = fileName.substring(fileName.lastIndexOf("."));
+		String suffix = FilenameUtils.getExtension(fileName);
 
 		if (bytes.length > ourTransferSizeLimit) {
 			ourLog.info(

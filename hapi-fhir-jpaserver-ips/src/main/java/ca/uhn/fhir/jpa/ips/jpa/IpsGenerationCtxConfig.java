@@ -17,21 +17,9 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.jpa.ips.api;
+package ca.uhn.fhir.jpa.ips.jpa;
 
-public enum IpsSectionEnum {
-	ALLERGY_INTOLERANCE,
-	MEDICATION_SUMMARY,
-	PROBLEM_LIST,
-	IMMUNIZATIONS,
-	PROCEDURES,
-	MEDICAL_DEVICES,
-	DIAGNOSTIC_RESULTS,
-	VITAL_SIGNS,
-	ILLNESS_HISTORY,
-	PREGNANCY,
-	SOCIAL_HISTORY,
-	FUNCTIONAL_STATUS,
-	PLAN_OF_CARE,
-	ADVANCE_DIRECTIVES
-}
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class IpsGenerationCtxConfig {}

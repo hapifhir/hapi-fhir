@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5619
+jira: SMILE-7909
+title: "Previously, when a transaction was posted with a resource that had placeholder references and auto versioning 
+references enabled for that path, if the target resource was included in the Bundle but not modified, the reference was 
+saved with a version number that didn't exist. This has been fixed."

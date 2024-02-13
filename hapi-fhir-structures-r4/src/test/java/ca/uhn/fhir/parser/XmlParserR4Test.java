@@ -13,6 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.IOException;
 import java.net.URL;
 
+import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Bundle;
@@ -183,6 +184,19 @@ public class XmlParserR4Test extends BaseTest {
 		
 		assertEquals("12346", getPatientIdValue(bundle, 0));
 		assertEquals("12345", getPatientIdValue(bundle, 1));
+	}
+
+	@Test
+	public void testParseResource_withDecimalElementHasLeadingPlus_resourceParsedCorrectly() {
+		// setup
+		String text = ClasspathUtil.loadResource("observation-decimal-element-with-leading-plus.xml");
+
+		// execute
+		Observation observation = ourCtx.newXmlParser().parseResource(Observation.class, text);
+
+		// verify
+		assertEquals("-3.0", observation.getReferenceRange().get(0).getLow().getValueElement().getValueAsString());
+		assertEquals("3.0", observation.getReferenceRange().get(0).getHigh().getValueElement().getValueAsString());
 	}
 
 	private String getPatientIdValue(Bundle input, int entry) {

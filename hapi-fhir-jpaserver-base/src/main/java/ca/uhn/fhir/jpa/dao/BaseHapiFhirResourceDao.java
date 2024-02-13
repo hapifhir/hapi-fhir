@@ -151,6 +151,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -851,12 +852,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return deleteExpunge(theUrl, theRequest);
 		}
 
-		return myTransactionService.execute(theRequest, transactionDetails, tx -> {
-			DeleteConflictList deleteConflicts = new DeleteConflictList();
-			DeleteMethodOutcome outcome = deleteByUrl(theUrl, deleteConflicts, theRequest, transactionDetails);
-			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
-			return outcome;
-		});
+		return myTransactionService
+				.withRequest(theRequest)
+				.withTransactionDetails(transactionDetails)
+				.execute(tx -> {
+					DeleteConflictList deleteConflicts = new DeleteConflictList();
+					DeleteMethodOutcome outcome = deleteByUrl(theUrl, deleteConflicts, theRequest, transactionDetails);
+					DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
+					return outcome;
+				});
 	}
 
 	/**
@@ -871,10 +875,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			@Nonnull TransactionDetails theTransactionDetails) {
 		validateDeleteEnabled();
 
-		return myTransactionService.execute(
-				theRequestDetails,
-				theTransactionDetails,
-				tx -> doDeleteByUrl(theUrl, deleteConflicts, theTransactionDetails, theRequestDetails));
+		return myTransactionService
+				.withRequest(theRequestDetails)
+				.withTransactionDetails(theTransactionDetails)
+				.execute(tx -> doDeleteByUrl(theUrl, deleteConflicts, theTransactionDetails, theRequestDetails));
 	}
 
 	@Nonnull
@@ -900,6 +904,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 										"DELETE",
 										theUrl,
 										resourceIds.size()));
+			}
+			// TODO: LD: There is a still a bug on slow deletes:  https://github.com/hapifhir/hapi-fhir/issues/5675
+			final long threshold = getStorageSettings().getRestDeleteByUrlResourceIdThreshold();
+			if (resourceIds.size() > threshold) {
+				throw new PreconditionFailedException(Msg.code(2496)
+						+ getContext()
+								.getLocalizer()
+								.getMessageSanitized(
+										BaseStorageDao.class,
+										"deleteByUrlThresholdExceeded",
+										theUrl,
+										resourceIds.size(),
+										threshold));
 			}
 		}
 
@@ -1709,17 +1726,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (historyEntity.getEncoding() == ResourceEncodingEnum.JSONC
 				|| historyEntity.getEncoding() == ResourceEncodingEnum.JSON) {
 			byte[] resourceBytes = historyEntity.getResource();
-
-			// Always migrate data out of the bytes column
 			if (resourceBytes != null) {
 				String resourceText = decodeResource(resourceBytes, historyEntity.getEncoding());
-				ourLog.debug(
-						"Storing text of resource {} version {} as inline VARCHAR",
-						entity.getResourceId(),
-						historyEntity.getVersion());
-				historyEntity.setResourceTextVc(resourceText);
-				historyEntity.setEncoding(ResourceEncodingEnum.JSON);
-				changed = true;
+				if (myResourceHistoryCalculator.conditionallyAlterHistoryEntity(entity, historyEntity, resourceText)) {
+					changed = true;
+				}
 			}
 		}
 		if (isBlank(historyEntity.getSourceUri()) && isBlank(historyEntity.getRequestId())) {
@@ -1985,8 +1996,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private void translateListSearchParams(SearchParameterMap theParams) {
 
+		Set<Map.Entry<String, List<List<IQueryParameterType>>>> entryHashSet = new HashSet<>(theParams.entrySet());
+
 		// Translate _list=42 to _has=List:item:_id=42
-		for (String key : theParams.keySet()) {
+		for (Map.Entry<String, List<List<IQueryParameterType>>> stringListEntry : entryHashSet) {
+			String key = stringListEntry.getKey();
 			if (Constants.PARAM_LIST.equals((key))) {
 				List<List<IQueryParameterType>> andOrValues = theParams.get(key);
 				theParams.remove(key);
