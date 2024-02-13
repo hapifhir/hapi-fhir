@@ -384,14 +384,20 @@ public class QueryStack {
 					List<List<IQueryParameterType>> params = theParams.get(theParamName);
 					if (params != null && !params.isEmpty() && !params.get(0).isEmpty()) {
 						IQueryParameterType locationParam = params.get(0).get(0);
-						final SpecialParam specialParam = new SpecialParam().setValue(locationParam.getValueAsQueryToken(myFhirContext));
+						final SpecialParam specialParam =
+								new SpecialParam().setValue(locationParam.getValueAsQueryToken(myFhirContext));
 						ParsedLocationParam location = ParsedLocationParam.from(theParams, specialParam);
 						double latitudeValue = location.getLatitudeValue();
 						double longitudeValue = location.getLongitudeValue();
-						final CoordsPredicateBuilder coordsPredicateBuilder = mySqlBuilder.addCoordsPredicateBuilder(resourceLinkPredicateBuilder.getColumnTargetResourceId());
-						mySqlBuilder.addSortCoordsNear(coordsPredicateBuilder, latitudeValue, longitudeValue, theAscending);
+						final CoordsPredicateBuilder coordsPredicateBuilder = mySqlBuilder.addCoordsPredicateBuilder(
+								resourceLinkPredicateBuilder.getColumnTargetResourceId());
+						mySqlBuilder.addSortCoordsNear(
+								coordsPredicateBuilder, latitudeValue, longitudeValue, theAscending);
 					} else {
-						String msg = myFhirContext.getLocalizer().getMessageSanitized(QueryStack.class, "cantSortOnCoordParamWithoutValues", theParamName);
+						String msg = myFhirContext
+								.getLocalizer()
+								.getMessageSanitized(
+										QueryStack.class, "cantSortOnCoordParamWithoutValues", theParamName);
 						throw new InvalidRequestException(Msg.code(2497) + msg);
 					}
 					return;
