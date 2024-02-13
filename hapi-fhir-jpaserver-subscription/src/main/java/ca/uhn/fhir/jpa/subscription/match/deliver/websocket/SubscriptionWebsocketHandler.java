@@ -44,7 +44,7 @@ import java.io.IOException;
 import java.util.Optional;
 
 public class SubscriptionWebsocketHandler extends TextWebSocketHandler implements WebSocketHandler {
-	private static Logger ourLog = LoggerFactory.getLogger(SubscriptionWebsocketHandler.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionWebsocketHandler.class);
 
 	@Autowired
 	protected WebsocketConnectionValidator myWebsocketConnectionValidator;
@@ -120,17 +120,22 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 			myActiveSubscription = theActiveSubscription;
 
 			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers =
-				mySubscriptionChannelRegistry.getDeliveryReceiverChannel(theActiveSubscription.getChannelName());
+					mySubscriptionChannelRegistry.getDeliveryReceiverChannel(theActiveSubscription.getChannelName());
 			subscriptionChannelWithHandlers.addHandler(this);
 		}
 
 		@Override
 		public void closing() {
 			SubscriptionChannelWithHandlers subscriptionChannelWithHandlers =
-				mySubscriptionChannelRegistry.getDeliveryReceiverChannel(myActiveSubscription.getChannelName());
+					mySubscriptionChannelRegistry.getDeliveryReceiverChannel(myActiveSubscription.getChannelName());
 			subscriptionChannelWithHandlers.removeHandler(this);
 		}
 
+		/**
+		 * Send the payload to the client
+		 *
+		 * @param payload The payload
+		 */
 		private void deliver(String payload) {
 			try {
 				// Log it
@@ -163,16 +168,21 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 		 * @param msg The message
 		 */
 		private void handleSubscriptionPayload(ResourceDeliveryMessage msg) {
+			// Check if the subscription exists and is the same as the active subscription
 			if (!myActiveSubscription.getSubscription().equals(msg.getSubscription())) {
 				return;
 			}
 
-			String payload = null;
+			String defaultPayload = "ping " + myActiveSubscription.getId();
+			String payload = defaultPayload;
 
+			// Check if the subscription is a topic subscription
 			if (msg.getSubscription().isTopicSubscription()) {
-				payload = getPayloadByContent(msg).orElse("ping " + myActiveSubscription.getId());
+				// Get the payload by content
+				payload = getPayloadByContent(msg).orElse(defaultPayload);
 			}
 
+			// Deliver the payload
 			deliver(payload);
 		}
 
