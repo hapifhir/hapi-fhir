@@ -24,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -55,7 +56,6 @@ public class ResourceLinkPredicateBuilderTest {
 		DbSchema schema = new DbSchema(spec, "schema");
 		DbTable table = new DbTable(schema, "table");
 		when(mySearchQueryBuilder.addTable(Mockito.anyString())).thenReturn(table);
-		when(mySearchQueryBuilder.getFhirContext()).thenReturn(FhirContext.forR4Cached());
         myResourceLinkPredicateBuilder = new ResourceLinkPredicateBuilder(null, mySearchQueryBuilder, false);
 		myResourceLinkPredicateBuilder.setSearchParamRegistryForUnitTest(mySearchParamRegistry);
 		myResourceLinkPredicateBuilder.setIdHelperServiceForUnitTest(myIdHelperService);
@@ -83,22 +83,22 @@ public class ResourceLinkPredicateBuilderTest {
 
 	@Test
 	void validateInvalidModifiers() {
+		when(mySearchQueryBuilder.getFhirContext()).thenReturn(FhirContext.forR4Cached());
 		final ReferenceParam referenceParam = new ReferenceParam(new IdDt("Observation", "123"));
 		final List<IQueryParameterType> referenceOrParamList = List.of(referenceParam);
 		final SystemRequestDetails requestDetails = new SystemRequestDetails();
-		final Map<String, String[]> params =
-			Map.of("subject:identifier", new String[]{"1"},
-			"subject:x", new String[]{"2"},
-			"subject:y", new String[]{"3"},
-			"patient", new String[]{"4"});
-
+		final Map<String, String[]> params = new LinkedHashMap<>();
+		params.put("subject:identifier", new String[]{"1"});
+		params.put("subject:x", new String[]{"2"});
+		params.put("subject:y", new String[]{"3"});
+		params.put("patient", new String[]{"4"});
 		requestDetails.setParameters(params);
 
 		try {
 			myResourceLinkPredicateBuilder.createPredicate(requestDetails, "Observation", "", Collections.emptyList(), referenceOrParamList, null, RequestPartitionId.allPartitions());
 			fail();
 		} catch (Exception exception) {
-			assertEquals("HAPI-2498: Unsupported search modifier(s): \"[subject:y, subject:x, subject:identifier]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :text]", exception.getMessage());
+			assertEquals("HAPI-2498: Unsupported search modifier(s): \"[subject:identifier, subject:x, subject:y]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :text]", exception.getMessage());
 		}
 	}
 }
