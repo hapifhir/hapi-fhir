@@ -84,6 +84,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -261,11 +262,14 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	}
 
 	private void validateModifierUse(RequestDetails theRequest, String theResourceType) {
-		final List<String> nonMatching = theRequest.getParameters().keySet().stream()
-				.filter(mod -> mod.contains(":"))
-				.filter(mod -> !VALID_MODIFIERS.contains(mod))
-				.distinct()
-				.collect(Collectors.toUnmodifiableList());
+		final List<String> nonMatching = Optional.ofNullable(theRequest)
+				.map(RequestDetails::getParameters)
+				.map(params -> params.keySet().stream()
+						.filter(mod -> mod.contains(":"))
+						.filter(mod -> !VALID_MODIFIERS.contains(mod))
+						.distinct()
+						.collect(Collectors.toUnmodifiableList()))
+				.orElse(Collections.emptyList());
 
 		if (!nonMatching.isEmpty()) {
 			final String msg = getFhirContext()
