@@ -274,25 +274,25 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			getFhirContext().getResourceDefinition(resourceTypeFromRef);
 		} catch (DataFormatException e) {
 			final List<String> nonMatching = Optional.ofNullable(theRequest)
-				.map(RequestDetails::getParameters)
-				.map(params -> params.keySet().stream()
-					.filter(mod -> mod.contains(":"))
-					.map(MODIFIER_REPLACE_PATTERN::matcher)
-					.map(pattern -> pattern.replaceAll(":"))
-					.filter(mod -> !VALID_MODIFIERS.contains(mod))
-					.distinct()
-					.collect(Collectors.toUnmodifiableList()))
-				.orElse(Collections.emptyList());
+					.map(RequestDetails::getParameters)
+					.map(params -> params.keySet().stream()
+							.filter(mod -> mod.contains(":"))
+							.map(MODIFIER_REPLACE_PATTERN::matcher)
+							.map(pattern -> pattern.replaceAll(":"))
+							.filter(mod -> !VALID_MODIFIERS.contains(mod))
+							.distinct()
+							.collect(Collectors.toUnmodifiableList()))
+					.orElse(Collections.emptyList());
 
 			if (!nonMatching.isEmpty()) {
 				final String msg = getFhirContext()
-					.getLocalizer()
-					.getMessageSanitized(
-						SearchCoordinatorSvcImpl.class,
-						"invalidUseOfSearchIdentifier",
-						nonMatching,
-						theResourceType,
-						VALID_MODIFIERS);
+						.getLocalizer()
+						.getMessageSanitized(
+								SearchCoordinatorSvcImpl.class,
+								"invalidUseOfSearchIdentifier",
+								nonMatching,
+								theResourceType,
+								VALID_MODIFIERS);
 				throw new InvalidRequestException(Msg.code(2498) + msg);
 			}
 		}
