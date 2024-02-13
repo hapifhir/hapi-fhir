@@ -7459,7 +7459,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 					.execute();
 				fail();
 			} catch (InvalidRequestException exception) {
-				assertEquals("HTTP 400 Bad Request: HAPI-2498: Unsupported search modifier(s): \"[subject:identifier]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :text]", exception.getMessage());
+				assertEquals("HTTP 400 Bad Request: HAPI-2498: Unsupported search modifier(s): \"[:identifier]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]", exception.getMessage());
 			}
 		}
 	}

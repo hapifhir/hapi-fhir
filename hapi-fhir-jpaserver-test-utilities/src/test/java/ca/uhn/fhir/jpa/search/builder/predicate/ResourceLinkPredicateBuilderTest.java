@@ -84,7 +84,7 @@ public class ResourceLinkPredicateBuilderTest {
 	@Test
 	void validateInvalidModifiers() {
 		when(mySearchQueryBuilder.getFhirContext()).thenReturn(FhirContext.forR4Cached());
-		final ReferenceParam referenceParam = new ReferenceParam(new IdDt("Observation", "123"));
+		final ReferenceParam referenceParam = new ReferenceParam(new IdDt(":identifier", "123"));
 		final List<IQueryParameterType> referenceOrParamList = List.of(referenceParam);
 		final SystemRequestDetails requestDetails = new SystemRequestDetails();
 		final Map<String, String[]> params = new LinkedHashMap<>();
@@ -98,7 +98,7 @@ public class ResourceLinkPredicateBuilderTest {
 			myResourceLinkPredicateBuilder.createPredicate(requestDetails, "Observation", "", Collections.emptyList(), referenceOrParamList, null, RequestPartitionId.allPartitions());
 			fail();
 		} catch (Exception exception) {
-			assertEquals("HAPI-2498: Unsupported search modifier(s): \"[subject:identifier, subject:x, subject:y]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :text]", exception.getMessage());
+			assertEquals("HAPI-2498: Unsupported search modifier(s): \"[:identifier, :x, :y]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]", exception.getMessage());
 		}
 	}
 }

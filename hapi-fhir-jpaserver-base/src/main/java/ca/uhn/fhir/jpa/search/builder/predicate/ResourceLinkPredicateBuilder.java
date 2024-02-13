@@ -86,6 +86,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
@@ -96,6 +97,7 @@ import static org.apache.commons.lang3.StringUtils.trim;
 public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder implements ICanMakeMissingParamPredicate {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceLinkPredicateBuilder.class);
+	private static final Pattern MODIFIER_REPLACE_PATTERN = Pattern.compile(".*:");
 	private final DbColumn myColumnSrcType;
 	private final DbColumn myColumnSrcPath;
 	private final DbColumn myColumnTargetResourceId;
@@ -207,7 +209,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 							targetQualifiedUrls.add(dt.getValue());
 						}
 					} else {
-						validateModifierUse(theRequest, theResourceType);
+						validateModifierUse(theRequest, theResourceType, ref);
 						validateResourceTypeInReferenceParam(ref.getResourceType());
 						targetIds.add(dt);
 					}
@@ -261,26 +263,38 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		}
 	}
 
-	private void validateModifierUse(RequestDetails theRequest, String theResourceType) {
-		final List<String> nonMatching = Optional.ofNullable(theRequest)
+	private void validateModifierUse(RequestDetails theRequest, String theResourceType, ReferenceParam theRef) {
+		try {
+			final String resourceTypeFromRef = theRef.getResourceType();
+			if (StringUtils.isEmpty(resourceTypeFromRef)) {
+				return;
+			}
+			// TODO: LD: unless we do this, ResourceProviderR4Test#testSearchWithSlashes will fail due to its
+			// derived-from: syntax
+			getFhirContext().getResourceDefinition(resourceTypeFromRef);
+		} catch (DataFormatException e) {
+			final List<String> nonMatching = Optional.ofNullable(theRequest)
 				.map(RequestDetails::getParameters)
 				.map(params -> params.keySet().stream()
-						.filter(mod -> mod.contains(":"))
-						.filter(mod -> !VALID_MODIFIERS.contains(mod))
-						.distinct()
-						.collect(Collectors.toUnmodifiableList()))
+					.filter(mod -> mod.contains(":"))
+					.map(MODIFIER_REPLACE_PATTERN::matcher)
+					.map(pattern -> pattern.replaceAll(":"))
+					.filter(mod -> !VALID_MODIFIERS.contains(mod))
+					.distinct()
+					.collect(Collectors.toUnmodifiableList()))
 				.orElse(Collections.emptyList());
 
-		if (!nonMatching.isEmpty()) {
-			final String msg = getFhirContext()
+			if (!nonMatching.isEmpty()) {
+				final String msg = getFhirContext()
 					.getLocalizer()
 					.getMessageSanitized(
-							SearchCoordinatorSvcImpl.class,
-							"invalidUseOfSearchIdentifier",
-							nonMatching,
-							theResourceType,
-							VALID_MODIFIERS);
-			throw new InvalidRequestException(Msg.code(2498) + msg);
+						SearchCoordinatorSvcImpl.class,
+						"invalidUseOfSearchIdentifier",
+						nonMatching,
+						theResourceType,
+						VALID_MODIFIERS);
+				throw new InvalidRequestException(Msg.code(2498) + msg);
+			}
 		}
 	}
 
