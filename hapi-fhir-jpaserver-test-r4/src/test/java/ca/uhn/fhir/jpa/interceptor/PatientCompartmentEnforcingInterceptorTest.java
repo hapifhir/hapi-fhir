@@ -1,8 +1,8 @@
 package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
-import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.r4.model.Annotation;
@@ -12,28 +12,31 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class PatientCompartmentEnforcingInterceptorTest extends BaseJpaR4Test {
+public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProviderR4Test {
 
 	public static final int ALTERNATE_DEFAULT_ID = -1;
-	private PatientIdPartitionInterceptor mySvc;
 	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
-	private PatientCompartmentEnforcingInterceptor myUpdateCrossPartitionInterceptor;
 
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
+
+	@SpyBean
+	private PatientIdPartitionInterceptor mySvc;
+
+	@SpyBean
+	@Autowired
+	private PatientCompartmentEnforcingInterceptor myUpdateCrossPartitionInterceptor;
 
 	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
-		mySvc = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings);
 		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
-		myUpdateCrossPartitionInterceptor = new PatientCompartmentEnforcingInterceptor(
-			myFhirContext, mySearchParamExtractor);
 
 		myInterceptorRegistry.registerInterceptor(mySvc);
 		myInterceptorRegistry.registerInterceptor(myForceOffsetSearchModeInterceptor);

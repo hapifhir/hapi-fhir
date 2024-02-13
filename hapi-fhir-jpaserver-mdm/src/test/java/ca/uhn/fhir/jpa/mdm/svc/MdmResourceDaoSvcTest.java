@@ -19,6 +19,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import java.io.IOException;
 import java.util.List;
@@ -37,6 +38,9 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	IMdmResourceDaoSvc myResourceDaoSvc;
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
+
+	@SpyBean
+	private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
 
 	@Override
 	@AfterEach
@@ -104,9 +108,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
-
-		PatientIdPartitionInterceptor interceptor = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 
 		try {
 			StringOrListParam patientIds = new StringOrListParam();
@@ -154,7 +156,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			Patient patient = (Patient) result.getAllResources().get(0);
 			assertTrue(patient.getId().contains(firstId.getValue()));
 		} finally {
-			myInterceptorRegistry.unregisterInterceptor(interceptor);
+			myInterceptorRegistry.unregisterInterceptor(myPatientIdPartitionInterceptor);
 		}
 	}
 

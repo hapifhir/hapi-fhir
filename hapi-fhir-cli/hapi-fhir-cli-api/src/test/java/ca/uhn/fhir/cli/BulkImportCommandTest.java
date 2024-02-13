@@ -110,6 +110,7 @@ public class BulkImportCommandTest {
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json");
 
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
 		when(myJobCoordinator.startInstance(any(), any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
@@ -194,6 +195,7 @@ public class BulkImportCommandTest {
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json");
 
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
 		when(myJobCoordinator.startInstance(any(), any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread

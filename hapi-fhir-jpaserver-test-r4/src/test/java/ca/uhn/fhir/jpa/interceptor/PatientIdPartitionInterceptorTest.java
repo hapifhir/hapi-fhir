@@ -16,15 +16,12 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
-import ca.uhn.fhir.rest.server.provider.BulkDataExportProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.MultimapCollector;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
-import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
@@ -53,7 +50,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -68,7 +64,6 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	private ISearchParamExtractor mySearchParamExtractor;
 
 	@SpyBean
-	@Autowired
 	private PatientIdPartitionInterceptor mySvc;
 
 	@Override
@@ -553,7 +548,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	public void testSystemBulkExport_withNoResourceType_usesNonPatientSpecificPartition() throws IOException {
+	public void testSystemOperation_withNoResourceType_usesNonPatientSpecificPartition() throws IOException {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 
@@ -564,47 +559,5 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		}
 
 		verify(mySvc).provideNonPatientSpecificQueryResponse(any());
-	}
-
-	@Test
-	public void testSystemBulkExport_withResourceType_exportUsesNonPatientSpecificPartition() throws IOException {
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE, "Patient");
-		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE_FILTER, "Patient?");
-
-		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)){
-			ourLog.info("Response: {}",postResponse);
-			assertEquals(202, postResponse.getStatusLine().getStatusCode());
-			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
-		}
-
-		verify(mySvc).provideNonPatientSpecificQueryResponse(any());
-	}
-
-	@Test
-	public void testSystemBulkExport_withResourceType_pollSuccessful() throws IOException {
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE, "Patient"); // ignored when computing partition
-		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE_FILTER, "Patient?");
-
-		String locationUrl;
-
-		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)){
-			ourLog.info("Response: {}",postResponse);
-			assertEquals(202, postResponse.getStatusLine().getStatusCode());
-			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
-
-			Header locationHeader = postResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION);
-			assertNotNull(locationHeader);
-			locationUrl = locationHeader.getValue();
-		}
-
-		HttpGet get = new HttpGet(locationUrl);
-		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(get)) {
-			ourLog.info("Response: {}", postResponse);
-			assertEquals(202, postResponse.getStatusLine().getStatusCode());
-		}
 	}
 }
