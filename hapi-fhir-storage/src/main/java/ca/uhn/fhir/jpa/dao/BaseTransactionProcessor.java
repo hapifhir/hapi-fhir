@@ -1940,12 +1940,12 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Extracts the transaction url from the entry and verifies it's:
-     * * not null or blank
-     * * is a relative url matching the resourceType it is about
-     * <p>
-     * Returns the transaction url (or throws an InvalidRequestException if url is not valid)
-     */
+	 * Extracts the transaction url from the entry and verifies it's:
+	 * * not null or blank
+	 * * is a relative url matching the resourceType it is about
+	 * <p>
+	 * Returns the transaction url (or throws an InvalidRequestException if url is not valid)
+	 */
 	private String extractAndVerifyTransactionUrlForEntry(IBase theEntry, String theVerb) {
 		String url = extractTransactionUrlOrThrowException(theEntry, theVerb);
 
@@ -1959,12 +1959,12 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Returns true if the provided url is a valid entry request.url.
-     * <p>
-     * This means:
-     * a) not an absolute url (does not start with http/https)
-     * b) starts with either a ResourceType or /ResourceType
-     */
+	 * Returns true if the provided url is a valid entry request.url.
+	 * <p>
+	 * This means:
+	 * a) not an absolute url (does not start with http/https)
+	 * b) starts with either a ResourceType or /ResourceType
+	 */
 	private boolean isValidResourceTypeUrl(@Nonnull String theUrl) {
 		if (UrlUtil.isAbsolute(theUrl)) {
 			return false;
@@ -1989,9 +1989,9 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Extracts the transaction url from the entry and verifies that it is not null/blank
-     * and returns it
-     */
+	 * Extracts the transaction url from the entry and verifies that it is not null/blank
+	 * and returns it
+	 */
 	private String extractTransactionUrlOrThrowException(IBase nextEntry, String verb) {
 		String url = myVersionAdapter.getEntryRequestUrl(nextEntry);
 		if (isBlank(url)) {
@@ -2043,14 +2043,14 @@ public abstract class BaseTransactionProcessor {
 	}
 
 	/**
-     * Transaction Order, per the spec:
-     * <p>
-     * Process any DELETE interactions
-     * Process any POST interactions
-     * Process any PUT interactions
-     * Process any PATCH interactions
-     * Process any GET interactions
-     */
+	 * Transaction Order, per the spec:
+	 * <p>
+	 * Process any DELETE interactions
+	 * Process any POST interactions
+	 * Process any PUT interactions
+	 * Process any PATCH interactions
+	 * Process any GET interactions
+	 */
 	// @formatter:off
 	public class TransactionSorter implements Comparator<IBase> {
 

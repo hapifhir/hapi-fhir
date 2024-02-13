@@ -693,7 +693,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		Bundle outputBundle = mySystemDao.transaction(mySrd, inputBundle);
 
-		assertThat(outputBundle.getEntry().get(0).getResponse().getLocation(), matchesPattern("AAAAA"));
+		assertThat(outputBundle.getEntry().get(0).getResponse().getLocation(), matchesPattern("Patient/[0-9]+/_history/1"));
 	}
 
 
