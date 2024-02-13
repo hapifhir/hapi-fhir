@@ -296,7 +296,8 @@ public class QueryStack {
 			String theReferenceTargetType,
 			String theParamName,
 			String theChain,
-			boolean theAscending) {
+			boolean theAscending,
+			SearchParameterMap theParams) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		ResourceLinkPredicateBuilder resourceLinkPredicateBuilder = mySqlBuilder.createReferencePredicateBuilder(this);
 
@@ -378,13 +379,31 @@ public class QueryStack {
 				 * sort on a target that was a reference or a quantity, but if someone needed
 				 * that we could implement it here.
 				 */
+			case SPECIAL: {
+				if (LOCATION_POSITION.equals(targetSearchParameter.getPath())) {
+					List<List<IQueryParameterType>> params = theParams.get(theParamName);
+					if (params != null && !params.isEmpty() && !params.get(0).isEmpty()) {
+						IQueryParameterType locationParam = params.get(0).get(0);
+						final SpecialParam specialParam = new SpecialParam().setValue(locationParam.getValueAsQueryToken(myFhirContext));
+						ParsedLocationParam location = ParsedLocationParam.from(theParams, specialParam);
+						double latitudeValue = location.getLatitudeValue();
+						double longitudeValue = location.getLongitudeValue();
+						final CoordsPredicateBuilder coordsPredicateBuilder = mySqlBuilder.addCoordsPredicateBuilder(resourceLinkPredicateBuilder.getColumnTargetResourceId());
+						mySqlBuilder.addSortCoordsNear(coordsPredicateBuilder, latitudeValue, longitudeValue, theAscending);
+					} else {
+						String msg = myFhirContext.getLocalizer().getMessageSanitized(QueryStack.class, "cantSortOnCoordParamWithoutValues", theParamName);
+						throw new InvalidRequestException(Msg.code(2497) + msg);
+					}
+					return;
+				}
+			}
 			case NUMBER:
 			case REFERENCE:
 			case COMPOSITE:
 			case QUANTITY:
 			case URI:
 			case HAS:
-			case SPECIAL:
+
 			default:
 				throw new InvalidRequestException(Msg.code(2290) + "Unable to sort on a chained parameter "
 						+ theParamName + "." + theChain + " as this parameter. Can not sort on chains of target type: "
