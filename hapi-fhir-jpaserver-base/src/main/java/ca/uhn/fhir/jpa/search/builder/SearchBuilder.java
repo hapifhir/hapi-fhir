@@ -932,7 +932,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					break;
 				case REFERENCE:
 					theQueryStack.addSortOnResourceLink(
-							myResourceName, referenceTargetType, paramName, chainName, ascending);
+							myResourceName, referenceTargetType, paramName, chainName, ascending, theParams);
 					break;
 				case TOKEN:
 					theQueryStack.addSortOnToken(myResourceName, paramName, ascending);
