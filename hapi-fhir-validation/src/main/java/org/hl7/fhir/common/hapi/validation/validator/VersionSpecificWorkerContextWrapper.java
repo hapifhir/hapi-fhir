@@ -220,7 +220,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	private List<StructureDefinition> allStructures() {
 
+		// LUKETODO: is this the source of the problem?
 		List<StructureDefinition> retVal = myAllStructures;
+		ourLog.info("5167: myAllStructures NON-NULL {}", (myAllStructures != null));
 		if (retVal == null) {
 			retVal = new ArrayList<>();
 			for (IBaseResource next :

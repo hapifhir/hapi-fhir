@@ -7423,4 +7423,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			);
 		}
 	}
+
+	@Test
+	void structDefCache() {
+		final Patient patient = new Patient();
+		patient.setMeta(new Meta().addProfile("https://www.esante.lu/fhir-spec/StructureDefinition/FTCommunication"));
+		final MethodOutcome execute = myClient.create().resource(patient).execute();
+
+
+	}
 }

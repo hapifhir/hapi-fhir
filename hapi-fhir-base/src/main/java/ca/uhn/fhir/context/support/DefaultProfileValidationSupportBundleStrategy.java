@@ -227,6 +227,8 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 				url = URL_PREFIX_STRUCTURE_DEFINITION_BASE + url;
 			}
 		}
+		// LUKETODO:  it doesn't make a difference what we do with the cache because by the time we get here, we're retrieving a Map that doesn't contain the
+		// latest StructureDefinition
 		Map<String, IBaseResource> structureDefinitionMap = provideStructureDefinitionMap();
 		IBaseResource retVal = structureDefinitionMap.get(url);
 		if (retVal == null) {

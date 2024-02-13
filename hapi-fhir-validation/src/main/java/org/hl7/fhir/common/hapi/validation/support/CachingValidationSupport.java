@@ -104,6 +104,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	@Override
 	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
 		String key = "fetchAllStructureDefinitions";
+		// LUKETODO:  this is called on the first call to validate the Patient
 		return loadFromCacheWithAsyncRefresh(myCache, key, t -> super.fetchAllStructureDefinitions());
 	}
 
@@ -143,6 +144,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 
 	@Override
 	public <T extends IBaseResource> T fetchResource(@Nullable Class<T> theClass, String theUri) {
+		// LUKETODO:  this is called on the second call to validate the patient
 		return loadFromCache(
 				myCache, "fetchResource " + theClass + " " + theUri, t -> super.fetchResource(theClass, theUri));
 	}
@@ -251,8 +253,13 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		ourLog.trace("Fetching from cache: {}", theKey);
 
 		Function<S, Optional<T>> loaderWrapper = key -> Optional.ofNullable(theLoader.apply(theKey));
+		// LUKETODO:  this is where we add the Optional.empty() to the cache for the meta profile URL:  this happens DEEP with the Caffeine cache
 		Optional<T> result = (Optional<T>) theCache.get(theKey, loaderWrapper);
 		assert result != null;
+
+		if (result.isEmpty()) {
+			theCache.invalidate(theKey);
+		}
 
 		return result.orElse(null);
 	}
@@ -295,6 +302,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		}
 
 		retVal = loadFromCache(theCache, theKey, theLoader);
+		// LUKETODO:  for the first call, retVal has all the entries except for the URL we're looking for
 		myNonExpiringCache.put(theKey, retVal);
 		return retVal;
 	}
