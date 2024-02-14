@@ -173,6 +173,7 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 				return;
 			}
 
+			// Default payload
 			String defaultPayload = "ping " + myActiveSubscription.getId();
 			String payload = defaultPayload;
 
