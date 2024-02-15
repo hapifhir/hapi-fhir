@@ -34,8 +34,14 @@ public interface IRequestPartitionHelperSvc {
 
 	@Nonnull
 	RequestPartitionId determineReadPartitionForRequest(
-			@Nonnull RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails);
+			@Nullable RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails);
 
+	/**
+	 * Determine partition to use when performing a server operation such as $bulk-import, $bulk-export, $reindex etc.
+	 * @param theRequest the request details from the context of the call
+	 * @param theOperationName the explicit name of the operation
+	 * @return the partition id which should be used for the operation
+	 */
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForServerOperation(
 			@Nullable RequestDetails theRequest, @Nonnull String theOperationName) {
@@ -43,33 +49,59 @@ public interface IRequestPartitionHelperSvc {
 		return determineReadPartitionForRequest(theRequest, details);
 	}
 
+	/**
+	 * Determine partition to use when performing database reads based on a resource instance.
+	 * @param theRequest the request details from the context of the call
+	 * @param theId the id of the resource instance
+	 * @return the partition id which should be used for the database read
+	 */
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForRead(
-			@Nonnull RequestDetails theRequest, @Nonnull IIdType theId) {
+			@Nullable RequestDetails theRequest, @Nonnull IIdType theId) {
 		ReadPartitionIdRequestDetails details =
 				ReadPartitionIdRequestDetails.forRead(theId.getResourceType(), theId, theId.hasVersionIdPart());
 		return determineReadPartitionForRequest(theRequest, details);
 	}
 
+	/**
+	 * Determine partition to use when performing database reads against a certain resource type based on a resource instance.
+	 * @param theRequest the request details from the context of the call
+	 * @param theResourceType the resource type
+	 * @param theId the id of the resource instance
+	 * @return the partition id which should be used for the database read
+	 */
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForRead(
-			@Nonnull RequestDetails theRequest, @Nonnull String theResourceType, @Nonnull IIdType theId) {
+			@Nullable RequestDetails theRequest, @Nonnull String theResourceType, @Nonnull IIdType theId) {
 		ReadPartitionIdRequestDetails details =
 				ReadPartitionIdRequestDetails.forRead(theResourceType, theId, theId.hasVersionIdPart());
 		return determineReadPartitionForRequest(theRequest, details);
 	}
 
+	/**
+	 * Determine partition to use when performing a database search against a certain resource type.
+	 * @param theRequest the request details from the context of the call
+	 * @param theResourceType the resource type
+	 * @return the partition id which should be used for the database search
+	 */
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForSearchType(
-			@Nonnull RequestDetails theRequest, @Nonnull String theResourceType) {
+			@Nullable RequestDetails theRequest, @Nonnull String theResourceType) {
 		ReadPartitionIdRequestDetails details =
 				ReadPartitionIdRequestDetails.forSearchType(theResourceType, SearchParameterMap.newSynchronous(), null);
 		return determineReadPartitionForRequest(theRequest, details);
 	}
 
+	/**
+	 * Determine partition to use when performing a database search based on a resource type and other search parameters.
+	 * @param theRequest the request details from the context of the call
+	 * @param theResourceType the resource type
+	 * @param theParams the search parameters
+	 * @return the partition id which should be used for the database search
+	 */
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForSearchType(
-			@Nonnull RequestDetails theRequest,
+			@Nullable RequestDetails theRequest,
 			@Nonnull String theResourceType,
 			@Nonnull SearchParameterMap theParams) {
 		ReadPartitionIdRequestDetails details =
@@ -77,9 +109,17 @@ public interface IRequestPartitionHelperSvc {
 		return determineReadPartitionForRequest(theRequest, details);
 	}
 
+	/**
+	 * Determine partition to use when performing a database search based on a resource type, search parameters and a conditional target resource (if available).
+	 * @param theRequest the request details from the context of the call
+	 * @param theResourceType the resource type
+	 * @param theParams the search parameters
+	 * @param theConditionalOperationTargetOrNull the conditional target resource
+	 * @return the partition id which should be used for the database search
+	 */
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForSearchType(
-			@Nonnull RequestDetails theRequest,
+			@Nullable RequestDetails theRequest,
 			@Nonnull String theResourceType,
 			@Nonnull SearchParameterMap theParams,
 			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
@@ -90,9 +130,16 @@ public interface IRequestPartitionHelperSvc {
 
 	RequestPartitionId determineGenericPartitionForRequest(RequestDetails theRequestDetails);
 
+	/**
+	 * Determine partition to use when performing the history operation based on a resource type and resource instance.
+	 * @param theRequest the request details from the context of the call
+	 * @param theResourceType the resource type
+	 * @param theIdType the id of the resource instance
+	 * @return the partition id which should be used for the history operation
+	 */
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForHistory(
-			@Nonnull RequestDetails theRequest, String theResourceType, IIdType theIdType) {
+			@Nullable RequestDetails theRequest, String theResourceType, IIdType theIdType) {
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(theResourceType, theIdType);
 		return determineReadPartitionForRequest(theRequest, details);
 	}
@@ -102,7 +149,7 @@ public interface IRequestPartitionHelperSvc {
 
 	@Nonnull
 	RequestPartitionId determineCreatePartitionForRequest(
-			@Nonnull RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType);
+			@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType);
 
 	@Nonnull
 	Set<Integer> toReadPartitions(@Nonnull RequestPartitionId theRequestPartitionId);

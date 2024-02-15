@@ -94,10 +94,10 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 	@Nonnull
 	@Override
 	public RequestPartitionId determineReadPartitionForRequest(
-			@Nullable RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails) {
+			@Nullable RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails) {
 		RequestPartitionId requestPartitionId;
 
-		String resourceType = theDetails != null ? theDetails.getResourceType() : null;
+		String resourceType = theDetails.getResourceType();
 		boolean nonPartitionableResource = !isResourcePartitionable(resourceType);
 		if (myPartitionSettings.isPartitioningEnabled()) {
 
@@ -313,7 +313,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 	@Override
 	public void validateHasPartitionPermissions(
-			RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
+		@Nonnull RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
 		if (myInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_SELECTED)) {
 			RuntimeResourceDefinition runtimeResourceDefinition = null;
 			if (theResourceType != null) {
