@@ -188,6 +188,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		IBaseResource fetched = myLoadCache.get(key, t -> doFetchResource(theClass, theUri));
 
 		if (fetched == myNoMatch) {
+			myLoadCache.invalidate(key);
 			return null;
 		}
 

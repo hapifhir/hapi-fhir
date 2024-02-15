@@ -254,6 +254,12 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		Optional<T> result = (Optional<T>) theCache.get(theKey, loaderWrapper);
 		assert result != null;
 
+		// LUKETODO:  this is new code:
+		if (result.isEmpty()) {
+			ourLog.info("5167: INVALIDATED!");
+			theCache.invalidate(theKey);
+		}
+
 		return result.orElse(null);
 	}
 
