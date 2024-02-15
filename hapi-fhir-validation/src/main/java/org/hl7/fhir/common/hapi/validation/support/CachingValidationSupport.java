@@ -80,6 +80,8 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		myValidateCodeCache = CacheFactory.build(theCacheTimeouts.getValidateCodeMillis(), 5000);
 		myLookupCodeCache = CacheFactory.build(theCacheTimeouts.getLookupCodeMillis(), 5000);
 		myTranslateCodeCache = CacheFactory.build(theCacheTimeouts.getTranslateCodeMillis(), 5000);
+		ourLog.info("5167: myCache timeout millis: {}", theCacheTimeouts.getMiscMillis());
+		// LUKETODO:  there's a bug in master where a cache set to 10 minutes expires after 1 minute
 		myCache = CacheFactory.build(theCacheTimeouts.getMiscMillis(), 5000);
 		myNonExpiringCache = Collections.synchronizedMap(new HashMap<>());
 
@@ -105,6 +107,7 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	public <T extends IBaseResource> List<T> fetchAllStructureDefinitions() {
 		String key = "fetchAllStructureDefinitions";
 		// LUKETODO:  this is called on the first call to validate the Patient
+		ourLog.info("5167: fetchAllStructureDefinitions");
 		return loadFromCacheWithAsyncRefresh(myCache, key, t -> super.fetchAllStructureDefinitions());
 	}
 
@@ -133,6 +136,9 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
+		if (theUrl.contains("https://www.esante.lu/fhir-spec/StructureDefinition/FTCommunication") || theUrl.contains("patient-1a")) {
+			ourLog.info("5167: fetchStructureDefinition() for myCache uri: {}", theUrl);
+		}
 		return loadFromCache(
 				myCache, "fetchStructureDefinition " + theUrl, t -> super.fetchStructureDefinition(theUrl));
 	}
@@ -145,6 +151,9 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	@Override
 	public <T extends IBaseResource> T fetchResource(@Nullable Class<T> theClass, String theUri) {
 		// LUKETODO:  this is called on the second call to validate the patient
+		if (theUri.contains("https://www.esante.lu/fhir-spec/StructureDefinition/FTCommunication") || theUri.contains("patient-1a")) {
+			ourLog.info("5167: fetchResource() for myCache uri: {}", theUri);
+		}
 		return loadFromCache(
 				myCache, "fetchResource " + theClass + " " + theUri, t -> super.fetchResource(theClass, theUri));
 	}
@@ -250,15 +259,31 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	@SuppressWarnings("OptionalAssignedToNull")
 	@Nullable
 	private <S, T> T loadFromCache(Cache<S, Object> theCache, S theKey, Function<S, T> theLoader) {
+		if (theKey.toString().contains("patient-1a") | theKey.toString().contains("https://www.esante.lu/fhir-spec/StructureDefinition/FTCommunication")) {
+			ourLog.info("5167: instance: {} loadFromCache() key: {}", hashCode(), theKey);
+		}
 		ourLog.trace("Fetching from cache: {}", theKey);
 
 		Function<S, Optional<T>> loaderWrapper = key -> Optional.ofNullable(theLoader.apply(theKey));
-		// LUKETODO:  this is where we add the Optional.empty() to the cache for the meta profile URL:  this happens DEEP with the Caffeine cache
+		// LUKETODO:  this is where we add the Optional.empty() to the cache for the meta profile URL:  this happens
+		// DEEP with the Caffeine cache
+		if (theKey.toString().contains("patient-1a")
+				|| theKey.toString().contains("https://www.esante.lu/fhir-spec/StructureDefinition/FTCommunication")) {
+			ourLog.info("5167: instance: {} START loadFromCache", hashCode());
+		}
 		Optional<T> result = (Optional<T>) theCache.get(theKey, loaderWrapper);
+		if (theKey.toString().contains("patient-1a")
+				|| theKey.toString().contains("https://www.esante.lu/fhir-spec/StructureDefinition/FTCommunication")) {
+			ourLog.info("5167: END loadFromCache result: {}", result);
+		}
 		assert result != null;
 
+		// LUKETODO:  this is new code:
 		if (result.isEmpty()) {
+			ourLog.info("5167: INVALIDATED!");
 			theCache.invalidate(theKey);
+			// LUKETODO:  what if we just say screw it and invalidate the whole cache right now?
+//			theCache.invalidateAll();
 		}
 
 		return result.orElse(null);
@@ -286,24 +311,28 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 	}
 
 	private <S, T> T loadFromCacheWithAsyncRefresh(Cache<S, Object> theCache, S theKey, Function<S, T> theLoader) {
+		ourLog.info("5167: loadFromCacheWithAsyncRefresh() theKey: {}", theKey);
 		T retVal = (T) theCache.getIfPresent(theKey);
 		if (retVal == null) {
 			retVal = (T) myNonExpiringCache.get(theKey);
 			if (retVal != null) {
-
+				ourLog.info("5167: retVal NOT NULL from myNonExpiringCache:");
 				Runnable loaderTask = () -> {
 					T loadedItem = loadFromCache(theCache, theKey, theLoader);
 					myNonExpiringCache.put(theKey, loadedItem);
 				};
 				myBackgroundExecutor.execute(loaderTask);
 
+				ourLog.info("5167: return from new query");
 				return retVal;
 			}
 		}
 
+		ourLog.info("5167: BEFORE loadFromCache");
 		retVal = loadFromCache(theCache, theKey, theLoader);
 		// LUKETODO:  for the first call, retVal has all the entries except for the URL we're looking for
 		myNonExpiringCache.put(theKey, retVal);
+		ourLog.info("5167: return from cache");
 		return retVal;
 	}
 
@@ -378,7 +407,8 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 					.setExpandValueSetMillis(1 * DateUtils.MILLIS_PER_MINUTE)
 					.setTranslateCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
 					.setValidateCodeMillis(10 * DateUtils.MILLIS_PER_MINUTE)
-					.setMiscMillis(10 * DateUtils.MILLIS_PER_MINUTE);
+				 .setMiscMillis(10 * DateUtils.MILLIS_PER_MINUTE);
+//					.setMiscMillis(1000000 * DateUtils.MILLIS_PER_MINUTE);
 		}
 	}
 

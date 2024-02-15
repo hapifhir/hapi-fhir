@@ -97,6 +97,7 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.HistorySearchDateRangeParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
@@ -1955,6 +1956,17 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public IBundleProvider search(
 			final SearchParameterMap theParams, RequestDetails theRequest, HttpServletResponse theServletResponse) {
+		final boolean anyMatch = theParams.values().stream()
+				.flatMap(Collection::stream)
+				.flatMap(Collection::stream)
+				.filter(UriParam.class::isInstance)
+				.map(UriParam.class::cast)
+				.map(UriParam::getValue)
+				.anyMatch(val -> val.contains("patient-1a"));
+
+		if (anyMatch) {
+			ourLog.info("5167: START search for: {}", theParams.values());
+		}
 
 		if (theParams.getSearchContainedMode() == SearchContainedModeEnum.BOTH) {
 			throw new MethodNotAllowedException(Msg.code(983) + "Contained mode 'both' is not currently supported");
@@ -1991,6 +2003,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
+		if (anyMatch) {
+			ourLog.info("5167: END search for: {} retVal: {}", theParams.values(), retVal);
+		}
 		return retVal;
 	}
 
@@ -2558,6 +2573,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			ValidationModeEnum theMode,
 			String theProfile,
 			RequestDetails theRequest) {
+		ourLog.info("5167: DAO validate()");
 		TransactionDetails transactionDetails = new TransactionDetails();
 
 		if (theMode == ValidationModeEnum.DELETE) {
@@ -2581,6 +2597,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		}
 
 		FhirValidator validator = getContext().newValidator();
+		// LUKETODO:  possibly add a new interceptor here?
 		validator.setInterceptorBroadcaster(
 				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequest));
 		validator.registerValidatorModule(getInstanceValidator());
@@ -2605,6 +2622,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				throw new InvalidRequestException(Msg.code(992) + msg);
 			}
 		} else if (isNotBlank(theRawResource)) {
+			// LUKETODO: so which do we pass to the interceptor:  the FhirValidator, the FhirInstanceValidator, etc?
+			ourLog.info("5167: DAO validateWithResult()");
 			result = validator.validateWithResult(theRawResource, options);
 		} else {
 			result = validator.validateWithResult(theResource, options);

@@ -11,6 +11,8 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -21,6 +23,7 @@ import java.util.List;
  * @since 5.0.0
  */
 public abstract class BaseValidationSupportWrapper extends BaseValidationSupport {
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseValidationSupportWrapper.class);
 	private final IValidationSupport myWrap;
 
 	/**
@@ -60,6 +63,9 @@ public abstract class BaseValidationSupportWrapper extends BaseValidationSupport
 
 	@Override
 	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
+		if (theUri.contains("patient-1a")) {
+			ourLog.info("5167: BaseValidationSupportWrapper: fetchResource: {}", theUri);
+		}
 		return myWrap.fetchResource(theClass, theUri);
 	}
 

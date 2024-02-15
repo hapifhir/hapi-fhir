@@ -91,7 +91,9 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	// TermReadSvcImpl calls these methods as a part of its "isCodeSystemSupported" calls.
 	// We should modify CachingValidationSupport to cache the results of "isXXXSupported"
 	// at which point we could do away with this cache
-	private Cache<String, IBaseResource> myLoadCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1), 1000);
+	// LUKETODO:  this is probably the cache that we're hitting here!!!!
+//	private Cache<String, IBaseResource> myLoadCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1), 1000);
+	private Cache<String, IBaseResource> myLoadCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(10), 1000);
 
 	/**
 	 * Constructor
@@ -174,20 +176,28 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		IBundleProvider search = myDaoRegistry
 				.getResourceDao("StructureDefinition")
 				.search(new SearchParameterMap().setLoadSynchronousUpTo(1000), new SystemRequestDetails());
-		return (List<T>) search.getResources(0, 1000);
+		final List<T> resources = (List<T>) search.getResources(0, 1000);
+		ourLog.info("5167: fetchAllStructureDefinitions(): {}", resources.size());
+		return resources;
 	}
 
 	@Override
 	@SuppressWarnings({"unchecked", "unused"})
 	public <T extends IBaseResource> T fetchResource(@Nullable Class<T> theClass, String theUri) {
+		if (theUri.contains("patient-1a")) {
+			ourLog.info("5167: JpaPersistedResourceValidationSupport.fetchResource()");
+		}
+
 		if (isBlank(theUri)) {
 			return null;
 		}
 
 		String key = theClass + " " + theUri;
+		// LUKETODO: this is the cache that's refusing to expire
 		IBaseResource fetched = myLoadCache.get(key, t -> doFetchResource(theClass, theUri));
 
 		if (fetched == myNoMatch) {
+			myLoadCache.invalidate(key);
 			return null;
 		}
 

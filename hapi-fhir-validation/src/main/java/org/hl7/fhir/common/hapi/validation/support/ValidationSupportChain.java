@@ -300,9 +300,16 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	@Override
 	public <T extends IBaseResource> T fetchResource(Class<T> theClass, String theUri) {
+		if (theUri.contains("patient-1a")) {
+			ourLog.info("5167: ValidationSupportChain: fetchResource");
+		}
 		for (IValidationSupport next : myChain) {
+			if (theUri.contains("patient-1a")) {
+				ourLog.info("5167: next.fetchResource");
+			}
 			T retVal = next.fetchResource(theClass, theUri);
 			if (retVal != null) {
+				//				ourLog.info("5167: next class: {}, retVal: {}", next.getClass().getName(), retVal);
 				if (ourLog.isDebugEnabled()) {
 					ourLog.debug(
 							"Resource {} with URI {} fetched by {}", retVal.getIdElement(), theUri, next.getName());

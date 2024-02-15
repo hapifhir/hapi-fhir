@@ -353,7 +353,9 @@ public class FhirValidator {
 	}
 
 	private ValidationResult validateResource(IValidationContext<IBaseResource> theValidationContext) {
+		ourLog.info("5167: validateResource()");
 		for (IValidatorModule next : myValidators) {
+			ourLog.info("5167: next.validateResource()");
 			next.validateResource(theValidationContext);
 		}
 		return theValidationContext.toResult();

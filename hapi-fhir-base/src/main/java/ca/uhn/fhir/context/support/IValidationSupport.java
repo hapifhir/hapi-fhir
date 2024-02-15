@@ -22,6 +22,7 @@ package ca.uhn.fhir.context.support;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
@@ -36,6 +37,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -79,6 +81,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * @since 5.0.0
  */
 public interface IValidationSupport {
+	static Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 	String URL_PREFIX_VALUE_SET = "http://hl7.org/fhir/ValueSet/";
 
 	/**
@@ -205,6 +208,7 @@ public interface IValidationSupport {
 	@SuppressWarnings("unchecked")
 	@Nullable
 	default <T extends IBaseResource> T fetchResource(@Nullable Class<T> theClass, String theUri) {
+		ourLog.info("5617: IValidationSupport.fetchResource()");
 		Validate.notBlank(theUri, "theUri must not be null or blank");
 
 		if (theClass == null) {

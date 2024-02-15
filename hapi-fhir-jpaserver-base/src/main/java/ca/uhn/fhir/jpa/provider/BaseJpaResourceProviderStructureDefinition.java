@@ -79,4 +79,6 @@ public abstract class BaseJpaResourceProviderStructureDefinition<T extends IBase
 	public IFhirResourceDaoStructureDefinition<T> getDao() {
 		return (IFhirResourceDaoStructureDefinition<T>) super.getDao();
 	}
+
+	// LUKETODO:   is there something I can extend here?
 }

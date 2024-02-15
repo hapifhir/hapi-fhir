@@ -26,6 +26,7 @@ import java.util.List;
 
 @SuppressWarnings({"PackageAccessibility", "Duplicates"})
 public class FhirInstanceValidator extends BaseValidatorBridge implements IInstanceValidatorModule {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidator.class);
 
 	private boolean myAnyExtensionsAllowed = true;
 	private BestPracticeWarningLevel myBestPracticeWarningLevel;
@@ -145,6 +146,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	 * DefaultProfileValidationSupport if the no-arguments constructor for this object was used.
 	 */
 	public void setValidationSupport(IValidationSupport theValidationSupport) {
+		// LUKETODO:  create a patient with a dummy URL then add a REAL structure def then create a patient with a real
+		// URL
 		myValidationSupport = theValidationSupport;
 		myWrappedWorkerContext = null;
 	}
@@ -223,6 +226,7 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 	@Override
 	protected List<ValidationMessage> validate(IValidationContext<?> theValidationCtx) {
+		ourLog.info("5617 FhirInstanceValidator.validate()");
 		VersionSpecificWorkerContextWrapper wrappedWorkerContext = provideWorkerContext();
 
 		return new ValidatorWrapper()
@@ -241,6 +245,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 
 	@Nonnull
 	protected VersionSpecificWorkerContextWrapper provideWorkerContext() {
+		// LUKETODO:  we have a single instance of this per FhirInstanceValidator always, if non-null
+		// LUKETODO:  we only care about this instance for expiring the cache for the time being
 		VersionSpecificWorkerContextWrapper wrappedWorkerContext = myWrappedWorkerContext;
 		if (wrappedWorkerContext == null) {
 			wrappedWorkerContext =
@@ -278,6 +284,8 @@ public class FhirInstanceValidator extends BaseValidatorBridge implements IInsta
 	 * Clear any cached data held by the validator or any of its internal stores. This is mostly intended
 	 * for unit tests, but could be used for production uses too.
 	 */
+	@Override
+	// LUKETODO:  ensure this gets called when a new StructureDefinition is added or for any other change
 	public void invalidateCaches() {
 		myValidationSupport.invalidateCaches();
 		if (myWrappedWorkerContext != null) {

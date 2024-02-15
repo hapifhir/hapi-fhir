@@ -25,7 +25,16 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListener;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCacheRefresher;
+import ca.uhn.fhir.jpa.cache.IResourceChangeListenerRegistry;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCache;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheFactory;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
+import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.jpa.validation.ValidatorPolicyAdvisor;
 import ca.uhn.fhir.jpa.validation.ValidatorResourceFetcher;
@@ -39,6 +48,7 @@ import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Scope;
 
 @Configuration
 public class ValidationSupportConfig {
@@ -73,6 +83,7 @@ public class ValidationSupportConfig {
 			ValidationSupportChain theValidationSupportChain,
 			IValidationSupport theValidationSupport,
 			DaoRegistry theDaoRegistry) {
+		// LUKETODO:  this is where we build the FhirInstanceValidator
 		if (theFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
 			FhirInstanceValidator val = new FhirInstanceValidator(theCachingValidationSupport);
 			val.setValidatorResourceFetcher(
@@ -101,5 +112,35 @@ public class ValidationSupportConfig {
 	@Lazy
 	public ValidatorPolicyAdvisor jpaValidatorPolicyAdvisor() {
 		return new ValidatorPolicyAdvisor();
+	}
+
+	@Bean
+	IResourceChangeListenerRegistry resourceChangeListenerRegistry(
+			FhirContext theFhirContext,
+			ResourceChangeListenerCacheFactory theResourceChangeListenerCacheFactory,
+			InMemoryResourceMatcher theInMemoryResourceMatcher) {
+		return new ResourceChangeListenerRegistryImpl(
+				theFhirContext, theResourceChangeListenerCacheFactory, theInMemoryResourceMatcher);
+	}
+
+	@Bean
+	IResourceChangeListenerCacheRefresher resourceChangeListenerCacheRefresher() {
+		return new ResourceChangeListenerCacheRefresherImpl();
+	}
+
+	@Bean
+	ResourceChangeListenerCacheFactory registeredResourceListenerFactory() {
+		return new ResourceChangeListenerCacheFactory();
+	}
+
+	@Bean
+	@Scope("prototype")
+	ResourceChangeListenerCache registeredResourceChangeListener(
+			String theResourceName,
+			IResourceChangeListener theResourceChangeListener,
+			SearchParameterMap theSearchParameterMap,
+			long theRemoteRefreshIntervalMs) {
+		return new ResourceChangeListenerCache(
+				theResourceName, theResourceChangeListener, theSearchParameterMap, theRemoteRefreshIntervalMs);
 	}
 }

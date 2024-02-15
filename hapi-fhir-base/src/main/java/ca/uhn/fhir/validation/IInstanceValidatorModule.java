@@ -25,6 +25,8 @@ package ca.uhn.fhir.validation;
  * profile validation)
  */
 public interface IInstanceValidatorModule extends IValidatorModule {
+	// LUKETODO:  javadoc
+	void invalidateCaches();
 
 	// nothing extra yet
 

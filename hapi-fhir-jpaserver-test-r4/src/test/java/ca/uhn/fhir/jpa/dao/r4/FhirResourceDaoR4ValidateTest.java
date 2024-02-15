@@ -31,8 +31,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IValidatorModule;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
-import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
@@ -53,7 +51,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 
@@ -1990,7 +1987,9 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	class TestValidateUsingDifferentialProfile {
 		@Test
 		public void testValidateUsingDifferentialProfile() throws IOException {
+			ourLog.info("5167: START testValidateUsingDifferentialProfile()");
 			StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-differential-patient-r4.json");
+			ourLog.info("5167: create SD");
 			myStructureDefinitionDao.create(sd);
 
 			Patient p = new Patient();
@@ -2000,16 +1999,55 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			p.setActive(true);
 
 			String raw = myFhirContext.newJsonParser().encodeResourceToString(p);
+			ourLog.info("5167:  FIRST call to validate()");
 			MethodOutcome outcome = myPatientDao.validate(p, null, raw, EncodingEnum.JSON, null, null, mySrd);
 
 			String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
-			ourLog.info("OO: {}", encoded);
+//			ourLog.info("OO: {}", encoded);
 			assertThat(encoded, containsString("No issues detected"));
 		}
 
 		@Test
 		// LUKETODO: rename
-		public void testValidateUsingDifferentialProfileWithPatientCreatedBeforeStructureDefinition() throws IOException {
+		public void testValidateUsingDifferentialProfileWithPatientGarbageValueCreatedBefore() throws IOException {
+			ourLog.info("5167: START testValidateUsingDifferentialProfileWithPatientGarbageValueCreatedBefore()");
+			final Patient patientWithGarbageValue = new Patient();
+			patientWithGarbageValue.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+			patientWithGarbageValue.getText().getDiv().setValue("<div>hello</div>");
+			patientWithGarbageValue.getMeta().addProfile("https://www.i.do.not.exist.com");
+			patientWithGarbageValue.setActive(true);
+
+			String rawWithGarbageValue = myFhirContext.newJsonParser().encodeResourceToString(patientWithGarbageValue);
+			ourLog.info("5167:  FIRST call to validate()");
+			MethodOutcome outcome1 = myPatientDao.validate(patientWithGarbageValue, null, rawWithGarbageValue, EncodingEnum.JSON, null, null, mySrd);
+
+			String encoded1 = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome1.getOperationOutcome());
+//			ourLog.info("OO: {}", encoded1);
+			assertTrue(encoded1.contains("VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY"));
+
+			StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-differential-patient-r4.json");
+			ourLog.info("5167: create SD");
+			myStructureDefinitionDao.create(sd, new SystemRequestDetails());
+
+			final Patient patientWithRealProfile = new Patient();
+			patientWithRealProfile.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+			patientWithRealProfile.getText().getDiv().setValue("<div>hello</div>");
+			patientWithRealProfile.getMeta().addProfile("http://example.com/fhir/StructureDefinition/patient-1a-extensions");
+			patientWithRealProfile.setActive(true);
+
+			String rawWithRealProfile = myFhirContext.newJsonParser().encodeResourceToString(patientWithRealProfile);
+			ourLog.info("5167:  SECOND call to validate()");
+			MethodOutcome outcome2 = myPatientDao.validate(patientWithRealProfile, null, rawWithRealProfile, EncodingEnum.JSON, null, null, mySrd);
+
+			String encoded2 = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome2.getOperationOutcome());
+			ourLog.info("OO: {}", encoded2);
+			assertFalse(encoded2.contains("VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY"));
+		}
+
+		@Test
+		// LUKETODO: rename
+		public void testValidateUsingDifferentialProfileWithPatientCreatedBeforeStructureDefinition() throws IOException, InterruptedException {
+			ourLog.info(">>>>>>>>>>>>> 5167: START testValidateUsingDifferentialProfileWithPatientCreatedBeforeStructureDefinition()");
 			final Patient p = new Patient();
 			p.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
 			p.getText().getDiv().setValue("<div>hello</div>");
@@ -2021,19 +2059,28 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			MethodOutcome outcome1 = myPatientDao.validate(p, null, raw, EncodingEnum.JSON, null, null, mySrd);
 
 			String encoded1 = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome1.getOperationOutcome());
-			ourLog.info("OO: {}", encoded1);
+//			ourLog.info("OO: {}", encoded1);
 			assertTrue(encoded1.contains("VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY"));
 
 			StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-differential-patient-r4.json");
+			ourLog.info(">>>>>>>>>>>>> 5167: create StructureDefinition");
 			myStructureDefinitionDao.create(sd, new SystemRequestDetails());
 
-			ourLog.info("5167:  SECOND call to validate()");
+			ourLog.info(">>>>>>>>>>>>> 5167:  SECOND call to validate()");
 			MethodOutcome outcome2 = myPatientDao.validate(p, null, raw, EncodingEnum.JSON, null, null, mySrd);
 
 			String encoded2 = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome2.getOperationOutcome());
 			ourLog.info("OO: {}", encoded2);
-			assertFalse(encoded1.contains("VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY"));
-//		assertThat(encoded, containsString("No issues detected"));
+			assertFalse(encoded2.contains("VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY"));
+			assertThat(encoded2, containsString("No issues detected"));
+
+			// 1 minute
+//			Thread.sleep(60000);
+//
+//			MethodOutcome outcome3 = myPatientDao.validate(p, null, raw, EncodingEnum.JSON, null, null, mySrd);
+//			String encoded3 = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome3.getOperationOutcome());
+//			ourLog.info("OO: {}", encoded3);
+//			assertFalse(encoded3.contains("VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY"));
 		}
 	}
 

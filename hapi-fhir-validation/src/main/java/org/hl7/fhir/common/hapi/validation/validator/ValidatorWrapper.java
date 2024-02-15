@@ -114,6 +114,7 @@ class ValidatorWrapper {
 
 	public List<ValidationMessage> validate(
 			IWorkerContext theWorkerContext, IValidationContext<?> theValidationContext) {
+		ourLog.info("5617 ValidationWrapper.validate()");
 		InstanceValidator v;
 		FHIRPathEngine.IEvaluationContext evaluationCtx = new FhirInstanceValidator.NullEvaluationContext();
 		XVerExtensionManager xverManager = new XVerExtensionManager(theWorkerContext);
@@ -223,7 +224,10 @@ class ValidatorWrapper {
 			String theUrl,
 			List<ValidationMessage> theMessages) {
 		try {
+			// LUKETODO:  what's this?
+			ourLog.info("5167: fetchAndAddProfile()");
 			StructureDefinition structureDefinition = theWorkerContext.fetchResource(StructureDefinition.class, theUrl);
+			ourLog.info("5167: fetchAndAddProfile(): structureDefinition: {}", structureDefinition);
 			if (structureDefinition != null) {
 				theProfileStructureDefinitions.add(structureDefinition);
 			}

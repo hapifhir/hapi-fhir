@@ -62,6 +62,12 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	private volatile List<StructureDefinition> myAllStructures;
 	private org.hl7.fhir.r5.model.Parameters myExpansionProfile;
 
+	// LUKETODO:  this constructor is called multiple times from:
+	// * FhirInstanceValidator
+	//     * GraphQLProviderWithIntrospection
+	//     * ValidatorResourceFetcher
+	// * SnapshotGeneratingValidationSupport
+	//     * A bunch of calling classes
 	public VersionSpecificWorkerContextWrapper(
 			ValidationSupportContext theValidationSupportContext, VersionCanonicalizer theVersionCanonicalizer) {
 		myValidationSupportContext = theValidationSupportContext;
@@ -93,9 +99,16 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 						.getImplementingClass();
 			}
 
+			// LUKETODO:  what's this?
+			if (key.getUri().contains("https://www.esante.lu/fhir-spec/StructureDefinition/FTCommunication") || key.getUri().contains("patient-1a")) {
+				ourLog.info("5167: fetchResource() for URI: {}", key.getUri());
+			}
 			IBaseResource fetched = myValidationSupportContext
 					.getRootValidationSupport()
 					.fetchResource(fetchResourceType, key.getUri());
+			if (key.getUri().contains("https://www.esante.lu/fhir-spec/StructureDefinition/FTCommunication")) {
+				ourLog.info("5167: fetched: {}", fetched);
+			}
 
 			Resource canonical = myVersionCanonicalizer.resourceToValidatorCanonical(fetched);
 
@@ -219,14 +232,25 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	private List<StructureDefinition> allStructures() {
+		// LUKETODO:  log in a PreDestroy method and log
 
-		// LUKETODO: is this the source of the problem?
+		// LUKETODO: any chance this can go into its own separate Bean that's injected, like a Registry?
+		// LUKETODO: we need a hook into this that can be called from an interceptor or other to expire this cache
 		List<StructureDefinition> retVal = myAllStructures;
-		ourLog.info("5167: myAllStructures NON-NULL {}", (myAllStructures != null));
+		//		ourLog.info("5167: myAllStructures size {}",
+		// (Optional.ofNullable(myAllStructures).map(List::size).orElse(-1)));
+		//		ourLog.info("5167: myAllStructures contains patient-1a {}",
+		// Optional.ofNullable(myAllStructures).stream().anyMatch(struct -> struct.stream().anyMatch(struct1 ->
+		// struct1.getUrl().contains("patient-1a"))));
 		if (retVal == null) {
 			retVal = new ArrayList<>();
-			for (IBaseResource next :
-					myValidationSupportContext.getRootValidationSupport().fetchAllStructureDefinitions()) {
+			//			ourLog.info("5167: START fetch structure definitions");
+			final IValidationSupport rootValidationSupport = myValidationSupportContext.getRootValidationSupport();
+			//			ourLog.info("5167: IValidationSupport class: {}", rootValidationSupport.getClass().getName());
+			final List<IBaseResource> resources = rootValidationSupport.fetchAllStructureDefinitions();
+			//			ourLog.info("5167: END fetch structure definitions: # of resources: {}",
+			// Optional.ofNullable(resources).map(List::size).orElse(-1));
+			for (IBaseResource next : resources) {
 				try {
 					StructureDefinition converted = myVersionCanonicalizer.structureDefinitionToCanonical(next);
 					retVal.add(converted);
@@ -234,6 +258,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					throw new InternalErrorException(Msg.code(659) + e);
 				}
 			}
+			// LUKETODO: see if this works
 			myAllStructures = retVal;
 		}
 
@@ -392,6 +417,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public <T extends Resource> T fetchResource(Class<T> class_, String uri) {
+		if (uri.contains("patient-1a")) {
+			ourLog.info("5167: VersionSpecificWorkerContextWrapper.fetchResource()");
+		}
 
 		if (isBlank(uri)) {
 			return null;
@@ -400,6 +428,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		ResourceKey key = new ResourceKey(class_.getSimpleName(), uri);
 		@SuppressWarnings("unchecked")
 		T retVal = (T) myFetchResourceCache.get(key);
+		if (uri.contains("patient-1a")) {
+			ourLog.info("5167: VersionSpecificWorkerContextWrapper.fetchResource(): retVal: {}", retVal);
+		}
 
 		return retVal;
 	}
@@ -683,10 +714,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	public void invalidateCaches() {
 		myFetchResourceCache.invalidateAll();
+		// LUKETODO: empty list instead?
+		myAllStructures = null;
 	}
 
 	@Override
 	public <T extends Resource> List<T> fetchResourcesByType(Class<T> theClass) {
+		ourLog.info("fetchResourcesByType()");
 		if (theClass.equals(StructureDefinition.class)) {
 			return (List<T>) allStructures();
 		}

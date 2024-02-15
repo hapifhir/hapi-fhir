@@ -39,4 +39,13 @@ public class JpaResourceDaoStructureDefinition<T extends IBaseResource> extends 
 		Validate.notNull(output);
 		return output;
 	}
+
+	// LUKETODO:  override updateEntity?
+	// LUKETODO:  also consider STORAGE_PRESTORAGE_RESOURCE_UPDATED>>>post commit hook  have cache class subscribe to
+	// this pointcut
+	// or is it STORAGE_PRECOMMIT_RESOURCE_UPDATED?
+
+	///  TABLE  :  cdr_cache_sync >>> CacheSyncEntity  >>> CacheSyncSvcImpl  >>> CacheSyncInterceptor
+	/// CacheSyncLoader  IResourceChangeListenerRegistry >>> move?
+	// ResourceChangeListenerRegistryInterceptor
 }
