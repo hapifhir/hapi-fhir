@@ -254,9 +254,9 @@ public class CachingValidationSupport extends BaseValidationSupportWrapper imple
 		Optional<T> result = (Optional<T>) theCache.get(theKey, loaderWrapper);
 		assert result != null;
 
-		// LUKETODO:  this is new code:
-		if (result.isEmpty()) {
-			ourLog.info("5167: INVALIDATED!");
+		// UGH!  Animal sniffer :(
+		if (!result.isPresent()) {
+			ourLog.debug("Invalidating cache entry for key: {} since the result of the underlying query is empty", theKey);
 			theCache.invalidate(theKey);
 		}
 
