@@ -1991,7 +1991,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		private static final Patient PATIENT_WITH_FAKE_URL = createPatient("https://www.i.do.not.exist.com");
 
 		@Test
-		public void testValidateUsingDifferentialProfile_StructDefThenPatient() throws IOException {
+		public void createStructDefThenValidatePatientWithRealUrl() throws IOException {
 			// setup
 			createStructureDefinitionInDao();
 
@@ -2003,7 +2003,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 
 		@Test
-		public void testValidateUsingDifferentialProfile_PatientWithFakeUrlStructDefThenPatientWithRealUrl() throws IOException {
+		public void validatePatientWithFakeUrlStructDefThenValidatePatientWithRealUrl() throws IOException {
 			// setup
 			final String outcomePatientValidateFakeUrl = validate(PATIENT_WITH_FAKE_URL);
 			assertTrue(outcomePatientValidateFakeUrl.contains(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY));
@@ -2017,7 +2017,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 
 		@Test
-		public void testValidateUsingDifferentialProfile_PatientThenStructDef() throws IOException {
+		public void validatePatientRealUrlThenCreateStructDefThenValidatePatientWithRealUrl() throws IOException {
 			// setup
 			final String outcomePatientValidateInitial = validate(PATIENT_WITH_REAL_URL);
 			assertTrue(outcomePatientValidateInitial.contains(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY));
