@@ -313,7 +313,7 @@ public abstract class BaseRequestPartitionHelperSvc implements IRequestPartition
 
 	@Override
 	public void validateHasPartitionPermissions(
-		@Nonnull RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
+			@Nonnull RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
 		if (myInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_PARTITION_SELECTED)) {
 			RuntimeResourceDefinition runtimeResourceDefinition = null;
 			if (theResourceType != null) {
