@@ -58,12 +58,9 @@ import static org.mockito.Mockito.verify;
 public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Test {
 	public static final int ALTERNATE_DEFAULT_ID = -1;
 
-	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
-
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
-
-	@SpyBean
+	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
 	private PatientIdPartitionInterceptor mySvc;
 
 	@Override
@@ -71,6 +68,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	public void before() throws Exception {
 		super.before();
 		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
+		mySvc = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
 
 		myInterceptorRegistry.registerInterceptor(mySvc);
 		myInterceptorRegistry.registerInterceptor(myForceOffsetSearchModeInterceptor);

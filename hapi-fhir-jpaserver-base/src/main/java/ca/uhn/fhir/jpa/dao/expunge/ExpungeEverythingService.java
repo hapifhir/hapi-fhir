@@ -135,7 +135,7 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 		ourLog.info("BEGINNING GLOBAL $expunge");
 		Propagation propagation = Propagation.REQUIRES_NEW;
 		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequestForOperation(
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
 						theRequest, ProviderConstants.OPERATION_EXPUNGE);
 
 		deleteAll(theRequest, propagation, requestPartitionId, counter);

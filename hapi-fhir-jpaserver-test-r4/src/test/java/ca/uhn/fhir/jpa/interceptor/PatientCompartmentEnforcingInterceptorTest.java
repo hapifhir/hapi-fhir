@@ -12,7 +12,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -20,27 +19,23 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProviderR4Test {
 
 	public static final int ALTERNATE_DEFAULT_ID = -1;
-	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
-
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
-
-	@SpyBean
-	private PatientIdPartitionInterceptor mySvc;
-
-	@SpyBean
-	@Autowired
-	private PatientCompartmentEnforcingInterceptor myUpdateCrossPartitionInterceptor;
+	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
+	private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
+	private PatientCompartmentEnforcingInterceptor mySvc;
 
 	@Override
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
 		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
+		mySvc = new PatientCompartmentEnforcingInterceptor(getFhirContext(), mySearchParamExtractor);
 
-		myInterceptorRegistry.registerInterceptor(mySvc);
+		myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 		myInterceptorRegistry.registerInterceptor(myForceOffsetSearchModeInterceptor);
-		myInterceptorRegistry.registerInterceptor(myUpdateCrossPartitionInterceptor);
+		myInterceptorRegistry.registerInterceptor(mySvc);
 
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
@@ -49,9 +44,9 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 
 	@AfterEach
 	public void after() {
-		myInterceptorRegistry.unregisterInterceptor(mySvc);
+		myInterceptorRegistry.unregisterInterceptor(myPatientIdPartitionInterceptor);
 		myInterceptorRegistry.unregisterInterceptor(myForceOffsetSearchModeInterceptor);
-		myInterceptorRegistry.unregisterInterceptor(myUpdateCrossPartitionInterceptor);
+		myInterceptorRegistry.unregisterInterceptor(mySvc);
 
 		myPartitionSettings.setPartitioningEnabled(false);
 		myPartitionSettings.setUnnamedPartitionMode(new PartitionSettings().isUnnamedPartitionMode());

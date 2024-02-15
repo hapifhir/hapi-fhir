@@ -128,8 +128,9 @@ public class ReindexProvider {
 					.forEach(params::addPartitionedUrl);
 		}
 
-		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForOperation(
-				theRequestDetails, ProviderConstants.OPERATION_REINDEX);
+		RequestPartitionId requestPartition =
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+						theRequestDetails, ProviderConstants.OPERATION_REINDEX);
 		params.setRequestPartitionId(requestPartition);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();

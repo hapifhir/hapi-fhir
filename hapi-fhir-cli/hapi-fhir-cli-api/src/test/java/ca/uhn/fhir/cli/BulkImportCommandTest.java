@@ -7,7 +7,6 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.model.PartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
@@ -29,12 +28,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -110,7 +107,7 @@ public class BulkImportCommandTest {
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json");
 
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
 		when(myJobCoordinator.startInstance(any(), any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
@@ -154,7 +151,7 @@ public class BulkImportCommandTest {
 
 		when(myJobCoordinator.startInstance(any(), any()))
 			.thenReturn(createJobStartResponse("THE-JOB-ID"));
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
 
 		// Start the command in a separate thread
 		new Thread(() -> App.main(new String[]{
@@ -195,7 +192,7 @@ public class BulkImportCommandTest {
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json");
 
-		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
 		when(myJobCoordinator.startInstance(any(), any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread

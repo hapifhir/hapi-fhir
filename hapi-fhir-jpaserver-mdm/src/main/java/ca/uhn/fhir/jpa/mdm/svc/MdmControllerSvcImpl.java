@@ -183,7 +183,7 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 			MdmTransactionContext theMdmTransactionContext,
 			RequestDetails theRequestDetails) {
 		RequestPartitionId theReadPartitionId =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequestForOperation(
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
 						theRequestDetails, ProviderConstants.MDM_QUERY_LINKS);
 		Page<MdmLinkJson> resultPage;
 		if (theReadPartitionId.hasPartitionIds()) {
@@ -241,8 +241,9 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 			RequestDetails theRequestDetails,
 			String theRequestResourceType) {
 		Page<MdmLinkJson> resultPage;
-		RequestPartitionId readPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForOperation(
-				theRequestDetails, ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES);
+		RequestPartitionId readPartitionId =
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+						theRequestDetails, ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES);
 
 		if (readPartitionId.isAllPartitions()) {
 			resultPage = myMdmLinkQuerySvc.getDuplicateGoldenResources(
@@ -318,8 +319,9 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 			params.setBatchSize(theBatchSize.getValue().intValue());
 		}
 
-		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForOperation(
-				theRequestDetails, ProviderConstants.OPERATION_MDM_CLEAR);
+		RequestPartitionId requestPartition =
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+						theRequestDetails, ProviderConstants.OPERATION_MDM_CLEAR);
 		params.setRequestPartitionId(requestPartition);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();

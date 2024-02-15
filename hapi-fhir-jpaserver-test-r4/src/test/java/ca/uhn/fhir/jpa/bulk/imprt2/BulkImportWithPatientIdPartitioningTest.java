@@ -21,7 +21,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import java.util.concurrent.TimeUnit;
 
@@ -32,13 +31,16 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class BulkImportWithPartitioningTest extends BaseJpaR4Test {
+/**
+ * This test class has just one test. It can potentially be moved
+ */
+public class BulkImportWithPatientIdPartitioningTest extends BaseJpaR4Test {
 	private static final String USERNAME = "username";
 	private static final String PASSWORD = "password";
-	private final BulkImportFileServlet myBulkImportFileServlet = new BulkImportFileServlet(USERNAME, PASSWORD);
+	private static final BulkImportFileServlet ourBulkImportFileServlet = new BulkImportFileServlet(USERNAME, PASSWORD);
 
 	@RegisterExtension
-	private final HttpServletExtension myHttpServletExtension = new HttpServletExtension().withServlet(myBulkImportFileServlet);
+	public static HttpServletExtension myHttpServletExtension = new HttpServletExtension().withServlet(ourBulkImportFileServlet);
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
@@ -48,19 +50,19 @@ public class BulkImportWithPartitioningTest extends BaseJpaR4Test {
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 
-	@SpyBean
-	private PatientIdPartitionInterceptor mySvc;
+	private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
 
 	@BeforeEach
 	public void before() {
-		myInterceptorRegistry.registerInterceptor(mySvc);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
+		myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 	}
 
 	@AfterEach
 	public void after() {
-		myInterceptorRegistry.unregisterInterceptor(mySvc);
+		myInterceptorRegistry.unregisterInterceptor(myPatientIdPartitionInterceptor);
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
 		myPartitionSettings.setUnnamedPartitionMode(new PartitionSettings().isUnnamedPartitionMode());
 	}
@@ -72,7 +74,7 @@ public class BulkImportWithPartitioningTest extends BaseJpaR4Test {
 		Patient p = new Patient().setActive(true);
 		p.setId("P1");
 		String fileContents = getFhirContext().newJsonParser().encodeResourceToString(p);
-		String id = myBulkImportFileServlet.registerFileByContents(fileContents);
+		String id = ourBulkImportFileServlet.registerFileByContents(fileContents);
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters();
 		parameters.setHttpBasicCredentials(USERNAME + ":" + PASSWORD);

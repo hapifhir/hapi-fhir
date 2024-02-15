@@ -103,8 +103,9 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 		deleteExpungeJobParameters.setBatchSize(theBatchSize);
 
 		// Also set top level partition in case there are no urls
-		RequestPartitionId requestPartition = myRequestPartitionHelperSvc.determineReadPartitionForRequestForOperation(
-				theRequestDetails, ProviderConstants.OPERATION_DELETE_EXPUNGE);
+		RequestPartitionId requestPartition =
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+						theRequestDetails, ProviderConstants.OPERATION_DELETE_EXPUNGE);
 		deleteExpungeJobParameters.setRequestPartitionId(requestPartition);
 		deleteExpungeJobParameters.setCascade(theCascade);
 		deleteExpungeJobParameters.setCascadeMaxRounds(theCascadeMaxRounds);

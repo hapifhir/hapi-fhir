@@ -186,8 +186,9 @@ public class BulkDataExportProvider {
 		}
 
 		// Determine and validate partition permissions (if needed).
-		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForOperation(
-				theRequestDetails, ProviderConstants.OPERATION_EXPORT);
+		RequestPartitionId partitionId =
+				myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
+						theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 		theOptions.setPartitionId(partitionId);
 
@@ -468,7 +469,7 @@ public class BulkDataExportProvider {
 		if (parameters.getPartitionId() != null) {
 			// Determine and validate permissions for partition (if needed)
 			RequestPartitionId partitionId =
-					myRequestPartitionHelperService.determineReadPartitionForRequestForOperation(
+					myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
 							theRequestDetails, ProviderConstants.OPERATION_EXPORT_POLL_STATUS);
 			myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 			if (!parameters.getPartitionId().equals(partitionId)) {
@@ -502,6 +503,9 @@ public class BulkDataExportProvider {
 						bulkResponseDocument.setRequest(results.getOriginalRequestUrl());
 
 						String serverBase = getServerBase(theRequestDetails);
+
+						// an output is required, even if empty, according to HL7 FHIR IG
+						bulkResponseDocument.getOutput();
 
 						for (Map.Entry<String, List<String>> entrySet :
 								results.getResourceTypeToBinaryIds().entrySet()) {

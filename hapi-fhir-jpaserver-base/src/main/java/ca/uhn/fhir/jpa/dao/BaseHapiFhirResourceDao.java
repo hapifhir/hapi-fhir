@@ -1349,7 +1349,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 
 			RequestPartitionId requestPartition =
-					myRequestPartitionHelperService.determineReadPartitionForRequestForOperation(
+					myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
 							theRequestDetails, ProviderConstants.OPERATION_REINDEX);
 			params.setRequestPartitionId(requestPartition);
 

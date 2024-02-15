@@ -17,32 +17,31 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class BulkExportWithPartitioningTest extends BaseResourceProviderR4Test {
-	private final Logger ourLog = LoggerFactory.getLogger(BulkExportWithPartitioningTest.class);
+public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProviderR4Test {
+	private final Logger ourLog = LoggerFactory.getLogger(BulkExportWithPatientIdPartitioningTest.class);
 
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 
-	@SpyBean
-	private PatientIdPartitionInterceptor mySvc;
+	private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
 
 	@BeforeEach
 	public void before() {
-		myInterceptorRegistry.registerInterceptor(mySvc);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
+		myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 	}
 
 	@AfterEach
 	public void after() {
-		myInterceptorRegistry.unregisterInterceptor(mySvc);
+		myInterceptorRegistry.unregisterInterceptor(myPatientIdPartitionInterceptor);
 		myPartitionSettings.setPartitioningEnabled(new PartitionSettings().isPartitioningEnabled());
 		myPartitionSettings.setUnnamedPartitionMode(new PartitionSettings().isUnnamedPartitionMode());
 	}

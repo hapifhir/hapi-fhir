@@ -15,10 +15,7 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,8 +28,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class JpaPackageCacheTest extends BaseJpaR4Test {
-
-	private static final Logger ourLog = LoggerFactory.getLogger(JpaPackageCacheTest.class);
 	@Autowired
 	private IHapiPackageCacheManager myPackageCacheManager;
 	@Autowired
@@ -46,7 +41,6 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 
-	@SpyBean
 	private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
 
 	@AfterEach
@@ -83,6 +77,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	public void testSaveAndDeletePackagePartitionsEnabled() throws IOException {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setDefaultPartitionId(1);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
 		myInterceptorService.registerInterceptor(myPatientIdPartitionInterceptor);
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 		try {

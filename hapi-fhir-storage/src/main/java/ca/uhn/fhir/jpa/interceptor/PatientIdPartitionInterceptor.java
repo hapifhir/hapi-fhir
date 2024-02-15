@@ -110,7 +110,7 @@ public class PatientIdPartitionInterceptor {
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_READ)
 	public RequestPartitionId identifyForRead(
 			@Nonnull ReadPartitionIdRequestDetails theReadDetails, RequestDetails theRequestDetails) {
-		List<RuntimeSearchParam> compartmentSps = null;
+		List<RuntimeSearchParam> compartmentSps = Collections.emptyList();
 		if (!isEmpty(theReadDetails.getResourceType())) {
 			RuntimeResourceDefinition resourceDef =
 					myFhirContext.getResourceDefinition(theReadDetails.getResourceType());
@@ -132,10 +132,6 @@ public class PatientIdPartitionInterceptor {
 				break;
 			case SEARCH_TYPE:
 				SearchParameterMap params = theReadDetails.getSearchParams();
-				if (params == null || params.isEmpty()) {
-					break;
-				}
-
 				if ("Patient".equals(theReadDetails.getResourceType())) {
 					List<String> idParts = getResourceIdList(params, "_id", "Patient", false);
 					if (idParts.size() == 1) {
@@ -144,9 +140,6 @@ public class PatientIdPartitionInterceptor {
 						return RequestPartitionId.allPartitions();
 					}
 				} else {
-					if (compartmentSps == null) {
-						break;
-					}
 					for (RuntimeSearchParam nextCompartmentSp : compartmentSps) {
 						List<String> idParts = getResourceIdList(params, nextCompartmentSp.getName(), "Patient", true);
 						if (!idParts.isEmpty()) {

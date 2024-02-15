@@ -37,7 +37,7 @@ public interface IRequestPartitionHelperSvc {
 			@Nonnull RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails);
 
 	@Nonnull
-	default RequestPartitionId determineReadPartitionForRequestForOperation(
+	default RequestPartitionId determineReadPartitionForRequestForServerOperation(
 			@Nullable RequestDetails theRequest, @Nonnull String theOperationName) {
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forServerOperation(theOperationName);
 		return determineReadPartitionForRequest(theRequest, details);
@@ -63,7 +63,7 @@ public interface IRequestPartitionHelperSvc {
 	default RequestPartitionId determineReadPartitionForRequestForSearchType(
 			@Nonnull RequestDetails theRequest, @Nonnull String theResourceType) {
 		ReadPartitionIdRequestDetails details =
-				ReadPartitionIdRequestDetails.forSearchType(theResourceType, null, null);
+				ReadPartitionIdRequestDetails.forSearchType(theResourceType, SearchParameterMap.newSynchronous(), null);
 		return determineReadPartitionForRequest(theRequest, details);
 	}
 

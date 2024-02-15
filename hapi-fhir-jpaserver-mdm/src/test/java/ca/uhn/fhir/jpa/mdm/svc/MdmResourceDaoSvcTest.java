@@ -19,7 +19,6 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import java.io.IOException;
 import java.util.List;
@@ -39,7 +38,6 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 
-	@SpyBean
 	private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
 
 	@Override
@@ -108,6 +106,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
 		myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 
 		try {
