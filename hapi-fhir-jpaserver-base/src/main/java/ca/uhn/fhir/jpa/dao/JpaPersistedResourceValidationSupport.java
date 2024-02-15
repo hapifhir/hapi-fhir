@@ -191,7 +191,8 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		IBaseResource fetched = myLoadCache.get(key, t -> doFetchResource(theClass, theUri));
 
 		if (fetched == myNoMatch) {
-			ourLog.debug("Invalidating cache entry for URI: {} since the result of the underlying query is empty", theUri);
+			ourLog.debug(
+					"Invalidating cache entry for URI: {} since the result of the underlying query is empty", theUri);
 			myLoadCache.invalidate(key);
 			return null;
 		}
