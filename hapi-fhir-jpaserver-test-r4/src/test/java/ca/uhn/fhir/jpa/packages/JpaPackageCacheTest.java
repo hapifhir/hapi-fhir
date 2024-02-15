@@ -117,6 +117,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		myPartitionSettings.setDefaultPartitionId(0);
 		boolean isUnnamed = myPartitionSettings.isUnnamedPartitionMode();
 		myPartitionSettings.setUnnamedPartitionMode(true);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
 		myInterceptorService.registerInterceptor(myPatientIdPartitionInterceptor);
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 		try {
