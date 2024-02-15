@@ -47,7 +47,7 @@ public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProvide
 	}
 
 	@Test
-	public void testSystemBulkExport_withResourceType_exportUsesNonPatientSpecificPartition () throws IOException {
+	public void testSystemBulkExport_withResourceType_success() throws IOException {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE, "Patient");

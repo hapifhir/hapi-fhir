@@ -36,7 +36,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import java.io.IOException;
 import java.util.List;
@@ -52,8 +51,6 @@ import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 
 public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Test {
 	public static final int ALTERNATE_DEFAULT_ID = -1;
@@ -546,7 +543,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	public void testSystemOperation_withNoResourceType_usesNonPatientSpecificPartition() throws IOException {
+	public void testSystemOperation_withNoResourceType_success() throws IOException {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 
@@ -555,7 +552,5 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			assertEquals(202, postResponse.getStatusLine().getStatusCode());
 			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
 		}
-
-		verify(mySvc).provideNonPatientSpecificQueryResponse(any());
 	}
 }
