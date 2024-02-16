@@ -2466,7 +2466,7 @@ public class QueryStack {
 								theRequestPartitionId,
 								andPredicates,
 								nextAnd)) {
-							break;
+							continue;
 						}
 
 						EmbeddedChainedSearchModeEnum embeddedChainedSearchModeEnum =
