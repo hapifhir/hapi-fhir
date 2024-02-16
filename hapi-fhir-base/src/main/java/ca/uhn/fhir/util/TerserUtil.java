@@ -384,7 +384,7 @@ public final class TerserUtil {
 	public static void clearField(FhirContext theFhirContext, IBaseResource theResource, String theFieldName) {
 		BaseRuntimeChildDefinition childDefinition =
 				getBaseRuntimeChildDefinition(theFhirContext, theFieldName, theResource);
-		clear(childDefinition.getAccessor().getValues(theResource));
+		childDefinition.getMutator().setValue(theResource, null);
 	}
 
 	/**
@@ -398,7 +398,17 @@ public final class TerserUtil {
 		BaseRuntimeElementDefinition definition = theFhirContext.getElementDefinition(theBase.getClass());
 		BaseRuntimeChildDefinition childDefinition = definition.getChildByName(theFieldName);
 		Validate.notNull(childDefinition);
-		clear(childDefinition.getAccessor().getValues(theBase));
+
+		BaseRuntimeChildDefinition.IAccessor accessor = childDefinition.getAccessor();
+		clear(accessor.getValues(theBase));
+		List<IBase> newValue = accessor.getValues(theBase);
+
+		if (newValue != null && !newValue.isEmpty()) {
+			// Our clear failed, probably because it was an immutable SingletonList returned by a FieldPlainAccessor
+			// that cannot be cleared.
+			// Let's just null it out instead.
+			childDefinition.getMutator().setValue(theBase, null);
+		}
 	}
 
 	/**
