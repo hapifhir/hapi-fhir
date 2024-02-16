@@ -56,6 +56,8 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -80,6 +82,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.substring;
 
 public class FhirTerser {
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirTerser.class);
 
 	private static final Pattern COMPARTMENT_MATCHER_PATH =
 			Pattern.compile("([a-zA-Z.]+)\\.where\\(resolve\\(\\) is ([a-zA-Z]+)\\)");
@@ -1090,11 +1093,14 @@ public class FhirTerser {
 								}
 								BaseRuntimeElementDefinition<?> childElementDef;
 								Class<? extends IBase> valueType = nextValue.getClass();
+								ourLog.info("5403 START WTF!!!!!\nnextChild:{}\nnextValue: {}\nvalueType: {}\nnextValue.getClass(): {}", nextChild, nextValue, valueType, nextValue.getClass());
 								childElementDef = nextChild.getChildElementDefinitionByDatatype(valueType);
 								while (childElementDef == null && IBase.class.isAssignableFrom(valueType)) {
 									childElementDef = nextChild.getChildElementDefinitionByDatatype(valueType);
 									valueType = (Class<? extends IBase>) valueType.getSuperclass();
+									ourLog.info("5403  WTF!!!!!\nchildElementDef: {},\nvalueType: {}", childElementDef, valueType);
 								}
+								ourLog.info("5403 END WTF!!!!!\nnextChild:{}\nchildElementDef:{}\nnextValue: {}\nvalueType: {}\nnextValue.getClass(): {}", nextChild, childElementDef, nextValue, valueType, nextValue.getClass());
 
 								Class<? extends IBase> typeClass = nextValue.getClass();
 								while (childElementDef == null && IBase.class.isAssignableFrom(typeClass)) {
@@ -1103,12 +1109,18 @@ public class FhirTerser {
 									childElementDef = nextChild.getChildElementDefinitionByDatatype(typeClass);
 								}
 
-								Validate.notNull(
+								// LUKETODO:  get rid of this try catch
+								try {
+									Validate.notNull(
 										childElementDef,
 										"Found value of type[%s] which is not valid for field[%s] in %s",
 										nextValue.getClass(),
 										nextChild.getElementName(),
 										childDef.getName());
+								} catch (NullPointerException exception) {
+									ourLog.info("5403: NPE:\nclass: {}\nelementName:{}\nchildDef.name:{}\nexception:{}", nextValue.getClass(), nextChild.getElementName(), childDef.getName(), exception.getMessage());
+									throw exception;
+								}
 
 								visit(
 										nextValue,
