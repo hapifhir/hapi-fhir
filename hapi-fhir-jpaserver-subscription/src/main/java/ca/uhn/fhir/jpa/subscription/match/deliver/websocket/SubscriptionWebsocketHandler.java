@@ -52,14 +52,14 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 	@Autowired
 	SubscriptionChannelRegistry mySubscriptionChannelRegistry;
 
+	private IState myState = new InitialState();
+
 	/**
 	 * Constructor
 	 */
 	public SubscriptionWebsocketHandler() {
 		super();
 	}
-
-	private IState myState = new InitialState();
 
 	@Override
 	public void afterConnectionClosed(WebSocketSession theSession, CloseStatus theStatus) throws Exception {
