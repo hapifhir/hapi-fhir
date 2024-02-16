@@ -132,6 +132,7 @@ public class PatientIdPartitionInterceptor {
 				break;
 			case SEARCH_TYPE:
 				SearchParameterMap params = theReadDetails.getSearchParams();
+				assert params != null;
 				if ("Patient".equals(theReadDetails.getResourceType())) {
 					List<String> idParts = getResourceIdList(params, "_id", "Patient", false);
 					if (idParts.size() == 1) {

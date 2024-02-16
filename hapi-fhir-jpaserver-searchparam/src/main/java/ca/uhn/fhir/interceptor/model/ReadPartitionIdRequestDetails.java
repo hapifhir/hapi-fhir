@@ -126,7 +126,7 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 				theResourceType,
 				RestOperationTypeEnum.SEARCH_TYPE,
 				null,
-				theParams,
+				theParams != null ? theParams : SearchParameterMap.newSynchronous(),
 				theConditionalOperationTargetOrNull,
 				null,
 				null);

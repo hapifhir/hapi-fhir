@@ -119,12 +119,13 @@ public interface IRequestPartitionHelperSvc {
 	 */
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForSearchType(
-			@Nullable RequestDetails theRequest,
-			@Nonnull String theResourceType,
-			@Nonnull SearchParameterMap theParams,
-			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
+			RequestDetails theRequest,
+			String theResourceType,
+			SearchParameterMap theParams,
+			IBaseResource theConditionalOperationTargetOrNull) {
+		SearchParameterMap searchParameterMap = theParams != null ? theParams : SearchParameterMap.newSynchronous();
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forSearchType(
-				theResourceType, theParams, theConditionalOperationTargetOrNull);
+				theResourceType, searchParameterMap, theConditionalOperationTargetOrNull);
 		return determineReadPartitionForRequest(theRequest, details);
 	}
 
