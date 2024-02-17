@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.dao.expunge;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
@@ -135,10 +134,9 @@ public class ExpungeEverythingService implements IExpungeEverythingService {
 
 		ourLog.info("BEGINNING GLOBAL $expunge");
 		Propagation propagation = Propagation.REQUIRES_NEW;
-		ReadPartitionIdRequestDetails details =
-				ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_EXPUNGE);
 		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequest, details);
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+						theRequest, ProviderConstants.OPERATION_EXPUNGE);
 
 		deleteAll(theRequest, propagation, requestPartitionId, counter);
 

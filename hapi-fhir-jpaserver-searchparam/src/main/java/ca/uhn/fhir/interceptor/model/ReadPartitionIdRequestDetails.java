@@ -108,18 +108,9 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 		return forRead(theId.getResourceType(), theId, false);
 	}
 
-	public static ReadPartitionIdRequestDetails forOperation(
-			@Nullable String theResourceType, @Nullable IIdType theId, @Nonnull String theExtendedOperationName) {
-		RestOperationTypeEnum op;
-		if (theId != null) {
-			op = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
-		} else if (theResourceType != null) {
-			op = RestOperationTypeEnum.EXTENDED_OPERATION_TYPE;
-		} else {
-			op = RestOperationTypeEnum.EXTENDED_OPERATION_SERVER;
-		}
-
-		return new ReadPartitionIdRequestDetails(theResourceType, op, null, null, null, null, theExtendedOperationName);
+	public static ReadPartitionIdRequestDetails forServerOperation(@Nonnull String theOperationName) {
+		return new ReadPartitionIdRequestDetails(
+				null, RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, null, null, null, null, theOperationName);
 	}
 
 	public static ReadPartitionIdRequestDetails forRead(
@@ -135,7 +126,7 @@ public class ReadPartitionIdRequestDetails extends PartitionIdRequestDetails {
 				theResourceType,
 				RestOperationTypeEnum.SEARCH_TYPE,
 				null,
-				theParams,
+				theParams != null ? theParams : SearchParameterMap.newSynchronous(),
 				theConditionalOperationTargetOrNull,
 				null,
 				null);
