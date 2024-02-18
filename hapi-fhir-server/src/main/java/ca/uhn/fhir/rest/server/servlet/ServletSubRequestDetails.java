@@ -60,6 +60,7 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 		return myWrap.getServletResponse();
 	}
 
+	@Override
 	public void addHeader(String theName, String theValue) {
 		String lowerCase = theName.toLowerCase();
 		List<String> list = myHeaders.computeIfAbsent(lowerCase, k -> new ArrayList<>());

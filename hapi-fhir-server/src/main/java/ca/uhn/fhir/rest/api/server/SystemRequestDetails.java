@@ -124,12 +124,24 @@ public class SystemRequestDetails extends RequestDetails {
 		return headers.get(name);
 	}
 
+	@Override
 	public void addHeader(String theName, String theValue) {
+		initHeaderMap();
+		myHeaders.put(theName, theValue);
+	}
+
+	@Override
+	public void setHeaders(String theName, List<String> theValues) {
+		initHeaderMap();
+		myHeaders.putAll(theName, theValues);
+	}
+
+	private void initHeaderMap() {
 		if (myHeaders == null) {
 			myHeaders = ArrayListMultimap.create();
 		}
-		myHeaders.put(theName, theValue);
 	}
+
 
 	@Override
 	public Object getAttribute(String theAttributeName) {

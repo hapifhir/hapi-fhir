@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// FIXME: still needed?
 public class ServletRequestUtil {
 	public static ServletSubRequestDetails getServletSubRequestDetails(
 			ServletRequestDetails theRequestDetails, String url, ArrayListMultimap<String, String> theParamValues) {
@@ -69,21 +70,4 @@ public class ServletRequestUtil {
 		return requestDetails;
 	}
 
-	public static String extractUrl(ServletRequestDetails theRequestDetails) {
-		StringBuilder b = new StringBuilder();
-		for (Map.Entry<String, String[]> next :
-				theRequestDetails.getParameters().entrySet()) {
-			for (String nextValue : next.getValue()) {
-				if (b.length() == 0) {
-					b.append('?');
-				} else {
-					b.append('&');
-				}
-				b.append(UrlUtil.escapeUrlParam(next.getKey()));
-				b.append('=');
-				b.append(UrlUtil.escapeUrlParam(nextValue));
-			}
-		}
-		return theRequestDetails.getRequestPath() + b.toString();
-	}
 }
