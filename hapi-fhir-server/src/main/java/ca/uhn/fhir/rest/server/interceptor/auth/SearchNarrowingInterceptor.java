@@ -158,6 +158,13 @@ public class SearchNarrowingInterceptor {
 		Validate.isTrue(restOperationType != RestOperationTypeEnum.SEARCH_SYSTEM);
 
 		switch (restOperationType) {
+			case EXTENDED_OPERATION_INSTANCE:
+			case EXTENDED_OPERATION_TYPE: {
+				if ("$everything".equals(theRequestDetails.getOperation())) {
+					narrowEverythingOperation(theRequestDetails);
+				}
+				break;
+			}
 			case SEARCH_TYPE:
 				narrowTypeSearch(theRequestDetails);
 				break;
@@ -208,6 +215,19 @@ public class SearchNarrowingInterceptor {
 	 */
 	protected AuthorizedList buildAuthorizedList(@SuppressWarnings("unused") RequestDetails theRequestDetails) {
 		return null;
+	}
+
+	/**
+	 * For the $everything operation, we only do code narrowing, and in this case
+	 * we're not actually even making any changes to the request. All we do here is
+	 * ensure that an attribute is added to the request, which is picked up later
+	 * by {@link SearchNarrowingConsentService}.
+	 */
+	private void narrowEverythingOperation(RequestDetails theRequestDetails) {
+		AuthorizedList authorizedList = buildAuthorizedList(theRequestDetails);
+		if (authorizedList != null) {
+			buildParameterListForAuthorizedCodes(theRequestDetails, theRequestDetails.getResourceName(), authorizedList);
+		}
 	}
 
 	private void narrowIfNoneExistHeader(RequestDetails theRequestDetails) {
