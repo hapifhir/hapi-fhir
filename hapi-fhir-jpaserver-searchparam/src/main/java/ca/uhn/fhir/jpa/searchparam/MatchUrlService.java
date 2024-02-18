@@ -23,8 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
@@ -58,9 +56,6 @@ public class MatchUrlService {
 	@Autowired
 	private ISearchParamRegistry mySearchParamRegistry;
 
-	@Autowired
-	private IInterceptorService myInterceptorService;
-
 	public SearchParameterMap translateMatchUrl(
 			String theMatchUrl, RuntimeResourceDefinition theResourceDefinition, Flag... theFlags) {
 		SearchParameterMap paramMap = new SearchParameterMap();
@@ -89,8 +84,6 @@ public class MatchUrlService {
 					QualifiedParamList.splitQueryStringByCommasIgnoreEscape(qualifier, next.getValue());
 			nameToParamLists.put(paramName, paramList);
 		}
-
-
 
 		for (String nextParamName : nameToParamLists.keySet()) {
 			List<QualifiedParamList> paramList = nameToParamLists.get(nextParamName);

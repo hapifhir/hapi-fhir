@@ -31,7 +31,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// FIXME: still needed?
 public class ServletRequestUtil {
 	public static ServletSubRequestDetails getServletSubRequestDetails(
 			ServletRequestDetails theRequestDetails, String url, ArrayListMultimap<String, String> theParamValues) {
