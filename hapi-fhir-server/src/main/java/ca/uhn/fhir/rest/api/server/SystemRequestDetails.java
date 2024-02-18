@@ -142,7 +142,6 @@ public class SystemRequestDetails extends RequestDetails {
 		}
 	}
 
-
 	@Override
 	public Object getAttribute(String theAttributeName) {
 		return null;

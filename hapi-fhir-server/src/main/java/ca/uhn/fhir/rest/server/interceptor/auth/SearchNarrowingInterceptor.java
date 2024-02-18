@@ -94,7 +94,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class SearchNarrowingInterceptor {
 
 	public static final String POST_FILTERING_LIST_ATTRIBUTE_NAME =
-		SearchNarrowingInterceptor.class.getName() + "_POST_FILTERING_LIST";
+			SearchNarrowingInterceptor.class.getName() + "_POST_FILTERING_LIST";
 	private IValidationSupport myValidationSupport;
 	private int myPostFilterLargeValueSetThreshold = 500;
 	private boolean myNarrowConditionalUrls;
@@ -126,8 +126,8 @@ public class SearchNarrowingInterceptor {
 	 */
 	public void setPostFilterLargeValueSetThreshold(int thePostFilterLargeValueSetThreshold) {
 		Validate.isTrue(
-			thePostFilterLargeValueSetThreshold > 0,
-			"thePostFilterLargeValueSetThreshold must be a positive integer");
+				thePostFilterLargeValueSetThreshold > 0,
+				"thePostFilterLargeValueSetThreshold must be a positive integer");
 		myPostFilterLargeValueSetThreshold = thePostFilterLargeValueSetThreshold;
 	}
 
@@ -150,8 +150,8 @@ public class SearchNarrowingInterceptor {
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
 	public void hookIncomingRequestPostProcessed(
-		RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse)
-		throws AuthenticationException {
+			RequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse)
+			throws AuthenticationException {
 
 		// We don't support this operation type yet
 		RestOperationTypeEnum restOperationType = theRequestDetails.getRestOperationType();
@@ -180,8 +180,8 @@ public class SearchNarrowingInterceptor {
 	 */
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
 	public void hookIncomingRequestPreHandled(
-		ServletRequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse)
-		throws AuthenticationException {
+			ServletRequestDetails theRequestDetails, HttpServletRequest theRequest, HttpServletResponse theResponse)
+			throws AuthenticationException {
 		if (theRequestDetails.getRestOperationType() != RestOperationTypeEnum.TRANSACTION) {
 			return;
 		}
@@ -189,7 +189,7 @@ public class SearchNarrowingInterceptor {
 		IBaseBundle bundle = (IBaseBundle) theRequestDetails.getResource();
 		FhirContext ctx = theRequestDetails.getFhirContext();
 		BundleEntryUrlProcessor processor =
-			new BundleEntryUrlProcessor(ctx, theRequestDetails, theRequest, theResponse);
+				new BundleEntryUrlProcessor(ctx, theRequestDetails, theRequest, theResponse);
 		BundleUtil.processEntries(ctx, bundle, processor);
 	}
 
@@ -214,7 +214,8 @@ public class SearchNarrowingInterceptor {
 		if (myNarrowConditionalUrls) {
 			String ifNoneExist = theRequestDetails.getHeader(Constants.HEADER_IF_NONE_EXIST);
 			if (isNotBlank(ifNoneExist)) {
-				String newConditionalUrl = narrowConditionalUrl(theRequestDetails, ifNoneExist, true, theRequestDetails.getResourceName(), false);
+				String newConditionalUrl = narrowConditionalUrl(
+						theRequestDetails, ifNoneExist, true, theRequestDetails.getResourceName(), false);
 				if (newConditionalUrl != null) {
 					theRequestDetails.setHeaders(Constants.HEADER_IF_NONE_EXIST, List.of(newConditionalUrl));
 				}
@@ -225,29 +226,40 @@ public class SearchNarrowingInterceptor {
 	private void narrowRequestUrl(RequestDetails theRequestDetails, RestOperationTypeEnum theRestOperationType) {
 		if (myNarrowConditionalUrls) {
 			String conditionalUrl = theRequestDetails.getConditionalUrl(theRestOperationType);
-			String newConditionalUrl = narrowConditionalUrl(theRequestDetails, conditionalUrl, false, theRequestDetails.getResourceName(), false);
+			String newConditionalUrl = narrowConditionalUrl(
+					theRequestDetails, conditionalUrl, false, theRequestDetails.getResourceName(), false);
 			if (newConditionalUrl != null) {
-				String newCompleteUrl = theRequestDetails.getCompleteUrl().substring(0, theRequestDetails.getCompleteUrl().indexOf('?') + 1) + newConditionalUrl;
+				String newCompleteUrl = theRequestDetails
+								.getCompleteUrl()
+								.substring(0, theRequestDetails.getCompleteUrl().indexOf('?') + 1)
+						+ newConditionalUrl;
 				theRequestDetails.setCompleteUrl(newCompleteUrl);
 			}
 		}
 	}
 
 	@Nullable
-	private String narrowConditionalUrl(RequestDetails theRequestDetails, String theConditionalUrl, boolean theIncludeUpToQuestionMarkInResponse, String theResourceName, boolean theNarrowCodes) {
+	private String narrowConditionalUrl(
+			RequestDetails theRequestDetails,
+			String theConditionalUrl,
+			boolean theIncludeUpToQuestionMarkInResponse,
+			String theResourceName,
+			boolean theNarrowCodes) {
 		if (isBlank(theConditionalUrl)) {
-            return null;
-        }
+			return null;
+		}
 
 		AuthorizedList authorizedList = buildAuthorizedList(theRequestDetails);
 		if (authorizedList == null) {
 			return null;
 		}
 
-		ListMultimap<String, String> parametersToAdd = buildParameterListForAuthorizedCompartment(theRequestDetails, theResourceName, authorizedList);
+		ListMultimap<String, String> parametersToAdd =
+				buildParameterListForAuthorizedCompartment(theRequestDetails, theResourceName, authorizedList);
 
 		if (theNarrowCodes) {
-			ListMultimap<String, String> parametersToAddForCodes = buildParameterListForAuthorizedCodes(theRequestDetails, theResourceName, authorizedList);
+			ListMultimap<String, String> parametersToAddForCodes =
+					buildParameterListForAuthorizedCodes(theRequestDetails, theResourceName, authorizedList);
 			if (parametersToAdd == null) {
 				parametersToAdd = parametersToAddForCodes;
 			} else if (parametersToAddForCodes != null) {
@@ -308,20 +320,24 @@ public class SearchNarrowingInterceptor {
 		String resourceName = theRequestDetails.getResourceName();
 
 		// Narrow request URL for compartments
-		ListMultimap<String, String> parametersToAdd = buildParameterListForAuthorizedCompartment(theRequestDetails, resourceName, authorizedList);
+		ListMultimap<String, String> parametersToAdd =
+				buildParameterListForAuthorizedCompartment(theRequestDetails, resourceName, authorizedList);
 		if (parametersToAdd != null) {
 			applyParametersToRequestDetails(theRequestDetails, parametersToAdd, true);
 		}
 
-		// Narrow request URL for codes - Add rules to request so that the SearchNarrowingConsentService can pick them up
-		ListMultimap<String, String> parameterToOrValues = buildParameterListForAuthorizedCodes(theRequestDetails, resourceName, authorizedList);
+		// Narrow request URL for codes - Add rules to request so that the SearchNarrowingConsentService can pick them
+		// up
+		ListMultimap<String, String> parameterToOrValues =
+				buildParameterListForAuthorizedCodes(theRequestDetails, resourceName, authorizedList);
 		if (parameterToOrValues != null) {
 			applyParametersToRequestDetails(theRequestDetails, parameterToOrValues, false);
 		}
 	}
 
 	@Nullable
-	private ListMultimap<String, String> buildParameterListForAuthorizedCodes(RequestDetails theRequestDetails, String resourceName, AuthorizedList authorizedList) {
+	private ListMultimap<String, String> buildParameterListForAuthorizedCodes(
+			RequestDetails theRequestDetails, String resourceName, AuthorizedList authorizedList) {
 		List<AllowedCodeInValueSet> postFilteringList = getPostFilteringList(theRequestDetails);
 		if (authorizedList.getAllowedCodeInValueSets() != null) {
 			postFilteringList.addAll(authorizedList.getAllowedCodeInValueSets());
@@ -338,7 +354,8 @@ public class SearchNarrowingInterceptor {
 	}
 
 	@Nullable
-	private ListMultimap<String, String> buildParameterListForAuthorizedCompartment(RequestDetails theRequestDetails, String theResourceName, @Nullable AuthorizedList theAuthorizedList) {
+	private ListMultimap<String, String> buildParameterListForAuthorizedCompartment(
+			RequestDetails theRequestDetails, String theResourceName, @Nullable AuthorizedList theAuthorizedList) {
 		if (theAuthorizedList == null) {
 			return null;
 		}
@@ -353,12 +370,14 @@ public class SearchNarrowingInterceptor {
 		Collection<String> compartments = theAuthorizedList.getAllowedCompartments();
 		ListMultimap<String, String> parametersToAdd = null;
 		if (compartments != null) {
-			parametersToAdd = processResourcesOrCompartments(theRequestDetails, resDef, compartments, true, theResourceName);
+			parametersToAdd =
+					processResourcesOrCompartments(theRequestDetails, resDef, compartments, true, theResourceName);
 		}
 
 		Collection<String> resources = theAuthorizedList.getAllowedInstances();
 		if (resources != null) {
-			ListMultimap<String, String> parameterToOrValues = processResourcesOrCompartments(theRequestDetails, resDef, resources, false, theResourceName);
+			ListMultimap<String, String> parameterToOrValues =
+					processResourcesOrCompartments(theRequestDetails, resDef, resources, false, theResourceName);
 			if (parametersToAdd == null) {
 				parametersToAdd = parameterToOrValues;
 			} else if (parameterToOrValues != null) {
@@ -373,36 +392,37 @@ public class SearchNarrowingInterceptor {
 	 */
 	private boolean shouldSkipNarrowing(RequestDetails theRequestDetails) {
 		return theRequestDetails.getRestOperationType() != RestOperationTypeEnum.SEARCH_TYPE
-			&& !"$everything".equalsIgnoreCase(theRequestDetails.getOperation());
+				&& !"$everything".equalsIgnoreCase(theRequestDetails.getOperation());
 	}
 
 	private void applyParametersToRequestDetails(
-		RequestDetails theRequestDetails,
-		@Nullable ListMultimap<String, String> theParameterToOrValues,
-		boolean thePatientIdMode) {
+			RequestDetails theRequestDetails,
+			@Nullable ListMultimap<String, String> theParameterToOrValues,
+			boolean thePatientIdMode) {
 		Map<String, String[]> inputParameters = theRequestDetails.getParameters();
 		if (theParameterToOrValues != null) {
-			Map<String, String[]> newParameters = applyCompartmentParameters(theParameterToOrValues, thePatientIdMode, inputParameters);
+			Map<String, String[]> newParameters =
+					applyCompartmentParameters(theParameterToOrValues, thePatientIdMode, inputParameters);
 			theRequestDetails.setParameters(newParameters);
 		}
 	}
 
 	@Nullable
 	private ListMultimap<String, String> processResourcesOrCompartments(
-		RequestDetails theRequestDetails,
-		RuntimeResourceDefinition theResDef,
-		Collection<String> theResourcesOrCompartments,
-		boolean theAreCompartments,
-		String theResourceName) {
+			RequestDetails theRequestDetails,
+			RuntimeResourceDefinition theResDef,
+			Collection<String> theResourcesOrCompartments,
+			boolean theAreCompartments,
+			String theResourceName) {
 		ListMultimap<String, String> retVal = null;
 
 		String lastCompartmentName = null;
 		String lastSearchParamName = null;
 		for (String nextCompartment : theResourcesOrCompartments) {
 			Validate.isTrue(
-				StringUtils.countMatches(nextCompartment, '/') == 1,
-				"Invalid compartment name (must be in form \"ResourceType/xxx\": %s",
-				nextCompartment);
+					StringUtils.countMatches(nextCompartment, '/') == 1,
+					"Invalid compartment name (must be in form \"ResourceType/xxx\": %s",
+					nextCompartment);
 			String compartmentName = nextCompartment.substring(0, nextCompartment.indexOf('/'));
 
 			String searchParamName = null;
@@ -420,7 +440,7 @@ public class SearchNarrowingInterceptor {
 				} else if (theAreCompartments) {
 
 					searchParamName =
-						selectBestSearchParameterForCompartment(theRequestDetails, theResDef, compartmentName);
+							selectBestSearchParameterForCompartment(theRequestDetails, theResDef, compartmentName);
 				}
 
 				lastCompartmentName = compartmentName;
@@ -440,7 +460,7 @@ public class SearchNarrowingInterceptor {
 
 	@Nullable
 	private ListMultimap<String, String> processAllowedCodes(
-		RuntimeResourceDefinition theResDef, List<AllowedCodeInValueSet> theAllowedCodeInValueSet) {
+			RuntimeResourceDefinition theResDef, List<AllowedCodeInValueSet> theAllowedCodeInValueSet) {
 		ListMultimap<String, String> retVal = null;
 
 		for (AllowedCodeInValueSet next : theAllowedCodeInValueSet) {
@@ -448,9 +468,9 @@ public class SearchNarrowingInterceptor {
 			String valueSetUrl = next.getValueSetUrl();
 
 			ValidateUtil.isNotBlankOrThrowIllegalArgument(
-				resourceName, "Resource name supplied by SearchNarrowingInterceptor must not be null");
+					resourceName, "Resource name supplied by SearchNarrowingInterceptor must not be null");
 			ValidateUtil.isNotBlankOrThrowIllegalArgument(
-				valueSetUrl, "ValueSet URL supplied by SearchNarrowingInterceptor must not be null");
+					valueSetUrl, "ValueSet URL supplied by SearchNarrowingInterceptor must not be null");
 
 			if (!resourceName.equals(theResDef.getName())) {
 				continue;
@@ -487,7 +507,7 @@ public class SearchNarrowingInterceptor {
 			options.setCount(myPostFilterLargeValueSetThreshold);
 			options.setIncludeHierarchy(false);
 			IValidationSupport.ValueSetExpansionOutcome outcome =
-				myValidationSupport.expandValueSet(ctx, options, theValueSetUrl);
+					myValidationSupport.expandValueSet(ctx, options, theValueSetUrl);
 			if (outcome != null && outcome.getValueSet() != null) {
 				FhirTerser terser = myValidationSupport.getFhirContext().newTerser();
 				List<IBase> contains = terser.getValues(outcome.getValueSet(), "ValueSet.expansion.contains");
@@ -499,7 +519,7 @@ public class SearchNarrowingInterceptor {
 	}
 
 	private String selectBestSearchParameterForCompartment(
-		RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, String compartmentName) {
+			RequestDetails theRequestDetails, RuntimeResourceDefinition theResDef, String compartmentName) {
 		String searchParamName = null;
 
 		Set<String> queryParameters = theRequestDetails.getParameters().keySet();
@@ -511,8 +531,8 @@ public class SearchNarrowingInterceptor {
 			// the compartment. In the case of Observation, it's subject, patient and performer.
 			// For this kind of thing, we'll prefer the one that matches the compartment name.
 			Optional<RuntimeSearchParam> primarySearchParam = searchParams.stream()
-				.filter(t -> t.getName().equalsIgnoreCase(compartmentName))
-				.findFirst();
+					.filter(t -> t.getName().equalsIgnoreCase(compartmentName))
+					.findFirst();
 
 			if (primarySearchParam.isPresent()) {
 				String primarySearchParamName = primarySearchParam.get().getName();
@@ -523,9 +543,9 @@ public class SearchNarrowingInterceptor {
 					// If the primary search parameter itself isn't in use, check to see whether any of its synonyms
 					// are.
 					Optional<RuntimeSearchParam> synonymInUse =
-						findSynonyms(searchParams, primarySearchParam.get()).stream()
-							.filter(t -> queryParameters.contains(t.getName()))
-							.findFirst();
+							findSynonyms(searchParams, primarySearchParam.get()).stream()
+									.filter(t -> queryParameters.contains(t.getName()))
+									.findFirst();
 					if (synonymInUse.isPresent()) {
 						// if a synonym is in use, use it
 						searchParamName = synonymInUse.get().getName();
@@ -544,15 +564,15 @@ public class SearchNarrowingInterceptor {
 	}
 
 	private List<RuntimeSearchParam> findSynonyms(
-		List<RuntimeSearchParam> searchParams, RuntimeSearchParam primarySearchParam) {
+			List<RuntimeSearchParam> searchParams, RuntimeSearchParam primarySearchParam) {
 		// We define two search parameters in a compartment as synonyms if they refer to the same field in the model,
 		// ignoring any qualifiers
 
 		String primaryBasePath = getBasePath(primarySearchParam);
 
 		return searchParams.stream()
-			.filter(t -> primaryBasePath.equals(getBasePath(t)))
-			.collect(Collectors.toList());
+				.filter(t -> primaryBasePath.equals(getBasePath(t)))
+				.collect(Collectors.toList());
 	}
 
 	private String getBasePath(RuntimeSearchParam searchParam) {
@@ -565,7 +585,10 @@ public class SearchNarrowingInterceptor {
 	}
 
 	@Nonnull
-	private static Map<String, String[]> applyCompartmentParameters(@Nonnull ListMultimap<String, String> theParameterToOrValues, boolean thePatientIdMode, Map<String, String[]> inputParameters) {
+	private static Map<String, String[]> applyCompartmentParameters(
+			@Nonnull ListMultimap<String, String> theParameterToOrValues,
+			boolean thePatientIdMode,
+			Map<String, String[]> inputParameters) {
 		Map<String, String[]> newParameters = new HashMap<>(inputParameters);
 		for (String nextParamName : theParameterToOrValues.keySet()) {
 			List<String> nextAllowedValues = theParameterToOrValues.get(nextParamName);
@@ -590,17 +613,17 @@ public class SearchNarrowingInterceptor {
 
 				if (thePatientIdMode) {
 					List<String> nextAllowedValueIds = nextAllowedValues.stream()
-						.map(t -> t.lastIndexOf("/") > -1 ? t.substring(t.lastIndexOf("/") + 1) : t)
-						.collect(Collectors.toList());
+							.map(t -> t.lastIndexOf("/") > -1 ? t.substring(t.lastIndexOf("/") + 1) : t)
+							.collect(Collectors.toList());
 					boolean restrictedExistingList = false;
 					for (int i = 0; i < existingValues.length; i++) {
 
 						String nextExistingValue = existingValues[i];
 						List<String> nextRequestedValues =
-							QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, nextExistingValue);
+								QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, nextExistingValue);
 						List<String> nextPermittedValues = ListUtils.union(
-							ListUtils.intersection(nextRequestedValues, nextAllowedValues),
-							ListUtils.intersection(nextRequestedValues, nextAllowedValueIds));
+								ListUtils.intersection(nextRequestedValues, nextAllowedValues),
+								ListUtils.intersection(nextRequestedValues, nextAllowedValueIds));
 						if (nextPermittedValues.size() > 0) {
 							restrictedExistingList = true;
 							existingValues[i] = ParameterUtil.escapeAndJoinOrList(nextPermittedValues);
@@ -615,14 +638,13 @@ public class SearchNarrowingInterceptor {
 					 */
 					if (!restrictedExistingList) {
 						throw new ForbiddenOperationException(Msg.code(2026) + "Value not permitted for parameter "
-							+ UrlUtil.escapeUrlParam(nextParamName));
+								+ UrlUtil.escapeUrlParam(nextParamName));
 					}
 
 				} else {
 
 					int existingValuesCount = existingValues.length;
-					String[] newValues =
-						Arrays.copyOf(existingValues, existingValuesCount + nextAllowedValues.size());
+					String[] newValues = Arrays.copyOf(existingValues, existingValuesCount + nextAllowedValues.size());
 					for (int i = 0; i < nextAllowedValues.size(); i++) {
 						newValues[existingValuesCount + i] = nextAllowedValues.get(i);
 					}
@@ -654,10 +676,10 @@ public class SearchNarrowingInterceptor {
 		private final HttpServletResponse myResponse;
 
 		public BundleEntryUrlProcessor(
-			FhirContext theFhirContext,
-			ServletRequestDetails theRequestDetails,
-			HttpServletRequest theRequest,
-			HttpServletResponse theResponse) {
+				FhirContext theFhirContext,
+				ServletRequestDetails theRequestDetails,
+				HttpServletRequest theRequest,
+				HttpServletResponse theResponse) {
 			myFhirContext = theFhirContext;
 			myRequestDetails = theRequestDetails;
 			myRequest = theRequest;
@@ -676,7 +698,8 @@ public class SearchNarrowingInterceptor {
 				switch (method) {
 					case GET: {
 						String existingRequestUrl = theModifiableBundleEntry.getRequestUrl();
-						String newConditionalUrl = narrowConditionalUrl(myRequestDetails, existingRequestUrl, false, resourceType, true);
+						String newConditionalUrl =
+								narrowConditionalUrl(myRequestDetails, existingRequestUrl, false, resourceType, true);
 						if (isNotBlank(newConditionalUrl)) {
 							newConditionalUrl = resourceType + "?" + newConditionalUrl;
 							theModifiableBundleEntry.setRequestUrl(myFhirContext, newConditionalUrl);
@@ -686,7 +709,8 @@ public class SearchNarrowingInterceptor {
 					case POST: {
 						if (myNarrowConditionalUrls) {
 							String existingConditionalUrl = theModifiableBundleEntry.getConditionalUrl();
-							String newConditionalUrl = narrowConditionalUrl(myRequestDetails, existingConditionalUrl, true, resourceType, false);
+							String newConditionalUrl = narrowConditionalUrl(
+									myRequestDetails, existingConditionalUrl, true, resourceType, false);
 							if (isNotBlank(newConditionalUrl)) {
 								theModifiableBundleEntry.setRequestIfNoneExist(myFhirContext, newConditionalUrl);
 							}
@@ -698,7 +722,8 @@ public class SearchNarrowingInterceptor {
 					case PATCH: {
 						if (myNarrowConditionalUrls) {
 							String existingConditionalUrl = theModifiableBundleEntry.getConditionalUrl();
-							String newConditionalUrl = narrowConditionalUrl(myRequestDetails, existingConditionalUrl, true, resourceType, false);
+							String newConditionalUrl = narrowConditionalUrl(
+									myRequestDetails, existingConditionalUrl, true, resourceType, false);
 							if (isNotBlank(newConditionalUrl)) {
 								theModifiableBundleEntry.setRequestUrl(myFhirContext, newConditionalUrl);
 							}
@@ -706,7 +731,6 @@ public class SearchNarrowingInterceptor {
 						break;
 					}
 				}
-
 			}
 		}
 	}

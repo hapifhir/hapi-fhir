@@ -560,8 +560,8 @@ public class UrlUtil {
 		for (int i = 0; i < theString.length(); i++) {
 			char nextChar = theString.charAt(i);
 			if (nextChar == '%' || (nextChar == '+' && shouldEscapePlus)) {
-                return URLDecoder.decode(theString, StandardCharsets.UTF_8);
-            }
+				return URLDecoder.decode(theString, StandardCharsets.UTF_8);
+			}
 		}
 		return theString;
 	}
