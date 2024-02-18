@@ -226,7 +226,8 @@ public class SearchNarrowingInterceptor {
 	private void narrowEverythingOperation(RequestDetails theRequestDetails) {
 		AuthorizedList authorizedList = buildAuthorizedList(theRequestDetails);
 		if (authorizedList != null) {
-			buildParameterListForAuthorizedCodes(theRequestDetails, theRequestDetails.getResourceName(), authorizedList);
+			buildParameterListForAuthorizedCodes(
+					theRequestDetails, theRequestDetails.getResourceName(), authorizedList);
 		}
 	}
 
