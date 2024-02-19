@@ -196,13 +196,11 @@ public class SearchNarrowingInterceptor {
 				case BATCH:
 					IBaseBundle bundle = (IBaseBundle) theRequestDetails.getResource();
 					FhirContext ctx = theRequestDetails.getFhirContext();
-					BundleEntryUrlProcessor processor =
-						new BundleEntryUrlProcessor(ctx, theRequestDetails);
+					BundleEntryUrlProcessor processor = new BundleEntryUrlProcessor(ctx, theRequestDetails);
 					BundleUtil.processEntries(ctx, bundle, processor);
 					break;
 			}
 		}
-
 	}
 
 	/**
@@ -254,12 +252,14 @@ public class SearchNarrowingInterceptor {
 			String conditionalUrl = theRequestDetails.getConditionalUrl(theRestOperationType);
 			if (isNotBlank(conditionalUrl)) {
 				String newConditionalUrl = narrowConditionalUrl(
-					theRequestDetails, conditionalUrl, false, theRequestDetails.getResourceName(), false);
+						theRequestDetails, conditionalUrl, false, theRequestDetails.getResourceName(), false);
 				if (newConditionalUrl != null) {
 					String newCompleteUrl = theRequestDetails
-						.getCompleteUrl()
-						.substring(0, theRequestDetails.getCompleteUrl().indexOf('?') + 1)
-						+ newConditionalUrl;
+									.getCompleteUrl()
+									.substring(
+											0,
+											theRequestDetails.getCompleteUrl().indexOf('?') + 1)
+							+ newConditionalUrl;
 					theRequestDetails.setCompleteUrl(newCompleteUrl);
 				}
 			}
@@ -274,11 +274,23 @@ public class SearchNarrowingInterceptor {
 			String theResourceName,
 			boolean theNarrowCodes) {
 		AuthorizedList authorizedList = buildAuthorizedList(theRequestDetails);
-		return narrowConditionalUrl(theRequestDetails, theConditionalUrl, theIncludeUpToQuestionMarkInResponse, theResourceName, theNarrowCodes, authorizedList);
+		return narrowConditionalUrl(
+				theRequestDetails,
+				theConditionalUrl,
+				theIncludeUpToQuestionMarkInResponse,
+				theResourceName,
+				theNarrowCodes,
+				authorizedList);
 	}
 
 	@Nullable
-	private String narrowConditionalUrl(RequestDetails theRequestDetails, @Nonnull String theConditionalUrl, boolean theIncludeUpToQuestionMarkInResponse, String theResourceName, boolean theNarrowCodes, AuthorizedList theAuthorizedList) {
+	private String narrowConditionalUrl(
+			RequestDetails theRequestDetails,
+			@Nonnull String theConditionalUrl,
+			boolean theIncludeUpToQuestionMarkInResponse,
+			String theResourceName,
+			boolean theNarrowCodes,
+			AuthorizedList theAuthorizedList) {
 		if (theAuthorizedList == null) {
 			return null;
 		}
@@ -703,9 +715,7 @@ public class SearchNarrowingInterceptor {
 		private final ServletRequestDetails myRequestDetails;
 		private final AuthorizedList myAuthorizedList;
 
-		public BundleEntryUrlProcessor(
-				FhirContext theFhirContext,
-				ServletRequestDetails theRequestDetails) {
+		public BundleEntryUrlProcessor(FhirContext theFhirContext, ServletRequestDetails theRequestDetails) {
 			myFhirContext = theFhirContext;
 			myRequestDetails = theRequestDetails;
 			myAuthorizedList = buildAuthorizedList(theRequestDetails);
@@ -714,6 +724,10 @@ public class SearchNarrowingInterceptor {
 		@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 		@Override
 		public void accept(ModifiableBundleEntry theModifiableBundleEntry) {
+			if (myAuthorizedList == null) {
+				return;
+			}
+
 			RequestTypeEnum method = theModifiableBundleEntry.getRequestMethod();
 			String requestUrl = theModifiableBundleEntry.getRequestUrl();
 			if (method != null && isNotBlank(requestUrl)) {
@@ -723,8 +737,8 @@ public class SearchNarrowingInterceptor {
 				switch (method) {
 					case GET: {
 						String existingRequestUrl = theModifiableBundleEntry.getRequestUrl();
-						String newConditionalUrl =
-								narrowConditionalUrl(myRequestDetails, existingRequestUrl, false, resourceType, true, myAuthorizedList);
+						String newConditionalUrl = narrowConditionalUrl(
+								myRequestDetails, existingRequestUrl, false, resourceType, true, myAuthorizedList);
 						if (isNotBlank(newConditionalUrl)) {
 							newConditionalUrl = resourceType + "?" + newConditionalUrl;
 							theModifiableBundleEntry.setRequestUrl(myFhirContext, newConditionalUrl);
@@ -736,7 +750,12 @@ public class SearchNarrowingInterceptor {
 							String existingConditionalUrl = theModifiableBundleEntry.getConditionalUrl();
 							if (isNotBlank(existingConditionalUrl)) {
 								String newConditionalUrl = narrowConditionalUrl(
-									myRequestDetails, existingConditionalUrl, true, resourceType, false, myAuthorizedList);
+										myRequestDetails,
+										existingConditionalUrl,
+										true,
+										resourceType,
+										false,
+										myAuthorizedList);
 								if (isNotBlank(newConditionalUrl)) {
 									theModifiableBundleEntry.setRequestIfNoneExist(myFhirContext, newConditionalUrl);
 								}
@@ -751,7 +770,12 @@ public class SearchNarrowingInterceptor {
 							String existingConditionalUrl = theModifiableBundleEntry.getConditionalUrl();
 							if (isNotBlank(existingConditionalUrl)) {
 								String newConditionalUrl = narrowConditionalUrl(
-									myRequestDetails, existingConditionalUrl, true, resourceType, false, myAuthorizedList);
+										myRequestDetails,
+										existingConditionalUrl,
+										true,
+										resourceType,
+										false,
+										myAuthorizedList);
 								if (isNotBlank(newConditionalUrl)) {
 									theModifiableBundleEntry.setRequestUrl(myFhirContext, newConditionalUrl);
 								}
