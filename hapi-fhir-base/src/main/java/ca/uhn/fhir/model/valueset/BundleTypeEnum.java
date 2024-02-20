@@ -91,7 +91,7 @@ public enum BundleTypeEnum {
 	/**
 	 * Returns the enumerated value associated with this code
 	 */
-	public BundleTypeEnum forCode(String theCode) {
+	public static BundleTypeEnum forCode(String theCode) {
 		BundleTypeEnum retVal = CODE_TO_ENUM.get(theCode);
 		return retVal;
 	}

@@ -23,7 +23,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -36,6 +35,7 @@ import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -60,6 +60,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -151,7 +152,6 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -658,7 +658,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 			myEncounterDao.search(map);
 			fail();
 		} catch (InvalidRequestException e) {
-			assertEquals("Resource type \"Organization\" is not a valid target type for reference search parameter: Encounter:subject", e.getMessage());
+			assertEquals(Msg.code(2495) + "Resource type \"Organization\" is not a valid target type for reference search parameter: Encounter:subject", e.getMessage());
 		}
 
 		map = new SearchParameterMap();
@@ -3549,7 +3549,41 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.add(Task.SP_REQUESTER, new ReferenceParam(oid1.getValue()));
 		ids = toUnqualifiedVersionlessIds(myTaskDao.search(map));
 		assertThat(ids, contains(tid1)); // NOT tid2
+	}
 
+	@Test
+	public void testSearchWithValidTypedResourceReference_returnsCorrectly() {
+		// setup
+		IIdType encounterId = createEncounter(withIdentifier("http://example", "someValue"));
+
+		MedicationAdministration ma = new MedicationAdministration()
+				.setContext(new Reference(encounterId))
+				.setEffective(new DateTimeType());
+		IIdType medicationAdministrationId = myMedicationAdministrationDao.create(ma, mySrd).getId();
+
+		// execute
+		ReferenceParam referenceParam = new ReferenceParam(encounterId.getResourceType(), null, encounterId.getIdPart());
+		SearchParameterMap map = new SearchParameterMap().add(MedicationAdministration.SP_CONTEXT, referenceParam);
+
+		// verify
+		List<IIdType> ids = toUnqualifiedVersionlessIds(myMedicationAdministrationDao.search(map, mySrd));
+		assertEquals(1, ids.size());
+		assertThat(ids, contains(medicationAdministrationId.toUnqualifiedVersionless()));
+	}
+
+	@Test
+	public void testSearchWithInvalidTypedResourceReference_throwsUnsupportedResourceType() {
+		// execute
+		try {
+			ReferenceParam referenceParam = new ReferenceParam("abc", null, "123");
+			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(MedicationAdministration.SP_CONTEXT, referenceParam);
+
+			// verify
+			myMedicationAdministrationDao.search(map, mySrd);
+			fail();
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(1250) + "Invalid/unsupported resource type: \"abc\"", e.getMessage());
+		}
 	}
 
 	@Test

@@ -29,4 +29,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 		getterVisibility = JsonAutoDetect.Visibility.NONE,
 		isGetterVisibility = JsonAutoDetect.Visibility.NONE,
 		setterVisibility = JsonAutoDetect.Visibility.NONE)
-public interface IModelJson {}
+public interface IModelJson {
+	String SENSITIVE_DATA_FILTER_NAME = "sensitiveDataFilter";
+}

@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.dao;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -158,9 +157,9 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	@Override
 	public IBundleProvider history(Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails) {
 		StopWatch w = new StopWatch();
-		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(null, null);
 		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, details);
+				myRequestPartitionHelperService.determineReadPartitionForRequestForHistory(
+						theRequestDetails, null, null);
 		IBundleProvider retVal = myTransactionService
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(requestPartitionId)

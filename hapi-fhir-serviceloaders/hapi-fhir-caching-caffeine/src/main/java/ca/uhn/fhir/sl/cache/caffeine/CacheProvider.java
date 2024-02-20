@@ -44,6 +44,9 @@ public class CacheProvider<K, V> implements ca.uhn.fhir.sl.cache.CacheProvider<K
 	public Cache<K, V> create(long timeoutMillis, long maximumSize) {
 		return new CacheDelegator<K, V>(Caffeine.newBuilder()
 				.expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS)
+				// Caffeine locks the whole array when growing the hash table.
+				// Set initial capacity to max to avoid this.  All our caches are <1M entries.
+				.initialCapacity((int) maximumSize)
 				.maximumSize(maximumSize)
 				.build());
 	}
@@ -51,6 +54,9 @@ public class CacheProvider<K, V> implements ca.uhn.fhir.sl.cache.CacheProvider<K
 	public LoadingCache<K, V> create(long timeoutMillis, long maximumSize, CacheLoader<K, V> loading) {
 		return new LoadingCacheDelegator<K, V>(Caffeine.newBuilder()
 				.expireAfterWrite(timeoutMillis, TimeUnit.MILLISECONDS)
+				// Caffeine locks the whole array when growing the hash table.
+				// Set initial capacity to max to avoid this.  All our caches are <1M entries.
+				.initialCapacity((int) maximumSize)
 				.maximumSize(maximumSize)
 				.build(loading::load));
 	}

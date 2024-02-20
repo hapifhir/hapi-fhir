@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5668
+title: "Added support for sorting on a chained `location.near` search. This allows you to sort location by nearness via a chained search. Thanks to Nicolai Gjøderum (@nigtrifork) for the contribution!"
