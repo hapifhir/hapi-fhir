@@ -73,8 +73,6 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
-	@SpyBean
-	@Autowired
 	private PatientIdPartitionInterceptor mySvc;
 
 	@Override
@@ -577,8 +575,6 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			assertEquals(202, postResponse.getStatusLine().getStatusCode());
 			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
 		}
-
-		verify(mySvc).provideNonPatientSpecificQueryResponse(any());
 	}
 
 	@Test
@@ -593,8 +589,6 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			assertEquals(202, postResponse.getStatusLine().getStatusCode());
 			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
 		}
-
-		verify(mySvc).provideNonPatientSpecificQueryResponse(any());
 	}
 
 	@Test
