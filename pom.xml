@@ -923,7 +923,7 @@
 		<checkstyle_version>10.6.0</checkstyle_version>
 		<maven_changes_version>2.12.1</maven_changes_version>
 		<commons_codec_version>1.15</commons_codec_version>
-		<commons_compress_version>1.21</commons_compress_version>
+		<commons_compress_version>1.26</commons_compress_version>
 		<!--
 		Note if you bump the version here - The commons-dbcp2 2.11.0 version
 		explicitly depends on commons-pool2 2.12.0, so we explicitly specify that
