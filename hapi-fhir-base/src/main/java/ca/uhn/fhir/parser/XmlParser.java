@@ -682,7 +682,7 @@ public class XmlParser extends BaseParser {
 		}
 
 		if (!theContainedResource) {
-			setContainedResources(getContext().newTerser().containResources(theResource));
+			containResourcesInReferences(theResource);
 		}
 
 		theEventWriter.writeStartElement(resDef.getName());

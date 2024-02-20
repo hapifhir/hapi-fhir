@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 5589
+backport: 6.10.5
+title: "When encoding a Bundle, if resources in bundle entries had a value in 
+   `Bundle.entry.fullUrl` but no value in `Bundle.entry.resource.id`, the parser
+   sometimes incorrectly moved these resources to be contained within other
+   resources when serializing the bundle. This has been corrected."
