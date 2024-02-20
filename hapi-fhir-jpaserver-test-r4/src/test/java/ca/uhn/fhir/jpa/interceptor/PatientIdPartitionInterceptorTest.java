@@ -73,8 +73,6 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
-	private PatientIdPartitionInterceptor mySvc;
-
 	@SpyBean
 	@Autowired
 	private PatientIdPartitionInterceptor mySvc;
@@ -563,7 +561,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testIdentifyForRead_serverOperation_returnsAllPartitions() {
-		ReadPartitionIdRequestDetails readRequestDetails = ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_EXPORT);
+		ReadPartitionIdRequestDetails readRequestDetails = ReadPartitionIdRequestDetails.forServerOperation(ProviderConstants.OPERATION_EXPORT);
 		RequestPartitionId requestPartitionId = mySvc.identifyForRead(readRequestDetails, mySrd);
 		assertEquals(requestPartitionId, RequestPartitionId.allPartitions());
 		assertEquals(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, readRequestDetails.getRestOperationType());
