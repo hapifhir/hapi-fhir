@@ -1,0 +1,26 @@
+<Observation xmlns="http://hl7.org/fhir">
+	<id value="0d87f02c-da2c-4551-9ead-2956f0165a4f"></id>
+	<code>
+		<coding>
+			<system value="http://loinc.org"></system>
+			<code value="8867-4"></code>
+		</coding>
+	</code>
+	<valueString value="observationValue"></valueString>
+	<status value="final"></status>
+	<referenceRange>
+		<low>
+			<value value="-3.0"/>
+			<unit value="mmol/l"/>
+			<system value="Home"/>
+			<code value="mmol/l"/>
+		</low>
+		<high>
+			<value value="+3.0"/>
+			<unit value="mmol/l"/>
+			<system value="Home"/>
+			<code value="mmol/l"/>
+		</high>
+		<text value="-3.0 mmol/l - +3.0 mmol/l"/>
+	</referenceRange>
+</Observation>

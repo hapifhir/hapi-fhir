@@ -786,7 +786,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		logAndValidateValueSet(result);
 
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("childAAA", "childAAB"));
+		assertThat(codes, containsInAnyOrder("childAA", "childAAA", "childAAB"));
 	}
 
 	@Test

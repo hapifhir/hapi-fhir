@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5659
+title: "Previously, after registering built-in interceptor `PatientIdPartitionInterceptor`, the system bulk export 
+(with no filters) operation would fail with a NullPointerException. This has been fixed."

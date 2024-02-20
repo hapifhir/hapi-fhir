@@ -91,6 +91,9 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	// TermReadSvcImpl calls these methods as a part of its "isCodeSystemSupported" calls.
 	// We should modify CachingValidationSupport to cache the results of "isXXXSupported"
 	// at which point we could do away with this cache
+	// TODO:  LD: This cache seems to supersede the cache in CachingValidationSupport, as that cache is set to
+	// 10 minutes, but this 1 minute cache now determines the expiry.
+	// This new behaviour was introduced between the 7.0.0 release and the current master (7.2.0)
 	private Cache<String, IBaseResource> myLoadCache = CacheFactory.build(TimeUnit.MINUTES.toMillis(1), 1000);
 
 	/**
@@ -188,6 +191,9 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 		IBaseResource fetched = myLoadCache.get(key, t -> doFetchResource(theClass, theUri));
 
 		if (fetched == myNoMatch) {
+			ourLog.debug(
+					"Invalidating cache entry for URI: {} since the result of the underlying query is empty", theUri);
+			myLoadCache.invalidate(key);
 			return null;
 		}
 

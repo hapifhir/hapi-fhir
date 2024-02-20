@@ -1745,16 +1745,18 @@ public abstract class BaseTransactionProcessor {
 				continue; // No substitution on the resource ID itself!
 			}
 			String nextUriString = nextRef.getValueAsString();
-			if (theIdSubstitutions.containsSource(nextUriString)) {
-				IIdType newId = theIdSubstitutions.getForSource(nextUriString);
-				ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
+			if (isNotBlank(nextUriString)) {
+				if (theIdSubstitutions.containsSource(nextUriString)) {
+					IIdType newId = theIdSubstitutions.getForSource(nextUriString);
+					ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
 
-				String existingValue = nextRef.getValueAsString();
-				theTransactionDetails.addRollbackUndoAction(() -> nextRef.setValueAsString(existingValue));
+					String existingValue = nextRef.getValueAsString();
+					theTransactionDetails.addRollbackUndoAction(() -> nextRef.setValueAsString(existingValue));
 
-				nextRef.setValueAsString(newId.toVersionless().getValue());
-			} else {
-				ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
+					nextRef.setValueAsString(newId.toVersionless().getValue());
+				} else {
+					ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
+				}
 			}
 		}
 
@@ -1806,10 +1808,7 @@ public abstract class BaseTransactionProcessor {
 
 			theDaoMethodOutcome.setId(newId);
 
-			IIdType target = theIdSubstitutions.getForSource(newId);
-			if (target != null) {
-				target.setValue(newId.getValue());
-			}
+			theIdSubstitutions.updateTargets(newId);
 
 			if (theDaoMethodOutcome.getOperationOutcome() != null) {
 				IBase responseEntry = entriesToProcess.getResponseBundleEntryWithVersionlessComparison(newId);
@@ -2256,8 +2255,7 @@ public abstract class BaseTransactionProcessor {
 	public static String performIdSubstitutionsInMatchUrl(IdSubstitutionMap theIdSubstitutions, String theMatchUrl) {
 		String matchUrl = theMatchUrl;
 		if (isNotBlank(matchUrl) && !theIdSubstitutions.isEmpty()) {
-
-			int startIdx = matchUrl.indexOf('?');
+			int startIdx = 0;
 			while (startIdx != -1) {
 
 				int endIdx = matchUrl.indexOf('&', startIdx + 1);

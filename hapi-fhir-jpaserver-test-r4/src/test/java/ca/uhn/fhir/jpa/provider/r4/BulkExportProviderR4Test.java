@@ -43,8 +43,6 @@ public class BulkExportProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertThat(e.getStatusCode(), equalTo(404));
 	}
-
-
 	@Test
 	void testBulkExport_typePatientIdNotExists_throws404() {
 		// given no data

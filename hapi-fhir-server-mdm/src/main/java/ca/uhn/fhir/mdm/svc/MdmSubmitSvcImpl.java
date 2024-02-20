@@ -106,7 +106,7 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 
 		RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
-						theRequestDetails, theSourceResourceType, spMap, null);
+						theRequestDetails, theSourceResourceType, spMap);
 		return submitAllMatchingResourcesToMdmChannel(spMap, searchBuilder, requestPartitionId);
 	}
 

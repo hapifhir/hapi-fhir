@@ -17,8 +17,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -33,10 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InMemoryTerminologyServerValidationSupportTest extends BaseValidationTestWithInlineMocks {
-
-	private static final Logger ourLog = LoggerFactory.getLogger(InMemoryTerminologyServerValidationSupportTest.class);
 	private InMemoryTerminologyServerValidationSupport mySvc;
-	private FhirContext myCtx = FhirContext.forR4();
+	private final FhirContext myCtx = FhirContext.forR4();
 	private DefaultProfileValidationSupport myDefaultSupport;
 	private ValidationSupportChain myChain;
 	private PrePopulatedValidationSupport myPrePopulated;
@@ -54,8 +50,153 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		myDefaultSupport.fetchCodeSystem("http://foo");
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {
+			CommonCodeSystemsTerminologyService.MIMETYPES_VALUESET_URL,
+			CommonCodeSystemsTerminologyService.CURRENCIES_VALUESET_URL,
+			CommonCodeSystemsTerminologyService.LANGUAGES_VALUESET_URL
+	})
+	public void testExpandValueSet_commonVS_expandOk(String theValueSet) {
+		ValueSet vs = (ValueSet) myChain.fetchValueSet(theValueSet);
+		assertNotNull(vs);
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		IValidationSupport.ValueSetExpansionOutcome expansion = mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
+		assertNotNull(expansion);
+		assertNull(expansion.getError());
+		ValueSet valueSet = (ValueSet) expansion.getValueSet();
+		assertNotNull(valueSet);
+		assertNotNull(valueSet.getExpansion());
+	}
+
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL,
+			CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL,
+			CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL
+	})
+	public void testExpandValueSet_customVSBasedOnCommonCS_expandOk(String theCodeSystem) {
+		ValueSet vs = new ValueSet();
+		vs.setId("mimetype");
+		vs.setUrl("http://example.com/mimetype");
+		vs.setVersion("1.0");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
+		vsInclude.setSystem(theCodeSystem);
+		myPrePopulated.addValueSet(vs);
+
+		vs = (ValueSet) myChain.fetchValueSet(vs.getUrl());
+		assertNotNull(vs);
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		IValidationSupport.ValueSetExpansionOutcome expansion = mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
+		assertNotNull(expansion);
+		assertNull(expansion.getError());
+		ValueSet valueSet = (ValueSet) expansion.getValueSet();
+		assertNotNull(valueSet);
+		assertNotNull(valueSet.getExpansion());
+	}
+
 	@Test
-	public void testValidateCodeWithInferredSystem_CommonCodeSystemsCs_BuiltInVs() {
+	public void testValidateCode_mimetypeVSRandomCode_returnsOk() {
+		final String codeSystem = CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL;
+		final String valueSetUrl = CommonCodeSystemsTerminologyService.MIMETYPES_VALUESET_URL;
+
+		final String code = "someRandomCode";
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(valCtx, options, codeSystem, code, null, valueSetUrl);
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk());
+		assertEquals(code, outcome.getCode());
+	}
+
+	@Test
+	public void testValidateCode_customMimetypeVSRandomCode_returnsOk() {
+		final String codeSystem = CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL;
+		final String code = "someRandomCode";
+
+		ValueSet vs = new ValueSet();
+		vs.setId("mimetype");
+		vs.setUrl("http://example.com/mimetype");
+		vs.setVersion("1.0");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
+		vsInclude.setSystem(codeSystem);
+		myPrePopulated.addValueSet(vs);
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(valCtx, options, codeSystem, code, null, vs.getUrl());
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk());
+	}
+
+	@Test
+	public void testValidateCode_customMimetypeVSCodeInVS_returnsOk() {
+		String codeSystem = CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL;
+
+		final String code = "someRandomCode";
+		final String display = "Display " + code;
+
+		ValueSet vs = new ValueSet();
+		vs.setId("example-vs");
+		vs.setUrl("http://example.com/example-vs");
+		vs.setVersion("1.0");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
+		vsInclude.setSystem(codeSystem);
+		vsInclude.addConcept().setCode(code).setDisplay(display);
+		myPrePopulated.addValueSet(vs);
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(valCtx, options, codeSystem, code, null, vs.getUrl());
+		assertNotNull(outcome);
+		assertTrue(outcome.isOk());
+		assertEquals(code, outcome.getCode());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+			CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL,
+			CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL,
+			CommonCodeSystemsTerminologyService.CURRENCIES_VALUESET_URL,
+			CommonCodeSystemsTerminologyService.LANGUAGES_CODESYSTEM_URL,
+			CommonCodeSystemsTerminologyService.UCUM_CODESYSTEM_URL
+	})
+	public void testValidateCode_customMimetypeVSCodeNotInVS_returnsError(String theCodeSystem) {
+		final String code = "someRandomCode";
+		final String codeToValidate = "otherCode";
+
+		ValueSet vs = new ValueSet();
+		vs.setId("mimetype");
+		vs.setUrl("http://example.com/mimetype");
+		vs.setVersion("1.0");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent vsInclude = vs.getCompose().addInclude();
+		vsInclude.setSystem(theCodeSystem);
+		vsInclude.addConcept().setCode(code).setDisplay("Display " + code);
+		myPrePopulated.addValueSet(vs);
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		ConceptValidationOptions options = new ConceptValidationOptions();
+
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(valCtx, options, theCodeSystem, codeToValidate, null, vs.getUrl());
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertEquals("Unknown code '" + theCodeSystem + "#" + codeToValidate + "' for in-memory expansion of ValueSet '" + vs.getUrl() + "'", outcome.getMessage());
+	}
+
+	@Test
+	public void testValidateCodeWithInferredSystem_CommonCs_BuiltInVs() {
 
 		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
 		ConceptValidationOptions options = new ConceptValidationOptions().setInferSystem(true);
@@ -278,9 +419,6 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertEquals(null, outcome.getDisplay());
 		assertEquals(null, outcome.getCodeSystemVersion());
 	}
-
-
-
 
 	@Test
 	public void testExpandValueSet_VsUsesVersionedSystem_CsIsFragmentWithoutCode() {

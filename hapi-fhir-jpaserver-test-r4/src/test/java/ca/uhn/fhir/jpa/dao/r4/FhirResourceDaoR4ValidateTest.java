@@ -31,8 +31,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IValidatorModule;
-import ca.uhn.fhir.validation.ResultSeverityEnum;
-import ca.uhn.fhir.validation.ValidationResult;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
@@ -49,10 +47,10 @@ import org.hl7.fhir.utilities.i18n.I18nConstants;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 
@@ -1985,23 +1983,76 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 	}
 
-	@Test
-	public void testValidateUsingDifferentialProfile() throws IOException {
-		StructureDefinition sd = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-differential-patient-r4.json");
-		myStructureDefinitionDao.create(sd);
+	@Nested
+	class TestValidateUsingDifferentialProfile {
+		private static final String PROFILE_URL = "http://example.com/fhir/StructureDefinition/patient-1a-extensions";
 
-		Patient p = new Patient();
-		p.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
-		p.getText().getDiv().setValue("<div>hello</div>");
-		p.getMeta().addProfile("http://example.com/fhir/StructureDefinition/patient-1a-extensions");
-		p.setActive(true);
+		private static final Patient PATIENT_WITH_REAL_URL = createPatient(PROFILE_URL);
+		private static final Patient PATIENT_WITH_FAKE_URL = createPatient("https://www.i.do.not.exist.com");
 
-		String raw = myFhirContext.newJsonParser().encodeResourceToString(p);
-		MethodOutcome outcome = myPatientDao.validate(p, null, raw, EncodingEnum.JSON, null, null, mySrd);
+		@Test
+		public void createStructDefThenValidatePatientWithRealUrl() throws IOException {
+			// setup
+			createStructureDefinitionInDao();
 
-		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
-		ourLog.info("OO: {}", encoded);
-		assertThat(encoded, containsString("No issues detected"));
+			// execute
+			final String outcomePatientValidate = validate(PATIENT_WITH_REAL_URL);
+
+			// verify
+			assertExpectedOutcome(outcomePatientValidate);
+		}
+
+		@Test
+		public void validatePatientWithFakeUrlStructDefThenValidatePatientWithRealUrl() throws IOException {
+			// setup
+			final String outcomePatientValidateFakeUrl = validate(PATIENT_WITH_FAKE_URL);
+			assertTrue(outcomePatientValidateFakeUrl.contains(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY));
+			createStructureDefinitionInDao();
+
+			// execute
+			final String outcomePatientValidateRealUrl = validate(PATIENT_WITH_REAL_URL);
+
+			// verify
+			assertExpectedOutcome(outcomePatientValidateRealUrl);
+		}
+
+		@Test
+		public void validatePatientRealUrlThenCreateStructDefThenValidatePatientWithRealUrl() throws IOException {
+			// setup
+			final String outcomePatientValidateInitial = validate(PATIENT_WITH_REAL_URL);
+			assertTrue(outcomePatientValidateInitial.contains(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY));
+			createStructureDefinitionInDao();
+
+			// execute
+			final String outcomePatientValidateAfterStructDef = validate(PATIENT_WITH_REAL_URL);
+
+			// verify
+			assertExpectedOutcome(outcomePatientValidateAfterStructDef);
+		}
+
+		private static void assertExpectedOutcome(String outcomeJson) {
+			assertThat(outcomeJson, not(containsString(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY)));
+			assertThat(outcomeJson, containsString("No issues detected"));
+		}
+
+		private String validate(Patient thePatient) {
+			final MethodOutcome validateOutcome = myPatientDao.validate(thePatient, null, myFhirContext.newJsonParser().encodeResourceToString(thePatient), EncodingEnum.JSON, null, null, mySrd);
+			return myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(validateOutcome.getOperationOutcome());
+		}
+
+		private void createStructureDefinitionInDao() throws IOException {
+			final StructureDefinition structureDefinition = loadResourceFromClasspath(StructureDefinition.class, "/r4/profile-differential-patient-r4.json");
+			myStructureDefinitionDao.create(structureDefinition, new SystemRequestDetails());
+		}
+
+		private static Patient createPatient(String theUrl) {
+			final Patient patient = new Patient();
+			patient.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
+			patient.getText().getDiv().setValue("<div>hello</div>");
+			patient.getMeta().addProfile(theUrl);
+			patient.setActive(true);
+			return patient;
+		}
 	}
 
 	@ParameterizedTest
