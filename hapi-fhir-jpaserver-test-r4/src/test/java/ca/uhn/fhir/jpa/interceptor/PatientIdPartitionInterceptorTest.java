@@ -1,8 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -12,10 +10,8 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -40,7 +36,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import java.io.IOException;
 import java.util.List;
@@ -56,19 +51,13 @@ import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 
 public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Test {
 	public static final int ALTERNATE_DEFAULT_ID = -1;
 
-	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
-
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
-
-	@SpyBean
-	@Autowired
+	private ForceOffsetSearchModeInterceptor myForceOffsetSearchModeInterceptor;
 	private PatientIdPartitionInterceptor mySvc;
 
 	@Override
@@ -76,6 +65,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	public void before() throws Exception {
 		super.before();
 		myForceOffsetSearchModeInterceptor = new ForceOffsetSearchModeInterceptor();
+		mySvc = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
 
 		myInterceptorRegistry.registerInterceptor(mySvc);
 		myInterceptorRegistry.registerInterceptor(myForceOffsetSearchModeInterceptor);
@@ -553,19 +543,7 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	public void testIdentifyForRead_serverOperation_returnsAllPartitions() {
-		ReadPartitionIdRequestDetails readRequestDetails = ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_EXPORT);
-		RequestPartitionId requestPartitionId = mySvc.identifyForRead(readRequestDetails, mySrd);
-		assertEquals(requestPartitionId, RequestPartitionId.allPartitions());
-		assertEquals(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, readRequestDetails.getRestOperationType());
-	}
-
-	@Test
-	public void testSystemBulkExport_withPatientIdPartitioningWithNoResourceType_usesNonPatientSpecificPartition() throws IOException {
-		final BulkExportJobParameters options = new BulkExportJobParameters();
-		options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
-		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-
+	public void testSystemOperation_withNoResourceType_success() throws IOException {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
 		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 
@@ -574,7 +552,5 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 			assertEquals(202, postResponse.getStatusLine().getStatusCode());
 			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
 		}
-
-		verify(mySvc).provideNonPatientSpecificQueryResponse(any());
 	}
 }

@@ -13,6 +13,7 @@ import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Quantity;
 import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.UriType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -27,6 +28,8 @@ import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.in;
+import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -667,6 +670,30 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertEquals("http://tag", actual.getMeta().getTagFirstRep().getSystem());
 
 
+	}
+
+
+	/**
+	 * See #5110
+	 */
+	@Test
+	public void testTransactionWithMissingSystem() {
+        BundleBuilder bb = new BundleBuilder(myFhirContext);
+		Patient patient = new Patient();
+		patient.setId(IdType.newRandomUuid());
+
+		// The identifier has a system URI that has no value, only an extension
+		UriType system = new UriType();
+		system.addExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason", new CodeType("unknown"));
+		patient.addIdentifier().setValue("m123").setSystemElement(system);
+
+		patient.addName().setText("Jane Doe");
+		bb.addTransactionCreateEntry(patient);
+        Bundle inputBundle = bb.getBundleTyped();
+
+		Bundle outputBundle = mySystemDao.transaction(mySrd, inputBundle);
+
+		assertThat(outputBundle.getEntry().get(0).getResponse().getLocation(), matchesPattern("Patient/[0-9]+/_history/1"));
 	}
 
 

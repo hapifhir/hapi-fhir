@@ -38,6 +38,8 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
 
+	private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
+
 	@Override
 	@AfterEach
 	public void after() throws IOException {
@@ -104,9 +106,8 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setUnnamedPartitionMode(true);
 		myPartitionSettings.setIncludePartitionInSearchHashes(false);
-
-		PatientIdPartitionInterceptor interceptor = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings);
-		myInterceptorRegistry.registerInterceptor(interceptor);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
+		myInterceptorRegistry.registerInterceptor(myPatientIdPartitionInterceptor);
 
 		try {
 			StringOrListParam patientIds = new StringOrListParam();
@@ -154,7 +155,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			Patient patient = (Patient) result.getAllResources().get(0);
 			assertTrue(patient.getId().contains(firstId.getValue()));
 		} finally {
-			myInterceptorRegistry.unregisterInterceptor(interceptor);
+			myInterceptorRegistry.unregisterInterceptor(myPatientIdPartitionInterceptor);
 		}
 	}
 

@@ -25,7 +25,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -184,7 +183,8 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 			MdmTransactionContext theMdmTransactionContext,
 			RequestDetails theRequestDetails) {
 		RequestPartitionId theReadPartitionId =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null);
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+						theRequestDetails, ProviderConstants.MDM_QUERY_LINKS);
 		Page<MdmLinkJson> resultPage;
 		if (theReadPartitionId.hasPartitionIds()) {
 			theMdmQuerySearchParameters.setPartitionIds(theReadPartitionId.getPartitionIds());
@@ -242,7 +242,8 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 			String theRequestResourceType) {
 		Page<MdmLinkJson> resultPage;
 		RequestPartitionId readPartitionId =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, null);
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+						theRequestDetails, ProviderConstants.MDM_DUPLICATE_GOLDEN_RESOURCES);
 
 		if (readPartitionId.isAllPartitions()) {
 			resultPage = myMdmLinkQuerySvc.getDuplicateGoldenResources(
@@ -318,10 +319,9 @@ public class MdmControllerSvcImpl implements IMdmControllerSvc {
 			params.setBatchSize(theBatchSize.getValue().intValue());
 		}
 
-		ReadPartitionIdRequestDetails details =
-				ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_MDM_CLEAR);
 		RequestPartitionId requestPartition =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+						theRequestDetails, ProviderConstants.OPERATION_MDM_CLEAR);
 		params.setRequestPartitionId(requestPartition);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();

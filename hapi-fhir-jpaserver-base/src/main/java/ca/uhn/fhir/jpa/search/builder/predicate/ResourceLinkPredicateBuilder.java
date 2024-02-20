@@ -49,7 +49,6 @@ import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.parser.DataFormatException;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -60,6 +59,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
@@ -84,16 +84,20 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Optional;
 import java.util.Set;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
+import static ca.uhn.fhir.rest.api.Constants.*;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.trim;
 
 public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder implements ICanMakeMissingParamPredicate {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceLinkPredicateBuilder.class);
+	private static final Pattern MODIFIER_REPLACE_PATTERN = Pattern.compile(".*:");
 	private final DbColumn myColumnSrcType;
 	private final DbColumn myColumnSrcPath;
 	private final DbColumn myColumnTargetResourceId;
@@ -205,6 +209,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 							targetQualifiedUrls.add(dt.getValue());
 						}
 					} else {
+						validateModifierUse(theRequest, theResourceType, ref);
 						validateResourceTypeInReferenceParam(ref.getResourceType());
 						targetIds.add(dt);
 					}
@@ -255,6 +260,41 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		} else {
 			Condition retVal = createPredicateReference(inverse, pathsToMatch, targetPidList, targetQualifiedUrls);
 			return combineWithRequestPartitionIdPredicate(getRequestPartitionId(), retVal);
+		}
+	}
+
+	private void validateModifierUse(RequestDetails theRequest, String theResourceType, ReferenceParam theRef) {
+		try {
+			final String resourceTypeFromRef = theRef.getResourceType();
+			if (StringUtils.isEmpty(resourceTypeFromRef)) {
+				return;
+			}
+			// TODO: LD: unless we do this, ResourceProviderR4Test#testSearchWithSlashes will fail due to its
+			// derived-from: syntax
+			getFhirContext().getResourceDefinition(resourceTypeFromRef);
+		} catch (DataFormatException e) {
+			final List<String> nonMatching = Optional.ofNullable(theRequest)
+					.map(RequestDetails::getParameters)
+					.map(params -> params.keySet().stream()
+							.filter(mod -> mod.contains(":"))
+							.map(MODIFIER_REPLACE_PATTERN::matcher)
+							.map(pattern -> pattern.replaceAll(":"))
+							.filter(mod -> !VALID_MODIFIERS.contains(mod))
+							.distinct()
+							.collect(Collectors.toUnmodifiableList()))
+					.orElse(Collections.emptyList());
+
+			if (!nonMatching.isEmpty()) {
+				final String msg = getFhirContext()
+						.getLocalizer()
+						.getMessageSanitized(
+								SearchCoordinatorSvcImpl.class,
+								"invalidUseOfSearchIdentifier",
+								nonMatching,
+								theResourceType,
+								VALID_MODIFIERS);
+				throw new InvalidRequestException(Msg.code(2498) + msg);
+			}
 		}
 	}
 
@@ -369,7 +409,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		/*
 		 * Handle chain on _type
 		 */
-		if (Constants.PARAM_TYPE.equals(theReferenceParam.getChain())) {
+		if (PARAM_TYPE.equals(theReferenceParam.getChain())) {
 
 			List<String> pathsToMatch = createResourceLinkPaths(theResourceName, theParamName, theQualifiers);
 			Condition typeCondition = createPredicateSourcePaths(pathsToMatch);
@@ -774,5 +814,15 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		}
 
 		return combineWithRequestPartitionIdPredicate(theParams.getRequestPartitionId(), unaryCondition);
+	}
+
+	@VisibleForTesting
+	void setSearchParamRegistryForUnitTest(ISearchParamRegistry theSearchParamRegistry) {
+		mySearchParamRegistry = theSearchParamRegistry;
+	}
+
+	@VisibleForTesting
+	void setIdHelperServiceForUnitTest(IIdHelperService theIdHelperService) {
+		myIdHelperService = theIdHelperService;
 	}
 }
