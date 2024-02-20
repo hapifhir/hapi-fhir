@@ -1745,16 +1745,18 @@ public abstract class BaseTransactionProcessor {
 				continue; // No substitution on the resource ID itself!
 			}
 			String nextUriString = nextRef.getValueAsString();
-			if (theIdSubstitutions.containsSource(nextUriString)) {
-				IIdType newId = theIdSubstitutions.getForSource(nextUriString);
-				ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
+			if (isNotBlank(nextUriString)) {
+				if (theIdSubstitutions.containsSource(nextUriString)) {
+					IIdType newId = theIdSubstitutions.getForSource(nextUriString);
+					ourLog.debug(" * Replacing resource ref {} with {}", nextUriString, newId);
 
-				String existingValue = nextRef.getValueAsString();
-				theTransactionDetails.addRollbackUndoAction(() -> nextRef.setValueAsString(existingValue));
+					String existingValue = nextRef.getValueAsString();
+					theTransactionDetails.addRollbackUndoAction(() -> nextRef.setValueAsString(existingValue));
 
-				nextRef.setValueAsString(newId.toVersionless().getValue());
-			} else {
-				ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
+					nextRef.setValueAsString(newId.toVersionless().getValue());
+				} else {
+					ourLog.debug(" * Reference [{}] does not exist in bundle", nextUriString);
+				}
 			}
 		}
 

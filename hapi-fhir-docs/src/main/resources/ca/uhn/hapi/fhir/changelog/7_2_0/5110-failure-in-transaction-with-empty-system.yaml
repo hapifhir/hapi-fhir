@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5110
+title: "When processing a FHIR transaction in the JPA server, an identifier containing a 
+   system that has no value but has an extension present could cause a NullPointerException.
+   This has been corrected."

@@ -27,7 +27,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
@@ -103,11 +102,10 @@ public class DeleteExpungeJobSubmitterImpl implements IDeleteExpungeJobSubmitter
 				.forEach(deleteExpungeJobParameters::addPartitionedUrl);
 		deleteExpungeJobParameters.setBatchSize(theBatchSize);
 
-		ReadPartitionIdRequestDetails details =
-				ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_DELETE_EXPUNGE);
-		// Also set toplevel partition in case there are no urls
+		// Also set top level partition in case there are no urls
 		RequestPartitionId requestPartition =
-				myRequestPartitionHelperSvc.determineReadPartitionForRequest(theRequestDetails, details);
+				myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(
+						theRequestDetails, ProviderConstants.OPERATION_DELETE_EXPUNGE);
 		deleteExpungeJobParameters.setRequestPartitionId(requestPartition);
 		deleteExpungeJobParameters.setCascade(theCascade);
 		deleteExpungeJobParameters.setCascadeMaxRounds(theCascadeMaxRounds);

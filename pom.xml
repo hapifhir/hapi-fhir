@@ -675,6 +675,11 @@
 			<name>Martin Zacho Grønhøj</name>
 		</developer>
 		<developer>
+			<id>nigtrifork</id>
+			<organization>Trifork</organization>
+			<name>Nicolai Gjøderum</name>
+		</developer>
+		<developer>
 			<id>augla</id>
 			<name>August Langhout</name>
 		</developer>
