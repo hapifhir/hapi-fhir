@@ -498,7 +498,7 @@ public class FhirContext {
 
 		RuntimeResourceDefinition retVal = (RuntimeResourceDefinition) myClassToElementDefinition.get(theResourceType);
 		if (retVal == null) {
-			ourLog.info("5403: getResourceDefinition(): {}", theResourceType);
+//			ourLog.info("5403: getResourceDefinition(): {}", theResourceType);
 			retVal = scanResourceType(theResourceType);
 		}
 

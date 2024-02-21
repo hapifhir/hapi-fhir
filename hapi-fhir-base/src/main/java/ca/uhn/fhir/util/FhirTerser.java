@@ -1128,6 +1128,7 @@ public class FhirTerser {
 									//noinspection unchecked
 									typeClass = (Class<? extends IBase>) typeClass.getSuperclass();
 									childElementDef = nextChild.getChildElementDefinitionByDatatype(typeClass);
+									ourLog.info("5403 WHILE assignable:\ntypeClass: {},\nchildElementDef: {}", typeClass, childElementDef);
 								}
 
 								// LUKETODO:  get rid of this try catch

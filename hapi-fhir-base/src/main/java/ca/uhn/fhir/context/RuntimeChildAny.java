@@ -64,6 +64,8 @@ public class RuntimeChildAny extends RuntimeChildChoiceDefinition {
 				}
 			}
 
+			// LUKETODO:  here, theClassToElementDefinitions does NOT contain Type, which means myChoiceTypes
+			// will not contain Type
 			if (IResource.class.isAssignableFrom(next)
 					|| IDatatype.class.isAssignableFrom(next)
 					|| IBaseDatatype.class.isAssignableFrom(next)
