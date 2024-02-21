@@ -137,10 +137,7 @@ public class HistoryBuilder {
 		 * IDX_RESVER_TYPE_DATE in the future.
 		 * -JA 2024-04-21
 		 */
-		criteriaQuery.orderBy(
-			cb.desc(from.get("myUpdated")),
-			cb.desc(from.get("myResourceId"))
-		);
+		criteriaQuery.orderBy(cb.desc(from.get("myUpdated")), cb.desc(from.get("myResourceId")));
 
 		TypedQuery<ResourceHistoryTable> query = myEntityManager.createQuery(criteriaQuery);
 
