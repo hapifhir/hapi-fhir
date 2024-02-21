@@ -1093,13 +1093,27 @@ public class FhirTerser {
 								}
 								BaseRuntimeElementDefinition<?> childElementDef;
 								Class<? extends IBase> valueType = nextValue.getClass();
-								final boolean isNextChildRuntimeChildAny = nextChild.getClass().getName().contains("RuntimeChildAny");
-								boolean isEnumerationUnknown =  nextValue.toString().equals("Enumeration[unknown]");
-								   if (isEnumerationUnknown) {
-									   ourLog.info("5403 START Enumeration[unknown]!!!!!\nchildType:{}\nnextChild:{}\nnextValue: {}\nvalueType: {}\nnextValue.getClass(): {}", theDefinition.getChildType(), nextChild, nextValue, valueType, nextValue.getClass());
-								   }
+								final boolean isNextChildRuntimeChildAny =
+										nextChild.getClass().getName().contains("RuntimeChildAny");
+								boolean isEnumerationUnknown =
+										nextValue.toString().equals("Enumeration[unknown]");
+								if (isEnumerationUnknown) {
+									ourLog.info(
+											"5403 START Enumeration[unknown]!!!!!\nchildType:{}\nnextChild:{}\nnextValue: {}\nvalueType: {}\nnextValue.getClass(): {}",
+											theDefinition.getChildType(),
+											nextChild,
+											nextValue,
+											valueType,
+											nextValue.getClass());
+								}
 								if (isNextChildRuntimeChildAny) {
-									ourLog.info("5403 START RuntimeChildAny !!!!!\nchildType:{}\nnextChild:{}\nnextValue: {}\nvalueType: {}\nnextValue.getClass(): {}", theDefinition.getChildType(), nextChild, nextValue, valueType, nextValue.getClass());
+									ourLog.info(
+											"5403 START RuntimeChildAny !!!!!\nchildType:{}\nnextChild:{}\nnextValue: {}\nvalueType: {}\nnextValue.getClass(): {}",
+											theDefinition.getChildType(),
+											nextChild,
+											nextValue,
+											valueType,
+											nextValue.getClass());
 								}
 								// LUKETODO:  Enumeration[unknown] doesn't ALWAYS result in a null childElementDef
 								// LUKETODO:  RuntimeChildAny doesn't ALWAYS result in a null childElementRef
@@ -1109,18 +1123,36 @@ public class FhirTerser {
 									childElementDef = nextChild.getChildElementDefinitionByDatatype(valueType);
 									valueType = (Class<? extends IBase>) valueType.getSuperclass();
 									if (isEnumerationUnknown) {
-										   ourLog.info("5403  WHILE Enumeration[unknown]!!!!!\nchildElementDef: {},\nvalueType: {}", childElementDef, valueType);
+										ourLog.info(
+												"5403  WHILE Enumeration[unknown]!!!!!\nchildElementDef: {},\nvalueType: {}",
+												childElementDef,
+												valueType);
 									}
 									if (isNextChildRuntimeChildAny) {
-										ourLog.info("5403  WHILE RuntimeChildAny\nchildElementDef: {},\nvalueType: {}", childElementDef, valueType);
+										ourLog.info(
+												"5403  WHILE RuntimeChildAny\nchildElementDef: {},\nvalueType: {}",
+												childElementDef,
+												valueType);
 									}
 								}
 								if (isEnumerationUnknown) {
-									  ourLog.info("5403 END Enumeration[unknown]!!!!!\nnextChild:{}\nchildElementDef:{}\nnextValue: {}\nvalueType: {}\nnextValue.getClass(): {}", nextChild, childElementDef, nextValue, valueType, nextValue.getClass());
+									ourLog.info(
+											"5403 END Enumeration[unknown]!!!!!\nnextChild:{}\nchildElementDef:{}\nnextValue: {}\nvalueType: {}\nnextValue.getClass(): {}",
+											nextChild,
+											childElementDef,
+											nextValue,
+											valueType,
+											nextValue.getClass());
 								}
 
 								if (isNextChildRuntimeChildAny) {
-									ourLog.info("5403 END RuntimeChildAny \nnextChild:{}\nchildElementDef:{}\nnextValue: {}\nvalueType: {}\nnextValue.getClass(): {}", nextChild, childElementDef, nextValue, valueType, nextValue.getClass());
+									ourLog.info(
+											"5403 END RuntimeChildAny \nnextChild:{}\nchildElementDef:{}\nnextValue: {}\nvalueType: {}\nnextValue.getClass(): {}",
+											nextChild,
+											childElementDef,
+											nextValue,
+											valueType,
+											nextValue.getClass());
 								}
 
 								Class<? extends IBase> typeClass = nextValue.getClass();
@@ -1128,19 +1160,27 @@ public class FhirTerser {
 									//noinspection unchecked
 									typeClass = (Class<? extends IBase>) typeClass.getSuperclass();
 									childElementDef = nextChild.getChildElementDefinitionByDatatype(typeClass);
-									ourLog.info("5403 WHILE assignable:\ntypeClass: {},\nchildElementDef: {}", typeClass, childElementDef);
+									ourLog.info(
+											"5403 WHILE assignable:\ntypeClass: {},\nchildElementDef: {}",
+											typeClass,
+											childElementDef);
 								}
 
 								// LUKETODO:  get rid of this try catch
 								try {
 									Validate.notNull(
-										childElementDef,
-										"Found value of type[%s] which is not valid for field[%s] in %s",
-										nextValue.getClass(),
-										nextChild.getElementName(),
-										childDef.getName());
+											childElementDef,
+											"Found value of type[%s] which is not valid for field[%s] in %s",
+											nextValue.getClass(),
+											nextChild.getElementName(),
+											childDef.getName());
 								} catch (NullPointerException exception) {
-									ourLog.info("5403: NPE:\nclass: {}\nelementName:{}\nchildDef.name:{}\nexception:{}", nextValue.getClass(), nextChild.getElementName(), childDef.getName(), exception.getMessage());
+									ourLog.info(
+											"5403: NPE:\nclass: {}\nelementName:{}\nchildDef.name:{}\nexception:{}",
+											nextValue.getClass(),
+											nextChild.getElementName(),
+											childDef.getName(),
+											exception.getMessage());
 									throw exception;
 								}
 
@@ -1238,7 +1278,7 @@ public class FhirTerser {
 		BaseRuntimeElementDefinition<?> def = myContext.getElementDefinition(theElement.getClass());
 		if (def instanceof BaseRuntimeElementCompositeDefinition) {
 			BaseRuntimeElementCompositeDefinition<?> defComposite = (BaseRuntimeElementCompositeDefinition<?>) def;
-//			ourLog.info("5403: theElement.getClass().getName(): {}", theElement.getClass().getName());
+			//			ourLog.info("5403: theElement.getClass().getName(): {}", theElement.getClass().getName());
 			visit(theElement, null, def, theVisitor, new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
 		} else if (theElement instanceof IBaseExtension) {
 			theVisitor.acceptUndeclaredExtension(

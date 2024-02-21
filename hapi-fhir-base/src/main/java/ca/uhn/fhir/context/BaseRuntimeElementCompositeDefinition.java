@@ -369,7 +369,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 
 			Class<?> nextElementType = next.getElementType();
 
-//			ourLog.info("5403: scanCompositeElementForChildren\nnextElementType: {}", nextElementType);
+			//			ourLog.info("5403: scanCompositeElementForChildren\nnextElementType: {}", nextElementType);
 			BaseRuntimeDeclaredChildDefinition def;
 			if (childAnnotation.name().equals("extension") && IBaseExtension.class.isAssignableFrom(nextElementType)) {
 				def = new RuntimeChildExtension(
@@ -468,15 +468,18 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 
 					// LUKETODO:  Here we create a RuntimeChildAny out of Type
 					def = new RuntimeChildAny(nextField, elementName, childAnnotation, descriptionAnnotation);
-//					ourLog.info("5403: RuntimeChildAny\nnextField:{},\nelementName:{}\nchildAnnotation:{}\ndescriptionAnnotation:{}", nextField, elementName, childAnnotation, descriptionAnnotation);
-//					ourLog.info("5403: YES-RuntimeChildAny\nnextElementType: {}", nextElementType);
+					//					ourLog.info("5403:
+					// RuntimeChildAny\nnextField:{},\nelementName:{}\nchildAnnotation:{}\ndescriptionAnnotation:{}",
+					// nextField, elementName, childAnnotation, descriptionAnnotation);
+					//					ourLog.info("5403: YES-RuntimeChildAny\nnextElementType: {}", nextElementType);
 				} else if (IDatatype.class.isAssignableFrom(nextElementType)
 						|| IPrimitiveType.class.isAssignableFrom(nextElementType)
 						|| ICompositeType.class.isAssignableFrom(nextElementType)
 						|| IBaseDatatype.class.isAssignableFrom(nextElementType)
 						|| IBaseExtension.class.isAssignableFrom(nextElementType)) {
-//					ourLog.info("5403: NON-RuntimeChildAny\nnextElementType: {}", nextElementType);
-//					ourLog.info("5403: NON-RuntimeChildAny\nnextField:{},\nelementName:{}\nchildAnnotation:{}\ndescriptionAnnotation:{}", nextField, elementName, childAnnotation, descriptionAnnotation);
+					//					ourLog.info("5403: NON-RuntimeChildAny\nnextElementType: {}", nextElementType);
+					//					ourLog.info("5403:
+					// NON-RuntimeChildAny\nnextField:{},\nelementName:{}\nchildAnnotation:{}\ndescriptionAnnotation:{}", nextField, elementName, childAnnotation, descriptionAnnotation);
 					Class<? extends IBase> nextDatatype = (Class<? extends IBase>) nextElementType;
 
 					if (IPrimitiveType.class.isAssignableFrom(nextElementType)) {

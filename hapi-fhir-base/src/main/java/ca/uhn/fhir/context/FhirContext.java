@@ -498,7 +498,7 @@ public class FhirContext {
 
 		RuntimeResourceDefinition retVal = (RuntimeResourceDefinition) myClassToElementDefinition.get(theResourceType);
 		if (retVal == null) {
-//			ourLog.info("5403: getResourceDefinition(): {}", theResourceType);
+			//			ourLog.info("5403: getResourceDefinition(): {}", theResourceType);
 			retVal = scanResourceType(theResourceType);
 		}
 
@@ -1089,7 +1089,8 @@ public class FhirContext {
 		Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> classToElementDefinition = new HashMap<>();
 		classToElementDefinition.putAll(myClassToElementDefinition);
 		classToElementDefinition.putAll(scanner.getClassToElementDefinitions());
-//		ourLog.info("5403: typesToScan: {}, scanner.getClassToElementDefinitions(): {}", typesToScan, scanner.getClassToElementDefinitions());
+		//		ourLog.info("5403: typesToScan: {}, scanner.getClassToElementDefinitions(): {}", typesToScan,
+		// scanner.getClassToElementDefinitions());
 		for (BaseRuntimeElementDefinition<?> next : classToElementDefinition.values()) {
 			if (next instanceof RuntimeResourceDefinition) {
 				if ("Bundle".equals(next.getName())) {

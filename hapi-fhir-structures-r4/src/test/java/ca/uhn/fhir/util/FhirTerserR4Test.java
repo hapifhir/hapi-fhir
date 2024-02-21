@@ -1526,6 +1526,7 @@ public class FhirTerserR4Test {
 		final Extension extensionUnknown = new Extension(url, enumerationUnknown);
 		org.hl7.fhir.r4.model.Type enumerationAsType = enumerationUnknown;
 
+		// LUKETODO:  AtomicBoolean
 		boolean[] results = new boolean[1];
 		final IModelVisitor2 iModelVisitor2 = (theElement, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath) -> {
 
