@@ -26,13 +26,11 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SummaryEnum;
-import ca.uhn.fhir.rest.api.server.IRestfulServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
@@ -45,7 +43,6 @@ import ca.uhn.fhir.rest.gclient.NumberClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -58,6 +55,7 @@ import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -116,7 +114,9 @@ import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Group;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ImagingStudy;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Location;
@@ -167,14 +167,12 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -191,7 +189,6 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -227,8 +224,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 @SuppressWarnings("Duplicates")
@@ -7421,6 +7416,51 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				// 8
 				Arguments.of(new MissingSearchTestParameters(JpaStorageSettings.IndexEnabledEnum.DISABLED, false, false))
 			);
+		}
+	}
+	@Nested
+	class SearchWithIdentifiers {
+		private static final String SYSTEM = "http://acme.org/fhir/identifier/mrn";
+		private static final String VALUE = "123456";
+		private IIdType myPatientId;
+
+		@BeforeEach
+		void beforeEach() {
+			final Patient patient = new Patient();
+			patient.addIdentifier().setValue(VALUE).setSystem(SYSTEM);
+			patient.addName().setUse(HumanName.NameUse.OFFICIAL).setFamily("Abbott").addGiven("Elias").addPrefix("Mr.");
+			patient.setGender(Enumerations.AdministrativeGender.MALE);
+
+			myPatientId = myClient.create().resource(patient).execute().getResource().getIdElement();
+
+			final Observation observation = new Observation();
+			observation.setStatus(Observation.ObservationStatus.FINAL);
+			observation.setCode(new CodeableConcept().addCoding(new Coding().setSystem("http://loinc.org").setCode("15074-8").setDisplay("Glucose [Moles/volume] in Blood")));
+			observation.setSubject(new Reference(myPatientId.toUnqualifiedVersionless()).setIdentifier(new Identifier().setSystem(SYSTEM).setValue(VALUE)));
+
+			myClient.create().resource(observation).execute().getResource().getIdElement();
+		}
+
+		@Test
+		void searchWithIdentifierToIdentifier() {
+			testAndAssertFailureFor("Observation?subject:identifier=http://acme.org/fhir/identifier/mrn|123456");
+		}
+
+		@Test
+		void searchWithIdentifierToId() {
+			testAndAssertFailureFor(String.format("Observation?subject:identifier=%s", myPatientId.getIdPart()));
+		}
+
+		private void testAndAssertFailureFor(String theUrl) {
+			try {
+				myClient.search()
+					.byUrl(theUrl)
+					.returnBundle(Bundle.class)
+					.execute();
+				fail();
+			} catch (InvalidRequestException exception) {
+				assertEquals("HTTP 400 Bad Request: HAPI-2498: Unsupported search modifier(s): \"[:identifier]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]", exception.getMessage());
+			}
 		}
 	}
 }

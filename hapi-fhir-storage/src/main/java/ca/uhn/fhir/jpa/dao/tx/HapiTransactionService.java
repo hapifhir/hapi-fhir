@@ -247,6 +247,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 			ourRequestPartitionThreadLocal.set(requestPartitionId);
 		}
 
+		ourLog.trace("Starting doExecute for RequestPartitionId {}", requestPartitionId);
 		if (!myPartitionSettings.isPartitioningEnabled()
 				|| Objects.equals(previousRequestPartitionId, requestPartitionId)) {
 			if (ourExistingTransaction.get() == this && canReuseExistingTransaction(theExecutionBuilder)) {
@@ -281,6 +282,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 			TransactionCallback<T> theCallback,
 			RequestPartitionId requestPartitionId,
 			RequestPartitionId previousRequestPartitionId) {
+		ourLog.trace("executeInNewTransactionForPartitionChange");
 		theExecutionBuilder.myPropagation = myTransactionPropagationWhenChangingPartitions;
 		return doExecuteInTransaction(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
 	}
@@ -310,6 +312,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 			TransactionCallback<T> theCallback,
 			RequestPartitionId requestPartitionId,
 			RequestPartitionId previousRequestPartitionId) {
+		ourLog.trace("doExecuteInTransaction");
 		try {
 			for (int i = 0; ; i++) {
 				try {
@@ -569,6 +572,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 	@Nullable
 	private static <T> T executeInExistingTransaction(@Nonnull TransactionCallback<T> theCallback) {
+		ourLog.trace("executeInExistingTransaction");
 		// TODO we could probably track the TransactionStatus we need as a thread local like we do our partition id.
 		return theCallback.doInTransaction(null);
 	}

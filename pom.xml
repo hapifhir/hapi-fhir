@@ -9,7 +9,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>7.1.1-SNAPSHOT</version>
+	<version>7.1.3-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -675,6 +675,11 @@
 			<name>Martin Zacho Grønhøj</name>
 		</developer>
 		<developer>
+			<id>nigtrifork</id>
+			<organization>Trifork</organization>
+			<name>Nicolai Gjøderum</name>
+		</developer>
+		<developer>
 			<id>augla</id>
 			<name>August Langhout</name>
 		</developer>
@@ -890,6 +895,10 @@
 		<developer>
 			<id>ArtyomyuS</id>
 			<name>Artiom Darie</name>
+		</developer>
+		<developer>
+			<id>pano-smals</id>
+			<name>pano-smals</name>
 		</developer>
 	</developers>
 

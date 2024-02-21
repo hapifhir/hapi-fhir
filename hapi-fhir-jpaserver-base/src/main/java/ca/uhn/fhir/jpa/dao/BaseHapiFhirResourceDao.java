@@ -30,7 +30,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -852,12 +851,15 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			return deleteExpunge(theUrl, theRequest);
 		}
 
-		return myTransactionService.execute(theRequest, transactionDetails, tx -> {
-			DeleteConflictList deleteConflicts = new DeleteConflictList();
-			DeleteMethodOutcome outcome = deleteByUrl(theUrl, deleteConflicts, theRequest, transactionDetails);
-			DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
-			return outcome;
-		});
+		return myTransactionService
+				.withRequest(theRequest)
+				.withTransactionDetails(transactionDetails)
+				.execute(tx -> {
+					DeleteConflictList deleteConflicts = new DeleteConflictList();
+					DeleteMethodOutcome outcome = deleteByUrl(theUrl, deleteConflicts, theRequest, transactionDetails);
+					DeleteConflictUtil.validateDeleteConflictsEmptyOrThrowException(getContext(), deleteConflicts);
+					return outcome;
+				});
 	}
 
 	/**
@@ -872,10 +874,10 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			@Nonnull TransactionDetails theTransactionDetails) {
 		validateDeleteEnabled();
 
-		return myTransactionService.execute(
-				theRequestDetails,
-				theTransactionDetails,
-				tx -> doDeleteByUrl(theUrl, deleteConflicts, theTransactionDetails, theRequestDetails));
+		return myTransactionService
+				.withRequest(theRequestDetails)
+				.withTransactionDetails(theTransactionDetails)
+				.execute(tx -> doDeleteByUrl(theUrl, deleteConflicts, theTransactionDetails, theRequestDetails));
 	}
 
 	@Nonnull
@@ -901,6 +903,19 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 										"DELETE",
 										theUrl,
 										resourceIds.size()));
+			}
+			// TODO: LD: There is a still a bug on slow deletes:  https://github.com/hapifhir/hapi-fhir/issues/5675
+			final long threshold = getStorageSettings().getRestDeleteByUrlResourceIdThreshold();
+			if (resourceIds.size() > threshold) {
+				throw new PreconditionFailedException(Msg.code(2496)
+						+ getContext()
+								.getLocalizer()
+								.getMessageSanitized(
+										BaseStorageDao.class,
+										"deleteByUrlThresholdExceeded",
+										theUrl,
+										resourceIds.size(),
+										threshold));
 			}
 		}
 
@@ -1233,9 +1248,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public IBundleProvider history(Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails) {
 		StopWatch w = new StopWatch();
-		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(myResourceName, null);
 		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, details);
+				myRequestPartitionHelperService.determineReadPartitionForRequestForHistory(
+						theRequestDetails, myResourceName, null);
 		IBundleProvider retVal = myTransactionService
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(requestPartitionId)
@@ -1254,9 +1269,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			final IIdType theId, final Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
 
-		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(myResourceName, theId);
 		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, details);
+				myRequestPartitionHelperService.determineReadPartitionForRequestForHistory(
+						theRequest, myResourceName, theId);
 		IBundleProvider retVal = myTransactionService
 				.withRequest(theRequest)
 				.withRequestPartitionId(requestPartitionId)
@@ -1284,9 +1299,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			final HistorySearchDateRangeParam theHistorySearchDateRangeParam,
 			RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
-		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(myResourceName, theId);
 		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, details);
+				myRequestPartitionHelperService.determineReadPartitionForRequestForHistory(
+						theRequest, myResourceName, theId);
 		IBundleProvider retVal = myTransactionService
 				.withRequest(theRequest)
 				.withRequestPartitionId(requestPartitionId)
@@ -1333,10 +1348,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				addAllResourcesTypesToReindex(theBase, theRequestDetails, params);
 			}
 
-			ReadPartitionIdRequestDetails details =
-					ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_REINDEX);
 			RequestPartitionId requestPartition =
-					myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, details);
+					myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
+							theRequestDetails, ProviderConstants.OPERATION_REINDEX);
 			params.setRequestPartitionId(requestPartition);
 
 			JobInstanceStartRequest request = new JobInstanceStartRequest();
@@ -1960,7 +1974,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-						theRequest, getResourceName(), theParams, null);
+						theRequest, getResourceName(), theParams);
 		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(
 				this, theParams, getResourceName(), cacheControlDirective, theRequest, requestPartitionId);
 
@@ -2129,7 +2143,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			BiFunction<RequestDetails, Stream<JpaPid>, Stream<V>> transform) {
 		RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-						theRequest, myResourceName, theParams, null);
+						theRequest, myResourceName, theParams);
 
 		String uuid = UUID.randomUUID().toString();
 

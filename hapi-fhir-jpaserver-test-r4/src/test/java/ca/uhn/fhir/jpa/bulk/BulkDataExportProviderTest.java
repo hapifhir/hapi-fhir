@@ -32,6 +32,7 @@ import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -62,7 +63,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -71,7 +71,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.arrayContainingInAnyOrder;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -1245,7 +1244,7 @@ public class BulkDataExportProviderTest {
 
 	private class MyRequestPartitionHelperSvc extends RequestPartitionHelperSvc {
 		@Override
-		public @NotNull RequestPartitionId determineReadPartitionForRequest(RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails) {
+		public @NotNull RequestPartitionId determineReadPartitionForRequest(@Nonnull RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails) {
 			assert theRequest != null;
 			if (myPartitionName.equals(theRequest.getTenantId())) {
 				return myRequestPartitionId;
@@ -1255,7 +1254,7 @@ public class BulkDataExportProviderTest {
 		}
 
 		@Override
-		public void validateHasPartitionPermissions(RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
+		public void validateHasPartitionPermissions(@Nonnull RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
 			if (!myPartitionName.equals(theRequest.getTenantId()) && theRequest.getTenantId() != null) {
 				throw new ForbiddenOperationException("User does not have access to resources on the requested partition");
 			}
