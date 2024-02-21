@@ -887,6 +887,10 @@
 			<name>Max Bureck</name>
 			<organization>Fraunhofer FOKUS</organization>
 		</developer>
+		<developer>
+			<id>ArtyomyuS</id>
+			<name>Artiom Darie</name>
+		</developer>
 	</developers>
 
 	<licenses>
