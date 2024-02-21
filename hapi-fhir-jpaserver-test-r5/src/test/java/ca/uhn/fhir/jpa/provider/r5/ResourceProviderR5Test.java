@@ -35,6 +35,8 @@ import org.hl7.fhir.r5.model.Quantity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.comparator.Comparators;
@@ -499,8 +501,9 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		myClient.transaction().withResources(carePlans).execute();
 	}
 
-	@Test
-	public void testHistoryPaging() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testHistoryPaging(boolean theTypeLevel) {
 		// Setup
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		List<String> expectedIdentifiers = new ArrayList<>();
@@ -518,8 +521,13 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		// Test
 		ourLog.info("Loading type history, expecting identifiers from {} to {}...", expectedIdentifiers.get(0), expectedIdentifiers.get(expectedIdentifiers.size() - 1));
 		List<String> actualIdentifiers = new ArrayList<>();
-		Bundle historyBundle = myClient.history().onType(Patient.class).returnBundle(Bundle.class).execute();
-		while (true) {
+		Bundle historyBundle;
+		if (theTypeLevel) {
+			historyBundle = myClient.history().onType(Patient.class).returnBundle(Bundle.class).execute();
+		} else {
+			historyBundle = myClient.history().onServer().returnBundle(Bundle.class).execute();
+		}
+        while (true) {
 			historyBundle
 				.getEntry()
 				.stream()
