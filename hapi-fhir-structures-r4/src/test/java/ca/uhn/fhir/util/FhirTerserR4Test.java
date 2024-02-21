@@ -53,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -1515,7 +1516,25 @@ public class FhirTerserR4Test {
 		}
 	}
 
+	@Test
+	void extensionWithEnumeration() {
+		final FhirContext ctx = FhirContext.forR4();
+		final FhirTerser fhirTerser = ctx.newTerser();
 
+		final String url = "http://hl7.org/fhir/StructureDefinition/data-absent-reason]";
+		final Enumeration<Enumerations.DataAbsentReason> enumerationUnknown = new Enumeration<>(new Enumerations.DataAbsentReasonEnumFactory(), "unknown");
+		final Extension extensionUnknown = new Extension(url, enumerationUnknown);
+
+		boolean[] results = new boolean[1];
+		final IModelVisitor2 iModelVisitor2 = (theElement, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath) -> {
+
+            results[0] = true;
+            return true;
+        };
+
+		fhirTerser.visit(extensionUnknown, iModelVisitor2);
+		assertTrue( results[0]);
+	}
 
 	private List<String> toStrings(List<StringType> theStrings) {
 		ArrayList<String> retVal = new ArrayList<>();
