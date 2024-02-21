@@ -206,6 +206,9 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 		terser.addElement(retVal, "id", UUID.randomUUID().toString());
 		terser.addElement(retVal, "name", "RestServer");
+		IBase text = terser.addElement(retVal, "text");
+		terser.addElement(text, "status", "generated");
+		terser.addElement(text, "div", "<div xmlns=\"http://www.w3.org/1999/xhtml\">HAPI-FHIR Server</div>");
 		terser.addElement(retVal, "publisher", myPublisher);
 		terser.addElement(retVal, "date", conformanceDate(configuration));
 		terser.addElement(
@@ -704,6 +707,10 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				myContext.getResourceDefinition("OperationDefinition").newInstance();
 		FhirTerser terser = myContext.newTerser();
 
+		IBase text = terser.addElement(op, "text");
+		terser.addElement(text, "status", "generated");
+		terser.addElement(text, "div", "<div xmlns=\"http://www.w3.org/1999/xhtml\">Operation Named Search</div>");
+
 		terser.addElement(op, "status", "active");
 		terser.addElement(op, "kind", "query");
 		terser.addElement(op, "affectsState", "false");
@@ -764,6 +771,10 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		IBaseResource op =
 				myContext.getResourceDefinition("OperationDefinition").newInstance();
 		FhirTerser terser = myContext.newTerser();
+
+		IBase text = terser.addElement(op, "text");
+		terser.addElement(text, "status", "generated");
+		terser.addElement(text, "div", "<div xmlns=\"http://www.w3.org/1999/xhtml\">Operation</div>");
 
 		terser.addElement(op, "status", "active");
 		terser.addElement(op, "kind", "operation");
