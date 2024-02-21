@@ -466,6 +466,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 						|| "Type".equals(nextElementType.getSimpleName())
 						|| IBaseDatatype.class.equals(nextElementType)) {
 
+					// LUKETODO:  Type becomes this:
 					def = new RuntimeChildAny(nextField, elementName, childAnnotation, descriptionAnnotation);
 //					ourLog.info("5403: RuntimeChildAny\nnextField:{},\nelementName:{}\nchildAnnotation:{}\ndescriptionAnnotation:{}", nextField, elementName, childAnnotation, descriptionAnnotation);
 					ourLog.info("5403: YES-RuntimeChildAny\nnextElementType: {}", nextElementType);
@@ -501,6 +502,7 @@ public abstract class BaseRuntimeElementCompositeDefinition<T extends IBase> ext
 									nextDatatype,
 									binderType);
 						} else {
+							// LUKETODO:  Enumeration becomes this:
 							def = new RuntimeChildPrimitiveDatatypeDefinition(
 									nextField, elementName, descriptionAnnotation, childAnnotation, nextDatatype);
 						}

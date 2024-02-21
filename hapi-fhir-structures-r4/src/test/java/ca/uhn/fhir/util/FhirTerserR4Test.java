@@ -1524,6 +1524,7 @@ public class FhirTerserR4Test {
 		final String url = "http://hl7.org/fhir/StructureDefinition/data-absent-reason]";
 		final Enumeration<Enumerations.DataAbsentReason> enumerationUnknown = new Enumeration<>(new Enumerations.DataAbsentReasonEnumFactory(), "unknown");
 		final Extension extensionUnknown = new Extension(url, enumerationUnknown);
+		org.hl7.fhir.r4.model.Type enumerationAsType = enumerationUnknown;
 
 		boolean[] results = new boolean[1];
 		final IModelVisitor2 iModelVisitor2 = (theElement, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath) -> {
