@@ -32,6 +32,10 @@ public class HapiFhirPostgresDialect extends PostgreSQLDialect {
 		super(DatabaseVersion.make(10, 0, 0));
 	}
 
+		public HapiFhirPostgresDialect(DialectResolutionInfo info) {
+		super(info);
+	}
+
 	/**
 	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
 	 */
