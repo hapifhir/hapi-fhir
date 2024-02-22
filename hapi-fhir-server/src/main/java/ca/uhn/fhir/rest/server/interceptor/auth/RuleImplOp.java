@@ -848,8 +848,13 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	}
 
 	private boolean isInvalidNestedParametersRequest(
-			FhirContext theContext, BundleEntryParts nextPart, RestOperationTypeEnum theOperation) {
-		RuntimeResourceDefinition resourceDefinition = theContext.getResourceDefinition(nextPart.getResource());
+			FhirContext theContext, BundleEntryParts theEntry, RestOperationTypeEnum theOperation) {
+		IBaseResource resource = theEntry.getResource();
+		if (resource == null) {
+			return false;
+		}
+
+		RuntimeResourceDefinition resourceDefinition = theContext.getResourceDefinition(resource);
 		final boolean isResourceParameters = PARAMETERS.equals(resourceDefinition.getName());
 		final boolean isOperationPatch = theOperation == RestOperationTypeEnum.PATCH;
 
