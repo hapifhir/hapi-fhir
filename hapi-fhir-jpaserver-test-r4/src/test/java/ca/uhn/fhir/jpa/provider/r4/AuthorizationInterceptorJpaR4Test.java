@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
@@ -62,6 +63,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,6 +94,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	private ThreadSafeResourceDeleterSvc myThreadSafeResourceDeleterSvc;
 	private AuthorizationInterceptor myReadAllBundleInterceptor;
 	private AuthorizationInterceptor myReadAllPatientInterceptor;
+	private AuthorizationInterceptor myWriteResourcesInTransactionAuthorizationInterceptor;
 
 	@BeforeEach
 	@Override
@@ -101,6 +105,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		myStorageSettings.setDeleteExpungeEnabled(true);
 		myReadAllBundleInterceptor = new ReadAllAuthorizationInterceptor("Bundle");
 		myReadAllPatientInterceptor = new ReadAllAuthorizationInterceptor("Patient");
+		myWriteResourcesInTransactionAuthorizationInterceptor = new WriteResourcesInTransactionAuthorizationInterceptor();
 	}
 
 	@Override
@@ -1656,25 +1661,18 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertTrue(AuthorizationInterceptor.shouldExamineBundleChildResources(requestDetails, myFhirContext, bundle));
 	}
 
-	@Test
-	public void testPermissionsToPostTransactionWithCollectionBundles_successfullyPostsTransactions(){
+	@ParameterizedTest
+	@ValueSource(strings = {"collection", "document", "message"})
+	public void testPermissionsToPostTransaction_withValidNestedBundleRequest_successfullyPostsTransactions(String theBundleType){
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
-		builder.setType("collection");
-		IBaseBundle collection = builder.getBundle();
+		builder.setType(theBundleType);
+		IBaseBundle nestedBundle = builder.getBundle();
 
 		builder = new BundleBuilder(myFhirContext);
-		builder.addTransactionCreateEntry(collection);
+		builder.addTransactionCreateEntry(nestedBundle);
 		IBaseBundle transaction = builder.getBundle();
 
-		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return new RuleBuilder()
-					.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
-					.allow().write().allResources().withAnyId().andThen()
-					.build();
-			}
-		});
+		myServer.getRestfulServer().registerInterceptor(myWriteResourcesInTransactionAuthorizationInterceptor);
 
 		myClient
 			.transaction()
@@ -1684,9 +1682,44 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		List<IBaseResource> savedBundles = myBundleDao.search(SearchParameterMap.newSynchronous(), mySrd).getAllResources();
 		assertEquals(1, savedBundles.size());
 
-		Bundle savedCollection = (Bundle) savedBundles.get(0);
-		assertEquals(Bundle.BundleType.COLLECTION, savedCollection.getType());
-		assertTrue(savedCollection.getEntry().isEmpty());
+		Bundle savedBundle = (Bundle) savedBundles.get(0);
+		assertEquals(theBundleType, savedBundle.getType().toCode());
+		assertTrue(savedBundle.getEntry().isEmpty());
+	}
+
+	@ParameterizedTest
+	@NullSource
+	@ValueSource(strings = {"", "/"})
+	public void testPermissionsToPostTransaction_withInvalidNestedBundleRequest_blocksTransaction(String theInvalidUrl){
+		// inner transaction
+		Patient patient = new Patient();
+		patient.setId("some-patient");
+		BundleBuilder builder = new BundleBuilder(myFhirContext);
+		builder.addTransactionCreateEntry(patient);
+		Bundle innerTransaction = (Bundle) builder.getBundle();
+
+		// outer transaction
+		Bundle outerTransaction = new Bundle();
+		outerTransaction.setType(Bundle.BundleType.TRANSACTION);
+		Bundle.BundleEntryComponent entry = outerTransaction.addEntry();
+		entry.setResource(innerTransaction);
+		entry.getRequest().setUrl(theInvalidUrl).setMethod(Bundle.HTTPVerb.POST);
+
+		myServer.getRestfulServer().registerInterceptor(myWriteResourcesInTransactionAuthorizationInterceptor);
+
+		try {
+			myClient
+				.transaction()
+				.withBundle(outerTransaction)
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			String expectedMessage = "HTTP 400 Bad Request: HAPI-2504: Can not handle nested Bundle request with url:";
+			assertTrue(e.getMessage().contains(expectedMessage));
+		}
+
+		// verify nested Patient transaction did NOT execute
+		assertTrue(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd).isEmpty());
 	}
 
 	private Patient createPatient(String theFirstName, String theLastName){
@@ -1795,6 +1828,21 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 			return new RuleBuilder()
 				.allow().read().allResources().inCompartment(myResourceType, myId).andThen()
+				.build();
+		}
+	}
+
+	static class WriteResourcesInTransactionAuthorizationInterceptor extends AuthorizationInterceptor {
+
+		public WriteResourcesInTransactionAuthorizationInterceptor(){
+			super(PolicyEnum.DENY);
+		}
+
+		@Override
+		public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+			return new RuleBuilder()
+				.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
+				.allow().write().allResources().withAnyId().andThen()
 				.build();
 		}
 	}
