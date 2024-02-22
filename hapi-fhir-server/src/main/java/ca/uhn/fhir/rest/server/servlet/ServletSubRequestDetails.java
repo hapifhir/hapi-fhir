@@ -34,7 +34,9 @@ public class ServletSubRequestDetails extends ServletRequestDetails {
 	/**
 	 * Map with case-insensitive keys
 	 */
-	private final ListMultimap<String, String> myHeaders = MultimapBuilder.treeKeys(String.CASE_INSENSITIVE_ORDER).arrayListValues().build();
+	private final ListMultimap<String, String> myHeaders = MultimapBuilder.treeKeys(String.CASE_INSENSITIVE_ORDER)
+			.arrayListValues()
+			.build();
 
 	/**
 	 * Constructor

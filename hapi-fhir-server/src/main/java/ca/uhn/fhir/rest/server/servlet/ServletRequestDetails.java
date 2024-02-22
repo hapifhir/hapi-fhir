@@ -174,7 +174,9 @@ public class ServletRequestDetails extends RequestDetails {
 	private void initHeaders() {
 		if (myHeaders == null) {
 			// Make sure we are case-insensitive for header names
-			myHeaders = MultimapBuilder.treeKeys(String.CASE_INSENSITIVE_ORDER).arrayListValues().build();
+			myHeaders = MultimapBuilder.treeKeys(String.CASE_INSENSITIVE_ORDER)
+					.arrayListValues()
+					.build();
 
 			Enumeration<String> headerNames = getServletRequest().getHeaderNames();
 			while (headerNames.hasMoreElements()) {

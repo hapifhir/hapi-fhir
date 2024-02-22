@@ -282,7 +282,7 @@ public class SearchNarrowingInterceptor {
 				theConditionalUrl,
 				theIncludeUpToQuestionMarkInResponse,
 				theResourceName,
-			false,
+				false,
 				authorizedList);
 	}
 

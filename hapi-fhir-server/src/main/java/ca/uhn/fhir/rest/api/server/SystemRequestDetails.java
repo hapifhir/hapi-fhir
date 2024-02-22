@@ -139,7 +139,9 @@ public class SystemRequestDetails extends RequestDetails {
 	private void initHeaderMap() {
 		if (myHeaders == null) {
 			// Make sure we are case-insensitive on keys
-			myHeaders = MultimapBuilder.treeKeys(String.CASE_INSENSITIVE_ORDER).arrayListValues().build();
+			myHeaders = MultimapBuilder.treeKeys(String.CASE_INSENSITIVE_ORDER)
+					.arrayListValues()
+					.build();
 		}
 	}
 
