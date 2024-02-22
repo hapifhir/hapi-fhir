@@ -1695,7 +1695,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	public void testPermissionsToPostTransaction_withInvalidNestedBundleRequest_blocksTransaction(String theInvalidUrl){
 		// inner transaction
 		Patient patient = new Patient();
-		patient.setId("some-patient");
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		builder.addTransactionCreateEntry(patient);
 		Bundle innerTransaction = (Bundle) builder.getBundle();
