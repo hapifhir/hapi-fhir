@@ -125,7 +125,6 @@ class ModelScanner {
 	private void init(
 			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theExistingDefinitions,
 			Set<Class<? extends IBase>> theTypesToScan) {
-		// LUKETODO:  this seems to be where we populate the resource definitions
 		if (theExistingDefinitions != null) {
 			myClassToElementDefinitions.putAll(theExistingDefinitions);
 		}

@@ -53,12 +53,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -1524,18 +1524,15 @@ public class FhirTerserR4Test {
 		final String url = "http://hl7.org/fhir/StructureDefinition/data-absent-reason]";
 		final Enumeration<Enumerations.DataAbsentReason> enumerationUnknown = new Enumeration<>(new Enumerations.DataAbsentReasonEnumFactory(), "unknown");
 		final Extension extensionUnknown = new Extension(url, enumerationUnknown);
-		org.hl7.fhir.r4.model.Type enumerationAsType = enumerationUnknown;
 
-		// LUKETODO:  AtomicBoolean
-		boolean[] results = new boolean[1];
+		final AtomicBoolean result = new AtomicBoolean(false);
 		final IModelVisitor2 iModelVisitor2 = (theElement, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath) -> {
-
-            results[0] = true;
+            result.set(true);
             return true;
         };
 
 		fhirTerser.visit(extensionUnknown, iModelVisitor2);
-		assertTrue( results[0]);
+		assertTrue(result.get());
 	}
 
 	private List<String> toStrings(List<StringType> theStrings) {

@@ -53,19 +53,6 @@ public class RuntimeChildAny extends RuntimeChildChoiceDefinition {
 				continue;
 			}
 
-			//			BaseRuntimeElementDefinition<?> nextDef = theClassToElementDefinitions.get(next);
-			//			if (nextDef instanceof IRuntimeDatatypeDefinition) {
-			//				if (((IRuntimeDatatypeDefinition) nextDef).isSpecialization()) {
-			//					/*
-			//					 * Things like BoundCodeDt shoudn't be considered as valid options for an "any" choice, since
-			//					 * we'll already have CodeDt as an option
-			//					 */
-			//					continue;
-			//				}
-			//			}
-
-			// LUKETODO:  here, theClassToElementDefinitions does NOT contain Type, which means myChoiceTypes
-			// will not contain Type
 			if (IResource.class.isAssignableFrom(next)
 					|| IDatatype.class.isAssignableFrom(next)
 					|| IBaseDatatype.class.isAssignableFrom(next)
