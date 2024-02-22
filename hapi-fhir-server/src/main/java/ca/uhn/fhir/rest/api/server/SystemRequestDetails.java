@@ -33,9 +33,9 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
+import com.google.common.collect.MultimapBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -138,7 +138,8 @@ public class SystemRequestDetails extends RequestDetails {
 
 	private void initHeaderMap() {
 		if (myHeaders == null) {
-			myHeaders = ArrayListMultimap.create();
+			// Make sure we are case-insensitive on keys
+			myHeaders = MultimapBuilder.treeKeys(String.CASE_INSENSITIVE_ORDER).arrayListValues().build();
 		}
 	}
 
@@ -156,7 +157,7 @@ public class SystemRequestDetails extends RequestDetails {
 	}
 
 	@Override
-	public Reader getReader() throws IOException {
+	public Reader getReader() {
 		return null;
 	}
 

@@ -90,6 +90,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  *
  * @see AuthorizationInterceptor
  */
+@SuppressWarnings("JavadocLinkAsPlainText")
 public class SearchNarrowingInterceptor {
 
 	public static final String POST_FILTERING_LIST_ATTRIBUTE_NAME =
@@ -179,7 +180,7 @@ public class SearchNarrowingInterceptor {
 	}
 
 	/**
-	 * This methos narrows FHIR transaction operations (because this pointcut
+	 * This method narrows FHIR transaction operations (because this pointcut
 	 * is called after the request body is parsed).
 	 *
 	 * @see #hookIncomingRequestPostProcessed(RequestDetails, HttpServletRequest, HttpServletResponse) This method narrows FHIR search/create/update/etc operations
@@ -238,8 +239,8 @@ public class SearchNarrowingInterceptor {
 		if (myNarrowConditionalUrls) {
 			String ifNoneExist = theRequestDetails.getHeader(Constants.HEADER_IF_NONE_EXIST);
 			if (isNotBlank(ifNoneExist)) {
-				String newConditionalUrl = narrowConditionalUrl(
-						theRequestDetails, ifNoneExist, true, theRequestDetails.getResourceName(), false);
+				String newConditionalUrl = narrowConditionalUrlForCompartmentOnly(
+						theRequestDetails, ifNoneExist, true, theRequestDetails.getResourceName());
 				if (newConditionalUrl != null) {
 					theRequestDetails.setHeaders(Constants.HEADER_IF_NONE_EXIST, List.of(newConditionalUrl));
 				}
@@ -251,8 +252,8 @@ public class SearchNarrowingInterceptor {
 		if (myNarrowConditionalUrls) {
 			String conditionalUrl = theRequestDetails.getConditionalUrl(theRestOperationType);
 			if (isNotBlank(conditionalUrl)) {
-				String newConditionalUrl = narrowConditionalUrl(
-						theRequestDetails, conditionalUrl, false, theRequestDetails.getResourceName(), false);
+				String newConditionalUrl = narrowConditionalUrlForCompartmentOnly(
+						theRequestDetails, conditionalUrl, false, theRequestDetails.getResourceName());
 				if (newConditionalUrl != null) {
 					String newCompleteUrl = theRequestDetails
 									.getCompleteUrl()
@@ -266,20 +267,22 @@ public class SearchNarrowingInterceptor {
 		}
 	}
 
+	/**
+	 * Does not narrow codes
+	 */
 	@Nullable
-	private String narrowConditionalUrl(
+	private String narrowConditionalUrlForCompartmentOnly(
 			RequestDetails theRequestDetails,
 			@Nonnull String theConditionalUrl,
 			boolean theIncludeUpToQuestionMarkInResponse,
-			String theResourceName,
-			boolean theNarrowCodes) {
+			String theResourceName) {
 		AuthorizedList authorizedList = buildAuthorizedList(theRequestDetails);
 		return narrowConditionalUrl(
 				theRequestDetails,
 				theConditionalUrl,
 				theIncludeUpToQuestionMarkInResponse,
 				theResourceName,
-				theNarrowCodes,
+			false,
 				authorizedList);
 	}
 
@@ -629,8 +632,8 @@ public class SearchNarrowingInterceptor {
 	private static Map<String, String[]> applyCompartmentParameters(
 			@Nonnull ListMultimap<String, String> theParameterToOrValues,
 			boolean thePatientIdMode,
-			Map<String, String[]> inputParameters) {
-		Map<String, String[]> newParameters = new HashMap<>(inputParameters);
+			Map<String, String[]> theInputParameters) {
+		Map<String, String[]> newParameters = new HashMap<>(theInputParameters);
 		for (String nextParamName : theParameterToOrValues.keySet()) {
 			List<String> nextAllowedValues = theParameterToOrValues.get(nextParamName);
 
@@ -665,7 +668,7 @@ public class SearchNarrowingInterceptor {
 						List<String> nextPermittedValues = ListUtils.union(
 								ListUtils.intersection(nextRequestedValues, nextAllowedValues),
 								ListUtils.intersection(nextRequestedValues, nextAllowedValueIds));
-						if (nextPermittedValues.size() > 0) {
+						if (!nextPermittedValues.isEmpty()) {
 							restrictedExistingList = true;
 							existingValues[i] = ParameterUtil.escapeAndJoinOrList(nextPermittedValues);
 						}
