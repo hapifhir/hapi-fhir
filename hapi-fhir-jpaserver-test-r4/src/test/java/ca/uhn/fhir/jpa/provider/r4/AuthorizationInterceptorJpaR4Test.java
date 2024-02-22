@@ -39,10 +39,12 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.IdType;
@@ -1722,9 +1724,73 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertTrue(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd).isEmpty());
 	}
 
+	@Test
+	public void testPermissionToPostTransaction_withUpdateParameters_blocksTransaction(){
+		DateType originalBirthDate = new DateType("2000-01-01");
+		Patient patient = createPatient(originalBirthDate);
+
+		DateType newBirthDate = new DateType("2005-01-01");
+		Parameters birthDatePatch = createPatientBirthdatePatch(newBirthDate);
+
+		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+		bundleBuilder.addTransactionUpdateEntry(birthDatePatch);
+		IBaseBundle transaction = bundleBuilder.getBundle();
+
+		myServer.getRestfulServer().registerInterceptor(myWriteResourcesInTransactionAuthorizationInterceptor);
+
+		try {
+			myClient
+				.transaction()
+				.withBundle(transaction)
+				.execute();
+			fail();
+		} catch (InvalidRequestException e) {
+			String expectedMessage = "HTTP 400 Bad Request: HAPI-0339: Can not handle nested Parameters with UPDATE operation";
+			assertEquals(expectedMessage, e.getMessage());
+		}
+
+		List<IBaseResource> allPatients = myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd).getAllResources();
+		assertEquals(1, allPatients.size());
+
+		Patient savedPatient = (Patient) allPatients.get(0);
+		assertEquals(originalBirthDate.getValueAsString(), savedPatient.getBirthDateElement().getValueAsString());
+	}
+
+	@Test
+	public void testPermissionToPostTransaction_withPatchParameters_successfullyPostsTransaction(){
+		DateType originalBirthDate = new DateType("2000-01-01");
+		Patient patient = createPatient(originalBirthDate);
+
+		DateType newBirthDate = new DateType("2005-01-01");
+		Parameters birthDatePatch = createPatientBirthdatePatch(newBirthDate);
+
+		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+		bundleBuilder.addTransactionFhirPatchEntry(patient.getIdElement(), birthDatePatch);
+		IBaseBundle transaction = bundleBuilder.getBundle();
+
+		myServer.getRestfulServer().registerInterceptor(myWriteResourcesInTransactionAuthorizationInterceptor);
+
+		myClient
+			.transaction()
+			.withBundle(transaction)
+			.execute();
+
+		List<IBaseResource> allPatients = myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd).getAllResources();
+		assertEquals(1, allPatients.size());
+
+		Patient savedPatient = (Patient) allPatients.get(0);
+		assertEquals(newBirthDate.getValueAsString(), savedPatient.getBirthDateElement().getValueAsString());
+	}
+
 	private Patient createPatient(String theFirstName, String theLastName){
 		Patient patient = new Patient();
 		patient.addName().addGiven(theFirstName).setFamily(theLastName);
+		return (Patient) myPatientDao.create(patient, mySrd).getResource();
+	}
+
+	private Patient createPatient(DateType theBirthDate) {
+		Patient patient = new Patient();
+		patient.setBirthDateElement(theBirthDate);
 		return (Patient) myPatientDao.create(patient, mySrd).getResource();
 	}
 
@@ -1794,6 +1860,17 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		bundle.setType(Bundle.BundleType.SEARCHSET);
 		Arrays.stream(theResources).forEach(resource -> bundle.addEntry().setResource(resource));
 		return bundle;
+	}
+
+	private Parameters createPatientBirthdatePatch(DateType theNewBirthDate){
+		final Parameters patch = new Parameters();
+
+		final Parameters.ParametersParameterComponent op = patch.addParameter().setName("operation");
+		op.addPart().setName("type").setValue(new CodeType("replace"));
+		op.addPart().setName("path").setValue(new CodeType("Patient.birthDate"));
+		op.addPart().setName("value").setValue(theNewBirthDate);
+
+		return patch;
 	}
 
 	static class ReadAllAuthorizationInterceptor extends AuthorizationInterceptor {

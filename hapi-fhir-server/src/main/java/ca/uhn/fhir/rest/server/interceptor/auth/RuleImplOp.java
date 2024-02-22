@@ -776,7 +776,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				// which is supported but a non-PATCH nested Parameters resource may be problematic.
 				if (isInvalidNestedParametersRequest(ctx, nextPart, operation)) {
 					throw new InvalidRequestException(Msg.code(339)
-							+ String.format("Can not handle nested Parameters with a %s operation", operation));
+							+ String.format("Can not handle nested Parameters with %s operation", operation));
 				}
 
 				String previousFixedConditionalUrl = theRequestDetails.getFixedConditionalUrl();
