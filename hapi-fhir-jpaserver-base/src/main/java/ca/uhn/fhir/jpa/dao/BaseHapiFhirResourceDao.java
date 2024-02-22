@@ -30,7 +30,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
-import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -1249,9 +1248,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	@Override
 	public IBundleProvider history(Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequestDetails) {
 		StopWatch w = new StopWatch();
-		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(myResourceName, null);
 		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, details);
+				myRequestPartitionHelperService.determineReadPartitionForRequestForHistory(
+						theRequestDetails, myResourceName, null);
 		IBundleProvider retVal = myTransactionService
 				.withRequest(theRequestDetails)
 				.withRequestPartitionId(requestPartitionId)
@@ -1270,9 +1269,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			final IIdType theId, final Date theSince, Date theUntil, Integer theOffset, RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
 
-		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(myResourceName, theId);
 		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, details);
+				myRequestPartitionHelperService.determineReadPartitionForRequestForHistory(
+						theRequest, myResourceName, theId);
 		IBundleProvider retVal = myTransactionService
 				.withRequest(theRequest)
 				.withRequestPartitionId(requestPartitionId)
@@ -1300,9 +1299,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			final HistorySearchDateRangeParam theHistorySearchDateRangeParam,
 			RequestDetails theRequest) {
 		StopWatch w = new StopWatch();
-		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(myResourceName, theId);
 		RequestPartitionId requestPartitionId =
-				myRequestPartitionHelperService.determineReadPartitionForRequest(theRequest, details);
+				myRequestPartitionHelperService.determineReadPartitionForRequestForHistory(
+						theRequest, myResourceName, theId);
 		IBundleProvider retVal = myTransactionService
 				.withRequest(theRequest)
 				.withRequestPartitionId(requestPartitionId)
@@ -1349,10 +1348,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				addAllResourcesTypesToReindex(theBase, theRequestDetails, params);
 			}
 
-			ReadPartitionIdRequestDetails details =
-					ReadPartitionIdRequestDetails.forOperation(null, null, ProviderConstants.OPERATION_REINDEX);
 			RequestPartitionId requestPartition =
-					myRequestPartitionHelperService.determineReadPartitionForRequest(theRequestDetails, details);
+					myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
+							theRequestDetails, ProviderConstants.OPERATION_REINDEX);
 			params.setRequestPartitionId(requestPartition);
 
 			JobInstanceStartRequest request = new JobInstanceStartRequest();
@@ -1976,7 +1974,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-						theRequest, getResourceName(), theParams, null);
+						theRequest, getResourceName(), theParams);
 		IBundleProvider retVal = mySearchCoordinatorSvc.registerSearch(
 				this, theParams, getResourceName(), cacheControlDirective, theRequest, requestPartitionId);
 
@@ -2145,7 +2143,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			BiFunction<RequestDetails, Stream<JpaPid>, Stream<V>> transform) {
 		RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
-						theRequest, myResourceName, theParams, null);
+						theRequest, myResourceName, theParams);
 
 		String uuid = UUID.randomUUID().toString();
 
