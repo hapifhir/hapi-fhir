@@ -1,0 +1,8 @@
+---
+- item:
+    type: "add"
+    title: "The version of a few dependencies have been bumped to the latest versions
+    (dependent HAPI modules listed in brackets):
+    <ul>
+        <li>Apache Commons Compress (Base): 1.21 -&gt; 1.26.0</li>
+    </ul>"
