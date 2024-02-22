@@ -30,12 +30,12 @@ import org.hl7.fhir.instance.model.api.IBaseReference;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
 public class RuntimeChildAny extends RuntimeChildChoiceDefinition {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuntimeChildAny.class);
 
 	public RuntimeChildAny(
 			Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation) {
@@ -46,13 +46,15 @@ public class RuntimeChildAny extends RuntimeChildChoiceDefinition {
 	void sealAndInitialize(
 			FhirContext theContext,
 			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions) {
-		List<Class<? extends IBase>> choiceTypes = new ArrayList<Class<? extends IBase>>();
+		List<Class<? extends IBase>> choiceTypes = new ArrayList<>();
+		List<Class<? extends IBase>> specializationChoiceTypes = new ArrayList<>();
 
 		for (Class<? extends IBase> next : theClassToElementDefinitions.keySet()) {
 			if (next.equals(XhtmlDt.class)) {
 				continue;
 			}
 
+			boolean isSpecialization = false;
 			BaseRuntimeElementDefinition<?> nextDef = theClassToElementDefinitions.get(next);
 			if (nextDef instanceof IRuntimeDatatypeDefinition) {
 				if (((IRuntimeDatatypeDefinition) nextDef).isSpecialization()) {
@@ -60,36 +62,44 @@ public class RuntimeChildAny extends RuntimeChildChoiceDefinition {
 					 * Things like BoundCodeDt shoudn't be considered as valid options for an "any" choice, since
 					 * we'll already have CodeDt as an option
 					 */
-//					continue;
-				}
+                    isSpecialization = true;
+                }
 			}
 
 			if (IResource.class.isAssignableFrom(next)
 					|| IDatatype.class.isAssignableFrom(next)
 					|| IBaseDatatype.class.isAssignableFrom(next)
 					|| IBaseReference.class.isAssignableFrom(next)) {
-				choiceTypes.add(next);
-			}
-		}
-		Collections.sort(choiceTypes, new Comparator<Class<?>>() {
-			@Override
-			public int compare(Class<?> theO1, Class<?> theO2) {
-				boolean o1res = IResource.class.isAssignableFrom(theO1);
-				boolean o2res = IResource.class.isAssignableFrom(theO2);
-				if (o1res && o2res) {
-					return theO1.getSimpleName().compareTo(theO2.getSimpleName());
-				} else if (o1res) {
-					return -1;
-				} else if (o1res == false && o2res == false) {
-					return 0;
+				if (isSpecialization) {
+					specializationChoiceTypes.add(next);
 				} else {
-					return 1;
+					choiceTypes.add(next);
 				}
 			}
-		});
+		}
 
-		setChoiceTypes(choiceTypes);
+		choiceTypes.sort(new ResourceTypeNameComparator());
+		specializationChoiceTypes.sort(new ResourceTypeNameComparator());
+
+		setChoiceTypes(choiceTypes, specializationChoiceTypes);
 
 		super.sealAndInitialize(theContext, theClassToElementDefinitions);
+	}
+
+	private static class ResourceTypeNameComparator implements Comparator<Class<?>> {
+		@Override
+		public int compare(Class<?> theO1, Class<?> theO2) {
+			boolean o1res = IResource.class.isAssignableFrom(theO1);
+			boolean o2res = IResource.class.isAssignableFrom(theO2);
+			if (o1res && o2res) {
+				return theO1.getSimpleName().compareTo(theO2.getSimpleName());
+			} else if (o1res) {
+				return -1;
+			} else if (!o2res) {
+				return 0;
+			} else {
+				return 1;
+			}
+		}
 	}
 }
