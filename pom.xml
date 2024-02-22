@@ -892,6 +892,10 @@
 			<name>Max Bureck</name>
 			<organization>Fraunhofer FOKUS</organization>
 		</developer>
+		<developer>
+			<id>pano-smals</id>
+			<name>pano-smals</name>
+		</developer>
 	</developers>
 
 	<licenses>
