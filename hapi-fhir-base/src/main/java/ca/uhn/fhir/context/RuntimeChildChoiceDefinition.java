@@ -73,7 +73,9 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		super(theField, theChildAnnotation, theDescriptionAnnotation, theElementName);
 	}
 
-	void setChoiceTypes(@Nonnull List<Class<? extends IBase>> theChoiceTypes, @Nonnull List<Class<? extends IBase>> theSpecializationChoiceTypes) {
+	void setChoiceTypes(
+			@Nonnull List<Class<? extends IBase>> theChoiceTypes,
+			@Nonnull List<Class<? extends IBase>> theSpecializationChoiceTypes) {
 		Validate.notNull(theChoiceTypes, "theChoiceTypes must not be null");
 		Validate.notNull(theSpecializationChoiceTypes, "theSpecializationChoiceTypes must not be null");
 		myChoiceTypes = Collections.unmodifiableList(theChoiceTypes);
@@ -109,8 +111,8 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 
 		myReferenceSuffix = "Reference";
 
-        sealAndInitializeChoiceTypes(theContext, theClassToElementDefinitions, mySpecializationChoiceTypes, true);
-        sealAndInitializeChoiceTypes(theContext, theClassToElementDefinitions, myChoiceTypes, false);
+		sealAndInitializeChoiceTypes(theContext, theClassToElementDefinitions, mySpecializationChoiceTypes, true);
+		sealAndInitializeChoiceTypes(theContext, theClassToElementDefinitions, myChoiceTypes, false);
 
 		myNameToChildDefinition = Collections.unmodifiableMap(myNameToChildDefinition);
 		myDatatypeToElementName = Collections.unmodifiableMap(myDatatypeToElementName);
@@ -118,7 +120,11 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 		myResourceTypes = Collections.unmodifiableList(myResourceTypes);
 	}
 
-	private void sealAndInitializeChoiceTypes(FhirContext theContext, Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions, List<Class<? extends IBase>> choiceTypes, boolean theIsSpecilization) {
+	private void sealAndInitializeChoiceTypes(
+			FhirContext theContext,
+			Map<Class<? extends IBase>, BaseRuntimeElementDefinition<?>> theClassToElementDefinitions,
+			List<Class<? extends IBase>> choiceTypes,
+			boolean theIsSpecilization) {
 		for (Class<? extends IBase> next : choiceTypes) {
 
 			String elementName = null;
@@ -203,7 +209,7 @@ public class RuntimeChildChoiceDefinition extends BaseRuntimeDeclaredChildDefini
 
 	@Override
 	public String getChildNameByDatatype(Class<? extends IBase> theDatatype) {
-        return myDatatypeToElementName.get(theDatatype);
+		return myDatatypeToElementName.get(theDatatype);
 	}
 
 	@Override

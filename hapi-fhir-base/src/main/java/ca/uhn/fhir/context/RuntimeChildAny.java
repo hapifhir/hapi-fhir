@@ -62,8 +62,8 @@ public class RuntimeChildAny extends RuntimeChildChoiceDefinition {
 					 * Things like BoundCodeDt shoudn't be considered as valid options for an "any" choice, since
 					 * we'll already have CodeDt as an option
 					 */
-                    isSpecialization = true;
-                }
+					isSpecialization = true;
+				}
 			}
 
 			if (IResource.class.isAssignableFrom(next)
