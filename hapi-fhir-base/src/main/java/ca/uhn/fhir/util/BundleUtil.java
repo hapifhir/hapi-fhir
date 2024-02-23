@@ -627,6 +627,8 @@ public class BundleUtil {
 				//noinspection EnumSwitchStatementWhichMissesCases
 				switch (requestType) {
 					case PUT:
+					case DELETE:
+					case PATCH:
 						conditionalUrl = url != null && url.contains("?") ? url : null;
 						break;
 					case POST:
