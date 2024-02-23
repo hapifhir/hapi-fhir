@@ -843,6 +843,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			return false;
 		}
 
+		// transactions are permitted that contain entries with Bundle requests that
+		// have a specified url (i.e. POST to /Bundle), but are rejected if no url is specified
+		// (i.e. nested transactions or batches).
 		String url = theEntry.getUrl();
 		return isBlank(url) || "/".equals(url);
 	}
