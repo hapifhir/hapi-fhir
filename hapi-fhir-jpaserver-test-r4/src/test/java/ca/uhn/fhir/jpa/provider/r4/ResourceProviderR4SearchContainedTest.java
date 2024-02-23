@@ -1073,7 +1073,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		final Group group = new Group();
 		group.addCharacteristic().getValueReference().setReference(orgId.getValue());
 
-		myGroupDao.create(group, new SystemRequestDetails());
+		final IIdType groupId = myGroupDao.create(group, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
 
 		final ExplanationOfBenefit explanationOfBenefit = new ExplanationOfBenefit();
 		explanationOfBenefit.setPatient(new Reference(patientId.getValue()));
@@ -1082,28 +1082,28 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		explanationOfBenefit.addCareTeam().setProvider(new Reference(practitionerId.getValue()));
 		explanationOfBenefit.addInsurance().setCoverage(new Reference(coverageId.getValue()));
 
-		final SearchParameter searchParameter = new SearchParameter();
-		searchParameter.setName("group-value-reference");
-		searchParameter.addBase("Group");
-		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		searchParameter.setCode("value-reference");
-		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
-		searchParameter.setExpression("Group.characteristic.value.as(Reference)");
-		searchParameter.addTarget("Organization");
-		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+//		final SearchParameter searchParameter = new SearchParameter();
+//		searchParameter.setName("group-value-reference");
+//		searchParameter.addBase("Group");
+//		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+//		searchParameter.setCode("value-reference");
+//		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
+//		searchParameter.setExpression("Group.characteristic.value.as(Reference)");
+//		searchParameter.addTarget("Organization");
+//		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+//
+//		mySearchParameterDao.create(searchParameter, new SystemRequestDetails());
 
-		mySearchParameterDao.create(searchParameter, new SystemRequestDetails());
-
-        try {
-            Thread.sleep(30000);
-        } catch (InterruptedException theE) {
-            throw new RuntimeException(theE);
-        }
-
+//        try {
+//            Thread.sleep(30000);
+//        } catch (InterruptedException theE) {
+//            throw new RuntimeException(theE);
+//        }
+//
         ourLog.info("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SEARCH");
 
 		final Bundle outcome = myClient.search()
-			.byUrl("Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization=org1")
+			.byUrl("Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization._has:Group:member:_id=" + groupId.getIdPart())
 			.returnBundle(Bundle.class)
 			.execute();
 
