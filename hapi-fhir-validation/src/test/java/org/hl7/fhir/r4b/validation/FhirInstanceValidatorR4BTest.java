@@ -1119,7 +1119,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 
 		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
-		assertEquals("Unknown code for 'http://loinc.org#12345'", errors.get(0).getMessage());
+		assertEquals("Unknown code (for 'http://loinc.org#12345')", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -1281,7 +1281,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertThat(errors.toString(), errors.size(), greaterThan(0));
-		assertEquals("Unknown code for 'http://acme.org#9988877'", errors.get(0).getMessage());
+		assertEquals("Unknown code (for 'http://acme.org#9988877')", errors.get(0).getMessage());
 
 	}
 

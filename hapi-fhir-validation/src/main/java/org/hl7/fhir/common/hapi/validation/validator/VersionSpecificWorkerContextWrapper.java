@@ -23,8 +23,10 @@ import org.hl7.fhir.r5.context.IContextResourceLoader;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.context.IWorkerContextManager;
 import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.NamingSystem;
+import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Resource;
@@ -764,8 +766,20 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			ValidationOptions theOptions,
 			org.hl7.fhir.r5.model.CodeableConcept code,
 			org.hl7.fhir.r5.model.ValueSet theVs) {
+
+
 		List<ValidationResult> validationResultsOk = new ArrayList<>();
 		for (Coding next : code.getCoding()) {
+			if (!next.hasSystem()) {
+				String message = "Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided";
+				OperationOutcome.OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent()
+					.setSeverity(OperationOutcome.IssueSeverity.WARNING)
+					.setCode(OperationOutcome.IssueType.INVALID)
+					.setDiagnostics(message).setDetails(new CodeableConcept().setText(message));
+
+				return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, List.of(issue));
+
+			}
 			ValidationResult retVal = validateCode(theOptions, next, theVs);
 			if (retVal.isOk()) {
 				if (myValidationSupportContext.isEnabledValidationForCodingsLogicalAnd()) {
@@ -781,7 +795,15 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return validationResultsOk.get(0);
 		}
 
-		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, null);
+
+
+		String message = "Unknown code (for '" + code.getCodingFirstRep().getSystem() + "#" + code.getCodingFirstRep().getCode() + "')";
+		OperationOutcome.OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent()
+			.setSeverity(OperationOutcome.IssueSeverity.ERROR)
+			.setCode(OperationOutcome.IssueType.NOTFOUND)
+			.setDiagnostics(message).setDetails(new CodeableConcept().setText(message));
+
+		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, List.of(issue));
 	}
 
 	public void invalidateCaches() {
