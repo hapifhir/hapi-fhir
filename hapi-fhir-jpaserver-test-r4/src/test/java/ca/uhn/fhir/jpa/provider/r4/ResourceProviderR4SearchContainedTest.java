@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.UrlUtil;
@@ -21,18 +20,15 @@ import org.hl7.fhir.r4.model.ClinicalImpression;
 import org.hl7.fhir.r4.model.ClinicalImpression.ClinicalImpressionStatus;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
-import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateTimeType;
-import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
-import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
-import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Observation;
@@ -44,7 +40,6 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.RiskAssessment;
 import org.hl7.fhir.r4.model.RiskAssessment.RiskAssessmentStatus;
-import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,7 +48,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -1054,26 +1048,28 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 	void complexQuery() {
 		final Patient patient = new Patient();
 
-		final IIdType patientId = myPatientDao.create(patient, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
+		final IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		final Organization organization = new Organization();
 		organization.setId("org1");
+		String orgName = "fooTheOrg";
+		organization.setName(orgName);
 
-		final IIdType orgId = myOrganizationDao.update(organization, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
+		final IIdType orgId = myOrganizationDao.update(organization, mySrd).getId().toUnqualifiedVersionless();
 
 		final Practitioner practitioner = new Practitioner();
 
-		final IIdType practitionerId = myPractitionerDao.create(practitioner, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
+		final IIdType practitionerId = myPractitionerDao.create(practitioner, mySrd).getId().toUnqualifiedVersionless();
 
 		final Coverage coverage = new Coverage();
 		coverage.addPayor().setReference(orgId.getValue());
 
-		final IIdType coverageId = myCoverageDao.create(coverage, new SystemRequestDetails()).getId();
+		final IIdType coverageId = myCoverageDao.create(coverage, mySrd).getId().toUnqualifiedVersionless();
 
-		final Group group = new Group();
-		group.addCharacteristic().getValueReference().setReference(orgId.getValue());
+		final ListResource list = new ListResource();
+		list.addEntry().setItem(new Reference(orgId.getValue()));
 
-		final IIdType groupId = myGroupDao.create(group, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
+		final IIdType listId = myListDao.create(list, mySrd).getId().toUnqualifiedVersionless();
 
 		final ExplanationOfBenefit explanationOfBenefit = new ExplanationOfBenefit();
 		explanationOfBenefit.setPatient(new Reference(patientId.getValue()));
@@ -1081,6 +1077,8 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		explanationOfBenefit.setProvider(new Reference(orgId.getValue()));
 		explanationOfBenefit.addCareTeam().setProvider(new Reference(practitionerId.getValue()));
 		explanationOfBenefit.addInsurance().setCoverage(new Reference(coverageId.getValue()));
+		
+		final IIdType eobId = myExplanationOfBenefitDao.create(explanationOfBenefit, mySrd).getId().toUnqualifiedVersionless();
 
 //		final SearchParameter searchParameter = new SearchParameter();
 //		searchParameter.setName("group-value-reference");
@@ -1092,7 +1090,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 //		searchParameter.addTarget("Organization");
 //		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
 //
-//		mySearchParameterDao.create(searchParameter, new SystemRequestDetails());
+//		mySearchParameterDao.create(searchParameter, mySrd);
 
 //        try {
 //            Thread.sleep(30000);
@@ -1101,13 +1099,84 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 //        }
 //
         ourLog.info("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SEARCH");
+		// Starting from the List and working backwards
+		{ // works
+			final Bundle outcome = myClient.search()
+			.byUrl("Coverage?payor._has:List:item:_id=" + listId.getIdPart())
+				.returnBundle(Bundle.class)
+				.execute();
 
-		final Bundle outcome = myClient.search()
-			.byUrl("Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization._has:Group:member:_id=" + groupId.getIdPart())
-			.returnBundle(Bundle.class)
-			.execute();
+			assertFalse(outcome.getEntry().isEmpty());
+		}
+		{ // works
+			final Bundle outcome = myClient.search()
+				.byUrl("Coverage?payor.name="+orgName)
+				.returnBundle(Bundle.class)
+				.execute();
 
-		assertFalse(outcome.getEntry().isEmpty());
+			assertFalse(outcome.getEntry().isEmpty());
+		}
+		{ // works
+			final Bundle outcome = myClient.search()
+				.byUrl("Coverage?payor=" + orgId.getIdPart())
+				.returnBundle(Bundle.class)
+				.execute();
+
+			assertFalse(outcome.getEntry().isEmpty());
+		}
+		{ // works
+			final Bundle outcome = myClient.search()
+				.byUrl("ExplanationOfBenefit?coverage.payor.name=" + orgName)
+				.returnBundle(Bundle.class)
+				.execute();
+
+			assertFalse(outcome.getEntry().isEmpty());
+		}
+		{ // works
+			final Bundle outcome = myClient.search()
+				.byUrl("ExplanationOfBenefit?coverage.payor=" + orgId.getIdPart())
+				.returnBundle(Bundle.class)
+				.execute();
+
+			assertFalse(outcome.getEntry().isEmpty());
+		}
+
+
+		{ //fails because has is not currently supported on parameter chain
+//			final Bundle outcome = myClient.search()
+//				.byUrl("ExplanationOfBenefit?coverage.payor._has:List:item:_id=" + listId.getIdPart())
+//				.returnBundle(Bundle.class)
+//				.execute();
+//
+//			assertFalse(outcome.getEntry().isEmpty());
+		}
+
+
+		// Now lets go from the other direction
+		{ // works
+			final Bundle outcome = myClient.search()
+				.byUrl("Practitioner?_has:ExplanationOfBenefit:care-team:_id=" + eobId.getIdPart())
+				.returnBundle(Bundle.class)
+				.execute();
+
+			assertFalse(outcome.getEntry().isEmpty());
+		}
+		{ // works
+			final Bundle outcome = myClient.search()
+				.byUrl("Practitioner?_has:ExplanationOfBenefit:care-team:coverage=" + coverageId.getIdPart())
+				.returnBundle(Bundle.class)
+				.execute();
+
+			assertFalse(outcome.getEntry().isEmpty());
+		}
+		{ // works
+			final Bundle outcome = myClient.search()
+				.byUrl("Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor=" + orgId.getIdPart())
+				.returnBundle(Bundle.class)
+				.execute();
+
+			assertFalse(outcome.getEntry().isEmpty());
+		}
 	}
 
 	public List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
