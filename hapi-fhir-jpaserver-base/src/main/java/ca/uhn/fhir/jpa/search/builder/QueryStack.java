@@ -3029,6 +3029,7 @@ public class QueryStack {
 					}
 				}
 			}
+			// LUKETODO:
 			if (!searchParamFound) {
 				throw new InvalidRequestException(Msg.code(1214)
 						+ myFhirContext

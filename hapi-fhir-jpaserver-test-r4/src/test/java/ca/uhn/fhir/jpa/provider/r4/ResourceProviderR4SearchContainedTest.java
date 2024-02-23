@@ -42,7 +42,10 @@ import org.hl7.fhir.r4.model.RiskAssessment;
 import org.hl7.fhir.r4.model.RiskAssessment.RiskAssessmentStatus;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -1044,134 +1047,85 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		assertThat(mids, contains(mid1.getValue()));
 	}
 
-	@Test
-	void complexQuery() {
-		final Patient patient = new Patient();
+	@Nested
+	class ComplexQueries {
+		private static final String PAT_ID = "pat1";
+		private static final String ORG_ID = "org1";
+		private static final String ORG_NAME = "fooTheOrg";
+		private static final String PRACTITIONER_ID = "pra1";
+		private static final String COVERAGE_ID = "cov1";
+		private static final String LIST_ID = "list1";
+		private static final String EOB_ID = "eob1";
 
-		final IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+		@BeforeEach
+		void beforeEach() {
+			final Patient patient = new Patient();
+			patient.setId(PAT_ID);
 
-		final Organization organization = new Organization();
-		organization.setId("org1");
-		String orgName = "fooTheOrg";
-		organization.setName(orgName);
+			final IIdType patientId = myPatientDao.update(patient, mySrd).getId().toUnqualifiedVersionless();
 
-		final IIdType orgId = myOrganizationDao.update(organization, mySrd).getId().toUnqualifiedVersionless();
+			final Organization organization = new Organization();
+			organization.setId(ORG_ID);
+			organization.setName(ORG_NAME);
 
-		final Practitioner practitioner = new Practitioner();
+			final IIdType orgId = myOrganizationDao.update(organization, mySrd).getId().toUnqualifiedVersionless();
 
-		final IIdType practitionerId = myPractitionerDao.create(practitioner, mySrd).getId().toUnqualifiedVersionless();
+			final Practitioner practitioner = new Practitioner();
+			practitioner.setId(PRACTITIONER_ID);
 
-		final Coverage coverage = new Coverage();
-		coverage.addPayor().setReference(orgId.getValue());
+			final IIdType practitionerId = myPractitionerDao.update(practitioner, mySrd).getId().toUnqualifiedVersionless();
 
-		final IIdType coverageId = myCoverageDao.create(coverage, mySrd).getId().toUnqualifiedVersionless();
+			final Coverage coverage = new Coverage();
+			coverage.setId(COVERAGE_ID);
+			coverage.addPayor().setReference(orgId.getValue());
 
-		final ListResource list = new ListResource();
-		list.addEntry().setItem(new Reference(orgId.getValue()));
+			final IIdType coverageId = myCoverageDao.update(coverage, mySrd).getId().toUnqualifiedVersionless();
 
-		final IIdType listId = myListDao.create(list, mySrd).getId().toUnqualifiedVersionless();
+			final ListResource list = new ListResource();
+			list.setId(LIST_ID);
+			list.addEntry().setItem(new Reference(orgId.getValue()));
 
-		final ExplanationOfBenefit explanationOfBenefit = new ExplanationOfBenefit();
-		explanationOfBenefit.setPatient(new Reference(patientId.getValue()));
-		explanationOfBenefit.setInsurer(new Reference(orgId.getValue()));
-		explanationOfBenefit.setProvider(new Reference(orgId.getValue()));
-		explanationOfBenefit.addCareTeam().setProvider(new Reference(practitionerId.getValue()));
-		explanationOfBenefit.addInsurance().setCoverage(new Reference(coverageId.getValue()));
-		
-		final IIdType eobId = myExplanationOfBenefitDao.create(explanationOfBenefit, mySrd).getId().toUnqualifiedVersionless();
+            myListDao.update(list, mySrd).getId().toUnqualifiedVersionless();
 
-//		final SearchParameter searchParameter = new SearchParameter();
-//		searchParameter.setName("group-value-reference");
-//		searchParameter.addBase("Group");
-//		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
-//		searchParameter.setCode("value-reference");
-//		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
-//		searchParameter.setExpression("Group.characteristic.value.as(Reference)");
-//		searchParameter.addTarget("Organization");
-//		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
-//
-//		mySearchParameterDao.create(searchParameter, mySrd);
+            final ExplanationOfBenefit explanationOfBenefit = new ExplanationOfBenefit();
+			explanationOfBenefit.setId(EOB_ID);
+			explanationOfBenefit.setPatient(new Reference(patientId.getValue()));
+			explanationOfBenefit.setInsurer(new Reference(orgId.getValue()));
+			explanationOfBenefit.setProvider(new Reference(orgId.getValue()));
+			explanationOfBenefit.addCareTeam().setProvider(new Reference(practitionerId.getValue()));
+			explanationOfBenefit.addInsurance().setCoverage(new Reference(coverageId.getValue()));
 
-//        try {
-//            Thread.sleep(30000);
-//        } catch (InterruptedException theE) {
-//            throw new RuntimeException(theE);
-//        }
-//
-        ourLog.info("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SEARCH");
-		// Starting from the List and working backwards
-		{ // works
-			final Bundle outcome = myClient.search()
-			.byUrl("Coverage?payor._has:List:item:_id=" + listId.getIdPart())
-				.returnBundle(Bundle.class)
-				.execute();
+            myExplanationOfBenefitDao.update(explanationOfBenefit, mySrd).getId().toUnqualifiedVersionless();
+        }
 
-			assertFalse(outcome.getEntry().isEmpty());
-		}
-		{ // works
-			final Bundle outcome = myClient.search()
-				.byUrl("Coverage?payor.name="+orgName)
-				.returnBundle(Bundle.class)
-				.execute();
-
-			assertFalse(outcome.getEntry().isEmpty());
-		}
-		{ // works
-			final Bundle outcome = myClient.search()
-				.byUrl("Coverage?payor=" + orgId.getIdPart())
-				.returnBundle(Bundle.class)
-				.execute();
-
-			assertFalse(outcome.getEntry().isEmpty());
-		}
-		{ // works
-			final Bundle outcome = myClient.search()
-				.byUrl("ExplanationOfBenefit?coverage.payor.name=" + orgName)
-				.returnBundle(Bundle.class)
-				.execute();
-
-			assertFalse(outcome.getEntry().isEmpty());
-		}
-		{ // works
-			final Bundle outcome = myClient.search()
-				.byUrl("ExplanationOfBenefit?coverage.payor=" + orgId.getIdPart())
-				.returnBundle(Bundle.class)
-				.execute();
-
-			assertFalse(outcome.getEntry().isEmpty());
+		@ParameterizedTest
+		@ValueSource(strings = {
+			"Coverage?payor._has:List:item:_id="+LIST_ID,
+			"Coverage?payor.name="+ORG_NAME,
+			"Coverage?payor="+ORG_ID,
+			"ExplanationOfBenefit?coverage.payor.name="+ORG_NAME,
+			"ExplanationOfBenefit?coverage.payor="+ORG_ID,
+			"ExplanationOfBenefit?coverage.payor._has:List:item:_id="+LIST_ID
+		})
+		void complexQueryFromList(String theQueryString) {
+			runAndAssert(theQueryString);
 		}
 
-
-		{ //fails because has is not currently supported on parameter chain
-//			final Bundle outcome = myClient.search()
-//				.byUrl("ExplanationOfBenefit?coverage.payor._has:List:item:_id=" + listId.getIdPart())
-//				.returnBundle(Bundle.class)
-//				.execute();
-//
-//			assertFalse(outcome.getEntry().isEmpty());
+		@ParameterizedTest
+		@ValueSource(strings = {
+			"Practitioner?_has:ExplanationOfBenefit:care-team:_id="+EOB_ID,
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage="+COVERAGE_ID,
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID
+		})
+		void complexQueryFromPractitioner(String theQueryString) {
+			runAndAssert(theQueryString);
 		}
 
+		private void runAndAssert(String theQueryString) {
+			ourLog.info("queryString:\n{}", theQueryString);
 
-		// Now lets go from the other direction
-		{ // works
 			final Bundle outcome = myClient.search()
-				.byUrl("Practitioner?_has:ExplanationOfBenefit:care-team:_id=" + eobId.getIdPart())
-				.returnBundle(Bundle.class)
-				.execute();
-
-			assertFalse(outcome.getEntry().isEmpty());
-		}
-		{ // works
-			final Bundle outcome = myClient.search()
-				.byUrl("Practitioner?_has:ExplanationOfBenefit:care-team:coverage=" + coverageId.getIdPart())
-				.returnBundle(Bundle.class)
-				.execute();
-
-			assertFalse(outcome.getEntry().isEmpty());
-		}
-		{ // works
-			final Bundle outcome = myClient.search()
-				.byUrl("Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor=" + orgId.getIdPart())
+				.byUrl(theQueryString)
 				.returnBundle(Bundle.class)
 				.execute();
 
