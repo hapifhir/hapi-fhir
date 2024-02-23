@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5680
+title: "Previously, after registering built-in interceptor `PatientIdPartitionInterceptor`, while performing 
+an async system bulk export, the `$poll-export-status` operation would fail with a `NullPointerException`. This has been fixed."
