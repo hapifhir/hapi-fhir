@@ -739,6 +739,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * Now perform the search
 		 */
 		GeneratedSql generatedSql = sqlBuilder.generate(theOffset, myMaxResultsToFetch);
+		ourLog.info("SQL:\n{}\nparams:\n{}", generatedSql.getSql(), generatedSql.getBindVariables());
 		if (!generatedSql.isMatchNothing()) {
 			SearchQueryExecutor executor =
 					mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);

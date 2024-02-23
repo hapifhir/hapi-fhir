@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.UrlUtil;
@@ -21,16 +22,21 @@ import org.hl7.fhir.r4.model.ClinicalImpression.ClinicalImpressionStatus;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
@@ -38,6 +44,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.RiskAssessment;
 import org.hl7.fhir.r4.model.RiskAssessment.RiskAssessmentStatus;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +60,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 
 public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR4Test {
@@ -1040,6 +1048,66 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 		assertEquals(1L, mids.size());
 		assertThat(mids, contains(mid1.getValue()));
+	}
+
+	@Test
+	void complexQuery() {
+		final Patient patient = new Patient();
+
+		final IIdType patientId = myPatientDao.create(patient, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
+
+		final Organization organization = new Organization();
+		organization.setId("org1");
+
+		final IIdType orgId = myOrganizationDao.update(organization, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
+
+		final Practitioner practitioner = new Practitioner();
+
+		final IIdType practitionerId = myPractitionerDao.create(practitioner, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
+
+		final Coverage coverage = new Coverage();
+		coverage.addPayor().setReference(orgId.getValue());
+
+		final IIdType coverageId = myCoverageDao.create(coverage, new SystemRequestDetails()).getId();
+
+		final Group group = new Group();
+		group.addCharacteristic().getValueReference().setReference(orgId.getValue());
+
+		myGroupDao.create(group, new SystemRequestDetails());
+
+		final ExplanationOfBenefit explanationOfBenefit = new ExplanationOfBenefit();
+		explanationOfBenefit.setPatient(new Reference(patientId.getValue()));
+		explanationOfBenefit.setInsurer(new Reference(orgId.getValue()));
+		explanationOfBenefit.setProvider(new Reference(orgId.getValue()));
+		explanationOfBenefit.addCareTeam().setProvider(new Reference(practitionerId.getValue()));
+		explanationOfBenefit.addInsurance().setCoverage(new Reference(coverageId.getValue()));
+
+		final SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setName("group-value-reference");
+		searchParameter.addBase("Group");
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setCode("value-reference");
+		searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
+		searchParameter.setExpression("Group.characteristic.value.as(Reference)");
+		searchParameter.addTarget("Organization");
+		searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+
+		mySearchParameterDao.create(searchParameter, new SystemRequestDetails());
+
+        try {
+            Thread.sleep(30000);
+        } catch (InterruptedException theE) {
+            throw new RuntimeException(theE);
+        }
+
+        ourLog.info("\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>\n>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>SEARCH");
+
+		final Bundle outcome = myClient.search()
+			.byUrl("Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization=org1")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertFalse(outcome.getEntry().isEmpty());
 	}
 
 	public List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
