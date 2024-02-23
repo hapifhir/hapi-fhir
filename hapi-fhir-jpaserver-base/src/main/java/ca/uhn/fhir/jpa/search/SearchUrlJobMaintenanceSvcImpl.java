@@ -61,7 +61,7 @@ public class SearchUrlJobMaintenanceSvcImpl implements ISearchUrlJobMaintenanceS
 		ScheduledJobDefinition jobDetail = new ScheduledJobDefinition();
 		jobDetail.setId(SearchUrlMaintenanceJob.class.getName());
 		jobDetail.setJobClass(SearchUrlMaintenanceJob.class);
-		theSchedulerService.scheduleLocalJob(10 * DateUtils.MILLIS_PER_MINUTE, jobDetail);
+		theSchedulerService.scheduleClusteredJob(10 * DateUtils.MILLIS_PER_MINUTE, jobDetail);
 	}
 
 	private Date calculateCutoffDate() {

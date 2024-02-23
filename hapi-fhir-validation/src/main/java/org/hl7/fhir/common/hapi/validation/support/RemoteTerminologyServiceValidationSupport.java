@@ -12,7 +12,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.gclient.IQuery;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
@@ -314,8 +313,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				conceptProperty = new CodingConceptProperty(
 						propertyName, coding.getSystem(), coding.getCode(), coding.getDisplay());
 				break;
+				// TODO: add other property types as per FHIR spec https://github.com/hapifhir/hapi-fhir/issues/5699
 			default:
-				throw new InternalErrorException(Msg.code(2450) + "Property type " + fhirType + " is not supported.");
+				// other types will not fail for Remote Terminology
+				conceptProperty = new StringConceptProperty(propertyName, value.toString());
 		}
 		return conceptProperty;
 	}
@@ -347,8 +348,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				conceptProperty =
 						new CodingConceptProperty(theName, coding.getSystem(), coding.getCode(), coding.getDisplay());
 				break;
+				// TODO: add other property types as per FHIR spec https://github.com/hapifhir/hapi-fhir/issues/5699
 			default:
-				throw new InternalErrorException(Msg.code(2451) + "Property type " + fhirType + " is not supported.");
+				// other types will not fail for Remote Terminology
+				conceptProperty = new StringConceptProperty(theName, theValue.toString());
 		}
 		return conceptProperty;
 	}
@@ -447,8 +450,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				conceptProperty = new CodingConceptProperty(
 						propertyName, coding.getSystem(), coding.getCode(), coding.getDisplay());
 				break;
+				// TODO: add other property types as per FHIR spec https://github.com/hapifhir/hapi-fhir/issues/5699
 			default:
-				throw new InternalErrorException(Msg.code(2452) + "Property type " + fhirType + " is not supported.");
+				// other types will not fail for Remote Terminology
+				conceptProperty = new StringConceptProperty(propertyName, value.toString());
 		}
 		return conceptProperty;
 	}
@@ -467,8 +472,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseValidationSup
 				conceptProperty =
 						new CodingConceptProperty(theName, coding.getSystem(), coding.getCode(), coding.getDisplay());
 				break;
+				// TODO: add other property types as per FHIR spec https://github.com/hapifhir/hapi-fhir/issues/5699
 			default:
-				throw new InternalErrorException(Msg.code(2453) + "Property type " + fhirType + " is not supported.");
+				// other types will not fail for Remote Terminology
+				conceptProperty = new StringConceptProperty(theName, theValue.toString());
 		}
 		return conceptProperty;
 	}
