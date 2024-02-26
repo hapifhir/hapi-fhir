@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -10,18 +12,27 @@ import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.provider.BulkDataExportProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.MultimapCollector;
+import com.google.common.base.Charsets;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.commons.io.IOUtils;
+import org.apache.http.Header;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Encounter;
@@ -36,6 +47,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import java.io.IOException;
 import java.util.List;
@@ -49,8 +61,11 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
 public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Test {
 	public static final int ALTERNATE_DEFAULT_ID = -1;
@@ -542,6 +557,70 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		return (Patient)update.getResource();
 	}
 
+	@Test
+	public void testIdentifyForRead_serverOperation_returnsAllPartitions() {
+		ReadPartitionIdRequestDetails readRequestDetails = ReadPartitionIdRequestDetails.forServerOperation(ProviderConstants.OPERATION_EXPORT);
+		RequestPartitionId requestPartitionId = mySvc.identifyForRead(readRequestDetails, mySrd);
+		assertEquals(requestPartitionId, RequestPartitionId.allPartitions());
+		assertEquals(RestOperationTypeEnum.EXTENDED_OPERATION_SERVER, readRequestDetails.getRestOperationType());
+	}
+
+	@Test
+	public void testSystemBulkExport_withPatientIdPartitioningWithNoResourceType_usesNonPatientSpecificPartition() throws IOException {
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+
+		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)){
+			ourLog.info("Response: {}",postResponse);
+			assertEquals(202, postResponse.getStatusLine().getStatusCode());
+			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
+		}
+	}
+
+	@Test
+	public void testSystemBulkExport_withPatientIdPartitioningWithResourceType_exportUsesNonPatientSpecificPartition() throws IOException {
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE, "Patient");
+		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE_FILTER, "Patient?");
+
+		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)){
+			ourLog.info("Response: {}",postResponse);
+			assertEquals(202, postResponse.getStatusLine().getStatusCode());
+			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
+		}
+	}
+
+	@Test
+	public void testSystemBulkExport_withPatientIdPartitioningWithResourceType_pollSuccessful() throws IOException {
+		final BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
+		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
+		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE, "Patient"); // ignored when computing partition
+		post.addHeader(BulkDataExportProvider.PARAM_EXPORT_TYPE_FILTER, "Patient?");
+
+		String locationUrl;
+
+		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)){
+			ourLog.info("Response: {}",postResponse);
+			assertEquals(202, postResponse.getStatusLine().getStatusCode());
+			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
+
+			Header locationHeader = postResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION);
+			assertNotNull(locationHeader);
+			locationUrl = locationHeader.getValue();
+		}
+
+		HttpGet get = new HttpGet(locationUrl);
+		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(get)) {
+			String responseContent = IOUtils.toString(postResponse.getEntity().getContent(), Charsets.UTF_8);
+			ourLog.info("Response: {}", responseContent);
+			assertEquals(202, postResponse.getStatusLine().getStatusCode());
+		}
+	}
 	@Test
 	public void testSystemOperation_withNoResourceType_success() throws IOException {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);

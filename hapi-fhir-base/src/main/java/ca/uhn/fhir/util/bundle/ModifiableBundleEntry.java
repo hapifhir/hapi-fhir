@@ -20,6 +20,7 @@
 package ca.uhn.fhir.util.bundle;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class ModifiableBundleEntry {
@@ -57,5 +58,17 @@ public class ModifiableBundleEntry {
 
 	public void setResource(IBaseResource theUpdatedResource) {
 		myBundleEntryMutator.setResource(theUpdatedResource);
+	}
+
+	public RequestTypeEnum getRequestMethod() {
+		return myBundleEntryParts.getRequestType();
+	}
+
+	public String getConditionalUrl() {
+		return myBundleEntryParts.getConditionalUrl();
+	}
+
+	public void setRequestIfNoneExist(FhirContext theFhirContext, String theIfNoneExist) {
+		myBundleEntryMutator.setRequestIfNoneExist(theFhirContext, theIfNoneExist);
 	}
 }
