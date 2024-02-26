@@ -25,7 +25,9 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.ListResource;
@@ -40,6 +42,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.RiskAssessment;
 import org.hl7.fhir.r4.model.RiskAssessment.RiskAssessmentStatus;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -1047,11 +1050,12 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		assertThat(mids, contains(mid1.getValue()));
 	}
 
+	// LUKETODO:  find another home for this
 	@Nested
 	class ComplexQueries {
 		private static final String PAT_ID = "pat1";
 		private static final String ORG_ID = "org1";
-		private static final String ORG_NAME = "fooTheOrg";
+		private static final String ORG_NAME = "myOrg";
 		private static final String PRACTITIONER_ID = "pra1";
 		private static final String COVERAGE_ID = "cov1";
 		private static final String LIST_ID = "list1";
@@ -1059,6 +1063,13 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 		@BeforeEach
 		void beforeEach() {
+			// LUKETODO:  storage settings
+			/*
+
+		boolean indexOnContainedResources = myStorageSettings.isIndexOnContainedResources();
+		boolean indexOnUpliftedRefchains = myStorageSettings.isIndexOnUpliftedRefchains();
+			 */
+			myStorageSettings.setIndexOnContainedResources(false);
 			final Patient patient = new Patient();
 			patient.setId(PAT_ID);
 
@@ -1085,7 +1096,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 			list.setId(LIST_ID);
 			list.addEntry().setItem(new Reference(orgId.getValue()));
 
-            myListDao.update(list, mySrd).getId().toUnqualifiedVersionless();
+			myListDao.update(list, mySrd).getId().toUnqualifiedVersionless();
 
             final ExplanationOfBenefit explanationOfBenefit = new ExplanationOfBenefit();
 			explanationOfBenefit.setId(EOB_ID);
@@ -1130,6 +1141,113 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 				.execute();
 
 			assertFalse(outcome.getEntry().isEmpty());
+			ourLog.info("result:\n{}", theQueryString);
+		}
+	}
+
+	@Nested
+	class ComplexQueriesWithCustomSearchParam {
+		private static final String PAT_ID = "pat1";
+		private static final String ORG_ID = "org1";
+		private static final String ORG_NAME = "myOrg";
+		private static final String PRACTITIONER_ID = "pra1";
+		private static final String COVERAGE_ID = "cov1";
+		private static final String LIST_ID = "list1";
+		private static final String GROUP_ID = "grp1";
+		private static final String EOB_ID = "eob1";
+
+		@BeforeEach
+		void beforeEach() {
+			// LUKETODO:  storage settings
+			/*
+
+		boolean indexOnContainedResources = myStorageSettings.isIndexOnContainedResources();
+		boolean indexOnUpliftedRefchains = myStorageSettings.isIndexOnUpliftedRefchains();
+			 */
+			myStorageSettings.setIndexOnContainedResources(false);
+			final Patient patient = new Patient();
+			patient.setId(PAT_ID);
+
+			final IIdType patientId = myPatientDao.update(patient, mySrd).getId().toUnqualifiedVersionless();
+
+			final Organization organization = new Organization();
+			organization.setId(ORG_ID);
+			organization.setName(ORG_NAME);
+
+			final IIdType orgId = myOrganizationDao.update(organization, mySrd).getId().toUnqualifiedVersionless();
+
+			final Practitioner practitioner = new Practitioner();
+			practitioner.setId(PRACTITIONER_ID);
+
+			final IIdType practitionerId = myPractitionerDao.update(practitioner, mySrd).getId().toUnqualifiedVersionless();
+
+			final Coverage coverage = new Coverage();
+			coverage.setId(COVERAGE_ID);
+			coverage.addPayor().setReference(orgId.getValue());
+
+			final IIdType coverageId = myCoverageDao.update(coverage, mySrd).getId().toUnqualifiedVersionless();
+
+			final Group group = new Group();
+			group.setId(GROUP_ID);
+			group.addCharacteristic().getValueReference().setReference(orgId.getValue());
+
+			final IIdType groupId = myGroupDao.update(group, mySrd).getId().toUnqualifiedVersionless();
+
+			final ExplanationOfBenefit explanationOfBenefit = new ExplanationOfBenefit();
+			explanationOfBenefit.setId(EOB_ID);
+			explanationOfBenefit.setPatient(new Reference(patientId.getValue()));
+			explanationOfBenefit.setInsurer(new Reference(orgId.getValue()));
+			explanationOfBenefit.setProvider(new Reference(orgId.getValue()));
+			explanationOfBenefit.addCareTeam().setProvider(new Reference(practitionerId.getValue()));
+			explanationOfBenefit.addInsurance().setCoverage(new Reference(coverageId.getValue()));
+
+			myExplanationOfBenefitDao.update(explanationOfBenefit, mySrd).getId().toUnqualifiedVersionless();
+
+			final SearchParameter searchParameter = new SearchParameter();
+			searchParameter.setId("group-value-reference");
+			searchParameter.setName("group-value-reference");
+			searchParameter.addBase("Group");
+			searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			searchParameter.setCode("value-reference");
+			searchParameter.setType(Enumerations.SearchParamType.REFERENCE);
+			searchParameter.setExpression("Group.characteristic.value.as(Reference)");
+			searchParameter.addTarget("Organization");
+			searchParameter.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+
+			mySearchParameterDao.update(searchParameter, mySrd);
+
+			try {
+				Thread.sleep(30000);
+			} catch (InterruptedException theE) {
+				throw new RuntimeException(theE);
+			}
+
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization._has:Group:value-reference:_id="+GROUP_ID,
+//			"Coverage?payor._has:List:item:_id="+LIST_ID,
+//			"Coverage?payor.name="+ORG_NAME,
+//			"Coverage?payor="+ORG_ID,
+//			"ExplanationOfBenefit?coverage.payor.name="+ORG_NAME,
+//			"ExplanationOfBenefit?coverage.payor="+ORG_ID,
+//			"ExplanationOfBenefit?coverage.payor._has:List:item:_id="+LIST_ID
+		})
+		void complexQueryFromList(String theQueryString) {
+			runAndAssert(theQueryString);
+		}
+
+		private void runAndAssert(String theQueryString) {
+			ourLog.info("queryString:\n{}", theQueryString);
+
+			final Bundle outcome = myClient.search()
+				.byUrl(theQueryString)
+				.returnBundle(Bundle.class)
+				.execute();
+
+			assertFalse(outcome.getEntry().isEmpty());
+			ourLog.info("result:\n{}", theQueryString);
 		}
 	}
 

@@ -109,6 +109,7 @@ import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -2362,6 +2363,7 @@ public class QueryStack {
 						theSearchForIdsParams.myAndOrParams, theSearchForIdsParams.mySourceJoinColumn);
 
 			default:
+				// LUKETODO:  we do a recursive call to this method
 				return createPredicateSearchParameter(
 						theSearchForIdsParams.mySourceJoinColumn,
 						theSearchForIdsParams.myResourceName,
@@ -2479,6 +2481,7 @@ public class QueryStack {
 					}
 					break;
 				case REFERENCE:
+					ourLog.info("5351: theAndOrParams: {}", theAndOrParams);
 					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 
 						// Handle Search Parameters where the name is a full chain
@@ -2730,6 +2733,11 @@ public class QueryStack {
 		boolean indexOnContainedResources = myStorageSettings.isIndexOnContainedResources();
 		boolean indexOnUpliftedRefchains = myStorageSettings.isIndexOnUpliftedRefchains();
 
+		ourLog.info(
+				"5351: indexOnContainedResources: {}, indexOnUpliftedRefchains: {}",
+				indexOnContainedResources,
+				indexOnUpliftedRefchains);
+
 		if (!indexOnContainedResources && !indexOnUpliftedRefchains) {
 			return EmbeddedChainedSearchModeEnum.REF_JOIN_ONLY;
 		}
@@ -2963,6 +2971,15 @@ public class QueryStack {
 				List<String> theQualifiers,
 				String theResourceType) {
 
+			ourLog.info(
+					"5351: processNext:\ntheSearchParams: {},\nthePreviousSearchParam: {},\ntheChain: {},\ntheTargetValue: {},\ntheQualifiers: {},\ntheResourceType: {}",
+					theSearchParams,
+					thePreviousSearchParam,
+					theChain,
+					theTargetValue,
+					theQualifiers,
+					theResourceType);
+
 			String nextParamName = theChain;
 			String nextChain = null;
 			String nextQualifier = null;
@@ -2978,6 +2995,10 @@ public class QueryStack {
 				nextQualifier = nextParamName.substring(qualifierIndex);
 			}
 
+			//			if (PARAM_HAS.equals(nextParamName)) {
+			//				createPredicateHas(null, theResourceType, List.of(), null, null);
+			//			}
+
 			List<String> qualifiersBranch = Lists.newArrayList();
 			qualifiersBranch.addAll(theQualifiers);
 			qualifiersBranch.add(nextQualifier);
@@ -2988,6 +3009,14 @@ public class QueryStack {
 				if (isBlank(theResourceType) || theResourceType.equals(nextTarget)) {
 					nextSearchParam = mySearchParamRegistry.getActiveSearchParam(nextTarget, nextParamName);
 				}
+				// LUKETODO:  we're passing "_has" as the nextParamName and getting back nothing, as opposed to the
+				// previous iteration, which got back a RuntimeSearchParam for "payor"
+				ourLog.info(
+						"5351: theResourceType: {}, nextTarget: {}, nextParamName: {}, nextSearchParam: {}",
+						theResourceType,
+						nextTarget,
+						nextParamName,
+						nextSearchParam);
 				if (nextSearchParam != null) {
 					searchParamFound = true;
 					// If we find a search param on this resource type for this parameter name, keep iterating
@@ -3027,6 +3056,32 @@ public class QueryStack {
 									nextQualifier);
 						}
 					}
+				} else if (PARAM_HAS.equals(nextParamName)) {
+					ourLog.info("5351: HAS param");
+					//					myReferenceFieldName = "item"
+					//					myParameterName = "_id"
+					//					myParameterValue = "list1"
+					//					myTargetResourceType = "List"
+					// LUKETODO:  do we want some sort of Param object here instead of some nasty String-splitting code?
+					//					theChain:     _has:List:item:_id
+					final String[] split = theChain.split(":");
+					ourLog.info("5351 theChain split: {}", Arrays.toString(split));
+
+					if (split.length == 4) {
+						final String shouldBe_Has = split[0];
+						final String targetResourceType = split[1];
+						final String referenceFieldName = split[2];
+						final String parameterName = split[3];
+
+						final HasParam hasParam =
+								new HasParam(targetResourceType, referenceFieldName, parameterName, "list1");
+					} else {
+						ourLog.error("split length is not 4! {}", split);
+					}
+
+					//					Coverage?payor._has:List:item:_id="+LIST_ID,
+					//					ExplanationOfBenefit?coverage.payor._has:List:item:_id="+LIST_ID
+
 				}
 			}
 			// LUKETODO:
