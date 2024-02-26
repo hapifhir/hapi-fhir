@@ -52,11 +52,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -779,7 +775,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 								.setDiagnostics(message)
 								.setDetails(new CodeableConcept().setText(message));
 
-				return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, List.of(issue));
+				return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, Collections.singletonList(issue));
 			}
 			ValidationResult retVal = validateCode(theOptions, next, theVs);
 			if (retVal.isOk()) {
@@ -804,7 +800,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 				.setDiagnostics(message)
 				.setDetails(new CodeableConcept().setText(message));
 
-		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, List.of(issue));
+		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, Collections.singletonList(issue));
 	}
 
 	public void invalidateCaches() {
