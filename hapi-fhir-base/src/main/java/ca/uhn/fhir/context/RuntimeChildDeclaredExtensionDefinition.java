@@ -82,7 +82,7 @@ public class RuntimeChildDeclaredExtensionDefinition extends RuntimeChildChoiceD
 			choiceTypes.add(theChildType);
 		}
 
-		setChoiceTypes(choiceTypes);
+		setChoiceTypes(choiceTypes, Collections.emptyList());
 	}
 
 	@Override
