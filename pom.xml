@@ -9,7 +9,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>7.1.3-SNAPSHOT</version>
+	<version>7.1.5-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -892,6 +892,14 @@
 			<name>Max Bureck</name>
 			<organization>Fraunhofer FOKUS</organization>
 		</developer>
+		<developer>
+			<id>ArtyomyuS</id>
+			<name>Artiom Darie</name>
+		</developer>
+		<developer>
+			<id>pano-smals</id>
+			<name>pano-smals</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -923,7 +931,7 @@
 		<checkstyle_version>10.6.0</checkstyle_version>
 		<maven_changes_version>2.12.1</maven_changes_version>
 		<commons_codec_version>1.15</commons_codec_version>
-		<commons_compress_version>1.21</commons_compress_version>
+		<commons_compress_version>1.26.0</commons_compress_version>
 		<!--
 		Note if you bump the version here - The commons-dbcp2 2.11.0 version
 		explicitly depends on commons-pool2 2.12.0, so we explicitly specify that
@@ -998,7 +1006,7 @@
 		<ucum_version>1.0.8</ucum_version>
 
 		<!-- CQL Support -->
-		<clinical-reasoning.version>3.0.0-PRE15</clinical-reasoning.version>
+		<clinical-reasoning.version>3.0.0-PRE17</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -3237,3 +3245,4 @@
 		</profile>
 	</profiles>
 </project>
+

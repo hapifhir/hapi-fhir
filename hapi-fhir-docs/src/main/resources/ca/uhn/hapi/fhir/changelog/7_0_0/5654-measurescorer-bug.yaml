@@ -1,0 +1,5 @@
+type: fix
+issue: 5654
+title: "Fixed a MeasureReport measureScoring bug impacting any measures currently using denominator-exception population will 
+incorrectly calculate the score without following specification. This bug adds an extension to MeasureReport Groups to capture calculated denominator and
+numerator to bring transparency to the measureScore calculation and act as a dataSource of measureScore instead of behind the scenes calculations."

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5692
+title: "The JPA WebSocket delivery mechanism now supports the `content` delivery mode.
+  Thanks to Artiom Darie for the contribution!"
