@@ -767,18 +767,19 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			org.hl7.fhir.r5.model.CodeableConcept code,
 			org.hl7.fhir.r5.model.ValueSet theVs) {
 
-
 		List<ValidationResult> validationResultsOk = new ArrayList<>();
 		for (Coding next : code.getCoding()) {
 			if (!next.hasSystem()) {
-				String message = "Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided";
-				OperationOutcome.OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent()
-					.setSeverity(OperationOutcome.IssueSeverity.WARNING)
-					.setCode(OperationOutcome.IssueType.INVALID)
-					.setDiagnostics(message).setDetails(new CodeableConcept().setText(message));
+				String message =
+						"Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided";
+				OperationOutcome.OperationOutcomeIssueComponent issue =
+						new OperationOutcome.OperationOutcomeIssueComponent()
+								.setSeverity(OperationOutcome.IssueSeverity.WARNING)
+								.setCode(OperationOutcome.IssueType.INVALID)
+								.setDiagnostics(message)
+								.setDetails(new CodeableConcept().setText(message));
 
 				return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, List.of(issue));
-
 			}
 			ValidationResult retVal = validateCode(theOptions, next, theVs);
 			if (retVal.isOk()) {
@@ -795,13 +796,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return validationResultsOk.get(0);
 		}
 
-
-
-		String message = "Unknown code (for '" + code.getCodingFirstRep().getSystem() + "#" + code.getCodingFirstRep().getCode() + "')";
+		String message = "Unknown code (for '" + code.getCodingFirstRep().getSystem() + "#"
+				+ code.getCodingFirstRep().getCode() + "')";
 		OperationOutcome.OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent()
-			.setSeverity(OperationOutcome.IssueSeverity.ERROR)
-			.setCode(OperationOutcome.IssueType.NOTFOUND)
-			.setDiagnostics(message).setDetails(new CodeableConcept().setText(message));
+				.setSeverity(OperationOutcome.IssueSeverity.ERROR)
+				.setCode(OperationOutcome.IssueType.NOTFOUND)
+				.setDiagnostics(message)
+				.setDetails(new CodeableConcept().setText(message));
 
 		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, List.of(issue));
 	}
@@ -915,5 +916,10 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		public int hashCode() {
 			return myHashCode;
 		}
+	}
+
+	@Override
+	public Boolean subsumes(ValidationOptions optionsArg, Coding parent, Coding child) {
+		throw new UnsupportedOperationException(Msg.code(2489));
 	}
 }

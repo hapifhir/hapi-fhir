@@ -635,4 +635,9 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	public <T extends Resource> T findTxResource(Class<T> class_, String canonical, String version) {
 		throw new UnsupportedOperationException(Msg.code(2493));
 	}
+
+	@Override
+	public Boolean subsumes(ValidationOptions optionsArg, Coding parent, Coding child) {
+		throw new UnsupportedOperationException(Msg.code(2488));
+	}
 }
