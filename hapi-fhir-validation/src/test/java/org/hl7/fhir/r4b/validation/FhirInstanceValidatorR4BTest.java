@@ -80,6 +80,7 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -354,7 +355,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		ValidationResult result = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(0).getMessage());
+		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(1).getMessage());
 
 	}
 
@@ -476,6 +477,8 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 	 */
 	@Test
 	public void testValidateDoesntEnforceBestPracticesByDefault() {
+		addValidConcept("http://loinc.org", "1234");
+
 		Observation input = new Observation();
 		input.addPerformer(new Reference("Practitioner/124"));
 		input.setEffective(new DateTimeType("2023-01-01T11:22:33Z"));
@@ -666,10 +669,12 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 	public void testLargeBase64() throws IOException {
 		String input = IOUtils.toString(FhirInstanceValidatorR4BTest.class.getResourceAsStream("/r4/diagnosticreport-example-gingival-mass.json"), Constants.CHARSET_UTF8);
 		ValidationResult output = myFhirValidator.validateWithResult(input);
-		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
-		assertEquals(2, errors.size());
-		assertThat(errors.get(0).getMessage(), containsString("None of the codings provided are in the value set 'LOINC Diagnostic Report Codes'"));
-		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", errors.get(1).getMessage());
+		List<SingleValidationMessage> messages = logResultsAndReturnAll(output);
+		assertEquals(4, messages.size());
+		assertThat(messages.get(0).getMessage(), containsString("Unknown code (for 'http://terminology.hl7.org/CodeSystem/v2-0074#PAT')"));
+		assertThat(messages.get(1).getMessage(), containsString("Unknown code (for 'http://loinc.org#1-8')"));
+		assertThat(messages.get(2).getMessage(), containsString("None of the codings provided are in the value set 'LOINC Diagnostic Report Codes'"));
+		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", messages.get(3).getMessage());
 	}
 
 	@Test
@@ -1070,7 +1075,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, res.size(), output.toString());
-		assertEquals("A code with no system has no defined meaning, and it cannot be validated. A system should be provided", output.getMessages().get(0).getMessage());
+		assertEquals("Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided", output.getMessages().get(0).getMessage());
 	}
 
 	/**
@@ -1253,6 +1258,8 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationFailing() {
+		addValidConcept("http://loinc.org", "12345");
+
 		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
@@ -1303,6 +1310,8 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingLoincWithExpansion() {
+
+
 		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
@@ -1319,7 +1328,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, errors.size());
-		assertEquals("Unknown code for 'http://loinc.org#1234'", errors.get(0).getMessage());
+		assertEquals("Unknown code (for 'http://loinc.org#1234')", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -1347,10 +1356,14 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 		ValidationResult output = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(1, all.size());
+		assertEquals(2, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
-		assertThat(all.get(0).getMessage(), containsString("None of the codings provided are in the value set 'IdentifierType'"));
-		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
+
+		assertThat(all.get(0).getMessage(), containsString("Unknown code (for 'http://example.com/foo/bar#bar')"));
+		assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
+
+		assertThat(all.get(1).getMessage(), containsString("None of the codings provided are in the value set 'IdentifierType'"));
+		assertEquals(ResultSeverityEnum.WARNING, all.get(1).getSeverity());
 
 	}
 
@@ -1369,7 +1382,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		output = myFhirValidator.validateWithResult(input);
 		all = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(2, all.size());
-		assertThat(all.get(0).getMessage(), containsString("The unit 'Heck' is unknown' at position 0 for 'http://unitsofmeasure.org#Heck'"));
+		assertThat(all.get(0).getMessage(), containsString("The Coding provided (http://unitsofmeasure.org#Heck) was not found in the value set 'Vital Signs Units' (http://hl7.org/fhir/ValueSet/ucum-vitals-common|4.3.0)"));
 		assertThat(all.get(1).getMessage(), containsString("The value provided ('Heck') was not found in the value set 'Body Temperature Units'"));
 
 	}
@@ -1415,6 +1428,8 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 		IValidatorResourceFetcher resourceFetcher = mock(IValidatorResourceFetcher.class);
 		IValidationPolicyAdvisor policyAdvisor = mock(IValidationPolicyAdvisor.class);
+		when(policyAdvisor.policyForElement(any(), any(),any(),any(),any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.ElementValidationAction.class));
+		when(policyAdvisor.policyForCodedContent(any(),any(),any(),any(),any(),any(),any(),any(),any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.CodedContentValidationAction.class));
 
 		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		when(policyAdvisor.policyForContained(any(), any(), any(), any(), any(), any(), any(), any(), any())).thenReturn(ContainedReferenceValidationPolicy.CHECK_TYPE);
