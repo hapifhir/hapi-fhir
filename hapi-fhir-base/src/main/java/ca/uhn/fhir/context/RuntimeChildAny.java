@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 
 public class RuntimeChildAny extends RuntimeChildChoiceDefinition {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RuntimeChildAny.class);
 
 	public RuntimeChildAny(
 			Field theField, String theElementName, Child theChildAnnotation, Description theDescriptionAnnotation) {
