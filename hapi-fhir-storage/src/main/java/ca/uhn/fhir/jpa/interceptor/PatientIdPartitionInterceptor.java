@@ -36,6 +36,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
@@ -151,7 +152,12 @@ public class PatientIdPartitionInterceptor {
 
 				break;
 			case EXTENDED_OPERATION_SERVER:
-				return provideNonPatientSpecificQueryResponse(theReadDetails);
+				String extendedOp = theReadDetails.getExtendedOperationName();
+				if (ProviderConstants.OPERATION_EXPORT.equals(extendedOp)
+						|| ProviderConstants.OPERATION_EXPORT_POLL_STATUS.equals(extendedOp)) {
+					return provideNonPatientSpecificQueryResponse(theReadDetails);
+				}
+				break;
 			default:
 				// nothing
 		}

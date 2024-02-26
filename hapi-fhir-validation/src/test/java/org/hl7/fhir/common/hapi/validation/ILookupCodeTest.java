@@ -40,43 +40,10 @@ public interface ILookupCodeTest {
 	}
 
 	@Nested
-	interface ILookupCodeUnsupportedPropertyTypeTest extends IValidationTest {
-
-		String getInvalidValueErrorCode();
-
-		String getInvalidValueErrorCodeForConvert();
-
-		@Override
-		IMySimpleCodeSystemProvider getCodeSystemProvider();
-
-		@Test
-		default void testLookupCode_forCodeSystemWithPropertyInvalidValue_throwsException() {
-			// test and verify
-			try {
-				getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
-				fail();
-			} catch (InternalErrorException e) {
-				assertTrue(e.getMessage().contains(getInvalidValueErrorCode() + ": Property type " + getCodeSystemProvider().getPropertyValue().fhirType() + " is not supported"));
-			}
-		}
-
-		@Test
-		default void testCreateConceptProperty_forCodeSystemWithPropertyInvalidValue_throwsException() {
-			// test and verify
-			try {
-				RemoteTerminologyServiceValidationSupport.createConceptProperty("property", getCodeSystemProvider().getPropertyValue());
-				fail();
-			} catch (InternalErrorException e) {
-				assertTrue(e.getMessage().contains(getInvalidValueErrorCodeForConvert() + ": Property type " + getCodeSystemProvider().getPropertyValue().fhirType() + " is not supported"));
-			}
-		}
-	}
-
-	@Nested
 	interface ILookupCodeSupportedPropertyTest extends IValidationTest {
 		IMyCodeSystemProvider getCodeSystemProvider();
 
-		 Stream<Arguments> getEmptyPropertyValues();
+		Stream<Arguments> getEmptyPropertyValues();
 
 		Stream<Arguments> getPropertyValues();
 

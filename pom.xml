@@ -9,7 +9,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>7.1.4-SNAPSHOT</version>
+	<version>7.1.5-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -893,6 +893,10 @@
 			<organization>Fraunhofer FOKUS</organization>
 		</developer>
 		<developer>
+			<id>ArtyomyuS</id>
+			<name>Artiom Darie</name>
+		</developer>
+		<developer>
 			<id>pano-smals</id>
 			<name>pano-smals</name>
 		</developer>
@@ -1002,7 +1006,7 @@
 		<ucum_version>1.0.8</ucum_version>
 
 		<!-- CQL Support -->
-		<clinical-reasoning.version>3.0.0-PRE14</clinical-reasoning.version>
+		<clinical-reasoning.version>3.0.0-PRE17</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
