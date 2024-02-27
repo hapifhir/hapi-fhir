@@ -158,7 +158,9 @@ public class ${className}ResourceProvider extends
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_PROFILE, theSearchForProfile);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE, theSearchForSource);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_LIST, theList);
+#if ( $version == 'r5' )
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_LANGUAGE, theResourceLanguage);
+#end
 			paramMap.add("_has", theHas);
 #foreach ( $param in $searchParams ) 
 			paramMap.add("${param.name}", the${param.nameCapitalized});
