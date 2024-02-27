@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cr.r4.structuredefinition;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.common.IQuestionnaireProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -36,6 +37,8 @@ import org.hl7.fhir.r4.model.StructureDefinition;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static ca.uhn.fhir.cr.common.CanonicalHelper.getCanonicalType;
+
 public class StructureDefinitionQuestionnaireProvider {
 	@Autowired
 	IQuestionnaireProcessorFactory myQuestionnaireProcessorFactory;
@@ -45,15 +48,17 @@ public class StructureDefinitionQuestionnaireProvider {
 	 * "https://hl7.org/fhir/structuredefinition-operation-questionnaire.html">$questionnaire</a>
 	 * operation.
 	 *
-	 * @param theId                  The id of the Questionnaire to populate.
-	 * @param theCanonical           The canonical identifier for the StructureDefinition (optionally version-specific).
+	 * @param theId                  The id of the StructureDefinition.
 	 * @param theProfile 			 The StructureDefinition to base the Questionnaire on. Used when the operation is invoked at the 'type' level.
-	 * @param theSupportedOnly       If true, the questionnaire will only include those elements marked as "mustSupport='true'" in the StructureDefinition.
-	 * @param theRequiredOnly        If true, the questionnaire will only include those elements marked as "min>0" in the StructureDefinition.
+	 * @param theCanonical           The canonical identifier for the StructureDefinition (optionally version-specific).
+	 * @param theUrl             	 Canonical URL of the StructureDefinition when invoked at the resource type level. This is exclusive with the profile and canonical parameters.
+	 * @param theVersion             Version of the StructureDefinition when invoked at the resource type level. This is exclusive with the profile and canonical parameters.
+	 * @param theSupportedOnly       If true (default: false), the questionnaire will only include those elements marked as "mustSupport='true'" in the StructureDefinition.
+	 * @param theRequiredOnly        If true (default: false), the questionnaire will only include those elements marked as "min>0" in the StructureDefinition.
 	 * @param theSubject             The subject(s) that is/are the target of the Questionnaire.
 	 * @param theParameters          Any input parameters defined in libraries referenced by the StructureDefinition.
-	 * @param theBundle              Data to be made available during CQL evaluation.
 	 * @param theUseServerData       Whether to use data from the server performing the evaluation.
+	 * @param theData              	 Data to be made available during CQL evaluation.
 	 * @param theDataEndpoint        An endpoint to use to access data referenced by retrieve operations in libraries
 	 *                               referenced by the StructureDefinition.
 	 * @param theContentEndpoint     An endpoint to use to access content (i.e. libraries) referenced by the StructureDefinition.
@@ -66,27 +71,63 @@ public class StructureDefinitionQuestionnaireProvider {
 	@Operation(name = ProviderConstants.CR_OPERATION_QUESTIONNAIRE, idempotent = true, type = StructureDefinition.class)
 	public Questionnaire questionnaire(
 			@IdParam IdType theId,
-			@OperationParam(name = "canonical") String theCanonical,
 			@OperationParam(name = "profile") StructureDefinition theProfile,
+			@OperationParam(name = "canonical") String theCanonical,
+			@OperationParam(name = "url") String theUrl,
+			@OperationParam(name = "version") String theVersion,
 			@OperationParam(name = "supportedOnly") BooleanType theSupportedOnly,
 			@OperationParam(name = "requiredOnly") BooleanType theRequiredOnly,
 			@OperationParam(name = "subject") String theSubject,
 			@OperationParam(name = "parameters") Parameters theParameters,
-			@OperationParam(name = "bundle") Bundle theBundle,
 			@OperationParam(name = "useServerData") BooleanType theUseServerData,
+			@OperationParam(name = "data") Bundle theData,
 			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
 			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
 			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
 			RequestDetails theRequestDetails) {
+		CanonicalType canonicalType = getCanonicalType(FhirVersionEnum.R4, theCanonical, theUrl, theVersion);
 		return (Questionnaire) myQuestionnaireProcessorFactory
 				.create(theRequestDetails)
 				.generateQuestionnaire(
-						Eithers.for3(theCanonical == null ? null : new CanonicalType(theCanonical), theId, theProfile),
-						theSupportedOnly == null ? Boolean.TRUE : theSupportedOnly.booleanValue(),
-						theRequiredOnly == null ? Boolean.TRUE : theRequiredOnly.booleanValue(),
+						Eithers.for3(canonicalType, theId, theProfile),
+						theSupportedOnly == null ? Boolean.FALSE : theSupportedOnly.booleanValue(),
+						theRequiredOnly == null ? Boolean.FALSE : theRequiredOnly.booleanValue(),
 						theSubject,
 						theParameters,
-						theBundle,
+						theData,
+						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
+						theDataEndpoint,
+						theContentEndpoint,
+						theTerminologyEndpoint,
+						null);
+	}
+
+	@Operation(name = ProviderConstants.CR_OPERATION_QUESTIONNAIRE, idempotent = true, type = StructureDefinition.class)
+	public Questionnaire questionnaire(
+			@OperationParam(name = "profile") StructureDefinition theProfile,
+			@OperationParam(name = "canonical") String theCanonical,
+			@OperationParam(name = "url") String theUrl,
+			@OperationParam(name = "version") String theVersion,
+			@OperationParam(name = "supportedOnly") BooleanType theSupportedOnly,
+			@OperationParam(name = "requiredOnly") BooleanType theRequiredOnly,
+			@OperationParam(name = "subject") String theSubject,
+			@OperationParam(name = "parameters") Parameters theParameters,
+			@OperationParam(name = "useServerData") BooleanType theUseServerData,
+			@OperationParam(name = "data") Bundle theData,
+			@OperationParam(name = "dataEndpoint") Endpoint theDataEndpoint,
+			@OperationParam(name = "contentEndpoint") Endpoint theContentEndpoint,
+			@OperationParam(name = "terminologyEndpoint") Endpoint theTerminologyEndpoint,
+			RequestDetails theRequestDetails) {
+		CanonicalType canonicalType = getCanonicalType(FhirVersionEnum.R4, theCanonical, theUrl, theVersion);
+		return (Questionnaire) myQuestionnaireProcessorFactory
+				.create(theRequestDetails)
+				.generateQuestionnaire(
+						Eithers.for3(canonicalType, null, theProfile),
+						theSupportedOnly == null ? Boolean.FALSE : theSupportedOnly.booleanValue(),
+						theRequiredOnly == null ? Boolean.FALSE : theRequiredOnly.booleanValue(),
+						theSubject,
+						theParameters,
+						theData,
 						theUseServerData == null ? Boolean.TRUE : theUseServerData.booleanValue(),
 						theDataEndpoint,
 						theContentEndpoint,

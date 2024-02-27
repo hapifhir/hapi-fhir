@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.cr.dstu3.questionnaire;
 
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.cr.common.IQuestionnaireProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -32,6 +33,8 @@ import org.hl7.fhir.dstu3.model.StringType;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import static ca.uhn.fhir.cr.common.CanonicalHelper.getCanonicalType;
+
 public class QuestionnairePackageProvider {
 	@Autowired
 	IQuestionnaireProcessorFactory myQuestionnaireProcessorFactory;
@@ -42,6 +45,8 @@ public class QuestionnairePackageProvider {
 	 *
 	 * @param theId             The id of the Questionnaire.
 	 * @param theCanonical      The canonical identifier for the questionnaire (optionally version-specific).
+	 * @param theUrl            Canonical URL of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters.
+	 * @param theVersion        Version of the Questionnaire when invoked at the resource type level. This is exclusive with the questionnaire and canonical parameters.
 	 * @Param theIsPut			 A boolean value to determine if the Bundle returned uses PUT or POST request methods.  Defaults to false.
 	 * @param theRequestDetails The details (such as tenant) of this request. Usually
 	 *                          autopopulated by HAPI.
@@ -51,24 +56,26 @@ public class QuestionnairePackageProvider {
 	public Bundle packageQuestionnaire(
 			@IdParam IdType theId,
 			@OperationParam(name = "canonical") String theCanonical,
+			@OperationParam(name = "url") String theUrl,
+			@OperationParam(name = "version") String theVersion,
 			@OperationParam(name = "usePut") String theIsPut,
 			RequestDetails theRequestDetails) {
+		StringType canonicalType = getCanonicalType(FhirVersionEnum.DSTU3, theCanonical, theUrl, theVersion);
 		return (Bundle) myQuestionnaireProcessorFactory
 				.create(theRequestDetails)
-				.packageQuestionnaire(
-						Eithers.for3(theCanonical == null ? null : new StringType(theCanonical), theId, null),
-						Boolean.parseBoolean(theIsPut));
+				.packageQuestionnaire(Eithers.for3(canonicalType, theId, null), Boolean.parseBoolean(theIsPut));
 	}
 
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = Questionnaire.class)
 	public Bundle packageQuestionnaire(
 			@OperationParam(name = "canonical") String theCanonical,
+			@OperationParam(name = "url") String theUrl,
+			@OperationParam(name = "version") String theVersion,
 			@OperationParam(name = "usePut") String theIsPut,
 			RequestDetails theRequestDetails) {
+		StringType canonicalType = getCanonicalType(FhirVersionEnum.DSTU3, theCanonical, theUrl, theVersion);
 		return (Bundle) myQuestionnaireProcessorFactory
 				.create(theRequestDetails)
-				.packageQuestionnaire(
-						Eithers.for3(theCanonical == null ? null : new StringType(theCanonical), null, null),
-						Boolean.parseBoolean(theIsPut));
+				.packageQuestionnaire(Eithers.for3(canonicalType, null, null), Boolean.parseBoolean(theIsPut));
 	}
 }

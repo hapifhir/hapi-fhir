@@ -27,12 +27,12 @@ import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.IdType;
+import org.hl7.fhir.dstu3.model.Parameters;
 import org.hl7.fhir.dstu3.model.QuestionnaireResponse;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
-import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r4.model.Parameters;
 import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -47,6 +47,8 @@ public class QuestionnaireResponseExtractProvider {
 	 *
 	 * @param theId                    The id of the QuestionnaireResponse to extract data from.
 	 * @param theQuestionnaireResponse The QuestionnaireResponse to extract data from. Used when the operation is invoked at the 'type' level.
+	 * @param theParameters            Any input parameters defined in libraries referenced by the Questionnaire.
+	 * @param theData                  Data to be made available during CQL evaluation.
 	 * @param theRequestDetails        The details (such as tenant) of this request. Usually
 	 *                                 autopopulated HAPI.
 	 * @return The resulting FHIR resource produced after extracting data. This will either be a single resource or a Transaction Bundle that contains multiple resources.
@@ -56,23 +58,23 @@ public class QuestionnaireResponseExtractProvider {
 			@IdParam IdType theId,
 			@OperationParam(name = "questionnaire-response") QuestionnaireResponse theQuestionnaireResponse,
 			@OperationParam(name = "parameters") Parameters theParameters,
-			@OperationParam(name = "bundle") Bundle theBundle,
+			@OperationParam(name = "data") Bundle theData,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return myQuestionnaireResponseProcessorFactory
 				.create(theRequestDetails)
-				.extract(Eithers.for2(theId, theQuestionnaireResponse), theParameters, theBundle);
+				.extract(Eithers.for2(theId, theQuestionnaireResponse), theParameters, theData);
 	}
 
 	@Operation(name = ProviderConstants.CR_OPERATION_EXTRACT, idempotent = true, type = QuestionnaireResponse.class)
 	public IBaseBundle extract(
 			@OperationParam(name = "questionnaire-response") QuestionnaireResponse theQuestionnaireResponse,
 			@OperationParam(name = "parameters") Parameters theParameters,
-			@OperationParam(name = "bundle") Bundle theBundle,
+			@OperationParam(name = "data") Bundle theData,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
 		return myQuestionnaireResponseProcessorFactory
 				.create(theRequestDetails)
-				.extract(Eithers.for2(null, theQuestionnaireResponse), theParameters, theBundle);
+				.extract(Eithers.for2(null, theQuestionnaireResponse), theParameters, theData);
 	}
 }
