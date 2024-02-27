@@ -41,7 +41,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public abstract class QuantitySearchParameterTestCases implements ITestDataBuilder.WithSupport {
 
@@ -75,7 +74,9 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 			@Test
 			public void noQuantityThrows() {
 				String invalidQtyParam = "|http://another.org";
-				DataFormatException thrown = assertThatExceptionOfType(DataFormatException.class).isThrownBy(() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=" + invalidQtyParam));
+				DataFormatException thrown = assertThatExceptionOfType(DataFormatException.class)
+						.isThrownBy(
+								() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=" + invalidQtyParam));
 
 				assertThat(thrown.getMessage()).startsWith("HAPI-1940: Invalid");
 				assertThat(thrown.getMessage()).contains(invalidQtyParam);
@@ -83,7 +84,8 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 
 			@Test
 			public void invalidPrefixThrows() {
-				DataFormatException thrown = assertThatExceptionOfType(DataFormatException.class).isThrownBy(() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=st5.35"));
+				DataFormatException thrown = assertThatExceptionOfType(DataFormatException.class)
+						.isThrownBy(() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=st5.35"));
 
 				assertThat(thrown.getMessage()).isEqualTo("HAPI-1941: Invalid prefix: \"st\"");
 			}
