@@ -6,7 +6,6 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
-import org.hamcrest.Matchers;
 import org.hibernate.search.engine.search.sort.dsl.CompositeSortComponentsStep;
 import org.hibernate.search.engine.search.sort.dsl.FieldSortMissingValueBehaviorStep;
 import org.hibernate.search.engine.search.sort.dsl.FieldSortOptionsStep;

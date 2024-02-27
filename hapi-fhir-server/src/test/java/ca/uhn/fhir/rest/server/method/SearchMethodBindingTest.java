@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import com.google.common.collect.ImmutableMap;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

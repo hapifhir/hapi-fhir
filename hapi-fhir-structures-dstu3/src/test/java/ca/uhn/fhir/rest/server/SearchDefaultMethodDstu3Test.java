@@ -26,8 +26,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.oneOf;
 
 public class SearchDefaultMethodDstu3Test {
 

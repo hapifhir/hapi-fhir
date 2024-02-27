@@ -34,9 +34,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.either;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -189,10 +186,12 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 			myMdmProvider.mdmBatchOnAllSourceResources(null, criteria , null, theSyncOrAsyncRequest);
 			fail("");
 		} catch (InvalidRequestException e) {
-
-			assertThat(e.getMessage(), either(
-				containsString(Msg.code(2039) + "Failed to validate parameters for job"))//Async case
-				.or(containsString(Msg.code(488) + "Failed to parse match URL")));// Sync case
+			assertThat(e.getMessage())
+				.overridingErrorMessage("Expected error message to contain specific codes and messages")
+				.satisfiesAnyOf(
+					message -> assertThat(message).contains(Msg.code(2039) + "Failed to validate parameters for job"),
+					message -> assertThat(message).contains(Msg.code(488) + "Failed to parse match URL")
+				);
 		}
 	}
 

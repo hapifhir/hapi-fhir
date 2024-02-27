@@ -17,7 +17,6 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicStatusLine;
-import org.hamcrest.core.StringContains;
 import org.hl7.fhir.r4b.model.IdType;
 import org.hl7.fhir.r4b.model.InstantType;
 import org.hl7.fhir.r4b.model.OperationOutcome;
@@ -34,7 +33,6 @@ import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -124,7 +122,7 @@ public class GenericClientR4BTest {
 
 		Patient response = client.read().resource(Patient.class).withId(new IdType("Patient/1234")).execute();
 
-		assertThat(response.getNameFirstRep().getFamily(), StringContains.containsString("Cardinal"));
+		assertThat(response.getNameFirstRep().getFamily()).contains("Cardinal");
 
 		assertThat(response.getIdElement().getValue()).isEqualTo("http://foo.com/Patient/123/_history/2333");
 

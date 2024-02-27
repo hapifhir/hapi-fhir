@@ -39,9 +39,6 @@ import java.util.Objects;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
 
 @ExtendWith(SpringExtension.class)
 @RequiresDocker

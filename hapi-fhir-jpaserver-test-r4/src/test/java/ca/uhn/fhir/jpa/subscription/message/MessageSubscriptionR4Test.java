@@ -46,8 +46,6 @@ import static ca.uhn.fhir.jpa.model.util.JpaConstants.HEADER_META_SNAPSHOT_MODE;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.IsEqual.equalTo;
 
 /**
  * Test the rest-hook subscriptions
@@ -125,7 +123,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 		//Quick validation source stored.
 		Observation readObs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
-		assertThat(readObs.getMeta().getSource(), equalTo(theExpectedSourceValue));
+		assertThat(readObs.getMeta().getSource()).isEqualTo(theExpectedSourceValue);
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
@@ -134,7 +132,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		IBaseResource resource = fetchSingleResourceFromSubscriptionTerminalEndpoint();
 		assertThat(resource).isInstanceOf(Observation.class);
 		Observation receivedObs = (Observation) resource;
-		assertThat(receivedObs.getMeta().getSource(), equalTo(theExpectedSourceValue));
+		assertThat(receivedObs.getMeta().getSource()).isEqualTo(theExpectedSourceValue);
 	}
 
 
@@ -287,14 +285,14 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	private static void assertEquals(ResourceModifiedMessage theMsg, ResourceModifiedMessage theComparedTo){
-		assertThat(theMsg.getPayloadId(), equalTo(theComparedTo.getPayloadId()));
-		assertThat(theMsg.getOperationType(), equalTo(theComparedTo.getOperationType()));
-		assertThat(theMsg.getPayloadString(), equalTo(theComparedTo.getPayloadString()));
-		assertThat(theMsg.getSubscriptionId(), equalTo(theComparedTo.getSubscriptionId()));
-		assertThat(theMsg.getMediaType(), equalTo(theComparedTo.getMediaType()));
-		assertThat(theMsg.getMessageKeyOrNull(), equalTo(theComparedTo.getMessageKeyOrNull()));
-		assertThat(theMsg.getTransactionId(), equalTo(theComparedTo.getTransactionId()));
-		assertThat(theMsg.getAttributes(), equalTo(theComparedTo.getAttributes()));
+		assertThat(theMsg.getPayloadId()).isEqualTo(theComparedTo.getPayloadId());
+		assertThat(theMsg.getOperationType()).isEqualTo(theComparedTo.getOperationType());
+		assertThat(theMsg.getPayloadString()).isEqualTo(theComparedTo.getPayloadString());
+		assertThat(theMsg.getSubscriptionId()).isEqualTo(theComparedTo.getSubscriptionId());
+		assertThat(theMsg.getMediaType()).isEqualTo(theComparedTo.getMediaType());
+		assertThat(theMsg.getMessageKeyOrNull()).isEqualTo(theComparedTo.getMessageKeyOrNull());
+		assertThat(theMsg.getTransactionId()).isEqualTo(theComparedTo.getTransactionId());
+		assertThat(theMsg.getAttributes()).isEqualTo(theComparedTo.getAttributes());
 	}
 
 	private void maybeAddHeaderInterceptor(IGenericClient theClient, List<Header> theHeaders) {
@@ -327,7 +325,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	private <T> T fetchSingleResourceFromSubscriptionTerminalEndpoint() {
-		assertThat(handler.getMessages().size(), equalTo(1));
+		assertThat(handler.getMessages()).hasSize(1);
 		ResourceModifiedJsonMessage resourceModifiedJsonMessage = handler.getMessages().get(0);
 		ResourceModifiedMessage payload = resourceModifiedJsonMessage.getPayload();
 		String payloadString = payload.getPayloadString();
@@ -337,7 +335,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	private static void assertEquals(String theMsg, String theComparedTo){
-		assertThat(theMsg, equalTo(theComparedTo));
+		assertThat(theMsg).isEqualTo(theComparedTo);
 	}
 
 	private static String toJson(Object theRequest) {

@@ -1,7 +1,6 @@
 package ca.uhn.fhir.util;
 
 import org.apache.commons.lang3.time.DateUtils;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -9,8 +8,6 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.oneOf;
 
 public class StopWatchTest {
 
@@ -183,7 +180,7 @@ public class StopWatchTest {
 		StopWatch sw = new StopWatch(DateUtils.addMinutes(new Date(), -4));
 		String throughput = sw.formatThroughput(60, TimeUnit.MINUTES).replace(',', '.');
 		ourLog.info("{} operations in {}ms = {} ops / second", 60, sw.getMillis(), throughput);
-		assertThat(throughput, oneOf("14.9", "15.0", "15.1", "14,9", "15,0", "15,1"));
+		assertThat(throughput).isIn("14.9", "15.0", "15.1", "14,9", "15,0", "15,1");
 	}
 
 	@Test

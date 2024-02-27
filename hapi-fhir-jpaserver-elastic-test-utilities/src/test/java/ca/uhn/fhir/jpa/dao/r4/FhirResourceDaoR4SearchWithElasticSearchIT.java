@@ -54,7 +54,6 @@ import ca.uhn.fhir.test.utilities.LogbackLevelOverrideExtension;
 import ca.uhn.fhir.test.utilities.docker.RequiresDocker;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -118,11 +117,6 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
-import static org.hamcrest.Matchers.stringContainsInOrder;
 
 @ExtendWith(SpringExtension.class)
 @ExtendWith(MockitoExtension.class)
@@ -795,7 +789,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
 		ourLog.info(resp);
 
-		assertThat(resp, stringContainsInOrder("<code value=\"childCA\"/>", "<display value=\"Child CA\"/>"));
+		assertThat(resp).containsSubsequence("<code value=\"childCA\"/>", "<display value=\"Child CA\"/>");
 	}
 
 	@Test
@@ -813,7 +807,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
 		ourLog.info(resp);
 
-		assertThat(resp, stringContainsInOrder("<code value=\"childCA\"/>", "<display value=\"Child CA\"/>"));
+		assertThat(resp).containsSubsequence("<code value=\"childCA\"/>", "<display value=\"Child CA\"/>");
 	}
 
 	@Test
@@ -831,7 +825,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
 		ourLog.info(resp);
 
-		assertThat(resp, not(stringContainsInOrder("<code value=\"childCA\"/>", "<display value=\"Child CA\"/>")));
+		assertThat(resp).containsSubsequence("<code value=\"childCA\"/>", "<display value=\"Child CA\"/>");
 	}
 
 	@Test
@@ -997,7 +991,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 	private void assertFindId(String theMessage, IIdType theResourceId, String theUrl) {
 		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-		assertThat(theMessage, resourceIds, hasItem(equalTo(theResourceId.getIdPart())));
+		assertThat(resourceIds).as(theMessage).contains(theResourceId.getIdPart());
 	}
 
 	private void assertFindIds(String theMessage, Collection<String> theResourceIds, String theUrl) {
@@ -1007,7 +1001,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 
 	private void assertNotFindId(String theMessage, IIdType theResourceId, String theUrl) {
 		List<String> resourceIds = myTestDaoSearch.searchForIds(theUrl);
-		assertThat(theMessage, resourceIds, not(hasItem(equalTo(theResourceId.getIdPart()))));
+		assertThat(resourceIds).as(theMessage).doesNotContain(theResourceId.getIdPart());
 	}
 
 	/**

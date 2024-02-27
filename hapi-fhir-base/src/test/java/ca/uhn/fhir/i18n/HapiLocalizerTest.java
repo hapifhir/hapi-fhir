@@ -5,9 +5,6 @@ import org.junit.jupiter.api.Test;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.not;
 
 public class HapiLocalizerTest {
 
@@ -25,7 +22,7 @@ public class HapiLocalizerTest {
 	public void testAllKeys() {
 		HapiLocalizer svc = new HapiLocalizer();
 		Set<String> allKeys = svc.getAllKeys();
-		assertThat(allKeys, not(empty()));
+		assertThat(allKeys).isNotEmpty();
 		
 		for (String next : allKeys) {
 			svc.getMessage(next);
