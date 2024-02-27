@@ -315,6 +315,7 @@ public class UrlUtil {
 		return theCtx.getResourceDefinition(resourceName);
 	}
 
+	@Nonnull
 	public static Map<String, String[]> parseQueryString(String theQueryString) {
 		HashMap<String, List<String>> map = new HashMap<>();
 		parseQueryString(theQueryString, map);

@@ -35,7 +35,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 
 /**
- * This service ensures uniqueness of resources during create or create-on-update by storing the resource searchUrl.
+ * This service ensures uniqueness of resources during create or create-on-update
+ * by storing the resource searchUrl.
+ *
+ * @see SearchUrlJobMaintenanceSvcImpl which deletes stale entities
  */
 @Transactional
 @Service
