@@ -69,6 +69,16 @@ public class ${className}ResourceProvider extends
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_PROFILE)
 			UriAndListParam theSearchForProfile,
 
+			@Description(shortDefinition="Search the contents of the resource's data using a list")
+			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_LIST)
+			StringAndListParam theList,
+
+#if ( $version == 'R5' )
+			@Description(shortDefinition="The language of the resource")
+			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_LANGUAGE)
+			TokenAndListParam theResourceLanguage,
+#end
+
 			@Description(shortDefinition="Search for resources which have the given source value (Resource.meta.source)")
 			@OptionalParam(name=ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE)
 			UriAndListParam theSearchForSource,
@@ -149,6 +159,10 @@ public class ${className}ResourceProvider extends
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_SECURITY, theSearchForSecurity);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_PROFILE, theSearchForProfile);
 			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE, theSearchForSource);
+			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_LIST, theList);
+#if ( $version == 'R5' )
+			paramMap.add(ca.uhn.fhir.rest.api.Constants.PARAM_LANGUAGE, theResourceLanguage);
+#end
 			paramMap.add("_has", theHas);
 #foreach ( $param in $searchParams ) 
 			paramMap.add("${param.name}", the${param.nameCapitalized});
