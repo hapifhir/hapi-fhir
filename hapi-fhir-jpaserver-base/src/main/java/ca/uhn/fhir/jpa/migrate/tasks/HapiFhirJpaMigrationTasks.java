@@ -291,6 +291,27 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addColumn("20230622.4", "WARNING_MSG")
 				.nullable()
 				.type(ColumnTypeEnum.STRING, 4000);
+
+		// Add additional LOB migration columns
+		version.onTable("BT2_JOB_INSTANCE")
+			.addColumn("20240227.1", "REPORT_VC")
+			.nullable()
+			.type(ColumnTypeEnum.TEXT);
+		version.onTable("BT2_JOB_INSTANCE")
+			.addColumn("20240227.2", "PARAMS_JSON_LOB_VC")
+			.nullable()
+			.type(ColumnTypeEnum.TEXT);
+
+		version.onTable("BT2_WORK_CHUNK")
+			.addColumn("20240227.3", "CHUNK_DATA_VC")
+			.nullable()
+			.type(ColumnTypeEnum.TEXT);
+
+		version.onTable("HFJ_SEARCH")
+			.addColumn("20240227.4", "SEARCH_QUERY_STRING_VC")
+			.nullable()
+			.type(ColumnTypeEnum.TEXT);
+
 	}
 
 	protected void init660() {

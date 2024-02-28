@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -146,6 +147,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "SEARCH_QUERY_STRING", nullable = true, updatable = false, length = MAX_SEARCH_QUERY_STRING)
 	private String mySearchQueryString;
+
+	// TODO: VC column added in 7.2.0 - Remove non-VC column later
+	@Column(name = "SEARCH_QUERY_STRING_VC", nullable = true)
+	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
+	@OptimisticLock(excluded = true)
+	private String mySearchQueryStringVc;
 
 	@Column(name = "SEARCH_QUERY_STRING_HASH", nullable = true, updatable = false)
 	private Integer mySearchQueryStringHash;
@@ -347,7 +354,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	 * Note that this field may have the request partition IDs prepended to it
 	 */
 	public String getSearchQueryString() {
-		return mySearchQueryString;
+		return mySearchQueryStringVc != null ? mySearchQueryStringVc : mySearchQueryString;
 	}
 
 	public void setSearchQueryString(String theSearchQueryString, RequestPartitionId theRequestPartitionId) {
@@ -359,12 +366,13 @@ public class Search implements ICachedSearchDetails, Serializable {
 			// We want this field to always have a wide distribution of values in order
 			// to avoid optimizers avoiding using it if it has lots of nulls, so in the
 			// case of null, just put a value that will never be hit
-			mySearchQueryString = UUID.randomUUID().toString();
+			mySearchQueryStringVc = UUID.randomUUID().toString();
 		} else {
-			mySearchQueryString = searchQueryString;
+			mySearchQueryStringVc = searchQueryString;
 		}
 
-		mySearchQueryStringHash = mySearchQueryString.hashCode();
+		mySearchQueryString = null;
+		mySearchQueryStringHash = mySearchQueryStringVc.hashCode();
 	}
 
 	public SearchTypeEnum getSearchType() {
