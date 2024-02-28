@@ -1162,6 +1162,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		// Double _has
 		params = new SearchParameterMap();
+		// LUKETODO:  double has
 		params.add(PARAM_HAS, new HasParam("Observation", "subject", "_has:DiagnosticReport:result:status", "final"));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params)), containsInAnyOrder(pid0.getValue()));
 

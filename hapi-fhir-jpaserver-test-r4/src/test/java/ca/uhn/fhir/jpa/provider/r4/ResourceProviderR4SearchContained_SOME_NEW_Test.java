@@ -39,6 +39,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -134,9 +135,13 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 
 		@ParameterizedTest
 		@ValueSource(strings = {
-			"Practitioner?_has:ExplanationOfBenefit:care-team:_id="+EOB_ID,
-			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage="+COVERAGE_ID,
-			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID, // This is the first half
+			"Organization?_has:Coverage:payor:_has:ExplanationOfBenefit:coverage:_id="+EOB_ID, // THIS WORKS!!!!!!!
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID, // this works
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor.name="+ORG_NAME, // this does not work because it's a chain inside a _has
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:_id="+EOB_ID,
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage="+COVERAGE_ID,
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID, // This is the first half
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:List:item:_id="+LIST_ID,
 		})
 		void complexQueryFromPractitioner(String theQueryString) {
 			runAndAssert(theQueryString);
@@ -145,6 +150,7 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 		@ParameterizedTest
 		@ValueSource(strings = {
 			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization._has:List:item:_id="+LIST_ID
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:_has:List:item:_id="+LIST_ID
 		})
 		void verySimilarToBug(String theQueryString) {
 			runAndAssert(theQueryString);
@@ -195,12 +201,10 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 		void searchWithSearchParameterWithIdealComposition() {
 			final SearchParameterMap searchParameterMap = new SearchParameterMap();
 
-			// LUKETODO:  this doesn't work because the second HasParam acts on the Practitioner
-			final HasParam hasParamEob = new HasParam("ExplanationOfBenefit", "care-team", "coverage.payor", ORG_ID);
-			final HasParam hasParamList = new HasParam("List", "item", "_id", LIST_ID);
+//			params.add(PARAM_HAS, new HasParam("Observation", "subject", "_has:DiagnosticReport:result:status", "final"));
+			final HasParam hasParamIdeal = new HasParam("ExplanationOfBenefit", "care-team", "coverage.payor:Organization._has:List:item:_id", LIST_ID);
 
-			searchParameterMap.add("_has", hasParamEob);
-			searchParameterMap.add("_has", hasParamList);
+			searchParameterMap.add("_has", hasParamIdeal);
 
 			final IBundleProvider search = myPractitionerDao.search(searchParameterMap, mySrd);
 
@@ -324,10 +328,12 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 
 		@ParameterizedTest
 		@ValueSource(strings = {
-			"Practitioner?_has:ExplanationOfBenefit:care-team:_id="+EOB_ID,
-			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage="+COVERAGE_ID,
-			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID,
-			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization="+ORG_ID  // This the first half of the buggy query
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:_id="+EOB_ID,
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage="+COVERAGE_ID,
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID,
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization="+ORG_ID,  // This the first half of the buggy query
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:Group:value-reference:_id="+GROUP_ID,
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization.name="+ORG_NAME // This doesn't work
 		})
 		void complexQueryFromPractitioner(String theQueryString) {
 			runAndAssert(theQueryString);

@@ -1129,16 +1129,24 @@ public class QueryStack {
 
 			String paramName = null;
 			List<QualifiedParamList> parameters = new ArrayList<>();
+			// LUKETODO: hasParams:  I think we need a third recursion in between the first 2, but how?
+			// First recursion:  myReferenceFieldName='care-team', myParameterName='coverage.payor:Organization._has:List:item:_id', myParameterValue='list1', myTargetResourceType='ExplanationOfBenefit'
+			// Second recursion:  myReferenceFieldName='item', myParameterName='_id', myParameterValue='list1', myTargetResourceType='List'
 			for (IQueryParameterType nextParam : nextOrList) {
 				HasParam next = (HasParam) nextParam;
 				ourLog.info("5351: next HasParam: {}", next);
 				targetResourceType = next.getTargetResourceType();
 				paramReference = next.getReferenceFieldName();
 				parameterName = next.getParameterName();
+				// LUKETODO:  this is where we start getting ourselves into trouble:
+//				parameterName: coverage.payor:Organization._has:List:item:_id
+//				paramName: coverage, singleton: [list1]
+//				parameters: [[list1]]
+//				paramName = parameterName.replaceAll("\\..*", "");
 				paramName = parameterName.replaceAll("\\..*", "");
 				final QualifiedParamList singleton =
 						QualifiedParamList.singleton(null, next.getValueAsQueryToken(myFhirContext));
-				ourLog.info("5351: paramName: {}, singleton: {}", paramName, singleton);
+				ourLog.info("5351: parameterName: {}, paramName: {}, singleton: {}", parameterName, paramName, singleton);
 				parameters.add(singleton);
 			}
 
@@ -1156,8 +1164,10 @@ public class QueryStack {
 
 			ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
 
-			if (paramName.startsWith("_has:")) {
-
+			// LUKETODO:  we NEVER hit this conditional block:   should we?
+//			if (paramName.startsWith("_has:")) {
+			 if (paramName.startsWith("_has:") || parameterName.contains("_has")) {
+				ourLog.info("5351: paramName.startsWith(_has): {}", paramName);
 				ourLog.trace("Handling double _has query: {}", paramName);
 
 				String qualifier = paramName.substring(4);
@@ -1187,8 +1197,11 @@ public class QueryStack {
 				// exists on the target resource, or in the top-level Resource resource.
 				mySearchParamRegistry.getRuntimeSearchParam(targetResourceType, paramReference);
 
+				// LUKETODO:  do we need to special case this somehow?
 				IQueryParameterAnd<?> parsedParam = JpaParamUtil.parseQueryParams(
 						mySearchParamRegistry, myFhirContext, owningParameterDef, paramName, parameters);
+
+				ourLog.info("5351: parsedParam: {}", parsedParam);
 
 				for (IQueryParameterOr<?> next : parsedParam.getValuesAsQueryTokens()) {
 					orValues.addAll(next.getValuesAsQueryTokens());
@@ -2766,11 +2779,6 @@ public class QueryStack {
 			String theResourceType, String theParameterName, List<? extends IQueryParameterType> theParameter) {
 		boolean indexOnContainedResources = myStorageSettings.isIndexOnContainedResources();
 		boolean indexOnUpliftedRefchains = myStorageSettings.isIndexOnUpliftedRefchains();
-
-		ourLog.info(
-				"5351: indexOnContainedResources: {}, indexOnUpliftedRefchains: {}",
-				indexOnContainedResources,
-				indexOnUpliftedRefchains);
 
 		if (!indexOnContainedResources && !indexOnUpliftedRefchains) {
 			return EmbeddedChainedSearchModeEnum.REF_JOIN_ONLY;
