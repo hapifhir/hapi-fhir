@@ -25,6 +25,8 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 
+import java.util.StringJoiner;
+
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
 /**
@@ -106,5 +108,15 @@ public class HasParam extends BaseParam implements IQueryParameterType {
 
 	private static void throwInvalidSyntaxException(String theParameterName) {
 		throw new InvalidRequestException(Msg.code(1942) + "Invalid _has parameter syntax: " + theParameterName);
+	}
+
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", HasParam.class.getSimpleName() + "[", "]")
+				.add("myReferenceFieldName='" + myReferenceFieldName + "'")
+				.add("myParameterName='" + myParameterName + "'")
+				.add("myParameterValue='" + myParameterValue + "'")
+				.add("myTargetResourceType='" + myTargetResourceType + "'")
+				.toString();
 	}
 }

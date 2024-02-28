@@ -4,9 +4,12 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
+import ca.uhn.fhir.rest.param.HasParam;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -26,6 +29,7 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,7 +125,8 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 			"ExplanationOfBenefit?coverage="+COVERAGE_ID,
 			"ExplanationOfBenefit?coverage.payor.name="+ORG_NAME,
 			"ExplanationOfBenefit?coverage.payor="+ORG_ID,
-			"ExplanationOfBenefit?coverage.payor._has:List:item:_id="+LIST_ID
+			"ExplanationOfBenefit?coverage.payor._has:List:item:_id="+LIST_ID,
+			"Organization?_has:List:item:_id="+LIST_ID, // This the second half of the buggy query
 		})
 		void complexQueryFromList(String theQueryString) {
 			runAndAssert(theQueryString);
@@ -131,10 +136,75 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 		@ValueSource(strings = {
 			"Practitioner?_has:ExplanationOfBenefit:care-team:_id="+EOB_ID,
 			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage="+COVERAGE_ID,
-			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID, // This is the first half
 		})
 		void complexQueryFromPractitioner(String theQueryString) {
 			runAndAssert(theQueryString);
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization._has:List:item:_id="+LIST_ID
+		})
+		void verySimilarToBug(String theQueryString) {
+			runAndAssert(theQueryString);
+		}
+
+		@Test
+		void searchWithSearchParameterSameAsBug() {
+			final SearchParameterMap searchParameterMap = new SearchParameterMap();
+
+			final HasParam hasParam = new HasParam("ExplanationOfBenefit", "care-team", "coverage.payor:Organization._has:List:item:_id", LIST_ID);
+
+			searchParameterMap.add("_has", hasParam);
+
+			final IBundleProvider search = myPractitionerDao.search(searchParameterMap, mySrd);
+
+			assertFalse(search.isEmpty());
+		}
+
+		@Test
+		void searchWithSearchParameterFirstHalf() {
+			final SearchParameterMap searchParameterMap = new SearchParameterMap();
+
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization="+ORG_ID  // This the first half of the buggy query
+			final HasParam hasParam = new HasParam("ExplanationOfBenefit", "care-team", "coverage.payor", ORG_ID);
+
+			searchParameterMap.add("_has", hasParam);
+
+			final IBundleProvider search = myPractitionerDao.search(searchParameterMap, mySrd);
+
+			assertFalse(search.isEmpty());
+		}
+
+		@Test
+		void searchWithSearchParameterSecondHalf() {
+			final SearchParameterMap searchParameterMap = new SearchParameterMap();
+
+//			"Organization?_has:List:item:_id="+LIST_ID, // This the second half of the buggy query
+			final HasParam hasParam = new HasParam("List", "item", "_id", LIST_ID);
+
+			searchParameterMap.add("_has", hasParam);
+
+			final IBundleProvider search = myOrganizationDao.search(searchParameterMap, mySrd);
+
+			assertFalse(search.isEmpty());
+		}
+
+		@Test
+		void searchWithSearchParameterWithIdealComposition() {
+			final SearchParameterMap searchParameterMap = new SearchParameterMap();
+
+			// LUKETODO:  this doesn't work because the second HasParam acts on the Practitioner
+			final HasParam hasParamEob = new HasParam("ExplanationOfBenefit", "care-team", "coverage.payor", ORG_ID);
+			final HasParam hasParamList = new HasParam("List", "item", "_id", LIST_ID);
+
+			searchParameterMap.add("_has", hasParamEob);
+			searchParameterMap.add("_has", hasParamList);
+
+			final IBundleProvider search = myPractitionerDao.search(searchParameterMap, mySrd);
+
+			assertFalse(search.isEmpty());
 		}
 
 		private void runAndAssert(String theQueryString) {

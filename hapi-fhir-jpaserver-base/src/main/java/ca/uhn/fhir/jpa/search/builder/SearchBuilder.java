@@ -377,6 +377,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			SearchRuntimeDetails theSearchRuntimeDetails) {
 
 		// LUKETODO:  so far so good
+		ourLog.info("5351: SearchParameterMap params: {}", theParams);
 		ArrayList<ISearchQueryExecutor> queries = new ArrayList<>();
 
 		if (checkUseHibernateSearch()) {

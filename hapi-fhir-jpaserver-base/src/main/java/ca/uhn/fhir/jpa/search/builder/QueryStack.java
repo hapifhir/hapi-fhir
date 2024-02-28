@@ -1112,7 +1112,7 @@ public class QueryStack {
 				.map(hasParam -> String.format(
 						"\nname: %s, \nvalue: %s, \ntarget resource: %s",
 						hasParam.getParameterName(), hasParam.getParameterValue(), hasParam.getTargetResourceType()))
-				.toList();
+				.collect(Collectors.toList());
 		ourLog.info(
 				"5351: createPredicateHas: theSourceJoinColumn: {}, theResourceType: {}, theHasParameters: {}\nbuiltSql:{}",
 				theSourceJoinColumn,
@@ -1131,12 +1131,18 @@ public class QueryStack {
 			List<QualifiedParamList> parameters = new ArrayList<>();
 			for (IQueryParameterType nextParam : nextOrList) {
 				HasParam next = (HasParam) nextParam;
+				ourLog.info("5351: next HasParam: {}", next);
 				targetResourceType = next.getTargetResourceType();
 				paramReference = next.getReferenceFieldName();
 				parameterName = next.getParameterName();
 				paramName = parameterName.replaceAll("\\..*", "");
-				parameters.add(QualifiedParamList.singleton(null, next.getValueAsQueryToken(myFhirContext)));
+				final QualifiedParamList singleton =
+						QualifiedParamList.singleton(null, next.getValueAsQueryToken(myFhirContext));
+				ourLog.info("5351: paramName: {}, singleton: {}", paramName, singleton);
+				parameters.add(singleton);
 			}
+
+			ourLog.info("5351: parameters: {}", parameters);
 
 			if (paramName == null) {
 				continue;
@@ -1207,7 +1213,10 @@ public class QueryStack {
 				parameterName = parameterName.substring(0, colonIndex);
 			}
 
-			ourLog.info("5351: PRE-ResourceLinkPredicateBuilder: {}", mySqlBuilder.getSelect());
+			ourLog.info(
+					"5351: PRE-ResourceLinkPredicateBuilder: theSourceJoinColumn: {}, SQL: {}",
+					theSourceJoinColumn,
+					mySqlBuilder.getSelect());
 			ResourceLinkPredicateBuilder resourceLinkTableJoin =
 					mySqlBuilder.addReferencePredicateBuilderReversed(this, theSourceJoinColumn);
 			ourLog.info("5351: POST-ResourceLinkPredicateBuilder: {}", mySqlBuilder.getSelect());
