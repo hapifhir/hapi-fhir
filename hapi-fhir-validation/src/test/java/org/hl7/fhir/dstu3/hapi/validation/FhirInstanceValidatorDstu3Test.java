@@ -173,14 +173,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 				return retVal;
 			}
 		});
-//		when(mockSupport.isValueSetSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
-//			@Override
-//			public Boolean answer(InvocationOnMock theInvocation) {
-//				String url = (String) theInvocation.getArguments()[1];
-//				boolean retVal = myValueSets.containsKey(url);
-//				return retVal;
-//			}
-//		});
+
 		when(mockSupport.fetchValueSet(any())).thenAnswer(t->{
 			String url = t.getArgument(0, String.class);
 			return myValueSets.get(url);

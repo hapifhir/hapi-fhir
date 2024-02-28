@@ -167,6 +167,8 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 		myValidConcepts = new ArrayList<>();
 
+		addMockedValueSets();
+
 		when(myMockSupport.expandValueSet(any(), nullable(ValueSetExpansionOptions.class), any(IBaseResource.class))).thenAnswer(t -> {
 			ValueSet arg = (ValueSet) t.getArgument(2, IBaseResource.class);
 			ValueSetExpansionComponent retVal = mySupportedCodeSystemsForExpansion.get(arg.getCompose().getIncludeFirstRep().getSystem());
@@ -179,15 +181,6 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 			ValueSet valueset = new ValueSet();
 			valueset.setExpansion(retVal);
 			return new ValueSetExpander.ValueSetExpansionOutcome(valueset);
-		});
-		when(myMockSupport.isCodeSystemSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
-			@Override
-			public Boolean answer(InvocationOnMock theInvocation) {
-				String argument = theInvocation.getArgument(1, String.class);
-				boolean retVal = myValidSystems.contains(argument);
-				ourLog.debug("isCodeSystemSupported({}) : {}", argument, retVal);
-				return retVal;
-			}
 		});
 		when(myMockSupport.fetchResource(nullable(Class.class), nullable(String.class))).thenAnswer(new Answer<IBaseResource>() {
 			@Override
@@ -206,26 +199,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 				return retVal;
 			}
 		});
-		when(myMockSupport.validateCode(any(), any(), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IValidationSupport.CodeValidationResult>() {
-			@Override
-			public IValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
-				ConceptValidationOptions options = theInvocation.getArgument(1, ConceptValidationOptions.class);
-				String system = theInvocation.getArgument(2, String.class);
-				String code = theInvocation.getArgument(3, String.class);
-				String display = theInvocation.getArgument(4, String.class);
-				String valueSetUrl = theInvocation.getArgument(5, String.class);
-				IValidationSupport.CodeValidationResult retVal;
-				if (myValidConcepts.contains(system + "___" + code)) {
-					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
-				} else if (myValidSystems.contains(system)) {
-					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code");
-				} else {
-					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
-				}
-				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
-				return retVal;
-			}
-		});
+
 		when(myMockSupport.fetchCodeSystem(nullable(String.class))).thenAnswer(new Answer<CodeSystem>() {
 			@Override
 			public CodeSystem answer(InvocationOnMock theInvocation) {
@@ -285,6 +259,40 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 			return null;
 		});
 
+	}
+
+	private void addMockedValueSets() {
+
+		when(myMockSupport.isCodeSystemSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
+			@Override
+			public Boolean answer(InvocationOnMock theInvocation) {
+				String argument = theInvocation.getArgument(1, String.class);
+				boolean retVal = myValidSystems.contains(argument);
+				ourLog.debug("isCodeSystemSupported({}) : {}", argument, retVal);
+				return retVal;
+			}
+		});
+
+		when(myMockSupport.validateCode(any(), any(), nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class))).thenAnswer(new Answer<IValidationSupport.CodeValidationResult>() {
+			@Override
+			public IValidationSupport.CodeValidationResult answer(InvocationOnMock theInvocation) {
+				ConceptValidationOptions options = theInvocation.getArgument(1, ConceptValidationOptions.class);
+				String system = theInvocation.getArgument(2, String.class);
+				String code = theInvocation.getArgument(3, String.class);
+				String display = theInvocation.getArgument(4, String.class);
+				String valueSetUrl = theInvocation.getArgument(5, String.class);
+				IValidationSupport.CodeValidationResult retVal;
+				if (myValidConcepts.contains(system + "___" + code)) {
+					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
+				} else if (myValidSystems.contains(system)) {
+					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code");
+				} else {
+					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
+				}
+				ourLog.debug("validateCode({}, {}, {}, {}) : {}", system, code, display, valueSetUrl, retVal);
+				return retVal;
+			}
+		});
 	}
 
 	private Object defaultString(Integer theLocationLine) {
@@ -1697,9 +1705,12 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	void testValidateCommonCodes_Ucum_ErrorMessageIsPreserved() {
-		buildValidationSupportWithLogicalAndSupport(false);
+		addValidConcept("http://loinc.org", "1234");
 
-		Observation input = new Observation();
+		buildValidationSupportWithLogicalAndSupport(false);
+		addMockedValueSets();
+
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		input.setStatus(ObservationStatus.AMENDED);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234").setDisplay("FOO");
@@ -1720,12 +1731,12 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 		assertEquals("Error processing unit 'MG/DL': The unit 'DL' is unknown' at position 3 (for 'http://unitsofmeasure.org#MG/DL')", result.getMessages().get(0).getMessage());
 		assertEquals(ResultSeverityEnum.ERROR, result.getMessages().get(0).getSeverity());
-		assertEquals(15, result.getMessages().get(0).getLocationLine());
+		assertEquals(22, result.getMessages().get(0).getLocationLine());
 		assertEquals(4, result.getMessages().get(0).getLocationCol());
 		assertEquals("Observation.value.ofType(Quantity)", result.getMessages().get(0).getLocationString());
 		assertEquals("Terminology_PassThrough_TX_Message", result.getMessages().get(0).getMessageId());
 
-		assertEquals(15, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
+		assertEquals(22, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
 		assertEquals(4, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
 		assertEquals("Terminology_PassThrough_TX_Message", ((StringType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").getValue()).getValue());
 		assertEquals("Error processing unit 'MG/DL': The unit 'DL' is unknown' at position 3 (for 'http://unitsofmeasure.org#MG/DL')", oo.getIssue().get(0).getDiagnostics());
@@ -1733,7 +1744,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertEquals(2, oo.getIssue().get(0).getLocation().size());
 		assertEquals("Observation.value.ofType(Quantity)", oo.getIssue().get(0).getLocation().get(0).getValue());
-		assertEquals("Line[15] Col[4]", oo.getIssue().get(0).getLocation().get(1).getValue());
+		assertEquals("Line[22] Col[4]", oo.getIssue().get(0).getLocation().get(1).getValue());
 	}
 
 	@Test
@@ -1741,6 +1752,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		addValidConcept("http://loinc.org", "1234");
 
 		buildValidationSupportWithLogicalAndSupport(false);
+		addMockedValueSets();
 
 		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -1761,10 +1773,10 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		OperationOutcome oo = (OperationOutcome) result.toOperationOutcome();
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
-		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah' (for 'urn:iso:std:iso:4217#blah')", result.getMessages().get(1).getMessage());
-		assertEquals(ResultSeverityEnum.ERROR, result.getMessages().get(1).getSeverity());
-		assertEquals(22, result.getMessages().get(1).getLocationLine());
-		assertEquals(4, result.getMessages().get(1).getLocationCol());
+		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah' (for 'urn:iso:std:iso:4217#blah')", result.getMessages().get(0).getMessage());
+		assertEquals(ResultSeverityEnum.ERROR, result.getMessages().get(0).getSeverity());
+		assertEquals(22, result.getMessages().get(0).getLocationLine());
+		assertEquals(4, result.getMessages().get(0).getLocationCol());
 		assertEquals("Observation.value.ofType(Quantity)", result.getMessages().get(0).getLocationString());
 		assertEquals("Terminology_PassThrough_TX_Message", result.getMessages().get(0).getMessageId());
 
