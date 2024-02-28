@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.annotations.OptimisticLock;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -98,11 +97,10 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Column(name = "PARAMS_JSON", length = PARAMS_JSON_MAX_LENGTH, nullable = true)
 	private String myParamsJson;
 
-	@Lob
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "PARAMS_JSON_LOB", nullable = true)
 	private String myParamsJsonLob;
 
-	// TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "PARAMS_JSON_LOB_VC", nullable = true)
 	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
 	private String myParamsJsonLobVc;
@@ -141,12 +139,11 @@ public class Batch2JobInstanceEntity implements Serializable {
 	 * Any output from the job can be held in this column
 	 * Even serialized json
 	 */
-	@Lob
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "REPORT", nullable = true, length = Integer.MAX_VALUE - 1)
 	private String myReport;
 
-	// TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "REPORT_VC", nullable = true)
 	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
 	private String myReportVc;

@@ -31,6 +31,7 @@ import ca.uhn.fhir.system.HapiSystemProperties;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.annotations.OptimisticLock;
+import org.hibernate.annotations.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -140,15 +141,18 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	@Column(name = "RESOURCE_TYPE", length = 200, nullable = true)
 	private String myResourceType;
+
 	/**
 	 * Note that this field may have the request partition IDs prepended to it
 	 */
-	@Lob()
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "SEARCH_QUERY_STRING", nullable = true, updatable = false, length = MAX_SEARCH_QUERY_STRING)
 	private String mySearchQueryString;
 
-	// TODO: VC column added in 7.2.0 - Remove non-VC column later
+	/**
+	 * Note that this field may have the request partition IDs prepended to it
+	 */
 	@Column(name = "SEARCH_QUERY_STRING_VC", nullable = true)
 	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
 	private String mySearchQueryStringVc;
@@ -175,9 +179,13 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Column(name = "OPTLOCK_VERSION", nullable = true)
 	private Integer myVersion;
 
-	@Lob
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
 	private byte[] mySearchParameterMap;
+
+	@Column(name = "SEARCH_PARAM_MAP_BIN", nullable = true)
+	@Type(type = JpaConstants.ORG_HIBERNATE_TYPE_BINARY_TYPE)
+	private byte[] mySearchParameterMapBin;
 
 	@Transient
 	private transient SearchParameterMap mySearchParameterMapTransient;
@@ -452,8 +460,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 			return Optional.of(mySearchParameterMapTransient);
 		}
 		SearchParameterMap searchParameterMap = null;
-		if (mySearchParameterMap != null) {
-			searchParameterMap = SerializationUtils.deserialize(mySearchParameterMap);
+		byte[] searchParameterMapSerialized = mySearchParameterMapBin;
+		if (searchParameterMapSerialized == null) {
+			searchParameterMapSerialized = mySearchParameterMap;
+		}
+		if (searchParameterMapSerialized != null) {
+			searchParameterMap = SerializationUtils.deserialize(searchParameterMapSerialized);
 			mySearchParameterMapTransient = searchParameterMap;
 		}
 		return Optional.ofNullable(searchParameterMap);
@@ -461,7 +473,8 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	public void setSearchParameterMap(SearchParameterMap theSearchParameterMap) {
 		mySearchParameterMapTransient = theSearchParameterMap;
-		mySearchParameterMap = SerializationUtils.serialize(theSearchParameterMap);
+		mySearchParameterMapBin = SerializationUtils.serialize(theSearchParameterMap);
+		mySearchParameterMap = null;
 	}
 
 	@Override

@@ -300,6 +300,7 @@ public class JpaConstants {
 	 */
 	public static final String SUMMARY_OPERATION_URL = "http://hl7.org/fhir/uv/ips/OperationDefinition/summary";
 
+	public static final String ORG_HIBERNATE_TYPE_BINARY_TYPE = "org.hibernate.type.BinaryType";
 	public static final String ORG_HIBERNATE_TYPE_TEXT_TYPE = "org.hibernate.type.TextType";
 	public static final String BULK_META_EXTENSION_EXPORT_IDENTIFIER =
 			"https://hapifhir.org/NamingSystem/bulk-export-identifier";

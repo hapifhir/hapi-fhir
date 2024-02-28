@@ -23,7 +23,6 @@ import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import org.hibernate.annotations.OptimisticLock;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -94,8 +93,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	@Column(name = "TGT_STEP_ID", length = ID_MAX_LENGTH, nullable = false)
 	private String myTargetStepId;
 
-	// TODO: VC column added in 7.2.0 - Remove non-VC column later
-	@Lob
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "CHUNK_DATA", nullable = true, length = Integer.MAX_VALUE - 1)
 	private String mySerializedData;
