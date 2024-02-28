@@ -377,7 +377,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
 		assertFalse(result.isSuccessful(), all.toString());
-		assertThat(result.getMessages().get(0).getMessage(), startsWith("Unknown code 'https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code#foo'"));
+		assertThat(result.getMessages().get(0).getMessage(), startsWith("Unknown code (for 'https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code#foo')"));
 
 	}
 
@@ -396,7 +396,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult result = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(0).getMessage());
+		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(1).getMessage());
 
 	}
 
@@ -518,6 +518,8 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 	 */
 	@Test
 	public void testValidateDoesntEnforceBestPracticesByDefault() {
+		addValidConcept("http://loinc.org", "1234");
+
 		Observation input = new Observation();
 		input.addPerformer(new Reference("Practitioner/124"));
 		input.setEffective(new DateTimeType("2023-01-01T11:22:33Z"));
@@ -708,10 +710,11 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 	public void testLargeBase64() throws IOException {
 		String input = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/r4/diagnosticreport-example-gingival-mass.json"), Constants.CHARSET_UTF8);
 		ValidationResult output = myFhirValidator.validateWithResult(input);
-		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
-		assertEquals(2, errors.size());
-		assertThat(errors.get(0).getMessage(), containsString("None of the codings provided are in the value set 'LOINC Diagnostic Report Codes'"));
-		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", errors.get(1).getMessage());
+		List<SingleValidationMessage> messages = logResultsAndReturnAll(output);
+		assertEquals(3, messages.size());
+		assertThat(messages.get(0).getMessage(), containsString("Unknown code (for 'http://loinc.org#1-8')"));
+		assertThat(messages.get(1).getMessage(), containsString("None of the codings provided are in the value set 'LOINC Diagnostic Report Codes'"));
+		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", messages.get(2).getMessage());
 	}
 
 	@Test
@@ -1112,7 +1115,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, res.size(), output.toString());
-		assertEquals("A code with no system has no defined meaning, and it cannot be validated. A system should be provided", output.getMessages().get(0).getMessage());
+		assertEquals("Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided", output.getMessages().get(0).getMessage());
 	}
 
 	/**
@@ -1203,7 +1206,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 
 		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
-		assertEquals("Unknown code for 'http://loinc.org#12345'", errors.get(0).getMessage());
+		assertEquals("Unknown code (for 'http://loinc.org#12345')", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -1330,6 +1333,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationFailing() {
+		addValidConcept("http://loinc.org", "12345");
 		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -1400,7 +1404,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertThat(errors.toString(), errors.size(), greaterThan(0));
-		assertEquals("Unknown code for 'http://acme.org#9988877'", errors.get(0).getMessage());
+		assertEquals("Unknown code (for 'http://acme.org#9988877')", errors.get(0).getMessage());
 
 	}
 
@@ -1439,7 +1443,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, errors.size());
-		assertEquals("Unknown code for 'http://loinc.org#1234'", errors.get(0).getMessage());
+		assertEquals("Unknown code (for 'http://loinc.org#1234')", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -1467,10 +1471,13 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(1, all.size());
-		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
-		assertThat(all.get(0).getMessage(), containsString("None of the codings provided are in the value set 'IdentifierType'"));
-		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
+		assertEquals(2, all.size());
+
+		assertThat(all.get(0).getMessage(), containsString("Unknown code (for 'http://example.com/foo/bar#bar')"));
+		assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
+
+		assertThat(all.get(1).getMessage(), containsString("None of the codings provided are in the value set 'IdentifierType'"));
+		assertEquals(ResultSeverityEnum.WARNING, all.get(1).getSeverity());
 
 	}
 
@@ -1731,6 +1738,8 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	void testValidateCommonCodes_Currency_ErrorMessageIsPreserved() {
+		addValidConcept("http://loinc.org", "1234");
+
 		buildValidationSupportWithLogicalAndSupport(false);
 
 		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
@@ -1752,10 +1761,10 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		OperationOutcome oo = (OperationOutcome) result.toOperationOutcome();
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
-		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah' (for 'urn:iso:std:iso:4217#blah')", result.getMessages().get(0).getMessage());
-		assertEquals(ResultSeverityEnum.ERROR, result.getMessages().get(0).getSeverity());
-		assertEquals(22, result.getMessages().get(0).getLocationLine());
-		assertEquals(4, result.getMessages().get(0).getLocationCol());
+		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah' (for 'urn:iso:std:iso:4217#blah')", result.getMessages().get(1).getMessage());
+		assertEquals(ResultSeverityEnum.ERROR, result.getMessages().get(1).getSeverity());
+		assertEquals(22, result.getMessages().get(1).getLocationLine());
+		assertEquals(4, result.getMessages().get(1).getLocationCol());
 		assertEquals("Observation.value.ofType(Quantity)", result.getMessages().get(0).getLocationString());
 		assertEquals("Terminology_PassThrough_TX_Message", result.getMessages().get(0).getMessageId());
 

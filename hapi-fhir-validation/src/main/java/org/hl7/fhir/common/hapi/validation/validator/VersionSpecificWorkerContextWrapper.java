@@ -775,7 +775,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 								.setDiagnostics(message)
 								.setDetails(new CodeableConcept().setText(message));
 
-				return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, Collections.singletonList(issue));
+				return new ValidationResult(
+						ValidationMessage.IssueSeverity.ERROR, null, Collections.singletonList(issue));
 			}
 			ValidationResult retVal = validateCode(theOptions, next, theVs);
 			if (retVal.isOk()) {

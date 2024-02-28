@@ -71,6 +71,7 @@ import org.mockito.stubbing.Answer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -351,9 +352,9 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 			ValidationResult result = val.validateWithResult(p);
 			assertFalse(result.isSuccessful());
 			List<SingleValidationMessage> all = logResultsAndReturnAll(result);
-			assertEquals(1, all.size());
+			assertEquals(2, all.size());
 			assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
-			assertEquals("Unknown code 'urn:iso:std:iso:3166#QQ' for 'urn:iso:std:iso:3166#QQ'", all.get(0).getMessage());
+			assertEquals("Unknown code (for 'urn:iso:std:iso:3166#QQ')", all.get(0).getMessage());
 		}
 	}
 
@@ -516,6 +517,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 	@Test
 	public void testGoal() {
+		addValidConcept("http://foo", "some other goal");
 		Goal goal = new Goal();
 		goal.setSubject(new Reference("Patient/123"));
 		goal.setDescription(new CodeableConcept().addCoding(new Coding("http://foo", "some other goal", "")));
@@ -778,9 +780,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult results = myVal.validateWithResult(is);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertEquals(1, outcome.size());
-		assertEquals("Unknown code 'http://dicom.nema.org/resources/ontology/DCM#BAR' for 'http://dicom.nema.org/resources/ontology/DCM#BAR'", outcome.get(0).getMessage());
-//		assertEquals("The Coding provided is not in the value set http://hl7.org/fhir/ValueSet/dicom-cid29, and a code should come from this value set unless it has no suitable code.  (error message = Unknown code[BAR] in system[http://dicom.nema.org/resources/ontology/DCM])", outcome.get(1).getMessage());
-
+		assertThat(outcome.get(0).getMessage(), containsString("The Coding provided (http://dicom.nema.org/resources/ontology/DCM#BAR) was not found in the value set 'Acquisition Modality Codes' (http://hl7.org/fhir/ValueSet/dicom-cid29|20121129)") );
 	}
 
 	/**
@@ -1048,7 +1048,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, res.size(), output.toString());
-		assertEquals("A code with no system has no defined meaning, and it cannot be validated. A system should be provided", output.getMessages().get(0).getMessage());
+		assertEquals("Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided", output.getMessages().get(0).getMessage());
 	}
 
 	/**
@@ -1137,7 +1137,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 
 		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
-		assertEquals("Unknown code for 'http://loinc.org#12345'", errors.get(0).getMessage());
+		assertEquals("Unknown code (for 'http://loinc.org#12345')", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -1233,6 +1233,8 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationFailing() {
+		addValidConcept("http://loinc.org", "12345");
+
 		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
@@ -1259,7 +1261,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertThat(errors.toString(), errors.size(), greaterThan(0));
-		assertEquals("Unknown code for 'http://acme.org#9988877'", errors.get(0).getMessage());
+		assertEquals("Unknown code (for 'http://acme.org#9988877')", errors.get(0).getMessage());
 
 	}
 
@@ -1295,7 +1297,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, errors.size());
-		assertEquals("Unknown code for 'http://loinc.org#1234'", errors.get(0).getMessage());
+		assertEquals("Unknown code (for 'http://loinc.org#1234')", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -1321,12 +1323,14 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 		ValidationResult output = myVal.validateWithResult(patient);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(1, all.size());
+		assertEquals(2, all.size());
+		assertThat(all.get(0).getMessage(), containsString("Unknown code (for 'http://example.com/foo/bar#bar')"));
+		assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertThat(
-			all.get(0).getMessage(),
+			all.get(1).getMessage(),
 			containsString("None of the codings provided are in the value set 'Identifier Type Codes'"));
-		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
+		assertEquals(ResultSeverityEnum.WARNING, all.get(1).getSeverity());
 
 	}
 
@@ -1359,6 +1363,9 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 		IValidationPolicyAdvisor policyAdvisor = mock(IValidationPolicyAdvisor.class);
 		IValidatorResourceFetcher fetcher = mock(IValidatorResourceFetcher.class);
+		when(policyAdvisor.policyForElement(any(), any(),any(),any(),any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.ElementValidationAction.class));
+		when(policyAdvisor.policyForCodedContent(any(),any(),any(),any(),any(),any(),any(),any(),any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.CodedContentValidationAction.class));
+
 
 		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
@@ -1373,8 +1380,9 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 	@Test
 	public void testValueWithWhitespace() throws IOException {
-		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/dstu3-rick-test.json"), Charsets.UTF_8);
+		addValidConcept("http://loinc.org", "34133-1");
 
+		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/dstu3-rick-test.json"), Charsets.UTF_8);
 		ValidationResult results = myVal.validateWithResult(input);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertEquals(2, outcome.size());
