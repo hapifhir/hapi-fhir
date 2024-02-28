@@ -224,10 +224,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName resourceTable = version.onTable("HFJ_RESOURCE");
 
 		resourceTable
-			.addIndex("20230502.1", "IDX_RES_RESID_UPDATED")
-			.unique(false)
-			.online(true)
-			.withColumns("RES_ID", "RES_UPDATED", "PARTITION_ID");
+				.addIndex("20230502.1", "IDX_RES_RESID_UPDATED")
+				.unique(false)
+				.online(true)
+				.withColumns("RES_ID", "RES_UPDATED", "PARTITION_ID");
 
 		Builder.BuilderWithTableName tagDefTable = version.onTable("HFJ_TAG_DEF");
 		tagDefTable.dropIndex("20230505.1", "IDX_TAGDEF_TYPESYSCODEVERUS");
