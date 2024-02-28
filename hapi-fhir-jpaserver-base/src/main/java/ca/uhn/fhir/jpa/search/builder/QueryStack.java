@@ -1105,6 +1105,21 @@ public class QueryStack {
 			RequestDetails theRequest,
 			RequestPartitionId theRequestPartitionId) {
 
+		final List<String> hasParams = theHasParameters.stream()
+				.flatMap(Collection::stream)
+				.filter(HasParam.class::isInstance)
+				.map(HasParam.class::cast)
+				.map(hasParam -> String.format(
+						"\nname: %s, \nvalue: %s, \ntarget resource: %s",
+						hasParam.getParameterName(), hasParam.getParameterValue(), hasParam.getTargetResourceType()))
+				.toList();
+		ourLog.info(
+				"5351: createPredicateHas: theSourceJoinColumn: {}, theResourceType: {}, theHasParameters: {}\nbuiltSql:{}",
+				theSourceJoinColumn,
+				theResourceType,
+				hasParams,
+				mySqlBuilder.getSelect());
+
 		List<Condition> andPredicates = new ArrayList<>();
 		for (List<? extends IQueryParameterType> nextOrList : theHasParameters) {
 
@@ -1185,13 +1200,17 @@ public class QueryStack {
 				parameterName = parameterName.substring(0, parameterName.indexOf('.'));
 			}
 
+			// LUKETODO:  we may already be wrong here:  parameterName: coverage
+
 			int colonIndex = parameterName.indexOf(':');
 			if (colonIndex != -1) {
 				parameterName = parameterName.substring(0, colonIndex);
 			}
 
+			ourLog.info("5351: PRE-ResourceLinkPredicateBuilder: {}", mySqlBuilder.getSelect());
 			ResourceLinkPredicateBuilder resourceLinkTableJoin =
 					mySqlBuilder.addReferencePredicateBuilderReversed(this, theSourceJoinColumn);
+			ourLog.info("5351: POST-ResourceLinkPredicateBuilder: {}", mySqlBuilder.getSelect());
 			Condition partitionPredicate = resourceLinkTableJoin.createPartitionIdPredicate(theRequestPartitionId);
 
 			List<String> paths = resourceLinkTableJoin.createResourceLinkPaths(
@@ -1199,6 +1218,9 @@ public class QueryStack {
 			if (CollectionUtils.isEmpty(paths)) {
 				throw new InvalidRequestException(Msg.code(2305) + "Reference field does not exist: " + paramReference);
 			}
+			// LUKETODO:  this looks correct:  paths:  ExplanationOfBenefit.careTeam.provider
+			// mySqlBuilder:  SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_RES_LINK t0 ON (t1.RES_ID =
+			// t0.TARGET_RESOURCE_ID)
 
 			Condition typePredicate = BinaryCondition.equalTo(
 					resourceLinkTableJoin.getColumnTargetResourceType(),
@@ -1437,12 +1459,14 @@ public class QueryStack {
 					theSourceJoinColumn,
 					theRequestPartitionId));
 		} else {
+			ourLog.info("5351: BEFORE ResourceLinkPredicateBuilder: mySqlBuilder: {}", mySqlBuilder.getSelect());
 			ResourceLinkPredicateBuilder predicateBuilder = createOrReusePredicateBuilder(
 							PredicateBuilderTypeEnum.REFERENCE,
 							theSourceJoinColumn,
 							theParamName,
 							() -> theSqlBuilder.addReferencePredicateBuilder(this, theSourceJoinColumn))
 					.getResult();
+			ourLog.info("5351: AFTER ResourceLinkPredicateBuilder: mySqlBuilder: {}", mySqlBuilder.getSelect());
 			return predicateBuilder.createPredicate(
 					theRequest,
 					theResourceName,
@@ -2481,7 +2505,7 @@ public class QueryStack {
 					}
 					break;
 				case REFERENCE:
-					ourLog.info("5351: theAndOrParams: {}", theAndOrParams);
+					ourLog.info("5351: theAndOrParams: {} mySqlBuilder: {}", theAndOrParams, mySqlBuilder.getSelect());
 					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 
 						// Handle Search Parameters where the name is a full chain
@@ -2676,6 +2700,7 @@ public class QueryStack {
 			RequestPartitionId theRequestPartitionId,
 			List<Condition> andPredicates,
 			List<? extends IQueryParameterType> nextAnd) {
+		// LUKETODO:  This could be interesting:  fullyChainedParameter
 		if (!nextAnd.isEmpty() && nextAnd.get(0) instanceof ReferenceParam) {
 			ReferenceParam param = (ReferenceParam) nextAnd.get(0);
 			if (isNotBlank(param.getChain())) {

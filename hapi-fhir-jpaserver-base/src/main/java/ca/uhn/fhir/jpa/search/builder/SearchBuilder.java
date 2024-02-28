@@ -284,6 +284,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				continue;
 			}
 			List<List<IQueryParameterType>> andOrParams = myParams.get(nextParamName);
+			// LUKETODO:  we're still ok here
 			Condition predicate = theQueryStack.searchForIdsWithAndOr(with().setResourceName(myResourceName)
 					.setParamName(nextParamName)
 					.setAndOrParams(andOrParams)
@@ -375,6 +376,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			RequestDetails theRequest,
 			SearchRuntimeDetails theSearchRuntimeDetails) {
 
+		// LUKETODO:  so far so good
 		ArrayList<ISearchQueryExecutor> queries = new ArrayList<>();
 
 		if (checkUseHibernateSearch()) {
@@ -453,6 +455,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					theParams, sort, theOffset, theMaximumResults, theCountOnlyFlag, theRequest, null, queries);
 		}
 
+		// LUKETODO:  it's already too late
 		return queries;
 	}
 
@@ -741,7 +744,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		 * Now perform the search
 		 */
 		GeneratedSql generatedSql = sqlBuilder.generate(theOffset, myMaxResultsToFetch);
-		ourLog.info("SQL:\n{}\nparams:\n{}", generatedSql.getSql(), generatedSql.getBindVariables());
+		ourLog.info("5351: SQL:\n{}\nparams:\n{}", generatedSql.getSql(), generatedSql.getBindVariables());
 		if (!generatedSql.isMatchNothing()) {
 			SearchQueryExecutor executor =
 					mySqlBuilderFactory.newSearchQueryExecutor(generatedSql, myMaxResultsToFetch);

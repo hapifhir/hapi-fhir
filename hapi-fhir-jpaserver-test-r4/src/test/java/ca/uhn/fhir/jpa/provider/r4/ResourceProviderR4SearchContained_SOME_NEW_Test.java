@@ -1,7 +1,10 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import org.apache.commons.io.IOUtils;
@@ -33,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourceProviderR4Test {
@@ -114,6 +118,7 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 			"Coverage?payor._has:List:item:_id="+LIST_ID,
 			"Coverage?payor.name="+ORG_NAME,
 			"Coverage?payor="+ORG_ID,
+			"ExplanationOfBenefit?coverage="+COVERAGE_ID,
 			"ExplanationOfBenefit?coverage.payor.name="+ORG_NAME,
 			"ExplanationOfBenefit?coverage.payor="+ORG_ID,
 			"ExplanationOfBenefit?coverage.payor._has:List:item:_id="+LIST_ID
@@ -158,7 +163,23 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 
 		@BeforeEach
 		void beforeEach() {
+			myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
 			myStorageSettings.setIndexOnContainedResources(false);
+
+			// LUKETODO:  not exactly like production but create SearchParameter first to create the RES_LINK
+			// and avoid a call to reindex
+			final SearchParameter searchParameterGroupValueReference = new SearchParameter();
+			searchParameterGroupValueReference.setId("group-value-reference");
+			searchParameterGroupValueReference.setName("group-value-reference");
+			searchParameterGroupValueReference.addBase("Group");
+			searchParameterGroupValueReference.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			searchParameterGroupValueReference.setCode("value-reference");
+			searchParameterGroupValueReference.setType(Enumerations.SearchParamType.REFERENCE);
+			searchParameterGroupValueReference.setExpression("Group.characteristic.value.as(Reference)");
+			searchParameterGroupValueReference.addTarget("Organization");
+			searchParameterGroupValueReference.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
+
+			mySearchParameterDao.update(searchParameterGroupValueReference, mySrd);
 
 			final Patient patient = new Patient();
 			patient.setId(PAT_ID);
@@ -197,46 +218,61 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 			explanationOfBenefit.addInsurance().setCoverage(new Reference(coverageId.getValue()));
 
 			myExplanationOfBenefitDao.update(explanationOfBenefit, mySrd).getId().toUnqualifiedVersionless();
-
-			final SearchParameter searchParameterGroupValueReference = new SearchParameter();
-			searchParameterGroupValueReference.setId("group-value-reference");
-			searchParameterGroupValueReference.setName("group-value-reference");
-			searchParameterGroupValueReference.addBase("Group");
-			searchParameterGroupValueReference.setStatus(Enumerations.PublicationStatus.ACTIVE);
-			searchParameterGroupValueReference.setCode("value-reference");
-			searchParameterGroupValueReference.setType(Enumerations.SearchParamType.REFERENCE);
-			searchParameterGroupValueReference.setExpression("Group.characteristic.value.as(Reference)");
-			searchParameterGroupValueReference.addTarget("Organization");
-			searchParameterGroupValueReference.setXpathUsage(SearchParameter.XPathUsageType.NORMAL);
-
-			// LUKETODO: this causes aw reindex and Exception:  org.hibernate.HibernateException: Unable to perform beforeTransactionCompletion callback: Cannot invoke "Object.equals(Object)" because the return value of "org.hibernate.engine.spi.EntityEntry.getVersion()" is null
-			mySearchParameterDao.update(searchParameterGroupValueReference, mySrd);
 		}
 
 		@ParameterizedTest
 		@ValueSource(strings = {
-			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization._has:Group:value-reference:_id="+GROUP_ID,
-//			"Coverage?payor._has:List:item:_id="+LIST_ID,
-//			"Coverage?payor.name="+ORG_NAME,
-//			"Coverage?payor="+ORG_ID,
-//			"ExplanationOfBenefit?coverage.payor.name="+ORG_NAME,
-//			"ExplanationOfBenefit?coverage.payor="+ORG_ID,
-//			"ExplanationOfBenefit?coverage.payor._has:List:item:_id="+LIST_ID
+			"Coverage?payor.name="+ORG_NAME,
+			"Coverage?payor="+ORG_ID,
+			"ExplanationOfBenefit?coverage.payor.name="+ORG_NAME,
+			"ExplanationOfBenefit?coverage.payor="+ORG_ID,
+			"ExplanationOfBenefit?care-team="+PRACTITIONER_ID,
+			"ExplanationOfBenefit?coverage="+COVERAGE_ID,
+			"ExplanationOfBenefit?provider="+ORG_ID,
 		})
-		void complexQueryFromList(String theQueryString) {
+		void complexQueryFromGroup(String theQueryString) {
+			runAndAssert(theQueryString);
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {
+			"Group?value-reference="+ORG_ID,
+			"Organization?_has:Group:value-reference:_id="+GROUP_ID, // This the second half of the buggy query
+		})
+		void useCustomSearchParam(String theQueryString) {
+			runAndAssert(theQueryString);
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {
+			// LUKETODO:  this is the exact scenario in the bug
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization._has:Group:value-reference:_id="+GROUP_ID,
+		})
+		void bug(String theQueryString) {
+			runAndAssert(theQueryString);
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {
+			"Practitioner?_has:ExplanationOfBenefit:care-team:_id="+EOB_ID,
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage="+COVERAGE_ID,
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID,
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization="+ORG_ID  // This the first half of the buggy query
+		})
+		void complexQueryFromPractitioner(String theQueryString) {
 			runAndAssert(theQueryString);
 		}
 
 		private void runAndAssert(String theQueryString) {
-			ourLog.info("queryString:\n{}", theQueryString);
+			ourLog.info("START queryString:\n{}", theQueryString);
 
 			final Bundle outcome = myClient.search()
 				.byUrl(theQueryString)
 				.returnBundle(Bundle.class)
 				.execute();
 
+			ourLog.info("END queryString:\n{}", theQueryString);
 			assertFalse(outcome.getEntry().isEmpty());
-			ourLog.info("result:\n{}", theQueryString);
 		}
 	}
 
