@@ -102,7 +102,6 @@ public class Batch2WorkChunkEntity implements Serializable {
 
 	@Column(name = "CHUNK_DATA_VC", nullable = true)
 	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
-	@OptimisticLock(excluded = true)
 	private String mySerializedDataVc;
 
 	@Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)

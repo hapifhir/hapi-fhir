@@ -105,7 +105,6 @@ public class Batch2JobInstanceEntity implements Serializable {
 	// TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "PARAMS_JSON_LOB_VC", nullable = true)
 	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
-	@OptimisticLock(excluded = true)
 	private String myParamsJsonLobVc;
 
 	@Column(name = "CMB_RECS_PROCESSED", nullable = true)
@@ -150,7 +149,6 @@ public class Batch2JobInstanceEntity implements Serializable {
 	// TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "REPORT_VC", nullable = true)
 	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
-	@OptimisticLock(excluded = true)
 	private String myReportVc;
 
 	public String getCurrentGatedStepId() {

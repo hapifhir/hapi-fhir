@@ -151,7 +151,6 @@ public class Search implements ICachedSearchDetails, Serializable {
 	// TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "SEARCH_QUERY_STRING_VC", nullable = true)
 	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
-	@OptimisticLock(excluded = true)
 	private String mySearchQueryStringVc;
 
 	@Column(name = "SEARCH_QUERY_STRING_HASH", nullable = true, updatable = false)
