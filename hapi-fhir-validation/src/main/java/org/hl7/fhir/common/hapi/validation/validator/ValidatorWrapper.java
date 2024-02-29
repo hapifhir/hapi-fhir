@@ -120,7 +120,7 @@ class ValidatorWrapper {
 		try {
 			v = new InstanceValidator(theWorkerContext, evaluationCtx, xverManager);
 		} catch (Exception e) {
-			throw new ConfigurationException(Msg.code(648) + e);
+			throw new ConfigurationException(Msg.code(648) + e.getMessage(), e);
 		}
 
 		v.setAssumeValidRestReferences(isAssumeValidRestReferences());
