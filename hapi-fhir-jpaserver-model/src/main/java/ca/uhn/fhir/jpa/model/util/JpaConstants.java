@@ -312,13 +312,14 @@ public class JpaConstants {
 	 * @see #ORG_HIBERNATE_TYPE_BINARY_TYPE
 	 */
 	public static final int ORG_HIBERNATE_TYPE_BINARY_TYPE_LENGTH = 1000000000;
+
 	public static final String BULK_META_EXTENSION_EXPORT_IDENTIFIER =
 			"https://hapifhir.org/NamingSystem/bulk-export-identifier";
 	public static final String BULK_META_EXTENSION_JOB_ID = "https://hapifhir.org/NamingSystem/bulk-export-job-id";
 	public static final String BULK_META_EXTENSION_RESOURCE_TYPE =
 			"https://hapifhir.org/NamingSystem/bulk-export-binary-resource-type";
 
-    /**
+	/**
 	 * Non-instantiable
 	 */
 	private JpaConstants() {

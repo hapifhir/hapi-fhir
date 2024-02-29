@@ -320,6 +320,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addColumn("20240227.6", "JOB_CONTENTS_VC")
 				.nullable()
 				.type(ColumnTypeEnum.TEXT);
+		version.onTable("HFJ_BLK_IMPORT_JOBFILE")
+				.modifyColumn("20240227.7", "JOB_CONTENTS")
+				.nullable()
+				.withType(ColumnTypeEnum.BLOB);
 	}
 
 	protected void init660() {

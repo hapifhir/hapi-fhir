@@ -68,10 +68,10 @@ public class BulkImportJobFileEntity implements Serializable {
 	private String myFileDescription;
 
 	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
-	@Column(name = "JOB_CONTENTS", nullable = false)
+	@Column(name = "JOB_CONTENTS", nullable = true)
 	private byte[] myContents;
 
-	@Column(name = "JOB_CONTENTS_VC", nullable = false)
+	@Column(name = "JOB_CONTENTS_VC", nullable = true)
 	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
 	private String myContentsVc;
 
