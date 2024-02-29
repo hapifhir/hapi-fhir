@@ -25,9 +25,7 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
-import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.batch2.model.AdditionalData;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -210,9 +208,6 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		IReductionStepWorker<PT, IT, OT> reductionStepWorker =
 				(IReductionStepWorker<PT, IT, OT>) step.getJobStepWorker();
 
-		// data to be passed to each reduction step consumption
-		AdditionalData data = reductionStepWorker.createInitialData();
-
 		instance.setStatus(FINALIZE);
 
 		boolean defaultSuccessValue = true;
@@ -223,7 +218,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				try (Stream<WorkChunk> chunkIterator =
 						myJobPersistence.fetchAllWorkChunksForStepStream(instance.getInstanceId(), step.getStepId())) {
 					chunkIterator.forEach(chunk ->
-							processChunk(chunk, instance, parameters, reductionStepWorker, response, theJobWorkCursor, data));
+							processChunk(chunk, instance, parameters, reductionStepWorker, response, theJobWorkCursor));
 				}
 				return null;
 			});
@@ -241,7 +236,6 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 						new StepExecutionDetails<>(parameters, null, instance, "REDUCTION");
 
 				if (response.isSuccessful()) {
-					chunkDetails.setAdditionalData(data);
 					reductionStepWorker.run(chunkDetails, dataSink);
 				}
 
@@ -314,8 +308,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			PT theParameters,
 			IReductionStepWorker<PT, IT, OT> theReductionStepWorker,
 			ReductionStepChunkProcessingResponse theResponseObject,
-			JobWorkCursor<PT, IT, OT> theJobWorkCursor,
-			AdditionalData theAdditionalData) {
+			JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
 
 		if (!theChunk.getStatus().isIncomplete()) {
 			// This should never happen since jobs with reduction are required to be gated
@@ -338,7 +331,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				IT chunkData =
 						theChunk.getData(theJobWorkCursor.getCurrentStep().getInputType());
 				ChunkExecutionDetails<PT, IT> chunkDetails = new ChunkExecutionDetails<>(
-						chunkData, theParameters, theInstance.getInstanceId(), theChunk.getId(), theAdditionalData);
+						chunkData, theParameters, theInstance.getInstanceId(), theChunk.getId());
 
 				ChunkOutcome outcome = theReductionStepWorker.consume(chunkDetails);
 

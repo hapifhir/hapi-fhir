@@ -14,10 +14,8 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
-import ca.uhn.fhir.batch2.model.AdditionalData;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
-import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
@@ -273,10 +271,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			@Override
 			public void reductionStepConsume(ChunkExecutionDetails<TestJobParameters, SecondStepOutput> theChunkDetails, IJobDataSink<ReductionStepOutput> theDataSink) {
 				int val = mySecondGate.getAndIncrement();
-				AdditionalData data = theChunkDetails.getAdditionalData();
-				assertTrue(data instanceof TestAdditionalData);
-				TestAdditionalData testData = (TestAdditionalData) data;
-				testData.Data.add(Integer.toString(val));
 				if (val == (totalCalls - 1)) {
 					myBatch2JobHelper.forceRunMaintenancePass();
 				}
@@ -286,14 +280,8 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			public void reductionStepRun(StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails, IJobDataSink<ReductionStepOutput> theDataSink) {
 				boolean isRunAlready = myBoolean.getAndSet(true);
 				assertFalse(isRunAlready, "Reduction step should only be called once!");
-				AdditionalData data = theStepExecutionDetails.getAdditionalData();
-				assertTrue(data instanceof TestAdditionalData);
-				TestAdditionalData testAdditionalData = (TestAdditionalData) data;
 
-				// we should have all the data here
-				assertEquals(totalCalls, testAdditionalData.Data.size());
-
-				theDataSink.accept(new ReductionStepOutput(testAdditionalData.Data));
+				theDataSink.accept(new ReductionStepOutput(new ArrayList<>()));
 				callLatch(myLastStepLatch, theStepExecutionDetails);
 			}
 		});
@@ -325,17 +313,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		// ensure our completion handler fires
 		assertTrue(completionBool.get());
-
-		Optional<JobDefinition<?>> jobOp = myJobDefinitionRegistry.getJobDefinition(jobId, TEST_JOB_VERSION);
-		assertTrue(jobOp.isPresent());
-		JobDefinition<?> job = jobOp.get();
-		List<? extends JobDefinitionStep<?, ?, ?>> steps = job.getSteps();
-		JobDefinitionStep<?, ?, ?> lastStep = steps.get(steps.size() - 1);
-		assertTrue(lastStep.isReductionStep());
-		IReductionStepWorker<?, ?, ?> reductionStepWorker = (IReductionStepWorker<?, ?, ?>) lastStep.getJobStepWorker();
-		AdditionalData data = reductionStepWorker.createInitialData();
-		assertTrue(data instanceof TestAdditionalData);
-		assertTrue(((TestAdditionalData) data).Data.isEmpty()); // new data object every time
 
 		assertEquals(StatusEnum.COMPLETED, jobInstance.getStatus());
 		assertEquals(1.0, jobInstance.getProgress());
@@ -651,11 +628,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				theHandler.reductionStepRun(theStepExecutionDetails, theDataSink);
 				return RunOutcome.SUCCESS;
 			}
-
-			@Override
-			public AdditionalData createInitialData() {
-				return new TestAdditionalData();
-			}
 		};
 		createThreeStepReductionJob(theJobId, first, second, last);
 	}
@@ -733,9 +705,5 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		void reductionStepConsume(ChunkExecutionDetails<TestJobParameters, SecondStepOutput> theChunkDetails, IJobDataSink<ReductionStepOutput> theDataSink);
 
 		void reductionStepRun(StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails, IJobDataSink<ReductionStepOutput> theDataSink);
-	}
-
-	private class TestAdditionalData extends AdditionalData {
-		public List<String> Data = new ArrayList<>();
 	}
 }
