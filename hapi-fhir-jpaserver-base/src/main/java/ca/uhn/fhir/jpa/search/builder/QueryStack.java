@@ -1168,9 +1168,35 @@ public class QueryStack {
 
 			ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
 
+			if (parameterName.contains("_has")) {
+				ourLog.info("5351: parameterName: {}", parameterName);
+				final String[] splitOnHas = parameterName.split("_has");
+				if (splitOnHas.length == 2) {
+					final String firstHalf = splitOnHas[0];
+					final String secondHalf = splitOnHas[1];
+					final String qualifier = secondHalf;
+
+					final ArrayList<IQueryParameterType> orValuesClone = new ArrayList<>(orValues);
+					for (IQueryParameterType next : nextOrList) {
+						HasParam nextHasParam = new HasParam();
+						nextHasParam.setValueAsQueryToken(
+								myFhirContext, PARAM_HAS, qualifier, next.getValueAsQueryToken(myFhirContext));
+						orValuesClone.add(nextHasParam);
+						//						orValues.add(nextHasParam);
+					}
+					ourLog.info(
+							"5351: firstHalf: {}, secondHalf: {}, orValuesClone: {}",
+							firstHalf,
+							secondHalf,
+							orValuesClone);
+				} else {
+					ourLog.info("5351: no split");
+				}
+			}
+
 			// LUKETODO:  we NEVER hit this conditional block:   should we?
-			//			if (paramName.startsWith("_has:")) {
-			if (paramName.startsWith("_has:") || parameterName.contains("_has")) {
+			if (paramName.startsWith("_has:")) {
+				//			if (paramName.startsWith("_has:") || parameterName.contains("_has")) {
 				ourLog.info("5351: paramName.startsWith(_has): {}", paramName);
 				ourLog.trace("Handling double _has query: {}", paramName);
 
@@ -1182,6 +1208,25 @@ public class QueryStack {
 					orValues.add(nextHasParam);
 				}
 
+				//			} else if (parameterName.contains("_has")) {
+				// LUKETODO:  the mere presence of this else if causes the scenario to error out instead of ail
+				//				final String qualifier = parameterName.replaceAll("\\_has.*", "");
+				//				final String[] splitOnHas = parameterName.split("_has");
+				//				if (splitOnHas.length == 2) {
+				//					final String firstHalf = splitOnHas[0];
+				//					final String secondHalf = splitOnHas[1];
+				//
+				//					ourLog.info("5351: firstHalf: {}, secondHalf: {}", firstHalf, secondHalf);
+				//				} else {
+				//					ourLog.info("5351: no split");
+				//				}
+
+				//				for (IQueryParameterType next : nextOrList) {
+				//					HasParam nextHasParam = new HasParam();
+				//					nextHasParam.setValueAsQueryToken(
+				//						myFhirContext, PARAM_HAS, qualifier, next.getValueAsQueryToken(myFhirContext));
+				//					orValues.add(nextHasParam);
+				//				}
 			} else if (paramName.equals(PARAM_ID)) {
 
 				for (IQueryParameterType next : nextOrList) {
@@ -1210,20 +1255,29 @@ public class QueryStack {
 				for (IQueryParameterOr<?> next : parsedParam.getValuesAsQueryTokens()) {
 					orValues.addAll(next.getValuesAsQueryTokens());
 				}
+
+				ourLog.info("5351: orValues: {}", orValues);
 			}
 
 			// Handle internal chain inside the has.
 			if (parameterName.contains(".")) {
+				// LUKETODO:  we're processing a chained parameter pointing to a ReferenceParam with a chain of a _has
 				String chainedPartOfParameter = getChainedPart(parameterName);
+				ourLog.info(
+						"5351: parameterName: {}, chainedPartOfParameter: {}", parameterName, chainedPartOfParameter);
 				orValues.stream()
 						.filter(qp -> qp instanceof ReferenceParam)
 						.map(qp -> (ReferenceParam) qp)
 						.forEach(rp -> rp.setChain(getChainedPart(chainedPartOfParameter)));
 
 				parameterName = parameterName.substring(0, parameterName.indexOf('.'));
-			}
+				ourLog.info("5351: parameterNmme: mutated: {}, orValues: {}", parameterName, orValues);
 
-			// LUKETODO:  we may already be wrong here:  parameterName: coverage
+				//				5351: parameterName: coverage.payor:Organization._has:List:item:_id, chainedPartOfParameter:
+				// payor:Organization._has:List:item:_id
+				//				5351: parameterNmme: mutated: coverage, orValues:
+				// [ReferenceParam[chain=_has:List:item:_id,value=list1]]
+			}
 
 			int colonIndex = parameterName.indexOf(':');
 			if (colonIndex != -1) {

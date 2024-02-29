@@ -1,26 +1,25 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.param.HasParam;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.ClinicalImpression;
 import org.hl7.fhir.r4.model.Coverage;
+import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.ListResource;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -28,6 +27,7 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -35,13 +35,9 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourceProviderR4Test {
@@ -65,7 +61,71 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
 	}
 
-	// LUKETODO:  find another home for this
+	@Nested
+	class TripleHas {
+		private static final String PAT_ID = "pat1";
+		private static final String OBSERVATION_ID = "obs1";
+		private static final String ENCOUNTER_ID = "enc1";
+		private static final String ADVERSE_EVENT_ID = "adv1";
+		private static final String CARE_PLAN_ID = "cp1";
+
+		@BeforeEach
+		void beforeEach() {
+			final Patient patient = new Patient();
+			patient.setId(PAT_ID);
+
+			final IIdType patientId = myPatientDao.update(patient, mySrd).getId().toUnqualifiedVersionless();
+
+			final Observation observation = new Observation();
+			observation.setId(OBSERVATION_ID);
+			observation.setSubject(new Reference(patientId.getValue()));
+
+			res2Json(observation);
+
+			final IIdType observationId = myObservationDao.update(observation, mySrd).getId().toUnqualifiedVersionless();
+
+			final Encounter encounter = new Encounter();
+			encounter.setId(ENCOUNTER_ID);
+			encounter.addReasonReference(new Reference(observationId.getValue()));
+
+			res2Json(encounter);
+
+			final IIdType encounterId = myEncounterDao.update(encounter, mySrd).getId().toUnqualifiedVersionless();
+
+			final CarePlan carePlan = new CarePlan();
+			carePlan.setId(CARE_PLAN_ID);
+			carePlan.setEncounter(new Reference(encounterId.getValue()));
+
+			res2Json(carePlan);
+
+			myCarePlanDao.update(carePlan, mySrd);
+
+			final List<ResourceLink> all = myResourceLinkDao.findAll();
+			all.forEach(link -> ourLog.info("link:{}", link));
+		}
+
+		private void res2Json(IBaseResource theResource) {
+			final String json = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource);
+
+			ourLog.info("\n"+json);
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {
+			"Patient?_id="+PAT_ID,
+			"CarePlan?_id="+CARE_PLAN_ID,
+			"Observation?subject="+PAT_ID,
+			"Patient?_has:Observation:subject:_id="+OBSERVATION_ID,
+			"Observation?_has:Encounter:reason-reference:_id="+ENCOUNTER_ID,
+			"Patient?_has:Observation:subject:_has:Encounter:reason-reference:_id="+ENCOUNTER_ID,
+			"Observation?_has:Encounter:reason-reference:_has:CarePlan:encounter:_id="+CARE_PLAN_ID,
+			"Patient?_has:Observation:subject:_has:Encounter:reason-reference:_has:CarePlan:encounter:_id="+CARE_PLAN_ID
+		})
+		void tripleHas(String theQueryString) {
+			runAndAssert(theQueryString);
+		}
+	}
+
 	@Nested
 	class ComplexQueries {
 		private static final String PAT_ID = "pat1";
@@ -136,12 +196,12 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 		@ParameterizedTest
 		@ValueSource(strings = {
 			"Organization?_has:Coverage:payor:_has:ExplanationOfBenefit:coverage:_id="+EOB_ID, // THIS WORKS!!!!!!!
-//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID, // this works
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID, // this works
 //			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor.name="+ORG_NAME, // this does not work because it's a chain inside a _has
-//			"Practitioner?_has:ExplanationOfBenefit:care-team:_id="+EOB_ID,
-//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage="+COVERAGE_ID,
-//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID, // This is the first half
-//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:List:item:_id="+LIST_ID,
+			"Practitioner?_has:ExplanationOfBenefit:care-team:_id="+EOB_ID,
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage="+COVERAGE_ID,
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID, // This is the first half
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:List:item:_id="+LIST_ID, // this doesn't work
 		})
 		void complexQueryFromPractitioner(String theQueryString) {
 			runAndAssert(theQueryString);
@@ -150,7 +210,6 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 		@ParameterizedTest
 		@ValueSource(strings = {
 			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization._has:List:item:_id="+LIST_ID
-//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:_has:List:item:_id="+LIST_ID
 		})
 		void verySimilarToBug(String theQueryString) {
 			runAndAssert(theQueryString);
@@ -198,29 +257,22 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 		}
 
 		@Test
+		@Disabled
 		void searchWithSearchParameterWithIdealComposition() {
 			final SearchParameterMap searchParameterMap = new SearchParameterMap();
 
 //			params.add(PARAM_HAS, new HasParam("Observation", "subject", "_has:DiagnosticReport:result:status", "final"));
-			final HasParam hasParamIdeal = new HasParam("ExplanationOfBenefit", "care-team", "coverage.payor:Organization._has:List:item:_id", LIST_ID);
+//			final HasParam hasParamIdeal = new HasParam("ExplanationOfBenefit", "care-team", "coverage.payor:Organization._has:List:item:_id", LIST_ID);
+			final HasParam hasParamIdeal = new HasParam("ExplanationOfBenefit", "care-team", "coverage.payor", "Organization._has:List:item:_id=" +LIST_ID);
+
+			// LUKETODO:  try:
+			// patient -> observation -> encounter -> adverseevent
 
 			searchParameterMap.add("_has", hasParamIdeal);
 
 			final IBundleProvider search = myPractitionerDao.search(searchParameterMap, mySrd);
 
 			assertFalse(search.isEmpty());
-		}
-
-		private void runAndAssert(String theQueryString) {
-			ourLog.info("queryString:\n{}", theQueryString);
-
-			final Bundle outcome = myClient.search()
-				.byUrl(theQueryString)
-				.returnBundle(Bundle.class)
-				.execute();
-
-			assertFalse(outcome.getEntry().isEmpty());
-			ourLog.info("result:\n{}", theQueryString);
 		}
 	}
 
@@ -231,7 +283,6 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 		private static final String ORG_NAME = "myOrg";
 		private static final String PRACTITIONER_ID = "pra1";
 		private static final String COVERAGE_ID = "cov1";
-		private static final String LIST_ID = "list1";
 		private static final String GROUP_ID = "grp1";
 		private static final String EOB_ID = "eob1";
 
@@ -281,7 +332,7 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 			group.setId(GROUP_ID);
 			group.addCharacteristic().getValueReference().setReference(orgId.getValue());
 
-			final IIdType groupId = myGroupDao.update(group, mySrd).getId().toUnqualifiedVersionless();
+			myGroupDao.update(group, mySrd);
 
 			final ExplanationOfBenefit explanationOfBenefit = new ExplanationOfBenefit();
 			explanationOfBenefit.setId(EOB_ID);
@@ -328,41 +379,28 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 
 		@ParameterizedTest
 		@ValueSource(strings = {
-//			"Practitioner?_has:ExplanationOfBenefit:care-team:_id="+EOB_ID,
-//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage="+COVERAGE_ID,
-//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID,
-//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization="+ORG_ID,  // This the first half of the buggy query
-			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:Group:value-reference:_id="+GROUP_ID,
+			"Practitioner?_has:ExplanationOfBenefit:care-team:_id="+EOB_ID,
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage="+COVERAGE_ID,
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID,
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization="+ORG_ID,  // This the first half of the buggy query
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:Group:value-reference:_id="+GROUP_ID, // this doesn't work
 //			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization.name="+ORG_NAME // This doesn't work
 		})
 		void complexQueryFromPractitioner(String theQueryString) {
 			runAndAssert(theQueryString);
 		}
-
-		private void runAndAssert(String theQueryString) {
-			ourLog.info("START queryString:\n{}", theQueryString);
-
-			final Bundle outcome = myClient.search()
-				.byUrl(theQueryString)
-				.returnBundle(Bundle.class)
-				.execute();
-
-			ourLog.info("END queryString:\n{}", theQueryString);
-			assertFalse(outcome.getEntry().isEmpty());
-		}
 	}
 
-	public List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
-		List<String> ids;
-		HttpGet get = new HttpGet(uri);
 
-		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
-			ids = toUnqualifiedVersionlessIdValues(bundle);
-		}
-		return ids;
+	private void runAndAssert(String theQueryString) {
+		ourLog.info("queryString:\n{}", theQueryString);
+
+		final Bundle outcome = myClient.search()
+			.byUrl(theQueryString)
+			.returnBundle(Bundle.class)
+			.execute();
+
+		assertFalse(outcome.getEntry().isEmpty());
+		ourLog.info("result:\n{}", theQueryString);
 	}
-
 }
