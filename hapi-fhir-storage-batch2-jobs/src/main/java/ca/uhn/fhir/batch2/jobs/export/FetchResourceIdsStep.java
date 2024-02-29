@@ -49,8 +49,6 @@ import java.util.Set;
 public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobParameters, ResourceIdList> {
 	private static final Logger ourLog = LoggerFactory.getLogger(FetchResourceIdsStep.class);
 
-	public static final int MAX_IDS_TO_BATCH = 900;
-
 	@Autowired
 	private IBulkExportProcessor myBulkExportProcessor;
 
@@ -71,6 +69,7 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 		providerParams.setGroupId(params.getGroupId());
 		providerParams.setPatientIds(params.getPatientIds());
 		providerParams.setExpandMdm(params.isExpandMdm());
+		providerParams.setChunkId(theStepExecutionDetails.getChunkId());
 
 		int submissionCount = 0;
 		try {

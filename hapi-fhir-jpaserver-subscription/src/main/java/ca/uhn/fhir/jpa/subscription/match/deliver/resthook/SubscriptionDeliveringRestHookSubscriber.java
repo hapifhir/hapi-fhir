@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.client.apache.ApacheRestfulClientFactory;
 import ca.uhn.fhir.rest.client.api.Header;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IHttpClient;
@@ -45,6 +46,7 @@ import ca.uhn.fhir.rest.gclient.IClientExecutable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
+import ca.uhn.fhir.util.StopWatch;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -55,6 +57,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.messaging.MessagingException;
 
 import javax.annotation.Nullable;
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -107,8 +110,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 			}
 
 			String payloadId = thePayloadResource.getIdElement().toUnqualified().getValue();
-			ourLog.info("Delivering {} rest-hook payload {} for {}", theMsg.getOperationType(), payloadId, theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue());
-
+			StopWatch sw = new StopWatch();
 			try {
 				operation.execute();
 			} catch (ResourceNotFoundException e) {
@@ -116,6 +118,7 @@ public class SubscriptionDeliveringRestHookSubscriber extends BaseSubscriptionDe
 				ourLog.error("Exception: ", e);
 				throw e;
 			}
+			ourLog.info("Delivering {} rest-hook payload {} for {} in {}", theMsg.getOperationType(), payloadId, theSubscription.getIdElement(myFhirContext).toUnqualifiedVersionless().getValue(), sw);
 
 		}
 	}

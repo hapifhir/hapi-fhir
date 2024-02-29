@@ -157,7 +157,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 
 	@Override
 	@Transactional(propagation = Propagation.MANDATORY)
-	public <P extends IResourcePersistentId> void preFetchResources(List<P> theResolvedIds) {
+	public <P extends IResourcePersistentId> void preFetchResources(List<P> theResolvedIds, boolean thePreFetchIndexes) {
 		List<Long> pids = theResolvedIds
 			.stream()
 			.map(t -> ((JpaPid) t).getId())
@@ -182,40 +182,42 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 
 				List<Long> entityIds;
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsStringPopulated()).map(t->t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "string", "myParamsString", null);
-				}
+				if (thePreFetchIndexes) {
+					entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsStringPopulated()).map(t -> t.getId()).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						preFetchIndexes(entityIds, "string", "myParamsString", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsTokenPopulated()).map(t->t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "token", "myParamsToken", null);
-				}
+					entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsTokenPopulated()).map(t -> t.getId()).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						preFetchIndexes(entityIds, "token", "myParamsToken", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsDatePopulated()).map(t->t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "date", "myParamsDate", null);
-				}
+					entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsDatePopulated()).map(t -> t.getId()).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						preFetchIndexes(entityIds, "date", "myParamsDate", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsQuantityPopulated()).map(t->t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "quantity", "myParamsQuantity", null);
-				}
+					entityIds = loadedResourceTableEntries.stream().filter(t -> t.isParamsQuantityPopulated()).map(t -> t.getId()).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						preFetchIndexes(entityIds, "quantity", "myParamsQuantity", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isHasLinks()).map(t->t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					preFetchIndexes(entityIds, "resourceLinks", "myResourceLinks", null);
-				}
+					entityIds = loadedResourceTableEntries.stream().filter(t -> t.isHasLinks()).map(t -> t.getId()).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						preFetchIndexes(entityIds, "resourceLinks", "myResourceLinks", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().filter(t -> t.isHasTags()).map(t->t.getId()).collect(Collectors.toList());
-				if (entityIds.size() > 0) {
-					myResourceTagDao.findByResourceIds(entityIds);
-					preFetchIndexes(entityIds, "tags", "myTags", null);
-				}
+					entityIds = loadedResourceTableEntries.stream().filter(t -> t.isHasTags()).map(t -> t.getId()).collect(Collectors.toList());
+					if (entityIds.size() > 0) {
+						myResourceTagDao.findByResourceIds(entityIds);
+						preFetchIndexes(entityIds, "tags", "myTags", null);
+					}
 
-				entityIds = loadedResourceTableEntries.stream().map(t->t.getId()).collect(Collectors.toList());
-				if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
-					preFetchIndexes(entityIds, "searchParamPresence", "mySearchParamPresents", null);
+					entityIds = loadedResourceTableEntries.stream().map(t -> t.getId()).collect(Collectors.toList());
+					if (myDaoConfig.getIndexMissingFields() == DaoConfig.IndexEnabledEnum.ENABLED) {
+						preFetchIndexes(entityIds, "searchParamPresence", "mySearchParamPresents", null);
+					}
 				}
 
 				new QueryChunker<ResourceTable>().chunk(loadedResourceTableEntries, SearchBuilder.getMaximumPageSize() / 2, entries -> {

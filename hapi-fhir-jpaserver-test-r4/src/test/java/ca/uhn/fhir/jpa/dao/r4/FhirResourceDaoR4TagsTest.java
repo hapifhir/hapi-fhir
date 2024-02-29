@@ -464,4 +464,18 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		return meta.getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList());
 	}
 
+	@Nonnull
+	public static SearchParameter createSecuritySearchParameter(FhirContext fhirContext) {
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setId("SearchParameter/resource-security");
+		for (String next : fhirContext.getResourceTypes().stream().sorted().collect(Collectors.toList())) {
+			searchParameter.addBase(next);
+		}
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setCode("_security");
+		searchParameter.setName("Security");
+		searchParameter.setExpression("meta.security");
+		return searchParameter;
+	}
 }

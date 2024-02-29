@@ -169,6 +169,13 @@ public interface IFhirResourceDao<T extends IBaseResource> extends IDao {
 	<MT extends IBaseMetaType> MT metaGetOperation(Class<MT> theType, RequestDetails theRequestDetails);
 
 	/**
+	 * This will be implemented in a better way in 6.6.0 (or later). This method will go away at that time.
+	 */
+	default void migrateLobToVarChar(IResourcePersistentId<?> theResourcePersistentId) {
+		// nothing
+	}
+
+	/**
 	 * Opens a new transaction and performs a patch operation
 	 */
 	DaoMethodOutcome patch(IIdType theId, String theConditionalUrl, PatchTypeEnum thePatchType, String thePatchBody, IBaseParameters theFhirPatchBody, RequestDetails theRequestDetails);

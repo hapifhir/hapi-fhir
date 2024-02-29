@@ -29,19 +29,22 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import javax.annotation.Nonnull;
+
 public class IndexedSearchParamExtractor {
 	@Autowired
 	private FhirContext myContext;
 	@Autowired
 	private SearchParamExtractorService mySearchParamExtractorService;
 
+	@Nonnull
 	public ResourceIndexedSearchParams extractIndexedSearchParams(IBaseResource theResource, RequestDetails theRequest) {
 		ResourceTable entity = new ResourceTable();
 		TransactionDetails transactionDetails = new TransactionDetails();
 		String resourceType = myContext.getResourceType(theResource);
 		entity.setResourceType(resourceType);
 		ResourceIndexedSearchParams resourceIndexedSearchParams = new ResourceIndexedSearchParams();
-		mySearchParamExtractorService.extractFromResource(null, theRequest, resourceIndexedSearchParams, entity, theResource, transactionDetails, false);
+		mySearchParamExtractorService.extractFromResource(null, theRequest, resourceIndexedSearchParams, new ResourceIndexedSearchParams(), entity, theResource, transactionDetails, false);
 		return resourceIndexedSearchParams;
 	}
 }

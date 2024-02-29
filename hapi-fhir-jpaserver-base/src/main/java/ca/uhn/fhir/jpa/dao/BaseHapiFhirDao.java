@@ -678,7 +678,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 * @return byte array of the resource
 	 */
 	@Nonnull
-	private byte[] getResourceBinary(ResourceEncodingEnum encoding, String encodedResource) {
+	protected byte[] getResourceBinary(ResourceEncodingEnum encoding, String encodedResource) {
 		byte[] resourceBinary;
 		switch (encoding) {
 			case JSON:
@@ -703,7 +703,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 	 * @param theMeta            the meta element of the resource
 	 * @return source extension if present in the meta element
 	 */
-	private IBaseExtension<?, ?> getExcludedElements(String theResourceType, List<String> theExcludeElements, IBaseMetaType theMeta) {
+	protected IBaseExtension<?, ?> getExcludedElements(String theResourceType, List<String> theExcludeElements, IBaseMetaType theMeta) {
 		boolean hasExtensions = false;
 		IBaseExtension<?, ?> sourceExtension = null;
 		if (theMeta instanceof IBaseHasExtensions) {
@@ -926,9 +926,9 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 		myDaoSearchParamSynchronizer = theDaoSearchParamSynchronizer;
 	}
 
-	private void verifyMatchUrlForConditionalCreate(IBaseResource theResource, String theIfNoneExist, ResourceTable entity, ResourceIndexedSearchParams theParams) {
+	private void verifyMatchUrlForConditionalCreate(IBaseResource theResource, String theIfNoneExist, ResourceIndexedSearchParams theParams, RequestDetails theRequestDetails) {
 		// Make sure that the match URL was actually appropriate for the supplied resource
-		InMemoryMatchResult outcome = myInMemoryResourceMatcher.match(theIfNoneExist, theResource, theParams);
+		InMemoryMatchResult outcome = myInMemoryResourceMatcher.match(theIfNoneExist, theResource, theParams, theRequestDetails);
 		if (outcome.supported() && !outcome.matched()) {
 			throw new InvalidRequestException(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
 		}
@@ -1041,7 +1041,7 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 					// matches. We could certainly make this configurable though in the
 					// future.
 					if (entity.getVersion() <= 1L && entity.getCreatedByMatchUrl() != null && thePerformIndexing) {
-						verifyMatchUrlForConditionalCreate(theResource, entity.getCreatedByMatchUrl(), entity, newParams);
+						verifyMatchUrlForConditionalCreate(theResource, entity.getCreatedByMatchUrl(), newParams, theRequest);
 					}
 
 					entity.setUpdated(theTransactionDetails.getTransactionDate());

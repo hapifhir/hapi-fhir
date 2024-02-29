@@ -67,9 +67,11 @@ public class ReindexAppCtx {
 			.build();
 	}
 
+	// TODO: We don't use a parameterized version of the GenerateRangeChunksStep which means
+	// we're not getting type checking. This should be cleaned up.
 	@Bean
 	public GenerateRangeChunksStep reindexGenerateRangeChunksStep() {
-		return new GenerateRangeChunksStep();
+		return new ReindexGenerateRangeChunksStep();
 	}
 
 	@Bean

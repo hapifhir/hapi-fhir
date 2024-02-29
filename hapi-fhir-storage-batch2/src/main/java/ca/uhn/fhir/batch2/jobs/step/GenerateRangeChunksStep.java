@@ -48,6 +48,8 @@ public class GenerateRangeChunksStep<PT extends PartitionedUrlListJobParameters>
 		Date start = BATCH_START_DATE;
 		Date end = new Date();
 
+		PT parameters = theStepExecutionDetails.getParameters();
+		
 		if (params.getPartitionedUrls().isEmpty()) {
 			ourLog.info("Searching for All Resources from {} to {}", start, end);
 			PartitionedUrlChunkRangeJson nextRange = new PartitionedUrlChunkRangeJson();

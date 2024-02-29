@@ -1,6 +1,8 @@
+package ca.uhn.fhir.jpa.reindex;
+
 /*-
  * #%L
- * hapi-fhir-storage-batch2-jobs
+ * HAPI FHIR JPA Server
  * %%
  * Copyright (C) 2014 - 2023 Smile CDR, Inc.
  * %%
@@ -17,3 +19,9 @@
  * limitations under the License.
  * #L%
  */
+
+public class StorageOptimizerSvc {
+
+
+
+}

@@ -29,6 +29,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -50,6 +51,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
+import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -139,6 +141,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -159,6 +162,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	public static final String BASE_RESOURCE_NAME = "resource";
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirResourceDao.class);
+	@Autowired
+	protected IInterceptorBroadcaster myInterceptorBroadcaster;
 
 	@Autowired
 	protected PlatformTransactionManager myPlatformTransactionManager;
@@ -726,6 +731,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return retVal;
 	}
 
+	@Override
 	protected ResourceTable updateEntityForDelete(RequestDetails theRequest, TransactionDetails theTransactionDetails, ResourceTable theEntity) {
 		myResourceSearchUrlSvc.deleteByResId(theEntity.getId());
 		Date updateTime = new Date();
@@ -1387,6 +1393,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		TransactionDetails transactionDetails = new TransactionDetails(theEntity.getUpdatedDate());
 		ResourceTable resourceTable = updateEntity(null, theResource, theEntity, theEntity.getDeleted(), true, false, transactionDetails, true, false);
+		ResourceHistoryTable resourceHistoryTable = theEntity.getCurrentVersionEntity();
 		if (theResource != null) {
 			CURRENTLY_REINDEXING.put(theResource, null);
 		}
@@ -1656,6 +1663,29 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		} else {
 			return myTransactionService.execute(theRequest, theTransactionDetails, tx -> doUpdate(theResource, theMatchUrl, thePerformIndexing, theForceUpdateVersion, theRequest, theTransactionDetails), onRollback);
 		}
+	}
+
+	@Override
+	public void migrateLobToVarChar(IResourcePersistentId<?> theResourcePersistentId) {
+			Long id = ((JpaPid)theResourcePersistentId).getId();
+			ResourceTable entity = myResourceTableDao.findById(id).orElse(null);
+			if (entity == null) {
+				ourLog.warn("Unable to find entity with PID: {}", id);
+			} else {
+				ResourceHistoryTable historyEntity = entity.getCurrentVersionEntity();
+				if (historyEntity != null) {
+					if (historyEntity.getEncoding() == ResourceEncodingEnum.JSONC || historyEntity.getEncoding() == ResourceEncodingEnum.JSON) {
+						byte[] resourceBytes = historyEntity.getResource();
+						if (resourceBytes != null) {
+							String resourceText = decodeResource(resourceBytes, historyEntity.getEncoding());
+							if (getConfig().getInlineResourceTextBelowSize() > 0 && resourceText.length() < getConfig().getInlineResourceTextBelowSize()) {
+								ourLog.info("Storing text of resource {} version {} as inline VARCHAR", entity.getResourceId(), entity.getVersion());
+								myResourceHistoryTableDao.setResourceTextVcForVersion(historyEntity.getId(), resourceText);
+							}
+						}
+					}
+				}
+			}
 	}
 
 	private DaoMethodOutcome doUpdate(T theResource, String theMatchUrl, boolean thePerformIndexing, boolean theForceUpdateVersion, RequestDetails theRequest, TransactionDetails theTransactionDetails) {

@@ -1,31 +1,46 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
+import ca.uhn.fhir.batch2.jobs.reindex.ReindexStep;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.api.config.DaoConfig;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
+import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
+import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.HasParam;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
+import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -46,16 +61,21 @@ import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.RegisterExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.util.comparator.ComparableComparator;
@@ -65,9 +85,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -78,13 +96,29 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test {
+	@RegisterExtension
+	@Order(0)
+	public static final RestfulServerExtension ourServer = new RestfulServerExtension(FhirContext.forR4Cached())
+		.keepAliveBetweenTests();
+	@RegisterExtension
+	@Order(1)
+	public static final HashMapResourceProviderExtension<Patient> ourPatientProvider = new HashMapResourceProviderExtension<>(ourServer, Patient.class);
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4QueryCountTest.class);
+	@Autowired
+	private ISearchParamPresentDao mySearchParamPresentDao;
+	@Autowired
+	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
+	@Autowired
+	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 
 	@AfterEach
 	public void afterResetDao() {
@@ -102,6 +136,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myDaoConfig.setPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets(new DaoConfig().isPopulateIdentifierInAutoCreatedPlaceholderReferenceTargets());
 		myDaoConfig.setResourceClientIdStrategy(new DaoConfig().getResourceClientIdStrategy());
 		myDaoConfig.setTagStorageMode(new DaoConfig().getTagStorageMode());
+		myDaoConfig.clearSupportedSubscriptionTypesForUnitTest();
+		myDaoConfig.setInlineResourceTextBelowSize(new DaoConfig().getInlineResourceTextBelowSize());
 
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
 	}
@@ -167,7 +203,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	@Test
-	public void testUpdateGroup_withAddedReferences_willSucceed(){
+	public void testUpdateGroup_withAddedReferences_willSucceed() {
 		int initialPatientsCount = 30;
 		int newPatientsCount = 5;
 		int allPatientsCount = initialPatientsCount + newPatientsCount;
@@ -190,7 +226,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	@Test
-	public void testUpdateGroup_NoChangesToReferences(){
+	public void testUpdateGroup_NoChangesToReferences() {
 		List<IIdType> patientList = createPatients(30);
 
 		myCaptureQueriesListener.clear();
@@ -787,6 +823,94 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
 	}
 
+	@Autowired
+	private ReindexStep myReindexStep;
+
+	@Test
+	public void testReindexJob_OptimizeStorage() {
+		// Setup
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		IIdType patientId = createPatient(withActiveTrue());
+		data.addTypedPid("Patient", patientId.getIdPartAsLong());
+		for (int i = 0; i < 9; i++) {
+			IIdType nextPatientId = createPatient(withActiveTrue());
+			data.addTypedPid("Patient", nextPatientId.getIdPartAsLong());
+		}
+
+		runInTransaction(()->{
+			assertEquals(10, myResourceHistoryTableDao.count());
+			ResourceHistoryTable history = myResourceHistoryTableDao.findAll().get(0);
+			assertNull(history.getResourceTextVc());
+			assertNotNull(history.getResource());
+		});
+
+		myDaoConfig.setInlineResourceTextBelowSize(10000);
+		ReindexJobParameters params = new ReindexJobParameters()
+			.setOptimizeStorage(true)
+			.setReindexSearchParameters(false);
+
+		// execute
+		myCaptureQueriesListener.clear();
+		RunOutcome outcome = myReindexStep.doReindex(data, mock(IJobDataSink.class), "123", "456", params);
+
+		// validate
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(10, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+		assertEquals(10, outcome.getRecordsProcessed());
+		runInTransaction(()->{
+			assertEquals(10, myResourceHistoryTableDao.count());
+			ResourceHistoryTable history = myResourceHistoryTableDao.findAll().get(0);
+			assertNotNull(history.getResourceTextVc());
+			assertNull(history.getResource());
+		});
+		Patient patient = myPatientDao.read(patientId, mySrd);
+		assertTrue(patient.getActive());
+
+	}
+
+
+	@Test
+	public void testReindexJob_OptimizeStorage_NoOp() {
+		// Setup
+
+		// Inlined already, so no reindexing needed
+		myDaoConfig.setInlineResourceTextBelowSize(10000);
+
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		IIdType patientId = createPatient(withActiveTrue());
+		data.addTypedPid("Patient", patientId.getIdPartAsLong());
+		for (int i = 0; i < 9; i++) {
+			IIdType nextPatientId = createPatient(withActiveTrue());
+			data.addTypedPid("Patient", nextPatientId.getIdPartAsLong());
+		}
+
+		runInTransaction(()->{
+			assertEquals(10, myResourceHistoryTableDao.count());
+			ResourceHistoryTable history = myResourceHistoryTableDao.findAll().get(0);
+			assertNotNull(history.getResourceTextVc());
+			assertNull(history.getResource());
+		});
+
+		ReindexJobParameters params = new ReindexJobParameters()
+			.setOptimizeStorage(true)
+			.setReindexSearchParameters(false);
+
+		// execute
+		myCaptureQueriesListener.clear();
+		RunOutcome outcome = myReindexStep.doReindex(data, mock(IJobDataSink.class), "123", "456", params);
+
+		// validate
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+	}
 
 	@Test
 	public void testSearchAndPageThroughResults_SmallChunksOnSameBundleProvider() {
@@ -2657,16 +2781,92 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		}
 
 		myCaptureQueriesListener.clear();
-		mySystemDao.transaction(mySrd, input);
+		Bundle output = mySystemDao.transaction(mySrd, input);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(45, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		assertEquals(input.getEntry().size(), output.getEntry().size());
+
+		runInTransaction(() -> {
+			assertEquals(10, myResourceTableDao.count());
+			assertEquals(10, myResourceHistoryTableDao.count());
+		});
+
+	}
+
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
+	@Test
+	public void testTransactionWithClientAssignedId() {
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+
+		for (int i = 0; i < 5; i++) {
+			Provenance prov = new Provenance();
+			prov.setId(IdType.newRandomUuid());
+			prov.setOccurred(new DateTimeType("2022"));
+			bb.addTransactionUpdateEntry(prov).conditional("Provenance/Patient-0d3b0c98-048e-4111-b804-d1c6c7816d5e-" + i);
+		}
+
+		Bundle input = bb.getBundleTyped();
+
+//		input.getEntry().get(0).
+
+		myCaptureQueriesListener.clear();
+		mySystemDao.transaction(mySrd, input);
+		assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 
 	}
 
 
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testTriggerSubscription() throws Exception {
+		// Setup
+
+		myModelConfig.addSupportedSubscriptionType(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.RESTHOOK);
+		mySubscriptionMatcherInterceptor.startIfNeeded();
+
+		for (int i = 0; i < 10; i++) {
+			createPatient(withActiveTrue());
+		}
+
+		Subscription subscription = new Subscription();
+		subscription.getChannel().setEndpoint(ourServer.getBaseUrl());
+		subscription.getChannel().setType(Subscription.SubscriptionChannelType.RESTHOOK);
+		subscription.getChannel().setPayload(Constants.CT_FHIR_JSON_NEW);
+		subscription.setStatus(Subscription.SubscriptionStatus.REQUESTED);
+		subscription.setCriteria("Patient?active=true");
+		IIdType subscriptionId = mySubscriptionDao.create(subscription, mySrd).getId().toUnqualifiedVersionless();
+		waitForActivatedSubscriptionCount(1);
+
+		mySubscriptionTriggeringSvc.triggerSubscription(null, List.of(new StringType("Patient?active=true")), subscriptionId);
+
+		// Test
+		myCaptureQueriesListener.clear();
+		mySubscriptionTriggeringSvc.runDeliveryPass();
+		ourPatientProvider.waitForUpdateCount(10);
+
+		// Validate
+		assertEquals(5, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(11, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+	}
+
+
+	/**
+	 * See the class javadoc before changing the counts in this test!
+	 */
 	@Test
 	public void testValueSetExpand_NotPreExpanded_UseHibernateSearch() {
 		createLocalCsAndVs();
@@ -2897,7 +3097,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 	@Test
-	public void testDeleteResource_WithMassIngestionMode_enabled(){
+	public void testDeleteResource_WithMassIngestionMode_enabled() {
 		myDaoConfig.setMassIngestionMode(true);
 
 		// given
@@ -2925,7 +3125,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 	}
 
-	private void assertQueryCount(int theExpectedSelectCount, int theExpectedUpdateCount, int theExpectedInsertCount, int theExpectedDeleteCount){
+	private void assertQueryCount(int theExpectedSelectCount, int theExpectedUpdateCount, int theExpectedInsertCount, int theExpectedDeleteCount) {
 
 		assertEquals(theExpectedSelectCount, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();

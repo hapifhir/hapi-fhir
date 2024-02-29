@@ -37,6 +37,8 @@ import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.ModelConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -52,6 +54,7 @@ import org.springframework.context.ApplicationContext;
 
 import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -84,24 +87,32 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 	@Autowired
 	private IHapiTransactionService myTransactionService;
 
+	@Autowired
+	private InMemoryResourceMatcher myInMemoryResourceMatcher;
+
 	private volatile ResponseTerminologyTranslationSvc myResponseTerminologyTranslationSvc;
 
 	@Nonnull
 	@Override
 	public RunOutcome run(@Nonnull StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
 								 @Nonnull IJobDataSink<ExpandedResourcesList> theDataSink) throws JobExecutionFailedException {
+		String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
+		String chunkId = theStepExecutionDetails.getChunkId();
 		ResourceIdList idList = theStepExecutionDetails.getData();
-		BulkExportJobParameters jobParameters = theStepExecutionDetails.getParameters();
+		BulkExportJobParameters parameters = theStepExecutionDetails.getParameters();
 
-		ourLog.info("Step 2 for bulk export - Expand resources");
-		ourLog.info("About to expand {} resource IDs into their full resource bodies.", idList.getIds().size());
+		ourLog.info("Bulk export instance[{}] chunk[{}] - About to expand {} resource IDs into their full resource bodies.", instanceId, chunkId, idList.getIds().size());
 
 		// search the resources
 		List<IBaseResource> allResources = fetchAllResources(idList);
 
+		// Apply post-fetch filtering
+		if (!parameters.getPostFetchFilterUrls().isEmpty()) {
+			applyPostFetchFiltering(allResources, parameters.getPostFetchFilterUrls(), instanceId, chunkId);
+		}
 
 		// if necessary, expand resources
-		if (jobParameters.isExpandMdm()) {
+		if (parameters.isExpandMdm()) {
 			myBulkExportProcessor.expandMdmResources(allResources);
 		}
 
@@ -116,25 +127,60 @@ public class ExpandResourcesStep implements IJobStepWorker<BulkExportJobParamete
 		}
 
 		// encode them - Key is resource type, Value is a collection of serialized resources of that type
-		ListMultimap<String, String> resources = encodeToString(allResources, jobParameters);
+		ListMultimap<String, String> resources = encodeToString(allResources, parameters);
 
 		// set to datasink
-		for (String nextResourceType : resources.keySet()) {
+		if (!resources.isEmpty()) {
+			for (String nextResourceType : resources.keySet()) {
 
-			ExpandedResourcesList output = new ExpandedResourcesList();
-			output.setStringifiedResources(resources.get(nextResourceType));
-			output.setResourceType(nextResourceType);
-			theDataSink.accept(output);
+				ExpandedResourcesList output = new ExpandedResourcesList();
+				output.setStringifiedResources(resources.get(nextResourceType));
+				output.setResourceType(nextResourceType);
+				theDataSink.accept(output);
 
-			ourLog.info("Expanding of {} resources of type {} completed",
-				idList.getIds().size(),
-				idList.getResourceType());
+				ourLog.info("Expanding of {} resources of type {} completed",
+					idList.getIds().size(),
+					idList.getResourceType());
 
-
+			}
 		}
 
 		// and return
 		return RunOutcome.SUCCESS;
+	}
+
+	private void applyPostFetchFiltering(List<IBaseResource> theResources, List<String> thePostFetchFilterUrls, String theInstanceId, String theChunkId) {
+		int numRemoved = 0;
+		for (Iterator<IBaseResource> iter = theResources.iterator(); iter.hasNext(); ) {
+			IBaseResource nextResource = iter.next();
+			String nextResourceType = myFhirContext.getResourceType(nextResource);
+			boolean matched = false;
+
+			for (String nextPostFetchFilterUrl : thePostFetchFilterUrls) {
+				// TODO: JA in next ticket - Add validation to the filter URLs when the job is submitted
+				// We should make sure that the format is [resourceType]?[at least one param] and that
+				// the param can be evaluated by the in memory matcher
+				if (nextPostFetchFilterUrl.contains("?")) {
+					String resourceType = nextPostFetchFilterUrl.substring(0, nextPostFetchFilterUrl.indexOf('?'));
+					if (nextResourceType.equals(resourceType)) {
+						InMemoryMatchResult matchResult = myInMemoryResourceMatcher.match(nextPostFetchFilterUrl, nextResource, null, new SystemRequestDetails());
+						if (matchResult.matched()) {
+							matched = true;
+							break;
+						}
+					}
+				}
+			}
+
+			if (!matched) {
+				iter.remove();
+				numRemoved++;
+			}
+		}
+
+		if (numRemoved > 0) {
+			ourLog.info("Bulk export instance[{}] chunk[{}] - {} resources were filtered out because of post-fetch filter URLs", theInstanceId, theChunkId, numRemoved);
+		}
 	}
 
 	private List<IBaseResource> fetchAllResources(ResourceIdList theIds) {

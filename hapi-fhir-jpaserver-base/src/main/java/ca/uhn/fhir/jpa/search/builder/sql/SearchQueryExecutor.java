@@ -26,10 +26,12 @@ import ca.uhn.fhir.jpa.util.ScrollableResultsIterator;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.IoUtil;
 import org.apache.commons.lang3.Validate;
+import org.hibernate.CacheMode;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.persistence.EntityManager;
@@ -118,6 +120,12 @@ public class SearchQueryExecutor implements ISearchQueryExecutor {
 					}
 
 					ourLog.trace("About to execute SQL: {}", sql);
+
+					// FIXME: update in ja_20230422_postgres_optimization
+					hibernateQuery.setFetchSize(500000);
+					hibernateQuery.setCacheable(false);
+					hibernateQuery.setCacheMode(CacheMode.IGNORE);
+					hibernateQuery.setReadOnly(true);
 
 					ScrollableResults scrollableResults = hibernateQuery.scroll(ScrollMode.FORWARD_ONLY);
 					myResultSet = new ScrollableResultsIterator<>(scrollableResults);

@@ -95,6 +95,14 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 		return b.toString();
 	}
 
+	/**
+	 * Default implementation is to return true for any Blob ID.
+	 */
+	@Override
+	public boolean isValidBlobId(String theNewBlobId) {
+		return true;
+	}
+
 	@Override
 	public boolean shouldStoreBlob(long theSize, IIdType theResourceId, String theContentType) {
 		return theSize >= getMinimumBinarySize();
