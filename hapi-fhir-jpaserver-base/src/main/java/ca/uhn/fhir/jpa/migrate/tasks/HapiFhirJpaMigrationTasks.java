@@ -132,7 +132,6 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.modifyColumn("20240227.7", "JOB_CONTENTS")
 				.nullable()
 				.withType(ColumnTypeEnum.BLOB);
-
 	}
 
 	protected void init680() {
