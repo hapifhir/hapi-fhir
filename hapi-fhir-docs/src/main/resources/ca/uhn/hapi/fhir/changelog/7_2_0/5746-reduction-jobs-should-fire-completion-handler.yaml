@@ -1,0 +1,11 @@
+---
+type: fix
+issue: 5746
+title: "Batch2 jobs with reduction steps didn't fire the completion handler.
+        This has been fixed.
+        There is now also an `AdditionalData` object that will be passed into
+        reduction jobs (created in the reduction step worker) that will allow
+        data to be collected / cached across all reduction consumption steps
+        without the need of local variables that need to be reset after reduction
+        step completion (a bug prone approach currently in place).
+"

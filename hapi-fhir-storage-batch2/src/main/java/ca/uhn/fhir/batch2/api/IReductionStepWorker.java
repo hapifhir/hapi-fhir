@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
+import ca.uhn.fhir.batch2.model.AdditionalData;
 import ca.uhn.fhir.model.api.IModelJson;
 import jakarta.annotation.Nonnull;
 
@@ -40,4 +41,12 @@ public interface IReductionStepWorker<PT extends IModelJson, IT extends IModelJs
 	 */
 	@Nonnull
 	ChunkOutcome consume(ChunkExecutionDetails<PT, IT> theChunkDetails);
+
+	/**
+	 * Used to create the initial data object that will be passed into
+	 * the consumption step before being attached to the StepExecutionDetails.
+	 */
+	default AdditionalData createInitialData() {
+		return new AdditionalData();
+	}
 }

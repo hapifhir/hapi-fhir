@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.batch2.api;
 
+import ca.uhn.fhir.batch2.model.AdditionalData;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.model.api.IModelJson;
 import jakarta.annotation.Nonnull;
@@ -32,6 +33,14 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 	private final IJobInstance myInstance;
 	private final String myChunkId;
 
+	/**
+	 * Additional data.
+	 * Primarily used by Reduction steps, this data object
+	 * is passed into all consumption steps so that data can be amalgamated or cached
+	 * as need be without fear of it affecting other (singleton) job instances.
+	 */
+	private AdditionalData myAdditionalData;
+
 	public StepExecutionDetails(
 			@Nonnull PT theParameters,
 			@Nullable IT theData,
@@ -43,6 +52,14 @@ public class StepExecutionDetails<PT extends IModelJson, IT extends IModelJson> 
 		// Make a copy so the step worker can't change the one passed in
 		myInstance = new JobInstance(theInstance);
 		myChunkId = theChunkId;
+	}
+
+	public void setAdditionalData(AdditionalData theData) {
+		myAdditionalData = theData;
+	}
+
+	public AdditionalData getAdditionalData() {
+		return myAdditionalData;
 	}
 
 	/**

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.batch2.api;
 
+import ca.uhn.fhir.batch2.model.AdditionalData;
 import ca.uhn.fhir.model.api.IModelJson;
 
 public class ChunkExecutionDetails<PT extends IModelJson, IT extends IModelJson> {
@@ -30,11 +31,23 @@ public class ChunkExecutionDetails<PT extends IModelJson, IT extends IModelJson>
 
 	private final String myChunkId;
 
-	public ChunkExecutionDetails(IT theData, PT theParameters, String theInstanceId, String theChunkId) {
+	private final AdditionalData myAdditionalData;
+
+	public ChunkExecutionDetails(
+		IT theData,
+		PT theParameters,
+		String theInstanceId,
+		String theChunkId,
+		AdditionalData theAdditionalData) {
 		myData = theData;
 		myParameters = theParameters;
 		myInstanceId = theInstanceId;
 		myChunkId = theChunkId;
+		myAdditionalData = theAdditionalData;
+	}
+
+	public AdditionalData getAdditionalData() {
+		return myAdditionalData;
 	}
 
 	public IT getData() {
