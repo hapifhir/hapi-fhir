@@ -183,7 +183,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
 	private byte[] mySearchParameterMap;
 
-	@Column(name = "SEARCH_PARAM_MAP_BIN", nullable = true)
+	@Column(name = "SEARCH_PARAM_MAP_BIN", nullable = true, length = JpaConstants.ORG_HIBERNATE_TYPE_BINARY_TYPE_LENGTH)
 	@Type(type = JpaConstants.ORG_HIBERNATE_TYPE_BINARY_TYPE)
 	private byte[] mySearchParameterMapBin;
 
