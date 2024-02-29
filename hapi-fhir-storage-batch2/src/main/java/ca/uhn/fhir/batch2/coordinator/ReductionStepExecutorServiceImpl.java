@@ -261,12 +261,11 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				if (response.isSuccessful()) {
 					/**
 					 * All reduction steps are final steps.
- 					 */
-					IJobCompletionHandler<PT> completionHandler = theJobWorkCursor.getJobDefinition().getCompletionHandler();
+					 */
+					IJobCompletionHandler<PT> completionHandler =
+							theJobWorkCursor.getJobDefinition().getCompletionHandler();
 					if (completionHandler != null) {
-						completionHandler.jobComplete(
-							new JobCompletionDetails<>(parameters, instance)
-						);
+						completionHandler.jobComplete(new JobCompletionDetails<>(parameters, instance));
 					}
 				}
 
