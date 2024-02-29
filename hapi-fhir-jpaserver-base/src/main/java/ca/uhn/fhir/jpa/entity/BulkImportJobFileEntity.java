@@ -37,6 +37,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
+import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.RES_TEXT_VC_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
@@ -71,7 +72,7 @@ public class BulkImportJobFileEntity implements Serializable {
 	@Column(name = "JOB_CONTENTS", nullable = true)
 	private byte[] myContents;
 
-	@Column(name = "JOB_CONTENTS_VC", nullable = true)
+	@Column(name = "JOB_CONTENTS_VC", nullable = true, length = RES_TEXT_VC_MAX_LENGTH)
 	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
 	private String myContentsVc;
 

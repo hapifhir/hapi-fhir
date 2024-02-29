@@ -298,7 +298,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.nullable()
 				.type(ColumnTypeEnum.TEXT);
 		version.onTable("BT2_JOB_INSTANCE")
-				.addColumn("20240227.2", "PARAMS_JSON_LOB_VC")
+				.addColumn("20240227.2", "PARAMS_JSON_VC")
 				.nullable()
 				.type(ColumnTypeEnum.TEXT);
 

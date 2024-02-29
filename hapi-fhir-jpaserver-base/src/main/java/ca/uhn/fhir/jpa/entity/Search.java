@@ -66,6 +66,7 @@ import javax.persistence.Transient;
 import javax.persistence.UniqueConstraint;
 import javax.persistence.Version;
 
+import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.RES_TEXT_VC_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
@@ -153,7 +154,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	/**
 	 * Note that this field may have the request partition IDs prepended to it
 	 */
-	@Column(name = "SEARCH_QUERY_STRING_VC", nullable = true)
+	@Column(name = "SEARCH_QUERY_STRING_VC", nullable = true, length = RES_TEXT_VC_MAX_LENGTH)
 	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
 	private String mySearchQueryStringVc;
 

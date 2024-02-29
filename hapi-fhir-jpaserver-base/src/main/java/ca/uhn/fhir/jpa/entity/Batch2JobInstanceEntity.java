@@ -44,6 +44,7 @@ import javax.persistence.Version;
 import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.WARNING_MSG_MAX_LENGTH;
+import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.RES_TEXT_VC_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
@@ -94,6 +95,7 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Column(name = "FAST_TRACKING", nullable = true)
 	private Boolean myFastTracking;
 
+	// TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "PARAMS_JSON", length = PARAMS_JSON_MAX_LENGTH, nullable = true)
 	private String myParamsJson;
 
@@ -101,9 +103,9 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Column(name = "PARAMS_JSON_LOB", nullable = true)
 	private String myParamsJsonLob;
 
-	@Column(name = "PARAMS_JSON_LOB_VC", nullable = true)
+	@Column(name = "PARAMS_JSON_VC", nullable = true, length = RES_TEXT_VC_MAX_LENGTH)
 	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
-	private String myParamsJsonLobVc;
+	private String myParamsJsonVc;
 
 	@Column(name = "CMB_RECS_PROCESSED", nullable = true)
 	private Integer myCombinedRecordsProcessed;
@@ -144,7 +146,7 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Column(name = "REPORT", nullable = true, length = Integer.MAX_VALUE - 1)
 	private String myReport;
 
-	@Column(name = "REPORT_VC", nullable = true)
+	@Column(name = "REPORT_VC", nullable = true, length = RES_TEXT_VC_MAX_LENGTH)
 	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
 	private String myReportVc;
 
@@ -261,8 +263,8 @@ public class Batch2JobInstanceEntity implements Serializable {
 	}
 
 	public String getParams() {
-		if (myParamsJsonLobVc != null) {
-			return myParamsJsonLobVc;
+		if (myParamsJsonVc != null) {
+			return myParamsJsonVc;
 		}
 		if (myParamsJsonLob != null) {
 			return myParamsJsonLob;
@@ -271,7 +273,7 @@ public class Batch2JobInstanceEntity implements Serializable {
 	}
 
 	public void setParams(String theParams) {
-		myParamsJsonLobVc = theParams;
+		myParamsJsonVc = theParams;
 		myParamsJsonLob = null;
 		myParamsJson = null;
 	}
