@@ -130,7 +130,7 @@ public enum VersionEnum {
 	V6_9_0,
 
 	V7_0_0,
-	
+
 	V7_2_0;
 
 	public static VersionEnum latestVersion() {
