@@ -230,11 +230,12 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		Patient patient = myPatientDao.read(patientVersionOne);
 		assertEquals("1", patient.getIdElement().getVersionIdPart());
 
-		myCaptureQueriesListener.logSelectQueries();
-		assertEquals(4, myCaptureQueriesListener.getSelectQueries().size());
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false), containsString("PARTITION_ID in (?)"));
-		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false), containsString("PARTITION_ID="));
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
+		List<SqlQuery> selectQueriesForCurrentThread = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
+		assertEquals(4, selectQueriesForCurrentThread.size());
+		assertThat(selectQueriesForCurrentThread.get(0).getSql(false, false), containsString("PARTITION_ID in (?)"));
+		assertThat(selectQueriesForCurrentThread.get(1).getSql(false, false), containsString("PARTITION_ID="));
 	}
 
 
