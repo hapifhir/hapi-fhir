@@ -127,9 +127,17 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.DERBY_EMBEDDED, "long varchar");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MARIADB_10_1, "longtext");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MYSQL_5_7, "longtext");
-		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.ORACLE_12C, "long");
+		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.ORACLE_12C, "clob");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.POSTGRES_9_4, "text");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MSSQL_2012, "varchar(MAX)");
+
+		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.H2_EMBEDDED, "binary(1000000000)");
+		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.DERBY_EMBEDDED, "varchar(1000000000) for bit data");
+		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.MARIADB_10_1, "longblob");
+		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.MYSQL_5_7, "longblob");
+		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.ORACLE_12C, "blob");
+		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.POSTGRES_9_4, "bytea");
+		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.MSSQL_2012, "varbinary(MAX)");
 	}
 
 	public static Map<ColumnTypeEnum, Map<DriverTypeEnum, String>> getColumnTypeToDriverTypeToSqlType() {

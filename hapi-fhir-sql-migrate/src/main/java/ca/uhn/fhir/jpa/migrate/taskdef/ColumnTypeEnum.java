@@ -31,5 +31,8 @@ public enum ColumnTypeEnum {
 	BLOB,
 	CLOB,
 	DOUBLE,
-	TEXT;
+	/** Long inline text */
+	TEXT,
+	/** Long inline binary */
+	BINARY;
 }
