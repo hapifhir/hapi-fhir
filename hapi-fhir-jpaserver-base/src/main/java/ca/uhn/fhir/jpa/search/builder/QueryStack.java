@@ -1179,7 +1179,7 @@ public class QueryStack {
 				orValues.stream()
 						.filter(qp -> qp instanceof ReferenceParam)
 						.map(qp -> (ReferenceParam) qp)
-						.forEach(rp -> rp.setChain(getChainedPart(chainedPartOfParameter)));
+						.forEach(rp -> rp.setChain(chainedPartOfParameter));
 
 				parameterName = parameterName.substring(0, parameterName.indexOf('.'));
 			}
