@@ -267,8 +267,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				.filter(t -> !t.equals(IAnyResource.SP_RES_ID))
 				.filter(t -> !t.equals(Constants.PARAM_TAG))
 				.collect(Collectors.toList());
-		// LUKETODO:
-		ourLog.info("5153:\nmyParams: {}\nparamNames: {}", myParams, paramNames);
 		if (myParams.containsKey(IAnyResource.SP_RES_ID)) {
 			paramNames.add(IAnyResource.SP_RES_ID);
 		}

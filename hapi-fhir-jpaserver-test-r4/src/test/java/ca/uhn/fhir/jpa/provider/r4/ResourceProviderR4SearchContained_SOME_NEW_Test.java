@@ -112,13 +112,21 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 
 		@ParameterizedTest
 		@ValueSource(strings = {
-			"Patient?_id="+PAT_ID,
-			"CarePlan?_id="+CARE_PLAN_ID,
-			"Observation?subject="+PAT_ID,
-			"Patient?_has:Observation:subject:_id="+OBSERVATION_ID,
-			"Observation?_has:Encounter:reason-reference:_id="+ENCOUNTER_ID,
 			"Patient?_has:Observation:subject:_has:Encounter:reason-reference:_id="+ENCOUNTER_ID,
-			"Observation?_has:Encounter:reason-reference:_has:CarePlan:encounter:_id="+CARE_PLAN_ID,
+		})
+		void doubleHas(String theQueryString) {
+			runAndAssert(theQueryString);
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {
+//			"Patient?_id="+PAT_ID,
+//			"CarePlan?_id="+CARE_PLAN_ID,
+//			"Observation?subject="+PAT_ID,
+//			"Patient?_has:Observation:subject:_id="+OBSERVATION_ID,
+//			"Observation?_has:Encounter:reason-reference:_id="+ENCOUNTER_ID,
+//			"Patient?_has:Observation:subject:_has:Encounter:reason-reference:_id="+ENCOUNTER_ID,
+//			"Observation?_has:Encounter:reason-reference:_has:CarePlan:encounter:_id="+CARE_PLAN_ID,
 			"Patient?_has:Observation:subject:_has:Encounter:reason-reference:_has:CarePlan:encounter:_id="+CARE_PLAN_ID
 		})
 		void tripleHas(String theQueryString) {
@@ -180,13 +188,40 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 
 		@ParameterizedTest
 		@ValueSource(strings = {
-			"Coverage?payor._has:List:item:_id="+LIST_ID,
+//			"Coverage?payor.name="+ORG_NAME,
+			"ExplanationOfBenefit?coverage.payor.name="+ORG_NAME,
+		})
+		void chain(String theQueryString) {
+			runAndAssert(theQueryString);
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID, // This is the first half
+		})
+		void hasThenChainSimple(String theQueryString) {
+			runAndAssert(theQueryString);
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {
+			"ExplanationOfBenefit?coverage.payor:Organization._has:List:item:_id="+LIST_ID
+		})
+		void chainThenHasSimple(String theQueryString) {
+			// LUKETODO:  this workflow is the gold standard on how to handle _has > chain > _has
+			runAndAssert(theQueryString);
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {
+			"Coverage?payor._has:List:item:_id="+LIST_ID, // dot _has
 			"Coverage?payor.name="+ORG_NAME,
 			"Coverage?payor="+ORG_ID,
 			"ExplanationOfBenefit?coverage="+COVERAGE_ID,
 			"ExplanationOfBenefit?coverage.payor.name="+ORG_NAME,
 			"ExplanationOfBenefit?coverage.payor="+ORG_ID,
 			"ExplanationOfBenefit?coverage.payor._has:List:item:_id="+LIST_ID,
+			"ExplanationOfBenefit?coverage.payor:Organization._has:List:item:_id="+LIST_ID,
 			"Organization?_has:List:item:_id="+LIST_ID, // This the second half of the buggy query
 		})
 		void complexQueryFromList(String theQueryString) {
@@ -197,11 +232,11 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 		@ValueSource(strings = {
 			"Organization?_has:Coverage:payor:_has:ExplanationOfBenefit:coverage:_id="+EOB_ID, // THIS WORKS!!!!!!!
 			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID, // this works
-//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor.name="+ORG_NAME, // this does not work because it's a chain inside a _has
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor.name="+ORG_NAME, // this does not work
 			"Practitioner?_has:ExplanationOfBenefit:care-team:_id="+EOB_ID,
 			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage="+COVERAGE_ID,
 			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor="+ORG_ID, // This is the first half
-//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:List:item:_id="+LIST_ID, // this doesn't work
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:List:item:_id="+LIST_ID, // this doesn't work ... reomoves Organzation
 		})
 		void complexQueryFromPractitioner(String theQueryString) {
 			runAndAssert(theQueryString);
@@ -209,7 +244,8 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 
 		@ParameterizedTest
 		@ValueSource(strings = {
-			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization._has:List:item:_id="+LIST_ID
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:List:item:_id="+LIST_ID,
+//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization._has:List:item:_id="+LIST_ID  // same thing
 		})
 		void verySimilarToBug(String theQueryString) {
 			runAndAssert(theQueryString);

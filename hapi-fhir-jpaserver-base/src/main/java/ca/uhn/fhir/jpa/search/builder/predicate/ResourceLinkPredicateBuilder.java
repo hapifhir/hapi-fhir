@@ -86,6 +86,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -183,6 +184,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			List<? extends IQueryParameterType> theReferenceOrParamList,
 			SearchFilterParser.CompareOperation theOperation,
 			RequestPartitionId theRequestPartitionId) {
+		ourLog.info("5351: TOP: ResourceLinkPredicateBuilder.createPredicate()");
 
 		List<IIdType> targetIds = new ArrayList<>();
 		List<String> targetQualifiedUrls = new ArrayList<>();
@@ -193,6 +195,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			if (nextOr instanceof ReferenceParam) {
 				ReferenceParam ref = (ReferenceParam) nextOr;
 
+				// LUKETODO: is this where we get into trouble?
+				ourLog.info("5351: isBlank(chain): {}, chain: {}", isBlank(ref.getChain()), ref.getChain());
 				if (isBlank(ref.getChain())) {
 
 					/*
@@ -395,6 +399,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			RequestDetails theRequest,
 			RequestPartitionId theRequestPartitionId) {
 
+		ourLog.info("5351: TOP: ResourceLinkPredicateBuilder.addPredicateReferenceWithChain()");
 		/*
 		 * Which resource types can the given chained parameter actually link to? This might be a list
 		 * where the chain is unqualified, as in: Observation?subject.identifier=(...)
@@ -435,6 +440,7 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 		String chain = theReferenceParam.getChain();
 
+		// LUKETODO:  this is an interesting pattern:  it extracts the _has from the parameter
 		String remainingChain = null;
 		int chainDotIndex = chain.indexOf('.');
 		if (chainDotIndex != -1) {
@@ -824,5 +830,18 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 	@VisibleForTesting
 	void setIdHelperServiceForUnitTest(IIdHelperService theIdHelperService) {
 		myIdHelperService = theIdHelperService;
+	}
+
+	@Override
+	public String toString() {
+		return new StringJoiner(", ", ResourceLinkPredicateBuilder.class.getSimpleName() + "[", "]")
+				.add("\nmyColumnSrcType=" + myColumnSrcType)
+				.add("\nmyColumnSrcPath=" + myColumnSrcPath)
+				.add("\nmyColumnTargetResourceId=" + myColumnTargetResourceId)
+				.add("\nmyColumnTargetResourceUrl=" + myColumnTargetResourceUrl)
+				.add("\nmyColumnSrcResourceId=" + myColumnSrcResourceId)
+				.add("\nmyColumnTargetResourceType=" + myColumnTargetResourceType)
+				.add("\nmyReversed=" + myReversed + "\n")
+				.toString();
 	}
 }
