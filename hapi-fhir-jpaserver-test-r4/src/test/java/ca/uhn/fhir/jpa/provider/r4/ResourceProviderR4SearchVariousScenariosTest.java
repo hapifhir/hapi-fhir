@@ -1,18 +1,12 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.param.HasParam;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CarePlan;
-import org.hl7.fhir.r4.model.ClinicalImpression;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -25,48 +19,23 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 
-public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourceProviderR4Test {
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4SearchContained_SOME_NEW_Test.class);
-	@Autowired
-	@Qualifier("myClinicalImpressionDaoR4")
-	protected IFhirResourceDao<ClinicalImpression> myClinicalImpressionDao;
-	private CapturingInterceptor myCapturingInterceptor = new CapturingInterceptor();
-
-	@Override
-	@AfterEach
-	public void after() throws Exception {
-		super.after();
-	}
-
-	@BeforeEach
-	@Override
-	public void before() throws Exception {
-		super.before();
-		myFhirContext.setParserErrorHandler(new StrictErrorHandler());
-	}
+public class ResourceProviderR4SearchVariousScenariosTest extends BaseResourceProviderR4Test {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4SearchVariousScenariosTest.class);
 
 	@Nested
-	class TripleHas {
+	class HasMultipleNoChains {
 		private static final String PAT_ID = "pat1";
 		private static final String OBSERVATION_ID = "obs1";
 		private static final String ENCOUNTER_ID = "enc1";
-		private static final String ADVERSE_EVENT_ID = "adv1";
 		private static final String CARE_PLAN_ID = "cp1";
 
 		@BeforeEach
@@ -80,15 +49,11 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 			observation.setId(OBSERVATION_ID);
 			observation.setSubject(new Reference(patientId.getValue()));
 
-			res2Json(observation);
-
 			final IIdType observationId = myObservationDao.update(observation, mySrd).getId().toUnqualifiedVersionless();
 
 			final Encounter encounter = new Encounter();
 			encounter.setId(ENCOUNTER_ID);
 			encounter.addReasonReference(new Reference(observationId.getValue()));
-
-			res2Json(encounter);
 
 			final IIdType encounterId = myEncounterDao.update(encounter, mySrd).getId().toUnqualifiedVersionless();
 
@@ -96,18 +61,7 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 			carePlan.setId(CARE_PLAN_ID);
 			carePlan.setEncounter(new Reference(encounterId.getValue()));
 
-			res2Json(carePlan);
-
 			myCarePlanDao.update(carePlan, mySrd);
-
-			final List<ResourceLink> all = myResourceLinkDao.findAll();
-			all.forEach(link -> ourLog.info("link:{}", link));
-		}
-
-		private void res2Json(IBaseResource theResource) {
-			final String json = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theResource);
-
-			ourLog.info("\n"+json);
 		}
 
 		@ParameterizedTest
@@ -120,13 +74,6 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 
 		@ParameterizedTest
 		@ValueSource(strings = {
-//			"Patient?_id="+PAT_ID,
-//			"CarePlan?_id="+CARE_PLAN_ID,
-//			"Observation?subject="+PAT_ID,
-//			"Patient?_has:Observation:subject:_id="+OBSERVATION_ID,
-//			"Observation?_has:Encounter:reason-reference:_id="+ENCOUNTER_ID,
-//			"Patient?_has:Observation:subject:_has:Encounter:reason-reference:_id="+ENCOUNTER_ID,
-//			"Observation?_has:Encounter:reason-reference:_has:CarePlan:encounter:_id="+CARE_PLAN_ID,
 			"Patient?_has:Observation:subject:_has:Encounter:reason-reference:_has:CarePlan:encounter:_id="+CARE_PLAN_ID
 		})
 		void tripleHas(String theQueryString) {
@@ -135,7 +82,7 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 	}
 
 	@Nested
-	class ComplexQueries {
+	class PractitionerEobCoveragePractitionerListNoCustomSearchParam {
 		private static final String PAT_ID = "pat1";
 		private static final String ORG_ID = "org1";
 		private static final String ORG_NAME = "myOrg";
@@ -188,10 +135,9 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 
 		@ParameterizedTest
 		@ValueSource(strings = {
-//			"Coverage?payor.name="+ORG_NAME,
 			"ExplanationOfBenefit?coverage.payor.name="+ORG_NAME,
 		})
-		void chain(String theQueryString) {
+		void chainSimple(String theQueryString) {
 			runAndAssert(theQueryString);
 		}
 
@@ -208,7 +154,6 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 			"ExplanationOfBenefit?coverage.payor:Organization._has:List:item:_id="+LIST_ID
 		})
 		void chainThenHasSimple(String theQueryString) {
-			// LUKETODO:  this workflow is the gold standard on how to handle _has > chain > _has
 			runAndAssert(theQueryString);
 		}
 
@@ -245,14 +190,14 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 		@ParameterizedTest
 		@ValueSource(strings = {
 			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:List:item:_id="+LIST_ID,
-//			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization._has:List:item:_id="+LIST_ID  // same thing
+			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization._has:List:item:_id="+LIST_ID  // same thing
 		})
-		void verySimilarToBug(String theQueryString) {
+		void hasThenChainThenHas(String theQueryString) {
 			runAndAssert(theQueryString);
 		}
 
 		@Test
-		void searchWithSearchParameterSameAsBug() {
+		void searchWithSearchParameterHasThenChainThenChain() {
 			final SearchParameterMap searchParameterMap = new SearchParameterMap();
 
 			final HasParam hasParam = new HasParam("ExplanationOfBenefit", "care-team", "coverage.payor:Organization._has:List:item:_id", LIST_ID);
@@ -291,29 +236,10 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 
 			assertFalse(search.isEmpty());
 		}
-
-		@Test
-		@Disabled
-		void searchWithSearchParameterWithIdealComposition() {
-			final SearchParameterMap searchParameterMap = new SearchParameterMap();
-
-//			params.add(PARAM_HAS, new HasParam("Observation", "subject", "_has:DiagnosticReport:result:status", "final"));
-//			final HasParam hasParamIdeal = new HasParam("ExplanationOfBenefit", "care-team", "coverage.payor:Organization._has:List:item:_id", LIST_ID);
-			final HasParam hasParamIdeal = new HasParam("ExplanationOfBenefit", "care-team", "coverage.payor", "Organization._has:List:item:_id=" +LIST_ID);
-
-			// LUKETODO:  try:
-			// patient -> observation -> encounter -> adverseevent
-
-			searchParameterMap.add("_has", hasParamIdeal);
-
-			final IBundleProvider search = myPractitionerDao.search(searchParameterMap, mySrd);
-
-			assertFalse(search.isEmpty());
-		}
 	}
 
 	@Nested
-	class ComplexQueriesWithCustomSearchParam {
+	class PractitionerEobCoveragePractitionerGroupYesCustomSearchParam {
 		private static final String PAT_ID = "pat1";
 		private static final String ORG_ID = "org1";
 		private static final String ORG_NAME = "myOrg";
@@ -327,7 +253,7 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 			myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(false);
 			myStorageSettings.setIndexOnContainedResources(false);
 
-			// LUKETODO:  not exactly like production but create SearchParameter first to create the RES_LINK
+			// This is not exactly lik the  production scenario but create SearchParameter first to create the RES_LINK
 			// and avoid a call to reindex
 			final SearchParameter searchParameterGroupValueReference = new SearchParameter();
 			searchParameterGroupValueReference.setId("group-value-reference");
@@ -406,10 +332,9 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 
 		@ParameterizedTest
 		@ValueSource(strings = {
-			// LUKETODO:  this is the exact scenario in the bug
 			"Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization._has:Group:value-reference:_id="+GROUP_ID,
 		})
-		void bug(String theQueryString) {
+		void hasThenChainThenHas(String theQueryString) {
 			runAndAssert(theQueryString);
 		}
 
@@ -426,7 +351,6 @@ public class ResourceProviderR4SearchContained_SOME_NEW_Test extends BaseResourc
 			runAndAssert(theQueryString);
 		}
 	}
-
 
 	private void runAndAssert(String theQueryString) {
 		ourLog.info("queryString:\n{}", theQueryString);

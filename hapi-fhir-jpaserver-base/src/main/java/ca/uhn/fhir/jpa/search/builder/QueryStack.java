@@ -109,7 +109,6 @@ import org.springframework.util.CollectionUtils;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -119,7 +118,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.StringJoiner;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -142,6 +140,8 @@ public class QueryStack {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(QueryStack.class);
 	public static final String LOCATION_POSITION = "Location.position";
+	private static final Pattern PATTERN_DOT_AND_ALL_AFTER = Pattern.compile("\\..*");
+	private static final Pattern PATTERN_CHAIN_THEN_HAS = Pattern.compile("\\..*_has");
 
 	private final FhirContext myFhirContext;
 	private final SearchQueryBuilder mySqlBuilder;
@@ -1100,28 +1100,12 @@ public class QueryStack {
 		return null;
 	}
 
-	private static final Pattern CHAIN_THEN_HAS = Pattern.compile("\\..*_has");
-
 	private Condition createPredicateHas(
 			@Nullable DbColumn theSourceJoinColumn,
 			String theResourceType,
 			List<List<IQueryParameterType>> theHasParameters,
 			RequestDetails theRequest,
 			RequestPartitionId theRequestPartitionId) {
-		final List<String> hasParams = theHasParameters.stream()
-				.flatMap(Collection::stream)
-				.filter(HasParam.class::isInstance)
-				.map(HasParam.class::cast)
-				.map(hasParam -> String.format(
-						"\nname: %s, \nvalue: %s, \ntarget resource: %s",
-						hasParam.getParameterName(), hasParam.getParameterValue(), hasParam.getTargetResourceType()))
-				.collect(Collectors.toList());
-		ourLog.info(
-				"5351: TOP: createPredicateHas(): theSourceJoinColumn: {}, theResourceType: {}, theHasParameters: {}\nbuiltSql:{}",
-				theSourceJoinColumn,
-				theResourceType,
-				hasParams,
-				mySqlBuilder.getSelect());
 
 		List<Condition> andPredicates = new ArrayList<>();
 		for (List<? extends IQueryParameterType> nextOrList : theHasParameters) {
@@ -1132,37 +1116,14 @@ public class QueryStack {
 
 			String paramName = null;
 			List<QualifiedParamList> parameters = new ArrayList<>();
-			// LUKETODO: hasParams:  I think we need a third recursion in between the first 2, but how?
-			// First recursion:  myReferenceFieldName='care-team',
-			// myParameterName='coverage.payor:Organization._has:List:item:_id', myParameterValue='list1',
-			// myTargetResourceType='ExplanationOfBenefit'
-			// Second recursion:  myReferenceFieldName='item', myParameterName='_id', myParameterValue='list1',
-			// myTargetResourceType='List'
 			for (IQueryParameterType nextParam : nextOrList) {
 				HasParam next = (HasParam) nextParam;
-				ourLog.info("5351: next HasParam: {}", next);
 				targetResourceType = next.getTargetResourceType();
 				paramReference = next.getReferenceFieldName();
 				parameterName = next.getParameterName();
-				// LUKETODO:  this is where we start getting ourselves into trouble:
-				//				parameterName: coverage.payor:Organization._has:List:item:_id
-				//				paramName: coverage, singleton: [list1]
-				//				parameters: [[list1]]
-				//				paramName = parameterName.replaceAll("\\..*", "");
-				if (CHAIN_THEN_HAS.matcher(parameterName).find()) {
-					ourLog.info("5351: THIS IS a chain then _has: {}", parameterName);
-				}
-
-				// LUKETODO:  this is the code path for _has THEN chain
-				paramName = parameterName.replaceAll("\\..*", "");
-				final QualifiedParamList singleton =
-						QualifiedParamList.singleton(null, next.getValueAsQueryToken(myFhirContext));
-				ourLog.info(
-						"5351: parameterName: {}, paramName: {}, singleton: {}", parameterName, paramName, singleton);
-				parameters.add(singleton);
+				paramName = PATTERN_DOT_AND_ALL_AFTER.matcher(parameterName).replaceAll("");
+				parameters.add(QualifiedParamList.singleton(null, next.getValueAsQueryToken(myFhirContext)));
 			}
-
-			ourLog.info("5351: parameters: {}", parameters);
 
 			if (paramName == null) {
 				continue;
@@ -1176,36 +1137,8 @@ public class QueryStack {
 
 			ArrayList<IQueryParameterType> orValues = Lists.newArrayList();
 
-			if (parameterName.contains("_has")) {
-				ourLog.info("5351: parameterName: {}", parameterName);
-				final String[] splitOnHas = parameterName.split("_has");
-				if (splitOnHas.length == 2) {
-					final String firstHalf = splitOnHas[0];
-					final String secondHalf = splitOnHas[1];
-					final String qualifier = secondHalf;
-
-					final ArrayList<IQueryParameterType> orValuesClone = new ArrayList<>(orValues);
-					for (IQueryParameterType next : nextOrList) {
-						HasParam nextHasParam = new HasParam();
-						nextHasParam.setValueAsQueryToken(
-								myFhirContext, PARAM_HAS, qualifier, next.getValueAsQueryToken(myFhirContext));
-						orValuesClone.add(nextHasParam);
-						//						orValues.add(nextHasParam);
-					}
-					ourLog.info(
-							"5351: firstHalf: {}, secondHalf: {}, orValuesClone: {}",
-							firstHalf,
-							secondHalf,
-							orValuesClone);
-				} else {
-					ourLog.info("5351: no split");
-				}
-			}
-
-			// LUKETODO:  we NEVER hit this conditional block:   should we?
 			if (paramName.startsWith("_has:")) {
-				//			if (paramName.startsWith("_has:") || parameterName.contains("_has")) {
-				ourLog.info("5351: IF-ELSEIF-ELSE paramName.startsWith(_has): {}", paramName);
+
 				ourLog.trace("Handling double _has query: {}", paramName);
 
 				String qualifier = paramName.substring(4);
@@ -1216,60 +1149,13 @@ public class QueryStack {
 					orValues.add(nextHasParam);
 				}
 
-				//			} else if (parameterName.contains("_has")) {
-				// LUKETODO:  the mere presence of this else if causes the scenario to error out instead of ail
-				//				final String qualifier = parameterName.replaceAll("\\_has.*", "");
-				//				final String[] splitOnHas = parameterName.split("_has");
-				//				if (splitOnHas.length == 2) {
-				//					final String firstHalf = splitOnHas[0];
-				//					final String secondHalf = splitOnHas[1];
-				//
-				//					ourLog.info("5351: firstHalf: {}, secondHalf: {}", firstHalf, secondHalf);
-				//				} else {
-				//					ourLog.info("5351: no split");
-				//				}
-
-				//				for (IQueryParameterType next : nextOrList) {
-				//					HasParam nextHasParam = new HasParam();
-				//					nextHasParam.setValueAsQueryToken(
-				//						myFhirContext, PARAM_HAS, qualifier, next.getValueAsQueryToken(myFhirContext));
-				//					orValues.add(nextHasParam);
-				//				}
 			} else if (paramName.equals(PARAM_ID)) {
-				ourLog.info("5351: IF-ELSEIF-ELSE paramName.equals(PARAM_ID)");
 
 				for (IQueryParameterType next : nextOrList) {
 					orValues.add(new TokenParam(next.getValueAsQueryToken(myFhirContext)));
 				}
 
-			} else if (CHAIN_THEN_HAS.matcher(parameterName).find()) {
-				// LUKETODO:  this has to be a brand-new code path narrowly defined for _has > chain > _has
-				ourLog.info("5351: IF-ELSEIF-ELSE CHAIN_THEN_HAS: paramName: {}", paramName);
-
-				// Ensure that the name of the search param
-				// (e.g. the `code` in Patient?_has:Observation:subject:code=sys|val)
-				// exists on the target resource type.
-				RuntimeSearchParam owningParameterDef =
-						mySearchParamRegistry.getRuntimeSearchParam(targetResourceType, paramName);
-
-				// Ensure that the name of the back-referenced search param on the target (e.g. the `subject` in
-				// Patient?_has:Observation:subject:code=sys|val)
-				// exists on the target resource, or in the top-level Resource resource.
-				mySearchParamRegistry.getRuntimeSearchParam(targetResourceType, paramReference);
-
-				// LUKETODO:  do we need to special case this somehow?
-				IQueryParameterAnd<?> parsedParam = JpaParamUtil.parseQueryParams(
-						mySearchParamRegistry, myFhirContext, owningParameterDef, paramName, parameters);
-
-				ourLog.info("5351: parsedParam: {}", parsedParam);
-
-				for (IQueryParameterOr<?> next : parsedParam.getValuesAsQueryTokens()) {
-					orValues.addAll(next.getValuesAsQueryTokens());
-				}
-
-				ourLog.info("5351: orValues: {}", orValues);
 			} else {
-				ourLog.info("5351: IF-ELSEIF-ELSE ELSE: paramName: {}", paramName);
 
 				// Ensure that the name of the search param
 				// (e.g. the `code` in Patient?_has:Observation:subject:code=sys|val)
@@ -1282,53 +1168,30 @@ public class QueryStack {
 				// exists on the target resource, or in the top-level Resource resource.
 				mySearchParamRegistry.getRuntimeSearchParam(targetResourceType, paramReference);
 
-				// LUKETODO:  do we need to special case this somehow?
 				IQueryParameterAnd<?> parsedParam = JpaParamUtil.parseQueryParams(
 						mySearchParamRegistry, myFhirContext, owningParameterDef, paramName, parameters);
-
-				ourLog.info("5351: parsedParam: {}", parsedParam);
 
 				for (IQueryParameterOr<?> next : parsedParam.getValuesAsQueryTokens()) {
 					orValues.addAll(next.getValuesAsQueryTokens());
 				}
-
-				ourLog.info("5351: orValues: {}", orValues);
 			}
 
 			// Handle internal chain inside the has.
 			if (parameterName.contains(".")) {
-				// LUKETODO:  we're processing a chained parameter pointing to a ReferenceParam with a chain of a _has
-				String chainedPartOfParameter = getChainedPart(parameterName);
-				// LUKETODO:  better pattern
-				final String parameterNameFinal = parameterName;
-				ourLog.info(
-						"5351: PRE-mutate: parameterName: {}, chainedPartOfParameter: {}, orValues: {}",
-						parameterName,
-						chainedPartOfParameter,
-						orValues);
+				final String chainedPart =
+						PATTERN_CHAIN_THEN_HAS.matcher(parameterName).find()
+								// The below handles then _has then chain then _has scenario: ex:
+								// "Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:List:item:_id=list1
+								? getChainedPart(parameterName)
+								// The below handles the regular has then chain scenario ex:
+								// Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization=org1
+								: getChainedPart(getChainedPart(parameterName));
 				orValues.stream()
 						.filter(qp -> qp instanceof ReferenceParam)
 						.map(qp -> (ReferenceParam) qp)
-						// LUKETODO:  this part isn't working!!!!!!!!!!
-						.forEach(rp -> {
-							final String chainedPart =
-									CHAIN_THEN_HAS.matcher(parameterNameFinal).find()
-											? chainedPartOfParameter
-											: getChainedPart(chainedPartOfParameter);
-							ourLog.info(
-									"5351: chainedPart: {}, chainedPartOfParameter: {}",
-									chainedPart,
-									chainedPartOfParameter);
-							rp.setChain(chainedPart);
-						});
+						.forEach(rp -> rp.setChain(chainedPart));
 
 				parameterName = parameterName.substring(0, parameterName.indexOf('.'));
-				ourLog.info("5351: POST-mutate parameterName:: {}, orValues: {}", parameterName, orValues);
-
-				//				5351: parameterName: coverage.payor:Organization._has:List:item:_id, chainedPartOfParameter:
-				// payor:Organization._has:List:item:_id
-				//				5351: parameterNmme: mutated: coverage, orValues:
-				// [ReferenceParam[chain=_has:List:item:_id,value=list1]]
 			}
 
 			int colonIndex = parameterName.indexOf(':');
@@ -1336,21 +1199,8 @@ public class QueryStack {
 				parameterName = parameterName.substring(0, colonIndex);
 			}
 
-			ourLog.info(
-					"5351: _HAS PRE-ResourceLinkPredicateBuilder: theSourceJoinColumn: {}\njoinMap: {}\nSQL: {}",
-					theSourceJoinColumn,
-					myJoinMap,
-					mySqlBuilder.getSelect());
-			// LUKETODO:  if we have a theSourceJoinColumn, that is, HFJ_RES_LINK.SRC_RESOURCE_ID, then that becomes the
-			// LEFT side of the JOIN:
-			// INNER JOIN HFJ_RES_LINK t2 ON (t0.SRC_RESOURCE_ID = t2.TARGET_RESOURCE_ID)
 			ResourceLinkPredicateBuilder resourceLinkTableJoin =
 					mySqlBuilder.addReferencePredicateBuilderReversed(this, theSourceJoinColumn);
-			ourLog.info(
-					"5351: _HAS POST-ResourceLinkPredicateBuilder: resourceLinkTableJoin: {}\nmyJoinNap: {}\nsql: {}",
-					resourceLinkTableJoin,
-					myJoinMap,
-					mySqlBuilder.getSelect());
 			Condition partitionPredicate = resourceLinkTableJoin.createPartitionIdPredicate(theRequestPartitionId);
 
 			List<String> paths = resourceLinkTableJoin.createResourceLinkPaths(
@@ -1358,9 +1208,6 @@ public class QueryStack {
 			if (CollectionUtils.isEmpty(paths)) {
 				throw new InvalidRequestException(Msg.code(2305) + "Reference field does not exist: " + paramReference);
 			}
-			// LUKETODO:  this looks correct:  paths:  ExplanationOfBenefit.careTeam.provider
-			// mySqlBuilder:  SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_RES_LINK t0 ON (t1.RES_ID =
-			// t0.TARGET_RESOURCE_ID)
 
 			Condition typePredicate = BinaryCondition.equalTo(
 					resourceLinkTableJoin.getColumnTargetResourceType(),
@@ -1579,12 +1426,6 @@ public class QueryStack {
 			RequestDetails theRequest,
 			RequestPartitionId theRequestPartitionId,
 			SearchQueryBuilder theSqlBuilder) {
-		ourLog.info(
-				"5351: TOP: createPredicateReference(): joinColumn: {}, resourceName: {}, paramName: {}, SQL: {}",
-				theSourceJoinColumn,
-				theResourceName,
-				theParamName,
-				mySqlBuilder.getSelect());
 
 		if ((theOperation != null)
 				&& (theOperation != SearchFilterParser.CompareOperation.eq)
@@ -1605,23 +1446,12 @@ public class QueryStack {
 					theSourceJoinColumn,
 					theRequestPartitionId));
 		} else {
-			ourLog.info(
-					"5351: REFERENCE PRE-ResourceLinkPredicateBuilder:\njoinMap:{}\nmySqlBuilder: {}",
-					myJoinMap,
-					mySqlBuilder.getSelect());
-			// LUKETODO:  could it be we're building the ResourceLinkPredicateBuilder wrong at some point and that's
-			// causing the bug?
 			ResourceLinkPredicateBuilder predicateBuilder = createOrReusePredicateBuilder(
 							PredicateBuilderTypeEnum.REFERENCE,
 							theSourceJoinColumn,
 							theParamName,
 							() -> theSqlBuilder.addReferencePredicateBuilder(this, theSourceJoinColumn))
 					.getResult();
-			ourLog.info(
-					"5351: REFERENCE POST-ResourceLinkPredicateBuilder: predicateBuilder: {}\njoinMap:{}\nmySqlBuilder: {}",
-					predicateBuilder,
-					myJoinMap,
-					mySqlBuilder.getSelect());
 			return predicateBuilder.createPredicate(
 					theRequest,
 					theResourceName,
@@ -2484,7 +2314,6 @@ public class QueryStack {
 
 	@Nullable
 	public Condition searchForIdsWithAndOr(SearchForIdsParams theSearchForIdsParams) {
-		ourLog.info("5351: TOP: searchForIdsWithAndOr(): {}", theSearchForIdsParams);
 
 		if (theSearchForIdsParams.myAndOrParams.isEmpty()) {
 			return null;
@@ -2543,7 +2372,6 @@ public class QueryStack {
 						theSearchForIdsParams.myAndOrParams, theSearchForIdsParams.mySourceJoinColumn);
 
 			default:
-				// LUKETODO:  this is where we start in the pure chain then _has case
 				return createPredicateSearchParameter(
 						theSearchForIdsParams.mySourceJoinColumn,
 						theSearchForIdsParams.myResourceName,
@@ -2612,27 +2440,8 @@ public class QueryStack {
 			List<List<IQueryParameterType>> theAndOrParams,
 			RequestDetails theRequest,
 			RequestPartitionId theRequestPartitionId) {
-		//		final List<String> hasParams = theAndOrParams.stream()
-		//			.flatMap(Collection::stream)
-		//			.filter(HasParam.class::isInstance)
-		//			.map(HasParam.class::cast)
-		//			.map(hasParam -> String.format(
-		//				"\nname: %s, \nvalue: %s, \ntarget resource: %s",
-		//				hasParam.getParameterName(), hasParam.getParameterValue(), hasParam.getTargetResourceType()))
-		//			.collect(Collectors.toList());
-		ourLog.info(
-				"5351: TOP: createPredicateSearchParameter(): theSourceJoinColumn: {}, theResourceType: {}, theHasParameters: {}\nbuiltSql:{}",
-				theSourceJoinColumn,
-				theResourceName,
-				theParamName,
-				mySqlBuilder.getSelect());
 		List<Condition> andPredicates = new ArrayList<>();
 		RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(theResourceName, theParamName);
-		ourLog.info(
-				"5351: andOrParams Type: {}",
-				Optional.ofNullable(nextParamDef)
-						.map(RuntimeSearchParam::getParamType)
-						.orElse(null));
 		if (nextParamDef != null) {
 
 			if (myPartitionSettings.isPartitioningEnabled() && myPartitionSettings.isIncludePartitionInSearchHashes()) {
@@ -2680,9 +2489,6 @@ public class QueryStack {
 					}
 					break;
 				case REFERENCE:
-					// LUKETODO:  this is where we do the pure chain then _has:  we should absolutely use this code or
-					// similar from the _has then chain then _has code path
-					ourLog.info("5351: theAndOrParams: {} mySqlBuilder: {}", theAndOrParams, mySqlBuilder.getSelect());
 					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
 
 						// Handle Search Parameters where the name is a full chain
@@ -2877,12 +2683,6 @@ public class QueryStack {
 			RequestPartitionId theRequestPartitionId,
 			List<Condition> andPredicates,
 			List<? extends IQueryParameterType> nextAnd) {
-		ourLog.info(
-				"5351: TOP: handleFullyChainedParameter(): theSourceJoinColumn: {}, theResourceType: {}, theHasParameters: {}\nbuiltSql:{}",
-				theSourceJoinColumn,
-				theResourceName,
-				theParamName,
-				mySqlBuilder.getSelect());
 		if (!nextAnd.isEmpty() && nextAnd.get(0) instanceof ReferenceParam) {
 			ReferenceParam param = (ReferenceParam) nextAnd.get(0);
 			if (isNotBlank(param.getChain())) {
@@ -3173,15 +2973,6 @@ public class QueryStack {
 				List<String> theQualifiers,
 				String theResourceType) {
 
-			ourLog.info(
-					"5351: processNext:\ntheSearchParams: {},\nthePreviousSearchParam: {},\ntheChain: {},\ntheTargetValue: {},\ntheQualifiers: {},\ntheResourceType: {}",
-					theSearchParams,
-					thePreviousSearchParam,
-					theChain,
-					theTargetValue,
-					theQualifiers,
-					theResourceType);
-
 			String nextParamName = theChain;
 			String nextChain = null;
 			String nextQualifier = null;
@@ -3197,10 +2988,6 @@ public class QueryStack {
 				nextQualifier = nextParamName.substring(qualifierIndex);
 			}
 
-			//			if (PARAM_HAS.equals(nextParamName)) {
-			//				createPredicateHas(null, theResourceType, List.of(), null, null);
-			//			}
-
 			List<String> qualifiersBranch = Lists.newArrayList();
 			qualifiersBranch.addAll(theQualifiers);
 			qualifiersBranch.add(nextQualifier);
@@ -3211,14 +2998,6 @@ public class QueryStack {
 				if (isBlank(theResourceType) || theResourceType.equals(nextTarget)) {
 					nextSearchParam = mySearchParamRegistry.getActiveSearchParam(nextTarget, nextParamName);
 				}
-				// LUKETODO:  we're passing "_has" as the nextParamName and getting back nothing, as opposed to the
-				// previous iteration, which got back a RuntimeSearchParam for "payor"
-				ourLog.info(
-						"5351: theResourceType: {}, nextTarget: {}, nextParamName: {}, nextSearchParam: {}",
-						theResourceType,
-						nextTarget,
-						nextParamName,
-						nextSearchParam);
 				if (nextSearchParam != null) {
 					searchParamFound = true;
 					// If we find a search param on this resource type for this parameter name, keep iterating
@@ -3258,35 +3037,8 @@ public class QueryStack {
 									nextQualifier);
 						}
 					}
-				} else if (PARAM_HAS.equals(nextParamName)) {
-					ourLog.info("5351: HAS param");
-					//					myReferenceFieldName = "item"
-					//					myParameterName = "_id"
-					//					myParameterValue = "list1"
-					//					myTargetResourceType = "List"
-					// LUKETODO:  do we want some sort of Param object here instead of some nasty String-splitting code?
-					//					theChain:     _has:List:item:_id
-					final String[] split = theChain.split(":");
-					ourLog.info("5351 theChain split: {}", Arrays.toString(split));
-
-					if (split.length == 4) {
-						final String shouldBe_Has = split[0];
-						final String targetResourceType = split[1];
-						final String referenceFieldName = split[2];
-						final String parameterName = split[3];
-
-						final HasParam hasParam =
-								new HasParam(targetResourceType, referenceFieldName, parameterName, "list1");
-					} else {
-						ourLog.error("split length is not 4! {}", split);
-					}
-
-					//					Coverage?payor._has:List:item:_id="+LIST_ID,
-					//					ExplanationOfBenefit?coverage.payor._has:List:item:_id="+LIST_ID
-
 				}
 			}
-			// LUKETODO:
 			if (!searchParamFound) {
 				throw new InvalidRequestException(Msg.code(1214)
 						+ myFhirContext
@@ -3455,19 +3207,6 @@ public class QueryStack {
 				ResourceTablePredicateBuilder theResourceTablePredicateBuilder) {
 			myResourceTablePredicateBuilder = theResourceTablePredicateBuilder;
 			return this;
-		}
-
-		@Override
-		public String toString() {
-			return new StringJoiner(", ", SearchForIdsParams.class.getSimpleName() + "[", "]")
-					.add("mySourceJoinColumn=" + mySourceJoinColumn)
-					.add("myResourceName='" + myResourceName + "'")
-					.add("myParamName='" + myParamName + "'")
-					.add("myAndOrParams=" + myAndOrParams)
-					.add("myRequest=" + myRequest)
-					.add("myRequestPartitionId=" + myRequestPartitionId)
-					.add("myResourceTablePredicateBuilder=" + myResourceTablePredicateBuilder)
-					.toString();
 		}
 	}
 }
