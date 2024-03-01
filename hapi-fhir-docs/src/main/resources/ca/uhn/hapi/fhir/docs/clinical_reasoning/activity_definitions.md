@@ -1,5 +1,7 @@
 # ActivityDefinition
 
+## Introduction
+
 The FHIR Clinical Reasoning Module defines the [ActivityDefinition resource](https://www.hl7.org/fhir/activitydefinition.html) and several [associated operations](https://www.hl7.org/fhir/activitydefinition-operations.html). An ActivityDefinition is a shareable, consumable description of some activity to be performed. It may be used to specify actions to be taken as part of a workflow, order set, or protocol, or it may be used independently as part of a catalog of activities such as orderables.
 
 In general, an activity definition is simply a conceptual description of some specific action that should be taken. An instance of an ActivityDefinition does not indicate that any action has been performed (as an event resource does), nor does it indicate the actual intent to carry out any particular action (as a request resource does). Instead, an activity definition provides a reusable template that can be used to construct specific request resources such as ServiceRequest and MedicationRequest.

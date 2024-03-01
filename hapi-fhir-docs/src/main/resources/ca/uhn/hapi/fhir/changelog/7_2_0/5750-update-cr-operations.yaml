@@ -6,5 +6,5 @@ title: "Update to the 3.1.0 release of the Clinical Reasoning Module.  This incl
     <li>Updated the Clinical Reasoning documentation.</li>
     <li>Added support for additional parameters on operations.</li>
     <li>Added StructureDefinition/$questionnaire operation.</li>
-    <li><Add ability to generate $apply results with unique ids./li>
+    <li>Add ability to generate $apply results with unique ids.</li>
 </ul>"
