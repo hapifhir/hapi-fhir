@@ -192,7 +192,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		validateDocument(output);
 		assertEquals(7, output.getEntry().size());
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toUnqualifiedVersionless().getValue();
-		assertEquals("Patient/5342998", patientId);
+		assertThat(patientId, matchesPattern("urn:uuid:.*"));
 		assertEquals(patientId, findEntryResource(output, Condition.class, 0, 2).getSubject().getReference());
 		assertEquals(patientId, findEntryResource(output, Condition.class, 1, 2).getSubject().getReference());
 
@@ -338,6 +338,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 	 * package.
 	 */
 	private class IpsTerminologySvc implements IValidationSupport {
+
 		@Override
 		public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 			return true;
@@ -347,12 +348,51 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		@Override
 		public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 			if ("http://loinc.org".equals(theCodeSystem)) {
-				if ("60591-5".equals(theCode)) {
+				if ("60591-5".equals(theCode)
+				) {
 					return new CodeValidationResult().setCode(theCode);
 				}
 			}
 			if ("http://snomed.info/sct".equals(theCodeSystem)) {
-				if ("14657009".equals(theCode) || "255604002".equals(theCode)) {
+				if ("14657009".equals(theCode)
+					|| "255604002".equals(theCode)
+					|| "38341003".equals(theCode)
+					|| "1208807009".equals(theCode)
+				) {
+					return new CodeValidationResult().setCode(theCode);
+				}
+			}
+			return null;
+		}
+
+		@Override
+		public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+			return true;
+		}
+
+		@Nullable
+		@Override
+		public CodeValidationResult validateCode(
+			ValidationSupportContext theValidationSupportContext,
+			ConceptValidationOptions theOptions,
+			String theCodeSystem,
+			String theCode,
+			String theDisplay,
+			String theValueSetUrl) {
+			if ("http://loinc.org".equals(theCodeSystem)) {
+				if ("48765-2".equals(theCode)
+					|| "10160-0".equals(theCode)
+					|| "11450-4".equals(theCode)
+				) {
+					return new CodeValidationResult().setCode(theCode);
+				}
+			}
+
+			if ("http://snomed.info/sct".equals(theCodeSystem)) {
+				if (
+					 "38341003".equals(theCode)
+					|| "1208807009".equals(theCode)
+				) {
 					return new CodeValidationResult().setCode(theCode);
 				}
 			}
