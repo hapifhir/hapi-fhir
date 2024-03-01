@@ -65,6 +65,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 	public static final int TEST_JOB_VERSION = 1;
 	public static final String FIRST_STEP_ID = "first-step";
+	public static final String SECOND_STEP_ID = "second-step";
 	public static final String LAST_STEP_ID = "last-step";
 	@Autowired
 	JobDefinitionRegistry myJobDefinitionRegistry;
@@ -271,9 +272,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			@Override
 			public void reductionStepConsume(ChunkExecutionDetails<TestJobParameters, SecondStepOutput> theChunkDetails, IJobDataSink<ReductionStepOutput> theDataSink) {
 				int val = mySecondGate.getAndIncrement();
-				if (val == (totalCalls - 1)) {
-					myBatch2JobHelper.forceRunMaintenancePass();
-				}
 			}
 
 			@Override
@@ -651,7 +649,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				FirstStepOutput.class,
 				theFirstStep
 			)
-			.addIntermediateStep("SECOND",
+			.addIntermediateStep(SECOND_STEP_ID,
 				"Second step",
 				SecondStepOutput.class,
 				theSecondStep)
