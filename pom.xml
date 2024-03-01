@@ -2511,6 +2511,7 @@
 						<verbose>true</verbose>
 						<addSvnKeyWords>false</addSvnKeyWords>
 						<encoding>UTF-8</encoding>
+						<skip>true</skip>
 					</configuration>
 				</plugin>
 				<plugin>

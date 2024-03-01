@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -52,7 +53,7 @@ import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OptimisticLock;
-import org.hibernate.type.SqlTypes;
+import org.hibernate.annotations.Type;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,6 +67,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.RES_TEXT_VC_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
@@ -141,13 +143,21 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	@Column(name = "RESOURCE_TYPE", length = 200, nullable = true)
 	private String myResourceType;
+
 	/**
 	 * Note that this field may have the request partition IDs prepended to it
 	 */
-	@Lob()
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "SEARCH_QUERY_STRING", nullable = true, updatable = false, length = MAX_SEARCH_QUERY_STRING)
 	private String mySearchQueryString;
+
+	/**
+	 * Note that this field may have the request partition IDs prepended to it
+	 */
+	@Column(name = "SEARCH_QUERY_STRING_VC", nullable = true, length = RES_TEXT_VC_MAX_LENGTH)
+	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
+	private String mySearchQueryStringVc;
 
 	@Column(name = "SEARCH_QUERY_STRING_HASH", nullable = true, updatable = false)
 	private Integer mySearchQueryStringHash;
@@ -172,9 +182,13 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Column(name = "OPTLOCK_VERSION", nullable = true)
 	private Integer myVersion;
 
-	@Lob
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
 	private byte[] mySearchParameterMap;
+
+	@Column(name = "SEARCH_PARAM_MAP_BIN", nullable = true, length = JpaConstants.ORG_HIBERNATE_TYPE_BINARY_TYPE_LENGTH)
+	@Type(type = JpaConstants.ORG_HIBERNATE_TYPE_BINARY_TYPE)
+	private byte[] mySearchParameterMapBin;
 
 	@Transient
 	private transient SearchParameterMap mySearchParameterMapTransient;
@@ -350,7 +364,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	 * Note that this field may have the request partition IDs prepended to it
 	 */
 	public String getSearchQueryString() {
-		return mySearchQueryString;
+		return mySearchQueryStringVc != null ? mySearchQueryStringVc : mySearchQueryString;
 	}
 
 	public void setSearchQueryString(String theSearchQueryString, RequestPartitionId theRequestPartitionId) {
@@ -362,12 +376,13 @@ public class Search implements ICachedSearchDetails, Serializable {
 			// We want this field to always have a wide distribution of values in order
 			// to avoid optimizers avoiding using it if it has lots of nulls, so in the
 			// case of null, just put a value that will never be hit
-			mySearchQueryString = UUID.randomUUID().toString();
+			mySearchQueryStringVc = UUID.randomUUID().toString();
 		} else {
-			mySearchQueryString = searchQueryString;
+			mySearchQueryStringVc = searchQueryString;
 		}
 
-		mySearchQueryStringHash = mySearchQueryString.hashCode();
+		mySearchQueryString = null;
+		mySearchQueryStringHash = mySearchQueryStringVc.hashCode();
 	}
 
 	public SearchTypeEnum getSearchType() {
@@ -466,8 +481,12 @@ public class Search implements ICachedSearchDetails, Serializable {
 			return Optional.of(mySearchParameterMapTransient);
 		}
 		SearchParameterMap searchParameterMap = null;
-		if (mySearchParameterMap != null) {
-			searchParameterMap = SerializationUtils.deserialize(mySearchParameterMap);
+		byte[] searchParameterMapSerialized = mySearchParameterMapBin;
+		if (searchParameterMapSerialized == null) {
+			searchParameterMapSerialized = mySearchParameterMap;
+		}
+		if (searchParameterMapSerialized != null) {
+			searchParameterMap = SerializationUtils.deserialize(searchParameterMapSerialized);
 			mySearchParameterMapTransient = searchParameterMap;
 		}
 		return Optional.ofNullable(searchParameterMap);
@@ -475,7 +494,8 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	public void setSearchParameterMap(SearchParameterMap theSearchParameterMap) {
 		mySearchParameterMapTransient = theSearchParameterMap;
-		mySearchParameterMap = SerializationUtils.serialize(theSearchParameterMap);
+		mySearchParameterMapBin = SerializationUtils.serialize(theSearchParameterMap);
+		mySearchParameterMap = null;
 	}
 
 	@Override

@@ -36,6 +36,7 @@ import jakarta.persistence.Table;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 
+import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.RES_TEXT_VC_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
@@ -66,9 +67,13 @@ public class BulkImportJobFileEntity implements Serializable {
 	@Column(name = "FILE_DESCRIPTION", nullable = true, length = MAX_DESCRIPTION_LENGTH)
 	private String myFileDescription;
 
-	@Lob
-	@Column(name = "JOB_CONTENTS", nullable = false)
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
+	@Column(name = "JOB_CONTENTS", nullable = true)
 	private byte[] myContents;
+
+	@Column(name = "JOB_CONTENTS_VC", nullable = true, length = RES_TEXT_VC_MAX_LENGTH)
+	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
+	private String myContentsVc;
 
 	@Column(name = "TENANT_NAME", nullable = true, length = PartitionEntity.MAX_NAME_LENGTH)
 	private String myTenantName;
@@ -98,11 +103,16 @@ public class BulkImportJobFileEntity implements Serializable {
 	}
 
 	public String getContents() {
-		return new String(myContents, StandardCharsets.UTF_8);
+		if (myContentsVc != null) {
+			return myContentsVc;
+		} else {
+			return new String(myContents, StandardCharsets.UTF_8);
+		}
 	}
 
 	public void setContents(String theContents) {
-		myContents = theContents.getBytes(StandardCharsets.UTF_8);
+		myContentsVc = theContents;
+		myContents = null;
 	}
 
 	public BulkImportJobFileJson toJson() {

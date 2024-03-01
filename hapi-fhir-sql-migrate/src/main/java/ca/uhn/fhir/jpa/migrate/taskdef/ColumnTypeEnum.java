@@ -37,5 +37,7 @@ public enum ColumnTypeEnum {
 	 * <code>@Column(length=Integer.MAX_VALUE)</code>
 	 */
 	TEXT,
+    /** Long inline binary */
+    BINARY,
 	BIG_DECIMAL;
 }

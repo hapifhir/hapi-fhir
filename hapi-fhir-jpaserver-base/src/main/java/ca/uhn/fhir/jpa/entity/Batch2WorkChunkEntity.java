@@ -44,6 +44,7 @@ import java.util.Date;
 
 import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 import static ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity.STATUS_MAX_LENGTH;
+import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.RES_TEXT_VC_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
@@ -92,10 +93,14 @@ public class Batch2WorkChunkEntity implements Serializable {
 	@Column(name = "TGT_STEP_ID", length = ID_MAX_LENGTH, nullable = false)
 	private String myTargetStepId;
 
-	@Lob
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "CHUNK_DATA", nullable = true, length = Integer.MAX_VALUE - 1)
 	private String mySerializedData;
+
+	@Column(name = "CHUNK_DATA_VC", nullable = true, length = RES_TEXT_VC_MAX_LENGTH)
+	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
+	private String mySerializedDataVc;
 
 	@Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)
 	@Enumerated(EnumType.STRING)
@@ -263,11 +268,12 @@ public class Batch2WorkChunkEntity implements Serializable {
 	}
 
 	public String getSerializedData() {
-		return mySerializedData;
+		return mySerializedDataVc != null ? mySerializedDataVc : mySerializedData;
 	}
 
 	public void setSerializedData(String theSerializedData) {
-		mySerializedData = theSerializedData;
+		mySerializedData = null;
+		mySerializedDataVc = theSerializedData;
 	}
 
 	public WorkChunkStatusEnum getStatus() {
@@ -309,7 +315,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 				.append("updateTime", myUpdateTime)
 				.append("recordsProcessed", myRecordsProcessed)
 				.append("targetStepId", myTargetStepId)
-				.append("serializedData", mySerializedData)
+				.append("serializedData", getSerializedData())
 				.append("status", myStatus)
 				.append("errorMessage", myErrorMessage)
 				.append("warningMessage", myWarningMessage)
