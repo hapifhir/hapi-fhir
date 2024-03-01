@@ -44,8 +44,12 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -105,7 +109,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		validateDocument(output);
 		assertEquals(117, output.getEntry().size());
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toUnqualifiedVersionless().getValue();
-		assertEquals("Patient/f15d2419-fbff-464a-826d-0afe8f095771", patientId);
+		assertThat(patientId, matchesPattern("urn:uuid:.*"));
 		MedicationStatement medicationStatement = findFirstEntryResource(output, MedicationStatement.class, 2);
 		assertEquals(patientId, medicationStatement.getSubject().getReference());
 		assertNull(medicationStatement.getInformationSource().getReference());
@@ -339,6 +343,115 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 	 */
 	private class IpsTerminologySvc implements IValidationSupport {
 
+		final Set<String> loincValueSetCodes = new HashSet<>(Arrays.asList(
+			"60591-5",
+			"75326-9",
+			"94306-8"
+		));
+
+		final Set<String> snomedValueSetCodes = new HashSet<>(Arrays.asList(
+			"14657009",
+			"255604002",
+			"38341003",
+			"1208807009"
+		));
+
+		final Set<String> loincCodes = new HashSet<>(Arrays.asList(
+			// Tiny patient summary
+			"48765-2",
+			"10160-0",
+			"11450-4",
+
+			// Large patient summary
+
+			"11369-6",
+			"30954-2",
+			"8094-5",
+			"8076-2",
+			"8093-7",
+			"31627-3",
+			"8091-1",
+			"8092-9",
+			"1988-5",
+			"26484-6",
+			"26449-9",
+			"30449-3",
+			"28539-5",
+			"30428-7",
+			"26474-7",
+			"26464-8",
+			"26444-0",
+			"718-7",
+			"26515-7",
+			"20570-8",
+			"2157-6",
+			"14933-6",
+			"26464-8",
+			"30428-7",
+			"26449-9",
+			"26474-7",
+			"26515-7",
+			"26484-6",
+			"26444-0",
+			"28539-5",
+			"30449-3",
+			"718-7",
+			"20570-8",
+			"14682-9",
+			"14933-6",
+			"2823-3",
+			"62238-1",
+			"2951-2",
+			"1988-5",
+			"8061-4",
+			"29953-7",
+			"14933-6",
+			"1988-5",
+			"28539-5",
+			"718-7",
+			"30449-3",
+			"26474-7",
+			"30428-7",
+			"26444-0",
+			"26484-6",
+			"20570-8",
+			"26449-9",
+			"26464-8",
+			"26515-7",
+			"32677-7",
+			"31348-6",
+			"14933-6",
+			"26449-9",
+			"718-7",
+			"26474-7",
+			"20570-8",
+			"26484-6",
+			"26444-0",
+			"30449-3",
+			"30428-7",
+			"26515-7",
+			"28539-5",
+			"26464-8",
+			"1988-5",
+			"94500-6"
+		));
+
+		final Set<String> snomedCodes = new HashSet<>(Arrays.asList(
+			// Tiny patient summary
+			"38341003",
+			"1208807009",
+
+			// Large patient summary
+			"10312003",
+			"385055001",
+			"318913001",
+			"90560007",
+			"1240581000000104",
+			"16217701000119102",
+			"72098002",
+			"260415000"
+		));
+
 		@Override
 		public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
 			return true;
@@ -348,17 +461,12 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		@Override
 		public CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
 			if ("http://loinc.org".equals(theCodeSystem)) {
-				if ("60591-5".equals(theCode)
-				) {
+				if (loincValueSetCodes.contains(theCode)) {
 					return new CodeValidationResult().setCode(theCode);
 				}
 			}
 			if ("http://snomed.info/sct".equals(theCodeSystem)) {
-				if ("14657009".equals(theCode)
-					|| "255604002".equals(theCode)
-					|| "38341003".equals(theCode)
-					|| "1208807009".equals(theCode)
-				) {
+				if (snomedValueSetCodes.contains(theCode)) {
 					return new CodeValidationResult().setCode(theCode);
 				}
 			}
@@ -380,19 +488,13 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 			String theDisplay,
 			String theValueSetUrl) {
 			if ("http://loinc.org".equals(theCodeSystem)) {
-				if ("48765-2".equals(theCode)
-					|| "10160-0".equals(theCode)
-					|| "11450-4".equals(theCode)
-				) {
+				if (loincCodes.contains(theCode)) {
 					return new CodeValidationResult().setCode(theCode);
 				}
 			}
 
 			if ("http://snomed.info/sct".equals(theCodeSystem)) {
-				if (
-					 "38341003".equals(theCode)
-					|| "1208807009".equals(theCode)
-				) {
+				if (snomedCodes.contains(theCode)) {
 					return new CodeValidationResult().setCode(theCode);
 				}
 			}
@@ -409,6 +511,15 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 				cs.addConcept().setCode("no-allergy-info");
 				cs.addConcept().setCode("no-medication-info");
 				cs.addConcept().setCode("no-known-allergies");
+				return cs;
+			}
+			if ("http://hl7.org/fhir/sid/cvx".equals(theSystem)) {
+				CodeSystem cs = new CodeSystem();
+				cs.setUrl("http://hl7.org/fhir/sid/cvx");
+				cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+				cs.addConcept().setCode("208");
+				cs.addConcept().setCode("121");
+				cs.addConcept().setCode("141");
 				return cs;
 			}
 			return null;
