@@ -558,4 +558,40 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		content.getAttachment().setData(theData);
 	}
 
+	@Test
+	public void testCreateBundleWithMultipleBinaryAttachments_createdSuccessfully() {
+		Binary binary = new Binary();
+		binary.setContentType("application/octet-stream");
+		binary.setData(SOME_BYTES);
+
+		DocumentReference docRef = new DocumentReference();
+		addDocumentAttachmentData(docRef, SOME_BYTES_2);
+
+		// Prepare the bundle
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		addBundleEntry(bundle, binary, "Binary");
+		addBundleEntry(bundle, docRef, "DocumentReference");
+
+		// Execute transaction
+		Bundle output = myClient.transaction().withBundle(bundle).execute();
+		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(output));
+
+		// Verify bundle response
+		assertEquals(2, output.getEntry().size());
+		output.getEntry().forEach(entry -> assertEquals("201 Created", entry.getResponse().getStatus()));
+
+		// Verify Binary and attachment
+		IIdType binaryId = new IdType(output.getEntry().get(0).getResponse().getLocation());
+		Binary actualBinary = myBinaryDao.read(binaryId, mySrd);
+		assertEquals(binary.getContentType(), actualBinary.getContentType());
+		assertArrayEquals(SOME_BYTES, actualBinary.getData());
+
+		// Verify DocumentReference and attachments
+		IIdType docRefId = new IdType(output.getEntry().get(1).getResponse().getLocation());
+		DocumentReference actualDocRef = myDocumentReferenceDao.read(docRefId, mySrd);
+		assertEquals("application/octet-stream", actualDocRef.getContentFirstRep().getAttachment().getContentType());
+		assertArrayEquals(SOME_BYTES_2, actualDocRef.getContentFirstRep().getAttachment().getData());
+	}
+
 }

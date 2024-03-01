@@ -253,7 +253,7 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 							List<DeferredBinaryTarget> deferredBinaryTargets =
 									getOrCreateDeferredBinaryStorageList(theResource);
 							DeferredBinaryTarget newDeferredBinaryTarget =
-									new DeferredBinaryTarget(newBlobId, nextTarget, data);
+									new DeferredBinaryTarget(newBlobId, resourceId.getValue(), nextTarget, data);
 							deferredBinaryTargets.add(newDeferredBinaryTarget);
 							newDeferredBinaryTarget.setBlobIdPrefixHookApplied(true);
 						} else {
@@ -312,12 +312,14 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 		if (deferredBinaryTargetList != null) {
 			IIdType resourceId = theResource.getIdElement();
 			for (DeferredBinaryTarget next : (List<DeferredBinaryTarget>) deferredBinaryTargetList) {
-				String blobId = next.getBlobId();
-				IBinaryTarget target = next.getBinaryTarget();
-				InputStream dataStream = next.getDataStream();
-				String contentType = target.getContentType();
-				RequestDetails requestDetails = initRequestDetails(next);
-				myBinaryStorageSvc.storeBlob(resourceId, blobId, contentType, dataStream, requestDetails);
+				if (resourceId.getValueAsString().equals(next.getResourceId())) {
+					String blobId = next.getBlobId();
+					IBinaryTarget target = next.getBinaryTarget();
+					InputStream dataStream = next.getDataStream();
+					String contentType = target.getContentType();
+					RequestDetails requestDetails = initRequestDetails(next);
+					myBinaryStorageSvc.storeBlob(resourceId, blobId, contentType, dataStream, requestDetails);
+				}
 			}
 		}
 	}
@@ -422,18 +424,25 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 
 	private static class DeferredBinaryTarget {
 		private final String myBlobId;
+		private final String myResourceId;
 		private final IBinaryTarget myBinaryTarget;
 		private final InputStream myDataStream;
 		private boolean myBlobIdPrefixHookApplied;
 
-		private DeferredBinaryTarget(String theBlobId, IBinaryTarget theBinaryTarget, byte[] theData) {
+		private DeferredBinaryTarget(
+				String theBlobId, String theResourceId, IBinaryTarget theBinaryTarget, byte[] theData) {
 			myBlobId = theBlobId;
+			myResourceId = theResourceId;
 			myBinaryTarget = theBinaryTarget;
 			myDataStream = new ByteArrayInputStream(theData);
 		}
 
 		String getBlobId() {
 			return myBlobId;
+		}
+
+		String getResourceId() {
+			return myResourceId;
 		}
 
 		IBinaryTarget getBinaryTarget() {
