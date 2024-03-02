@@ -441,38 +441,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				// Add RevInclude to CapabilityStatement.rest.resource
 				if (myRestResourceRevIncludesEnabled) {
 					NavigableSet<String> resourceRevIncludes = resourceNameToRevIncludes.get(resourceName);
-					if (resourceRevIncludes.isEmpty()) {
-						TreeSet<String> revIncludes = new TreeSet<>();
-						for (String nextResourceName : resourceToMethods.keySet()) {
-							if (isBlank(nextResourceName)) {
-								continue;
-							}
-
-							for (RuntimeSearchParam t : searchParamRegistry
-									.getActiveSearchParams(nextResourceName)
-									.values()) {
-								if (t.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-									if (isNotBlank(t.getName())) {
-										boolean appropriateTarget = false;
-										if (t.getTargets().contains(resourceName)
-												|| t.getTargets().isEmpty()) {
-											appropriateTarget = true;
-										}
-
-										if (appropriateTarget) {
-											revIncludes.add(nextResourceName + ":" + t.getName());
-										}
-									}
-								}
-							}
-						}
-						for (String nextInclude : revIncludes) {
-							terser.addElement(resource, "searchRevInclude", nextInclude);
-						}
-					} else {
-						for (String resourceInclude : resourceRevIncludes) {
-							terser.addElement(resource, "searchRevInclude", resourceInclude);
-						}
+					for (String resourceInclude : resourceRevIncludes) {
+						terser.addElement(resource, "searchRevInclude", resourceInclude);
 					}
 				}
 
