@@ -20,9 +20,11 @@
 package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
+import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
+import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
@@ -221,7 +223,6 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				return null;
 			});
 		} finally {
-
 			executeInTransactionWithSynchronization(() -> {
 				ourLog.info(
 						"Reduction step for instance[{}] produced {} successful and {} failed chunks",
@@ -256,6 +257,18 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 							WorkChunkStatusEnum.FAILED,
 							"JOB ABORTED");
 				}
+
+				if (response.isSuccessful()) {
+					/**
+					 * All reduction steps are final steps.
+					 */
+					IJobCompletionHandler<PT> completionHandler =
+							theJobWorkCursor.getJobDefinition().getCompletionHandler();
+					if (completionHandler != null) {
+						completionHandler.jobComplete(new JobCompletionDetails<>(parameters, instance));
+					}
+				}
+
 				return null;
 			});
 		}
