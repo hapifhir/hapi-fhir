@@ -1185,9 +1185,9 @@ public class QueryStack {
 				// instead of passing " payor._has:List:item:_id=list1" to the next recursion, the second call to
 				// getChainedPart() was wrongly removing "payor." and passing down "_has:List:item:_id=list1" instead.
 				// This resulted in running incorrect SQL with nonsensical join that resulted in 0 results.
-				// However, after running the hapi-fhir pipeline and the cdr master pipeline pointing to my branch,
-				// I've concluded there's no use case at all for the double call to "getChainedPart()", which is
-				// why there's no conditional logic at all to make a double call to getChainedPart().
+				// However, after running the pipeline,  I've concluded there's no use case at all for the
+				// double call to "getChainedPart()", which is why there's no conditional logic at all to make a double
+				// call to getChainedPart().
 				final String chainedPart = getChainedPart(parameterName);
 
 				orValues.stream()
