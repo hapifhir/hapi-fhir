@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.function.Consumer;
 
 import static ca.uhn.fhir.jpa.provider.BaseJpaSystemProvider.RESP_PARAM_SUCCESS;
+import static ca.uhn.test.util.LogEventIterableAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -69,7 +70,7 @@ class ReindexTerminologyCommandTest {
 		);
 		runAppWithStartupHook(args, getLoggingStartupHook());
 
-		LogEventIterableAssert.assertThat(myAppLogCapture.getLogEvents()).hasNoFailureMessages();
+		assertThat(myAppLogCapture.getLogEvents()).hasNoFailureMessages();
 	}
 
 
@@ -156,8 +157,9 @@ class ReindexTerminologyCommandTest {
 		);
 		runAppWithStartupHook(args, getLoggingStartupHook());
 
-		LogEventIterableAssert.assertThat(myAppLogCapture.getLogEvents()).hasAtLeastOneFailureMessage();
-		LogEventIterableAssert.assertThat(myAppLogCapture.getLogEvents()).hasAtLeastOneEventWithMessage("Freetext service is not configured. Operation didn't run.");
+		LogEventIterableAssert.assertThat(myAppLogCapture.getLogEvents())
+			.hasAtLeastOneFailureMessage()
+			.hasAtLeastOneEventWithMessage("Freetext service is not configured. Operation didn't run.");
 	}
 
 	static void runAppWithStartupHook(String[] args, Consumer<BaseApp> startupHook) {

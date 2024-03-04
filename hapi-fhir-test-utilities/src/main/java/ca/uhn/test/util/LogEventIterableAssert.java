@@ -5,15 +5,15 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.annotation.Nonnull;
 import org.assertj.core.api.AbstractIterableAssert;
 
-import java.util.Collection;
+import java.util.List;
 
-public class LogEventIterableAssert extends AbstractIterableAssert<LogEventIterableAssert, Collection<? extends ILoggingEvent>, ILoggingEvent, LogEventAssert> {
+public class LogEventIterableAssert extends AbstractIterableAssert<LogEventIterableAssert, List<? extends ILoggingEvent>, ILoggingEvent, LogEventAssert> {
 
-	protected LogEventIterableAssert(Collection<ILoggingEvent> actual) {
+	protected LogEventIterableAssert(List<ILoggingEvent> actual) {
 		super(actual, LogEventIterableAssert.class);
 	}
 
-	public static LogEventIterableAssert assertThat(Collection<ILoggingEvent> actual) {
+	public static LogEventIterableAssert assertThat(List<ILoggingEvent> actual) {
 		return new LogEventIterableAssert(actual);
 	}
 
@@ -60,6 +60,6 @@ public class LogEventIterableAssert extends AbstractIterableAssert<LogEventItera
 
 	@Override
 	protected LogEventIterableAssert newAbstractIterableAssert(Iterable<? extends ILoggingEvent> iterable) {
-		return new LogEventIterableAssert((Collection<ILoggingEvent>) iterable);
+		return new LogEventIterableAssert((List<ILoggingEvent>) iterable);
 	}
 }
