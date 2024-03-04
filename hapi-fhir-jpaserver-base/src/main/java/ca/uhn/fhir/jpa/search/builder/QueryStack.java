@@ -141,7 +141,6 @@ public class QueryStack {
 	private static final Logger ourLog = LoggerFactory.getLogger(QueryStack.class);
 	public static final String LOCATION_POSITION = "Location.position";
 	private static final Pattern PATTERN_DOT_AND_ALL_AFTER = Pattern.compile("\\..*");
-	private static final Pattern PATTERN_CHAIN_THEN_HAS = Pattern.compile("\\..*_has");
 
 	private final FhirContext myFhirContext;
 	private final SearchQueryBuilder mySqlBuilder;
@@ -1178,14 +1177,18 @@ public class QueryStack {
 
 			// Handle internal chain inside the has.
 			if (parameterName.contains(".")) {
-				final String chainedPart =
-						PATTERN_CHAIN_THEN_HAS.matcher(parameterName).find()
-								// The below handles then _has then chain then _has scenario: ex:
-								// "Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:List:item:_id=list1
-								? getChainedPart(parameterName)
-								// The below handles the regular has then chain scenario ex:
-								// Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor:Organization=org1
-								: getChainedPart(getChainedPart(parameterName));
+				// Previously, for some unknown reason, we were calling getChainedPart() twice.  This broke the _has
+				// then chain, then _has use case by effectively cutting off the second part of the chain and
+				// missing one iteration of the recursive call to build the query.
+				// So, for example, for Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:List:item:_id=list1
+				// instead of passing " payor._has:List:item:_id=list1" to the next recursion, the second call to
+				// getChainedPart() was wrongly removing "payor." and passing down "_has:List:item:_id=list1" instead.
+				// This resulted in running incorrect SQL with nonsensical join that resulted in 0 results.
+				// However, after running the hapi-fhir pipeline and the cdr master pipeline pointing to my branch,
+				// I've concluded there's no use case at all for the double call to "getChainedPart()", which is
+				// why there's no conditional logic at all to make a double call to getChainedPart().
+				final String chainedPart = getChainedPart(parameterName);
+
 				orValues.stream()
 						.filter(qp -> qp instanceof ReferenceParam)
 						.map(qp -> (ReferenceParam) qp)
