@@ -24,6 +24,7 @@ import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.LineIterator;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -66,7 +67,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -352,7 +352,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			verifyBulkExportResults(options, List.of("Patient/PING1"), Collections.singletonList("Patient/PNING3"));
 		} finally {
 			myCaptureQueriesListener.logSelectQueries();
-
 		}
 	}
 
