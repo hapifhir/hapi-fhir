@@ -1180,7 +1180,8 @@ public class QueryStack {
 				// Previously, for some unknown reason, we were calling getChainedPart() twice.  This broke the _has
 				// then chain, then _has use case by effectively cutting off the second part of the chain and
 				// missing one iteration of the recursive call to build the query.
-				// So, for example, for Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:List:item:_id=list1
+				// So, for example, for
+				// Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:List:item:_id=list1
 				// instead of passing " payor._has:List:item:_id=list1" to the next recursion, the second call to
 				// getChainedPart() was wrongly removing "payor." and passing down "_has:List:item:_id=list1" instead.
 				// This resulted in running incorrect SQL with nonsensical join that resulted in 0 results.
