@@ -51,8 +51,9 @@ public class PagingIteratorTest {
 		myPagingIterator = createPagingIterator(10);
 
 		String next = myPagingIterator.next();
-		assertThat(next).isNotNull();
-		assertThat(next).isNotEmpty();
+		assertThat(next)
+			.isNotNull()
+			.isNotEmpty();
 	}
 
 	@Test
