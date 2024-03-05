@@ -244,9 +244,15 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		AtomicBoolean completionBool = new AtomicBoolean();
 
+		AtomicBoolean jobStatusBool = new AtomicBoolean();
+
 		myCompletionHandler = (params) -> {
 			// ensure our completion handler fires
 			completionBool.getAndSet(true);
+
+			if (StatusEnum.COMPLETED.equals(params.getInstance().getStatus())){
+				jobStatusBool.getAndSet(true);
+			}
 		};
 
 		buildAndDefine3StepReductionJob(jobId, new IReductionStepHandler() {
@@ -309,8 +315,9 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		assertTrue(instanceOp.isPresent());
 		JobInstance jobInstance = instanceOp.get();
 
-		// ensure our completion handler fires
+		// ensure our completion handler fires with the up-to-date job instance
 		assertTrue(completionBool.get());
+		assertTrue(jobStatusBool.get());
 
 		assertEquals(StatusEnum.COMPLETED, jobInstance.getStatus());
 		assertEquals(1.0, jobInstance.getProgress());
