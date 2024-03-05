@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.jpa.test.config.Batch2FastSchedulerConfig;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.JsonUtil;
@@ -43,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.context.ContextConfiguration;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -60,6 +62,9 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+@ContextConfiguration(classes = {
+	Batch2FastSchedulerConfig.class
+})
 public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(Batch2CoordinatorIT.class);
 
@@ -192,6 +197,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
+		myBatch2JobHelper.awaitWorkChunksQueued(startResponse.getInstanceId());
 		myFirstStepLatch.awaitExpected();
 
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
@@ -216,8 +222,9 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.setExpectedCount(1);
 		myLastStepLatch.setExpectedCount(1);
 		String batchJobId = myJobCoordinator.startInstance(new SystemRequestDetails(), request).getInstanceId();
+		myBatch2JobHelper.awaitWorkChunksQueued(batchJobId);
 		myFirstStepLatch.awaitExpected();
-
+		myBatch2JobHelper.awaitWorkChunksQueued(batchJobId);
 		myBatch2JobHelper.assertFastTracking(batchJobId);
 
 		// Since there was only one chunk, the job should proceed without requiring a maintenance pass
@@ -290,6 +297,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 
 		String instanceId = startResponse.getInstanceId();
+		myBatch2JobHelper.awaitWorkChunksQueued(instanceId);
 		myFirstStepLatch.awaitExpected();
 		assertNotNull(instanceId);
 
@@ -379,8 +387,8 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		JobInstanceStartRequest request = buildRequest(jobId);
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
-
 		String instanceId = startResponse.getInstanceId();
+		myBatch2JobHelper.awaitWorkChunksQueued(instanceId);
 		myFirstStepLatch.awaitExpected();
 		assertNotNull(instanceId);
 
@@ -439,6 +447,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 		String instanceId = startResponse.getInstanceId();
+		myBatch2JobHelper.awaitWorkChunksQueued(instanceId);
 		myFirstStepLatch.awaitExpected();
 
 		myLastStepLatch.setExpectedCount(2);
@@ -494,6 +503,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 		String instanceId = startResponse.getInstanceId();
+		myBatch2JobHelper.awaitWorkChunksQueued(instanceId);
 		myFirstStepLatch.awaitExpected();
 
 		// validate

@@ -28,16 +28,25 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
+import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.time.DateUtils;
+import org.hibernate.Session;
 import org.slf4j.Logger;
+import org.springframework.transaction.annotation.Propagation;
 
+import java.sql.Connection;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
 public class JobInstanceProcessor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -52,13 +61,19 @@ public class JobInstanceProcessor {
 	private final String myInstanceId;
 	private final JobDefinitionRegistry myJobDefinitionegistry;
 
+	private final IHapiTransactionService myTransactionService;
+	private final EntityManager myEntityManager;
+
 	public JobInstanceProcessor(
 			IJobPersistence theJobPersistence,
 			BatchJobSender theBatchJobSender,
 			String theInstanceId,
 			JobChunkProgressAccumulator theProgressAccumulator,
 			IReductionStepExecutorService theReductionStepExecutorService,
-			JobDefinitionRegistry theJobDefinitionRegistry) {
+			JobDefinitionRegistry theJobDefinitionRegistry,
+			EntityManager theEntityManager,
+			IHapiTransactionService theTransactionService
+	) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myInstanceId = theInstanceId;
@@ -68,6 +83,9 @@ public class JobInstanceProcessor {
 		myJobInstanceProgressCalculator =
 				new JobInstanceProgressCalculator(theJobPersistence, theProgressAccumulator, theJobDefinitionRegistry);
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
+
+		myEntityManager = theEntityManager;
+		myTransactionService = theTransactionService;
 	}
 
 	public void process() {
@@ -84,8 +102,14 @@ public class JobInstanceProcessor {
 			// reload after update
 			theInstance = myJobPersistence.fetchInstance(myInstanceId).orElseThrow();
 		}
+
+		String instanceId = theInstance.getInstanceId();
+		JobDefinition<? extends IModelJson> jobDefinition =
+			myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
+
+		enqueueReadyChunks(instanceId, jobDefinition);
 		cleanupInstance(theInstance);
-		triggerGatedExecutions(theInstance);
+		triggerGatedExecutions(theInstance, jobDefinition);
 
 		ourLog.debug("Finished job processing: {} - {}", myInstanceId, stopWatch);
 	}
@@ -156,7 +180,7 @@ public class JobInstanceProcessor {
 		return false;
 	}
 
-	private void triggerGatedExecutions(JobInstance theInstance) {
+	private void triggerGatedExecutions(JobInstance theInstance, JobDefinition<?> theJobDefinition) {
 		if (!theInstance.isRunning()) {
 			ourLog.debug(
 					"JobInstance {} is not in a \"running\" state. Status {}",
@@ -169,10 +193,8 @@ public class JobInstanceProcessor {
 			return;
 		}
 
-		JobDefinition<? extends IModelJson> jobDefinition =
-				myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
 		JobWorkCursor<?, ?, ?> jobWorkCursor =
-				JobWorkCursor.fromJobDefinitionAndRequestedStepId(jobDefinition, theInstance.getCurrentGatedStepId());
+			JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, theInstance.getCurrentGatedStepId());
 
 		// final step
 		if (jobWorkCursor.isFinalStep() && !jobWorkCursor.isReductionStep()) {
@@ -193,7 +215,7 @@ public class JobInstanceProcessor {
 
 			if (jobWorkCursor.nextStep.isReductionStep()) {
 				JobWorkCursor<?, ?, ?> nextJobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
-						jobDefinition, jobWorkCursor.nextStep.getStepId());
+					jobWorkCursor.getJobDefinition(), jobWorkCursor.nextStep.getStepId());
 				myReductionStepExecutorService.triggerReductionStep(instanceId, nextJobWorkCursor);
 			} else {
 				// otherwise, continue processing as expected
@@ -204,8 +226,67 @@ public class JobInstanceProcessor {
 					"Not ready to advance gated execution of instance {} from step {} to {}.",
 					instanceId,
 					currentStepId,
-					jobWorkCursor.nextStep.getStepId());
+				jobWorkCursor.nextStep.getStepId());
 		}
+	}
+
+	/**
+	 * Chunks are initially created in READY state.
+	 * We will move READY chunks to QUEUE'd and sends them to the queue/topic (kafka)
+	 */
+	private void enqueueReadyChunks(String theJobInstanceId, JobDefinition<?> theJobDefinition) {
+		// we need a transaction to access the stream of workchunks
+		// because workchunks are created in READY state, there's an unknown
+		// number of them
+		getTxBuilder()
+			.withPropagation(Propagation.REQUIRES_NEW)
+			.execute(() -> {
+				Stream<WorkChunk> readyChunks = myJobPersistence.fetchAllWorkChunksForJobInStates(theJobInstanceId, Set.of(WorkChunkStatusEnum.READY));
+
+				// for each chunk id
+				// in transaction....
+				// -move to QUEUE'd
+				// -sent to topic
+				// commit
+				readyChunks.forEach(chunk -> {
+					/*
+					 * For each chunk id
+					 * * Move to QUEUE'd
+					 * * Send to kafka topic
+					 * * flush changes
+					 * * commit
+					 */
+					getTxBuilder().execute(() -> {
+						updateChunk(chunk, theJobInstanceId, theJobDefinition);
+
+						// flush this transaction
+						myEntityManager.flush();
+						myEntityManager.unwrap(Session.class)
+							.doWork(Connection::commit);
+					});
+				});
+			});
+	}
+
+	private void updateChunk(WorkChunk theChunk, String theInstanceId, JobDefinition<?> theJobDefinition) {
+		String chunkId = theChunk.getId();
+		int updated = myJobPersistence.enqueueWorkChunkForProcessing(chunkId);
+
+		if (updated == 1) {
+			// send to the queue
+			// we use current step id because it has not been moved to the next step (yet)
+			JobWorkNotification workNotification = new JobWorkNotification(
+				theJobDefinition.getJobDefinitionId(), theJobDefinition.getJobDefinitionVersion(),
+				theInstanceId, theChunk.getTargetStepId(), chunkId);
+			myBatchJobSender.sendWorkChannelMessage(workNotification);
+		} else {
+			// TODO - throw?
+		}
+	}
+
+	IHapiTransactionService.IExecutionBuilder getTxBuilder() {
+		return myTransactionService.withSystemRequest()
+			.withRequestPartitionId(RequestPartitionId.allPartitions());
 	}
 
 	private void processChunksForNextSteps(JobInstance theInstance, String nextStepId) {

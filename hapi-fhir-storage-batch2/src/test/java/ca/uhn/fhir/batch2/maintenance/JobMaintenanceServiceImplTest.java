@@ -17,14 +17,15 @@ import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
-import ca.uhn.fhir.util.Logs;
 import ca.uhn.test.util.LogbackCaptureTestExtension;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.google.common.collect.Lists;
+import jakarta.persistence.EntityManager;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,6 +86,10 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 	@Mock
 	private IChannelProducer myWorkChannelProducer;
+	@Mock
+	private EntityManager myEntityManager;
+	@Mock
+	IHapiTransactionService myTransactionService;
 	@Captor
 	private ArgumentCaptor<Message<JobWorkNotification>> myMessageCaptor;
 	@Captor
@@ -102,7 +107,10 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			myJobDefinitionRegistry,
 			batchJobSender,
 			myJobExecutorSvc,
-			myReductionStepExecutorService);
+			myReductionStepExecutorService,
+			myTransactionService,
+			myEntityManager
+		);
 		myStorageSettings.setJobFastTrackingEnabled(true);
 	}
 

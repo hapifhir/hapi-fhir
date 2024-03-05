@@ -88,11 +88,11 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 
 		myLastChunkId.set(chunkId);
 
-		if (!myGatedExecution) {
-			JobWorkNotification workNotification = new JobWorkNotification(
-					myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
-			myBatchJobSender.sendWorkChannelMessage(workNotification);
-		}
+//		if (!myGatedExecution) {
+//			JobWorkNotification workNotification = new JobWorkNotification(
+//					myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
+//			myBatchJobSender.sendWorkChannelMessage(workNotification);
+//		}
 	}
 
 	@Override

@@ -24,6 +24,8 @@ import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
@@ -35,6 +37,7 @@ import org.thymeleaf.util.ArrayUtils;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -84,6 +87,26 @@ public class Batch2JobHelper {
 
 	public JobInstance awaitJobHasStatusWithoutMaintenancePass(String theInstanceId, StatusEnum... theExpectedStatus) {
 		return awaitJobawaitJobHasStatusWithoutMaintenancePass(theInstanceId, 10, theExpectedStatus);
+	}
+
+	public JobInstance awaitWorkChunksQueued(String theInstanceId) {
+		return awaitWorkChunksQueued(theInstanceId, 10);
+	}
+
+	public JobInstance awaitWorkChunksQueued(String theInstanceId, int theSecondsToWait) {
+		await()
+			.atMost(theSecondsToWait, TimeUnit.SECONDS)
+			.pollDelay(100, TimeUnit.MILLISECONDS)
+			.until(() -> {
+				runMaintenancePass();
+
+				// if none in READY, we can assume they're queued
+				List<WorkChunk> workChunks = myJobPersistence.getAllWorkChunksForJob(theInstanceId);
+				return workChunks.stream().noneMatch(c -> c.getStatus() == WorkChunkStatusEnum.READY);
+			});
+
+		runMaintenancePass();
+		return myJobCoordinator.getInstance(theInstanceId);
 	}
 
 	public JobInstance awaitJobHasStatus(String theInstanceId, int theSecondsToWait, StatusEnum... theExpectedStatus) {
@@ -175,7 +198,11 @@ public class Batch2JobHelper {
 	}
 
 	public void awaitGatedStepId(String theExpectedGatedStepId, String theInstanceId) {
-		await().until(() -> theExpectedGatedStepId.equals(myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId()));
+		await().until(() -> {
+			String currentGatedStepId = myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId();
+			System.out.println("YYYYY " + currentGatedStepId);
+			return theExpectedGatedStepId.equals(currentGatedStepId);
+		});
 	}
 
 	public long getCombinedRecordsProcessed(String theInstanceId) {

@@ -534,9 +534,18 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 
 
 			// when
-			runInTransaction(()-> new JobInstanceProcessor(mySvc, null, instanceId1, new JobChunkProgressAccumulator(), null, jobDefinitionRegistry)
-				.process());
-
+			runInTransaction(()-> {
+				new JobInstanceProcessor(
+					mySvc,
+					null,
+					instanceId1,
+					new JobChunkProgressAccumulator(),
+					null,
+					jobDefinitionRegistry,
+					null, // entity manager
+					null // transaction manager
+				).process();
+			});
 
 			// then
 			JobInstance freshInstance1 = mySvc.fetchInstance(instanceId1).orElseThrow();

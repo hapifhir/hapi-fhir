@@ -27,7 +27,9 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -35,6 +37,7 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.util.Logs;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
+import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
@@ -89,6 +92,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final BatchJobSender myBatchJobSender;
 	private final WorkChunkProcessor myJobExecutorSvc;
+	private final IHapiTransactionService myTransactionService;
+	private final EntityManager myEntityManager;
 
 	private final Semaphore myRunMaintenanceSemaphore = new Semaphore(1);
 
@@ -107,7 +112,10 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 			@Nonnull BatchJobSender theBatchJobSender,
 			@Nonnull WorkChunkProcessor theExecutor,
-			@Nonnull IReductionStepExecutorService theReductionStepExecutorService) {
+			@Nonnull IReductionStepExecutorService theReductionStepExecutorService,
+			IHapiTransactionService theTransactionService,
+			EntityManager theEntityManager
+	) {
 		myStorageSettings = theStorageSettings;
 		myReductionStepExecutorService = theReductionStepExecutorService;
 		Validate.notNull(theSchedulerService);
@@ -120,6 +128,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myBatchJobSender = theBatchJobSender;
 		myJobExecutorSvc = theExecutor;
+		myTransactionService = theTransactionService;
+		myEntityManager = theEntityManager;
 	}
 
 	@Override
@@ -158,6 +168,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 
 	private boolean runMaintenanceDirectlyWithTimeout() {
 		if (getQueueLength() > 0) {
+			System.out.println("THREDS WAITING RETURN FALSE FOR FAST TRACKING");
 			ourLog.debug(
 					"There are already {} threads waiting to run a maintenance pass.  Ignoring request.",
 					getQueueLength());
@@ -232,7 +243,10 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 								instanceId,
 								progressAccumulator,
 								myReductionStepExecutorService,
-								myJobDefinitionRegistry);
+								myJobDefinitionRegistry,
+								myEntityManager,
+								myTransactionService
+						);
 						ourLog.debug(
 								"Triggering maintenance process for instance {} in status {}",
 								instanceId,

@@ -13,15 +13,19 @@ import ca.uhn.fhir.batch2.maintenance.JobMaintenanceServiceImpl;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.jpa.test.config.Batch2FastSchedulerConfig;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,8 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -53,7 +55,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @TestPropertySource(properties = {
 	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_FALSE
 })
-@ContextConfiguration(classes = {Batch2JobMaintenanceIT.SpringConfig.class})
+@ContextConfiguration(classes = {Batch2FastSchedulerConfig.class})
 public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(Batch2JobMaintenanceIT.class);
 
@@ -122,7 +124,8 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 
 		myFirstStepLatch.setExpectedCount(1);
 		myLastStepLatch.setExpectedCount(1);
-		String batchJobId = myJobCoordinator.startInstance(request).getInstanceId();
+		String batchJobId = myJobCoordinator.startInstance(new SystemRequestDetails(), request).getInstanceId();
+		myBatch2JobHelper.awaitJobHasStatus(batchJobId, StatusEnum.QUEUED);
 		myFirstStepLatch.awaitExpected();
 
 		myBatch2JobHelper.assertFastTracking(batchJobId);
@@ -249,16 +252,6 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 
 		ReductionStepOutput(List<?> theResult) {
 			myResult = theResult;
-		}
-	}
-
-	static class SpringConfig {
-		@Autowired
-		IJobMaintenanceService myJobMaintenanceService;
-
-		@PostConstruct
-		void fastScheduler() {
-			((JobMaintenanceServiceImpl)myJobMaintenanceService).setScheduledJobFrequencyMillis(200);
 		}
 	}
 }

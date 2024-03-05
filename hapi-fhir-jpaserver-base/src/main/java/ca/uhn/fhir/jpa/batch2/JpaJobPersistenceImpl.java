@@ -120,7 +120,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setSerializedData(theBatchWorkChunk.serializedData);
 		entity.setCreateTime(new Date());
 		entity.setStartTime(new Date());
-		entity.setStatus(WorkChunkStatusEnum.QUEUED);
+		entity.setStatus(WorkChunkStatusEnum.READY);
 		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
 		ourLog.trace(
 				"Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
@@ -137,6 +137,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				List.of(WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.ERRORED, WorkChunkStatusEnum.IN_PROGRESS);
 		int rowsModified = myWorkChunkRepository.updateChunkStatusForStart(
 				theChunkId, new Date(), WorkChunkStatusEnum.IN_PROGRESS, priorStates);
+
 		if (rowsModified == 0) {
 			ourLog.info("Attempting to start chunk {} but it was already started.", theChunkId);
 			return Optional.empty();
@@ -286,6 +287,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				.execute(() -> myJobInstanceRepository.findAll(pageRequest).stream()
 						.map(this::toInstance)
 						.collect(Collectors.toList()));
+	}
+
+	@Override
+	public int enqueueWorkChunkForProcessing(String theChunkId) {
+		return myWorkChunkRepository.updateChunkStatus(theChunkId,
+			WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.READY);
 	}
 
 	@Override
@@ -456,6 +463,22 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return myWorkChunkRepository
 				.fetchChunksForStep(theInstanceId, theStepId)
 				.map(this::toChunk);
+	}
+
+	@Override
+	public Stream<WorkChunk> fetchAllWorkChunksForJobInStates(String theInstanceId, Set<WorkChunkStatusEnum> theWorkChunkStatuses) {
+		return myWorkChunkRepository.fetchChunksForJobInStates(theInstanceId, theWorkChunkStatuses)
+			.map(this::toChunk);
+	}
+
+	@Override
+	public List<WorkChunk> getAllWorkChunksForJob(String theInstanceId) {
+		return myTransactionService.withSystemRequest()
+			.withPropagation(Propagation.REQUIRES_NEW)
+			.execute(() -> {
+				return myWorkChunkRepository.fetchChunks(Pageable.ofSize(100), theInstanceId)
+					.stream().map(this::toChunk).collect(Collectors.toList());
+			});
 	}
 
 	@Override

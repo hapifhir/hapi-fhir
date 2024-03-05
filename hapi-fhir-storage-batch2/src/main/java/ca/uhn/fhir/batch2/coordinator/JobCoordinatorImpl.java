@@ -148,9 +148,10 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 				.withPropagation(Propagation.REQUIRES_NEW)
 				.execute(() -> myJobPersistence.onCreateWithFirstChunk(jobDefinition, theStartRequest.getParameters()));
 
-		JobWorkNotification workNotification = JobWorkNotification.firstStepNotification(
-				jobDefinition, instanceAndFirstChunk.jobInstanceId, instanceAndFirstChunk.workChunkId);
-		sendBatchJobWorkNotificationAfterCommit(workNotification);
+//		JobWorkNotification workNotification = JobWorkNotification.firstStepNotification(
+//				jobDefinition, instanceAndFirstChunk.jobInstanceId, instanceAndFirstChunk.workChunkId);
+//		sendBatchJobWorkNotificationAfterCommit(workNotification);
+
 
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
 		response.setInstanceId(instanceAndFirstChunk.jobInstanceId);

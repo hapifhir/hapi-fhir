@@ -25,7 +25,9 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
@@ -86,6 +88,8 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	List<JobInstance> fetchInstances(int thePageSize, int thePageIndex);
 
+	int enqueueWorkChunkForProcessing(String theChunkId);
+
 	/**
 	 * Fetch instances ordered by myCreateTime DESC
 	 */
@@ -130,6 +134,25 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @return - a stream for fetching work chunks
 	 */
 	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
+
+	/**
+	 * Fetch all WorkChunks for job with instance id theInstanceId that are in
+	 * theWorkChunkStatuses.
+	 * @param theInstanceId the instance id of the job
+	 * @param theWorkChunkStatuses the statuses of interest
+	 * @return a stream of work chunks
+	 */
+	@Transactional
+	Stream<WorkChunk> fetchAllWorkChunksForJobInStates(String theInstanceId, Set<WorkChunkStatusEnum> theWorkChunkStatuses);
+
+	/**
+	 * This method is only useful for testing.
+	 * @param theInstanceId
+	 * @param theStatuses
+	 * @return
+	 */
+	@VisibleForTesting
+	List<WorkChunk> getAllWorkChunksForJob(String theInstanceId);
 
 	/**
 	 * Callback to update a JobInstance within a locked transaction.

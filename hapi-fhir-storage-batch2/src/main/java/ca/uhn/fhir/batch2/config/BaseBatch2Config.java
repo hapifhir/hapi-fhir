@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
+import jakarta.persistence.EntityManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -103,15 +104,21 @@ public abstract class BaseBatch2Config {
 			JpaStorageSettings theStorageSettings,
 			BatchJobSender theBatchJobSender,
 			WorkChunkProcessor theExecutor,
-			IReductionStepExecutorService theReductionStepExecutorService) {
+			IReductionStepExecutorService theReductionStepExecutorService,
+			IHapiTransactionService theTransactionService,
+			EntityManager theEntityManager
+	) {
 		return new JobMaintenanceServiceImpl(
-				theSchedulerService,
-				myPersistence,
-				theStorageSettings,
-				theJobDefinitionRegistry,
-				theBatchJobSender,
-				theExecutor,
-				theReductionStepExecutorService);
+			theSchedulerService,
+			myPersistence,
+			theStorageSettings,
+			theJobDefinitionRegistry,
+			theBatchJobSender,
+			theExecutor,
+			theReductionStepExecutorService,
+			theTransactionService,
+			theEntityManager
+		);
 	}
 
 	@Bean
