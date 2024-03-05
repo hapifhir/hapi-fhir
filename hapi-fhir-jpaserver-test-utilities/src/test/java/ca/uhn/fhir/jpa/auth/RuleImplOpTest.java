@@ -36,9 +36,9 @@ public class RuleImplOpTest {
 	private static final String PATIENT_BIRTH_DATE = "Patient.birthDate";
 	private static final Parameters PARAMETERS = buildParameters();
 	private static final String DOCUMENT = "document";
-	private static final String ERROR_TEMPLATE = "HAPI-0339: Can not handle transaction with nested resource of type %s";
-	private static final String ERROR_PARAMETERS = String.format(ERROR_TEMPLATE, "Parameters");
-	private static final String ERROR_BUNDLE = String.format(ERROR_TEMPLATE, "Bundle");
+	private static final String ERROR_TEMPLATE = "HAPI-0339: Can not handle nested Parameters with %s operation";
+	private static final String ERROR_UPDATE = String.format(ERROR_TEMPLATE, "UPDATE");
+	private static final String ERROR_CREATE = String.format(ERROR_TEMPLATE, "CREATE");
 
 	private static final String REQUEST_RULELIST = AuthorizationInterceptor.class.getName() + "_1_RULELIST";
 	private final Patient myPatient = buildPatient();
@@ -71,7 +71,7 @@ public class RuleImplOpTest {
 			applyRule(bundleBuilder.getBundle());
 			fail("Expected an InvalidRequestException");
 		} catch (InvalidRequestException exception) {
-			assertEquals(ERROR_PARAMETERS, exception.getMessage());
+			assertEquals(ERROR_UPDATE, exception.getMessage());
 		}
 	}
 
@@ -84,7 +84,7 @@ public class RuleImplOpTest {
 			applyRule(bundleBuilder.getBundle());
 			fail("Expected an InvalidRequestException");
 		} catch (InvalidRequestException exception) {
-			assertEquals(ERROR_BUNDLE, exception.getMessage());
+			assertEquals(ERROR_CREATE, exception.getMessage());
 		}
 	}
 
