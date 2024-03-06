@@ -27,7 +27,6 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
-import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
@@ -150,7 +149,8 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @return a stream of work chunks
 	 */
 	@Transactional
-	Stream<WorkChunk> fetchAllWorkChunksForJobInStates(String theInstanceId, Set<WorkChunkStatusEnum> theWorkChunkStatuses);
+	Stream<WorkChunk> fetchAllWorkChunksForJobInStates(
+			String theInstanceId, Set<WorkChunkStatusEnum> theWorkChunkStatuses);
 
 	/**
 	 * Callback to update a JobInstance within a locked transaction.

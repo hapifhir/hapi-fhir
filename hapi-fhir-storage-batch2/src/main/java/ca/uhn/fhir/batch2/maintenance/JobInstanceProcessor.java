@@ -32,11 +32,9 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.model.api.IModelJson;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import jakarta.persistence.EntityManager;
@@ -74,8 +72,7 @@ public class JobInstanceProcessor {
 			IReductionStepExecutorService theReductionStepExecutorService,
 			JobDefinitionRegistry theJobDefinitionRegistry,
 			EntityManager theEntityManager,
-			IHapiTransactionService theTransactionService
-	) {
+			IHapiTransactionService theTransactionService) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myInstanceId = theInstanceId;
@@ -106,7 +103,7 @@ public class JobInstanceProcessor {
 		}
 
 		JobDefinition<? extends IModelJson> jobDefinition =
-			myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
+				myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
 
 		enqueueReadyChunks(theInstance, jobDefinition);
 		cleanupInstance(theInstance);
@@ -194,8 +191,8 @@ public class JobInstanceProcessor {
 			return;
 		}
 
-		JobWorkCursor<?, ?, ?> jobWorkCursor =
-			JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, theInstance.getCurrentGatedStepId());
+		JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
+				theJobDefinition, theInstance.getCurrentGatedStepId());
 
 		// final step
 		if (jobWorkCursor.isFinalStep() && !jobWorkCursor.isReductionStep()) {
@@ -216,7 +213,7 @@ public class JobInstanceProcessor {
 
 			if (jobWorkCursor.nextStep.isReductionStep()) {
 				JobWorkCursor<?, ?, ?> nextJobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
-					jobWorkCursor.getJobDefinition(), jobWorkCursor.nextStep.getStepId());
+						jobWorkCursor.getJobDefinition(), jobWorkCursor.nextStep.getStepId());
 				myReductionStepExecutorService.triggerReductionStep(instanceId, nextJobWorkCursor);
 			} else {
 				// otherwise, continue processing as expected
@@ -227,7 +224,7 @@ public class JobInstanceProcessor {
 					"Not ready to advance gated execution of instance {} from step {} to {}.",
 					instanceId,
 					currentStepId,
-				jobWorkCursor.nextStep.getStepId());
+					jobWorkCursor.nextStep.getStepId());
 		}
 	}
 
@@ -245,30 +242,27 @@ public class JobInstanceProcessor {
 		// we need a transaction to access the stream of workchunks
 		// because workchunks are created in READY state, there's an unknown
 		// number of them (and so we could be reading many from the db)
-		getTxBuilder()
-			.withPropagation(Propagation.REQUIRES_NEW)
-			.execute(() -> {
-				Stream<WorkChunk> readyChunks = myJobPersistence.fetchAllWorkChunksForJobInStates(theJobInstance.getInstanceId(),
-					Set.of(WorkChunkStatusEnum.READY));
+		getTxBuilder().withPropagation(Propagation.REQUIRES_NEW).execute(() -> {
+			Stream<WorkChunk> readyChunks = myJobPersistence.fetchAllWorkChunksForJobInStates(
+					theJobInstance.getInstanceId(), Set.of(WorkChunkStatusEnum.READY));
 
-				readyChunks.forEach(chunk -> {
-					/*
-					 * For each chunk id
-					 * * Move to QUEUE'd
-					 * * Send to topic
-					 * * flush changes
-					 * * commit
-					 */
-					getTxBuilder().execute(() -> {
-						if (updateChunkAndSendToQueue(chunk, theJobInstance, theJobDefinition)) {
-							// flush this transaction
-							myEntityManager.flush();
-							myEntityManager.unwrap(Session.class)
-								.doWork(Connection::commit);
-						}
-					});
+			readyChunks.forEach(chunk -> {
+				/*
+				 * For each chunk id
+				 * * Move to QUEUE'd
+				 * * Send to topic
+				 * * flush changes
+				 * * commit
+				 */
+				getTxBuilder().execute(() -> {
+					if (updateChunkAndSendToQueue(chunk, theJobInstance, theJobDefinition)) {
+						// flush this transaction
+						myEntityManager.flush();
+						myEntityManager.unwrap(Session.class).doWork(Connection::commit);
+					}
 				});
 			});
+		});
 	}
 
 	/**
@@ -280,13 +274,14 @@ public class JobInstanceProcessor {
 	 *
 	 * Returns true after processing.
 	 */
-	private boolean updateChunkAndSendToQueue(WorkChunk theChunk, JobInstance theInstance, JobDefinition<?> theJobDefinition) {
+	private boolean updateChunkAndSendToQueue(
+			WorkChunk theChunk, JobInstance theInstance, JobDefinition<?> theJobDefinition) {
 		String chunkId = theChunk.getId();
 		int updated = myJobPersistence.enqueueWorkChunkForProcessing(chunkId);
 
 		if (updated == 1) {
 			JobWorkCursor<?, ?, ?> jobWorkCursor =
-				JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, theChunk.getTargetStepId());
+					JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, theChunk.getTargetStepId());
 
 			if (theJobDefinition.isGatedExecution() && jobWorkCursor.isFinalStep() && jobWorkCursor.isReductionStep()) {
 				// reduction steps are processed by
@@ -299,16 +294,21 @@ public class JobInstanceProcessor {
 			// send to the queue
 			// we use current step id because it has not been moved to the next step (yet)
 			JobWorkNotification workNotification = new JobWorkNotification(
-				theJobDefinition.getJobDefinitionId(), theJobDefinition.getJobDefinitionVersion(),
-				theInstance.getInstanceId(), theChunk.getTargetStepId(), chunkId);
+					theJobDefinition.getJobDefinitionId(),
+					theJobDefinition.getJobDefinitionVersion(),
+					theInstance.getInstanceId(),
+					theChunk.getTargetStepId(),
+					chunkId);
 			myBatchJobSender.sendWorkChannelMessage(workNotification);
 			return true;
 		} else {
 			// means the work chunk is likely already gone...
 			// we'll log and skip it. If it's still in the DB, the next pass
 			// will pick it up. Otherwise, it's no longer important
-			ourLog.error("Job Instance {} failed to transition work chunk with id {} from READY to QUEUED; skipping work chunk.",
-				theInstance.getInstanceId(), theChunk.getId());
+			ourLog.error(
+					"Job Instance {} failed to transition work chunk with id {} from READY to QUEUED; skipping work chunk.",
+					theInstance.getInstanceId(),
+					theChunk.getId());
 
 			// nothing changed, nothing to commit
 			return false;
@@ -316,8 +316,7 @@ public class JobInstanceProcessor {
 	}
 
 	private IHapiTransactionService.IExecutionBuilder getTxBuilder() {
-		return myTransactionService.withSystemRequest()
-			.withRequestPartitionId(RequestPartitionId.allPartitions());
+		return myTransactionService.withSystemRequest().withRequestPartitionId(RequestPartitionId.allPartitions());
 	}
 
 	private void processChunksForNextSteps(JobInstance theInstance, String nextStepId) {

@@ -293,8 +293,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public int enqueueWorkChunkForProcessing(String theChunkId) {
-		return myWorkChunkRepository.updateChunkStatus(theChunkId,
-			WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.READY);
+		return myWorkChunkRepository.updateChunkStatus(
+				theChunkId, WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.READY);
 	}
 
 	@Override
@@ -410,7 +410,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public Set<WorkChunkStatusEnum> getDistinctWorkChunkStatesForJobAndStep(String theInstanceId, String theCurrentStepId) {
+	public Set<WorkChunkStatusEnum> getDistinctWorkChunkStatesForJobAndStep(
+			String theInstanceId, String theCurrentStepId) {
 		if (getRunningJob(theInstanceId) == null) {
 			return Collections.unmodifiableSet(new HashSet<>());
 		}
@@ -484,9 +485,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public Stream<WorkChunk> fetchAllWorkChunksForJobInStates(String theInstanceId, Set<WorkChunkStatusEnum> theWorkChunkStatuses) {
-		return myWorkChunkRepository.fetchChunksForJobInStates(theInstanceId, theWorkChunkStatuses)
-			.map(this::toChunk);
+	public Stream<WorkChunk> fetchAllWorkChunksForJobInStates(
+			String theInstanceId, Set<WorkChunkStatusEnum> theWorkChunkStatuses) {
+		return myWorkChunkRepository
+				.fetchChunksForJobInStates(theInstanceId, theWorkChunkStatuses)
+				.map(this::toChunk);
 	}
 
 	@Override

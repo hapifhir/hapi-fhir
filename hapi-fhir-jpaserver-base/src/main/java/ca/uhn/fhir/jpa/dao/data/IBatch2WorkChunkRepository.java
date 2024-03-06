@@ -63,11 +63,9 @@ public interface IBatch2WorkChunkRepository
 	Stream<Batch2WorkChunkEntity> fetchChunksForStep(
 			@Param("instanceId") String theInstanceId, @Param("targetStepId") String theTargetStepId);
 
-	@Query(
-		"SELECT e FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId AND e.myStatus IN :states"
-	)
+	@Query("SELECT e FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId AND e.myStatus IN :states")
 	Stream<Batch2WorkChunkEntity> fetchChunksForJobInStates(
-		@Param("instanceId") String theInstanceId, @Param("states") Collection<WorkChunkStatusEnum> theStates);
+			@Param("instanceId") String theInstanceId, @Param("states") Collection<WorkChunkStatusEnum> theStates);
 
 	@Modifying
 	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, "
@@ -109,14 +107,11 @@ public interface IBatch2WorkChunkRepository
 			@Param("startStatuses") Collection<WorkChunkStatusEnum> theStartStatuses);
 
 	@Modifying
-	@Query(
-		"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :newStatus WHERE e.myId = :id AND e.myStatus = :oldStatus"
-	)
+	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :newStatus WHERE e.myId = :id AND e.myStatus = :oldStatus")
 	int updateChunkStatus(
-		@Param("id") String theChunkId,
-		@Param("newStatus") WorkChunkStatusEnum theNewStatus,
-		@Param("oldStatus") WorkChunkStatusEnum theOldStatus
-	);
+			@Param("id") String theChunkId,
+			@Param("newStatus") WorkChunkStatusEnum theNewStatus,
+			@Param("oldStatus") WorkChunkStatusEnum theOldStatus);
 
 	@Modifying
 	@Query("DELETE FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId")

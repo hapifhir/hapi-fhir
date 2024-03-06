@@ -106,19 +106,17 @@ public abstract class BaseBatch2Config {
 			WorkChunkProcessor theExecutor,
 			IReductionStepExecutorService theReductionStepExecutorService,
 			IHapiTransactionService theTransactionService,
-			EntityManager theEntityManager
-	) {
+			EntityManager theEntityManager) {
 		return new JobMaintenanceServiceImpl(
-			theSchedulerService,
-			myPersistence,
-			theStorageSettings,
-			theJobDefinitionRegistry,
-			theBatchJobSender,
-			theExecutor,
-			theReductionStepExecutorService,
-			theTransactionService,
-			theEntityManager
-		);
+				theSchedulerService,
+				myPersistence,
+				theStorageSettings,
+				theJobDefinitionRegistry,
+				theBatchJobSender,
+				theExecutor,
+				theReductionStepExecutorService,
+				theTransactionService,
+				theEntityManager);
 	}
 
 	@Bean

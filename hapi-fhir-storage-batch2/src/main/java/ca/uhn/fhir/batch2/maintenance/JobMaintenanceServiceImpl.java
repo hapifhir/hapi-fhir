@@ -27,7 +27,6 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
@@ -114,8 +113,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			@Nonnull WorkChunkProcessor theExecutor,
 			@Nonnull IReductionStepExecutorService theReductionStepExecutorService,
 			IHapiTransactionService theTransactionService,
-			EntityManager theEntityManager
-	) {
+			EntityManager theEntityManager) {
 		myStorageSettings = theStorageSettings;
 		myReductionStepExecutorService = theReductionStepExecutorService;
 		Validate.notNull(theSchedulerService);
@@ -245,8 +243,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 								myReductionStepExecutorService,
 								myJobDefinitionRegistry,
 								myEntityManager,
-								myTransactionService
-						);
+								myTransactionService);
 						ourLog.debug(
 								"Triggering maintenance process for instance {} in status {}",
 								instanceId,
