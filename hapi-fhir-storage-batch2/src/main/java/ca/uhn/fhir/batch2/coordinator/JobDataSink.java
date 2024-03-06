@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
-import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkData;
 import ca.uhn.fhir.i18n.Msg;
@@ -50,7 +49,6 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 	private final JobDefinitionStep<PT, OT, ?> myTargetStep;
 	private final AtomicInteger myChunkCounter = new AtomicInteger(0);
 	private final AtomicReference<String> myLastChunkId = new AtomicReference<>();
-	private final boolean myGatedExecution;
 	private final IHapiTransactionService myHapiTransactionService;
 
 	JobDataSink(
@@ -66,7 +64,6 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 		myJobDefinitionId = theDefinition.getJobDefinitionId();
 		myJobDefinitionVersion = theDefinition.getJobDefinitionVersion();
 		myTargetStep = theJobWorkCursor.nextStep;
-		myGatedExecution = theDefinition.isGatedExecution();
 		myHapiTransactionService = theHapiTransactionService;
 	}
 
@@ -79,6 +76,9 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 		OT dataValue = theData.getData();
 		String dataValueString = JsonUtil.serialize(dataValue, false);
 
+		// once finished, create workchunks in READY state
+		// the JobMaintenanceServiceImpl will transition these to
+		// QUEUED when necessary
 		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(
 				myJobDefinitionId, myJobDefinitionVersion, targetStepId, instanceId, sequence, dataValueString);
 		String chunkId = myHapiTransactionService
@@ -87,12 +87,6 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 				.execute(() -> myJobPersistence.onWorkChunkCreate(batchWorkChunk));
 
 		myLastChunkId.set(chunkId);
-
-//		if (!myGatedExecution) {
-//			JobWorkNotification workNotification = new JobWorkNotification(
-//					myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
-//			myBatchJobSender.sendWorkChannelMessage(workNotification);
-//		}
 	}
 
 	@Override

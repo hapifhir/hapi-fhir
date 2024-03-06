@@ -1,0 +1,12 @@
+---
+type: add
+issue: 5745
+title: "Added another work chunk state to Batch2 jobs: READY.
+        This work chunk state will be the initial state work chunks
+        are created. After which, they will be picked up by a maintenance
+        pass and have their states updated to QUEUED before sending them to
+        the queue.
+        The exception is for ReductionStep chunks (because reduction steps
+        are not read off of the queue, but executed by the maintenance job
+        inline.
+"

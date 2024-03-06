@@ -32,9 +32,11 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import jakarta.persistence.EntityManager;
@@ -103,11 +105,10 @@ public class JobInstanceProcessor {
 			theInstance = myJobPersistence.fetchInstance(myInstanceId).orElseThrow();
 		}
 
-		String instanceId = theInstance.getInstanceId();
 		JobDefinition<? extends IModelJson> jobDefinition =
 			myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
 
-		enqueueReadyChunks(instanceId, jobDefinition);
+		enqueueReadyChunks(theInstance, jobDefinition);
 		cleanupInstance(theInstance);
 		triggerGatedExecutions(theInstance, jobDefinition);
 
@@ -204,8 +205,8 @@ public class JobInstanceProcessor {
 
 		String instanceId = theInstance.getInstanceId();
 		String currentStepId = jobWorkCursor.getCurrentStepId();
-		boolean shouldAdvance = myJobPersistence.canAdvanceInstanceToNextStep(instanceId, currentStepId);
-		if (shouldAdvance) {
+		boolean canAdvance = myJobPersistence.canAdvanceInstanceToNextStep(instanceId, currentStepId);
+		if (canAdvance) {
 			String nextStepId = jobWorkCursor.nextStep.getStepId();
 			ourLog.info(
 					"All processing is complete for gated execution of instance {} step {}. Proceeding to step {}",
@@ -232,59 +233,89 @@ public class JobInstanceProcessor {
 
 	/**
 	 * Chunks are initially created in READY state.
-	 * We will move READY chunks to QUEUE'd and sends them to the queue/topic (kafka)
+	 * We will move READY chunks to QUEUE'd and send them to the queue/topic (kafka)
+	 * for processing.
+	 *
+	 * We could block chunks from being moved from QUEUE'd to READY here for gated steps
+	 * but currently, progress is calculated by looking at completed chunks only;
+	 * we'd need a new GATE_WAITING state to move chunks to to prevent jobs from
+	 * completing prematurely.
 	 */
-	private void enqueueReadyChunks(String theJobInstanceId, JobDefinition<?> theJobDefinition) {
+	private void enqueueReadyChunks(JobInstance theJobInstance, JobDefinition<?> theJobDefinition) {
 		// we need a transaction to access the stream of workchunks
 		// because workchunks are created in READY state, there's an unknown
-		// number of them
+		// number of them (and so we could be reading many from the db)
 		getTxBuilder()
 			.withPropagation(Propagation.REQUIRES_NEW)
 			.execute(() -> {
-				Stream<WorkChunk> readyChunks = myJobPersistence.fetchAllWorkChunksForJobInStates(theJobInstanceId, Set.of(WorkChunkStatusEnum.READY));
+				Stream<WorkChunk> readyChunks = myJobPersistence.fetchAllWorkChunksForJobInStates(theJobInstance.getInstanceId(),
+					Set.of(WorkChunkStatusEnum.READY));
 
-				// for each chunk id
-				// in transaction....
-				// -move to QUEUE'd
-				// -sent to topic
-				// commit
 				readyChunks.forEach(chunk -> {
 					/*
 					 * For each chunk id
 					 * * Move to QUEUE'd
-					 * * Send to kafka topic
+					 * * Send to topic
 					 * * flush changes
 					 * * commit
 					 */
 					getTxBuilder().execute(() -> {
-						updateChunk(chunk, theJobInstanceId, theJobDefinition);
-
-						// flush this transaction
-						myEntityManager.flush();
-						myEntityManager.unwrap(Session.class)
-							.doWork(Connection::commit);
+						if (updateChunkAndSendToQueue(chunk, theJobInstance, theJobDefinition)) {
+							// flush this transaction
+							myEntityManager.flush();
+							myEntityManager.unwrap(Session.class)
+								.doWork(Connection::commit);
+						}
 					});
 				});
 			});
 	}
 
-	private void updateChunk(WorkChunk theChunk, String theInstanceId, JobDefinition<?> theJobDefinition) {
+	/**
+	 * Updates the Work Chunk and sends it to the queue.
+	 *
+	 * Because ReductionSteps are done inline by the maintenance pass,
+	 * those will not be sent to the queue (but they will still have their
+	 * status updated from READY -> QUEUED).
+	 *
+	 * Returns true after processing.
+	 */
+	private boolean updateChunkAndSendToQueue(WorkChunk theChunk, JobInstance theInstance, JobDefinition<?> theJobDefinition) {
 		String chunkId = theChunk.getId();
 		int updated = myJobPersistence.enqueueWorkChunkForProcessing(chunkId);
 
 		if (updated == 1) {
+			JobWorkCursor<?, ?, ?> jobWorkCursor =
+				JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, theChunk.getTargetStepId());
+
+			if (theJobDefinition.isGatedExecution() && jobWorkCursor.isFinalStep() && jobWorkCursor.isReductionStep()) {
+				// reduction steps are processed by
+				// ReductionStepExecutorServiceImpl
+				// which does not wait for steps off the queue but reads all the
+				// "QUEUE'd" chunks and processes them inline
+				return true;
+			}
+
 			// send to the queue
 			// we use current step id because it has not been moved to the next step (yet)
 			JobWorkNotification workNotification = new JobWorkNotification(
 				theJobDefinition.getJobDefinitionId(), theJobDefinition.getJobDefinitionVersion(),
-				theInstanceId, theChunk.getTargetStepId(), chunkId);
+				theInstance.getInstanceId(), theChunk.getTargetStepId(), chunkId);
 			myBatchJobSender.sendWorkChannelMessage(workNotification);
+			return true;
 		} else {
-			// TODO - throw?
+			// means the work chunk is likely already gone...
+			// we'll log and skip it. If it's still in the DB, the next pass
+			// will pick it up. Otherwise, it's no longer important
+			ourLog.error("Job Instance {} failed to transition work chunk with id {} from READY to QUEUED; skipping work chunk.",
+				theInstance.getInstanceId(), theChunk.getId());
+
+			// nothing changed, nothing to commit
+			return false;
 		}
 	}
 
-	IHapiTransactionService.IExecutionBuilder getTxBuilder() {
+	private IHapiTransactionService.IExecutionBuilder getTxBuilder() {
 		return myTransactionService.withSystemRequest()
 			.withRequestPartitionId(RequestPartitionId.allPartitions());
 	}

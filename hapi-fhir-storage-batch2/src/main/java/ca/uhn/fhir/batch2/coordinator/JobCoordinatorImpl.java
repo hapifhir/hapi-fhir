@@ -143,43 +143,16 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		myJobParameterJsonValidator.validateJobParameters(theRequestDetails, theStartRequest, jobDefinition);
 
+		// we only create the first chunk amd job here
+		// JobMaintenanceServiceImpl.doMaintenancePass will handle the rest
 		IJobPersistence.CreateResult instanceAndFirstChunk = myTransactionService
 				.withSystemRequestOnDefaultPartition()
 				.withPropagation(Propagation.REQUIRES_NEW)
 				.execute(() -> myJobPersistence.onCreateWithFirstChunk(jobDefinition, theStartRequest.getParameters()));
 
-//		JobWorkNotification workNotification = JobWorkNotification.firstStepNotification(
-//				jobDefinition, instanceAndFirstChunk.jobInstanceId, instanceAndFirstChunk.workChunkId);
-//		sendBatchJobWorkNotificationAfterCommit(workNotification);
-
-
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
 		response.setInstanceId(instanceAndFirstChunk.jobInstanceId);
 		return response;
-	}
-
-	/**
-	 * In order to make sure that the data is actually in the DB when JobWorkNotification is handled,
-	 * this method registers a transaction synchronization that sends JobWorkNotification to Job WorkChannel
-	 * if and when the current database transaction is successfully committed.
-	 * If the transaction is rolled back, the JobWorkNotification will not be sent to the job WorkChannel.
-	 */
-	private void sendBatchJobWorkNotificationAfterCommit(final JobWorkNotification theJobWorkNotification) {
-		if (TransactionSynchronizationManager.isSynchronizationActive()) {
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-				@Override
-				public int getOrder() {
-					return 0;
-				}
-
-				@Override
-				public void afterCommit() {
-					myBatchJobSender.sendWorkChannelMessage(theJobWorkNotification);
-				}
-			});
-		} else {
-			myBatchJobSender.sendWorkChannelMessage(theJobWorkNotification);
-		}
 	}
 
 	/**

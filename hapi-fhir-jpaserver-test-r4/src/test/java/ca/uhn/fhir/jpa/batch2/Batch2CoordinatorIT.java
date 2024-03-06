@@ -197,7 +197,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
-		myBatch2JobHelper.awaitWorkChunksQueued(startResponse.getInstanceId());
+		myBatch2JobHelper.runMaintenancePass();
 		myFirstStepLatch.awaitExpected();
 
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
@@ -222,12 +222,10 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.setExpectedCount(1);
 		myLastStepLatch.setExpectedCount(1);
 		String batchJobId = myJobCoordinator.startInstance(new SystemRequestDetails(), request).getInstanceId();
-		myBatch2JobHelper.awaitWorkChunksQueued(batchJobId);
+		myBatch2JobHelper.runMaintenancePass();
 		myFirstStepLatch.awaitExpected();
-		myBatch2JobHelper.awaitWorkChunksQueued(batchJobId);
 		myBatch2JobHelper.assertFastTracking(batchJobId);
 
-		// Since there was only one chunk, the job should proceed without requiring a maintenance pass
 		myBatch2JobHelper.awaitJobCompletion(batchJobId);
 		myLastStepLatch.awaitExpected();
 
@@ -297,7 +295,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 
 		String instanceId = startResponse.getInstanceId();
-		myBatch2JobHelper.awaitWorkChunksQueued(instanceId);
+		myBatch2JobHelper.runMaintenancePass();
 		myFirstStepLatch.awaitExpected();
 		assertNotNull(instanceId);
 
@@ -388,7 +386,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 		String instanceId = startResponse.getInstanceId();
-		myBatch2JobHelper.awaitWorkChunksQueued(instanceId);
+		myBatch2JobHelper.runMaintenancePass();
 		myFirstStepLatch.awaitExpected();
 		assertNotNull(instanceId);
 
@@ -447,7 +445,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 		String instanceId = startResponse.getInstanceId();
-		myBatch2JobHelper.awaitWorkChunksQueued(instanceId);
+		myBatch2JobHelper.runMaintenancePass();
 		myFirstStepLatch.awaitExpected();
 
 		myLastStepLatch.setExpectedCount(2);
@@ -503,7 +501,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.setExpectedCount(1);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 		String instanceId = startResponse.getInstanceId();
-		myBatch2JobHelper.awaitWorkChunksQueued(instanceId);
+		myBatch2JobHelper.runMaintenancePass();
 		myFirstStepLatch.awaitExpected();
 
 		// validate

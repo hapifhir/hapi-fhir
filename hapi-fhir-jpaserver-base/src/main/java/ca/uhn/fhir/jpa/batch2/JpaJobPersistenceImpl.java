@@ -64,7 +64,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -392,15 +394,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
-		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(theInstanceId);
-		if (instance.isEmpty()) {
+		if (getRunningJob(theInstanceId) == null) {
 			return false;
 		}
-		if (instance.get().getStatus().isEnded()) {
-			return false;
-		}
+
 		Set<WorkChunkStatusEnum> statusesForStep =
-				myWorkChunkRepository.getDistinctStatusesForStep(theInstanceId, theCurrentStepId);
+				getDistinctWorkChunkStatesForJobAndStep(theInstanceId, theCurrentStepId);
 
 		ourLog.debug(
 				"Checking whether gated job can advanced to next step. [instanceId={}, currentStepId={}, statusesForStep={}]",
@@ -408,6 +407,25 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				theCurrentStepId,
 				statusesForStep);
 		return statusesForStep.isEmpty() || statusesForStep.equals(Set.of(WorkChunkStatusEnum.COMPLETED));
+	}
+
+	@Override
+	public Set<WorkChunkStatusEnum> getDistinctWorkChunkStatesForJobAndStep(String theInstanceId, String theCurrentStepId) {
+		if (getRunningJob(theInstanceId) == null) {
+			return Collections.unmodifiableSet(new HashSet<>());
+		}
+		return myWorkChunkRepository.getDistinctStatusesForStep(theInstanceId, theCurrentStepId);
+	}
+
+	private Batch2JobInstanceEntity getRunningJob(String theInstanceId) {
+		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(theInstanceId);
+		if (instance.isEmpty()) {
+			return null;
+		}
+		if (instance.get().getStatus().isEnded()) {
+			return null;
+		}
+		return instance.get();
 	}
 
 	private void fetchChunks(
@@ -469,16 +487,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public Stream<WorkChunk> fetchAllWorkChunksForJobInStates(String theInstanceId, Set<WorkChunkStatusEnum> theWorkChunkStatuses) {
 		return myWorkChunkRepository.fetchChunksForJobInStates(theInstanceId, theWorkChunkStatuses)
 			.map(this::toChunk);
-	}
-
-	@Override
-	public List<WorkChunk> getAllWorkChunksForJob(String theInstanceId) {
-		return myTransactionService.withSystemRequest()
-			.withPropagation(Propagation.REQUIRES_NEW)
-			.execute(() -> {
-				return myWorkChunkRepository.fetchChunks(Pageable.ofSize(100), theInstanceId)
-					.stream().map(this::toChunk).collect(Collectors.toList());
-			});
 	}
 
 	@Override

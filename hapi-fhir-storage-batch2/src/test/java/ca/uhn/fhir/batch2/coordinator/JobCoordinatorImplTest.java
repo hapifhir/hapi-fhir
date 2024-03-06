@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.AfterEach;
@@ -73,7 +74,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 	@Mock
 	private IJobMaintenanceService myJobMaintenanceService;
-	private IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
+	private final IHapiTransactionService myTransactionService = new NonTransactionalHapiTransactionService();
 	@Captor
 	private ArgumentCaptor<StepExecutionDetails<TestJobParameters, VoidModel>> myStep1ExecutionDetailsCaptor;
 	@Captor
@@ -144,7 +145,6 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		assertEquals(PASSWORD_VALUE, params.getPassword());
 
 		verify(myJobInstancePersister, times(1)).onWorkChunkCompletion(new WorkChunkCompletionEvent(CHUNK_ID, 50, 0));
-		verify(myBatchJobSender, times(2)).sendWorkChannelMessage(any());
 	}
 
 	private void setupMocks(JobDefinition<TestJobParameters> theJobDefinition, WorkChunk theWorkChunk) {
@@ -467,7 +467,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(JOB_DEFINITION_ID);
 		startRequest.setParameters(new TestJobParameters().setParam1(PARAM_1_VALUE).setParam2(PARAM_2_VALUE).setPassword(PASSWORD_VALUE));
-		mySvc.startInstance(startRequest);
+		mySvc.startInstance(new SystemRequestDetails(), startRequest);
 
 		// Verify
 
@@ -475,12 +475,6 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 			.onCreateWithFirstChunk(myJobDefinitionCaptor.capture(), myParametersJsonCaptor.capture());
 		assertSame(jobDefinition, myJobDefinitionCaptor.getValue());
 		assertEquals(startRequest.getParameters(), myParametersJsonCaptor.getValue());
-
-		verify(myBatchJobSender, times(1)).sendWorkChannelMessage(myJobWorkNotificationCaptor.capture());
-		assertEquals(CHUNK_ID, myJobWorkNotificationCaptor.getAllValues().get(0).getChunkId());
-		assertEquals(JOB_DEFINITION_ID, myJobWorkNotificationCaptor.getAllValues().get(0).getJobDefinitionId());
-		assertEquals(1, myJobWorkNotificationCaptor.getAllValues().get(0).getJobDefinitionVersion());
-		assertEquals(STEP_1, myJobWorkNotificationCaptor.getAllValues().get(0).getTargetStepId());
 
 		verifyNoMoreInteractions(myJobInstancePersister);
 		verifyNoMoreInteractions(myStep1Worker);

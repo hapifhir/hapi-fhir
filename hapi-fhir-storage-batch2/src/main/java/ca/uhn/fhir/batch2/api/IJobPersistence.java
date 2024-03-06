@@ -120,6 +120,13 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);
 
 	/**
+	 * Returns set of all distinct states for the specified job instance id
+	 * and step id.
+	 */
+	@Transactional
+	Set<WorkChunkStatusEnum> getDistinctWorkChunkStatesForJobAndStep(String theInstanceId, String theCurrentStepId);
+
+	/**
 	 * Fetch all chunks for a given instance.
 	 *
 	 * @param theInstanceId - instance id
@@ -144,15 +151,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 */
 	@Transactional
 	Stream<WorkChunk> fetchAllWorkChunksForJobInStates(String theInstanceId, Set<WorkChunkStatusEnum> theWorkChunkStatuses);
-
-	/**
-	 * This method is only useful for testing.
-	 * @param theInstanceId
-	 * @param theStatuses
-	 * @return
-	 */
-	@VisibleForTesting
-	List<WorkChunk> getAllWorkChunksForJob(String theInstanceId);
 
 	/**
 	 * Callback to update a JobInstance within a locked transaction.
