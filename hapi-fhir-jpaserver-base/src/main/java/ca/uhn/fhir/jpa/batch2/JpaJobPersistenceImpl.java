@@ -54,6 +54,7 @@ import jakarta.persistence.LockModeType;
 import jakarta.persistence.Query;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
+import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -64,6 +65,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.sql.Connection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -74,6 +76,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -292,9 +295,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public int enqueueWorkChunkForProcessing(String theChunkId) {
-		return myWorkChunkRepository.updateChunkStatus(
+	public void enqueueWorkChunkForProcessing(String theChunkId, Consumer<Integer> theCallback) {
+		int updated = myWorkChunkRepository.updateChunkStatus(
 				theChunkId, WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.READY);
+		theCallback.accept(updated);
+		if (updated == 1) {
+			myEntityManager.flush();
+			myEntityManager.unwrap(Session.class)
+				.doWork(Connection::commit);
+		}
 	}
 
 	@Override

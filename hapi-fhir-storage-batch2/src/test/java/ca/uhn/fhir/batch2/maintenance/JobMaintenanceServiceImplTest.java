@@ -52,6 +52,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.coordinator.JobCoordinatorImplTest.createWorkChunkStep1;
@@ -68,6 +69,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -110,8 +112,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 	@Mock
 	private IChannelProducer myWorkChannelProducer;
-	@Mock
-	private EntityManager myEntityManager;
 	@Spy
 	private IHapiTransactionService myTransactionService = new TestHapiTransactionservice();
 	@Captor
@@ -132,8 +132,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			batchJobSender,
 			myJobExecutorSvc,
 			myReductionStepExecutorService,
-			myTransactionService,
-			myEntityManager
+			myTransactionService
 		);
 		myStorageSettings.setJobFastTrackingEnabled(true);
 	}
@@ -395,10 +394,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			.thenAnswer(t -> theChunks.stream());
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
 			.thenAnswer(t -> theChunks.stream().map(c -> c.setStatus(WorkChunkStatusEnum.QUEUED)).toList().iterator());
-		// lenient, because we are using this test setup in 3 different tests;
-		// one of which will never call this
-		lenient().when(myEntityManager.unwrap(eq(Session.class)))
-			.thenReturn(sessionContract);
 		// we just need it to fire, so we'll fire it manually
 		when(((TestHapiTransactionservice)myTransactionService).overrideExecute(any()))
 			.thenAnswer(args -> {
@@ -420,16 +415,18 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		);
 
 		// when
-		when(myJobPersistence.enqueueWorkChunkForProcessing(anyString()))
-			.thenReturn(1);
+		doAnswer(args -> {
+			Consumer<Integer> consumer = args.getArgument(1);
+			consumer.accept(1);
+			return 1;
+		}).when(myJobPersistence).enqueueWorkChunkForProcessing(anyString(), any());
 
 		// test
 		runEnqueueReadyChunksTest(chunks, createJobDefinitionWithReduction());
 
 		// verify
 		// saved, but not sent to the queue
-		verify(myEntityManager, times(2)).flush();
-		verify(myJobPersistence, times(2)).enqueueWorkChunkForProcessing(anyString());
+		verify(myJobPersistence, times(2)).enqueueWorkChunkForProcessing(anyString(), any());
 		verify(myWorkChannelProducer, never()).send(any());
 	}
 
@@ -442,15 +439,18 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		);
 
 		// when
-		when(myJobPersistence.enqueueWorkChunkForProcessing(anyString()))
-			.thenReturn(1);
+		doAnswer(args -> {
+			Consumer<Integer> consumer = args.getArgument(1);
+			consumer.accept(1);
+			return 1;
+		}).when(myJobPersistence).enqueueWorkChunkForProcessing(anyString(), any());
+
 
 		// test
 		runEnqueueReadyChunksTest(chunks, createJobDefinition());
 
 		// verify
-		verify(myEntityManager, times(2)).flush();
-		verify(myJobPersistence, times(2)).enqueueWorkChunkForProcessing(anyString());
+		verify(myJobPersistence, times(2)).enqueueWorkChunkForProcessing(anyString(), any());
 		verify(myWorkChannelProducer, times(2)).send(myMessageCaptor.capture());
 		List<Message<JobWorkNotification>> sentMessages = myMessageCaptor.getAllValues();
 		for (Message<JobWorkNotification> msg : sentMessages) {
@@ -471,15 +471,17 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		myLogCapture.setUp(Level.ERROR);
 
 		// when
-		when(myJobPersistence.enqueueWorkChunkForProcessing(anyString()))
-			.thenReturn(0); // fails to update/not found
+		doAnswer(args -> {
+			Consumer<Integer> consumer = args.getArgument(1);
+			consumer.accept(0); // nothing processed
+			return 1;
+		}).when(myJobPersistence).enqueueWorkChunkForProcessing(anyString(), any());
 
 		// test
 		runEnqueueReadyChunksTest(chunks, createJobDefinitionWithReduction());
 
 		// verify
-		verify(myJobPersistence, times(2)).enqueueWorkChunkForProcessing(anyString());
-		verify(myEntityManager, never()).flush();
+		verify(myJobPersistence, times(2)).enqueueWorkChunkForProcessing(anyString(), any());
 		verify(myWorkChannelProducer, never()).send(any());
 
 		List<ILoggingEvent> events = myLogCapture.getLogEvents();

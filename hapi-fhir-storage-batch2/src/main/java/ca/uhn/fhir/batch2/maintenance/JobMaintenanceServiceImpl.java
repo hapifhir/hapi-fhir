@@ -36,7 +36,6 @@ import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.util.Logs;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
-import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
@@ -92,7 +91,6 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	private final BatchJobSender myBatchJobSender;
 	private final WorkChunkProcessor myJobExecutorSvc;
 	private final IHapiTransactionService myTransactionService;
-	private final EntityManager myEntityManager;
 
 	private final Semaphore myRunMaintenanceSemaphore = new Semaphore(1);
 
@@ -112,8 +110,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			@Nonnull BatchJobSender theBatchJobSender,
 			@Nonnull WorkChunkProcessor theExecutor,
 			@Nonnull IReductionStepExecutorService theReductionStepExecutorService,
-			IHapiTransactionService theTransactionService,
-			EntityManager theEntityManager) {
+			IHapiTransactionService theTransactionService) {
 		myStorageSettings = theStorageSettings;
 		myReductionStepExecutorService = theReductionStepExecutorService;
 		Validate.notNull(theSchedulerService);
@@ -127,7 +124,6 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		myBatchJobSender = theBatchJobSender;
 		myJobExecutorSvc = theExecutor;
 		myTransactionService = theTransactionService;
-		myEntityManager = theEntityManager;
 	}
 
 	@Override
@@ -242,7 +238,6 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 								progressAccumulator,
 								myReductionStepExecutorService,
 								myJobDefinitionRegistry,
-								myEntityManager,
 								myTransactionService);
 						ourLog.debug(
 								"Triggering maintenance process for instance {} in status {}",

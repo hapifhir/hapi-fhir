@@ -42,6 +42,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
@@ -87,7 +89,8 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	List<JobInstance> fetchInstances(int thePageSize, int thePageIndex);
 
-	int enqueueWorkChunkForProcessing(String theChunkId);
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	void enqueueWorkChunkForProcessing(String theChunkId, Consumer<Integer> theCallback);
 
 	/**
 	 * Fetch instances ordered by myCreateTime DESC

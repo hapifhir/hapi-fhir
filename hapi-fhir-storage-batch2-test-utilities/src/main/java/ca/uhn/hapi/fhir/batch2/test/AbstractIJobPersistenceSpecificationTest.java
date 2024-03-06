@@ -542,7 +542,6 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 					new JobChunkProgressAccumulator(),
 					null,
 					jobDefinitionRegistry,
-					null, // entity manager
 					null // transaction manager
 				).process();
 			});

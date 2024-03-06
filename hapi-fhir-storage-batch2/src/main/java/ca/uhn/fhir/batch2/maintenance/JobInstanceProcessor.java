@@ -62,7 +62,6 @@ public class JobInstanceProcessor {
 	private final JobDefinitionRegistry myJobDefinitionegistry;
 
 	private final IHapiTransactionService myTransactionService;
-	private final EntityManager myEntityManager;
 
 	public JobInstanceProcessor(
 			IJobPersistence theJobPersistence,
@@ -71,7 +70,6 @@ public class JobInstanceProcessor {
 			JobChunkProgressAccumulator theProgressAccumulator,
 			IReductionStepExecutorService theReductionStepExecutorService,
 			JobDefinitionRegistry theJobDefinitionRegistry,
-			EntityManager theEntityManager,
 			IHapiTransactionService theTransactionService) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
@@ -83,7 +81,6 @@ public class JobInstanceProcessor {
 				new JobInstanceProgressCalculator(theJobPersistence, theProgressAccumulator, theJobDefinitionRegistry);
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
 
-		myEntityManager = theEntityManager;
 		myTransactionService = theTransactionService;
 	}
 
@@ -254,13 +251,7 @@ public class JobInstanceProcessor {
 				 * * flush changes
 				 * * commit
 				 */
-				getTxBuilder().execute(() -> {
-					if (updateChunkAndSendToQueue(chunk, theJobInstance, theJobDefinition)) {
-						// flush this transaction
-						myEntityManager.flush();
-						myEntityManager.unwrap(Session.class).doWork(Connection::commit);
-					}
-				});
+				updateChunkAndSendToQueue(chunk, theJobInstance, theJobDefinition);
 			});
 		});
 	}
@@ -274,45 +265,41 @@ public class JobInstanceProcessor {
 	 *
 	 * Returns true after processing.
 	 */
-	private boolean updateChunkAndSendToQueue(
+	private void updateChunkAndSendToQueue(
 			WorkChunk theChunk, JobInstance theInstance, JobDefinition<?> theJobDefinition) {
 		String chunkId = theChunk.getId();
-		int updated = myJobPersistence.enqueueWorkChunkForProcessing(chunkId);
-
-		if (updated == 1) {
-			JobWorkCursor<?, ?, ?> jobWorkCursor =
+		myJobPersistence.enqueueWorkChunkForProcessing(chunkId, updated -> {
+			if (updated == 1) {
+				JobWorkCursor<?, ?, ?> jobWorkCursor =
 					JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, theChunk.getTargetStepId());
 
-			if (theJobDefinition.isGatedExecution() && jobWorkCursor.isFinalStep() && jobWorkCursor.isReductionStep()) {
-				// reduction steps are processed by
-				// ReductionStepExecutorServiceImpl
-				// which does not wait for steps off the queue but reads all the
-				// "QUEUE'd" chunks and processes them inline
-				return true;
-			}
+				if (theJobDefinition.isGatedExecution() && jobWorkCursor.isFinalStep() && jobWorkCursor.isReductionStep()) {
+					// reduction steps are processed by
+					// ReductionStepExecutorServiceImpl
+					// which does not wait for steps off the queue but reads all the
+					// "QUEUE'd" chunks and processes them inline
+					return;
+				}
 
-			// send to the queue
-			// we use current step id because it has not been moved to the next step (yet)
-			JobWorkNotification workNotification = new JobWorkNotification(
+				// send to the queue
+				// we use current step id because it has not been moved to the next step (yet)
+				JobWorkNotification workNotification = new JobWorkNotification(
 					theJobDefinition.getJobDefinitionId(),
 					theJobDefinition.getJobDefinitionVersion(),
 					theInstance.getInstanceId(),
 					theChunk.getTargetStepId(),
 					chunkId);
-			myBatchJobSender.sendWorkChannelMessage(workNotification);
-			return true;
-		} else {
-			// means the work chunk is likely already gone...
-			// we'll log and skip it. If it's still in the DB, the next pass
-			// will pick it up. Otherwise, it's no longer important
-			ourLog.error(
+				myBatchJobSender.sendWorkChannelMessage(workNotification);
+			} else {
+				// means the work chunk is likely already gone...
+				// we'll log and skip it. If it's still in the DB, the next pass
+				// will pick it up. Otherwise, it's no longer important
+				ourLog.error(
 					"Job Instance {} failed to transition work chunk with id {} from READY to QUEUED; skipping work chunk.",
 					theInstance.getInstanceId(),
 					theChunk.getId());
-
-			// nothing changed, nothing to commit
-			return false;
-		}
+			}
+		});
 	}
 
 	private IHapiTransactionService.IExecutionBuilder getTxBuilder() {
