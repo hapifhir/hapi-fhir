@@ -76,7 +76,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -301,8 +300,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		theCallback.accept(updated);
 		if (updated == 1) {
 			myEntityManager.flush();
-			myEntityManager.unwrap(Session.class)
-				.doWork(Connection::commit);
+			myEntityManager.unwrap(Session.class).doWork(Connection::commit);
 		}
 	}
 
