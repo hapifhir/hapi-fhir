@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest;
 import com.google.common.collect.ImmutableList;
@@ -76,6 +77,9 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	private IBatch2WorkChunkRepository myWorkChunkRepository;
 	@Autowired
 	private IBatch2JobInstanceRepository myJobInstanceRepository;
+
+	@Autowired
+	public Batch2JobHelper myBatch2JobHelper;
 
 	@Test
 	public void testDeleteInstance() {
@@ -323,13 +327,18 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	class Batch2SpecTest extends AbstractIJobPersistenceSpecificationTest {
 
 		@Override
-		protected PlatformTransactionManager getTxManager() {
+		public PlatformTransactionManager getTxManager() {
 			return JpaJobPersistenceImplTest.this.getTxManager();
 		}
 
 		@Override
-		protected WorkChunk freshFetchWorkChunk(String chunkId) {
+		public WorkChunk freshFetchWorkChunk(String chunkId) {
 			return JpaJobPersistenceImplTest.this.freshFetchWorkChunk(chunkId);
+		}
+
+		@Override
+		public void runMaintenancePass() {
+			myBatch2JobHelper.runMaintenancePass();
 		}
 	}
 
