@@ -764,6 +764,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			org.hl7.fhir.r5.model.ValueSet theVs) {
 
 		List<ValidationResult> validationResultsOk = new ArrayList<>();
+		List<OperationOutcome.OperationOutcomeIssueComponent> issues = new ArrayList<>();
 		for (Coding next : code.getCoding()) {
 			if (!next.hasSystem()) {
 				String message =
@@ -785,6 +786,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 				} else {
 					return retVal;
 				}
+			} else {
+				issues.add(getOperationOutcomeTxIssueComponent(retVal.getMessage(), "not-in-vs"));
 			}
 		}
 
@@ -793,15 +796,29 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return validationResultsOk.get(0);
 		}
 
-		String message = "Unknown code (for '" + code.getCodingFirstRep().getSystem() + "#"
+		if (theVs == null) {
+			String message = "Unknown code (for '" + code.getCodingFirstRep().getSystem() + "#"
 				+ code.getCodingFirstRep().getCode() + "')";
+			OperationOutcome.OperationOutcomeIssueComponent issue = getOperationOutcomeTxIssueComponent(message, OperationOutcome.IssueType.CODEINVALID.toCode());
+			issues.add(issue);
+		}
+
+		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, issues);
+	}
+
+	private static OperationOutcome.OperationOutcomeIssueComponent getOperationOutcomeTxIssueComponent(String message, String txIssueTypeCode) {
 		OperationOutcome.OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent()
 				.setSeverity(OperationOutcome.IssueSeverity.ERROR)
-				.setCode(OperationOutcome.IssueType.NOTFOUND)
-				.setDiagnostics(message)
-				.setDetails(new CodeableConcept().setText(message));
+				.setDiagnostics(message);
+		issue.getDetails().setText(message);
 
-		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, Collections.singletonList(issue));
+		issue.setCode(OperationOutcome.IssueType.CODEINVALID);
+		issue.getDetails()
+			.addCoding(
+				"http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
+				txIssueTypeCode,
+				null);
+		return issue;
 	}
 
 	public void invalidateCaches() {

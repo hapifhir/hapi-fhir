@@ -192,7 +192,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
-					return new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage("Unknown code");
+					return new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage("Unknown code (for '" + system + "#" + code + "')");
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
 				}
@@ -255,13 +255,15 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 			.setSystem("http://foo")
 			.setCode("AA  ");
 
+		ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
 
 		ValidationResult result = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(1).getMessage());
+		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(0).getMessage());
 
 	}
 
@@ -774,8 +776,11 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		results = myVal.validateWithResult(rp);
 		outcome = logResultsAndReturnAll(results);
 
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(rp));
+
+
 		assertEquals(2, outcome.size());
-		assertThat(outcome.get(0).getMessage(), containsString("Unknown code (for 'http://terminology.hl7.org/CodeSystem/v2-0131#GAGAGAGA')"));
+		assertThat(outcome.get(0).getMessage(), containsString("Unknown code 'http://terminology.hl7.org/CodeSystem/v2-0131#GAGAGAGA'"));
 		assertEquals(ResultSeverityEnum.ERROR, outcome.get(0).getSeverity());
 		assertThat(outcome.get(1).getMessage(), containsString("None of the codings provided are in the value set 'Patient Relationship Type'"));
 		assertEquals(ResultSeverityEnum.INFORMATION, outcome.get(1).getSeverity());
@@ -797,6 +802,9 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		myInstanceVal.setValidationSupport(myValidationSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
+
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+
 
 		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
 		assertEquals("Unknown code (for 'http://loinc.org#12345')", errors.get(0).getMessage());
@@ -995,6 +1003,9 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		p.addIdentifier().setSystem("http://example.com/").setValue("12345").getType()
 			.addCoding().setSystem("http://example.com/foo/bar").setCode("bar");
 
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
+
 		ValidationResult output = myVal.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertEquals(2, all.size());
@@ -1002,7 +1013,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
 		assertThat(
 			all.get(0).getMessage(),
-			containsString("Unknown code (for 'http://example.com/foo/bar#bar')")
+			containsString("Unknown code 'http://example.com/foo/bar#bar'")
 		);
 
 		assertEquals("Patient.identifier[0].type", all.get(1).getLocationString());

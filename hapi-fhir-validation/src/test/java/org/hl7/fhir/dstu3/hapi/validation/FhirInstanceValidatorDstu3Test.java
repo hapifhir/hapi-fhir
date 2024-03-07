@@ -223,7 +223,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
-					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code");
+					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code (for '" + system + "#" + code + "')");
 				} else if (myCodeSystems.containsKey(system)) {
 					CodeSystem cs = myCodeSystems.get(system);
 					Optional<ConceptDefinitionComponent> found = cs.getConcept().stream().filter(t -> t.getCode().equals(code)).findFirst();
@@ -401,6 +401,8 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 	 */
 	@Test
 	public void testDstu3UsesLatestDefinitions() throws IOException {
+		addValidConcept("http://www.nlm.nih.gov/research/umls/rxnorm", "316663");
+		addValidConcept("http://snomed.info/sct", "14760008");
 		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/bug703.json"), Charsets.UTF_8);
 
 		ValidationResult results = myVal.validateWithResult(input);
@@ -794,6 +796,22 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 	@Test
 	public void testValidateDocument() throws Exception {
 		String vsContents = ClasspathUtil.loadResource("/sample-document.xml");
+
+		addValidConcept("http://loinc.org", "29299-5");
+		addValidConcept("http://loinc.org", "18776-5");
+		addValidConcept("http://loinc.org", "69730-0");
+		addValidConcept("http://loinc.org", "8716-3");
+		addValidConcept("http://loinc.org", "10160-0");
+		addValidConcept("http://loinc.org", "29549-3");
+		addValidConcept("http://loinc.org", "11450-4");
+		addValidConcept("http://loinc.org", "48765-2");
+		addValidConcept("http://loinc.org", "30954-2");
+		addValidConcept("http://loinc.org", "47519-4");
+		addValidConcept("http://loinc.org", "11369-6");
+		addValidConcept("http://loinc.org", "29762-2");
+		addValidConcept("http://loinc.org", "46240-8");
+		addValidConcept("http://loinc.org", "42348-3");
+		addValidConcept("http://loinc.org", "42348-3");
 
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);

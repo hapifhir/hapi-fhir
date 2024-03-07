@@ -355,7 +355,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		ValidationResult result = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(1).getMessage());
+		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(0).getMessage());
 
 	}
 
@@ -667,14 +667,14 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 	@Test
 	public void testLargeBase64() throws IOException {
+		addValidConcept("http://loinc.org", "1-8");
+
 		String input = IOUtils.toString(FhirInstanceValidatorR4BTest.class.getResourceAsStream("/r4/diagnosticreport-example-gingival-mass.json"), Constants.CHARSET_UTF8);
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> messages = logResultsAndReturnAll(output);
-		assertEquals(4, messages.size());
-		assertThat(messages.get(0).getMessage(), containsString("Unknown code (for 'http://terminology.hl7.org/CodeSystem/v2-0074#PAT')"));
-		assertThat(messages.get(1).getMessage(), containsString("Unknown code (for 'http://loinc.org#1-8')"));
-		assertThat(messages.get(2).getMessage(), containsString("None of the codings provided are in the value set 'LOINC Diagnostic Report Codes'"));
-		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", messages.get(3).getMessage());
+		assertEquals(2, messages.size());
+		assertThat(messages.get(0).getMessage(), containsString("None of the codings provided are in the value set 'LOINC Diagnostic Report Codes'"));
+		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", messages.get(1).getMessage());
 	}
 
 	@Test
@@ -1356,14 +1356,11 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 		ValidationResult output = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(2, all.size());
+		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 
-		assertThat(all.get(0).getMessage(), containsString("Unknown code (for 'http://example.com/foo/bar#bar')"));
-		assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
-
-		assertThat(all.get(1).getMessage(), containsString("None of the codings provided are in the value set 'IdentifierType'"));
-		assertEquals(ResultSeverityEnum.WARNING, all.get(1).getSeverity());
+		assertThat(all.get(0).getMessage(), containsString("None of the codings provided are in the value set 'IdentifierType'"));
+		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}
 
