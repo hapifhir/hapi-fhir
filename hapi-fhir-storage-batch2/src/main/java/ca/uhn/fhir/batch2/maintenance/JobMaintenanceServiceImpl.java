@@ -162,7 +162,6 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 
 	private boolean runMaintenanceDirectlyWithTimeout() {
 		if (getQueueLength() > 0) {
-			System.out.println("THREDS WAITING RETURN FALSE FOR FAST TRACKING");
 			ourLog.debug(
 					"There are already {} threads waiting to run a maintenance pass.  Ignoring request.",
 					getQueueLength());
