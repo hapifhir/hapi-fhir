@@ -25,6 +25,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
+import static org.apache.commons.lang3.StringUtils.defaultString;
+
 public class BatchResourceId implements IModelJson {
 
 	@JsonProperty("type")
@@ -75,6 +77,15 @@ public class BatchResourceId implements IModelJson {
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37).append(myResourceType).append(myId).toHashCode();
+	}
+
+	/**
+	 * Returns an estimate of how long the JSON serialized (non-pretty printed) form
+	 * of this object will be.
+	 */
+	public int estimateSerializedSize() {
+		// 19 chars: {"id":"","type":""}
+		return 19 + defaultString(myId).length() + defaultString(myResourceType).length();
 	}
 
 	public static BatchResourceId getIdFromPID(IResourcePersistentId thePID, String theResourceType) {

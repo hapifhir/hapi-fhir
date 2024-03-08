@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.bulk;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -10,6 +11,9 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl;
+import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
+import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
@@ -21,11 +25,13 @@ import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.LineIterator;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -66,6 +72,7 @@ import org.mockito.Spy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -80,6 +87,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.batch2.jobs.export.BulkExportAppCtx.CREATE_REPORT_STEP;
+import static ca.uhn.fhir.batch2.jobs.export.BulkExportAppCtx.WRITE_TO_BINARIES;
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsInlineTest.createSearchParameterForInlineSecurity;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.awaitility.Awaitility.await;
@@ -100,17 +109,25 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
+	@Autowired
+	private IBatch2WorkChunkRepository myWorkChunkRepository;
+	@Autowired
+	private IJobPersistence myJobPersistence;
+	private JpaJobPersistenceImpl myJobPersistenceImpl;
 
 	@AfterEach
 	void afterEach() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
-		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
-		myStorageSettings.setResourceClientIdStrategy(new JpaStorageSettings().getResourceClientIdStrategy());
+		JpaStorageSettings defaults = new JpaStorageSettings();
+		myStorageSettings.setTagStorageMode(defaults.getTagStorageMode());
+		myStorageSettings.setResourceClientIdStrategy(defaults.getResourceClientIdStrategy());
+		myStorageSettings.setBulkExportFileMaximumSize(defaults.getBulkExportFileMaximumSize());
 	}
 
 	@BeforeEach
 	public void beforeEach() {
 		myStorageSettings.setJobFastTrackingEnabled(false);
+		myJobPersistenceImpl = ProxyUtil.getSingletonTarget(myJobPersistence, JpaJobPersistenceImpl.class);
 	}
 
 	@Spy
@@ -118,6 +135,56 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 	@RegisterExtension
 	private final HttpClientExtension mySender = new HttpClientExtension();
+
+	/**
+	 * We should never exceed the maximum threshold for a single binary chunk held in memory
+	 * or in disk.
+	 */
+	@Test
+	public void testEnforceMaxFileSizes() {
+
+		/*
+		 * We're going to set the maximum file size to 3000, and create some resources with
+		 * a name that is 1000 chars long. With the other boilerplate text in a resource that
+		 * will put the resource length at just over 1000 chars, meaning that any given
+		 * chunk or file should have only 2 resources in it.
+		 */
+		int testResourceSize = 1000;
+		int maxFileSize = 3 * testResourceSize;
+		myStorageSettings.setBulkExportFileMaximumSize(maxFileSize);
+
+		List<String> expectedIds = new ArrayList<>();
+		for (int i = 0; i < 10; i++) {
+			Patient p = new Patient();
+			p.addName().setFamily(StringUtils.leftPad("", testResourceSize, 'A'));
+			String id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless().getValue();
+			expectedIds.add(id);
+		}
+
+		// set the export options
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setResourceTypes(Sets.newHashSet("Patient"));
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		String instanceId = verifyBulkExportResults(options, expectedIds, List.of()).getInstanceId();
+
+		runInTransaction(()->{
+			List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.ofSize(100000), instanceId);
+			for (var next : chunks) {
+				switch (next.getTargetStepId()) {
+					case WRITE_TO_BINARIES:
+						assertTrue(next.getSerializedData().length() > 100);
+						break;
+					case CREATE_REPORT_STEP:
+						assertTrue(next.getSerializedData().length() > 100);
+						break;
+					default:
+						fail("Unexpected step ID: " + next.getTargetStepId());
+				}
+			}
+		});
+
+	}
 
 	@Test
 	public void testGroupBulkExportWithTypeFilter() {

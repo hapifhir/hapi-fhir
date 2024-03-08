@@ -36,6 +36,7 @@ import org.springframework.context.annotation.Scope;
 public class BulkExportAppCtx {
 
 	public static final String WRITE_TO_BINARIES = "write-to-binaries";
+	public static final String CREATE_REPORT_STEP = "create-report-step";
 
 	@Bean
 	public JobDefinition bulkExportJobDefinition() {
@@ -65,7 +66,7 @@ public class BulkExportAppCtx {
 						writeBinaryStep())
 				// finalize the job (set to complete)
 				.addFinalReducerStep(
-						"create-report-step",
+					CREATE_REPORT_STEP,
 						"Creates the output report from a bulk export job",
 						BulkExportJobResults.class,
 						createReportStep())
@@ -139,4 +140,5 @@ public class BulkExportAppCtx {
 	public BulkExportCreateReportStep createReportStep() {
 		return new BulkExportCreateReportStep();
 	}
+
 }
