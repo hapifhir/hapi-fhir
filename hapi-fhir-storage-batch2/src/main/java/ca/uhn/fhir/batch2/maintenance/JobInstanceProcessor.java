@@ -39,7 +39,10 @@ import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.util.List;
 import java.util.Optional;
@@ -59,7 +62,7 @@ public class JobInstanceProcessor {
 	private final String myInstanceId;
 	private final JobDefinitionRegistry myJobDefinitionegistry;
 
-	private final IHapiTransactionService myTransactionService;
+	private final PlatformTransactionManager myTransactionManager;
 
 	public JobInstanceProcessor(
 			IJobPersistence theJobPersistence,
@@ -68,7 +71,7 @@ public class JobInstanceProcessor {
 			JobChunkProgressAccumulator theProgressAccumulator,
 			IReductionStepExecutorService theReductionStepExecutorService,
 			JobDefinitionRegistry theJobDefinitionRegistry,
-			IHapiTransactionService theTransactionService) {
+			PlatformTransactionManager theTransactionManager) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myInstanceId = theInstanceId;
@@ -79,7 +82,7 @@ public class JobInstanceProcessor {
 				new JobInstanceProgressCalculator(theJobPersistence, theProgressAccumulator, theJobDefinitionRegistry);
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
 
-		myTransactionService = theTransactionService;
+		myTransactionManager = theTransactionManager;
 	}
 
 	public void process() {
@@ -199,18 +202,19 @@ public class JobInstanceProcessor {
 		String currentStepId = jobWorkCursor.getCurrentStepId();
 		boolean canAdvance = canAdvanceGatedJob(theJobDefinition, theInstance, currentStepId);
 		if (canAdvance) {
-			String nextStepId = jobWorkCursor.nextStep.getStepId();
-			ourLog.info(
+			// current step is the reduction step (a final step)
+			if (jobWorkCursor.isReductionStep()) {
+				JobWorkCursor<?, ?, ?> nextJobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
+						jobWorkCursor.getJobDefinition(), jobWorkCursor.getCurrentStepId());
+				myReductionStepExecutorService.triggerReductionStep(instanceId, nextJobWorkCursor);
+			} else {
+				String nextStepId = jobWorkCursor.nextStep.getStepId();
+				ourLog.info(
 					"All processing is complete for gated execution of instance {} step {}. Proceeding to step {}",
 					instanceId,
 					currentStepId,
 					nextStepId);
 
-			if (jobWorkCursor.nextStep.isReductionStep()) {
-				JobWorkCursor<?, ?, ?> nextJobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
-						jobWorkCursor.getJobDefinition(), jobWorkCursor.nextStep.getStepId());
-				myReductionStepExecutorService.triggerReductionStep(instanceId, nextJobWorkCursor);
-			} else {
 				// otherwise, continue processing as expected
 				processChunksForNextSteps(theInstance, nextStepId);
 			}
@@ -268,33 +272,35 @@ public class JobInstanceProcessor {
 		// we need a transaction to access the stream of workchunks
 		// because workchunks are created in READY state, there's an unknown
 		// number of them (and so we could be reading many from the db)
-		getTxBuilder().withPropagation(Propagation.REQUIRES_NEW).execute(() -> {
-			Stream<WorkChunk> readyChunks = myJobPersistence.fetchAllWorkChunksForJobInStates(
-					theJobInstance.getInstanceId(), Set.of(WorkChunkStatusEnum.READY));
 
-			readyChunks.forEach(chunk -> {
-				JobWorkCursor<?, ?, ?> jobWorkCursor =
-					JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, chunk.getTargetStepId());
-				if (theJobDefinition.isGatedExecution()
-					&& jobWorkCursor.isFinalStep()
-					&& jobWorkCursor.isReductionStep()) {
-					// reduction steps are processed by
-					// ReductionStepExecutorServiceImpl
-					// which does not wait for steps off the queue.
-					// so we will not process them here
-					return;
-				}
+		TransactionStatus status = myTransactionManager.getTransaction(new DefaultTransactionDefinition());
+		Stream<WorkChunk> readyChunks = myJobPersistence.fetchAllWorkChunksForJobInStates(
+			theJobInstance.getInstanceId(), Set.of(WorkChunkStatusEnum.READY));
 
-				/*
-				 * For each chunk id
-				 * * Move to QUEUE'd
-				 * * Send to topic
-				 * * flush changes
-				 * * commit
-				 */
-				updateChunkAndSendToQueue(chunk, theJobInstance, theJobDefinition);
-			});
+		readyChunks.forEach(chunk -> {
+			JobWorkCursor<?, ?, ?> jobWorkCursor =
+				JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, chunk.getTargetStepId());
+			if (theJobDefinition.isGatedExecution()
+				&& jobWorkCursor.isFinalStep()
+				&& jobWorkCursor.isReductionStep()) {
+				// reduction steps are processed by
+				// ReductionStepExecutorServiceImpl
+				// which does not wait for steps off the queue.
+				// so we will not process them here
+				return;
+			}
+
+			/*
+			 * For each chunk id
+			 * * Move to QUEUE'd
+			 * * Send to topic
+			 * * flush changes
+			 * * commit
+			 */
+			updateChunkAndSendToQueue(chunk, theJobInstance, theJobDefinition);
 		});
+
+		myTransactionManager.commit(status);
 	}
 
 	/**
@@ -330,10 +336,6 @@ public class JobInstanceProcessor {
 						theChunk.getId());
 			}
 		});
-	}
-
-	private IHapiTransactionService.IExecutionBuilder getTxBuilder() {
-		return myTransactionService.withSystemRequest().withRequestPartitionId(RequestPartitionId.allPartitions());
 	}
 
 	private void processChunksForNextSteps(JobInstance theInstance, String nextStepId) {

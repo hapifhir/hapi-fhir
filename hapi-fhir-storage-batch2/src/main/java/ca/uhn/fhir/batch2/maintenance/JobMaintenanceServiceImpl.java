@@ -28,7 +28,6 @@ import ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
-import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -41,6 +40,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.quartz.JobExecutionContext;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.HashSet;
 import java.util.List;
@@ -90,7 +90,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final BatchJobSender myBatchJobSender;
 	private final WorkChunkProcessor myJobExecutorSvc;
-	private final IHapiTransactionService myTransactionService;
+	private final PlatformTransactionManager myTransactionManager;
 
 	private final Semaphore myRunMaintenanceSemaphore = new Semaphore(1);
 
@@ -110,7 +110,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			@Nonnull BatchJobSender theBatchJobSender,
 			@Nonnull WorkChunkProcessor theExecutor,
 			@Nonnull IReductionStepExecutorService theReductionStepExecutorService,
-			IHapiTransactionService theTransactionService) {
+			PlatformTransactionManager theTransactionService) {
 		myStorageSettings = theStorageSettings;
 		myReductionStepExecutorService = theReductionStepExecutorService;
 		Validate.notNull(theSchedulerService);
@@ -123,7 +123,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myBatchJobSender = theBatchJobSender;
 		myJobExecutorSvc = theExecutor;
-		myTransactionService = theTransactionService;
+		myTransactionManager = theTransactionService;
 	}
 
 	@Override
@@ -237,7 +237,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 								progressAccumulator,
 								myReductionStepExecutorService,
 								myJobDefinitionRegistry,
-								myTransactionService);
+							myTransactionManager);
 						ourLog.debug(
 								"Triggering maintenance process for instance {} in status {}",
 								instanceId,

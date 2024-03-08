@@ -89,6 +89,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 
 	@BeforeEach
 	public void before() {
+		myStorageSettings.setJobFastTrackingEnabled(true);
 		myCompletionHandler = details -> {};
 		myWorkChannel = (LinkedBlockingChannel) myChannelFactory.getOrCreateReceiver(CHANNEL_NAME, JobWorkNotificationJsonMessage.class, new ChannelConsumerSettings());
 		JobMaintenanceServiceImpl jobMaintenanceService = (JobMaintenanceServiceImpl) myJobMaintenanceService;
@@ -101,7 +102,6 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myWorkChannel.clearInterceptorsForUnitTest();
-		myStorageSettings.setJobFastTrackingEnabled(true);
 		JobMaintenanceServiceImpl jobMaintenanceService = (JobMaintenanceServiceImpl) myJobMaintenanceService;
 		jobMaintenanceService.setMaintenanceJobStartedCallback(() -> {});
 	}
