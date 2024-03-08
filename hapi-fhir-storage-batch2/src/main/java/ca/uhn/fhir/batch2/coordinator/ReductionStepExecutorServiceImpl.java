@@ -65,6 +65,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.batch2.model.StatusEnum.COMPLETED;
 import static ca.uhn.fhir.batch2.model.StatusEnum.ERRORED;
 import static ca.uhn.fhir.batch2.model.StatusEnum.FINALIZE;
 import static ca.uhn.fhir.batch2.model.StatusEnum.IN_PROGRESS;
@@ -237,6 +238,10 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 				if (response.isSuccessful()) {
 					reductionStepWorker.run(chunkDetails, dataSink);
+
+					// the ReductionStepDataSink will update the job status to COMPLETED
+					// we should update instance here to keep it consistent with the newest version in persistence
+					instance.setStatus(COMPLETED);
 				}
 
 				if (response.hasSuccessfulChunksIds()) {
