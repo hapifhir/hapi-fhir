@@ -251,6 +251,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		myCompletionHandler = (params) -> {
 			// ensure our completion handler fires
+			assertEquals(StatusEnum.COMPLETED, params.getInstance().getStatus());
 			completionBool.getAndSet(true);
 		};
 

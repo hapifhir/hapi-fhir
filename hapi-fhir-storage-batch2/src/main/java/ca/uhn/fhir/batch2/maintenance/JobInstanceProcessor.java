@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 import org.springframework.transaction.annotation.Propagation;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -196,7 +197,7 @@ public class JobInstanceProcessor {
 
 		String instanceId = theInstance.getInstanceId();
 		String currentStepId = jobWorkCursor.getCurrentStepId();
-		boolean canAdvance = myJobPersistence.canAdvanceInstanceToNextStep(instanceId, currentStepId);
+		boolean canAdvance = canAdvanceGatedJob(theJobDefinition, theInstance, currentStepId);
 		if (canAdvance) {
 			String nextStepId = jobWorkCursor.nextStep.getStepId();
 			ourLog.info(
@@ -222,6 +223,37 @@ public class JobInstanceProcessor {
 		}
 	}
 
+	private boolean canAdvanceGatedJob(JobDefinition<?> theJobDefinition, JobInstance theInstance, String theStepId) {
+		// make sure our instance still exists
+		if (myJobPersistence.fetchInstance(theInstance.getInstanceId()).isEmpty()) {
+			// no more job
+			return false;
+		}
+
+		Set<WorkChunkStatusEnum> workChunkStatuses = myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(theInstance.getInstanceId(), theStepId);
+
+		if (workChunkStatuses.isEmpty()) {
+			// no work chunks = no output
+			// trivial to advance to next step
+			return true;
+		}
+
+		if (workChunkStatuses.equals(Set.of(WorkChunkStatusEnum.COMPLETED))) {
+			// all work chunks complete -> go to next step
+			return true;
+		}
+
+		if (workChunkStatuses.equals(Set.of(WorkChunkStatusEnum.READY))
+			 && theJobDefinition.getStepById(theStepId).isReductionStep()) {
+			// all workchunks ready && last step is reduction step;
+			// proceed
+			return true;
+		}
+
+		// anything else
+		return false;
+	}
+
 	/**
 	 * Chunks are initially created in READY state.
 	 * We will move READY chunks to QUEUE'd and send them to the queue/topic (kafka)
@@ -241,6 +273,18 @@ public class JobInstanceProcessor {
 					theJobInstance.getInstanceId(), Set.of(WorkChunkStatusEnum.READY));
 
 			readyChunks.forEach(chunk -> {
+				JobWorkCursor<?, ?, ?> jobWorkCursor =
+					JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, chunk.getTargetStepId());
+				if (theJobDefinition.isGatedExecution()
+					&& jobWorkCursor.isFinalStep()
+					&& jobWorkCursor.isReductionStep()) {
+					// reduction steps are processed by
+					// ReductionStepExecutorServiceImpl
+					// which does not wait for steps off the queue.
+					// so we will not process them here
+					return;
+				}
+
 				/*
 				 * For each chunk id
 				 * * Move to QUEUE'd
@@ -267,19 +311,6 @@ public class JobInstanceProcessor {
 		String chunkId = theChunk.getId();
 		myJobPersistence.enqueueWorkChunkForProcessing(chunkId, updated -> {
 			if (updated == 1) {
-				JobWorkCursor<?, ?, ?> jobWorkCursor =
-						JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, theChunk.getTargetStepId());
-
-				if (theJobDefinition.isGatedExecution()
-						&& jobWorkCursor.isFinalStep()
-						&& jobWorkCursor.isReductionStep()) {
-					// reduction steps are processed by
-					// ReductionStepExecutorServiceImpl
-					// which does not wait for steps off the queue but reads all the
-					// "QUEUE'd" chunks and processes them inline
-					return;
-				}
-
 				// send to the queue
 				// we use current step id because it has not been moved to the next step (yet)
 				JobWorkNotification workNotification = new JobWorkNotification(

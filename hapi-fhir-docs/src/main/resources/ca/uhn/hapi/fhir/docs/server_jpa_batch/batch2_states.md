@@ -47,7 +47,6 @@ stateDiagram-v2
 title: Batch2 Job Work Chunk state transitions
 ---
 stateDiagram-v2
-    [*]:
     state READY
     state QUEUED
     state on_receive <<choice>>

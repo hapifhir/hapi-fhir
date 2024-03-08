@@ -145,6 +145,13 @@ public class JobDefinition<PT extends IModelJson> {
 		return myGatedExecution;
 	}
 
+	public JobDefinitionStep<?, ?, ?> getStepById(String theId) {
+		return getSteps().stream()
+			.filter(s -> s.getStepId().equals(theId))
+			.findFirst()
+			.orElse(null);
+	}
+
 	public boolean isLastStepReduction() {
 		int stepCount = getSteps().size();
 		return stepCount >= 1 && getSteps().get(stepCount - 1).isReductionStep();

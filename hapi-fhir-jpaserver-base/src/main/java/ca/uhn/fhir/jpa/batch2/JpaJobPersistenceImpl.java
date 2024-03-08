@@ -298,10 +298,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		int updated = myWorkChunkRepository.updateChunkStatus(
 				theChunkId, WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.READY);
 		theCallback.accept(updated);
-		if (updated == 1) {
-			myEntityManager.flush();
-			myEntityManager.unwrap(Session.class).doWork(Connection::commit);
-		}
 	}
 
 	@Override
@@ -401,7 +397,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
-		if (getRunningJob(theInstanceId) == null) {
+		Batch2JobInstanceEntity jobInstanceEntity = getRunningJob(theInstanceId);
+		if (jobInstanceEntity == null) {
 			return false;
 		}
 
@@ -413,7 +410,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				theInstanceId,
 				theCurrentStepId,
 				statusesForStep);
-		return statusesForStep.isEmpty() || statusesForStep.equals(Set.of(WorkChunkStatusEnum.COMPLETED));
+
+		return statusesForStep.isEmpty() || statusesForStep.equals(Set.of(WorkChunkStatusEnum.COMPLETED))
+			|| statusesForStep.equals(Set.of(WorkChunkStatusEnum.READY));
 	}
 
 	@Override
