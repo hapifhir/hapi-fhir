@@ -12,6 +12,7 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
@@ -37,6 +38,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -529,6 +531,54 @@ public class FhirPatchApplyR4Test {
 		assertThat(patient.getExtension(), hasSize(1));
 		assertThat(patient.getExtension().get(0).getUrl(), is(equalTo("http://foo/fhir/extension/foo")));
 		assertThat(patient.getExtension().get(0).getValueAsPrimitive().getValueAsString(), is(equalTo("foo")));
+	}
+
+	@Test
+	public void testAddExtensionWithExtension() {
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Patient patient = new Patient();
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent addOperation = createPatchAddOperation("Patient", "extension", null);
+		addOperation
+			.addPart()
+			.setName("value")
+			.addPart(
+				new Parameters.ParametersParameterComponent()
+					.setName("url")
+					.setValue(new UriType("http://foo/fhir/extension/foo"))
+			)
+			.addPart(
+				new Parameters.ParametersParameterComponent()
+					.setName("extension")
+					.addPart(
+						new Parameters.ParametersParameterComponent()
+							.setName("url")
+							.setValue(new UriType("http://foo/fhir/extension/innerExtension"))
+					)
+					.addPart(
+						new Parameters.ParametersParameterComponent()
+							.setName("value")
+							.setValue(new DateTimeType("2021-07-24T13:23:30-04:00"))
+					)
+			);
+
+		patch.addParameter(addOperation);
+
+		ourLog.debug("Patch:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
+
+		svc.apply(patient, patch);
+		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		//Then: it adds the new extension correctly.
+		assertThat(patient.getExtension(), hasSize(1));
+		Extension extension = patient.getExtension().get(0);
+		assertThat(extension.getUrl(), is(equalTo("http://foo/fhir/extension/foo")));
+		Extension innerExtension = extension.getExtensionFirstRep();
+
+		assertThat(innerExtension, notNullValue());
+		assertThat(innerExtension.getUrl(), is(equalTo("http://foo/fhir/extension/innerExtension")));
+
 	}
 
 	private Parameters.ParametersParameterComponent createPatchAddOperation(String thePath, String theName, Type theValue) {
