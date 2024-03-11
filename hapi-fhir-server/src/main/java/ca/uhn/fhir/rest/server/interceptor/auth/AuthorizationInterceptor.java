@@ -159,6 +159,12 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			rules = buildRuleList(theRequestDetails);
 			theRequestDetails.getUserData().put(myRequestRuleListKey, rules);
 		}
+		// LUKETODO:  rules do not contain any reference to PATCH
+		/*
+		0 = {RuleImplOp@40767} "RuleImplOp[testers=<null>,op=TRANSACTION,transactionAppliesToOp=ANY_OPERATION,appliesTo=<null>,appliesToTypes=<null>,classifierCompartmentName=<null>,classifierCompartmentOwners=<null>,classifierType=<null>]"
+		1 = {RuleImplOp@40768} "RuleImplOp[testers=<null>,op=WRITE,transactionAppliesToOp=<null>,appliesTo=TYPES,appliesToTypes=[Patient],classifierCompartmentName=<null>,classifierCompartmentOwners=<null>,classifierType=ANY_ID]"
+		 */
+
 		Set<AuthorizationFlagsEnum> flags = getFlags();
 
 		ourLog.trace(
@@ -168,10 +174,26 @@ public class AuthorizationInterceptor implements IRuleApplier {
 				getResourceTypeOrEmpty(theInputResource),
 				getResourceTypeOrEmpty(theOutputResource));
 
+
 		Verdict verdict = null;
-		for (IAuthRule nextRule : rules) {
-			ourLog.trace("Rule being applied - {}", nextRule);
-			verdict = nextRule.applyRule(
+
+		// LUKETODO:  try to just check for FHIR_PATCH if this is a FHIR_PATCH and if it's not there, then return a deny verdict
+		if (theOperation == RestOperationTypeEnum.PATCH) {
+//			if (rules.stream()
+//				.filter(RuleImplOp.class::isInstance)
+//				.map(RuleImplOp.class::cast)
+//				.noneMatch(rule -> rule.getOp() == RuleOpEnum.PATCH)) {
+			if (rules.stream()
+				.noneMatch(RuleImplPatch.class::isInstance)) {
+				// LUKETODO:  this results in a 403 but is that what we want?
+				verdict = new Verdict(PolicyEnum.DENY, null);
+			}
+		}
+
+		if (verdict == null) {
+			for (IAuthRule nextRule : rules) {
+				ourLog.trace("Rule being applied - {}", nextRule);
+				verdict = nextRule.applyRule(
 					theOperation,
 					theRequestDetails,
 					theInputResource,
@@ -180,9 +202,10 @@ public class AuthorizationInterceptor implements IRuleApplier {
 					this,
 					flags,
 					thePointcut);
-			if (verdict != null) {
-				ourLog.trace("Rule {} returned decision {}", nextRule, verdict.getDecision());
-				break;
+				if (verdict != null) {
+					ourLog.trace("Rule {} returned decision {}", nextRule, verdict.getDecision());
+					break;
+				}
 			}
 		}
 

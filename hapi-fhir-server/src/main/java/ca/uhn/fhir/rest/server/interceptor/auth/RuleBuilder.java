@@ -834,10 +834,17 @@ public class RuleBuilder implements IAuthRuleBuilder {
 
 			@Override
 			public IAuthRuleFinished allRequests() {
+				// LUKETODO:  should we be building this simple ruleImplOp or should be we basing this off RuleImplOp?
 				BaseRule rule =
 						new RuleImplPatch(myRuleName).setAllRequests(true).setMode(myRuleMode);
+				// LUKETODO:  HTTP 500 Server Error: HAPI-0335: Unable to apply security to event of type PATCH
+				RuleImplOp ruleImplOp = new RuleImplOp(myRuleName);
+				ruleImplOp.setMode(myRuleMode);
+				ruleImplOp.setOp(RuleOpEnum.PATCH);
+				ruleImplOp.setTransactionAppliesToOp(TransactionAppliesToEnum.ANY_OPERATION);
+//				myRules.add(ruleImplOp);
 				myRules.add(rule);
-				return new RuleBuilderFinished(rule);
+				return new RuleBuilderFinished(ruleImplOp);
 			}
 		}
 

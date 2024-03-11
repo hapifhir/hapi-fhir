@@ -240,6 +240,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 						}
 						break;
 					case PATCH:
+						// LUKETODO:  should we just short-circuit here and let the PATCH case decide this?
 						target.resource = null;
 						if (theInputResourceId != null) {
 							target.resourceIds = Collections.singletonList(theInputResourceId);
@@ -348,6 +349,16 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							theRuleApplier);
 				}
 				return null;
+//			case PATCH:
+//				// LUKETODO:  ?
+//				// LUKETODO:  do we need applies to types to correspond to
+//				target.resource = null;
+//				if (theInputResourceId != null) {
+//					target.resourceIds = Collections.singletonList(theInputResourceId);
+//				} else {
+//					return null;
+//				}
+//				break;
 			default:
 				// Should not happen
 				throw new IllegalStateException(
@@ -957,6 +968,10 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			}
 		}
 		return false;
+	}
+
+	public RuleOpEnum getOp() {
+		return myOp;
 	}
 
 	public void setAppliesTo(AppliesTypeEnum theAppliesTo) {
