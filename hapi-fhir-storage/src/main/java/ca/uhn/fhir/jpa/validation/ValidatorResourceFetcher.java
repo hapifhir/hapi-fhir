@@ -43,8 +43,10 @@ import org.hl7.fhir.utilities.CanonicalPair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 
@@ -131,12 +133,18 @@ public class ValidatorResourceFetcher implements IValidatorResourceFetcher {
 	}
 
 	@Override
-	public CanonicalResource fetchCanonicalResource(IResourceValidator iResourceValidator, String s) {
+	public CanonicalResource fetchCanonicalResource(IResourceValidator validator, Object appContext, String url)
+			throws URISyntaxException {
 		return null;
 	}
 
 	@Override
 	public boolean fetchesCanonicalResource(IResourceValidator iResourceValidator, String s) {
 		return false;
+	}
+
+	@Override
+	public Set<String> fetchCanonicalResourceVersions(IResourceValidator validator, Object appContext, String url) {
+		return null;
 	}
 }

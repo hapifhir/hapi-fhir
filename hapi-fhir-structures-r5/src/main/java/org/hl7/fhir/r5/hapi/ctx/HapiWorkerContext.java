@@ -591,6 +591,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public <T extends Resource> List<T> fetchResourcesByUrl(Class<T> class_, String url) {
+		throw new UnsupportedOperationException(Msg.code(2508) + "Can't fetch all resources of url: " + url);
+	}
+
+	@Override
 	public IWorkerContext setPackageTracker(IWorkerContextManager.IPackageLoadingTracker theIPackageLoadingTracker) {
 		throw new UnsupportedOperationException(Msg.code(220));
 	}

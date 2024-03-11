@@ -798,26 +798,24 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 		if (theVs == null) {
 			String message = "Unknown code (for '" + code.getCodingFirstRep().getSystem() + "#"
-				+ code.getCodingFirstRep().getCode() + "')";
-			OperationOutcome.OperationOutcomeIssueComponent issue = getOperationOutcomeTxIssueComponent(message, OperationOutcome.IssueType.CODEINVALID.toCode());
+					+ code.getCodingFirstRep().getCode() + "')";
+			OperationOutcome.OperationOutcomeIssueComponent issue =
+					getOperationOutcomeTxIssueComponent(message, OperationOutcome.IssueType.CODEINVALID.toCode());
 			issues.add(issue);
 		}
 
 		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, issues);
 	}
 
-	private static OperationOutcome.OperationOutcomeIssueComponent getOperationOutcomeTxIssueComponent(String message, String txIssueTypeCode) {
+	private static OperationOutcome.OperationOutcomeIssueComponent getOperationOutcomeTxIssueComponent(
+			String message, String txIssueTypeCode) {
 		OperationOutcome.OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent()
 				.setSeverity(OperationOutcome.IssueSeverity.ERROR)
 				.setDiagnostics(message);
 		issue.getDetails().setText(message);
 
 		issue.setCode(OperationOutcome.IssueType.CODEINVALID);
-		issue.getDetails()
-			.addCoding(
-				"http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
-				txIssueTypeCode,
-				null);
+		issue.getDetails().addCoding("http://hl7.org/fhir/tools/CodeSystem/tx-issue-type", txIssueTypeCode, null);
 		return issue;
 	}
 
@@ -831,6 +829,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return (List<T>) allStructures();
 		}
 		throw new UnsupportedOperationException(Msg.code(650) + "Unable to fetch resources of type: " + theClass);
+	}
+
+	@Override
+	public <T extends Resource> List<T> fetchResourcesByUrl(Class<T> class_, String url) {
+		throw new UnsupportedOperationException(Msg.code(2509) + "Can't fetch all resources of url: " + url);
 	}
 
 	@Override
