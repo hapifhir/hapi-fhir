@@ -535,6 +535,10 @@ public class FhirPatchApplyR4Test {
 
 	@Test
 	public void testAddExtensionWithExtension() {
+		final String extensionUrl  = "http://foo/fhir/extension/foo";
+		final String innerExtensionUrl  = "http://foo/fhir/extension/innerExtension";
+		final String innerExtensionValue = "2021-07-24T13:23:30-04:00";
+
 		FhirPatch svc = new FhirPatch(ourCtx);
 		Patient patient = new Patient();
 
@@ -546,7 +550,7 @@ public class FhirPatchApplyR4Test {
 			.addPart(
 				new Parameters.ParametersParameterComponent()
 					.setName("url")
-					.setValue(new UriType("http://foo/fhir/extension/foo"))
+					.setValue(new UriType(extensionUrl))
 			)
 			.addPart(
 				new Parameters.ParametersParameterComponent()
@@ -554,18 +558,18 @@ public class FhirPatchApplyR4Test {
 					.addPart(
 						new Parameters.ParametersParameterComponent()
 							.setName("url")
-							.setValue(new UriType("http://foo/fhir/extension/innerExtension"))
+							.setValue(new UriType(innerExtensionUrl))
 					)
 					.addPart(
 						new Parameters.ParametersParameterComponent()
 							.setName("value")
-							.setValue(new DateTimeType("2021-07-24T13:23:30-04:00"))
+							.setValue(new DateTimeType(innerExtensionValue))
 					)
 			);
 
 		patch.addParameter(addOperation);
 
-		ourLog.debug("Patch:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
+		ourLog.info("Patch:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
 
 		svc.apply(patient, patch);
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
@@ -573,11 +577,12 @@ public class FhirPatchApplyR4Test {
 		//Then: it adds the new extension correctly.
 		assertThat(patient.getExtension(), hasSize(1));
 		Extension extension = patient.getExtension().get(0);
-		assertThat(extension.getUrl(), is(equalTo("http://foo/fhir/extension/foo")));
+		assertThat(extension.getUrl(), is(equalTo(extensionUrl)));
 		Extension innerExtension = extension.getExtensionFirstRep();
 
 		assertThat(innerExtension, notNullValue());
-		assertThat(innerExtension.getUrl(), is(equalTo("http://foo/fhir/extension/innerExtension")));
+		assertThat(innerExtension.getUrl(), is(equalTo(innerExtensionUrl)));
+		assertThat(innerExtension.getValue().primitiveValue(), is(equalTo(innerExtensionValue)));
 
 	}
 
