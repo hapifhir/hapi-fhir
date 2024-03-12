@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5773
+title: "Subscriptions with null content caused NullPointerExceptions. This condition is now checked and handled."
