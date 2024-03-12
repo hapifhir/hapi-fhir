@@ -39,7 +39,6 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import java.util.ArrayList;
@@ -321,7 +320,8 @@ public class FhirPatch {
 			newValue = valuePartValue.get();
 		} else {
 			List<IBase> partParts =
-					extractPartsFromPart(valuePart.orElse(new Parameters.ParametersParameterComponent()));
+					valuePart.isPresent() ? extractPartsFromPart(valuePart.get()) : Collections.emptyList();
+
 			newValue = createAndPopulateNewElement(theChildDefinition, partParts);
 		}
 
