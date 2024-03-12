@@ -842,7 +842,7 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				ruleImplOp.setMode(myRuleMode);
 				ruleImplOp.setOp(RuleOpEnum.PATCH);
 				ruleImplOp.setTransactionAppliesToOp(TransactionAppliesToEnum.ANY_OPERATION);
-//				myRules.add(ruleImplOp);
+				//				myRules.add(ruleImplOp);
 				myRules.add(rule);
 				return new RuleBuilderFinished(ruleImplOp);
 			}

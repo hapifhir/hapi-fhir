@@ -349,16 +349,16 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 							theRuleApplier);
 				}
 				return null;
-//			case PATCH:
-//				// LUKETODO:  ?
-//				// LUKETODO:  do we need applies to types to correspond to
-//				target.resource = null;
-//				if (theInputResourceId != null) {
-//					target.resourceIds = Collections.singletonList(theInputResourceId);
-//				} else {
-//					return null;
-//				}
-//				break;
+				//			case PATCH:
+				//				// LUKETODO:  ?
+				//				// LUKETODO:  do we need applies to types to correspond to
+				//				target.resource = null;
+				//				if (theInputResourceId != null) {
+				//					target.resourceIds = Collections.singletonList(theInputResourceId);
+				//				} else {
+				//					return null;
+				//				}
+				//				break;
 			default:
 				// Should not happen
 				throw new IllegalStateException(
