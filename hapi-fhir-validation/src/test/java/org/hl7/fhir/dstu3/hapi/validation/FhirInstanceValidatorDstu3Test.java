@@ -812,6 +812,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		addValidConcept("http://loinc.org", "46240-8");
 		addValidConcept("http://loinc.org", "42348-3");
 		addValidConcept("http://loinc.org", "42348-3");
+		addValidConcept("http://loinc.org", "34133-9");
 
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
@@ -1331,6 +1332,9 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://example.com/").setValue("12345").getType().addCoding().setSystem("http://example.com/foo/bar").setCode("bar");
+
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
+
 
 		ValidationResult output = myVal.validateWithResult(patient);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);

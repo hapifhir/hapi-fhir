@@ -771,8 +771,8 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 						"Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided";
 				OperationOutcome.OperationOutcomeIssueComponent issue =
 						new OperationOutcome.OperationOutcomeIssueComponent()
-								.setSeverity(OperationOutcome.IssueSeverity.WARNING)
-								.setCode(OperationOutcome.IssueType.INVALID)
+								.setSeverity(OperationOutcome.IssueSeverity.ERROR)
+								.setCode(OperationOutcome.IssueType.NOTFOUND)
 								.setDiagnostics(message)
 								.setDetails(new CodeableConcept().setText(message));
 
@@ -787,7 +787,9 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					return retVal;
 				}
 			} else {
-				issues.add(getOperationOutcomeTxIssueComponent(retVal.getMessage(), "not-in-vs"));
+				final String message = "Unknown code (for '" + code.getCodingFirstRep().getSystem() + "#"
+					+ code.getCodingFirstRep().getCode() + "')";
+				issues.add(getOperationOutcomeTxIssueComponent(message, OperationOutcome.IssueType.CODEINVALID, OperationOutcome.IssueType.CODEINVALID.toCode()));
 			}
 		}
 
@@ -796,11 +798,12 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return validationResultsOk.get(0);
 		}
 
-		if (theVs == null) {
+
+		if (theVs == null && issues.isEmpty()) {
 			String message = "Unknown code (for '" + code.getCodingFirstRep().getSystem() + "#"
 					+ code.getCodingFirstRep().getCode() + "')";
 			OperationOutcome.OperationOutcomeIssueComponent issue =
-					getOperationOutcomeTxIssueComponent(message, OperationOutcome.IssueType.CODEINVALID.toCode());
+					getOperationOutcomeTxIssueComponent(message, OperationOutcome.IssueType.NOTFOUND, OperationOutcome.IssueType.NOTFOUND.toCode());
 			issues.add(issue);
 		}
 
@@ -808,13 +811,13 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	private static OperationOutcome.OperationOutcomeIssueComponent getOperationOutcomeTxIssueComponent(
-			String message, String txIssueTypeCode) {
+		String message, OperationOutcome.IssueType issueCode, String txIssueTypeCode) {
 		OperationOutcome.OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent()
 				.setSeverity(OperationOutcome.IssueSeverity.ERROR)
 				.setDiagnostics(message);
 		issue.getDetails().setText(message);
 
-		issue.setCode(OperationOutcome.IssueType.CODEINVALID);
+		issue.setCode(issueCode);
 		issue.getDetails().addCoding("http://hl7.org/fhir/tools/CodeSystem/tx-issue-type", txIssueTypeCode, null);
 		return issue;
 	}

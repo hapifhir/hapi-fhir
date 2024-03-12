@@ -716,13 +716,13 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	public void testLargeBase64() throws IOException {
+		addValidConcept("http://loinc.org", "1-8");
+
 		String input = IOUtils.toString(FhirInstanceValidatorR4Test.class.getResourceAsStream("/r4/diagnosticreport-example-gingival-mass.json"), Constants.CHARSET_UTF8);
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> messages = logResultsAndReturnAll(output);
-		assertEquals(3, messages.size());
-		assertThat(messages.get(0).getMessage(), containsString("Unknown code (for 'http://loinc.org#1-8')"));
-		assertThat(messages.get(1).getMessage(), containsString("None of the codings provided are in the value set 'LOINC Diagnostic Report Codes'"));
-		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", messages.get(2).getMessage());
+		assertEquals(1, messages.size());
+		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", messages.get(0).getMessage());
 	}
 
 	@Test

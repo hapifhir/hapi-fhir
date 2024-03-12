@@ -263,7 +263,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		ValidationResult result = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(0).getMessage());
+		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(1).getMessage());
 
 	}
 
@@ -780,7 +780,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 
 		assertEquals(2, outcome.size());
-		assertThat(outcome.get(0).getMessage(), containsString("Unknown code 'http://terminology.hl7.org/CodeSystem/v2-0131#GAGAGAGA'"));
+		assertThat(outcome.get(0).getMessage(), containsString("Unknown code (for 'http://terminology.hl7.org/CodeSystem/v2-0131#GAGAGAGA')"));
 		assertEquals(ResultSeverityEnum.ERROR, outcome.get(0).getSeverity());
 		assertThat(outcome.get(1).getMessage(), containsString("None of the codings provided are in the value set 'Patient Relationship Type'"));
 		assertEquals(ResultSeverityEnum.INFORMATION, outcome.get(1).getSeverity());
@@ -1013,7 +1013,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
 		assertThat(
 			all.get(0).getMessage(),
-			containsString("Unknown code 'http://example.com/foo/bar#bar'")
+			containsString("Unknown code (for 'http://example.com/foo/bar#bar')")
 		);
 
 		assertEquals("Patient.identifier[0].type", all.get(1).getLocationString());
