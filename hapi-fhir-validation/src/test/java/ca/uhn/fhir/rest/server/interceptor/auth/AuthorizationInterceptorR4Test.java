@@ -2592,7 +2592,25 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 	@Test
 	public void testPatchAllowed() throws IOException {
 		Observation obs = new Observation();
+		obs.setId("123");
 		obs.setSubject(new Reference("Patient/999"));
+
+		final HttpPut put = new HttpPut(ourServer.getBaseUrl() + "/Observation/123");
+
+		final String obsAsJson = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs);
+
+		put.setEntity(new StringEntity(obsAsJson, ContentType.create(Constants.CT_JSON, Charsets.UTF_8)));
+
+		CloseableHttpResponse status1 = ourClient.execute(put);
+		final String response = extractResponseAndClose(status1);
+
+		ourLog.info("response: {}", response);
+
+//		final HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/123");
+//
+//		CloseableHttpResponse status2 = ourClient.execute(httpGet);
+//		final String response2 = extractResponseAndClose(status2);
+//		ourLog.info("response2: {}", response2);
 
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -2608,6 +2626,56 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			"     ]";
 		HttpPatch patch = new HttpPatch(ourServer.getBaseUrl() + "/Observation/123");
 		patch.setEntity(new StringEntity(patchBody, ContentType.create(Constants.CT_JSON_PATCH, Charsets.UTF_8)));
+		ourLog.info("BEFORE execute PATCH");
+		CloseableHttpResponse status = ourClient.execute(patch);
+		ourLog.info("AFTER execute PATCH");
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+	}
+
+	@Test
+	public void testPatchAllowedFhirJson() throws IOException {
+		Observation obs = new Observation();
+		obs.setSubject(new Reference("Patient/999"));
+
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().patch().allRequests().andThen()
+					.build();
+			}
+		});
+
+		String patchBody =
+			"""
+				{
+				    "resourceType": "Parameters",
+				    "parameter": [
+				        {
+				            "name": "operation",
+				            "part": [
+				                {
+				                    "name": "type",
+				                    "valueCode": "replace"
+				                },
+				                {
+				                    "name": "path",
+				                    "valueString": "Observation/status"
+				                },
+				                {
+				                    "name": "value",
+				                    "value": "amended"
+				                }
+				            ]
+				        }
+				    ]
+				}
+			""";
+
+		HttpPatch patch = new HttpPatch(ourServer.getBaseUrl() + "/Observation/123");
+		patch.setEntity(new StringEntity(patchBody, ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
 		CloseableHttpResponse status = ourClient.execute(patch);
 		extractResponseAndClose(status);
 		assertEquals(200, status.getStatusLine().getStatusCode());

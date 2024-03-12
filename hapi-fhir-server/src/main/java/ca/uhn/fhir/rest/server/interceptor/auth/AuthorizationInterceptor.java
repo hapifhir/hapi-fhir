@@ -159,12 +159,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			rules = buildRuleList(theRequestDetails);
 			theRequestDetails.getUserData().put(myRequestRuleListKey, rules);
 		}
-		// LUKETODO:  rules do not contain any reference to PATCH
-		/*
-		0 = {RuleImplOp@40767} "RuleImplOp[testers=<null>,op=TRANSACTION,transactionAppliesToOp=ANY_OPERATION,appliesTo=<null>,appliesToTypes=<null>,classifierCompartmentName=<null>,classifierCompartmentOwners=<null>,classifierType=<null>]"
-		1 = {RuleImplOp@40768} "RuleImplOp[testers=<null>,op=WRITE,transactionAppliesToOp=<null>,appliesTo=TYPES,appliesToTypes=[Patient],classifierCompartmentName=<null>,classifierCompartmentOwners=<null>,classifierType=ANY_ID]"
-		 */
-
 		Set<AuthorizationFlagsEnum> flags = getFlags();
 
 		ourLog.trace(
@@ -175,39 +169,20 @@ public class AuthorizationInterceptor implements IRuleApplier {
 				getResourceTypeOrEmpty(theOutputResource));
 
 		Verdict verdict = null;
-
-		// LUKETODO:  explicitly rule out superuser
-		if (theOperation == RestOperationTypeEnum.PATCH) {
-			//			if (rules.stream()
-			//				.filter(RuleImplOp.class::isInstance)
-			//				.map(RuleImplOp.class::cast)
-			//				.noneMatch(rule -> rule.getOp() == RuleOpEnum.PATCH)) {
-			if (rules.stream().noneMatch(RuleImplPatch.class::isInstance)
-					&& rules.stream()
-							.filter(RuleImplOp.class::isInstance)
-							.map(RuleImplOp.class::cast)
-							.noneMatch(rule -> rule.getOp() == RuleOpEnum.ALL)) {
-				// LUKETODO:  this results in a 403 but is that what we want?
-				verdict = new Verdict(PolicyEnum.DENY, null);
-			}
-		}
-
-		if (verdict == null) {
-			for (IAuthRule nextRule : rules) {
-				ourLog.trace("Rule being applied - {}", nextRule);
-				verdict = nextRule.applyRule(
-						theOperation,
-						theRequestDetails,
-						theInputResource,
-						theInputResourceId,
-						theOutputResource,
-						this,
-						flags,
-						thePointcut);
-				if (verdict != null) {
-					ourLog.trace("Rule {} returned decision {}", nextRule, verdict.getDecision());
-					break;
-				}
+		for (IAuthRule nextRule : rules) {
+			ourLog.trace("Rule being applied - {}", nextRule);
+			verdict = nextRule.applyRule(
+					theOperation,
+					theRequestDetails,
+					theInputResource,
+					theInputResourceId,
+					theOutputResource,
+					this,
+					flags,
+					thePointcut);
+			if (verdict != null) {
+				ourLog.trace("Rule {} returned decision {}", nextRule, verdict.getDecision());
+				break;
 			}
 		}
 
@@ -422,6 +397,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
 	public void incomingRequestPreHandled(RequestDetails theRequest, Pointcut thePointcut) {
+		ourLog.info("5688: PATCH: SERVER_INCOMING_REQUEST_PRE_HANDLED");
 		IBaseResource inputResource = null;
 		IIdType inputResourceId = null;
 
@@ -590,6 +566,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			IBaseResource theOldResource,
 			IBaseResource theNewResource,
 			Pointcut thePointcut) {
+		ourLog.info("5688: PATCH: STORAGE_PRESTORAGE_RESOURCE_UPDATED");
 		if (theOldResource != null) {
 			handleUserOperation(theRequest, theOldResource, RestOperationTypeEnum.UPDATE, thePointcut);
 		}
