@@ -34,7 +34,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
-import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -315,12 +314,11 @@ public class FhirPatch {
 		Optional<IBase> valuePartValue =
 				ParametersUtil.getParameterPartValue(myContext, theParameters, PARAMETER_VALUE);
 
-		IBase newValue = null;
+		IBase newValue;
 		if (valuePartValue.isPresent()) {
 			newValue = valuePartValue.get();
 		} else {
-			List<IBase> partParts =
-					valuePart.isPresent() ? extractPartsFromPart(valuePart.get()) : Collections.emptyList();
+			List<IBase> partParts = valuePart.map(this::extractPartsFromPart).orElse(Collections.emptyList());
 
 			newValue = createAndPopulateNewElement(theChildDefinition, partParts);
 		}
@@ -420,17 +418,6 @@ public class FhirPatch {
 				if (theElement instanceof IPrimitiveType) {
 					((IPrimitiveType<?>) theElement).setValueAsString(null);
 				}
-				return true;
-			}
-
-			@Override
-			public boolean acceptUndeclaredExtension(
-					IBaseExtension<?, ?> theNextExt,
-					List<IBase> theContainingElementPath,
-					List<BaseRuntimeChildDefinition> theChildDefinitionPath,
-					List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
-				theNextExt.setUrl(null);
-				theNextExt.setValue(null);
 				return true;
 			}
 		});
@@ -597,7 +584,7 @@ public class FhirPatch {
 		 * If the value is a Resource or a datatype, we can put it into the part.value and that will cover
 		 * all of its children. If it's an infrastructure element though, such as Patient.contact we can't
 		 * just put it into part.value because it isn't an actual type. So we have to put all of its
-		 * childen in instead.
+		 * children in instead.
 		 */
 		if (valueDef.isStandardType()) {
 			ParametersUtil.addPart(myContext, operation, PARAMETER_VALUE, value);
