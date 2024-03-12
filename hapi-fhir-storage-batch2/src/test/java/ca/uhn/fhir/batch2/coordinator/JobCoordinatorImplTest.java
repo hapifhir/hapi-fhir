@@ -55,6 +55,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -476,6 +477,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		assertSame(jobDefinition, myJobDefinitionCaptor.getValue());
 		assertEquals(startRequest.getParameters(), myParametersJsonCaptor.getValue());
 
+		verify(myBatchJobSender, never()).sendWorkChannelMessage(any());
 		verifyNoMoreInteractions(myJobInstancePersister);
 		verifyNoMoreInteractions(myStep1Worker);
 		verifyNoMoreInteractions(myStep2Worker);

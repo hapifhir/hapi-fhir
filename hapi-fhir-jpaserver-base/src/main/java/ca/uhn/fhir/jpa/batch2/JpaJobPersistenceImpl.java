@@ -297,7 +297,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public void enqueueWorkChunkForProcessing(String theChunkId, Consumer<Integer> theCallback) {
 		int updated = myWorkChunkRepository.updateChunkStatus(
 				theChunkId, WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.READY);
-		theCallback.accept(updated);
+		if (updated == 1) {
+			theCallback.accept(updated);
+		}
 	}
 
 	@Override
