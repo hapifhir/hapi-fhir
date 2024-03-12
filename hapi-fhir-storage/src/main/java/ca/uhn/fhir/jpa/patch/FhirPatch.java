@@ -30,6 +30,7 @@ import ca.uhn.fhir.util.IModelVisitor2;
 import ca.uhn.fhir.util.ParametersUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
@@ -38,6 +39,7 @@ import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import java.util.ArrayList;
@@ -49,7 +51,6 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class FhirPatch {
 
@@ -315,16 +316,13 @@ public class FhirPatch {
 		Optional<IBase> valuePartValue =
 				ParametersUtil.getParameterPartValue(myContext, theParameters, PARAMETER_VALUE);
 
-		IBase newValue;
+		IBase newValue = null;
 		if (valuePartValue.isPresent()) {
 			newValue = valuePartValue.get();
 		} else {
-			newValue = theChildDefinition.getChildElement().newInstance();
-
-			if (valuePart.isPresent()) {
-				IBase theValueElement = valuePart.get();
-				populateNewValue(theChildDefinition, newValue, theValueElement);
-			}
+			List<IBase> partParts =
+					extractPartsFromPart(valuePart.orElse(new Parameters.ParametersParameterComponent()));
+			newValue = createAndPopulateNewElement(theChildDefinition, partParts);
 		}
 
 		if (IBaseEnumeration.class.isAssignableFrom(
@@ -350,31 +348,65 @@ public class FhirPatch {
 		return newValue;
 	}
 
-	private void populateNewValue(ChildDefinition theChildDefinition, IBase theNewValue, IBase theValueElement) {
-		List<IBase> valuePartParts = myContext.newTerser().getValues(theValueElement, "part");
-		for (IBase nextValuePartPart : valuePartParts) {
+	@Nonnull
+	private List<IBase> extractPartsFromPart(IBase theParametersParameterComponent) {
+		return myContext.newTerser().getValues(theParametersParameterComponent, "part");
+	}
+
+	/**
+	 * this method will instantiate an element according to the provided Definition and it according to
+	 * the properties found in thePartParts.  a part usually represent a datatype as a name/value[X] pair.
+	 * it may also represent a complex type like an Extension.
+	 *
+	 * @param theDefinition wrapper around the runtime definition of the element to be populated
+	 * @param thePartParts list of Part to populate the element that will be created from theDefinition
+	 * @return an element that was created from theDefinition and populated with the parts
+	 */
+	private IBase createAndPopulateNewElement(ChildDefinition theDefinition, List<IBase> thePartParts) {
+		IBase newElement = theDefinition.getChildElement().newInstance();
+
+		for (IBase nextValuePartPart : thePartParts) {
 
 			String name = myContext
 					.newTerser()
 					.getSingleValue(nextValuePartPart, PARAMETER_NAME, IPrimitiveType.class)
 					.map(IPrimitiveType::getValueAsString)
 					.orElse(null);
-			if (isNotBlank(name)) {
 
-				Optional<IBase> value =
-						myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
-				if (value.isPresent()) {
+			if (StringUtils.isBlank(name)) {
+				continue;
+			}
 
-					BaseRuntimeChildDefinition partChildDef =
-							theChildDefinition.getChildElement().getChildByName(name);
-					if (partChildDef == null) {
-						name = name + "[x]";
-						partChildDef = theChildDefinition.getChildElement().getChildByName(name);
-					}
-					partChildDef.getMutator().addValue(theNewValue, value.get());
+			Optional<IBase> value = myContext.newTerser().getSingleValue(nextValuePartPart, "value[x]", IBase.class);
+
+			if (value.isPresent()) {
+				// we have a dataType. let's extract its value and assign it.
+				BaseRuntimeChildDefinition partChildDef =
+						theDefinition.getChildElement().getChildByName(name);
+				if (partChildDef == null) {
+					name = name + "[x]";
+					partChildDef = theDefinition.getChildElement().getChildByName(name);
 				}
+				partChildDef.getMutator().addValue(newElement, value.get());
+
+				// a part represent a datatype or a complexType but not both at the same time.
+				continue;
+			}
+
+			List<IBase> part = extractPartsFromPart(nextValuePartPart);
+
+			if (!part.isEmpty()) {
+				// we have a complexType.  let's find its definition and recursively process
+				// them till all complexTypes are processed.
+				ChildDefinition childDefinition = findChildDefinition(newElement, name);
+
+				IBase childNewValue = createAndPopulateNewElement(childDefinition, part);
+
+				childDefinition.getChildDef().getMutator().setValue(newElement, childNewValue);
 			}
 		}
+
+		return newElement;
 	}
 
 	private void deleteSingleElement(IBase theElementToDelete) {

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5771
+jira: SMILE-7837
+title: "Previously, a Patch operation would fail when adding a complex extension, i.e. an extension
+comprised of another extension.  This issue has been fixed."
