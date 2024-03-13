@@ -32,8 +32,6 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
@@ -41,11 +39,9 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -216,7 +212,7 @@ public class JobInstanceProcessor {
 					nextStepId);
 
 				// otherwise, continue processing as expected
-				processChunksForNextSteps(theInstance, nextStepId);
+				processChunksForNextGatedSteps(theInstance, theJobDefinition, nextStepId);
 			}
 		} else {
 			ourLog.debug(
@@ -242,15 +238,13 @@ public class JobInstanceProcessor {
 			return true;
 		}
 
-		if (workChunkStatuses.equals(Set.of(WorkChunkStatusEnum.COMPLETED))) {
-			// all work chunks complete -> go to next step
-			return true;
-		}
+//		if (workChunkStatuses.equals(Set.of(WorkChunkStatusEnum.COMPLETED))) {
+//			// all work chunks complete -> go to next step
+//			return true;
+//		}
 
-		if (workChunkStatuses.equals(Set.of(WorkChunkStatusEnum.READY))
-			 && theJobDefinition.getStepById(theStepId).isReductionStep()) {
-			// all workchunks ready && last step is reduction step;
-			// proceed
+		if (workChunkStatuses.equals(Set.of(WorkChunkStatusEnum.READY))) {
+			// all workchunks ready -> proceed
 			return true;
 		}
 
@@ -281,12 +275,14 @@ public class JobInstanceProcessor {
 			JobWorkCursor<?, ?, ?> jobWorkCursor =
 				JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, chunk.getTargetStepId());
 			if (theJobDefinition.isGatedExecution()
-				&& jobWorkCursor.isFinalStep()
-				&& jobWorkCursor.isReductionStep()) {
-				// reduction steps are processed by
-				// ReductionStepExecutorServiceImpl
-				// which does not wait for steps off the queue.
-				// so we will not process them here
+				|| jobWorkCursor.isReductionStep()) {
+				/*
+				 * Gated executions are queued later when all work chunks are ready.
+				 *
+				 * Reduction steps are not submitted to the queue at all, but processed inline.
+				 * Currently all reduction steps are also gated, but this might not always
+				 * be true.
+				 */
 				return;
 			}
 
@@ -316,6 +312,7 @@ public class JobInstanceProcessor {
 			WorkChunk theChunk, JobInstance theInstance, JobDefinition<?> theJobDefinition) {
 		String chunkId = theChunk.getId();
 		myJobPersistence.enqueueWorkChunkForProcessing(chunkId, updated -> {
+			ourLog.debug("Updated {} workchunk with id {}", updated, chunkId);
 			if (updated == 1) {
 				// send to the queue
 				// we use current step id because it has not been moved to the next step (yet)
@@ -331,30 +328,33 @@ public class JobInstanceProcessor {
 				// we'll log and skip it. If it's still in the DB, the next pass
 				// will pick it up. Otherwise, it's no longer important
 				ourLog.error(
-						"Job Instance {} failed to transition work chunk with id {} from READY to QUEUED; skipping work chunk.",
+						"Job Instance {} failed to transition work chunk with id {} from READY to QUEUED; found {}, expected 1; skipping work chunk.",
 						theInstance.getInstanceId(),
-						theChunk.getId());
+						theChunk.getId(),
+						updated);
 			}
 		});
 	}
 
-	private void processChunksForNextSteps(JobInstance theInstance, String nextStepId) {
+	private void processChunksForNextGatedSteps(JobInstance theInstance, JobDefinition<?> theJobDefinition, String nextStepId) {
 		String instanceId = theInstance.getInstanceId();
-		List<String> queuedChunksForNextStep =
-				myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.QUEUED);
+		List<String> readyChunksForNextStep =
+				myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.READY);
 		int totalChunksForNextStep = myProgressAccumulator.getTotalChunkCountForInstanceAndStep(instanceId, nextStepId);
-		if (totalChunksForNextStep != queuedChunksForNextStep.size()) {
+		if (totalChunksForNextStep != readyChunksForNextStep.size()) {
 			ourLog.debug(
-					"Total ProgressAccumulator QUEUED chunk count does not match QUEUED chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]",
+					"Total ProgressAccumulator READY chunk count does not match READY chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]",
 					instanceId,
 					nextStepId,
 					totalChunksForNextStep,
-					queuedChunksForNextStep.size());
+					readyChunksForNextStep.size());
 		}
+
 		// Note on sequence: we don't have XA transactions, and are talking to two stores (JPA + Queue)
 		// Sequence: 1 - So we run the query to minimize the work overlapping.
-		List<String> chunksToSubmit =
-				myJobPersistence.fetchAllChunkIdsForStepWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.QUEUED);
+//		List<String> chunksToSubmit =
+//				myJobPersistence.fetchAllChunkIdsForStepWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.READY);
+
 		// Sequence: 2 - update the job step so the workers will process them.
 		boolean changed = myJobPersistence.updateInstance(instanceId, instance -> {
 			if (instance.getCurrentGatedStepId().equals(nextStepId)) {
@@ -364,24 +364,28 @@ public class JobInstanceProcessor {
 			instance.setCurrentGatedStepId(nextStepId);
 			return true;
 		});
+
+
 		if (!changed) {
 			// we collided with another maintenance job.
 			ourLog.warn("Skipping gate advance to {} for instance {} - already advanced.", nextStepId, instanceId);
 			return;
 		}
 
+		enqueueReadyChunks(theInstance, theJobDefinition);
+
 		// DESIGN GAP: if we die here, these chunks will never be queued.
 		// Need a WAITING stage before QUEUED for chunks, so we can catch them.
 
 		// Sequence: 3 - send the notifications
-		for (String nextChunkId : chunksToSubmit) {
-			JobWorkNotification workNotification = new JobWorkNotification(theInstance, nextStepId, nextChunkId);
-			myBatchJobSender.sendWorkChannelMessage(workNotification);
-		}
-		ourLog.debug(
-				"Submitted a batch of chunks for processing. [chunkCount={}, instanceId={}, stepId={}]",
-				chunksToSubmit.size(),
-				instanceId,
-				nextStepId);
+//		for (String nextChunkId : chunksToSubmit) {
+//			JobWorkNotification workNotification = new JobWorkNotification(theInstance, nextStepId, nextChunkId);
+//			myBatchJobSender.sendWorkChannelMessage(workNotification);
+//		}
+//		ourLog.debug(
+//				"Submitted a batch of chunks for processing. [chunkCount={}, instanceId={}, stepId={}]",
+//				chunksToSubmit.size(),
+//				instanceId,
+//				nextStepId);
 	}
 }

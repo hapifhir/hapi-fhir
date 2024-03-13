@@ -93,7 +93,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -582,13 +581,13 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		p.addName().setFamily("family");
 		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualified();
 
-		sleepUntilTimeChanges();
+		sleep1MS();
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://foo");
 		myValueSetDao.create(vs, mySrd);
 
-		sleepUntilTimeChanges();
+		sleep1MS();
 
 		ResourceTable entity = new TransactionTemplate(myTxManager).execute(t -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
 		assertEquals(Long.valueOf(1), entity.getIndexStatus());

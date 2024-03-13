@@ -184,7 +184,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 			.thenReturn(Arrays.asList(existingInProgInstance));
 
 		// test
-		Batch2JobStartResponse startResponse = mySvc.startInstance(startRequest);
+		Batch2JobStartResponse startResponse = mySvc.startInstance(new SystemRequestDetails(), startRequest);
 
 		// verify
 		assertEquals(inProgressInstanceId, startResponse.getInstanceId()); // make sure it's the completed one
