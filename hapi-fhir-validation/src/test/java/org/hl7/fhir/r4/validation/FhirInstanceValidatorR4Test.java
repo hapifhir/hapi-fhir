@@ -404,7 +404,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult result = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(1).getMessage());
+		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(0).getMessage());
 
 	}
 
