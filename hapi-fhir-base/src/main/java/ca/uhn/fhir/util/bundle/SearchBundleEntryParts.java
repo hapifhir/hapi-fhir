@@ -30,7 +30,7 @@ public class SearchBundleEntryParts {
 	public SearchBundleEntryParts(String theFullUrl, IBaseResource theResource, String theSearchMode) {
 		myFullUrl = theFullUrl;
 		myResource = theResource;
-        mySearchMode = BundleEntrySearchModeEnum.forCode(theSearchMode);
+		mySearchMode = BundleEntrySearchModeEnum.forCode(theSearchMode);
 	}
 
 	public String getFullUrl() {
