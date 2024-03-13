@@ -120,16 +120,25 @@ public class BulkExportAppCtx {
 		return new FetchResourceIdsStep();
 	}
 
+	/**
+	 * Note, this bean is only used for version 1 of the bulk export job definition
+	 */
 	@Bean
 	public ExpandResourcesStep expandResourcesStep() {
 		return new ExpandResourcesStep();
 	}
 
+	/**
+	 * Note, this bean is only used for version 1 of the bulk export job definition
+	 */
 	@Bean
 	public WriteBinaryStep writeBinaryStep() {
 		return new WriteBinaryStep();
 	}
 
+	/**
+	 * Note, this bean is only used for version 2 of the bulk export job definition
+	 */
 	@Bean
 	public ExpandResourceAndWriteBinaryStep expandResourceAndWriteBinaryStep() {
 		return new ExpandResourceAndWriteBinaryStep();
