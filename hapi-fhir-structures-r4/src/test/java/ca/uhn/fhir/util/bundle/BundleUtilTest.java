@@ -473,9 +473,6 @@ public class BundleUtilTest {
 			{
 			  "resourceType": "Bundle",
 			  "id": "bd194b7f-ac1e-429a-a206-ee2c470f23b5",
-			  "meta": {
-			    "lastUpdated": "2021-10-18T16:25:55.330-07:00"
-			  },
 			  "type": "searchset",
 			  "total": 1,
 			  "link": [
@@ -490,20 +487,12 @@ public class BundleUtilTest {
 			      "resource": {
 			        "resourceType": "Condition",
 			        "id": "1626",
-			        "meta": {
-			          "versionId": "1",
-			          "lastUpdated": "2021-10-18T16:25:51.672-07:00",
-			          "source": "#gSOcGAdA3acaaNq1"
-			        },
 			        "identifier": [
 			          {
 			            "system": "urn:hssc:musc:conditionid",
 			            "value": "1064115000.1.5"
 			          }
-			        ],
-			        "subject": {
-			          "reference": "Patient/pata"
-			        }
+			        ]
 			      }
 			    }
 			  ]
@@ -516,6 +505,53 @@ public class BundleUtilTest {
 		//Then
 		assertThat(searchBundleEntryParts, hasSize(1));
 		assertThat(searchBundleEntryParts.get(0).getSearchMode(), is(nullValue()));
+		assertThat(searchBundleEntryParts.get(0).getFullUrl(), is(containsString("Condition/1626")));
+		assertThat(searchBundleEntryParts.get(0).getResource(), is(notNullValue()));
+	}
+
+	@Test
+	public void testConvertingToSearchBundleEntryPartsRespectsOutcomeMode() {
+
+		//Given
+		String bundleString = """
+			{
+			  "resourceType": "Bundle",
+			  "id": "bd194b7f-ac1e-429a-a206-ee2c470f23b5",
+			  "type": "searchset",
+			  "total": 1,
+			  "link": [
+			    {
+			      "relation": "self",
+			      "url": "http://localhost:8000/Condition?_count=1"
+			    }
+			  ],
+			  "entry": [
+			    {
+			      "fullUrl": "http://localhost:8000/Condition/1626",
+			      "resource": {
+			        "resourceType": "Condition",
+			        "id": "1626",
+			        "identifier": [
+			          {
+			            "system": "urn:hssc:musc:conditionid",
+			            "value": "1064115000.1.5"
+			          }
+			        ]
+			      },
+			      "search": {
+			        "mode": "outcome"
+			      }
+			    }
+			  ]
+			}""";
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, bundleString);
+
+		//When
+		List<SearchBundleEntryParts> searchBundleEntryParts = BundleUtil.getSearchBundleEntryParts(ourCtx, bundle);
+
+		//Then
+		assertThat(searchBundleEntryParts, hasSize(1));
+		assertThat(searchBundleEntryParts.get(0).getSearchMode(), is(equalTo(BundleEntrySearchModeEnum.OUTCOME)));
 		assertThat(searchBundleEntryParts.get(0).getFullUrl(), is(containsString("Condition/1626")));
 		assertThat(searchBundleEntryParts.get(0).getResource(), is(notNullValue()));
 	}
