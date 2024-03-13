@@ -343,7 +343,6 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 	@Test
 	public void testValidateCodeWithTailingSpace() {
-		//addValidConcept("http://loinc.org", "1-8");
 
 		Patient p = new Patient();
 		p.getMaritalStatus()
@@ -357,7 +356,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		ValidationResult result = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(1).getMessage());
+		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(0).getMessage());
 
 	}
 

@@ -1338,14 +1338,12 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 		ValidationResult output = myVal.validateWithResult(patient);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(2, all.size());
-		assertThat(all.get(0).getMessage(), containsString("Unknown code (for 'http://example.com/foo/bar#bar')"));
-		assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
+		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertThat(
-			all.get(1).getMessage(),
+			all.get(0).getMessage(),
 			containsString("None of the codings provided are in the value set 'Identifier Type Codes'"));
-		assertEquals(ResultSeverityEnum.WARNING, all.get(1).getSeverity());
+		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}
 

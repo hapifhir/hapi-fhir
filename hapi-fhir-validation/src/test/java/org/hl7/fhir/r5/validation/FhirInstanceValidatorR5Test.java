@@ -1008,19 +1008,13 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myVal.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(2, all.size());
+		assertEquals(1, all.size());
 
-		assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
+		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertThat(
 			all.get(0).getMessage(),
-			containsString("Unknown code (for 'http://example.com/foo/bar#bar')")
-		);
-
-		assertEquals("Patient.identifier[0].type", all.get(1).getLocationString());
-		assertThat(
-			all.get(1).getMessage(),
 			containsString("None of the codings provided are in the value set 'Identifier Type Codes'"));
-		assertEquals(ResultSeverityEnum.WARNING, all.get(1).getSeverity());
+		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}
 

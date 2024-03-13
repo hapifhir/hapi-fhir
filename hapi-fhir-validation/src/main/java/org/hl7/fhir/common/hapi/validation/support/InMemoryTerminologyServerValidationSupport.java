@@ -588,7 +588,17 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 		ValidationMessage.IssueSeverity severity;
 		String message;
-		if ("fragment".equals(codeSystemResourceContentMode)) {
+		/*if (someCondition) {
+			// RETURN A WARNING FOR OUR SPECIAL SPECIAL CASE
+			severity = ValidationMessage.IssueSeverity.WARNING;
+			message =  "Unknown code '"
+				+ (isNotBlank(theCodeSystemUrlAndVersionToValidate)
+				? theCodeSystemUrlAndVersionToValidate + "#"
+				: "")
+				+ theCodeToValidate + "'";
+		}
+		else*/
+			if ("fragment".equals(codeSystemResourceContentMode)) {
 			severity = ValidationMessage.IssueSeverity.WARNING;
 			message = "Unknown code in fragment CodeSystem '"
 					+ (isNotBlank(theCodeSystemUrlAndVersionToValidate)

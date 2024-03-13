@@ -787,9 +787,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					return retVal;
 				}
 			} else {
-				final String message = "Unknown code (for '" + code.getCodingFirstRep().getSystem() + "#"
-					+ code.getCodingFirstRep().getCode() + "')";
-				issues.add(getOperationOutcomeTxIssueComponent(message, OperationOutcome.IssueType.CODEINVALID, OperationOutcome.IssueType.CODEINVALID.toCode()));
+				final String message = "Unknown code (for '" + next.getSystem() + "#"
+					+ next.getCode() + "')";
+				final String txIssueTypeCode = getTxIssueTypeCode(next.getSystem(), theVs);
+
+				issues.add(getOperationOutcomeTxIssueComponent(message, OperationOutcome.IssueType.CODEINVALID, txIssueTypeCode));
 			}
 		}
 
@@ -808,6 +810,16 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		}
 
 		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, issues);
+	}
+
+	private String getTxIssueTypeCode(String theSystem, ValueSet theVs) {
+		if (theVs == null ) {
+			return OperationOutcome.IssueType.CODEINVALID.toCode();
+		}
+		if (myValidationSupportContext.getRootValidationSupport().isCodeSystemSupported(myValidationSupportContext, theSystem)) {
+			return OperationOutcome.IssueType.CODEINVALID.toCode();
+		}
+		return  "not-in-vs";
 	}
 
 	private static OperationOutcome.OperationOutcomeIssueComponent getOperationOutcomeTxIssueComponent(
