@@ -205,6 +205,9 @@ public class SubscriptionWebsocketHandler extends TextWebSocketHandler implement
 		 * @return The payload
 		 */
 		private Optional<String> getPayloadByContent(ResourceDeliveryMessage msg) {
+			if (msg.getSubscription().getContent() == null) {
+				return Optional.empty();
+			}
 			switch (msg.getSubscription().getContent()) {
 				case IDONLY:
 					return Optional.of(msg.getPayloadId());
