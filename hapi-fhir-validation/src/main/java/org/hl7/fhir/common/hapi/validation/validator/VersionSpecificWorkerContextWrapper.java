@@ -788,15 +788,14 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 				}
 			} else {
 
-					final String message = "Unknown code (for '" + next.getSystem() + "#"
-					+ next.getCode() + "')";
-					final String txIssueTypeCode = getTxIssueTypeCode(next.getSystem(), theVs);
-					OperationOutcome.OperationOutcomeIssueComponent issue = getOperationOutcomeTxIssueComponent(message, OperationOutcome.IssueType.CODEINVALID, txIssueTypeCode);
-					if (myValidationSupportContext.isEnabledValidationForCodingsLogicalAnd()) {
-						issue.setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
-					}
-					issues.add(issue);
-
+				final String message = "Unknown code (for '" + next.getSystem() + "#" + next.getCode() + "')";
+				final String txIssueTypeCode = getTxIssueTypeCode(next.getSystem(), theVs);
+				OperationOutcome.OperationOutcomeIssueComponent issue = getOperationOutcomeTxIssueComponent(
+						message, OperationOutcome.IssueType.CODEINVALID, txIssueTypeCode);
+				if (myValidationSupportContext.isEnabledValidationForCodingsLogicalAnd()) {
+					issue.setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
+				}
+				issues.add(issue);
 			}
 		}
 
@@ -805,12 +804,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return validationResultsOk.get(0);
 		}
 
-
 		if (theVs == null && issues.isEmpty()) {
 			String message = "Unknown code (for '" + code.getCodingFirstRep().getSystem() + "#"
 					+ code.getCodingFirstRep().getCode() + "')";
-			OperationOutcome.OperationOutcomeIssueComponent issue =
-					getOperationOutcomeTxIssueComponent(message, OperationOutcome.IssueType.NOTFOUND, OperationOutcome.IssueType.NOTFOUND.toCode());
+			OperationOutcome.OperationOutcomeIssueComponent issue = getOperationOutcomeTxIssueComponent(
+					message, OperationOutcome.IssueType.NOTFOUND, OperationOutcome.IssueType.NOTFOUND.toCode());
 			issues.add(issue);
 		}
 
@@ -818,17 +816,19 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	private String getTxIssueTypeCode(String theSystem, ValueSet theVs) {
-		if (theVs == null ) {
+		if (theVs == null) {
 			return OperationOutcome.IssueType.CODEINVALID.toCode();
 		}
-		if (myValidationSupportContext.getRootValidationSupport().isCodeSystemSupported(myValidationSupportContext, theSystem)) {
+		if (myValidationSupportContext
+				.getRootValidationSupport()
+				.isCodeSystemSupported(myValidationSupportContext, theSystem)) {
 			return OperationOutcome.IssueType.CODEINVALID.toCode();
 		}
-		return  "not-in-vs";
+		return "not-in-vs";
 	}
 
 	private static OperationOutcome.OperationOutcomeIssueComponent getOperationOutcomeTxIssueComponent(
-		String message, OperationOutcome.IssueType issueCode, String txIssueTypeCode) {
+			String message, OperationOutcome.IssueType issueCode, String txIssueTypeCode) {
 		OperationOutcome.OperationOutcomeIssueComponent issue = new OperationOutcome.OperationOutcomeIssueComponent()
 				.setSeverity(OperationOutcome.IssueSeverity.ERROR)
 				.setDiagnostics(message);
