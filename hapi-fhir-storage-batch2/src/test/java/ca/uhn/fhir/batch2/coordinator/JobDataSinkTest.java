@@ -35,6 +35,8 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -111,14 +113,7 @@ class JobDataSinkTest {
 
 		// theDataSink.accept(output) called by firstStepWorker above calls two services.  Let's validate them both.
 
-		verify(myBatchJobSender).sendWorkChannelMessage(myJobWorkNotificationCaptor.capture());
-
-		JobWorkNotification notification = myJobWorkNotificationCaptor.getValue();
-		assertEquals(JOB_DEF_ID, notification.getJobDefinitionId());
-		assertEquals(JOB_INSTANCE_ID, notification.getInstanceId());
-		assertEquals(CHUNK_ID, notification.getChunkId());
-		assertEquals(JOB_DEF_VERSION, notification.getJobDefinitionVersion());
-		assertEquals(LAST_STEP_ID, notification.getTargetStepId());
+		verify(myBatchJobSender, never()).sendWorkChannelMessage(any());
 
 		WorkChunkCreateEvent batchWorkChunk = myBatchWorkChunkCaptor.getValue();
 		assertEquals(JOB_DEF_VERSION, batchWorkChunk.jobDefinitionVersion);

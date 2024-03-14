@@ -127,6 +127,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		ourLog.trace(
 				"Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
 		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myWorkChunkRepository.save(entity));
+		System.out.println("==========");
+		System.out.println("Creating workchunk " + entity.getId() + " for " + entity.getTargetStepId() + " in " + entity.getStatus().name());
 		return entity.getId();
 	}
 
@@ -357,13 +359,17 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public void onWorkChunkCompletion(WorkChunkCompletionEvent theEvent) {
 		myTransactionService
 				.withSystemRequestOnDefaultPartition()
-				.execute(() -> myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
+				.execute(() -> {
+					System.out.println("xxxxxxxxxxx");
+					System.out.println("onWorkChunkCompletion " + theEvent.getChunkId() + " " + WorkChunkStatusEnum.COMPLETED.name());
+					myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
 						theEvent.getChunkId(),
 						new Date(),
 						theEvent.getRecordsProcessed(),
 						theEvent.getRecoveredErrorCount(),
 						WorkChunkStatusEnum.COMPLETED,
-						theEvent.getRecoveredWarningMessage()));
+						theEvent.getRecoveredWarningMessage());
+				});
 	}
 
 	@Nullable

@@ -38,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.PlatformTransactionManager;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -239,7 +240,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	public void testInProgress_GatedExecution_FirstStepComplete() {
 		// Setup
 		List<WorkChunk> chunks = Arrays.asList(
-			JobCoordinatorImplTest.createWorkChunkStep1().setStatus(WorkChunkStatusEnum.COMPLETED).setId(CHUNK_ID + "abc"),
 			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.READY).setId(CHUNK_ID),
 			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.READY).setId(CHUNK_ID_2)
 		);
@@ -255,7 +255,10 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance1));
 		when(myJobPersistence.fetchAllWorkChunksForJobInStates(anyString(), eq(Set.of(WorkChunkStatusEnum.READY))))
-			.thenReturn(chunks.stream().filter(c -> c.getStatus() == WorkChunkStatusEnum.READY));
+			.thenAnswer((args) -> {
+				// new stream every time
+				return new ArrayList<>(chunks).stream();
+			});
 		doAnswer(a -> {
 			Consumer<Integer> callback = a.getArgument(1);
 			callback.accept(1);
@@ -268,7 +271,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		// Verify
 		verify(myWorkChannelProducer, times(2)).send(myMessageCaptor.capture());
-		verify(myJobPersistence, times(1)).updateInstance(eq(INSTANCE_ID), any());
+		verify(myJobPersistence, times(2)).updateInstance(eq(INSTANCE_ID), any());
 		verifyNoMoreInteractions(myJobPersistence);
 		JobWorkNotification payload0 = myMessageCaptor.getAllValues().get(0).getPayload();
 		assertEquals(STEP_2, payload0.getTargetStepId());
@@ -390,7 +393,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchAllWorkChunksForJobInStates(eq(INSTANCE_ID), eq(Set.of(WorkChunkStatusEnum.READY))))
 			.thenAnswer(t -> theChunks.stream());
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
-			.thenAnswer(t -> theChunks.stream().map(c -> c.setStatus(WorkChunkStatusEnum.QUEUED)).toList().iterator());
+			.thenAnswer(t -> theChunks.stream().map(c -> c.setStatus(WorkChunkStatusEnum.READY)).toList().iterator());
 
 		// test
 		mySvc.runMaintenancePass();
@@ -454,6 +457,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			createWorkChunkStep2().setStatus(WorkChunkStatusEnum.READY),
 			createWorkChunkStep2().setStatus(WorkChunkStatusEnum.READY)
 		);
+		JobInstance instance = createInstance();
+		instance.setCurrentGatedStepId(STEP_2);
 
 		myLogCapture.setUp(Level.ERROR);
 
@@ -463,6 +468,12 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			consumer.accept(0); // nothing processed
 			return 1;
 		}).when(myJobPersistence).enqueueWorkChunkForProcessing(anyString(), any());
+		doAnswer(args -> {
+			IJobPersistence.JobInstanceUpdateCallback callback = args.getArgument(1);
+
+			callback.doUpdate(instance);
+			return true;
+		}).when(myJobPersistence).updateInstance(any(), any());
 
 		// test
 		runEnqueueReadyChunksTest(chunks, createJobDefinitionWithReduction());

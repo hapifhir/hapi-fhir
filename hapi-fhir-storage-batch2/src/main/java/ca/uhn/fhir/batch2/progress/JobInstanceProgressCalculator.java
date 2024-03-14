@@ -98,6 +98,7 @@ public class JobInstanceProgressCalculator {
 
 		while (workChunkIterator.hasNext()) {
 			WorkChunk next = workChunkIterator.next();
+
 			// global stats
 			myProgressAccumulator.addChunk(next);
 			// instance stats

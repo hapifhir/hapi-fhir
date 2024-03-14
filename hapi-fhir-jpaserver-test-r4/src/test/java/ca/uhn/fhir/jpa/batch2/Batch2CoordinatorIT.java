@@ -300,7 +300,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.awaitExpected();
 		assertNotNull(instanceId);
 
-		myBatch2JobHelper.awaitGatedStepId(FIRST_STEP_ID, instanceId);
+		myBatch2JobHelper.awaitGatedStepId(SECOND_STEP_ID, instanceId);
 
 		// wait for last step to finish
 		ourLog.info("Setting last step latch");
@@ -391,7 +391,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.awaitExpected();
 		assertNotNull(instanceId);
 
-		myBatch2JobHelper.awaitGatedStepId(FIRST_STEP_ID, instanceId);
+		myBatch2JobHelper.awaitGatedStepId(SECOND_STEP_ID, instanceId);
 
 		// wait for last step to finish
 		ourLog.info("Setting last step latch");

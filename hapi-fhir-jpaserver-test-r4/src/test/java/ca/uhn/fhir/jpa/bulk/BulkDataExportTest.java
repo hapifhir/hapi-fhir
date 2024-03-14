@@ -1079,8 +1079,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
 			String resourceType = file.getKey();
 			List<String> binaryIds = file.getValue();
-			System.out.println("xxxxxxxxxxxxxxxx");
-			System.out.println(resourceType + " binary with ids " + String.join(", ", binaryIds));
 			for (var nextBinaryId : binaryIds) {
 				String nextBinaryIdPart = new IdType(nextBinaryId).getIdPart();
 				assertThat(nextBinaryIdPart, matchesPattern("[a-zA-Z0-9]{32}"));
@@ -1092,8 +1090,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 				try (var iter = new LineIterator(new StringReader(nextNdJsonFileContent))) {
 					iter.forEachRemaining(t -> {
 						if (isNotBlank(t)) {
-							System.out.println("xxxxxxx");
-							System.out.println(t);
 							IBaseResource next = myFhirContext.newJsonParser().parseResource(t);
 							IIdType nextId = next.getIdElement().toUnqualifiedVersionless();
 							if (!resourceType.equals(nextId.getResourceType())) {
