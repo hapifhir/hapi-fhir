@@ -1585,16 +1585,16 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	@ParameterizedTest
 	@CsvSource({
 		// search url                                                                                       expected count
-		"/Bundle?composition.patient.identifier=system|value-1&composition.patient.birthdate=1980-01-01,    1,     correct identifier, correct birthdate",
-		"/Bundle?composition.patient.birthdate=1980-01-01&composition.patient.identifier=system|value-1,    1,     correct birthdate,  correct identifier",
-		"/Bundle?composition.patient.identifier=system|value-1&composition.patient.birthdate=2000-01-01,    0,     correct identifier, incorrect birthdate",
-		"/Bundle?composition.patient.birthdate=2000-01-01&composition.patient.identifier=system|value-1,    0,     incorrect birthdate, correct identifier",
-		"/Bundle?composition.patient.identifier=system|value-2&composition.patient.birthdate=1980-01-01,    0,     incorrect identifier, correct birthdate",
-		"/Bundle?composition.patient.birthdate=1980-01-01&composition.patient.identifier=system|value-2,    0,     correct birthdate,  incorrect identifier",
-		"/Bundle?composition.patient.identifier=system|value-2&composition.patient.birthdate=2000-01-01,    0,     incorrect identifier, incorrect birthdate",
-		"/Bundle?composition.patient.birthdate=2000-01-01&composition.patient.identifier=system|value-2,    0,     incorrect birthdate,  incorrect identifier",
+		"/Bundle?composition.patient.identifier=system|value-1&composition.patient.birthdate=1980-01-01,    1,     correct identifier correct birthdate",
+		"/Bundle?composition.patient.birthdate=1980-01-01&composition.patient.identifier=system|value-1,    1,     correct birthdate  correct identifier",
+		"/Bundle?composition.patient.identifier=system|value-1&composition.patient.birthdate=2000-01-01,    0,     correct identifier incorrect birthdate",
+		"/Bundle?composition.patient.birthdate=2000-01-01&composition.patient.identifier=system|value-1,    0,     incorrect birthdate correct identifier",
+		"/Bundle?composition.patient.identifier=system|value-2&composition.patient.birthdate=1980-01-01,    0,     incorrect identifier correct birthdate",
+		"/Bundle?composition.patient.birthdate=1980-01-01&composition.patient.identifier=system|value-2,    0,     correct birthdate  incorrect identifier",
+		"/Bundle?composition.patient.identifier=system|value-2&composition.patient.birthdate=2000-01-01,    0,     incorrect identifier incorrect birthdate",
+		"/Bundle?composition.patient.birthdate=2000-01-01&composition.patient.identifier=system|value-2,    0,     incorrect birthdate  incorrect identifier",
 		// try sort by composition sp
-		"/Bundle?composition.patient.identifier=system|value-1&_sort=composition.patient.birthdate,    1,     correct identifier, sort by birthdate",
+		"/Bundle?composition.patient.identifier=system|value-1&_sort=composition.patient.birthdate,    1,     correct identifier sort by birthdate",
 
 	})
 	public void testMultipleChainedBundleCompositionSearchParameters(String theSearchUrl, int theExpectedCount, String theMessage) {
