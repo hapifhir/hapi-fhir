@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -11,7 +12,6 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AuditEvent;
@@ -49,6 +49,7 @@ import java.util.List;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -1584,16 +1585,19 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	@ParameterizedTest
 	@CsvSource({
 		// search url                                                                                       expected count
-		"/Bundle?composition.patient.identifier=system|value-1&composition.patient.birthdate=1980-01-01,    1",     // correct identifier, correct birthdate
-		"/Bundle?composition.patient.birthdate=1980-01-01&composition.patient.identifier=system|value-1,    1",     // correct birthdate,  correct identifier
-		"/Bundle?composition.patient.identifier=system|value-1&composition.patient.birthdate=2000-01-01,    0",     // correct identifier, incorrect birthdate
-		"/Bundle?composition.patient.birthdate=2000-01-01&composition.patient.identifier=system|value-1,    0",     // incorrect birthdate, correct identifier
-		"/Bundle?composition.patient.identifier=system|value-2&composition.patient.birthdate=1980-01-01,    0",     // incorrect identifier, correct birthdate
-		"/Bundle?composition.patient.birthdate=1980-01-01&composition.patient.identifier=system|value-2,    0",     // correct birthdate,  incorrect identifier
-		"/Bundle?composition.patient.identifier=system|value-2&composition.patient.birthdate=2000-01-01,    0",     // incorrect identifier, incorrect birthdate
-		"/Bundle?composition.patient.birthdate=2000-01-01&composition.patient.identifier=system|value-2,    0",     // incorrect birthdate,  incorrect identifier
+		"/Bundle?composition.patient.identifier=system|value-1&composition.patient.birthdate=1980-01-01,    1,     correct identifier, correct birthdate",
+		"/Bundle?composition.patient.birthdate=1980-01-01&composition.patient.identifier=system|value-1,    1,     correct birthdate,  correct identifier",
+		"/Bundle?composition.patient.identifier=system|value-1&composition.patient.birthdate=2000-01-01,    0,     correct identifier, incorrect birthdate",
+		"/Bundle?composition.patient.birthdate=2000-01-01&composition.patient.identifier=system|value-1,    0,     incorrect birthdate, correct identifier",
+		"/Bundle?composition.patient.identifier=system|value-2&composition.patient.birthdate=1980-01-01,    0,     incorrect identifier, correct birthdate",
+		"/Bundle?composition.patient.birthdate=1980-01-01&composition.patient.identifier=system|value-2,    0,     correct birthdate,  incorrect identifier",
+		"/Bundle?composition.patient.identifier=system|value-2&composition.patient.birthdate=2000-01-01,    0,     incorrect identifier, incorrect birthdate",
+		"/Bundle?composition.patient.birthdate=2000-01-01&composition.patient.identifier=system|value-2,    0,     incorrect birthdate,  incorrect identifier",
+		// try sort by composition sp
+		"/Bundle?composition.patient.identifier=system|value-1&_sort=composition.patient.birthdate,    1,     correct identifier, sort by birthdate",
+
 	})
-	public void testMultipleChainedBundleCompositionSearchParameters(String theSearchUrl, int theExpectedCount) {
+	public void testMultipleChainedBundleCompositionSearchParameters(String theSearchUrl, int theExpectedCount, String theMessage) {
 		createSearchParameter("bundle-composition-patient-birthdate",
 			"composition.patient.birthdate",
 			"Bundle",
@@ -1610,8 +1614,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		createDocumentBundleWithPatientDetails("1980-01-01", "system", "value-1");
 
-		SearchParameterMap params = myMatchUrlService.getResourceSearch(theSearchUrl).getSearchParameterMap().setLoadSynchronous(true);
-		assertSearchReturns(myBundleDao, params, theExpectedCount);
+		List<String> ids = myTestDaoSearch.searchForIds(theSearchUrl);
+		assertThat(theMessage, ids, hasSize(theExpectedCount));
 	}
 
 	private void createSearchParameter(String theId, String theCode, String theBase, String theExpression, Enumerations.SearchParamType theType) {
@@ -1629,7 +1633,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		assertNotNull(mySearchParamRegistry.getActiveSearchParam(theBase, searchParameter.getName()));
 	}
 
-	private void createDocumentBundleWithPatientDetails(String theBirthDate, String theIdentifierSystem, String theIdentifierValue) {
+	private IIdType createDocumentBundleWithPatientDetails(String theBirthDate, String theIdentifierSystem, String theIdentifierValue) {
 		Patient patient = new Patient();
 		patient.setBirthDate(Date.valueOf(theBirthDate));
 		patient.addIdentifier().setSystem(theIdentifierSystem).setValue(theIdentifierValue);
@@ -1643,8 +1647,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		bundle.addEntry().setResource(composition);
 		composition.getSubject().setReference(patient.getIdElement().getValue());
 		bundle.addEntry().setResource(patient);
-		myBundleDao.create(bundle, mySrd);
+		DaoMethodOutcome daoMethodOutcome = myBundleDao.create(bundle, mySrd);
 		assertSearchReturns(myBundleDao, SearchParameterMap.newSynchronous(), 1);
+		return daoMethodOutcome.getId().toUnqualifiedVersionless();
 	}
 
 	private void assertSearchReturns(IFhirResourceDao<?> theDao, SearchParameterMap theSearchParams, int theExpectedCount){

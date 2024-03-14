@@ -10,13 +10,18 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -27,6 +32,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"unchecked", "deprecation"})
 public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
@@ -352,16 +358,60 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 			ourLog.info("Dates:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
-		map = new SearchParameterMap();
-		map.setLoadSynchronous(true);
-		map.add(Observation.SP_SUBJECT, new ReferenceParam("Patient", "identifier", "PCA|PCA"));
-		map.setSort(new SortSpec("date").setOrder(SortOrderEnum.DESC));
-		myCaptureQueriesListener.clear();
-		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		ourLog.info("IDS: {}", ids);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids.toString(), ids, contains("Observation/OBS2", "Observation/OBS1"));
+		myTestDaoSearch.assertSearchFinds(
+			"chained search",
+		"Observation?subject.identifier=PCA|PCA&_sort=-date",
+			"OBS2", "OBS1"
+			);
+	}
+
+	/**
+	 * Define a composition SP for document Bundles, and sort by it.
+	 * The chain is referencing the Bundle contents.
+	 * @see https://smilecdr.com/docs/fhir_storage_relational/chained_searches_and_sorts.html#document-and-message-search-parameters
+	 */
+	@Test
+	void testSortByCompositionSP() {
+	    // given
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setId("bundle-composition-patient-birthdate");
+		searchParameter.setCode("composition.patient.birthdate");
+		searchParameter.setName("composition.patient.birthdate");
+		searchParameter.setUrl("http://example.org/SearchParameter/bundle-composition-patient-birthdate");
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.addBase("Bundle");
+		searchParameter.setType(Enumerations.SearchParamType.DATE);
+		searchParameter.setExpression("Bundle.entry.resource.ofType(Patient).birthDate");
+		doUpdateResource(searchParameter);
+
+		mySearchParamRegistry.forceRefresh();
+
+		Patient pat1 = buildResource("Patient", withId("pat1"), withBirthdate("2001-03-17"));
+		doUpdateResource(pat1);
+		Bundle pat1Bundle = buildCompositionBundle(pat1);
+		IIdType pat1BundleId = doCreateResource(pat1Bundle);
+
+		Patient pat2 = buildResource("Patient", withId("pat2"), withBirthdate("2000-01-01"));
+		doUpdateResource(pat2);
+		Bundle pat2Bundle = buildCompositionBundle(pat2);
+		IIdType pat2BundleId = doCreateResource(pat2Bundle);
+
+		// then
+		myTestDaoSearch.assertSearchFinds("sort by contained date",
+			"Bundle?_sort=composition.patient.birthdate", List.of(pat2BundleId.getIdPart(), pat1BundleId.getIdPart()));
 
 	}
+
+	private static Bundle buildCompositionBundle(Patient pat11) {
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.DOCUMENT);
+		Composition composition = new Composition();
+		composition.setType(new CodeableConcept().addCoding(new Coding().setCode("code").setSystem("http://example.org")));
+		bundle.addEntry().setResource(composition);
+		composition.getSubject().setReference(pat11.getIdElement().getValue());
+		bundle.addEntry().setResource(pat11);
+		return bundle;
+	}
+
 
 }
