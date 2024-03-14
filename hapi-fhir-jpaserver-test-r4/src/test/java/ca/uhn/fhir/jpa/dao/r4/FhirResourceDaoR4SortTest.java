@@ -32,9 +32,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
-@SuppressWarnings({"unchecked", "deprecation"})
+@SuppressWarnings({"deprecation"})
 public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SortTest.class);
@@ -57,7 +56,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSortOnId() throws Exception {
+	public void testSortOnId() {
 		// Numeric ID
 		Patient p01 = new Patient();
 		p01.setActive(true);
@@ -153,7 +152,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSortOnSearchParameterWhereAllResourcesHaveAValue() throws Exception {
+	public void testSortOnSearchParameterWhereAllResourcesHaveAValue() {
 		Patient pBA = new Patient();
 		pBA.setId("BA");
 		pBA.setActive(true);
@@ -354,9 +353,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		SearchParameterMap map;
 		List<String> ids;
 
-		runInTransaction(() -> {
-			ourLog.info("Dates:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
-		});
+		runInTransaction(() -> ourLog.info("Dates:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * "))));
 
 		myTestDaoSearch.assertSearchFinds(
 			"chained search",
