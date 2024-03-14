@@ -787,11 +787,16 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					return retVal;
 				}
 			} else {
-				final String message = "Unknown code (for '" + next.getSystem() + "#"
-					+ next.getCode() + "')";
-				final String txIssueTypeCode = getTxIssueTypeCode(next.getSystem(), theVs);
 
-				issues.add(getOperationOutcomeTxIssueComponent(message, OperationOutcome.IssueType.CODEINVALID, txIssueTypeCode));
+					final String message = "Unknown code (for '" + next.getSystem() + "#"
+					+ next.getCode() + "')";
+					final String txIssueTypeCode = getTxIssueTypeCode(next.getSystem(), theVs);
+					OperationOutcome.OperationOutcomeIssueComponent issue = getOperationOutcomeTxIssueComponent(message, OperationOutcome.IssueType.CODEINVALID, txIssueTypeCode);
+					if (myValidationSupportContext.isEnabledValidationForCodingsLogicalAnd()) {
+						issue.setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
+					}
+					issues.add(issue);
+
 			}
 		}
 
