@@ -147,9 +147,9 @@ public class JobDefinition<PT extends IModelJson> {
 
 	public JobDefinitionStep<?, ?, ?> getStepById(String theId) {
 		return getSteps().stream()
-			.filter(s -> s.getStepId().equals(theId))
-			.findFirst()
-			.orElse(null);
+				.filter(s -> s.getStepId().equals(theId))
+				.findFirst()
+				.orElse(null);
 	}
 
 	public boolean isLastStepReduction() {

@@ -237,7 +237,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 								progressAccumulator,
 								myReductionStepExecutorService,
 								myJobDefinitionRegistry,
-							myTransactionManager);
+								myTransactionManager);
 						ourLog.debug(
 								"Triggering maintenance process for instance {} in status {}",
 								instanceId,

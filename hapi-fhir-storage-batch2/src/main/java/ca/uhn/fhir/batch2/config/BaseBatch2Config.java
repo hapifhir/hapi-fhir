@@ -114,7 +114,7 @@ public abstract class BaseBatch2Config {
 				theBatchJobSender,
 				theExecutor,
 				theReductionStepExecutorService,
-			theTransactionManager);
+				theTransactionManager);
 	}
 
 	@Bean
