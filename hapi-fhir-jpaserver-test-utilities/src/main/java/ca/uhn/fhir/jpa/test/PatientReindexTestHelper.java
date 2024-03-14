@@ -56,13 +56,13 @@ public class PatientReindexTestHelper {
 
 	public static Stream<Arguments> numResourcesParams(){
 		return Stream.of(
-//			Arguments.of(0),
-			Arguments.of(1)//,
-//			Arguments.of(499),
-//			Arguments.of(500),
-//			Arguments.of(750),
-//			Arguments.of(1000),
-//			Arguments.of(1001)
+			Arguments.of(0),
+			Arguments.of(1),
+			Arguments.of(499),
+			Arguments.of(500),
+			Arguments.of(750),
+			Arguments.of(1000),
+			Arguments.of(1001)
 		);
 	}
 

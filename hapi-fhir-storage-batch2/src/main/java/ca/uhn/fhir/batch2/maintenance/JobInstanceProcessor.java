@@ -217,11 +217,14 @@ public class JobInstanceProcessor {
 				processChunksForNextGatedSteps(theInstance, theJobDefinition, jobWorkCursor, nextStepId);
 			}
 		} else {
+			String stepId = jobWorkCursor.nextStep != null
+					? jobWorkCursor.nextStep.getStepId()
+					: jobWorkCursor.getCurrentStepId();
 			ourLog.debug(
 					"Not ready to advance gated execution of instance {} from step {} to {}.",
 					instanceId,
 					currentStepId,
-					jobWorkCursor.nextStep.getStepId());
+					stepId);
 		}
 	}
 
