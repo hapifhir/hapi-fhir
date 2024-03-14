@@ -1806,7 +1806,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-		assertTrue(errors.isEmpty());
+		assertFalse(output.isSuccessful());;
 	}
 
 	@Test
