@@ -68,13 +68,13 @@ public class CrDiscoveryElementR4 implements ICrDiscoveryElement {
 						|| p.equals("Patient?_id=Patient/{{context.patientId}}"))) {
 			String key = getKey(++itemNo);
 			service.addPrefetch(key, "Patient?_id={{context.patientId}}");
-			service.addSource(key, CdsResolutionStrategyEnum.NONE);
+			service.addSource(key, CdsResolutionStrategyEnum.FHIR_CLIENT);
 		}
 
 		for (String item : myPrefetchUrlList) {
 			String key = getKey(++itemNo);
 			service.addPrefetch(key, item);
-			service.addSource(key, CdsResolutionStrategyEnum.NONE);
+			service.addSource(key, CdsResolutionStrategyEnum.FHIR_CLIENT);
 		}
 
 		return service;
