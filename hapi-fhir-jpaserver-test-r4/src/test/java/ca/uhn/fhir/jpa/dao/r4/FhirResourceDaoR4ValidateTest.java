@@ -1588,10 +1588,14 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	@Test
 	void testValidateCommonCodes_Ucum_ErrorMessageIsPreserved() {
+
+		String loincCode = "1234";
+		addLoincCodeToCodeSystemDao(loincCode);
+
 		Observation input = new Observation();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		input.setStatus(ObservationStatus.AMENDED);
-		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234").setDisplay("FOO");
+		input.getCode().addCoding().setSystem("http://loinc.org").setCode(loincCode).setDisplay("FOO");
 		input.setValue(new Quantity(
 				null,
 				123,
@@ -1618,10 +1622,14 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	@Test
 	void testValidateCommonCodes_Currency_ErrorMessageIsPreserved() {
+		String loincCode = "1234";
+
+		addLoincCodeToCodeSystemDao(loincCode);
+
 		Observation input = new Observation();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		input.setStatus(ObservationStatus.AMENDED);
-		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234").setDisplay("FOO");
+		input.getCode().addCoding().setSystem("http://loinc.org").setCode(loincCode).setDisplay("FOO");
 		input.setValue(new Quantity(
 				null,
 				123,
@@ -2179,17 +2187,23 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	@Test
 	public void testKnownCodeSystemUnknownValueSetUri() {
-		CodeSystem cs = new CodeSystem();
-		cs.setUrl(ITermLoaderSvc.LOINC_URI);
-		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		cs.addConcept().setCode("10013-1");
-		cs.setId(LOINC_LOW);
-		myCodeSystemDao.update(cs);
+		String loincCode = "10013-1";
 
-		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://fooVs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
+		addLoincCodeToCodeSystemDao(loincCode);
+
+		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://fooVs"), null, new StringType(loincCode), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
 		assertFalse(result.isOk());
 		assertEquals("Validator is unable to provide validation for 10013-1#http://loinc.org - Unknown or unusable ValueSet[http://fooVs]", result.getMessage());
+	}
+
+	private void addLoincCodeToCodeSystemDao(String loincCode) {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(ITermLoaderSvc.LOINC_URI);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode(loincCode);
+		cs.setId(LOINC_LOW);
+		myCodeSystemDao.update(cs);
 	}
 
 
