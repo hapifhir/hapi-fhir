@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -386,17 +387,18 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		Patient pat1 = buildResource("Patient", withId("pat1"), withBirthdate("2001-03-17"));
 		doUpdateResource(pat1);
 		Bundle pat1Bundle = buildCompositionBundle(pat1);
-		IIdType pat1BundleId = doCreateResource(pat1Bundle);
+		String pat1BundleId = doCreateResource(pat1Bundle).getIdPart();
 
 		Patient pat2 = buildResource("Patient", withId("pat2"), withBirthdate("2000-01-01"));
 		doUpdateResource(pat2);
 		Bundle pat2Bundle = buildCompositionBundle(pat2);
-		IIdType pat2BundleId = doCreateResource(pat2Bundle);
+		String pat2BundleId = doCreateResource(pat2Bundle).getIdPart();
 
 		// then
 		myTestDaoSearch.assertSearchFinds("sort by contained date",
-			"Bundle?_sort=composition.patient.birthdate", List.of(pat2BundleId.getIdPart(), pat1BundleId.getIdPart()));
-
+			"Bundle?_sort=composition.patient.birthdate", List.of(pat2BundleId, pat1BundleId));
+		myTestDaoSearch.assertSearchFinds("reverse sort by contained date",
+			"Bundle?_sort=-composition.patient.birthdate", List.of(pat1BundleId, pat2BundleId));
 	}
 
 	private static Bundle buildCompositionBundle(Patient pat11) {
