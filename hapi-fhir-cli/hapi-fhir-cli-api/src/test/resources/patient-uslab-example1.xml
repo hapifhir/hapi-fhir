@@ -40,6 +40,7 @@
 	<extension url="http://hl7.org/fhir/StructureDefinition/us-core-race">
 		<valueCodeableConcept>
 			<coding>
+				<system value="http://terminology.hl7.org/CodeSystem/v3-Race"/>
 				<code value="2106-3"/>
 			</coding>
 		</valueCodeableConcept>
@@ -47,6 +48,7 @@
 	<extension url="http://hl7.org/fhir/StructureDefinition/us-core-ethnicity">
 		<valueCodeableConcept>
 			<coding>
+				<system value="http://terminology.hl7.org/CodeSystem/v3-Ethnicity"/>
 				<code value="2135-2"/>
 			</coding>
 		</valueCodeableConcept>
