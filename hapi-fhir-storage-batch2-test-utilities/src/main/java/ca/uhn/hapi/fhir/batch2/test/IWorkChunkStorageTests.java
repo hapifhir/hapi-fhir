@@ -63,7 +63,6 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, freshFetchWorkChunk(chunkId).getStatus()));
 		sleepUntilTimeChanges();
 
-
 		WorkChunk chunk = getSvc().onWorkChunkDequeue(chunkId).orElseThrow(IllegalArgumentException::new);
 		assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
 		assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());

@@ -314,10 +314,10 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 			ReductionStepChunkProcessingResponse theResponseObject,
 			JobWorkCursor<PT, IT, OT> theJobWorkCursor) {
 
-		if (!theChunk.getStatus().isIncomplete()) {
+		if (theChunk.getStatus() != WorkChunkStatusEnum.READY) {
 			// This should never happen since jobs with reduction are required to be gated
 			ourLog.error(
-					"Unexpected chunk {} with status {} found while reducing {}.  No chunks feeding into a reduction step should be complete.",
+					"Unexpected chunk {} with status {} found while reducing {}.  No chunks feeding into a reduction step should be in a state other than READY.",
 					theChunk.getId(),
 					theChunk.getStatus(),
 					theInstance);

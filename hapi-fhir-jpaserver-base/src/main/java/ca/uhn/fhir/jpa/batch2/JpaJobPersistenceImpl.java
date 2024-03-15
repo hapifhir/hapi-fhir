@@ -54,7 +54,6 @@ import jakarta.persistence.LockModeType;
 import jakarta.persistence.Query;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.Validate;
-import org.hibernate.Session;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -65,7 +64,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.sql.Connection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -129,6 +127,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		ourLog.trace(
 				"Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
 		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myWorkChunkRepository.save(entity));
+
 		return entity.getId();
 	}
 
@@ -298,10 +297,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		int updated = myWorkChunkRepository.updateChunkStatus(
 				theChunkId, WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.READY);
 		theCallback.accept(updated);
-		if (updated == 1) {
-			myEntityManager.flush();
-			myEntityManager.unwrap(Session.class).doWork(Connection::commit);
-		}
 	}
 
 	@Override
@@ -361,15 +356,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public void onWorkChunkCompletion(WorkChunkCompletionEvent theEvent) {
-		myTransactionService
-				.withSystemRequestOnDefaultPartition()
-				.execute(() -> myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
-						theEvent.getChunkId(),
-						new Date(),
-						theEvent.getRecordsProcessed(),
-						theEvent.getRecoveredErrorCount(),
-						WorkChunkStatusEnum.COMPLETED,
-						theEvent.getRecoveredWarningMessage()));
+		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
+					theEvent.getChunkId(),
+					new Date(),
+					theEvent.getRecordsProcessed(),
+					theEvent.getRecoveredErrorCount(),
+					WorkChunkStatusEnum.COMPLETED,
+					theEvent.getRecoveredWarningMessage());
+		});
 	}
 
 	@Nullable
@@ -401,7 +396,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
-		if (getRunningJob(theInstanceId) == null) {
+		Batch2JobInstanceEntity jobInstanceEntity = getRunningJob(theInstanceId);
+		if (jobInstanceEntity == null) {
 			return false;
 		}
 
@@ -413,7 +409,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				theInstanceId,
 				theCurrentStepId,
 				statusesForStep);
-		return statusesForStep.isEmpty() || statusesForStep.equals(Set.of(WorkChunkStatusEnum.COMPLETED));
+
+		return statusesForStep.isEmpty()
+				|| statusesForStep.equals(Set.of(WorkChunkStatusEnum.COMPLETED))
+				|| statusesForStep.equals(Set.of(WorkChunkStatusEnum.READY));
 	}
 
 	@Override

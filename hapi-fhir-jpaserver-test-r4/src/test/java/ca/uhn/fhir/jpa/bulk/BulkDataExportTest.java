@@ -881,6 +881,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "CarePlan", "MedicationAdministration", "ServiceRequest"));
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
 		verifyBulkExportResults(options, List.of("Patient/P1", carePlanId, medAdminId, sevReqId, obsSubId, obsPerId), Collections.emptyList());
 	}
 
@@ -1079,7 +1080,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			String resourceType = file.getKey();
 			List<String> binaryIds = file.getValue();
 			for (var nextBinaryId : binaryIds) {
-
 				String nextBinaryIdPart = new IdType(nextBinaryId).getIdPart();
 				assertThat(nextBinaryIdPart, matchesPattern("[a-zA-Z0-9]{32}"));
 

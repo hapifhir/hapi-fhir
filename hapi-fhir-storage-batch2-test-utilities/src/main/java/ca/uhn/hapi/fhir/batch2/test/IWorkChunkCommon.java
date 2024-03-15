@@ -6,6 +6,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobParameters;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 public interface IWorkChunkCommon extends WorkChunkTestConstants {
@@ -31,7 +32,7 @@ public interface IWorkChunkCommon extends WorkChunkTestConstants {
 
 	void runMaintenancePass();
 
-	IHapiTransactionService getTransactionManager();
+	PlatformTransactionManager getTransactionManager();
 
 	IJobPersistence getSvc();
 

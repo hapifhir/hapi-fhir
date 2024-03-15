@@ -30,22 +30,22 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Setup
 
 		createPatient(withActiveFalse());
-		sleepUntilTimeChanges();
+		sleep1MS();
 
 		Date start = new Date();
 
 		Long id0 = createPatient(withActiveFalse()).getIdPartAsLong();
-		sleepUntilTimeChanges();
+		sleep1MS();
 		Long id1 = createPatient(withActiveFalse()).getIdPartAsLong();
-		sleepUntilTimeChanges();
+		sleep1MS();
 		Date beforeLastInRange = new Date();
-		sleepUntilTimeChanges();
+		sleep1MS();
 		Long id2 = createObservation(withObservationCode("http://foo", "bar")).getIdPartAsLong();
-		sleepUntilTimeChanges();
+		sleep1MS();
 
 		Date end = new Date();
 
-		sleepUntilTimeChanges();
+		sleep1MS();
 
 		createPatient(withActiveFalse());
 
@@ -103,26 +103,26 @@ public class ResourceReindexSvcImplTest extends BaseJpaR4Test {
 		// Setup
 
 		final Long patientId0 = createPatient(withActiveFalse()).getIdPartAsLong();
-		sleepUntilTimeChanges();
+		sleep1MS();
 
 		// Start of resources within range
 		Date start = new Date();
-		sleepUntilTimeChanges();
+		sleep1MS();
 		Long patientId1 = createPatient(withActiveFalse()).getIdPartAsLong();
 		createObservation(withObservationCode("http://foo", "bar"));
 		createObservation(withObservationCode("http://foo", "bar"));
-		sleepUntilTimeChanges();
+		sleep1MS();
 		Date beforeLastInRange = new Date();
-		sleepUntilTimeChanges();
+		sleep1MS();
 		Long patientId2 = createPatient(withActiveFalse()).getIdPartAsLong();
-		sleepUntilTimeChanges();
+		sleep1MS();
 		Date end = new Date();
-		sleepUntilTimeChanges();
+		sleep1MS();
 		// End of resources within range
 
 		createObservation(withObservationCode("http://foo", "bar"));
 		final Long patientId3 = createPatient(withActiveFalse()).getIdPartAsLong();
-		sleepUntilTimeChanges();
+		sleep1MS();
 
 		// Execute
 

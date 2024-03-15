@@ -609,7 +609,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	/**
 	 * Sleep until at least 1 ms has elapsed
 	 */
-	public void sleepUntilTimeChanges() {
+	public void sleep1MS() {
 		StopWatch sw = new StopWatch();
 		await().until(() -> sw.getMillis() > 0);
 	}

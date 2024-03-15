@@ -118,6 +118,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest);
 
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
+	@Deprecated
 	boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);
 
 	/**

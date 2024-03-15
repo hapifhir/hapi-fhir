@@ -77,8 +77,6 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 		String dataValueString = JsonUtil.serialize(dataValue, false);
 
 		// once finished, create workchunks in READY state
-		// the JobMaintenanceServiceImpl will transition these to
-		// QUEUED when necessary
 		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(
 				myJobDefinitionId, myJobDefinitionVersion, targetStepId, instanceId, sequence, dataValueString);
 		String chunkId = myHapiTransactionService

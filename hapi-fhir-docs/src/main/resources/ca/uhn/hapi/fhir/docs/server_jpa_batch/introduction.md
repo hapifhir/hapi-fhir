@@ -24,12 +24,12 @@ The Batch Job Coordinator will then store two records in the database:
 
 ### The Maintenance Job
 
-A Scheduled Job runs every so often (default once a minute), and does the following for each Job Instance in the database:
+A Scheduled Job runs periodically (once a minute).  For each Job Instance in the database, it:
 
 1. Moves all `READY` work chunks into the `QUEUED` state and publishes a message to the Batch Notification Message Channel to inform worker threads that a work chunk is now ready for processing. \*
 1. Calculates job progress (% of work chunks in `COMPLETE` status). If the job is finished, purges any left over work chunks still in the database.
 1. Cleans up any complete, failed, or cancelled jobs that need to be removed.
-1. Moves any gated jobs onto their next step.
+1. Moves any gated jobs onto their next step when complete.
 1. If the final step of a gated job is a reduction step, a reduction step execution will be triggered.
 
 \* An exception is for the final reduction step, where work chunks are not published to the Batch Notification Message Channel,

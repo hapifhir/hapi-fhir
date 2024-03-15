@@ -27,7 +27,6 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
-import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobParameters;
@@ -60,10 +59,10 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IInPro
 	private JobDefinitionRegistry myJobDefinitionRegistry;
 
 	@Autowired
-	private IHapiTransactionService myTransactionService;
+	private PlatformTransactionManager myTransactionManager;
 
-	public IHapiTransactionService getTransactionManager() {
-		return myTransactionService;
+	public PlatformTransactionManager getTransactionManager() {
+		return myTransactionManager;
 	}
 
 	public IJobPersistence getSvc() {
