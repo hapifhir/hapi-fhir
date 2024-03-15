@@ -434,6 +434,57 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testJobWithLongPollingStep() {
+		// create job definition
+		String jobId = new Exception().getStackTrace()[0].getMethodName();
+
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> {
+			myFirstStepLatch.call(1);
+			return RunOutcome.SUCCESS;
+		};
+
+		// step 2
+		IJobStepWorker<TestJobParameters, FirstStepOutput, SecondStepOutput> second = (step, sink) -> {
+			// TODO - poll
+
+			return RunOutcome.SUCCESS;
+		};
+
+		// step 3
+		ILastJobStepWorker<TestJobParameters, SecondStepOutput> last = (step, sink) -> {
+			myLastStepLatch.call(1);
+			return RunOutcome.SUCCESS;
+		};
+
+		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
+			.setJobDefinitionId(jobId)
+			.setJobDescription("test job")
+			.setJobDefinitionVersion(TEST_JOB_VERSION)
+			.setParametersType(TestJobParameters.class)
+			.gatedExecution()
+			.addFirstStep(
+				FIRST_STEP_ID,
+				"First step",
+				FirstStepOutput.class,
+				first
+			)
+			.addIntermediateStep(SECOND_STEP_ID,
+				"Second step",
+				SecondStepOutput.class,
+				second)
+			.addLastStep(
+				LAST_STEP_ID,
+				"Final step",
+				last
+			)
+			.completionHandler(myCompletionHandler)
+			.build();
+		myJobDefinitionRegistry.addJobDefinition(jd);
+
+
+	}
+
+	@Test
 	public void testFirstStepToSecondStep_doubleChunk_doesNotFastTrack() throws InterruptedException {
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
 			sink.accept(new FirstStepOutput());
@@ -465,7 +516,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 
 	@Test
-	public void JobExecutionFailedException_CausesInstanceFailure() {
+	public void jobExecutionFailedException_CausesInstanceFailure() {
 		// setup
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
 			throw new JobExecutionFailedException("Expected Test Exception");

@@ -87,6 +87,11 @@ public class WorkChunk implements IModelJson {
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myUpdateTime;
 
+	@JsonProperty("nextPollTimestamp")
+	@JsonSerialize(using = JsonDateSerializer.class)
+	@JsonDeserialize(using = JsonDateDeserializer.class)
+	private Date myNextPollTime;
+
 	@JsonProperty(value = "recordsProcessed", access = JsonProperty.Access.READ_ONLY)
 	private Integer myRecordsProcessed;
 
@@ -251,6 +256,14 @@ public class WorkChunk implements IModelJson {
 		myUpdateTime = theUpdateTime;
 	}
 
+	public Date getNextPollTime() {
+		return myNextPollTime;
+	}
+
+	public void setNextPollTime(Date theNextPollTime) {
+		myNextPollTime = theNextPollTime;
+	}
+
 	public String getWarningMessage() {
 		return myWarningMessage;
 	}
@@ -276,6 +289,9 @@ public class WorkChunk implements IModelJson {
 		b.append("EndTime", myEndTime);
 		b.append("UpdateTime", myUpdateTime);
 		b.append("RecordsProcessed", myRecordsProcessed);
+		if (myNextPollTime != null) {
+			b.append("NextPollTime", myNextPollTime);
+		}
 		if (isNotBlank(myErrorMessage)) {
 			b.append("ErrorMessage", myErrorMessage);
 		}
