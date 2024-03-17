@@ -253,6 +253,69 @@ public class ExpandResourceAndWriteBinaryStepTest {
 	}
 
 	@Test
+	public void testRespectMaxChunkSize() {
+		// setup
+		myStorageSettings.setBulkExportFileMaximumSize(1000);
+
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("1");
+		IFhirResourceDao<IBaseBinary> binaryDao = mock(IFhirResourceDao.class);
+		IFhirResourceDao<?> patientDao = mockOutDaoRegistry();
+		IJobDataSink<BulkExportBinaryFileId> sink = mock(IJobDataSink.class);
+
+		ResourceIdList idList = new ResourceIdList();
+		ArrayList<IBaseResource> resources = createResourceList(idList);
+
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> input = createInput(
+			idList,
+			createParameters(thePartitioned),
+			instance
+		);
+
+		IIdType binaryId = new IdType("Binary/123");
+		DaoMethodOutcome methodOutcome = new DaoMethodOutcome();
+		methodOutcome.setId(binaryId);
+
+		// when
+		when(patientDao.search(any(), any())).thenReturn(new SimpleBundleProvider(resources));
+		when(myIdHelperService.newPidFromStringIdAndResourceName(anyString(), anyString())).thenReturn(JpaPid.fromId(1L));
+		when(myIdHelperService.translatePidsToForcedIds(any())).thenAnswer(t->{
+			Set<IResourcePersistentId<JpaPid>> inputSet = t.getArgument(0, Set.class);
+			Map<IResourcePersistentId<?>, Optional<String>> map = new HashMap<>();
+			for (var next : inputSet) {
+				map.put(next, Optional.empty());
+			}
+			return new PersistentIdToForcedIdMap<>(map);
+		});
+		when(myDaoRegistry.getResourceDao(eq("Binary")))
+			.thenReturn(binaryDao);
+		when(binaryDao.update(any(IBaseBinary.class), any(RequestDetails.class)))
+			.thenReturn(methodOutcome);
+
+		// test
+		RunOutcome outcome = myFinalStep.run(input, sink);
+
+		// verify
+		assertEquals(new RunOutcome(resources.size()).getRecordsProcessed(), outcome.getRecordsProcessed());
+
+		ArgumentCaptor<IBaseBinary> binaryCaptor = ArgumentCaptor.forClass(IBaseBinary.class);
+		ArgumentCaptor<SystemRequestDetails> binaryDaoCreateRequestDetailsCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
+		verify(binaryDao)
+			.update(binaryCaptor.capture(), binaryDaoCreateRequestDetailsCaptor.capture());
+		String outputString = new String(binaryCaptor.getValue().getContent());
+		assertEquals(resources.size(), StringUtils.countOccurrencesOf(outputString, "\n"));
+		if (thePartitioned) {
+			assertEquals(getPartitionId(thePartitioned), binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId());
+		}
+
+		ArgumentCaptor<BulkExportBinaryFileId> fileIdArgumentCaptor = ArgumentCaptor.forClass(BulkExportBinaryFileId.class);
+		verify(sink)
+			.accept(fileIdArgumentCaptor.capture());
+		assertEquals(binaryId.getValueAsString(), fileIdArgumentCaptor.getValue().getBinaryId());
+	}
+
+
+	@Test
 	public void run_withIOException_throws() throws IOException {
 		// setup
 		String testException = "I am an exceptional exception.";
