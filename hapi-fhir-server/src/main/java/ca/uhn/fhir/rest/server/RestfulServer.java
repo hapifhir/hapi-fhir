@@ -1327,7 +1327,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	protected void addRequestIdToResponse(ServletRequestDetails theRequestDetails, String theRequestId) {
 		String caseSensitiveRequestIdKey = Constants.HEADER_REQUEST_ID;
 		for (String key : theRequestDetails.getHeaders().keySet()) {
-			if (Constants.HEADER_REQUEST_ID.equalsIgnoreCase(key)){
+			if (Constants.HEADER_REQUEST_ID.equalsIgnoreCase(key)) {
 				caseSensitiveRequestIdKey = key;
 				break;
 			}
