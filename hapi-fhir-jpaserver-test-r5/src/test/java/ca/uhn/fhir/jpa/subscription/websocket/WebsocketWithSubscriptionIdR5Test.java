@@ -59,6 +59,36 @@ public class WebsocketWithSubscriptionIdR5Test extends BaseSubscriptionsR5Test {
 		myWebsocketClientExtension.afterEach(null);
 	}
 
+	@Test
+	public void testSubscriptionMessagePayloadContentIsNull() {
+		// Given a subscription
+		Subscription subscription = new Subscription();
+		subscription.setStatus(Enumerations.SubscriptionStatusCodes.ACTIVE);
+		subscription.setContent(null);
+		subscription.setTopic("Topic/123");
+		subscription.getChannelType().setCode("websocket");
+		MethodOutcome methodOutcome = myClient.create().resource(subscription).execute();
+		String subscriptionId = methodOutcome.getId().getIdPart();
+
+		// When
+		myWebsocketClientExtension.bind(subscriptionId);
+
+		// And
+		// Trigger resource creation
+		Patient patient = new Patient();
+		patient.setActive(true);
+		myClient.create().resource(patient).execute();
+
+		// Then
+		List<String> messages = myWebsocketClientExtension.getMessages();
+		await().until(() -> !messages.isEmpty());
+
+		// Log it
+		ourLog.info("Messages: {}", messages);
+
+		// Verify a ping message shall be returned
+		Assertions.assertTrue(messages.contains("ping " + subscriptionId));
+	}
 
 	@Test
 	public void testSubscriptionMessagePayloadContentIsEmpty() {

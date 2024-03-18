@@ -33,7 +33,6 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSuggestionJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceResponseSystemActionJson;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.CarePlan;
-import org.hl7.fhir.dstu3.model.Endpoint;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.ParameterDefinition;
@@ -54,7 +53,6 @@ import java.util.List;
 import java.util.Map;
 
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_DATA;
-import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_DATA_ENDPOINT;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_ENCOUNTER;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_PARAMETERS;
 import static ca.uhn.hapi.fhir.cdshooks.svc.cr.CdsCrConstants.APPLY_PARAMETER_PRACTITIONER;
@@ -112,22 +110,6 @@ public class CdsCrServiceDstu3 implements ICdsCrService {
 		Bundle data = getPrefetchResources(theJson);
 		if (data.hasEntry()) {
 			parameters.addParameter(part(APPLY_PARAMETER_DATA, data));
-		}
-		if (theJson.getFhirServer() != null) {
-			Endpoint endpoint = new Endpoint().setAddress(theJson.getFhirServer());
-			if (theJson.getServiceRequestAuthorizationJson().getAccessToken() != null) {
-				String tokenType = getTokenType(theJson.getServiceRequestAuthorizationJson());
-				endpoint.addHeader(String.format(
-						"Authorization: %s %s",
-						tokenType, theJson.getServiceRequestAuthorizationJson().getAccessToken()));
-				if (theJson.getServiceRequestAuthorizationJson().getSubject() != null) {
-					endpoint.addHeader(String.format(
-							"%s: %s",
-							myCdsConfigService.getCdsCrSettings().getClientIdHeaderName(),
-							theJson.getServiceRequestAuthorizationJson().getSubject()));
-				}
-			}
-			parameters.addParameter(part(APPLY_PARAMETER_DATA_ENDPOINT, endpoint));
 		}
 		return parameters;
 	}

@@ -29,6 +29,7 @@ import java.util.Map;
 public enum BundleEntrySearchModeEnum {
 	MATCH("match", "http://hl7.org/fhir/search-entry-mode"),
 	INCLUDE("include", "http://hl7.org/fhir/search-entry-mode"),
+	OUTCOME("outcome", "http://hl7.org/fhir/search-entry-mode"),
 	;
 
 	/**
@@ -79,7 +80,7 @@ public enum BundleEntrySearchModeEnum {
 	/**
 	 * Returns the enumerated value associated with this code
 	 */
-	public BundleEntrySearchModeEnum forCode(String theCode) {
+	public static BundleEntrySearchModeEnum forCode(String theCode) {
 		BundleEntrySearchModeEnum retVal = CODE_TO_ENUM.get(theCode);
 		return retVal;
 	}
