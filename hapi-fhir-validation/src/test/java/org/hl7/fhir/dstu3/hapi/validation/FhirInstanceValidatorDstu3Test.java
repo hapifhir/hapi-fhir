@@ -797,22 +797,52 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 	public void testValidateDocument() throws Exception {
 		String vsContents = ClasspathUtil.loadResource("/sample-document.xml");
 
-		addValidConcept("http://loinc.org", "29299-5");
-		addValidConcept("http://loinc.org", "18776-5");
-		addValidConcept("http://loinc.org", "69730-0");
-		addValidConcept("http://loinc.org", "8716-3");
-		addValidConcept("http://loinc.org", "10160-0");
-		addValidConcept("http://loinc.org", "29549-3");
-		addValidConcept("http://loinc.org", "11450-4");
-		addValidConcept("http://loinc.org", "48765-2");
-		addValidConcept("http://loinc.org", "30954-2");
-		addValidConcept("http://loinc.org", "47519-4");
-		addValidConcept("http://loinc.org", "11369-6");
-		addValidConcept("http://loinc.org", "29762-2");
-		addValidConcept("http://loinc.org", "46240-8");
-		addValidConcept("http://loinc.org", "42348-3");
-		addValidConcept("http://loinc.org", "42348-3");
-		addValidConcept("http://loinc.org", "34133-9");
+		ValueSet valuesetDocTypeCodes = loadResource("/dstu3/valueset-doc-typecodes.json", ValueSet.class);
+		myValueSets.put(valuesetDocTypeCodes.getUrl(), valuesetDocTypeCodes);
+		myValueSets.put("ValueSet/" + valuesetDocTypeCodes.getIdElement().getIdPart(), valuesetDocTypeCodes);
+
+		ValueSet valuesetV2_0131 = loadResource("/dstu3/valueset-v2-0131.json", ValueSet.class);
+		myValueSets.put(valuesetV2_0131.getUrl(), valuesetV2_0131);
+		myValueSets.put("ValueSet/" + valuesetV2_0131.getIdElement().getIdPart(), valuesetV2_0131);
+
+		org.hl7.fhir.dstu3.model.CodeSystem mockOfRoleCode = new org.hl7.fhir.dstu3.model.CodeSystem();
+		mockOfRoleCode.setUrl("http://hl7.org/fhir/v3/RoleCode");
+		mockOfRoleCode.setContent(org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode.COMPLETE);
+		mockOfRoleCode.addConcept().setCode("PRN");
+		mockOfRoleCode.addConcept().setCode("GPARNT");
+		myCodeSystems.put("http://hl7.org/fhir/v3/RoleCode", mockOfRoleCode);
+
+		addValidConcept("http://hl7.org/fhir/v3/RoleCode", "GPARNT");
+
+		org.hl7.fhir.dstu3.model.CodeSystem mockOfLoinc = new org.hl7.fhir.dstu3.model.CodeSystem();
+		mockOfLoinc.setUrl("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips");
+		mockOfLoinc.setContent(org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode.COMPLETE);
+
+		String[] validLoincCodes = {
+			"29299-5",
+			"18776-5",
+			"69730-0",
+			"8716-3",
+			"10160-0",
+			"29549-3",
+			"11450-4",
+			"48765-2",
+			"30954-2",
+			"47519-4",
+			"11369-6",
+			"29762-2",
+			"46240-8",
+			"42348-3",
+			"42348-3",
+			"34133-9"
+		};
+
+		for (String validLoincCode: validLoincCodes) {
+			addValidConcept("http://loinc.org", validLoincCode);
+			mockOfLoinc.addConcept().setCode(validLoincCode);
+		}
+
+		myCodeSystems.put("http://loinc.org", mockOfLoinc);
 
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
