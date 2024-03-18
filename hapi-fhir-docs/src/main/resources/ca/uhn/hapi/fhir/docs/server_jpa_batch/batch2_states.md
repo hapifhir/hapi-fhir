@@ -56,7 +56,9 @@ stateDiagram-v2
     state FAILED
     state COMPLETED
    direction LR
-   [*]         --> READY         : on create - normal or step
+   [*]         --> READY         : on create - normal
+   [*]         --> GATED         : on create - gated
+   GATED       --> READY         : on create - gated
    READY       --> QUEUED        : placed on kafka (maint.)
   
   %% worker processing states

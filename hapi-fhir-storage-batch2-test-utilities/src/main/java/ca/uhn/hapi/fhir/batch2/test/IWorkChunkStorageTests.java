@@ -32,6 +32,10 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 		assertNull(chunk.getData());
 	}
 
+	// fixme add test - testWorkChunkCreate_inReady
+
+	// fixme add test - testNonGatedWorkChunkInReady_IsQueuedDuringMaintentaince
+
 	@Test
 	default void testStoreAndFetchWorkChunk_WithData() {
 		JobInstance instance = createInstance();
@@ -39,6 +43,7 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 
 		String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, CHUNK_DATA);
 		assertNotNull(id);
+		// fixme drop this verify against READY state.
 		runMaintenancePass();
 		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, freshFetchWorkChunk(id).getStatus()));
 
