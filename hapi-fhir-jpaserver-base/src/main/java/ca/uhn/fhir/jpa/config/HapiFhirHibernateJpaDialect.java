@@ -74,7 +74,7 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 		}
 
 		if (HapiSystemProperties.isUnitTestModeEnabled()) {
-			ourLog.error("Hibernate exception", theException);
+			ourLog.error("Unit test: Hibernate exception", theException);
 		}
 
 		if (theException instanceof ConstraintViolationException) {
