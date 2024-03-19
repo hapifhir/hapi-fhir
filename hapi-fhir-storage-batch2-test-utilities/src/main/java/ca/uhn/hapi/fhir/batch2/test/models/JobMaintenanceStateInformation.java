@@ -125,7 +125,8 @@ public class JobMaintenanceStateInformation {
 
 	private String getJobStepId(String theIndexId) {
 		try {
-			int index = Integer.parseInt(theIndexId.trim());
+			// -1 because code is 0 indexed, but people think in 1 indexed
+			int index = Integer.parseInt(theIndexId.trim()) - 1;
 
 			if (index >= myJobDefinition.getSteps().size()) {
 				throw new RuntimeException("Unable to find step with index " + index);
@@ -149,7 +150,7 @@ public class JobMaintenanceStateInformation {
 
 	private WorkChunk createBaseWorkChunk() {
 		WorkChunk chunk = new WorkChunk();
-		chunk.setId(UUID.randomUUID().toString());
+//		chunk.setId(UUID.randomUUID().toString());
 		chunk.setJobDefinitionId(myJobDefinition.getJobDefinitionId());
 		chunk.setInstanceId(myInstanceId);
 		chunk.setJobDefinitionVersion(myJobDefinition.getJobDefinitionVersion());

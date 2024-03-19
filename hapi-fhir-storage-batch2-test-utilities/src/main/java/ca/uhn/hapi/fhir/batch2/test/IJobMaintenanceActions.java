@@ -14,6 +14,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestConstants {
 
@@ -23,8 +24,31 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 
 	void createChunksInStates(JobMaintenanceStateInformation theInitialState);
 
-	// fixme step 1 is special - only 1 chunk.
-	// fixme cover step 1 to step 2 and step 2->3
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"""
+      		# chunks ready - move to queued
+   			1|COMPLETED
+   			2|READY,2|QUEUED
+   			2|READY,2|QUEUED
+			"""
+	})
+	default void test_gatedJob_stepReady_advances(String theChunkState) {
+		// given
+		enableMaintenanceRunner(false);
+		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(theChunkState);
+
+		// setup
+		createChunksInStates(result);
+
+		// TEST run job maintenance - force transition
+		enableMaintenanceRunner(true);
+		runMaintenancePass();
+
+		// verify
+		verifyWorkChunkFinalStates(result);
+	}
+
 	@ParameterizedTest
 	@ValueSource(strings = {
 //		"""
@@ -32,20 +56,37 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 //   2|GATED
 //			""",
 		"""
+   			# Chunk already queued -> waiting for complete
 			1|COMPLETED
 			2|QUEUED
 			""",
 		"""
+   			# Chunks in progress, complete, errored -> cannot advance
 			1|COMPLETED
 			2|COMPLETED
 			2|ERRORED
 			2|IN_PROGRESS
 			""",
 		"""
+   			# Chunk in errored/already queued -> cannot advance
 			1|COMPLETED
 			2|ERRORED # equivalent of QUEUED
 			2|COMPLETED
 			""",
+		"""
+      		# Not all steps ready to advance
+   			1|COMPLETED
+   			2|READY  # a single ready chunk
+   			2|IN_PROGRESS
+			""",
+		"""
+      		# Previous step not ready -> do not advance
+   			1|COMPLETED
+   			2|COMPLETED
+   			2|IN_PROGRESS
+   			3|READY
+   			3|READY
+			"""
 //		"""
 //   1|COMPLETED
 //   2|READY
@@ -153,9 +194,12 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 		workChunkIterator.forEachRemaining(workchunks::add);
 
 		assertEquals(workchunks.size(), workchunkMap.size());
+		workchunks.forEach(c -> ourLog.info("Returned " + c.toString()));
 
 		for (WorkChunk wc : workchunks) {
 			WorkChunk expected = workchunkMap.get(wc.getId());
+			assertNotNull(expected);
+
 			// verify status and step id
 			assertEquals(expected.getTargetStepId(), wc.getTargetStepId());
 			assertEquals(expected.getStatus(), wc.getStatus());

@@ -38,6 +38,8 @@ import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep2InputType;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep3InputType;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -48,10 +50,10 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
@@ -60,6 +62,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * Test setups should use the public batch2 api to create scenarios.
  */
 public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMaintenanceActions, IInProgressActionsTests, IInstanceStateTransitions, IWorkChunkStateTransitions, IWorkChunkStorageTests, IWorkChunkErrorActionsTests, WorkChunkTestConstants {
+
+	private static final Logger ourLog = LoggerFactory.getLogger(AbstractIJobPersistenceSpecificationTest.class);
 
 	@Autowired
 	private IJobPersistence mySvc;
@@ -182,9 +186,20 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 	}
 
 	public void createChunksInStates(JobMaintenanceStateInformation theJobMaintenanceStateInformation) {
+		// should have as many input workchunks as output workchunks
+		// unless we have newly created ones somewhere
+		assertEquals(theJobMaintenanceStateInformation.getInitialWorkChunks().size(), theJobMaintenanceStateInformation.getFinalWorkChunk().size());
+
 		Set<String> stepIds = new HashSet<>();
-		for (WorkChunk workChunk : theJobMaintenanceStateInformation.getInitialWorkChunks()) {
-			mySvc.createWorkChunk(workChunk);
+		for (int i = 0; i < theJobMaintenanceStateInformation.getInitialWorkChunks().size(); i++) {
+			WorkChunk workChunk = theJobMaintenanceStateInformation.getInitialWorkChunks().get(i);
+			WorkChunk saved = mySvc.createWorkChunk(workChunk);
+			ourLog.info("Created WorkChunk: " + saved.toString());
+			workChunk.setId(saved.getId());
+
+			theJobMaintenanceStateInformation.getFinalWorkChunk().get(i)
+				.setId(saved.getId());
+
 			stepIds.add(workChunk.getTargetStepId());
 		}
 		// if it's a gated job, we'll manually set the step id for the instance
