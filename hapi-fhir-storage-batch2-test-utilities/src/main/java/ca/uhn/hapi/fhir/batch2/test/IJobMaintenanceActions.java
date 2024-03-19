@@ -3,6 +3,7 @@ package ca.uhn.hapi.fhir.batch2.test;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.hapi.fhir.batch2.test.models.JobMaintenanceStateInformation;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
@@ -24,19 +25,17 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 
 	void createChunksInStates(JobMaintenanceStateInformation theInitialState);
 
-	@ParameterizedTest
-	@ValueSource(strings = {
-		"""
+	@Test
+	default void test_gatedJob_stepReady_advances() {
+		// given
+		String initialState = 	"""
       		# chunks ready - move to queued
    			1|COMPLETED
    			2|READY,2|QUEUED
    			2|READY,2|QUEUED
-			"""
-	})
-	default void test_gatedJob_stepReady_advances(String theChunkState) {
-		// given
+		""";
 		enableMaintenanceRunner(false);
-		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(theChunkState);
+		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(initialState);
 
 		// setup
 		createChunksInStates(result);
@@ -51,64 +50,64 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 
 	@ParameterizedTest
 	@ValueSource(strings = {
-//		"""
-//   1|COMPLETED
-//   2|GATED
-//			""",
-		"""
-   			# Chunk already queued -> waiting for complete
-			1|COMPLETED
-			2|QUEUED
-			""",
-		"""
-   			# Chunks in progress, complete, errored -> cannot advance
-			1|COMPLETED
-			2|COMPLETED
-			2|ERRORED
-			2|IN_PROGRESS
-			""",
-		"""
-   			# Chunk in errored/already queued -> cannot advance
-			1|COMPLETED
-			2|ERRORED # equivalent of QUEUED
-			2|COMPLETED
-			""",
-		"""
-      		# Not all steps ready to advance
-   			1|COMPLETED
-   			2|READY  # a single ready chunk
-   			2|IN_PROGRESS
-			""",
-		"""
-      		# Previous step not ready -> do not advance
-   			1|COMPLETED
-   			2|COMPLETED
-   			2|IN_PROGRESS
-   			3|READY
-   			3|READY
-			"""
-//		"""
-//   1|COMPLETED
-//   2|READY
-//   2|QUEUED
-//   2|COMPLETED
-//   2|ERRORED
-//   2|FAILED
-//   2|IN_PROGRESS
-//   3|GATED
-//   3|GATED
-//			""",
-//		"""
-//   1|COMPLETED
-//   2|READY
-//   2|QUEUED
-//   2|COMPLETED
-//   2|ERRORED
-//   2|FAILED
-//   2|IN_PROGRESS
-//   3|QUEUED  # a lie
-//   3|GATED
-//			"""
+	"""
+   		1|COMPLETED
+   		2|GATED
+	""",
+	"""
+   		# Chunk already queued -> waiting for complete
+		1|COMPLETED
+		2|QUEUED
+	""",
+	"""
+   		# Chunks in progress, complete, errored -> cannot advance
+		1|COMPLETED
+		2|COMPLETED
+		2|ERRORED
+		2|IN_PROGRESS
+	""",
+	"""
+   		# Chunk in errored/already queued -> cannot advance
+		1|COMPLETED
+		2|ERRORED # equivalent of QUEUED
+		2|COMPLETED
+	""",
+	"""
+    	# Not all steps ready to advance
+   		1|COMPLETED
+   		2|READY  # a single ready chunk
+   		2|IN_PROGRESS
+	""",
+	"""
+    	# Previous step not ready -> do not advance
+   		1|COMPLETED
+   		2|COMPLETED
+   		2|IN_PROGRESS
+   		3|READY
+   		3|READY
+	""",
+	"""
+   		1|COMPLETED
+   		2|READY
+   		2|QUEUED
+   		2|COMPLETED
+   		2|ERRORED
+   		2|FAILED
+   		2|IN_PROGRESS
+   		3|GATED
+   		3|GATED
+	""",
+	"""
+   		1|COMPLETED
+   		2|READY
+   		2|QUEUED
+   		2|COMPLETED
+   		2|ERRORED
+   		2|FAILED
+   		2|IN_PROGRESS
+   		3|QUEUED  # a lie
+   		3|GATED
+	"""
 	})
 	default void testGatedStep2NotReady_notAdvance(String theChunkState) {
 		// given
@@ -128,28 +127,28 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 
 	@ParameterizedTest
 	@ValueSource(strings = {
-//   """
-//   # new code only
-//   1|COMPLETED
-//   2|COMPLETED
-//   2|COMPLETED
-//   3|GATED|READY
-//   3|GATED|READY
-//   """,
-//		"""
-//			# OLD code only
-//			1|COMPLETED
-//			2|QUEUED,2|READY
-//			2|QUEUED,2|READY
-//			""",
-//	"""
-//	# mixed code only
-//	1|COMPLETED
-//	2|COMPLETED
-//	2|COMPLETED
-//	3|GATED|READY
-//	3|QUEUED|READY
-//	"""
+    """
+		# new code only
+		1|COMPLETED
+		2|COMPLETED
+		2|COMPLETED
+		3|GATED|READY
+		3|GATED|READY
+    """,
+    """
+		# OLD code only
+		1|COMPLETED
+		2|QUEUED,2|READY
+		2|QUEUED,2|READY
+	""",
+	"""
+		# mixed code only
+		1|COMPLETED
+		2|COMPLETED
+		2|COMPLETED
+		3|GATED|READY
+		3|QUEUED|READY
+	"""
 	})
 	default void testGatedStep2ReadyToAdvance_advanceToStep3(String theChunkState) {
 		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(theChunkState);
