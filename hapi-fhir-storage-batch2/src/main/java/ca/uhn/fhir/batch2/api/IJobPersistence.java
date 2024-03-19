@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.slf4j.Logger;
@@ -280,4 +281,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 		return markInstanceAsStatusWhenStatusIn(
 				theJobInstanceId, StatusEnum.IN_PROGRESS, Collections.singleton(StatusEnum.QUEUED));
 	}
+
+	@VisibleForTesting
+	WorkChunk createWorkChunk(WorkChunk theWorkChunk);
 }

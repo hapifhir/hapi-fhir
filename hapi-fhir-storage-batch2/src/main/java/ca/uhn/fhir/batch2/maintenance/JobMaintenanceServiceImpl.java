@@ -99,6 +99,8 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	private Runnable myMaintenanceJobFinishedCallback = () -> {};
 	private final IReductionStepExecutorService myReductionStepExecutorService;
 
+	private boolean myEnabledBool = true;
+
 	/**
 	 * Constructor
 	 */
@@ -201,7 +203,16 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	}
 
 	@Override
+	public void enableMaintenancePass(boolean theToEnable) {
+		myEnabledBool = theToEnable;
+	}
+
+	@Override
 	public void runMaintenancePass() {
+		if (!myEnabledBool) {
+			ourLog.error("Maintenance job is disabled! This will affect all batch2 jobs!");
+		}
+
 		if (!myRunMaintenanceSemaphore.tryAcquire()) {
 			ourLog.debug("Another maintenance pass is already in progress.  Ignoring request.");
 			return;

@@ -10,7 +10,7 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 
 	@Test
 	default void chunkCreation_isQueued() {
-		String jobInstanceId = createAndStoreJobInstance();
+		String jobInstanceId = createAndStoreJobInstance(null);
 		String myChunkId = createChunk(jobInstanceId);
 
 		WorkChunk fetchedWorkChunk = freshFetchWorkChunk(myChunkId);
@@ -19,7 +19,7 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 
 	@Test
 	default void chunkReceived_queuedToInProgress() {
-		String jobInstanceId = createAndStoreJobInstance();
+		String jobInstanceId = createAndStoreJobInstance(null);
 		String myChunkId = createChunk(jobInstanceId);
 
 		runMaintenancePass();

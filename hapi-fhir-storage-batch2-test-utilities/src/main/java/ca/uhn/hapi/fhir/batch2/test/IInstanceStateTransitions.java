@@ -30,7 +30,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 	@Test
 	default void createInstance_createsInQueuedWithChunk() {
 		// given
-		JobDefinition<?> jd = withJobDefinition();
+		JobDefinition<?> jd = withJobDefinition(false);
 
 		// when
 		IJobPersistence.CreateResult createResult =
@@ -55,7 +55,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 	@Test
 	default void testCreateInstance_firstChunkDequeued_movesToInProgress() {
 		// given
-		JobDefinition<?> jd = withJobDefinition();
+		JobDefinition<?> jd = withJobDefinition(false);
 		IJobPersistence.CreateResult createResult = newTxTemplate().execute(status->
 			getSvc().onCreateWithFirstChunk(jd, "{}"));
 		assertNotNull(createResult);
@@ -82,7 +82,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		String instanceId2 = getSvc().storeNewInstance(normalInstance);
 
 		JobDefinitionRegistry jobDefinitionRegistry = new JobDefinitionRegistry();
-		jobDefinitionRegistry.addJobDefinitionIfNotRegistered(withJobDefinition());
+		jobDefinitionRegistry.addJobDefinitionIfNotRegistered(withJobDefinition(false));
 
 		// when
 		runInTransaction(()-> {

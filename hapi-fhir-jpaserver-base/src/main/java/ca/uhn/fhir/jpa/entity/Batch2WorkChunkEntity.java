@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
@@ -160,6 +161,26 @@ public class Batch2WorkChunkEntity implements Serializable {
 		myErrorCount = theErrorCount;
 		myRecordsProcessed = theRecordsProcessed;
 		myWarningMessage = theWarningMessage;
+	}
+
+	public static Batch2WorkChunkEntity fromWorkChunk(WorkChunk theWorkChunk) {
+		return new Batch2WorkChunkEntity(
+			theWorkChunk.getId(),
+			theWorkChunk.getSequence(),
+			theWorkChunk.getJobDefinitionId(),
+			theWorkChunk.getJobDefinitionVersion(),
+			theWorkChunk.getInstanceId(),
+			theWorkChunk.getTargetStepId(),
+			theWorkChunk.getStatus(),
+			theWorkChunk.getCreateTime(),
+			theWorkChunk.getStartTime(),
+			theWorkChunk.getUpdateTime(),
+			theWorkChunk.getEndTime(),
+			theWorkChunk.getErrorMessage(),
+			theWorkChunk.getErrorCount(),
+			theWorkChunk.getRecordsProcessed(),
+			theWorkChunk.getWarningMessage()
+		);
 	}
 
 	public int getErrorCount() {

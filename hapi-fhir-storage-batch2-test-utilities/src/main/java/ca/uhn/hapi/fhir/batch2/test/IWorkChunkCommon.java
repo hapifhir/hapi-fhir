@@ -10,7 +10,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 public interface IWorkChunkCommon extends WorkChunkTestConstants {
-	String createAndStoreJobInstance();
+	String createAndStoreJobInstance(JobDefinition<?> theJobDefinition);
 
 	String createAndDequeueWorkChunk(String theJobInstanceId);
 
@@ -24,7 +24,7 @@ public interface IWorkChunkCommon extends WorkChunkTestConstants {
 
 	public void sleepUntilTimeChanges();
 
-	JobDefinition<TestJobParameters> withJobDefinition();
+	JobDefinition<TestJobParameters> withJobDefinition(boolean theIsGatedJob);
 
 	TransactionTemplate newTxTemplate();
 

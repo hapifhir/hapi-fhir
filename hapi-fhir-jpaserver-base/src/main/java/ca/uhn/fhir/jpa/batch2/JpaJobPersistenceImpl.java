@@ -474,6 +474,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		myJobInstanceRepository.updateInstanceUpdateTime(theInstanceId, new Date());
 	}
 
+	@Override
+	public WorkChunk createWorkChunk(WorkChunk theWorkChunk) {
+		if (theWorkChunk.getId() == null) {
+			theWorkChunk.setId(UUID.randomUUID().toString());
+		}
+		return toChunk(myWorkChunkRepository.save(Batch2WorkChunkEntity.fromWorkChunk(theWorkChunk)));
+	}
+
 	/**
 	 * Note: Not @Transactional because the transaction happens in a lambda that's called outside of this method's scope
 	 */
