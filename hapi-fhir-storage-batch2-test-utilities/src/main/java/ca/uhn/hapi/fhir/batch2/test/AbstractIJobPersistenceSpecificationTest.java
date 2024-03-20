@@ -26,19 +26,19 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
-import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.hapi.fhir.batch2.test.models.JobMaintenanceStateInformation;
+import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobParameters;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep2InputType;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep3InputType;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Nested;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,21 +48,20 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.concurrent.Callable;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Specification tests for batch2 storage and event system.
  * These tests are abstract, and do not depend on JPA.
  * Test setups should use the public batch2 api to create scenarios.
  */
-public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMaintenanceActions, IInProgressActionsTests, IInstanceStateTransitions, IWorkChunkStateTransitions, IWorkChunkStorageTests, IWorkChunkErrorActionsTests, WorkChunkTestConstants {
+public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMaintenanceActions, IInProgressActionsTests, IInstanceStateTransitions, IWorkChunkCommon, WorkChunkTestConstants {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AbstractIJobPersistenceSpecificationTest.class);
 
@@ -107,7 +106,41 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 	@AfterEach
 	public void after() {
 		myJobDefinitionRegistry.removeJobDefinition(JOB_DEFINITION_ID, JOB_DEF_VER);
+
+		// re-enable our runner after every test (just in case)
 		myMaintenanceService.enableMaintenancePass(true);
+	}
+
+	@Nested
+	class WorkChunkStorage implements IWorkChunkStorageTests {
+
+		@Override
+		public IWorkChunkCommon getTestManager() {
+			return AbstractIJobPersistenceSpecificationTest.this;
+		}
+
+		@Nested
+		class StateTransitions implements IWorkChunkStateTransitions {
+
+			@Override
+			public IWorkChunkCommon getTestManager() {
+				return AbstractIJobPersistenceSpecificationTest.this;
+			}
+
+			@Nested
+			class ErrorActions implements IWorkChunkErrorActionsTests {
+
+				@Override
+				public IWorkChunkCommon getTestManager() {
+					return AbstractIJobPersistenceSpecificationTest.this;
+				}
+			}
+		}
+	}
+
+	@Override
+	public IWorkChunkCommon getTestManager() {
+		return this;
 	}
 
 	@Nonnull
@@ -185,50 +218,24 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 		return chunkId;
 	}
 
+	public String createChunk(String theInstanceId) {
+		return storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, theInstanceId, 0, CHUNK_DATA);
+	}
+
 	public void enableMaintenanceRunner(boolean theToEnable) {
 		myMaintenanceService.enableMaintenancePass(theToEnable);
 	}
 
-	public BatchJobSender getBatchJobSender() {
-		return myBatchJobSender;
+	public void disableWorkChunkMessageHandler() {
+		doNothing().when(myBatchJobSender).sendWorkChannelMessage(any(JobWorkNotification.class));
+	}
+
+	public void verifyWorkChunkMessageHandlerCalled(int theNumberOfTimes) {
+		verify(myBatchJobSender, times(theNumberOfTimes))
+			.sendWorkChannelMessage(any(JobWorkNotification.class));
 	}
 
 	public void createChunksInStates(JobMaintenanceStateInformation theJobMaintenanceStateInformation) {
-		// should have as many input workchunks as output workchunks
-		// unless we have newly created ones somewhere
-		assertEquals(theJobMaintenanceStateInformation.getInitialWorkChunks().size(), theJobMaintenanceStateInformation.getFinalWorkChunk().size());
-
-		Set<String> stepIds = new HashSet<>();
-		for (int i = 0; i < theJobMaintenanceStateInformation.getInitialWorkChunks().size(); i++) {
-			WorkChunk workChunk = theJobMaintenanceStateInformation.getInitialWorkChunks().get(i);
-			WorkChunk saved = mySvc.createWorkChunk(workChunk);
-			ourLog.info("Created WorkChunk: " + saved.toString());
-			workChunk.setId(saved.getId());
-
-			theJobMaintenanceStateInformation.getFinalWorkChunk().get(i)
-				.setId(saved.getId());
-
-			stepIds.add(workChunk.getTargetStepId());
-		}
-		// if it's a gated job, we'll manually set the step id for the instance
-		JobDefinition<?> jobDef = theJobMaintenanceStateInformation.getJobDefinition();
-		if (jobDef.isGatedExecution()) {
-			AtomicReference<String> latestStepId = new AtomicReference<>();
-			int totalSteps = jobDef.getSteps().size();
-			for (int i = totalSteps - 1; i >= 0; i--) {
-				JobDefinitionStep<?, ?, ?> step = jobDef.getSteps().get(i);
-				if (stepIds.contains(step.getStepId())) {
-					latestStepId.set(step.getStepId());
-					break;
-				}
-			}
-			// should def have a value
-			assertNotNull(latestStepId.get());
-			String instanceId = theJobMaintenanceStateInformation.getInstanceId();
-			mySvc.updateInstance(instanceId, instance -> {
-				instance.setCurrentGatedStepId(latestStepId.get());
-				return true;
-			});
-		}
+		theJobMaintenanceStateInformation.initialize(mySvc);
 	}
 }

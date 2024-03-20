@@ -1,42 +1,27 @@
 package ca.uhn.hapi.fhir.batch2.test;
 
-import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
-import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.hapi.fhir.batch2.test.models.JobMaintenanceStateInformation;
+import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
 
 public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestConstants {
 
 	Logger ourLog = LoggerFactory.getLogger(IJobMaintenanceActions.class);
 
-	void enableMaintenanceRunner(boolean theToEnable);
-
-	void createChunksInStates(JobMaintenanceStateInformation theInitialState);
-
-	BatchJobSender getBatchJobSender();
-
 	@Test
 	default void test_gatedJob_stepReady_advances() {
-		// given
+		// setup
 		String initialState = 	"""
       		# chunks ready - move to queued
    			1|COMPLETED
@@ -44,18 +29,16 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
    			2|READY,2|QUEUED
 		""";
 		enableMaintenanceRunner(false);
+		disableWorkChunkMessageHandler();
 		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(initialState, true);
-
-		// setup
 		createChunksInStates(result);
 
-		// TEST run job maintenance - force transition
-		doNothing().when(getBatchJobSender()).sendWorkChannelMessage(any(JobWorkNotification.class));
-		enableMaintenanceRunner(true);
+		// test
 		runMaintenancePass();
 
 		// verify
 		verifyWorkChunkFinalStates(result);
+		verifyWorkChunkMessageHandlerCalled(2);
 	}
 
 	@ParameterizedTest
@@ -120,21 +103,20 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 	"""
 	})
 	default void testGatedStep2NotReady_notAdvance(String theChunkState) {
-		// given
+		// setup
 		enableMaintenanceRunner(false);
+		disableWorkChunkMessageHandler();
 		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(theChunkState, true);
 
-		// setup
 		createChunksInStates(result);
 
-		// TEST run job maintenance - force transition
-		enableMaintenanceRunner(true);
-		lenient().doNothing().when(getBatchJobSender()).sendWorkChannelMessage(any(JobWorkNotification.class));
-
+		// test
 		runMaintenancePass();
 
 		// verify
 		verifyWorkChunkFinalStates(result);
+		// nothing ever queued -> nothing ever sent to queue
+		verifyWorkChunkMessageHandlerCalled(0);
 	}
 
 	@ParameterizedTest
@@ -163,25 +145,25 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 	"""
 	})
 	default void testGatedStep2ReadyToAdvance_advanceToStep3(String theChunkState) {
-		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(theChunkState, true);
-
 		// setup
 		enableMaintenanceRunner(false);
+		disableWorkChunkMessageHandler();
+		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(theChunkState, true);
 		createChunksInStates(result);
 
-		// TEST run job maintenance - force transition
-		enableMaintenanceRunner(true);
-		lenient().doNothing().when(getBatchJobSender()).sendWorkChannelMessage(any(JobWorkNotification.class));
-
+		// test
 		runMaintenancePass();
 
 		// verify
 		verifyWorkChunkFinalStates(result);
+		// things are being set to READY; is anything being queued?
+		verifyWorkChunkMessageHandlerCalled(0);
 	}
 
-	@ParameterizedTest
-	@ValueSource(strings = {
-		"""
+	@Test
+	default void test_ungatedJob_advancesSteps() {
+		// setup
+		String state = 		"""
      		# READY chunks should transition; others should stay
   			1|COMPLETED
   			2|READY,2|QUEUED
@@ -189,31 +171,28 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
   			2|COMPLETED
   			2|IN_PROGRESS
   			3|IN_PROGRESS
-		"""
-	})
-	default void test_ungatedJob_advancesSteps(String theChunkState) {
-		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(theChunkState, false);
+		""";
+		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(state, false);
 
-		// setup
 		enableMaintenanceRunner(false);
+		disableWorkChunkMessageHandler();
 		createChunksInStates(result);
 
 		// TEST run job maintenance - force transition
 		enableMaintenanceRunner(true);
-		lenient().doNothing().when(getBatchJobSender()).sendWorkChannelMessage(any(JobWorkNotification.class));
 
 		runMaintenancePass();
 
 		// verify
 		verifyWorkChunkFinalStates(result);
+		verifyWorkChunkMessageHandlerCalled(2);
 	}
 
 	private JobMaintenanceStateInformation setupGatedWorkChunkTransitionTest(String theChunkState, boolean theIsGated) {
 		// get the job def and store the instance
 		JobDefinition<?> definition = withJobDefinition(theIsGated);
 		String instanceId = createAndStoreJobInstance(definition);
-		JobMaintenanceStateInformation stateInformation = new JobMaintenanceStateInformation(instanceId, definition);
-		stateInformation.initialize(theChunkState);
+		JobMaintenanceStateInformation stateInformation = new JobMaintenanceStateInformation(instanceId, definition, theChunkState);
 
 		ourLog.info("Starting test case \n {}", theChunkState);
 		// display comments if there are any
@@ -222,28 +201,6 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 	}
 
 	private void verifyWorkChunkFinalStates(JobMaintenanceStateInformation theStateInformation) {
-		assertEquals(theStateInformation.getInitialWorkChunks().size(), theStateInformation.getFinalWorkChunk().size());
-
-		HashMap<String, WorkChunk> workchunkMap = new HashMap<>();
-		for (WorkChunk fs : theStateInformation.getFinalWorkChunk()) {
-			workchunkMap.put(fs.getId(), fs);
-		}
-
-		// fetch all workchunks
-		Iterator<WorkChunk> workChunkIterator = getSvc().fetchAllWorkChunksIterator(theStateInformation.getInstanceId(), true);
-		List<WorkChunk> workchunks = new ArrayList<>();
-		workChunkIterator.forEachRemaining(workchunks::add);
-
-		assertEquals(workchunks.size(), workchunkMap.size());
-		workchunks.forEach(c -> ourLog.info("Returned " + c.toString()));
-
-		for (WorkChunk wc : workchunks) {
-			WorkChunk expected = workchunkMap.get(wc.getId());
-			assertNotNull(expected);
-
-			// verify status and step id
-			assertEquals(expected.getTargetStepId(), wc.getTargetStepId());
-			assertEquals(expected.getStatus(), wc.getStatus());
-		}
+		theStateInformation.verifyFinalStates(getSvc());
 	}
 }

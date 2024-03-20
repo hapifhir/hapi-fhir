@@ -164,7 +164,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	}
 
 	public static Batch2WorkChunkEntity fromWorkChunk(WorkChunk theWorkChunk) {
-		return new Batch2WorkChunkEntity(
+		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity(
 			theWorkChunk.getId(),
 			theWorkChunk.getSequence(),
 			theWorkChunk.getJobDefinitionId(),
@@ -181,6 +181,9 @@ public class Batch2WorkChunkEntity implements Serializable {
 			theWorkChunk.getRecordsProcessed(),
 			theWorkChunk.getWarningMessage()
 		);
+		entity.setSerializedData(theWorkChunk.getData());
+
+		return entity;
 	}
 
 	public int getErrorCount() {

@@ -1,5 +1,6 @@
-package ca.uhn.hapi.fhir.batch2.test.models;
+package ca.uhn.hapi.fhir.batch2.test.support;
 
+import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.WorkChunk;
@@ -9,13 +10,19 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class JobMaintenanceStateInformation {
 
@@ -33,9 +40,20 @@ public class JobMaintenanceStateInformation {
 
 	private final String myInstanceId;
 
-	public JobMaintenanceStateInformation(String theInstanceId, JobDefinition<?> theJobDefinition) {
+	private Consumer<WorkChunk> myWorkChunkModifier = (chunk) -> {};
+
+	public JobMaintenanceStateInformation(
+		String theInstanceId,
+		JobDefinition<?> theJobDefinition,
+		String theStateUnderTest) {
 		myInstanceId = theInstanceId;
 		myJobDefinition = theJobDefinition;
+
+		setState(theStateUnderTest);
+	}
+
+	public void addWorkChunkModifier(Consumer<WorkChunk> theModifier) {
+		myWorkChunkModifier = theModifier;
 	}
 
 	public List<String> getLineComments() {
@@ -58,7 +76,73 @@ public class JobMaintenanceStateInformation {
 		return myInstanceId;
 	}
 
-	public void initialize(String theState) {
+	public void verifyFinalStates(IJobPersistence theJobPersistence) {
+		assertEquals(getInitialWorkChunks().size(), getFinalWorkChunk().size());
+
+		HashMap<String, WorkChunk> workchunkMap = new HashMap<>();
+		for (WorkChunk fs : getFinalWorkChunk()) {
+			workchunkMap.put(fs.getId(), fs);
+		}
+
+		// fetch all workchunks
+		Iterator<WorkChunk> workChunkIterator = theJobPersistence.fetchAllWorkChunksIterator(getInstanceId(), true);
+		List<WorkChunk> workchunks = new ArrayList<>();
+		workChunkIterator.forEachRemaining(workchunks::add);
+
+		assertEquals(workchunks.size(), workchunkMap.size());
+		workchunks.forEach(c -> ourLog.info("Returned " + c.toString()));
+
+		for (WorkChunk wc : workchunks) {
+			WorkChunk expected = workchunkMap.get(wc.getId());
+			assertNotNull(expected);
+
+			// verify status and step id
+			assertEquals(expected.getTargetStepId(), wc.getTargetStepId());
+			assertEquals(expected.getStatus(), wc.getStatus());
+		}
+	}
+
+	public void initialize(IJobPersistence theJobPersistence) {
+		// should have as many input workchunks as output workchunks
+		// unless we have newly created ones somewhere
+		assertEquals(getInitialWorkChunks().size(), getFinalWorkChunk().size());
+
+		Set<String> stepIds = new HashSet<>();
+		for (int i = 0; i < getInitialWorkChunks().size(); i++) {
+			WorkChunk workChunk = getInitialWorkChunks().get(i);
+			myWorkChunkModifier.accept(workChunk);
+			WorkChunk saved = theJobPersistence.createWorkChunk(workChunk);
+			ourLog.info("Created WorkChunk: " + saved.toString());
+			workChunk.setId(saved.getId());
+
+			getFinalWorkChunk().get(i)
+				.setId(saved.getId());
+
+			stepIds.add(workChunk.getTargetStepId());
+		}
+		// if it's a gated job, we'll manually set the step id for the instance
+		JobDefinition<?> jobDef = getJobDefinition();
+		if (jobDef.isGatedExecution()) {
+			AtomicReference<String> latestStepId = new AtomicReference<>();
+			int totalSteps = jobDef.getSteps().size();
+			for (int i = totalSteps - 1; i >= 0; i--) {
+				JobDefinitionStep<?, ?, ?> step = jobDef.getSteps().get(i);
+				if (stepIds.contains(step.getStepId())) {
+					latestStepId.set(step.getStepId());
+					break;
+				}
+			}
+			// should def have a value
+			assertNotNull(latestStepId.get());
+			String instanceId = getInstanceId();
+			theJobPersistence.updateInstance(instanceId, instance -> {
+				instance.setCurrentGatedStepId(latestStepId.get());
+				return true;
+			});
+		}
+	}
+
+	private void setState(String theState) {
 		String[] chunkLines = theState.split("\n");
 		Pattern pattern = Pattern.compile(COMMENT_PATTERN);
 		for (String chunkLine : chunkLines) {
@@ -117,10 +201,10 @@ public class JobMaintenanceStateInformation {
 		String stepId = getJobStepId(parts[0]);
 
 		WorkChunkStatusEnum initialStatus = WorkChunkStatusEnum.valueOf(parts[1].trim());
-		WorkChunk initial = createBaseWorkChunk();
-		initial.setStatus(initialStatus);
-		initial.setTargetStepId(stepId);
-		theAdder.accept(initial);
+		WorkChunk chunk = createBaseWorkChunk();
+		chunk.setStatus(initialStatus);
+		chunk.setTargetStepId(stepId);
+		theAdder.accept(chunk);
 	}
 
 	private String getJobStepId(String theIndexId) {
@@ -150,7 +234,6 @@ public class JobMaintenanceStateInformation {
 
 	private WorkChunk createBaseWorkChunk() {
 		WorkChunk chunk = new WorkChunk();
-//		chunk.setId(UUID.randomUUID().toString());
 		chunk.setJobDefinitionId(myJobDefinition.getJobDefinitionId());
 		chunk.setInstanceId(myInstanceId);
 		chunk.setJobDefinitionVersion(myJobDefinition.getJobDefinitionVersion());
