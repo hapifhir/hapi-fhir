@@ -27,6 +27,7 @@ import ca.uhn.fhir.testjob.TestJobDefinitionUtils;
 import ca.uhn.fhir.testjob.models.FirstStepOutput;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest;
+import ca.uhn.hapi.fhir.batch2.test.configs.SpyOverrideConfig;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import jakarta.annotation.Nonnull;
@@ -38,6 +39,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -71,6 +73,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ContextConfiguration(classes = {
 	Batch2FastSchedulerConfig.class
 })
+@Import(SpyOverrideConfig.class)
 public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	public static final String JOB_DEFINITION_ID = "definition-id";

@@ -23,6 +23,7 @@ package ca.uhn.hapi.fhir.batch2.test;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
@@ -77,6 +78,9 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 	@Autowired
 	private IJobMaintenanceService myMaintenanceService;
 
+	@Autowired
+	private BatchJobSender myBatchJobSender;
+
 	public PlatformTransactionManager getTransactionManager() {
 		return myTransactionManager;
 	}
@@ -110,7 +114,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 	public JobInstance createInstance(JobDefinition<?> theJobDefinition) {
 		JobDefinition<?> jobDefinition = theJobDefinition == null ? withJobDefinition(false)
 			: theJobDefinition;
-		if (myJobDefinitionRegistry.getJobDefinition(theJobDefinition.getJobDefinitionId(), theJobDefinition.getJobDefinitionVersion()).isEmpty()) {
+		if (myJobDefinitionRegistry.getJobDefinition(jobDefinition.getJobDefinitionId(), jobDefinition.getJobDefinitionVersion()).isEmpty()) {
 			myJobDefinitionRegistry.addJobDefinition(jobDefinition);
 		}
 
@@ -183,6 +187,10 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 
 	public void enableMaintenanceRunner(boolean theToEnable) {
 		myMaintenanceService.enableMaintenancePass(theToEnable);
+	}
+
+	public BatchJobSender getBatchJobSender() {
+		return myBatchJobSender;
 	}
 
 	public void createChunksInStates(JobMaintenanceStateInformation theJobMaintenanceStateInformation) {
