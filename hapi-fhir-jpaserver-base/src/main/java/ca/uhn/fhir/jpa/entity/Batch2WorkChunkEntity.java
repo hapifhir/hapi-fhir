@@ -165,22 +165,21 @@ public class Batch2WorkChunkEntity implements Serializable {
 
 	public static Batch2WorkChunkEntity fromWorkChunk(WorkChunk theWorkChunk) {
 		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity(
-			theWorkChunk.getId(),
-			theWorkChunk.getSequence(),
-			theWorkChunk.getJobDefinitionId(),
-			theWorkChunk.getJobDefinitionVersion(),
-			theWorkChunk.getInstanceId(),
-			theWorkChunk.getTargetStepId(),
-			theWorkChunk.getStatus(),
-			theWorkChunk.getCreateTime(),
-			theWorkChunk.getStartTime(),
-			theWorkChunk.getUpdateTime(),
-			theWorkChunk.getEndTime(),
-			theWorkChunk.getErrorMessage(),
-			theWorkChunk.getErrorCount(),
-			theWorkChunk.getRecordsProcessed(),
-			theWorkChunk.getWarningMessage()
-		);
+				theWorkChunk.getId(),
+				theWorkChunk.getSequence(),
+				theWorkChunk.getJobDefinitionId(),
+				theWorkChunk.getJobDefinitionVersion(),
+				theWorkChunk.getInstanceId(),
+				theWorkChunk.getTargetStepId(),
+				theWorkChunk.getStatus(),
+				theWorkChunk.getCreateTime(),
+				theWorkChunk.getStartTime(),
+				theWorkChunk.getUpdateTime(),
+				theWorkChunk.getEndTime(),
+				theWorkChunk.getErrorMessage(),
+				theWorkChunk.getErrorCount(),
+				theWorkChunk.getRecordsProcessed(),
+				theWorkChunk.getWarningMessage());
 		entity.setSerializedData(theWorkChunk.getData());
 
 		return entity;

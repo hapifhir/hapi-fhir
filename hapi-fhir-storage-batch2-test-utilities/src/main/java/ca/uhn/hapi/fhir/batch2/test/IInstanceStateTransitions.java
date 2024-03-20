@@ -28,7 +28,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 	Logger ourLog = LoggerFactory.getLogger(IInstanceStateTransitions.class);
 
 	@Test
-	default void createInstance_createsInQueuedWithChunk() {
+	default void createInstance_createsInQueuedWithChunkInReady() {
 		// given
 		JobDefinition<?> jd = withJobDefinition(false);
 
