@@ -391,9 +391,10 @@ public class JobInstanceProcessor {
 					readyChunksForNextStep.size());
 		}
 
-		// fixme create a new persistence transition for state advance
-		// fixme update stepId to next step AND update all chunks in this step to READY (from GATED or QUEUED ;-P)
-		// fixme so we can queue them safely.
+		// TODO
+		// create a new persistence transition for state advance
+		// update stepId to next step AND update all chunks in this step to READY (from GATED or QUEUED ;-P)
+		// so we can queue them safely.
 
 		// update the job step so the workers will process them.
 		// if it's the last (gated) step, there will be no change - but we should
