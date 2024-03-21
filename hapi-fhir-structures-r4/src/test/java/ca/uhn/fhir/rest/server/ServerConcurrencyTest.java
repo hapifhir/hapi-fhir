@@ -9,11 +9,6 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.helger.commons.collection.iterate.EmptyEnumeration;
-import jakarta.annotation.Nonnull;
-import jakarta.servlet.ReadListener;
-import jakarta.servlet.ServletInputStream;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.collections4.iterators.IteratorEnumeration;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.hl7.fhir.r4.model.IdType;
@@ -28,6 +23,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.Assert;
 
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.IOException;
@@ -36,9 +36,7 @@ import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Set;
 
-import static org.apache.commons.collections.CollectionUtils.isEmpty;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -108,13 +106,6 @@ public class ServerConcurrencyTest {
 			ourLog.info("Request for header '{}' produced: {}", header, value);
 			if (value != null) {
 				return new IteratorEnumeration<>(Collections.singleton(value).iterator());
-			}
-			return new EmptyEnumeration<>();
-		});
-		when(myRequest.getHeaderNames()).thenAnswer(t -> {
-			Set<String> headerNames = myHeaders.keySet();
-			if (!isEmpty(headerNames)){
-				return new IteratorEnumeration<>(headerNames.iterator());
 			}
 			return new EmptyEnumeration<>();
 		});
