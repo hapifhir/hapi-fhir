@@ -63,10 +63,6 @@ public interface IBatch2WorkChunkRepository
 	Stream<Batch2WorkChunkEntity> fetchChunksForStep(
 			@Param("instanceId") String theInstanceId, @Param("targetStepId") String theTargetStepId);
 
-	@Query("SELECT e FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId AND e.myStatus IN :states")
-	Stream<Batch2WorkChunkEntity> fetchChunksForJobInStates(
-			@Param("instanceId") String theInstanceId, @Param("states") Collection<WorkChunkStatusEnum> theStates);
-
 	@Modifying
 	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, "
 			+ "e.myRecordsProcessed = :rp, e.myErrorCount = e.myErrorCount + :errorRetries, e.mySerializedData = null, "

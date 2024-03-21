@@ -366,7 +366,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		Date updateTime = runInTransaction(() -> new Date(myJobInstanceRepository.findById(instanceId).orElseThrow().getUpdateTime().getTime()));
 
-		sleep1MS();
+		sleepUntilTimeChange();
 
 		// Test
 		runInTransaction(() -> mySvc.updateInstanceUpdateTime(instanceId));
@@ -504,7 +504,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertNotNull(chunk.getData());
 		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
 
-		sleep1MS();
+		sleepUntilTimeChange();
 
 		mySvc.onWorkChunkCompletion(new WorkChunkCompletionEvent(chunkId, 50, 0));
 		runInTransaction(() -> {
@@ -569,7 +569,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
 		assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
 
-		sleep1MS();
+		sleepUntilTimeChange();
 
 		WorkChunkErrorEvent request = new WorkChunkErrorEvent(chunkId).setErrorMsg("This is an error message");
 		mySvc.onWorkChunkError(request);
@@ -621,7 +621,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
 		assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
 
-		sleep1MS();
+		sleepUntilTimeChange();
 
 		mySvc.onWorkChunkFailed(chunkId, "This is an error message");
 		runInTransaction(() -> {

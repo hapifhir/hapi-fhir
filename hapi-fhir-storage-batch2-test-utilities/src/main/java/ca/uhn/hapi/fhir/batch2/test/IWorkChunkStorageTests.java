@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
+import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 
@@ -54,10 +55,12 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 	}
 
 	@Test
-	default void testNonGatedWorkChunkInReady_IsQueuedDuringMaintenance() {
+	default void testNonGatedWorkChunkInReady_IsQueuedDuringMaintenance() throws InterruptedException {
 		// setup
+		int expectedCalls = 1;
 		enableMaintenanceRunner(false);
-		disableWorkChunkMessageHandler();
+		PointcutLatch sendingLatch = disableWorkChunkMessageHandler();
+		sendingLatch.setExpectedCount(expectedCalls);
 		String state = "1|READY,1|QUEUED";
 		JobDefinition<?> jobDefinition = withJobDefinition(false);
 		String instanceId = createAndStoreJobInstance(jobDefinition);
@@ -74,7 +77,7 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 
 		// verify it's in QUEUED now
 		stateInformation.verifyFinalStates(getSvc());
-		verifyWorkChunkMessageHandlerCalled(1);
+		verifyWorkChunkMessageHandlerCalled(sendingLatch, expectedCalls);
 	}
 
 	@Test

@@ -26,6 +26,9 @@ import java.util.LinkedList;
 import java.util.NoSuchElementException;
 import java.util.function.Consumer;
 
+/**
+ * This paging iterator only works with already ordered queries
+ */
 public class PagingIterator<T> implements Iterator<T> {
 
 	public interface PageFetcher<T> {
@@ -42,8 +45,16 @@ public class PagingIterator<T> implements Iterator<T> {
 
 	private final PageFetcher<T> myFetcher;
 
+	private final int myPageSize;
+
 	public PagingIterator(PageFetcher<T> theFetcher) {
+		this(PAGE_SIZE, theFetcher);
+	}
+
+	public PagingIterator(int thePageSize, PageFetcher<T> theFetcher) {
+		assert thePageSize > 0 : "Page size must be a positive value";
 		myFetcher = theFetcher;
+		myPageSize = thePageSize;
 	}
 
 	@Override
@@ -66,9 +77,9 @@ public class PagingIterator<T> implements Iterator<T> {
 
 	private void fetchNextBatch() {
 		if (!myIsFinished && myCurrentBatch.isEmpty()) {
-			myFetcher.fetchNextPage(myPage, PAGE_SIZE, myCurrentBatch::add);
+			myFetcher.fetchNextPage(myPage, myPageSize, myCurrentBatch::add);
 			myPage++;
-			myIsFinished = myCurrentBatch.size() < PAGE_SIZE;
+			myIsFinished = myCurrentBatch.size() < myPageSize;
 		}
 	}
 }

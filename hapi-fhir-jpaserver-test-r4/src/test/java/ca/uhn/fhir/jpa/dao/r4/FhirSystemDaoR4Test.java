@@ -581,13 +581,13 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		p.addName().setFamily("family");
 		final IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualified();
 
-		sleep1MS();
+		sleepUntilTimeChange();
 
 		ValueSet vs = new ValueSet();
 		vs.setUrl("http://foo");
 		myValueSetDao.create(vs, mySrd);
 
-		sleep1MS();
+		sleepUntilTimeChange();
 
 		ResourceTable entity = new TransactionTemplate(myTxManager).execute(t -> myEntityManager.find(ResourceTable.class, id.getIdPartAsLong()));
 		assertEquals(Long.valueOf(1), entity.getIndexStatus());

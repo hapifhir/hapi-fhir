@@ -358,7 +358,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 			myReindexTestHelper.createObservationWithAlleleExtension(Observation.ObservationStatus.FINAL);
 		}
 
-		sleep1MS();
+		sleepUntilTimeChange();
 
 		myReindexTestHelper.createAlleleSearchParameter();
 		mySearchParamRegistry.forceRefresh();

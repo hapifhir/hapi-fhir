@@ -15,6 +15,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkMetadata;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
@@ -51,7 +52,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.coordinator.JobCoordinatorImplTest.createWorkChunkStep1;
 import static ca.uhn.fhir.batch2.coordinator.JobCoordinatorImplTest.createWorkChunkStep2;
@@ -131,6 +131,10 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		JobInstance instance = createInstance();
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(List.of(instance));
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance));
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(eq(INSTANCE_ID), any()))
+			.thenReturn(chunks.stream()
+				.map(c -> (WorkChunkMetadata) c)
+				.iterator());
 
 		mySvc.runMaintenancePass();
 
@@ -173,8 +177,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
-		when(myJobPersistence.fetchAllWorkChunksForJobInStates(eq(instance.getInstanceId()), eq(Set.of(WorkChunkStatusEnum.READY))))
-			.thenReturn(Stream.empty());
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(eq(instance.getInstanceId()), eq(Set.of(WorkChunkStatusEnum.READY))))
+			.thenReturn(Collections.emptyIterator());
 		stubUpdateInstanceCallback(instance);
 
 		mySvc.runMaintenancePass();
@@ -217,8 +221,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
-		when(myJobPersistence.fetchAllWorkChunksForJobInStates(eq(instance.getInstanceId()), eq(Set.of(WorkChunkStatusEnum.READY))))
-			.thenReturn(Stream.empty());
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(eq(instance.getInstanceId()), eq(Set.of(WorkChunkStatusEnum.READY))))
+			.thenReturn(Collections.emptyIterator());
 		stubUpdateInstanceCallback(instance);
 
 		// Execute
@@ -254,10 +258,10 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		instance1.setCurrentGatedStepId(STEP_1);
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance1));
-		when(myJobPersistence.fetchAllWorkChunksForJobInStates(anyString(), eq(Set.of(WorkChunkStatusEnum.READY))))
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(anyString(), eq(Set.of(WorkChunkStatusEnum.READY))))
 			.thenAnswer((args) -> {
-				// new stream every time
-				return new ArrayList<>(chunks).stream();
+				// new iterator every time (called more than once)
+				return new ArrayList<>(chunks).iterator();
 			});
 		doAnswer(a -> {
 			Consumer<Integer> callback = a.getArgument(1);
@@ -289,8 +293,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		instance.setEndTime(parseTime("2001-01-01T12:12:12Z"));
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance));
-		when(myJobPersistence.fetchAllWorkChunksForJobInStates(eq(instance.getInstanceId()), eq(Set.of(WorkChunkStatusEnum.READY))))
-			.thenReturn(Stream.empty());
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(eq(instance.getInstanceId()), eq(Set.of(WorkChunkStatusEnum.READY))))
+			.thenReturn(Collections.emptyIterator());
 
 		mySvc.runMaintenancePass();
 
@@ -314,8 +318,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean())).thenAnswer(t->chunks.iterator());
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance));
-		when(myJobPersistence.fetchAllWorkChunksForJobInStates(eq(INSTANCE_ID), eq(Set.of(WorkChunkStatusEnum.READY))))
-			.thenReturn(Stream.empty());
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(eq(INSTANCE_ID), eq(Set.of(WorkChunkStatusEnum.READY))))
+			.thenReturn(Collections.emptyIterator());
 		stubUpdateInstanceCallback(instance);
 
 		// Execute
@@ -358,8 +362,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
 			.thenAnswer(t->chunks.iterator());
-		when(myJobPersistence.fetchAllWorkChunksForJobInStates(eq(instance.getInstanceId()), eq(Set.of(WorkChunkStatusEnum.READY))))
-			.thenReturn(Stream.empty());
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(eq(instance.getInstanceId()), eq(Set.of(WorkChunkStatusEnum.READY))))
+			.thenReturn(Collections.emptyIterator());
 		stubUpdateInstanceCallback(instance);
 
 		mySvc.runMaintenancePass();
@@ -390,8 +394,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		// mocks
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance));
-		when(myJobPersistence.fetchAllWorkChunksForJobInStates(eq(INSTANCE_ID), eq(Set.of(WorkChunkStatusEnum.READY))))
-			.thenAnswer(t -> theChunks.stream());
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(eq(INSTANCE_ID), eq(Set.of(WorkChunkStatusEnum.READY))))
+			.thenAnswer(t -> theChunks.iterator());
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
 			.thenAnswer(t -> theChunks.stream().map(c -> c.setStatus(WorkChunkStatusEnum.READY)).toList().iterator());
 
@@ -406,10 +410,19 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			createWorkChunkStep3().setStatus(WorkChunkStatusEnum.READY),
 			createWorkChunkStep3().setStatus(WorkChunkStatusEnum.READY)
 		);
+		List<WorkChunk> previousChunks = List.of(
+			createWorkChunkStep2().setStatus(WorkChunkStatusEnum.COMPLETED),
+			createWorkChunkStep2().setStatus(WorkChunkStatusEnum.COMPLETED)
+		);
+
+		String lastStepId = chunks.get(0).getTargetStepId();
+		String previousStepId = previousChunks.get(0).getTargetStepId();
 
 		// when
-		when(myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(anyString(), anyString()))
+		when(myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(eq(INSTANCE_ID), eq(lastStepId)))
 			.thenReturn(chunks.stream().map(WorkChunk::getStatus).collect(Collectors.toSet()));
+		when(myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(eq(INSTANCE_ID), eq(previousStepId)))
+			.thenReturn(previousChunks.stream().map(WorkChunk::getStatus).collect(Collectors.toSet()));
 
 		// test
 		runEnqueueReadyChunksTest(chunks, createJobDefinitionWithReduction());

@@ -29,7 +29,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkMetadata;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
@@ -39,13 +39,12 @@ import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 
 public class JobInstanceProcessor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -299,17 +298,24 @@ public class JobInstanceProcessor {
 		// we need a transaction to access the stream of workchunks
 		// because workchunks are created in READY state, there's an unknown
 		// number of them (and so we could be reading many from the db)
-		TransactionStatus status = myTransactionManager.getTransaction(new DefaultTransactionDefinition());
-		Stream<WorkChunk> readyChunks = myJobPersistence.fetchAllWorkChunksForJobInStates(
-				theJobInstance.getInstanceId(), Set.of(WorkChunkStatusEnum.READY));
+//		TransactionStatus status = myTransactionManager.getTransaction(new DefaultTransactionDefinition());
+
+		Iterator<WorkChunkMetadata> readyChunkMetadata = myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(
+			theJobInstance.getInstanceId(), Set.of(WorkChunkStatusEnum.READY)
+		);
 
 		AtomicInteger counter = new AtomicInteger();
-		readyChunks.forEach(chunk -> {
+		ConcurrentHashMap<String, JobWorkCursor<?, ?, ?>> stepToWorkCursor = new ConcurrentHashMap<>();
+		while (readyChunkMetadata.hasNext()) {
+			WorkChunkMetadata metadata = readyChunkMetadata.next();
+
 			JobWorkCursor<?, ?, ?> jobWorkCursor =
-					JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, chunk.getTargetStepId());
+				stepToWorkCursor.computeIfAbsent(metadata.getTargetStepId(), (e) -> {
+					return JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, metadata.getTargetStepId());
+				});
 			counter.getAndIncrement();
 			if (!theIsGatedExecutionAdvancementBool
-					&& (theJobDefinition.isGatedExecution() || jobWorkCursor.isReductionStep())) {
+				&& (theJobDefinition.isGatedExecution() || jobWorkCursor.isReductionStep())) {
 				/*
 				 * Gated executions are queued later when all work chunks are ready.
 				 *
@@ -327,10 +333,40 @@ public class JobInstanceProcessor {
 			 * * flush changes
 			 * * commit
 			 */
-			updateChunkAndSendToQueue(chunk, theJobInstance, theJobDefinition);
-		});
+			updateChunkAndSendToQueue(metadata);
+		}
 
-		myTransactionManager.commit(status);
+//		Stream<WorkChunk> readyChunks = myJobPersistence.fetchAllWorkChunksForJobInStates(
+//				theJobInstance.getInstanceId(), Set.of(WorkChunkStatusEnum.READY));
+//
+//		AtomicInteger counter = new AtomicInteger();
+//		readyChunks.forEach(chunk -> {
+//			JobWorkCursor<?, ?, ?> jobWorkCursor =
+//					JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, chunk.getTargetStepId());
+//			counter.getAndIncrement();
+//			if (!theIsGatedExecutionAdvancementBool
+//					&& (theJobDefinition.isGatedExecution() || jobWorkCursor.isReductionStep())) {
+//				/*
+//				 * Gated executions are queued later when all work chunks are ready.
+//				 *
+//				 * Reduction steps are not submitted to the queue at all, but processed inline.
+//				 * Currently all reduction steps are also gated, but this might not always
+//				 * be true.
+//				 */
+//				return;
+//			}
+//
+//			/*
+//			 * For each chunk id
+//			 * * Move to QUEUE'd
+//			 * * Send to topic
+//			 * * flush changes
+//			 * * commit
+//			 */
+//			updateChunkAndSendToQueue(chunk, theJobInstance, theJobDefinition);
+//		});
+
+//		myTransactionManager.commit(status);
 
 		ourLog.debug(
 				"Encountered {} READY work chunks for job {}", counter.get(), theJobDefinition.getJobDefinitionId());
@@ -345,32 +381,35 @@ public class JobInstanceProcessor {
 	 *
 	 * Returns true after processing.
 	 */
-	private void updateChunkAndSendToQueue(
-			WorkChunk theChunk, JobInstance theInstance, JobDefinition<?> theJobDefinition) {
+	private void updateChunkAndSendToQueue(WorkChunkMetadata theChunk) {
 		String chunkId = theChunk.getId();
 		myJobPersistence.enqueueWorkChunkForProcessing(chunkId, updated -> {
 			ourLog.info("Updated {} workchunk with id {}", updated, chunkId);
 			if (updated == 1) {
-				// send to the queue
-				// we use current step id because it has not been moved to the next step (yet)
-				JobWorkNotification workNotification = new JobWorkNotification(
-						theJobDefinition.getJobDefinitionId(),
-						theJobDefinition.getJobDefinitionVersion(),
-						theInstance.getInstanceId(),
-						theChunk.getTargetStepId(),
-						chunkId);
-				myBatchJobSender.sendWorkChannelMessage(workNotification);
+				sendNotification(theChunk);
 			} else {
 				// means the work chunk is likely already gone...
 				// we'll log and skip it. If it's still in the DB, the next pass
 				// will pick it up. Otherwise, it's no longer important
 				ourLog.error(
 						"Job Instance {} failed to transition work chunk with id {} from READY to QUEUED; found {}, expected 1; skipping work chunk.",
-						theInstance.getInstanceId(),
+						theChunk.getInstanceId(),
 						theChunk.getId(),
 						updated);
 			}
 		});
+	}
+
+	private void sendNotification(WorkChunkMetadata theChunk) {
+		// send to the queue
+		// we use current step id because it has not been moved to the next step (yet)
+		JobWorkNotification workNotification = new JobWorkNotification(
+				theChunk.getJobDefinitionId(),
+				theChunk.getJobDefinitionVersion(),
+				theChunk.getInstanceId(),
+				theChunk.getTargetStepId(),
+				theChunk.getId());
+		myBatchJobSender.sendWorkChannelMessage(workNotification);
 	}
 
 	private void processChunksForNextGatedSteps(

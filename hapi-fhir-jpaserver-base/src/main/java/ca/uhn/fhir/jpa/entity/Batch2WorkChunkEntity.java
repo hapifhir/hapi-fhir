@@ -47,10 +47,15 @@ import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 import static ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity.STATUS_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
+// add index for instance,stepId,status,seq,id
 @Entity
 @Table(
 		name = "BT2_WORK_CHUNK",
-		indexes = {@Index(name = "IDX_BT2WC_II_SEQ", columnList = "INSTANCE_ID,SEQ")})
+		indexes = {
+			@Index(name = "IDX_BT2WC_II_SEQ", columnList = "INSTANCE_ID,SEQ"),
+			@Index(name = "IDX_BT2WC_II_SI_S_SEQ_ID", columnList = "INSTANCE_ID,TGT_STEP_ID,STAT,SEQ,ID")
+		}
+)
 public class Batch2WorkChunkEntity implements Serializable {
 
 	public static final int ERROR_MSG_MAX_LENGTH = 500;

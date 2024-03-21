@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
+import ca.uhn.fhir.batch2.model.WorkChunkMetadata;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import com.google.common.annotations.VisibleForTesting;
@@ -146,15 +147,13 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
 
 	/**
-	 * Fetch all WorkChunks for job with instance id theInstanceId that are in
-	 * theWorkChunkStatuses.
-	 * @param theInstanceId the instance id of the job
-	 * @param theWorkChunkStatuses the statuses of interest
-	 * @return a stream of work chunks
+	 * Fetches an iterator that retrieves WorkChunkMetadata from the db.
+	 * @param theInstanceId instance id of job of interest
+	 * @param theStates states of interset
+	 * @return an iterator for the workchunks
 	 */
-	@Transactional
-	Stream<WorkChunk> fetchAllWorkChunksForJobInStates(
-			String theInstanceId, Set<WorkChunkStatusEnum> theWorkChunkStatuses);
+	@Transactional(propagation = Propagation.SUPPORTS)
+	Iterator<WorkChunkMetadata> fetchAllWorkChunkMetadataForJobInStates(String theInstanceId, Set<WorkChunkStatusEnum> theStates);
 
 	/**
 	 * Callback to update a JobInstance within a locked transaction.

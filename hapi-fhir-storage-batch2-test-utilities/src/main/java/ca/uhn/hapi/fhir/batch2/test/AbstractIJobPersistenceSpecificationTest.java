@@ -36,9 +36,12 @@ import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobParameters;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep2InputType;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep3InputType;
+import ca.uhn.test.concurrency.PointcutLatch;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,7 +55,7 @@ import java.util.concurrent.Callable;
 
 import static org.awaitility.Awaitility.await;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -109,6 +112,10 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 
 		// re-enable our runner after every test (just in case)
 		myMaintenanceService.enableMaintenancePass(true);
+
+		// clear invocations on the batch sender from previous jobs that might be
+		// kicking around
+		Mockito.clearInvocations(myBatchJobSender);
 	}
 
 	@Nested
@@ -226,13 +233,22 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 		myMaintenanceService.enableMaintenancePass(theToEnable);
 	}
 
-	public void disableWorkChunkMessageHandler() {
-		doNothing().when(myBatchJobSender).sendWorkChannelMessage(any(JobWorkNotification.class));
+	public PointcutLatch disableWorkChunkMessageHandler() {
+		PointcutLatch latch = new PointcutLatch(new Exception().getStackTrace()[0].getMethodName());
+
+		doAnswer(a -> {
+			latch.call(1);
+			return Void.class;
+		}).when(myBatchJobSender).sendWorkChannelMessage(any(JobWorkNotification.class));
+		return latch;
 	}
 
-	public void verifyWorkChunkMessageHandlerCalled(int theNumberOfTimes) {
+	public void verifyWorkChunkMessageHandlerCalled(PointcutLatch theSendingLatch, int theNumberOfTimes) throws InterruptedException {
+		theSendingLatch.awaitExpected();
+		ArgumentCaptor<JobWorkNotification> notificationCaptor = ArgumentCaptor.forClass(JobWorkNotification.class);
+
 		verify(myBatchJobSender, times(theNumberOfTimes))
-			.sendWorkChannelMessage(any(JobWorkNotification.class));
+			.sendWorkChannelMessage(notificationCaptor.capture());
 	}
 
 	public void createChunksInStates(JobMaintenanceStateInformation theJobMaintenanceStateInformation) {

@@ -39,30 +39,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  *
  * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
  */
-public class WorkChunk implements IModelJson {
+public class WorkChunk extends WorkChunkMetadata {
 
-	@JsonProperty("id")
-	private String myId;
-
-	@JsonProperty("sequence")
-	// TODO MB danger - these repeat with a job or even a single step.  They start at 0 for every parent chunk.  Review
-	// after merge.
-	private int mySequence;
-
-	@JsonProperty("status")
-	private WorkChunkStatusEnum myStatus;
-
-	@JsonProperty("jobDefinitionId")
-	private String myJobDefinitionId;
-
-	@JsonProperty("jobDefinitionVersion")
-	private int myJobDefinitionVersion;
-
-	@JsonProperty("targetStepId")
-	private String myTargetStepId;
-
-	@JsonProperty("instanceId")
-	private String myInstanceId;
 
 	@JsonProperty("data")
 	private String myData;
@@ -106,6 +84,36 @@ public class WorkChunk implements IModelJson {
 		super();
 	}
 
+	public WorkChunk setId(String theId) {
+		super.setId(theId);
+		return this;
+	}
+
+	public WorkChunk setStatus(WorkChunkStatusEnum theStatus) {
+		super.setStatus(theStatus);
+		return this;
+	}
+
+	public WorkChunk setInstanceId(String theInstanceId) {
+		super.setInstanceId(theInstanceId);
+		return this;
+	}
+
+	public WorkChunk setTargetStepId(String theTargetStepId) {
+		super.setTargetStepId(theTargetStepId);
+		return this;
+	}
+
+	public WorkChunk setJobDefinitionVersion(int theJobDefinitionVersion) {
+		super.setJobDefinitionVersion(theJobDefinitionVersion);
+		return this;
+	}
+
+	public WorkChunk setJobDefinitionId(String theJobDefinitionId) {
+		super.setJobDefinitionId(theJobDefinitionId);
+		return this;
+	}
+
 	public int getErrorCount() {
 		return myErrorCount;
 	}
@@ -142,45 +150,6 @@ public class WorkChunk implements IModelJson {
 		return this;
 	}
 
-	public WorkChunkStatusEnum getStatus() {
-		return myStatus;
-	}
-
-	public WorkChunk setStatus(WorkChunkStatusEnum theStatus) {
-		myStatus = theStatus;
-		return this;
-	}
-
-	public String getJobDefinitionId() {
-		return myJobDefinitionId;
-	}
-
-	public WorkChunk setJobDefinitionId(String theJobDefinitionId) {
-		Validate.notBlank(theJobDefinitionId);
-		myJobDefinitionId = theJobDefinitionId;
-		return this;
-	}
-
-	public int getJobDefinitionVersion() {
-		return myJobDefinitionVersion;
-	}
-
-	public WorkChunk setJobDefinitionVersion(int theJobDefinitionVersion) {
-		Validate.isTrue(theJobDefinitionVersion >= 1);
-		myJobDefinitionVersion = theJobDefinitionVersion;
-		return this;
-	}
-
-	public String getTargetStepId() {
-		return myTargetStepId;
-	}
-
-	public WorkChunk setTargetStepId(String theTargetStepId) {
-		Validate.notBlank(theTargetStepId);
-		myTargetStepId = theTargetStepId;
-		return this;
-	}
-
 	public String getData() {
 		return myData;
 	}
@@ -197,33 +166,6 @@ public class WorkChunk implements IModelJson {
 
 	public <T extends IModelJson> T getData(Class<T> theType) {
 		return JsonUtil.deserialize(getData(), theType);
-	}
-
-	public String getInstanceId() {
-		return myInstanceId;
-	}
-
-	public WorkChunk setInstanceId(String theInstanceId) {
-		myInstanceId = theInstanceId;
-		return this;
-	}
-
-	public String getId() {
-		return myId;
-	}
-
-	public WorkChunk setId(String theId) {
-		Validate.notBlank(theId);
-		myId = theId;
-		return this;
-	}
-
-	public int getSequence() {
-		return mySequence;
-	}
-
-	public void setSequence(int theSequence) {
-		mySequence = theSequence;
 	}
 
 	public Date getCreateTime() {
@@ -263,13 +205,13 @@ public class WorkChunk implements IModelJson {
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this);
-		b.append("Id", myId);
-		b.append("Sequence", mySequence);
-		b.append("Status", myStatus);
-		b.append("JobDefinitionId", myJobDefinitionId);
-		b.append("JobDefinitionVersion", myJobDefinitionVersion);
-		b.append("TargetStepId", myTargetStepId);
-		b.append("InstanceId", myInstanceId);
+		b.append("Id", getId());
+		b.append("Sequence", getSequence());
+		b.append("Status", getStatus());
+		b.append("JobDefinitionId", getJobDefinitionId());
+		b.append("JobDefinitionVersion", getJobDefinitionVersion());
+		b.append("TargetStepId", getTargetStepId());
+		b.append("InstanceId", getInstanceId());
 		b.append("Data", isNotBlank(myData) ? "(present)" : "(absent)");
 		b.append("CreateTime", myCreateTime);
 		b.append("StartTime", myStartTime);

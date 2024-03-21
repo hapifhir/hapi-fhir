@@ -216,6 +216,14 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// This fix will work for MSSQL or Oracle.
 		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231222.1"));
+
+		// add index to Batch2WorkChunkEntity
+		Builder.BuilderWithTableName workChunkTable = version.onTable("BT2_WORK_CHUNK");
+
+		workChunkTable
+			.addIndex("20240321.1", "IDX_BT2WC_II_SI_S_SEQ_ID")
+			.unique(true)
+			.withColumns("INSTANCE_ID", "TGT_STEP_ID", "STAT", "SEQ", "ID");
 	}
 
 	protected void init680() {
