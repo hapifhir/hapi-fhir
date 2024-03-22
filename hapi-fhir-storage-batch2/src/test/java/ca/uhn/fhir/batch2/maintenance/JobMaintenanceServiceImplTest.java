@@ -114,8 +114,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			myJobDefinitionRegistry,
 			batchJobSender,
 			myJobExecutorSvc,
-			myReductionStepExecutorService,
-			myTransactionService
+			myReductionStepExecutorService
 		);
 		myStorageSettings.setJobFastTrackingEnabled(true);
 	}

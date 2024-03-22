@@ -92,8 +92,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 				instanceId1,
 				new JobChunkProgressAccumulator(),
 				null,
-				jobDefinitionRegistry,
-				getTransactionManager()
+				jobDefinitionRegistry
 			).process();
 		});
 
