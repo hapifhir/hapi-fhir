@@ -221,9 +221,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName workChunkTable = version.onTable("BT2_WORK_CHUNK");
 
 		workChunkTable
-			.addIndex("20240321.1", "IDX_BT2WC_II_SI_S_SEQ_ID")
-			.unique(true)
-			.withColumns("INSTANCE_ID", "TGT_STEP_ID", "STAT", "SEQ", "ID");
+				.addIndex("20240321.1", "IDX_BT2WC_II_SI_S_SEQ_ID")
+				.unique(true)
+				.withColumns("INSTANCE_ID", "TGT_STEP_ID", "STAT", "SEQ", "ID");
 	}
 
 	protected void init680() {

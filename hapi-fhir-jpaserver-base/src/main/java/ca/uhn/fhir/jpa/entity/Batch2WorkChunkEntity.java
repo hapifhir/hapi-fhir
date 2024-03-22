@@ -54,8 +54,7 @@ import static org.apache.commons.lang3.StringUtils.left;
 		indexes = {
 			@Index(name = "IDX_BT2WC_II_SEQ", columnList = "INSTANCE_ID,SEQ"),
 			@Index(name = "IDX_BT2WC_II_SI_S_SEQ_ID", columnList = "INSTANCE_ID,TGT_STEP_ID,STAT,SEQ,ID")
-		}
-)
+		})
 public class Batch2WorkChunkEntity implements Serializable {
 
 	public static final int ERROR_MSG_MAX_LENGTH = 500;

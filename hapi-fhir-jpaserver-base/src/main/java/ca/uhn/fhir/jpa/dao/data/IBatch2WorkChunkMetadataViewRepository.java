@@ -9,17 +9,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
-import java.util.List;
 
 public interface IBatch2WorkChunkMetadataViewRepository extends JpaRepository<Batch2WorkChunkMetadataView, String> {
 
-	@Query(
-		"SELECT v FROM Batch2WorkChunkMetadataView v WHERE v.myInstanceId = :instanceId AND v.myStatus IN :states "
-		+ " ORDER BY v.myInstanceId, v.mySequence, v.myTargetStepId, v.myStatus, v.myId ASC"
-	)
+	@Query("SELECT v FROM Batch2WorkChunkMetadataView v WHERE v.myInstanceId = :instanceId AND v.myStatus IN :states "
+			+ " ORDER BY v.myInstanceId, v.mySequence, v.myTargetStepId, v.myStatus, v.myId ASC")
 	Page<Batch2WorkChunkMetadataView> fetchWorkChunkMetadataForJobInStates(
-		Pageable thePageRequest,
-		@Param("instanceId") String theInstanceId,
-		@Param("states") Collection<WorkChunkStatusEnum> theStates
-		);
+			Pageable thePageRequest,
+			@Param("instanceId") String theInstanceId,
+			@Param("states") Collection<WorkChunkStatusEnum> theStates);
 }

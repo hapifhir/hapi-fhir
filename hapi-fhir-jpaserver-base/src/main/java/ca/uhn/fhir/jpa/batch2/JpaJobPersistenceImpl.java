@@ -505,9 +505,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public Page<WorkChunkMetadata> fetchAllWorkChunkMetadataForJobInStates(int thePageIndex, int thePageSize, String theInstanceId, Set<WorkChunkStatusEnum> theStates) {
+	public Page<WorkChunkMetadata> fetchAllWorkChunkMetadataForJobInStates(
+			int thePageIndex, int thePageSize, String theInstanceId, Set<WorkChunkStatusEnum> theStates) {
 		Pageable request = PageRequest.of(thePageIndex, thePageSize);
-		Page<Batch2WorkChunkMetadataView> page = myWorkChunkMetadataViewRepo.fetchWorkChunkMetadataForJobInStates(request, theInstanceId, theStates);
+		Page<Batch2WorkChunkMetadataView> page =
+				myWorkChunkMetadataViewRepo.fetchWorkChunkMetadataForJobInStates(request, theInstanceId, theStates);
 
 		return page.map(Batch2WorkChunkMetadataView::toChunkMetadata);
 	}

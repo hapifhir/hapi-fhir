@@ -71,7 +71,7 @@ public class JobInstanceProcessor {
 		private void getNextPage() {
 			if (currentPage == null || currentPage.hasNext()) {
 				currentPage = myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(
-					myPageIndex++, getPageSize(), myInstanceId, Set.of(WorkChunkStatusEnum.READY));
+						myPageIndex++, getPageSize(), myInstanceId, Set.of(WorkChunkStatusEnum.READY));
 				myItemIndex = 0;
 			} else {
 				currentPage = Page.empty();
@@ -360,13 +360,12 @@ public class JobInstanceProcessor {
 		ConcurrentHashMap<String, JobWorkCursor<?, ?, ?>> stepToWorkCursor = new ConcurrentHashMap<>();
 		while (iter.hasNext()) {
 			WorkChunkMetadata metadata = iter.next();
-			JobWorkCursor<?, ?, ?> jobWorkCursor =
-				stepToWorkCursor.computeIfAbsent(metadata.getTargetStepId(), (e) -> {
-					return JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, metadata.getTargetStepId());
-				});
+			JobWorkCursor<?, ?, ?> jobWorkCursor = stepToWorkCursor.computeIfAbsent(metadata.getTargetStepId(), (e) -> {
+				return JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, metadata.getTargetStepId());
+			});
 			counter.getAndIncrement();
 			if (!theIsGatedExecutionAdvancementBool
-				&& (theJobDefinition.isGatedExecution() || jobWorkCursor.isReductionStep())) {
+					&& (theJobDefinition.isGatedExecution() || jobWorkCursor.isReductionStep())) {
 				/*
 				 * Gated executions are queued later when all work chunks are ready.
 				 *
@@ -387,7 +386,7 @@ public class JobInstanceProcessor {
 			updateChunkAndSendToQueue(metadata);
 		}
 		ourLog.debug(
-			"Encountered {} READY work chunks for job {}", counter.get(), theJobDefinition.getJobDefinitionId());
+				"Encountered {} READY work chunks for job {}", counter.get(), theJobDefinition.getJobDefinitionId());
 	}
 
 	/**

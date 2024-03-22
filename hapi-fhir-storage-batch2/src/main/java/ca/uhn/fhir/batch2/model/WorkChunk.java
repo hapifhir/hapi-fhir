@@ -26,7 +26,6 @@ import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.Date;
@@ -40,7 +39,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
  */
 public class WorkChunk extends WorkChunkMetadata {
-
 
 	@JsonProperty("data")
 	private String myData;
