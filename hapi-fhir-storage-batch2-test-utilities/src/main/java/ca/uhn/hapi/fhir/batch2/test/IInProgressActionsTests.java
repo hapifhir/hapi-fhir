@@ -12,7 +12,7 @@ public interface IInProgressActionsTests extends IWorkChunkCommon, WorkChunkTest
 
 	@Test
 	default void processingOk_inProgressToSuccess_clearsDataSavesRecordCount() {
-		String jobId = createAndStoreJobInstance();
+		String jobId = createAndStoreJobInstance(null);
 		String myChunkId = createAndDequeueWorkChunk(jobId);
 		// execution ok
 		getSvc().onWorkChunkCompletion(new WorkChunkCompletionEvent(myChunkId, 3, 0));
@@ -28,7 +28,7 @@ public interface IInProgressActionsTests extends IWorkChunkCommon, WorkChunkTest
 
 	@Test
 	default void processingRetryableError_inProgressToError_bumpsCountRecordsMessage() {
-		String jobId = createAndStoreJobInstance();
+		String jobId = createAndStoreJobInstance(null);
 		String myChunkId = createAndDequeueWorkChunk(jobId);
 		// execution had a retryable error
 		getSvc().onWorkChunkError(new WorkChunkErrorEvent(myChunkId, ERROR_MESSAGE_A));
@@ -42,7 +42,7 @@ public interface IInProgressActionsTests extends IWorkChunkCommon, WorkChunkTest
 
 	@Test
 	default void processingFailure_inProgressToFailed() {
-		String jobId = createAndStoreJobInstance();
+		String jobId = createAndStoreJobInstance(null);
 		String myChunkId = createAndDequeueWorkChunk(jobId);
 		// execution had a failure
 		getSvc().onWorkChunkFailed(myChunkId, "some error");

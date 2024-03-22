@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import jakarta.persistence.Basic;
 import jakarta.persistence.Column;
@@ -46,10 +47,14 @@ import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 import static ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity.STATUS_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
+// add index for instance,stepId,status,seq,id
 @Entity
 @Table(
 		name = "BT2_WORK_CHUNK",
-		indexes = {@Index(name = "IDX_BT2WC_II_SEQ", columnList = "INSTANCE_ID,SEQ")})
+		indexes = {
+			@Index(name = "IDX_BT2WC_II_SEQ", columnList = "INSTANCE_ID,SEQ"),
+			@Index(name = "IDX_BT2WC_II_SI_S_SEQ_ID", columnList = "INSTANCE_ID,TGT_STEP_ID,STAT,SEQ,ID")
+		})
 public class Batch2WorkChunkEntity implements Serializable {
 
 	public static final int ERROR_MSG_MAX_LENGTH = 500;
@@ -171,6 +176,28 @@ public class Batch2WorkChunkEntity implements Serializable {
 		myWarningMessage = theWarningMessage;
 		myNextPollTime = theNextPollTime;
 		myPollAttempts = thePollAttempts;
+	}
+
+	public static Batch2WorkChunkEntity fromWorkChunk(WorkChunk theWorkChunk) {
+		Batch2WorkChunkEntity entity = new Batch2WorkChunkEntity(
+				theWorkChunk.getId(),
+				theWorkChunk.getSequence(),
+				theWorkChunk.getJobDefinitionId(),
+				theWorkChunk.getJobDefinitionVersion(),
+				theWorkChunk.getInstanceId(),
+				theWorkChunk.getTargetStepId(),
+				theWorkChunk.getStatus(),
+				theWorkChunk.getCreateTime(),
+				theWorkChunk.getStartTime(),
+				theWorkChunk.getUpdateTime(),
+				theWorkChunk.getEndTime(),
+				theWorkChunk.getErrorMessage(),
+				theWorkChunk.getErrorCount(),
+				theWorkChunk.getRecordsProcessed(),
+				theWorkChunk.getWarningMessage());
+		entity.setSerializedData(theWorkChunk.getData());
+
+		return entity;
 	}
 
 	public int getErrorCount() {

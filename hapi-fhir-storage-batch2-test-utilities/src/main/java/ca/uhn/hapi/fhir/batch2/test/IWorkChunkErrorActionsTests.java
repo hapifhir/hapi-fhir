@@ -18,7 +18,7 @@ public interface IWorkChunkErrorActionsTests extends IWorkChunkCommon, WorkChunk
 				 */
 	@Test
 	default void errorRetry_errorToInProgress() {
-		String jobId = createAndStoreJobInstance();
+		String jobId = createAndStoreJobInstance(null);
 		String myChunkId = createAndDequeueWorkChunk(jobId);
 		getSvc().onWorkChunkError(new WorkChunkErrorEvent(myChunkId, FIRST_ERROR_MESSAGE));
 
@@ -37,7 +37,7 @@ public interface IWorkChunkErrorActionsTests extends IWorkChunkCommon, WorkChunk
 
 	@Test
 	default void errorRetry_repeatError_increasesErrorCount() {
-		String jobId = createAndStoreJobInstance();
+		String jobId = createAndStoreJobInstance(null);
 		String myChunkId = createAndDequeueWorkChunk(jobId);
 		getSvc().onWorkChunkError(new WorkChunkErrorEvent(myChunkId, FIRST_ERROR_MESSAGE));
 
@@ -48,7 +48,6 @@ public interface IWorkChunkErrorActionsTests extends IWorkChunkCommon, WorkChunk
 		// when another error happens
 		getSvc().onWorkChunkError(new WorkChunkErrorEvent(myChunkId, ERROR_MESSAGE_B));
 
-
 		// verify the state, new message, and error count
 		var workChunkEntity = freshFetchWorkChunk(myChunkId);
 		assertEquals(WorkChunkStatusEnum.ERRORED, workChunkEntity.getStatus());
@@ -58,7 +57,7 @@ public interface IWorkChunkErrorActionsTests extends IWorkChunkCommon, WorkChunk
 
 	@Test
 	default void errorThenRetryAndComplete_addsErrorCounts() {
-		String jobId = createAndStoreJobInstance();
+		String jobId = createAndStoreJobInstance(null);
 		String myChunkId = createAndDequeueWorkChunk(jobId);
 		getSvc().onWorkChunkError(new WorkChunkErrorEvent(myChunkId, FIRST_ERROR_MESSAGE));
 
@@ -78,10 +77,9 @@ public interface IWorkChunkErrorActionsTests extends IWorkChunkCommon, WorkChunk
 	@Test
 	default void errorRetry_maxErrors_movesToFailed() {
 		// we start with 1 error already
-		String jobId = createAndStoreJobInstance();
+		String jobId = createAndStoreJobInstance(null);
 		String myChunkId = createAndDequeueWorkChunk(jobId);
 		getSvc().onWorkChunkError(new WorkChunkErrorEvent(myChunkId, FIRST_ERROR_MESSAGE));
-
 
 		// 2nd try
 		getSvc().onWorkChunkDequeue(myChunkId);

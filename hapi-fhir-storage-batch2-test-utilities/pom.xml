@@ -17,6 +17,12 @@
 	<name>HAPI FHIR JPA Server - Batch2 specification tests</name>
 	<description>Batch2 is a framework for managing and executing long running "batch" jobs</description>
 
+	<properties>
+	<maven.compiler.source>17</maven.compiler.source>
+	<maven.compiler.target>17</maven.compiler.target>
+	<maven.compiler.release>17</maven.compiler.release>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>

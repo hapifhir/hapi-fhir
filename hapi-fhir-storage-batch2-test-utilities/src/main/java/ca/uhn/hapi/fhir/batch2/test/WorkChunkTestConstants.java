@@ -2,6 +2,9 @@ package ca.uhn.hapi.fhir.batch2.test;
 
 public interface WorkChunkTestConstants {
 	public static final String JOB_DEFINITION_ID = "definition-id";
+	// we use a separate id for gated jobs because these job definitions might not
+	// be cleaned up after any given test run
+	String GATED_JOB_DEFINITION_ID = "gated_job_def_id";
 	public static final String TARGET_STEP_ID = "step-id";
 	public static final String DEF_CHUNK_ID = "definition-chunkId";
 	public static final int JOB_DEF_VER = 1;

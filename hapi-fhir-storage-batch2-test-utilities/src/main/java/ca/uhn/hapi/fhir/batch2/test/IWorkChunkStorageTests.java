@@ -1,22 +1,30 @@
 package ca.uhn.hapi.fhir.batch2.test;
 
+import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
+import ca.uhn.test.concurrency.PointcutLatch;
 import com.google.common.collect.ImmutableList;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 
 public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestConstants {
 
@@ -26,23 +34,77 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 		String instanceId = getSvc().storeNewInstance(instance);
 
 		String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, null);
+
+		runInTransaction(() -> {
+			WorkChunk chunk = freshFetchWorkChunk(id);
+			assertNull(chunk.getData());
+		});
+	}
+
+	@Test
+	default void testWorkChunkCreate_inReadyState() {
+		JobInstance instance = createInstance();
+		String instanceId = getSvc().storeNewInstance(instance);
+
+		enableMaintenanceRunner(false);
+
+		String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, CHUNK_DATA);
+		assertNotNull(id);
+
+		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, freshFetchWorkChunk(id).getStatus()));
+	}
+
+	@Test
+	default void testNonGatedWorkChunkInReady_IsQueuedDuringMaintenance() throws InterruptedException {
+		// setup
+		int expectedCalls = 1;
+		enableMaintenanceRunner(false);
+		PointcutLatch sendingLatch = disableWorkChunkMessageHandler();
+		sendingLatch.setExpectedCount(expectedCalls);
+		String state = "1|READY,1|QUEUED";
+		JobDefinition<?> jobDefinition = withJobDefinition(false);
+		String instanceId = createAndStoreJobInstance(jobDefinition);
+		JobMaintenanceStateInformation stateInformation = new JobMaintenanceStateInformation(instanceId, jobDefinition, state);
+
+		createChunksInStates(stateInformation);
+		String id = stateInformation.getInitialWorkChunks().stream().findFirst().orElseThrow().getId();
+
+		// verify created in ready
+		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, freshFetchWorkChunk(id).getStatus()));
+
+		// test
 		runMaintenancePass();
 
-		WorkChunk chunk = getSvc().onWorkChunkDequeue(id).orElseThrow(IllegalArgumentException::new);
-		assertNull(chunk.getData());
+		// verify it's in QUEUED now
+		stateInformation.verifyFinalStates(getSvc());
+		verifyWorkChunkMessageHandlerCalled(sendingLatch, expectedCalls);
 	}
 
 	@Test
 	default void testStoreAndFetchWorkChunk_WithData() {
+		// setup
+		disableWorkChunkMessageHandler();
+		enableMaintenanceRunner(false);
+		JobDefinition<?> jobDefinition = withJobDefinition(false);
 		JobInstance instance = createInstance();
 		String instanceId = getSvc().storeNewInstance(instance);
 
-		String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, CHUNK_DATA);
-		assertNotNull(id);
-		runMaintenancePass();
+		// we're not transitioning this state; we're just checking storage of data
+		JobMaintenanceStateInformation info = new JobMaintenanceStateInformation(instanceId, jobDefinition, "1|QUEUED");
+		info.addWorkChunkModifier((chunk) -> {
+			chunk.setData(CHUNK_DATA);
+		});
+
+		createChunksInStates(info);
+		String id = info.getInitialWorkChunks().stream().findFirst().orElseThrow().getId();
+
+		// verify created in QUEUED
 		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, freshFetchWorkChunk(id).getStatus()));
 
+		// test; manually dequeue chunk
 		WorkChunk chunk = getSvc().onWorkChunkDequeue(id).orElseThrow(IllegalArgumentException::new);
+
+		// verify
 		assertEquals(36, chunk.getInstanceId().length());
 		assertEquals(JOB_DEFINITION_ID, chunk.getJobDefinitionId());
 		assertEquals(JOB_DEF_VER, chunk.getJobDefinitionVersion());
@@ -54,69 +116,56 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 
 	@Test
 	default void testMarkChunkAsCompleted_Success() {
-		JobInstance instance = createInstance();
-		String instanceId = getSvc().storeNewInstance(instance);
-		String chunkId = storeWorkChunk(DEF_CHUNK_ID, TARGET_STEP_ID, instanceId, SEQUENCE_NUMBER, CHUNK_DATA);
-		assertNotNull(chunkId);
+		// setup
+		String state = "2|IN_PROGRESS,2|COMPLETED";
+		disableWorkChunkMessageHandler();
+		enableMaintenanceRunner(false);
 
-		runMaintenancePass();
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, freshFetchWorkChunk(chunkId).getStatus()));
-		sleepUntilTimeChanges();
+		JobDefinition<?> jobDefinition = withJobDefinition(false);
+		String instanceId = createAndStoreJobInstance(jobDefinition);
+		JobMaintenanceStateInformation info = new JobMaintenanceStateInformation(instanceId, jobDefinition, state);
+		info.addWorkChunkModifier(chunk -> {
+			chunk.setCreateTime(new Date());
+			chunk.setData(CHUNK_DATA);
+		});
+		createChunksInStates(info);
 
-		WorkChunk chunk = getSvc().onWorkChunkDequeue(chunkId).orElseThrow(IllegalArgumentException::new);
-		assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
-		assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
-		assertNotNull(chunk.getCreateTime());
-		assertNotNull(chunk.getStartTime());
-		assertNull(chunk.getEndTime());
-		assertNull(chunk.getRecordsProcessed());
-		assertNotNull(chunk.getData());
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, freshFetchWorkChunk(chunkId).getStatus()));
+		String chunkId = info.getInitialWorkChunks().stream().findFirst().orElseThrow().getId();
 
-		sleepUntilTimeChanges();
-
+		// run test
 		runInTransaction(() -> getSvc().onWorkChunkCompletion(new WorkChunkCompletionEvent(chunkId, 50, 0)));
 
+		// verify
+		info.verifyFinalStates(getSvc());
 		WorkChunk entity = freshFetchWorkChunk(chunkId);
 		assertEquals(WorkChunkStatusEnum.COMPLETED, entity.getStatus());
 		assertEquals(50, entity.getRecordsProcessed());
 		assertNotNull(entity.getCreateTime());
-		assertNotNull(entity.getStartTime());
-		assertNotNull(entity.getEndTime());
 		assertNull(entity.getData());
-		assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
-		assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
 	}
 
 	@Test
 	default void testMarkChunkAsCompleted_Error() {
-		JobInstance instance = createInstance();
-		String instanceId = getSvc().storeNewInstance(instance);
-		String chunkId = storeWorkChunk(DEF_CHUNK_ID, TARGET_STEP_ID, instanceId, SEQUENCE_NUMBER, null);
-		assertNotNull(chunkId);
+		// setup
+		String state = "1|IN_PROGRESS,1|ERRORED";
+		disableWorkChunkMessageHandler();
+		enableMaintenanceRunner(false);
+		JobDefinition<?> jobDef = withJobDefinition(false);
+		String instanceId = createAndStoreJobInstance(jobDef);
+		JobMaintenanceStateInformation info = new JobMaintenanceStateInformation(
+			instanceId, jobDef, state
+		);
+		createChunksInStates(info);
+		String chunkId = info.getInitialWorkChunks().stream().findFirst().orElseThrow().getId();
 
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, freshFetchWorkChunk(chunkId).getStatus()));
-		runMaintenancePass();
-		sleepUntilTimeChanges();
-
-		WorkChunk chunk = getSvc().onWorkChunkDequeue(chunkId).orElseThrow(IllegalArgumentException::new);
-		assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
-		assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
-
-		sleepUntilTimeChanges();
-
+		// test
 		WorkChunkErrorEvent request = new WorkChunkErrorEvent(chunkId, ERROR_MESSAGE_A);
 		getSvc().onWorkChunkError(request);
 		runInTransaction(() -> {
 			WorkChunk entity = freshFetchWorkChunk(chunkId);
 			assertEquals(WorkChunkStatusEnum.ERRORED, entity.getStatus());
 			assertEquals(ERROR_MESSAGE_A, entity.getErrorMessage());
-			assertNotNull(entity.getCreateTime());
-			assertNotNull(entity.getStartTime());
-			assertNotNull(entity.getEndTime());
 			assertEquals(1, entity.getErrorCount());
-			assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
-			assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
 		});
 
 		// Mark errored again
@@ -127,68 +176,64 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 			WorkChunk entity = freshFetchWorkChunk(chunkId);
 			assertEquals(WorkChunkStatusEnum.ERRORED, entity.getStatus());
 			assertEquals("This is an error message 2", entity.getErrorMessage());
-			assertNotNull(entity.getCreateTime());
-			assertNotNull(entity.getStartTime());
-			assertNotNull(entity.getEndTime());
 			assertEquals(2, entity.getErrorCount());
-			assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
-			assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
 		});
 
 		List<WorkChunk> chunks = ImmutableList.copyOf(getSvc().fetchAllWorkChunksIterator(instanceId, true));
 		assertEquals(1, chunks.size());
 		assertEquals(2, chunks.get(0).getErrorCount());
+
+		info.verifyFinalStates(getSvc());
 	}
 
 	@Test
 	default void testMarkChunkAsCompleted_Fail() {
-		JobInstance instance = createInstance();
-		String instanceId = getSvc().storeNewInstance(instance);
-		String chunkId = storeWorkChunk(DEF_CHUNK_ID, TARGET_STEP_ID, instanceId, SEQUENCE_NUMBER, null);
-		assertNotNull(chunkId);
+		// setup
+		String state = "1|IN_PROGRESS,1|FAILED";
+		disableWorkChunkMessageHandler();
+		enableMaintenanceRunner(false);
+		JobDefinition<?> jobDef = withJobDefinition(false);
+		String instanceId = createAndStoreJobInstance(jobDef);
+		JobMaintenanceStateInformation info = new JobMaintenanceStateInformation(
+			instanceId, jobDef, state
+		);
+		createChunksInStates(info);
+		String chunkId = info.getInitialWorkChunks().stream().findFirst().orElseThrow().getId();
 
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, freshFetchWorkChunk(chunkId).getStatus()));
-		runMaintenancePass();
-		sleepUntilTimeChanges();
-
-		WorkChunk chunk = getSvc().onWorkChunkDequeue(chunkId).orElseThrow(IllegalArgumentException::new);
-		assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
-		assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
-
-		sleepUntilTimeChanges();
-
+		// test
 		getSvc().onWorkChunkFailed(chunkId, "This is an error message");
+
+		// verify
 		runInTransaction(() -> {
 			WorkChunk entity = freshFetchWorkChunk(chunkId);
 			assertEquals(WorkChunkStatusEnum.FAILED, entity.getStatus());
 			assertEquals("This is an error message", entity.getErrorMessage());
-			assertNotNull(entity.getCreateTime());
-			assertNotNull(entity.getStartTime());
-			assertNotNull(entity.getEndTime());
-			assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
-			assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
 		});
+
+		info.verifyFinalStates(getSvc());
 	}
 
 	@Test
 	default void markWorkChunksWithStatusAndWipeData_marksMultipleChunksWithStatus_asExpected() {
-		JobInstance instance = createInstance();
-		String instanceId = getSvc().storeNewInstance(instance);
-		ArrayList<String> chunkIds = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
-			WorkChunkCreateEvent chunk = new WorkChunkCreateEvent(
-				"defId",
-				1,
-				"stepId",
-				instanceId,
-				0,
-				"{}"
-			);
-			String id = getSvc().onWorkChunkCreate(chunk);
-			chunkIds.add(id);
-		}
+		// setup
+		String state = """
+   			1|IN_PROGRESS,1|COMPLETED
+   			1|ERRORED,1|COMPLETED
+   			1|QUEUED,1|COMPLETED
+   			1|IN_PROGRESS,1|COMPLETED
+		""";
+		disableWorkChunkMessageHandler();
+		enableMaintenanceRunner(false);
+		JobDefinition<?> jobDef = withJobDefinition(false);
+		String instanceId = createAndStoreJobInstance(jobDef);
+		JobMaintenanceStateInformation info = new JobMaintenanceStateInformation(
+			instanceId, jobDef, state
+		);
+		createChunksInStates(info);
+		List<String> chunkIds = info.getInitialWorkChunks().stream().map(WorkChunk::getId)
+			.collect(Collectors.toList());
 
-		runInTransaction(() -> getSvc().markWorkChunksWithStatusAndWipeData(instance.getInstanceId(), chunkIds, WorkChunkStatusEnum.COMPLETED, null));
+		runInTransaction(() -> getSvc().markWorkChunksWithStatusAndWipeData(instanceId, chunkIds, WorkChunkStatusEnum.COMPLETED, null));
 
 		Iterator<WorkChunk> reducedChunks = getSvc().fetchAllWorkChunksIterator(instanceId, true);
 

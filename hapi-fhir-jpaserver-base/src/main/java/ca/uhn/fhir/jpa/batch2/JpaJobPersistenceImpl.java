@@ -28,16 +28,19 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
+import ca.uhn.fhir.batch2.model.WorkChunkMetadata;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
+import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkMetadataViewRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
+import ca.uhn.fhir.jpa.entity.Batch2WorkChunkMetadataView;
 import ca.uhn.fhir.model.api.PagingIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -90,6 +93,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	private final IBatch2JobInstanceRepository myJobInstanceRepository;
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
+	private final IBatch2WorkChunkMetadataViewRepository myWorkChunkMetadataViewRepo;
 	private final EntityManager myEntityManager;
 	private final IHapiTransactionService myTransactionService;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -100,6 +104,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public JpaJobPersistenceImpl(
 			IBatch2JobInstanceRepository theJobInstanceRepository,
 			IBatch2WorkChunkRepository theWorkChunkRepository,
+			IBatch2WorkChunkMetadataViewRepository theWorkChunkMetadataViewRepo,
 			IHapiTransactionService theTransactionService,
 			EntityManager theEntityManager,
 			IInterceptorBroadcaster theInterceptorBroadcaster) {
@@ -107,6 +112,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		Validate.notNull(theWorkChunkRepository);
 		myJobInstanceRepository = theJobInstanceRepository;
 		myWorkChunkRepository = theWorkChunkRepository;
+		myWorkChunkMetadataViewRepo = theWorkChunkMetadataViewRepo;
 		myTransactionService = theTransactionService;
 		myEntityManager = theEntityManager;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
@@ -491,6 +497,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	public WorkChunk createWorkChunk(WorkChunk theWorkChunk) {
+		if (theWorkChunk.getId() == null) {
+			theWorkChunk.setId(UUID.randomUUID().toString());
+		}
+		return toChunk(myWorkChunkRepository.save(Batch2WorkChunkEntity.fromWorkChunk(theWorkChunk)));
+	}
+
+	@Override
 	public void updateWorkChunkToStatus(String theChunkId, WorkChunkStatusEnum theOldStatus, WorkChunkStatusEnum theNewStatus) {
 		int updated = myWorkChunkRepository.updateChunkStatus(theChunkId, theNewStatus, theOldStatus);
 
@@ -516,11 +530,13 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public Stream<WorkChunk> fetchAllWorkChunksForJobInStates(
-			String theInstanceId, Set<WorkChunkStatusEnum> theWorkChunkStatuses) {
-		return myWorkChunkRepository
-				.fetchChunksForJobInStates(theInstanceId, theWorkChunkStatuses)
-				.map(this::toChunk);
+	public Page<WorkChunkMetadata> fetchAllWorkChunkMetadataForJobInStates(
+			int thePageIndex, int thePageSize, String theInstanceId, Set<WorkChunkStatusEnum> theStates) {
+		Pageable request = PageRequest.of(thePageIndex, thePageSize);
+		Page<Batch2WorkChunkMetadataView> page =
+				myWorkChunkMetadataViewRepo.fetchWorkChunkMetadataForJobInStates(request, theInstanceId, theStates);
+
+		return page.map(Batch2WorkChunkMetadataView::toChunkMetadata);
 	}
 
 	@Override

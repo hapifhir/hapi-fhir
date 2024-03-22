@@ -22,10 +22,12 @@ import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.jpa.test.config.Batch2FastSchedulerConfig;
 import ca.uhn.fhir.testjob.TestJobDefinitionUtils;
 import ca.uhn.fhir.testjob.models.FirstStepOutput;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest;
+import ca.uhn.hapi.fhir.batch2.test.configs.SpyOverrideConfig;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import jakarta.annotation.Nonnull;
@@ -37,9 +39,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.Instant;
@@ -66,6 +70,10 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
+@ContextConfiguration(classes = {
+	Batch2FastSchedulerConfig.class
+})
+@Import(SpyOverrideConfig.class)
 public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	public static final String JOB_DEFINITION_ID = "definition-id";
@@ -346,7 +354,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		@Override
 		public void runMaintenancePass() {
-			myBatch2JobHelper.runMaintenancePass();
+			myBatch2JobHelper.forceRunMaintenancePass();
 		}
 	}
 
@@ -358,7 +366,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		Date updateTime = runInTransaction(() -> new Date(myJobInstanceRepository.findById(instanceId).orElseThrow().getUpdateTime().getTime()));
 
-		sleep1MS();
+		sleepUntilTimeChange();
 
 		// Test
 		runInTransaction(() -> mySvc.updateInstanceUpdateTime(instanceId));
@@ -496,7 +504,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertNotNull(chunk.getData());
 		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
 
-		sleep1MS();
+		sleepUntilTimeChange();
 
 		mySvc.onWorkChunkCompletion(new WorkChunkCompletionEvent(chunkId, 50, 0));
 		runInTransaction(() -> {
@@ -561,7 +569,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
 		assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
 
-		sleep1MS();
+		sleepUntilTimeChange();
 
 		WorkChunkErrorEvent request = new WorkChunkErrorEvent(chunkId).setErrorMsg("This is an error message");
 		mySvc.onWorkChunkError(request);
@@ -613,7 +621,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
 		assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
 
-		sleep1MS();
+		sleepUntilTimeChange();
 
 		mySvc.onWorkChunkFailed(chunkId, "This is an error message");
 		runInTransaction(() -> {
