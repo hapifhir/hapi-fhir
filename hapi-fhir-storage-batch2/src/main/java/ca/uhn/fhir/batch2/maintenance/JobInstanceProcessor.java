@@ -39,7 +39,6 @@ import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
-import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Iterator;
 import java.util.List;
@@ -346,9 +345,6 @@ public class JobInstanceProcessor {
 	 */
 	private void enqueueReadyChunks(
 			JobInstance theJobInstance, JobDefinition<?> theJobDefinition, boolean theIsGatedExecutionAdvancementBool) {
-		// we need a transaction to access the stream of workchunks
-		// because workchunks are created in READY state, there's an unknown
-		// number of them (and so we could be reading many from the db)
 		Iterator<WorkChunkMetadata> iter = getReadyChunks(theJobInstance.getInstanceId());
 
 		AtomicInteger counter = new AtomicInteger();
