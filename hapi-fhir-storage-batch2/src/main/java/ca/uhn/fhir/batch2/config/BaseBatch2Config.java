@@ -104,8 +104,7 @@ public abstract class BaseBatch2Config {
 			JpaStorageSettings theStorageSettings,
 			BatchJobSender theBatchJobSender,
 			WorkChunkProcessor theExecutor,
-			IReductionStepExecutorService theReductionStepExecutorService,
-			PlatformTransactionManager theTransactionManager) {
+			IReductionStepExecutorService theReductionStepExecutorService) {
 		return new JobMaintenanceServiceImpl(
 				theSchedulerService,
 				myPersistence,
@@ -113,8 +112,7 @@ public abstract class BaseBatch2Config {
 				theJobDefinitionRegistry,
 				theBatchJobSender,
 				theExecutor,
-				theReductionStepExecutorService,
-				theTransactionManager);
+				theReductionStepExecutorService);
 	}
 
 	@Bean

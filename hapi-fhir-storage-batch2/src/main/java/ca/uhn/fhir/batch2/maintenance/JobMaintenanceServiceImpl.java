@@ -90,7 +90,6 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final BatchJobSender myBatchJobSender;
 	private final WorkChunkProcessor myJobExecutorSvc;
-	private final PlatformTransactionManager myTransactionManager;
 
 	private final Semaphore myRunMaintenanceSemaphore = new Semaphore(1);
 
@@ -111,8 +110,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 			@Nonnull BatchJobSender theBatchJobSender,
 			@Nonnull WorkChunkProcessor theExecutor,
-			@Nonnull IReductionStepExecutorService theReductionStepExecutorService,
-			PlatformTransactionManager theTransactionService) {
+			@Nonnull IReductionStepExecutorService theReductionStepExecutorService) {
 		myStorageSettings = theStorageSettings;
 		myReductionStepExecutorService = theReductionStepExecutorService;
 		Validate.notNull(theSchedulerService);
@@ -125,7 +123,6 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myBatchJobSender = theBatchJobSender;
 		myJobExecutorSvc = theExecutor;
-		myTransactionManager = theTransactionService;
 	}
 
 	@Override
@@ -247,8 +244,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 								instanceId,
 								progressAccumulator,
 								myReductionStepExecutorService,
-								myJobDefinitionRegistry,
-								myTransactionManager);
+								myJobDefinitionRegistry);
 						ourLog.debug(
 								"Triggering maintenance process for instance {} in status {}",
 								instanceId,

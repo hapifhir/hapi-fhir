@@ -111,16 +111,13 @@ public class JobInstanceProcessor {
 	private final String myInstanceId;
 	private final JobDefinitionRegistry myJobDefinitionegistry;
 
-	private final PlatformTransactionManager myTransactionManager;
-
 	public JobInstanceProcessor(
 			IJobPersistence theJobPersistence,
 			BatchJobSender theBatchJobSender,
 			String theInstanceId,
 			JobChunkProgressAccumulator theProgressAccumulator,
 			IReductionStepExecutorService theReductionStepExecutorService,
-			JobDefinitionRegistry theJobDefinitionRegistry,
-			PlatformTransactionManager theTransactionManager) {
+			JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myInstanceId = theInstanceId;
@@ -130,8 +127,6 @@ public class JobInstanceProcessor {
 		myJobInstanceProgressCalculator =
 				new JobInstanceProgressCalculator(theJobPersistence, theProgressAccumulator, theJobDefinitionRegistry);
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
-
-		myTransactionManager = theTransactionManager;
 	}
 
 	public void process() {
