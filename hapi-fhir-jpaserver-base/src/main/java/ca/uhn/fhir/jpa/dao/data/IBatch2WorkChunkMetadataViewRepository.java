@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkMetadataView;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,7 +17,7 @@ public interface IBatch2WorkChunkMetadataViewRepository extends JpaRepository<Ba
 		"SELECT v FROM Batch2WorkChunkMetadataView v WHERE v.myInstanceId = :instanceId AND v.myStatus IN :states "
 		+ " ORDER BY v.myInstanceId, v.mySequence, v.myTargetStepId, v.myStatus, v.myId ASC"
 	)
-	List<Batch2WorkChunkMetadataView> fetchWorkChunkMetadataForJobInStates(
+	Page<Batch2WorkChunkMetadataView> fetchWorkChunkMetadataForJobInStates(
 		Pageable thePageRequest,
 		@Param("instanceId") String theInstanceId,
 		@Param("states") Collection<WorkChunkStatusEnum> theStates

@@ -25,7 +25,7 @@ import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 	+ " e.definition_id as job_definition_id, "
 	+ " e.definition_ver as job_definition_version, "
 	+ " e.tgt_step_id as target_step_id "
-	+ "FROM BT2_WORK_CHUNK e WHERE (1=0) = false"
+	+ "FROM BT2_WORK_CHUNK e"
 )
 public class Batch2WorkChunkMetadataView implements Serializable {
 

@@ -38,6 +38,7 @@ import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
+import org.springframework.data.domain.Page;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.Iterator;
@@ -49,6 +50,57 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class JobInstanceProcessor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final long PURGE_THRESHOLD = 7L * DateUtils.MILLIS_PER_DAY;
+
+	class ReadyChunkIterator implements Iterator<WorkChunkMetadata> {
+
+		// 10,000 - we want big batches
+		private static final int PAGE_SIZE = 10000;
+
+		private Page<WorkChunkMetadata> currentPage;
+
+		private int myPageIndex = 0;
+
+		private int myItemIndex = 0;
+
+		private final String myInstanceId;
+
+		public ReadyChunkIterator(String theInstanceId) {
+			myInstanceId = theInstanceId;
+		}
+
+		private void getNextPage() {
+			if (currentPage == null || currentPage.hasNext()) {
+				currentPage = myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(
+					myPageIndex++, getPageSize(), myInstanceId, Set.of(WorkChunkStatusEnum.READY));
+				myItemIndex = 0;
+			} else {
+				currentPage = Page.empty();
+			}
+		}
+
+		int getPageSize() {
+			return PAGE_SIZE;
+		}
+
+		@Override
+		public boolean hasNext() {
+			if (currentPage == null) {
+				getNextPage();
+			}
+			return currentPage.getContent().size() > myItemIndex || currentPage.hasNext();
+		}
+
+		@Override
+		public WorkChunkMetadata next() {
+			if (myItemIndex >= currentPage.getSize()) {
+				getNextPage();
+			}
+			if (myItemIndex < currentPage.getSize()) {
+				return currentPage.getContent().get(myItemIndex++);
+			}
+			return null;
+		}
+	}
 
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
@@ -283,6 +335,10 @@ public class JobInstanceProcessor {
 		return false;
 	}
 
+	protected ReadyChunkIterator getReadyChunks(String theInstanceId) {
+		return new ReadyChunkIterator(theInstanceId);
+	}
+
 	/**
 	 * Chunks are initially created in READY state.
 	 * We will move READY chunks to QUEUE'd and send them to the queue/topic (kafka)
@@ -298,17 +354,12 @@ public class JobInstanceProcessor {
 		// we need a transaction to access the stream of workchunks
 		// because workchunks are created in READY state, there's an unknown
 		// number of them (and so we could be reading many from the db)
-//		TransactionStatus status = myTransactionManager.getTransaction(new DefaultTransactionDefinition());
-
-		Iterator<WorkChunkMetadata> readyChunkMetadata = myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(
-			theJobInstance.getInstanceId(), Set.of(WorkChunkStatusEnum.READY)
-		);
+		Iterator<WorkChunkMetadata> iter = getReadyChunks(theJobInstance.getInstanceId());
 
 		AtomicInteger counter = new AtomicInteger();
 		ConcurrentHashMap<String, JobWorkCursor<?, ?, ?>> stepToWorkCursor = new ConcurrentHashMap<>();
-		while (readyChunkMetadata.hasNext()) {
-			WorkChunkMetadata metadata = readyChunkMetadata.next();
-
+		while (iter.hasNext()) {
+			WorkChunkMetadata metadata = iter.next();
 			JobWorkCursor<?, ?, ?> jobWorkCursor =
 				stepToWorkCursor.computeIfAbsent(metadata.getTargetStepId(), (e) -> {
 					return JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, metadata.getTargetStepId());
@@ -335,41 +386,8 @@ public class JobInstanceProcessor {
 			 */
 			updateChunkAndSendToQueue(metadata);
 		}
-
-//		Stream<WorkChunk> readyChunks = myJobPersistence.fetchAllWorkChunksForJobInStates(
-//				theJobInstance.getInstanceId(), Set.of(WorkChunkStatusEnum.READY));
-//
-//		AtomicInteger counter = new AtomicInteger();
-//		readyChunks.forEach(chunk -> {
-//			JobWorkCursor<?, ?, ?> jobWorkCursor =
-//					JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, chunk.getTargetStepId());
-//			counter.getAndIncrement();
-//			if (!theIsGatedExecutionAdvancementBool
-//					&& (theJobDefinition.isGatedExecution() || jobWorkCursor.isReductionStep())) {
-//				/*
-//				 * Gated executions are queued later when all work chunks are ready.
-//				 *
-//				 * Reduction steps are not submitted to the queue at all, but processed inline.
-//				 * Currently all reduction steps are also gated, but this might not always
-//				 * be true.
-//				 */
-//				return;
-//			}
-//
-//			/*
-//			 * For each chunk id
-//			 * * Move to QUEUE'd
-//			 * * Send to topic
-//			 * * flush changes
-//			 * * commit
-//			 */
-//			updateChunkAndSendToQueue(chunk, theJobInstance, theJobDefinition);
-//		});
-
-//		myTransactionManager.commit(status);
-
 		ourLog.debug(
-				"Encountered {} READY work chunks for job {}", counter.get(), theJobDefinition.getJobDefinitionId());
+			"Encountered {} READY work chunks for job {}", counter.get(), theJobDefinition.getJobDefinitionId());
 	}
 
 	/**

@@ -153,7 +153,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @return an iterator for the workchunks
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS)
-	Iterator<WorkChunkMetadata> fetchAllWorkChunkMetadataForJobInStates(String theInstanceId, Set<WorkChunkStatusEnum> theStates);
+	Page<WorkChunkMetadata> fetchAllWorkChunkMetadataForJobInStates(int thePageIndex, int thePageSize, String theInstanceId, Set<WorkChunkStatusEnum> theStates);
 
 	/**
 	 * Callback to update a JobInstance within a locked transaction.
