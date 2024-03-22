@@ -121,6 +121,13 @@ public class Batch2WorkChunkEntity implements Serializable {
 	@Column(name = "WARNING_MSG", length = WARNING_MSG_MAX_LENGTH, nullable = true)
 	private String myWarningMessage;
 
+	@Column(name = "NEXT_POLL_TIME", nullable = true)
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date myNextPollTime;
+
+	@Column(name = "POLL_ATTEMPTS", nullable = true)
+	private int myPollAttempts;
+
 	/**
 	 * Default constructor for Hibernate.
 	 */
@@ -144,7 +151,9 @@ public class Batch2WorkChunkEntity implements Serializable {
 			String theErrorMessage,
 			int theErrorCount,
 			Integer theRecordsProcessed,
-			String theWarningMessage) {
+			String theWarningMessage,
+			Date theNextPollTime,
+			Integer thePollAttempts) {
 		myId = theId;
 		mySequence = theSequence;
 		myJobDefinitionId = theJobDefinitionId;
@@ -160,6 +169,8 @@ public class Batch2WorkChunkEntity implements Serializable {
 		myErrorCount = theErrorCount;
 		myRecordsProcessed = theRecordsProcessed;
 		myWarningMessage = theWarningMessage;
+		myNextPollTime = theNextPollTime;
+		myPollAttempts = thePollAttempts;
 	}
 
 	public int getErrorCount() {
@@ -294,6 +305,22 @@ public class Batch2WorkChunkEntity implements Serializable {
 		myInstanceId = theInstanceId;
 	}
 
+	public Date getNextPollTime() {
+		return myNextPollTime;
+	}
+
+	public void setNextPollTime(Date theNextPollTime) {
+		myNextPollTime = theNextPollTime;
+	}
+
+	public int getPollAttempts() {
+		return myPollAttempts;
+	}
+
+	public void setPollAttempts(int thePollAttempts) {
+		myPollAttempts = thePollAttempts;
+	}
+
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
@@ -313,6 +340,8 @@ public class Batch2WorkChunkEntity implements Serializable {
 				.append("status", myStatus)
 				.append("errorMessage", myErrorMessage)
 				.append("warningMessage", myWarningMessage)
+				.append("nextPollTime", myNextPollTime)
+				.append("pollAttempts", myPollAttempts)
 				.toString();
 	}
 }

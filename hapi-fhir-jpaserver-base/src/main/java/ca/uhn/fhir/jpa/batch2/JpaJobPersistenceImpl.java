@@ -64,6 +64,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -73,6 +75,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -345,6 +348,19 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	public void onWorkChunkPollDelay(String theChunkId, int thePollDelayMs) {
+		int updated = myWorkChunkRepository.updateWorkChunkNextPollTime(
+			theChunkId,
+			WorkChunkStatusEnum.POLL_WAITING,
+			Date.from(Instant.now().plus(thePollDelayMs, ChronoUnit.MILLIS))
+		);
+
+		if (updated != 1) {
+			ourLog.warn("Expected to update 1 work chunk's poll delay; but found {}", updated);
+		}
+	}
+
+	@Override
 	public void onWorkChunkFailed(String theChunkId, String theErrorMessage) {
 		ourLog.info("Marking chunk {} as failed with message: {}", theChunkId, theErrorMessage);
 		String errorMessage = truncateErrorMessage(theErrorMessage);
@@ -472,6 +488,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	public void updateInstanceUpdateTime(String theInstanceId) {
 		myJobInstanceRepository.updateInstanceUpdateTime(theInstanceId, new Date());
+	}
+
+	@Override
+	public void updateWorkChunkToStatus(String theChunkId, WorkChunkStatusEnum theOldStatus, WorkChunkStatusEnum theNewStatus) {
+		int updated = myWorkChunkRepository.updateChunkStatus(theChunkId, theNewStatus, theOldStatus);
+
+		if (updated != 1) {
+			ourLog.warn("Expected to update 1 work chunk's status; instead updated {}", updated);
+		}
 	}
 
 	/**

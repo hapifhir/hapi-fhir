@@ -23,6 +23,7 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.JobStepFailedException;
+import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
@@ -57,6 +58,10 @@ public class StepExecutor {
 		try {
 			outcome = theStepWorker.run(theStepExecutionDetails, theDataSink);
 			Validate.notNull(outcome, "Step theWorker returned null: %s", theStepWorker.getClass());
+		} catch (RetryChunkLaterException ex) {
+			ourLog.debug("Polling job encountered; will retry after {}ms", ex.getMsPollDelay());
+			myJobPersistence.onWorkChunkPollDelay(theStepExecutionDetails.getChunkId(), ex.getMsPollDelay());
+			return false;
 		} catch (JobExecutionFailedException e) {
 			ourLog.error(
 					"Unrecoverable failure executing job {} step {} chunk {}",

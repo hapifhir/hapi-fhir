@@ -42,6 +42,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -101,6 +102,7 @@ public class JobInstanceProcessor {
 		JobDefinition<? extends IModelJson> jobDefinition =
 				myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
 
+		processPollingChunks(theInstance, jobDefinition);
 		enqueueReadyChunks(theInstance, jobDefinition, false);
 		cleanupInstance(theInstance);
 		triggerGatedExecutions(theInstance, jobDefinition);
@@ -415,5 +417,26 @@ public class JobInstanceProcessor {
 		// because we now have all gated job chunks in READY state,
 		// we can enqueue them
 		enqueueReadyChunks(theInstance, theJobDefinition, true);
+	}
+
+	private void processPollingChunks(JobInstance theInstance, JobDefinition<?> theJobDefinition) {
+		TransactionStatus transactionStatus = myTransactionManager.getTransaction(new DefaultTransactionDefinition());
+
+		Stream<WorkChunk> chunks = myJobPersistence.fetchAllWorkChunksForJobInStates(theInstance.getInstanceId(), Set.of(WorkChunkStatusEnum.POLL_WAITING));
+
+		chunks.forEach(chunk -> {
+			Date pollTime = chunk.getNextPollTime();
+			if (pollTime.after(new Date())) {
+				/*
+				 * We'll update these 1 at a time;
+				 * We're unlikely to have many jobs with many steps
+				 * in this state. But if we ever do, we can update this area.
+				 */
+				myJobPersistence.updateWorkChunkToStatus(chunk.getId(),
+					WorkChunkStatusEnum.POLL_WAITING,
+					WorkChunkStatusEnum.READY);
+			}
+		});
+		myTransactionManager.commit(transactionStatus);
 	}
 }

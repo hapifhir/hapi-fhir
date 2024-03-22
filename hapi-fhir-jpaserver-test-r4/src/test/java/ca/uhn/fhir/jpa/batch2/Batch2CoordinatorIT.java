@@ -10,6 +10,7 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.ILastJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -45,11 +46,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -428,9 +431,12 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testJobWithLongPollingStep() {
+	public void testJobWithLongPollingStep() throws InterruptedException {
 		// create job definition
+		int callsToMake = 3;
 		String jobId = new Exception().getStackTrace()[0].getMethodName();
+
+		AtomicInteger pollCounter = new AtomicInteger();
 
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> {
 			myFirstStepLatch.call(1);
@@ -439,9 +445,15 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		// step 2
 		IJobStepWorker<TestJobParameters, FirstStepOutput, SecondStepOutput> second = (step, sink) -> {
-			// TODO - poll
+			// simulate a call
+			Awaitility.await().atMost(100, TimeUnit.MICROSECONDS);
 
-			return RunOutcome.SUCCESS;
+			// we use Batch2FastSchedulerConfig, so we have a fast scheduler
+			// that should catch and call repeatedly pretty quickly
+			if (pollCounter.getAndIncrement() > callsToMake) {
+				return RunOutcome.SUCCESS;
+			}
+			throw new RetryChunkLaterException(300);
 		};
 
 		// step 3
@@ -475,7 +487,23 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			.build();
 		myJobDefinitionRegistry.addJobDefinition(jd);
 
+		// test
+		JobInstanceStartRequest request = buildRequest(jobId);
+		myFirstStepLatch.setExpectedCount(1);
+		myLastStepLatch.setExpectedCount(1);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
+		String instanceId = startResponse.getInstanceId();
 
+		// waiting for the job
+		myBatch2JobHelper.awaitGatedStepId(FIRST_STEP_ID, instanceId);
+		myFirstStepLatch.awaitExpected();
+		myBatch2JobHelper.awaitGatedStepId(SECOND_STEP_ID, instanceId);
+		myLastStepLatch.awaitExpected();
+
+		myBatch2JobHelper.awaitJobCompletion(instanceId);
+
+		// verify
+		assertEquals(callsToMake, pollCounter.get());
 	}
 
 	@Test

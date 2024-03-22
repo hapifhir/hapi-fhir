@@ -80,6 +80,12 @@ public interface IBatch2WorkChunkRepository
 			@Param("warningMessage") String theWarningMessage);
 
 	@Modifying
+	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myNextPollTime = :nextPollTime, e.myPollAttempts = e.myPollAttempts + 1 WHERE e.myId = :id")
+	int updateWorkChunkNextPollTime(@Param("id") String theChunkId,
+									 @Param("status") WorkChunkStatusEnum theStatus,
+									 @Param("nextPollTime") Date theNextPollTime);
+
+	@Modifying
 	@Query(
 			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.mySerializedData = null, e.myErrorMessage = :em WHERE e.myId IN(:ids)")
 	void updateAllChunksForInstanceStatusClearDataAndSetError(

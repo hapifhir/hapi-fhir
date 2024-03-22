@@ -87,10 +87,19 @@ public class WorkChunk implements IModelJson {
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myUpdateTime;
 
+	/**
+	 * Timestamp of when next to call the current workchunk poll step.
+	 */
 	@JsonProperty("nextPollTimestamp")
 	@JsonSerialize(using = JsonDateSerializer.class)
 	@JsonDeserialize(using = JsonDateDeserializer.class)
 	private Date myNextPollTime;
+
+	/**
+	 * Total polling attempts done thus far.
+	 */
+	@JsonProperty("pollAttempts")
+	private int myPollAttempts;
 
 	@JsonProperty(value = "recordsProcessed", access = JsonProperty.Access.READ_ONLY)
 	private Integer myRecordsProcessed;
@@ -264,6 +273,14 @@ public class WorkChunk implements IModelJson {
 		myNextPollTime = theNextPollTime;
 	}
 
+	public int getPollAttempts() {
+		return myPollAttempts;
+	}
+
+	public void setPollAttempts(int thePollAttempts) {
+		myPollAttempts = thePollAttempts;
+	}
+
 	public String getWarningMessage() {
 		return myWarningMessage;
 	}
@@ -291,6 +308,8 @@ public class WorkChunk implements IModelJson {
 		b.append("RecordsProcessed", myRecordsProcessed);
 		if (myNextPollTime != null) {
 			b.append("NextPollTime", myNextPollTime);
+
+			b.append("PollAttempts", myPollAttempts);
 		}
 		if (isNotBlank(myErrorMessage)) {
 			b.append("ErrorMessage", myErrorMessage);

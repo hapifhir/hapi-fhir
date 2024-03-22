@@ -85,6 +85,16 @@ public interface IWorkChunkPersistence {
 	WorkChunkStatusEnum onWorkChunkError(WorkChunkErrorEvent theParameters);
 
 	/**
+	 * Updates the specified Work Chunk to set the next polling interval.
+	 * It wil also:
+	 * * update the poll attempts
+	 * * sets the workchunk status to POLL_WAITING (if it's not already in this state)
+	 * @param theChunkId the id of the chunk to update
+	 * @param thePollDelayMs the amount of time (after now) to wait (in ms)
+	 */
+	void onWorkChunkPollDelay(String theChunkId, int thePollDelayMs);
+
+	/**
 	 * An unrecoverable error.
 	 * Transition to {@link WorkChunkStatusEnum#FAILED}
 	 *

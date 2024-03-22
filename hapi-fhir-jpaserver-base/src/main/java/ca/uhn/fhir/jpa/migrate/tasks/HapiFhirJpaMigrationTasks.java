@@ -131,15 +131,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder.BuilderWithTableName mdmLinkTable = version.onTable("MPI_LINK");
 
 		mdmLinkTable
-				.addIndex("20230911.1", "IDX_EMPI_TGT_MR_LS")
-				.unique(false)
-				.online(true)
-				.withColumns("TARGET_TYPE", "MATCH_RESULT", "LINK_SOURCE");
+			.addIndex("20230911.1", "IDX_EMPI_TGT_MR_LS")
+			.unique(false)
+			.online(true)
+			.withColumns("TARGET_TYPE", "MATCH_RESULT", "LINK_SOURCE");
 		mdmLinkTable
-				.addIndex("20230911.2", "IDX_EMPi_TGT_MR_SCore")
-				.unique(false)
-				.online(true)
-				.withColumns("TARGET_TYPE", "MATCH_RESULT", "SCORE");
+			.addIndex("20230911.2", "IDX_EMPi_TGT_MR_SCore")
+			.unique(false)
+			.online(true)
+			.withColumns("TARGET_TYPE", "MATCH_RESULT", "SCORE");
 
 		// Move forced_id constraints to hfj_resource and the new fhir_id column
 		// Note: we leave the HFJ_FORCED_ID.IDX_FORCEDID_TYPE_FID index in place to support old writers for a while.
@@ -159,20 +159,20 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		hfjResource.dropIndex("20231027.1", "IDX_RES_FHIR_ID");
 		hfjResource
-				.addIndex("20231027.2", "IDX_RES_TYPE_FHIR_ID")
-				.unique(true)
-				.online(true)
-				// include res_id and our deleted flag so we can satisfy Observation?_sort=_id from the index on
-				// platforms that support it.
-				.includeColumns("RES_ID, RES_DELETED_AT")
-				.withColumns("RES_TYPE", "FHIR_ID");
+			.addIndex("20231027.2", "IDX_RES_TYPE_FHIR_ID")
+			.unique(true)
+			.online(true)
+			// include res_id and our deleted flag so we can satisfy Observation?_sort=_id from the index on
+			// platforms that support it.
+			.includeColumns("RES_ID, RES_DELETED_AT")
+			.withColumns("RES_TYPE", "FHIR_ID");
 
 		// For resolving references that don't supply the type.
 		hfjResource
-				.addIndex("20231027.3", "IDX_RES_FHIR_ID")
-				.unique(false)
-				.online(true)
-				.withColumns("FHIR_ID");
+			.addIndex("20231027.3", "IDX_RES_FHIR_ID")
+			.unique(false)
+			.online(true)
+			.withColumns("FHIR_ID");
 
 		Builder.BuilderWithTableName batch2JobInstanceTable = version.onTable("BT2_JOB_INSTANCE");
 
@@ -182,33 +182,33 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		{
 			version.executeRawSql(
-							"20231212.1",
-							"CREATE INDEX CONCURRENTLY idx_sp_string_hash_nrm_pattern_ops ON hfj_spidx_string USING btree (hash_norm_prefix, sp_value_normalized varchar_pattern_ops, res_id, partition_id)")
-					.setTransactional(false)
-					.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4)
-					.onlyIf(
-							String.format(
-									QUERY_FOR_COLUMN_COLLATION_TEMPLATE,
-									"HFJ_SPIDX_STRING".toLowerCase(),
-									"SP_VALUE_NORMALIZED".toLowerCase()),
-							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing")
-					.onlyIf(
-							"SELECT NOT EXISTS(select 1 from pg_indexes where indexname='idx_sp_string_hash_nrm_pattern_ops')",
-							"Index idx_sp_string_hash_nrm_pattern_ops already exists");
+					"20231212.1",
+					"CREATE INDEX CONCURRENTLY idx_sp_string_hash_nrm_pattern_ops ON hfj_spidx_string USING btree (hash_norm_prefix, sp_value_normalized varchar_pattern_ops, res_id, partition_id)")
+				.setTransactional(false)
+				.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4)
+				.onlyIf(
+					String.format(
+						QUERY_FOR_COLUMN_COLLATION_TEMPLATE,
+						"HFJ_SPIDX_STRING".toLowerCase(),
+						"SP_VALUE_NORMALIZED".toLowerCase()),
+					"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing")
+				.onlyIf(
+					"SELECT NOT EXISTS(select 1 from pg_indexes where indexname='idx_sp_string_hash_nrm_pattern_ops')",
+					"Index idx_sp_string_hash_nrm_pattern_ops already exists");
 			version.executeRawSql(
-							"20231212.2",
-							"CREATE UNIQUE INDEX CONCURRENTLY idx_sp_uri_hash_identity_pattern_ops ON hfj_spidx_uri USING btree (hash_identity, sp_uri varchar_pattern_ops, res_id, partition_id)")
-					.setTransactional(false)
-					.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4)
-					.onlyIf(
-							String.format(
-									QUERY_FOR_COLUMN_COLLATION_TEMPLATE,
-									"HFJ_SPIDX_URI".toLowerCase(),
-									"SP_URI".toLowerCase()),
-							"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing")
-					.onlyIf(
-							"SELECT NOT EXISTS(select 1 from pg_indexes where indexname='idx_sp_uri_hash_identity_pattern_ops')",
-							"Index idx_sp_uri_hash_identity_pattern_ops already exists.");
+					"20231212.2",
+					"CREATE UNIQUE INDEX CONCURRENTLY idx_sp_uri_hash_identity_pattern_ops ON hfj_spidx_uri USING btree (hash_identity, sp_uri varchar_pattern_ops, res_id, partition_id)")
+				.setTransactional(false)
+				.onlyAppliesToPlatforms(DriverTypeEnum.POSTGRES_9_4)
+				.onlyIf(
+					String.format(
+						QUERY_FOR_COLUMN_COLLATION_TEMPLATE,
+						"HFJ_SPIDX_URI".toLowerCase(),
+						"SP_URI".toLowerCase()),
+					"Column HFJ_SPIDX_STRING.SP_VALUE_NORMALIZED already has a collation of 'C' so doing nothing")
+				.onlyIf(
+					"SELECT NOT EXISTS(select 1 from pg_indexes where indexname='idx_sp_uri_hash_identity_pattern_ops')",
+					"Index idx_sp_uri_hash_identity_pattern_ops already exists.");
 		}
 
 		// This fix was bad for MSSQL, it has been set to do nothing.
@@ -216,6 +216,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// This fix will work for MSSQL or Oracle.
 		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231222.1"));
+
+		// add columns to Batch2WorkChunkEntity
+		Builder.BuilderWithTableName batch2WorkChunkTable = version.onTable("BT2_WORK_CHUNK");
+
+		batch2WorkChunkTable
+			.addColumn("20240315.1", "NEXT_POLL_TIME")
+			.nullable()
+			.type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batch2WorkChunkTable
+			.addColumn("20240315.2", "POLL_ATTEMPTS")
+			.nullable()
+			.type(ColumnTypeEnum.INT);
 	}
 
 	protected void init680() {
