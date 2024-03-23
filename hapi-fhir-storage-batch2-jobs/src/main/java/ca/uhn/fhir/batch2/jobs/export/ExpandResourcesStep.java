@@ -39,7 +39,6 @@ import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -131,8 +130,8 @@ public class ExpandResourcesStep
 			// Apply post-fetch filtering
 			String resourceType = data.getResourceType();
 			List<String> postFetchFilterUrls = parameters.getPostFetchFilterUrls().stream()
-				.filter(t -> t.substring(0, t.indexOf('?')).equals(resourceType))
-				.collect(Collectors.toList());
+					.filter(t -> t.substring(0, t.indexOf('?')).equals(resourceType))
+					.collect(Collectors.toList());
 
 			if (!postFetchFilterUrls.isEmpty()) {
 				applyPostFetchFiltering(allResources, postFetchFilterUrls, instanceId, chunkId);
@@ -157,10 +156,10 @@ public class ExpandResourcesStep
 			if (myInterceptorService.hasHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION)) {
 				for (Iterator<IBaseResource> iter = allResources.iterator(); iter.hasNext(); ) {
 					HookParams params = new HookParams()
-						.add(BulkExportJobParameters.class, theStepExecutionDetails.getParameters())
-						.add(IBaseResource.class, iter.next());
+							.add(BulkExportJobParameters.class, theStepExecutionDetails.getParameters())
+							.add(IBaseResource.class, iter.next());
 					boolean outcome =
-						myInterceptorService.callHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION, params);
+							myInterceptorService.callHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION, params);
 					if (!outcome) {
 						iter.remove();
 					}
@@ -180,7 +179,8 @@ public class ExpandResourcesStep
 
 				for (String nextStringifiedResource : stringifiedResources) {
 
-					if (currentFileSize + nextStringifiedResource.length() > maxFileSize && !currentFileStringifiedResources.isEmpty()) {
+					if (currentFileSize + nextStringifiedResource.length() > maxFileSize
+							&& !currentFileStringifiedResources.isEmpty()) {
 						ExpandedResourcesList output = new ExpandedResourcesList();
 						output.setStringifiedResources(currentFileStringifiedResources);
 						output.setResourceType(nextResourceType);
@@ -192,7 +192,6 @@ public class ExpandResourcesStep
 
 					currentFileStringifiedResources.add(nextStringifiedResource);
 					currentFileSize += nextStringifiedResource.length();
-
 				}
 
 				if (!currentFileStringifiedResources.isEmpty()) {
@@ -202,12 +201,8 @@ public class ExpandResourcesStep
 					theDataSink.accept(output);
 				}
 
-				ourLog.info(
-					"Expanding of {} resources of type {} completed",
-					idList.size(),
-					data.getResourceType());
+				ourLog.info("Expanding of {} resources of type {} completed", idList.size(), data.getResourceType());
 			}
-
 		}
 
 		// and return
@@ -258,7 +253,8 @@ public class ExpandResourcesStep
 		return false;
 	}
 
-	private List<IBaseResource> fetchAllResources(List<BatchResourceId> theIds, RequestPartitionId theRequestPartitionId) {
+	private List<IBaseResource> fetchAllResources(
+			List<BatchResourceId> theIds, RequestPartitionId theRequestPartitionId) {
 		ArrayListMultimap<String, String> typeToIds = ArrayListMultimap.create();
 		theIds.forEach(t -> typeToIds.put(t.getResourceType(), t.getId()));
 
@@ -287,7 +283,6 @@ public class ExpandResourcesStep
 			IBundleProvider outcome =
 					dao.search(spMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
 			resources.addAll(outcome.getAllResources());
-
 		}
 
 		return resources;

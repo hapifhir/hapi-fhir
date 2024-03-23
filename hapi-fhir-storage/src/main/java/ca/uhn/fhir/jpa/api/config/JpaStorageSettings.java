@@ -2345,7 +2345,6 @@ public class JpaStorageSettings extends StorageSettings {
 		myBulkExportFileMaximumSize = theBulkExportFileMaximumSize;
 	}
 
-
 	/**
 	 * If this setting is enabled, then gated batch jobs that produce only one chunk will immediately trigger a batch
 	 * maintenance job.  This may be useful for testing, but is not recommended for production use.

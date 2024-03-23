@@ -66,7 +66,7 @@ public class BulkExportAppCtx {
 						writeBinaryStep())
 				// finalize the job (set to complete)
 				.addFinalReducerStep(
-					CREATE_REPORT_STEP,
+						CREATE_REPORT_STEP,
 						"Creates the output report from a bulk export job",
 						BulkExportJobResults.class,
 						createReportStep())
@@ -149,5 +149,4 @@ public class BulkExportAppCtx {
 	public BulkExportCreateReportStep createReportStep() {
 		return new BulkExportCreateReportStep();
 	}
-
 }

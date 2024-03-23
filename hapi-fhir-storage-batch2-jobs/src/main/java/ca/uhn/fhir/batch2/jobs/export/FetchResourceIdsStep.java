@@ -130,7 +130,8 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 					estimatedChunkSize += batchResourceId.estimateSerializedSize();
 
 					// Make sure resources stored in each batch does not go over the max capacity
-					if (idsToSubmit.size() >= myStorageSettings.getBulkExportFileMaximumCapacity() || estimatedChunkSize >= myStorageSettings.getBulkExportFileMaximumSize()) {
+					if (idsToSubmit.size() >= myStorageSettings.getBulkExportFileMaximumCapacity()
+							|| estimatedChunkSize >= myStorageSettings.getBulkExportFileMaximumSize()) {
 						submitWorkChunk(idsToSubmit, resourceType, theDataSink);
 						submissionCount++;
 						idsToSubmit = new ArrayList<>();
