@@ -41,6 +41,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.DELETE;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.GET;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST;
@@ -463,6 +464,96 @@ public class BundleUtilTest {
 		assertThat(searchBundleEntryParts.get(1).getSearchMode(), is(equalTo(BundleEntrySearchModeEnum.INCLUDE)));
 		assertThat(searchBundleEntryParts.get(1).getFullUrl(), is(containsString("Condition/")));
 		assertThat(searchBundleEntryParts.get(1).getResource(), is(notNullValue()));
+	}
+	@Test
+	public void testConvertingToSearchBundleEntryPartsRespectsMissingMode() {
+
+		//Given
+		String bundleString = """
+			{
+			  "resourceType": "Bundle",
+			  "id": "bd194b7f-ac1e-429a-a206-ee2c470f23b5",
+			  "type": "searchset",
+			  "total": 1,
+			  "link": [
+			    {
+			      "relation": "self",
+			      "url": "http://localhost:8000/Condition?_count=1"
+			    }
+			  ],
+			  "entry": [
+			    {
+			      "fullUrl": "http://localhost:8000/Condition/1626",
+			      "resource": {
+			        "resourceType": "Condition",
+			        "id": "1626",
+			        "identifier": [
+			          {
+			            "system": "urn:hssc:musc:conditionid",
+			            "value": "1064115000.1.5"
+			          }
+			        ]
+			      }
+			    }
+			  ]
+			}""";
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, bundleString);
+
+		//When
+		List<SearchBundleEntryParts> searchBundleEntryParts = BundleUtil.getSearchBundleEntryParts(ourCtx, bundle);
+
+		//Then
+		assertThat(searchBundleEntryParts, hasSize(1));
+		assertThat(searchBundleEntryParts.get(0).getSearchMode(), is(nullValue()));
+		assertThat(searchBundleEntryParts.get(0).getFullUrl(), is(containsString("Condition/1626")));
+		assertThat(searchBundleEntryParts.get(0).getResource(), is(notNullValue()));
+	}
+
+	@Test
+	public void testConvertingToSearchBundleEntryPartsRespectsOutcomeMode() {
+
+		//Given
+		String bundleString = """
+			{
+			  "resourceType": "Bundle",
+			  "id": "bd194b7f-ac1e-429a-a206-ee2c470f23b5",
+			  "type": "searchset",
+			  "total": 1,
+			  "link": [
+			    {
+			      "relation": "self",
+			      "url": "http://localhost:8000/Condition?_count=1"
+			    }
+			  ],
+			  "entry": [
+			    {
+			      "fullUrl": "http://localhost:8000/Condition/1626",
+			      "resource": {
+			        "resourceType": "Condition",
+			        "id": "1626",
+			        "identifier": [
+			          {
+			            "system": "urn:hssc:musc:conditionid",
+			            "value": "1064115000.1.5"
+			          }
+			        ]
+			      },
+			      "search": {
+			        "mode": "outcome"
+			      }
+			    }
+			  ]
+			}""";
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, bundleString);
+
+		//When
+		List<SearchBundleEntryParts> searchBundleEntryParts = BundleUtil.getSearchBundleEntryParts(ourCtx, bundle);
+
+		//Then
+		assertThat(searchBundleEntryParts, hasSize(1));
+		assertThat(searchBundleEntryParts.get(0).getSearchMode(), is(equalTo(BundleEntrySearchModeEnum.OUTCOME)));
+		assertThat(searchBundleEntryParts.get(0).getFullUrl(), is(containsString("Condition/1626")));
+		assertThat(searchBundleEntryParts.get(0).getResource(), is(notNullValue()));
 	}
 
 	@Test

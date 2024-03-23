@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5777
+title: "Change the implementation of CDS on FHIR to use the Auto Prefetch functionality and to no longer pass the fhirServer from the request into the dataEndpoint parameter of $apply."
