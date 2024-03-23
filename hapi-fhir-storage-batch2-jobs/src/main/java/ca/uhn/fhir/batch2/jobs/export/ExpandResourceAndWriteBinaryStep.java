@@ -42,7 +42,6 @@ import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -76,11 +75,13 @@ import org.springframework.context.ApplicationContext;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_ID;
@@ -127,234 +128,31 @@ public class ExpandResourceAndWriteBinaryStep
 			@Nonnull IJobDataSink<BulkExportBinaryFileId> theDataSink)
 			throws JobExecutionFailedException {
 
-		List<ExpandedResourcesList> expandedResourcesList = expandResourcesFromList(theStepExecutionDetails);
-		int numResourcesProcessed = 0;
-		ourLog.info("Write binary step of Job Export");
+		// TODO: Currently only NDJSON output format is supported, but we could add other
+		// kinds of consumers here
+		NdJsonResourceWriter resourceWriter = new NdJsonResourceWriter(theStepExecutionDetails, theDataSink);
 
-		// write to binary each resource type separately, without chunking, we need to do this in a loop now
-		for (ExpandedResourcesList expandedResources : expandedResourcesList) {
+		expandResourcesFromList(theStepExecutionDetails, resourceWriter);
 
-			numResourcesProcessed += expandedResources.getStringifiedResources().size();
-
-			ourLog.info("Writing {} resources to binary file", numResourcesProcessed);
-
-			@SuppressWarnings("unchecked")
-			IFhirResourceDao<IBaseBinary> binaryDao = myDaoRegistry.getResourceDao("Binary");
-
-			IBaseBinary binary = BinaryUtil.newBinary(myFhirContext);
-
-			addMetadataExtensionsToBinary(theStepExecutionDetails, expandedResources, binary);
-
-			// TODO
-			// should be dependent on the output format in parameters but for now, only NDJSON is supported
-			binary.setContentType(Constants.CT_FHIR_NDJSON);
-
-			int processedRecordsCount = 0;
-			try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-				try (OutputStreamWriter streamWriter = getStreamWriter(outputStream)) {
-					for (String stringified : expandedResources.getStringifiedResources()) {
-						streamWriter.append(stringified);
-						streamWriter.append("\n");
-						processedRecordsCount++;
-					}
-					streamWriter.flush();
-					outputStream.flush();
-				}
-				binary.setContent(outputStream.toByteArray());
-			} catch (IOException ex) {
-				String errorMsg = String.format(
-						"Failure to process resource of type %s : %s",
-						expandedResources.getResourceType(), ex.getMessage());
-				ourLog.error(errorMsg);
-
-				throw new JobExecutionFailedException(Msg.code(2431) + errorMsg);
-			}
-
-			SystemRequestDetails srd = new SystemRequestDetails();
-			BulkExportJobParameters jobParameters = theStepExecutionDetails.getParameters();
-			RequestPartitionId partitionId = jobParameters.getPartitionId();
-			if (partitionId == null) {
-				srd.setRequestPartitionId(RequestPartitionId.defaultPartition());
-			} else {
-				srd.setRequestPartitionId(partitionId);
-			}
-
-			// Pick a unique ID and retry until we get one that isn't already used. This is just to
-			// avoid any possibility of people guessing the IDs of these Binaries and fishing for them.
-			while (true) {
-				// Use a random ID to make it harder to guess IDs - 32 characters of a-zA-Z0-9
-				// has 190 bts of entropy according to https://www.omnicalculator.com/other/password-entropy
-				String proposedId = RandomTextUtils.newSecureRandomAlphaNumericString(32);
-				binary.setId(proposedId);
-
-				// Make sure we don't accidentally reuse an ID. This should be impossible given the
-				// amount of entropy in the IDs but might as well be sure.
-				try {
-					IBaseBinary output = binaryDao.read(binary.getIdElement(), new SystemRequestDetails(), true);
-					if (output != null) {
-						continue;
-					}
-				} catch (ResourceNotFoundException e) {
-					// good
-				}
-
-				break;
-			}
-
-			if (myFhirContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
-				if (isNotBlank(jobParameters.getBinarySecurityContextIdentifierSystem())
-						|| isNotBlank(jobParameters.getBinarySecurityContextIdentifierValue())) {
-					FhirTerser terser = myFhirContext.newTerser();
-					terser.setElement(
-							binary,
-							"securityContext.identifier.system",
-							jobParameters.getBinarySecurityContextIdentifierSystem());
-					terser.setElement(
-							binary,
-							"securityContext.identifier.value",
-							jobParameters.getBinarySecurityContextIdentifierValue());
-				}
-			}
-
-			DaoMethodOutcome outcome = binaryDao.update(binary, srd);
-			IIdType id = outcome.getId();
-
-			BulkExportBinaryFileId bulkExportBinaryFileId = new BulkExportBinaryFileId();
-			bulkExportBinaryFileId.setBinaryId(id.getValueAsString());
-			bulkExportBinaryFileId.setResourceType(expandedResources.getResourceType());
-			theDataSink.accept(bulkExportBinaryFileId);
-
-			ourLog.info(
-					"Binary writing complete for {} resources of type {}.",
-					processedRecordsCount,
-					expandedResources.getResourceType());
-		}
-		return new RunOutcome(numResourcesProcessed);
+		return new RunOutcome(resourceWriter.getNumResourcesProcessed());
 	}
 
-	private List<ExpandedResourcesList> expandResourcesFromList(
-			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails) {
-		List<ExpandedResourcesList> expandedResourcesList = new ArrayList<>();
-		String instanceId = theStepExecutionDetails.getInstance().getInstanceId();
-		String chunkId = theStepExecutionDetails.getChunkId();
+	private void expandResourcesFromList(
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
+		Consumer<ExpandedResourcesList> theResourceWriter) {
+
 		ResourceIdList idList = theStepExecutionDetails.getData();
 		BulkExportJobParameters parameters = theStepExecutionDetails.getParameters();
 
-		ourLog.info(
-				"Bulk export instance[{}] chunk[{}] - About to expand {} resource IDs into their full resource bodies.",
-				instanceId,
-				chunkId,
-				idList.getIds().size());
+		Consumer<List<IBaseResource>> resourceListConsumer = new ExpandResourcesConsumer(theStepExecutionDetails, theResourceWriter);
 
 		// search the resources
-		List<IBaseResource> allResources = fetchAllResources(idList, parameters.getPartitionId());
-
-		// Apply post-fetch filtering
-		String resourceType = idList.getResourceType();
-		List<String> postFetchFilterUrls = parameters.getPostFetchFilterUrls().stream()
-				.filter(t -> t.substring(0, t.indexOf('?')).equals(resourceType))
-				.collect(Collectors.toList());
-
-		if (!postFetchFilterUrls.isEmpty()) {
-			applyPostFetchFiltering(allResources, postFetchFilterUrls, instanceId, chunkId);
-		}
-
-		// if necessary, expand resources
-		if (parameters.isExpandMdm()) {
-			myBulkExportProcessor.expandMdmResources(allResources);
-		}
-
-		// Normalize terminology
-		if (myStorageSettings.isNormalizeTerminologyForBulkExportJobs()) {
-			ResponseTerminologyTranslationSvc terminologyTranslationSvc = myResponseTerminologyTranslationSvc;
-			if (terminologyTranslationSvc == null) {
-				terminologyTranslationSvc = myApplicationContext.getBean(ResponseTerminologyTranslationSvc.class);
-				myResponseTerminologyTranslationSvc = terminologyTranslationSvc;
-			}
-			terminologyTranslationSvc.processResourcesForTerminologyTranslation(allResources);
-		}
-
-		// Interceptor call
-		if (myInterceptorService.hasHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION)) {
-			for (Iterator<IBaseResource> iter = allResources.iterator(); iter.hasNext(); ) {
-				HookParams params = new HookParams()
-						.add(BulkExportJobParameters.class, theStepExecutionDetails.getParameters())
-						.add(IBaseResource.class, iter.next());
-				boolean outcome =
-						myInterceptorService.callHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION, params);
-				if (!outcome) {
-					iter.remove();
-				}
-			}
-		}
-
-		// encode them - Key is resource type, Value is a collection of serialized resources of that type
-		ListMultimap<String, String> resources = encodeToString(allResources, parameters);
-
-		for (String nextResourceType : resources.keySet()) {
-
-			ExpandedResourcesList output = new ExpandedResourcesList();
-			output.setStringifiedResources(resources.get(nextResourceType));
-			output.setResourceType(nextResourceType);
-			expandedResourcesList.add(output);
-
-			ourLog.info(
-					"Expanding of {} resources of type {} completed",
-					idList.getIds().size(),
-					idList.getResourceType());
-		}
-		return expandedResourcesList;
+		fetchAllResources(idList, parameters.getPartitionId(), resourceListConsumer);
 	}
 
-	private void applyPostFetchFiltering(
-			List<IBaseResource> theResources,
-			List<String> thePostFetchFilterUrls,
-			String theInstanceId,
-			String theChunkId) {
-		int numRemoved = 0;
-		for (Iterator<IBaseResource> iter = theResources.iterator(); iter.hasNext(); ) {
-			boolean matched = applyPostFetchFilteringForSingleResource(thePostFetchFilterUrls, iter);
-
-			if (!matched) {
-				iter.remove();
-				numRemoved++;
-			}
-		}
-
-		if (numRemoved > 0) {
-			ourLog.info(
-					"Bulk export instance[{}] chunk[{}] - {} resources were filtered out because of post-fetch filter URLs",
-					theInstanceId,
-					theChunkId,
-					numRemoved);
-		}
-	}
-
-	private boolean applyPostFetchFilteringForSingleResource(
-			List<String> thePostFetchFilterUrls, Iterator<IBaseResource> iter) {
-		IBaseResource nextResource = iter.next();
-		String nextResourceType = myFhirContext.getResourceType(nextResource);
-
-		for (String nextPostFetchFilterUrl : thePostFetchFilterUrls) {
-			if (nextPostFetchFilterUrl.contains("?")) {
-				String resourceType = nextPostFetchFilterUrl.substring(0, nextPostFetchFilterUrl.indexOf('?'));
-				if (nextResourceType.equals(resourceType)) {
-					InMemoryMatchResult matchResult = myInMemoryResourceMatcher.match(
-							nextPostFetchFilterUrl, nextResource, null, new SystemRequestDetails());
-					if (matchResult.matched()) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
-	}
-
-	private List<IBaseResource> fetchAllResources(ResourceIdList theIds, RequestPartitionId theRequestPartitionId) {
+	private void fetchAllResources(ResourceIdList theIds, RequestPartitionId theRequestPartitionId, Consumer<List<IBaseResource>> theResourceListConsumer) {
 		ArrayListMultimap<String, String> typeToIds = ArrayListMultimap.create();
 		theIds.getIds().forEach(t -> typeToIds.put(t.getResourceType(), t.getId()));
-
-		List<IBaseResource> resources = new ArrayList<>(theIds.getIds().size());
 
 		for (String resourceType : typeToIds.keySet()) {
 
@@ -384,32 +182,12 @@ public class ExpandResourceAndWriteBinaryStep
 				SearchParameterMap spMap = SearchParameterMap.newSynchronous().add(PARAM_ID, idListParam);
 				IBundleProvider outcome =
 						dao.search(spMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
-				resources.addAll(outcome.getAllResources());
+				theResourceListConsumer.accept(outcome.getAllResources());
 			}
 		}
 
-		return resources;
 	}
 
-	private ListMultimap<String, String> encodeToString(
-			List<IBaseResource> theResources, BulkExportJobParameters theParameters) {
-		IParser parser = getParser(theParameters);
-
-		ListMultimap<String, String> retVal = ArrayListMultimap.create();
-		for (IBaseResource resource : theResources) {
-			String type = myFhirContext.getResourceType(resource);
-			String jsonResource = parser.encodeResourceToString(resource);
-			retVal.put(type, jsonResource);
-		}
-		return retVal;
-	}
-
-	private IParser getParser(BulkExportJobParameters theParameters) {
-		// The parser depends on the output format
-		// but for now, only ndjson is supported
-		// see WriteBinaryStep as well
-		return myFhirContext.newJsonParser().setPrettyPrint(false);
-	}
 
 	/**
 	 * Adds 3 extensions to the `binary.meta` element.
@@ -463,4 +241,301 @@ public class ExpandResourceAndWriteBinaryStep
 	public void setIdHelperServiceForUnitTest(IIdHelperService theIdHelperService) {
 		myIdHelperService = theIdHelperService;
 	}
+
+
+	private class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
+
+		private final Consumer<ExpandedResourcesList> mytheResourceWriter;
+		private final StepExecutionDetails<BulkExportJobParameters, ResourceIdList> myStepExecutionDetails;
+
+		public ExpandResourcesConsumer(StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails, Consumer<ExpandedResourcesList> theResourceWriter) {
+			myStepExecutionDetails = theStepExecutionDetails;
+			mytheResourceWriter = theResourceWriter;
+		}
+
+		@Override
+		public void accept(List<IBaseResource> theResources) throws JobExecutionFailedException {
+			String instanceId = myStepExecutionDetails.getInstance().getInstanceId();
+			String chunkId = myStepExecutionDetails.getChunkId();
+			ResourceIdList idList = myStepExecutionDetails.getData();
+			BulkExportJobParameters parameters = myStepExecutionDetails.getParameters();
+
+			ourLog.info(
+				"Bulk export instance[{}] chunk[{}] - About to expand {} resource IDs into their full resource bodies.",
+				instanceId,
+				chunkId,
+				idList.getIds().size());
+
+			// Apply post-fetch filtering
+			String resourceType = idList.getResourceType();
+			List<String> postFetchFilterUrls = parameters.getPostFetchFilterUrls().stream()
+				.filter(t -> t.substring(0, t.indexOf('?')).equals(resourceType))
+				.collect(Collectors.toList());
+
+			if (!postFetchFilterUrls.isEmpty()) {
+				applyPostFetchFiltering(theResources, postFetchFilterUrls, instanceId, chunkId);
+			}
+
+			// if necessary, expand resources
+			if (parameters.isExpandMdm()) {
+				myBulkExportProcessor.expandMdmResources(theResources);
+			}
+
+			// Normalize terminology
+			if (myStorageSettings.isNormalizeTerminologyForBulkExportJobs()) {
+				ResponseTerminologyTranslationSvc terminologyTranslationSvc = myResponseTerminologyTranslationSvc;
+				if (terminologyTranslationSvc == null) {
+					terminologyTranslationSvc = myApplicationContext.getBean(ResponseTerminologyTranslationSvc.class);
+					myResponseTerminologyTranslationSvc = terminologyTranslationSvc;
+				}
+				terminologyTranslationSvc.processResourcesForTerminologyTranslation(theResources);
+			}
+
+			// Interceptor call
+			if (myInterceptorService.hasHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION)) {
+				for (Iterator<IBaseResource> iter = theResources.iterator(); iter.hasNext(); ) {
+					HookParams params = new HookParams()
+						.add(BulkExportJobParameters.class, myStepExecutionDetails.getParameters())
+						.add(IBaseResource.class, iter.next());
+					boolean outcome =
+						myInterceptorService.callHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_INCLUSION, params);
+					if (!outcome) {
+						iter.remove();
+					}
+				}
+			}
+
+			// encode them - Key is resource type, Value is a collection of serialized resources of that type
+			IParser parser = getParser(parameters);
+
+			ListMultimap<String, String> resourceTypeToStringifiedResources = ArrayListMultimap.create();
+			Map<String, Integer> resourceTypeToTotalSize = new HashMap<>();
+			for (IBaseResource resource : theResources) {
+				String type = myFhirContext.getResourceType(resource);
+				int existingSize = resourceTypeToTotalSize.getOrDefault(type, 0);
+
+				String jsonResource = parser.encodeResourceToString(resource);
+				int newSize = existingSize + jsonResource.length();
+
+				// If adding another stringified resource to the list for the given type
+				// would exceed the configured maximum allowed, then let's send the current
+				// list and flush it. Note that if a single resource exceeds the configurable
+				// maximum then we have no choice but to send it
+				long bulkExportFileMaximumSize = myStorageSettings.getBulkExportFileMaximumSize();
+				if (newSize > bulkExportFileMaximumSize && existingSize > 0) {
+					List<String> stringifiedResources = resourceTypeToStringifiedResources.get(type);
+					writeStringifiedResources(type, stringifiedResources);
+
+					resourceTypeToStringifiedResources.removeAll(type);
+					newSize = jsonResource.length();
+				}
+
+				resourceTypeToStringifiedResources.put(type, jsonResource);
+				resourceTypeToTotalSize.put(type, newSize);
+			}
+
+            for (String nextResourceType : resourceTypeToStringifiedResources.keySet()) {
+				List<String> stringifiedResources = resourceTypeToStringifiedResources.get(nextResourceType);
+				writeStringifiedResources(nextResourceType, stringifiedResources);
+			}
+		}
+
+		private void writeStringifiedResources(String theResourceType, List<String> theStringifiedResources) {
+			if (!theStringifiedResources.isEmpty()) {
+
+				ExpandedResourcesList output = new ExpandedResourcesList();
+				output.setStringifiedResources(theStringifiedResources);
+				output.setResourceType(theResourceType);
+				mytheResourceWriter.accept(output);
+
+				ourLog.info(
+					"Expanding of {} resources of type {} completed",
+					theStringifiedResources.size(),
+					theResourceType);
+			}
+		}
+
+		private void applyPostFetchFiltering(
+			List<IBaseResource> theResources,
+			List<String> thePostFetchFilterUrls,
+			String theInstanceId,
+			String theChunkId) {
+			int numRemoved = 0;
+			for (Iterator<IBaseResource> iter = theResources.iterator(); iter.hasNext(); ) {
+				boolean matched = applyPostFetchFilteringForSingleResource(thePostFetchFilterUrls, iter);
+
+				if (!matched) {
+					iter.remove();
+					numRemoved++;
+				}
+			}
+
+			if (numRemoved > 0) {
+				ourLog.info(
+					"Bulk export instance[{}] chunk[{}] - {} resources were filtered out because of post-fetch filter URLs",
+					theInstanceId,
+					theChunkId,
+					numRemoved);
+			}
+		}
+
+		private boolean applyPostFetchFilteringForSingleResource(
+			List<String> thePostFetchFilterUrls, Iterator<IBaseResource> iter) {
+			IBaseResource nextResource = iter.next();
+			String nextResourceType = myFhirContext.getResourceType(nextResource);
+
+			for (String nextPostFetchFilterUrl : thePostFetchFilterUrls) {
+				if (nextPostFetchFilterUrl.contains("?")) {
+					String resourceType = nextPostFetchFilterUrl.substring(0, nextPostFetchFilterUrl.indexOf('?'));
+					if (nextResourceType.equals(resourceType)) {
+						InMemoryMatchResult matchResult = myInMemoryResourceMatcher.match(
+							nextPostFetchFilterUrl, nextResource, null, new SystemRequestDetails());
+						if (matchResult.matched()) {
+							return true;
+						}
+					}
+				}
+			}
+			return false;
+		}
+
+		private ListMultimap<String, String> encodeToString(
+			List<IBaseResource> theResources, BulkExportJobParameters theParameters) {
+			IParser parser = getParser(theParameters);
+
+			ListMultimap<String, String> retVal = ArrayListMultimap.create();
+			for (IBaseResource resource : theResources) {
+				String type = myFhirContext.getResourceType(resource);
+				String jsonResource = parser.encodeResourceToString(resource);
+				retVal.put(type, jsonResource);
+			}
+			return retVal;
+		}
+
+		private IParser getParser(BulkExportJobParameters theParameters) {
+			// The parser depends on the output format
+			// but for now, only ndjson is supported
+			// see WriteBinaryStep as well
+			return myFhirContext.newJsonParser().setPrettyPrint(false);
+		}
+
+
+	}
+
+	private class NdJsonResourceWriter implements Consumer<ExpandedResourcesList> {
+
+		private final StepExecutionDetails<BulkExportJobParameters, ResourceIdList> myStepExecutionDetails;
+		private final IJobDataSink<BulkExportBinaryFileId> myDataSink;
+		private int myNumResourcesProcessed = 0;
+
+		public NdJsonResourceWriter(StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails, IJobDataSink<BulkExportBinaryFileId> theDataSink) {
+			this.myStepExecutionDetails = theStepExecutionDetails;
+			this.myDataSink = theDataSink;
+		}
+
+		public int getNumResourcesProcessed() {
+			return myNumResourcesProcessed;
+		}
+
+		@Override
+		public void accept(ExpandedResourcesList theExpandedResourcesList) throws JobExecutionFailedException {
+			int batchSize = theExpandedResourcesList.getStringifiedResources().size();
+			ourLog.info("Writing {} resources to binary file", batchSize);
+
+			myNumResourcesProcessed += batchSize;
+
+				@SuppressWarnings("unchecked")
+				IFhirResourceDao<IBaseBinary> binaryDao = myDaoRegistry.getResourceDao("Binary");
+
+				IBaseBinary binary = BinaryUtil.newBinary(myFhirContext);
+
+				addMetadataExtensionsToBinary(myStepExecutionDetails, theExpandedResourcesList, binary);
+
+				binary.setContentType(Constants.CT_FHIR_NDJSON);
+
+				int processedRecordsCount = 0;
+				try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+					try (OutputStreamWriter streamWriter = getStreamWriter(outputStream)) {
+						for (String stringified : theExpandedResourcesList.getStringifiedResources()) {
+							streamWriter.append(stringified);
+							streamWriter.append("\n");
+							processedRecordsCount++;
+						}
+						streamWriter.flush();
+						outputStream.flush();
+					}
+					binary.setContent(outputStream.toByteArray());
+				} catch (IOException ex) {
+					String errorMsg = String.format(
+						"Failure to process resource of type %s : %s",
+						theExpandedResourcesList.getResourceType(), ex.getMessage());
+					ourLog.error(errorMsg);
+
+					throw new JobExecutionFailedException(Msg.code(2431) + errorMsg);
+				}
+
+				SystemRequestDetails srd = new SystemRequestDetails();
+				BulkExportJobParameters jobParameters = myStepExecutionDetails.getParameters();
+				RequestPartitionId partitionId = jobParameters.getPartitionId();
+				if (partitionId == null) {
+					srd.setRequestPartitionId(RequestPartitionId.defaultPartition());
+				} else {
+					srd.setRequestPartitionId(partitionId);
+				}
+
+				// Pick a unique ID and retry until we get one that isn't already used. This is just to
+				// avoid any possibility of people guessing the IDs of these Binaries and fishing for them.
+				while (true) {
+					// Use a random ID to make it harder to guess IDs - 32 characters of a-zA-Z0-9
+					// has 190 bts of entropy according to https://www.omnicalculator.com/other/password-entropy
+					String proposedId = RandomTextUtils.newSecureRandomAlphaNumericString(32);
+					binary.setId(proposedId);
+
+					// Make sure we don't accidentally reuse an ID. This should be impossible given the
+					// amount of entropy in the IDs but might as well be sure.
+					try {
+						IBaseBinary output = binaryDao.read(binary.getIdElement(), new SystemRequestDetails(), true);
+						if (output != null) {
+							continue;
+						}
+					} catch (ResourceNotFoundException e) {
+						// good
+					}
+
+					break;
+				}
+
+				if (myFhirContext.getVersion().getVersion().isNewerThan(FhirVersionEnum.DSTU2)) {
+					if (isNotBlank(jobParameters.getBinarySecurityContextIdentifierSystem())
+						|| isNotBlank(jobParameters.getBinarySecurityContextIdentifierValue())) {
+						FhirTerser terser = myFhirContext.newTerser();
+						terser.setElement(
+							binary,
+							"securityContext.identifier.system",
+							jobParameters.getBinarySecurityContextIdentifierSystem());
+						terser.setElement(
+							binary,
+							"securityContext.identifier.value",
+							jobParameters.getBinarySecurityContextIdentifierValue());
+					}
+				}
+
+				DaoMethodOutcome outcome = binaryDao.update(binary, srd);
+				IIdType id = outcome.getId();
+
+				BulkExportBinaryFileId bulkExportBinaryFileId = new BulkExportBinaryFileId();
+				bulkExportBinaryFileId.setBinaryId(id.getValueAsString());
+				bulkExportBinaryFileId.setResourceType(theExpandedResourcesList.getResourceType());
+				myDataSink.accept(bulkExportBinaryFileId);
+
+				ourLog.info(
+					"Binary writing complete for {} resources of type {}.",
+					processedRecordsCount,
+					theExpandedResourcesList.getResourceType());
+
+		}
+	}
+
+
+
 }

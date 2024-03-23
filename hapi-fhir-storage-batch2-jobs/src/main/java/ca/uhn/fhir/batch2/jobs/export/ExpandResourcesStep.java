@@ -182,7 +182,7 @@ public class ExpandResourcesStep
 
 					if (currentFileSize + nextStringifiedResource.length() > maxFileSize && !currentFileStringifiedResources.isEmpty()) {
 						ExpandedResourcesList output = new ExpandedResourcesList();
-						output.setStringifiedResources(stringifiedResources);
+						output.setStringifiedResources(currentFileStringifiedResources);
 						output.setResourceType(nextResourceType);
 						theDataSink.accept(output);
 
@@ -195,10 +195,12 @@ public class ExpandResourcesStep
 
 				}
 
-				ExpandedResourcesList output = new ExpandedResourcesList();
-				output.setStringifiedResources(stringifiedResources);
-				output.setResourceType(nextResourceType);
-				theDataSink.accept(output);
+				if (!currentFileStringifiedResources.isEmpty()) {
+					ExpandedResourcesList output = new ExpandedResourcesList();
+					output.setStringifiedResources(currentFileStringifiedResources);
+					output.setResourceType(nextResourceType);
+					theDataSink.accept(output);
+				}
 
 				ourLog.info(
 					"Expanding of {} resources of type {} completed",

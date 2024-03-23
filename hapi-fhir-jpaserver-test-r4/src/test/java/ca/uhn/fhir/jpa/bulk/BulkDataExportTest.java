@@ -136,56 +136,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	@RegisterExtension
 	private final HttpClientExtension mySender = new HttpClientExtension();
 
-	/**
-	 * We should never exceed the maximum threshold for a single binary chunk held in memory
-	 * or in disk.
-	 */
-	@Test
-	public void testEnforceMaxFileSizes() {
-
-		/*
-		 * We're going to set the maximum file size to 3000, and create some resources with
-		 * a name that is 1000 chars long. With the other boilerplate text in a resource that
-		 * will put the resource length at just over 1000 chars, meaning that any given
-		 * chunk or file should have only 2 resources in it.
-		 */
-		int testResourceSize = 1000;
-		int maxFileSize = 3 * testResourceSize;
-		myStorageSettings.setBulkExportFileMaximumSize(maxFileSize);
-
-		List<String> expectedIds = new ArrayList<>();
-		for (int i = 0; i < 10; i++) {
-			Patient p = new Patient();
-			p.addName().setFamily(StringUtils.leftPad("", testResourceSize, 'A'));
-			String id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless().getValue();
-			expectedIds.add(id);
-		}
-
-		// set the export options
-		BulkExportJobParameters options = new BulkExportJobParameters();
-		options.setResourceTypes(Sets.newHashSet("Patient"));
-		options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
-		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		String instanceId = verifyBulkExportResults(options, expectedIds, List.of()).getInstanceId();
-
-		runInTransaction(()->{
-			List<Batch2WorkChunkEntity> chunks = myWorkChunkRepository.fetchChunks(PageRequest.ofSize(100000), instanceId);
-			for (var next : chunks) {
-				switch (next.getTargetStepId()) {
-					case WRITE_TO_BINARIES:
-						assertTrue(next.getSerializedData().length() > 100);
-						break;
-					case CREATE_REPORT_STEP:
-						assertTrue(next.getSerializedData().length() > 100);
-						break;
-					default:
-						fail("Unexpected step ID: " + next.getTargetStepId());
-				}
-			}
-		});
-
-	}
-
 	@Test
 	public void testGroupBulkExportWithTypeFilter() {
 		// Create some resources

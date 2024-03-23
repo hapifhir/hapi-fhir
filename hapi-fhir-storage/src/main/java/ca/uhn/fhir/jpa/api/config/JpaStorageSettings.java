@@ -2323,6 +2323,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 * below any hard limits that may be present.
 	 *
 	 * @since 7.2.0
+	 * @see #DEFAULT_BULK_EXPORT_MAXIMUM_WORK_CHUNK_SIZE The default value for this setting
 	 */
 	public long getBulkExportFileMaximumSize() {
 		return myBulkExportFileMaximumSize;
@@ -2337,6 +2338,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 *
 	 * @since 7.2.0
 	 * @see #setBulkExportFileMaximumCapacity(int)
+	 * @see #DEFAULT_BULK_EXPORT_MAXIMUM_WORK_CHUNK_SIZE The default value for this setting
 	 */
 	public void setBulkExportFileMaximumSize(long theBulkExportFileMaximumSize) {
 		Validate.isTrue(theBulkExportFileMaximumSize > 0, "theBulkExportFileMaximumSize must be positive");

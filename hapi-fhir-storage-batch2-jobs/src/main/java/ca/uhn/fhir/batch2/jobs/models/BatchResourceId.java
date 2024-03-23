@@ -22,12 +22,13 @@ package ca.uhn.fhir.batch2.jobs.models;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
-public class BatchResourceId implements IModelJson {
+public class BatchResourceId implements IModelJson, Comparable<BatchResourceId> {
 
 	@JsonProperty("type")
 	private String myResourceType;
@@ -86,6 +87,15 @@ public class BatchResourceId implements IModelJson {
 	public int estimateSerializedSize() {
 		// 19 chars: {"id":"","type":""}
 		return 19 + defaultString(myId).length() + defaultString(myResourceType).length();
+	}
+
+	@Override
+	public int compareTo(@Nonnull BatchResourceId o) {
+		int retVal = o.myResourceType.compareTo(myResourceType);
+		if (retVal == 0) {
+			retVal = o.myId.compareTo(myId);
+		}
+		return retVal;
 	}
 
 	public static BatchResourceId getIdFromPID(IResourcePersistentId thePID, String theResourceType) {

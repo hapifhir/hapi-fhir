@@ -21,6 +21,8 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.IntStream;
 
@@ -218,6 +220,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 			String id = myPatientDao.create(p, mySrd).getId().getIdPart();
 			expectedIds.add(new BatchResourceId().setResourceType("Patient").setId(id));
 		}
+		Collections.sort(expectedIds);
 
 		ResourceIdList resourceList = new ResourceIdList();
 		resourceList.setResourceType("Patient");
@@ -236,10 +239,21 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 
 		// Verify
 		verify(mySink, atLeast(1)).accept(myWorkChunkCaptor.capture());
+		List<BatchResourceId> actualResourceIdList = new ArrayList<>();
 		for (var next : myWorkChunkCaptor.getAllValues()) {
 			int nextSize = String.join("\n", next.getStringifiedResources()).length();
+			ourLog.info("Next size: {}", nextSize);
 			assertThat(nextSize, lessThanOrEqualTo(maxFileSize));
+			next.getStringifiedResources().stream()
+				.filter(StringUtils::isNotBlank)
+				.map(t->myFhirContext.newJsonParser().parseResource(t))
+				.map(t->new BatchResourceId().setResourceType(t.getIdElement().getResourceType()).setId(t.getIdElement().getIdPart()))
+				.forEach(actualResourceIdList::add);
 		}
+
+		Collections.sort(actualResourceIdList);
+		assertEquals(expectedIds, actualResourceIdList);
+
 
 	}
 
