@@ -36,6 +36,7 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.Length;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -43,7 +44,6 @@ import java.util.Date;
 import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.ERROR_MSG_MAX_LENGTH;
 import static ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity.WARNING_MSG_MAX_LENGTH;
-import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.RES_TEXT_VC_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
@@ -104,8 +104,7 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Column(name = "PARAMS_JSON_LOB", nullable = true)
 	private String myParamsJsonLob;
 
-	@Column(name = "PARAMS_JSON_VC", nullable = true, length = RES_TEXT_VC_MAX_LENGTH)
-	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
+	@Column(name = "PARAMS_JSON_VC", nullable = true, length = Length.LONG32)
 	private String myParamsJsonVc;
 
 	@Column(name = "CMB_RECS_PROCESSED", nullable = true)
@@ -153,8 +152,7 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Column(name = "REPORT", nullable = true, length = Integer.MAX_VALUE - 1)
 	private String myReport;
 
-	@Column(name = "REPORT_VC", nullable = true, length = RES_TEXT_VC_MAX_LENGTH)
-	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
+	@Column(name = "REPORT_VC", nullable = true, length = Length.LONG32)
 	private String myReportVc;
 
 	public String getCurrentGatedStepId() {

@@ -38,13 +38,13 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.Length;
 
 import java.io.Serializable;
 import java.util.Date;
 
 import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 import static ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity.STATUS_MAX_LENGTH;
-import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.RES_TEXT_VC_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
@@ -98,8 +98,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 	@Column(name = "CHUNK_DATA", nullable = true, length = Integer.MAX_VALUE - 1)
 	private String mySerializedData;
 
-	@Column(name = "CHUNK_DATA_VC", nullable = true, length = RES_TEXT_VC_MAX_LENGTH)
-	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
+	@Column(name = "CHUNK_DATA_VC", nullable = true, length = Length.LONG32)
 	private String mySerializedDataVc;
 
 	@Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)

@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.entity;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
-import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -51,9 +50,10 @@ import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.SerializationUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.hibernate.Length;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OptimisticLock;
-import org.hibernate.annotations.Type;
+import org.hibernate.type.SqlTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +67,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.RES_TEXT_VC_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
 @Entity
@@ -155,8 +154,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	/**
 	 * Note that this field may have the request partition IDs prepended to it
 	 */
-	@Column(name = "SEARCH_QUERY_STRING_VC", nullable = true, length = RES_TEXT_VC_MAX_LENGTH)
-	@org.hibernate.annotations.Type(type = JpaConstants.ORG_HIBERNATE_TYPE_TEXT_TYPE)
+	@Column(name = "SEARCH_QUERY_STRING_VC", nullable = true, length = Length.LONG32)
 	private String mySearchQueryStringVc;
 
 	@Column(name = "SEARCH_QUERY_STRING_HASH", nullable = true, updatable = false)
@@ -186,8 +184,7 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Column(name = "SEARCH_PARAM_MAP", nullable = true)
 	private byte[] mySearchParameterMap;
 
-	@Column(name = "SEARCH_PARAM_MAP_BIN", nullable = true, length = JpaConstants.ORG_HIBERNATE_TYPE_BINARY_TYPE_LENGTH)
-	@Type(type = JpaConstants.ORG_HIBERNATE_TYPE_BINARY_TYPE)
+	@Column(name = "SEARCH_PARAM_MAP_BIN", nullable = true, length = Length.LONG32)
 	private byte[] mySearchParameterMapBin;
 
 	@Transient
