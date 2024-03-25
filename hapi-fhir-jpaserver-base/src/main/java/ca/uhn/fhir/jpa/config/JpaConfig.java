@@ -288,11 +288,7 @@ public class JpaConfig {
 		return b;
 	}
 
-	@Bean(name = "mySubscriptionTriggeringProvider")
-	@Lazy
-	public SubscriptionTriggeringProvider subscriptionTriggeringProvider() {
-		return new SubscriptionTriggeringProvider();
-	}
+	// FIXME KHS removing SubscriptionTriggeringProvider from this config will break hapi tests
 
 	@Bean
 	@Lazy

@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
@@ -51,6 +52,8 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 
 	private final FhirContext myContext;
 	private JpaStorageSettings myStorageSettings;
+	private SubscriptionSettings mySubscriptionSettings;
+
 	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
 	private IFhirSystemDao<?, ?> mySystemDao;
@@ -62,6 +65,7 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 			@Nonnull RestfulServer theRestfulServer,
 			@Nonnull IFhirSystemDao<?, ?> theSystemDao,
 			@Nonnull JpaStorageSettings theStorageSettings,
+			@Nonnull SubscriptionSettings theSubscriptionSettings,
 			@Nonnull ISearchParamRegistry theSearchParamRegistry,
 			IValidationSupport theValidationSupport) {
 		super(theRestfulServer, theSearchParamRegistry, theValidationSupport);
@@ -74,6 +78,7 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 		myContext = theRestfulServer.getFhirContext();
 		mySystemDao = theSystemDao;
 		myStorageSettings = theStorageSettings;
+		mySubscriptionSettings = theSubscriptionSettings;
 		setIncludeResourceCounts(true);
 	}
 
@@ -95,7 +100,7 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	protected void postProcessRest(FhirTerser theTerser, IBase theRest) {
 		super.postProcessRest(theTerser, theRest);
 
-		if (myStorageSettings
+		if (mySubscriptionSettings
 				.getSupportedSubscriptionTypes()
 				.contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
 			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {

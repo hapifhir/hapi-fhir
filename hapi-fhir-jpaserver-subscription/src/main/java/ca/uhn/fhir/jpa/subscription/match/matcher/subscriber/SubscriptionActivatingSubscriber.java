@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
@@ -66,7 +67,7 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	@Autowired
-	private StorageSettings myStorageSettings;
+	private SubscriptionSettings mySubscriptionSettings;
 
 	@Autowired
 	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
@@ -126,7 +127,7 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 
 		// Only activate supported subscriptions
 		if (subscriptionChannelType == null
-				|| !myStorageSettings.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
+				|| !mySubscriptionSettings.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
 			return false;
 		}
 
@@ -177,6 +178,6 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 	public boolean isChannelTypeSupported(IBaseResource theSubscription) {
 		Subscription.SubscriptionChannelType channelType =
 				mySubscriptionCanonicalizer.getChannelType(theSubscription).toCanonical();
-		return myStorageSettings.getSupportedSubscriptionTypes().contains(channelType);
+		return mySubscriptionSettings.getSupportedSubscriptionTypes().contains(channelType);
 	}
 }

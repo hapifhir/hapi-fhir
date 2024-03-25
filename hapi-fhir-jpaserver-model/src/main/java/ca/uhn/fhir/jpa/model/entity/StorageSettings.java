@@ -95,7 +95,6 @@ public class StorageSettings {
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<>();
 	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myDefaultSearchParamsCanBeOverridden = true;
-	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private boolean myAutoCreatePlaceholderReferenceTargets;
 	private boolean myCrossPartitionSubscriptionEnabled = false;
 	private Integer myBundleBatchPoolSize = DEFAULT_BUNDLE_BATCH_POOL_SIZE;
@@ -134,10 +133,6 @@ public class StorageSettings {
 	 */
 	private boolean myAllowOnlyInMemorySubscriptions = false;
 
-	/**
-	 * Since 6.4.0
-	 */
-	private boolean myQualifySubscriptionMatchingChannelName = true;
 	/**
 	 * Should the {@literal _lamguage} SearchParameter be supported
 	 * on this server?
@@ -780,38 +775,6 @@ public class StorageSettings {
 	}
 
 	/**
-	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
-	 * to the server matching these types will be activated.
-	 */
-	public StorageSettings addSupportedSubscriptionType(
-			Subscription.SubscriptionChannelType theSubscriptionChannelType) {
-		mySupportedSubscriptionTypes.add(theSubscriptionChannelType);
-		return this;
-	}
-
-	/**
-	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
-	 * to the server matching these types will be activated.
-	 */
-	public Set<Subscription.SubscriptionChannelType> getSupportedSubscriptionTypes() {
-		return Collections.unmodifiableSet(mySupportedSubscriptionTypes);
-	}
-
-	/**
-	 * Indicate whether a subscription channel type is supported by this server.
-	 *
-	 * @return true if at least one subscription channel type is supported by this server false otherwise.
-	 */
-	public boolean hasSupportedSubscriptionTypes() {
-		return CollectionUtils.isNotEmpty(mySupportedSubscriptionTypes);
-	}
-
-	@VisibleForTesting
-	public void clearSupportedSubscriptionTypesForUnitTest() {
-		mySupportedSubscriptionTypes.clear();
-	}
-
-	/**
 	 * If e-mail subscriptions are supported, the From address used when sending e-mails
 	 */
 	public String getEmailFromAddress() {
@@ -1286,28 +1249,6 @@ public class StorageSettings {
 	 */
 	public void setCrossPartitionSubscriptionEnabled(boolean theAllowCrossPartitionSubscription) {
 		myCrossPartitionSubscriptionEnabled = theAllowCrossPartitionSubscription;
-	}
-
-	/**
-	 * This setting controls whether the {@link  BaseChannelSettings#isQualifyChannelName}
-	 * should be qualified or not.
-	 * Default is true, ie, the channel name will be qualified.
-	 *
-	 * @since 6.4.0
-	 */
-	public void setQualifySubscriptionMatchingChannelName(boolean theQualifySubscriptionMatchingChannelName) {
-		myQualifySubscriptionMatchingChannelName = theQualifySubscriptionMatchingChannelName;
-	}
-
-	/**
-	 * This setting return whether the {@link BaseChannelSettings#isQualifyChannelName}
-	 * should be qualified or not.
-	 *
-	 * @return whether the {@link BaseChannelSettings#isQualifyChannelName} is qualified or not
-	 * @since 6.4.0
-	 */
-	public boolean isQualifySubscriptionMatchingChannelName() {
-		return myQualifySubscriptionMatchingChannelName;
 	}
 
 	/**

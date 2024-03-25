@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicMatchingSubscriber;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegisteringSubscriber;
 import jakarta.annotation.PreDestroy;
@@ -63,7 +64,7 @@ public class MatchingQueueSubscriberLoader {
 	private SubscriptionActivatingSubscriber mySubscriptionActivatingSubscriber;
 
 	@Autowired
-	private StorageSettings myStorageSettings;
+	private SubscriptionSettings mySubscriptionSettings;
 
 	@EventListener(ContextRefreshedEvent.class)
 	@Order(IHapiBootOrder.SUBSCRIPTION_MATCHING_CHANNEL_HANDLER)
@@ -92,7 +93,7 @@ public class MatchingQueueSubscriberLoader {
 
 	private ChannelConsumerSettings getChannelConsumerSettings() {
 		ChannelConsumerSettings channelConsumerSettings = new ChannelConsumerSettings();
-		channelConsumerSettings.setQualifyChannelName(myStorageSettings.isQualifySubscriptionMatchingChannelName());
+		channelConsumerSettings.setQualifyChannelName(mySubscriptionSettings.isQualifySubscriptionMatchingChannelName());
 		return channelConsumerSettings;
 	}
 

@@ -41,6 +41,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
 import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -105,7 +106,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private JpaStorageSettings myStorageSettings;
+	private SubscriptionSettings mySubscriptionSettings;
 
 	@Autowired
 	private ISearchCoordinatorSvc<? extends IResourcePersistentId<?>> mySearchCoordinatorSvc;
@@ -134,6 +135,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
+	public SubscriptionTriggeringSvcImpl() {}
+
 	@Override
 	public IBaseParameters triggerSubscription(
 			@Nullable List<IPrimitiveType<String>> theResourceIds,
@@ -141,7 +144,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			@Nullable IIdType theSubscriptionId,
 			RequestDetails theRequestDetails) {
 
-		if (myStorageSettings.getSupportedSubscriptionTypes().isEmpty()) {
+		if (mySubscriptionSettings.getSupportedSubscriptionTypes().isEmpty()) {
 			throw new PreconditionFailedException(Msg.code(22) + "Subscription processing not active on this server");
 		}
 

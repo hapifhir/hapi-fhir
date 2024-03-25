@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFact
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
@@ -62,14 +63,14 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceModifiedSubmitterSvc.class);
 	private volatile MessageChannel myMatchingChannel;
 
-	private final StorageSettings myStorageSettings;
+	private final SubscriptionSettings mySubscriptionSettings;
 	private final SubscriptionChannelFactory mySubscriptionChannelFactory;
 	private final IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 	private final IHapiTransactionService myHapiTransactionService;
 
 	@EventListener(classes = {ContextRefreshedEvent.class})
 	public void startIfNeeded() {
-		if (!myStorageSettings.hasSupportedSubscriptionTypes()) {
+		if (!mySubscriptionSettings.hasSupportedSubscriptionTypes()) {
 			ourLog.debug(
 					"Subscriptions are disabled on this server.  Skipping {} channel creation.",
 					SUBSCRIPTION_MATCHING_CHANNEL_NAME);
@@ -82,11 +83,11 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 	}
 
 	public ResourceModifiedSubmitterSvc(
-			StorageSettings theStorageSettings,
+		    SubscriptionSettings theSubscriptionSettings,
 			SubscriptionChannelFactory theSubscriptionChannelFactory,
 			IResourceModifiedMessagePersistenceSvc resourceModifiedMessagePersistenceSvc,
 			IHapiTransactionService theHapiTransactionService) {
-		myStorageSettings = theStorageSettings;
+		mySubscriptionSettings = theSubscriptionSettings;
 		mySubscriptionChannelFactory = theSubscriptionChannelFactory;
 		myResourceModifiedMessagePersistenceSvc = resourceModifiedMessagePersistenceSvc;
 		myHapiTransactionService = theHapiTransactionService;
@@ -210,7 +211,7 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 
 	private ChannelProducerSettings getChannelProducerSettings() {
 		ChannelProducerSettings channelProducerSettings = new ChannelProducerSettings();
-		channelProducerSettings.setQualifyChannelName(myStorageSettings.isQualifySubscriptionMatchingChannelName());
+		channelProducerSettings.setQualifyChannelName(mySubscriptionSettings.isQualifySubscriptionMatchingChannelName());
 		return channelProducerSettings;
 	}
 

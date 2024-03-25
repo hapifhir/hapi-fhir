@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -59,10 +60,10 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 	private volatile CapabilityStatement myCachedValue;
 	private JpaStorageSettings myStorageSettings;
+	private SubscriptionSettings mySubscriptionSettings;
 	private ISearchParamRegistry mySearchParamRegistry;
 	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
-	private RestfulServer myRestfulServer;
 	private IFhirSystemDao<Bundle, Meta> mySystemDao;
 
 	private RestfulServerConfiguration myServerConfiguration;
@@ -84,11 +85,12 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 			RestfulServer theRestfulServer,
 			IFhirSystemDao<Bundle, Meta> theSystemDao,
 			JpaStorageSettings theStorageSettings,
+			SubscriptionSettings theSubscriptionSettings,
 			ISearchParamRegistry theSearchParamRegistry) {
 		super(theRestfulServer);
-		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
 		myStorageSettings = theStorageSettings;
+		mySubscriptionSettings = theSubscriptionSettings;
 		myServerConfiguration = theRestfulServer.createConfiguration();
 		super.setCache(false);
 		setSearchParamRegistry(theSearchParamRegistry);
@@ -176,7 +178,7 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 		massage(retVal);
 
-		if (myStorageSettings
+		if (mySubscriptionSettings
 				.getSupportedSubscriptionTypes()
 				.contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
 			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
@@ -295,7 +297,6 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 	@Override
 	public void setRestfulServer(RestfulServer theRestfulServer) {
-		this.myRestfulServer = theRestfulServer;
 		super.setRestfulServer(theRestfulServer);
 	}
 

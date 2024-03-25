@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
+import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu2.composite.MetaDt;
@@ -58,6 +59,8 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 
 	private volatile Conformance myCachedValue;
 	private JpaStorageSettings myStorageSettings;
+	private SubscriptionSettings mySubscriptionSettings;
+
 	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
 	private RestfulServer myRestfulServer;
@@ -80,11 +83,13 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 	public JpaConformanceProviderDstu2(
 			RestfulServer theRestfulServer,
 			IFhirSystemDao<Bundle, MetaDt> theSystemDao,
-			JpaStorageSettings theStorageSettings) {
+			JpaStorageSettings theStorageSettings,
+			SubscriptionSettings theSubscriptionSettings) {
 		super(theRestfulServer);
 		myRestfulServer = theRestfulServer;
 		mySystemDao = theSystemDao;
 		myStorageSettings = theStorageSettings;
+		mySubscriptionSettings = theSubscriptionSettings;
 		super.setCache(false);
 		setIncludeResourceCounts(true);
 	}
@@ -135,7 +140,7 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 			}
 		}
 
-		if (myStorageSettings
+		if (mySubscriptionSettings
 				.getSupportedSubscriptionTypes()
 				.contains(Subscription.SubscriptionChannelType.WEBSOCKET)) {
 			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {

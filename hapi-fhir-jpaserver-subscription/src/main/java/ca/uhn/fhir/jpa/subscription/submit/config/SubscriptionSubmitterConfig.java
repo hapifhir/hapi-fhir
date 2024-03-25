@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.subscription.async.AsyncResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
+import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionQueryValidator;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
@@ -75,10 +76,10 @@ public class SubscriptionSubmitterConfig {
 			IHapiTransactionService theHapiTransactionService,
 			IResourceModifiedMessagePersistenceSvc theResourceModifiedMessagePersistenceSvc,
 			SubscriptionChannelFactory theSubscriptionChannelFactory,
-			StorageSettings theStorageSettings) {
+			SubscriptionSettings theSubscriptionSettings) {
 
 		return new ResourceModifiedSubmitterSvc(
-				theStorageSettings,
+			    theSubscriptionSettings,
 				theSubscriptionChannelFactory,
 				theResourceModifiedMessagePersistenceSvc,
 				theHapiTransactionService);

@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
+import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
@@ -42,6 +43,8 @@ public class SubscriptionTestUtil {
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
+	@Autowired
+	private SubscriptionSettings mySubscriptionSettings;
 	@Autowired
 	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 	@Autowired
@@ -76,27 +79,27 @@ public class SubscriptionTestUtil {
 	}
 
 	public void registerEmailInterceptor() {
-		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
+		mySubscriptionSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
 		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void registerRestHookInterceptor() {
-		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
+		mySubscriptionSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
 		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void registerMessageInterceptor() {
-		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
+		mySubscriptionSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.MESSAGE);
 		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void registerWebSocketInterceptor() {
-		myStorageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
+		mySubscriptionSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
 		mySubscriptionSubmitInterceptorLoader.start();
 	}
 
 	public void unregisterSubscriptionInterceptor() {
-		myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
+		mySubscriptionSettings.clearSupportedSubscriptionTypesForUnitTest();
 		mySubscriptionSubmitInterceptorLoader.unregisterInterceptorsForUnitTest();
 	}
 
