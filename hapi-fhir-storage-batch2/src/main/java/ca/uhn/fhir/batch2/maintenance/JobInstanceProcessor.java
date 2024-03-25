@@ -286,7 +286,7 @@ public class JobInstanceProcessor {
 		return new PagingIterator<>(WORK_CHUNK_METADATA_BATCH_SIZE, (index, batchsize, consumer) -> {
 			Pageable pageable = Pageable.ofSize(batchsize).withPage(index);
 			Page<WorkChunkMetadata> results = myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(
-				pageable, myInstanceId, Set.of(WorkChunkStatusEnum.READY));
+					pageable, myInstanceId, Set.of(WorkChunkStatusEnum.READY));
 			for (WorkChunkMetadata metadata : results) {
 				consumer.accept(metadata);
 			}
