@@ -126,10 +126,16 @@ public class Batch2WorkChunkEntity implements Serializable {
 	@Column(name = "WARNING_MSG", length = WARNING_MSG_MAX_LENGTH, nullable = true)
 	private String myWarningMessage;
 
+	/**
+	 * The next time the work chunk can attempt to rerun its work step.
+	 */
 	@Column(name = "NEXT_POLL_TIME", nullable = true)
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myNextPollTime;
 
+	/**
+	 * The number of times the work chunk has had its state set back to POLL_WAITING.
+	 */
 	@Column(name = "POLL_ATTEMPTS", nullable = true)
 	private int myPollAttempts;
 
