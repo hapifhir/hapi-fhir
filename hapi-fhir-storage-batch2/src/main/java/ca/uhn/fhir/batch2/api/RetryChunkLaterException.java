@@ -6,7 +6,7 @@ package ca.uhn.fhir.batch2.api;
  */
 public class RetryChunkLaterException extends RuntimeException {
 
-	private static final int ONE_MIN = 60*1000; // 1 min
+	private static final int ONE_MIN = 60 * 1000; // 1 min
 
 	/**
 	 * The delay to wait (in ms) for the next poll call.

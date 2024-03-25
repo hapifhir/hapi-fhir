@@ -250,7 +250,8 @@ class WorkChannelMessageHandler implements MessageHandler {
 
 		processingPreparation.ifPresentOrElse(
 				// all the setup is happy and committed.  Do the work.
-				process -> process.myStepExector.executeStep(), () -> {
+				process -> process.myStepExector.executeStep(),
+				() -> {
 					// discard the chunk
 					ourLog.debug("Discarding chunk notification {}", workNotification);
 				});

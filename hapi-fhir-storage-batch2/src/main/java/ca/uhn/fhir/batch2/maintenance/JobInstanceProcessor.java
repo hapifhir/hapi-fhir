@@ -42,9 +42,6 @@ import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -440,6 +437,7 @@ public class JobInstanceProcessor {
 	private void processPollingChunks(String theInstanceId) {
 		int updatedChunkCount = myJobPersistence.updatePollWaitingChunksForJobIfReady(theInstanceId);
 
-		ourLog.debug("Moved {} Work Chunks in POLL_WAITING to READY for Job Instance {}", updatedChunkCount, theInstanceId);
+		ourLog.debug(
+				"Moved {} Work Chunks in POLL_WAITING to READY for Job Instance {}", updatedChunkCount, theInstanceId);
 	}
 }

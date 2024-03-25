@@ -78,7 +78,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -310,11 +309,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public int updatePollWaitingChunksForJobIfReady(String theInstanceId) {
-		return myWorkChunkRepository.updateWorkChunksForPollWaiting(theInstanceId,
-			WorkChunkStatusEnum.READY,
-			Set.of(WorkChunkStatusEnum.POLL_WAITING),
-			Date.from(Instant.now())
-		);
+		return myWorkChunkRepository.updateWorkChunksForPollWaiting(
+				theInstanceId,
+				WorkChunkStatusEnum.READY,
+				Set.of(WorkChunkStatusEnum.POLL_WAITING),
+				Date.from(Instant.now()));
 	}
 
 	@Override
@@ -365,10 +364,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	public void onWorkChunkPollDelay(String theChunkId, int thePollDelayMs) {
 		int updated = myWorkChunkRepository.updateWorkChunkNextPollTime(
-			theChunkId,
-			WorkChunkStatusEnum.POLL_WAITING,
-			Date.from(Instant.now().plus(thePollDelayMs, ChronoUnit.MILLIS))
-		);
+				theChunkId,
+				WorkChunkStatusEnum.POLL_WAITING,
+				Date.from(Instant.now().plus(thePollDelayMs, ChronoUnit.MILLIS)));
 
 		if (updated != 1) {
 			ourLog.warn("Expected to update 1 work chunk's poll delay; but found {}", updated);
@@ -514,7 +512,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public void updateWorkChunkToStatus(String theChunkId, WorkChunkStatusEnum theOldStatus, WorkChunkStatusEnum theNewStatus) {
+	public void updateWorkChunkToStatus(
+			String theChunkId, WorkChunkStatusEnum theOldStatus, WorkChunkStatusEnum theNewStatus) {
 		int updated = myWorkChunkRepository.updateChunkStatus(theChunkId, theNewStatus, theOldStatus);
 
 		if (updated != 1) {
