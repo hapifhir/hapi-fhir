@@ -49,7 +49,8 @@ public interface IBatch2WorkChunkRepository
 	@Query("SELECT new Batch2WorkChunkEntity("
 			+ "e.myId, e.mySequence, e.myJobDefinitionId, e.myJobDefinitionVersion, e.myInstanceId, e.myTargetStepId, e.myStatus,"
 			+ "e.myCreateTime, e.myStartTime, e.myUpdateTime, e.myEndTime,"
-			+ "e.myErrorMessage, e.myErrorCount, e.myRecordsProcessed, e.myWarningMessage"
+			+ "e.myErrorMessage, e.myErrorCount, e.myRecordsProcessed, e.myWarningMessage,"
+			+ "e.myNextPollTime, e.myPollAttempts"
 			+ ") FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId ORDER BY e.mySequence ASC, e.myId ASC")
 	List<Batch2WorkChunkEntity> fetchChunksNoData(Pageable thePageRequest, @Param("instanceId") String theInstanceId);
 
@@ -80,6 +81,14 @@ public interface IBatch2WorkChunkRepository
 	int updateWorkChunkNextPollTime(@Param("id") String theChunkId,
 									 @Param("status") WorkChunkStatusEnum theStatus,
 									 @Param("nextPollTime") Date theNextPollTime);
+
+	@Modifying
+	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myNextPollTime = null WHERE e.myInstanceId = :instanceId AND e.myStatus IN(:states) AND e.myNextPollTime IS NOT NULL AND e.myNextPollTime <= :pollTime")
+	int updateWorkChunksForPollWaiting(
+		@Param("instanceId") String theInstanceId,
+		@Param("status") WorkChunkStatusEnum theNewStatus,
+		@Param("states") Set<WorkChunkStatusEnum> theStates,
+		@Param("pollTime") Date theTime);
 
 	@Modifying
 	@Query(

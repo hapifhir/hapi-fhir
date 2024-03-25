@@ -92,6 +92,7 @@ public interface IWorkChunkPersistence {
 	 * @param theChunkId the id of the chunk to update
 	 * @param thePollDelayMs the amount of time (after now) to wait (in ms)
 	 */
+	@Transactional
 	void onWorkChunkPollDelay(String theChunkId, int thePollDelayMs);
 
 	/**

@@ -35,6 +35,7 @@ import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
+import net.sf.saxon.trans.SymbolicName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,8 +50,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -434,12 +437,17 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	public void testJobWithLongPollingStep() throws InterruptedException {
 		// create job definition
 		int callsToMake = 3;
+		int chunksToAwait = 2;
 		String jobId = new Exception().getStackTrace()[0].getMethodName();
 
-		AtomicInteger pollCounter = new AtomicInteger();
-
+		HashMap<String, AtomicInteger> chunkToCounter = new HashMap<>();
+		HashMap<String, Integer> chunkToCallsToMake = new HashMap<>();
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> {
-			myFirstStepLatch.call(1);
+			for (int i = 0; i < chunksToAwait; i++) {
+				String cv = "chunk" + i;
+				chunkToCallsToMake.put(cv, callsToMake);
+				sink.accept(new FirstStepOutput().setValue(cv));
+			}
 			return RunOutcome.SUCCESS;
 		};
 
@@ -448,9 +456,18 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			// simulate a call
 			Awaitility.await().atMost(100, TimeUnit.MICROSECONDS);
 
+			String chunkValue = step.getData().myTestValue;
+			if (!chunkToCounter.containsKey(chunkValue)) {
+				chunkToCounter.put(chunkValue, new AtomicInteger());
+			}
+			AtomicInteger pollCounter = chunkToCounter.get(chunkValue);
+
+			int count = pollCounter.getAndIncrement();
+
 			// we use Batch2FastSchedulerConfig, so we have a fast scheduler
 			// that should catch and call repeatedly pretty quickly
-			if (pollCounter.getAndIncrement() > callsToMake) {
+			if (count > chunkToCallsToMake.get(chunkValue)) {
+				sink.accept(new SecondStepOutput());
 				return RunOutcome.SUCCESS;
 			}
 			throw new RetryChunkLaterException(300);
@@ -459,6 +476,8 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		// step 3
 		ILastJobStepWorker<TestJobParameters, SecondStepOutput> last = (step, sink) -> {
 			myLastStepLatch.call(1);
+			sink.accept(new VoidModel());
+			System.out.println("here i am");
 			return RunOutcome.SUCCESS;
 		};
 
@@ -489,21 +508,21 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		// test
 		JobInstanceStartRequest request = buildRequest(jobId);
-		myFirstStepLatch.setExpectedCount(1);
-		myLastStepLatch.setExpectedCount(1);
+		myLastStepLatch.setExpectedCount(chunksToAwait);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
 		String instanceId = startResponse.getInstanceId();
 
 		// waiting for the job
-		myBatch2JobHelper.awaitGatedStepId(FIRST_STEP_ID, instanceId);
-		myFirstStepLatch.awaitExpected();
-		myBatch2JobHelper.awaitGatedStepId(SECOND_STEP_ID, instanceId);
+		myBatch2JobHelper.awaitJobCompletion(startResponse);
+		JobInstance instance = myJobCoordinator.getInstance(instanceId);
+		System.out.println(instance.getStatus().name());
 		myLastStepLatch.awaitExpected();
 
-		myBatch2JobHelper.awaitJobCompletion(instanceId);
-
 		// verify
-		assertEquals(callsToMake, pollCounter.get());
+		assertEquals(chunksToAwait, chunkToCounter.size());
+		for (Map.Entry<String, AtomicInteger> set : chunkToCounter.entrySet()) {
+			assertEquals(callsToMake, set.getValue().get());
+		}
 	}
 
 	@Test
@@ -758,7 +777,15 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	static class FirstStepOutput implements IModelJson {
+		@JsonProperty("test")
+		private String myTestValue;
+
 		FirstStepOutput() {
+		}
+
+		public FirstStepOutput setValue(String theV) {
+			myTestValue = theV;
+			return this;
 		}
 	}
 

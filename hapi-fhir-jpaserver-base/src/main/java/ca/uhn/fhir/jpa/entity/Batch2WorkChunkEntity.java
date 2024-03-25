@@ -194,7 +194,9 @@ public class Batch2WorkChunkEntity implements Serializable {
 				theWorkChunk.getErrorMessage(),
 				theWorkChunk.getErrorCount(),
 				theWorkChunk.getRecordsProcessed(),
-				theWorkChunk.getWarningMessage());
+				theWorkChunk.getWarningMessage(),
+				theWorkChunk.getNextPollTime(),
+				theWorkChunk.getPollAttempts());
 		entity.setSerializedData(theWorkChunk.getData());
 
 		return entity;

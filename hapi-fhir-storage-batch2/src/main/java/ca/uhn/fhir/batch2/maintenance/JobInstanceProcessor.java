@@ -39,10 +39,11 @@ import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
-import org.springframework.transaction.PlatformTransactionManager;
 
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,7 +53,7 @@ public class JobInstanceProcessor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final long PURGE_THRESHOLD = 7L * DateUtils.MILLIS_PER_DAY;
 
-	class ReadyChunkIterator implements Iterator<WorkChunkMetadata> {
+	class PagingChunkIterator implements Iterator<WorkChunkMetadata> {
 
 		// 10,000 - we want big batches
 		private static final int PAGE_SIZE = 10000;
@@ -65,14 +66,18 @@ public class JobInstanceProcessor {
 
 		private final String myInstanceId;
 
-		public ReadyChunkIterator(String theInstanceId) {
+		private final Set<WorkChunkStatusEnum> myStatuses = new HashSet<>();
+
+		public PagingChunkIterator(String theInstanceId, WorkChunkStatusEnum... theStatuses) {
 			myInstanceId = theInstanceId;
+			myStatuses.addAll(Arrays.asList(theStatuses));
+			assert !myStatuses.isEmpty() : "Must have at least one status of interest.";
 		}
 
 		private void getNextPage() {
 			if (currentPage == null || currentPage.hasNext()) {
 				currentPage = myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(
-						myPageIndex++, getPageSize(), myInstanceId, Set.of(WorkChunkStatusEnum.READY));
+						myPageIndex++, getPageSize(), myInstanceId, myStatuses);
 				myItemIndex = 0;
 			} else {
 				currentPage = Page.empty();
@@ -148,7 +153,7 @@ public class JobInstanceProcessor {
 		JobDefinition<? extends IModelJson> jobDefinition =
 				myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
 
-		processPollingChunks(theInstance, jobDefinition);
+		processPollingChunks(theInstance.getInstanceId());
 		enqueueReadyChunks(theInstance, jobDefinition, false);
 		cleanupInstance(theInstance);
 		triggerGatedExecutions(theInstance, jobDefinition);
@@ -332,8 +337,8 @@ public class JobInstanceProcessor {
 		return false;
 	}
 
-	protected ReadyChunkIterator getReadyChunks(String theInstanceId) {
-		return new ReadyChunkIterator(theInstanceId);
+	protected PagingChunkIterator getReadyChunks(String theInstanceId) {
+		return new PagingChunkIterator(theInstanceId, WorkChunkStatusEnum.READY);
 	}
 
 	/**
@@ -475,24 +480,9 @@ public class JobInstanceProcessor {
 		enqueueReadyChunks(theInstance, theJobDefinition, true);
 	}
 
-	private void processPollingChunks(JobInstance theInstance, JobDefinition<?> theJobDefinition) {
-		TransactionStatus transactionStatus = myTransactionManager.getTransaction(new DefaultTransactionDefinition());
+	private void processPollingChunks(String theInstanceId) {
+		int updatedChunkCount = myJobPersistence.updatePollWaitingChunksForJobIfReady(theInstanceId);
 
-		Stream<WorkChunk> chunks = myJobPersistence.fetchAllWorkChunksForJobInStates(theInstance.getInstanceId(), Set.of(WorkChunkStatusEnum.POLL_WAITING));
-
-		chunks.forEach(chunk -> {
-			Date pollTime = chunk.getNextPollTime();
-			if (pollTime.after(new Date())) {
-				/*
-				 * We'll update these 1 at a time;
-				 * We're unlikely to have many jobs with many steps
-				 * in this state. But if we ever do, we can update this area.
-				 */
-				myJobPersistence.updateWorkChunkToStatus(chunk.getId(),
-					WorkChunkStatusEnum.POLL_WAITING,
-					WorkChunkStatusEnum.READY);
-			}
-		});
-		myTransactionManager.commit(transactionStatus);
+		ourLog.debug("Moved {} Work Chunks in POLL_WAITING to READY for Job Instance {}", updatedChunkCount, theInstanceId);
 	}
 }

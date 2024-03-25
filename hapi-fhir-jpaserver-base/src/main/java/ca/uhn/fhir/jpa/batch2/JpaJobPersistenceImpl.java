@@ -309,6 +309,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	public int updatePollWaitingChunksForJobIfReady(String theInstanceId) {
+		return myWorkChunkRepository.updateWorkChunksForPollWaiting(theInstanceId,
+			WorkChunkStatusEnum.READY,
+			Set.of(WorkChunkStatusEnum.POLL_WAITING),
+			Date.from(Instant.now())
+		);
+	}
+
+	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex) {
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.DESC, CREATE_TIME);

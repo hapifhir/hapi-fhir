@@ -20,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.util.ArrayList;
@@ -28,7 +27,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -48,18 +46,18 @@ public class JobInstanceProcessorTest {
 
 	public static class TestJobInstanceProcessor extends JobInstanceProcessor {
 
-		private ReadyChunkIterator mySpy;
+		private PagingChunkIterator mySpy;
 
 		public TestJobInstanceProcessor(IJobPersistence theJobPersistence, BatchJobSender theBatchJobSender, String theInstanceId, JobChunkProgressAccumulator theProgressAccumulator, IReductionStepExecutorService theReductionStepExecutorService, JobDefinitionRegistry theJobDefinitionRegistry, PlatformTransactionManager theTransactionManager) {
 			super(theJobPersistence, theBatchJobSender, theInstanceId, theProgressAccumulator, theReductionStepExecutorService, theJobDefinitionRegistry, theTransactionManager);
 		}
 
-		public void setSpy(ReadyChunkIterator theSpy) {
+		public void setSpy(PagingChunkIterator theSpy) {
 			mySpy = theSpy;
 		}
 
 		@Override
-		protected ReadyChunkIterator getReadyChunks(String theInstanceId) {
+		protected PagingChunkIterator getReadyChunks(String theInstanceId) {
 			if (mySpy == null) {
 				return super.getReadyChunks(theInstanceId);
 			}
@@ -104,7 +102,7 @@ public class JobInstanceProcessorTest {
 		);
 
 		// we need to spy our iterator so we don't use 1000s in this test
-		JobInstanceProcessor.ReadyChunkIterator chunkIterator = spy(myJobInstanceProcessor.getReadyChunks(instanceId));
+		JobInstanceProcessor.PagingChunkIterator chunkIterator = spy(myJobInstanceProcessor.getReadyChunks(instanceId));
 
 		// mock
 		when(myJobPersistence.fetchInstance(eq(instanceId)))
