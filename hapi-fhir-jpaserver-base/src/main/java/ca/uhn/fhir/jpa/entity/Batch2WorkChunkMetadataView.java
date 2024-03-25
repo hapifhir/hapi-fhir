@@ -14,6 +14,10 @@ import java.io.Serializable;
 
 import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 
+/**
+ * A view for a Work Chunk that contains only the most necessary information
+ * to satisfy the no-data path.
+ */
 @Entity
 @Immutable
 @Subselect("SELECT e.id as id, "

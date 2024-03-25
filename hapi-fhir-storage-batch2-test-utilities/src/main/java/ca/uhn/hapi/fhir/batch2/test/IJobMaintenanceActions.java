@@ -3,6 +3,7 @@ package ca.uhn.hapi.fhir.batch2.test;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
 import ca.uhn.test.concurrency.PointcutLatch;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,6 +15,11 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 
 	Logger ourLog = LoggerFactory.getLogger(IJobMaintenanceActions.class);
 
+	@BeforeEach
+	default void before() {
+		enableMaintenanceRunner(false);
+	}
+
 	@Test
 	default void test_gatedJob_stepReady_advances() throws InterruptedException {
 		// setup
@@ -24,7 +30,6 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
    			2|READY,2|QUEUED
 		""";
 		int numToTransition = 2;
-		enableMaintenanceRunner(false);
 		PointcutLatch sendLatch = disableWorkChunkMessageHandler();
 		sendLatch.setExpectedCount(numToTransition);
 		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(initialState, true);
@@ -101,7 +106,6 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 	})
 	default void testGatedStep2NotReady_notAdvance(String theChunkState) throws InterruptedException {
 		// setup
-		enableMaintenanceRunner(false);
 		PointcutLatch sendingLatch = disableWorkChunkMessageHandler();
 		sendingLatch.setExpectedCount(0);
 		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(theChunkState, true);
@@ -145,7 +149,6 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 	})
 	default void testGatedStep2ReadyToAdvance_advanceToStep3(String theChunkState) throws InterruptedException {
 		// setup
-		enableMaintenanceRunner(false);
 		PointcutLatch sendingLatch = disableWorkChunkMessageHandler();
 		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(theChunkState, true);
 		createChunksInStates(result);
@@ -160,7 +163,7 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 	}
 
 	@Test
-	default void test_ungatedJob_advancesSteps() throws InterruptedException {
+	default void test_ungatedJob_queuesReadyChunks() throws InterruptedException {
 		// setup
 		String state = 		"""
      		# READY chunks should transition; others should stay
@@ -174,7 +177,6 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 		int expectedTransitions = 2;
 		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(state, false);
 
-		enableMaintenanceRunner(false);
 		PointcutLatch sendLatch = disableWorkChunkMessageHandler();
 		sendLatch.setExpectedCount(expectedTransitions);
 		createChunksInStates(result);
