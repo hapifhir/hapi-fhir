@@ -34,11 +34,13 @@ import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator;
 import ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.model.api.PagingIterator;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -53,61 +55,8 @@ public class JobInstanceProcessor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	public static final long PURGE_THRESHOLD = 7L * DateUtils.MILLIS_PER_DAY;
 
-	class PagingChunkIterator implements Iterator<WorkChunkMetadata> {
-
-		// 10,000 - we want big batches
-		private static final int PAGE_SIZE = 10000;
-
-		private Page<WorkChunkMetadata> currentPage;
-
-		private int myPageIndex = 0;
-
-		private int myItemIndex = 0;
-
-		private final String myInstanceId;
-
-		private final Set<WorkChunkStatusEnum> myStatuses = new HashSet<>();
-
-		public PagingChunkIterator(String theInstanceId, WorkChunkStatusEnum... theStatuses) {
-			myInstanceId = theInstanceId;
-			myStatuses.addAll(Arrays.asList(theStatuses));
-			assert !myStatuses.isEmpty() : "Must have at least one status of interest.";
-		}
-
-		private void getNextPage() {
-			if (currentPage == null || currentPage.hasNext()) {
-				currentPage = myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(
-						myPageIndex++, getPageSize(), myInstanceId, myStatuses);
-				myItemIndex = 0;
-			} else {
-				currentPage = Page.empty();
-			}
-		}
-
-		int getPageSize() {
-			return PAGE_SIZE;
-		}
-
-		@Override
-		public boolean hasNext() {
-			if (currentPage == null) {
-				getNextPage();
-			}
-			return currentPage.getContent().size() > myItemIndex || currentPage.hasNext();
-		}
-
-		@Override
-		public WorkChunkMetadata next() {
-			if (myItemIndex >= currentPage.getSize()) {
-				getNextPage();
-			}
-			if (myItemIndex < currentPage.getSize()) {
-				return currentPage.getContent().get(myItemIndex++);
-			}
-			return null;
-		}
-	}
-
+	// 10k; we want to get as many as we can
+	private static final int WORK_CHUNK_METADATA_BATCH_SIZE = 10000;
 	private final IJobPersistence myJobPersistence;
 	private final BatchJobSender myBatchJobSender;
 	private final JobChunkProgressAccumulator myProgressAccumulator;
@@ -337,8 +286,15 @@ public class JobInstanceProcessor {
 		return false;
 	}
 
-	protected PagingChunkIterator getReadyChunks(String theInstanceId) {
-		return new PagingChunkIterator(theInstanceId, WorkChunkStatusEnum.READY);
+	protected PagingIterator<WorkChunkMetadata> getReadyChunks() {
+		return new PagingIterator<>(WORK_CHUNK_METADATA_BATCH_SIZE, (index, batchsize, consumer) -> {
+			Pageable pageable = Pageable.ofSize(batchsize).withPage(index);
+			Page<WorkChunkMetadata> results = myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(
+					pageable, myInstanceId, Set.of(WorkChunkStatusEnum.READY));
+			for (WorkChunkMetadata metadata : results) {
+				consumer.accept(metadata);
+			}
+		});
 	}
 
 	/**
@@ -353,10 +309,7 @@ public class JobInstanceProcessor {
 	 */
 	private void enqueueReadyChunks(
 			JobInstance theJobInstance, JobDefinition<?> theJobDefinition, boolean theIsGatedExecutionAdvancementBool) {
-		// we need a transaction to access the stream of workchunks
-		// because workchunks are created in READY state, there's an unknown
-		// number of them (and so we could be reading many from the db)
-		Iterator<WorkChunkMetadata> iter = getReadyChunks(theJobInstance.getInstanceId());
+		Iterator<WorkChunkMetadata> iter = getReadyChunks();
 
 		AtomicInteger counter = new AtomicInteger();
 		ConcurrentHashMap<String, JobWorkCursor<?, ?, ?>> stepToWorkCursor = new ConcurrentHashMap<>();

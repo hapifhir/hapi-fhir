@@ -163,7 +163,7 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 */
 	@Transactional(propagation = Propagation.SUPPORTS)
 	Page<WorkChunkMetadata> fetchAllWorkChunkMetadataForJobInStates(
-			int thePageIndex, int thePageSize, String theInstanceId, Set<WorkChunkStatusEnum> theStates);
+			Pageable thePageable, String theInstanceId, Set<WorkChunkStatusEnum> theStates);
 
 	/**
 	 * Callback to update a JobInstance within a locked transaction.

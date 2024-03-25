@@ -75,6 +75,7 @@ public class InstanceProgress {
 		switch (theChunk.getStatus()) {
 			case READY:
 			case QUEUED:
+			case POLL_WAITING:
 			case IN_PROGRESS:
 				myIncompleteChunkCount++;
 				break;

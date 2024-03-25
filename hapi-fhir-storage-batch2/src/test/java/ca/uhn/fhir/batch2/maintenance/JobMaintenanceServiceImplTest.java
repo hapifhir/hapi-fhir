@@ -38,6 +38,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.Message;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -133,7 +134,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		JobInstance instance = createInstance();
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(List.of(instance));
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance));
-		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(anyInt(), anyInt(), eq(INSTANCE_ID), any()))
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(any(Pageable.class), eq(INSTANCE_ID), any()))
 			.thenReturn(page);
 
 		mySvc.runMaintenancePass();
@@ -177,7 +178,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
-		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(anyInt(), anyInt(), eq(instance.getInstanceId()), eq(Set.of(WorkChunkStatusEnum.READY))))
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(any(Pageable.class), eq(instance.getInstanceId()), eq(Set.of(WorkChunkStatusEnum.READY))))
 			.thenReturn(Page.empty());
 		stubUpdateInstanceCallback(instance);
 
@@ -193,6 +194,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		assertNull(instance.getEndTime());
 		assertEquals("00:10:00", instance.getEstimatedTimeRemaining());
 
+		verify(myJobPersistence).updatePollWaitingChunksForJobIfReady(eq(instance.getInstanceId()));
 		verifyNoMoreInteractions(myJobPersistence);
 	}
 
@@ -221,7 +223,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
-		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(anyInt(), anyInt(), eq(instance.getInstanceId()), eq(Set.of(WorkChunkStatusEnum.READY))))
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(any(Pageable.class), eq(instance.getInstanceId()), eq(Set.of(WorkChunkStatusEnum.READY))))
 			.thenReturn(Page.empty());
 		stubUpdateInstanceCallback(instance);
 
@@ -237,6 +239,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		assertEquals(50, instance.getCombinedRecordsProcessed());
 		assertEquals(0.08333333333333333, instance.getCombinedRecordsProcessedPerSecond());
 
+		verify(myJobPersistence).updatePollWaitingChunksForJobIfReady(eq(instance.getInstanceId()));
 		verifyNoMoreInteractions(myJobPersistence);
 	}
 
@@ -258,7 +261,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		instance1.setCurrentGatedStepId(STEP_1);
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance1));
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance1));
-		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(anyInt(), anyInt(), anyString(), eq(Set.of(WorkChunkStatusEnum.READY))))
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(any(Pageable.class), anyString(), eq(Set.of(WorkChunkStatusEnum.READY))))
 			.thenAnswer((args) -> {
 				// new page every time (called more than once)
 				return getPageOfData(new ArrayList<>(chunks));
@@ -276,6 +279,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		// Verify
 		verify(myWorkChannelProducer, times(2)).send(myMessageCaptor.capture());
 		verify(myJobPersistence, times(2)).updateInstance(eq(INSTANCE_ID), any());
+		verify(myJobPersistence).updatePollWaitingChunksForJobIfReady(eq(INSTANCE_ID));
 		verifyNoMoreInteractions(myJobPersistence);
 		JobWorkNotification payload0 = myMessageCaptor.getAllValues().get(0).getPayload();
 		assertEquals(STEP_2, payload0.getTargetStepId());
@@ -293,12 +297,13 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		instance.setEndTime(parseTime("2001-01-01T12:12:12Z"));
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance));
-		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(anyInt(), anyInt(), eq(instance.getInstanceId()), eq(Set.of(WorkChunkStatusEnum.READY))))
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(any(Pageable.class), eq(instance.getInstanceId()), eq(Set.of(WorkChunkStatusEnum.READY))))
 			.thenReturn(Page.empty());
 
 		mySvc.runMaintenancePass();
 
 		verify(myJobPersistence, times(1)).deleteInstanceAndChunks(eq(INSTANCE_ID));
+		verify(myJobPersistence).updatePollWaitingChunksForJobIfReady(eq(instance.getInstanceId()));
 		verifyNoMoreInteractions(myJobPersistence);
 	}
 
@@ -318,7 +323,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean())).thenAnswer(t->chunks.iterator());
 		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenReturn(Optional.of(instance));
-		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(anyInt(), anyInt(), eq(INSTANCE_ID), eq(Set.of(WorkChunkStatusEnum.READY))))
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(any(Pageable.class), eq(INSTANCE_ID), eq(Set.of(WorkChunkStatusEnum.READY))))
 			.thenReturn(Page.empty());
 		stubUpdateInstanceCallback(instance);
 
@@ -338,7 +343,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		verify(myJobPersistence, times(1)).deleteChunksAndMarkInstanceAsChunksPurged(eq(INSTANCE_ID));
 		verify(myCompletionHandler, times(1)).jobComplete(myJobCompletionCaptor.capture());
-
+		verify(myJobPersistence).updatePollWaitingChunksForJobIfReady(eq(instance.getInstanceId()));
 		verifyNoMoreInteractions(myJobPersistence);
 
 		assertEquals(INSTANCE_ID, myJobCompletionCaptor.getValue().getInstance().getInstanceId());
@@ -362,7 +367,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
 			.thenAnswer(t->chunks.iterator());
-		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(anyInt(), anyInt(), eq(instance.getInstanceId()), eq(Set.of(WorkChunkStatusEnum.READY))))
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(any(Pageable.class), eq(instance.getInstanceId()), eq(Set.of(WorkChunkStatusEnum.READY))))
 			.thenReturn(Page.empty());
 		stubUpdateInstanceCallback(instance);
 
@@ -378,7 +383,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		// twice - once to move to FAILED, and once to purge the chunks
 		verify(myJobPersistence, times(1)).updateInstance(eq(INSTANCE_ID), any());
 		verify(myJobPersistence, times(1)).deleteChunksAndMarkInstanceAsChunksPurged(eq(INSTANCE_ID));
-
+		verify(myJobPersistence).updatePollWaitingChunksForJobIfReady(eq(instance.getInstanceId()));
 		verifyNoMoreInteractions(myJobPersistence);
 	}
 
@@ -394,7 +399,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		// mocks
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance));
-		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(anyInt(), anyInt(), eq(INSTANCE_ID), eq(Set.of(WorkChunkStatusEnum.READY))))
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(any(Pageable.class), eq(INSTANCE_ID), eq(Set.of(WorkChunkStatusEnum.READY))))
 			.thenReturn(getPageOfData(theChunks));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
 			.thenAnswer(t -> theChunks.stream().map(c -> c.setStatus(WorkChunkStatusEnum.READY)).toList().iterator());

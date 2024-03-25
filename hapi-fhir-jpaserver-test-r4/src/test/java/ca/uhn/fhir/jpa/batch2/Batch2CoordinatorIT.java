@@ -35,7 +35,6 @@ import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
-import net.sf.saxon.trans.SymbolicName;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,6 +54,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -440,7 +440,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		int chunksToAwait = 2;
 		String jobId = new Exception().getStackTrace()[0].getMethodName();
 
-		HashMap<String, AtomicInteger> chunkToCounter = new HashMap<>();
+		ConcurrentHashMap<String, AtomicInteger> chunkToCounter = new ConcurrentHashMap<>();
 		HashMap<String, Integer> chunkToCallsToMake = new HashMap<>();
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> {
 			for (int i = 0; i < chunksToAwait; i++) {
@@ -456,28 +456,25 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			// simulate a call
 			Awaitility.await().atMost(100, TimeUnit.MICROSECONDS);
 
-			String chunkValue = step.getData().myTestValue;
-			if (!chunkToCounter.containsKey(chunkValue)) {
-				chunkToCounter.put(chunkValue, new AtomicInteger());
-			}
-			AtomicInteger pollCounter = chunkToCounter.get(chunkValue);
-
-			int count = pollCounter.getAndIncrement();
-
 			// we use Batch2FastSchedulerConfig, so we have a fast scheduler
 			// that should catch and call repeatedly pretty quickly
-			if (count > chunkToCallsToMake.get(chunkValue)) {
+			String chunkValue = step.getData().myTestValue;
+			AtomicInteger pollCounter = chunkToCounter.computeIfAbsent(chunkValue, (key) -> {
+				return new AtomicInteger();
+			});
+			int count = pollCounter.getAndIncrement();
+
+			if (chunkToCallsToMake.get(chunkValue) <= count) {
 				sink.accept(new SecondStepOutput());
 				return RunOutcome.SUCCESS;
 			}
-			throw new RetryChunkLaterException(300);
+			// 200ms so we aren't waiting forever
+			throw new RetryChunkLaterException(200);
 		};
 
 		// step 3
 		ILastJobStepWorker<TestJobParameters, SecondStepOutput> last = (step, sink) -> {
 			myLastStepLatch.call(1);
-			sink.accept(new VoidModel());
-			System.out.println("here i am");
 			return RunOutcome.SUCCESS;
 		};
 
@@ -514,14 +511,15 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		// waiting for the job
 		myBatch2JobHelper.awaitJobCompletion(startResponse);
-		JobInstance instance = myJobCoordinator.getInstance(instanceId);
-		System.out.println(instance.getStatus().name());
+		// ensure final step fired
 		myLastStepLatch.awaitExpected();
 
 		// verify
 		assertEquals(chunksToAwait, chunkToCounter.size());
 		for (Map.Entry<String, AtomicInteger> set : chunkToCounter.entrySet()) {
-			assertEquals(callsToMake, set.getValue().get());
+			// +1 because after 0 indexing; it will make callsToMake failed calls (0, 1... callsToMake)
+			// and one more successful call (callsToMake + 1)
+			assertEquals(callsToMake + 1, set.getValue().get());
 		}
 	}
 
