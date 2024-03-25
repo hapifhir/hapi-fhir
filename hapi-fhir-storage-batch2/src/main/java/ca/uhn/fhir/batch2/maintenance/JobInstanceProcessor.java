@@ -433,6 +433,10 @@ public class JobInstanceProcessor {
 		enqueueReadyChunks(theInstance, theJobDefinition, true);
 	}
 
+	/**
+	 * Moves all POLL_WAITING work chunks to READY for work chunks whose
+	 * nextPollTime has expired.
+	 */
 	private void processPollingChunks(String theInstanceId) {
 		int updatedChunkCount = myJobPersistence.updatePollWaitingChunksForJobIfReady(theInstanceId);
 
