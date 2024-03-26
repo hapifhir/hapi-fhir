@@ -151,7 +151,7 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 		setSystem(null);
 
 		if (theQualifier != null) {
-			if(Constants.PARAMQUALIFIER_MDM.equals(theQualifier)){
+			if (Constants.PARAMQUALIFIER_MDM.equals(theQualifier)) {
 				setMdmExpand(true);
 			}
 
@@ -162,7 +162,6 @@ public class TokenParam extends BaseParam /*implements IQueryParameterType*/ {
 				setValue(ParameterUtil.unescape(theParameter));
 				return;
 			}
-
 		}
 
 		if (theParameter == null) {
