@@ -94,4 +94,16 @@ public class WorkChunkMetadata implements IModelJson {
 	public void setSequence(int theSequence) {
 		mySequence = theSequence;
 	}
+
+	public WorkChunk toWorkChunk() {
+		WorkChunk workChunk = new WorkChunk();
+		workChunk.setId(getId());
+		workChunk.setStatus(getStatus());
+		workChunk.setInstanceId(getInstanceId());
+		workChunk.setJobDefinitionId(getJobDefinitionId());
+		workChunk.setJobDefinitionVersion(getJobDefinitionVersion());
+		workChunk.setSequence(getSequence());
+		workChunk.setTargetStepId(getTargetStepId());
+		return workChunk;
+	}
 }

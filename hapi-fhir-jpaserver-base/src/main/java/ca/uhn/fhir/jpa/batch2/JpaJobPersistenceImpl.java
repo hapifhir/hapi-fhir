@@ -440,7 +440,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 						Page<Batch2WorkChunkMetadataView> page = myWorkChunkMetadataViewRepo.findAll(
 								Pageable.ofSize(thePageSize).withPage(thePageIndex));
 						for (Batch2WorkChunkMetadataView metadataView : page.getContent()) {
-							theConsumer.accept((WorkChunk) metadataView.toChunkMetadata());
+							theConsumer.accept(metadataView.toChunkMetadata().toWorkChunk());
 						}
 					}
 				});
