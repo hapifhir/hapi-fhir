@@ -433,15 +433,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 					if (theIncludeData) {
 						chunks = myWorkChunkRepository.fetchChunks(
 								PageRequest.of(thePageIndex, thePageSize), theInstanceId);
-						for (Batch2WorkChunkEntity chunk : chunks) {
-							theConsumer.accept(toChunk(chunk));
-						}
 					} else {
-						Page<Batch2WorkChunkMetadataView> page = myWorkChunkMetadataViewRepo.findAll(
-								Pageable.ofSize(thePageSize).withPage(thePageIndex));
-						for (Batch2WorkChunkMetadataView metadataView : page.getContent()) {
-							theConsumer.accept(metadataView.toChunkMetadata().toWorkChunk());
-						}
+						chunks = myWorkChunkRepository.fetchChunksNoData(
+							PageRequest.of(thePageIndex, thePageSize), theInstanceId);
+					}
+					for (Batch2WorkChunkEntity chunk : chunks) {
+						theConsumer.accept(toChunk(chunk));
 					}
 				});
 	}
