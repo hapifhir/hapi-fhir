@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Patient;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -19,16 +18,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ResourceProviderLanguageParamR5Test extends BaseResourceProviderR5Test {
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderLanguageParamR5Test.class);
-
-	@BeforeEach
-	@Override
-	public void before() throws Exception {
-		super.before();
-		myStorageSettings.setLanguageSearchParameterEnabled(new JpaStorageSettings().isLanguageSearchParameterEnabled());
-		mySearchParamRegistry.forceRefresh();
-	}
 
 	@SuppressWarnings("unused")
 	@Test

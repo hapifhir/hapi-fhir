@@ -9,7 +9,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -20,16 +19,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ResourceProviderLanguageParamDstu2Test extends BaseResourceProviderDstu2Test {
-
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderLanguageParamDstu2Test.class);
-
-	@BeforeEach
-	@Override
-	public void before() throws Exception {
-		super.before();
-		myStorageSettings.setLanguageSearchParameterEnabled(new JpaStorageSettings().isLanguageSearchParameterEnabled());
-		mySearchParamRegistry.forceRefresh();
-	}
 
 	@SuppressWarnings("unused")
 	@Test
