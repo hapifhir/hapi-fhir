@@ -94,10 +94,12 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 			myJobPersistence.enqueueWorkChunkForProcessing(chunkId, updated -> {
 				if (updated == 1) {
 					JobWorkNotification workNotification = new JobWorkNotification(
-						myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
+							myJobDefinitionId, myJobDefinitionVersion, instanceId, targetStepId, chunkId);
 					myBatchJobSender.sendWorkChannelMessage(workNotification);
 				} else {
-					ourLog.error("Expected to have updated 1 workchunk, but instead found {}. Chunk is not sent to queue.", updated);
+					ourLog.error(
+							"Expected to have updated 1 workchunk, but instead found {}. Chunk is not sent to queue.",
+							updated);
 				}
 			});
 		}
