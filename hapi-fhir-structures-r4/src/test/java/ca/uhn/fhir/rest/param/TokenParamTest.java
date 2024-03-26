@@ -2,14 +2,13 @@ package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 public class TokenParamTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
@@ -51,19 +50,14 @@ public class TokenParamTest {
 	}
 
 	@Test
-	public void testNameNickname() {
-		StringParam param = new StringParam();
-		assertFalse(param.isNicknameExpand());
-		param.setValueAsQueryToken(ourCtx, "name", Constants.PARAMQUALIFIER_NICKNAME, "kenny");
-		assertTrue(param.isNicknameExpand());
+	public void testMdmQualifier() {
+		TokenParam param = new TokenParam();
+		param.setValueAsQueryToken(ourCtx, "_id", Constants.PARAMQUALIFIER_MDM, "Patient/PJANE1");
+		assertNull(param.getModifier());
+		assertNull(param.getSystem());
+		assertTrue(param.isMdmExpand());
+		assertEquals("Patient/PJANE1", param.getValue());
 	}
 
-	@Test
-	public void testGivenNickname() {
-		StringParam param = new StringParam();
-		assertFalse(param.isNicknameExpand());
-		param.setValueAsQueryToken(ourCtx, "given", Constants.PARAMQUALIFIER_NICKNAME, "kenny");
-		assertTrue(param.isNicknameExpand());
-	}
 
 }
