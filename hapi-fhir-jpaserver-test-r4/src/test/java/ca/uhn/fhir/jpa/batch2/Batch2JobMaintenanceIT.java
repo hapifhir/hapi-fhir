@@ -206,7 +206,7 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 
 	@Nonnull
 	private JobDefinition<? extends IModelJson> buildGatedJobDefinition(String theJobId, IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep, IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> theLastStep) {
-		return TestJobDefinitionUtils.buildGatedJobDefinition(
+		return TestJobDefinitionUtils.buildJobDefinition(
 			theJobId,
 			theFirstStep,
 			theLastStep,

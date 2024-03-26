@@ -29,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -36,6 +37,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -101,6 +105,11 @@ class JobDataSinkTest {
 		// execute
 		// Let's test our first step worker by calling run on it:
 		when(myJobPersistence.onWorkChunkCreate(myBatchWorkChunkCaptor.capture())).thenReturn(CHUNK_ID);
+		doAnswer(args -> {
+			Consumer<Integer> consumer = args.getArgument(1);
+			consumer.accept(1);
+			return 1;
+		}).when(myJobPersistence).enqueueWorkChunkForProcessing(anyString(), any());
 		JobInstance instance = JobInstance.fromInstanceId(JOB_INSTANCE_ID);
 		StepExecutionDetails<TestJobParameters, VoidModel> details = new StepExecutionDetails<>(new TestJobParameters().setParam1("" + PID_COUNT), null, instance, CHUNK_ID);
 		JobWorkCursor<TestJobParameters, VoidModel, Step1Output> cursor = new JobWorkCursor<>(job, true, firstStep, lastStep);
@@ -113,7 +122,13 @@ class JobDataSinkTest {
 
 		// theDataSink.accept(output) called by firstStepWorker above calls two services.  Let's validate them both.
 
-		verify(myBatchJobSender, never()).sendWorkChannelMessage(any());
+		verify(myBatchJobSender).sendWorkChannelMessage(myJobWorkNotificationCaptor.capture());
+		JobWorkNotification notification = myJobWorkNotificationCaptor.getValue();
+		assertEquals(JOB_DEF_ID, notification.getJobDefinitionId());
+		assertEquals(JOB_INSTANCE_ID, notification.getInstanceId());
+		assertEquals(CHUNK_ID, notification.getChunkId());
+		assertEquals(JOB_DEF_VERSION, notification.getJobDefinitionVersion());
+		assertEquals(LAST_STEP_ID, notification.getTargetStepId());
 
 		WorkChunkCreateEvent batchWorkChunk = myBatchWorkChunkCaptor.getValue();
 		assertEquals(JOB_DEF_VERSION, batchWorkChunk.jobDefinitionVersion);

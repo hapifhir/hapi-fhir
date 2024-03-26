@@ -22,7 +22,7 @@ import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 @Immutable
 @Subselect("SELECT e.id as id, "
 		+ " e.seq as seq,"
-		+ " e.stat as status, "
+		+ " e.stat as state, "
 		+ " e.instance_id as instance_id, "
 		+ " e.definition_id as job_definition_id, "
 		+ " e.definition_ver as job_definition_version, "
@@ -37,7 +37,7 @@ public class Batch2WorkChunkMetadataView implements Serializable {
 	@Column(name = "SEQ", nullable = false)
 	private int mySequence;
 
-	@Column(name = "STATUS", length = ID_MAX_LENGTH, nullable = false)
+	@Column(name = "STATE", length = ID_MAX_LENGTH, nullable = false)
 	@Enumerated(EnumType.STRING)
 	private WorkChunkStatusEnum myStatus;
 

@@ -400,28 +400,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
-		Batch2JobInstanceEntity jobInstanceEntity = getRunningJob(theInstanceId);
-		if (jobInstanceEntity == null) {
-			return false;
-		}
-
-		Set<WorkChunkStatusEnum> statusesForStep =
-				getDistinctWorkChunkStatesForJobAndStep(theInstanceId, theCurrentStepId);
-
-		ourLog.debug(
-				"Checking whether gated job can advanced to next step. [instanceId={}, currentStepId={}, statusesForStep={}]",
-				theInstanceId,
-				theCurrentStepId,
-				statusesForStep);
-
-		return statusesForStep.isEmpty()
-				|| statusesForStep.equals(Set.of(WorkChunkStatusEnum.COMPLETED))
-				|| statusesForStep.equals(Set.of(WorkChunkStatusEnum.READY));
-	}
-
-	@Override
 	public Set<WorkChunkStatusEnum> getDistinctWorkChunkStatesForJobAndStep(
 			String theInstanceId, String theCurrentStepId) {
 		if (getRunningJob(theInstanceId) == null) {

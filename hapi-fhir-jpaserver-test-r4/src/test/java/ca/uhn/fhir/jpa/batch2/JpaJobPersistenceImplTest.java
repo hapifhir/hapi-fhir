@@ -31,6 +31,7 @@ import ca.uhn.hapi.fhir.batch2.test.configs.SpyOverrideConfig;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import jakarta.annotation.Nonnull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -96,6 +97,11 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	@Autowired
 	public JobDefinitionRegistry myJobDefinitionRegistry;
+
+	@AfterEach
+	public void after() {
+		myJobDefinitionRegistry.removeJobDefinition(JOB_DEFINITION_ID, JOB_DEF_VER);
+	}
 
 	@Test
 	public void testDeleteInstance() {
@@ -383,7 +389,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	@Test
 	public void testStoreAndFetchWorkChunk_NoData() {
-		JobInstance instance = createInstance(true);
+		JobInstance instance = createInstance(true, false);
 		String instanceId = mySvc.storeNewInstance(instance);
 
 		String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, null);
@@ -465,7 +471,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	@Test
 	public void testStoreAndFetchWorkChunk_WithData() {
-		JobInstance instance = createInstance(true);
+		JobInstance instance = createInstance(true, false);
 		String instanceId = mySvc.storeNewInstance(instance);
 
 		String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, CHUNK_DATA);
@@ -485,7 +491,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	@Test
 	public void testMarkChunkAsCompleted_Success() {
-		JobInstance instance = createInstance(true);
+		JobInstance instance = createInstance(true, false);
 		String instanceId = mySvc.storeNewInstance(instance);
 		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, CHUNK_DATA);
 		assertNotNull(chunkId);
@@ -521,42 +527,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testGatedAdvancementByStatus() {
-		// Setup
-		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
-		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
-		mySvc.onWorkChunkCompletion(new WorkChunkCompletionEvent(chunkId, 0, 0));
-
-		boolean canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
-		assertTrue(canAdvance);
-
-		//Storing a new chunk with QUEUED should prevent advancement.
-		String newChunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
-
-		canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
-		assertFalse(canAdvance);
-
-		//Toggle it to complete
-		mySvc.onWorkChunkCompletion(new WorkChunkCompletionEvent(newChunkId, 50, 0));
-		canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
-		assertTrue(canAdvance);
-
-		//Create a new chunk and set it in progress.
-		String newerChunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
-		mySvc.onWorkChunkDequeue(newerChunkId);
-		canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
-		assertFalse(canAdvance);
-
-		//Toggle IN_PROGRESS to complete
-		mySvc.onWorkChunkCompletion(new WorkChunkCompletionEvent(newerChunkId, 50, 0));
-		canAdvance = mySvc.canAdvanceInstanceToNextStep(instanceId, STEP_CHUNK_ID);
-		assertTrue(canAdvance);
-	}
-
-	@Test
 	public void testMarkChunkAsCompleted_Error() {
-		JobInstance instance = createInstance(true);
+		JobInstance instance = createInstance(true, false);
 		String instanceId = mySvc.storeNewInstance(instance);
 		String chunkId = storeWorkChunk(JOB_DEFINITION_ID, TestJobDefinitionUtils.FIRST_STEP_ID, instanceId, SEQUENCE_NUMBER, null);
 		assertNotNull(chunkId);
@@ -608,7 +580,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	@Test
 	public void testMarkChunkAsCompleted_Fail() {
-		JobInstance instance = createInstance(true);
+		JobInstance instance = createInstance(true, false);
 		String instanceId = mySvc.storeNewInstance(instance);
 		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null);
 		assertNotNull(chunkId);
@@ -697,11 +669,11 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	private JobInstance createInstance() {
-		return createInstance(false);
+		return createInstance(false, false);
 	}
 
 	@Nonnull
-	private JobInstance createInstance(boolean theCreateJobDefBool) {
+	private JobInstance createInstance(boolean theCreateJobDefBool, boolean theCreateGatedJob) {
 		JobInstance instance = new JobInstance();
 		instance.setJobDefinitionId(JOB_DEFINITION_ID);
 		instance.setStatus(StatusEnum.QUEUED);
@@ -710,19 +682,37 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		instance.setReport("TEST");
 
 		if (theCreateJobDefBool) {
-			JobDefinition<?> jobDef = TestJobDefinitionUtils.buildGatedJobDefinition(
-				JOB_DEFINITION_ID,
-				(step, sink) -> {
-					sink.accept(new FirstStepOutput());
-					return RunOutcome.SUCCESS;
-				},
-				(step, sink) -> {
-					return RunOutcome.SUCCESS;
-				},
-				theDetails -> {
+			JobDefinition<?> jobDef;
 
-				}
-			);
+			if (theCreateGatedJob) {
+				jobDef = TestJobDefinitionUtils.buildGatedJobDefinition(
+					JOB_DEFINITION_ID,
+					(step, sink) -> {
+						sink.accept(new FirstStepOutput());
+						return RunOutcome.SUCCESS;
+					},
+					(step, sink) -> {
+						return RunOutcome.SUCCESS;
+					},
+					theDetails -> {
+
+					}
+				);
+			} else {
+				jobDef = TestJobDefinitionUtils.buildJobDefinition(
+					JOB_DEFINITION_ID,
+					(step, sink) -> {
+						sink.accept(new FirstStepOutput());
+						return RunOutcome.SUCCESS;
+					},
+					(step, sink) -> {
+						return RunOutcome.SUCCESS;
+					},
+					theDetails -> {
+
+					}
+				);
+			}
 			if (myJobDefinitionRegistry.getJobDefinition(jobDef.getJobDefinitionId(), jobDef.getJobDefinitionVersion()).isEmpty()) {
 				myJobDefinitionRegistry.addJobDefinition(jobDef);
 			}
