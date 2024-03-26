@@ -152,18 +152,6 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 
 	@Override
 	@Transactional
-	public long submitPractitionerTypeToMdm(@Nullable String theCriteria, @Nonnull RequestDetails theRequestDetails) {
-		return submitSourceResourceTypeToMdm("Practitioner", theCriteria, theRequestDetails);
-	}
-
-	@Override
-	@Transactional
-	public long submitPatientTypeToMdm(@Nullable String theCriteria, @Nonnull RequestDetails theRequestDetails) {
-		return submitSourceResourceTypeToMdm("Patient", theCriteria, theRequestDetails);
-	}
-
-	@Override
-	@Transactional
 	public long submitSourceResourceToMdm(IIdType theId, RequestDetails theRequestDetails) {
 		validateSourceType(theId.getResourceType());
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theId.getResourceType());

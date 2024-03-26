@@ -49,24 +49,6 @@ public interface IMdmSubmitSvc {
 			String theSourceResourceType, String theCriteria, RequestDetails theRequestDetails);
 
 	/**
-	 * Convenience method that calls {@link #submitSourceResourceTypeToMdm(String, String)} with the type pre-populated.
-	 *
-	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for MDM processing.
-	 * @return the number of resources submitted for MDM processing.
-	 */
-	@Deprecated(forRemoval = true, since = "6.8.0")
-	long submitPractitionerTypeToMdm(String theCriteria, RequestDetails theRequestDetails);
-
-	/**
-	 * Convenience method that calls {@link #submitSourceResourceTypeToMdm(String, String)} with the type pre-populated.
-	 *
-	 * @param theCriteria The FHIR search critieria for filtering the resources to be submitted for MDM processing.
-	 * @return the number of resources submitted for MDM processing.
-	 */
-	@Deprecated(forRemoval = true, since = "6.8.0")
-	long submitPatientTypeToMdm(String theCriteria, RequestDetails theRequestDetails);
-
-	/**
 	 * Given an ID and a source resource type valid for MDM, manually submit the given ID for MDM processing.
 	 *
 	 * @param theId the ID of the resource to process for MDM.
