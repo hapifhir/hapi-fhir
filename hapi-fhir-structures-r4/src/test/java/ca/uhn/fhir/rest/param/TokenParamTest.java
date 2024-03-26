@@ -51,12 +51,14 @@ public class TokenParamTest {
 
 	@Test
 	public void testMdmQualifier() {
+		final String value = "Patient/PJANE1";
+
 		TokenParam param = new TokenParam();
-		param.setValueAsQueryToken(ourCtx, "_id", Constants.PARAMQUALIFIER_MDM, "Patient/PJANE1");
+		param.setValueAsQueryToken(ourCtx, "_id", Constants.PARAMQUALIFIER_MDM, value);
 		assertNull(param.getModifier());
 		assertNull(param.getSystem());
 		assertTrue(param.isMdmExpand());
-		assertEquals("Patient/PJANE1", param.getValue());
+		assertEquals(value, param.getValue());
 	}
 
 
