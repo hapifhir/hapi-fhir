@@ -18,8 +18,6 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
-import org.hl7.fhir.r4.model.StringType;
-import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -180,6 +178,29 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				translationRequest.getCodeableConcept().addCoding()
 					.setSystem(CS_URL)
 					.setCode("BOGUS");
+				translationRequest.setTargetSystem(CS_URL_3);
+
+				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+				assertNotNull(targets);
+				assertTrue(targets.isEmpty());
+			}
+		});
+	}
+
+	@Test
+	public void testByCodeSystemsAndSourceCodeMatchedWithoutCode() {
+		createAndPersistConceptMap();
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
+				TranslationRequest translationRequest = new TranslationRequest();
+				translationRequest.getCodeableConcept().addCoding()
+					.setSystem(CS_URL_4)
+					.setCode("89012");
 				translationRequest.setTargetSystem(CS_URL_3);
 
 				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
@@ -1221,162 +1242,193 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals(VS_URL, conceptMap.getSource());
 				assertEquals(VS_URL_2, conceptMap.getTarget());
 				assertEquals(CM_URL, conceptMap.getUrl());
-				assertEquals(3, conceptMap.getConceptMapGroups().size());
+				assertEquals(4, conceptMap.getConceptMapGroups().size());
 
 				TermConceptMapGroup group = conceptMap.getConceptMapGroups().get(0);
 
 				ourLog.info("ConceptMap.group(0):\n" + group.toString());
 
-				assertEquals(CS_URL, group.getSource());
-				assertEquals("Version 1", group.getSourceVersion());
+				assertGroupHasValues(
+					CS_URL,"Version 1", CS_URL_2, "Version 2", group);
 				assertEquals(VS_URL, group.getSourceValueSet());
-				assertEquals(CS_URL_2, group.getTarget());
-				assertEquals("Version 2", group.getTargetVersion());
 				assertEquals(VS_URL_2, group.getTargetValueSet());
-				assertEquals(CM_URL, group.getConceptMapUrl());
 				assertEquals(2, group.getConceptMapGroupElements().size());
 
 				TermConceptMapGroupElement element = group.getConceptMapGroupElements().get(0);
 
 				ourLog.info("ConceptMap.group(0).element(0):\n" + element.toString());
 
-				assertEquals("12345", element.getCode());
-				assertEquals("Source Code 12345", element.getDisplay());
-				assertEquals(CS_URL, element.getSystem());
-				assertEquals("Version 1", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+				assertElementHasValues(
+					"12345", "Source Code 12345", CS_URL, "Version 1", element);
 				assertEquals(1, element.getConceptMapGroupElementTargets().size());
 
 				TermConceptMapGroupElementTarget target = element.getConceptMapGroupElementTargets().get(0);
 
 				ourLog.info("ConceptMap.group(0).element(0).target(0):\n" + target.toString());
 
-				assertEquals("34567", target.getCode());
-				assertEquals("Target Code 34567", target.getDisplay());
-				assertEquals(CS_URL_2, target.getSystem());
-				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+				assertTargetHasValues(
+					"34567", "Target Code 34567", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.EQUAL, target);
 
 				element = group.getConceptMapGroupElements().get(1);
 
 				ourLog.info("ConceptMap.group(0).element(1):\n" + element.toString());
 
-				assertEquals("23456", element.getCode());
-				assertEquals("Source Code 23456", element.getDisplay());
-				assertEquals(CS_URL, element.getSystem());
-				assertEquals("Version 1", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+				assertElementHasValues(
+					"23456", "Source Code 23456", CS_URL, "Version 1", element);
 
 				assertEquals(2, element.getConceptMapGroupElementTargets().size());
 
 				target = element.getConceptMapGroupElementTargets().get(0);
 				ourLog.info("ConceptMap.group(0).element(1).target(0):\n" + target.toString());
-				assertEquals("45678", target.getCode());
-				assertEquals("Target Code 45678", target.getDisplay());
-				assertEquals(CS_URL_2, target.getSystem());
-				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+				assertTargetHasValues(
+					"45678", "Target Code 45678", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.WIDER, target);
 
 				// We had deliberately added a duplicate, and here it is...
 				target = element.getConceptMapGroupElementTargets().get(1);
 				ourLog.info("ConceptMap.group(0).element(1).target(1):\n" + target.toString());
-				assertEquals("45678", target.getCode());
-				assertEquals("Target Code 45678", target.getDisplay());
-				assertEquals(CS_URL_2, target.getSystem());
-				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+				assertTargetHasValues(
+					"45678", "Target Code 45678", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.WIDER, target);
 
 				group = conceptMap.getConceptMapGroups().get(1);
 
 				ourLog.info("ConceptMap.group(1):\n" + group.toString());
 
-				assertEquals(CS_URL, group.getSource());
-				assertEquals("Version 3", group.getSourceVersion());
-				assertEquals(CS_URL_3, group.getTarget());
-				assertEquals("Version 4", group.getTargetVersion());
-				assertEquals(CM_URL, group.getConceptMapUrl());
+				assertGroupHasValues(
+					CS_URL, "Version 3", CS_URL_3, "Version 4", group);
 				assertEquals(1, group.getConceptMapGroupElements().size());
 
 				element = group.getConceptMapGroupElements().get(0);
 
 				ourLog.info("ConceptMap.group(1).element(0):\n" + element.toString());
 
-				assertEquals("12345", element.getCode());
-				assertEquals("Source Code 12345", element.getDisplay());
-				assertEquals(CS_URL, element.getSystem());
-				assertEquals("Version 3", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+				assertElementHasValues(
+					"12345", "Source Code 12345", CS_URL, "Version 3", element);
 				assertEquals(2, element.getConceptMapGroupElementTargets().size());
 
 				target = element.getConceptMapGroupElementTargets().get(0);
 
 				ourLog.info("ConceptMap.group(1).element(0).target(0):\n" + target.toString());
 
-				assertEquals("56789", target.getCode());
-				assertEquals("Target Code 56789", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+				assertTargetHasValues(
+					"56789", "Target Code 56789", CS_URL_3, "Version 4", Enumerations.ConceptMapEquivalence.EQUAL, target);
 
 				target = element.getConceptMapGroupElementTargets().get(1);
 
 				ourLog.info("ConceptMap.group(1).element(0).target(1):\n" + target.toString());
 
-				assertEquals("67890", target.getCode());
-				assertEquals("Target Code 67890", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+				assertTargetHasValues(
+					"67890", "Target Code 67890", CS_URL_3, "Version 4", Enumerations.ConceptMapEquivalence.WIDER, target);
 
 				group = conceptMap.getConceptMapGroups().get(2);
 
 				ourLog.info("ConceptMap.group(2):\n" + group.toString());
 
-				assertEquals(CS_URL_4, group.getSource());
-				assertEquals("Version 5", group.getSourceVersion());
-				assertEquals(CS_URL_2, group.getTarget());
-				assertEquals("Version 2", group.getTargetVersion());
-				assertEquals(CM_URL, group.getConceptMapUrl());
+				assertGroupHasValues(
+					CS_URL_4, "Version 5", CS_URL_2, "Version 2", group);
 				assertEquals(1, group.getConceptMapGroupElements().size());
 
 				element = group.getConceptMapGroupElements().get(0);
 
 				ourLog.info("ConceptMap.group(2).element(0):\n" + element.toString());
 
-				assertEquals("78901", element.getCode());
-				assertEquals("Source Code 78901", element.getDisplay());
-				assertEquals(CS_URL_4, element.getSystem());
-				assertEquals("Version 5", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+				assertElementHasValues(
+					"78901", "Source Code 78901", CS_URL_4, "Version 5", element);
 				assertEquals(1, element.getConceptMapGroupElementTargets().size());
 
 				target = element.getConceptMapGroupElementTargets().get(0);
 
 				ourLog.info("ConceptMap.group(2).element(0).target(0):\n" + target.toString());
-
-				assertEquals("34567", target.getCode());
-				assertEquals("Target Code 34567", target.getDisplay());
-				assertEquals(CS_URL_2, target.getSystem());
-				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.NARROWER, target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
 			}
 		});
+	}
+
+	@Test
+	public void testStoreTermConceptMapAndChildren_handleUnmappedElements() {
+		createAndPersistConceptMap();
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
+			@Override
+			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
+				Pageable page = PageRequest.of(0, 1);
+				List<TermConceptMap> optionalConceptMap = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, CM_URL);
+				assertEquals(1, optionalConceptMap.size());
+
+				TermConceptMap conceptMap = optionalConceptMap.get(0);
+				TermConceptMapGroup group = conceptMap.getConceptMapGroups().get(3);
+
+				ourLog.info("ConceptMap.group(3):\n" + group.toString());
+
+				assertGroupHasValues(
+					CS_URL_4, "Version 1", CS_URL_3, "Version 1", group);
+				assertEquals(2, group.getConceptMapGroupElements().size());
+
+				TermConceptMapGroupElement element = group.getConceptMapGroupElements().get(0);
+
+				ourLog.info("ConceptMap.group(3).element(0):\n" + element.toString());
+
+				assertElementHasValues(
+					"89012", "Source Code 89012", CS_URL_4, "Version 1", element);
+				assertEquals(0, element.getConceptMapGroupElementTargets().size());
+
+				element = group.getConceptMapGroupElements().get(1);
+
+				ourLog.info("ConceptMap.group(3).element(1):\n" + element.toString());
+
+				assertElementHasValues(
+					"89123", "Source Code 89123", CS_URL_4, "Version 1", element);
+				assertEquals(1, element.getConceptMapGroupElementTargets().size());
+
+				TermConceptMapGroupElementTarget target = element.getConceptMapGroupElementTargets().get(0);
+
+				ourLog.info("ConceptMap.group(3).element(1).target(0):\n" + target.toString());
+
+				assertTargetHasValues(
+					null, null, CS_URL_3, "Version 1", Enumerations.ConceptMapEquivalence.UNMATCHED, target);
+			}
+		});
+	}
+
+	private void assertGroupHasValues(String theExpectedSourceCodeSystem,
+									  String theExpectedSourceCodeSystemVersion,
+									  String theExpectedTargetCodeSystem,
+									  String theExpectedTargetCodeSystemVersion,
+									  TermConceptMapGroup group) {
+		assertEquals(theExpectedSourceCodeSystem, group.getSource());
+		assertEquals(theExpectedSourceCodeSystemVersion, group.getSourceVersion());
+		assertEquals(theExpectedTargetCodeSystem, group.getTarget());
+		assertEquals(theExpectedTargetCodeSystemVersion, group.getTargetVersion());
+		assertEquals(CM_URL, group.getConceptMapUrl());
+	}
+
+	private void assertElementHasValues(String theExpectedCode,
+										String theExpectedDisplayText,
+										String theExpectedCodeSystem,
+										String theExpectedCodeSystemVersion,
+										TermConceptMapGroupElement element) {
+		assertEquals(theExpectedCode, element.getCode());
+		assertEquals(theExpectedDisplayText, element.getDisplay());
+		assertEquals(theExpectedCodeSystem, element.getSystem());
+		assertEquals(theExpectedCodeSystemVersion, element.getSystemVersion());
+		assertEquals(VS_URL, element.getValueSet());
+		assertEquals(CM_URL, element.getConceptMapUrl());
+	}
+
+	private void assertTargetHasValues(String theExpectedCode,
+									   String theExpectedDisplayText,
+									   String theExpectedCodeSystem,
+									   String theExpectedCodeSystemVersion,
+									   Enumerations.ConceptMapEquivalence theExpectedEquivalence,
+									   TermConceptMapGroupElementTarget target) {
+		assertEquals(theExpectedCode, target.getCode());
+		assertEquals(theExpectedDisplayText, target.getDisplay());
+		assertEquals(theExpectedCodeSystem, target.getSystem());
+		assertEquals(theExpectedCodeSystemVersion, target.getSystemVersion());
+		assertEquals(theExpectedEquivalence, target.getEquivalence());
+		assertEquals(VS_URL_2, target.getValueSet());
+		assertEquals(CM_URL, target.getConceptMapUrl());
 	}
 
 	@Test
@@ -1400,7 +1452,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 				assertEquals(VS_URL, conceptMap.getSource());
 				assertEquals(VS_URL_2, conceptMap.getTarget());
 				assertEquals(CM_URL, conceptMap.getUrl());
-				assertEquals(3, conceptMap.getConceptMapGroups().size());
+				assertEquals(4, conceptMap.getConceptMapGroups().size());
 
 				TermConceptMapGroup group = conceptMap.getConceptMapGroups().get(0);
 
@@ -1419,141 +1471,77 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 				ourLog.info("ConceptMap.group(0).element(0):\n" + element.toString());
 
-				assertEquals("12345", element.getCode());
-				assertEquals("Source Code 12345", element.getDisplay());
-				assertEquals(CS_URL, element.getSystem());
-				assertEquals("Version 1", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+				assertElementHasValues("12345", "Source Code 12345", CS_URL, "Version 1", element);
 				assertEquals(1, element.getConceptMapGroupElementTargets().size());
 
 				TermConceptMapGroupElementTarget target = element.getConceptMapGroupElementTargets().get(0);
 
 				ourLog.info("ConceptMap.group(0).element(0).target(0):\n" + target.toString());
 
-				assertEquals("34567", target.getCode());
-				assertEquals("Target Code 34567", target.getDisplay());
-				assertEquals(CS_URL_2, target.getSystem());
-				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+				assertTargetHasValues("34567", "Target Code 34567", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.EQUAL, target);
 
 				element = group.getConceptMapGroupElements().get(1);
 
 				ourLog.info("ConceptMap.group(0).element(1):\n" + element.toString());
 
-				assertEquals("23456", element.getCode());
-				assertEquals("Source Code 23456", element.getDisplay());
-				assertEquals(CS_URL, element.getSystem());
-				assertEquals("Version 1", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+				assertElementHasValues("23456", "Source Code 23456", CS_URL, "Version 1", element);
 
 				assertEquals(2, element.getConceptMapGroupElementTargets().size());
 
 				target = element.getConceptMapGroupElementTargets().get(0);
 				ourLog.info("ConceptMap.group(0).element(1).target(0):\n" + target.toString());
-				assertEquals("45678", target.getCode());
-				assertEquals("Target Code 45678", target.getDisplay());
-				assertEquals(CS_URL_2, target.getSystem());
-				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+				assertTargetHasValues("45678", "Target Code 45678", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.WIDER, target);
 
 				// We had deliberately added a duplicate, and here it is...
 				target = element.getConceptMapGroupElementTargets().get(1);
 				ourLog.info("ConceptMap.group(0).element(1).target(1):\n" + target.toString());
-				assertEquals("45678", target.getCode());
-				assertEquals("Target Code 45678", target.getDisplay());
-				assertEquals(CS_URL_2, target.getSystem());
-				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+				assertTargetHasValues("45678", "Target Code 45678", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.WIDER, target);
 
 				group = conceptMap.getConceptMapGroups().get(1);
 
 				ourLog.info("ConceptMap.group(1):\n" + group.toString());
 
-				assertEquals(CS_URL, group.getSource());
-				assertEquals("Version 3", group.getSourceVersion());
-				assertEquals(CS_URL_3, group.getTarget());
-				assertEquals("Version 4", group.getTargetVersion());
-				assertEquals(CM_URL, group.getConceptMapUrl());
+				assertGroupHasValues(CS_URL, "Version 3", CS_URL_3, "Version 4", group);
 				assertEquals(1, group.getConceptMapGroupElements().size());
 
 				element = group.getConceptMapGroupElements().get(0);
 
 				ourLog.info("ConceptMap.group(1).element(0):\n" + element.toString());
 
-				assertEquals("12345", element.getCode());
-				assertEquals("Source Code 12345", element.getDisplay());
-				assertEquals(CS_URL, element.getSystem());
-				assertEquals("Version 3", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+				assertElementHasValues("12345", "Source Code 12345", CS_URL, "Version 3", element);
 				assertEquals(2, element.getConceptMapGroupElementTargets().size());
 
 				target = element.getConceptMapGroupElementTargets().get(0);
 
 				ourLog.info("ConceptMap.group(1).element(0).target(0):\n" + target.toString());
 
-				assertEquals("56789", target.getCode());
-				assertEquals("Target Code 56789", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL, target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+				assertTargetHasValues("56789", "Target Code 56789", CS_URL_3, "Version 4", Enumerations.ConceptMapEquivalence.EQUAL, target);
 
 				target = element.getConceptMapGroupElementTargets().get(1);
 
 				ourLog.info("ConceptMap.group(1).element(0).target(1):\n" + target.toString());
 
-				assertEquals("67890", target.getCode());
-				assertEquals("Target Code 67890", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER, target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+				assertTargetHasValues("67890", "Target Code 67890", CS_URL_3, "Version 4", Enumerations.ConceptMapEquivalence.WIDER, target);
 
 				group = conceptMap.getConceptMapGroups().get(2);
 
 				ourLog.info("ConceptMap.group(2):\n" + group.toString());
 
-				assertEquals(CS_URL_4, group.getSource());
-				assertEquals("Version 5", group.getSourceVersion());
-				assertEquals(CS_URL_2, group.getTarget());
-				assertEquals("Version 2", group.getTargetVersion());
-				assertEquals(CM_URL, group.getConceptMapUrl());
+				assertGroupHasValues(CS_URL_4, "Version 5", CS_URL_2, "Version 2", group);
 				assertEquals(1, group.getConceptMapGroupElements().size());
 
 				element = group.getConceptMapGroupElements().get(0);
 
 				ourLog.info("ConceptMap.group(2).element(0):\n" + element.toString());
 
-				assertEquals("78901", element.getCode());
-				assertEquals("Source Code 78901", element.getDisplay());
-				assertEquals(CS_URL_4, element.getSystem());
-				assertEquals("Version 5", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+				assertElementHasValues("78901", "Source Code 78901", CS_URL_4, "Version 5", element);
 				assertEquals(1, element.getConceptMapGroupElementTargets().size());
 
 				target = element.getConceptMapGroupElementTargets().get(0);
 
 				ourLog.info("ConceptMap.group(2).element(0).target(0):\n" + target.toString());
 
-				assertEquals("34567", target.getCode());
-				assertEquals("Target Code 34567", target.getDisplay());
-				assertEquals(CS_URL_2, target.getSystem());
-				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.NARROWER, target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+				assertTargetHasValues("34567", "Target Code 34567", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.NARROWER, target);
 			}
 		});
 	}
