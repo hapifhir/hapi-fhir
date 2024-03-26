@@ -194,6 +194,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		assertNull(instance.getEndTime());
 		assertEquals("00:10:00", instance.getEstimatedTimeRemaining());
 
+		verify(myJobPersistence).updatePollWaitingChunksForJobIfReady(eq(instance.getInstanceId()));
 		verifyNoMoreInteractions(myJobPersistence);
 	}
 
@@ -238,6 +239,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		assertEquals(50, instance.getCombinedRecordsProcessed());
 		assertEquals(0.08333333333333333, instance.getCombinedRecordsProcessedPerSecond());
 
+		verify(myJobPersistence).updatePollWaitingChunksForJobIfReady(eq(instance.getInstanceId()));
 		verifyNoMoreInteractions(myJobPersistence);
 	}
 
@@ -277,6 +279,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		// Verify
 		verify(myWorkChannelProducer, times(2)).send(myMessageCaptor.capture());
 		verify(myJobPersistence, times(2)).updateInstance(eq(INSTANCE_ID), any());
+		verify(myJobPersistence).updatePollWaitingChunksForJobIfReady(eq(INSTANCE_ID));
 		verifyNoMoreInteractions(myJobPersistence);
 		JobWorkNotification payload0 = myMessageCaptor.getAllValues().get(0).getPayload();
 		assertEquals(STEP_2, payload0.getTargetStepId());
@@ -300,6 +303,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		mySvc.runMaintenancePass();
 
 		verify(myJobPersistence, times(1)).deleteInstanceAndChunks(eq(INSTANCE_ID));
+		verify(myJobPersistence).updatePollWaitingChunksForJobIfReady(eq(instance.getInstanceId()));
 		verifyNoMoreInteractions(myJobPersistence);
 	}
 
@@ -339,7 +343,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		verify(myJobPersistence, times(1)).deleteChunksAndMarkInstanceAsChunksPurged(eq(INSTANCE_ID));
 		verify(myCompletionHandler, times(1)).jobComplete(myJobCompletionCaptor.capture());
-
+		verify(myJobPersistence).updatePollWaitingChunksForJobIfReady(eq(instance.getInstanceId()));
 		verifyNoMoreInteractions(myJobPersistence);
 
 		assertEquals(INSTANCE_ID, myJobCompletionCaptor.getValue().getInstance().getInstanceId());
@@ -379,7 +383,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		// twice - once to move to FAILED, and once to purge the chunks
 		verify(myJobPersistence, times(1)).updateInstance(eq(INSTANCE_ID), any());
 		verify(myJobPersistence, times(1)).deleteChunksAndMarkInstanceAsChunksPurged(eq(INSTANCE_ID));
-
+		verify(myJobPersistence).updatePollWaitingChunksForJobIfReady(eq(instance.getInstanceId()));
 		verifyNoMoreInteractions(myJobPersistence);
 	}
 

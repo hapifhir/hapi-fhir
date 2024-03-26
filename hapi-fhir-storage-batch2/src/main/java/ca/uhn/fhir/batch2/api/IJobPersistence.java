@@ -94,6 +94,15 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	void enqueueWorkChunkForProcessing(String theChunkId, Consumer<Integer> theCallback);
 
 	/**
+	 * Updates all Work Chunks in POLL_WAITING if their nextPollTime <= now
+	 * for the given Job Instance.
+	 * @param theInstanceId the instance id
+	 * @return the number of updated chunks
+	 */
+	@Transactional
+	int updatePollWaitingChunksForJobIfReady(String theInstanceId);
+
+	/**
 	 * Fetch instances ordered by myCreateTime DESC
 	 */
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -280,4 +289,12 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	@VisibleForTesting
 	WorkChunk createWorkChunk(WorkChunk theWorkChunk);
+
+	/**
+	 * Updates the given work chunk from the given status to the new status.
+	 * @param theChunkId the given chunk id
+	 * @param theOldStatus the old status
+	 * @param theNewStatus the new status
+	 */
+	void updateWorkChunkToStatus(String theChunkId, WorkChunkStatusEnum theOldStatus, WorkChunkStatusEnum theNewStatus);
 }

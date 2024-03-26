@@ -67,6 +67,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -306,6 +308,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	public int updatePollWaitingChunksForJobIfReady(String theInstanceId) {
+		return myWorkChunkRepository.updateWorkChunksForPollWaiting(
+				theInstanceId,
+				WorkChunkStatusEnum.READY,
+				Set.of(WorkChunkStatusEnum.POLL_WAITING),
+				Date.from(Instant.now()));
+	}
+
+	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex) {
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.DESC, CREATE_TIME);
@@ -348,6 +359,18 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				return WorkChunkStatusEnum.ERRORED;
 			}
 		});
+	}
+
+	@Override
+	public void onWorkChunkPollDelay(String theChunkId, int thePollDelayMs) {
+		int updated = myWorkChunkRepository.updateWorkChunkNextPollTime(
+				theChunkId,
+				WorkChunkStatusEnum.POLL_WAITING,
+				Date.from(Instant.now().plus(thePollDelayMs, ChronoUnit.MILLIS)));
+
+		if (updated != 1) {
+			ourLog.warn("Expected to update 1 work chunk's poll delay; but found {}", updated);
+		}
 	}
 
 	@Override
@@ -464,6 +487,16 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			theWorkChunk.setId(UUID.randomUUID().toString());
 		}
 		return toChunk(myWorkChunkRepository.save(Batch2WorkChunkEntity.fromWorkChunk(theWorkChunk)));
+	}
+
+	@Override
+	public void updateWorkChunkToStatus(
+			String theChunkId, WorkChunkStatusEnum theOldStatus, WorkChunkStatusEnum theNewStatus) {
+		int updated = myWorkChunkRepository.updateChunkStatus(theChunkId, theNewStatus, theOldStatus);
+
+		if (updated != 1) {
+			ourLog.warn("Expected to update 1 work chunk's status; instead updated {}", updated);
+		}
 	}
 
 	/**
