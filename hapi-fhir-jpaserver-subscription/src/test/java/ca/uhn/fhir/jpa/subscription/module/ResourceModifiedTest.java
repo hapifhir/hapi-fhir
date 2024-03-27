@@ -65,5 +65,4 @@ public class ResourceModifiedTest {
 		assertEquals(msg.getPartitionId().getPartitionIds().size(), 1);
 		assertEquals(msg.getPartitionId().getPartitionIds().get(0), 123);
 	}
-
 }
