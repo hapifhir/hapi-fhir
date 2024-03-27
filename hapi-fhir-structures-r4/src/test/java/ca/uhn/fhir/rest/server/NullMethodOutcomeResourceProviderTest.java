@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.apache.http.HttpStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -71,8 +72,11 @@ public class NullMethodOutcomeResourceProviderTest {
 		try {
 			myClient.validate().resource(myPatient).execute();
 			fail();
-		} catch (InternalErrorException e){
-			assertTrue(e.getMessage().contains("HTTP 500 Server Error: HAPI-0368"));
+		} catch (ResourceNotFoundException e){
+			// This fails with HAPI-0436 because the MethodOutcome of the @Validate method is used
+			// to build an IBundleProvider with a OperationOutcome resource (which will be null from the provider below).
+			// See OperationMethodBinding#invokeServer()
+			assertTrue(e.getMessage().contains("HTTP 404 Not Found: HAPI-0436"));
 		}
 	}
 
