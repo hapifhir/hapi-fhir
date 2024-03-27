@@ -936,7 +936,7 @@
 		<jaxb_api_version>2.3.1</jaxb_api_version>
 		<jaxb_core_version>2.3.0.1</jaxb_core_version>
 		<jaxb_runtime_version>3.0.0</jaxb_runtime_version>
-		<jena_version>4.8.0</jena_version>
+		<jena_version>4.9.0</jena_version>
 		<jersey_version>3.0.3</jersey_version>
 		<jetty_version>10.0.14</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
@@ -1172,7 +1172,7 @@
 			<dependency>
 				<groupId>com.squareup.okio</groupId>
 				<artifactId>okio-jvm</artifactId>
-				<version>3.2.0</version>
+				<version>3.4.0</version>
 			</dependency>
 
 			<dependency>
