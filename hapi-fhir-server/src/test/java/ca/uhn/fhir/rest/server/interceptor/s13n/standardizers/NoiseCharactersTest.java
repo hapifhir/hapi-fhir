@@ -1,6 +1,8 @@
 package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -55,16 +57,10 @@ class NoiseCharactersTest {
 		assertFalse(myFilter.isNoise('A'));
 	}
 
-	@Test
-	public void testInvalidChar() {
-		String[] invalidPatterns = new String[]{"", "1", "ABC", "\\u21", "#x0001-#x0000"
-			, "#x0001 - #x - #x0000", "#x0000 #x0022"};
-
-		for (String i : invalidPatterns) {
-			assertThrows(IllegalArgumentException.class, () -> {
-				myFilter.add(i);
-			});
-		}
+	@ParameterizedTest
+	@ValueSource(strings = {"", "1", "ABC", "\\u21", "#x0001-#x0000", "#x0001 - #x - #x0000", "#x0000 #x0022"})
+	public void testInvalidChar(String invalidPattern) {
+		assertThrows(IllegalArgumentException.class, () -> myFilter.add(invalidPattern));
 	}
 
 }
