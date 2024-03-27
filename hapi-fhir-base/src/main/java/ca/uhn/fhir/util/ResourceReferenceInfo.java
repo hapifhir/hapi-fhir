@@ -102,7 +102,9 @@ public class ResourceReferenceInfo {
 					final String completeName = myOwningResource + "." + myName;
 					boolean matched = false;
 					for (String s : searchParamDef.getPathsSplit()) {
-						if (s.equals(completeName) || s.startsWith(completeName + ".")) {
+						if (s.equals(completeName)
+								|| s.startsWith(completeName + ".")
+								|| s.startsWith("(" + completeName )) {
 							matched = true;
 							break;
 						}
