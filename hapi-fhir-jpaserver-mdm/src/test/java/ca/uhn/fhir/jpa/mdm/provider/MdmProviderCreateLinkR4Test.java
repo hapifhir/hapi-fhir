@@ -162,7 +162,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 	public void testCreateExistentLink() {
 		assertLinkCount(1);
 		try {
-			myMdmProvider.createLink(mySourcePatientId, myPatientId, MATCH_RESULT,myRequestDetails);
+			myMdmProvider.createLink(myGoldenPatientId, myPatientId, MATCH_RESULT,myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertThat(e.getMessage(), startsWith(Msg.code(753) + "Link already exists"));
@@ -173,7 +173,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 	@Test
 	public void testCreateIllegalResultPD() {
 		try {
-			myMdmProvider.createLink(mySourcePatientId, myPatientId, POSSIBLE_DUPLICATE_RESULT, myRequestDetails);
+			myMdmProvider.createLink(myGoldenPatientId, myPatientId, POSSIBLE_DUPLICATE_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1496) + "$mdm-create-link illegal matchResult value 'POSSIBLE_DUPLICATE'.  Must be NO_MATCH, MATCH or POSSIBLE_MATCH", e.getMessage());
@@ -218,7 +218,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 		patient.getMeta().addTag().setSystem(MdmConstants.SYSTEM_MDM_MANAGED).setCode(MdmConstants.CODE_NO_MDM_MANAGED);
 		createPatient(patient);
 		try {
-			myMdmProvider.createLink(mySourcePatientId, new StringType(patient.getIdElement().getValue()), MATCH_RESULT, myRequestDetails);
+			myMdmProvider.createLink(myGoldenPatientId, new StringType(patient.getIdElement().getValue()), MATCH_RESULT, myRequestDetails);
 			fail();
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(759) + myMessageHelper.getMessageForUnsupportedSourceResource(), e.getMessage());
