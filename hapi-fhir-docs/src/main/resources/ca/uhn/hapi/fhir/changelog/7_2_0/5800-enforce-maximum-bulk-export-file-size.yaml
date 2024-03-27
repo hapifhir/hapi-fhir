@@ -1,0 +1,6 @@
+---
+type: add
+issue: 5800
+title: "A new setting in JpaStorageSettings enforces a maximum file size for Bulk Export
+   output files, as well as work chunks creating during processing. This setting has
+   a default value of 100 MB."

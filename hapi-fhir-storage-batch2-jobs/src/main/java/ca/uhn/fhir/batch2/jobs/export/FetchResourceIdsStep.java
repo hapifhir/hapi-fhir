@@ -102,6 +102,8 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 						myBulkExportProcessor.getResourcePidIterator(providerParams);
 				List<BatchResourceId> idsToSubmit = new ArrayList<>();
 
+				int estimatedChunkSize = 0;
+
 				if (!pidIterator.hasNext()) {
 					ourLog.debug("Bulk Export generated an iterator with no results!");
 				}
@@ -121,17 +123,25 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 
 					idsToSubmit.add(batchResourceId);
 
+					if (estimatedChunkSize > 0) {
+						// Account for comma between array entries
+						estimatedChunkSize++;
+					}
+					estimatedChunkSize += batchResourceId.estimateSerializedSize();
+
 					// Make sure resources stored in each batch does not go over the max capacity
-					if (idsToSubmit.size() >= myStorageSettings.getBulkExportFileMaximumCapacity()) {
-						submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
+					if (idsToSubmit.size() >= myStorageSettings.getBulkExportFileMaximumCapacity()
+							|| estimatedChunkSize >= myStorageSettings.getBulkExportFileMaximumSize()) {
+						submitWorkChunk(idsToSubmit, resourceType, theDataSink);
 						submissionCount++;
 						idsToSubmit = new ArrayList<>();
+						estimatedChunkSize = 0;
 					}
 				}
 
 				// if we have any other Ids left, submit them now
 				if (!idsToSubmit.isEmpty()) {
-					submitWorkChunk(idsToSubmit, resourceType, params, theDataSink);
+					submitWorkChunk(idsToSubmit, resourceType, theDataSink);
 					submissionCount++;
 				}
 			}
@@ -150,7 +160,6 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 	private void submitWorkChunk(
 			List<BatchResourceId> theBatchResourceIds,
 			String theResourceType,
-			BulkExportJobParameters theParams,
 			IJobDataSink<ResourceIdList> theDataSink) {
 		ResourceIdList idList = new ResourceIdList();
 

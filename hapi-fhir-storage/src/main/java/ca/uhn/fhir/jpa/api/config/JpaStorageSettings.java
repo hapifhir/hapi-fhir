@@ -50,6 +50,10 @@ import java.util.TreeSet;
 public class JpaStorageSettings extends StorageSettings {
 
 	/**
+	 * Default value for {@link #getBulkExportFileMaximumSize()}: 100 MB
+	 */
+	public static final long DEFAULT_BULK_EXPORT_MAXIMUM_WORK_CHUNK_SIZE = 100 * FileUtils.ONE_MB;
+	/**
 	 * Default value for {@link #setReuseCachedSearchResultsForMillis(Long)}: 60000ms (one minute)
 	 */
 	public static final Long DEFAULT_REUSE_CACHED_SEARCH_RESULTS_FOR_MILLIS = DateUtils.MILLIS_PER_MINUTE;
@@ -313,6 +317,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Since 6.2.0
 	 */
 	private int myBulkExportFileMaximumCapacity = DEFAULT_BULK_EXPORT_FILE_MAXIMUM_CAPACITY;
+	/**
+	 * Since 7.2.0
+	 */
+	private long myBulkExportFileMaximumSize = DEFAULT_BULK_EXPORT_MAXIMUM_WORK_CHUNK_SIZE;
 	/**
 	 * Since 6.4.0
 	 */
@@ -2301,9 +2309,40 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Default is 1000 resources per file.
 	 *
 	 * @since 6.2.0
+	 * @see #setBulkExportFileMaximumCapacity(int)
 	 */
 	public void setBulkExportFileMaximumCapacity(int theBulkExportFileMaximumCapacity) {
 		myBulkExportFileMaximumCapacity = theBulkExportFileMaximumCapacity;
+	}
+
+	/**
+	 * Defines the maximum size for a single work chunk or report file to be held in
+	 * memory or stored in the database for bulk export jobs.
+	 * Note that the framework will attempt to not exceed this limit, but will only
+	 * estimate the actual chunk size as it works, so this value should be set
+	 * below any hard limits that may be present.
+	 *
+	 * @since 7.2.0
+	 * @see #DEFAULT_BULK_EXPORT_MAXIMUM_WORK_CHUNK_SIZE The default value for this setting
+	 */
+	public long getBulkExportFileMaximumSize() {
+		return myBulkExportFileMaximumSize;
+	}
+
+	/**
+	 * Defines the maximum size for a single work chunk or report file to be held in
+	 * memory or stored in the database for bulk export jobs. Default is 100 MB.
+	 * Note that the framework will attempt to not exceed this limit, but will only
+	 * estimate the actual chunk size as it works, so this value should be set
+	 * below any hard limits that may be present.
+	 *
+	 * @since 7.2.0
+	 * @see #setBulkExportFileMaximumCapacity(int)
+	 * @see #DEFAULT_BULK_EXPORT_MAXIMUM_WORK_CHUNK_SIZE The default value for this setting
+	 */
+	public void setBulkExportFileMaximumSize(long theBulkExportFileMaximumSize) {
+		Validate.isTrue(theBulkExportFileMaximumSize > 0, "theBulkExportFileMaximumSize must be positive");
+		myBulkExportFileMaximumSize = theBulkExportFileMaximumSize;
 	}
 
 	/**
