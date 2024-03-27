@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5801
+title: "Support for the _language parameter was added but it was not able to be used by clients of a JPA server
+because the _language parameter was not added to the resource providers. Additionally, no error message
+was returned when language support was disabled and a search with _language was performed. This has 
+been fixed."
