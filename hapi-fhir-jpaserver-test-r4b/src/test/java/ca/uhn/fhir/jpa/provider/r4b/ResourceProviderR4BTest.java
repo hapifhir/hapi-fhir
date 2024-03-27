@@ -20,6 +20,7 @@ import org.hl7.fhir.r4b.model.CarePlan;
 import org.hl7.fhir.r4b.model.CodeableConcept;
 import org.hl7.fhir.r4b.model.Condition;
 import org.hl7.fhir.r4b.model.DateTimeType;
+import org.hl7.fhir.r4b.model.Group;
 import org.hl7.fhir.r4b.model.MedicationRequest;
 import org.hl7.fhir.r4b.model.Observation;
 import org.hl7.fhir.r4b.model.Observation.ObservationComponentComponent;
@@ -75,6 +76,14 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		this.myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 	}
 
+
+	@Test
+	public void testConditionalCreateOnEscapedPlus() {
+		Group group = new Group();
+		group.setName("FOO BAR");
+
+		myClient.create().resource(group).conditionalByUrl("Group?name=FOO+BAR").execute();
+	}
 	@Test
 	public void testSearchWithContainsLowerCase() {
 		this.myStorageSettings.setAllowContainsSearches(true);
