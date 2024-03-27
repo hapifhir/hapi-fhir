@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -85,7 +86,7 @@ abstract class BaseOutcomeReturningMethodBinding extends BaseMethodBinding {
 	 */
 	protected abstract String getMatchingOperation();
 
-	private int getOperationStatus(MethodOutcome response) {
+	private int getOperationStatus(@Nullable MethodOutcome response) {
 
 		// if the response status code is set (i.e. from a custom Resource provider) it should be respected
 		if (response != null && response.isResponseStatusCodeSet()) {
