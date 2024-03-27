@@ -55,18 +55,17 @@ public class MdmCandidateSearchCriteriaBuilderSvc {
 
 		// If there are candidate search params, then make use of them, otherwise, search with only the filters.
 		if (resourceSearchParam != null) {
-			resourceSearchParam.iterator().forEachRemaining(searchParam -> {
+			for (String searchParam : resourceSearchParam) {
 				// to compare it to all known GOLDEN_RESOURCE objects, using the overlapping search parameters that they
 				// have.
 				List<String> valuesFromResourceForSearchParam =
 						myMdmSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam);
-				if (!valuesFromResourceForSearchParam.isEmpty()) {
-					criteria.add(buildResourceMatchQuery(searchParam, valuesFromResourceForSearchParam));
+				if (valuesFromResourceForSearchParam.isEmpty()) {
+					// Don't search if some of the search parameters aren't present in the resource
+					return Optional.empty();
 				}
-			});
-			if (criteria.isEmpty()) {
-				// TODO GGG/KHS, re-evaluate whether we should early drop here.
-				return Optional.empty();
+
+				criteria.add(buildResourceMatchQuery(searchParam, valuesFromResourceForSearchParam));
 			}
 		}
 

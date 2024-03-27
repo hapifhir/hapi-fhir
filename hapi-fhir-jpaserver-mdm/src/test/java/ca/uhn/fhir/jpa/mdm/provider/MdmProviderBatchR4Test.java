@@ -101,6 +101,27 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 		super.after();
 	}
 
+	protected void clearMdmLinks() {
+		// Override of super class.
+		//
+		// Each resource that needs to be cleared produces a separate work chunk in batch processing, owing to a loop
+		// in MdmGenerateRangeChunksStep. There are three resource types used in this test, so that means there are
+		// three work chunks created for finding GoldenResourceIds and deleting them.
+		//
+		// TestR4Config proscribes (via JpaBatch2Config/BaseBatch2Config) that there are 4 threads processing chunks.
+		// However, TestR4Config also proscribes that there is somewhere between 3 and 8 database connections available.
+		//
+		// Consequently, if we clear all resource types at once, we can end up with 3 threads processing a chunk each.
+		// Which would be fine, except LoadGoldenIdsStep requires 2 database connections - one to read data,
+		// and the second to create the clear step chunks based on that data. If TestR4Config rolls low and there
+		// are only three connections available, we risk a deadlock due to database connection exhaustion if we
+		// process all 3 resource types at once. (With 4 connections or more, one of the three chunks is guaranteed to
+		// be able to finish, thereby freeing resources for the other chunks to finish.)
+		clearMdmLinks("Medication");
+		clearMdmLinks("Practitioner");
+		clearMdmLinks("Patient");
+	}
+
 	@ParameterizedTest
 	@MethodSource("requestTypes")
 	public void testBatchRunOnAllMedications(ServletRequestDetails theSyncOrAsyncRequest) throws InterruptedException {
