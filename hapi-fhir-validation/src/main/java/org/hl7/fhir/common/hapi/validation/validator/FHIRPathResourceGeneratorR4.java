@@ -8,10 +8,10 @@ import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.r4.fhirpath.ExpressionNode;
+import org.hl7.fhir.r4.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
-import org.hl7.fhir.r4.model.ExpressionNode;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.utils.FHIRPathEngine;
 
 import java.util.ArrayList;
 import java.util.HashMap;

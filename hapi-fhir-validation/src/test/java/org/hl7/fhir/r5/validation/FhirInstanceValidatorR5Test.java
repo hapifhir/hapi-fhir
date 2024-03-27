@@ -60,6 +60,7 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -97,6 +98,8 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 	private Map<String, ValueSetExpansionComponent> mySupportedCodeSystemsForExpansion;
 	private FhirValidator myVal;
 	private ArrayList<String> myValidConcepts;
+
+	private Set<String> mySupportedValueSets = new HashSet<>();
 	private Set<String> myValidSystems = new HashSet<>();
 	private CachingValidationSupport myValidationSupport;
 
@@ -104,6 +107,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		myValidSystems.add(theSystem);
 		myValidConcepts.add(theSystem + "___" + theCode);
 	}
+
 
 	/**
 	 * An invalid local reference should not cause a ServiceException.
@@ -188,7 +192,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
-					return new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage("Unknown code");
+					return new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage("Unknown code (for '" + system + "#" + code + "')");
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
 				}
@@ -251,6 +255,8 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 			.setSystem("http://foo")
 			.setCode("AA  ");
 
+		ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+
 		FhirValidator val = ourCtx.newValidator();
 		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
 
@@ -288,7 +294,12 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 	 */
 	@Test
 	public void testValidateDoesntEnforceBestPracticesByDefault() {
+		addValidConcept("http://loinc.org", "1234");
+
 		Observation input = new Observation();
+		input.addPerformer(new Reference("Practitioner/124"));
+		input.setEffective(new DateTimeType("2023-01-01T11:22:33Z"));
+
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		input.setStatus(Enumerations.ObservationStatus.AMENDED);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234").setDisplay("FOO");
@@ -305,7 +316,9 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
 		assertTrue(result.isSuccessful());
-		assertThat(all, empty());
+		assertThat(all, hasSize(1));
+		assertEquals("Best Practice Recommendation: In general, all observations should have a subject", all.get(0).getMessage());
+		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 		// With BPs enabled
 		val = ourCtx.newValidator();
@@ -316,7 +329,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertEquals("All observations should have a subject", all.get(0).getMessage());
+		assertEquals("Best Practice Recommendation: In general, all observations should have a subject", all.get(0).getMessage());
 	}
 
 
@@ -454,14 +467,15 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		IValidatorResourceFetcher resourceFetcher = mock(IValidatorResourceFetcher.class);
 		IValidationPolicyAdvisor policyAdvisor = mock(IValidationPolicyAdvisor.class);
-
+		when(policyAdvisor.policyForElement(any(), any(),any(),any(),any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.ElementValidationAction.class));
+		when(policyAdvisor.policyForCodedContent(any(),any(),any(),any(),any(),any(),any(),any(),any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.CodedContentValidationAction.class));
 		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		myInstanceVal.setValidatorResourceFetcher(resourceFetcher);
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myVal.validateWithResult(input);
 
 		//verify(resourceFetcher, times(13)).resolveURL(any(), any(), anyString(), anyString(), anyString());
-		verify(policyAdvisor, times(4)).policyForReference(any(), any(), anyString(), anyString());
+		verify(policyAdvisor, times(8)).policyForReference(any(), any(), anyString(), anyString());
 		//verify(resourceFetcher, times(3)).fetch(any(), any(), anyString());
 	}
 
@@ -590,7 +604,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myVal.validateWithResult(encoded);
 		assertEquals( 1, output.getMessages().size(), output.toString());
 
-		assertEquals("The extension http://hl7.org/fhir/v3/ethnicity is unknown, and not allowed here", output.getMessages().get(0).getMessage());
+		assertEquals("The extension http://hl7.org/fhir/v3/ethnicity could not be found so is not allowed here", output.getMessages().get(0).getMessage());
 		assertEquals(ResultSeverityEnum.ERROR, output.getMessages().get(0).getSeverity());
 	}
 
@@ -679,13 +693,12 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, res.size(), output.toString());
-		assertEquals("A code with no system has no defined meaning. A system should be provided", res.get(0).getMessage());
+		assertEquals("Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided", res.get(0).getMessage());
 	}
 
 	@Test
 	public void testValidateRawXmlWithMissingRootNamespace() {
-		String input = ""
-			+ "<Patient>"
+		String input = "<Patient>"
 			+ "    <text>"
 			+ "        <status value=\"generated\"/>"
 			+ "        <div xmlns=\"http://www.w3.org/1999/xhtml\">Some narrative</div>"
@@ -701,7 +714,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertEquals(1, output.getMessages().size(), output.toString());
-		assertEquals("This does not appear to be a FHIR resource (unknown namespace/name 'noNamespace::Patient')", output.getMessages().get(0).getMessage());
+		assertEquals("This content cannot be parsed (unknown or unrecognized XML Root element namespace/name 'noNamespace::Patient')", output.getMessages().get(0).getMessage());
 		ourLog.info(output.getMessages().get(0).getLocationString());
 	}
 
@@ -739,7 +752,6 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 	 */
 	@Test
 	public void testValidateRelatedPerson() {
-
 		/*
 		 * Try with a code that is in http://hl7.org/fhir/ValueSet/relatedperson-relationshiptype
 		 * and therefore should validate
@@ -747,7 +759,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		RelatedPerson rp = new RelatedPerson();
 		rp.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		rp.getPatient().setReference("Patient/1");
-		rp.addRelationship().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0131").setCode("C");
+		rp.addRelationship().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0131").setCode("O");
 
 		ValidationResult results = myVal.validateWithResult(rp);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
@@ -757,17 +769,22 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		 * Now a bad code
 		 */
 		rp = new RelatedPerson();
+		rp.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		rp.getPatient().setReference("Patient/1");
 		rp.addRelationship().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v2-0131").setCode("GAGAGAGA");
 
 		results = myVal.validateWithResult(rp);
 		outcome = logResultsAndReturnAll(results);
 
-		assertThat(outcome.get(0).getMessage(), containsString("None of the codings provided are in the value set 'Patient Relationship Type'"));
-		assertEquals(ResultSeverityEnum.INFORMATION, outcome.get(0).getSeverity());
-		assertThat(outcome.get(1).getMessage(), containsString("Unknown code 'http://terminology.hl7.org/CodeSystem/v2-0131#GAGAGAGA'"));
-		assertEquals(ResultSeverityEnum.ERROR, outcome.get(1).getSeverity());
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(rp));
+
+
 		assertEquals(2, outcome.size());
+		assertThat(outcome.get(0).getMessage(), containsString("Unknown code 'http://terminology.hl7.org/CodeSystem/v2-0131#GAGAGAGA'"));
+		assertEquals(ResultSeverityEnum.ERROR, outcome.get(0).getSeverity());
+		assertThat(outcome.get(1).getMessage(), containsString("None of the codings provided are in the value set 'Patient Relationship Type'"));
+		assertEquals(ResultSeverityEnum.INFORMATION, outcome.get(1).getSeverity());
+
 	}
 
 	@Test
@@ -786,8 +803,11 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
+
+
 		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
-		assertEquals("Unknown code for 'http://loinc.org#12345'", errors.get(0).getMessage());
+		assertEquals("Unknown code (for 'http://loinc.org#12345')", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -816,7 +836,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 	public void testValidateResourceContainingProfileDeclarationDoesntResolve() {
 		addValidConcept("http://loinc.org", "12345");
 
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		input.getMeta().addProfile("http://foo/structuredefinition/myprofile");
 
@@ -826,7 +846,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		myInstanceVal.setValidationSupport(myValidationSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it is unknown"));
+		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found"));
 	}
 
 	@Test
@@ -846,7 +866,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	public void testValidateResourceWithDefaultValueset() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		input.setStatus(Enumerations.ObservationStatus.FINAL);
@@ -855,7 +875,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertEquals(output.getMessages().size(), 0);
+		assertEquals( 0, output.getMessages().size());
 	}
 
 	@Test
@@ -875,13 +895,23 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		logResultsAndReturnAll(output);
 		assertThat(
 			output.getMessages().get(0).getMessage(),
-			containsString("The value provided ('notvalidcode') is not in the value set 'Observation Status' (http://hl7.org/fhir/ValueSet/observation-status|5.0.0), and a code is required from this value set  (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')")
+			containsString("The value provided ('notvalidcode') was not found in the value set 'Observation Status' (http://hl7.org/fhir/ValueSet/observation-status|5.0.0), and a code is required from this value set  (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')")
 			);
 	}
 
+
+	private Observation createObservationWithDefaultSubjectPerfomerEffective() {
+		Observation observation = new Observation();
+		observation.setSubject(new Reference("Patient/123"));
+		observation.addPerformer(new Reference("Practitioner/124"));
+		observation.setEffective(new DateTimeType("2023-01-01T11:22:33Z"));
+		return observation;
+	}
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationFailing() {
-		Observation input = new Observation();
+		addValidConcept("http://loinc.org", "12345");
+
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
@@ -897,7 +927,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationFailingNonLoinc() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
@@ -909,13 +939,13 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertThat(errors.toString(), errors.size(), greaterThan(0));
-		assertEquals("Unknown code for 'http://acme.org#9988877'", errors.get(0).getMessage());
+		assertEquals("Unknown code (for 'http://acme.org#9988877')", errors.get(0).getMessage());
 
 	}
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingLoinc() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
@@ -931,7 +961,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingLoincWithExpansion() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		ValueSetExpansionComponent expansionComponent = new ValueSetExpansionComponent();
@@ -947,12 +977,12 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, errors.size());
-		assertEquals("Unknown code for 'http://loinc.org#1234'", errors.get(0).getMessage());
+		assertEquals("Unknown code (for 'http://loinc.org#1234')", errors.get(0).getMessage());
 	}
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingNonLoinc() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
@@ -968,19 +998,29 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	public void testValidateResourceWithValuesetExpansionBad() {
-
 		Patient p = new Patient();
 		p.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-		p.addIdentifier().setSystem("http://example.com/").setValue("12345").getType().addCoding().setSystem("http://example.com/foo/bar").setCode("bar");
+		p.addIdentifier().setSystem("http://example.com/").setValue("12345").getType()
+			.addCoding().setSystem("http://example.com/foo/bar").setCode("bar");
+
+		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
+
 
 		ValidationResult output = myVal.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(1, all.size());
-		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
+		assertEquals(2, all.size());
+
+		assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
 		assertThat(
 			all.get(0).getMessage(),
+			containsString("Unknown code 'http://example.com/foo/bar#bar'")
+		);
+
+		assertEquals("Patient.identifier[0].type", all.get(1).getLocationString());
+		assertThat(
+			all.get(1).getMessage(),
 			containsString("None of the codings provided are in the value set 'Identifier Type Codes'"));
-		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
+		assertEquals(ResultSeverityEnum.WARNING, all.get(1).getSeverity());
 
 	}
 

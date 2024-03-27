@@ -747,14 +747,18 @@ public interface IValidationSupport {
 		private final IBaseResource myValueSet;
 		private final String myError;
 
-		public ValueSetExpansionOutcome(String theError) {
+		private boolean myErrorIsFromServer;
+
+		public ValueSetExpansionOutcome(String theError, boolean theErrorIsFromServer) {
 			myValueSet = null;
 			myError = theError;
+			myErrorIsFromServer = theErrorIsFromServer;
 		}
 
 		public ValueSetExpansionOutcome(IBaseResource theValueSet) {
 			myValueSet = theValueSet;
 			myError = null;
+			myErrorIsFromServer = false;
 		}
 
 		public String getError() {
@@ -763,6 +767,10 @@ public interface IValidationSupport {
 
 		public IBaseResource getValueSet() {
 			return myValueSet;
+		}
+
+		public boolean getErrorIsFromServer() {
+			return myErrorIsFromServer;
 		}
 	}
 

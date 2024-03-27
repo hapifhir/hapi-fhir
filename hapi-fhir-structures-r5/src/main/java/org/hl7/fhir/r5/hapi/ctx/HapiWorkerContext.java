@@ -13,6 +13,7 @@ import org.apache.commons.lang3.Validate;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.exceptions.TerminologyServiceException;
+import org.hl7.fhir.r5.context.IContextResourceLoader;
 import org.hl7.fhir.r5.context.IWorkerContext;
 import org.hl7.fhir.r5.context.IWorkerContextManager;
 import org.hl7.fhir.r5.model.CodeSystem;
@@ -30,8 +31,11 @@ import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.profilemodel.PEBuilder;
 import org.hl7.fhir.r5.terminologies.expansion.ValueSetExpansionOutcome;
+import org.hl7.fhir.r5.terminologies.utilities.CodingValidationRequest;
+import org.hl7.fhir.r5.terminologies.utilities.ValidationResult;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.ValidationContextCarrier;
+import org.hl7.fhir.utilities.FhirPublication;
 import org.hl7.fhir.utilities.TimeTracker;
 import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.i18n.I18nBase;
@@ -91,6 +95,16 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public CodeSystem fetchCodeSystem(String system, FhirPublication fhirVersion) {
+		throw new UnsupportedOperationException(Msg.code(2456));
+	}
+
+	@Override
+	public CodeSystem fetchCodeSystem(String system, String version, FhirPublication fhirVersion) {
+		throw new UnsupportedOperationException(Msg.code(2457));
+	}
+
+	@Override
 	public CodeSystem fetchSupplementedCodeSystem(String theS) {
 		return null;
 	}
@@ -101,6 +115,16 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public CodeSystem fetchSupplementedCodeSystem(String system, FhirPublication fhirVersion) {
+		throw new UnsupportedOperationException(Msg.code(2458));
+	}
+
+	@Override
+	public CodeSystem fetchSupplementedCodeSystem(String system, String version, FhirPublication fhirVersion) {
+		throw new UnsupportedOperationException(Msg.code(2459));
+	}
+
+	@Override
 	public List<String> getResourceNames() {
 		List<String> result = new ArrayList<>();
 		for (ResourceType next : ResourceType.values()) {
@@ -108,6 +132,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		}
 		Collections.sort(result);
 		return result;
+	}
+
+	@Override
+	public List<String> getResourceNames(FhirPublication fhirVersion) {
+		throw new UnsupportedOperationException(Msg.code(2460));
 	}
 
 	@Override
@@ -128,6 +157,14 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			return myValidationSupport.isCodeSystemSupported(
 					new ValidationSupportContext(myValidationSupport), theSystem);
 		}
+	}
+
+	@Override
+	public boolean supportsSystem(String system, FhirPublication fhirVersion) throws TerminologyServiceException {
+		if (!fhirVersion.equals(FhirPublication.R5)) {
+			throw new UnsupportedOperationException(Msg.code(2461));
+		}
+		return supportsSystem(system);
 	}
 
 	@Override
@@ -247,6 +284,10 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public void setExpansionParameters(Parameters expParameters) {
+		setExpansionProfile(expParameters);
+	}
+
 	public void setExpansionProfile(Parameters theExpParameters) {
 		myExpansionProfile = theExpParameters;
 	}
@@ -264,7 +305,8 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 		input.getCompose().addInclude(theInc);
 		IValidationSupport.ValueSetExpansionOutcome output =
 				myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), null, input);
-		return new ValueSetExpansionOutcome((ValueSet) output.getValueSet(), output.getError(), null);
+		return new ValueSetExpansionOutcome(
+				(ValueSet) output.getValueSet(), output.getError(), null, output.getErrorIsFromServer());
 	}
 
 	@Override
@@ -278,12 +320,12 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public ILoggingService getLogger() {
+	public org.hl7.fhir.r5.context.ILoggingService getLogger() {
 		throw new UnsupportedOperationException(Msg.code(213));
 	}
 
 	@Override
-	public void setLogger(ILoggingService theLogger) {
+	public void setLogger(org.hl7.fhir.r5.context.ILoggingService theLogger) {
 		throw new UnsupportedOperationException(Msg.code(214));
 	}
 
@@ -323,8 +365,28 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public boolean isPrimitiveType(String s) {
+		throw new UnsupportedOperationException(Msg.code(2462));
+	}
+
+	@Override
+	public boolean isDataType(String s) {
+		throw new UnsupportedOperationException(Msg.code(2463));
+	}
+
+	@Override
+	public StructureDefinition fetchTypeDefinition(String typeName, FhirPublication fhirVersion) {
+		throw new UnsupportedOperationException(Msg.code(2464));
+	}
+
+	@Override
 	public List<StructureDefinition> fetchTypeDefinitions(String n) {
 		throw new UnsupportedOperationException(Msg.code(234));
+	}
+
+	@Override
+	public List<StructureDefinition> fetchTypeDefinitions(String n, FhirPublication fhirPublication) {
+		throw new UnsupportedOperationException(Msg.code(2465));
 	}
 
 	@Override
@@ -341,6 +403,10 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			T retVal = (T) myFetchedResourceCache.get(theUri, t -> myValidationSupport.fetchResource(theClass, theUri));
 			return retVal;
 		}
+	}
+
+	public <T extends Resource> T fetchResource(Class<T> class_, String uri, FhirPublication fhirVersion) {
+		throw new UnsupportedOperationException(Msg.code(2466));
 	}
 
 	@Override
@@ -365,8 +431,19 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public <T extends Resource> T fetchResource(
+			Class<T> class_, String uri, String version, FhirPublication fhirVersion) {
+		throw new UnsupportedOperationException(Msg.code(2467));
+	}
+
+	@Override
 	public <T extends Resource> T fetchResource(Class<T> class_, String uri, Resource canonicalForSource) {
 		return fetchResource(class_, uri);
+	}
+
+	@Override
+	public <T extends Resource> List<T> fetchResourcesByType(Class<T> class_, FhirPublication fhirVersion) {
+		throw new UnsupportedOperationException(Msg.code(2468));
 	}
 
 	@Override
@@ -375,8 +452,23 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
+	public Resource fetchResourceById(String type, String uri, FhirPublication fhirVersion) {
+		throw new UnsupportedOperationException(Msg.code(2469));
+	}
+
+	@Override
 	public <T extends org.hl7.fhir.r5.model.Resource> boolean hasResource(Class<T> theClass_, String theUri) {
 		throw new UnsupportedOperationException(Msg.code(227));
+	}
+
+	@Override
+	public <T extends Resource> boolean hasResource(Class<T> class_, String uri, Resource sourceOfReference) {
+		throw new UnsupportedOperationException(Msg.code(2470));
+	}
+
+	@Override
+	public <T extends Resource> boolean hasResource(Class<T> class_, String uri, FhirPublication fhirVersion) {
+		throw new UnsupportedOperationException(Msg.code(2471));
 	}
 
 	@Override
@@ -395,6 +487,11 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public Set<String> getResourceNamesAsSet() {
 		return myCtx.getResourceTypes();
+	}
+
+	@Override
+	public Set<String> getResourceNamesAsSet(FhirPublication fhirVersion) {
+		throw new UnsupportedOperationException(Msg.code(2472));
 	}
 
 	@Override
@@ -517,5 +614,30 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public void setForPublication(boolean b) {
 		throw new UnsupportedOperationException(Msg.code(2350));
+	}
+
+	@Override
+	public Set<String> urlsForOid(boolean codeSystem, String oid) {
+		throw new UnsupportedOperationException(Msg.code(2473));
+	}
+
+	@Override
+	public <T extends Resource> T findTxResource(Class<T> class_, String canonical, Resource sourceOfReference) {
+		throw new UnsupportedOperationException(Msg.code(2491));
+	}
+
+	@Override
+	public <T extends Resource> T findTxResource(Class<T> class_, String canonical) {
+		throw new UnsupportedOperationException(Msg.code(2492));
+	}
+
+	@Override
+	public <T extends Resource> T findTxResource(Class<T> class_, String canonical, String version) {
+		throw new UnsupportedOperationException(Msg.code(2493));
+	}
+
+	@Override
+	public Boolean subsumes(ValidationOptions optionsArg, Coding parent, Coding child) {
+		throw new UnsupportedOperationException(Msg.code(2488));
 	}
 }

@@ -79,6 +79,7 @@ import org.hl7.fhir.r4.model.OperationDefinition.OperationKind;
 import org.hl7.fhir.r4.model.OperationDefinition.OperationParameterUse;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r5.utils.validation.constants.BestPracticeWarningLevel;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -142,7 +143,8 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 	@BeforeEach
 	public void before() {
 		myValidator = myCtx.newValidator();
-		myValidator.registerValidatorModule(new FhirInstanceValidator(myCtx));
+		FhirInstanceValidator fhirInstanceValidator = new FhirInstanceValidator(myCtx);
+		myValidator.registerValidatorModule(fhirInstanceValidator);
 	}
 
 	private HttpServletRequest createHttpServletRequest() {

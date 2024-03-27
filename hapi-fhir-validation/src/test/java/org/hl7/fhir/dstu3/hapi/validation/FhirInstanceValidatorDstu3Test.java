@@ -22,6 +22,7 @@ import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationS
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.dstu3.hapi.ctx.HapiWorkerContext;
+import org.hl7.fhir.dstu3.fhirpath.FHIRPathEngine;
 import org.hl7.fhir.dstu3.model.Base;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -53,7 +54,6 @@ import org.hl7.fhir.dstu3.model.StructureDefinition;
 import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
-import org.hl7.fhir.dstu3.utils.FHIRPathEngine;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
@@ -71,6 +71,7 @@ import org.mockito.stubbing.Answer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -172,14 +173,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 				return retVal;
 			}
 		});
-//		when(mockSupport.isValueSetSupported(any(), nullable(String.class))).thenAnswer(new Answer<Boolean>() {
-//			@Override
-//			public Boolean answer(InvocationOnMock theInvocation) {
-//				String url = (String) theInvocation.getArguments()[1];
-//				boolean retVal = myValueSets.containsKey(url);
-//				return retVal;
-//			}
-//		});
+
 		when(mockSupport.fetchValueSet(any())).thenAnswer(t->{
 			String url = t.getArgument(0, String.class);
 			return myValueSets.get(url);
@@ -229,7 +223,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
-					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code");
+					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code (for '" + system + "#" + code + "')");
 				} else if (myCodeSystems.containsKey(system)) {
 					CodeSystem cs = myCodeSystems.get(system);
 					Optional<ConceptDefinitionComponent> found = cs.getConcept().stream().filter(t -> t.getCode().equals(code)).findFirst();
@@ -351,9 +345,9 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 			ValidationResult result = val.validateWithResult(p);
 			assertFalse(result.isSuccessful());
 			List<SingleValidationMessage> all = logResultsAndReturnAll(result);
-			assertEquals(1, all.size());
+			assertEquals(2, all.size());
 			assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
-			assertEquals("Unknown code 'urn:iso:std:iso:3166#QQ' for 'urn:iso:std:iso:3166#QQ'", all.get(0).getMessage());
+			assertEquals("Unknown code (for 'urn:iso:std:iso:3166#QQ')", all.get(0).getMessage());
 		}
 	}
 
@@ -407,6 +401,8 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 	 */
 	@Test
 	public void testDstu3UsesLatestDefinitions() throws IOException {
+		addValidConcept("http://www.nlm.nih.gov/research/umls/rxnorm", "316663");
+		addValidConcept("http://snomed.info/sct", "14760008");
 		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/bug703.json"), Charsets.UTF_8);
 
 		ValidationResult results = myVal.validateWithResult(input);
@@ -516,6 +512,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 	@Test
 	public void testGoal() {
+		addValidConcept("http://foo", "some other goal");
 		Goal goal = new Goal();
 		goal.setSubject(new Reference("Patient/123"));
 		goal.setDescription(new CodeableConcept().addCoding(new Coding("http://foo", "some other goal", "")));
@@ -681,10 +678,29 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 					} else if (t.getMessage().contains("sdf-15") && t.getMessage().contains("The name 'kind' is not valid for any of the possible types")) {
 						// Find constraint sdf-15 fails with stricter core validation.
 						return false;
-					} else if (t.getMessage().contains("side is inherently a collection") && t.getMessage().endsWith("may fail or return false if there is more than one item in the content being evaluated")) {
+					}
+					else if (t.getMessage().contains("bdl-7") && t.getMessage().contains("Error evaluating FHIRPath expression: The parameter type http://hl7.org/fhir/StructureDefinition/uri is not legal for where parameter 1. expecting SINGLETON[http://hl7.org/fhirpath/System.Boolean]")) {
+						// Find constraint sdf-15 fails with stricter core validation.
+						return false;
+					}
+					else if (t.getMessage().contains("side is inherently a collection") && t.getMessage().endsWith("may fail or return false if there is more than one item in the content being evaluated")) {
 						// Some DSTU3 FHIRPath expressions now produce warnings if a singleton is compared to a collection that potentially has > 1 elements
 						return false;
-					} else {
+					} else if (t.getMessage().contains("When HL7 is publishing a resource, the owning committee must be stated using the http://hl7.org/fhir/StructureDefinition/structuredefinition-wg extension")) {
+						// DSTU3 resources predate this strict requirement
+						return false;
+					} else if (t.getMessage().equals("The nominated WG 'rcrim' is unknown")) {
+						//The rcrim workgroup is now brr http://www.hl7.org/Special/committees/rcrim/index.cfm
+						return false;
+					} else if (t.getSeverity() == ResultSeverityEnum.WARNING
+						&& ( t.getMessageId().equals("VALIDATION_HL7_PUBLISHER_MISMATCH")
+						|| t.getMessageId().equals("VALIDATION_HL7_PUBLISHER_MISMATCH2")
+						|| t.getMessageId().equals("VALIDATION_HL7_WG_URL")
+					)) {
+						// Workgroups have been updated and have slightly different naming conventions and URLs.
+						return false;
+					}
+					else {
 						return true;
 					}
 				})
@@ -759,9 +775,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult results = myVal.validateWithResult(is);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertEquals(1, outcome.size());
-		assertEquals("Unknown code 'http://dicom.nema.org/resources/ontology/DCM#BAR' for 'http://dicom.nema.org/resources/ontology/DCM#BAR'", outcome.get(0).getMessage());
-//		assertEquals("The Coding provided is not in the value set http://hl7.org/fhir/ValueSet/dicom-cid29, and a code should come from this value set unless it has no suitable code.  (error message = Unknown code[BAR] in system[http://dicom.nema.org/resources/ontology/DCM])", outcome.get(1).getMessage());
-
+		assertThat(outcome.get(0).getMessage(), containsString("The Coding provided (http://dicom.nema.org/resources/ontology/DCM#BAR) was not found in the value set 'Acquisition Modality Codes' (http://hl7.org/fhir/ValueSet/dicom-cid29|20121129)") );
 	}
 
 	/**
@@ -783,6 +797,22 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 	public void testValidateDocument() throws Exception {
 		String vsContents = ClasspathUtil.loadResource("/sample-document.xml");
 
+		addValidConcept("http://loinc.org", "29299-5");
+		addValidConcept("http://loinc.org", "18776-5");
+		addValidConcept("http://loinc.org", "69730-0");
+		addValidConcept("http://loinc.org", "8716-3");
+		addValidConcept("http://loinc.org", "10160-0");
+		addValidConcept("http://loinc.org", "29549-3");
+		addValidConcept("http://loinc.org", "11450-4");
+		addValidConcept("http://loinc.org", "48765-2");
+		addValidConcept("http://loinc.org", "30954-2");
+		addValidConcept("http://loinc.org", "47519-4");
+		addValidConcept("http://loinc.org", "11369-6");
+		addValidConcept("http://loinc.org", "29762-2");
+		addValidConcept("http://loinc.org", "46240-8");
+		addValidConcept("http://loinc.org", "42348-3");
+		addValidConcept("http://loinc.org", "42348-3");
+
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
 		assertTrue(output.isSuccessful());
@@ -796,7 +826,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		Patient resource = loadResource("/dstu3/nl/nl-core-patient-01.json", Patient.class);
 		ValidationResult results = myVal.validateWithResult(resource);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome.toString(), containsString("The Coding provided (urn:oid:2.16.840.1.113883.2.4.4.16.34#6030) is not in the value set 'LandGBACodelijst'"));
+		assertThat(outcome.toString(), containsString("The Coding provided (urn:oid:2.16.840.1.113883.2.4.4.16.34#6030) was not found in the value set 'LandGBACodelijst'"));
 	}
 
 	private void loadNL() throws IOException {
@@ -961,7 +991,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult output = myVal.validateWithResult(encoded);
 		assertEquals(1, output.getMessages().size(), output.toString());
 
-		assertEquals("The extension http://hl7.org/fhir/v3/ethnicity is unknown, and not allowed here", output.getMessages().get(0).getMessage());
+		assertEquals("The extension http://hl7.org/fhir/v3/ethnicity could not be found so is not allowed here", output.getMessages().get(0).getMessage());
 		assertEquals(ResultSeverityEnum.ERROR, output.getMessages().get(0).getSeverity());
 	}
 
@@ -1029,7 +1059,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, res.size(), output.toString());
-		assertEquals("A code with no system has no defined meaning. A system should be provided", output.getMessages().get(0).getMessage());
+		assertEquals("Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided", output.getMessages().get(0).getMessage());
 	}
 
 	/**
@@ -1118,7 +1148,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 
 		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
-		assertEquals("Unknown code for 'http://loinc.org#12345'", errors.get(0).getMessage());
+		assertEquals("Unknown code (for 'http://loinc.org#12345')", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -1146,7 +1176,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 	public void testValidateResourceContainingProfileDeclarationDoesntResolve() {
 		addValidConcept("http://loinc.org", "12345");
 
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 		input.getMeta().addProfile("http://foo/structuredefinition/myprofile");
 
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
@@ -1155,7 +1185,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		myInstanceVal.setValidationSupport(myValidationSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it is unknown"));
+		assertThat(errors.toString(), containsString("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it could not be found"));
 	}
 
 	@Test
@@ -1172,9 +1202,17 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 	}
 
+	private Observation createObservationWithDefaultSubjectPerfomerEffective() {
+		Observation observation = new Observation();
+		observation.setSubject(new Reference("Patient/123"));
+		observation.addPerformer(new Reference("Practitioner/124"));
+		observation.setEffective(new DateTimeType("2023-01-01T11:22:33Z"));
+		return observation;
+	}
+
 	@Test
 	public void testValidateResourceWithDefaultValueset() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().setText("No code here!");
@@ -1200,13 +1238,15 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		logResultsAndReturnAll(output);
 		assertThat(
 			output.getMessages().get(0).getMessage(),
-			containsString("The value provided ('notvalidcode') is not in the value set 'ObservationStatus'")
+			containsString("The value provided ('notvalidcode') was not found in the value set 'ObservationStatus'")
 			);
 	}
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationFailing() {
-		Observation input = new Observation();
+		addValidConcept("http://loinc.org", "12345");
+
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
 
@@ -1232,13 +1272,13 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertThat(errors.toString(), errors.size(), greaterThan(0));
-		assertEquals("Unknown code for 'http://acme.org#9988877'", errors.get(0).getMessage());
+		assertEquals("Unknown code (for 'http://acme.org#9988877')", errors.get(0).getMessage());
 
 	}
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingLoinc() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
 		addValidConcept("http://loinc.org", "12345");
@@ -1253,7 +1293,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingLoincWithExpansion() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 
 		ValueSetExpansionComponent expansionComponent = new ValueSetExpansionComponent();
 		expansionComponent.addContains().setSystem("http://loinc.org").setCode("12345").setDisplay("Some display code");
@@ -1268,12 +1308,12 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertEquals(1, errors.size());
-		assertEquals("Unknown code for 'http://loinc.org#1234'", errors.get(0).getMessage());
+		assertEquals("Unknown code (for 'http://loinc.org#1234')", errors.get(0).getMessage());
 	}
 
 	@Test
 	public void testValidateResourceWithExampleBindingCodeValidationPassingNonLoinc() {
-		Observation input = new Observation();
+		Observation input = createObservationWithDefaultSubjectPerfomerEffective();
 
 		myInstanceVal.setValidationSupport(myValidationSupport);
 		addValidConcept("http://acme.org", "12345");
@@ -1294,12 +1334,14 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 		ValidationResult output = myVal.validateWithResult(patient);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(1, all.size());
+		assertEquals(2, all.size());
+		assertThat(all.get(0).getMessage(), containsString("Unknown code (for 'http://example.com/foo/bar#bar')"));
+		assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertThat(
-			all.get(0).getMessage(),
+			all.get(1).getMessage(),
 			containsString("None of the codings provided are in the value set 'Identifier Type Codes'"));
-		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
+		assertEquals(ResultSeverityEnum.WARNING, all.get(1).getSeverity());
 
 	}
 
@@ -1332,6 +1374,9 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 		IValidationPolicyAdvisor policyAdvisor = mock(IValidationPolicyAdvisor.class);
 		IValidatorResourceFetcher fetcher = mock(IValidatorResourceFetcher.class);
+		when(policyAdvisor.policyForElement(any(), any(),any(),any(),any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.ElementValidationAction.class));
+		when(policyAdvisor.policyForCodedContent(any(),any(),any(),any(),any(),any(),any(),any(),any())).thenReturn(EnumSet.allOf(IValidationPolicyAdvisor.CodedContentValidationAction.class));
+
 
 		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
 		when(policyAdvisor.policyForReference(any(), any(), any(), any())).thenReturn(ReferenceValidationPolicy.CHECK_TYPE_IF_EXISTS);
@@ -1346,8 +1391,9 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 	@Test
 	public void testValueWithWhitespace() throws IOException {
-		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/dstu3-rick-test.json"), Charsets.UTF_8);
+		addValidConcept("http://loinc.org", "34133-1");
 
+		String input = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/dstu3-rick-test.json"), Charsets.UTF_8);
 		ValidationResult results = myVal.validateWithResult(input);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertEquals(2, outcome.size());

@@ -13,6 +13,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.context.IWorkerContext;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.utilities.FhirPublication;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.io.Resource;
@@ -57,7 +58,8 @@ public class HapiWorkerContextTest extends BaseValidationTestWithInlineMocks {
 		// Built-in Codes
 
 		vs.setUrl("http://hl7.org/fhir/ValueSet/fm-status");
-		ValidationOptions options = new ValidationOptions().withGuessSystem();
+		ValidationOptions options = new ValidationOptions(FhirPublication.fromCode(
+			workerCtx.getVersion().toString())).withGuessSystem();
 		outcome = workerCtx.validateCode(options, "active", vs);
 		assertEquals(true, outcome.isOk(), outcome.getMessage());
 

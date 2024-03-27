@@ -66,7 +66,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		assertHasWarnings(oo);
 		String encode = encode(oo);
 		ourLog.info(encode);
-		assertThat(encode, containsString("All observations should have a performer"));
+		assertThat(encode, containsString("In general, all observations should have a performer"));
 	}
 
 	@Test

@@ -270,7 +270,7 @@ public class QuestionnaireResponseValidatorR5Test  {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Unknown code for 'http://codesystems.com/system#code1'"));
+		assertThat(errors.toString(), containsString("Unknown code (for 'http://codesystems.com/system#code1')"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		qa = new QuestionnaireResponse();
@@ -281,7 +281,7 @@ public class QuestionnaireResponseValidatorR5Test  {
 		errors = myVal.validateWithResult(qa);
 		errors = stripBindingHasNoSourceMessage(errors);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("Unknown code 'http://codesystems.com/system2#code3' for 'http://codesystems.com/system2#code3'"));
+		assertThat(errors.toString(), containsString("Unknown code 'http://codesystems.com/system2#code3' (for 'http://codesystems.com/system2#code3')"));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 	}
@@ -330,10 +330,12 @@ public class QuestionnaireResponseValidatorR5Test  {
 	public void testMissingRequiredQuestion() {
 
 		Questionnaire q = new Questionnaire();
+		q.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(org.hl7.fhir.r5.model.Narrative.NarrativeStatus.GENERATED);
 		q.addItem().setLinkId("link0").setRequired(true).setType(QuestionnaireItemType.STRING);
 		q.addItem().setLinkId("link1").setRequired(true).setType(QuestionnaireItemType.STRING);
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(org.hl7.fhir.r5.model.Narrative.NarrativeStatus.GENERATED);
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaireElement().setValue("http://example.com/Questionnaire/q1");
 		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
@@ -625,9 +627,11 @@ public class QuestionnaireResponseValidatorR5Test  {
 	@Test
 	public void testUnexpectedAnswer() {
 		Questionnaire q = new Questionnaire();
+		q.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(org.hl7.fhir.r5.model.Narrative.NarrativeStatus.GENERATED);
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.BOOLEAN);
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(org.hl7.fhir.r5.model.Narrative.NarrativeStatus.GENERATED);
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaireElement().setValue("http://example.com/Questionnaire/q1");
 		qa.addItem().setLinkId("link1").addAnswer().setValue(new StringType("FOO"));
@@ -643,9 +647,11 @@ public class QuestionnaireResponseValidatorR5Test  {
 	@Test
 	public void testUnexpectedGroup() {
 		Questionnaire q = new Questionnaire();
+		q.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(org.hl7.fhir.r5.model.Narrative.NarrativeStatus.GENERATED);
 		q.addItem().setLinkId("link0").setRequired(false).setType(QuestionnaireItemType.BOOLEAN);
 
 		QuestionnaireResponse qa = new QuestionnaireResponse();
+		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(org.hl7.fhir.r5.model.Narrative.NarrativeStatus.GENERATED);
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 		qa.getQuestionnaireElement().setValue("http://example.com/Questionnaire/q1");
 		qa.addItem().setLinkId("link1").addItem().setLinkId("link2");
