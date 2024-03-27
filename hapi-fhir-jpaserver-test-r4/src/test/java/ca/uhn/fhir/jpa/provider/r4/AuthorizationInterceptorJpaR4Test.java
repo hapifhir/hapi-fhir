@@ -1919,6 +1919,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			return new RuleBuilder()
 				.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
 				.allow().write().allResources().withAnyId().andThen()
+				.allow().patch().allRequests().andThen()
 				.build();
 		}
 	}

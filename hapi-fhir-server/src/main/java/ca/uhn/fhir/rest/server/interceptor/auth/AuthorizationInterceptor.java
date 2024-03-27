@@ -397,6 +397,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
 	public void incomingRequestPreHandled(RequestDetails theRequest, Pointcut thePointcut) {
+		ourLog.info("5688: PATCH: SERVER_INCOMING_REQUEST_PRE_HANDLED");
 		IBaseResource inputResource = null;
 		IIdType inputResourceId = null;
 
@@ -565,6 +566,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			IBaseResource theOldResource,
 			IBaseResource theNewResource,
 			Pointcut thePointcut) {
+		ourLog.info("5688: PATCH: STORAGE_PRESTORAGE_RESOURCE_UPDATED");
 		if (theOldResource != null) {
 			handleUserOperation(theRequest, theOldResource, RestOperationTypeEnum.UPDATE, thePointcut);
 		}
