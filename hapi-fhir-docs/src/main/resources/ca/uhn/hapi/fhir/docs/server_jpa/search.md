@@ -238,3 +238,25 @@ In order to improve sorting performance when chained sorts are needed, an [Uplif
 # _include and _revinclude order
 
 By default, all _revincludes will be performed first and then all _includes are performed afterwards.  However, if any _revinclude parameters are modified with :iterate (or :recurse for earlier versions of FHIR) then all _include parameters will be evaluated first.
+
+# %now and %today
+
+The HAPI FHIR JPA Server supports the use of the special values `%now` and `%today` in search parameters. These values are replaced with the current time and current date respectively when the search is executed.
+
+Given the current day is January 1, 2020 and the current time is 12PM an example of a `%today` and `%now` searches using this search parameter is:
+
+```url
+http://example.org/Observation?date=gt%today
+```
+```url
+http://example.org/Observation?date=gt%now
+```
+
+These are equivalent to the following searches:
+
+```url
+http://example.org/Observation?date=gt2020-01-01
+```
+```url
+http://example.org/Observation?date=gt2020-01-01T12:00:00
+```
