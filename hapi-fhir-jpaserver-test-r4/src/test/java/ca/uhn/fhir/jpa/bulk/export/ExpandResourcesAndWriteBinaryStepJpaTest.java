@@ -93,7 +93,6 @@ public class ExpandResourcesAndWriteBinaryStepJpaTest extends BaseJpaR4Test {
 
 		// Test
 
-		myCaptureQueriesListener.clear();
 		myExpandResourcesStep.run(details, mySink);
 
 		// Verify
@@ -106,6 +105,63 @@ public class ExpandResourcesAndWriteBinaryStepJpaTest extends BaseJpaR4Test {
 
 			// This is the most important check here
 			assertThat(nextNdJsonString.length(), lessThanOrEqualTo(maxFileSize));
+
+			Arrays.stream(nextNdJsonString.split("\\n"))
+				.filter(StringUtils::isNotBlank)
+				.map(t->myFhirContext.newJsonParser().parseResource(t))
+				.map(t->new BatchResourceId().setResourceType(t.getIdElement().getResourceType()).setId(t.getIdElement().getIdPart()))
+				.forEach(actualResourceIdList::add);
+
+		}
+		Collections.sort(actualResourceIdList);
+		assertEquals(expectedIds, actualResourceIdList);
+	}
+
+	@Test
+	public void testMaximumChunkSize_SingleFileExceedsMaximum() {
+		/*
+		 * We're going to set the maximum file size to 1000, and create some resources
+		 * with a name that is 1500 chars long. In this case, we'll exceed the
+		 * configured maximum, so it should be one output file per resourcs.
+		 */
+		int testResourceSize = 1500;
+		int maxFileSize = 1000;
+		myStorageSettings.setBulkExportFileMaximumSize(maxFileSize);
+
+		List<BatchResourceId> expectedIds = new ArrayList<>();
+		int numberOfResources = 10;
+		for (int i = 0; i < numberOfResources; i++) {
+			Patient p = new Patient();
+			p.addName().setFamily(StringUtils.leftPad("", testResourceSize, 'A'));
+			String id = myPatientDao.create(p, mySrd).getId().getIdPart();
+			expectedIds.add(new BatchResourceId().setResourceType("Patient").setId(id));
+		}
+		Collections.sort(expectedIds);
+
+		ResourceIdList resourceList = new ResourceIdList();
+		resourceList.setResourceType("Patient");
+		resourceList.setIds(expectedIds);
+
+		BulkExportJobParameters params = new BulkExportJobParameters();
+		JobInstance jobInstance = new JobInstance();
+		String chunkId = "ABC";
+
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> details = new StepExecutionDetails<>(params, resourceList, jobInstance, chunkId);
+
+		// Test
+
+		myExpandResourcesStep.run(details, mySink);
+
+		// Verify
+
+		// This is the most important check - we should have one file per resource
+		verify(mySink, times(numberOfResources)).accept(myWorkChunkCaptor.capture());
+
+		List<BatchResourceId> actualResourceIdList = new ArrayList<>();
+		for (BulkExportBinaryFileId next : myWorkChunkCaptor.getAllValues()) {
+
+			Binary nextBinary = myBinaryDao.read(new IdType(next.getBinaryId()), mySrd);
+			String nextNdJsonString = new String(nextBinary.getContent(), StandardCharsets.UTF_8);
 
 			Arrays.stream(nextNdJsonString.split("\\n"))
 				.filter(StringUtils::isNotBlank)

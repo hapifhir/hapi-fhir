@@ -261,6 +261,16 @@ public class ExpandResourceAndWriteBinaryStep
 		myIdHelperService = theIdHelperService;
 	}
 
+	/**
+	 * This class takes a collection of lists of resources read from the
+	 * repository, and processes them, then converts them into
+	 * {@link ExpandedResourcesList} instances, each one of which corresponds
+	 * to a single output file. We try to avoid exceeding the maximum file
+	 * size defined in
+	 * {@link JpaStorageSettings#getBulkExportFileMaximumSize()}
+	 * so we will do our best to emit multiple lists in favour of emitting
+	 * a list that exceeds that threshold.
+	 */
 	private class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 
 		private final Consumer<ExpandedResourcesList> myResourceWriter;
@@ -342,13 +352,21 @@ public class ExpandResourceAndWriteBinaryStep
 				// list and flush it. Note that if a single resource exceeds the configurable
 				// maximum then we have no choice but to send it
 				long bulkExportFileMaximumSize = myStorageSettings.getBulkExportFileMaximumSize();
-				if (newSize > bulkExportFileMaximumSize && existingSize > 0) {
-					List<String> stringifiedResources = resourceTypeToStringifiedResources.get(type);
-					writeStringifiedResources(type, stringifiedResources);
+				if (newSize > bulkExportFileMaximumSize) {
+                    if (existingSize == 0) {
+						// If no files are already in the collection, then this one file
+						// is bigger than the maximum allowable. We'll allow it in that
+						// case
+                        ourLog.warn("Single resource size {} exceeds allowable maximum of {}, so will ignore maximum", newSize, bulkExportFileMaximumSize);
+                    } else {
+						// Otherwise, flush the contents now before adding the next file
+                        List<String> stringifiedResources = resourceTypeToStringifiedResources.get(type);
+                        writeStringifiedResources(type, stringifiedResources);
 
-					resourceTypeToStringifiedResources.removeAll(type);
-					newSize = jsonResource.length();
-				}
+                        resourceTypeToStringifiedResources.removeAll(type);
+                        newSize = jsonResource.length();
+                    }
+                }
 
 				resourceTypeToStringifiedResources.put(type, jsonResource);
 				resourceTypeToTotalSize.put(type, newSize);
@@ -427,6 +445,10 @@ public class ExpandResourceAndWriteBinaryStep
 		}
 	}
 
+	/**
+	 * This class takes a collection of expanded resources, and expands it to
+	 * an NDJSON file, which is written to a Binary resource.
+	 */
 	private class NdJsonResourceWriter implements Consumer<ExpandedResourcesList> {
 
 		private final StepExecutionDetails<BulkExportJobParameters, ResourceIdList> myStepExecutionDetails;
