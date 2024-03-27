@@ -17,10 +17,10 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.r4;
+package ca.uhn.fhir.cr.common;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.opencds.cqf.fhir.cr.questionnaire.r4.processor.QuestionnaireProcessor;
+import org.opencds.cqf.fhir.cr.questionnaire.QuestionnaireProcessor;
 
 @FunctionalInterface
 public interface IQuestionnaireProcessorFactory {

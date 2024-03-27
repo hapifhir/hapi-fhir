@@ -17,45 +17,36 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.config.r4;
+package ca.uhn.fhir.cr.config.dstu3;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.cr.config.CrProcessorConfig;
 import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 
 import java.util.Arrays;
 import java.util.Map;
 
-@Configuration
-@Import(CrProcessorConfig.class)
-public class ApplyOperationConfig {
+public class QuestionnaireOperationConfig {
 	@Bean
-	ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionApplyProvider r4ActivityDefinitionApplyProvider() {
-		return new ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionApplyProvider();
+	ca.uhn.fhir.cr.dstu3.structuredefinition.StructureDefinitionQuestionnaireProvider
+			dstu3StructureDefinitionQuestionnaireProvider() {
+		return new ca.uhn.fhir.cr.dstu3.structuredefinition.StructureDefinitionQuestionnaireProvider();
 	}
 
-	@Bean
-	ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionApplyProvider r4PlanDefinitionApplyProvider() {
-		return new ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionApplyProvider();
-	}
-
-	@Bean(name = "applyOperationLoader")
-	public ProviderLoader applyOperationLoader(
+	@Bean(name = "questionnaireOperationLoader")
+	public ProviderLoader questionnaireOperationLoader(
 			ApplicationContext theApplicationContext, FhirContext theFhirContext, RestfulServer theRestfulServer) {
 		var selector = new ProviderSelector(
 				theFhirContext,
 				Map.of(
-						FhirVersionEnum.R4,
+						FhirVersionEnum.DSTU3,
 						Arrays.asList(
-								ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionApplyProvider.class,
-								ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionApplyProvider.class)));
+								ca.uhn.fhir.cr.dstu3.structuredefinition.StructureDefinitionQuestionnaireProvider
+										.class)));
 
 		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}

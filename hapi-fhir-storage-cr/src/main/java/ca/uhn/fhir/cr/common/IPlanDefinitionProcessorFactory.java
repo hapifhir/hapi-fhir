@@ -17,12 +17,12 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.r4;
+package ca.uhn.fhir.cr.common;
 
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.opencds.cqf.fhir.cr.activitydefinition.r4.ActivityDefinitionProcessor;
+import org.opencds.cqf.fhir.cr.plandefinition.PlanDefinitionProcessor;
 
 @FunctionalInterface
-public interface IActivityDefinitionProcessorFactory {
-	ActivityDefinitionProcessor create(RequestDetails theRequestDetails);
+public interface IPlanDefinitionProcessorFactory {
+	PlanDefinitionProcessor create(RequestDetails theRequestDetails);
 }

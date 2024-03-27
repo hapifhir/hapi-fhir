@@ -101,7 +101,6 @@ public class CrR4Config {
 				theCareGapsProperties,
 				theRepositoryFactory.create(rd),
 				theMeasureEvaluationOptions,
-				theExecutor,
 				rd.getFhirServerBase());
 	}
 
