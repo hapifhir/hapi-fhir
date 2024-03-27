@@ -554,7 +554,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		});
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(uuid).orElseThrow(() -> new InternalErrorException(""));
-			assertEquals(50, search.getNumFound());
+			assertEquals(51, search.getNumFound());
 			assertEquals(search.getNumFound(), mySearchResultDao.count());
 			assertEquals(null, search.getTotalCount());
 			assertEquals(SearchStatusEnum.PASSCMPLET, search.getStatus());
@@ -1172,12 +1172,12 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
 		// first prefetch is 50+1
-		assertEquals(51, myCaptureQueriesListener.logInsertQueries());
+		assertEquals(52, myCaptureQueriesListener.logInsertQueries());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
 		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(51, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(52, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
