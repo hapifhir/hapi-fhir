@@ -42,8 +42,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -610,12 +608,16 @@ public class UrlUtil {
 	 * Example input: http://[host]/[pathPart1]/[pathPart2]
 	 * Example output: http://[host], http://[host]/[pathPart1], http://[host]/[pathPart1]/[pathPart2]
 	 *
+	 * Note that [pathPart2] also will contain any query string and/or fragment from the input
+	 * Note also that all parts of url are as presented in the input without any %xx decoding
+	 *
 	 * @param theUri String URI parameter
 	 * @return List of URI candidates
 	 */
 	public static List<String> getAboveUriCandidates(String theUri) {
+		URI uri = null;
 		try {
-			URI uri = new URI(theUri);
+			uri = new URI(theUri);
 			if (uri.getScheme() == null || uri.getHost() == null) {
 				throwInvalidRequestExceptionForNotValidUri(theUri, null);
 			}
@@ -624,12 +626,24 @@ public class UrlUtil {
 		}
 
 		List<String> candidates = new ArrayList<>();
-		Path path = Paths.get(theUri);
-		candidates.add(path.toString().replace(":/", "://"));
-		while (path.getParent() != null && path.getParent().toString().contains("/")) {
-			candidates.add(path.getParent().toString().replace(":/", "://"));
-			path = path.getParent();
+
+		String path = uri.getScheme() + "://";
+		int stopLen = path.length();
+
+		path += uri.getRawAuthority() + uri.getRawPath();
+		if (uri.getRawQuery() != null) {
+			path += "?" + uri.getRawQuery();
 		}
+		if (uri.getRawFragment() != null) {
+			path += "#" + uri.getRawFragment();
+		}
+		candidates.add(path);
+
+		int ix = path.length();
+		while ((ix = path.substring(0, ix - 1).lastIndexOf('/')) > stopLen) {
+			candidates.add(path.substring(0, ix));
+		}
+
 		return candidates;
 	}
 
