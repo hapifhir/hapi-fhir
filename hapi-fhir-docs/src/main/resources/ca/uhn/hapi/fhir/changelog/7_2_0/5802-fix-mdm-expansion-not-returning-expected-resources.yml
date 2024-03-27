@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5802
+title: "Previously, using the ':mdm' qualifier with the '_id' search parameter would not included expanded resources in 
+search result.  This issue has been fixed."
