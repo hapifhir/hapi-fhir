@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.config.BaseBatch2Config;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
+import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkMetadataViewRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import jakarta.persistence.EntityManager;
@@ -39,12 +40,14 @@ public class JpaBatch2Config extends BaseBatch2Config {
 	public IJobPersistence batch2JobInstancePersister(
 			IBatch2JobInstanceRepository theJobInstanceRepository,
 			IBatch2WorkChunkRepository theWorkChunkRepository,
+			IBatch2WorkChunkMetadataViewRepository theWorkChunkMetadataViewRepo,
 			IHapiTransactionService theTransactionService,
 			EntityManager theEntityManager,
 			IInterceptorBroadcaster theInterceptorBroadcaster) {
 		return new JpaJobPersistenceImpl(
 				theJobInstanceRepository,
 				theWorkChunkRepository,
+				theWorkChunkMetadataViewRepo,
 				theTransactionService,
 				theEntityManager,
 				theInterceptorBroadcaster);

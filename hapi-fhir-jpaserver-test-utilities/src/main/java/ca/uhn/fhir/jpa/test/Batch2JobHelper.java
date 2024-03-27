@@ -175,7 +175,10 @@ public class Batch2JobHelper {
 	}
 
 	public void awaitGatedStepId(String theExpectedGatedStepId, String theInstanceId) {
-		await().until(() -> theExpectedGatedStepId.equals(myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId()));
+		await().until(() -> {
+			String currentGatedStepId = myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId();
+			return theExpectedGatedStepId.equals(currentGatedStepId);
+		});
 	}
 
 	public long getCombinedRecordsProcessed(String theInstanceId) {

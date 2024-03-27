@@ -103,6 +103,13 @@ public interface IBatch2WorkChunkRepository
 			@Param("startStatuses") Collection<WorkChunkStatusEnum> theStartStatuses);
 
 	@Modifying
+	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :newStatus WHERE e.myId = :id AND e.myStatus = :oldStatus")
+	int updateChunkStatus(
+			@Param("id") String theChunkId,
+			@Param("newStatus") WorkChunkStatusEnum theNewStatus,
+			@Param("oldStatus") WorkChunkStatusEnum theOldStatus);
+
+	@Modifying
 	@Query("DELETE FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId")
 	int deleteAllForInstance(@Param("instanceId") String theInstanceId);
 

@@ -36,4 +36,11 @@ public interface IJobMaintenanceService {
 	 */
 	@VisibleForTesting
 	void forceMaintenancePass();
+
+	/**
+	 * This is only to be called in a testing environment
+	 * to ensure state changes are controlled.
+	 */
+	@VisibleForTesting
+	void enableMaintenancePass(boolean thetoEnable);
 }

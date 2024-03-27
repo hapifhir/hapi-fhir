@@ -28,16 +28,19 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
+import ca.uhn.fhir.batch2.model.WorkChunkMetadata;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
+import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkMetadataViewRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
+import ca.uhn.fhir.jpa.entity.Batch2WorkChunkMetadataView;
 import ca.uhn.fhir.model.api.PagingIterator;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -64,7 +67,9 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
@@ -85,6 +90,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	private final IBatch2JobInstanceRepository myJobInstanceRepository;
 	private final IBatch2WorkChunkRepository myWorkChunkRepository;
+	private final IBatch2WorkChunkMetadataViewRepository myWorkChunkMetadataViewRepo;
 	private final EntityManager myEntityManager;
 	private final IHapiTransactionService myTransactionService;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -95,6 +101,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	public JpaJobPersistenceImpl(
 			IBatch2JobInstanceRepository theJobInstanceRepository,
 			IBatch2WorkChunkRepository theWorkChunkRepository,
+			IBatch2WorkChunkMetadataViewRepository theWorkChunkMetadataViewRepo,
 			IHapiTransactionService theTransactionService,
 			EntityManager theEntityManager,
 			IInterceptorBroadcaster theInterceptorBroadcaster) {
@@ -102,6 +109,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		Validate.notNull(theWorkChunkRepository);
 		myJobInstanceRepository = theJobInstanceRepository;
 		myWorkChunkRepository = theWorkChunkRepository;
+		myWorkChunkMetadataViewRepo = theWorkChunkMetadataViewRepo;
 		myTransactionService = theTransactionService;
 		myEntityManager = theEntityManager;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
@@ -120,11 +128,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setSerializedData(theBatchWorkChunk.serializedData);
 		entity.setCreateTime(new Date());
 		entity.setStartTime(new Date());
-		entity.setStatus(WorkChunkStatusEnum.QUEUED);
+		entity.setStatus(WorkChunkStatusEnum.READY);
 		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
 		ourLog.trace(
 				"Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
 		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myWorkChunkRepository.save(entity));
+
 		return entity.getId();
 	}
 
@@ -137,6 +146,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 				List.of(WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.ERRORED, WorkChunkStatusEnum.IN_PROGRESS);
 		int rowsModified = myWorkChunkRepository.updateChunkStatusForStart(
 				theChunkId, new Date(), WorkChunkStatusEnum.IN_PROGRESS, priorStates);
+
 		if (rowsModified == 0) {
 			ourLog.info("Attempting to start chunk {} but it was already started.", theChunkId);
 			return Optional.empty();
@@ -289,6 +299,13 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
+	public void enqueueWorkChunkForProcessing(String theChunkId, Consumer<Integer> theCallback) {
+		int updated = myWorkChunkRepository.updateChunkStatus(
+				theChunkId, WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.READY);
+		theCallback.accept(updated);
+	}
+
+	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	public List<JobInstance> fetchRecentInstances(int thePageSize, int thePageIndex) {
 		PageRequest pageRequest = PageRequest.of(thePageIndex, thePageSize, Sort.Direction.DESC, CREATE_TIME);
@@ -345,15 +362,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public void onWorkChunkCompletion(WorkChunkCompletionEvent theEvent) {
-		myTransactionService
-				.withSystemRequestOnDefaultPartition()
-				.execute(() -> myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
-						theEvent.getChunkId(),
-						new Date(),
-						theEvent.getRecordsProcessed(),
-						theEvent.getRecoveredErrorCount(),
-						WorkChunkStatusEnum.COMPLETED,
-						theEvent.getRecoveredWarningMessage()));
+		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
+			myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
+					theEvent.getChunkId(),
+					new Date(),
+					theEvent.getRecordsProcessed(),
+					theEvent.getRecoveredErrorCount(),
+					WorkChunkStatusEnum.COMPLETED,
+					theEvent.getRecoveredWarningMessage());
+		});
 	}
 
 	@Nullable
@@ -383,24 +400,23 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId) {
+	public Set<WorkChunkStatusEnum> getDistinctWorkChunkStatesForJobAndStep(
+			String theInstanceId, String theCurrentStepId) {
+		if (getRunningJob(theInstanceId) == null) {
+			return Collections.unmodifiableSet(new HashSet<>());
+		}
+		return myWorkChunkRepository.getDistinctStatusesForStep(theInstanceId, theCurrentStepId);
+	}
+
+	private Batch2JobInstanceEntity getRunningJob(String theInstanceId) {
 		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(theInstanceId);
 		if (instance.isEmpty()) {
-			return false;
+			return null;
 		}
 		if (instance.get().getStatus().isEnded()) {
-			return false;
+			return null;
 		}
-		Set<WorkChunkStatusEnum> statusesForStep =
-				myWorkChunkRepository.getDistinctStatusesForStep(theInstanceId, theCurrentStepId);
-
-		ourLog.debug(
-				"Checking whether gated job can advanced to next step. [instanceId={}, currentStepId={}, statusesForStep={}]",
-				theInstanceId,
-				theCurrentStepId,
-				statusesForStep);
-		return statusesForStep.isEmpty() || statusesForStep.equals(Set.of(WorkChunkStatusEnum.COMPLETED));
+		return instance.get();
 	}
 
 	private void fetchChunks(
@@ -442,6 +458,14 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		myJobInstanceRepository.updateInstanceUpdateTime(theInstanceId, new Date());
 	}
 
+	@Override
+	public WorkChunk createWorkChunk(WorkChunk theWorkChunk) {
+		if (theWorkChunk.getId() == null) {
+			theWorkChunk.setId(UUID.randomUUID().toString());
+		}
+		return toChunk(myWorkChunkRepository.save(Batch2WorkChunkEntity.fromWorkChunk(theWorkChunk)));
+	}
+
 	/**
 	 * Note: Not @Transactional because the transaction happens in a lambda that's called outside of this method's scope
 	 */
@@ -456,6 +480,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		return myWorkChunkRepository
 				.fetchChunksForStep(theInstanceId, theStepId)
 				.map(this::toChunk);
+	}
+
+	@Override
+	public Page<WorkChunkMetadata> fetchAllWorkChunkMetadataForJobInStates(
+			Pageable thePageable, String theInstanceId, Set<WorkChunkStatusEnum> theStates) {
+		Page<Batch2WorkChunkMetadataView> page =
+				myWorkChunkMetadataViewRepo.fetchWorkChunkMetadataForJobInStates(thePageable, theInstanceId, theStates);
+
+		return page.map(Batch2WorkChunkMetadataView::toChunkMetadata);
 	}
 
 	@Override

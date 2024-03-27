@@ -57,6 +57,7 @@ public class JobInstanceProgressCalculator {
 		StopWatch stopWatch = new StopWatch();
 		ourLog.trace("calculating progress: {}", theInstanceId);
 
+		// calculate progress based on number of work chunks in COMPLETE state
 		InstanceProgress instanceProgress = calculateInstanceProgress(theInstanceId);
 
 		myJobPersistence.updateInstance(theInstanceId, currentInstance -> {
@@ -97,6 +98,7 @@ public class JobInstanceProgressCalculator {
 
 		while (workChunkIterator.hasNext()) {
 			WorkChunk next = workChunkIterator.next();
+
 			// global stats
 			myProgressAccumulator.addChunk(next);
 			// instance stats

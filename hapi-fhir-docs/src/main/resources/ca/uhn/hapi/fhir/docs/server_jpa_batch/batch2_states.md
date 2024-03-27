@@ -47,6 +47,7 @@ stateDiagram-v2
 title: Batch2 Job Work Chunk state transitions
 ---
 stateDiagram-v2
+    state READY
     state QUEUED
     state on_receive <<choice>>
     state IN_PROGRESS
@@ -55,10 +56,13 @@ stateDiagram-v2
     state FAILED
     state COMPLETED
    direction LR
-   [*]         --> QUEUED        : on create
+   [*]         --> READY         : on create - normal
+   [*]         --> GATED         : on create - gated
+   GATED       --> READY         : on create - gated
+   READY       --> QUEUED        : placed on kafka (maint.)
   
   %% worker processing states
-  QUEUED      --> on_receive : on deque by worker
+  QUEUED     --> on_receive : on deque by worker
   on_receive --> IN_PROGRESS : start execution
   
   IN_PROGRESS --> execute: execute
