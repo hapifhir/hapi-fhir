@@ -124,7 +124,6 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		Observation input = new Observation();
 		String profileUri = "http://example.com/StructureDefinition/" + methodName;
 		ResourceMetadataKeyEnum.PROFILES.put(input, Collections.singletonList(new IdDt(profileUri)));
-
 		input.addIdentifier().setSystem("http://acme").setValue("12345");
 		input.getEncounter().setReference("http://foo.com/Encounter/9");
 		input.setStatus(ObservationStatusEnum.FINAL);
@@ -138,7 +137,7 @@ public class FhirResourceDaoDstu2ValidateTest extends BaseJpaDstu2Test {
 		assertHasErrors(oo);
 		String ooString = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo);
 		ourLog.info(ooString);
-		assertThat(ooString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' has not been checked because it is unknown"));
+		assertThat(ooString, containsString("Profile reference 'http://example.com/StructureDefinition/testValidateResourceContainingProfileDeclarationInvalid' has not been checked because it could not be found"));
 	}
 
 	@Test

@@ -50,6 +50,7 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 
 	@Test
 	public void testValidationIsSkippedOnAutoCreatedPlaceholderReferencesIfConfiguredToDoSo() {
+		createLocalCsAndVs();
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
 			.forResourcesOfType("Observation")
 			.requireValidationToDeclaredProfiles()
@@ -57,7 +58,7 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 		myValInterceptor.setRules(rules);
 
 		Observation obs = new Observation();
-		obs.getCode().addCoding().setSystem("http://foo").setCode("123").setDisplay("help im a bug");
+		obs.getCode().addCoding().setSystem("http://example.com/my_code_system").setCode("A").setDisplay("Code A");
 		obs.setStatus(Observation.ObservationStatus.AMENDED);
 
 		MethodOutcome outcome = myRestfulServerExtension
@@ -69,11 +70,12 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 
 		String operationOutcomeEncoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info("Outcome: {}", operationOutcomeEncoded);
-		assertThat(operationOutcomeEncoded, containsString("All observations should have a subject"));
+		assertThat(operationOutcomeEncoded, containsString("In general, all observations should have a subject"));
 
 	}
 	@Test
 	public void testValidationOutcomeAddedToRequestResponse() {
+		createLocalCsAndVs();
 		List<IRepositoryValidatingRule> rules = newRuleBuilder()
 			.forResourcesOfType("Observation")
 			.requireValidationToDeclaredProfiles()
@@ -82,7 +84,7 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 		myValInterceptor.setRules(rules);
 
 		Observation obs = new Observation();
-		obs.getCode().addCoding().setSystem("http://foo").setCode("123").setDisplay("help im a bug");
+		obs.getCode().addCoding().setSystem("http://example.com/my_code_system").setCode("A").setDisplay("Code A");
 		obs.setStatus(Observation.ObservationStatus.AMENDED);
 
 		MethodOutcome outcome = myRestfulServerExtension
@@ -94,7 +96,7 @@ public class RepositoryValidatingInterceptorHttpR4Test extends BaseJpaR4Test {
 
 		String operationOutcomeEncoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.getOperationOutcome());
 		ourLog.info("Outcome: {}", operationOutcomeEncoded);
-		assertThat(operationOutcomeEncoded, containsString("All observations should have a subject"));
+		assertThat(operationOutcomeEncoded, containsString("In general, all observations should have a subject"));
 
 	}
 

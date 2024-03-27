@@ -134,7 +134,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			expansionR5 = expandValueSetToCanonical(
 					theValidationSupportContext, theValueSetToExpand, theWantSystemAndVersion, theWantCode);
 		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
-			return new ValueSetExpansionOutcome(e.getMessage());
+			return new ValueSetExpansionOutcome(e.getMessage(), false);
 		}
 		if (expansionR5 == null) {
 			return null;
@@ -588,6 +588,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 		ValidationMessage.IssueSeverity severity;
 		String message;
+
 		if ("fragment".equals(codeSystemResourceContentMode)) {
 			severity = ValidationMessage.IssueSeverity.WARNING;
 			message = "Unknown code in fragment CodeSystem '"

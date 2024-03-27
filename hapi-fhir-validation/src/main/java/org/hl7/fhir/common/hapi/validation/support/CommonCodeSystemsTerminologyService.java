@@ -464,7 +464,9 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
-
+		if (theSystem == null) {
+			return false;
+		}
 		switch (theSystem) {
 			case COUNTRIES_CODESYSTEM_URL:
 			case UCUM_CODESYSTEM_URL:

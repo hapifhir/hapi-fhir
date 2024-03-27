@@ -27,13 +27,13 @@ import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.constants.BindingKind;
-import org.hl7.fhir.r5.utils.validation.constants.CodedContentValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ContainedReferenceValidationPolicy;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.EnumSet;
 import java.util.List;
 
 public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
@@ -58,22 +58,41 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 	}
 
 	@Override
-	public CodedContentValidationPolicy policyForCodedContent(
-			IResourceValidator iResourceValidator,
-			Object o,
-			String s,
-			ElementDefinition elementDefinition,
-			StructureDefinition structureDefinition,
-			BindingKind bindingKind,
+	public EnumSet<ResourceValidationAction> policyForResource(
+			IResourceValidator validator, Object appContext, StructureDefinition type, String path) {
+		return EnumSet.allOf(ResourceValidationAction.class);
+	}
+
+	@Override
+	public EnumSet<ElementValidationAction> policyForElement(
+			IResourceValidator validator,
+			Object appContext,
+			StructureDefinition structure,
+			ElementDefinition element,
+			String path) {
+		return EnumSet.allOf(ElementValidationAction.class);
+	}
+
+	@Override
+	public EnumSet<CodedContentValidationAction> policyForCodedContent(
+			IResourceValidator validator,
+			Object appContext,
+			String stackPath,
+			ElementDefinition definition,
+			StructureDefinition structure,
+			BindingKind kind,
+			AdditionalBindingPurpose purpose,
 			ValueSet valueSet,
-			List<String> list) {
-		return CodedContentValidationPolicy.CODE;
+			List<String> systems) {
+		return EnumSet.allOf(CodedContentValidationAction.class);
 	}
 
 	@Override
 	public ContainedReferenceValidationPolicy policyForContained(
 			IResourceValidator validator,
 			Object appContext,
+			StructureDefinition structure,
+			ElementDefinition element,
 			String containerType,
 			String containerId,
 			Element.SpecialElement containingResourceType,

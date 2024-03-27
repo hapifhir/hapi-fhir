@@ -71,6 +71,7 @@ import static ca.uhn.fhir.jpa.ips.generator.IpsGenerationR4Test.findEntryResourc
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -178,8 +179,10 @@ public class IpsGeneratorSvcImplTest {
 		// Composition itself should also have a narrative
 		String compositionNarrative = composition.getText().getDivAsString();
 		ourLog.info("Composition narrative: {}", compositionNarrative);
-		assertThat(compositionNarrative, containsString("Allergies and Intolerances"));
-		assertThat(compositionNarrative, not(containsString("Pregnancy")));
+		assertThat(compositionNarrative, is(
+			"<div xmlns=\"http://www.w3.org/1999/xhtml\"><h1>International Patient Summary Document</h1></div>"
+		));
+
 
 	}
 

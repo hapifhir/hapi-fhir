@@ -38,7 +38,7 @@ public class ValidateCommandTest {
 
 	@Test
 	public void testValidateLocalProfileDstu3() {
-		String resourcePath = ValidateCommandTest.class.getResource("/patient-uslab-example1.xml").getFile();
+		String resourcePath = ValidateCommandTest.class.getResource("/patient-uslab-example1-dstu3.xml").getFile();
 
 		App.main(new String[]{
 			"validate",
@@ -49,7 +49,7 @@ public class ValidateCommandTest {
 
 	@Test
 	public void testValidateLocalProfileR4() {
-		String resourcePath = ValidateCommandTest.class.getResource("/patient-uslab-example1.xml").getFile();
+		String resourcePath = ValidateCommandTest.class.getResource("/patient-uslab-example1-r4.xml").getFile();
 		ourLog.info(resourcePath);
 
 		App.main(new String[]{

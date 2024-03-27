@@ -53,11 +53,13 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.text.StringEscapeUtils;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
+import org.hl7.fhir.utilities.xhtml.NodeType;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
 
 import java.io.IOException;
@@ -858,7 +860,7 @@ public class ResponseHighlighterInterceptor {
 
 		// Try to extract the narrative from the resource. First, just see if there
 		// is a narrative in the normal spot.
-		XhtmlNode xhtmlNode = extractNarrativeFromDomainResource(theResource, ctx);
+		XhtmlNode xhtmlNode = extractNarrativeFromElement(theResource, ctx);
 
 		// If the resource is a document, see if the Composition has a narrative
 		if (xhtmlNode == null && "Bundle".equals(ctx.getResourceType(theResource))) {
@@ -866,7 +868,7 @@ public class ResponseHighlighterInterceptor {
 				IBaseResource firstResource =
 						ctx.newTerser().getSingleValueOrNull(theResource, "entry.resource", IBaseResource.class);
 				if (firstResource != null && "Composition".equals(ctx.getResourceType(firstResource))) {
-					xhtmlNode = extractNarrativeFromDomainResource(firstResource, ctx);
+					xhtmlNode = extractNarrativeFromComposition(firstResource, ctx);
 				}
 			}
 		}
@@ -895,6 +897,34 @@ public class ResponseHighlighterInterceptor {
 		}
 
 		return null;
+	}
+
+	private XhtmlNode extractNarrativeFromComposition(IBaseResource theComposition, FhirContext theCtx) {
+		XhtmlNode retVal = new XhtmlNode(NodeType.Element, "div");
+
+		XhtmlNode xhtmlNode = extractNarrativeFromElement(theComposition, theCtx);
+		if (xhtmlNode != null) {
+			retVal.add(xhtmlNode);
+		}
+
+		List<IBase> sections = theCtx.newTerser().getValues(theComposition, "section");
+		for (IBase section : sections) {
+			String title = theCtx.newTerser().getSinglePrimitiveValueOrNull(section, "title");
+			if (isNotBlank(title)) {
+				XhtmlNode sectionNarrative = extractNarrativeFromElement(section, theCtx);
+				if (sectionNarrative != null && sectionNarrative.hasChildren()) {
+					XhtmlNode titleNode = new XhtmlNode(NodeType.Element, "h1");
+					titleNode.addText(title);
+					retVal.add(titleNode);
+					retVal.add(sectionNarrative);
+				}
+			}
+		}
+
+		if (retVal.isEmpty()) {
+			return null;
+		}
+		return retVal;
 	}
 
 	private void writeLength(HttpServletResponse theServletResponse, int theLength) throws IOException {
@@ -1014,11 +1044,15 @@ public class ResponseHighlighterInterceptor {
 		myShowNarrative = theShowNarrative;
 	}
 
+	/**
+	 * Extracts the narrative from an element (typically a FHIR resource) that holds
+	 * a "text" element
+	 */
 	@Nullable
-	private static XhtmlNode extractNarrativeFromDomainResource(@Nonnull IBaseResource theResource, FhirContext ctx) {
-		if (ctx.getResourceDefinition(theResource).getChildByName("text") != null) {
+	private static XhtmlNode extractNarrativeFromElement(@Nonnull IBase theElement, FhirContext ctx) {
+		if (ctx.getElementDefinition(theElement.getClass()).getChildByName("text") != null) {
 			return ctx.newTerser()
-					.getSingleValue(theResource, "text.div", XhtmlNode.class)
+					.getSingleValue(theElement, "text.div", XhtmlNode.class)
 					.orElse(null);
 		}
 		return null;

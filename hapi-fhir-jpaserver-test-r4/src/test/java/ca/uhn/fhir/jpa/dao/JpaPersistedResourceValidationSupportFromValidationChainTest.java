@@ -74,7 +74,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithBadLibrary);
 
-		assertEquals(10, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertEquals(12, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
 	@Test
@@ -91,7 +91,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureOnly );
 
-		assertEquals(8, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertEquals(10, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
 	@Test
@@ -105,7 +105,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureOnlyNoLibraryReference);
 
-		assertEquals(7, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
+		assertEquals(9, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
 	@Test
