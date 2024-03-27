@@ -353,20 +353,23 @@ public class ExpandResourceAndWriteBinaryStep
 				// maximum then we have no choice but to send it
 				long bulkExportFileMaximumSize = myStorageSettings.getBulkExportFileMaximumSize();
 				if (newSize > bulkExportFileMaximumSize) {
-                    if (existingSize == 0) {
+					if (existingSize == 0) {
 						// If no files are already in the collection, then this one file
 						// is bigger than the maximum allowable. We'll allow it in that
 						// case
-                        ourLog.warn("Single resource size {} exceeds allowable maximum of {}, so will ignore maximum", newSize, bulkExportFileMaximumSize);
-                    } else {
+						ourLog.warn(
+								"Single resource size {} exceeds allowable maximum of {}, so will ignore maximum",
+								newSize,
+								bulkExportFileMaximumSize);
+					} else {
 						// Otherwise, flush the contents now before adding the next file
-                        List<String> stringifiedResources = resourceTypeToStringifiedResources.get(type);
-                        writeStringifiedResources(type, stringifiedResources);
+						List<String> stringifiedResources = resourceTypeToStringifiedResources.get(type);
+						writeStringifiedResources(type, stringifiedResources);
 
-                        resourceTypeToStringifiedResources.removeAll(type);
-                        newSize = jsonResource.length();
-                    }
-                }
+						resourceTypeToStringifiedResources.removeAll(type);
+						newSize = jsonResource.length();
+					}
+				}
 
 				resourceTypeToStringifiedResources.put(type, jsonResource);
 				resourceTypeToTotalSize.put(type, newSize);
