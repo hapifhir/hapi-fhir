@@ -37,7 +37,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 	IPartitionLookupSvc myPartitionConfigSvc;
 
 	@Override
-	protected RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
+	public RequestPartitionId validateAndNormalizePartitionIds(RequestPartitionId theRequestPartitionId) {
 		List<String> names = null;
 		for (int i = 0; i < theRequestPartitionId.getPartitionIds().size(); i++) {
 
@@ -94,7 +94,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 	}
 
 	@Override
-	protected RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId) {
+	public RequestPartitionId validateAndNormalizePartitionNames(RequestPartitionId theRequestPartitionId) {
 		List<Integer> ids = null;
 		for (int i = 0; i < theRequestPartitionId.getPartitionNames().size(); i++) {
 
