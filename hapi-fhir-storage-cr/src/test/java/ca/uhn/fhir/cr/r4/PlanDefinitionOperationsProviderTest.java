@@ -19,7 +19,6 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-PatientData.json");
 
 		var requestDetails = setupRequestDetails();
-		// var planDefinitionID = new IdType(Enumerations.FHIRAllTypes.PLANDEFINITION.toCode(), "ASLPA1");
 		var url = "http://example.org/sdh/dtr/aslp/PlanDefinition/ASLPA1";
 		var version = "1.0.0";
 		var patientID = "positive";
