@@ -24,7 +24,6 @@ import java.util.List;
 public class ResourceProviderFactory extends FhirServerExtensionFactory<IResourceProviderFactoryObserver> {
 	public ResourceProviderFactory() {}
 
-
 	public List<Object> createProviders() {
 		return super.getSupplierResults();
 	}
