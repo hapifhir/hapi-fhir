@@ -41,5 +41,4 @@ public class FhirServerExtensionFactory<T extends IFhirServerExtensionFactoryObs
 	public void detach(T theObserver) {
 		myObservers.remove(theObserver);
 	}
-
 }

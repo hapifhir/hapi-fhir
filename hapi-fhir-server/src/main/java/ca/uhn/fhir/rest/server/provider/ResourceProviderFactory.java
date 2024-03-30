@@ -19,15 +19,6 @@
  */
 package ca.uhn.fhir.rest.server.provider;
 
-import jakarta.annotation.Nonnull;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Supplier;
-
 public class ResourceProviderFactory extends FhirServerExtensionFactory<IResourceProviderFactoryObserver> {
 	public ResourceProviderFactory() {}
 }

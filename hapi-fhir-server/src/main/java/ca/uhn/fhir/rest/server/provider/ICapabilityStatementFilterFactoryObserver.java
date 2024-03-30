@@ -19,5 +19,4 @@
  */
 package ca.uhn.fhir.rest.server.provider;
 
-public interface ICapabilityStatementFilterFactoryObserver extends IFhirServerExtensionFactoryObserver {
-}
+public interface ICapabilityStatementFilterFactoryObserver extends IFhirServerExtensionFactoryObserver {}

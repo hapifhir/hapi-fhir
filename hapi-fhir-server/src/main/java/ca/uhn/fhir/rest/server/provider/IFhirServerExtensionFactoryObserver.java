@@ -8,5 +8,4 @@ public interface IFhirServerExtensionFactoryObserver {
 	void update(@Nonnull Supplier<Object> theSupplier);
 
 	void remove(@Nonnull Supplier<Object> theSupplier);
-
 }

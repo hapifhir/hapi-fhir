@@ -19,5 +19,4 @@
  */
 package ca.uhn.fhir.rest.server.provider;
 
-public class CapabilityStatementFilterFactory extends FhirServerExtensionFactory<IResourceProviderFactoryObserver> {
-}
+public class CapabilityStatementFilterFactory extends FhirServerExtensionFactory<IResourceProviderFactoryObserver> {}

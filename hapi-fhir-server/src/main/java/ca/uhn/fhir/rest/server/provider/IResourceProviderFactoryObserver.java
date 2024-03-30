@@ -19,9 +19,4 @@
  */
 package ca.uhn.fhir.rest.server.provider;
 
-import jakarta.annotation.Nonnull;
-
-import java.util.function.Supplier;
-
-public interface IResourceProviderFactoryObserver extends IFhirServerExtensionFactoryObserver {
-}
+public interface IResourceProviderFactoryObserver extends IFhirServerExtensionFactoryObserver {}
