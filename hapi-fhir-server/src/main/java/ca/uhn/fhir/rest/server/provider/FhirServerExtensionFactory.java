@@ -23,7 +23,15 @@ public class FhirServerExtensionFactory<T extends IFhirServerExtensionFactoryObs
 		myObservers.forEach(observer -> observer.remove(theSupplier));
 	}
 
-	public List<Object> createProviders() {
+	public void attach(T theObserver) {
+		myObservers.add(theObserver);
+	}
+
+	public void detach(T theObserver) {
+		myObservers.remove(theObserver);
+	}
+
+	protected List<Object> getSupplierResults() {
 		List<Object> retVal = new ArrayList<>();
 		for (Supplier<Object> next : mySuppliers) {
 			Object nextRp = next.get();
@@ -32,13 +40,5 @@ public class FhirServerExtensionFactory<T extends IFhirServerExtensionFactoryObs
 			}
 		}
 		return retVal;
-	}
-
-	public void attach(T theObserver) {
-		myObservers.add(theObserver);
-	}
-
-	public void detach(T theObserver) {
-		myObservers.remove(theObserver);
 	}
 }

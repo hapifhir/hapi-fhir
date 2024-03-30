@@ -19,4 +19,11 @@
  */
 package ca.uhn.fhir.rest.server.provider;
 
-public class CapabilityStatementFilterFactory extends FhirServerExtensionFactory<IResourceProviderFactoryObserver> {}
+import java.util.List;
+
+public class CapabilityStatementFilterFactory extends FhirServerExtensionFactory<IResourceProviderFactoryObserver> {
+
+	public List<Object> createFilters() {
+		return super.getSupplierResults();
+	}
+}
