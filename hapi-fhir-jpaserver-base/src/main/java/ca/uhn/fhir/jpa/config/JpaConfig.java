@@ -172,6 +172,7 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationInterce
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
+import ca.uhn.fhir.rest.server.provider.CapabilityStatementFilterFactory;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.IMetaTagSorter;
@@ -875,5 +876,10 @@ public class JpaConfig {
 	public ResourceHistoryCalculator resourceHistoryCalculator(
 			FhirContext theFhirContext, HibernatePropertiesProvider theHibernatePropertiesProvider) {
 		return new ResourceHistoryCalculator(theFhirContext, theHibernatePropertiesProvider.isOracleDialect());
+	}
+
+	@Bean
+	public CapabilityStatementFilterFactory capabilityStatementCustomizerFactory() {
+		return new CapabilityStatementFilterFactory();
 	}
 }
