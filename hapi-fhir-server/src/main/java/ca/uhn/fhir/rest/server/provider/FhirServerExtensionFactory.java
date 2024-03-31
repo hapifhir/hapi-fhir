@@ -10,7 +10,9 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 public class FhirServerExtensionFactory<T extends IFhirServerExtensionFactoryObserver> {
+
 	private Set<T> myObservers = Collections.synchronizedSet(new HashSet<>());
+
 	private List<Supplier<Object>> mySuppliers = new ArrayList<>();
 
 	public void addSupplier(@Nonnull Supplier<Object> theSupplier) {
