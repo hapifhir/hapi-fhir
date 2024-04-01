@@ -1,0 +1,12 @@
+---
+type: add
+issue: 5750
+title: "Update to the 3.2.0 release of the Clinical Reasoning Module.  This includes the following changes:
+<ul>
+    <li>Updated the Clinical Reasoning documentation.</li>
+    <li>Added support for additional parameters on operations.</li>
+    <li>Added StructureDefinition/$questionnaire operation.</li>
+    <li>Add ability to generate PlanDefinition/$apply results with unique ids.</li>
+    <li>Resolved issues with Questionnaire item generation during PlanDefinition/$apply.</li>
+    <li>Resolved issues with some request resources not generated correctly from ActivityDefinition/$apply</li>
+</ul>"

@@ -117,6 +117,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init640_after_20230126();
 		init660();
 		init680();
+		init680_Part2();
 		init700();
 		init720();
 	}
@@ -229,6 +230,44 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		// This fix will work for MSSQL or Oracle.
 		version.addTask(new ForceIdMigrationFixTask(version.getRelease(), "20231222.1"));
+	}
+
+	private void init680_Part2() {
+		Builder version = forVersion(VersionEnum.V6_8_0);
+
+		// Add additional LOB migration columns
+		version.onTable("BT2_JOB_INSTANCE")
+				.addColumn("20240227.1", "REPORT_VC")
+				.nullable()
+				.type(ColumnTypeEnum.TEXT);
+		version.onTable("BT2_JOB_INSTANCE")
+				.addColumn("20240227.2", "PARAMS_JSON_VC")
+				.nullable()
+				.type(ColumnTypeEnum.TEXT);
+
+		version.onTable("BT2_WORK_CHUNK")
+				.addColumn("20240227.3", "CHUNK_DATA_VC")
+				.nullable()
+				.type(ColumnTypeEnum.TEXT);
+
+		version.onTable("HFJ_SEARCH")
+				.addColumn("20240227.4", "SEARCH_QUERY_STRING_VC")
+				.nullable()
+				.type(ColumnTypeEnum.TEXT);
+		version.onTable("HFJ_SEARCH")
+				.addColumn("20240227.5", "SEARCH_PARAM_MAP_BIN")
+				.nullable()
+				.type(ColumnTypeEnum.BINARY);
+
+		version.onTable("HFJ_BLK_IMPORT_JOBFILE")
+				.addColumn("20240227.6", "JOB_CONTENTS_VC")
+				.nullable()
+				.type(ColumnTypeEnum.TEXT);
+
+		version.onTable("HFJ_BLK_IMPORT_JOBFILE")
+				.modifyColumn("20240227.7", "JOB_CONTENTS")
+				.nullable()
+				.withType(ColumnTypeEnum.BLOB);
 	}
 
 	protected void init680() {

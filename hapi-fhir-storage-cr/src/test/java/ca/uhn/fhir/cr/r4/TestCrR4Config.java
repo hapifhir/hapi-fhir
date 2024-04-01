@@ -49,7 +49,6 @@ public class TestCrR4Config {
 	@Bean
 	CareGapsProperties careGapsProperties()  {
 		var careGapsProperties = new CareGapsProperties();
-		careGapsProperties.setThreadedCareGapsEnabled(false);
 		careGapsProperties.setCareGapsReporter("Organization/alphora");
 		careGapsProperties.setCareGapsCompositionSectionAuthor("Organization/alphora-author");
 		return careGapsProperties;
