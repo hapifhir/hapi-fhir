@@ -53,6 +53,7 @@ stateDiagram-v2
     state on_receive <<choice>>
     state IN_PROGRESS
     state ERROR
+    state POLL_WAITING
     state execute <<choice>>
     state FAILED
     state COMPLETED
