@@ -35,6 +35,10 @@ import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.Date;
+
 public class StepExecutor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	private final IJobPersistence myJobPersistence;
@@ -59,8 +63,11 @@ public class StepExecutor {
 			outcome = theStepWorker.run(theStepExecutionDetails, theDataSink);
 			Validate.notNull(outcome, "Step theWorker returned null: %s", theStepWorker.getClass());
 		} catch (RetryChunkLaterException ex) {
-			ourLog.debug("Polling job encountered; will retry after {}ms", ex.getMsPollDelay());
-			myJobPersistence.onWorkChunkPollDelay(theStepExecutionDetails.getChunkId(), ex.getMsPollDelay());
+			Date nextPollTime = Date.from(
+				Instant.now().plus(ex.getNextPollDuration())
+			);
+			ourLog.debug("Polling job encountered; will retry after {}ms", ex.getNextPollDuration().get(ChronoUnit.MILLIS));
+			myJobPersistence.onWorkChunkPollDelay(theStepExecutionDetails.getChunkId(), nextPollTime);
 			return false;
 		} catch (JobExecutionFailedException e) {
 			ourLog.error(

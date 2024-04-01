@@ -293,12 +293,4 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	@VisibleForTesting
 	WorkChunk createWorkChunk(WorkChunk theWorkChunk);
-
-	/**
-	 * Updates the given work chunk from the given status to the new status.
-	 * @param theChunkId the given chunk id
-	 * @param theOldStatus the old status
-	 * @param theNewStatus the new status
-	 */
-	void updateWorkChunkToStatus(String theChunkId, WorkChunkStatusEnum theOldStatus, WorkChunkStatusEnum theNewStatus);
 }

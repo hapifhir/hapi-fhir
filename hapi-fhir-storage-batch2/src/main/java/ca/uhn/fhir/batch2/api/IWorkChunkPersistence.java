@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -90,10 +91,10 @@ public interface IWorkChunkPersistence {
 	 * * update the poll attempts
 	 * * sets the workchunk status to POLL_WAITING (if it's not already in this state)
 	 * @param theChunkId the id of the chunk to update
-	 * @param thePollDelayMs the amount of time (after now) to wait (in ms)
+	 * @param theNewDeadline the time when polling should be redone
 	 */
 	@Transactional
-	void onWorkChunkPollDelay(String theChunkId, int thePollDelayMs);
+	void onWorkChunkPollDelay(String theChunkId, Date theNewDeadline);
 
 	/**
 	 * An unrecoverable error.

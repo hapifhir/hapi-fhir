@@ -6,8 +6,14 @@ import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -84,5 +90,88 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 			});
 		}
 		latch.awaitExpected();
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+ 		"2|IN_PROGRESS,2|POLL_WAITING",
+ 		"2|IN_PROGRESS"
+	})
+	default void onWorkChunkPollDelay_workChunkIN_PROGRESSdeadlineExpired_transitionsToPOLL_WAITINGandUpdatesTime() {
+		// setup
+		disableWorkChunkMessageHandler();
+		enableMaintenanceRunner(false);
+		JobDefinition<?> jobDef = withJobDefinition(false);
+		String jobInstanceId = createAndStoreJobInstance(jobDef);
+
+		Date newTime = Date.from(
+			Instant.now().plus(Duration.ofSeconds(100))
+		);
+		String state = "2|IN_PROGRESS,2|POLL_WAITING";
+		JobMaintenanceStateInformation stateInformation = new JobMaintenanceStateInformation(
+			jobInstanceId, jobDef,
+			state
+		);
+		stateInformation.addWorkChunkModifier(chunk -> {
+			chunk.setNextPollTime(Date.from(
+				Instant.now().minus(Duration.ofSeconds(100))
+			));
+		});
+		stateInformation.initialize(getSvc());
+
+		String chunkId = stateInformation.getInitialWorkChunks()
+			.stream().findFirst().orElseThrow().getId();
+
+		// test
+		getSvc().onWorkChunkPollDelay(chunkId, newTime);
+
+		// verify
+		stateInformation.verifyFinalStates(getSvc(), (chunk) -> {
+			assertEquals(newTime, chunk.getNextPollTime());
+		});
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"2|READY",
+		"2|QUEUED",
+		"2|FAILED",
+		"2|COMPLETE"
+	})
+	default void updatePollWaitingChunksForJobIfReady_nonApplicableStates_doNotTransitionToPollWaiting() {
+		// setup
+		disableWorkChunkMessageHandler();
+		enableMaintenanceRunner(false);
+
+		JobDefinition<?> jobDef = withJobDefinition(false);
+		String jobInstanceId = createAndStoreJobInstance(jobDef);
+
+		StringBuilder sb = new StringBuilder();
+		for (WorkChunkStatusEnum status : WorkChunkStatusEnum.values()) {
+			if (status != WorkChunkStatusEnum.POLL_WAITING && status != WorkChunkStatusEnum.IN_PROGRESS
+					&& status != WorkChunkStatusEnum.ERRORED) {
+				sb.append("2|")
+					.append(status.name())
+					.append("\n");
+			}
+		}
+		String state = sb.toString();
+
+		JobMaintenanceStateInformation stateInformation = new JobMaintenanceStateInformation(jobInstanceId,
+			jobDef,
+			state);
+		stateInformation.addWorkChunkModifier((chunk) -> {
+			chunk.setNextPollTime(
+				Date.from(Instant.now().minus(Duration.ofSeconds(10)))
+			);
+		});
+		stateInformation.initialize(getSvc());
+
+		// test
+		int updateCount = getSvc().updatePollWaitingChunksForJobIfReady(jobInstanceId);
+
+		// verify
+		assertEquals(0, updateCount);
+		stateInformation.verifyFinalStates(getSvc());
 	}
 }

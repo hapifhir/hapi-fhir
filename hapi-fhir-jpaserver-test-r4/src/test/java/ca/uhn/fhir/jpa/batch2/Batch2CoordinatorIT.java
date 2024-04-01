@@ -48,6 +48,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -468,8 +470,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				sink.accept(new SecondStepOutput());
 				return RunOutcome.SUCCESS;
 			}
-			// 200ms so we aren't waiting forever
-			throw new RetryChunkLaterException(200);
+			throw new RetryChunkLaterException(Duration.of(200, ChronoUnit.MILLIS));
 		};
 
 		// step 3

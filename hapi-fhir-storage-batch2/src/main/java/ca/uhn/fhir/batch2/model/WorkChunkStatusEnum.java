@@ -51,6 +51,9 @@ public enum WorkChunkStatusEnum {
 	 * that will not complete in a reasonably short amount of time
 	 */
 	POLL_WAITING,
+	/**
+	 * ERRORED is a transient state on retry when a chunk throws an error, but hasn't FAILED yet. Will move back to IN_PROGRESS on retry.
+	 */
 	ERRORED,
 	FAILED,
 	/**
@@ -83,7 +86,9 @@ public enum WorkChunkStatusEnum {
 			case QUEUED:
 				return EnumSet.of(IN_PROGRESS);
 			case IN_PROGRESS:
-				return EnumSet.of(IN_PROGRESS, ERRORED, FAILED, COMPLETED);
+				return EnumSet.of(IN_PROGRESS, ERRORED, FAILED, COMPLETED, POLL_WAITING);
+			case POLL_WAITING:
+				return EnumSet.of(POLL_WAITING, READY);
 			case ERRORED:
 				return EnumSet.of(IN_PROGRESS, FAILED, COMPLETED);
 				// terminal states
