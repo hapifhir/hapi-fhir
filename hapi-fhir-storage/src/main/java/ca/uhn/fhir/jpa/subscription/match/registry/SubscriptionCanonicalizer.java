@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
@@ -68,10 +69,12 @@ public class SubscriptionCanonicalizer {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionCanonicalizer.class);
 
 	final FhirContext myFhirContext;
+	private final boolean myCrossPartitionSubscriptionEnabled;
 
 	@Autowired
-	public SubscriptionCanonicalizer(FhirContext theFhirContext) {
+	public SubscriptionCanonicalizer(FhirContext theFhirContext, boolean theCrossPartitionSubscriptionEnabled ) {
 		myFhirContext = theFhirContext;
+		myCrossPartitionSubscriptionEnabled = theCrossPartitionSubscriptionEnabled;
 	}
 
 	public CanonicalSubscription canonicalize(IBaseResource theSubscription) {
@@ -292,7 +295,15 @@ public class SubscriptionCanonicalizer {
 				getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
 		retVal.setTags(extractTags(subscription));
 		setPartitionIdOnReturnValue(theSubscription, retVal);
-		retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
+		// LUKETODO:  if there's a subscription on the "default partition" whatever that means, we're in cross partition true and there's no extension
+		// LUKETODO: R4B, R5, etc?
+		// LUKETODO: temporarily hard-code this: then reverse
+//		retVal.setCrossPartitionEnabled(true);
+		if (myCrossPartitionSubscriptionEnabled) {
+			retVal.setCrossPartitionEnabled(true);
+		} else {
+			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
+		}
 
 		List<org.hl7.fhir.r4.model.CanonicalType> profiles =
 				subscription.getMeta().getProfile();
@@ -761,5 +772,10 @@ public class SubscriptionCanonicalizer {
 			return null;
 		}
 		return status.getValueAsString();
+	}
+
+	@Override
+	public String toString() {
+		return "myCrossPartitionSubscriptionEnabled: " + myCrossPartitionSubscriptionEnabled;
 	}
 }

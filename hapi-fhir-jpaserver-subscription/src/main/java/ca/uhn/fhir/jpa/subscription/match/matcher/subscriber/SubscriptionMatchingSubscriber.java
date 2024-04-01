@@ -168,6 +168,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			ourLog.info("5815: processSubscription(): FALSE!");
 			return false;
 		}
+		// LUKETODO:  the cross-partition fix works here!
 		ourLog.info("5815: processSubscription(): TRUE!");
 		String nextSubscriptionId = theActiveSubscription.getId();
 

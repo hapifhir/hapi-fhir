@@ -20,17 +20,30 @@
 package ca.uhn.fhir.jpa.subscription.model.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class SubscriptionModelConfig {
+	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionModelConfig.class);
 
 	@Bean
-	public SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext) {
-		return new SubscriptionCanonicalizer(theFhirContext);
+	// LUKETODO:  cannot find bean for JpaStorageSettings
+	// LUKETODO:  StorageSettings for the persistence module contains the correct true value, but for the subscription module it's false
+//	public SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext, JpaStorageSettings theJpaStorageSettings) {
+	public SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext, StorageSettings theStorageSettings) {
+//	public SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext) {
+//		return new SubscriptionCanonicalizer(theFhirContext, true);
+//		return new SubscriptionCanonicalizer(theFhirContext, false);
+		ourLog.info("5815: theStorageSettings.isCrossPartitionSubscriptionEnabled(): {}", theStorageSettings.isCrossPartitionSubscriptionEnabled());
+		return new SubscriptionCanonicalizer(theFhirContext, theStorageSettings.isCrossPartitionSubscriptionEnabled());
 	}
 
 	@Bean

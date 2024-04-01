@@ -98,10 +98,13 @@ public class PatientIdPartitionInterceptor {
 
 		List<RuntimeSearchParam> compartmentSps =
 				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
+		// LUKETODO:  try this:  it doesn't work:
+//		if (! resourceDef.getName().equals("Subscription") && compartmentSps.isEmpty()) {
 		if (compartmentSps.isEmpty()) {
 			return provideNonCompartmentMemberTypeResponse(theResource);
 		}
 
+		// LUKETODO:  how are we supposed to know the patient partition if the subscription only contains "Patient?"
 		Optional<String> oCompartmentIdentity;
 		if (resourceDef.getName().equals("Patient")) {
 			oCompartmentIdentity =
@@ -111,6 +114,7 @@ public class PatientIdPartitionInterceptor {
 						Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode");
 			}
 		} else {
+			// LUKETODO:  this returns nothing before compartmentSps is empty
 			oCompartmentIdentity =
 					ResourceCompartmentUtil.getResourceCompartment(theResource, compartmentSps, mySearchParamExtractor);
 		}

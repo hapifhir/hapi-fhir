@@ -27,6 +27,8 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Set;
 
+// LUKETODO:  document that this doesn't do anything
+// LUKETODO:  deprecate it
 class RuleImplPatch extends BaseRule {
 	private boolean myAllRequests;
 
