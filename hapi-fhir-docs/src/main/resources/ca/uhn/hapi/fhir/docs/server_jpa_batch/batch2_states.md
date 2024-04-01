@@ -4,7 +4,8 @@
 title: Batch2 Job Instance state transitions
 ---
 stateDiagram-v2
-  [*]         --> QUEUED         : on db create and first chunk queued on kakfa
+  [*]         --> READY          : on db create
+  READY       --> QUEUED         : on sending to db
   QUEUED      --> IN_PROGRESS    : on any work-chunk received by worker
   %%  and  (see ca.uhn.fhir.batch2.progress.InstanceProgress.getNewStatus())
   state first_step_finished <<choice>>
@@ -74,6 +75,6 @@ stateDiagram-v2
   ERROR       --> on_receive : exception rollback\n triggers redelivery
   
   %% terminal states 
-  COMPLETED       --> [*]
+  COMPLETED    --> [*]
   FAILED       --> [*]
 ```
