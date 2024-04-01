@@ -24,6 +24,26 @@ import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+/**
+ * This class is used to help set up and verify WorkChunk transitions.
+ *
+ * Creating this object requires an instanceid (of a stored instance), and jobdefinition (of stored job defintion)
+ * and a state string.
+ *
+ * State strings are defined as follows:
+ * "step-name-or-step-index,INITIAL_STATE|step-name-or-step-index,FINAL_STATE"
+ *
+ * where "step-name-or-step-index" is the name or index of a step in the provided
+ * JobDefinition; the step that the work chunk should start in.
+ *
+ * If no final state/step name is provided, no transition is assumed.
+ *
+ * Further, comments can be added to the state string, but must be started by a "#".
+ *
+ * Eg:
+ * 1,READY|1,QUEUED  # will create an initial work chunk in the READY state in step 1.
+ * 					 #	validation will verify that this workchunk has been transitioned to QUEUED.
+ */
 public class JobMaintenanceStateInformation {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(JobMaintenanceStateInformation.class);

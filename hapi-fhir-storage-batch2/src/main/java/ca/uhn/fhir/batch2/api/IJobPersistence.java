@@ -128,10 +128,6 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
 	Page<JobInstance> fetchJobInstances(JobInstanceFetchRequest theRequest);
 
-	// on implementations @Transactional(propagation = Propagation.REQUIRES_NEW)
-	@Deprecated
-	boolean canAdvanceInstanceToNextStep(String theInstanceId, String theCurrentStepId);
-
 	/**
 	 * Returns set of all distinct states for the specified job instance id
 	 * and step id.
