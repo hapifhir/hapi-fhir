@@ -44,7 +44,6 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
@@ -569,13 +568,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// Store the resource forced ID if necessary
 		JpaPid jpaPid = JpaPid.fromId(updatedEntity.getResourceId());
 		if (resourceHadIdBeforeStorage) {
-			if (resourceIdWasServerAssigned) {
-				boolean createForPureNumericIds = true;
-				createForcedIdIfNeeded(entity, resourceIdBeforeStorage, createForPureNumericIds);
-			} else {
-				boolean createForPureNumericIds = getStorageSettings().getResourceClientIdStrategy()
-						!= JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC;
-				createForcedIdIfNeeded(entity, resourceIdBeforeStorage, createForPureNumericIds);
+			if (isNotBlank(resourceIdBeforeStorage)) {
+				entity.setFhirId(resourceIdBeforeStorage);
 			}
 		} else {
 			switch (getStorageSettings().getResourceClientIdStrategy()) {
@@ -583,13 +577,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				case ALPHANUMERIC:
 					break;
 				case ANY:
-					boolean createForPureNumericIds = true;
-					createForcedIdIfNeeded(
-							updatedEntity, theResource.getIdElement().getIdPart(), createForPureNumericIds);
+					String resourceId = theResource.getIdElement().getIdPart();
+					updatedEntity.setFhirId(resourceId);
 					// for client ID mode ANY, we will always have a forced ID. If we ever
 					// stop populating the transient forced ID be warned that we use it
 					// (and expect it to be set correctly) farther below.
-					assert updatedEntity.getTransientForcedId() != null;
+					assert updatedEntity.getFhirId() != null;
 					break;
 			}
 		}
@@ -600,7 +593,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// Pre-cache the resource ID
 		jpaPid.setAssociatedResourceId(entity.getIdType(myFhirContext));
 		myIdHelperService.addResolvedPidToForcedId(
-				jpaPid, theRequestPartitionId, getResourceName(), entity.getTransientForcedId(), null);
+				jpaPid, theRequestPartitionId, getResourceName(), entity.getFhirId(), null);
 		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
 		theTransactionDetails.addResolvedResource(jpaPid.getAssociatedResourceId(), theResource);
 
@@ -643,36 +636,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		populateOperationOutcomeForUpdate(w, outcome, theMatchUrl, theOperationType);
 
 		return outcome;
-	}
-
-	private void createForcedIdIfNeeded(
-			ResourceTable theEntity, String theResourceId, boolean theCreateForPureNumericIds) {
-		// TODO MB delete this in step 3
-		if (isNotBlank(theResourceId)) {
-			if (theCreateForPureNumericIds || !IdHelperService.isValidPid(theResourceId)) {
-
-				/*
-				 * As of Hibernate 5.6.2, assigning the forced ID to the
-				 * resource table causes an extra update to happen, even
-				 * though the ResourceTable entity isn't actually changed
-				 * (there is a @OneToOne reference on ResourceTable to the
-				 * ForcedId table, but the actual column is on the ForcedId
-				 * table so it doesn't actually make sense to update the table
-				 * when this is set). But to work around that we avoid
-				 * actually assigning ResourceTable#myForcedId here.
-				 *
-				 * It's conceivable they may fix this in the future, or
-				 * they may not.
-				 *
-				 * If you want to try assigning the forced it to the resource
-				 * entity (by calling ResourceTable#setForcedId) try running
-				 * the tests FhirResourceDaoR4QueryCountTest to verify that
-				 * nothing has broken as a result.
-				 * JA 20220121
-				 */
-				theEntity.setTransientForcedId(theResourceId);
-			}
-		}
 	}
 
 	void validateResourceIdCreation(T theResource, RequestDetails theRequest) {
@@ -1884,7 +1847,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceNotFoundException(Msg.code(1998) + theId);
 		}
 		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
-		entity.setTransientForcedId(theId.getIdPart());
 		return entity;
 	}
 

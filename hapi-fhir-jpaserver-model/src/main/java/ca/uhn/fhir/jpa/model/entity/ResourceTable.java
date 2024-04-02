@@ -879,7 +879,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 		retVal.setResourceId(myId);
 		retVal.setResourceType(myResourceType);
-		retVal.setTransientForcedId(getTransientForcedId());
+		retVal.setTransientForcedId(getFhirId());
 		retVal.setFhirVersion(getFhirVersion());
 		retVal.setResourceTable(this);
 		retVal.setPartitionId(getPartitionId());
@@ -977,8 +977,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		String resourceId;
 		if (myFhirId != null && !myFhirId.isEmpty()) {
 			resourceId = myFhirId;
-		} else if (getTransientForcedId() != null) {
-			resourceId = getTransientForcedId();
 		} else {
 			Long id = this.getResourceId();
 			resourceId = Long.toString(id);
