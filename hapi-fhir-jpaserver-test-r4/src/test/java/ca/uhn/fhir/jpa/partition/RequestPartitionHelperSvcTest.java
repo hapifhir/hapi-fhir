@@ -41,7 +41,7 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void determineReadPartitionForSystemRequest() {
+	public void testDetermineReadPartitionForSystemRequest_withPartitionIdOnly_returnsCorrectPartition() {
 		// setup
 		PartitionEntity partitionEntity = createPartition();
 		SystemRequestDetails srd = new SystemRequestDetails();
@@ -56,7 +56,7 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void determineCreatePartitionForSystemRequest() {
+	public void testDetermineCreatePartitionForRequest_withPartitionIdOnly_returnsCorrectPartition() {
 		// setup
 		PartitionEntity partitionEntity = createPartition();
 		SystemRequestDetails srd = new SystemRequestDetails();
