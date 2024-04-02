@@ -69,12 +69,12 @@ public class SubscriptionCanonicalizer {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionCanonicalizer.class);
 
 	final FhirContext myFhirContext;
-	private final boolean myCrossPartitionSubscriptionEnabled;
+	private final StorageSettings myStorageSettings;
 
 	@Autowired
-	public SubscriptionCanonicalizer(FhirContext theFhirContext, boolean theCrossPartitionSubscriptionEnabled ) {
+	public SubscriptionCanonicalizer(FhirContext theFhirContext, StorageSettings theStorageSettings) {
 		myFhirContext = theFhirContext;
-		myCrossPartitionSubscriptionEnabled = theCrossPartitionSubscriptionEnabled;
+		myStorageSettings = theStorageSettings;
 	}
 
 	public CanonicalSubscription canonicalize(IBaseResource theSubscription) {
@@ -295,15 +295,19 @@ public class SubscriptionCanonicalizer {
 				getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
 		retVal.setTags(extractTags(subscription));
 		setPartitionIdOnReturnValue(theSubscription, retVal);
-		// LUKETODO:  if there's a subscription on the "default partition" whatever that means, we're in cross partition true and there's no extension
+		// LUKETODO:  if there's a subscription on the "default partition" whatever that means, we're in cross partition
+		// true and there's no extension
 		// LUKETODO: R4B, R5, etc?
 		// LUKETODO: temporarily hard-code this: then reverse
-//		retVal.setCrossPartitionEnabled(true);
-		if (myCrossPartitionSubscriptionEnabled) {
+		//		retVal.setCrossPartitionEnabled(true);
+		if (myStorageSettings.isCrossPartitionSubscriptionEnabled()) {
+			ourLog.info("5815: isCrossPartitionSubscriptionEnabled(), SubscriptionUtil.isCrossPartition(theSubscription): {}", SubscriptionUtil.isCrossPartition(theSubscription));
 			retVal.setCrossPartitionEnabled(true);
 		} else {
+			ourLog.info("5815: NOT isCrossPartitionSubscriptionEnabled()");
 			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
 		}
+//		retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
 
 		List<org.hl7.fhir.r4.model.CanonicalType> profiles =
 				subscription.getMeta().getProfile();
@@ -772,10 +776,5 @@ public class SubscriptionCanonicalizer {
 			return null;
 		}
 		return status.getValueAsString();
-	}
-
-	@Override
-	public String toString() {
-		return "myCrossPartitionSubscriptionEnabled: " + myCrossPartitionSubscriptionEnabled;
 	}
 }

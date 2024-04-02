@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.match.registry;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
@@ -31,7 +32,7 @@ class SubscriptionCanonicalizerTest {
 
 	FhirContext r4Context = FhirContext.forR4();
 
-	private final SubscriptionCanonicalizer testedSC = new SubscriptionCanonicalizer(r4Context);
+	private final SubscriptionCanonicalizer testedSC = new SubscriptionCanonicalizer(r4Context, new StorageSettings());
 
 	@Test
 	void testCanonicalizeR4SendDeleteMessagesSetsExtensionValueNotPresent() {
@@ -72,7 +73,7 @@ class SubscriptionCanonicalizerTest {
 	@Test
 	public void testCanonicalizeDstu2SendDeleteMessages() {
 		//setup
-		SubscriptionCanonicalizer dstu2Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forDstu2Cached());
+		SubscriptionCanonicalizer dstu2Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forDstu2Cached(), new StorageSettings());
 		ca.uhn.fhir.model.dstu2.resource.Subscription dstu2Sub = new ca.uhn.fhir.model.dstu2.resource.Subscription();
 		ExtensionDt extensionDt = new ExtensionDt();
 		extensionDt.setUrl(EX_SEND_DELETE_MESSAGES);
@@ -108,7 +109,7 @@ class SubscriptionCanonicalizerTest {
 	@ValueSource(strings = {"full-resource", "id-only", "empty"})
 	public void testR5Canonicalize_returnsCorrectCanonicalSubscription(String thePayloadContent) {
 		// setup
-		SubscriptionCanonicalizer r5Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR5Cached());
+		SubscriptionCanonicalizer r5Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR5Cached(), new StorageSettings());
 		org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent payloadContent =
 				org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent.fromCode(thePayloadContent);
 		org.hl7.fhir.r5.model.Subscription subscription = buildR5Subscription(payloadContent);
@@ -148,7 +149,7 @@ class SubscriptionCanonicalizerTest {
 		// Example drawn from http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/Subscription-subscription-zulip.json.html
 
 		// setup
-		SubscriptionCanonicalizer r4bCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4BCached());
+		SubscriptionCanonicalizer r4bCanonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4BCached(), new StorageSettings());
 		org.hl7.fhir.r4b.model.Subscription subscription = buildR4BSubscription(thePayloadContent);
 
 		// execute
@@ -195,7 +196,7 @@ class SubscriptionCanonicalizerTest {
 		// Example drawn from http://build.fhir.org/ig/HL7/fhir-subscription-backport-ig/Subscription-subscription-zulip.json.html
 
 		// setup
-		SubscriptionCanonicalizer r4Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4Cached());
+		SubscriptionCanonicalizer r4Canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4Cached(), new StorageSettings());
 
 		// execute
 		Subscription subscription = SubscriptionTestDataHelper.buildR4TopicSubscriptionWithContent(thePayloadContent);

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
@@ -66,7 +67,7 @@ public class CanonicalSubscriptionTest {
 
 	@Test
 	public void testCanonicalSubscriptionRetainsMetaTags() throws IOException {
-		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4());
+		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), new StorageSettings());
 		CanonicalSubscription sub1 = canonicalizer.canonicalize(makeMdmSubscription());
 		assertTrue(sub1.getTags().keySet().contains(TAG_SYSTEM));
 		assertEquals(sub1.getTags().get(TAG_SYSTEM), TAG_VALUE);
@@ -74,7 +75,7 @@ public class CanonicalSubscriptionTest {
 
 	@Test
 	public void emailDetailsEquals() {
-		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4());
+		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), new StorageSettings());
 		CanonicalSubscription sub1 = canonicalizer.canonicalize(makeEmailSubscription());
 		CanonicalSubscription sub2 = canonicalizer.canonicalize(makeEmailSubscription());
 		assertTrue(sub1.equals(sub2));
@@ -82,7 +83,7 @@ public class CanonicalSubscriptionTest {
 
 	@Test
 	public void testSerializeMultiPartitionSubscription(){
-		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4());
+		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), new StorageSettings());
 		Subscription subscription = makeEmailSubscription();
 		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType().setValue(true));
 		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(subscription);
@@ -92,7 +93,7 @@ public class CanonicalSubscriptionTest {
 
 	@Test
 	public void testSerializeIncorrectMultiPartitionSubscription(){
-		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4());
+		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), new StorageSettings());
 		Subscription subscription = makeEmailSubscription();
 		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new StringType().setValue("false"));
 		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(subscription);
@@ -104,7 +105,7 @@ public class CanonicalSubscriptionTest {
 
 	@Test
 	public void testSerializeNonMultiPartitionSubscription(){
-		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4());
+		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), new StorageSettings());
 		Subscription subscription = makeEmailSubscription();
 		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType().setValue(false));
 		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(subscription);

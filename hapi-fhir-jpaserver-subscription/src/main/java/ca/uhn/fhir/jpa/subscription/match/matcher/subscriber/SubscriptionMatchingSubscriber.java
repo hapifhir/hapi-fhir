@@ -154,12 +154,15 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 		// skip if the partitions don't match
 		CanonicalSubscription subscription = theActiveSubscription.getSubscription();
 		// LUKETODO: this is failing because the subscription has a null partition ID
-		ourLog.info("5815: subscription.partitionId: {}, crossPartitionEnabled: {}, msg.partitionId: {}, msg.hasPartitionId: {}, theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId(): {}",
-			(subscription != null) ? subscription.getRequestPartitionId() : "subscription is null",
-			(subscription != null) ? subscription.getCrossPartitionEnabled() : "subscription is null",
-			theMsg.getPartitionId(),
-			(theMsg.getPartitionId() != null) ? theMsg.getPartitionId().hasPartitionIds() : "NULL getPartitionId()",
-			(theMsg.getPartitionId() != null && subscription != null) ? theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId()) :  "NULL getPartitionId() or subscription");
+		ourLog.info(
+				"5815: subscription.partitionId: {}, crossPartitionEnabled: {}, msg.partitionId: {}, msg.hasPartitionId: {}, theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId(): {}",
+				(subscription != null) ? subscription.getRequestPartitionId() : "subscription is null",
+				(subscription != null) ? subscription.getCrossPartitionEnabled() : "subscription is null",
+				theMsg.getPartitionId(),
+				(theMsg.getPartitionId() != null) ? theMsg.getPartitionId().hasPartitionIds() : "NULL getPartitionId()",
+				(theMsg.getPartitionId() != null && subscription != null)
+						? theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())
+						: "NULL getPartitionId() or subscription");
 		if (subscription != null
 				&& theMsg.getPartitionId() != null
 				&& theMsg.getPartitionId().hasPartitionIds()
