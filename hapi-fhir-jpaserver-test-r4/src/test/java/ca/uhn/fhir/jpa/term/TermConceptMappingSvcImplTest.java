@@ -25,11 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
-import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 
@@ -71,142 +67,130 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 	@Test
 	public void testByCodeSystemsAndSourceCodeOneToMany() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("12345");
-				translationRequest.setTargetSystem(CS_URL_3);
+		runInTransaction(() -> {
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem(CS_URL)
+				.setCode("12345");
+			translationRequest.setTargetSystem(CS_URL_3);
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(2, targets.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
+			List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(2, targets.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslateConceptResult target = targets.get(0);
+			TranslateConceptResult target = targets.get(0);
 
-				ourLog.info("target(0):\n" + target.toString());
+			ourLog.info("target(0):\n" + target.toString());
 
-				assertEquals("56789", target.getCode());
-				assertEquals("Target Code 56789", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("56789", target.getCode());
+			assertEquals("Target Code 56789", target.getDisplay());
+			assertEquals(CS_URL_3, target.getSystem());
+			assertEquals("Version 4", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				target = targets.get(1);
+			target = targets.get(1);
 
-				ourLog.info("target(1):\n" + target.toString());
+			ourLog.info("target(1):\n" + target.toString());
 
-				assertEquals("67890", target.getCode());
-				assertEquals("Target Code 67890", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("67890", target.getCode());
+			assertEquals("Target Code 67890", target.getDisplay());
+			assertEquals(CS_URL_3, target.getSystem());
+			assertEquals("Version 4", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(2, targets.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
-			}
+			// Test caching.
+			targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(2, targets.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 		});
 	}
 
 	@Test
 	public void testByCodeSystemsAndSourceCodeOneToOne() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("12345");
-				translationRequest.setTargetSystem(CS_URL_2);
+		runInTransaction(() -> {
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem(CS_URL)
+				.setCode("12345");
+			translationRequest.setTargetSystem(CS_URL_2);
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(1, targets.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
+			List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(1, targets.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslateConceptResult target = targets.get(0);
+			TranslateConceptResult target = targets.get(0);
 
-				ourLog.info("ConceptMap.group.element.target:\n" + target.toString());
+			ourLog.info("ConceptMap.group.element.target:\n" + target.toString());
 
-				assertEquals("34567", target.getCode());
-				assertEquals("Target Code 34567", target.getDisplay());
-				assertEquals(CS_URL_2, target.getSystem());
-				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("34567", target.getCode());
+			assertEquals("Target Code 34567", target.getDisplay());
+			assertEquals(CS_URL_2, target.getSystem());
+			assertEquals("Version 2", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(1, targets.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
-			}
+			// Test caching.
+			targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(1, targets.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 		});
 	}
 
 	@Test
 	public void testByCodeSystemsAndSourceCodeUnmapped() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("BOGUS");
-				translationRequest.setTargetSystem(CS_URL_3);
+		runInTransaction(() -> {
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem(CS_URL)
+				.setCode("BOGUS");
+			translationRequest.setTargetSystem(CS_URL_3);
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertTrue(targets.isEmpty());
-			}
+			List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertTrue(targets.isEmpty());
 		});
 	}
 
 	@Test
 	public void testByCodeSystemsAndSourceCodeMatchedWithoutCode() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL_4)
-					.setCode("89012");
-				translationRequest.setTargetSystem(CS_URL_3);
+		runInTransaction(() -> {
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem(CS_URL_4)
+				.setCode("89012");
+			translationRequest.setTargetSystem(CS_URL_3);
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertTrue(targets.isEmpty());
-			}
+			List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertTrue(targets.isEmpty());
 		});
 	}
 
@@ -229,7 +213,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 			.addTarget()
 			.setCode("999");
 
-		myConceptMapDao.create(conceptMap);
+		myConceptMapDao.create(conceptMap, mySrd);
 
 		TranslationRequest translationRequest = new TranslationRequest()
 			.addCode(CS_URL, "12345")
@@ -243,954 +227,903 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 	@Test
 	public void testUsingPredicatesWithCodeOnly() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				/*
-				 * Provided:
-				 *   source code
-				 */
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setCode("12345");
+		runInTransaction(() -> {
+			/*
+			 * Provided:
+			 *   source code
+			 */
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setCode("12345");
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(3, targets.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
+			List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(3, targets.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslateConceptResult target = targets.get(0);
+			TranslateConceptResult target = targets.get(0);
 
-				ourLog.info("target(0):\n" + target.toString());
+			ourLog.info("target(0):\n" + target.toString());
 
-				assertEquals("34567", target.getCode());
-				assertEquals("Target Code 34567", target.getDisplay());
-				assertEquals(CS_URL_2, target.getSystem());
-				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("34567", target.getCode());
+			assertEquals("Target Code 34567", target.getDisplay());
+			assertEquals(CS_URL_2, target.getSystem());
+			assertEquals("Version 2", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				target = targets.get(1);
+			target = targets.get(1);
 
-				ourLog.info("target(1):\n" + target.toString());
+			ourLog.info("target(1):\n" + target.toString());
 
-				assertEquals("56789", target.getCode());
-				assertEquals("Target Code 56789", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("56789", target.getCode());
+			assertEquals("Target Code 56789", target.getDisplay());
+			assertEquals(CS_URL_3, target.getSystem());
+			assertEquals("Version 4", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				target = targets.get(2);
+			target = targets.get(2);
 
-				ourLog.info("target(2):\n" + target.toString());
+			ourLog.info("target(2):\n" + target.toString());
 
-				assertEquals("67890", target.getCode());
-				assertEquals("Target Code 67890", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("67890", target.getCode());
+			assertEquals("Target Code 67890", target.getDisplay());
+			assertEquals(CS_URL_3, target.getSystem());
+			assertEquals("Version 4", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(3, targets.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
-			}
+			// Test caching.
+			targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(3, targets.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 		});
 	}
 
 	@Test
 	public void testUsingPredicatesWithSourceAndTargetSystem2() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				/*
-				 * Provided:
-				 *   source code
-				 *   source code system
-				 *   target code system #2
-				 */
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("12345");
-				translationRequest.setTargetSystem(CS_URL_2);
+		runInTransaction(() -> {
+			/*
+			 * Provided:
+			 *   source code
+			 *   source code system
+			 *   target code system #2
+			 */
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem(CS_URL)
+				.setCode("12345");
+			translationRequest.setTargetSystem(CS_URL_2);
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(1, targets.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
+			List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(1, targets.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslateConceptResult target = targets.get(0);
+			TranslateConceptResult target = targets.get(0);
 
-				ourLog.info("target:\n" + target.toString());
+			ourLog.info("target:\n" + target.toString());
 
-				assertEquals("34567", target.getCode());
-				assertEquals("Target Code 34567", target.getDisplay());
-				assertEquals(CS_URL_2, target.getSystem());
-				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("34567", target.getCode());
+			assertEquals("Target Code 34567", target.getDisplay());
+			assertEquals(CS_URL_2, target.getSystem());
+			assertEquals("Version 2", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(1, targets.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
-			}
+			// Test caching.
+			targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(1, targets.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 		});
 	}
 
 	@Test
 	public void testUsingPredicatesWithSourceAndTargetSystem3() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				/*
-				 * Provided:
-				 *   source code
-				 *   source code system
-				 *   target code system #3
-				 */
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("12345");
-				translationRequest.setTargetSystem(CS_URL_3);
+		runInTransaction(() -> {
+			/*
+			 * Provided:
+			 *   source code
+			 *   source code system
+			 *   target code system #3
+			 */
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem(CS_URL)
+				.setCode("12345");
+			translationRequest.setTargetSystem(CS_URL_3);
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(2, targets.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
+			List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(2, targets.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslateConceptResult target = targets.get(0);
+			TranslateConceptResult target = targets.get(0);
 
-				ourLog.info("target(0):\n" + target.toString());
+			ourLog.info("target(0):\n" + target.toString());
 
-				assertEquals("56789", target.getCode());
-				assertEquals("Target Code 56789", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("56789", target.getCode());
+			assertEquals("Target Code 56789", target.getDisplay());
+			assertEquals(CS_URL_3, target.getSystem());
+			assertEquals("Version 4", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				target = targets.get(1);
+			target = targets.get(1);
 
-				ourLog.info("target(1):\n" + target.toString());
+			ourLog.info("target(1):\n" + target.toString());
 
-				assertEquals("67890", target.getCode());
-				assertEquals("Target Code 67890", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("67890", target.getCode());
+			assertEquals("Target Code 67890", target.getDisplay());
+			assertEquals(CS_URL_3, target.getSystem());
+			assertEquals("Version 4", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(2, targets.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
-			}
+			// Test caching.
+			targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(2, targets.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 		});
 	}
 
 	@Test
 	public void testUsingPredicatesWithSourceSystem() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				/*
-				 * Provided:
-				 *   source code
-				 *   source code system
-				 */
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("12345");
+		runInTransaction(() -> {
+			/*
+			 * Provided:
+			 *   source code
+			 *   source code system
+			 */
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem(CS_URL)
+				.setCode("12345");
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(3, targets.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
+			List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(3, targets.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslateConceptResult target = targets.get(0);
+			TranslateConceptResult target = targets.get(0);
 
-				ourLog.info("target(0):\n" + target.toString());
+			ourLog.info("target(0):\n" + target.toString());
 
-				assertEquals("34567", target.getCode());
-				assertEquals("Target Code 34567", target.getDisplay());
-				assertEquals(CS_URL_2, target.getSystem());
-				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("34567", target.getCode());
+			assertEquals("Target Code 34567", target.getDisplay());
+			assertEquals(CS_URL_2, target.getSystem());
+			assertEquals("Version 2", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				target = targets.get(1);
+			target = targets.get(1);
 
-				ourLog.info("target(1):\n" + target.toString());
+			ourLog.info("target(1):\n" + target.toString());
 
-				assertEquals("56789", target.getCode());
-				assertEquals("Target Code 56789", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("56789", target.getCode());
+			assertEquals("Target Code 56789", target.getDisplay());
+			assertEquals(CS_URL_3, target.getSystem());
+			assertEquals("Version 4", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				target = targets.get(2);
+			target = targets.get(2);
 
-				ourLog.info("target(2):\n" + target.toString());
+			ourLog.info("target(2):\n" + target.toString());
 
-				assertEquals("67890", target.getCode());
-				assertEquals("Target Code 67890", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("67890", target.getCode());
+			assertEquals("Target Code 67890", target.getDisplay());
+			assertEquals(CS_URL_3, target.getSystem());
+			assertEquals("Version 4", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(3, targets.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
-			}
+			// Test caching.
+			targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(3, targets.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 		});
 	}
 
 	@Test
 	public void testUsingPredicatesWithSourceSystemAndVersion1() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				/*
-				 * Provided:
-				 *   source code
-				 *   source code system
-				 *   source code system version #1
-				 */
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("12345")
-					.setVersion("Version 1");
+		runInTransaction(() -> {
+			/*
+			 * Provided:
+			 *   source code
+			 *   source code system
+			 *   source code system version #1
+			 */
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem(CS_URL)
+				.setCode("12345")
+				.setVersion("Version 1");
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(1, targets.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
+			List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(1, targets.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslateConceptResult target = targets.get(0);
+			TranslateConceptResult target = targets.get(0);
 
-				ourLog.info("target:\n" + target.toString());
+			ourLog.info("target:\n" + target.toString());
 
-				assertEquals("34567", target.getCode());
-				assertEquals("Target Code 34567", target.getDisplay());
-				assertEquals(CS_URL_2, target.getSystem());
-				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("34567", target.getCode());
+			assertEquals("Target Code 34567", target.getDisplay());
+			assertEquals(CS_URL_2, target.getSystem());
+			assertEquals("Version 2", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(1, targets.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
-			}
+			// Test caching.
+			targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(1, targets.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 		});
 	}
 
 	@Test
 	public void testUsingPredicatesWithSourceSystemAndVersion3() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				/*
-				 * Provided:
-				 *   source code
-				 *   source code system
-				 *   source code system version #3
-				 */
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("12345")
-					.setVersion("Version 3");
+		runInTransaction(() -> {
+			/*
+			 * Provided:
+			 *   source code
+			 *   source code system
+			 *   source code system version #3
+			 */
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem(CS_URL)
+				.setCode("12345")
+				.setVersion("Version 3");
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(2, targets.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
+			List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(2, targets.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslateConceptResult target = targets.get(0);
+			TranslateConceptResult target = targets.get(0);
 
-				ourLog.info("target(0):\n" + target.toString());
+			ourLog.info("target(0):\n" + target.toString());
 
-				assertEquals("56789", target.getCode());
-				assertEquals("Target Code 56789", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("56789", target.getCode());
+			assertEquals("Target Code 56789", target.getDisplay());
+			assertEquals(CS_URL_3, target.getSystem());
+			assertEquals("Version 4", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				target = targets.get(1);
+			target = targets.get(1);
 
-				ourLog.info("target(1):\n" + target.toString());
+			ourLog.info("target(1):\n" + target.toString());
 
-				assertEquals("67890", target.getCode());
-				assertEquals("Target Code 67890", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("67890", target.getCode());
+			assertEquals("Target Code 67890", target.getDisplay());
+			assertEquals(CS_URL_3, target.getSystem());
+			assertEquals("Version 4", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(2, targets.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
-			}
+			// Test caching.
+			targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(2, targets.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 		});
 	}
 
 	@Test
 	public void testUsingPredicatesWithSourceValueSet() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				/*
-				 * Provided:
-				 *   source code
-				 *   source value set
-				 */
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setCode("12345");
-				translationRequest.setSource(VS_URL);
+		runInTransaction(() -> {
+			/*
+			 * Provided:
+			 *   source code
+			 *   source value set
+			 */
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setCode("12345");
+			translationRequest.setSource(VS_URL);
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(3, targets.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
+			List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(3, targets.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslateConceptResult target = targets.get(0);
+			TranslateConceptResult target = targets.get(0);
 
-				ourLog.info("target(0):\n" + target.toString());
+			ourLog.info("target(0):\n" + target.toString());
 
-				assertEquals("34567", target.getCode());
-				assertEquals("Target Code 34567", target.getDisplay());
-				assertEquals(CS_URL_2, target.getSystem());
-				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("34567", target.getCode());
+			assertEquals("Target Code 34567", target.getDisplay());
+			assertEquals(CS_URL_2, target.getSystem());
+			assertEquals("Version 2", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				target = targets.get(1);
+			target = targets.get(1);
 
-				ourLog.info("target(1):\n" + target.toString());
+			ourLog.info("target(1):\n" + target.toString());
 
-				assertEquals("56789", target.getCode());
-				assertEquals("Target Code 56789", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("56789", target.getCode());
+			assertEquals("Target Code 56789", target.getDisplay());
+			assertEquals(CS_URL_3, target.getSystem());
+			assertEquals("Version 4", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				target = targets.get(2);
+			target = targets.get(2);
 
-				ourLog.info("target(2):\n" + target.toString());
+			ourLog.info("target(2):\n" + target.toString());
 
-				assertEquals("67890", target.getCode());
-				assertEquals("Target Code 67890", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("67890", target.getCode());
+			assertEquals("Target Code 67890", target.getDisplay());
+			assertEquals(CS_URL_3, target.getSystem());
+			assertEquals("Version 4", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(3, targets.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
-			}
+			// Test caching.
+			targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(3, targets.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 		});
 	}
 
 	@Test
 	public void testUsingPredicatesWithTargetValueSet() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				/*
-				 * Provided:
-				 *   source code
-				 *   target value set
-				 */
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setCode("12345");
-				translationRequest.setTarget(VS_URL_2);
+		runInTransaction(() -> {
+			/*
+			 * Provided:
+			 *   source code
+			 *   target value set
+			 */
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setCode("12345");
+			translationRequest.setTarget(VS_URL_2);
 
-				List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(3, targets.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
+			List<TranslateConceptResult> targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(3, targets.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 
-				TranslateConceptResult target = targets.get(0);
+			TranslateConceptResult target = targets.get(0);
 
-				ourLog.info("target(0):\n" + target.toString());
+			ourLog.info("target(0):\n" + target.toString());
 
-				assertEquals("34567", target.getCode());
-				assertEquals("Target Code 34567", target.getDisplay());
-				assertEquals(CS_URL_2, target.getSystem());
-				assertEquals("Version 2", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("34567", target.getCode());
+			assertEquals("Target Code 34567", target.getDisplay());
+			assertEquals(CS_URL_2, target.getSystem());
+			assertEquals("Version 2", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				target = targets.get(1);
+			target = targets.get(1);
 
-				ourLog.info("target(1):\n" + target.toString());
+			ourLog.info("target(1):\n" + target.toString());
 
-				assertEquals("56789", target.getCode());
-				assertEquals("Target Code 56789", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("56789", target.getCode());
+			assertEquals("Target Code 56789", target.getDisplay());
+			assertEquals(CS_URL_3, target.getSystem());
+			assertEquals("Version 4", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				target = targets.get(2);
+			target = targets.get(2);
 
-				ourLog.info("target(2):\n" + target.toString());
+			ourLog.info("target(2):\n" + target.toString());
 
-				assertEquals("67890", target.getCode());
-				assertEquals("Target Code 67890", target.getDisplay());
-				assertEquals(CS_URL_3, target.getSystem());
-				assertEquals("Version 4", target.getSystemVersion());
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
-				assertEquals(VS_URL_2, target.getValueSet());
-				assertEquals(CM_URL, target.getConceptMapUrl());
+			assertEquals("67890", target.getCode());
+			assertEquals("Target Code 67890", target.getDisplay());
+			assertEquals(CS_URL_3, target.getSystem());
+			assertEquals("Version 4", target.getSystemVersion());
+			assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), target.getEquivalence());
+			assertEquals(VS_URL_2, target.getValueSet());
+			assertEquals(CM_URL, target.getConceptMapUrl());
 
-				// Test caching.
-				targets = myConceptMappingSvc.translate(translationRequest).getResults();
-				assertNotNull(targets);
-				assertEquals(3, targets.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
-			}
+			// Test caching.
+			targets = myConceptMappingSvc.translate(translationRequest).getResults();
+			assertNotNull(targets);
+			assertEquals(3, targets.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationCache());
 		});
 	}
 
 	@Test
 	public void testWithReverse() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				/*
-				 * Provided:
-				 *   source code
-				 *   source code system
-				 *   target code system
-				 *   reverse = true
-				 */
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL_2)
-					.setCode("34567");
-				translationRequest.setTargetSystem(CS_URL_4);
-				translationRequest.setReverse(true);
+		runInTransaction(() -> {
+			/*
+			 * Provided:
+			 *   source code
+			 *   source code system
+			 *   target code system
+			 *   reverse = true
+			 */
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem(CS_URL_2)
+				.setCode("34567");
+			translationRequest.setTargetSystem(CS_URL_4);
+			translationRequest.setReverse(true);
 
-				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
-				assertNotNull(elements);
-				assertEquals(1, elements.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+			TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+			assertNotNull(elements);
+			assertEquals(1, elements.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
-				TranslateConceptResult element = elements.getResults().get(0);
+			TranslateConceptResult element = elements.getResults().get(0);
 
-				ourLog.info("element:\n" + element.toString());
+			ourLog.info("element:\n" + element.toString());
 
-				assertEquals("78901", element.getCode());
-				assertEquals("Source Code 78901", element.getDisplay());
-				assertEquals(CS_URL_4, element.getSystem());
-				assertEquals("Version 5", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+			assertEquals("78901", element.getCode());
+			assertEquals("Source Code 78901", element.getDisplay());
+			assertEquals(CS_URL_4, element.getSystem());
+			assertEquals("Version 5", element.getSystemVersion());
+			assertEquals(VS_URL, element.getValueSet());
+			assertEquals(CM_URL, element.getConceptMapUrl());
 
-				// Test caching.
-				elements = myConceptMappingSvc.translateWithReverse(translationRequest);
-				assertNotNull(elements);
-				assertEquals(1, elements.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
-			}
+			// Test caching.
+			elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+			assertNotNull(elements);
+			assertEquals(1, elements.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 		});
 	}
 
 	@Test
 	public void testWithReverseByCodeSystemsAndSourceCodeUnmapped() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL_3)
-					.setCode("BOGUS");
-				translationRequest.setTargetSystem(CS_URL);
+		runInTransaction(() -> {
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem(CS_URL_3)
+				.setCode("BOGUS");
+			translationRequest.setTargetSystem(CS_URL);
 
-				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
-				assertNotNull(elements);
-				assertTrue(elements.isEmpty());
-			}
+			TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+			assertNotNull(elements);
+			assertTrue(elements.isEmpty());
 		});
 	}
 
 	@Test
 	public void testWithReverseUsingPredicatesWithCodeOnly() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				/*
-				 * Provided:
-				 *   source code
-				 *   reverse = true
-				 */
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setCode("34567");
-				translationRequest.setReverse(true);
+		runInTransaction(() -> {
+			/*
+			 * Provided:
+			 *   source code
+			 *   reverse = true
+			 */
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setCode("34567");
+			translationRequest.setReverse(true);
 
-				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
-				assertNotNull(elements);
-				assertEquals(2, elements.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+			TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+			assertNotNull(elements);
+			assertEquals(2, elements.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
-				TranslateConceptResult element = elements.getResults().get(0);
+			TranslateConceptResult element = elements.getResults().get(0);
 
-				ourLog.info("element:\n" + element.toString());
+			ourLog.info("element:\n" + element.toString());
 
-				assertEquals("12345", element.getCode());
-				assertEquals("Source Code 12345", element.getDisplay());
-				assertEquals(CS_URL, element.getSystem());
-				assertEquals("Version 1", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+			assertEquals("12345", element.getCode());
+			assertEquals("Source Code 12345", element.getDisplay());
+			assertEquals(CS_URL, element.getSystem());
+			assertEquals("Version 1", element.getSystemVersion());
+			assertEquals(VS_URL, element.getValueSet());
+			assertEquals(CM_URL, element.getConceptMapUrl());
 
-				element = elements.getResults().get(1);
+			element = elements.getResults().get(1);
 
-				ourLog.info("element:\n" + element.toString());
+			ourLog.info("element:\n" + element.toString());
 
-				assertEquals("78901", element.getCode());
-				assertEquals("Source Code 78901", element.getDisplay());
-				assertEquals(CS_URL_4, element.getSystem());
-				assertEquals("Version 5", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+			assertEquals("78901", element.getCode());
+			assertEquals("Source Code 78901", element.getDisplay());
+			assertEquals(CS_URL_4, element.getSystem());
+			assertEquals("Version 5", element.getSystemVersion());
+			assertEquals(VS_URL, element.getValueSet());
+			assertEquals(CM_URL, element.getConceptMapUrl());
 
-				// Test caching.
-				elements = myConceptMappingSvc.translateWithReverse(translationRequest);
-				assertNotNull(elements);
-				assertEquals(2, elements.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
-			}
+			// Test caching.
+			elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+			assertNotNull(elements);
+			assertEquals(2, elements.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 		});
 	}
 
 	@Test
 	public void testWithReverseUsingPredicatesWithSourceAndTargetSystem1() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				/*
-				 * Provided:
-				 *   source code
-				 *   source code system
-				 *   target code system #1
-				 *   reverse = true
-				 */
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL_2)
-					.setCode("34567");
-				translationRequest.setTargetSystem(CS_URL);
-				translationRequest.setReverse(true);
+		runInTransaction(() -> {
+			/*
+			 * Provided:
+			 *   source code
+			 *   source code system
+			 *   target code system #1
+			 *   reverse = true
+			 */
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem(CS_URL_2)
+				.setCode("34567");
+			translationRequest.setTargetSystem(CS_URL);
+			translationRequest.setReverse(true);
 
-				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
-				assertNotNull(elements);
-				assertEquals(1, elements.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+			TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+			assertNotNull(elements);
+			assertEquals(1, elements.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
-				TranslateConceptResult element = elements.getResults().get(0);
+			TranslateConceptResult element = elements.getResults().get(0);
 
-				ourLog.info("element:\n" + element.toString());
+			ourLog.info("element:\n" + element.toString());
 
-				assertEquals("12345", element.getCode());
-				assertEquals("Source Code 12345", element.getDisplay());
-				assertEquals(CS_URL, element.getSystem());
-				assertEquals("Version 1", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+			assertEquals("12345", element.getCode());
+			assertEquals("Source Code 12345", element.getDisplay());
+			assertEquals(CS_URL, element.getSystem());
+			assertEquals("Version 1", element.getSystemVersion());
+			assertEquals(VS_URL, element.getValueSet());
+			assertEquals(CM_URL, element.getConceptMapUrl());
 
-				// Test caching.
-				elements = myConceptMappingSvc.translateWithReverse(translationRequest);
-				assertNotNull(elements);
-				assertEquals(1, elements.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
-			}
+			// Test caching.
+			elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+			assertNotNull(elements);
+			assertEquals(1, elements.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 		});
 	}
 
 	@Test
 	public void testWithReverseUsingPredicatesWithSourceAndTargetSystem4() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				/*
-				 * Provided:
-				 *   source code
-				 *   source code system
-				 *   target code system #4
-				 *   reverse = true
-				 */
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL_2)
-					.setCode("34567");
-				translationRequest.setTargetSystem(CS_URL_4);
-				translationRequest.setReverse(true);
+		runInTransaction(() -> {
+			/*
+			 * Provided:
+			 *   source code
+			 *   source code system
+			 *   target code system #4
+			 *   reverse = true
+			 */
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem(CS_URL_2)
+				.setCode("34567");
+			translationRequest.setTargetSystem(CS_URL_4);
+			translationRequest.setReverse(true);
 
-				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
-				assertNotNull(elements);
-				assertEquals(1, elements.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+			TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+			assertNotNull(elements);
+			assertEquals(1, elements.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
-				TranslateConceptResult element = elements.getResults().get(0);
+			TranslateConceptResult element = elements.getResults().get(0);
 
-				ourLog.info("element:\n" + element.toString());
+			ourLog.info("element:\n" + element.toString());
 
-				assertEquals("78901", element.getCode());
-				assertEquals("Source Code 78901", element.getDisplay());
-				assertEquals(CS_URL_4, element.getSystem());
-				assertEquals("Version 5", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+			assertEquals("78901", element.getCode());
+			assertEquals("Source Code 78901", element.getDisplay());
+			assertEquals(CS_URL_4, element.getSystem());
+			assertEquals("Version 5", element.getSystemVersion());
+			assertEquals(VS_URL, element.getValueSet());
+			assertEquals(CM_URL, element.getConceptMapUrl());
 
-				// Test caching.
-				elements = myConceptMappingSvc.translateWithReverse(translationRequest);
-				assertNotNull(elements);
-				assertEquals(1, elements.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
-			}
+			// Test caching.
+			elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+			assertNotNull(elements);
+			assertEquals(1, elements.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 		});
 	}
 
 	@Test
 	public void testWithReverseUsingPredicatesWithSourceSystem() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				/*
-				 * Provided:
-				 *   source code
-				 *   source code system
-				 *   reverse = true
-				 */
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL_2)
-					.setCode("34567");
-				translationRequest.setReverse(true);
+		runInTransaction(() -> {
+			/*
+			 * Provided:
+			 *   source code
+			 *   source code system
+			 *   reverse = true
+			 */
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem(CS_URL_2)
+				.setCode("34567");
+			translationRequest.setReverse(true);
 
-				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
-				assertNotNull(elements);
-				assertEquals(2, elements.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+			TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+			assertNotNull(elements);
+			assertEquals(2, elements.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
-				TranslateConceptResult element = elements.getResults().get(0);
+			TranslateConceptResult element = elements.getResults().get(0);
 
-				ourLog.info("element:\n" + element.toString());
+			ourLog.info("element:\n" + element.toString());
 
-				assertEquals("12345", element.getCode());
-				assertEquals("Source Code 12345", element.getDisplay());
-				assertEquals(CS_URL, element.getSystem());
-				assertEquals("Version 1", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+			assertEquals("12345", element.getCode());
+			assertEquals("Source Code 12345", element.getDisplay());
+			assertEquals(CS_URL, element.getSystem());
+			assertEquals("Version 1", element.getSystemVersion());
+			assertEquals(VS_URL, element.getValueSet());
+			assertEquals(CM_URL, element.getConceptMapUrl());
 
-				element = elements.getResults().get(1);
+			element = elements.getResults().get(1);
 
-				ourLog.info("element:\n" + element.toString());
+			ourLog.info("element:\n" + element.toString());
 
-				assertEquals("78901", element.getCode());
-				assertEquals("Source Code 78901", element.getDisplay());
-				assertEquals(CS_URL_4, element.getSystem());
-				assertEquals("Version 5", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+			assertEquals("78901", element.getCode());
+			assertEquals("Source Code 78901", element.getDisplay());
+			assertEquals(CS_URL_4, element.getSystem());
+			assertEquals("Version 5", element.getSystemVersion());
+			assertEquals(VS_URL, element.getValueSet());
+			assertEquals(CM_URL, element.getConceptMapUrl());
 
-				// Test caching.
-				elements = myConceptMappingSvc.translateWithReverse(translationRequest);
-				assertNotNull(elements);
-				assertEquals(2, elements.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
-			}
+			// Test caching.
+			elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+			assertNotNull(elements);
+			assertEquals(2, elements.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 		});
 	}
 
 	@Test
 	public void testWithReverseUsingPredicatesWithSourceSystemAndVersion() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				/*
-				 * Provided:
-				 *   source code
-				 *   source code system
-				 *   source code system version
-				 *   reverse = true
-				 */
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL_2)
-					.setCode("34567")
-					.setVersion("Version 2");
-				translationRequest.setReverse(true);
+		runInTransaction(() -> {
+			/*
+			 * Provided:
+			 *   source code
+			 *   source code system
+			 *   source code system version
+			 *   reverse = true
+			 */
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem(CS_URL_2)
+				.setCode("34567")
+				.setVersion("Version 2");
+			translationRequest.setReverse(true);
 
-				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
-				assertNotNull(elements);
-				assertEquals(2, elements.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+			TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+			assertNotNull(elements);
+			assertEquals(2, elements.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
-				TranslateConceptResult element = elements.getResults().get(0);
+			TranslateConceptResult element = elements.getResults().get(0);
 
-				ourLog.info("element:\n" + element.toString());
+			ourLog.info("element:\n" + element.toString());
 
-				assertEquals("12345", element.getCode());
-				assertEquals("Source Code 12345", element.getDisplay());
-				assertEquals(CS_URL, element.getSystem());
-				assertEquals("Version 1", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+			assertEquals("12345", element.getCode());
+			assertEquals("Source Code 12345", element.getDisplay());
+			assertEquals(CS_URL, element.getSystem());
+			assertEquals("Version 1", element.getSystemVersion());
+			assertEquals(VS_URL, element.getValueSet());
+			assertEquals(CM_URL, element.getConceptMapUrl());
 
-				element = elements.getResults().get(1);
+			element = elements.getResults().get(1);
 
-				ourLog.info("element:\n" + element.toString());
+			ourLog.info("element:\n" + element.toString());
 
-				assertEquals("78901", element.getCode());
-				assertEquals("Source Code 78901", element.getDisplay());
-				assertEquals(CS_URL_4, element.getSystem());
-				assertEquals("Version 5", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+			assertEquals("78901", element.getCode());
+			assertEquals("Source Code 78901", element.getDisplay());
+			assertEquals(CS_URL_4, element.getSystem());
+			assertEquals("Version 5", element.getSystemVersion());
+			assertEquals(VS_URL, element.getValueSet());
+			assertEquals(CM_URL, element.getConceptMapUrl());
 
-				// Test caching.
-				elements = myConceptMappingSvc.translateWithReverse(translationRequest);
-				assertNotNull(elements);
-				assertEquals(2, elements.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
-			}
+			// Test caching.
+			elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+			assertNotNull(elements);
+			assertEquals(2, elements.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 		});
 	}
 
 	@Test
 	public void testWithReverseUsingPredicatesWithSourceValueSet() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				/*
-				 * Provided:
-				 *   source code
-				 *   source value set
-				 *   reverse = true
-				 */
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setCode("34567");
-				translationRequest.setSource(VS_URL_2);
-				translationRequest.setReverse(true);
+		runInTransaction(() -> {
+			/*
+			 * Provided:
+			 *   source code
+			 *   source value set
+			 *   reverse = true
+			 */
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setCode("34567");
+			translationRequest.setSource(VS_URL_2);
+			translationRequest.setReverse(true);
 
-				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
-				assertNotNull(elements);
-				assertEquals(2, elements.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+			TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+			assertNotNull(elements);
+			assertEquals(2, elements.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
-				TranslateConceptResult element = elements.getResults().get(0);
+			TranslateConceptResult element = elements.getResults().get(0);
 
-				ourLog.info("element:\n" + element.toString());
+			ourLog.info("element:\n" + element.toString());
 
-				assertEquals("12345", element.getCode());
-				assertEquals("Source Code 12345", element.getDisplay());
-				assertEquals(CS_URL, element.getSystem());
-				assertEquals("Version 1", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+			assertEquals("12345", element.getCode());
+			assertEquals("Source Code 12345", element.getDisplay());
+			assertEquals(CS_URL, element.getSystem());
+			assertEquals("Version 1", element.getSystemVersion());
+			assertEquals(VS_URL, element.getValueSet());
+			assertEquals(CM_URL, element.getConceptMapUrl());
 
-				element = elements.getResults().get(1);
+			element = elements.getResults().get(1);
 
-				ourLog.info("element:\n" + element.toString());
+			ourLog.info("element:\n" + element.toString());
 
-				assertEquals("78901", element.getCode());
-				assertEquals("Source Code 78901", element.getDisplay());
-				assertEquals(CS_URL_4, element.getSystem());
-				assertEquals("Version 5", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+			assertEquals("78901", element.getCode());
+			assertEquals("Source Code 78901", element.getDisplay());
+			assertEquals(CS_URL_4, element.getSystem());
+			assertEquals("Version 5", element.getSystemVersion());
+			assertEquals(VS_URL, element.getValueSet());
+			assertEquals(CM_URL, element.getConceptMapUrl());
 
-				// Test caching.
-				elements = myConceptMappingSvc.translateWithReverse(translationRequest);
-				assertNotNull(elements);
-				assertEquals(2, elements.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
-			}
+			// Test caching.
+			elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+			assertNotNull(elements);
+			assertEquals(2, elements.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 		});
 	}
 
 	@Test
 	public void testWithReverseUsingPredicatesWithTargetValueSet() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				/*
-				 * Provided:
-				 *   source code
-				 *   target value set
-				 *   reverse = true
-				 */
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setCode("34567");
-				translationRequest.setTarget(VS_URL);
-				translationRequest.setReverse(true);
+		runInTransaction(() -> {
+			/*
+			 * Provided:
+			 *   source code
+			 *   target value set
+			 *   reverse = true
+			 */
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setCode("34567");
+			translationRequest.setTarget(VS_URL);
+			translationRequest.setReverse(true);
 
-				TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
-				assertNotNull(elements);
-				assertEquals(2, elements.size());
-				assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
+			TranslateConceptResults elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+			assertNotNull(elements);
+			assertEquals(2, elements.size());
+			assertFalse(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 
-				TranslateConceptResult element = elements.getResults().get(0);
+			TranslateConceptResult element = elements.getResults().get(0);
 
-				ourLog.info("element:\n" + element.toString());
+			ourLog.info("element:\n" + element.toString());
 
-				assertEquals("12345", element.getCode());
-				assertEquals("Source Code 12345", element.getDisplay());
-				assertEquals(CS_URL, element.getSystem());
-				assertEquals("Version 1", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+			assertEquals("12345", element.getCode());
+			assertEquals("Source Code 12345", element.getDisplay());
+			assertEquals(CS_URL, element.getSystem());
+			assertEquals("Version 1", element.getSystemVersion());
+			assertEquals(VS_URL, element.getValueSet());
+			assertEquals(CM_URL, element.getConceptMapUrl());
 
-				element = elements.getResults().get(1);
+			element = elements.getResults().get(1);
 
-				ourLog.info("element:\n" + element.toString());
+			ourLog.info("element:\n" + element.toString());
 
-				assertEquals("78901", element.getCode());
-				assertEquals("Source Code 78901", element.getDisplay());
-				assertEquals(CS_URL_4, element.getSystem());
-				assertEquals("Version 5", element.getSystemVersion());
-				assertEquals(VS_URL, element.getValueSet());
-				assertEquals(CM_URL, element.getConceptMapUrl());
+			assertEquals("78901", element.getCode());
+			assertEquals("Source Code 78901", element.getDisplay());
+			assertEquals(CS_URL_4, element.getSystem());
+			assertEquals("Version 5", element.getSystemVersion());
+			assertEquals(VS_URL, element.getValueSet());
+			assertEquals(CM_URL, element.getConceptMapUrl());
 
-				// Test caching.
-				elements = myConceptMappingSvc.translateWithReverse(translationRequest);
-				assertNotNull(elements);
-				assertEquals(2, elements.size());
-				assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
-			}
+			// Test caching.
+			elements = myConceptMappingSvc.translateWithReverse(translationRequest);
+			assertNotNull(elements);
+			assertEquals(2, elements.size());
+			assertTrue(TermConceptMappingSvcImpl.isOurLastResultsFromTranslationWithReverseCache());
 		});
 	}
 
@@ -1224,170 +1157,164 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 	@Test
 	public void testStoreTermConceptMapAndChildren() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap originalConceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(originalConceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				Pageable page = PageRequest.of(0, 1);
-				List<TermConceptMap> optionalConceptMap = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, CM_URL);
-				assertEquals(1, optionalConceptMap.size());
+		runInTransaction(() -> {
+			Pageable page = PageRequest.of(0, 1);
+			List<TermConceptMap> optionalConceptMap = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, CM_URL);
+			assertEquals(1, optionalConceptMap.size());
 
-				TermConceptMap conceptMap = optionalConceptMap.get(0);
+			TermConceptMap conceptMap = optionalConceptMap.get(0);
 
-				ourLog.info("ConceptMap:\n" + conceptMap.toString());
+			ourLog.info("ConceptMap:\n" + conceptMap.toString());
 
-				assertEquals(VS_URL, conceptMap.getSource());
-				assertEquals(VS_URL_2, conceptMap.getTarget());
-				assertEquals(CM_URL, conceptMap.getUrl());
-				assertEquals(4, conceptMap.getConceptMapGroups().size());
+			assertEquals(VS_URL, conceptMap.getSource());
+			assertEquals(VS_URL_2, conceptMap.getTarget());
+			assertEquals(CM_URL, conceptMap.getUrl());
+			assertEquals(4, conceptMap.getConceptMapGroups().size());
 
-				TermConceptMapGroup group = conceptMap.getConceptMapGroups().get(0);
+			TermConceptMapGroup group = conceptMap.getConceptMapGroups().get(0);
 
-				ourLog.info("ConceptMap.group(0):\n" + group.toString());
+			ourLog.info("ConceptMap.group(0):\n" + group.toString());
 
-				assertGroupHasValues(
-					CS_URL,"Version 1", CS_URL_2, "Version 2", group);
-				assertEquals(VS_URL, group.getSourceValueSet());
-				assertEquals(VS_URL_2, group.getTargetValueSet());
-				assertEquals(2, group.getConceptMapGroupElements().size());
+			assertGroupHasValues(
+				CS_URL,"Version 1", CS_URL_2, "Version 2", group);
+			assertEquals(VS_URL, group.getSourceValueSet());
+			assertEquals(VS_URL_2, group.getTargetValueSet());
+			assertEquals(2, group.getConceptMapGroupElements().size());
 
-				TermConceptMapGroupElement element = group.getConceptMapGroupElements().get(0);
+			TermConceptMapGroupElement element = group.getConceptMapGroupElements().get(0);
 
-				ourLog.info("ConceptMap.group(0).element(0):\n" + element.toString());
+			ourLog.info("ConceptMap.group(0).element(0):\n" + element.toString());
 
-				assertElementHasValues(
-					"12345", "Source Code 12345", CS_URL, "Version 1", element);
-				assertEquals(1, element.getConceptMapGroupElementTargets().size());
+			assertElementHasValues(
+				"12345", "Source Code 12345", CS_URL, "Version 1", element);
+			assertEquals(1, element.getConceptMapGroupElementTargets().size());
 
-				TermConceptMapGroupElementTarget target = element.getConceptMapGroupElementTargets().get(0);
+			TermConceptMapGroupElementTarget target = element.getConceptMapGroupElementTargets().get(0);
 
-				ourLog.info("ConceptMap.group(0).element(0).target(0):\n" + target.toString());
+			ourLog.info("ConceptMap.group(0).element(0).target(0):\n" + target.toString());
 
-				assertTargetHasValues(
-					"34567", "Target Code 34567", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.EQUAL, target);
+			assertTargetHasValues(
+				"34567", "Target Code 34567", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.EQUAL, target);
 
-				element = group.getConceptMapGroupElements().get(1);
+			element = group.getConceptMapGroupElements().get(1);
 
-				ourLog.info("ConceptMap.group(0).element(1):\n" + element.toString());
+			ourLog.info("ConceptMap.group(0).element(1):\n" + element.toString());
 
-				assertElementHasValues(
-					"23456", "Source Code 23456", CS_URL, "Version 1", element);
+			assertElementHasValues(
+				"23456", "Source Code 23456", CS_URL, "Version 1", element);
 
-				assertEquals(2, element.getConceptMapGroupElementTargets().size());
+			assertEquals(2, element.getConceptMapGroupElementTargets().size());
 
-				target = element.getConceptMapGroupElementTargets().get(0);
-				ourLog.info("ConceptMap.group(0).element(1).target(0):\n" + target.toString());
-				assertTargetHasValues(
-					"45678", "Target Code 45678", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.WIDER, target);
+			target = element.getConceptMapGroupElementTargets().get(0);
+			ourLog.info("ConceptMap.group(0).element(1).target(0):\n" + target.toString());
+			assertTargetHasValues(
+				"45678", "Target Code 45678", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.WIDER, target);
 
-				// We had deliberately added a duplicate, and here it is...
-				target = element.getConceptMapGroupElementTargets().get(1);
-				ourLog.info("ConceptMap.group(0).element(1).target(1):\n" + target.toString());
-				assertTargetHasValues(
-					"45678", "Target Code 45678", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.WIDER, target);
+			// We had deliberately added a duplicate, and here it is...
+			target = element.getConceptMapGroupElementTargets().get(1);
+			ourLog.info("ConceptMap.group(0).element(1).target(1):\n" + target.toString());
+			assertTargetHasValues(
+				"45678", "Target Code 45678", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.WIDER, target);
 
-				group = conceptMap.getConceptMapGroups().get(1);
+			group = conceptMap.getConceptMapGroups().get(1);
 
-				ourLog.info("ConceptMap.group(1):\n" + group.toString());
+			ourLog.info("ConceptMap.group(1):\n" + group.toString());
 
-				assertGroupHasValues(
-					CS_URL, "Version 3", CS_URL_3, "Version 4", group);
-				assertEquals(1, group.getConceptMapGroupElements().size());
+			assertGroupHasValues(
+				CS_URL, "Version 3", CS_URL_3, "Version 4", group);
+			assertEquals(1, group.getConceptMapGroupElements().size());
 
-				element = group.getConceptMapGroupElements().get(0);
+			element = group.getConceptMapGroupElements().get(0);
 
-				ourLog.info("ConceptMap.group(1).element(0):\n" + element.toString());
+			ourLog.info("ConceptMap.group(1).element(0):\n" + element.toString());
 
-				assertElementHasValues(
-					"12345", "Source Code 12345", CS_URL, "Version 3", element);
-				assertEquals(2, element.getConceptMapGroupElementTargets().size());
+			assertElementHasValues(
+				"12345", "Source Code 12345", CS_URL, "Version 3", element);
+			assertEquals(2, element.getConceptMapGroupElementTargets().size());
 
-				target = element.getConceptMapGroupElementTargets().get(0);
+			target = element.getConceptMapGroupElementTargets().get(0);
 
-				ourLog.info("ConceptMap.group(1).element(0).target(0):\n" + target.toString());
+			ourLog.info("ConceptMap.group(1).element(0).target(0):\n" + target.toString());
 
-				assertTargetHasValues(
-					"56789", "Target Code 56789", CS_URL_3, "Version 4", Enumerations.ConceptMapEquivalence.EQUAL, target);
+			assertTargetHasValues(
+				"56789", "Target Code 56789", CS_URL_3, "Version 4", Enumerations.ConceptMapEquivalence.EQUAL, target);
 
-				target = element.getConceptMapGroupElementTargets().get(1);
+			target = element.getConceptMapGroupElementTargets().get(1);
 
-				ourLog.info("ConceptMap.group(1).element(0).target(1):\n" + target.toString());
+			ourLog.info("ConceptMap.group(1).element(0).target(1):\n" + target.toString());
 
-				assertTargetHasValues(
-					"67890", "Target Code 67890", CS_URL_3, "Version 4", Enumerations.ConceptMapEquivalence.WIDER, target);
+			assertTargetHasValues(
+				"67890", "Target Code 67890", CS_URL_3, "Version 4", Enumerations.ConceptMapEquivalence.WIDER, target);
 
-				group = conceptMap.getConceptMapGroups().get(2);
+			group = conceptMap.getConceptMapGroups().get(2);
 
-				ourLog.info("ConceptMap.group(2):\n" + group.toString());
+			ourLog.info("ConceptMap.group(2):\n" + group.toString());
 
-				assertGroupHasValues(
-					CS_URL_4, "Version 5", CS_URL_2, "Version 2", group);
-				assertEquals(1, group.getConceptMapGroupElements().size());
+			assertGroupHasValues(
+				CS_URL_4, "Version 5", CS_URL_2, "Version 2", group);
+			assertEquals(1, group.getConceptMapGroupElements().size());
 
-				element = group.getConceptMapGroupElements().get(0);
+			element = group.getConceptMapGroupElements().get(0);
 
-				ourLog.info("ConceptMap.group(2).element(0):\n" + element.toString());
+			ourLog.info("ConceptMap.group(2).element(0):\n" + element.toString());
 
-				assertElementHasValues(
-					"78901", "Source Code 78901", CS_URL_4, "Version 5", element);
-				assertEquals(1, element.getConceptMapGroupElementTargets().size());
+			assertElementHasValues(
+				"78901", "Source Code 78901", CS_URL_4, "Version 5", element);
+			assertEquals(1, element.getConceptMapGroupElementTargets().size());
 
-				target = element.getConceptMapGroupElementTargets().get(0);
+			target = element.getConceptMapGroupElementTargets().get(0);
 
-				ourLog.info("ConceptMap.group(2).element(0).target(0):\n" + target.toString());
-			}
+			ourLog.info("ConceptMap.group(2).element(0).target(0):\n" + target.toString());
 		});
 	}
 
 	@Test
 	public void testStoreTermConceptMapAndChildren_handleUnmappedElements() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap originalConceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(originalConceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				Pageable page = PageRequest.of(0, 1);
-				List<TermConceptMap> optionalConceptMap = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, CM_URL);
-				assertEquals(1, optionalConceptMap.size());
+		runInTransaction(() -> {
+			Pageable page = PageRequest.of(0, 1);
+			List<TermConceptMap> optionalConceptMap = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, CM_URL);
+			assertEquals(1, optionalConceptMap.size());
 
-				TermConceptMap conceptMap = optionalConceptMap.get(0);
-				TermConceptMapGroup group = conceptMap.getConceptMapGroups().get(3);
+			TermConceptMap conceptMap = optionalConceptMap.get(0);
+			TermConceptMapGroup group = conceptMap.getConceptMapGroups().get(3);
 
-				ourLog.info("ConceptMap.group(3):\n" + group.toString());
+			ourLog.info("ConceptMap.group(3):\n" + group.toString());
 
-				assertGroupHasValues(
-					CS_URL_4, "Version 1", CS_URL_3, "Version 1", group);
-				assertEquals(2, group.getConceptMapGroupElements().size());
+			assertGroupHasValues(
+				CS_URL_4, "Version 1", CS_URL_3, "Version 1", group);
+			assertEquals(2, group.getConceptMapGroupElements().size());
 
-				TermConceptMapGroupElement element = group.getConceptMapGroupElements().get(0);
+			TermConceptMapGroupElement element = group.getConceptMapGroupElements().get(0);
 
-				ourLog.info("ConceptMap.group(3).element(0):\n" + element.toString());
+			ourLog.info("ConceptMap.group(3).element(0):\n" + element.toString());
 
-				assertElementHasValues(
-					"89012", "Source Code 89012", CS_URL_4, "Version 1", element);
-				assertEquals(0, element.getConceptMapGroupElementTargets().size());
+			assertElementHasValues(
+				"89012", "Source Code 89012", CS_URL_4, "Version 1", element);
+			assertEquals(0, element.getConceptMapGroupElementTargets().size());
 
-				element = group.getConceptMapGroupElements().get(1);
+			element = group.getConceptMapGroupElements().get(1);
 
-				ourLog.info("ConceptMap.group(3).element(1):\n" + element.toString());
+			ourLog.info("ConceptMap.group(3).element(1):\n" + element.toString());
 
-				assertElementHasValues(
-					"89123", "Source Code 89123", CS_URL_4, "Version 1", element);
-				assertEquals(1, element.getConceptMapGroupElementTargets().size());
+			assertElementHasValues(
+				"89123", "Source Code 89123", CS_URL_4, "Version 1", element);
+			assertEquals(1, element.getConceptMapGroupElementTargets().size());
 
-				TermConceptMapGroupElementTarget target = element.getConceptMapGroupElementTargets().get(0);
+			TermConceptMapGroupElementTarget target = element.getConceptMapGroupElementTargets().get(0);
 
-				ourLog.info("ConceptMap.group(3).element(1).target(0):\n" + target.toString());
+			ourLog.info("ConceptMap.group(3).element(1).target(0):\n" + target.toString());
 
-				assertTargetHasValues(
-					null, null, CS_URL_3, "Version 1", Enumerations.ConceptMapEquivalence.UNMATCHED, target);
-			}
+			assertTargetHasValues(
+				null, null, CS_URL_3, "Version 1", Enumerations.ConceptMapEquivalence.UNMATCHED, target);
 		});
 	}
 
@@ -1434,115 +1361,112 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 	@Test
 	public void testStoreTermConceptMapAndChildrenWithClientAssignedId() {
 		createAndPersistConceptMap();
-		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
+		ConceptMap originalConceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
 
-		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(originalConceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				Pageable page = PageRequest.of(0, 1);
-				List<TermConceptMap> optionalConceptMap = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, CM_URL);
-				assertEquals(1, optionalConceptMap.size());
+		runInTransaction(() -> {
+			Pageable page = PageRequest.of(0, 1);
+			List<TermConceptMap> optionalConceptMap = myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, CM_URL);
+			assertEquals(1, optionalConceptMap.size());
 
-				TermConceptMap conceptMap = optionalConceptMap.get(0);
+			TermConceptMap conceptMap = optionalConceptMap.get(0);
 
-				ourLog.info("ConceptMap:\n" + conceptMap.toString());
+			ourLog.info("ConceptMap:\n" + conceptMap.toString());
 
-				assertEquals(VS_URL, conceptMap.getSource());
-				assertEquals(VS_URL_2, conceptMap.getTarget());
-				assertEquals(CM_URL, conceptMap.getUrl());
-				assertEquals(4, conceptMap.getConceptMapGroups().size());
+			assertEquals(VS_URL, conceptMap.getSource());
+			assertEquals(VS_URL_2, conceptMap.getTarget());
+			assertEquals(CM_URL, conceptMap.getUrl());
+			assertEquals(4, conceptMap.getConceptMapGroups().size());
 
-				TermConceptMapGroup group = conceptMap.getConceptMapGroups().get(0);
+			TermConceptMapGroup group = conceptMap.getConceptMapGroups().get(0);
 
-				ourLog.info("ConceptMap.group(0):\n" + group.toString());
+			ourLog.info("ConceptMap.group(0):\n" + group.toString());
 
-				assertEquals(CS_URL, group.getSource());
-				assertEquals("Version 1", group.getSourceVersion());
-				assertEquals(VS_URL, group.getSourceValueSet());
-				assertEquals(CS_URL_2, group.getTarget());
-				assertEquals("Version 2", group.getTargetVersion());
-				assertEquals(VS_URL_2, group.getTargetValueSet());
-				assertEquals(CM_URL, group.getConceptMapUrl());
-				assertEquals(2, group.getConceptMapGroupElements().size());
+			assertEquals(CS_URL, group.getSource());
+			assertEquals("Version 1", group.getSourceVersion());
+			assertEquals(VS_URL, group.getSourceValueSet());
+			assertEquals(CS_URL_2, group.getTarget());
+			assertEquals("Version 2", group.getTargetVersion());
+			assertEquals(VS_URL_2, group.getTargetValueSet());
+			assertEquals(CM_URL, group.getConceptMapUrl());
+			assertEquals(2, group.getConceptMapGroupElements().size());
 
-				TermConceptMapGroupElement element = group.getConceptMapGroupElements().get(0);
+			TermConceptMapGroupElement element = group.getConceptMapGroupElements().get(0);
 
-				ourLog.info("ConceptMap.group(0).element(0):\n" + element.toString());
+			ourLog.info("ConceptMap.group(0).element(0):\n" + element.toString());
 
-				assertElementHasValues("12345", "Source Code 12345", CS_URL, "Version 1", element);
-				assertEquals(1, element.getConceptMapGroupElementTargets().size());
+			assertElementHasValues("12345", "Source Code 12345", CS_URL, "Version 1", element);
+			assertEquals(1, element.getConceptMapGroupElementTargets().size());
 
-				TermConceptMapGroupElementTarget target = element.getConceptMapGroupElementTargets().get(0);
+			TermConceptMapGroupElementTarget target = element.getConceptMapGroupElementTargets().get(0);
 
-				ourLog.info("ConceptMap.group(0).element(0).target(0):\n" + target.toString());
+			ourLog.info("ConceptMap.group(0).element(0).target(0):\n" + target.toString());
 
-				assertTargetHasValues("34567", "Target Code 34567", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.EQUAL, target);
+			assertTargetHasValues("34567", "Target Code 34567", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.EQUAL, target);
 
-				element = group.getConceptMapGroupElements().get(1);
+			element = group.getConceptMapGroupElements().get(1);
 
-				ourLog.info("ConceptMap.group(0).element(1):\n" + element.toString());
+			ourLog.info("ConceptMap.group(0).element(1):\n" + element.toString());
 
-				assertElementHasValues("23456", "Source Code 23456", CS_URL, "Version 1", element);
+			assertElementHasValues("23456", "Source Code 23456", CS_URL, "Version 1", element);
 
-				assertEquals(2, element.getConceptMapGroupElementTargets().size());
+			assertEquals(2, element.getConceptMapGroupElementTargets().size());
 
-				target = element.getConceptMapGroupElementTargets().get(0);
-				ourLog.info("ConceptMap.group(0).element(1).target(0):\n" + target.toString());
-				assertTargetHasValues("45678", "Target Code 45678", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.WIDER, target);
+			target = element.getConceptMapGroupElementTargets().get(0);
+			ourLog.info("ConceptMap.group(0).element(1).target(0):\n" + target.toString());
+			assertTargetHasValues("45678", "Target Code 45678", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.WIDER, target);
 
-				// We had deliberately added a duplicate, and here it is...
-				target = element.getConceptMapGroupElementTargets().get(1);
-				ourLog.info("ConceptMap.group(0).element(1).target(1):\n" + target.toString());
-				assertTargetHasValues("45678", "Target Code 45678", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.WIDER, target);
+			// We had deliberately added a duplicate, and here it is...
+			target = element.getConceptMapGroupElementTargets().get(1);
+			ourLog.info("ConceptMap.group(0).element(1).target(1):\n" + target.toString());
+			assertTargetHasValues("45678", "Target Code 45678", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.WIDER, target);
 
-				group = conceptMap.getConceptMapGroups().get(1);
+			group = conceptMap.getConceptMapGroups().get(1);
 
-				ourLog.info("ConceptMap.group(1):\n" + group.toString());
+			ourLog.info("ConceptMap.group(1):\n" + group.toString());
 
-				assertGroupHasValues(CS_URL, "Version 3", CS_URL_3, "Version 4", group);
-				assertEquals(1, group.getConceptMapGroupElements().size());
+			assertGroupHasValues(CS_URL, "Version 3", CS_URL_3, "Version 4", group);
+			assertEquals(1, group.getConceptMapGroupElements().size());
 
-				element = group.getConceptMapGroupElements().get(0);
+			element = group.getConceptMapGroupElements().get(0);
 
-				ourLog.info("ConceptMap.group(1).element(0):\n" + element.toString());
+			ourLog.info("ConceptMap.group(1).element(0):\n" + element.toString());
 
-				assertElementHasValues("12345", "Source Code 12345", CS_URL, "Version 3", element);
-				assertEquals(2, element.getConceptMapGroupElementTargets().size());
+			assertElementHasValues("12345", "Source Code 12345", CS_URL, "Version 3", element);
+			assertEquals(2, element.getConceptMapGroupElementTargets().size());
 
-				target = element.getConceptMapGroupElementTargets().get(0);
+			target = element.getConceptMapGroupElementTargets().get(0);
 
-				ourLog.info("ConceptMap.group(1).element(0).target(0):\n" + target.toString());
+			ourLog.info("ConceptMap.group(1).element(0).target(0):\n" + target.toString());
 
-				assertTargetHasValues("56789", "Target Code 56789", CS_URL_3, "Version 4", Enumerations.ConceptMapEquivalence.EQUAL, target);
+			assertTargetHasValues("56789", "Target Code 56789", CS_URL_3, "Version 4", Enumerations.ConceptMapEquivalence.EQUAL, target);
 
-				target = element.getConceptMapGroupElementTargets().get(1);
+			target = element.getConceptMapGroupElementTargets().get(1);
 
-				ourLog.info("ConceptMap.group(1).element(0).target(1):\n" + target.toString());
+			ourLog.info("ConceptMap.group(1).element(0).target(1):\n" + target.toString());
 
-				assertTargetHasValues("67890", "Target Code 67890", CS_URL_3, "Version 4", Enumerations.ConceptMapEquivalence.WIDER, target);
+			assertTargetHasValues("67890", "Target Code 67890", CS_URL_3, "Version 4", Enumerations.ConceptMapEquivalence.WIDER, target);
 
-				group = conceptMap.getConceptMapGroups().get(2);
+			group = conceptMap.getConceptMapGroups().get(2);
 
-				ourLog.info("ConceptMap.group(2):\n" + group.toString());
+			ourLog.info("ConceptMap.group(2):\n" + group.toString());
 
-				assertGroupHasValues(CS_URL_4, "Version 5", CS_URL_2, "Version 2", group);
-				assertEquals(1, group.getConceptMapGroupElements().size());
+			assertGroupHasValues(CS_URL_4, "Version 5", CS_URL_2, "Version 2", group);
+			assertEquals(1, group.getConceptMapGroupElements().size());
 
-				element = group.getConceptMapGroupElements().get(0);
+			element = group.getConceptMapGroupElements().get(0);
 
-				ourLog.info("ConceptMap.group(2).element(0):\n" + element.toString());
+			ourLog.info("ConceptMap.group(2).element(0):\n" + element.toString());
 
-				assertElementHasValues("78901", "Source Code 78901", CS_URL_4, "Version 5", element);
-				assertEquals(1, element.getConceptMapGroupElementTargets().size());
+			assertElementHasValues("78901", "Source Code 78901", CS_URL_4, "Version 5", element);
+			assertEquals(1, element.getConceptMapGroupElementTargets().size());
 
-				target = element.getConceptMapGroupElementTargets().get(0);
+			target = element.getConceptMapGroupElementTargets().get(0);
 
-				ourLog.info("ConceptMap.group(2).element(0).target(0):\n" + target.toString());
+			ourLog.info("ConceptMap.group(2).element(0).target(0):\n" + target.toString());
 
-				assertTargetHasValues("34567", "Target Code 34567", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.NARROWER, target);
-			}
+			assertTargetHasValues("34567", "Target Code 34567", CS_URL_2, "Version 2", Enumerations.ConceptMapEquivalence.NARROWER, target);
 		});
 	}
 
@@ -1658,19 +1582,13 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 	private void persistConceptMap(ConceptMap theConceptMap, HttpVerb theVerb) {
 		switch (theVerb) {
 			case POST:
-				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						myConceptMapId = myConceptMapDao.create(theConceptMap, mySrd).getId().toUnqualifiedVersionless();
-					}
+				runInTransaction(() -> {
+					myConceptMapId = myConceptMapDao.create(theConceptMap, mySrd).getId().toUnqualifiedVersionless();
 				});
 				break;
 			case PUT:
-				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						myConceptMapId = myConceptMapDao.update(theConceptMap, mySrd).getId().toUnqualifiedVersionless();
-					}
+				runInTransaction(() -> {
+					myConceptMapId = myConceptMapDao.update(theConceptMap, mySrd).getId().toUnqualifiedVersionless();
 				});
 				break;
 			default:
