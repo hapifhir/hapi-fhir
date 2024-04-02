@@ -40,8 +40,6 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
@@ -61,7 +59,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 @Interceptor
 public class PatientIdPartitionInterceptor {
-	private static final Logger ourLog = LoggerFactory.getLogger(PatientIdPartitionInterceptor.class);
 
 	@Autowired
 	private FhirContext myFhirContext;
@@ -86,25 +83,13 @@ public class PatientIdPartitionInterceptor {
 
 	@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 	public RequestPartitionId identifyForCreate(IBaseResource theResource, RequestDetails theRequestDetails) {
-		// LUKETODO:  could this be it?
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResource);
-
-//				.filter(param -> param.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
-//			.filter(param -> param.getProvidesMembershipInCompartments() != null
-//				&& param.getProvidesMembershipInCompartments().contains("Patient"))
-
-		// LUKETODO:  there is no REFERENCE paramType of Patient here for the Subscription, only for the Patient, which means presumably the Patient gets a Partition ID but the Subscription does not
-		resourceDef.getSearchParams().forEach(param -> ourLog.info("5815: paramType : {}, providesMembershipInCompartments: {}", param.getParamType(), param.getProvidesMembershipInCompartments()));
-
 		List<RuntimeSearchParam> compartmentSps =
 				ResourceCompartmentUtil.getPatientCompartmentSearchParams(resourceDef);
-		// LUKETODO:  try this:  it doesn't work:
-//		if (! resourceDef.getName().equals("Subscription") && compartmentSps.isEmpty()) {
 		if (compartmentSps.isEmpty()) {
 			return provideNonCompartmentMemberTypeResponse(theResource);
 		}
 
-		// LUKETODO:  how are we supposed to know the patient partition if the subscription only contains "Patient?"
 		Optional<String> oCompartmentIdentity;
 		if (resourceDef.getName().equals("Patient")) {
 			oCompartmentIdentity =
@@ -114,7 +99,6 @@ public class PatientIdPartitionInterceptor {
 						Msg.code(1321) + "Patient resource IDs must be client-assigned in patient compartment mode");
 			}
 		} else {
-			// LUKETODO:  this returns nothing before compartmentSps is empty
 			oCompartmentIdentity =
 					ResourceCompartmentUtil.getResourceCompartment(theResource, compartmentSps, mySearchParamExtractor);
 		}

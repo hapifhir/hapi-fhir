@@ -48,6 +48,7 @@ import java.util.TreeSet;
 
 @SuppressWarnings("JavadocLinkAsPlainText")
 public class JpaStorageSettings extends StorageSettings {
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageSettings.class);
 
 	/**
 	 * Default value for {@link #setReuseCachedSearchResultsForMillis(Long)}: 60000ms (one minute)
@@ -101,7 +102,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
 
-	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageSettings.class);
 	private static final int DEFAULT_REINDEX_BATCH_SIZE = 800;
 	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
 	/**
@@ -356,6 +356,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Constructor
 	 */
 	public JpaStorageSettings() {
+		ourLog.info("5815: JpaStorageSettings()");
 		setMarkResourcesForReindexingUponSearchParameterChange(true);
 		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
 		setExpungeThreadCount(Runtime.getRuntime().availableProcessors());
