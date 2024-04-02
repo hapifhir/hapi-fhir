@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +20,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(MockitoExtension.class)
 class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
@@ -28,6 +30,9 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 
 	static final int PARTITION_ID_2 = 2;
 	static final String PARTITION_NAME_2 = "SOME-PARTITION-2";
+
+	static final int UNKNOWN_PARTITION_ID = 1_000_000;
+	static final String UNKNOWN_PARTITION_NAME = "UNKNOWN";
 
 	@Autowired
 	IPartitionDao myPartitionDao;
@@ -86,6 +91,31 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 
 		assertEquals(PARTITION_ID_1, result.getFirstPartitionIdOrNull());
 		assertEquals(PARTITION_NAME_1, result.getFirstPartitionNameOrNull());
+	}
+
+	@Test
+	public void testValidateAndNormalizePartitionIds_withUnknownId_throwsException(){
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(UNKNOWN_PARTITION_ID);
+
+		try{
+			mySvc.validateAndNormalizePartitionIds(partitionId);
+			fail();
+		} catch (ResourceNotFoundException e){
+			assertTrue(e.getMessage().contains("No partition exists with ID 1,000,000"));
+		}
+	}
+
+	@Test
+	public void testValidateAndNormalizePartitionIds_withIdAndInvalidName_throwsException(){
+		createPartition1();
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIdAndName(PARTITION_ID_1, UNKNOWN_PARTITION_NAME);
+
+		try{
+			mySvc.validateAndNormalizePartitionIds(partitionId);
+			fail();
+		} catch (IllegalArgumentException e){
+			assertTrue(e.getMessage().contains("Partition name UNKNOWN does not match ID 1"));
+		}
 	}
 
 	@Test

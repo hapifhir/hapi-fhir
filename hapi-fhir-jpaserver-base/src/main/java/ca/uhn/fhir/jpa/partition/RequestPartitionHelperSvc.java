@@ -59,7 +59,7 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 				}
 			}
 
-			if (theRequestPartitionId.getPartitionNames() != null) {
+			if (theRequestPartitionId.hasPartitionNames()) {
 				if (partition == null) {
 					Validate.isTrue(
 							theRequestPartitionId.getPartitionIds().get(i) == null,
@@ -68,8 +68,8 @@ public class RequestPartitionHelperSvc extends BaseRequestPartitionHelperSvc {
 				} else {
 					Validate.isTrue(
 							Objects.equals(
-									theRequestPartitionId.getPartitionIds().get(i), partition.getId()),
-							"Partition name %s does not match ID %n",
+									theRequestPartitionId.getPartitionNames().get(i), partition.getName()),
+							"Partition name %s does not match ID %s",
 							theRequestPartitionId.getPartitionNames().get(i),
 							theRequestPartitionId.getPartitionIds().get(i));
 				}
