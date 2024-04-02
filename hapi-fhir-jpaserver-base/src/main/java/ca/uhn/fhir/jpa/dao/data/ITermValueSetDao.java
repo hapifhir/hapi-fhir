@@ -55,7 +55,7 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long>, IHa
 	 */
 	@Query(
 			value =
-					"SELECT vs FROM ForcedId f, TermValueSet vs where f.myForcedId = :forcedId and vs.myResource = f.myResource")
+					"SELECT vs FROM TermValueSet vs where vs.myResource.myFhirId = :forcedId ")
 	Optional<TermValueSet> findTermValueSetByForcedId(@Param("forcedId") String theForcedId);
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url AND vs.myVersion IS NULL")

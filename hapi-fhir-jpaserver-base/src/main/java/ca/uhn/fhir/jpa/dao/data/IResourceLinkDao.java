@@ -44,6 +44,6 @@ public interface IResourceLinkDao extends JpaRepository<ResourceLink, Long>, IHa
 	 * the target resources and their forced IDs
 	 */
 	@Query(
-			"SELECT t FROM ResourceLink t LEFT JOIN FETCH t.myTargetResource tr LEFT JOIN FETCH tr.myForcedId WHERE t.myId in :pids")
+			"SELECT t FROM ResourceLink t LEFT JOIN FETCH t.myTargetResource tr WHERE t.myId in :pids")
 	List<ResourceLink> findByPidAndFetchTargetDetails(@Param("pids") List<Long> thePids);
 }

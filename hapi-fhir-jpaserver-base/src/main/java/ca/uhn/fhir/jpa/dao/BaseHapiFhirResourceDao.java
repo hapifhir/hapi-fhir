@@ -51,7 +51,6 @@ import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -649,13 +648,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private void createForcedIdIfNeeded(
 			ResourceTable theEntity, String theResourceId, boolean theCreateForPureNumericIds) {
 		// TODO MB delete this in step 3
-		if (isNotBlank(theResourceId) && theEntity.getForcedId() == null) {
+		if (isNotBlank(theResourceId) ) {
 			if (theCreateForPureNumericIds || !IdHelperService.isValidPid(theResourceId)) {
-				ForcedId forcedId = new ForcedId();
-				forcedId.setResourceType(theEntity.getResourceType());
-				forcedId.setForcedId(theResourceId);
-				forcedId.setResource(theEntity);
-				forcedId.setPartitionId(theEntity.getPartitionId());
 
 				/*
 				 * As of Hibernate 5.6.2, assigning the forced ID to the
@@ -676,7 +670,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				 * nothing has broken as a result.
 				 * JA 20220121
 				 */
-				theEntity.setTransientForcedId(forcedId.getForcedId());
+				theEntity.setTransientForcedId(theResourceId);
 			}
 		}
 	}
@@ -2633,9 +2627,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	private void validateGivenIdIsAppropriateToRetrieveResource(IIdType theId, BaseHasResource entity) {
-		if (entity.getForcedId() != null) {
-			if (getStorageSettings().getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY) {
-				if (theId.isIdPartValidLong()) {
+		if (!entity.getIdDt().getIdPart().equals(theId.getIdPart())) {
 					// This means that the resource with the given numeric ID exists, but it has a "forced ID", meaning
 					// that
 					// as far as the outside world is concerned, the given ID doesn't exist (it's just an internal
@@ -2643,8 +2635,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					// to the
 					// forced ID)
 					throw new ResourceNotFoundException(Msg.code(2000) + theId);
-				}
-			}
 		}
 	}
 

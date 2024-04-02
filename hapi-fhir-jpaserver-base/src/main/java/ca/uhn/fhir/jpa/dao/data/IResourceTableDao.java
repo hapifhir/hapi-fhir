@@ -178,25 +178,25 @@ public interface IResourceTableDao
 	Collection<Object[]> getResourceVersionsForPid(@Param("pid") List<Long> pid);
 
 	@Query(
-			"SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE t.myPartitionId.myPartitionId IS NULL AND t.myId = :pid")
+			"SELECT t FROM ResourceTable t WHERE t.myPartitionId.myPartitionId IS NULL AND t.myId = :pid")
 	Optional<ResourceTable> readByPartitionIdNull(@Param("pid") Long theResourceId);
 
 	@Query(
-			"SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE t.myPartitionId.myPartitionId = :partitionId AND t.myId = :pid")
+			"SELECT t FROM ResourceTable t WHERE t.myPartitionId.myPartitionId = :partitionId AND t.myId = :pid")
 	Optional<ResourceTable> readByPartitionId(
 			@Param("partitionId") int thePartitionId, @Param("pid") Long theResourceId);
 
 	@Query(
-			"SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE (t.myPartitionId.myPartitionId IS NULL OR t.myPartitionId.myPartitionId IN (:partitionIds)) AND t.myId = :pid")
+			"SELECT t FROM ResourceTable t WHERE (t.myPartitionId.myPartitionId IS NULL OR t.myPartitionId.myPartitionId IN (:partitionIds)) AND t.myId = :pid")
 	Optional<ResourceTable> readByPartitionIdsOrNull(
 			@Param("partitionIds") Collection<Integer> thrValues, @Param("pid") Long theResourceId);
 
 	@Query(
-			"SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE t.myPartitionId.myPartitionId IN (:partitionIds) AND t.myId = :pid")
+			"SELECT t FROM ResourceTable t WHERE t.myPartitionId.myPartitionId IN (:partitionIds) AND t.myId = :pid")
 	Optional<ResourceTable> readByPartitionIds(
 			@Param("partitionIds") Collection<Integer> thrValues, @Param("pid") Long theResourceId);
 
-	@Query("SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE t.myId IN :pids")
+	@Query("SELECT t FROM ResourceTable t WHERE t.myId IN :pids")
 	List<ResourceTable> findAllByIdAndLoadForcedIds(@Param("pids") List<Long> thePids);
 
 	@Query("SELECT t FROM ResourceTable t where t.myResourceType = :restype and t.myFhirId = :fhirId")

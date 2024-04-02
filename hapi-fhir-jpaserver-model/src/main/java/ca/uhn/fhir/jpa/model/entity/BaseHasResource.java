@@ -97,10 +97,6 @@ public abstract class BaseHasResource extends BasePartitionable
 		myFhirVersion = theFhirVersion;
 	}
 
-	public abstract ForcedId getForcedId();
-
-	public abstract void setForcedId(ForcedId theForcedId);
-
 	@Override
 	public abstract Long getId();
 

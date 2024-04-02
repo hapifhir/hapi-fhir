@@ -280,16 +280,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		return new IdDt(getResourceType() + '/' + resourceIdPart + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 	}
 
-	@Override
-	public ForcedId getForcedId() {
-		return getResourceTable().getForcedId();
-	}
-
-	@Override
-	public void setForcedId(ForcedId theForcedId) {
-		getResourceTable().setForcedId(theForcedId);
-	}
-
 	/**
 	 * Returns <code>true</code> if there is a populated resource text (i.e.
 	 * either {@link #getResource()} or {@link #getResourceTextVc()} return a non null

@@ -420,15 +420,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@Transient
 	private transient boolean myVersionUpdatedInCurrentTransaction;
 
-	@OneToOne(
-			optional = true,
-			fetch = FetchType.EAGER,
-			cascade = {},
-			orphanRemoval = false,
-			mappedBy = "myResource")
-	@OptimisticLock(excluded = true)
-	private ForcedId myForcedId;
-
 	@Transient
 	private volatile String myCreatedByMatchUrl;
 
@@ -892,7 +883,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		retVal.setTransientForcedId(getTransientForcedId());
 		retVal.setFhirVersion(getFhirVersion());
 		retVal.setResourceTable(this);
-		retVal.setForcedId(getForcedId());
 		retVal.setPartitionId(getPartitionId());
 
 		retVal.setHasTags(isHasTags());
@@ -971,18 +961,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return JpaPid.fromId(getId());
 	}
 
-	// fixme delete!
-	@Deprecated
-	@Override
-	public ForcedId getForcedId() {
-		return myForcedId;
-	}
-
-	@Override
-	public void setForcedId(ForcedId theForcedId) {
-		myForcedId = theForcedId;
-	}
-
 	@Override
 	public IdDt getIdDt() {
 		IdDt retVal = new IdDt();
@@ -1002,8 +980,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 			resourceId = myFhirId;
 		} else if (getTransientForcedId() != null) {
 			resourceId = getTransientForcedId();
-		} else if (myForcedId != null) {
-			resourceId = myForcedId.getForcedId();
 		} else {
 			Long id = this.getResourceId();
 			resourceId = Long.toString(id);
