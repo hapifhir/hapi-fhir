@@ -160,9 +160,9 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				(subscription != null) ? subscription.getCrossPartitionEnabled() : "subscription is null",
 				theMsg.getPartitionId(),
 				(theMsg.getPartitionId() != null) ? theMsg.getPartitionId().hasPartitionIds() : "NULL getPartitionId()",
-				(theMsg.getPartitionId() != null && subscription != null)
+				(theMsg.getPartitionId() != null && ! theMsg.getPartitionId().isAllPartitions() && subscription != null)
 						? theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())
-						: "NULL getPartitionId() or subscription");
+						: "NULL getPartitionId() all partitions or null subscription");
 		if (subscription != null
 				&& theMsg.getPartitionId() != null
 				&& theMsg.getPartitionId().hasPartitionIds()

@@ -301,13 +301,15 @@ public class SubscriptionCanonicalizer {
 		// LUKETODO: temporarily hard-code this: then reverse
 		//		retVal.setCrossPartitionEnabled(true);
 		if (myStorageSettings.isCrossPartitionSubscriptionEnabled()) {
-			ourLog.info("5815: isCrossPartitionSubscriptionEnabled(), SubscriptionUtil.isCrossPartition(theSubscription): {}", SubscriptionUtil.isCrossPartition(theSubscription));
+			ourLog.info(
+					"5815: isCrossPartitionSubscriptionEnabled(), SubscriptionUtil.isCrossPartition(theSubscription): {}",
+					SubscriptionUtil.isCrossPartition(theSubscription));
 			retVal.setCrossPartitionEnabled(true);
 		} else {
 			ourLog.info("5815: NOT isCrossPartitionSubscriptionEnabled()");
 			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
 		}
-//		retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
+//				retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
 
 		List<org.hl7.fhir.r4.model.CanonicalType> profiles =
 				subscription.getMeta().getProfile();
