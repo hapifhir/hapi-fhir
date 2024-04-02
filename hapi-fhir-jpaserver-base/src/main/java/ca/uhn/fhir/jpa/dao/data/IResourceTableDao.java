@@ -198,4 +198,8 @@ public interface IResourceTableDao
 
 	@Query("SELECT t FROM ResourceTable t LEFT JOIN FETCH t.myForcedId WHERE t.myId IN :pids")
 	List<ResourceTable> findAllByIdAndLoadForcedIds(@Param("pids") List<Long> thePids);
+
+	@Query("SELECT t FROM ResourceTable t where t.myResourceType = :restype and t.myFhirId = :fhirId")
+	Optional<ResourceTable> findByTypeAndFhirId(
+			@Param("restype") String theResourceName, @Param("fhirId") String theFhirId);
 }

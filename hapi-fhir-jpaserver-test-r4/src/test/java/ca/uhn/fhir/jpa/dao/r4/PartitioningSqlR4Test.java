@@ -15,7 +15,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
@@ -589,13 +588,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myPatientDao.update(p, mySrd);
 
 		runInTransaction(() -> {
-			// HFJ_FORCED_ID
-			List<ForcedId> forcedIds = myForcedIdDao.findAll();
-			assertEquals(2, forcedIds.size());
-			assertEquals(myPartitionId, forcedIds.get(0).getPartitionId().getPartitionId().intValue());
-			assertLocalDateFromDbMatches(myPartitionDate, forcedIds.get(0).getPartitionId().getPartitionDate());
-			assertEquals(myPartitionId, forcedIds.get(1).getPartitionId().getPartitionId().intValue());
-			assertLocalDateFromDbMatches(myPartitionDate, forcedIds.get(1).getPartitionId().getPartitionDate());
+			ResourceTable orgResourceTable = myResourceTableDao.findByTypeAndFhirId("Organization", "org").orElseThrow(IllegalArgumentException::new);
+			assertEquals(myPartitionId, orgResourceTable.getPartitionId().getPartitionId().intValue());
+			assertLocalDateFromDbMatches(myPartitionDate, orgResourceTable.getPartitionId().getPartitionDate());
+
+			ResourceTable patientResourceTable = myResourceTableDao.findByTypeAndFhirId("Patient", "pat").orElseThrow(IllegalArgumentException::new);
+			assertEquals(myPartitionId, patientResourceTable.getPartitionId().getPartitionId().intValue());
+			assertLocalDateFromDbMatches(myPartitionDate, patientResourceTable.getPartitionId().getPartitionDate());
 		});
 
 	}
@@ -615,11 +614,11 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myPatientDao.update(p, mySrd);
 
 		runInTransaction(() -> {
-			// HFJ_FORCED_ID
-			List<ForcedId> forcedIds = myForcedIdDao.findAll();
-			assertEquals(2, forcedIds.size());
-			assertEquals(null, forcedIds.get(0).getPartitionId());
-			assertEquals(null, forcedIds.get(1).getPartitionId());
+			ResourceTable orgResourceTable = myResourceTableDao.findByTypeAndFhirId("Organization", "org").orElseThrow(IllegalArgumentException::new);
+			assertNull(orgResourceTable.getPartitionId());
+
+			ResourceTable patientResourceTable = myResourceTableDao.findByTypeAndFhirId("Patient", "pat").orElseThrow(IllegalArgumentException::new);
+			assertNull(patientResourceTable.getPartitionId());
 		});
 
 	}
@@ -639,13 +638,13 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myPatientDao.update(p, mySrd);
 
 		runInTransaction(() -> {
-			// HFJ_FORCED_ID
-			List<ForcedId> forcedIds = myForcedIdDao.findAll();
-			assertEquals(2, forcedIds.size());
-			assertEquals(null, forcedIds.get(0).getPartitionId().getPartitionId());
-			assertLocalDateFromDbMatches(myPartitionDate, forcedIds.get(0).getPartitionId().getPartitionDate());
-			assertEquals(null, forcedIds.get(1).getPartitionId().getPartitionId());
-			assertLocalDateFromDbMatches(myPartitionDate, forcedIds.get(1).getPartitionId().getPartitionDate());
+			ResourceTable orgResourceTable = myResourceTableDao.findByTypeAndFhirId("Organization", "org").orElseThrow(IllegalArgumentException::new);
+			assertNull(orgResourceTable.getPartitionId().getPartitionId());
+			assertLocalDateFromDbMatches(myPartitionDate, orgResourceTable.getPartitionId().getPartitionDate());
+
+			ResourceTable patientResourceTable = myResourceTableDao.findByTypeAndFhirId("Patient", "pat").orElseThrow(IllegalArgumentException::new);
+			assertNull(patientResourceTable.getPartitionId().getPartitionId());
+			assertLocalDateFromDbMatches(myPartitionDate, patientResourceTable.getPartitionId().getPartitionDate());
 		});
 
 	}
@@ -2899,7 +2898,7 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		assertEquals(18, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(6607, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(6189, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(418, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		assertEquals(2, myCaptureQueriesListener.countCommits());

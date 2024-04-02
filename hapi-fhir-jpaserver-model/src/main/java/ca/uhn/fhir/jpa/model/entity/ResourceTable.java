@@ -923,6 +923,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("pid", myId);
+		b.append("fhirId", myFhirId);
 		b.append("resourceType", myResourceType);
 		b.append("version", myVersion);
 		if (getPartitionId() != null) {
@@ -970,6 +971,8 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		return JpaPid.fromId(getId());
 	}
 
+	// fixme delete!
+	@Deprecated
 	@Override
 	public ForcedId getForcedId() {
 		return myForcedId;
