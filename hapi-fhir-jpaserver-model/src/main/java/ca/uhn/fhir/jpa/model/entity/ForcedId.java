@@ -32,6 +32,9 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.annotations.ColumnDefault;
 
+/**
+ * @deprecated This is unused, and only kept for history.
+ */
 @Entity()
 @Table(
 		name = ForcedId.HFJ_FORCED_ID,
@@ -61,7 +64,8 @@ import org.hibernate.annotations.ColumnDefault;
 			@Index(name = "IDX_FORCEID_FID", columnList = "FORCED_ID"),
 			// @Index(name = "IDX_FORCEID_RESID", columnList = "RESOURCE_PID"),
 		})
-public class ForcedId extends BasePartitionable {
+@Deprecated(since="7.1", forRemoval = true)
+class ForcedId extends BasePartitionable {
 
 	public static final int MAX_FORCED_ID_LENGTH = 100;
 	public static final String IDX_FORCEDID_TYPE_FID = "IDX_FORCEDID_TYPE_FID";
