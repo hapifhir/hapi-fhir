@@ -53,9 +53,7 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, Long>, IHa
 	 * The current TermValueSet is not necessarily the last uploaded anymore, but the current VS resource
 	 * is pointed by a specific ForcedId, so we locate current ValueSet as the one pointing to current VS resource
 	 */
-	@Query(
-			value =
-					"SELECT vs FROM TermValueSet vs where vs.myResource.myFhirId = :forcedId ")
+	@Query(value = "SELECT vs FROM TermValueSet vs where vs.myResource.myFhirId = :forcedId ")
 	Optional<TermValueSet> findTermValueSetByForcedId(@Param("forcedId") String theForcedId);
 
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url AND vs.myVersion IS NULL")

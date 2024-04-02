@@ -648,7 +648,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	private void createForcedIdIfNeeded(
 			ResourceTable theEntity, String theResourceId, boolean theCreateForPureNumericIds) {
 		// TODO MB delete this in step 3
-		if (isNotBlank(theResourceId) ) {
+		if (isNotBlank(theResourceId)) {
 			if (theCreateForPureNumericIds || !IdHelperService.isValidPid(theResourceId)) {
 
 				/*
@@ -2628,13 +2628,13 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 	private void validateGivenIdIsAppropriateToRetrieveResource(IIdType theId, BaseHasResource entity) {
 		if (!entity.getIdDt().getIdPart().equals(theId.getIdPart())) {
-					// This means that the resource with the given numeric ID exists, but it has a "forced ID", meaning
-					// that
-					// as far as the outside world is concerned, the given ID doesn't exist (it's just an internal
-					// pointer
-					// to the
-					// forced ID)
-					throw new ResourceNotFoundException(Msg.code(2000) + theId);
+			// This means that the resource with the given numeric ID exists, but it has a "forced ID", meaning
+			// that
+			// as far as the outside world is concerned, the given ID doesn't exist (it's just an internal
+			// pointer
+			// to the
+			// forced ID)
+			throw new ResourceNotFoundException(Msg.code(2000) + theId);
 		}
 	}
 

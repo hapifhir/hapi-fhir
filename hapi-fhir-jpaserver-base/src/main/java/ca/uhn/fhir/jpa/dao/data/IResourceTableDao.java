@@ -177,12 +177,10 @@ public interface IResourceTableDao
 	@Query("SELECT t.myId, t.myResourceType, t.myVersion FROM ResourceTable t WHERE t.myId IN ( :pid )")
 	Collection<Object[]> getResourceVersionsForPid(@Param("pid") List<Long> pid);
 
-	@Query(
-			"SELECT t FROM ResourceTable t WHERE t.myPartitionId.myPartitionId IS NULL AND t.myId = :pid")
+	@Query("SELECT t FROM ResourceTable t WHERE t.myPartitionId.myPartitionId IS NULL AND t.myId = :pid")
 	Optional<ResourceTable> readByPartitionIdNull(@Param("pid") Long theResourceId);
 
-	@Query(
-			"SELECT t FROM ResourceTable t WHERE t.myPartitionId.myPartitionId = :partitionId AND t.myId = :pid")
+	@Query("SELECT t FROM ResourceTable t WHERE t.myPartitionId.myPartitionId = :partitionId AND t.myId = :pid")
 	Optional<ResourceTable> readByPartitionId(
 			@Param("partitionId") int thePartitionId, @Param("pid") Long theResourceId);
 
@@ -191,8 +189,7 @@ public interface IResourceTableDao
 	Optional<ResourceTable> readByPartitionIdsOrNull(
 			@Param("partitionIds") Collection<Integer> thrValues, @Param("pid") Long theResourceId);
 
-	@Query(
-			"SELECT t FROM ResourceTable t WHERE t.myPartitionId.myPartitionId IN (:partitionIds) AND t.myId = :pid")
+	@Query("SELECT t FROM ResourceTable t WHERE t.myPartitionId.myPartitionId IN (:partitionIds) AND t.myId = :pid")
 	Optional<ResourceTable> readByPartitionIds(
 			@Param("partitionIds") Collection<Integer> thrValues, @Param("pid") Long theResourceId);
 
