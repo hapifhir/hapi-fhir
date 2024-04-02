@@ -429,13 +429,13 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 	}
 
 	/**
-     * Evaluates whether a translation result contains any positive matches or only negative ones. This is required
-     * because the <a href="https://hl7.org/fhir/R4/conceptmap-operation-translate.html">FHIR specification</a> states
+	 * Evaluates whether a translation result contains any positive matches or only negative ones. This is required
+	 * because the <a href="https://hl7.org/fhir/R4/conceptmap-operation-translate.html">FHIR specification</a> states
 	 * that the result field "can only be true if at least one returned match has an equivalence which is not unmatched
 	 * or disjoint".
-     * @param theTranslationResult the translation result to be evaluated
-     * @return true if all the potential matches in the result have a negative valence (i.e., "unmatched" and "disjoint")
-     */
+	 * @param theTranslationResult the translation result to be evaluated
+	 * @return true if all the potential matches in the result have a negative valence (i.e., "unmatched" and "disjoint")
+	 */
 	private boolean isOnlyNegativeMatches(TranslateConceptResults theTranslationResult) {
 		return theTranslationResult.getResults().stream()
 				.map(TranslateConceptResult::getEquivalence)
