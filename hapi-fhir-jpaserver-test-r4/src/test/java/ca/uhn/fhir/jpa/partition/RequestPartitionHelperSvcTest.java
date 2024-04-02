@@ -154,6 +154,31 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 		assertTrue(result.getPartitionNames().containsAll(Set.of(PARTITION_NAME_1, PARTITION_NAME_2)));
 	}
 
+	@Test
+	public void testValidateAndNormalizePartitionNames_withUnknownName_throwsException(){
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionName(UNKNOWN_PARTITION_NAME);
+
+		try{
+			mySvc.validateAndNormalizePartitionNames(partitionId);
+			fail();
+		} catch (ResourceNotFoundException e){
+			assertTrue(e.getMessage().contains("Partition name \"UNKNOWN\" is not valid"));
+		}
+	}
+
+	@Test
+	public void testValidateAndNormalizePartitionNames_withNameAndInvalidId_throwsException(){
+		createPartition1();
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIdAndName(UNKNOWN_PARTITION_ID, PARTITION_NAME_1);
+
+		try{
+			mySvc.validateAndNormalizePartitionNames(partitionId);
+			fail();
+		} catch (IllegalArgumentException e){
+			assertTrue(e.getMessage().contains("Partition ID 1000000 does not match name SOME-PARTITION-1"));
+		}
+	}
+
 	private PartitionEntity createPartition1() {
 		return myPartitionDao.save(new PartitionEntity().setId(PARTITION_ID_1).setName(PARTITION_NAME_1));
 	}
