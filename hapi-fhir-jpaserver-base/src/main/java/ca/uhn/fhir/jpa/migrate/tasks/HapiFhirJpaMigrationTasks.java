@@ -119,6 +119,19 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init680();
 		init680_Part2();
 		init700();
+		init720();
+	}
+
+	protected void init720() {
+		// Start of migrations from 7.0 to 7.2
+
+		Builder version = forVersion(VersionEnum.V7_2_0);
+
+		// allow null codes in concept map targets
+		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
+				.modifyColumn("20240327.1", "TARGET_CODE")
+				.nullable()
+				.withType(ColumnTypeEnum.STRING, 500);
 	}
 
 	protected void init700() {
