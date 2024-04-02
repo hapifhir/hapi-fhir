@@ -167,6 +167,14 @@ public class HistoryBuilder {
 				Optional<String> forcedId = pidToForcedId.get(JpaPid.fromId(nextResourceId));
 				if (forcedId.isPresent()) {
 					resourceId = forcedId.get();
+					// IdHelperService returns a forcedId with the '<resourceType>/' prefix
+					// but the transientForcedId is expected to be just the idPart (without the <resourceType>/ prefix).
+					// For that reason, strip the prefix before setting the transientForcedId below.
+					// If not stripped this messes up the id of the resource as the resourceType would be repeated
+					// twice like Patient/Patient/1234 in the resource constructed
+					if (resourceId.startsWith(myResourceType + "/")) {
+						resourceId = resourceId.substring(myResourceType.length() + 1);
+					}
 				} else {
 					resourceId = nextResourceId.toString();
 				}
