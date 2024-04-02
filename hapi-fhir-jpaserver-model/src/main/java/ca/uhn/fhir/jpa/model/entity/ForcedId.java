@@ -64,7 +64,7 @@ import org.hibernate.annotations.ColumnDefault;
 			@Index(name = "IDX_FORCEID_FID", columnList = "FORCED_ID"),
 			// @Index(name = "IDX_FORCEID_RESID", columnList = "RESOURCE_PID"),
 		})
-@Deprecated(since="7.1", forRemoval = true)
+@Deprecated(since = "7.1", forRemoval = true)
 class ForcedId extends BasePartitionable {
 
 	public static final int MAX_FORCED_ID_LENGTH = 100;
