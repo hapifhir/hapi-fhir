@@ -61,6 +61,7 @@ stateDiagram-v2
    [*]         --> GATED         : on create - gated
    GATED       --> READY         : on create - gated
    READY       --> QUEUED        : placed on kafka (maint.)
+   POLL_WAITING --> READY        : after a poll delay on a POLL_WAITING work chunk has elapsed
   
   %% worker processing states
   QUEUED     --> on_receive : on deque by worker
@@ -70,6 +71,7 @@ stateDiagram-v2
   execute --> ERROR       : on re-triable error
   execute --> COMPLETED   : success\n maybe trigger instance first_step_finished
   execute --> FAILED      : on unrecoverable \n or too many errors
+  execute --> POLL_WAITING : job step has throw a RetryChunkLaterException and must be tried again after the provided poll delay
   
   %% temporary error state until retry
   ERROR       --> on_receive : exception rollback\n triggers redelivery

@@ -78,19 +78,20 @@ public interface IBatch2WorkChunkRepository
 
 	@Modifying
 	@Query(
-			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myNextPollTime = :nextPollTime, e.myPollAttempts = e.myPollAttempts + 1 WHERE e.myId = :id")
+			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myNextPollTime = :nextPollTime, e.myPollAttempts = e.myPollAttempts + 1 WHERE e.myId = :id AND e.myStatus IN(:states)")
 	int updateWorkChunkNextPollTime(
 			@Param("id") String theChunkId,
 			@Param("status") WorkChunkStatusEnum theStatus,
+			@Param("states") Set<WorkChunkStatusEnum> theInitialStates,
 			@Param("nextPollTime") Date theNextPollTime);
 
 	@Modifying
 	@Query(
-			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myNextPollTime = null WHERE e.myInstanceId = :instanceId AND e.myStatus IN(:states) AND e.myNextPollTime IS NOT NULL AND e.myNextPollTime <= :pollTime")
+			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myNextPollTime = null WHERE e.myInstanceId = :instanceId AND e.myStatus IN(:states) AND e.myNextPollTime <= :pollTime")
 	int updateWorkChunksForPollWaiting(
 			@Param("instanceId") String theInstanceId,
 			@Param("status") WorkChunkStatusEnum theNewStatus,
-			@Param("states") Set<WorkChunkStatusEnum> theStates,
+			@Param("states") Set<WorkChunkStatusEnum> theInitialStates,
 			@Param("pollTime") Date theTime);
 
 	@Modifying

@@ -68,7 +68,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -364,8 +363,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	public void onWorkChunkPollDelay(String theChunkId, Date theDeadline) {
 		int updated = myWorkChunkRepository.updateWorkChunkNextPollTime(
-				theChunkId,
-				WorkChunkStatusEnum.POLL_WAITING, theDeadline);
+			theChunkId,
+			WorkChunkStatusEnum.POLL_WAITING,
+			Set.of(WorkChunkStatusEnum.IN_PROGRESS),
+			theDeadline);
 
 		if (updated != 1) {
 			ourLog.warn("Expected to update 1 work chunk's poll delay; but found {}", updated);
@@ -486,16 +487,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			theWorkChunk.setId(UUID.randomUUID().toString());
 		}
 		return toChunk(myWorkChunkRepository.save(Batch2WorkChunkEntity.fromWorkChunk(theWorkChunk)));
-	}
-
-	@Override
-	public void updateWorkChunkToStatus(
-			String theChunkId, WorkChunkStatusEnum theOldStatus, WorkChunkStatusEnum theNewStatus) {
-		int updated = myWorkChunkRepository.updateChunkStatus(theChunkId, theNewStatus, theOldStatus);
-
-		if (updated != 1) {
-			ourLog.warn("Expected to update 1 work chunk's status; instead updated {}", updated);
-		}
 	}
 
 	/**

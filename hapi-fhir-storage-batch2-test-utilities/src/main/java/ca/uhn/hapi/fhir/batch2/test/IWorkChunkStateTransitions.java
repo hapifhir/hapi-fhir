@@ -16,6 +16,7 @@ import java.time.Instant;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkTestConstants {
 
@@ -94,29 +95,62 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 
 	@ParameterizedTest
 	@ValueSource(strings = {
- 		"2|IN_PROGRESS,2|POLL_WAITING",
- 		"2|IN_PROGRESS"
+		"2|READY",
+		"2|QUEUED",
+		//"2|GATED,", // TODO - update/enable when gated status is available
+		"2|POLL_WAITING",
+		"2|ERRORED",
+		"2|FAILED",
+		"2|COMPLETED"
 	})
-	default void onWorkChunkPollDelay_workChunkIN_PROGRESSdeadlineExpired_transitionsToPOLL_WAITINGandUpdatesTime() {
+	default void onWorkChunkPollDelay_withNoInProgressChunks_doNotTransitionNorSetTime(String theState) {
 		// setup
 		disableWorkChunkMessageHandler();
 		enableMaintenanceRunner(false);
 		JobDefinition<?> jobDef = withJobDefinition(false);
 		String jobInstanceId = createAndStoreJobInstance(jobDef);
 
+		// the time we set it to
 		Date newTime = Date.from(
 			Instant.now().plus(Duration.ofSeconds(100))
 		);
+		JobMaintenanceStateInformation stateInformation = new JobMaintenanceStateInformation(
+			jobInstanceId,
+			jobDef,
+			theState
+		);
+		stateInformation.initialize(getSvc());
+
+		String chunkId = stateInformation.getInitialWorkChunks()
+			.stream().findFirst().orElseThrow().getId();
+
+		// test
+		getSvc().onWorkChunkPollDelay(chunkId, newTime);
+
+		// verify
+		stateInformation.verifyFinalStates(getSvc(), chunk -> {
+			assertNull(chunk.getNextPollTime());
+		});
+	}
+
+	@Test
+	default void onWorkChunkPollDelay_withInProgressChunks_transitionsAndSetsNewTime() {
+		// setup
+		disableWorkChunkMessageHandler();
+		enableMaintenanceRunner(false);
+		JobDefinition<?> jobDef = withJobDefinition(false);
+		String jobInstanceId = createAndStoreJobInstance(jobDef);
+
+		// the time we set it to
+		Date newTime = Date.from(
+			Instant.now().plus(Duration.ofSeconds(100))
+		);
+
 		String state = "2|IN_PROGRESS,2|POLL_WAITING";
 		JobMaintenanceStateInformation stateInformation = new JobMaintenanceStateInformation(
 			jobInstanceId, jobDef,
 			state
 		);
-		stateInformation.addWorkChunkModifier(chunk -> {
-			chunk.setNextPollTime(Date.from(
-				Instant.now().minus(Duration.ofSeconds(100))
-			));
-		});
 		stateInformation.initialize(getSvc());
 
 		String chunkId = stateInformation.getInitialWorkChunks()
@@ -127,18 +161,72 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 
 		// verify
 		stateInformation.verifyFinalStates(getSvc(), (chunk) -> {
+			// verify the time has been set
 			assertEquals(newTime, chunk.getNextPollTime());
+			assertEquals(1, chunk.getPollAttempts());
 		});
 	}
 
+	@Test
+	default void updatePollWaitingChunksForJobIfReady_pollWaitingChunkWithExpiredTime_transition() {
+		updatePollWaitingChunksForJobIfReady_POLL_WAITING_chunksTest(true);
+	}
+
+	@Test
+	default void updatePollWaitingChunksForJobIfReady_pollWaitingChunkWithNonExpiredTime_doesNotTransition() {
+		updatePollWaitingChunksForJobIfReady_POLL_WAITING_chunksTest(false);
+	}
+
+	private void updatePollWaitingChunksForJobIfReady_POLL_WAITING_chunksTest(boolean theDeadlineIsExpired) {
+		// setup
+		disableWorkChunkMessageHandler();
+		enableMaintenanceRunner(false);
+		String state = "1|POLL_WAITING";
+		if (theDeadlineIsExpired) {
+			state += ",1|READY";
+		}
+
+		JobDefinition<?> jobDef = withJobDefinition(false);
+		String jobInstanceId = createAndStoreJobInstance(jobDef);
+		JobMaintenanceStateInformation stateInformation = new JobMaintenanceStateInformation(
+			jobInstanceId,
+			jobDef,
+			state
+		);
+		Date nextPollTime = theDeadlineIsExpired ?
+			Date.from(Instant.now().minus(Duration.ofSeconds(10))) : Date.from(Instant.now().plus(Duration.ofSeconds(10)));
+		stateInformation.addWorkChunkModifier(chunk -> {
+			chunk.setNextPollTime(nextPollTime);
+		});
+		stateInformation.initialize(getSvc());
+
+		// test
+		int updateCount = getSvc().updatePollWaitingChunksForJobIfReady(jobInstanceId);
+
+		// verify
+		if (theDeadlineIsExpired) {
+			assertEquals(1, updateCount);
+		} else {
+			assertEquals(0, updateCount);
+		}
+		stateInformation.verifyFinalStates(getSvc());
+	}
+
+	/**
+	 * Only POLL_WAITING chunks should be able to transition to READY via
+	 * updatePollWaitingChunksForJobIfReady
+	 */
 	@ParameterizedTest
 	@ValueSource(strings = {
 		"2|READY",
+		// "2|GATED", // TODO - update/enable whenever gated status is ready
 		"2|QUEUED",
+		"2|IN_PROGRESS",
+		"2|ERRORED",
 		"2|FAILED",
-		"2|COMPLETE"
+		"2|COMPLETED"
 	})
-	default void updatePollWaitingChunksForJobIfReady_nonApplicableStates_doNotTransitionToPollWaiting() {
+	default void updatePollWaitingChunksForJobIfReady_withNoPollWaitingChunks_doNotTransitionNorUpdateTime(String theState) {
 		// setup
 		disableWorkChunkMessageHandler();
 		enableMaintenanceRunner(false);
@@ -146,21 +234,12 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 		JobDefinition<?> jobDef = withJobDefinition(false);
 		String jobInstanceId = createAndStoreJobInstance(jobDef);
 
-		StringBuilder sb = new StringBuilder();
-		for (WorkChunkStatusEnum status : WorkChunkStatusEnum.values()) {
-			if (status != WorkChunkStatusEnum.POLL_WAITING && status != WorkChunkStatusEnum.IN_PROGRESS
-					&& status != WorkChunkStatusEnum.ERRORED) {
-				sb.append("2|")
-					.append(status.name())
-					.append("\n");
-			}
-		}
-		String state = sb.toString();
-
 		JobMaintenanceStateInformation stateInformation = new JobMaintenanceStateInformation(jobInstanceId,
 			jobDef,
-			state);
+			theState);
 		stateInformation.addWorkChunkModifier((chunk) -> {
+			// make sure time is in the past, so we aren't testing the
+			// time <= now aspect
 			chunk.setNextPollTime(
 				Date.from(Instant.now().minus(Duration.ofSeconds(10)))
 			);

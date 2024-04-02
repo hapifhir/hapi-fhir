@@ -66,7 +66,7 @@ public class StepExecutor {
 			Date nextPollTime = Date.from(
 				Instant.now().plus(ex.getNextPollDuration())
 			);
-			ourLog.debug("Polling job encountered; will retry after {}ms", ex.getNextPollDuration().get(ChronoUnit.MILLIS));
+			ourLog.debug("Polling job encountered; will retry after {}s", ex.getNextPollDuration().get(ChronoUnit.SECONDS));
 			myJobPersistence.onWorkChunkPollDelay(theStepExecutionDetails.getChunkId(), nextPollTime);
 			return false;
 		} catch (JobExecutionFailedException e) {

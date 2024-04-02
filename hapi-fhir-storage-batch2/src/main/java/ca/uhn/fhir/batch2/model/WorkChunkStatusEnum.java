@@ -52,9 +52,12 @@ public enum WorkChunkStatusEnum {
 	 */
 	POLL_WAITING,
 	/**
-	 * ERRORED is a transient state on retry when a chunk throws an error, but hasn't FAILED yet. Will move back to IN_PROGRESS on retry.
+	 * A transient state on retry when a chunk throws an error, but hasn't FAILED yet. Will move back to IN_PROGRESS on retry.
 	 */
 	ERRORED,
+	/**
+	 * Chunk has failed with a non-retriable error, or has run out of retry attempts.
+	 */
 	FAILED,
 	/**
 	 * The state of workchunks that have finished their job's step.
