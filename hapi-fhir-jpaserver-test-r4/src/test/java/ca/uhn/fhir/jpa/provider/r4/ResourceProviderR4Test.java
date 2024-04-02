@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
+import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -2402,6 +2403,100 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		idValues = searchAndReturnUnqualifiedIdValues(myServerBase + "/_history?_at=gt" + InstantDt.withCurrentTime().getYear());
 		assertThat(idValues, hasSize(0));
+	}
+
+
+	@ParameterizedTest
+	@CsvSource({
+		"false,PatientWithServerGeneratedId1",
+		"true,PatientWithServerGeneratedId2"
+	})
+	public void testHistoryOnInstanceWithServerGeneratedId(boolean theInvalidateCacheBeforeHistory,
+														   String thePatientFamilyName) {
+
+		Patient patient = new Patient();
+		patient.addName().setFamily(thePatientFamilyName);
+		IIdType id = myClient.create().resource(patient).execute().getId().toVersionless();
+		ourLog.info("Res ID: {}", id);
+
+		final String expectedFullUrl = myServerBase +  "/Patient/" + id.getIdPart();
+
+		if (theInvalidateCacheBeforeHistory) {
+			// the reason for this test parameterization to invalidate the cache is that
+			// when a resource is created/updated, its id mapping is cached for 1 minute so
+			// retrieving the history right after creating the resource will use the cached value.
+			// By invalidating the cache here and getting the history bundle again,
+			// we test the scenario where the id mapping needs to be read from the db, 
+			// hence testing a different code path.
+			myMemoryCacheService.invalidateCaches(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID);
+		}
+
+		Bundle history = myClient.history().onInstance(id.getValue()).andReturnBundle(Bundle.class).execute();
+		assertEquals(1, history.getEntry().size());
+		BundleEntryComponent historyEntry0 = history.getEntry().get(0);
+		// validate entry.fullUrl
+		assertEquals(expectedFullUrl, historyEntry0.getFullUrl());
+		//validate entry.request
+		assertEquals(HTTPVerb.POST, historyEntry0.getRequest().getMethod());
+		assertEquals("Patient/" + id.getIdPart() + "/_history/1", historyEntry0.getRequest().getUrl());
+		//validate entry.response
+		assertEquals("201 Created", historyEntry0.getResponse().getStatus());
+		assertNotNull(historyEntry0.getResponse().getEtag());
+
+		//validate patient resource details in the entry
+		Patient historyEntry0Patient = (Patient) historyEntry0.getResource();
+		assertEquals(id.withVersion("1").getValue(), historyEntry0Patient.getId());
+		assertEquals(1, historyEntry0Patient.getName().size());
+		assertEquals(thePatientFamilyName, historyEntry0Patient.getName().get(0).getFamily());
+
+
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"false,PatientWithForcedId1",
+		"true,PatientWithForcedId2"
+	})
+	public void testHistoryOnInstanceWithForcedId(boolean theInvalidateCacheBeforeHistory,
+												  String thePatientFamilyName) {
+
+		final String patientForcedId = thePatientFamilyName + "-ForcedId";
+		Patient patient = new Patient();
+		patient.addName().setFamily(thePatientFamilyName);
+		patient.setId(patientForcedId);
+		IIdType id = myClient.update().resource(patient).execute().getId().toVersionless();
+		ourLog.info("Res ID: {}", id);
+		assertEquals(patientForcedId, id.getIdPart());
+
+		final String expectedFullUrl = myServerBase +  "/Patient/" + id.getIdPart();
+
+		if (theInvalidateCacheBeforeHistory) {
+			// the reason for this test parameterization to invalidate the cache is that
+			// when a resource is created/updated, its id mapping is cached for 1 minute so
+			// retrieving the history right after creating the resource will use the cached value.
+			// By invalidating the cache here and getting the history bundle again,
+			// we test the scenario where the id mapping needs to be read from the db,
+			// hence testing a different code path.
+			myMemoryCacheService.invalidateCaches(MemoryCacheService.CacheEnum.PID_TO_FORCED_ID);
+		}
+
+		Bundle history = myClient.history().onInstance(id.getValue()).andReturnBundle(Bundle.class).execute();
+		assertEquals(1, history.getEntry().size());
+		BundleEntryComponent historyEntry0 = history.getEntry().get(0);
+		// validate entry.fullUrl
+		assertEquals(expectedFullUrl, historyEntry0.getFullUrl());
+		//validate entry.request
+		assertEquals(HTTPVerb.POST, historyEntry0.getRequest().getMethod());
+		assertEquals("Patient/" + id.getIdPart() + "/_history/1", historyEntry0.getRequest().getUrl());
+		//validate entry.response
+		assertEquals("201 Created", historyEntry0.getResponse().getStatus());
+		assertNotNull(historyEntry0.getResponse().getEtag());
+
+		//validate patient resource details in the entry
+		Patient historyEntry0Patient = (Patient) historyEntry0.getResource();
+		assertEquals(id.withVersion("1").getValue(), historyEntry0Patient.getId());
+		assertEquals(1, historyEntry0Patient.getName().size());
+		assertEquals(thePatientFamilyName, historyEntry0Patient.getName().get(0).getFamily());
 	}
 
 	@Test
