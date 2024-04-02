@@ -63,10 +63,10 @@ public class StepExecutor {
 			outcome = theStepWorker.run(theStepExecutionDetails, theDataSink);
 			Validate.notNull(outcome, "Step theWorker returned null: %s", theStepWorker.getClass());
 		} catch (RetryChunkLaterException ex) {
-			Date nextPollTime = Date.from(
-				Instant.now().plus(ex.getNextPollDuration())
-			);
-			ourLog.debug("Polling job encountered; will retry after {}s", ex.getNextPollDuration().get(ChronoUnit.SECONDS));
+			Date nextPollTime = Date.from(Instant.now().plus(ex.getNextPollDuration()));
+			ourLog.debug(
+					"Polling job encountered; will retry after {}s",
+					ex.getNextPollDuration().get(ChronoUnit.SECONDS));
 			myJobPersistence.onWorkChunkPollDelay(theStepExecutionDetails.getChunkId(), nextPollTime);
 			return false;
 		} catch (JobExecutionFailedException e) {

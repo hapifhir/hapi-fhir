@@ -363,10 +363,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	public void onWorkChunkPollDelay(String theChunkId, Date theDeadline) {
 		int updated = myWorkChunkRepository.updateWorkChunkNextPollTime(
-			theChunkId,
-			WorkChunkStatusEnum.POLL_WAITING,
-			Set.of(WorkChunkStatusEnum.IN_PROGRESS),
-			theDeadline);
+				theChunkId, WorkChunkStatusEnum.POLL_WAITING, Set.of(WorkChunkStatusEnum.IN_PROGRESS), theDeadline);
 
 		if (updated != 1) {
 			ourLog.warn("Expected to update 1 work chunk's poll delay; but found {}", updated);
