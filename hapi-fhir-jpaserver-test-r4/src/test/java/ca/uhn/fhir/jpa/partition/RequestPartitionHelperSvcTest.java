@@ -14,13 +14,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 
-	static final String PARTITION_NAME = "SOME-PARTITION";
-	static final int PARTITION_ID = 1;
+	static final int PARTITION_ID_1 = 1;
+	static final String PARTITION_NAME_1 = "SOME-PARTITION-1";
+
+	static final int PARTITION_ID_2 = 2;
+	static final String PARTITION_NAME_2 = "SOME-PARTITION-2";
 
 	@Autowired
 	IPartitionDao myPartitionDao;
@@ -43,7 +50,7 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 	@Test
 	public void testDetermineReadPartitionForSystemRequest_withPartitionIdOnly_returnsCorrectPartition() {
 		// setup
-		PartitionEntity partitionEntity = createPartition();
+		PartitionEntity partitionEntity = createPartition1();
 		SystemRequestDetails srd = new SystemRequestDetails();
 		srd.setRequestPartitionId(RequestPartitionId.fromPartitionId(partitionEntity.getId()));
 
@@ -51,14 +58,14 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 		RequestPartitionId result = mySvc.determineReadPartitionForRequestForRead(srd, myPatient.fhirType(), myPatient.getIdElement());
 
 		// verify
-		assertEquals(PARTITION_ID, result.getFirstPartitionIdOrNull());
-		assertEquals(PARTITION_NAME, result.getFirstPartitionNameOrNull());
+		assertEquals(PARTITION_ID_1, result.getFirstPartitionIdOrNull());
+		assertEquals(PARTITION_NAME_1, result.getFirstPartitionNameOrNull());
 	}
 
 	@Test
 	public void testDetermineCreatePartitionForRequest_withPartitionIdOnly_returnsCorrectPartition() {
 		// setup
-		PartitionEntity partitionEntity = createPartition();
+		PartitionEntity partitionEntity = createPartition1();
 		SystemRequestDetails srd = new SystemRequestDetails();
 		srd.setRequestPartitionId(RequestPartitionId.fromPartitionId(partitionEntity.getId()));
 
@@ -67,13 +74,38 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 		RequestPartitionId result = mySvc.determineCreatePartitionForRequest(srd, patient, patient.fhirType());
 
 		// verify
-		assertEquals(PARTITION_ID, result.getFirstPartitionIdOrNull());
-		assertEquals(PARTITION_NAME, result.getFirstPartitionNameOrNull());
+		assertEquals(PARTITION_ID_1, result.getFirstPartitionIdOrNull());
+		assertEquals(PARTITION_NAME_1, result.getFirstPartitionNameOrNull());
 	}
 
-	private PartitionEntity createPartition() {
-		PartitionEntity partitionEntity = new PartitionEntity().setId(PARTITION_ID).setName(PARTITION_NAME);
-		partitionEntity = myPartitionDao.save(partitionEntity);
-		return partitionEntity;
+	@Test
+	public void testValidateAndNormalizePartitionIds_withPartitionIdOnly_populatesPartitionName(){
+		PartitionEntity partitionEntity = createPartition1();
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionId(partitionEntity.getId());
+		RequestPartitionId result = mySvc.validateAndNormalizePartitionIds(partitionId);
+
+		assertEquals(PARTITION_ID_1, result.getFirstPartitionIdOrNull());
+		assertEquals(PARTITION_NAME_1, result.getFirstPartitionNameOrNull());
+	}
+
+	@Test
+	public void testValidateAndNormalizePartitionIds_withMultiplePartitionIdOnly_populatesPartitionName(){
+		PartitionEntity partitionEntity1 = createPartition1();
+		PartitionEntity partitionEntity2 = createPartition2();
+
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIds(partitionEntity1.getId(), partitionEntity2.getId());
+		RequestPartitionId result = mySvc.validateAndNormalizePartitionIds(partitionId);
+
+		assertTrue(result.getPartitionIds().containsAll(Set.of(PARTITION_ID_1, PARTITION_ID_2)));
+		assertNotNull(result.getPartitionNames());
+		assertTrue(result.getPartitionNames().containsAll(Set.of(PARTITION_NAME_1, PARTITION_NAME_2)));
+	}
+
+	private PartitionEntity createPartition1() {
+		return myPartitionDao.save(new PartitionEntity().setId(PARTITION_ID_1).setName(PARTITION_NAME_1));
+	}
+
+	private PartitionEntity createPartition2() {
+		return myPartitionDao.save(new PartitionEntity().setId(PARTITION_ID_2).setName(PARTITION_NAME_2));
 	}
 }
