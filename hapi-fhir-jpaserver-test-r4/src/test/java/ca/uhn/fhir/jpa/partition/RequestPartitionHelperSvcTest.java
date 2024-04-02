@@ -89,12 +89,35 @@ class RequestPartitionHelperSvcTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testValidateAndNormalizePartitionIds_withMultiplePartitionIdOnly_populatesPartitionName(){
+	public void testValidateAndNormalizePartitionIds_withMultiplePartitionIdOnly_populatesPartitionNames(){
 		PartitionEntity partitionEntity1 = createPartition1();
 		PartitionEntity partitionEntity2 = createPartition2();
 
 		RequestPartitionId partitionId = RequestPartitionId.fromPartitionIds(partitionEntity1.getId(), partitionEntity2.getId());
 		RequestPartitionId result = mySvc.validateAndNormalizePartitionIds(partitionId);
+
+		assertTrue(result.getPartitionIds().containsAll(Set.of(PARTITION_ID_1, PARTITION_ID_2)));
+		assertNotNull(result.getPartitionNames());
+		assertTrue(result.getPartitionNames().containsAll(Set.of(PARTITION_NAME_1, PARTITION_NAME_2)));
+	}
+
+	@Test
+	public void testValidateAndNormalizePartitionNames_withPartitionNameOnly_populatesPartitionId(){
+		PartitionEntity partitionEntity = createPartition1();
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionName(partitionEntity.getName());
+		RequestPartitionId result = mySvc.validateAndNormalizePartitionNames(partitionId);
+
+		assertEquals(PARTITION_ID_1, result.getFirstPartitionIdOrNull());
+		assertEquals(PARTITION_NAME_1, result.getFirstPartitionNameOrNull());
+	}
+
+	@Test
+	public void testValidateAndNormalizePartitionNames_withMultiplePartitionNamesOnly_populatesPartitionIds(){
+		PartitionEntity partitionEntity1 = createPartition1();
+		PartitionEntity partitionEntity2 = createPartition2();
+
+		RequestPartitionId partitionId = RequestPartitionId.fromPartitionNames(partitionEntity1.getName(), partitionEntity2.getName());
+		RequestPartitionId result = mySvc.validateAndNormalizePartitionNames(partitionId);
 
 		assertTrue(result.getPartitionIds().containsAll(Set.of(PARTITION_ID_1, PARTITION_ID_2)));
 		assertNotNull(result.getPartitionNames());
