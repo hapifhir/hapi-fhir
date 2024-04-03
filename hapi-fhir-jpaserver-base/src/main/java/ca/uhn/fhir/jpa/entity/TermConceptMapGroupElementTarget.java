@@ -58,7 +58,7 @@ public class TermConceptMapGroupElementTarget implements Serializable {
 			foreignKey = @ForeignKey(name = "FK_TCMGETARGET_ELEMENT"))
 	private TermConceptMapGroupElement myConceptMapGroupElement;
 
-	@Column(name = "TARGET_CODE", nullable = false, length = TermConcept.MAX_CODE_LENGTH)
+	@Column(name = "TARGET_CODE", nullable = true, length = TermConcept.MAX_CODE_LENGTH)
 	private String myCode;
 
 	@Column(name = "TARGET_DISPLAY", nullable = true, length = TermConcept.MAX_DISP_LENGTH)

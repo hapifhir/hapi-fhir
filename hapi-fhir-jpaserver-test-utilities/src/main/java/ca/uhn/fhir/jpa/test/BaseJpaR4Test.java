@@ -932,6 +932,28 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		target.setDisplay("Target Code 34567");
 		target.setEquivalence(ConceptMapEquivalence.NARROWER);
 
+		group = conceptMap.addGroup();
+		group.setSource(CS_URL_4);
+		group.setSourceVersion("Version 1");
+		group.setTarget(CS_URL_3);
+		group.setTargetVersion("Version 1");
+
+		// This one should not show up in the results because it doesn't have a code
+		element = group.addElement();
+		element.setCode("89012");
+		element.setDisplay("Source Code 89012");
+
+		target = element.addTarget();
+		target.setEquivalence(ConceptMapEquivalence.DISJOINT);
+
+		// This one should show up in the results because unmatched targets are allowed to be codeless
+		element = group.addElement();
+		element.setCode("89123");
+		element.setDisplay("Source Code 89123");
+
+		target = element.addTarget();
+		target.setEquivalence(ConceptMapEquivalence.UNMATCHED);
+
 		return conceptMap;
 	}
 
