@@ -119,6 +119,17 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init680();
 		init680_Part2();
 		init700();
+		init720();
+	}
+
+	private void init720() {
+		Builder version = forVersion(VersionEnum.V7_2_0);
+
+		Builder.BuilderWithTableName forcedId = version.onTable("HFJ_FORCED_ID");
+		forcedId.dropIndex("20240402.1", "FK_FORCEDID_RESOURCE");
+		forcedId.dropIndex("20240402.2", "IDX_FORCEDID_RESID");
+		forcedId.dropIndex("20240402.3", "IDX_FORCEDID_TYPE_FID");
+		forcedId.dropIndex("20240402.4", "IDX_FORCEID_FID");
 	}
 
 	protected void init700() {
