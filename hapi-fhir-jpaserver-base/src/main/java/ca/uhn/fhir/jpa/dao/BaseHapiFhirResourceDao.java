@@ -515,12 +515,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		boolean isClientAssigned = storeClientAssignedId(theResource, entity);
+		boolean isClientAssignedId = storeClientAssignedId(theResource, entity);
 
 		HookParams hookParams;
 
 		// Notify interceptor for accepting/rejecting client assigned ids
-		if (isClientAssigned) {
+		if (isClientAssignedId) {
 			hookParams = new HookParams().add(IBaseResource.class, theResource).add(RequestDetails.class, theRequest);
 			doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_CLIENT_ASSIGNED_ID, hookParams);
 		}
@@ -534,7 +534,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.add(TransactionDetails.class, theTransactionDetails);
 		doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, hookParams);
 
-		if (isClientAssigned) {
+		if (isClientAssignedId) {
 			validateResourceIdCreation(theResource, theRequest);
 		}
 
