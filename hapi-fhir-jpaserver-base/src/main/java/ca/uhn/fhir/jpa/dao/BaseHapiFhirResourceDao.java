@@ -515,18 +515,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		String resourceIdBeforeStorage = theResource.getIdElement().getIdPart();
-		boolean resourceHadIdBeforeStorage = isNotBlank(resourceIdBeforeStorage);
-		boolean resourceIdWasServerAssigned =
-				theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE;
-		if (resourceHadIdBeforeStorage) {
-			entity.setFhirId(resourceIdBeforeStorage);
-		}
+		boolean isClientAssigned = storeClientAssignedId(theResource, entity);
 
 		HookParams hookParams;
 
 		// Notify interceptor for accepting/rejecting client assigned ids
-		if (!resourceIdWasServerAssigned && resourceHadIdBeforeStorage) {
+		if (isClientAssigned) {
 			hookParams = new HookParams().add(IBaseResource.class, theResource).add(RequestDetails.class, theRequest);
 			doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_CLIENT_ASSIGNED_ID, hookParams);
 		}
@@ -540,7 +534,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.add(TransactionDetails.class, theTransactionDetails);
 		doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, hookParams);
 
-		if (resourceHadIdBeforeStorage && !resourceIdWasServerAssigned) {
+		if (isClientAssigned) {
 			validateResourceIdCreation(theResource, theRequest);
 		}
 
@@ -567,25 +561,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Store the resource forced ID if necessary
 		JpaPid jpaPid = JpaPid.fromId(updatedEntity.getResourceId());
-		if (resourceHadIdBeforeStorage) {
-			if (isNotBlank(resourceIdBeforeStorage)) {
-				entity.setFhirId(resourceIdBeforeStorage);
-			}
-		} else {
-			switch (getStorageSettings().getResourceClientIdStrategy()) {
-				case NOT_ALLOWED:
-				case ALPHANUMERIC:
-					break;
-				case ANY:
-					String resourceId = theResource.getIdElement().getIdPart();
-					updatedEntity.setFhirId(resourceId);
-					// for client ID mode ANY, we will always have a forced ID. If we ever
-					// stop populating the transient forced ID be warned that we use it
-					// (and expect it to be set correctly) farther below.
-					assert updatedEntity.getFhirId() != null;
-					break;
-			}
-		}
 
 		// Populate the resource with its actual final stored ID from the entity
 		theResource.setId(entity.getIdDt());
@@ -636,6 +611,28 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		populateOperationOutcomeForUpdate(w, outcome, theMatchUrl, theOperationType);
 
 		return outcome;
+	}
+
+	/**
+	 * Check for a client-assigned resource id and if so,
+	 * store it in ResourceTable.
+	 *
+	 * The fhirId property is either set here with the client-assigned id,
+	 * OR by hibernate once the PK is generated for a server-assigned id.
+	 * @return true if this is a client-assigned id
+	 *
+	 * @see ca.uhn.fhir.jpa.model.entity.ResourceTable.FhirIdGenerator
+	 */
+	private boolean storeClientAssignedId(T theResource, ResourceTable entity) {
+			String resourceIdBeforeStorage = theResource.getIdElement().getIdPart();
+			boolean resourceHadIdBeforeStorage = isNotBlank(resourceIdBeforeStorage);
+			boolean resourceIdWasServerAssigned =
+				theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE;
+			boolean isClientAssigned = resourceHadIdBeforeStorage && !resourceIdWasServerAssigned;
+			if (isClientAssigned) {
+				entity.setFhirId(resourceIdBeforeStorage);
+			}
+		return isClientAssigned;
 	}
 
 	void validateResourceIdCreation(T theResource, RequestDetails theRequest) {
