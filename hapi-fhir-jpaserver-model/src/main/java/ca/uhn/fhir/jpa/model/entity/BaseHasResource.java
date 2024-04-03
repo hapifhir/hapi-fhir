@@ -29,7 +29,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.persistence.Transient;
 import org.hibernate.annotations.OptimisticLock;
 
 import java.util.Collection;
@@ -65,22 +64,6 @@ public abstract class BaseHasResource extends BasePartitionable
 	@OptimisticLock(excluded = true)
 	private Date myUpdated;
 
-	/**
-	 * This is stored as an optimization to avoid needing to query for this
-	 * after an update
-	 */
-	@Transient
-	// TODO MB forced_id delete this in step 3
-	private transient String myTransientForcedId;
-
-	public String getTransientForcedId() {
-		return myTransientForcedId;
-	}
-
-	public void setTransientForcedId(String theTransientForcedId) {
-		myTransientForcedId = theTransientForcedId;
-	}
-
 	public abstract BaseTag addTag(TagDefinition theDef);
 
 	@Override
@@ -96,13 +79,6 @@ public abstract class BaseHasResource extends BasePartitionable
 	public void setFhirVersion(FhirVersionEnum theFhirVersion) {
 		myFhirVersion = theFhirVersion;
 	}
-
-	public abstract ForcedId getForcedId();
-
-	public abstract void setForcedId(ForcedId theForcedId);
-
-	@Override
-	public abstract Long getId();
 
 	public void setDeleted(Date theDate) {
 		myDeleted = theDate;
@@ -129,12 +105,6 @@ public abstract class BaseHasResource extends BasePartitionable
 		myPublished = thePublished.getValue();
 	}
 
-	@Override
-	public abstract Long getResourceId();
-
-	@Override
-	public abstract String getResourceType();
-
 	public abstract Collection<? extends BaseTag> getTags();
 
 	@Override
@@ -150,9 +120,6 @@ public abstract class BaseHasResource extends BasePartitionable
 	public void setUpdated(Date theUpdated) {
 		myUpdated = theUpdated;
 	}
-
-	@Override
-	public abstract long getVersion();
 
 	@Override
 	public boolean isHasTags() {

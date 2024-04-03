@@ -1,5 +1,5 @@
 
--- we can't use convering index until the autovacuum runs for those rows, which kills index performance
+-- we can't use covering index until the autovacuum runs for those rows, which kills index performance
 ALTER TABLE hfj_resource SET (autovacuum_vacuum_scale_factor = 0.01);
 ALTER TABLE hfj_forced_id SET (autovacuum_vacuum_scale_factor = 0.01);
 ALTER TABLE hfj_res_link SET (autovacuum_vacuum_scale_factor = 0.01);
