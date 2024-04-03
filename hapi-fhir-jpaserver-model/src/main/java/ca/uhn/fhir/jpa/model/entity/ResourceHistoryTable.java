@@ -131,11 +131,10 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 	@Transient
 	private transient ResourceHistoryProvenanceEntity myNewHistoryProvenanceEntity;
 	/**
-	 * This is stored as an optimization to avoid needing to query for this
-	 * after an update
+	 * This is stored as an optimization to avoid needing to fetch ResourceTable
+	 * to access the resource id.
 	 */
 	@Transient
-	// TODO MB forced_id delete this in step 3
 	private transient String myTransientForcedId;
 
 	/**

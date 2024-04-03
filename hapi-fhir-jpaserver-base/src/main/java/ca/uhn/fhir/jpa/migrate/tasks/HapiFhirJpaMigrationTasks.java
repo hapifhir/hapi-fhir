@@ -125,6 +125,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 	private void init720() {
 		Builder version = forVersion(VersionEnum.V7_2_0);
 
+		// Stop writing to hfj_forced_id https://github.com/hapifhir/hapi-fhir/pull/5817
 		Builder.BuilderWithTableName forcedId = version.onTable("HFJ_FORCED_ID");
 		forcedId.dropIndex("20240402.1", "FK_FORCEDID_RESOURCE");
 		forcedId.dropIndex("20240402.2", "IDX_FORCEDID_RESID");
