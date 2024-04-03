@@ -70,17 +70,17 @@ public class MdmProviderLoader {
 			case R5:
 				// We store the supplier so that removeSupplier works properly
 				myMdmProviderSupplier = () -> new MdmProviderDstu3Plus(
-					myFhirContext,
-					myMdmControllerSvc,
-					myMdmControllerHelper,
-					myMdmSubmitSvc,
-					myInterceptorBroadcaster,
-					myMdmSettings);
+						myFhirContext,
+						myMdmControllerSvc,
+						myMdmControllerHelper,
+						myMdmSubmitSvc,
+						myInterceptorBroadcaster,
+						myMdmSettings);
 				// We store the supplier so that removeSupplier works properly
 				myResourceProviderFactory.addSupplier(myMdmProviderSupplier);
 				if (myStorageSettings.isNonResourceDbHistoryEnabled()) {
 					myMdmHistoryProviderSupplier = () -> new MdmLinkHistoryProviderDstu3Plus(
-                        myFhirContext, myMdmControllerSvc, myInterceptorBroadcaster);
+							myFhirContext, myMdmControllerSvc, myInterceptorBroadcaster);
 					myResourceProviderFactory.addSupplier(myMdmHistoryProviderSupplier);
 				}
 				break;
