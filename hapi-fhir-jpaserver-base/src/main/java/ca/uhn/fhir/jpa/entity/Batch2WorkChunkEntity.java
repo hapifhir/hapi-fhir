@@ -39,6 +39,7 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.Length;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -97,10 +98,13 @@ public class Batch2WorkChunkEntity implements Serializable {
 	@Column(name = "TGT_STEP_ID", length = ID_MAX_LENGTH, nullable = false)
 	private String myTargetStepId;
 
-	@Lob
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "CHUNK_DATA", nullable = true, length = Integer.MAX_VALUE - 1)
 	private String mySerializedData;
+
+	@Column(name = "CHUNK_DATA_VC", nullable = true, length = Length.LONG32)
+	private String mySerializedDataVc;
 
 	@Column(name = "STAT", length = STATUS_MAX_LENGTH, nullable = false)
 	@Enumerated(EnumType.STRING)
@@ -309,11 +313,12 @@ public class Batch2WorkChunkEntity implements Serializable {
 	}
 
 	public String getSerializedData() {
-		return mySerializedData;
+		return mySerializedDataVc != null ? mySerializedDataVc : mySerializedData;
 	}
 
 	public void setSerializedData(String theSerializedData) {
-		mySerializedData = theSerializedData;
+		mySerializedData = null;
+		mySerializedDataVc = theSerializedData;
 	}
 
 	public WorkChunkStatusEnum getStatus() {
@@ -371,7 +376,7 @@ public class Batch2WorkChunkEntity implements Serializable {
 				.append("updateTime", myUpdateTime)
 				.append("recordsProcessed", myRecordsProcessed)
 				.append("targetStepId", myTargetStepId)
-				.append("serializedData", mySerializedData)
+				.append("serializedData", getSerializedData())
 				.append("status", myStatus)
 				.append("errorMessage", myErrorMessage)
 				.append("warningMessage", myWarningMessage)

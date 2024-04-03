@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5788
+title: "Previously, the casing of the X-Request-ID header key was not retained in the corresponding response.
+This has been fixed."
+

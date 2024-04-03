@@ -66,7 +66,7 @@ public interface IBatch2WorkChunkRepository
 
 	@Modifying
 	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, "
-			+ "e.myRecordsProcessed = :rp, e.myErrorCount = e.myErrorCount + :errorRetries, e.mySerializedData = null, "
+			+ "e.myRecordsProcessed = :rp, e.myErrorCount = e.myErrorCount + :errorRetries, e.mySerializedData = null, e.mySerializedDataVc = null, "
 			+ "e.myWarningMessage = :warningMessage WHERE e.myId = :id")
 	void updateChunkStatusAndClearDataForEndSuccess(
 			@Param("id") String theChunkId,
@@ -96,7 +96,7 @@ public interface IBatch2WorkChunkRepository
 
 	@Modifying
 	@Query(
-			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.mySerializedData = null, e.myErrorMessage = :em WHERE e.myId IN(:ids)")
+			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myEndTime = :et, e.mySerializedData = null, e.mySerializedDataVc = null, e.myErrorMessage = :em WHERE e.myId IN(:ids)")
 	void updateAllChunksForInstanceStatusClearDataAndSetError(
 			@Param("ids") List<String> theChunkIds,
 			@Param("et") Date theEndTime,
