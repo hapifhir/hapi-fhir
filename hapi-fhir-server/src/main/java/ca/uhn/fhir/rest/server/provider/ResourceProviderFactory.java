@@ -21,6 +21,10 @@ package ca.uhn.fhir.rest.server.provider;
 
 import java.util.List;
 
+/**
+ * This Factory stores FHIR Resource Provider instances that will be registered on a FHIR Endpoint later.
+ * See {@link FhirServerExtensionFactory}
+ */
 public class ResourceProviderFactory extends FhirServerExtensionFactory<IResourceProviderFactoryObserver> {
 	public ResourceProviderFactory() {}
 
