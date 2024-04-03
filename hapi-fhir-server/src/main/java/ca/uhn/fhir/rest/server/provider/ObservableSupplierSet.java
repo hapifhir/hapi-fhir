@@ -7,33 +7,34 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
 
 /**
  * This is a generic implementation of the <a href="https://refactoring.guru/design-patterns/observer">Observer Design Pattern</a>.
- * We use this to pass lists of beans from exporting Spring application contexts to importing Spring application contexts. We defer
+ * We use this to pass sets of beans from exporting Spring application contexts to importing Spring application contexts. We defer
  * resolving the observed beans via a Supplier to give the exporting context a chance to initialize the beans before they are used.
  * @param <T> the class of the Observer
- *
+ * <p>
  * A typical usage pattern would be:
  * <ol>
- *           <li>Create Factory in exporter context.</li>
+ *           <li>Create {@link ObservableSupplierSet} in exporter context.</li>
  *           <li>Add all the suppliers in the exporter context.</li>
- *           <li>Attach the importer to the factory</li>
- *           <li>Importer calls getSupplierResults() and processes all the beans</li>
+ *           <li>Attach the importer to the {@link ObservableSupplierSet}</li>
+ *           <li>Importer calls {@link ObservableSupplierSet#getSupplierResults} and processes all the beans</li>
  *           <li>Some other service beans may add more suppliers later as a part of their initialization and the observer handlers will process them accordingly</li>
- *           <li>Those other service beans should call removeSupplier in a @PreDestroy method so they are properly cleaned up if those services are shut down or restarted</li>
+ *           <li>Those other service beans should call {@link ObservableSupplierSet#removeSupplier(Supplier)} in a @PreDestroy method so they are properly cleaned up if those services are shut down or restarted</li>
  * </ol>
  *
  */
-public class FhirServerExtensionFactory<T extends IFhirServerExtensionFactoryObserver> {
-	private static final Logger ourLog = LoggerFactory.getLogger(FhirServerExtensionFactory.class);
+public class ObservableSupplierSet<T extends IObservableSupplierSetObserver> {
+	private static final Logger ourLog = LoggerFactory.getLogger(ObservableSupplierSet.class);
 
-	private Set<T> myObservers = Collections.synchronizedSet(new HashSet<>());
+	private final Set<T> myObservers = Collections.synchronizedSet(new HashSet<>());
 
-	private List<Supplier<Object>> mySuppliers = new ArrayList<>();
+	private final Set<Supplier<Object>> mySuppliers = new LinkedHashSet<>();
 
 	/** Add a supplier and notify all observers
 	 *
@@ -45,19 +46,19 @@ public class FhirServerExtensionFactory<T extends IFhirServerExtensionFactoryObs
 		}
 	}
 
-	/** Remove a supplier and notify all observers.  CAUTION, you might think that this code would work but it does not:
+	/** Remove a supplier and notify all observers.  CAUTION, you might think that this code would work, but it does not:
 	 * <code>
-	 * factory.addSupplier(() -> myBean);
+	 * observableSupplierSet.addSupplier(() -> myBean);
 	 * ...
-	 * factory.removeSupplier(() -> myBean);
+	 * observableSupplierSet.removeSupplier(() -> myBean);
 	 * </code>
 	 * the removeSupplier in this example would fail because it is a different lambda instance from the first.  Instead,
 	 * you need to store the supplier between the add and remove:
 	 * <code>
 	 * mySupplier = () -> myBean;
-	 * factory.addSupplier(mySupplier);
+	 * observableSupplierSet.addSupplier(mySupplier);
 	 * ...
-	 * factory.removeSupplier(mySupplier);
+	 * observableSupplierSet.removeSupplier(mySupplier);
 	 * </code>
 	 *
 	 * @param theSupplier the supplier to be removed
@@ -71,16 +72,16 @@ public class FhirServerExtensionFactory<T extends IFhirServerExtensionFactoryObs
 	}
 
 	/**
-	 * Attach an observer to this Factory.  This observer will be notified every time a supplier is added or removed.
-	 * @param theObserver
+	 * Attach an observer to this observableSupplierSet.  This observer will be notified every time a supplier is added or removed.
+	 * @param theObserver the observer to be notified
 	 */
 	public void attach(T theObserver) {
 		myObservers.add(theObserver);
 	}
 
 	/**
-	 * Detach an observer from this Factory so it is no longer notified when suppliers are added and removed.
-	 * @param theObserver
+	 * Detach an observer from this observableSupplierSet, so it is no longer notified when suppliers are added and removed.
+	 * @param theObserver the observer to be removed
 	 */
 	public void detach(T theObserver) {
 		myObservers.remove(theObserver);

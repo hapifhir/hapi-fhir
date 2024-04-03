@@ -19,4 +19,7 @@
  */
 package ca.uhn.fhir.rest.server.provider;
 
-public interface IResourceProviderFactoryObserver extends IFhirServerExtensionFactoryObserver {}
+/**
+ * See {@link ObservableSupplierSet}
+ */
+public interface IResourceProviderFactoryObserver extends IObservableSupplierSetObserver {}

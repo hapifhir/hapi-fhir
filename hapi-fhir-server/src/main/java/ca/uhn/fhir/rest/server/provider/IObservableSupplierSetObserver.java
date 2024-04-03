@@ -4,7 +4,10 @@ import jakarta.annotation.Nonnull;
 
 import java.util.function.Supplier;
 
-public interface IFhirServerExtensionFactoryObserver {
+/**
+ * See {@link ObservableSupplierSet}
+ */
+public interface IObservableSupplierSetObserver {
 	void update(@Nonnull Supplier<Object> theSupplier);
 
 	void remove(@Nonnull Supplier<Object> theSupplier);
