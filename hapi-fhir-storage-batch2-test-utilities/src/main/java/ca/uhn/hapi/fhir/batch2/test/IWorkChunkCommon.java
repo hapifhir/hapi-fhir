@@ -35,8 +35,8 @@ public interface IWorkChunkCommon extends WorkChunkTestConstants {
 		return getTestManager().createInstance();
 	}
 
-	default String storeWorkChunk(String theJobDefinitionId, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData, boolean theGatedExecution) {
-		return getTestManager().storeWorkChunk(theJobDefinitionId, theTargetStepId, theInstanceId, theSequence, theSerializedData, theGatedExecution);
+	default String storeWorkChunk(String theJobDefinitionId, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData) {
+		return getTestManager().storeWorkChunk(theJobDefinitionId, theTargetStepId, theInstanceId, theSequence, theSerializedData);
 	}
 
 	default void runInTransaction(Runnable theRunnable) {
@@ -78,10 +78,6 @@ public interface IWorkChunkCommon extends WorkChunkTestConstants {
 	 */
 	default String createChunk(String theJobInstanceId) {
 		return getTestManager().createChunk(theJobInstanceId);
-	}
-
-	default String createChunk(String theJobInstanceId, boolean theGatedExecution) {
-		return getTestManager().createChunk(theJobInstanceId, theGatedExecution);
 	}
 
 	/**

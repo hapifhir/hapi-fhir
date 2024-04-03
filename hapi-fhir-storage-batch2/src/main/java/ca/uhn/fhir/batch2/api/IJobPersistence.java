@@ -280,28 +280,4 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 
 	@VisibleForTesting
 	WorkChunk createWorkChunk(WorkChunk theWorkChunk);
-
-	/**
-	 * Atomically advance the given job to the given step and change the status of all chunks in the next step to READY
-	 * @param theJobInstanceId the id of the job instance to be updated
-	 * @param theNextStepId the id of the next job step
-	 * @return
-	 */
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	boolean advanceJobStepAndUpdateChunkStatus(String theJobInstanceId, String theNextStepId);
-
-	/**
-	 * Update all chunks of the given step id for the given job from
-	 * @param theJobInstanceId the id of the job instance to be updated
-	 * @param theStepId the id of the step which the chunks belong to
-	 * @param theNewStatus the new status
-	 * @param theOldStatus the old status
-	 * @return
-	 */
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	int updateAllChunksForStepWithStatus(
-			String theJobInstanceId,
-			String theStepId,
-			WorkChunkStatusEnum theNewStatus,
-			WorkChunkStatusEnum theOldStatus);
 }

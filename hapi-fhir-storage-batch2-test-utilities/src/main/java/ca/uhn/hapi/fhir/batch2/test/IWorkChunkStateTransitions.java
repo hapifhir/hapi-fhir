@@ -6,8 +6,6 @@ import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,30 +15,21 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 
 	Logger ourLog = LoggerFactory.getLogger(IWorkChunkStateTransitions.class);
 
-	@ParameterizedTest
-	@CsvSource({
-		"false, READY",
-		"true, GATE_WAITING"
-	})
-	default void chunkCreation_isInExpectedStatus(boolean theGatedExecution, WorkChunkStatusEnum expectedStatus) {
+	@Test
+	default void chunkCreation_isQueued() {
 		String jobInstanceId = createAndStoreJobInstance(null);
-		String myChunkId = createChunk(jobInstanceId, theGatedExecution);
+		String myChunkId = createChunk(jobInstanceId);
 
 		WorkChunk fetchedWorkChunk = freshFetchWorkChunk(myChunkId);
-		assertEquals(expectedStatus, fetchedWorkChunk.getStatus(), "New chunks are " + expectedStatus);
+		assertEquals(WorkChunkStatusEnum.READY, fetchedWorkChunk.getStatus(), "New chunks are READY");
 	}
 
-	@ParameterizedTest
-	@CsvSource({
-		"false",
-		"true"
-	})
-	default void chunkReceived_queuedToInProgress(boolean theGatedExecution) throws InterruptedException {
+	@Test
+	default void chunkReceived_queuedToInProgress() throws InterruptedException {
 		PointcutLatch sendLatch = disableWorkChunkMessageHandler();
 		sendLatch.setExpectedCount(1);
-
-		String jobInstanceId = createAndStoreJobInstance(withJobDefinition(theGatedExecution));
-		String myChunkId = createChunk(jobInstanceId, theGatedExecution);
+		String jobInstanceId = createAndStoreJobInstance(null);
+		String myChunkId = createChunk(jobInstanceId);
 
 		runMaintenancePass();
 		// the worker has received the chunk, and marks it started.

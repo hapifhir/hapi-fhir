@@ -82,13 +82,7 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 
 		// once finished, create workchunks in READY state
 		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(
-				myJobDefinitionId,
-				myJobDefinitionVersion,
-				targetStepId,
-				instanceId,
-				sequence,
-				dataValueString,
-				myGatedExecution);
+				myJobDefinitionId, myJobDefinitionVersion, targetStepId, instanceId, sequence, dataValueString);
 		String chunkId = myHapiTransactionService
 				.withSystemRequestOnDefaultPartition()
 				.withPropagation(Propagation.REQUIRES_NEW)
