@@ -19,14 +19,14 @@ A HAPI-FHIR batch job definition consists of a job name, version, parameter json
 After a job has been defined, *instances* of that job can be submitted for batch processing by populating a `JobInstanceStartRequest` with the job name and job parameters json and then submitting that request to the Batch Job Coordinator.
 
 The Batch Job Coordinator will then store two records in the database:
-- Job Instance with status QUEUED: that is the parent record for all data concerning this job
-- Batch Work Chunk with status READY: this describes the first "chunk" of work required for this job.  The first Batch Work Chunk contains no data.
+- Job Instance with status `QUEUED`: that is the parent record for all data concerning this job
+- Batch Work Chunk with status `READY`/`GATE_WAITING`: this describes the first "chunk" of work required for this job. The first Batch Work Chunk contains no data. The initial status of the work chunk will be `READY` or `GATE_WAITING` for non-gated and gated batch jobs, respectively. Please refer to [Gated Execution](#gated-execution) for more explanation on gated batch jobs.
 
 ### The Maintenance Job
 
 A Scheduled Job runs periodically (once a minute).  For each Job Instance in the database, it:
 
-1. Moves all `READY` work chunks into the `QUEUED` state and publishes a message to the Batch Notification Message Channel to inform worker threads that a work chunk is now ready for processing. \*
+1. Moves all `READY` work chunks into the `QUEUED` state and publishes a message to the Batch Notification Message Channel to inform worker threads that a work chunk is now ready for processing. For gated batch jobs, the maintenance also moves all `GATE_WAITING` work chunks into `READY` when the current batch step is ready to advance. \*
 1. Calculates job progress (% of work chunks in `COMPLETE` status). If the job is finished, purges any left over work chunks still in the database.
 1. Cleans up any complete, failed, or cancelled jobs that need to be removed.
 1. Moves any gated jobs onto their next step when complete.

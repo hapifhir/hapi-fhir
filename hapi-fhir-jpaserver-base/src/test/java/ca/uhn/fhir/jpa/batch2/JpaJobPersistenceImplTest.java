@@ -4,6 +4,7 @@ import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -171,6 +172,36 @@ class JpaJobPersistenceImplTest {
 		// verify
 		assertTrue(retInstance.isPresent());
 		assertEquals(instance.getInstanceId(), retInstance.get().getInstanceId());
+	}
+
+	@Test
+	void advanceJobStepAndUpdateChunkStatus_validRequest_callsPersistenceUpdateAndReturnsChanged() {
+		// setup
+		String instanceId = "jobId";
+		String nextStepId = "nextStep";
+
+		// execute
+		mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, nextStepId);
+
+		// verify
+		verify(mySvc).updateInstance(instanceId, any());
+		verify(myWorkChunkRepository).updateAllChunksForStepWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.READY, WorkChunkStatusEnum.GATE_WAITING);
+		verify(myWorkChunkRepository).updateAllChunksForStepWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.READY, WorkChunkStatusEnum.QUEUED);
+	}
+
+	@Test
+	void updateAllChunksForStepWithStatus_validRequest_callsPersistenceUpdateAndReturnsChanged() {
+		// setup
+		String instanceId = "jobId";
+		String nextStepId = "nextStep";
+		WorkChunkStatusEnum expectedNewStatus = WorkChunkStatusEnum.READY;
+		WorkChunkStatusEnum expectedOldStatus = WorkChunkStatusEnum.GATE_WAITING;
+
+		// execute
+		mySvc.updateAllChunksForStepWithStatus(instanceId, nextStepId, expectedNewStatus, expectedOldStatus);
+
+		// verify
+		verify(myWorkChunkRepository).updateAllChunksForStepWithStatus(instanceId, nextStepId, expectedNewStatus, expectedOldStatus);
 	}
 
 	private JobInstance createJobInstanceFromEntity(Batch2JobInstanceEntity theEntity) {

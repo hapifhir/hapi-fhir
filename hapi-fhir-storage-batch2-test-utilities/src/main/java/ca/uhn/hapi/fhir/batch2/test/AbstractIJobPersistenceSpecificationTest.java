@@ -91,6 +91,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 		return mySvc;
 	}
 
+	@Nonnull
 	public JobDefinition<TestJobParameters> withJobDefinition(boolean theIsGatedBoolean) {
 		JobDefinition.Builder<TestJobParameters, ?> builder = JobDefinition.newBuilder()
 			.setJobDefinitionId(theIsGatedBoolean ? GATED_JOB_DEFINITION_ID : JOB_DEFINITION_ID)
@@ -165,11 +166,14 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 		instance.setJobDefinitionVersion(JOB_DEF_VER);
 		instance.setParameters(CHUNK_DATA);
 		instance.setReport("TEST");
+        if (jobDefinition.isGatedExecution()) {
+			instance.setCurrentGatedStepId(jobDefinition.getFirstStepId());
+		}
 		return instance;
 	}
 
-	public String storeWorkChunk(String theJobDefinitionId, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData) {
-		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(theJobDefinitionId, JOB_DEF_VER, theTargetStepId, theInstanceId, theSequence, theSerializedData);
+	public String storeWorkChunk(String theJobDefinitionId, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData, boolean theGatedExecution) {
+		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(theJobDefinitionId, JOB_DEF_VER, theTargetStepId, theInstanceId, theSequence, theSerializedData, theGatedExecution);
 		return mySvc.onWorkChunkCreate(batchWorkChunk);
 	}
 
@@ -226,7 +230,11 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 	}
 
 	public String createChunk(String theInstanceId) {
-		return storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, theInstanceId, 0, CHUNK_DATA);
+		return storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, theInstanceId, 0, CHUNK_DATA, false);
+	}
+
+	public String createChunk(String theInstanceId, boolean theGatedExecution) {
+		return storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, theInstanceId, 0, CHUNK_DATA, theGatedExecution);
 	}
 
 	public void enableMaintenanceRunner(boolean theToEnable) {

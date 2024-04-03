@@ -32,6 +32,7 @@ import java.util.Set;
  */
 public enum WorkChunkStatusEnum {
 	// wipmb For 6.8 Add WAITING for gated, and READY for in db, but not yet sent to channel.
+	GATE_WAITING,
 	READY,
 	QUEUED,
 	IN_PROGRESS,
@@ -59,6 +60,8 @@ public enum WorkChunkStatusEnum {
 
 	public Set<WorkChunkStatusEnum> getNextStates() {
 		switch (this) {
+			case GATE_WAITING:
+				return EnumSet.of(READY);
 			case READY:
 				return EnumSet.of(QUEUED);
 			case QUEUED:
