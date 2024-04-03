@@ -515,7 +515,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		boolean isClientAssignedId = storeClientAssignedId(theResource, entity);
+		boolean isClientAssignedId = storeNonPidResourceId(theResource, entity);
 
 		HookParams hookParams;
 
@@ -617,21 +617,29 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * Check for a client-assigned resource id and if so,
 	 * store it in ResourceTable.
 	 *
-	 * The fhirId property is either set here with the client-assigned id,
+	 * The fhirId property is either set here with the resource id
 	 * OR by hibernate once the PK is generated for a server-assigned id.
+	 *
+	 * Used for both client-assigned id and for server-assigned UUIDs.
+	 *
 	 * @return true if this is a client-assigned id
 	 *
 	 * @see ca.uhn.fhir.jpa.model.entity.ResourceTable.FhirIdGenerator
 	 */
-	private boolean storeClientAssignedId(T theResource, ResourceTable entity) {
+	private boolean storeNonPidResourceId(T theResource, ResourceTable entity) {
 		String resourceIdBeforeStorage = theResource.getIdElement().getIdPart();
 		boolean resourceHadIdBeforeStorage = isNotBlank(resourceIdBeforeStorage);
 		boolean resourceIdWasServerAssigned =
 				theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE;
+
+		// We distinguish actual client-assigned ids from UUIDs which the server assigned.
+		boolean isClientAssigned = resourceHadIdBeforeStorage && !resourceIdWasServerAssigned;
+
+		// But both need to be set on the entity fhirId field.
 		if (resourceHadIdBeforeStorage) {
 			entity.setFhirId(resourceIdBeforeStorage);
 		}
-		boolean isClientAssigned = resourceHadIdBeforeStorage && !resourceIdWasServerAssigned;
+
 		return isClientAssigned;
 	}
 
