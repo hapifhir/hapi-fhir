@@ -614,7 +614,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	/**
-	 * Check for a client-assigned resource id and if so,
+	 * Check for an id on the resource and if so,
 	 * store it in ResourceTable.
 	 *
 	 * The fhirId property is either set here with the resource id
