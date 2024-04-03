@@ -624,14 +624,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	 * @see ca.uhn.fhir.jpa.model.entity.ResourceTable.FhirIdGenerator
 	 */
 	private boolean storeClientAssignedId(T theResource, ResourceTable entity) {
-			String resourceIdBeforeStorage = theResource.getIdElement().getIdPart();
-			boolean resourceHadIdBeforeStorage = isNotBlank(resourceIdBeforeStorage);
-			boolean resourceIdWasServerAssigned =
+		String resourceIdBeforeStorage = theResource.getIdElement().getIdPart();
+		boolean resourceHadIdBeforeStorage = isNotBlank(resourceIdBeforeStorage);
+		boolean resourceIdWasServerAssigned =
 				theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE;
-			boolean isClientAssigned = resourceHadIdBeforeStorage && !resourceIdWasServerAssigned;
-			if (isClientAssigned) {
-				entity.setFhirId(resourceIdBeforeStorage);
-			}
+		boolean isClientAssigned = resourceHadIdBeforeStorage && !resourceIdWasServerAssigned;
+		if (isClientAssigned) {
+			entity.setFhirId(resourceIdBeforeStorage);
+		}
 		return isClientAssigned;
 	}
 
