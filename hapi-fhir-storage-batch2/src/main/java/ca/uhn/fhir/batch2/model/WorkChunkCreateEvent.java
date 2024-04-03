@@ -36,6 +36,7 @@ public class WorkChunkCreateEvent {
 	public final String instanceId;
 	public final int sequence;
 	public final String serializedData;
+	public final boolean isGatedExecution;
 
 	/**
 	 * Constructor
@@ -52,20 +53,24 @@ public class WorkChunkCreateEvent {
 			@Nonnull String theTargetStepId,
 			@Nonnull String theInstanceId,
 			int theSequence,
-			@Nullable String theSerializedData) {
+			@Nullable String theSerializedData,
+			boolean theGatedExecution) {
 		jobDefinitionId = theJobDefinitionId;
 		jobDefinitionVersion = theJobDefinitionVersion;
 		targetStepId = theTargetStepId;
 		instanceId = theInstanceId;
 		sequence = theSequence;
 		serializedData = theSerializedData;
+		isGatedExecution = theGatedExecution;
 	}
 
 	public static WorkChunkCreateEvent firstChunk(JobDefinition<?> theJobDefinition, String theInstanceId) {
 		String firstStepId = theJobDefinition.getFirstStepId();
 		String jobDefinitionId = theJobDefinition.getJobDefinitionId();
 		int jobDefinitionVersion = theJobDefinition.getJobDefinitionVersion();
-		return new WorkChunkCreateEvent(jobDefinitionId, jobDefinitionVersion, firstStepId, theInstanceId, 0, null);
+		boolean isGatedExecution = theJobDefinition.isGatedExecution();
+		return new WorkChunkCreateEvent(
+				jobDefinitionId, jobDefinitionVersion, firstStepId, theInstanceId, 0, null, isGatedExecution);
 	}
 
 	@Override
@@ -83,6 +88,7 @@ public class WorkChunkCreateEvent {
 				.append(instanceId, that.instanceId)
 				.append(sequence, that.sequence)
 				.append(serializedData, that.serializedData)
+				.append(isGatedExecution, that.isGatedExecution)
 				.isEquals();
 	}
 
@@ -95,6 +101,7 @@ public class WorkChunkCreateEvent {
 				.append(instanceId)
 				.append(sequence)
 				.append(serializedData)
+				.append(isGatedExecution)
 				.toHashCode();
 	}
 }

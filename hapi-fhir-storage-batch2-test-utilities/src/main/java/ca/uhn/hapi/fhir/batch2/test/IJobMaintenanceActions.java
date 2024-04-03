@@ -47,7 +47,7 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 	@ValueSource(strings = {
 	"""
    		1|COMPLETED
-   		2|GATED
+   		2|GATE_WAITING
 	""",
 	"""
    		# Chunk already queued -> waiting for complete
@@ -69,8 +69,9 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 	""",
 	"""
     	# Not all steps ready to advance
+		# Latch Count: 1
    		1|COMPLETED
-   		2|READY  # a single ready chunk
+   		2|READY,2|QUEUED  # a single ready chunk
    		2|IN_PROGRESS
 	""",
 	"""
@@ -82,32 +83,36 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
    		3|READY
 	""",
 	"""
-   		1|COMPLETED
-   		2|READY
-   		2|QUEUED
-   		2|COMPLETED
-   		2|ERRORED
-   		2|FAILED
-   		2|IN_PROGRESS
-   		3|GATED
-   		3|GATED
+		# when current step is not all queued, should queue READY chunks
+		# Latch Count: 1
+		1|COMPLETED
+		2|READY,2|QUEUED
+		2|QUEUED
+		2|COMPLETED
+		2|ERRORED
+		2|FAILED
+		2|IN_PROGRESS
+		3|GATE_WAITING
+		3|QUEUED
 	""",
 	"""
-   		1|COMPLETED
-   		2|READY
-   		2|QUEUED
-   		2|COMPLETED
-   		2|ERRORED
-   		2|FAILED
-   		2|IN_PROGRESS
-   		3|QUEUED  # a lie
-   		3|GATED
+		# when current step is all queued but not done, should not proceed
+		1|COMPLETED
+		2|COMPLETED
+		2|QUEUED
+		2|COMPLETED
+		2|ERRORED
+		2|FAILED
+		2|IN_PROGRESS
+		3|GATE_WAITING
+		3|GATE_WAITING
 	"""
 	})
 	default void testGatedStep2NotReady_notAdvance(String theChunkState) throws InterruptedException {
 		// setup
+		int expectedLatchCount = getLatchCountFromState(theChunkState);
 		PointcutLatch sendingLatch = disableWorkChunkMessageHandler();
-		sendingLatch.setExpectedCount(0);
+		sendingLatch.setExpectedCount(expectedLatchCount);
 		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(theChunkState, true);
 
 		createChunksInStates(result);
@@ -117,11 +122,21 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 
 		// verify
 		// nothing ever queued -> nothing ever sent to queue
-		verifyWorkChunkMessageHandlerCalled(sendingLatch, 0);
+		verifyWorkChunkMessageHandlerCalled(sendingLatch, expectedLatchCount);
 		verifyWorkChunkFinalStates(result);
 	}
 
-	@Disabled
+	/**
+	 * Returns the expected latch count specified in the state. Defaults to 0 if not found.
+	 * Expected format: # Latch Count: {}
+	 * e.g. # Latch Count: 3
+	 */
+	private int getLatchCountFromState(String theState){
+		String keyStr = "# Latch Count: ";
+		int index = theState.indexOf(keyStr);
+		return index == -1 ? 0 : theState.charAt(index + keyStr.length()) - '0';
+	}
+
 	@ParameterizedTest
 	@ValueSource(strings = {
     """
@@ -129,27 +144,30 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 		1|COMPLETED
 		2|COMPLETED
 		2|COMPLETED
-		3|GATED|READY
-		3|GATED|READY
+		3|GATE_WAITING,3|QUEUED
+		3|GATE_WAITING,3|QUEUED
     """,
     """
 		# OLD code only
 		1|COMPLETED
-		2|QUEUED,2|READY
-		2|QUEUED,2|READY
+		2|COMPLETED
+		2|COMPLETED
+		3|QUEUED,3|QUEUED
+		3|QUEUED,3|QUEUED
 	""",
 	"""
-		# mixed code only
+		# mixed code
 		1|COMPLETED
 		2|COMPLETED
 		2|COMPLETED
-		3|GATED|READY
-		3|QUEUED|READY
+		3|GATE_WAITING,3|QUEUED
+		3|QUEUED,3|QUEUED
 	"""
 	})
 	default void testGatedStep2ReadyToAdvance_advanceToStep3(String theChunkState) throws InterruptedException {
 		// setup
 		PointcutLatch sendingLatch = disableWorkChunkMessageHandler();
+		sendingLatch.setExpectedCount(2);
 		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(theChunkState, true);
 		createChunksInStates(result);
 
@@ -157,8 +175,7 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 		runMaintenancePass();
 
 		// verify
-		// things are being set to READY; is anything being queued?
-		verifyWorkChunkMessageHandlerCalled(sendingLatch, 0);
+		verifyWorkChunkMessageHandlerCalled(sendingLatch, 2);
 		verifyWorkChunkFinalStates(result);
 	}
 

@@ -145,7 +145,8 @@ public class JobMaintenanceStateInformation {
 		if (jobDef.isGatedExecution()) {
 			AtomicReference<String> latestStepId = new AtomicReference<>();
 			int totalSteps = jobDef.getSteps().size();
-			for (int i = totalSteps - 1; i >= 0; i--) {
+			// ignore the last step
+			for (int i = totalSteps - 2; i >= 0; i--) {
 				JobDefinitionStep<?, ?, ?> step = jobDef.getSteps().get(i);
 				if (stepIds.contains(step.getStepId())) {
 					latestStepId.set(step.getStepId());

@@ -128,7 +128,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setSerializedData(theBatchWorkChunk.serializedData);
 		entity.setCreateTime(new Date());
 		entity.setStartTime(new Date());
-		entity.setStatus(WorkChunkStatusEnum.READY);
+		// set to GATE_WAITING if job is gated, to READY if not
+		entity.setStatus(
+				theBatchWorkChunk.isGatedExecution ? WorkChunkStatusEnum.GATE_WAITING : WorkChunkStatusEnum.READY);
+
 		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
 		ourLog.trace(
 				"Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
@@ -574,5 +577,62 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, params);
 		}
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public boolean advanceJobStepAndUpdateChunkStatus(String theJobInstanceId, String theNextStepId) {
+		boolean changed = updateInstance(theJobInstanceId, instance -> {
+			if (instance.getCurrentGatedStepId().equals(theNextStepId)) {
+				// someone else beat us here.  No changes
+				return false;
+			}
+			ourLog.debug("Moving gated instance {} to the next step {}.", theJobInstanceId, theNextStepId);
+			instance.setCurrentGatedStepId(theNextStepId);
+			return true;
+		});
+
+		if (changed) {
+			ourLog.debug(
+					"Updating chunk status from GATE_WAITING to READY for gated instance {} in step {}.",
+					theJobInstanceId,
+					theNextStepId);
+			// when we reach here, the current step id is equal to theNextStepId
+			myWorkChunkRepository.updateAllChunksForStepWithStatus(
+					theJobInstanceId, theNextStepId, WorkChunkStatusEnum.READY, WorkChunkStatusEnum.GATE_WAITING);
+
+			// In the old code, gated jobs' workchunks are created in status QUEUED but not actually queued for the
+			// workers.
+			// In order to keep them compatible, turn QUEUED chunks into READY, too.
+			// TODO: remove this when we are certain that no one is still running the old code.
+			int numChanged = myWorkChunkRepository.updateAllChunksForStepWithStatus(
+					theJobInstanceId, theNextStepId, WorkChunkStatusEnum.READY, WorkChunkStatusEnum.QUEUED);
+			if (numChanged > 0) {
+				ourLog.debug(
+						"Updated {} chunks of gated instance {} for step {} from fake QUEUED to READY.",
+						numChanged,
+						theJobInstanceId,
+						theNextStepId);
+			}
+		}
+
+		return changed;
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public int updateAllChunksForStepWithStatus(
+			String theJobInstanceId,
+			String theStepId,
+			WorkChunkStatusEnum theNewStatus,
+			WorkChunkStatusEnum theOldStatus) {
+		ourLog.debug(
+				"Updating chunk status from {} to {} for gated instance {} in step {}.",
+				theOldStatus,
+				theNewStatus,
+				theJobInstanceId,
+				theStepId);
+		return myWorkChunkRepository.updateAllChunksForStepWithStatus(
+				theJobInstanceId, theStepId, theNewStatus, theOldStatus);
 	}
 }

@@ -55,7 +55,8 @@ public interface IWorkChunkPersistence {
 	 * The first state event, as the chunk is created.
 	 * This method should be atomic and should only
 	 * return when the chunk has been successfully stored in the database.
-	 * Chunk should be stored with a status of {@link WorkChunkStatusEnum#QUEUED}
+	 * Chunk should be stored with a status of {@link WorkChunkStatusEnum#READY} or
+	 * {@link WorkChunkStatusEnum#GATE_WAITING} for ungated and gated jobs, respectively.
 	 *
 	 * @param theBatchWorkChunk the batch work chunk to be stored
 	 * @return a globally unique identifier for this chunk.

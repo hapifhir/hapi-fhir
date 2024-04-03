@@ -73,6 +73,7 @@ public class InstanceProgress {
 		statusToCountMap.put(theChunk.getStatus(), statusToCountMap.getOrDefault(theChunk.getStatus(), 0) + 1);
 
 		switch (theChunk.getStatus()) {
+			case GATE_WAITING:
 			case READY:
 			case QUEUED:
 			case IN_PROGRESS:
