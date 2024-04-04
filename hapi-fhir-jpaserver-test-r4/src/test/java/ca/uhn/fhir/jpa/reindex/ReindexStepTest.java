@@ -64,7 +64,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(6, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(5, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.logUpdateQueries();
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
@@ -95,7 +95,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(8, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(7, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -128,7 +128,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(6, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(5, myCaptureQueriesListener.logSelectQueries().size());
 		// name, family, phonetic, deceased, active
 		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
@@ -196,7 +196,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(2, outcome.getRecordsProcessed());
-		assertEquals(10, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(9, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
@@ -241,7 +241,7 @@ public class ReindexStepTest extends BaseJpaR4Test {
 
 		// Verify
 		assertEquals(4, outcome.getRecordsProcessed());
-		assertEquals(9, myCaptureQueriesListener.logSelectQueries().size());
+		assertEquals(8, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(5, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(2, myCaptureQueriesListener.countUpdateQueries());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());

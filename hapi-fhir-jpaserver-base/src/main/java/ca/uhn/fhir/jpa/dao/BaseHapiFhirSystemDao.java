@@ -38,6 +38,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
+import ca.uhn.fhir.jpa.search.SearchConstants;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -59,12 +60,12 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 
 public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends BaseStorageDao
 		implements IFhirSystemDao<T, MT> {
@@ -183,11 +184,10 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	 * When processing several resources (e.g. transaction bundle, $reindex chunk, etc.)
 	 * it would be slow to fetch each piece of a resource (e.g. all token index rows)
 	 * one resource at a time.
-	 * Instead, we fetch all the linked resources for the entire batch here so they are present in the Hibernate Session.
+	 * Instead, we fetch all the linked resources for the entire batch and populate the Hibernate Session.
 	 *
-	 * @param theResolvedIds
+	 * @param theResolvedIds the pids
 	 * @param thePreFetchIndexes Should resource indexes be loaded
-	 * @param <P>
 	 */
 	@Override
 	public <P extends IResourcePersistentId> void preFetchResources(
@@ -195,7 +195,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 		HapiTransactionService.requireTransaction();
 		List<Long> pids = theResolvedIds.stream().map(t -> ((JpaPid) t).getId()).collect(Collectors.toList());
 
-		new QueryChunker<Long>().chunk(pids, ids -> {
+		new QueryChunker<Long>().chunk(pids, idChunk -> {
 
 			/*
 			 * Pre-fetch the resources we're touching in this transaction in mass - this reduced the
@@ -208,114 +208,111 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			 *
 			 * However, for realistic average workloads, this should reduce the number of round trips.
 			 */
-			if (ids.size() >= 2) {
-				List<ResourceTable> loadedResourceTableEntries = new ArrayList<>();
-
-				prefetchResourceTableHistoryAndProvenance(ids, loadedResourceTableEntries);
-
-				List<Long> entityIds;
+			if (idChunk.size() >= 2) {
+				List<ResourceTable> entityChunk = prefetchResourceTableHistoryAndProvenance(idChunk);
 
 				if (thePreFetchIndexes) {
-					entityIds = loadedResourceTableEntries.stream()
-							.filter(ResourceTable::isParamsStringPopulated)
-							.map(ResourceTable::getId)
-							.collect(Collectors.toList());
-					if (entityIds.size() > 0) {
-						preFetchIndexes(entityIds, "string", "myParamsString", null);
-					}
 
-					entityIds = loadedResourceTableEntries.stream()
-							.filter(ResourceTable::isParamsTokenPopulated)
-							.map(ResourceTable::getId)
-							.collect(Collectors.toList());
-					if (entityIds.size() > 0) {
-						preFetchIndexes(entityIds, "token", "myParamsToken", null);
-					}
+					prefetchByField("string", "myParamsString", ResourceTable::isParamsStringPopulated, entityChunk);
+					prefetchByField("token", "myParamsToken", ResourceTable::isParamsTokenPopulated, entityChunk);
+					prefetchByField("date", "myParamsDate", ResourceTable::isParamsDatePopulated, entityChunk);
+					prefetchByField(
+							"quantity", "myParamsQuantity", ResourceTable::isParamsQuantityPopulated, entityChunk);
+					prefetchByField("resourceLinks", "myResourceLinks", ResourceTable::isHasLinks, entityChunk);
 
-					entityIds = loadedResourceTableEntries.stream()
-							.filter(ResourceTable::isParamsDatePopulated)
-							.map(ResourceTable::getId)
-							.collect(Collectors.toList());
-					if (entityIds.size() > 0) {
-						preFetchIndexes(entityIds, "date", "myParamsDate", null);
-					}
+					prefetchByJoinClause(
+							"tags",
+							// fetch the TagResources and the actual TagDefinitions
+							"LEFT JOIN FETCH r.myTags t LEFT JOIN FETCH t.myTag",
+							BaseHasResource::isHasTags,
+							entityChunk);
 
-					entityIds = loadedResourceTableEntries.stream()
-							.filter(ResourceTable::isParamsQuantityPopulated)
-							.map(ResourceTable::getId)
-							.collect(Collectors.toList());
-					if (entityIds.size() > 0) {
-						preFetchIndexes(entityIds, "quantity", "myParamsQuantity", null);
-					}
-
-					entityIds = loadedResourceTableEntries.stream()
-							.filter(ResourceTable::isHasLinks)
-							.map(ResourceTable::getId)
-							.collect(Collectors.toList());
-					if (entityIds.size() > 0) {
-						preFetchIndexes(entityIds, "resourceLinks", "myResourceLinks", null);
-					}
-
-					entityIds = loadedResourceTableEntries.stream()
-							.filter(BaseHasResource::isHasTags)
-							.map(ResourceTable::getId)
-							.collect(Collectors.toList());
-					if (entityIds.size() > 0) {
-						myResourceTagDao.findByResourceIds(entityIds);
-						preFetchIndexes(entityIds, "tags", "myTags", null);
-					}
-
-					entityIds = loadedResourceTableEntries.stream()
-							.map(ResourceTable::getId)
-							.collect(Collectors.toList());
 					if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.ENABLED) {
-						preFetchIndexes(entityIds, "searchParamPresence", "mySearchParamPresents", null);
+						prefetchByField("searchParamPresence", "mySearchParamPresents", r -> true, entityChunk);
 					}
 				}
 			}
 		});
 	}
 
-	private void prefetchResourceTableHistoryAndProvenance(
-			List<Long> ids, List<ResourceTable> loadedResourceTableEntries) {
-		new QueryChunker<Long>().chunk(ids, nextChunk -> {
-			Query query = myEntityManager.createQuery("select r, h "
-					+ " FROM ResourceTable r "
-					+ " LEFT JOIN fetch ResourceHistoryTable h "
-					+ "      on r.myVersion = h.myResourceVersion and r.id = h.myResourceId "
-					+ " left join fetch h.myProvenance "
-					+ " WHERE r.myId IN ( :IDS ) ");
-			query.setParameter("IDS", ids);
+	@Nonnull
+	private List<ResourceTable> prefetchResourceTableHistoryAndProvenance(List<Long> idChunk) {
+		assert idChunk.size() < SearchConstants.MAX_PAGE_SIZE : "assume pre-chunked";
 
-			@SuppressWarnings("unchecked")
-			List<Object[]> allById = query.getResultList();
+		Query query = myEntityManager.createQuery("select r, h "
+				+ " FROM ResourceTable r "
+				+ " LEFT JOIN fetch ResourceHistoryTable h "
+				+ "      on r.myVersion = h.myResourceVersion and r.id = h.myResourceId "
+				+ " left join fetch h.myProvenance "
+				+ " WHERE r.myId IN ( :IDS ) ");
+		query.setParameter("IDS", idChunk);
 
-			for (Object[] nextPair : allById) {
-				ResourceTable r = (ResourceTable) nextPair[0];
-				ResourceHistoryTable h = (ResourceHistoryTable) nextPair[1];
-				// history is a big weird - we hold it in a transient field because we also hold the new version.
-				r.setCurrentVersionEntity(h);
-				loadedResourceTableEntries.add(r);
-			}
-		});
+		@SuppressWarnings("unchecked")
+		List<Object[]> queryResults = query.getResultList();
+
+		return queryResults.stream()
+				.map(nextPair -> {
+					// Store the matching ResourceHistoryTable in the transient slot on ResourceTable
+					ResourceTable result = (ResourceTable) nextPair[0];
+					ResourceHistoryTable currentVersion = (ResourceHistoryTable) nextPair[1];
+					result.setCurrentVersionEntity(currentVersion);
+					return result;
+				})
+				.collect(Collectors.toList());
 	}
 
-	private void preFetchIndexes(
-			List<Long> theIds,
-			String typeDesc,
-			String fieldName,
-			@Nullable List<ResourceTable> theEntityListToPopulate) {
-		new QueryChunker<Long>().chunk(theIds, ids -> {
-			TypedQuery<ResourceTable> query = myEntityManager.createQuery(
-					"FROM ResourceTable r LEFT JOIN FETCH r." + fieldName + " WHERE r.myId IN ( :IDS )",
-					ResourceTable.class);
-			query.setParameter("IDS", ids);
-			List<ResourceTable> indexFetchOutcome = query.getResultList();
-			ourLog.debug("Pre-fetched {} {}} indexes", indexFetchOutcome.size(), typeDesc);
-			if (theEntityListToPopulate != null) {
-				theEntityListToPopulate.addAll(indexFetchOutcome);
-			}
-		});
+	/**
+	 * Prefetch a join field for the active subset of some ResourceTable entities.
+	 * Convenience wrapper around prefetchByJoinClause() for simple fields.
+	 *
+	 * @param theDescription             for logging
+	 * @param theJpaFieldName            the field to join
+	 * @param theEntityPredicate         select which ResourceTable entities need this join
+	 * @param theEntities                the ResourceTable entities to consider
+	 */
+	private void prefetchByField(
+			String theDescription,
+			String theJpaFieldName,
+			java.util.function.Predicate<ResourceTable> theEntityPredicate,
+			List<ResourceTable> theEntities) {
+
+		String joinClause = "LEFT JOIN FETCH r." + theJpaFieldName;
+
+		prefetchByJoinClause(theDescription, joinClause, theEntityPredicate, theEntities);
+	}
+
+	/**
+	 * Prefetch a join field for the active subset of some ResourceTable entities.
+	 *
+	 * @param theDescription             for logging
+	 * @param theJoinClause              the JPA join expression to add to `ResourceTable r`
+	 * @param theEntityPredicate         selects which entities need this prefetch
+	 * @param theEntities                the ResourceTable entities to consider
+	 */
+	private void prefetchByJoinClause(
+			String theDescription,
+			String theJoinClause,
+			java.util.function.Predicate<ResourceTable> theEntityPredicate,
+			List<ResourceTable> theEntities) {
+
+		// Which entities need this prefetch?
+		List<Long> idSubset = theEntities.stream()
+				.filter(theEntityPredicate)
+				.map(ResourceTable::getId)
+				.collect(Collectors.toList());
+
+		if (idSubset.isEmpty()) {
+			// nothing to do
+			return;
+		}
+
+		String jqlQuery = "FROM ResourceTable r " + theJoinClause + " WHERE r.myId IN ( :IDS )";
+
+		TypedQuery<ResourceTable> query = myEntityManager.createQuery(jqlQuery, ResourceTable.class);
+		query.setParameter("IDS", idSubset);
+		List<ResourceTable> indexFetchOutcome = query.getResultList();
+
+		ourLog.debug("Pre-fetched {} {} indexes", indexFetchOutcome.size(), theDescription);
 	}
 
 	@Nullable
