@@ -28,13 +28,16 @@ import ca.uhn.fhir.rest.api.PagingHttpMethodEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
+import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.ee10.servlet.ServletApiRequest;
-import org.eclipse.jetty.server.Request;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -48,9 +51,6 @@ import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,7 +61,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEachCallback, AfterEachCallback {
-	protected final MyRestfulServer myRestServer;
+	private final MyRestfulServer myRestServer;
+	private static IPagingProvider myPagingProvider = new FifoMemoryPagingProvider(20);
 
 	public RestServerR4Helper() {
 		this(false, false);
@@ -216,6 +217,10 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		myRestServer.setConceptMapResourceProvider(theResourceProvider);
 	}
 
+	public void setPagingProvider(IPagingProvider thePagingProvider) {
+		myPagingProvider = thePagingProvider;
+	}
+
 	@Override
 	public IIdType createPatientWithId(String theId) {
 		Patient patient = new Patient();
@@ -331,8 +336,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 
 		public void clearCounts() {
 			for (IResourceProvider next : getResourceProviders()) {
-				if (next instanceof HashMapResourceProvider) {
-					HashMapResourceProvider provider = (HashMapResourceProvider) next;
+				if (next instanceof HashMapResourceProvider<?> provider) {
 					provider.clearCounts();
 				}
 			}
@@ -372,8 +376,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 
 		public void clearDataAndCounts() {
 			for (IResourceProvider next : getResourceProviders()) {
-				if (next instanceof HashMapResourceProvider) {
-					HashMapResourceProvider provider = (HashMapResourceProvider) next;
+				if (next instanceof HashMapResourceProvider<?> provider) {
 					provider.clear();
 				}
 			}
@@ -385,7 +388,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		}
 
 		public void setObservationResourceProvider(HashMapResourceProvider<Observation> theResourceProvider) {
-			myObservationResourceProvider.getStoredResources().forEach(o -> theResourceProvider.store(o));
+			myObservationResourceProvider.getStoredResources().forEach(theResourceProvider::store);
 
 			unregisterProvider(myObservationResourceProvider);
 			registerProvider(theResourceProvider);
@@ -401,7 +404,7 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 		}
 
 		public void setConceptMapResourceProvider(HashMapResourceProvider<ConceptMap> theResourceProvider) {
-			myConceptMapResourceProvider.getStoredResources().forEach(c -> theResourceProvider.store(c));
+			myConceptMapResourceProvider.getStoredResources().forEach(theResourceProvider::store);
 
 			unregisterProvider(myConceptMapResourceProvider);
 			registerProvider(theResourceProvider);
@@ -417,23 +420,23 @@ public class RestServerR4Helper extends BaseRestServerHelper implements BeforeEa
 			super.initialize();
 
 			FhirContext fhirContext = getFhirContext();
-			myPatientResourceProvider = new MyHashMapResourceProvider(fhirContext, Patient.class);
+			myPatientResourceProvider = new MyHashMapResourceProvider<>(fhirContext, Patient.class);
 			registerProvider(myPatientResourceProvider);
-			myObservationResourceProvider = new MyHashMapResourceProvider(fhirContext, Observation.class);
+			myObservationResourceProvider = new MyHashMapResourceProvider<>(fhirContext, Observation.class);
 			registerProvider(myObservationResourceProvider);
-			myOrganizationResourceProvider = new MyHashMapResourceProvider(fhirContext, Organization.class);
+			myOrganizationResourceProvider = new MyHashMapResourceProvider<>(fhirContext, Organization.class);
 			registerProvider(myOrganizationResourceProvider);
-			myConceptMapResourceProvider = new MyHashMapResourceProvider(fhirContext, ConceptMap.class);
+			myConceptMapResourceProvider = new MyHashMapResourceProvider<>(fhirContext, ConceptMap.class);
 			registerProvider(myConceptMapResourceProvider);
 
 			myPlainProvider = new RestServerDstu3Helper.MyPlainProvider(myInitialTransactionLatchEnabled);
 			registerProvider(myPlainProvider);
 
-			setPagingProvider(new FifoMemoryPagingProvider(20));
+			setPagingProvider(myPagingProvider);
 		}
 
 		public class MyHashMapResourceProvider<T extends IBaseResource> extends HashMapResourceProvider<T> {
-			public MyHashMapResourceProvider(FhirContext theContext, Class theType) {
+			public MyHashMapResourceProvider(FhirContext theContext, Class<T> theType) {
 				super(theContext, theType);
 			}
 
