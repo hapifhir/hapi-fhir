@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5824
+title: "We now avoid a query during reindex and transaction processing that was very slow on Sql Server."
