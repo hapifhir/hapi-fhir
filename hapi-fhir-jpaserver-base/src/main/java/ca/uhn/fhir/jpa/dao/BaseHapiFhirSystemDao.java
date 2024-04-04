@@ -199,28 +199,24 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			if (ids.size() >= 2) {
 				List<ResourceTable> loadedResourceTableEntries = new ArrayList<>();
 
-				new QueryChunker<Long>()
-						.chunk(
-								ids,
-								nextChunk -> {
-									//List<ResourceTable> allById = myResourceTableDao.findAllById(nextChunk);
-									Query query = myEntityManager.createQuery(
-										"select r, h FROM ResourceTable r " +
-											" LEFT JOIN fetch ResourceHistoryTable h on r.myVersion = h.myResourceVersion and r.id = h.myResourceId" +
-											" left join fetch h.myProvenance" +
-											" WHERE r.myId IN ( :IDS )");
-									query.setParameter("IDS", ids);
+				new QueryChunker<Long>().chunk(ids, nextChunk -> {
+					// List<ResourceTable> allById = myResourceTableDao.findAllById(nextChunk);
+					Query query = myEntityManager.createQuery("select r, h FROM ResourceTable r "
+							+ " LEFT JOIN fetch ResourceHistoryTable h on r.myVersion = h.myResourceVersion and r.id = h.myResourceId"
+							+ " left join fetch h.myProvenance"
+							+ " WHERE r.myId IN ( :IDS )");
+					query.setParameter("IDS", ids);
 
-									@SuppressWarnings("unchecked")
-									List<Object[]> allById = query.getResultList();
+					@SuppressWarnings("unchecked")
+					List<Object[]> allById = query.getResultList();
 
-									for (Object[] nextPair : allById) {
-										ResourceTable r = (ResourceTable) nextPair[0];
-										ResourceHistoryTable h = (ResourceHistoryTable) nextPair[1];
-										r.setCurrentVersionEntity(h);
-										loadedResourceTableEntries.add(r);
-									}
-                                });
+					for (Object[] nextPair : allById) {
+						ResourceTable r = (ResourceTable) nextPair[0];
+						ResourceHistoryTable h = (ResourceHistoryTable) nextPair[1];
+						r.setCurrentVersionEntity(h);
+						loadedResourceTableEntries.add(r);
+					}
+				});
 
 				List<Long> entityIds;
 
@@ -282,33 +278,33 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 					}
 				}
 
-//				new QueryChunker<ResourceTable>()
-//						.chunk(loadedResourceTableEntries, SearchBuilder.getMaximumPageSize() / 2, entries -> {
-//							Map<Long, ResourceTable> entities =
-//									entries.stream().collect(Collectors.toMap(ResourceTable::getId, t -> t));
-//
-//							CriteriaBuilder b = myEntityManager.getCriteriaBuilder();
-//							CriteriaQuery<ResourceHistoryTable> q = b.createQuery(ResourceHistoryTable.class);
-//							Root<ResourceHistoryTable> from = q.from(ResourceHistoryTable.class);
-//
-//							from.fetch("myProvenance", JoinType.LEFT);
-//
-//							List<Predicate> orPredicates = new ArrayList<>();
-//							for (ResourceTable next : entries) {
-//								Predicate resId = b.equal(from.get("myResourceId"), next.getId());
-//								Predicate resVer = b.equal(from.get("myResourceVersion"), next.getVersion());
-//								orPredicates.add(b.and(resId, resVer));
-//							}
-//							q.where(b.or(orPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
-//							List<ResourceHistoryTable> resultList =
-//									myEntityManager.createQuery(q).getResultList();
-//							for (ResourceHistoryTable next : resultList) {
-//								ResourceTable nextEntity = entities.get(next.getResourceId());
-//								if (nextEntity != null) {
-//									nextEntity.setCurrentVersionEntity(next);
-//								}
-//							}
-//						});
+				//				new QueryChunker<ResourceTable>()
+				//						.chunk(loadedResourceTableEntries, SearchBuilder.getMaximumPageSize() / 2, entries -> {
+				//							Map<Long, ResourceTable> entities =
+				//									entries.stream().collect(Collectors.toMap(ResourceTable::getId, t -> t));
+				//
+				//							CriteriaBuilder b = myEntityManager.getCriteriaBuilder();
+				//							CriteriaQuery<ResourceHistoryTable> q = b.createQuery(ResourceHistoryTable.class);
+				//							Root<ResourceHistoryTable> from = q.from(ResourceHistoryTable.class);
+				//
+				//							from.fetch("myProvenance", JoinType.LEFT);
+				//
+				//							List<Predicate> orPredicates = new ArrayList<>();
+				//							for (ResourceTable next : entries) {
+				//								Predicate resId = b.equal(from.get("myResourceId"), next.getId());
+				//								Predicate resVer = b.equal(from.get("myResourceVersion"), next.getVersion());
+				//								orPredicates.add(b.and(resId, resVer));
+				//							}
+				//							q.where(b.or(orPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
+				//							List<ResourceHistoryTable> resultList =
+				//									myEntityManager.createQuery(q).getResultList();
+				//							for (ResourceHistoryTable next : resultList) {
+				//								ResourceTable nextEntity = entities.get(next.getResourceId());
+				//								if (nextEntity != null) {
+				//									nextEntity.setCurrentVersionEntity(next);
+				//								}
+				//							}
+				//						});
 			}
 		});
 	}
