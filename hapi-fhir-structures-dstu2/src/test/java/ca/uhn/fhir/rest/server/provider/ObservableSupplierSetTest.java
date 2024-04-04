@@ -91,7 +91,7 @@ class ObservableSupplierSetTest {
 
 		@Override
 		public void remove(@NotNull Supplier<Object> theSupplier) {
-			++ removed;
+			++removed;
 		}
 
 		public void assertCalls(int theExpectedUpdated, int theExpectedRemoved) {

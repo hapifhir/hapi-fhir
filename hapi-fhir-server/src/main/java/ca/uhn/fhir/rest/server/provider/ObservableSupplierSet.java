@@ -67,7 +67,7 @@ public class ObservableSupplierSet<T extends IObservableSupplierSetObserver> {
 		if (mySuppliers.remove(theSupplier)) {
 			myObservers.forEach(observer -> observer.remove(theSupplier));
 		} else {
-			ourLog.warn("Failed to remove Fhir Extension", new RuntimeException());
+			ourLog.warn("Failed to remove supplier", new RuntimeException());
 		}
 	}
 
