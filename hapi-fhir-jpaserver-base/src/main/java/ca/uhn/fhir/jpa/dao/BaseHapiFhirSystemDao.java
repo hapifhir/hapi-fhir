@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
-import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -54,7 +53,6 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.Predicate;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -65,14 +63,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends BaseStorageDao
 		implements IFhirSystemDao<T, MT> {
-
-	public static final Predicate[] EMPTY_PREDICATE_ARRAY = new Predicate[0];
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseHapiFhirSystemDao.class);
+
 	public ResourceCountCache myResourceCountsCache;
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
@@ -92,9 +90,6 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 
 	@Autowired
 	private PersistedJpaBundleProviderFactory myPersistedJpaBundleProviderFactory;
-
-	@Autowired
-	private IResourceTagDao myResourceTagDao;
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -190,6 +185,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	 * @param theResolvedIds the pids
 	 * @param thePreFetchIndexes Should resource indexes be loaded
 	 */
+	@SuppressWarnings("rawtypes")
 	@Override
 	public <P extends IResourcePersistentId> void preFetchResources(
 			List<P> theResolvedIds, boolean thePreFetchIndexes) {
@@ -273,7 +269,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	private void prefetchByField(
 			String theDescription,
 			String theJpaFieldName,
-			java.util.function.Predicate<ResourceTable> theEntityPredicate,
+			Predicate<ResourceTable> theEntityPredicate,
 			List<ResourceTable> theEntities) {
 
 		String joinClause = "LEFT JOIN FETCH r." + theJpaFieldName;
@@ -292,7 +288,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	private void prefetchByJoinClause(
 			String theDescription,
 			String theJoinClause,
-			java.util.function.Predicate<ResourceTable> theEntityPredicate,
+			Predicate<ResourceTable> theEntityPredicate,
 			List<ResourceTable> theEntities) {
 
 		// Which entities need this prefetch?
