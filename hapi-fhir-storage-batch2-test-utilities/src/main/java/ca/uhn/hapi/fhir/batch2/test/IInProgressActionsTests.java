@@ -12,13 +12,13 @@ public interface IInProgressActionsTests extends IWorkChunkCommon, WorkChunkTest
 
 	@Test
 	default void processingOk_inProgressToSuccess_clearsDataSavesRecordCount() {
-		String jobId = createAndStoreJobInstance(null);
-		String myChunkId = createAndDequeueWorkChunk(jobId);
+		String jobId = getTestManager().createAndStoreJobInstance(null);
+		String myChunkId = getTestManager().createAndDequeueWorkChunk(jobId);
 		// execution ok
-		getSvc().onWorkChunkCompletion(new WorkChunkCompletionEvent(myChunkId, 3, 0));
+		getTestManager().getSvc().onWorkChunkCompletion(new WorkChunkCompletionEvent(myChunkId, 3, 0));
 
 		// verify the db was updated
-		var workChunkEntity = freshFetchWorkChunk(myChunkId);
+		var workChunkEntity = getTestManager().freshFetchWorkChunk(myChunkId);
 		assertEquals(WorkChunkStatusEnum.COMPLETED, workChunkEntity.getStatus());
 		assertNull(workChunkEntity.getData());
 		assertEquals(3, workChunkEntity.getRecordsProcessed());
@@ -28,13 +28,13 @@ public interface IInProgressActionsTests extends IWorkChunkCommon, WorkChunkTest
 
 	@Test
 	default void processingRetryableError_inProgressToError_bumpsCountRecordsMessage() {
-		String jobId = createAndStoreJobInstance(null);
-		String myChunkId = createAndDequeueWorkChunk(jobId);
+		String jobId = getTestManager().createAndStoreJobInstance(null);
+		String myChunkId = getTestManager().createAndDequeueWorkChunk(jobId);
 		// execution had a retryable error
-		getSvc().onWorkChunkError(new WorkChunkErrorEvent(myChunkId, ERROR_MESSAGE_A));
+		getTestManager().getSvc().onWorkChunkError(new WorkChunkErrorEvent(myChunkId, ERROR_MESSAGE_A));
 
 		// verify the db was updated
-		var workChunkEntity = freshFetchWorkChunk(myChunkId);
+		var workChunkEntity = getTestManager().freshFetchWorkChunk(myChunkId);
 		assertEquals(WorkChunkStatusEnum.ERRORED, workChunkEntity.getStatus());
 		assertEquals(ERROR_MESSAGE_A, workChunkEntity.getErrorMessage());
 		assertEquals(1, workChunkEntity.getErrorCount());
@@ -42,13 +42,13 @@ public interface IInProgressActionsTests extends IWorkChunkCommon, WorkChunkTest
 
 	@Test
 	default void processingFailure_inProgressToFailed() {
-		String jobId = createAndStoreJobInstance(null);
-		String myChunkId = createAndDequeueWorkChunk(jobId);
+		String jobId = getTestManager().createAndStoreJobInstance(null);
+		String myChunkId = getTestManager().createAndDequeueWorkChunk(jobId);
 		// execution had a failure
-		getSvc().onWorkChunkFailed(myChunkId, "some error");
+		getTestManager().getSvc().onWorkChunkFailed(myChunkId, "some error");
 
 		// verify the db was updated
-		var workChunkEntity = freshFetchWorkChunk(myChunkId);
+		var workChunkEntity = getTestManager().freshFetchWorkChunk(myChunkId);
 		assertEquals(WorkChunkStatusEnum.FAILED, workChunkEntity.getStatus());
 		assertEquals("some error", workChunkEntity.getErrorMessage());
 	}

@@ -11,12 +11,12 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 	@Test
 	default void testStoreAndFetchWorkChunk_NoData() {
 		JobInstance instance = createInstance();
-		String instanceId = getSvc().storeNewInstance(instance);
+		String instanceId = getTestManager().getSvc().storeNewInstance(instance);
 
-		String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, null);
+		String id = getTestManager().storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, null);
 
-		runInTransaction(() -> {
-			WorkChunk chunk = freshFetchWorkChunk(id);
+		getTestManager().runInTransaction(() -> {
+			WorkChunk chunk = getTestManager().freshFetchWorkChunk(id);
 			assertNull(chunk.getData());
 		});
 	}

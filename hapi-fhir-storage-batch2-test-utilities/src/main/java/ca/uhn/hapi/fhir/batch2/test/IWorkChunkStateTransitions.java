@@ -15,18 +15,18 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 
 	@Test
 	default void chunkReceived_queuedToInProgress() throws InterruptedException {
-		String jobInstanceId = createAndStoreJobInstance(null);
-		String myChunkId = createChunk(jobInstanceId);
+		String jobInstanceId = getTestManager().createAndStoreJobInstance(null);
+		String myChunkId = getTestManager().createChunk(jobInstanceId);
 
-		runMaintenancePass();
+		getTestManager().runMaintenancePass();
 		// the worker has received the chunk, and marks it started.
-		WorkChunk chunk = getSvc().onWorkChunkDequeue(myChunkId).orElseThrow(IllegalArgumentException::new);
+		WorkChunk chunk = getTestManager().getSvc().onWorkChunkDequeue(myChunkId).orElseThrow(IllegalArgumentException::new);
 
 		assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
 		assertEquals(CHUNK_DATA, chunk.getData());
 
 		// verify the db was updated too
-		WorkChunk fetchedWorkChunk = freshFetchWorkChunk(myChunkId);
+		WorkChunk fetchedWorkChunk = getTestManager().freshFetchWorkChunk(myChunkId);
 		assertEquals(WorkChunkStatusEnum.IN_PROGRESS, fetchedWorkChunk.getStatus());
 	}
 }

@@ -26,16 +26,16 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 	@Test
 	default void testCreateInstance_firstChunkDequeued_movesToInProgress() {
 		// given
-		JobDefinition<?> jd = withJobDefinition(false);
-		IJobPersistence.CreateResult createResult = newTxTemplate().execute(status->
-			getSvc().onCreateWithFirstChunk(jd, "{}"));
+		JobDefinition<?> jd = getTestManager().withJobDefinition(false);
+		IJobPersistence.CreateResult createResult = getTestManager().newTxTemplate().execute(status->
+			getTestManager().getSvc().onCreateWithFirstChunk(jd, "{}"));
 		assertNotNull(createResult);
 
 		// when
-		newTxTemplate().execute(status -> getSvc().onChunkDequeued(createResult.jobInstanceId));
+		getTestManager().newTxTemplate().execute(status -> getTestManager().getSvc().onChunkDequeued(createResult.jobInstanceId));
 
 		// then
-		JobInstance jobInstance = freshFetchJobInstance(createResult.jobInstanceId);
+		JobInstance jobInstance = getTestManager().freshFetchJobInstance(createResult.jobInstanceId);
 		assertThat(jobInstance.getStatus(), equalTo(StatusEnum.IN_PROGRESS));
 	}
 
@@ -45,20 +45,20 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		// given
 		JobInstance cancelledInstance = createInstance();
 		cancelledInstance.setStatus(theState);
-		String instanceId1 = getSvc().storeNewInstance(cancelledInstance);
-		getSvc().cancelInstance(instanceId1);
+		String instanceId1 = getTestManager().getSvc().storeNewInstance(cancelledInstance);
+		getTestManager().getSvc().cancelInstance(instanceId1);
 
 		JobInstance normalInstance = createInstance();
 		normalInstance.setStatus(theState);
-		String instanceId2 = getSvc().storeNewInstance(normalInstance);
+		String instanceId2 = getTestManager().getSvc().storeNewInstance(normalInstance);
 
 		JobDefinitionRegistry jobDefinitionRegistry = new JobDefinitionRegistry();
-		jobDefinitionRegistry.addJobDefinitionIfNotRegistered(withJobDefinition(false));
+		jobDefinitionRegistry.addJobDefinitionIfNotRegistered(getTestManager().withJobDefinition(false));
 
 		// when
-		runInTransaction(()-> {
+		getTestManager().runInTransaction(()-> {
 			new JobInstanceProcessor(
-				getSvc(),
+				getTestManager().getSvc(),
 				null,
 				instanceId1,
 				new JobChunkProgressAccumulator(),
@@ -68,7 +68,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		});
 
 		// then
-		JobInstance freshInstance1 = getSvc().fetchInstance(instanceId1).orElseThrow();
+		JobInstance freshInstance1 = getTestManager().getSvc().fetchInstance(instanceId1).orElseThrow();
 		if (theState.isCancellable()) {
 			assertEquals(StatusEnum.CANCELLED, freshInstance1.getStatus(), "cancel request processed");
 			assertThat(freshInstance1.getErrorMessage(), containsString("Job instance cancelled"));
@@ -76,17 +76,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 			assertEquals(theState, freshInstance1.getStatus(), "cancel request ignored - state unchanged");
 			assertNull(freshInstance1.getErrorMessage(), "no error message");
 		}
-		JobInstance freshInstance2 = getSvc().fetchInstance(instanceId2).orElseThrow();
+		JobInstance freshInstance2 = getTestManager().getSvc().fetchInstance(instanceId2).orElseThrow();
 		assertEquals(theState, freshInstance2.getStatus(), "cancel request ignored - cancelled not set");
-	}
-
-	default JobInstance createInstance() {
-		JobInstance instance = new JobInstance();
-		instance.setJobDefinitionId(JOB_DEFINITION_ID);
-		instance.setStatus(StatusEnum.QUEUED);
-		instance.setJobDefinitionVersion(JOB_DEF_VER);
-		instance.setParameters(CHUNK_DATA);
-		instance.setReport("TEST");
-		return instance;
 	}
 }

@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
@@ -63,7 +64,7 @@ import static org.mockito.Mockito.verify;
  * These tests are abstract, and do not depend on JPA.
  * Test setups should use the public batch2 api to create scenarios.
  */
-public abstract class AbstractIJobPersistenceSpecificationTest implements IInProgressActionsTests, IInstanceStateTransitions, IWorkChunkCommon, WorkChunkTestConstants {
+public abstract class AbstractIJobPersistenceSpecificationTest implements IInProgressActionsTests, IInstanceStateTransitions, ITestFixture, WorkChunkTestConstants {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AbstractIJobPersistenceSpecificationTest.class);
 
@@ -114,11 +115,21 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IInPro
 		Mockito.clearInvocations(myBatchJobSender);
 	}
 
+	@Override
+	public ITestFixture getTestManager() {
+		return this;
+	}
+
+	@Override
+	public void enableMaintenanceRunner(boolean theToEnable) {
+		myMaintenanceService.enableMaintenancePass(theToEnable);
+	}
+
 	@Nested
 	class WorkChunkStorage implements IWorkChunkStorageTests {
 
 		@Override
-		public IWorkChunkCommon getTestManager() {
+		public ITestFixture getTestManager() {
 			return AbstractIJobPersistenceSpecificationTest.this;
 		}
 
@@ -126,7 +137,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IInPro
 		class StateTransitions implements IWorkChunkStateTransitions {
 
 			@Override
-			public IWorkChunkCommon getTestManager() {
+			public ITestFixture getTestManager() {
 				return AbstractIJobPersistenceSpecificationTest.this;
 			}
 
@@ -134,16 +145,11 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IInPro
 			class ErrorActions implements IWorkChunkErrorActionsTests {
 
 				@Override
-				public IWorkChunkCommon getTestManager() {
+				public ITestFixture getTestManager() {
 					return AbstractIJobPersistenceSpecificationTest.this;
 				}
 			}
 		}
-	}
-
-	@Override
-	public IWorkChunkCommon getTestManager() {
-		return this;
 	}
 
 	@Nonnull
@@ -174,6 +180,9 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IInPro
 	public JobInstance freshFetchJobInstance(String theInstanceId) {
 		return runInTransaction(() -> mySvc.fetchInstance(theInstanceId).orElseThrow());
 	}
+
+	@Override
+	public abstract void runMaintenancePass();
 
 	public TransactionTemplate newTxTemplate() {
 		TransactionTemplate retVal = new TransactionTemplate(getTxManager());
@@ -220,6 +229,9 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IInPro
 		mySvc.onWorkChunkDequeue(chunkId);
 		return chunkId;
 	}
+
+	@Override
+	public abstract WorkChunk freshFetchWorkChunk(String theChunkId);
 
 	public String createChunk(String theInstanceId) {
 		return storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, theInstanceId, 0, CHUNK_DATA);
