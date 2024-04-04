@@ -272,34 +272,6 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 						preFetchIndexes(entityIds, "searchParamPresence", "mySearchParamPresents", null);
 					}
 				}
-
-				//				new QueryChunker<ResourceTable>()
-				//						.chunk(loadedResourceTableEntries, SearchBuilder.getMaximumPageSize() / 2, entries -> {
-				//							Map<Long, ResourceTable> entities =
-				//									entries.stream().collect(Collectors.toMap(ResourceTable::getId, t -> t));
-				//
-				//							CriteriaBuilder b = myEntityManager.getCriteriaBuilder();
-				//							CriteriaQuery<ResourceHistoryTable> q = b.createQuery(ResourceHistoryTable.class);
-				//							Root<ResourceHistoryTable> from = q.from(ResourceHistoryTable.class);
-				//
-				//							from.fetch("myProvenance", JoinType.LEFT);
-				//
-				//							List<Predicate> orPredicates = new ArrayList<>();
-				//							for (ResourceTable next : entries) {
-				//								Predicate resId = b.equal(from.get("myResourceId"), next.getId());
-				//								Predicate resVer = b.equal(from.get("myResourceVersion"), next.getVersion());
-				//								orPredicates.add(b.and(resId, resVer));
-				//							}
-				//							q.where(b.or(orPredicates.toArray(EMPTY_PREDICATE_ARRAY)));
-				//							List<ResourceHistoryTable> resultList =
-				//									myEntityManager.createQuery(q).getResultList();
-				//							for (ResourceHistoryTable next : resultList) {
-				//								ResourceTable nextEntity = entities.get(next.getResourceId());
-				//								if (nextEntity != null) {
-				//									nextEntity.setCurrentVersionEntity(next);
-				//								}
-				//							}
-				//						});
 			}
 		});
 	}
