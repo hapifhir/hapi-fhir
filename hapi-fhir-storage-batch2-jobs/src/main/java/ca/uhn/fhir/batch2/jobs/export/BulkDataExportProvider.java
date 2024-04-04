@@ -77,7 +77,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -293,11 +292,13 @@ public class BulkDataExportProvider {
 	 */
 	private void validateTargetsExists(
 			RequestDetails theRequestDetails, String theTargetResourceName, Iterable<IIdType> theIdParams) {
-		RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
+		if (theIdParams.iterator().hasNext()) {
+			RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
 				theRequestDetails, theTargetResourceName, theIdParams.iterator().next());
-		SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
-		for (IIdType nextId : theIdParams) {
-			myDaoRegistry.getResourceDao(theTargetResourceName).read(nextId, requestDetails);
+			SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
+			for (IIdType nextId : theIdParams) {
+				myDaoRegistry.getResourceDao(theTargetResourceName).read(nextId, requestDetails);
+			}
 		}
 	}
 
@@ -364,26 +365,20 @@ public class BulkDataExportProvider {
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
 			ServletRequestDetails theRequestDetails) {
-		validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
-		if (thePatient != null) {
-			validateTargetsExists(
-					theRequestDetails,
-					"Patient",
-					thePatient.stream().map(s -> new IdDt(s.getValue())).collect(Collectors.toList()));
-		}
+		List<IPrimitiveType<String>> patientIds = thePatient != null
+				? thePatient.stream().map(s -> new IdDt(s.getValue())).collect(Collectors.toList())
+				: new ArrayList<>();
 
-		BulkExportJobParameters BulkExportJobParameters = buildPatientBulkExportOptions(
+		doPatientExport(
+				theRequestDetails,
 				theOutputFormat,
 				theType,
 				theSince,
-				theTypeFilter,
 				theExportIdentifier,
-				thePatient,
-				theTypePostFetchFilterUrl);
-		validateResourceTypesAllContainPatientSearchParams(BulkExportJobParameters.getResourceTypes());
-
-		startJob(theRequestDetails, BulkExportJobParameters);
+				theTypeFilter,
+				theTypePostFetchFilterUrl,
+				patientIds);
 	}
 
 	/**
@@ -417,9 +412,33 @@ public class BulkDataExportProvider {
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_IDENTIFIER, min = 0, max = 1, typeName = "string")
 					IPrimitiveType<String> theExportIdentifier,
 			ServletRequestDetails theRequestDetails) {
+
+		doPatientExport(
+				theRequestDetails,
+				theOutputFormat,
+				theType,
+				theSince,
+				theExportIdentifier,
+				theTypeFilter,
+				theTypePostFetchFilterUrl,
+				List.of(theIdParam));
+	}
+
+	private void doPatientExport(
+			ServletRequestDetails theRequestDetails,
+			IPrimitiveType<String> theOutputFormat,
+			IPrimitiveType<String> theType,
+			IPrimitiveType<Date> theSince,
+			IPrimitiveType<String> theExportIdentifier,
+			List<IPrimitiveType<String>> theTypeFilter,
+			List<IPrimitiveType<String>> theTypePostFetchFilterUrl,
+			List<IPrimitiveType<String>> thePatientIds) {
 		validatePreferAsyncHeader(theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 
-		validateTargetsExists(theRequestDetails, "Patient", List.of(theIdParam));
+		validateTargetsExists(
+				theRequestDetails,
+				"Patient",
+				thePatientIds.stream().map(c -> new IdType(c.getValue())).collect(Collectors.toList()));
 
 		BulkExportJobParameters BulkExportJobParameters = buildPatientBulkExportOptions(
 				theOutputFormat,
@@ -427,7 +446,7 @@ public class BulkDataExportProvider {
 				theSince,
 				theTypeFilter,
 				theExportIdentifier,
-				theIdParam,
+				thePatientIds,
 				theTypePostFetchFilterUrl);
 		validateResourceTypesAllContainPatientSearchParams(BulkExportJobParameters.getResourceTypes());
 
@@ -667,31 +686,6 @@ public class BulkDataExportProvider {
 			BulkExportJobParameters.setPatientIds(
 					thePatientIds.stream().map(IPrimitiveType::getValueAsString).collect(Collectors.toSet()));
 		}
-		return BulkExportJobParameters;
-	}
-
-	private BulkExportJobParameters buildPatientBulkExportOptions(
-			IPrimitiveType<String> theOutputFormat,
-			IPrimitiveType<String> theType,
-			IPrimitiveType<Date> theSince,
-			List<IPrimitiveType<String>> theTypeFilter,
-			IPrimitiveType<String> theExportIdentifier,
-			IIdType thePatientId,
-			List<IPrimitiveType<String>> theTypePostFetchFilterUrl) {
-		IPrimitiveType<String> type = theType;
-		if (type == null) {
-			// set type to all patient compartment resources if it is null
-			type = new StringDt(String.join(",", getPatientCompartmentResources()));
-		}
-		BulkExportJobParameters BulkExportJobParameters = buildBulkExportJobParameters(
-				theOutputFormat,
-				type,
-				theSince,
-				theTypeFilter,
-				theExportIdentifier,
-				ExportStyle.PATIENT,
-				theTypePostFetchFilterUrl);
-		BulkExportJobParameters.setPatientIds(Collections.singleton(thePatientId.getValue()));
 		return BulkExportJobParameters;
 	}
 
