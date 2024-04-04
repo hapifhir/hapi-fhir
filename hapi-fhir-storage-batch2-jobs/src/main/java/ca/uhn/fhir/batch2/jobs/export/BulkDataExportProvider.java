@@ -37,7 +37,6 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.bulk.export.model.BulkExportResponseJson;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -369,8 +368,7 @@ public class BulkDataExportProvider {
 			ServletRequestDetails theRequestDetails) {
 
 		List<IPrimitiveType<String>> patientIds = thePatient != null
-				? thePatient.stream().map(s -> new IdDt(s.getValue())).collect(Collectors.toList())
-				: new ArrayList<>();
+				? thePatient : new ArrayList<>();
 
 		doPatientExport(
 				theRequestDetails,
@@ -415,15 +413,17 @@ public class BulkDataExportProvider {
 					IPrimitiveType<String> theExportIdentifier,
 			ServletRequestDetails theRequestDetails) {
 
-		doPatientExport(
-				theRequestDetails,
-				theOutputFormat,
-				theType,
-				theSince,
-				theExportIdentifier,
-				theTypeFilter,
-				theTypePostFetchFilterUrl,
-				List.of(theIdParam));
+		// call the type-level export to ensure spec compliance
+		patientExport(
+			theOutputFormat,
+			theType,
+			theSince,
+			theTypeFilter,
+			theTypePostFetchFilterUrl,
+			List.of(theIdParam),
+			theExportIdentifier,
+			theRequestDetails
+		);
 	}
 
 	private void doPatientExport(
