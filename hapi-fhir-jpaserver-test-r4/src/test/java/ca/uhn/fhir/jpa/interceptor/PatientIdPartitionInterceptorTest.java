@@ -112,8 +112,6 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		});
 	}
 
-	// LUKETODO:  add here?
-
 	/**
 	 * This is an edge case where a client assigned ID has a Java hashCode equal to Integer.MIN_VALUE.
 	 */

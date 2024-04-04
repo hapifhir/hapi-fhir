@@ -88,7 +88,6 @@ public class CanonicalSubscription implements Serializable, Cloneable, IModelJso
 	@JsonProperty("partitionId")
 	private Integer myPartitionId;
 
-	// LUKETODO:  hwo is this set?
 	@JsonProperty("crossPartitionEnabled")
 	private boolean myCrossPartitionEnabled;
 

@@ -112,7 +112,7 @@ public class SubscriptionCanonicalizer {
 			retVal.setIdElement(subscription.getIdElement());
 			retVal.setPayloadString(channel.getPayload());
 			retVal.setTags(extractTags(subscription));
-			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
+			handleCrossPartition(theSubscription, retVal);
 			retVal.setSendDeleteMessages(extractDeleteExtensionDstu2(subscription));
 		} catch (FHIRException theE) {
 			throw new InternalErrorException(Msg.code(557) + theE);
@@ -164,7 +164,7 @@ public class SubscriptionCanonicalizer {
 			retVal.setPayloadSearchCriteria(
 					getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
 			retVal.setTags(extractTags(subscription));
-			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
+			handleCrossPartition(theSubscription, retVal);
 
 			if (retVal.getChannelType() == CanonicalSubscriptionChannelType.EMAIL) {
 				String from;
@@ -295,21 +295,7 @@ public class SubscriptionCanonicalizer {
 				getExtensionString(subscription, HapiExtensions.EXT_SUBSCRIPTION_PAYLOAD_SEARCH_CRITERIA));
 		retVal.setTags(extractTags(subscription));
 		setPartitionIdOnReturnValue(theSubscription, retVal);
-		// LUKETODO:  if there's a subscription on the "default partition" whatever that means, we're in cross partition
-		// true and there's no extension
-		// LUKETODO: R4B, R5, etc?
-		// LUKETODO: temporarily hard-code this: then reverse
-		//		retVal.setCrossPartitionEnabled(true);
-		if (myStorageSettings.isCrossPartitionSubscriptionEnabled()) {
-			ourLog.info(
-					"5815: isCrossPartitionSubscriptionEnabled(), SubscriptionUtil.isCrossPartition(theSubscription): {}",
-					SubscriptionUtil.isCrossPartition(theSubscription));
-			retVal.setCrossPartitionEnabled(true);
-		} else {
-			ourLog.info("5815: NOT isCrossPartitionSubscriptionEnabled()");
-			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
-		}
-//				retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
+		handleCrossPartition(theSubscription, retVal);
 
 		List<org.hl7.fhir.r4.model.CanonicalType> profiles =
 				subscription.getMeta().getProfile();
@@ -514,6 +500,8 @@ public class SubscriptionCanonicalizer {
 			retVal.setSendDeleteMessages(extension.getValueBooleanType().booleanValue());
 		}
 
+		handleCrossPartition(theSubscription, retVal);
+
 		return retVal;
 	}
 
@@ -577,6 +565,8 @@ public class SubscriptionCanonicalizer {
 		retVal.getTopicSubscription().setMaxCount(subscription.getMaxCount());
 
 		setR5FlagsBasedOnChannelType(subscription, retVal);
+
+		handleCrossPartition(theSubscription, retVal);
 
 		return retVal;
 	}
@@ -778,5 +768,18 @@ public class SubscriptionCanonicalizer {
 			return null;
 		}
 		return status.getValueAsString();
+	}
+
+	private void handleCrossPartition(IBaseResource theSubscription, CanonicalSubscription retVal) {
+		if (myStorageSettings.isCrossPartitionSubscriptionEnabled()) {
+			ourLog.info(
+					"5815: isCrossPartitionSubscriptionEnabled(), SubscriptionUtil.isCrossPartition(theSubscription): {}",
+					SubscriptionUtil.isCrossPartition(theSubscription));
+			retVal.setCrossPartitionEnabled(true);
+		} else {
+			ourLog.info("5815: NOT isCrossPartitionSubscriptionEnabled()");
+			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
+		}
+		//				retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
 	}
 }
