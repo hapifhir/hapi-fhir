@@ -177,6 +177,18 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 		return myTransactionProcessor.transaction(theRequestDetails, theRequest, true);
 	}
 
+	/**
+	 * Prefetch entities into the Hibernate session.
+	 *
+	 * When processing several resources (e.g. transaction bundle, $reindex chunk, etc.)
+	 * it would be slow to fetch each piece of a resource (e.g. all token index rows)
+	 * one resource at a time.
+	 * Instead, we fetch all the linked resources for the entire batch here so they are present in the Hibernate Session.
+	 *
+	 * @param theResolvedIds
+	 * @param thePreFetchIndexes Should resource indexes be loaded
+	 * @param <P>
+	 */
 	@Override
 	public <P extends IResourcePersistentId> void preFetchResources(
 			List<P> theResolvedIds, boolean thePreFetchIndexes) {
@@ -199,24 +211,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			if (ids.size() >= 2) {
 				List<ResourceTable> loadedResourceTableEntries = new ArrayList<>();
 
-				new QueryChunker<Long>().chunk(ids, nextChunk -> {
-					// List<ResourceTable> allById = myResourceTableDao.findAllById(nextChunk);
-					Query query = myEntityManager.createQuery("select r, h FROM ResourceTable r "
-							+ " LEFT JOIN fetch ResourceHistoryTable h on r.myVersion = h.myResourceVersion and r.id = h.myResourceId"
-							+ " left join fetch h.myProvenance"
-							+ " WHERE r.myId IN ( :IDS )");
-					query.setParameter("IDS", ids);
-
-					@SuppressWarnings("unchecked")
-					List<Object[]> allById = query.getResultList();
-
-					for (Object[] nextPair : allById) {
-						ResourceTable r = (ResourceTable) nextPair[0];
-						ResourceHistoryTable h = (ResourceHistoryTable) nextPair[1];
-						r.setCurrentVersionEntity(h);
-						loadedResourceTableEntries.add(r);
-					}
-				});
+				prefetchResourceTableHistoryAndProvenance(ids, loadedResourceTableEntries);
 
 				List<Long> entityIds;
 
@@ -305,6 +300,30 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 				//								}
 				//							}
 				//						});
+			}
+		});
+	}
+
+	private void prefetchResourceTableHistoryAndProvenance(
+			List<Long> ids, List<ResourceTable> loadedResourceTableEntries) {
+		new QueryChunker<Long>().chunk(ids, nextChunk -> {
+			Query query = myEntityManager.createQuery("select r, h "
+					+ " FROM ResourceTable r "
+					+ " LEFT JOIN fetch ResourceHistoryTable h "
+					+ "      on r.myVersion = h.myResourceVersion and r.id = h.myResourceId "
+					+ " left join fetch h.myProvenance "
+					+ " WHERE r.myId IN ( :IDS ) ");
+			query.setParameter("IDS", ids);
+
+			@SuppressWarnings("unchecked")
+			List<Object[]> allById = query.getResultList();
+
+			for (Object[] nextPair : allById) {
+				ResourceTable r = (ResourceTable) nextPair[0];
+				ResourceHistoryTable h = (ResourceHistoryTable) nextPair[1];
+				// history is a big weird - we hold it in a transient field because we also hold the new version.
+				r.setCurrentVersionEntity(h);
+				loadedResourceTableEntries.add(r);
 			}
 		});
 	}
