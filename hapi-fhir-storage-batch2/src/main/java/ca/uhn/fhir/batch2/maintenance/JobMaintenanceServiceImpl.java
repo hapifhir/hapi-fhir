@@ -99,7 +99,6 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 
 	private boolean myEnabledBool = true;
 
-
 	/**
 	 * Constructor
 	 */
