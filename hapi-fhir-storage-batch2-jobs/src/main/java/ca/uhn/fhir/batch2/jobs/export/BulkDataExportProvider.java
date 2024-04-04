@@ -294,7 +294,9 @@ public class BulkDataExportProvider {
 			RequestDetails theRequestDetails, String theTargetResourceName, Iterable<IIdType> theIdParams) {
 		if (theIdParams.iterator().hasNext()) {
 			RequestPartitionId partitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
-				theRequestDetails, theTargetResourceName, theIdParams.iterator().next());
+					theRequestDetails,
+					theTargetResourceName,
+					theIdParams.iterator().next());
 			SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
 			for (IIdType nextId : theIdParams) {
 				myDaoRegistry.getResourceDao(theTargetResourceName).read(nextId, requestDetails);
