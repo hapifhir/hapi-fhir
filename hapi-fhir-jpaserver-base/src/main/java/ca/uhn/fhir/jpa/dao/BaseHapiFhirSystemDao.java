@@ -65,6 +65,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 
 public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends BaseStorageDao
@@ -248,9 +249,8 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 		query.setParameter("IDS", idChunk);
 
 		@SuppressWarnings("unchecked")
-		List<Object[]> queryResults = query.getResultList();
-
-		return queryResults.stream()
+		Stream<Object[]> queryResultStream = query.getResultStream();
+		return queryResultStream
 				.map(nextPair -> {
 					// Store the matching ResourceHistoryTable in the transient slot on ResourceTable
 					ResourceTable result = (ResourceTable) nextPair[0];
@@ -266,7 +266,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 	 * Convenience wrapper around prefetchByJoinClause() for simple fields.
 	 *
 	 * @param theDescription             for logging
-	 * @param theJpaFieldName            the field to join
+	 * @param theJpaFieldName            the join field from ResourceTable
 	 * @param theEntityPredicate         select which ResourceTable entities need this join
 	 * @param theEntities                the ResourceTable entities to consider
 	 */
