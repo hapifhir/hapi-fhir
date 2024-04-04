@@ -1,0 +1,4 @@
+---
+type: change
+issue: 5817
+title: "The HFJ_FORCED_ID table is no longer used."

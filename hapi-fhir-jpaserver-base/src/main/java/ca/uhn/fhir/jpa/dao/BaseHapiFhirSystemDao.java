@@ -202,7 +202,12 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			 */
 			if (ids.size() >= 2) {
 				List<ResourceTable> loadedResourceTableEntries = new ArrayList<>();
-				preFetchIndexes(ids, "forcedId", "myForcedId", loadedResourceTableEntries);
+
+				new QueryChunker<Long>()
+						.chunk(
+								ids,
+								nextChunk ->
+										loadedResourceTableEntries.addAll(myResourceTableDao.findAllById(nextChunk)));
 
 				List<Long> entityIds;
 
