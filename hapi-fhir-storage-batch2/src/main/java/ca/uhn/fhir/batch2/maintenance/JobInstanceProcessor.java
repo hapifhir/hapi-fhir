@@ -227,8 +227,6 @@ public class JobInstanceProcessor {
 		}
 	}
 
-
-
 	private boolean canAdvanceGatedJob(
 			JobDefinition<?> theJobDefinition, JobInstance theInstance, JobWorkCursor<?, ?, ?> theWorkCursor) {
 		// make sure our instance still exists
