@@ -367,8 +367,7 @@ public class BulkDataExportProvider {
 					IPrimitiveType<String> theExportIdentifier,
 			ServletRequestDetails theRequestDetails) {
 
-		List<IPrimitiveType<String>> patientIds = thePatient != null
-				? thePatient : new ArrayList<>();
+		List<IPrimitiveType<String>> patientIds = thePatient != null ? thePatient : new ArrayList<>();
 
 		doPatientExport(
 				theRequestDetails,
@@ -415,15 +414,14 @@ public class BulkDataExportProvider {
 
 		// call the type-level export to ensure spec compliance
 		patientExport(
-			theOutputFormat,
-			theType,
-			theSince,
-			theTypeFilter,
-			theTypePostFetchFilterUrl,
-			List.of(theIdParam),
-			theExportIdentifier,
-			theRequestDetails
-		);
+				theOutputFormat,
+				theType,
+				theSince,
+				theTypeFilter,
+				theTypePostFetchFilterUrl,
+				List.of(theIdParam),
+				theExportIdentifier,
+				theRequestDetails);
 	}
 
 	private void doPatientExport(
