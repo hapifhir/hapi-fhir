@@ -41,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -48,6 +49,9 @@ import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.Optional;
+
+
+import static java.util.Objects.nonNull;
 
 @Transactional
 public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
@@ -87,11 +91,15 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
 		Session session = (Session) myEntityManager.getDelegate();
 		LobHelper lobHelper = session.getLobHelper();
+
 		byte[] loadedStream = IOUtils.toByteArray(countingInputStream);
-		String id = super.provideIdForNewBlob(theBlobIdOrNull, loadedStream, theRequestDetails, theContentType);
-		entity.setBlobId(id);
+		entity.setStorageContentBin(loadedStream);
+
 		Blob dataBlob = lobHelper.createBlob(loadedStream);
 		entity.setBlob(dataBlob);
+
+		String id = super.provideIdForNewBlob(theBlobIdOrNull, loadedStream, theRequestDetails, theContentType);
+		entity.setBlobId(id);
 
 		// Update the entity with the final byte count and hash
 		long bytes = countingInputStream.getByteCount();
@@ -161,7 +169,8 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	}
 
 	void copyBlobToOutputStream(OutputStream theOutputStream, BinaryStorageEntity theEntity) throws IOException {
-		try (InputStream inputStream = theEntity.getBlob().getBinaryStream()) {
+
+		try (InputStream inputStream = getBinaryContent(theEntity)) {
 			IOUtils.copy(inputStream, theOutputStream);
 		} catch (SQLException e) {
 			throw new IOException(Msg.code(1341) + e);
@@ -169,10 +178,37 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	}
 
 	byte[] copyBlobToByteArray(BinaryStorageEntity theEntity) throws IOException {
-		try {
-			return ByteStreams.toByteArray(theEntity.getBlob().getBinaryStream());
+		byte[] retVal;
+
+		try (InputStream inputStream = getBinaryContent(theEntity)) {
+			retVal = ByteStreams.toByteArray(inputStream);
 		} catch (SQLException e) {
 			throw new IOException(Msg.code(1342) + e);
 		}
+
+		return retVal;
 	}
+
+	/**
+	 *
+	 * The caller is responsible for closing the returned stream.
+	 *
+	 * @param theEntity
+	 * @return
+	 * @throws SQLException
+	 */
+	private InputStream getBinaryContent(BinaryStorageEntity theEntity) throws SQLException {
+		InputStream retVal;
+
+		if (theEntity.hasStorageContent()) {
+			retVal = new ByteArrayInputStream(theEntity.getStorageContentBin());
+		} else if (theEntity.hasBlob()){
+			retVal = theEntity.getBlob().getBinaryStream();
+		} else {
+			retVal = new ByteArrayInputStream(new byte[0]);
+		}
+
+		return retVal;
+	}
+
 }

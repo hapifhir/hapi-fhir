@@ -119,6 +119,32 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init680();
 		init680_Part2();
 		init700();
+		init720();
+	}
+
+	protected void init720() {
+		/* ************************************************
+		 * Start of 7.10 migrations
+		 *********************************************** */
+		Builder version = forVersion(VersionEnum.V7_2_0);
+
+		// Postgres migration from LOB
+		{
+			Builder.BuilderWithTableName binaryStorageBlobTable = version.onTable("HFJ_BINARY_STORAGE_BLOB");
+
+			binaryStorageBlobTable
+				.modifyColumn("20240404.1", "BLOB_DATA")
+				.nullable()
+				.withType(ColumnTypeEnum.BLOB);
+
+			binaryStorageBlobTable
+				.addColumn("20240404.1", "STORAGE_CONTENT_BIN")
+				.nullable()
+				.type(ColumnTypeEnum.BINARY);
+
+			binaryStorageBlobTable.migratePostgresOidToBinary("20240404.3", "BLOB_DATA", "STORAGE_CONTENT_BIN");
+
+		}
 	}
 
 	protected void init700() {
