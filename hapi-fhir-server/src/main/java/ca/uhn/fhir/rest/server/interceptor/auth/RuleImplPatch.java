@@ -27,8 +27,10 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Set;
 
-// LUKETODO:  document that this doesn't do anything
-// LUKETODO:  deprecate it
+/**
+ * @deprecated Users should be instead be granted more granular write permissions that cover PATCH operations.
+ */
+@Deprecated
 class RuleImplPatch extends BaseRule {
 	private boolean myAllRequests;
 
