@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
+import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -21,6 +22,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.search.backend.lucene.cfg.LuceneBackendSettings;
 import org.hibernate.search.backend.lucene.cfg.LuceneIndexSettings;
 import org.hibernate.search.engine.cfg.BackendSettings;
+import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +74,15 @@ public class TestR4BConfig {
 		retVal.setIndexOnContainedResources(true);
 		retVal.setIndexIdentifierOfType(true);
 		return retVal;
+	}
+
+	@Bean
+	public SubscriptionSettings subscriptionSettings() {
+		SubscriptionSettings retval = new SubscriptionSettings();
+		retval.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
+		retval.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
+		retval.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
+		return retval;
 	}
 
 	@Bean

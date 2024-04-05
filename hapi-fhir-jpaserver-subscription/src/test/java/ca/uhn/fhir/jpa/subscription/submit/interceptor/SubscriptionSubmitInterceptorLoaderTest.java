@@ -8,10 +8,12 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.hl7.fhir.dstu2.model.Subscription;
@@ -36,9 +38,6 @@ import static org.mockito.Mockito.verify;
 	SubscriptionSubmitInterceptorLoaderTest.MyConfig.class
 })
 public class SubscriptionSubmitInterceptorLoaderTest {
-
-	@Autowired
-	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 	@MockBean
@@ -67,10 +66,10 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 		}
 
 		@Bean
-		public JpaStorageSettings storageSettings() {
-			JpaStorageSettings storageSettings = new JpaStorageSettings();
-			storageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
-			return storageSettings;
+		public SubscriptionSettings subscriptionSettings() {
+			SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
+			subscriptionSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
+			return subscriptionSettings;
 		}
 
 		@MockBean
@@ -91,6 +90,8 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 		private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 		@MockBean
 		private IHapiTransactionService myHapiTransactionService;
+		@MockBean
+		StorageSettings myStorageSettings;
 
 	}
 

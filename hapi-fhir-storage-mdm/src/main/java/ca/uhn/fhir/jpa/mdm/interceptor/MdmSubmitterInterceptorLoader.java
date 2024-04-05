@@ -22,7 +22,6 @@ package ca.uhn.fhir.jpa.mdm.interceptor;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
@@ -57,7 +56,9 @@ public class MdmSubmitterInterceptorLoader {
 			return;
 		}
 
-		if (!theSubscriptionSettings.getSupportedSubscriptionTypes().contains(Subscription.SubscriptionChannelType.MESSAGE)) {
+		if (!theSubscriptionSettings
+				.getSupportedSubscriptionTypes()
+				.contains(Subscription.SubscriptionChannelType.MESSAGE)) {
 			throw new ConfigurationException(
 					Msg.code(2421) + "MDM requires Message Subscriptions to be enabled in the Storage Settings");
 		}

@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyE
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
@@ -55,7 +56,7 @@ public class SubscriptionActivatingSubscriberTest {
 	private SubscriptionCanonicalizer mySubscriptionCanonicallizer;
 
 	@Mock
-	private JpaStorageSettings myStorageSettings;
+	private SubscriptionSettings mySubscriptionSettings;
 
 	@Mock
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
@@ -93,7 +94,7 @@ public class SubscriptionActivatingSubscriberTest {
 		// when
 		Mockito.when(mySubscriptionCanonicallizer.getChannelType(Mockito.any(IBaseResource.class)))
 			.thenReturn(type);
-		Mockito.when(myStorageSettings.getSupportedSubscriptionTypes())
+		Mockito.when(mySubscriptionSettings.getSupportedSubscriptionTypes())
 			.thenReturn(Sets.newSet(type.toCanonical()));
 		Mockito.when(mySubscriptionCanonicallizer.getSubscriptionStatus(Mockito.any(IBaseResource.class)))
 			.thenReturn(SubscriptionConstants.REQUESTED_STATUS);

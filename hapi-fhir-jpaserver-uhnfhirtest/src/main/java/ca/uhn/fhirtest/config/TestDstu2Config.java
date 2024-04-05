@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.config.util.HapiEntityManagerFactoryUtil;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
+import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -56,9 +57,6 @@ public class TestDstu2Config {
 	@Bean
 	public JpaStorageSettings storageSettings() {
 		JpaStorageSettings retVal = new JpaStorageSettings();
-		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
-		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
-		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
 		retVal.setWebsocketContextPath("/websocketDstu2");
 		retVal.setAllowContainsSearches(true);
 		retVal.setAllowMultipleDelete(true);
@@ -78,6 +76,15 @@ public class TestDstu2Config {
 		retVal.setIndexIdentifierOfType(true);
 		//		retVal.setHistoryCountMode(HistoryCountModeEnum.COUNT_ACCURATE);
 		return retVal;
+	}
+
+	@Bean
+	public SubscriptionSettings subscriptionSettings() {
+		SubscriptionSettings retval = new SubscriptionSettings();
+		retval.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
+		retval.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
+		retval.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
+		return retval;
 	}
 
 	@Bean

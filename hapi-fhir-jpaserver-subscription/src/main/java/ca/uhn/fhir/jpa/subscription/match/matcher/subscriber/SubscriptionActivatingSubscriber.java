@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
@@ -127,7 +126,9 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 
 		// Only activate supported subscriptions
 		if (subscriptionChannelType == null
-				|| !mySubscriptionSettings.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
+				|| !mySubscriptionSettings
+						.getSupportedSubscriptionTypes()
+						.contains(subscriptionChannelType.toCanonical())) {
 			return false;
 		}
 

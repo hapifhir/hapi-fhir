@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.subscription.model.config;
 
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.collections4.CollectionUtils;
 import org.hl7.fhir.dstu2.model.Subscription;
@@ -21,7 +20,7 @@ public class SubscriptionSettings {
 	 * to the server matching these types will be activated.
 	 */
 	public SubscriptionSettings addSupportedSubscriptionType(
-		Subscription.SubscriptionChannelType theSubscriptionChannelType) {
+			Subscription.SubscriptionChannelType theSubscriptionChannelType) {
 		mySupportedSubscriptionTypes.add(theSubscriptionChannelType);
 		return this;
 	}
@@ -69,5 +68,4 @@ public class SubscriptionSettings {
 	public boolean isQualifySubscriptionMatchingChannelName() {
 		return myQualifySubscriptionMatchingChannelName;
 	}
-
 }

@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicValidatingInterceptor;
 import com.google.common.annotations.VisibleForTesting;
@@ -59,7 +58,7 @@ public class SubscriptionSubmitInterceptorLoader {
 	@PostConstruct
 	public void start() {
 		Set<Subscription.SubscriptionChannelType> supportedSubscriptionTypes =
-			mySubscriptionSettings.getSupportedSubscriptionTypes();
+				mySubscriptionSettings.getSupportedSubscriptionTypes();
 
 		if (supportedSubscriptionTypes.isEmpty()) {
 			ourLog.info(

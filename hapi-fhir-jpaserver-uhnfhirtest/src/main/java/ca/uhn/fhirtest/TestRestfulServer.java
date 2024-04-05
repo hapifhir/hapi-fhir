@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.dstu3.JpaConformanceProviderDstu3;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
+import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
@@ -67,8 +68,6 @@ public class TestRestfulServer extends RestfulServer {
 	public static final String FHIR_BASEURL_R4B = "fhir.baseurl.r4b";
 	public static final String FHIR_BASEURL_DSTU2 = "fhir.baseurl.dstu2";
 	public static final String FHIR_BASEURL_DSTU3 = "fhir.baseurl.dstu3";
-	public static final String FHIR_BASEURL_TDL2 = "fhir.baseurl.tdl2";
-	public static final String FHIR_BASEURL_TDL3 = "fhir.baseurl.tdl3";
 
 	private static final long serialVersionUID = 1L;
 
@@ -123,7 +122,7 @@ public class TestRestfulServer extends RestfulServer {
 				systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
 				JpaConformanceProviderDstu2 confProvider =
-						new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(JpaStorageSettings.class));
+						new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(JpaStorageSettings.class), myAppCtx.getBean(SubscriptionSettings.class));
 				setServerConformanceProvider(confProvider);
 				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
@@ -143,6 +142,7 @@ public class TestRestfulServer extends RestfulServer {
 						this,
 						systemDao,
 						myAppCtx.getBean(JpaStorageSettings.class),
+					myAppCtx.getBean(SubscriptionSettings.class),
 						myAppCtx.getBean(ISearchParamRegistry.class));
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
@@ -166,6 +166,7 @@ public class TestRestfulServer extends RestfulServer {
 						this,
 						systemDao,
 						myAppCtx.getBean(JpaStorageSettings.class),
+						myAppCtx.getBean(SubscriptionSettings.class),
 						myAppCtx.getBean(ISearchParamRegistry.class),
 						validationSupport);
 				setServerConformanceProvider(confProvider);
@@ -191,6 +192,7 @@ public class TestRestfulServer extends RestfulServer {
 						this,
 						systemDao,
 						myAppCtx.getBean(JpaStorageSettings.class),
+					myAppCtx.getBean(SubscriptionSettings.class),
 						myAppCtx.getBean(ISearchParamRegistry.class),
 						validationSupport);
 				setServerConformanceProvider(confProvider);
@@ -215,6 +217,7 @@ public class TestRestfulServer extends RestfulServer {
 						this,
 						systemDao,
 						myAppCtx.getBean(JpaStorageSettings.class),
+						myAppCtx.getBean(SubscriptionSettings.class),
 						myAppCtx.getBean(ISearchParamRegistry.class),
 						validationSupport);
 				setServerConformanceProvider(confProvider);
@@ -239,6 +242,7 @@ public class TestRestfulServer extends RestfulServer {
 						this,
 						systemDao,
 						myAppCtx.getBean(JpaStorageSettings.class),
+						myAppCtx.getBean(SubscriptionSettings.class),
 						myAppCtx.getBean(ISearchParamRegistry.class),
 						validationSupport);
 				setServerConformanceProvider(confProvider);
