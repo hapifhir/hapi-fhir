@@ -127,6 +127,7 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	}
 
 	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
+		ourLog.info("5815: doMatchActiveSubscriptionsAndDeliver()");
 		IIdType resourceId = theMsg.getPayloadId(myFhirContext);
 
 		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAllNonTopicSubscriptions();
@@ -151,18 +152,9 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	 */
 	private boolean processSubscription(
 			ResourceModifiedMessage theMsg, IIdType theResourceId, ActiveSubscription theActiveSubscription) {
+		ourLog.info("5815: processSubscription()");
 		// skip if the partitions don't match
 		CanonicalSubscription subscription = theActiveSubscription.getSubscription();
-		// LUKETODO:  get rid of this:
-		ourLog.info(
-				"5815: subscription.partitionId: {}, crossPartitionEnabled: {}, msg.partitionId: {}, msg.hasPartitionId: {}, theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId(): {}",
-				(subscription != null) ? subscription.getRequestPartitionId() : "subscription is null",
-				(subscription != null) ? subscription.getCrossPartitionEnabled() : "subscription is null",
-				theMsg.getPartitionId(),
-				(theMsg.getPartitionId() != null) ? theMsg.getPartitionId().hasPartitionIds() : "NULL getPartitionId()",
-				(theMsg.getPartitionId() != null && !theMsg.getPartitionId().isAllPartitions() && subscription != null)
-						? theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())
-						: "NULL getPartitionId() all partitions or null subscription");
 		if (subscription != null
 				&& theMsg.getPartitionId() != null
 				&& theMsg.getPartitionId().hasPartitionIds()
@@ -172,8 +164,6 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 			ourLog.info("5815: processSubscription(): FALSE!");
 			return false;
 		}
-		// LUKETODO:  get rid of this:
-		ourLog.info("5815: processSubscription(): TRUE!");
 		String nextSubscriptionId = theActiveSubscription.getId();
 
 		if (isNotBlank(theMsg.getSubscriptionId())) {

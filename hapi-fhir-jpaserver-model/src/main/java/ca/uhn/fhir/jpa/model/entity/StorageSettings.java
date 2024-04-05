@@ -31,8 +31,6 @@ import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.DateTimeType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -49,7 +47,6 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
  * Ultimately it should live in that project
  */
 public class StorageSettings {
-	private static final Logger ourLog = LoggerFactory.getLogger(StorageSettings.class);
 	/**
 	 * @since 5.6.0
 	 */
@@ -181,7 +178,6 @@ public class StorageSettings {
 	 * Constructor
 	 */
 	public StorageSettings() {
-		ourLog.info("5815: StorageSettings()");
 		setSequenceValueMassagerClass(ISequenceValueMassager.NoopSequenceValueMassager.class);
 		setPeriodIndexStartOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_START_OF_TIME));
 		setPeriodIndexEndOfTime(new DateTimeType(DEFAULT_PERIOD_INDEX_END_OF_TIME));

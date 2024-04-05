@@ -77,6 +77,17 @@ public class SubscriptionCanonicalizer {
 		myStorageSettings = theStorageSettings;
 	}
 
+	// TODO:  LD:  remove this constructor once all callers call the 2 arg constructor above
+
+	/**
+	 * @deprecated All callers should invoke {@link SubscriptionCanonicalizer()} instead.
+	 */
+	@Deprecated
+	public SubscriptionCanonicalizer(FhirContext theFhirContext) {
+		myFhirContext = theFhirContext;
+		myStorageSettings = new StorageSettings();
+	}
+
 	public CanonicalSubscription canonicalize(IBaseResource theSubscription) {
 		switch (myFhirContext.getVersion().getVersion()) {
 			case DSTU2:
@@ -772,14 +783,9 @@ public class SubscriptionCanonicalizer {
 
 	private void handleCrossPartition(IBaseResource theSubscription, CanonicalSubscription retVal) {
 		if (myStorageSettings.isCrossPartitionSubscriptionEnabled()) {
-			ourLog.info(
-					"5815: isCrossPartitionSubscriptionEnabled(), SubscriptionUtil.isCrossPartition(theSubscription): {}",
-					SubscriptionUtil.isCrossPartition(theSubscription));
 			retVal.setCrossPartitionEnabled(true);
 		} else {
-			ourLog.info("5815: NOT isCrossPartitionSubscriptionEnabled()");
 			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
 		}
-		//				retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));
 	}
 }

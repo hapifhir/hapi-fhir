@@ -356,7 +356,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Constructor
 	 */
 	public JpaStorageSettings() {
-		ourLog.info("5815: JpaStorageSettings()");
 		setMarkResourcesForReindexingUponSearchParameterChange(true);
 		setReindexThreadCount(Runtime.getRuntime().availableProcessors());
 		setExpungeThreadCount(Runtime.getRuntime().availableProcessors());
