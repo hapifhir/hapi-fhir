@@ -50,6 +50,10 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 
+/**
+ * @deprecated Users should be instead be granted more granular write permissions that cover PATCH operations.
+ */
+@Deprecated
 public class FhirPatch {
 
 	public static final String OPERATION_ADD = "add";

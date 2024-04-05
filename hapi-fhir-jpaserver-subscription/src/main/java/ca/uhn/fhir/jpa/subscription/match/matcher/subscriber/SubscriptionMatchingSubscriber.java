@@ -127,7 +127,6 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	}
 
 	private void doMatchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
-		ourLog.info("5815: doMatchActiveSubscriptionsAndDeliver()");
 		IIdType resourceId = theMsg.getPayloadId(myFhirContext);
 
 		Collection<ActiveSubscription> subscriptions = mySubscriptionRegistry.getAllNonTopicSubscriptions();
@@ -152,7 +151,6 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 	 */
 	private boolean processSubscription(
 			ResourceModifiedMessage theMsg, IIdType theResourceId, ActiveSubscription theActiveSubscription) {
-		ourLog.info("5815: processSubscription()");
 		// skip if the partitions don't match
 		CanonicalSubscription subscription = theActiveSubscription.getSubscription();
 		if (subscription != null
@@ -160,8 +158,6 @@ public class SubscriptionMatchingSubscriber implements MessageHandler {
 				&& theMsg.getPartitionId().hasPartitionIds()
 				&& !subscription.getCrossPartitionEnabled()
 				&& !theMsg.getPartitionId().hasPartitionId(subscription.getRequestPartitionId())) {
-			// LUKETODO:  get rid of this:
-			ourLog.info("5815: processSubscription(): FALSE!");
 			return false;
 		}
 		String nextSubscriptionId = theActiveSubscription.getId();
