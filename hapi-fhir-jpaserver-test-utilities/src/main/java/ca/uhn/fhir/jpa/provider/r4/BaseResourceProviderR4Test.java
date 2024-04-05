@@ -198,8 +198,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 					ourRestServer,
 					mySystemDao,
 					myStorageSettings,
-					mySubscriptionSettings,
-					ourSearchParamRegistry,
+                    ourSearchParamRegistry,
 					validationSupport);
 			ourCapabilityStatementProvider.setImplementationDescription("THIS IS THE DESC");
 			ourRestServer.setServerConformanceProvider(ourCapabilityStatementProvider);

@@ -101,8 +101,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 						s,
 						mySystemDao,
 						myStorageSettings,
-						mySubscriptionSettings,
-						mySearchParamRegistry,
+					mySearchParamRegistry,
 						myValidationSupport);
 				confProvider.setImplementationDescription("THIS IS THE DESC");
 				s.setServerConformanceProvider(confProvider);

@@ -145,7 +145,6 @@ public class TestRestfulServer extends RestfulServer {
 						this,
 						systemDao,
 						myAppCtx.getBean(JpaStorageSettings.class),
-						myAppCtx.getBean(SubscriptionSettings.class),
 						myAppCtx.getBean(ISearchParamRegistry.class));
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
@@ -169,7 +168,6 @@ public class TestRestfulServer extends RestfulServer {
 						this,
 						systemDao,
 						myAppCtx.getBean(JpaStorageSettings.class),
-						myAppCtx.getBean(SubscriptionSettings.class),
 						myAppCtx.getBean(ISearchParamRegistry.class),
 						validationSupport);
 				setServerConformanceProvider(confProvider);
@@ -195,7 +193,6 @@ public class TestRestfulServer extends RestfulServer {
 						this,
 						systemDao,
 						myAppCtx.getBean(JpaStorageSettings.class),
-						myAppCtx.getBean(SubscriptionSettings.class),
 						myAppCtx.getBean(ISearchParamRegistry.class),
 						validationSupport);
 				setServerConformanceProvider(confProvider);
@@ -220,7 +217,6 @@ public class TestRestfulServer extends RestfulServer {
 						this,
 						systemDao,
 						myAppCtx.getBean(JpaStorageSettings.class),
-						myAppCtx.getBean(SubscriptionSettings.class),
 						myAppCtx.getBean(ISearchParamRegistry.class),
 						validationSupport);
 				setServerConformanceProvider(confProvider);
@@ -245,7 +241,6 @@ public class TestRestfulServer extends RestfulServer {
 						this,
 						systemDao,
 						myAppCtx.getBean(JpaStorageSettings.class),
-						myAppCtx.getBean(SubscriptionSettings.class),
 						myAppCtx.getBean(ISearchParamRegistry.class),
 						validationSupport);
 				setServerConformanceProvider(confProvider);

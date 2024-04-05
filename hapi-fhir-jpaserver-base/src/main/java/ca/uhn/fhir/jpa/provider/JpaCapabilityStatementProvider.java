@@ -52,9 +52,8 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 
 	private final FhirContext myContext;
 	private JpaStorageSettings myStorageSettings;
-	private SubscriptionSettings mySubscriptionSettings;
 
-	private String myImplementationDescription;
+    private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
 	private IFhirSystemDao<?, ?> mySystemDao;
 
@@ -65,7 +64,6 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 			@Nonnull RestfulServer theRestfulServer,
 			@Nonnull IFhirSystemDao<?, ?> theSystemDao,
 			@Nonnull JpaStorageSettings theStorageSettings,
-			@Nonnull SubscriptionSettings theSubscriptionSettings,
 			@Nonnull ISearchParamRegistry theSearchParamRegistry,
 			IValidationSupport theValidationSupport) {
 		super(theRestfulServer, theSearchParamRegistry, theValidationSupport);
@@ -78,8 +76,7 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 		myContext = theRestfulServer.getFhirContext();
 		mySystemDao = theSystemDao;
 		myStorageSettings = theStorageSettings;
-		mySubscriptionSettings = theSubscriptionSettings;
-		setIncludeResourceCounts(true);
+        setIncludeResourceCounts(true);
 	}
 
 	@Override
@@ -94,24 +91,6 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_FHIR_XML_NEW);
 		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_JSON_PATCH);
 		theTerser.addElement(theCapabilityStatement, "patchFormat", Constants.CT_XML_PATCH);
-	}
-
-	@Override
-	protected void postProcessRest(FhirTerser theTerser, IBase theRest) {
-		super.postProcessRest(theTerser, theRest);
-
-		if (mySubscriptionSettings
-				.getSupportedSubscriptionTypes()
-				.contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
-				ExtensionUtil.setExtension(
-						myContext,
-						theRest,
-						Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL,
-						"uri",
-						myStorageSettings.getWebsocketContextPath());
-			}
-		}
 	}
 
 	@Override

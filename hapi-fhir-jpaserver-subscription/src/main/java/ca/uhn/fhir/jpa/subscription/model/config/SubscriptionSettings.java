@@ -15,6 +15,8 @@ public class SubscriptionSettings {
 	 */
 	private boolean myQualifySubscriptionMatchingChannelName = true;
 
+	public SubscriptionSettings() {}
+
 	/**
 	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
 	 * to the server matching these types will be activated.

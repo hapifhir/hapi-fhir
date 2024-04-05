@@ -83,7 +83,6 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 			RestfulServer theRestfulServer,
 			IFhirSystemDao<Bundle, Meta> theSystemDao,
 			JpaStorageSettings theStorageSettings,
-			SubscriptionSettings theSubscriptionSettings,
 			ISearchParamRegistry theSearchParamRegistry) {
 		super(theRestfulServer);
 		mySystemDao = theSystemDao;
