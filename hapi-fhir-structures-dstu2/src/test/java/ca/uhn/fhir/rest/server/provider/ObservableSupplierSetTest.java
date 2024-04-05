@@ -57,7 +57,7 @@ class ObservableSupplierSetTest {
 		myObservableSupplierSet.removeSupplier(myCounter::incrementAndGet);
 		myObserver.assertCalls(1, 0);
 		assertThat(myObservableSupplierSet.getSupplierResults(), hasSize(1));
-		List<ILoggingEvent> events = myLogger.filterLoggingEventsWithMessageContaining("Failed to remove Fhir Extension");
+		List<ILoggingEvent> events = myLogger.filterLoggingEventsWithMessageContaining("Failed to remove supplier");
 		assertThat(events, hasSize(1));
 		assertEquals(Level.WARN, events.get(0).getLevel());
 	}
