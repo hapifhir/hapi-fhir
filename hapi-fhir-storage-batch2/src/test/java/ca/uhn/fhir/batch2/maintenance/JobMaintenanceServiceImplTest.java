@@ -488,6 +488,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			callback.doUpdate(instance);
 			return true;
 		}).when(myJobPersistence).updateInstance(any(), any());
+		when(myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(eq(instance.getInstanceId()), eq(STEP_2)))
+			.thenReturn(chunks.stream().map(WorkChunkMetadata::getStatus).collect(Collectors.toSet()));
 
 		// test
 		runEnqueueReadyChunksTest(chunks, createJobDefinitionWithReduction());
