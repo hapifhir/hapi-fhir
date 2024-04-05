@@ -175,12 +175,12 @@ public class TestDstu3Config {
 		return dataSource;
 	}
 
-	@Bean
-	public IEmailSender emailSender() {
-		final MailConfig mailConfig = new MailConfig().setSmtpHostname("localhost").setSmtpPort(3025);
-		final IMailSvc mailSvc = new MailSvc(mailConfig);
-		return new EmailSenderImpl(mailSvc);
-	}
+//	@Bean
+//	public IEmailSender emailSender() {
+//		final MailConfig mailConfig = new MailConfig().setSmtpHostname("localhost").setSmtpPort(3025);
+//		final IMailSvc mailSvc = new MailSvc(mailConfig);
+//		return new EmailSenderImpl(mailSvc);
+//	}
 
 	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext, JpaStorageSettings theStorageSettings) {
