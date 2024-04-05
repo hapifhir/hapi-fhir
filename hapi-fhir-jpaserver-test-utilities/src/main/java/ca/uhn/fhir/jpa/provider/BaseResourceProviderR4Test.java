@@ -98,11 +98,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 				s.setPagingProvider(myAppCtx.getBean(DatabaseBackedPagingProvider.class));
 
 				JpaCapabilityStatementProvider confProvider = new JpaCapabilityStatementProvider(
-						s,
-						mySystemDao,
-						myStorageSettings,
-					mySearchParamRegistry,
-						myValidationSupport);
+						s, mySystemDao, myStorageSettings, mySearchParamRegistry, myValidationSupport);
 				confProvider.setImplementationDescription("THIS IS THE DESC");
 				s.setServerConformanceProvider(confProvider);
 

@@ -23,7 +23,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
-import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionSettings;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
@@ -53,7 +52,7 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 	private final FhirContext myContext;
 	private JpaStorageSettings myStorageSettings;
 
-    private String myImplementationDescription;
+	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
 	private IFhirSystemDao<?, ?> mySystemDao;
 
@@ -76,7 +75,7 @@ public class JpaCapabilityStatementProvider extends ServerCapabilityStatementPro
 		myContext = theRestfulServer.getFhirContext();
 		mySystemDao = theSystemDao;
 		myStorageSettings = theStorageSettings;
-        setIncludeResourceCounts(true);
+		setIncludeResourceCounts(true);
 	}
 
 	@Override
