@@ -284,7 +284,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals(CS_URL_3, group.getTarget());
 		assertEquals("Version 3t", group.getTargetVersion());
 
-		assertEquals(4, group.getElement().size());
+		assertEquals(5, group.getElement().size());
 
 		source = group.getElement().get(0);
 		assertEquals("Code 2a", source.getCode());
@@ -333,6 +333,19 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertEquals("Display 3d", target.getDisplay());
 		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
 		assertEquals("3d This is a comment.", target.getComment());
+
+		// ensure unmatched codes are handled correctly
+		source = group.getElement().get(4);
+		assertEquals("Code 2e", source.getCode());
+		assertEquals("Display 2e", source.getDisplay());
+
+		assertEquals(1, source.getTarget().size());
+
+		target = source.getTarget().get(0);
+		assertNull(target.getCode());
+		assertNull(target.getDisplay());
+		assertEquals(ConceptMapEquivalence.UNMATCHED, target.getEquivalence());
+		assertEquals("3e This is a comment.", target.getComment());
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{
