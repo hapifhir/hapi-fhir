@@ -36,7 +36,6 @@ import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.JpaPersistedResourceValidationSupport;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboTokensNonUniqueDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamCoordsDao;
@@ -61,7 +60,6 @@ import ca.uhn.fhir.jpa.entity.TermConceptProperty;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamCoords;
@@ -100,6 +98,8 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TestUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.persistence.EntityManager;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -130,8 +130,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
-import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -260,8 +258,6 @@ public abstract class BaseJpaTest extends BaseTest {
 	private IResourceTagDao myResourceTagDao;
 	@Autowired
 	private IResourceHistoryTableDao myResourceHistoryTableDao;
-	@Autowired
-	protected IForcedIdDao myForcedIdDao;
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	private final List<Object> myRegisteredInterceptors = new ArrayList<>(1);
@@ -518,14 +514,6 @@ public abstract class BaseJpaTest extends BaseTest {
 			List<TermValueSet> valueSets = myTermValueSetDao.findAll();
 			ourLog.info("ValueSets:\n * {}", valueSets.stream().map(TermValueSet::toString).collect(Collectors.joining("\n * ")));
 			return valueSets.size();
-		});
-	}
-
-	protected int logAllForcedIds() {
-		return runInTransaction(() -> {
-			List<ForcedId> forcedIds = myForcedIdDao.findAll();
-			ourLog.info("Resources:\n * {}", forcedIds.stream().map(ForcedId::toString).collect(Collectors.joining("\n * ")));
-			return forcedIds.size();
 		});
 	}
 
