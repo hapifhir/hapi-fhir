@@ -121,8 +121,11 @@ public class TestRestfulServer extends RestfulServer {
 				beans = myAppCtx.getBean("myResourceProvidersDstu2", ResourceProviderFactory.class);
 				systemDao = myAppCtx.getBean("mySystemDaoDstu2", IFhirSystemDao.class);
 				etagSupport = ETagSupportEnum.ENABLED;
-				JpaConformanceProviderDstu2 confProvider =
-						new JpaConformanceProviderDstu2(this, systemDao, myAppCtx.getBean(JpaStorageSettings.class), myAppCtx.getBean(SubscriptionSettings.class));
+				JpaConformanceProviderDstu2 confProvider = new JpaConformanceProviderDstu2(
+						this,
+						systemDao,
+						myAppCtx.getBean(JpaStorageSettings.class),
+						myAppCtx.getBean(SubscriptionSettings.class));
 				setServerConformanceProvider(confProvider);
 				registerInterceptor(myAppCtx.getBean(BalpAuditCaptureInterceptor.class));
 				break;
@@ -142,7 +145,7 @@ public class TestRestfulServer extends RestfulServer {
 						this,
 						systemDao,
 						myAppCtx.getBean(JpaStorageSettings.class),
-					myAppCtx.getBean(SubscriptionSettings.class),
+						myAppCtx.getBean(SubscriptionSettings.class),
 						myAppCtx.getBean(ISearchParamRegistry.class));
 				setServerConformanceProvider(confProvider);
 				providers.add(myAppCtx.getBean(TerminologyUploaderProvider.class));
@@ -192,7 +195,7 @@ public class TestRestfulServer extends RestfulServer {
 						this,
 						systemDao,
 						myAppCtx.getBean(JpaStorageSettings.class),
-					myAppCtx.getBean(SubscriptionSettings.class),
+						myAppCtx.getBean(SubscriptionSettings.class),
 						myAppCtx.getBean(ISearchParamRegistry.class),
 						validationSupport);
 				setServerConformanceProvider(confProvider);
