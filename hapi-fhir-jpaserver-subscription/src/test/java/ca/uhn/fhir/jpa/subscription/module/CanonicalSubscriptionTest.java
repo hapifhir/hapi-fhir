@@ -9,12 +9,15 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.Nonnull;
 import org.assertj.core.util.Lists;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -91,28 +94,30 @@ public class CanonicalSubscriptionTest {
 		assertEquals(canonicalSubscription.getCrossPartitionEnabled(), true);
 	}
 
-	@Test
-	public void testSerializeIncorrectMultiPartitionSubscription(){
-		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), new StorageSettings());
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSerializeIncorrectMultiPartitionSubscription(boolean theIsCrossPartitionEnabled){
+		final StorageSettings storageSettings = buildStorageSettings(theIsCrossPartitionEnabled);
+		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), storageSettings);
 		Subscription subscription = makeEmailSubscription();
 		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new StringType().setValue("false"));
 		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(subscription);
 
-		System.out.print(canonicalSubscription);
-
-		assertEquals(canonicalSubscription.getCrossPartitionEnabled(), false);
+		assertEquals(canonicalSubscription.getCrossPartitionEnabled(), theIsCrossPartitionEnabled);
 	}
 
-	@Test
-	public void testSerializeNonMultiPartitionSubscription(){
-		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), new StorageSettings());
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testSerializeNonMultiPartitionSubscription(boolean theIsCrossPartitionEnabled){
+		final StorageSettings storageSettings = buildStorageSettings(theIsCrossPartitionEnabled);
+		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), storageSettings);
 		Subscription subscription = makeEmailSubscription();
 		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType().setValue(false));
 		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(subscription);
 
 		System.out.print(canonicalSubscription);
 
-		assertEquals(canonicalSubscription.getCrossPartitionEnabled(), false);
+		assertEquals(canonicalSubscription.getCrossPartitionEnabled(), theIsCrossPartitionEnabled);
 	}
 
 	@Test
@@ -154,5 +159,12 @@ public class CanonicalSubscriptionTest {
 
 		ResourceDeliveryMessage payload = resourceDeliveryMessage.getPayload();
 		return payload.getSubscription();
+	}
+
+	@Nonnull
+	private static StorageSettings buildStorageSettings(boolean theIsCrossPartitionEnabled) {
+		final StorageSettings storageSettings = new StorageSettings();
+		storageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
+		return storageSettings;
 	}
 }
