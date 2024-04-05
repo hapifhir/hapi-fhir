@@ -44,7 +44,6 @@ import org.hl7.fhir.dstu3.model.DecimalType;
 import org.hl7.fhir.dstu3.model.Enumerations.SearchParamType;
 import org.hl7.fhir.dstu3.model.Extension;
 import org.hl7.fhir.dstu3.model.Meta;
-import org.hl7.fhir.dstu3.model.UriType;
 
 import java.util.Collections;
 import java.util.List;
@@ -60,7 +59,6 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 	private volatile CapabilityStatement myCachedValue;
 	private JpaStorageSettings myStorageSettings;
-	private SubscriptionSettings mySubscriptionSettings;
 	private ISearchParamRegistry mySearchParamRegistry;
 	private String myImplementationDescription;
 	private boolean myIncludeResourceCounts;
@@ -90,7 +88,6 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		super(theRestfulServer);
 		mySystemDao = theSystemDao;
 		myStorageSettings = theStorageSettings;
-		mySubscriptionSettings = theSubscriptionSettings;
 		myServerConfiguration = theRestfulServer.createConfiguration();
 		super.setCache(false);
 		setSearchParamRegistry(theSearchParamRegistry);
@@ -177,17 +174,6 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 		}
 
 		massage(retVal);
-
-		if (mySubscriptionSettings
-				.getSupportedSubscriptionTypes()
-				.contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
-				Extension websocketExtension = new Extension();
-				websocketExtension.setUrl(Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL);
-				websocketExtension.setValue(new UriType(myStorageSettings.getWebsocketContextPath()));
-				retVal.getRestFirstRep().addExtension(websocketExtension);
-			}
-		}
 
 		retVal.getImplementation().setDescription(myImplementationDescription);
 		myCachedValue = retVal;
