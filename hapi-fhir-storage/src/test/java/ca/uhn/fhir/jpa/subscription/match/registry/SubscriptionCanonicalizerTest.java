@@ -18,7 +18,6 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Subscription;
 import org.hl7.fhir.r4b.hapi.ctx.FhirR4B;
-import org.hl7.fhir.r4b.model.CodeType;
 import org.hl7.fhir.r5.hapi.ctx.FhirR5;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.Enumerations;
@@ -238,7 +237,7 @@ class SubscriptionCanonicalizerTest {
 				.getPayloadElement()
 				.addExtension(
 						SubscriptionConstants.SUBSCRIPTION_TOPIC_CHANNEL_PAYLOAD_CONTENT,
-						new CodeType(thePayloadContent));
+						new org.hl7.fhir.r4b.model.CodeType(thePayloadContent));
 
 		return subscription;
 	}
