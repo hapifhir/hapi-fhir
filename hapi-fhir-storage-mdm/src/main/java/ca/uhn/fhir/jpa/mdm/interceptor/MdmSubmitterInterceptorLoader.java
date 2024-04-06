@@ -42,9 +42,6 @@ public class MdmSubmitterInterceptorLoader {
 	JpaStorageSettings myStorageSettings;
 
 	@Autowired
-	private IMdmStorageInterceptor myIMdmStorageInterceptor;
-
-	@Autowired
 	private MdmSearchExpandingInterceptor myMdmSearchExpandingInterceptorInterceptor;
 
 	@Autowired
@@ -60,7 +57,6 @@ public class MdmSubmitterInterceptorLoader {
 			throw new ConfigurationException(
 					Msg.code(2421) + "MDM requires Message Subscriptions to be enabled in the Storage Settings");
 		}
-		myInterceptorService.registerInterceptor(myIMdmStorageInterceptor);
 		myInterceptorService.registerInterceptor(myMdmSearchExpandingInterceptorInterceptor);
 		ourLog.info("MDM interceptors registered");
 	}
