@@ -131,6 +131,14 @@ public final class ColumnTypeToDriverTypeToSqlType {
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.POSTGRES_9_4, "text");
 		setColumnType(ColumnTypeEnum.TEXT, DriverTypeEnum.MSSQL_2012, "varchar(MAX)");
 
+		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.H2_EMBEDDED, "blob");
+		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.DERBY_EMBEDDED, "blob");
+		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.MARIADB_10_1, "longblob");
+		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.MYSQL_5_7, "longblob");
+		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.ORACLE_12C, "blob");
+		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.POSTGRES_9_4, "bytea");
+		setColumnType(ColumnTypeEnum.BINARY, DriverTypeEnum.MSSQL_2012, "varbinary(MAX)");
+
 		setColumnType(ColumnTypeEnum.BIG_DECIMAL, DriverTypeEnum.H2_EMBEDDED, "numeric(38,2)");
 		setColumnType(ColumnTypeEnum.BIG_DECIMAL, DriverTypeEnum.DERBY_EMBEDDED, "decimal(31,2)");
 		setColumnType(ColumnTypeEnum.BIG_DECIMAL, DriverTypeEnum.MARIADB_10_1, "decimal(38,2)");

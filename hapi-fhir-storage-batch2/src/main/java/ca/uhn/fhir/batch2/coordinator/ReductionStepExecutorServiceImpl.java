@@ -20,9 +20,11 @@
 package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
+import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
+import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinitionStep;
@@ -63,6 +65,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.batch2.model.StatusEnum.COMPLETED;
 import static ca.uhn.fhir.batch2.model.StatusEnum.ERRORED;
 import static ca.uhn.fhir.batch2.model.StatusEnum.FINALIZE;
 import static ca.uhn.fhir.batch2.model.StatusEnum.IN_PROGRESS;
@@ -221,7 +224,6 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 				return null;
 			});
 		} finally {
-
 			executeInTransactionWithSynchronization(() -> {
 				ourLog.info(
 						"Reduction step for instance[{}] produced {} successful and {} failed chunks",
@@ -236,6 +238,10 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 				if (response.isSuccessful()) {
 					reductionStepWorker.run(chunkDetails, dataSink);
+
+					// the ReductionStepDataSink will update the job status to COMPLETED
+					// we should update instance here to keep it consistent with the newest version in persistence
+					instance.setStatus(COMPLETED);
 				}
 
 				if (response.hasSuccessfulChunksIds()) {
@@ -256,6 +262,18 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 							WorkChunkStatusEnum.FAILED,
 							"JOB ABORTED");
 				}
+
+				if (response.isSuccessful()) {
+					/**
+					 * All reduction steps are final steps.
+					 */
+					IJobCompletionHandler<PT> completionHandler =
+							theJobWorkCursor.getJobDefinition().getCompletionHandler();
+					if (completionHandler != null) {
+						completionHandler.jobComplete(new JobCompletionDetails<>(parameters, instance));
+					}
+				}
+
 				return null;
 			});
 		}

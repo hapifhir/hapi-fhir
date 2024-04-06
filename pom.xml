@@ -9,7 +9,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>7.1.5-SNAPSHOT</version>
+	<version>7.1.8-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -989,7 +989,7 @@
 		<swagger_version>2.2.19</swagger_version>
 		<slf4j_version>2.0.9</slf4j_version>
 		<log4j_to_slf4j_version>2.19.0</log4j_to_slf4j_version>
-		<spring_version>6.1.1</spring_version>
+		<spring_version>6.1.5</spring_version>
 		<spring_data_bom_version>2023.1.0</spring_data_bom_version>
 		<spring_batch_version>4.3.3</spring_batch_version>
 		<spring_boot_version>3.2.0</spring_boot_version>
@@ -1006,7 +1006,7 @@
 		<ucum_version>1.0.8</ucum_version>
 
 		<!-- CQL Support -->
-		<clinical-reasoning.version>3.0.0-PRE17</clinical-reasoning.version>
+		<clinical-reasoning.version>3.2.0</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1990,7 +1990,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.7.1</version>
+				<version>42.7.3</version>
 			</dependency>
 			<dependency>
 				<groupId>com.oracle.database.jdbc</groupId>
