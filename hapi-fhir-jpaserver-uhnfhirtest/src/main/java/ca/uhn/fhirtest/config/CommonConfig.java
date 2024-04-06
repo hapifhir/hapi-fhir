@@ -8,7 +8,6 @@ import ca.uhn.fhir.jpa.api.config.ThreadPoolFactoryConfig;
 import ca.uhn.fhir.jpa.batch2.JpaBatch2Config;
 import ca.uhn.fhir.jpa.fql.provider.HfqlRestProviderCtxConfig;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.subscription.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
@@ -20,6 +19,7 @@ import ca.uhn.fhir.storage.interceptor.balp.AsyncMemoryQueueBackedFhirClientBalp
 import ca.uhn.fhir.storage.interceptor.balp.BalpAuditCaptureInterceptor;
 import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditContextServices;
 import ca.uhn.fhir.storage.interceptor.balp.IBalpAuditEventSink;
+import ca.uhn.fhir.subscription.config.SubscriptionChannelConfig;
 import ca.uhn.fhirtest.ScheduledSubscriptionDeleter;
 import ca.uhn.fhirtest.interceptor.AnalyticsInterceptor;
 import ca.uhn.fhirtest.joke.HolyFooCowInterceptor;

@@ -12,7 +12,6 @@ public class ChannelConfig {
 	/**
 	 * Create a @Primary @Bean if you need a different implementation
 	 */
-
 	@Bean
 	public IChannelFactory queueChannelFactory(IChannelNamer theChannelNamer) {
 		return new LinkedBlockingChannelFactory(theChannelNamer);
