@@ -24,6 +24,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.mdm.log.Logs;
 import jakarta.annotation.PostConstruct;
@@ -40,6 +41,9 @@ public class MdmSubmitterInterceptorLoader {
 	@Autowired
 	JpaStorageSettings myStorageSettings;
 
+	@Autowired(required = false)
+	private IMdmStorageInterceptor myMdmStorageInterceptor;
+
 	@Autowired
 	private MdmSearchExpandingInterceptor myMdmSearchExpandingInterceptorInterceptor;
 
@@ -55,6 +59,9 @@ public class MdmSubmitterInterceptorLoader {
 		if (!myStorageSettings.getSupportedSubscriptionTypes().contains(Subscription.SubscriptionChannelType.MESSAGE)) {
 			throw new ConfigurationException(
 					Msg.code(2421) + "MDM requires Message Subscriptions to be enabled in the Storage Settings");
+		}
+		if (myMdmStorageInterceptor != null) {
+			myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
 		}
 		myInterceptorService.registerInterceptor(myMdmSearchExpandingInterceptorInterceptor);
 		ourLog.info("MDM interceptors registered");
