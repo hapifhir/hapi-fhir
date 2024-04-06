@@ -24,7 +24,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
 import ca.uhn.fhir.mdm.interceptor.MdmSearchExpandingInterceptor;
 import ca.uhn.fhir.mdm.log.Logs;
 import jakarta.annotation.PostConstruct;
