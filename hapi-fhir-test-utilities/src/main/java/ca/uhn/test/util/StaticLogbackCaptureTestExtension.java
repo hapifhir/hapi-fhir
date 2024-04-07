@@ -19,6 +19,10 @@ public class StaticLogbackCaptureTestExtension implements BeforeAllCallback, Aft
         myLogbackCaptureTestExtension = theLogbackCaptureTestExtension;
     }
 
+	public StaticLogbackCaptureTestExtension() {
+		myLogbackCaptureTestExtension = new LogbackCaptureTestExtension();
+	}
+
 	@Override
 	public void beforeAll(ExtensionContext theExtensionContext) throws Exception {
 		myLogbackCaptureTestExtension.beforeEach(theExtensionContext);
