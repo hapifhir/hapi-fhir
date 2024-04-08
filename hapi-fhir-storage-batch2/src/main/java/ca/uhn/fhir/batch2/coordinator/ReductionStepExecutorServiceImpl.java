@@ -237,7 +237,13 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		return response;
 	}
 
-	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> void processChunksAndCompleteJob(JobWorkCursor<PT, IT, OT> theJobWorkCursor, JobDefinitionStep<PT, IT, OT> step, JobInstance instance, PT parameters, IReductionStepWorker<PT, IT, OT> reductionStepWorker, ReductionStepChunkProcessingResponse response) {
+	private <PT extends IModelJson, IT extends IModelJson, OT extends IModelJson> void processChunksAndCompleteJob(
+			JobWorkCursor<PT, IT, OT> theJobWorkCursor,
+			JobDefinitionStep<PT, IT, OT> step,
+			JobInstance instance,
+			PT parameters,
+			IReductionStepWorker<PT, IT, OT> reductionStepWorker,
+			ReductionStepChunkProcessingResponse response) {
 		try {
 			executeInTransactionWithSynchronization(() -> {
 				try (Stream<WorkChunk> chunkIterator =
