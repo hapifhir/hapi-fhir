@@ -86,6 +86,14 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 		this(theClass.getName());
     }
 
+	public LogbackCaptureTestExtension(Class<?> theClass, Level theLevel) {
+		this(theClass.getName(), theLevel);
+	}
+
+	public LogbackCaptureTestExtension(org.slf4j.Logger theLogger) {
+		this((Logger) theLogger);
+	}
+
     /**
 	 * Returns a copy to avoid concurrent modification errors.
 	 * @return A copy of the log events so far.
@@ -152,6 +160,16 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 			.stream()
 			.filter(theLoggingEventPredicate)
 			.collect(Collectors.toList());
+	}
+
+	/**
+	 * Extract the log messages from the logging events.
+	 * @return a copy of the List of log messages
+	 *
+	 */
+	@Nonnull
+	public List<String> getLogMessages() {
+		return getLogEvents().stream().map(ILoggingEvent::getMessage).collect(Collectors.toList());
 	}
 
 	//  Hamcrest matcher support

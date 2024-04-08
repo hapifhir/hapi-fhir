@@ -27,8 +27,6 @@ import ca.uhn.fhir.util.MultimapCollector;
 import com.google.common.base.Charsets;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -47,7 +45,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import java.io.IOException;
 import java.util.List;
@@ -64,8 +61,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
 
 public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Test {
 	public static final int ALTERNATE_DEFAULT_ID = -1;
@@ -355,7 +350,6 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 		org.setName("name 2");
 
 		logAllResources();
-		logAllForcedIds();
 
 		myOrganizationDao.update(org);
 

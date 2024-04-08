@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
@@ -64,7 +65,7 @@ import static org.mockito.Mockito.verify;
  * These tests are abstract, and do not depend on JPA.
  * Test setups should use the public batch2 api to create scenarios.
  */
-public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMaintenanceActions, IInProgressActionsTests, IInstanceStateTransitions, IWorkChunkCommon, WorkChunkTestConstants {
+public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMaintenanceActions, IInProgressActionsTests, IInstanceStateTransitions, ITestFixture, IWorkChunkCommon, WorkChunkTestConstants {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AbstractIJobPersistenceSpecificationTest.class);
 
@@ -104,6 +105,11 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 			builder.gatedExecution();
 		}
 		return builder.build();
+	}
+
+	@Override
+	public ITestFixture getTestManager() {
+		return this;
 	}
 
 	@AfterEach
@@ -178,6 +184,9 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 	public JobInstance freshFetchJobInstance(String theInstanceId) {
 		return runInTransaction(() -> mySvc.fetchInstance(theInstanceId).orElseThrow());
 	}
+
+	@Override
+	public abstract void runMaintenancePass();
 
 	public TransactionTemplate newTxTemplate() {
 		TransactionTemplate retVal = new TransactionTemplate(getTxManager());

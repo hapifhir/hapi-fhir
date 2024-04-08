@@ -31,9 +31,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.ProxyUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.checkerframework.checker.units.qual.A;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BodyStructure;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -1238,12 +1236,11 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		myPatientDao.update(p).getId().toUnqualifiedVersionless();
 
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		runInTransaction(() -> {
 			assertEquals(1, myResourceTableDao.count());
 			assertEquals(1, myResourceHistoryTableDao.count());
-			assertEquals(1, myForcedIdDao.count());
 			assertEquals(1, myResourceIndexedSearchParamTokenDao.count());
 		});
 
@@ -1264,7 +1261,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			assertEquals(1, myResourceTableDao.count());
 			assertEquals(2, myResourceHistoryTableDao.count());
-			assertEquals(1, myForcedIdDao.count());
 			assertEquals(1, myResourceIndexedSearchParamTokenDao.count());
 		});
 

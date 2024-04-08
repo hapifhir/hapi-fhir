@@ -19,7 +19,6 @@ import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
@@ -72,6 +71,7 @@ import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import jakarta.persistence.EntityManager;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.AllergyIntolerance;
@@ -134,7 +134,6 @@ import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Transactional;
 
-import jakarta.persistence.EntityManager;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -302,8 +301,6 @@ public abstract class BaseJpaR5Test extends BaseJpaTest implements ITestDataBuil
 	protected IResourceHistoryTagDao myResourceHistoryTagDao;
 	@Autowired
 	protected IResourceHistoryProvenanceDao myResourceHistoryProvenanceDao;
-	@Autowired
-	protected IForcedIdDao myForcedIdDao;
 	@Autowired
 	@Qualifier("myCoverageDaoR5")
 	protected IFhirResourceDao<Coverage> myCoverageDao;
