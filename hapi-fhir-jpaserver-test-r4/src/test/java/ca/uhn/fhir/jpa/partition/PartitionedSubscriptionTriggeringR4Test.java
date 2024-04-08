@@ -40,8 +40,6 @@ import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.awaitility.Awaitility.await;
@@ -151,94 +149,83 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testCreateSubscriptionInPartitionAndResourceInDifferentPartition(boolean theIsCrossPartitionEnabled) throws Exception {
-		final boolean oldIsCrossPartitionSubscriptionEnabled = myStorageSettings.isCrossPartitionSubscriptionEnabled();
+		myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
+		String payload = "application/fhir+json";
+
+		String code = "1000000050";
+		String criteria1 = "Patient?active=true";
+		Subscription subscription = newSubscription(criteria1, payload);
+
+		Assertions.assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
+
+		myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd);
+
+		waitForActivatedSubscriptionCount(1);
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		myDaoRegistry.getResourceDao("Patient").create(patient, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(2)));
+
+		// Should see 0 subscription notification
+		waitForQueueToDrain();
+		Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourPatientProvider.getCountCreate());
 
 		try {
-			myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
-			String payload = "application/fhir+json";
-
-			String code = "1000000050";
-			String criteria1 = "Patient?active=true";
-			Subscription subscription = newSubscription(criteria1, payload);
-
-			Assertions.assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
-
-			myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd);
-
-			waitForActivatedSubscriptionCount(1);
-
-			Patient patient = new Patient();
-			patient.setActive(true);
-			myDaoRegistry.getResourceDao("Patient").create(patient, new SystemRequestDetails().setRequestPartitionId(RequestPartitionId.fromPartitionId(2)));
-
-			// Should see 0 subscription notification
-			waitForQueueToDrain();
-			Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourPatientProvider.getCountCreate());
-
-			try {
-				// Should have 0 matching subscription, if we get 1 update count then the test fails
-				BaseSubscriptionsR4Test.ourPatientProvider.waitForUpdateCount(1);
-				if (! theIsCrossPartitionEnabled) {
-					fail();
-				}
-			} catch (ConditionTimeoutException e) {
-				if (theIsCrossPartitionEnabled) {
-					fail();
-				} else {
-					Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().size());
-				}
+			BaseSubscriptionsR4Test.ourPatientProvider.waitForUpdateCount(1);
+			if (!theIsCrossPartitionEnabled) {
+				fail("Expecting a timeout and 0 matching subscriptions and thus a timeout if cross partition is DISabled");
 			}
-		} finally {
-			myStorageSettings.setCrossPartitionSubscriptionEnabled(oldIsCrossPartitionSubscriptionEnabled);
+			Assertions.assertEquals(1, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().size());
+		} catch (ConditionTimeoutException e) {
+			if (theIsCrossPartitionEnabled) {
+				fail("Expecting no timeout and 1 matching subscriptions and thus a timeout if cross partition is enabled");
+			} else {
+				// Should have 0 matching subscription, if we get 1 update count then the test fails
+				Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().size());
+			}
 		}
 	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testManualTriggeredSubscriptionDoesNotCheckOutsideOfPartition(boolean theIsCrossPartitionEnabled) throws Exception {
-		final boolean oldIsCrossPartitionSubscriptionEnabled = myStorageSettings.isCrossPartitionSubscriptionEnabled();
+		myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
+		String payload = "application/fhir+json";
+		String code = "1000000050";
+		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-		try {
-			myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
-			String payload = "application/fhir+json";
-			String code = "1000000050";
-			String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		//Given: We store a resource in partition 2
+		myPartitionInterceptor.setRequestPartitionId(REQ_PART_2);
+		final IFhirResourceDao observation = myDaoRegistry.getResourceDao("Observation");
+		IIdType observationIdPartitionTwo = observation.create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
 
-			//Given: We store a resource in partition 2
-			myPartitionInterceptor.setRequestPartitionId(REQ_PART_2);
-			final IFhirResourceDao observation = myDaoRegistry.getResourceDao("Observation");
-			IIdType observationIdPartitionTwo = observation.create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
+		//Given: We store a similar resource in partition 1
+		myPartitionInterceptor.setRequestPartitionId(REQ_PART_1);
+		IIdType observationIdPartitionOne = observation.create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
 
-			//Given: We store a similar resource in partition 1
-			myPartitionInterceptor.setRequestPartitionId(REQ_PART_1);
-			IIdType observationIdPartitionOne = observation.create(createBaseObservation(code, "SNOMED-CT"), mySrd).getId();
+		//Given: We create a subscrioption on Partition 1
+		IIdType subscriptionId = myDaoRegistry.getResourceDao("Subscription").create(newSubscription(criteria1, payload), mySrd).getId();
+		waitForActivatedSubscriptionCount(1);
 
-			//Given: We create a subscrioption on Partition 1
-			IIdType subscriptionId= myDaoRegistry.getResourceDao("Subscription").create(newSubscription(criteria1, payload), mySrd).getId();
-			waitForActivatedSubscriptionCount(1);
+		ArrayList<IPrimitiveType<String>> searchUrlList = new ArrayList<>();
+		searchUrlList.add(new StringDt("Observation?"));
 
-			ArrayList<IPrimitiveType<String>> searchUrlList = new ArrayList<>();
-			searchUrlList.add(new StringDt("Observation?"));
+		Parameters resultParameters = (Parameters) mySubscriptionTriggeringSvc.triggerSubscription(null, searchUrlList, subscriptionId, mySrd);
+		mySubscriptionTriggeringSvc.runDeliveryPass();
 
-			Parameters resultParameters = (Parameters) mySubscriptionTriggeringSvc.triggerSubscription(null, searchUrlList, subscriptionId, mySrd);
-			mySubscriptionTriggeringSvc.runDeliveryPass();
-
-			waitForQueueToDrain();
-			List<Observation> resourceUpdates = BaseSubscriptionsR4Test.ourObservationProvider.getResourceUpdates();
-			if (theIsCrossPartitionEnabled) {
-				assertThat(resourceUpdates.size(), is(equalTo(2)));
-				assertThat(resourceUpdates.stream().map(Resource::getId).sorted().toList(),
-					is(equalTo(Stream.of(observationIdPartitionOne, observationIdPartitionTwo).map(Object::toString).sorted().toList())));
-			} else {
-				assertThat(resourceUpdates.size(), is(equalTo(1)));
-				assertThat(resourceUpdates.get(0).getId(), is(equalTo(observationIdPartitionOne.toString())));
-			}
-
-			String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
-			assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
-		} finally {
-			myStorageSettings.setCrossPartitionSubscriptionEnabled(oldIsCrossPartitionSubscriptionEnabled);
+		waitForQueueToDrain();
+		List<Observation> resourceUpdates = BaseSubscriptionsR4Test.ourObservationProvider.getResourceUpdates();
+		if (theIsCrossPartitionEnabled) {
+			assertThat(resourceUpdates.size(), is(equalTo(2)));
+			assertThat(resourceUpdates.stream().map(Resource::getId).sorted().toList(),
+				is(equalTo(Stream.of(observationIdPartitionOne, observationIdPartitionTwo).map(Object::toString).sorted().toList())));
+		} else {
+			assertThat(resourceUpdates.size(), is(equalTo(1)));
+			assertThat(resourceUpdates.get(0).getId(), is(equalTo(observationIdPartitionOne.toString())));
 		}
+
+		String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
+		assertThat(responseValue, containsString("Subscription triggering job submitted as JOB ID"));
 	}
 
 	@Test

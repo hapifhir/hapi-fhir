@@ -232,119 +232,95 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testSubscriptionAndResourceOnDiffPartitionNotMatch(boolean theIsCrossPartitionEnabled) throws InterruptedException {
-		final boolean oldIsCrossPartitionSubscriptionEnabled = myStorageSettings.isCrossPartitionSubscriptionEnabled();
+		myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
+		myPartitionSettings.setPartitioningEnabled(true);
+		String payload = "application/fhir+json";
 
-		try {
-			myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
-			myPartitionSettings.setPartitioningEnabled(true);
-			String payload = "application/fhir+json";
+		String code = "1000000050";
+		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-			String code = "1000000050";
-			String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
+		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
+		mockSubscriptionRead(requestPartitionId, subscription);
+		sendSubscription(subscription, requestPartitionId, true);
 
-			RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
-			Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
-			mockSubscriptionRead(requestPartitionId, subscription);
-			sendSubscription(subscription, requestPartitionId, true);
-
-			final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(0));
-			if (theIsCrossPartitionEnabled) {
-				runWithinLatchLogicExpectSuccess(throwsInterrupted);
-			} else {
-				runWithLatchLogicExpectFailure(throwsInterrupted);
-			}
-		} finally {
-			myStorageSettings.setCrossPartitionSubscriptionEnabled(oldIsCrossPartitionSubscriptionEnabled);
+		final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(0));
+		if (theIsCrossPartitionEnabled) {
+			runWithinLatchLogicExpectSuccess(throwsInterrupted);
+		} else {
+			runWithLatchLogicExpectFailure(throwsInterrupted);
 		}
 	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testSubscriptionAndResourceOnDiffPartitionNotMatchPart2(boolean theIsCrossPartitionEnabled) throws InterruptedException {
-		final boolean oldIsCrossPartitionSubscriptionEnabled = myStorageSettings.isCrossPartitionSubscriptionEnabled();
+		myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
+		myPartitionSettings.setPartitioningEnabled(true);
+		String payload = "application/fhir+json";
 
-		try {
-			myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
-			myPartitionSettings.setPartitioningEnabled(true);
-			String payload = "application/fhir+json";
+		String code = "1000000050";
+		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-			String code = "1000000050";
-			String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(0);
+		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
+		mockSubscriptionRead(requestPartitionId, subscription);
+		sendSubscription(subscription, requestPartitionId, true);
 
-			RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(0);
-			Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
-			mockSubscriptionRead(requestPartitionId, subscription);
-			sendSubscription(subscription, requestPartitionId, true);
+		final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(1));
 
-			final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(1));
-
-			if (theIsCrossPartitionEnabled) {
-				runWithinLatchLogicExpectSuccess(throwsInterrupted);
-			} else {
-				runWithLatchLogicExpectFailure(throwsInterrupted);
-			}
-		} finally {
-			myStorageSettings.setCrossPartitionSubscriptionEnabled(oldIsCrossPartitionSubscriptionEnabled);
+		if (theIsCrossPartitionEnabled) {
+			runWithinLatchLogicExpectSuccess(throwsInterrupted);
+		} else {
+			runWithLatchLogicExpectFailure(throwsInterrupted);
 		}
 	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testSubscriptionOnDefaultPartitionAndResourceOnDiffPartitionNotMatch(boolean theIsCrossPartitionEnabled) throws InterruptedException {
-		final boolean oldIsCrossPartitionSubscriptionEnabled = myStorageSettings.isCrossPartitionSubscriptionEnabled();
+		myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
+		myPartitionSettings.setPartitioningEnabled(true);
+		String payload = "application/fhir+json";
 
-		try {
-			myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
-			myPartitionSettings.setPartitioningEnabled(true);
-			String payload = "application/fhir+json";
+		String code = "1000000050";
+		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-			String code = "1000000050";
-			String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		RequestPartitionId requestPartitionId = RequestPartitionId.defaultPartition();
+		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
+		mockSubscriptionRead(requestPartitionId, subscription);
+		sendSubscription(subscription, requestPartitionId, true);
 
-			RequestPartitionId requestPartitionId = RequestPartitionId.defaultPartition();
-			Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
-			mockSubscriptionRead(requestPartitionId, subscription);
-			sendSubscription(subscription, requestPartitionId, true);
+		final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(1));
 
-			final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionId(1));
-
-			if (theIsCrossPartitionEnabled) {
-				runWithinLatchLogicExpectSuccess(throwsInterrupted);
-			} else {
-				runWithLatchLogicExpectFailure(throwsInterrupted);
-			}
-		} finally {
-			myStorageSettings.setCrossPartitionSubscriptionEnabled(oldIsCrossPartitionSubscriptionEnabled);
+		if (theIsCrossPartitionEnabled) {
+			runWithinLatchLogicExpectSuccess(throwsInterrupted);
+		} else {
+			runWithLatchLogicExpectFailure(throwsInterrupted);
 		}
 	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testSubscriptionOnAPartitionAndResourceOnDefaultPartitionNotMatch(boolean theIsCrossPartitionEnabled) throws InterruptedException {
-		final boolean oldIsCrossPartitionSubscriptionEnabled = myStorageSettings.isCrossPartitionSubscriptionEnabled();
+		myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
+		myPartitionSettings.setPartitioningEnabled(true);
+		String payload = "application/fhir+json";
 
-		try {
-			myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
-			myPartitionSettings.setPartitioningEnabled(true);
-			String payload = "application/fhir+json";
+		String code = "1000000050";
+		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-			String code = "1000000050";
-			String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
+		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
+		mockSubscriptionRead(requestPartitionId, subscription);
+		sendSubscription(subscription, requestPartitionId, true);
 
-			RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
-			Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
-			mockSubscriptionRead(requestPartitionId, subscription);
-			sendSubscription(subscription, requestPartitionId, true);
+		final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.defaultPartition());
 
-			final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.defaultPartition());
-
-			if (theIsCrossPartitionEnabled) {
-				runWithinLatchLogicExpectSuccess(throwsInterrupted);
-			} else {
-				runWithLatchLogicExpectFailure(throwsInterrupted);
-			}
-		} finally {
-			myStorageSettings.setCrossPartitionSubscriptionEnabled(oldIsCrossPartitionSubscriptionEnabled);
+		if (theIsCrossPartitionEnabled) {
+			runWithinLatchLogicExpectSuccess(throwsInterrupted);
+		} else {
+			runWithLatchLogicExpectFailure(throwsInterrupted);
 		}
 	}
 
@@ -372,30 +348,24 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
 	public void testSubscriptionOnOnePartitionDoNotMatchResourceOnMultiplePartitions(boolean theIsCrossPartitionEnabled) throws InterruptedException {
-		final boolean oldIsCrossPartitionSubscriptionEnabled = myStorageSettings.isCrossPartitionSubscriptionEnabled();
+		myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
+		myPartitionSettings.setPartitioningEnabled(true);
+		String payload = "application/fhir+json";
 
-		try {
-			myStorageSettings.setCrossPartitionSubscriptionEnabled(theIsCrossPartitionEnabled);
-			myPartitionSettings.setPartitioningEnabled(true);
-			String payload = "application/fhir+json";
+		String code = "1000000050";
+		String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 
-			String code = "1000000050";
-			String criteria = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
+		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
+		Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
+		mockSubscriptionRead(requestPartitionId, subscription);
+		sendSubscription(subscription, requestPartitionId, true);
 
-			RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
-			Subscription subscription = makeActiveSubscription(criteria, payload, ourListenerServerBase);
-			mockSubscriptionRead(requestPartitionId, subscription);
-			sendSubscription(subscription, requestPartitionId, true);
+		final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionIds(Collections.synchronizedList(Lists.newArrayList(0, 2))));
 
-			final ThrowsInterrupted throwsInterrupted = () -> sendObservation(code, "SNOMED-CT", RequestPartitionId.fromPartitionIds(Collections.synchronizedList(Lists.newArrayList(0, 2))));
-
-			if (theIsCrossPartitionEnabled) {
-				runWithinLatchLogicExpectSuccess(throwsInterrupted);
-			} else {
-				runWithLatchLogicExpectFailure(throwsInterrupted);
-			}
-		} finally {
-			myStorageSettings.setCrossPartitionSubscriptionEnabled(oldIsCrossPartitionSubscriptionEnabled);
+		if (theIsCrossPartitionEnabled) {
+			runWithinLatchLogicExpectSuccess(throwsInterrupted);
+		} else {
+			runWithLatchLogicExpectFailure(throwsInterrupted);
 		}
 	}
 
