@@ -47,13 +47,6 @@ public interface IInProgressActionsTests extends IWorkChunkCommon, WorkChunkTest
 
 	@Test
 	default void processingRetryableError_inProgressToError_bumpsCountRecordsMessage() {
-		String jobId = createAndStoreJobInstance(null);
-		String myChunkId = createAndDequeueWorkChunk(jobId);
-		// execution had a retryable error
-		getSvc().onWorkChunkError(new WorkChunkErrorEvent(myChunkId, ERROR_MESSAGE_A));
-
-		// verify the db was updated
-		var workChunkEntity = freshFetchWorkChunk(myChunkId);
 		String jobId = getTestManager().createAndStoreJobInstance(null);
 		String myChunkId = getTestManager().createAndDequeueWorkChunk(jobId);
 		// execution had a retryable error

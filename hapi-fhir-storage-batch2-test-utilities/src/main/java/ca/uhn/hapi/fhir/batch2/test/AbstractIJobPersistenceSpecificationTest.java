@@ -29,7 +29,6 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
@@ -128,7 +127,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 	class WorkChunkStorage implements IWorkChunkStorageTests {
 
 		@Override
-		public IWorkChunkCommon getTestManager() {
+		public ITestFixture getTestManager() {
 			return AbstractIJobPersistenceSpecificationTest.this;
 		}
 
@@ -136,7 +135,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 		class StateTransitions implements IWorkChunkStateTransitions {
 
 			@Override
-			public IWorkChunkCommon getTestManager() {
+			public ITestFixture getTestManager() {
 				return AbstractIJobPersistenceSpecificationTest.this;
 			}
 
@@ -144,16 +143,11 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 			class ErrorActions implements IWorkChunkErrorActionsTests {
 
 				@Override
-				public IWorkChunkCommon getTestManager() {
+				public ITestFixture getTestManager() {
 					return AbstractIJobPersistenceSpecificationTest.this;
 				}
 			}
 		}
-	}
-
-	@Override
-	public IWorkChunkCommon getTestManager() {
-		return this;
 	}
 
 	@Nonnull
@@ -260,6 +254,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 			.sendWorkChannelMessage(notificationCaptor.capture());
 	}
 
+	@Override
 	public void createChunksInStates(JobMaintenanceStateInformation theJobMaintenanceStateInformation) {
 		theJobMaintenanceStateInformation.initialize(mySvc);
 	}

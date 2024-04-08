@@ -50,12 +50,12 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 	@Test
 	default void createInstance_createsInQueuedWithChunkInReady() {
 		// given
-		JobDefinition<?> jd = withJobDefinition(false);
+		JobDefinition<?> jd = getTestManager().withJobDefinition(false);
 
 		// when
 		IJobPersistence.CreateResult createResult =
-			newTxTemplate().execute(status->
-				getSvc().onCreateWithFirstChunk(jd, "{}"));
+			getTestManager().newTxTemplate().execute(status->
+				getTestManager().getSvc().onCreateWithFirstChunk(jd, "{}"));
 
 		// then
 		ourLog.info("job and chunk created {}", createResult);
@@ -63,11 +63,11 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		assertThat(createResult.jobInstanceId, not(emptyString()));
 		assertThat(createResult.workChunkId, not(emptyString()));
 
-		JobInstance jobInstance = freshFetchJobInstance(createResult.jobInstanceId);
+		JobInstance jobInstance = getTestManager().freshFetchJobInstance(createResult.jobInstanceId);
 		assertThat(jobInstance.getStatus(), equalTo(StatusEnum.QUEUED));
 		assertThat(jobInstance.getParameters(), equalTo("{}"));
 
-		WorkChunk firstChunk = freshFetchWorkChunk(createResult.workChunkId);
+		WorkChunk firstChunk = getTestManager().freshFetchWorkChunk(createResult.workChunkId);
 		assertThat(firstChunk.getStatus(), equalTo(WorkChunkStatusEnum.READY));
 		assertNull(firstChunk.getData(), "First chunk data is null - only uses parameters");
 	}

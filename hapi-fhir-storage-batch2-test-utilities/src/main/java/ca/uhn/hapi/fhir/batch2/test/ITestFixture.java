@@ -23,6 +23,7 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobParameters;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -81,4 +82,10 @@ public interface ITestFixture {
 	 * @param theNumberOfTimes the number of invocations to expect
 	 */
 	void verifyWorkChunkMessageHandlerCalled(PointcutLatch theSendingLatch, int theNumberOfTimes) throws InterruptedException;
+
+	/**
+	 * Uses the JobMaintenanceStateInformation to setup a test.
+	 * @param theJobMaintenanceStateInformation
+	 */
+	void createChunksInStates(JobMaintenanceStateInformation theJobMaintenanceStateInformation);
 }

@@ -76,7 +76,7 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 		String id = getTestManager().storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, CHUNK_DATA);
 		assertNotNull(id);
 
-		getTestManager().runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, freshFetchWorkChunk(id).getStatus()));
+		getTestManager().runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, getTestManager().freshFetchWorkChunk(id).getStatus()));
 	}
 
 	@Test
@@ -95,7 +95,7 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 		String id = stateInformation.getInitialWorkChunks().stream().findFirst().orElseThrow().getId();
 
 		// verify created in ready
-		getTestManager().runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, freshFetchWorkChunk(id).getStatus()));
+		getTestManager().runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, getTestManager().freshFetchWorkChunk(id).getStatus()));
 
 		// test
 		getTestManager().runMaintenancePass();
@@ -124,10 +124,10 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 		String id = info.getInitialWorkChunks().stream().findFirst().orElseThrow().getId();
 
 		// verify created in QUEUED
-		getTestManager().runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, freshFetchWorkChunk(id).getStatus()));
+		getTestManager().runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, getTestManager().freshFetchWorkChunk(id).getStatus()));
 
 		// test; manually dequeue chunk
-		WorkChunk chunk = getSvc().onWorkChunkDequeue(id).orElseThrow(IllegalArgumentException::new);
+		WorkChunk chunk = getTestManager().getSvc().onWorkChunkDequeue(id).orElseThrow(IllegalArgumentException::new);
 
 		// verify
 		assertEquals(36, chunk.getInstanceId().length());
@@ -136,7 +136,7 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 		assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
 		assertEquals(CHUNK_DATA, chunk.getData());
 
-		getTestManager().runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, freshFetchWorkChunk(id).getStatus()));
+		getTestManager().runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, getTestManager().freshFetchWorkChunk(id).getStatus()));
 	}
 
 	@Test
