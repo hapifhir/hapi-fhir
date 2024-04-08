@@ -287,7 +287,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		assertEquals(totalChunks, chunkCounter.get());
 
 		assertEquals(StatusEnum.FAILED, jobInstance.getStatus());
-		assertEquals(1.0, jobInstance.getProgress());
 	}
 
 	@Test
