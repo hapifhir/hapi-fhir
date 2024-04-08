@@ -19,7 +19,6 @@ import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
@@ -227,7 +226,8 @@ class BaseHapiFhirResourceDaoTest {
 		RequestPartitionId partitionId = Mockito.mock(RequestPartitionId.class);
 		JpaPid jpaPid = JpaPid.fromIdAndVersion(123L, 1L);
 		ResourceTable entity = new ResourceTable();
-		entity.setForcedId(new ForcedId());
+		entity.setId(123L);
+		entity.setFhirId("456");
 
 		// mock
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(

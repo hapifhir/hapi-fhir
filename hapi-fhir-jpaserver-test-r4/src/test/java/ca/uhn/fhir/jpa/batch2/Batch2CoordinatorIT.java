@@ -330,6 +330,61 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void reductionStepFailing_willFailJob() throws InterruptedException {
+		// setup
+		String jobId = new Exception().getStackTrace()[0].getMethodName();
+		int totalChunks = 3;
+		AtomicInteger chunkCounter = new AtomicInteger();
+		String error = "this is an error";
+
+		buildAndDefine3StepReductionJob(jobId, new IReductionStepHandler() {
+
+			@Override
+			public void firstStep(StepExecutionDetails<TestJobParameters, VoidModel> theStep, IJobDataSink<FirstStepOutput> theDataSink) {
+				for (int i = 0; i < totalChunks; i++) {
+					theDataSink.accept(new FirstStepOutput());
+				}
+			}
+
+			@Override
+			public void secondStep(StepExecutionDetails<TestJobParameters, FirstStepOutput> theStep, IJobDataSink<SecondStepOutput> theDataSink) {
+				SecondStepOutput output = new SecondStepOutput();
+				theDataSink.accept(output);
+			}
+
+			@Override
+			public void reductionStepConsume(ChunkExecutionDetails<TestJobParameters, SecondStepOutput> theChunkDetails, IJobDataSink<ReductionStepOutput> theDataSink) {
+				chunkCounter.getAndIncrement();
+			}
+
+			@Override
+			public void reductionStepRun(StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails, IJobDataSink<ReductionStepOutput> theDataSink) {
+				// always throw
+				throw new RuntimeException(error);
+			}
+		});
+
+		// test
+		JobInstanceStartRequest request = buildRequest(jobId);
+		myFirstStepLatch.setExpectedCount(1);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
+		String instanceId = startResponse.getInstanceId();
+		assertNotNull(instanceId);
+
+		// waiting for job to end (any status - but we'll verify failed later)
+		myBatch2JobHelper.awaitJobHasStatus(instanceId, StatusEnum.getEndedStatuses().toArray(new StatusEnum[0]));
+
+		// verify
+		Optional<JobInstance> instanceOp = myJobPersistence.fetchInstance(instanceId);
+		assertTrue(instanceOp.isPresent());
+		JobInstance jobInstance = instanceOp.get();
+
+		assertEquals(totalChunks, chunkCounter.get());
+
+		assertEquals(StatusEnum.FAILED, jobInstance.getStatus());
+	}
+
+	@Test
 	public void testJobWithReductionStepFiresCompletionHandler() throws InterruptedException {
 		// setup
 		String jobId = new Exception().getStackTrace()[0].getMethodName();

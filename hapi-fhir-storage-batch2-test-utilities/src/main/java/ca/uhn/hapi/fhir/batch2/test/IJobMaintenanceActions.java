@@ -17,7 +17,7 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 
 	@BeforeEach
 	default void before() {
-		enableMaintenanceRunner(false);
+		getTestManager().enableMaintenanceRunner(false);
 	}
 
 	@Test
@@ -30,16 +30,16 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
    			2|READY,2|QUEUED
 		""";
 		int numToTransition = 2;
-		PointcutLatch sendLatch = disableWorkChunkMessageHandler();
+		PointcutLatch sendLatch = getTestManager().disableWorkChunkMessageHandler();
 		sendLatch.setExpectedCount(numToTransition);
 		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(initialState, true);
-		createChunksInStates(result);
+		getTestManager().createChunksInStates(result);
 
 		// test
-		runMaintenancePass();
+		getTestManager().runMaintenancePass();
 
 		// verify
-		verifyWorkChunkMessageHandlerCalled(sendLatch, numToTransition);
+		getTestManager().verifyWorkChunkMessageHandlerCalled(sendLatch, numToTransition);
 		verifyWorkChunkFinalStates(result);
 	}
 
@@ -106,18 +106,18 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 	})
 	default void testGatedStep2NotReady_notAdvance(String theChunkState) throws InterruptedException {
 		// setup
-		PointcutLatch sendingLatch = disableWorkChunkMessageHandler();
+		PointcutLatch sendingLatch = getTestManager().disableWorkChunkMessageHandler();
 		sendingLatch.setExpectedCount(0);
 		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(theChunkState, true);
 
-		createChunksInStates(result);
+		getTestManager().createChunksInStates(result);
 
 		// test
-		runMaintenancePass();
+		getTestManager().runMaintenancePass();
 
 		// verify
 		// nothing ever queued -> nothing ever sent to queue
-		verifyWorkChunkMessageHandlerCalled(sendingLatch, 0);
+		getTestManager().verifyWorkChunkMessageHandlerCalled(sendingLatch, 0);
 		verifyWorkChunkFinalStates(result);
 	}
 
@@ -149,16 +149,16 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 	})
 	default void testGatedStep2ReadyToAdvance_advanceToStep3(String theChunkState) throws InterruptedException {
 		// setup
-		PointcutLatch sendingLatch = disableWorkChunkMessageHandler();
+		PointcutLatch sendingLatch = getTestManager().disableWorkChunkMessageHandler();
 		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(theChunkState, true);
-		createChunksInStates(result);
+		getTestManager().createChunksInStates(result);
 
 		// test
-		runMaintenancePass();
+		getTestManager().runMaintenancePass();
 
 		// verify
 		// things are being set to READY; is anything being queued?
-		verifyWorkChunkMessageHandlerCalled(sendingLatch, 0);
+		getTestManager().verifyWorkChunkMessageHandlerCalled(sendingLatch, 0);
 		verifyWorkChunkFinalStates(result);
 	}
 
@@ -177,24 +177,24 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 		int expectedTransitions = 2;
 		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(state, false);
 
-		PointcutLatch sendLatch = disableWorkChunkMessageHandler();
+		PointcutLatch sendLatch = getTestManager().disableWorkChunkMessageHandler();
 		sendLatch.setExpectedCount(expectedTransitions);
-		createChunksInStates(result);
+		getTestManager().createChunksInStates(result);
 
 		// TEST run job maintenance - force transition
-		enableMaintenanceRunner(true);
+		getTestManager().enableMaintenanceRunner(true);
 
-		runMaintenancePass();
+		getTestManager().runMaintenancePass();
 
 		// verify
-		verifyWorkChunkMessageHandlerCalled(sendLatch, expectedTransitions);
+		getTestManager().verifyWorkChunkMessageHandlerCalled(sendLatch, expectedTransitions);
 		verifyWorkChunkFinalStates(result);
 	}
 
 	private JobMaintenanceStateInformation setupGatedWorkChunkTransitionTest(String theChunkState, boolean theIsGated) {
 		// get the job def and store the instance
-		JobDefinition<?> definition = withJobDefinition(theIsGated);
-		String instanceId = createAndStoreJobInstance(definition);
+		JobDefinition<?> definition = getTestManager().withJobDefinition(theIsGated);
+		String instanceId = getTestManager().createAndStoreJobInstance(definition);
 		JobMaintenanceStateInformation stateInformation = new JobMaintenanceStateInformation(instanceId, definition, theChunkState);
 
 		ourLog.info("Starting test case \n {}", theChunkState);
@@ -204,6 +204,6 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 	}
 
 	private void verifyWorkChunkFinalStates(JobMaintenanceStateInformation theStateInformation) {
-		theStateInformation.verifyFinalStates(getSvc());
+		theStateInformation.verifyFinalStates(getTestManager().getSvc());
 	}
 }
