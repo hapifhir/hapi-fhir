@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.sql.Timestamp;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -39,8 +41,9 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsTrueForMatchingNullDates() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", null, null, null, null, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", null, null, null, null, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", null, null, null, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", null, null, null, null, "SomeValue");
+		calculateHashes(param, param2);
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
@@ -49,8 +52,9 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsTrueForMatchingDates() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1B, null, date2B, null, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1B, null, date2B, null, "SomeValue");
+		calculateHashes(param, param2);
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
@@ -59,8 +63,9 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsTrueForMatchingTimeStampsThatMatch() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp1B, null, timestamp2B, null, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp1B, null, timestamp2B, null, "SomeValue");
+		calculateHashes(param, param2);
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
@@ -71,8 +76,9 @@ public class ResourceIndexedSearchParamDateTest {
 	// other will be equivalent but will be a java.sql.Timestamp. Equals should work in both directions.
 	@Test
 	public void equalsIsTrueForMixedTimestampsAndDates() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
+		calculateHashes(param, param2);
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
@@ -81,8 +87,9 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsFalseForNonMatchingDates() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date2A, null, date1A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date2A, null, date1A, null, "SomeValue");
+		calculateHashes(param, param2);
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));
@@ -91,8 +98,9 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsFalseForNonMatchingDatesNullCase() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", null, null, null, null, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", null, null, null, null, "SomeValue");
+		calculateHashes(param, param2);
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));
@@ -101,8 +109,9 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsFalseForNonMatchingTimeStamps() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp2A, null, timestamp1A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp1A, null, timestamp2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp2A, null, timestamp1A, null, "SomeValue");
+		calculateHashes(param, param2);
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));
@@ -111,8 +120,9 @@ public class ResourceIndexedSearchParamDateTest {
 
 	@Test
 	public void equalsIsFalseForMixedTimestampsAndDatesThatDoNotMatch() {
-		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
-		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "SomeResource", timestamp2A, null, timestamp1A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "SomeResource", date1A, null, date2A, null, "SomeValue");
+		ResourceIndexedSearchParamDate param2 = new ResourceIndexedSearchParamDate("Patient", "SomeResource", timestamp2A, null, timestamp1A, null, "SomeValue");
+		calculateHashes(param, param2);
 
 		assertFalse(param.equals(param2));
 		assertFalse(param2.equals(param));
@@ -125,16 +135,18 @@ public class ResourceIndexedSearchParamDateTest {
 		ResourceIndexedSearchParamDate val1 = new ResourceIndexedSearchParamDate()
 			.setValueHigh(new Date(100000000L))
 			.setValueLow(new Date(111111111L));
-		val1.setPartitionSettings(new PartitionSettings());
-		val1.calculateHashes();
+		calculateHashes(val1);
 		ResourceIndexedSearchParamDate val2 = new ResourceIndexedSearchParamDate()
 			.setValueHigh(new Date(100000000L))
 			.setValueLow(new Date(111111111L));
-		val2.setPartitionSettings(new PartitionSettings());
-		val2.calculateHashes();
+		calculateHashes(val2);
 		assertEquals(val1, val1);
 		assertEquals(val1, val2);
 		assertNotEquals(val1, null);
 		assertNotEquals(val1, "");
+	}
+
+	private void calculateHashes(BaseResourceIndex... theParams) {
+		Arrays.stream(theParams).forEach(param -> param.calculateHashes(new ResourceIndexHasher(new PartitionSettings(), new StorageSettings())));
 	}
 }

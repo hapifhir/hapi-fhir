@@ -21,7 +21,6 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -52,8 +51,8 @@ public class SearchParamPresentPredicateBuilder extends BaseJoiningPredicateBuil
 
 	public Condition createPredicateParamMissingForReference(
 			String theResourceName, String theParamName, boolean theMissing, RequestPartitionId theRequestPartitionId) {
-		Long hash = SearchParamPresentEntity.calculateHashPresence(
-				myPartitionSettings, theRequestPartitionId, theResourceName, theParamName, !theMissing);
+		Long hash = getResourceIndexHasher()
+				.hash(theRequestPartitionId, theResourceName, theParamName, Boolean.toString(!theMissing));
 		BinaryCondition predicate = BinaryCondition.equalTo(myColumnHashPresence, generatePlaceholder(hash));
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}

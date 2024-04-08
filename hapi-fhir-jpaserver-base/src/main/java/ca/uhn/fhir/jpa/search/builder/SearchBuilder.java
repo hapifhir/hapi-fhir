@@ -48,12 +48,12 @@ import ca.uhn.fhir.jpa.entity.ResourceSearchView;
 import ca.uhn.fhir.jpa.interceptor.JpaPreResourceAccessDetails;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.IBaseResourceEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
 import ca.uhn.fhir.jpa.model.search.SearchBuilderLoadIncludesParameters;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.jpa.search.SearchConstants;
 import ca.uhn.fhir.jpa.search.builder.models.ResolvedSearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
@@ -197,6 +197,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 	@Autowired
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
+
+	@Autowired
+	private ResourceIndexHasher theResourceIndexHasher;
 
 	/**
 	 * Constructor
@@ -1639,8 +1642,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		assert !theTargetResourceTypes.isEmpty();
 
 		Set<Long> identityHashesForTypes = theTargetResourceTypes.stream()
-				.map(type -> BaseResourceIndexedSearchParam.calculateHashIdentity(
-						myPartitionSettings, myRequestPartitionId, type, "url"))
+				.map(type -> theResourceIndexHasher.hash(myRequestPartitionId, type, "url"))
 				.collect(Collectors.toSet());
 
 		Map<String, Object> canonicalUriQueryParams = new HashMap<>();

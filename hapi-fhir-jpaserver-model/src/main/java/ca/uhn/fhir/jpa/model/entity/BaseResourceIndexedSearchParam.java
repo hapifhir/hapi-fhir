@@ -20,41 +20,24 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
-import com.google.common.hash.HashCode;
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hasher;
-import com.google.common.hash.Hashing;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.persistence.Transient;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Objects;
 
 @MappedSuperclass
 public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	static final int MAX_SP_NAME = 100;
-	/**
-	 * Don't change this without careful consideration. You will break existing hashes!
-	 */
-	private static final HashFunction HASH_FUNCTION = Hashing.murmur3_128(0);
-
-	/**
-	 * Don't make this public 'cause nobody better be able to modify it!
-	 */
-	private static final byte[] DELIMITER_BYTES = "|".getBytes(Charsets.UTF_8);
 
 	private static final long serialVersionUID = 1L;
 
@@ -78,11 +61,12 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
 
-	@Transient
-	private transient PartitionSettings myPartitionSettings;
+	@Column(name = "HASH_IDENTITY", nullable = true)
+	private Long myHashIdentity;
 
-	@Transient
-	private transient StorageSettings myStorageSettings;
+	@GenericField
+	@Column(name = "CONTAINED_ORD", nullable = true)
+	private Integer myContainedOrd;
 
 	@Override
 	public abstract Long getId();
@@ -109,16 +93,22 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	@Override
 	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
 		BaseResourceIndexedSearchParam source = (BaseResourceIndexedSearchParam) theSource;
+		// 1. copy hash values
+		myHashIdentity = source.myHashIdentity;
+		// 2. copy fields that are part of the hash next
+		setResourceType(source.myResourceType);
+		setParamName(source.myParamName);
+		setPartitionId(source.getPartitionId());
+		setContainedOrd(source.myContainedOrd);
+		// 3. copy other fields that are not part of any hash
 		myMissing = source.myMissing;
 		myParamName = source.myParamName;
 		myUpdated = source.myUpdated;
-		myStorageSettings = source.myStorageSettings;
-		myPartitionSettings = source.myPartitionSettings;
-		setPartitionId(source.getPartitionId());
 	}
 
 	public Long getResourcePid() {
-		return myResourcePid;
+		ResourceTable entity = getResource();
+		return entity != null ? entity.getResourceId() : null;
 	}
 
 	public String getResourceType() {
@@ -126,7 +116,10 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	}
 
 	public void setResourceType(String theResourceType) {
-		myResourceType = theResourceType;
+		if (!StringUtils.equals(myResourceType, theResourceType)) {
+			myResourceType = theResourceType;
+			clearHashes();
+		}
 	}
 
 	public Date getUpdated() {
@@ -146,96 +139,50 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		return this;
 	}
 
+	public Long getHashIdentity() {
+		return myHashIdentity;
+	}
+
+	public Integer getContainedOrd() {
+		return myContainedOrd;
+	}
+
+	public void setContainedOrd(Integer theContainedOrd) {
+		if (!Objects.equals(theContainedOrd, myContainedOrd)) {
+			myContainedOrd = theContainedOrd;
+			clearHashes();
+		}
+	}
+
+	public boolean isContained() {
+		return myContainedOrd != null;
+	}
+
+	/**
+	 * Calculates the hashes for the search parameter.
+	 * This method should be overridden to compute additional hash values as needed by the specific parameter type.
+	 * The current object selects which fields need to be hashed.
+	 * @param theHasher the hasher which performs the hashing
+	 */
+	public void calculateHashes(ResourceIndexHasher theHasher) {
+		if (isHashPopulated(myHashIdentity)) {
+			return;
+		}
+		myHashIdentity = theHasher.hash(getPartitionId(), isContained(), getResourceType(), getParamName());
+	}
+
+	@Override
+	public void clearHashes() {
+		myHashIdentity = null;
+	}
+
 	public abstract IQueryParameterType toQueryParameterType();
 
 	public boolean matches(IQueryParameterType theParam) {
 		throw new UnsupportedOperationException(Msg.code(1526) + "No parameter matcher for " + theParam);
 	}
 
-	public PartitionSettings getPartitionSettings() {
-		return myPartitionSettings;
-	}
-
-	public BaseResourceIndexedSearchParam setPartitionSettings(PartitionSettings thePartitionSettings) {
-		myPartitionSettings = thePartitionSettings;
-		return this;
-	}
-
-	public StorageSettings getStorageSettings() {
-		return myStorageSettings;
-	}
-
-	public BaseResourceIndexedSearchParam setStorageSettings(StorageSettings theStorageSettings) {
-		myStorageSettings = theStorageSettings;
-		return this;
-	}
-
-	public static long calculateHashIdentity(
-			PartitionSettings thePartitionSettings,
-			PartitionablePartitionId theRequestPartitionId,
-			String theResourceType,
-			String theParamName) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashIdentity(thePartitionSettings, requestPartitionId, theResourceType, theParamName);
-	}
-
-	public static long calculateHashIdentity(
-			PartitionSettings thePartitionSettings,
-			RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			String theParamName) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName);
-	}
-
-	public static long calculateHashIdentity(
-			PartitionSettings thePartitionSettings,
-			RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			String theParamName,
-			List<String> theAdditionalValues) {
-		String[] values = new String[theAdditionalValues.size() + 2];
-		values[0] = theResourceType;
-		values[1] = theParamName;
-		for (int i = 0; i < theAdditionalValues.size(); i++) {
-			values[i + 2] = theAdditionalValues.get(i);
-		}
-
-		return hash(thePartitionSettings, theRequestPartitionId, values);
-	}
-
-	/**
-	 * Applies a fast and consistent hashing algorithm to a set of strings
-	 */
-	static long hash(
-			PartitionSettings thePartitionSettings, RequestPartitionId theRequestPartitionId, String... theValues) {
-		Hasher hasher = HASH_FUNCTION.newHasher();
-
-		if (thePartitionSettings.isPartitioningEnabled()
-				&& thePartitionSettings.isIncludePartitionInSearchHashes()
-				&& theRequestPartitionId != null) {
-			if (theRequestPartitionId.getPartitionIds().size() > 1) {
-				throw new InternalErrorException(Msg.code(1527)
-						+ "Can not search multiple partitions when partitions are included in search hashes");
-			}
-			Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
-			if (partitionId != null) {
-				hasher.putInt(partitionId);
-			}
-		}
-
-		for (String next : theValues) {
-			if (next == null) {
-				hasher.putByte((byte) 0);
-			} else {
-				next = UrlUtil.escapeUrlParam(next);
-				byte[] bytes = next.getBytes(Charsets.UTF_8);
-				hasher.putBytes(bytes);
-			}
-			hasher.putBytes(DELIMITER_BYTES);
-		}
-
-		HashCode hashCode = hasher.hash();
-		long retVal = hashCode.asLong();
-		return retVal;
+	protected static boolean isHashPopulated(Long theHash) {
+		return ObjectUtils.defaultIfNull(theHash, 0L) > 0L;
 	}
 }

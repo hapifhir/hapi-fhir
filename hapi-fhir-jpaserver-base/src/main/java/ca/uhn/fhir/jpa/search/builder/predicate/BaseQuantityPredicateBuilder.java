@@ -22,8 +22,6 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -73,21 +71,14 @@ public abstract class BaseQuantityPredicateBuilder extends BaseSearchParamPredic
 
 		Condition hashPredicate;
 		if (!isBlank(systemValue) && !isBlank(unitsValue)) {
-			long hash = BaseResourceIndexedSearchParamQuantity.calculateHashSystemAndUnits(
-					getPartitionSettings(),
-					theRequestPartitionId,
-					theResourceName,
-					theParamName,
-					systemValue,
-					unitsValue);
+			long hash = getResourceIndexHasher()
+					.hash(theRequestPartitionId, theResourceName, theParamName, systemValue, unitsValue);
 			hashPredicate = BinaryCondition.equalTo(myColumnHashIdentitySystemUnits, generatePlaceholder(hash));
 		} else if (!isBlank(unitsValue)) {
-			long hash = BaseResourceIndexedSearchParamQuantity.calculateHashUnits(
-					getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName, unitsValue);
+			long hash = getResourceIndexHasher().hash(theRequestPartitionId, theResourceName, theParamName, unitsValue);
 			hashPredicate = BinaryCondition.equalTo(myColumnHashIdentityUnits, generatePlaceholder(hash));
 		} else {
-			long hash = BaseResourceIndexedSearchParam.calculateHashIdentity(
-					getPartitionSettings(), theRequestPartitionId, theResourceName, theParamName);
+			long hash = getResourceIndexHasher().hash(theRequestPartitionId, theResourceName, theParamName);
 			hashPredicate = BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hash));
 		}
 

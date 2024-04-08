@@ -17,7 +17,6 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
-import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
 import ca.uhn.fhir.jpa.dao.ResourceHistoryCalculator;
@@ -32,6 +31,8 @@ import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
@@ -48,6 +49,22 @@ import ca.uhn.fhir.util.MetaTagSorterAlphabetical;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import com.google.common.collect.Lists;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityGraph;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.Query;
+import jakarta.persistence.StoredProcedureQuery;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaDelete;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaUpdate;
+import jakarta.persistence.metamodel.Metamodel;
 import org.hamcrest.Matchers;
 import org.hibernate.internal.SessionImpl;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -79,22 +96,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
-import jakarta.persistence.EntityGraph;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.EntityManagerFactory;
-import jakarta.persistence.EntityTransaction;
-import jakarta.persistence.FlushModeType;
-import jakarta.persistence.LockModeType;
-import jakarta.persistence.Query;
-import jakarta.persistence.StoredProcedureQuery;
-import jakarta.persistence.TypedQuery;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaDelete;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.CriteriaUpdate;
-import jakarta.persistence.metamodel.Metamodel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -134,6 +135,7 @@ public class GiantTransactionPerfTest {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private SearchParamWithInlineReferencesExtractor mySearchParamWithInlineReferencesExtractor;
 	private PartitionSettings myPartitionSettings;
+	private ResourceIndexHasher myResourceIndexHasher;
 	private SearchParamExtractorService mySearchParamExtractorSvc;
 	private SearchParamExtractorR4 mySearchParamExtractor;
 	private SearchParamRegistryImpl mySearchParamRegistry;
@@ -177,6 +179,7 @@ public class GiantTransactionPerfTest {
 		myDaoRegistry = new DaoRegistry(ourFhirContext);
 
 		myPartitionSettings = new PartitionSettings();
+		myResourceIndexHasher = new ResourceIndexHasher(myPartitionSettings, new StorageSettings());
 
 		myMetaTagSorter = new MetaTagSorterAlphabetical();
 
@@ -236,25 +239,25 @@ public class GiantTransactionPerfTest {
 		mySearchParamExtractor = new SearchParamExtractorR4();
 		mySearchParamExtractor.setContext(ourFhirContext);
 		mySearchParamExtractor.setSearchParamRegistry(mySearchParamRegistry);
-		mySearchParamExtractor.setPartitionSettings(this.myPartitionSettings);
 		mySearchParamExtractor.setStorageSettings(myStorageSettings);
+		mySearchParamExtractor.setResourceIndexHasher(myResourceIndexHasher);
 		mySearchParamExtractor.start();
 
 		mySearchParamExtractorSvc = new SearchParamExtractorService();
 		mySearchParamExtractorSvc.setContext(ourFhirContext);
 		mySearchParamExtractorSvc.setSearchParamExtractor(mySearchParamExtractor);
 		mySearchParamExtractorSvc.setStorageSettings(myStorageSettings);
+		mySearchParamExtractorSvc.setResourceIndexHasher(myResourceIndexHasher);
+
 
 		myDaoSearchParamSynchronizer = new DaoSearchParamSynchronizer();
 		myDaoSearchParamSynchronizer.setEntityManager(myEntityManager);
+		myDaoSearchParamSynchronizer.setResourceIndexHasher(myResourceIndexHasher);
 
 		mySearchParamWithInlineReferencesExtractor = new SearchParamWithInlineReferencesExtractor();
 		mySearchParamWithInlineReferencesExtractor.setStorageSettings(myStorageSettings);
 		mySearchParamWithInlineReferencesExtractor.setContext(ourFhirContext);
-		mySearchParamWithInlineReferencesExtractor.setPartitionSettings(this.myPartitionSettings);
 		mySearchParamWithInlineReferencesExtractor.setSearchParamExtractorService(mySearchParamExtractorSvc);
-		mySearchParamWithInlineReferencesExtractor.setSearchParamRegistry(mySearchParamRegistry);
-		mySearchParamWithInlineReferencesExtractor.setDaoSearchParamSynchronizer(myDaoSearchParamSynchronizer);
 
 		myEobDao = new JpaResourceDao<>();
 		myEobDao.setContext(ourFhirContext);

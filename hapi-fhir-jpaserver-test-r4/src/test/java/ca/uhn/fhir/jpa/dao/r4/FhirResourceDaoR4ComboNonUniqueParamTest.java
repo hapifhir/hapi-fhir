@@ -26,7 +26,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -122,9 +121,9 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		logAllNonUniqueIndexes();
 		runInTransaction(() -> {
 			List<ResourceIndexedComboTokenNonUnique> indexedTokens = myResourceIndexedComboTokensNonUniqueDao.findAll();
-			indexedTokens.sort(Comparator.comparing(t -> t.getId()));
+			indexedTokens.sort(Comparator.comparing(ResourceIndexedComboTokenNonUnique::getId));
 			assertEquals(2, indexedTokens.size());
-			assertEquals(-7504889232313729794L, indexedTokens.get(0).getHashComplete().longValue());
+			assertEquals(-5766118529266402756L, indexedTokens.get(0).getHashComplete().longValue());
 		});
 
 		myMessages.clear();
@@ -179,7 +178,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertNotNull(id1);
 
 		assertEquals(0, myCaptureQueriesListener.countSelectQueries(),
-			String.join(",", "\n" + myCaptureQueriesListener.getSelectQueries().stream().map(q -> q.getThreadName()).collect(Collectors.toList()))
+			String.join(",", "\n" + myCaptureQueriesListener.getSelectQueries().stream().map(SqlQuery::getThreadName).toList())
 		);
 		assertEquals(12, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
@@ -237,9 +236,9 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		logAllNonUniqueIndexes();
 		runInTransaction(() -> {
 			List<ResourceIndexedComboTokenNonUnique> indexedTokens = myResourceIndexedComboTokensNonUniqueDao.findAll();
-			indexedTokens.sort(Comparator.comparing(t -> t.getId()));
+			indexedTokens.sort(Comparator.comparing(ResourceIndexedComboTokenNonUnique::getId));
 			assertEquals(2, indexedTokens.size());
-			assertEquals(-7504889232313729794L, indexedTokens.get(0).getHashComplete().longValue());
+			assertEquals(-5766118529266402756L, indexedTokens.get(0).getHashComplete().longValue());
 		});
 
 		myMessages.clear();
@@ -255,7 +254,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
 
 		String sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
-		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_IDX_CMB_TOK_NU t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_DATE t2 ON (t1.RES_ID = t2.RES_ID) WHERE ((t0.IDX_STRING = 'Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1') AND ((t2.HASH_IDENTITY = '5247847184787287691') AND ((t2.SP_VALUE_LOW_DATE_ORDINAL >= '20210202') AND (t2.SP_VALUE_HIGH_DATE_ORDINAL <= '20210202'))))", sql);
+		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_IDX_CMB_TOK_NU t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_DATE t2 ON (t1.RES_ID = t2.RES_ID) WHERE ((t0.IDX_STRING = 'Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1') AND ((t2.HASH_IDENTITY = '-8610480885734599914') AND ((t2.SP_VALUE_LOW_DATE_ORDINAL >= '20210202') AND (t2.SP_VALUE_HIGH_DATE_ORDINAL <= '20210202'))))", sql);
 
 		logCapturedMessages();
 		assertThat(myMessages.toString(), containsString("[INFO Using NON_UNIQUE index for query for search: Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1]"));
@@ -269,8 +268,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		pt2.getNameFirstRep().setFamily("Family2").addGiven("Given2");
 		pt2.setGender(Enumerations.AdministrativeGender.MALE);
 		pt2.setBirthDateElement(new DateType("2021-02-02"));
-		IIdType id2 = myPatientDao.create(pt2).getId().toUnqualified();
-		return id2;
+		return myPatientDao.create(pt2).getId().toUnqualified();
 	}
 
 	private IIdType createPatient1() {

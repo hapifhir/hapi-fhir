@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.search.builder.models.MissingQueryParameterPredicateParams;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -90,8 +89,7 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 
 	@Nonnull
 	public Condition createHashIdentityPredicate(String theResourceType, String theParamName) {
-		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-				getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName);
+		long hashIdentity = getResourceIndexHasher().hash(getRequestPartitionId(), theResourceType, theParamName);
 		String hashIdentityVal = generatePlaceholder(hashIdentity);
 		return BinaryCondition.equalTo(myColumnHashIdentity, hashIdentityVal);
 	}
@@ -111,11 +109,11 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 		subquery.addCustomColumns(1);
 		subquery.addFromTable(getTable());
 
-		long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-				getPartitionSettings(),
-				theParams.getRequestPartitionId(),
-				theParams.getResourceTablePredicateBuilder().getResourceType(),
-				theParams.getParamName());
+		long hashIdentity = getResourceIndexHasher()
+				.hash(
+						theParams.getRequestPartitionId(),
+						theParams.getResourceTablePredicateBuilder().getResourceType(),
+						theParams.getParamName());
 
 		Condition subQueryCondition = ComboCondition.and(
 				BinaryCondition.equalTo(

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -276,7 +277,7 @@ public class ResourceLink extends BaseResourceIndex {
 	}
 
 	@Override
-	public void calculateHashes() {
+	public void calculateHashes(ResourceIndexHasher theHasher) {
 		// nothing right now
 	}
 

@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.dao.r5;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Enumerations;
@@ -13,7 +15,9 @@ import org.springframework.test.context.ContextConfiguration;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ContextConfiguration(classes = TestHSearchAddInConfig.NoFT.class)
 @SuppressWarnings({"Duplicates"})
@@ -38,9 +42,9 @@ public class FhirResourceDaoR5ReindexTest extends BaseJpaR5Test {
 			assertEquals(1, myEntityManager.createNativeQuery("UPDATE HFJ_RESOURCE set sp_uri_present = true").executeUpdate());
 			ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow();
 			assertTrue(table.isParamsUriPopulated());
-			ResourceIndexedSearchParamUri uri = new ResourceIndexedSearchParamUri(new PartitionSettings(), "SearchParameter", "url", "http://foo");
+			ResourceIndexedSearchParamUri uri = new ResourceIndexedSearchParamUri("SearchParameter", "url", "http://foo");
 			uri.setResource(table);
-			uri.calculateHashes();
+			uri.calculateHashes(new ResourceIndexHasher(new PartitionSettings(), new StorageSettings()));
 			myResourceIndexedSearchParamUriDao.save(uri);
 		});
 

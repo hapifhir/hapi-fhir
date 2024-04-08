@@ -25,8 +25,6 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.data.IResourceIndexedSearchParamUriDao;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -119,8 +117,8 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 					CompositeInterceptorBroadcaster.doCallHooks(
 							myInterceptorBroadcaster, theRequestDetails, Pointcut.JPA_PERFTRACE_WARNING, params);
 
-					long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-							getPartitionSettings(), getRequestPartitionId(), getResourceType(), theParamName);
+					long hashIdentity =
+							getResourceIndexHasher().hash(getRequestPartitionId(), getResourceType(), theParamName);
 					Collection<String> candidates =
 							myResourceIndexedSearchParamUriDao.findAllByHashIdentity(hashIdentity);
 					List<String> toFind = new ArrayList<>();
@@ -154,12 +152,8 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 					Condition uriPredicate = null;
 					if (theOperation == null || theOperation == SearchFilterParser.CompareOperation.eq) {
-						long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(
-								getPartitionSettings(),
-								getRequestPartitionId(),
-								getResourceType(),
-								theParamName,
-								value);
+						long hashUri = getResourceIndexHasher()
+								.hash(getRequestPartitionId(), getResourceType(), theParamName, value);
 						uriPredicate = BinaryCondition.equalTo(myColumnHashUri, generatePlaceholder(hashUri));
 						predicateIsHash = true;
 					} else if (theOperation == SearchFilterParser.CompareOperation.ne) {

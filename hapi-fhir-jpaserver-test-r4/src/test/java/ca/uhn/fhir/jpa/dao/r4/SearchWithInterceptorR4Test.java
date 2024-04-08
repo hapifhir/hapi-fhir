@@ -69,7 +69,7 @@ public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 			String query = list.get(0).getSql(true, false);
 			ourLog.info("Query: {}", query);
 
-			assertThat(query, containsString("HASH_SYS_AND_VALUE = '3788488238034018567'"));
+			assertThat(query, containsString("HASH_SYS_AND_VALUE = '7974409934988753957'"));
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);

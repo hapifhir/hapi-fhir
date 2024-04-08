@@ -4,12 +4,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
@@ -68,7 +69,6 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private final FhirContextSearchParamRegistry mySearchParamRegistry = new FhirContextSearchParamRegistry(ourCtx);
 	private final PartitionSettings myPartitionSettings = new PartitionSettings();
-	final StorageSettings myStorageSettings = new StorageSettings();
 
 	@Test
 	public void testParamWithOrInPath() {
@@ -87,8 +87,8 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 	@Test
 	public void testName() {
 		Patient patient = new Patient();
-		List<StringType> suffixStrings = Arrays.asList(new StringType("the Great"));
-		List<StringType> prefixStrings = Arrays.asList(new StringType("King"));
+		List<StringType> suffixStrings = List.of(new StringType("the Great"));
+		List<StringType> prefixStrings = List.of(new StringType("King"));
 		HumanName humanName = patient.addName();
 		humanName.addGiven("Jimmy");
 		humanName.setFamily("Jones");
@@ -126,7 +126,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.stream()
 			.filter(t -> t.getParamName().equals("code"))
 			.sorted(comparing(o -> o.getClass().getName()).reversed())
-			.collect(Collectors.toList());
+			.toList();
 		assertEquals(2, tokens.size());
 
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
@@ -155,7 +155,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.stream()
 			.filter(t -> t.getParamName().equals("code"))
 			.sorted(comparing(o -> o.getClass().getName()).reversed())
-			.collect(Collectors.toList());
+			.toList();
 		assertEquals(1, tokens.size());
 
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
@@ -179,7 +179,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.stream()
 			.filter(t -> t.getParamName().equals("code"))
 			.sorted(comparing(o -> o.getClass().getName()).reversed())
-			.collect(Collectors.toList());
+			.toList();
 		assertEquals(1, tokens.size());
 
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
@@ -208,7 +208,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.stream()
 			.filter(t -> t.getParamName().equals("code"))
 			.sorted(comparing(o -> o.getClass().getName()).reversed())
-			.collect(Collectors.toList());
+			.toList();
 		assertEquals(2, tokens.size());
 
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
@@ -297,7 +297,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		Set<ResourceIndexedSearchParamQuantity> links = extractor.extractSearchParamQuantity(o1);
-		ourLog.info("Links:\n  {}", links.stream().map(t -> t.toString()).collect(Collectors.joining("\n  ")));
+		ourLog.info("Links:\n  {}", links.stream().map(ResourceIndexedSearchParamQuantity::toString).collect(Collectors.joining("\n  ")));
 		assertEquals(4, links.size());
 	}
 
@@ -315,7 +315,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(storageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		Set<ResourceIndexedSearchParamQuantityNormalized> links = extractor.extractSearchParamQuantityNormalized(o1);
-		ourLog.info("Links:\n  {}", links.stream().map(t -> t.toString()).collect(Collectors.joining("\n  ")));
+		ourLog.info("Links:\n  {}", links.stream().map(ResourceIndexedSearchParamQuantityNormalized::toString).collect(Collectors.joining("\n  ")));
 		assertEquals(2, links.size());
 
 	}
@@ -343,7 +343,6 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 	@Test
 	public void testExtractIdentifierOfType() {
-
 		StorageSettings storageSettings = new StorageSettings();
 		storageSettings.setIndexIdentifierOfType(true);
 
@@ -365,32 +364,34 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
 			.setCode("MR");
 
-		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(storageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		ResourceIndexedSearchParamToken[] expected = new ResourceIndexedSearchParamToken[] {
+				new ResourceIndexedSearchParamToken("Patient", "deceased", null, "false"),
+				new ResourceIndexedSearchParamToken("Patient", "identifier", "http://foo1", "bar1"),
+				new ResourceIndexedSearchParamToken("Patient", "identifier", "http://foo2", "bar2"),
+				new ResourceIndexedSearchParamToken("Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar1"),
+				new ResourceIndexedSearchParamToken("Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar2")
+		};
+		Arrays.stream(expected).forEach(param -> param.calculateHashes(new ResourceIndexHasher(myPartitionSettings, storageSettings)));
+
+		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(storageSettings, myPartitionSettings, ourCtx, mySearchParamRegistry);
 		List<ResourceIndexedSearchParamToken> list = extractor
 			.extractSearchParamTokens(patient)
 			.stream()
 			.map(t->(ResourceIndexedSearchParamToken)t)
 			.collect(Collectors.toList());
-		list.forEach(t->t.calculateHashes());
-		ourLog.info("Found tokens:\n * {}", list.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+		ourLog.info("Found tokens:\n * {}", list.stream().map(ResourceIndexedSearchParamToken::toString).collect(Collectors.joining("\n * ")));
 
-		assertThat(list, containsInAnyOrder(
-			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "deceased", null, "false"),
-			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier", "http://foo1", "bar1"),
-			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier", "http://foo2", "bar2"),
-			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar1"),
-			new ResourceIndexedSearchParamToken(new PartitionSettings(), "Patient", "identifier:of-type", "http://terminology.hl7.org/CodeSystem/v2-0203", "MR|bar2")
-		));
-
+		assertEquals(expected.length, list.size());
+		assertThat(list, containsInAnyOrder(expected));
 	}
 
 	@Nested
 	class CompositeSearchParameter {
+		StorageSettings myStorageSettings = new StorageSettings();
 		SearchParamExtractorR4 myExtractor = new SearchParamExtractorR4(myStorageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
 
 		/**
 		 * Install a full definition of component-code-value-concept in the SP registry.
-		 *
 		 * We can't use the base FhirContext SP definitions since @SearchParamDefinition
 		 * only includes the sub-SP ids, and lacks the composite sub-paths.
 		 * @see ca.uhn.fhir.model.api.annotation.SearchParamDefinition#compositeOf
@@ -515,7 +516,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			assertThat(components, hasSize(1));
 			ResourceIndexedSearchParamComposite spEntry = components.get(0);
 
-			// this SP has two sub-components
+			// this SP has two subcomponents
 			assertThat(spEntry.getComponents(), hasSize(2));
 
 			ResourceIndexedSearchParamComposite.Component indexComponent0 = spEntry.getComponents().get(0);

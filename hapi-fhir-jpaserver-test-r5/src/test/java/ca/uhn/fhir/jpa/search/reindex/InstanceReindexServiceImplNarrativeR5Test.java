@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.search.reindex;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
@@ -14,20 +15,22 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.test.utilities.HtmlUtil;
-import org.htmlunit.html.HtmlPage;
-import org.htmlunit.html.HtmlTable;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
+import org.htmlunit.html.HtmlPage;
+import org.htmlunit.html.HtmlTable;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 
@@ -51,7 +54,9 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 	public void testIndexComboNonUnique() throws IOException {
 		// Setup
 		ResourceIndexedSearchParams newParams = newParams();
-		newParams.myComboTokenNonUnique.add(new ResourceIndexedComboTokenNonUnique(myPartitionSettings, myEntity, "Patient?identifier=123"));
+		ResourceIndexedComboTokenNonUnique param = new ResourceIndexedComboTokenNonUnique(myEntity, "Patient?identifier=123");
+		calculateHashes(param);
+		newParams.myComboTokenNonUnique.add(param);
 
 		// Test
 		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
@@ -87,11 +92,10 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 	public void testIndexMissing() throws IOException {
 		// Setup
 		ResourceIndexedSearchParams newParams = newParams();
-		newParams.myTokenParams.add(new ResourceIndexedSearchParamToken(myPartitionSettings, "Observation", "identifier", true));
+		newParams.myTokenParams.add(new ResourceIndexedSearchParamToken("Observation", "identifier", true));
 		SearchParamPresentEntity subject = new SearchParamPresentEntity("subject", false);
 		subject.setResource(new ResourceTable());
-		subject.setPartitionSettings(myPartitionSettings);
-		subject.calculateHashes();
+		calculateHashes(subject);
 		newParams.mySearchParamPresentEntities.add(subject);
 
 		// Test
@@ -115,7 +119,9 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 	public void testIndexNumber() throws IOException {
 		// Setup
 		ResourceIndexedSearchParams newParams = newParams();
-		newParams.myNumberParams.add(new ResourceIndexedSearchParamNumber(myPartitionSettings, "Immunization", "dose", BigDecimal.ONE));
+		ResourceIndexedSearchParamNumber param = new ResourceIndexedSearchParamNumber("Immunization", "dose", BigDecimal.ONE);
+		calculateHashes(param);
+		newParams.myNumberParams.add(param);
 
 		// Test
 		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
@@ -196,7 +202,9 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 	public void testIndexQuantity() throws IOException {
 		// Setup
 		ResourceIndexedSearchParams newParams = newParams();
-		newParams.myQuantityParams.add(new ResourceIndexedSearchParamQuantity(myPartitionSettings, "Observation", "value-quantity", BigDecimal.valueOf(123), "http://unitsofmeasure.org", "kg"));
+		ResourceIndexedSearchParamQuantity param = new ResourceIndexedSearchParamQuantity("Observation", "value-quantity", BigDecimal.valueOf(123), "http://unitsofmeasure.org", "kg");
+		calculateHashes(param);
+		newParams.myQuantityParams.add(param);
 
 		// Test
 		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
@@ -217,7 +225,9 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 	public void testIndexQuantityNormalized() throws IOException {
 		// Setup
 		ResourceIndexedSearchParams newParams = newParams();
-		newParams.myQuantityNormalizedParams.add(new ResourceIndexedSearchParamQuantityNormalized(myPartitionSettings, "Observation", "value-quantity", 123.0, "http://unitsofmeasure.org", "kg"));
+		ResourceIndexedSearchParamQuantityNormalized param = new ResourceIndexedSearchParamQuantityNormalized("Observation", "value-quantity", 123.0, "http://unitsofmeasure.org", "kg");
+		calculateHashes(param);
+		newParams.myQuantityNormalizedParams.add(param);
 
 		// Test
 		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
@@ -238,7 +248,9 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 	public void testIndexString() throws IOException {
 		// Setup
 		ResourceIndexedSearchParams newParams = newParams();
-		newParams.myStringParams.add(new ResourceIndexedSearchParamString(myPartitionSettings, myStorageSettings, "Patient", "family", "Simpson", "SIMPSON"));
+		ResourceIndexedSearchParamString param = new ResourceIndexedSearchParamString("Patient", "family", "Simpson", "SIMPSON");
+		calculateHashes(param);
+		newParams.myStringParams.add(param);
 
 		// Test
 		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
@@ -258,7 +270,9 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 	public void testIndexToken() throws IOException {
 		// Setup
 		ResourceIndexedSearchParams newParams = newParams();
-		newParams.myTokenParams.add(new ResourceIndexedSearchParamToken(myPartitionSettings, "Observation", "identifier", "http://id-system", "id-value"));
+		ResourceIndexedSearchParamToken param = new ResourceIndexedSearchParamToken("Observation", "identifier", "http://id-system", "id-value");
+		calculateHashes(param);
+		newParams.myTokenParams.add(param);
 
 		// Test
 		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
@@ -278,7 +292,9 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 	public void testIndexUrl() throws IOException {
 		// Setup
 		ResourceIndexedSearchParams newParams = newParams();
-		newParams.myUriParams.add(new ResourceIndexedSearchParamUri(myPartitionSettings, "CodeSystem", "uri", "http://some-codesystem"));
+		ResourceIndexedSearchParamUri param = new ResourceIndexedSearchParamUri("CodeSystem", "uri", "http://some-codesystem");
+		calculateHashes(param);
+		newParams.myUriParams.add(param);
 
 		// Test
 		Parameters outcome = mySvc.buildIndexResponse(newParams(), newParams, true, Collections.emptyList());
@@ -291,6 +307,14 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		assertEquals("ADD", getBodyCellValue(table, 0, 1));
 		assertEquals("Uri", getBodyCellValue(table, 0, 2));
 		assertEquals("http://some-codesystem", getBodyCellValue(table, 0, 3));
+	}
+
+	private void calculateHashes(SearchParamPresentEntity theParam) {
+		theParam.calculateHashes(new ResourceIndexHasher(myPartitionSettings, myStorageSettings));
+	}
+
+	private void calculateHashes(BaseResourceIndex... theParams) {
+		Arrays.stream(theParams).forEach(param -> param.calculateHashes(new ResourceIndexHasher(myPartitionSettings, myStorageSettings)));
 	}
 
 	@Nonnull

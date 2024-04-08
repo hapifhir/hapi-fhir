@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -45,7 +46,6 @@ import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.util.ResourceSearchParams;
-import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -171,32 +171,6 @@ public final class ResourceIndexedSearchParams {
 		theEntity.setResourceLinks(myLinks);
 	}
 
-	public void updateSpnamePrefixForIndexOnUpliftedChain(String theContainingType, String theSpnamePrefix) {
-		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myNumberParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myQuantityParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myQuantityNormalizedParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myDateParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myUriParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myTokenParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myStringParams, theSpnamePrefix);
-		updateSpnamePrefixForIndexOnUpliftedChain(theContainingType, myCoordsParams, theSpnamePrefix);
-	}
-
-	public void updateSpnamePrefixForLinksOnContainedResource(String theSpNamePrefix) {
-		for (ResourceLink param : myLinks) {
-			// The resource link already has the resource type of the contained resource at the head of the path.
-			// We need to replace this with the name of the containing type, and extend the search path.
-			int index = param.getSourcePath().indexOf('.');
-			if (index > -1) {
-				param.setSourcePath(theSpNamePrefix + param.getSourcePath().substring(index));
-			} else {
-				// Can this ever happen?
-				param.setSourcePath(theSpNamePrefix + "." + param.getSourcePath());
-			}
-			param.calculateHashes(); // re-calculateHashes
-		}
-	}
-
 	void setUpdatedTime(Date theUpdateTime) {
 		setUpdatedTime(myStringParams, theUpdateTime);
 		setUpdatedTime(myNumberParams, theUpdateTime);
@@ -211,20 +185,6 @@ public final class ResourceIndexedSearchParams {
 	private void setUpdatedTime(Collection<? extends BaseResourceIndexedSearchParam> theParams, Date theUpdateTime) {
 		for (BaseResourceIndexedSearchParam nextSearchParam : theParams) {
 			nextSearchParam.setUpdated(theUpdateTime);
-		}
-	}
-
-	private void updateSpnamePrefixForIndexOnUpliftedChain(
-			String theContainingType,
-			Collection<? extends BaseResourceIndexedSearchParam> theParams,
-			@Nonnull String theSpnamePrefix) {
-
-		for (BaseResourceIndexedSearchParam param : theParams) {
-			param.setResourceType(theContainingType);
-			param.setParamName(theSpnamePrefix + "." + param.getParamName());
-
-			// re-calculate hashes
-			param.calculateHashes();
 		}
 	}
 
@@ -287,7 +247,6 @@ public final class ResourceIndexedSearchParams {
 			case HAS:
 			case SPECIAL:
 			default:
-				resourceParams = null;
 		}
 		if (resourceParams == null) {
 			return false;
@@ -365,11 +324,7 @@ public final class ResourceIndexedSearchParams {
 			}
 		}
 
-		if (!targetId.equals(theReference.getIdPart())) {
-			return false;
-		}
-
-		return true;
+		return targetId.equals(theReference.getIdPart());
 	}
 
 	private boolean searchParameterPathMatches(
@@ -394,56 +349,54 @@ public final class ResourceIndexedSearchParams {
 				+ myLinks + '}';
 	}
 
+	@Deprecated(since = "HAPI-FHIR 7.2")
 	public void findMissingSearchParams(
 			PartitionSettings thePartitionSettings,
 			StorageSettings theStorageSettings,
 			ResourceTable theEntity,
 			ResourceSearchParams theActiveSearchParams) {
 		findMissingSearchParams(
-				thePartitionSettings,
-				theStorageSettings,
+				new ResourceIndexHasher(thePartitionSettings, theStorageSettings), theEntity, theActiveSearchParams);
+	}
+
+	public void findMissingSearchParams(
+			ResourceIndexHasher theResourceIndexHasher,
+			ResourceTable theEntity,
+			ResourceSearchParams theActiveSearchParams) {
+		findMissingSearchParams(
+				theResourceIndexHasher,
 				theEntity,
 				theActiveSearchParams,
 				RestSearchParameterTypeEnum.STRING,
 				myStringParams);
 		findMissingSearchParams(
-				thePartitionSettings,
-				theStorageSettings,
+				theResourceIndexHasher,
 				theEntity,
 				theActiveSearchParams,
 				RestSearchParameterTypeEnum.NUMBER,
 				myNumberParams);
 		findMissingSearchParams(
-				thePartitionSettings,
-				theStorageSettings,
+				theResourceIndexHasher,
 				theEntity,
 				theActiveSearchParams,
 				RestSearchParameterTypeEnum.QUANTITY,
 				myQuantityParams);
 		findMissingSearchParams(
-				thePartitionSettings,
-				theStorageSettings,
+				theResourceIndexHasher,
 				theEntity,
 				theActiveSearchParams,
 				RestSearchParameterTypeEnum.DATE,
 				myDateParams);
 		findMissingSearchParams(
-				thePartitionSettings,
-				theStorageSettings,
-				theEntity,
-				theActiveSearchParams,
-				RestSearchParameterTypeEnum.URI,
-				myUriParams);
+				theResourceIndexHasher, theEntity, theActiveSearchParams, RestSearchParameterTypeEnum.URI, myUriParams);
 		findMissingSearchParams(
-				thePartitionSettings,
-				theStorageSettings,
+				theResourceIndexHasher,
 				theEntity,
 				theActiveSearchParams,
 				RestSearchParameterTypeEnum.TOKEN,
 				myTokenParams);
 		findMissingSearchParams(
-				thePartitionSettings,
-				theStorageSettings,
+				theResourceIndexHasher,
 				theEntity,
 				theActiveSearchParams,
 				RestSearchParameterTypeEnum.SPECIAL,
@@ -452,8 +405,7 @@ public final class ResourceIndexedSearchParams {
 
 	@SuppressWarnings("unchecked")
 	private <RT extends BaseResourceIndexedSearchParam> void findMissingSearchParams(
-			PartitionSettings thePartitionSettings,
-			StorageSettings theStorageSettings,
+			ResourceIndexHasher theResourceIndexHasher,
 			ResourceTable theEntity,
 			ResourceSearchParams activeSearchParams,
 			RestSearchParameterTypeEnum type,
@@ -490,7 +442,7 @@ public final class ResourceIndexedSearchParams {
 							param = new ResourceIndexedSearchParamQuantity();
 							break;
 						case STRING:
-							param = new ResourceIndexedSearchParamString().setStorageSettings(theStorageSettings);
+							param = new ResourceIndexedSearchParamString();
 							break;
 						case TOKEN:
 							param = new ResourceIndexedSearchParamToken();
@@ -511,11 +463,10 @@ public final class ResourceIndexedSearchParams {
 						default:
 							continue;
 					}
-					param.setPartitionSettings(thePartitionSettings);
 					param.setResource(theEntity);
 					param.setMissing(true);
 					param.setParamName(nextParamName);
-					param.calculateHashes();
+					param.calculateHashes(theResourceIndexHasher);
 					paramCollection.add((RT) param);
 				}
 			}
@@ -562,10 +513,10 @@ public final class ResourceIndexedSearchParams {
 		thePartsChoices.sort((o1, o2) -> {
 			String str1 = null;
 			String str2 = null;
-			if (o1.size() > 0) {
+			if (!o1.isEmpty()) {
 				str1 = o1.get(0);
 			}
-			if (o2.size() > 0) {
+			if (!o2.isEmpty()) {
 				str2 = o2.get(0);
 			}
 			return compare(str1, str2);
@@ -585,7 +536,7 @@ public final class ResourceIndexedSearchParams {
 			List<List<String>> thePartsChoices,
 			List<String> theValues,
 			Set<String> theQueryStringsToPopulate) {
-		if (thePartsChoices.size() > 0) {
+		if (!thePartsChoices.isEmpty()) {
 			List<String> nextList = thePartsChoices.get(0);
 			Collections.sort(nextList);
 			for (String nextChoice : nextList) {
@@ -598,7 +549,7 @@ public final class ResourceIndexedSearchParams {
 				theValues.remove(theValues.size() - 1);
 			}
 		} else {
-			if (theValues.size() > 0) {
+			if (!theValues.isEmpty()) {
 				StringBuilder uniqueString = new StringBuilder();
 				uniqueString.append(theResourceType);
 

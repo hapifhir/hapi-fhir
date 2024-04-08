@@ -13,6 +13,8 @@ import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
@@ -67,8 +69,6 @@ public class TransactionProcessorTest {
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@MockBean
 	private IIdHelperService myIdHelperService;
-	@MockBean
-	private PartitionSettings myPartitionSettings;
 	@MockBean
 	private MatchUrlService myMatchUrlService;
 	@MockBean
@@ -133,6 +133,11 @@ public class TransactionProcessorTest {
 		}
 
 		@Bean
+		public PartitionSettings partitionSettings() {
+			return new PartitionSettings();
+		}
+
+		@Bean
 		public TransactionProcessor transactionProcessor() {
 			return new TransactionProcessor();
 		}
@@ -152,5 +157,9 @@ public class TransactionProcessorTest {
 			return new NonTransactionalHapiTransactionService();
 		}
 
+		@Bean
+		public ResourceIndexHasher resourceIndexHasher() {
+			return new ResourceIndexHasher(new PartitionSettings(), new StorageSettings());
+		}
 	}
 }

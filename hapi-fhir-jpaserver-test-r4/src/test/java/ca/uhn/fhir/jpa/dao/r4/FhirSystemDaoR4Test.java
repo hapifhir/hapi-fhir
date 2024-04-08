@@ -713,8 +713,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 				.stream()
 				.filter(t -> t.getParamName().equals("family"))
 				.findFirst()
-				.orElseThrow(() -> new IllegalArgumentException());
-			assertEquals(-6332913947530887803L, param.getHashNormalizedPrefix().longValue());
+				.orElseThrow(IllegalArgumentException::new);
+			assertEquals(5639364296718303682L, param.getHashNormalizedPrefix().longValue());
 		});
 
 		assertEquals(1, myPatientDao.search(searchParamMap).size().intValue());

@@ -19,8 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -91,11 +90,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
-	/**
-	 * @since 3.4.0 - At some point this should be made not-null
-	 */
 	@Column(name = "HASH_SYS", nullable = true)
 	private Long myHashSystem;
 	/**
@@ -123,83 +117,72 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamToken() {
-		super();
-	}
+	public ResourceIndexedSearchParamToken() {}
 
 	/**
 	 * Constructor
 	 */
 	public ResourceIndexedSearchParamToken(
-			PartitionSettings thePartitionSettings,
-			String theResourceType,
-			String theParamName,
-			String theSystem,
-			String theValue) {
-		super();
-		setPartitionSettings(thePartitionSettings);
+			String theResourceType, String theParamName, String theSystem, String theValue) {
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setSystem(theSystem);
 		setValue(theValue);
-		calculateHashes();
 	}
 
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamToken(
-			PartitionSettings thePartitionSettings, String theResourceType, String theParamName, boolean theMissing) {
+	public ResourceIndexedSearchParamToken(String theResourceType, String theParamName, boolean theMissing) {
 		super();
-		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setMissing(theMissing);
-		calculateHashes();
 	}
 
 	@Override
 	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
 		super.copyMutableValuesFrom(theSource);
 		ResourceIndexedSearchParamToken source = (ResourceIndexedSearchParamToken) theSource;
-
-		mySystem = source.mySystem;
-		myValue = source.myValue;
+		// 1. copy hash values first
 		myHashSystem = source.myHashSystem;
 		myHashSystemAndValue = source.getHashSystemAndValue();
 		myHashValue = source.myHashValue;
-		myHashIdentity = source.myHashIdentity;
+		// 2. copy fields that are part of the hash next
+		mySystem = source.mySystem;
+		myValue = source.myValue;
 	}
 
 	@Override
 	public void clearHashes() {
-		myHashIdentity = null;
+		super.clearHashes();
 		myHashSystem = null;
 		myHashSystemAndValue = null;
 		myHashValue = null;
 	}
 
 	@Override
-	public void calculateHashes() {
-		if (myHashIdentity != null || myHashSystem != null || myHashValue != null || myHashSystemAndValue != null) {
+	public void calculateHashes(ResourceIndexHasher theHasher) {
+		super.calculateHashes(theHasher);
+		if (isHashPopulated(myHashSystemAndValue)) {
 			return;
 		}
-
 		String resourceType = getResourceType();
 		String paramName = getParamName();
-		String system = getSystem();
+		String system = defaultString(trim(getSystem()));
 		String value = getValue();
-		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
-		setHashSystemAndValue(calculateHashSystemAndValue(
-				getPartitionSettings(), getPartitionId(), resourceType, paramName, system, value));
-
+		PartitionablePartitionId partitionId = getPartitionId();
+		boolean isContained = isContained();
+		myHashSystemAndValue = theHasher.hash(partitionId, isContained, resourceType, paramName, system, value);
 		// Searches using the :of-type modifier can never be partial (system-only or value-only) so don't
 		// bother saving these
 		boolean calculatePartialHashes = !StringUtils.endsWith(paramName, Constants.PARAMQUALIFIER_TOKEN_OF_TYPE);
 		if (calculatePartialHashes) {
-			setHashSystem(
-					calculateHashSystem(getPartitionSettings(), getPartitionId(), resourceType, paramName, system));
-			setHashValue(calculateHashValue(getPartitionSettings(), getPartitionId(), resourceType, paramName, value));
+			if (isHashPopulated(myHashSystem) && isHashPopulated(myHashValue)) {
+				return;
+			}
+			myHashSystem = theHasher.hash(partitionId, isContained, resourceType, paramName, system);
+			myHashValue = theHasher.hash(partitionId, isContained, resourceType, paramName, value);
 		}
 	}
 
@@ -216,9 +199,13 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		}
 		ResourceIndexedSearchParamToken obj = (ResourceIndexedSearchParamToken) theObj;
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(getHashSystem(), obj.getHashSystem());
-		b.append(getHashValue(), obj.getHashValue());
-		b.append(getHashSystemAndValue(), obj.getHashSystemAndValue());
+		b.append(getResourceType(), obj.getResourceType());
+		b.append(getParamName(), obj.getParamName());
+		b.append(isMissing(), obj.isMissing());
+		b.append(getContainedOrd(), obj.getContainedOrd());
+		b.append(getPartitionId(), obj.getPartitionId());
+		b.append(getSystem(), obj.getSystem());
+		b.append(getValue(), obj.getValue());
 		return b.isEquals();
 	}
 
@@ -226,28 +213,12 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 		return myHashSystem;
 	}
 
-	private void setHashSystem(Long theHashSystem) {
-		myHashSystem = theHashSystem;
-	}
-
-	private void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
-	}
-
 	public Long getHashSystemAndValue() {
 		return myHashSystemAndValue;
 	}
 
-	private void setHashSystemAndValue(Long theHashSystemAndValue) {
-		myHashSystemAndValue = theHashSystemAndValue;
-	}
-
 	public Long getHashValue() {
 		return myHashValue;
-	}
-
-	private void setHashValue(Long theHashValue) {
-		myHashValue = theHashValue;
 	}
 
 	@Override
@@ -265,8 +236,10 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	public void setSystem(String theSystem) {
-		mySystem = StringUtils.defaultIfBlank(theSystem, null);
-		myHashSystemAndValue = null;
+		if (!StringUtils.equals(mySystem, theSystem)) {
+			mySystem = StringUtils.defaultIfBlank(theSystem, null);
+			clearHashes();
+		}
 	}
 
 	public String getValue() {
@@ -274,8 +247,11 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	}
 
 	public ResourceIndexedSearchParamToken setValue(String theValue) {
-		myValue = StringUtils.defaultIfBlank(theValue, null);
-		myHashSystemAndValue = null;
+		if (!StringUtils.equals(myValue, theValue)) {
+			myValue = StringUtils.defaultIfBlank(theValue, null);
+			myHashSystemAndValue = null;
+			return this;
+		}
 		return this;
 	}
 
@@ -283,10 +259,12 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getResourceType());
-		b.append(getHashValue());
-		b.append(getHashSystem());
-		b.append(getHashSystemAndValue());
-
+		b.append(getParamName());
+		b.append(isMissing());
+		b.append(getContainedOrd());
+		b.append(getPartitionId());
+		b.append(getSystem());
+		b.append(getValue());
 		return b.toHashCode();
 	}
 
@@ -299,22 +277,13 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("id", getId());
-		if (getPartitionId() != null) {
-			b.append("partitionId", getPartitionId().getPartitionId());
-		}
 		b.append("resourceType", getResourceType());
 		b.append("paramName", getParamName());
-		if (isMissing()) {
-			b.append("missing", true);
-		} else {
-			b.append("system", getSystem());
-			b.append("value", getValue());
-		}
-		b.append("hashIdentity", myHashIdentity);
-		b.append("hashSystem", myHashSystem);
-		b.append("hashValue", myHashValue);
-		b.append("hashSysAndValue", myHashSystemAndValue);
-		b.append("partition", getPartitionId());
+		b.append("missing", isMissing());
+		b.append("containedOrd", getContainedOrd());
+		b.append("partitionId", getPartitionId());
+		b.append("system", getSystem());
+		b.append("value", getValue());
 		return b.build();
 	}
 
@@ -343,73 +312,6 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 			}
 		}
 		return retVal;
-	}
-
-	public static long calculateHashSystem(
-			PartitionSettings thePartitionSettings,
-			PartitionablePartitionId theRequestPartitionId,
-			String theResourceType,
-			String theParamName,
-			String theSystem) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashSystem(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theSystem);
-	}
-
-	public static long calculateHashSystem(
-			PartitionSettings thePartitionSettings,
-			RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			String theParamName,
-			String theSystem) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, trim(theSystem));
-	}
-
-	public static long calculateHashSystemAndValue(
-			PartitionSettings thePartitionSettings,
-			PartitionablePartitionId theRequestPartitionId,
-			String theResourceType,
-			String theParamName,
-			String theSystem,
-			String theValue) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashSystemAndValue(
-				thePartitionSettings, requestPartitionId, theResourceType, theParamName, theSystem, theValue);
-	}
-
-	public static long calculateHashSystemAndValue(
-			PartitionSettings thePartitionSettings,
-			RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			String theParamName,
-			String theSystem,
-			String theValue) {
-		return hash(
-				thePartitionSettings,
-				theRequestPartitionId,
-				theResourceType,
-				theParamName,
-				defaultString(trim(theSystem)),
-				trim(theValue));
-	}
-
-	public static long calculateHashValue(
-			PartitionSettings thePartitionSettings,
-			PartitionablePartitionId theRequestPartitionId,
-			String theResourceType,
-			String theParamName,
-			String theValue) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashValue(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theValue);
-	}
-
-	public static long calculateHashValue(
-			PartitionSettings thePartitionSettings,
-			RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			String theParamName,
-			String theValue) {
-		String value = trim(theValue);
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
 	}
 
 	@Override

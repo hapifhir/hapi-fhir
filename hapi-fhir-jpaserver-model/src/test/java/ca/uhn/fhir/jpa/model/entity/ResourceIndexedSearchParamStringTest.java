@@ -1,7 +1,10 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,37 +15,37 @@ public class ResourceIndexedSearchParamStringTest {
 
 	@Test
 	public void testHashFunctions() {
-		ResourceIndexedSearchParamString token = new ResourceIndexedSearchParamString(new PartitionSettings(), new StorageSettings(), "Patient", "NAME", "value", "VALUE");
+		ResourceIndexedSearchParamString token = new ResourceIndexedSearchParamString("Patient", "NAME", "value", "VALUE");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
-		token.calculateHashes();
+		calculateHashes(token);
 
 		// Make sure our hashing function gives consistent results
-		assertEquals(6598082761639188617L, token.getHashNormalizedPrefix().longValue());
-		assertEquals(-1970227166134682431L, token.getHashExact().longValue());
+		assertEquals(-3910281295602822115L, token.getHashNormalizedPrefix().longValue());
+		assertEquals(-4852130101009756551L, token.getHashExact().longValue());
 	}
 
 	@Test
 	public void testHashFunctionsPrefixOnly() {
-		ResourceIndexedSearchParamString token = new ResourceIndexedSearchParamString(new PartitionSettings(), new StorageSettings(), "Patient", "NAME", "vZZZZZZZZZZZZZZZZ", "VZZZZZZzzzZzzzZ");
+		ResourceIndexedSearchParamString token = new ResourceIndexedSearchParamString("Patient", "NAME", "vZZZZZZZZZZZZZZZZ", "VZZZZZZzzzZzzzZ");
 		token.setResource(new ResourceTable().setResourceType("Patient"));
-		token.calculateHashes();
+		calculateHashes(token);
 
 		// Should be the same as in testHashFunctions()
-		assertEquals(6598082761639188617L, token.getHashNormalizedPrefix().longValue());
+		assertEquals(-3910281295602822115L, token.getHashNormalizedPrefix().longValue());
 
 		// Should be different from testHashFunctions()
-		assertEquals(7045214018927566109L, token.getHashExact().longValue());
+		assertEquals(-7052799977993561763L, token.getHashExact().longValue());
 	}
 
 	@Test
 	public void testHashFunctionsPrefixOnly_John_JN_vs_JAN() {
-		final ResourceIndexedSearchParamString token1 = new ResourceIndexedSearchParamString(new PartitionSettings(), new StorageSettings(), "Patient", "query-1-param", "JN", "John");
+		final ResourceIndexedSearchParamString token1 = new ResourceIndexedSearchParamString("Patient", "query-1-param", "JN", "John");
 		token1.setResource(new ResourceTable().setResourceType("Patient"));
-		token1.calculateHashes();
 
-		final ResourceIndexedSearchParamString token2 = new ResourceIndexedSearchParamString(new PartitionSettings(), new StorageSettings(), "Patient", "query-1-param", "JAN", "John");
+		final ResourceIndexedSearchParamString token2 = new ResourceIndexedSearchParamString("Patient", "query-1-param", "JAN", "John");
 		token2.setResource(new ResourceTable().setResourceType("Patient"));
-		token2.calculateHashes();
+
+		calculateHashes(token1, token2);
 
 		assertAll(
 			// We only hash on the first letter for performance reasons
@@ -54,13 +57,12 @@ public class ResourceIndexedSearchParamStringTest {
 
 	@Test
 	public void testHashFunctionsPrefixOnly_Doe_T_vs_D() {
-		final ResourceIndexedSearchParamString token1 = new ResourceIndexedSearchParamString(new PartitionSettings(), new StorageSettings(), "Patient", "query-1-param", "T", "Doe");
+		final ResourceIndexedSearchParamString token1 = new ResourceIndexedSearchParamString("Patient", "query-1-param", "T", "Doe");
 		token1.setResource(new ResourceTable().setResourceType("Patient"));
-		token1.calculateHashes();
-
-		final ResourceIndexedSearchParamString token2 = new ResourceIndexedSearchParamString(new PartitionSettings(), new StorageSettings(), "Patient", "query-1-param", "D", "Doe");
+		final ResourceIndexedSearchParamString token2 = new ResourceIndexedSearchParamString("Patient", "query-1-param", "D", "Doe");
 		token2.setResource(new ResourceTable().setResourceType("Patient"));
-		token2.calculateHashes();
+
+		calculateHashes(token1, token2);
 
 		assertAll(
 			() -> assertNotEquals(token1.getHashNormalizedPrefix(), token2.getHashNormalizedPrefix()),
@@ -74,15 +76,10 @@ public class ResourceIndexedSearchParamStringTest {
 		ResourceIndexedSearchParamString val1 = new ResourceIndexedSearchParamString()
 			.setValueExact("aaa")
 			.setValueNormalized("AAA");
-		val1.setPartitionSettings(new PartitionSettings());
-		val1.setStorageSettings(new StorageSettings());
-		val1.calculateHashes();
 		ResourceIndexedSearchParamString val2 = new ResourceIndexedSearchParamString()
 			.setValueExact("aaa")
 			.setValueNormalized("AAA");
-		val2.setPartitionSettings(new PartitionSettings());
-		val2.setStorageSettings(new StorageSettings());
-		val2.calculateHashes();
+		calculateHashes(val1, val2);
 		assertEquals(val1, val1);
 		assertEquals(val1, val2);
 		assertNotEquals(val1, null);
@@ -94,19 +91,17 @@ public class ResourceIndexedSearchParamStringTest {
 		ResourceIndexedSearchParamString val1 = new ResourceIndexedSearchParamString()
 			.setValueExact("aaa")
 			.setValueNormalized("AAA");
-		val1.setPartitionSettings(new PartitionSettings().setIncludePartitionInSearchHashes(true));
-		val1.setStorageSettings(new StorageSettings());
-		val1.calculateHashes();
 		ResourceIndexedSearchParamString val2 = new ResourceIndexedSearchParamString()
 			.setValueExact("aaa")
 			.setValueNormalized("AAA");
-		val2.setPartitionSettings(new PartitionSettings().setIncludePartitionInSearchHashes(true));
-		val2.setStorageSettings(new StorageSettings());
-		val2.calculateHashes();
+		calculateHashes(val1, val2);
 		assertEquals(val1, val1);
 		assertEquals(val1, val2);
 		assertNotEquals(val1, null);
 		assertNotEquals(val1, "");
 	}
 
+	private void calculateHashes(BaseResourceIndex... theParams) {
+		Arrays.stream(theParams).forEach(param -> param.calculateHashes(new ResourceIndexHasher(new PartitionSettings(), new StorageSettings())));
+	}
 }

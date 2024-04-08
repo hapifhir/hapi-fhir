@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import jakarta.persistence.Column;
@@ -36,6 +35,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ScaledNumberField;
@@ -95,32 +95,20 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	}
 
 	public ResourceIndexedSearchParamQuantity(
-			PartitionSettings thePartitionSettings,
-			String theResourceType,
-			String theParamName,
-			BigDecimal theValue,
-			String theSystem,
-			String theUnits) {
-		this();
-		setPartitionSettings(thePartitionSettings);
+			String theResourceType, String theParamName, BigDecimal theValue, String theSystem, String theUnits) {
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setSystem(theSystem);
 		setValue(theValue);
 		setUnits(theUnits);
-		calculateHashes();
 	}
 
 	@Override
 	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
 		super.copyMutableValuesFrom(theSource);
 		ResourceIndexedSearchParamQuantity source = (ResourceIndexedSearchParamQuantity) theSource;
-		mySystem = source.mySystem;
-		myUnits = source.myUnits;
+		// 3. copy other fields that are not part of any hash
 		myValue = source.myValue;
-		setHashIdentity(source.getHashIdentity());
-		setHashIdentityAndUnits(source.getHashIdentityAndUnits());
-		setHashIdentitySystemAndUnits(source.getHashIdentitySystemAndUnits());
 	}
 
 	public BigDecimal getValue() {
@@ -150,13 +138,15 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("paramName", getParamName());
 		b.append("resourceId", getResourcePid());
+		b.append("resourceType", getResourceType());
+		b.append("paramName", getParamName());
+		b.append("missing", isMissing());
+		b.append("containedOrd", getContainedOrd());
+		b.append("partitionId", getPartitionId());
 		b.append("system", getSystem());
 		b.append("units", getUnits());
 		b.append("value", getValue());
-		b.append("missing", isMissing());
-		b.append("hashIdentitySystemAndUnits", getHashIdentitySystemAndUnits());
 		return b.build();
 	}
 
@@ -175,12 +165,27 @@ public class ResourceIndexedSearchParamQuantity extends BaseResourceIndexedSearc
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
-		b.append(getHashIdentity(), obj.getHashIdentity());
-		b.append(getHashIdentityAndUnits(), obj.getHashIdentityAndUnits());
-		b.append(getHashIdentitySystemAndUnits(), obj.getHashIdentitySystemAndUnits());
 		b.append(isMissing(), obj.isMissing());
+		b.append(getContainedOrd(), obj.getContainedOrd());
+		b.append(getPartitionId(), obj.getPartitionId());
+		b.append(getSystem(), obj.getSystem());
+		b.append(getUnits(), obj.getUnits());
 		b.append(getValue(), obj.getValue());
 		return b.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getResourceType());
+		b.append(getParamName());
+		b.append(isMissing());
+		b.append(getContainedOrd());
+		b.append(getPartitionId());
+		b.append(getSystem());
+		b.append(getUnits());
+		b.append(getValue());
+		return b.toHashCode();
 	}
 
 	@Override

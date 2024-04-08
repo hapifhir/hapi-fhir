@@ -20,8 +20,7 @@
 package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.util.StringUtil;
@@ -37,6 +36,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -70,7 +70,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	 * Note that MYSQL chokes on unique indexes for lengths > 255 so be careful here
 	 */
 	public static final int MAX_LENGTH = 200;
-	public static final int HASH_PREFIX_LENGTH = 1;
 	private static final long serialVersionUID = 1L;
 
 	@Id
@@ -98,11 +97,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Column(name = "HASH_NORM_PREFIX", nullable = true)
 	private Long myHashNormalizedPrefix;
 	/**
-	 * @since 3.6.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
-	/**
 	 * @since 3.4.0 - At some point this should be made not-null
 	 */
 	@Column(name = "HASH_EXACT", nullable = true)
@@ -113,58 +107,47 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	}
 
 	public ResourceIndexedSearchParamString(
-			PartitionSettings thePartitionSettings,
-			StorageSettings theStorageSettings,
-			String theResourceType,
-			String theParamName,
-			String theValueNormalized,
-			String theValueExact) {
-		setPartitionSettings(thePartitionSettings);
-		setStorageSettings(theStorageSettings);
+			String theResourceType, String theParamName, String theValueNormalized, String theValueExact) {
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setValueNormalized(theValueNormalized);
 		setValueExact(theValueExact);
-		calculateHashes();
 	}
 
 	@Override
 	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
 		super.copyMutableValuesFrom(theSource);
 		ResourceIndexedSearchParamString source = (ResourceIndexedSearchParamString) theSource;
+		// 1. copy hash values first
+		myHashExact = source.myHashExact;
+		myHashNormalizedPrefix = source.myHashNormalizedPrefix;
+		// 2. copy fields that are part of the hash next
 		myValueExact = source.myValueExact;
 		myValueNormalized = source.myValueNormalized;
-		myHashExact = source.myHashExact;
-		myHashIdentity = source.myHashIdentity;
-		myHashNormalizedPrefix = source.myHashNormalizedPrefix;
 	}
 
 	@Override
 	public void clearHashes() {
-		myHashIdentity = null;
+		super.clearHashes();
 		myHashNormalizedPrefix = null;
 		myHashExact = null;
 	}
 
 	@Override
-	public void calculateHashes() {
-		if (myHashIdentity != null || myHashExact != null || myHashNormalizedPrefix != null) {
+	public void calculateHashes(ResourceIndexHasher theHasher) {
+		super.calculateHashes(theHasher);
+		if (isHashPopulated(myHashNormalizedPrefix) && isHashPopulated(myHashExact)) {
 			return;
 		}
-
 		String resourceType = getResourceType();
 		String paramName = getParamName();
 		String valueNormalized = getValueNormalized();
 		String valueExact = getValueExact();
-		setHashNormalizedPrefix(calculateHashNormalized(
-				getPartitionSettings(),
-				getPartitionId(),
-				getStorageSettings(),
-				resourceType,
-				paramName,
-				valueNormalized));
-		setHashExact(calculateHashExact(getPartitionSettings(), getPartitionId(), resourceType, paramName, valueExact));
-		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
+		boolean isContained = isContained();
+		PartitionablePartitionId partitionId = getPartitionId();
+		myHashNormalizedPrefix =
+				theHasher.hashNormalized(partitionId, isContained, resourceType, paramName, valueNormalized);
+		myHashExact = theHasher.hash(partitionId, isContained, resourceType, paramName, valueExact);
 	}
 
 	@Override
@@ -182,36 +165,20 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
+		b.append(isMissing(), obj.isMissing());
+		b.append(getContainedOrd(), obj.getContainedOrd());
+		b.append(getPartitionId(), obj.getPartitionId());
 		b.append(getValueExact(), obj.getValueExact());
-		b.append(getHashIdentity(), obj.getHashIdentity());
-		b.append(getHashExact(), obj.getHashExact());
-		b.append(getHashNormalizedPrefix(), obj.getHashNormalizedPrefix());
 		b.append(getValueNormalized(), obj.getValueNormalized());
 		return b.isEquals();
-	}
-
-	private Long getHashIdentity() {
-		return myHashIdentity;
-	}
-
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
 	}
 
 	public Long getHashExact() {
 		return myHashExact;
 	}
 
-	public void setHashExact(Long theHashExact) {
-		myHashExact = theHashExact;
-	}
-
 	public Long getHashNormalizedPrefix() {
 		return myHashNormalizedPrefix;
-	}
-
-	public void setHashNormalizedPrefix(Long theHashNormalizedPrefix) {
-		myHashNormalizedPrefix = theHashNormalizedPrefix;
 	}
 
 	@Override
@@ -232,7 +199,10 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		if (defaultString(theValueExact).length() > MAX_LENGTH) {
 			throw new IllegalArgumentException(Msg.code(1529) + "Value is too long: " + theValueExact.length());
 		}
-		myValueExact = theValueExact;
+		if (!StringUtils.equals(myValueExact, theValueExact)) {
+			myValueExact = theValueExact;
+			clearHashes();
+		}
 		return this;
 	}
 
@@ -244,7 +214,10 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		if (defaultString(theValueNormalized).length() > MAX_LENGTH) {
 			throw new IllegalArgumentException(Msg.code(1530) + "Value is too long: " + theValueNormalized.length());
 		}
-		myValueNormalized = theValueNormalized;
+		if (!StringUtils.equals(myValueNormalized, theValueNormalized)) {
+			myValueNormalized = theValueNormalized;
+			clearHashes();
+		}
 		return this;
 	}
 
@@ -253,10 +226,10 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getResourceType());
 		b.append(getParamName());
+		b.append(isMissing());
+		b.append(getContainedOrd());
+		b.append(getPartitionId());
 		b.append(getValueExact());
-		b.append(getHashIdentity());
-		b.append(getHashExact());
-		b.append(getHashNormalizedPrefix());
 		b.append(getValueNormalized());
 		return b.toHashCode();
 	}
@@ -269,13 +242,14 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("resourceId", getResourcePid());
 		b.append("resourceType", getResourceType());
 		b.append("paramName", getParamName());
-		b.append("resourceId", getResourcePid());
-		b.append("hashIdentity", getHashIdentity());
-		b.append("hashNormalizedPrefix", getHashNormalizedPrefix());
-		b.append("valueNormalized", getValueNormalized());
+		b.append("missing", isMissing());
+		b.append("containedOrd", getContainedOrd());
 		b.append("partitionId", getPartitionId());
+		b.append("valueExact", getValueExact());
+		b.append("valueNormalized", getValueNormalized());
 		return b.build();
 	}
 
@@ -287,65 +261,6 @@ public class ResourceIndexedSearchParamString extends BaseResourceIndexedSearchP
 		StringParam string = (StringParam) theParam;
 		String normalizedString = StringUtil.normalizeStringForSearchIndexing(defaultString(string.getValue()));
 		return defaultString(getValueNormalized()).startsWith(normalizedString);
-	}
-
-	public static long calculateHashExact(
-			PartitionSettings thePartitionSettings,
-			PartitionablePartitionId theRequestPartitionId,
-			String theResourceType,
-			String theParamName,
-			String theValueExact) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashExact(
-				thePartitionSettings, requestPartitionId, theResourceType, theParamName, theValueExact);
-	}
-
-	public static long calculateHashExact(
-			PartitionSettings thePartitionSettings,
-			RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			String theParamName,
-			String theValueExact) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theValueExact);
-	}
-
-	public static long calculateHashNormalized(
-			PartitionSettings thePartitionSettings,
-			PartitionablePartitionId theRequestPartitionId,
-			StorageSettings theStorageSettings,
-			String theResourceType,
-			String theParamName,
-			String theValueNormalized) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashNormalized(
-				thePartitionSettings,
-				requestPartitionId,
-				theStorageSettings,
-				theResourceType,
-				theParamName,
-				theValueNormalized);
-	}
-
-	public static long calculateHashNormalized(
-			PartitionSettings thePartitionSettings,
-			RequestPartitionId theRequestPartitionId,
-			StorageSettings theStorageSettings,
-			String theResourceType,
-			String theParamName,
-			String theValueNormalized) {
-		/*
-		 * If we're not allowing contained searches, we'll add the first
-		 * bit of the normalized value to the hash. This helps to
-		 * make the hash even more unique, which will be good for
-		 * performance.
-		 */
-		int hashPrefixLength = HASH_PREFIX_LENGTH;
-		if (theStorageSettings.isAllowContainsSearches()) {
-			hashPrefixLength = 0;
-		}
-
-		String value = StringUtil.left(theValueNormalized, hashPrefixLength);
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, value);
 	}
 
 	@Override

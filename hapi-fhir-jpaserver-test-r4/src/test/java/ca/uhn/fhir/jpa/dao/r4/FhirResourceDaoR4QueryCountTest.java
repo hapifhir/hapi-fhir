@@ -1979,7 +1979,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		mySystemDao.transaction(mySrd, input);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(2, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
-		assertEquals(1, countMatches(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), "'6445233466262474106'"));
+		assertEquals(1, countMatches(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false), "'-5332022776260416668'"));
 		assertEquals(1, countMatches(myCaptureQueriesListener.getSelectQueries().get(1).getSql(true, false), "'LOC'"));
 		assertEquals(6, runInTransaction(() -> myResourceTableDao.count()));
 
@@ -2393,7 +2393,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		// Make sure the match URL query uses a small limit
 		String matchUrlQuery = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
-		assertThat(matchUrlQuery, containsString("rispt1_0.HASH_SYS_AND_VALUE='-4132452001562191669'"));
+		assertThat(matchUrlQuery, containsString("rispt1_0.HASH_SYS_AND_VALUE='4921711664933321977'"));
 		assertThat(matchUrlQuery, containsString("fetch first '2'"));
 
 		runInTransaction(() -> {
