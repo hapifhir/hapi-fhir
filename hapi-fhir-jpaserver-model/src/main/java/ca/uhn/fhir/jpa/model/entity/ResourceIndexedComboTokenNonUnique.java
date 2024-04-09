@@ -139,7 +139,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 			return;
 		}
 		String queryString = myIndexString;
-		setHashComplete(theHasher.hash(getPartitionId(), queryString));
+		setHashComplete(theHasher.hash(getPartitionId(), false, queryString));
 	}
 
 	@Override

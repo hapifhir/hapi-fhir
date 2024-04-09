@@ -102,7 +102,8 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 			String resourceType = getResource().getResourceType();
 			String paramName = getParamName();
 			boolean present = myPresent;
-			myHashPresence = theHasher.hash(getPartitionId(), resourceType, paramName, Boolean.toString(present));
+			myHashPresence =
+					theHasher.hash(getPartitionId(), false, resourceType, paramName, Boolean.toString(present));
 		}
 	}
 

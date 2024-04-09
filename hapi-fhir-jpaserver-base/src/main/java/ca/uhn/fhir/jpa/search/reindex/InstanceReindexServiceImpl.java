@@ -448,10 +448,12 @@ public class InstanceReindexServiceImpl implements IInstanceReindexService {
 		ResourceSearchParams searchParams = mySearchParamRegistry.getActiveSearchParams(theResourceName);
 		for (RuntimeSearchParam next : searchParams.values()) {
 			hashes.put(
-					myResourceIndexHasher.hash(theEntity.getPartitionId(), theResourceName, next.getName(), "true"),
+					myResourceIndexHasher.hash(
+							theEntity.getPartitionId(), false, theResourceName, next.getName(), "true"),
 					next.getName());
 			hashes.put(
-					myResourceIndexHasher.hash(theEntity.getPartitionId(), theResourceName, next.getName(), "false"),
+					myResourceIndexHasher.hash(
+							theEntity.getPartitionId(), false, theResourceName, next.getName(), "false"),
 					next.getName());
 		}
 

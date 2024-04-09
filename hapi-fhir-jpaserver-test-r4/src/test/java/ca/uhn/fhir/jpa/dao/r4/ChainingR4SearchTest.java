@@ -163,10 +163,10 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			});
 			List<Short> patientFamilyOrdinalList = containerOrdMap.get("patient.family");
 			assertNotNull(patientFamilyOrdinalList);
-			assertThat(patientFamilyOrdinalList, contains(1));
+			assertThat(patientFamilyOrdinalList, contains((short)1));
 			List<Short>  performerFamilyOrdinalList = containerOrdMap.get("performer.family");
 			assertNotNull(performerFamilyOrdinalList);
-			assertThat(performerFamilyOrdinalList, containsInAnyOrder(2, 3, 4));
+			assertThat(performerFamilyOrdinalList, containsInAnyOrder((short)2, (short)3, (short)4));
 		});
 	}
 

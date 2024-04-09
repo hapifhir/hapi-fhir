@@ -107,8 +107,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 	}
 
 	public Long getResourcePid() {
-		ResourceTable entity = getResource();
-		return entity != null ? entity.getResourceId() : null;
+		return myResourcePid;
 	}
 
 	public String getResourceType() {

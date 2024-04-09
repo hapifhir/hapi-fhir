@@ -44,16 +44,16 @@ public class CalculateHashesTest extends BaseTest {
 			JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
 
 			map = jdbcTemplate.queryForMap("select * from HFJ_SPIDX_TOKEN where SP_ID = 1");
-			assertEquals(7001889285610424179L, map.get("HASH_IDENTITY"));
-			assertEquals(2686400398917843456L, map.get("HASH_SYS"));
-			assertEquals(-3943098850992523411L, map.get("HASH_SYS_AND_VALUE"));
-			assertEquals(845040519142030272L, map.get("HASH_VALUE"));
+			assertEquals(792023395537367244L, map.get("HASH_IDENTITY"));
+			assertEquals(3234227391249831252L, map.get("HASH_SYS"));
+			assertEquals(9195454949267654659L, map.get("HASH_SYS_AND_VALUE"));
+			assertEquals(4905282360287126028L, map.get("HASH_VALUE"));
 
 			map = jdbcTemplate.queryForMap("select * from HFJ_SPIDX_TOKEN where SP_ID = 2");
-			assertEquals(7001889285610424179L, map.get("HASH_IDENTITY"));
-			assertEquals(2686400398917843456L, map.get("HASH_SYS"));
-			assertEquals(-6583685191951870327L, map.get("HASH_SYS_AND_VALUE"));
-			assertEquals(8271382783311609619L, map.get("HASH_VALUE"));
+			assertEquals(792023395537367244L, map.get("HASH_IDENTITY"));
+			assertEquals(3234227391249831252L, map.get("HASH_SYS"));
+			assertEquals(9081870298460263153L, map.get("HASH_SYS_AND_VALUE"));
+			assertEquals(8599736225628469090L, map.get("HASH_VALUE"));
 
 			return null;
 		});

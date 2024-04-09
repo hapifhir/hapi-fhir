@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class HapiFhirMigrationTasks_V7_2 {
 	private final Builder myVersion;
@@ -28,7 +29,7 @@ public class HapiFhirMigrationTasks_V7_2 {
 		forcedId.dropIndex("20240402.3", "IDX_FORCEDID_TYPE_FID");
 		forcedId.dropIndex("20240402.4", "IDX_FORCEID_FID");
 
-		String subVersionName = "20240227.1";
+		String subVersionName = "20240408";
 
 		Collection<String> indexTableList = List.of(
 				"HFJ_SPIDX_COORDS",
@@ -41,9 +42,13 @@ public class HapiFhirMigrationTasks_V7_2 {
 				"HFJ_SPIDX_TOKEN",
 				"HFJ_SPIDX_URI");
 
+		AtomicInteger i = new AtomicInteger();
 		indexTableList.forEach(idxTable -> {
 			Builder.BuilderWithTableName tableBuilder = myVersion.onTable(idxTable);
-			tableBuilder.addColumn(subVersionName, "contained_ord").nullable().type(ColumnTypeEnum.TINYINT);
+			tableBuilder
+					.addColumn(subVersionName + "." + i.getAndIncrement(), "contained_ord")
+					.nullable()
+					.type(ColumnTypeEnum.TINYINT);
 		});
 	}
 }

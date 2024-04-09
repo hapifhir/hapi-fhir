@@ -39,7 +39,6 @@ public class ResourceIndexHasher {
 			return this;
 		}
 
-		@Nullable
 		public Integer getPartitionId() {
 			return myPartitionId;
 		}
@@ -113,17 +112,6 @@ public class ResourceIndexHasher {
 	}
 
 	/**
-	 * Compute a hash value for the provided arguments.
-	 * @param thePartitionId the partition id to be included in the hash
-	 * @param theValues the list of values to be included in the hash
-	 * @return the hash value
-	 */
-	public long hash(@Nullable PartitionablePartitionId thePartitionId, @NotNull String... theValues) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(thePartitionId);
-		return hash(requestPartitionId, false, theValues);
-	}
-
-	/**
 	 * Compute the hash value for a set of provided arguments.
 	 * @param thePartitionId the partition id assigned to the object being hashed
 	 * @param theIsContained true if the hash is computed for a contained resource
@@ -162,7 +150,7 @@ public class ResourceIndexHasher {
 				&& theRequestPartitionId != null
 				&& theRequestPartitionId.hasPartitionIds()) {
 			if (theRequestPartitionId.getPartitionIds().size() > 1) {
-				throw new InternalErrorException(Msg.code(2512)
+				throw new InternalErrorException(Msg.code(1527)
 						+ "Can not search multiple partitions when partitions are included in search hashes");
 			}
 			Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
