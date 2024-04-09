@@ -119,7 +119,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 	protected void init720() {
 		// Start of migrations from 7.0 to 7.2
-		new HapiFhirMigrationTasks_V7_2(forVersion(VersionEnum.V7_2_0)).populate();
+		new HapiFhirMigrationTasksV7(forVersion(VersionEnum.V7_2_0)).populateV720();
 	}
 
 	protected void init700() {

@@ -7,14 +7,14 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class HapiFhirMigrationTasks_V7_2 {
+public class HapiFhirMigrationTasksV7 {
 	private final Builder myVersion;
 
-	public HapiFhirMigrationTasks_V7_2(Builder theVersion) {
+	public HapiFhirMigrationTasksV7(Builder theVersion) {
 		this.myVersion = theVersion;
 	}
 
-	public void populate() {
+	public void populateV720() {
 		// allow null codes in concept map targets
 		myVersion
 				.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
