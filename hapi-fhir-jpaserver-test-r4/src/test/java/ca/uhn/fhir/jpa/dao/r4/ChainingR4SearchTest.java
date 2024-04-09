@@ -144,9 +144,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		obs.getPerformer().add(new Reference(p4.getId()));
 		obs.getContained().addAll(List.of(p1, p2, p3, p4));
 
+		final Map<String, List<Short>> containerOrdMap = new HashMap<>();
 		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 		runInTransaction(()-> {
-			Map<String, List<Short>> containerOrdMap = new HashMap<>();
 			myResourceIndexedSearchParamStringDao.findAllForResourceId(obsId.getIdPartAsLong()).forEach(param -> {
 				String paramName = param.getParamName();
 				if (paramName.startsWith("patient.") || paramName.startsWith("performer.")) {
@@ -161,13 +161,14 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 					containerOrdMap.put(paramName, list);
 				}
 			});
-			List<Short> patientFamilyOrdinalList = containerOrdMap.get("patient.family");
-			assertNotNull(patientFamilyOrdinalList);
-			assertThat(patientFamilyOrdinalList, contains((short)1));
-			List<Short>  performerFamilyOrdinalList = containerOrdMap.get("performer.family");
-			assertNotNull(performerFamilyOrdinalList);
-			assertThat(performerFamilyOrdinalList, containsInAnyOrder((short)2, (short)3, (short)4));
 		});
+
+		List<Short> patientFamilyOrdinalList = containerOrdMap.get("patient.family");
+		assertNotNull(patientFamilyOrdinalList);
+		assertThat(patientFamilyOrdinalList, contains((short)1));
+		List<Short>  performerFamilyOrdinalList = containerOrdMap.get("performer.family");
+		assertNotNull(performerFamilyOrdinalList);
+		assertThat(performerFamilyOrdinalList, containsInAnyOrder((short)2, (short)3, (short)4));
 	}
 
 
