@@ -243,7 +243,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 	 */
 	private byte[] fetchBlobFromBinary(IBaseBinary theBinary) throws IOException {
 		if (myBinaryStorageSvc != null && !(myBinaryStorageSvc instanceof NullBinaryStorageSvcImpl)) {
-			return myBinaryStorageSvc.fetchDataBlobFromBinary(theBinary);
+			return myBinaryStorageSvc.fetchDataByteArrayFromBinary(theBinary);
 		} else {
 			byte[] value = BinaryUtil.getOrCreateData(myCtx, theBinary).getValue();
 			if (value == null) {

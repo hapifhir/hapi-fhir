@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.ModifyColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameIndexTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.RenameTableTask;
 import org.apache.commons.lang3.Validate;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
@@ -318,6 +319,11 @@ public class Builder {
 			task.setConstraintName(theFkName);
 			task.setTableName(getTableName());
 			task.setParentTableName(theParentTableName);
+			addTask(task);
+		}
+
+		public void renameTable(String theVersion, String theNewTableName){
+			RenameTableTask task = new RenameTableTask(myRelease, theVersion, theNewTableName);
 			addTask(task);
 		}
 

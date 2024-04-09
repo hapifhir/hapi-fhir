@@ -38,18 +38,18 @@ import static java.util.Objects.nonNull;
 public class BinaryStorageEntity {
 
 	@Id
-	@Column(name = "BLOB_ID", length = 200, nullable = false)
+	@Column(name = "CONTENT_ID", length = 200, nullable = false)
 	// N.B GGG: Note that the `blob id` is the same as the `externalized binary id`.
-	private String myBlobId;
+	private String myContentId;
 
 	@Column(name = "RESOURCE_ID", length = 100, nullable = false)
 	private String myResourceId;
 
-	@Column(name = "BLOB_SIZE", nullable = true)
+	@Column(name = "CONTENT_SIZE", nullable = true)
 	private long mySize;
 
 	@Column(name = "CONTENT_TYPE", nullable = false, length = 100)
-	private String myBlobContentType;
+	private String myContentType;
 
 	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "BLOB_DATA", nullable = true, insertable = true, updatable = false)
@@ -62,7 +62,7 @@ public class BinaryStorageEntity {
 	@Column(name = "PUBLISHED_DATE", nullable = false)
 	private Date myPublished;
 
-	@Column(name = "BLOB_HASH", length = 128, nullable = true)
+	@Column(name = "CONTENT_HASH", length = 128, nullable = true)
 	private String myHash;
 
 	public Date getPublished() {
@@ -77,8 +77,8 @@ public class BinaryStorageEntity {
 		return myHash;
 	}
 
-	public void setBlobId(String theBlobId) {
-		myBlobId = theBlobId;
+	public void setContentId(String theContentId) {
+		myContentId = theContentId;
 	}
 
 	public void setResourceId(String theResourceId) {
@@ -89,12 +89,12 @@ public class BinaryStorageEntity {
 		return mySize;
 	}
 
-	public String getBlobContentType() {
-		return myBlobContentType;
+	public String getContentType() {
+		return myContentType;
 	}
 
-	public void setBlobContentType(String theBlobContentType) {
-		myBlobContentType = theBlobContentType;
+	public void setContentType(String theContentType) {
+		myContentType = theContentType;
 	}
 
 	public Blob getBlob() {
@@ -105,8 +105,8 @@ public class BinaryStorageEntity {
 		myBlob = theBlob;
 	}
 
-	public String getBlobId() {
-		return myBlobId;
+	public String getContentId() {
+		return myContentId;
 	}
 
 	public void setSize(long theSize) {

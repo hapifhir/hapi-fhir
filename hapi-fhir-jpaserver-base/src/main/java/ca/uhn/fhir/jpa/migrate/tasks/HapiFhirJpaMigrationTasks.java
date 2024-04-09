@@ -133,16 +133,23 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			Builder.BuilderWithTableName binaryStorageBlobTable = version.onTable("HFJ_BINARY_STORAGE_BLOB");
 
 			binaryStorageBlobTable
-				.modifyColumn("20240404.1", "BLOB_DATA")
+				.renameColumn("20240404.1", "BLOB_ID", "CONTENT_ID")
+				.renameColumn("20240404.2", "BLOB_SIZE", "CONTENT_SIZE")
+				.renameColumn("20240404.3", "BLOB_HASH", "CONTENT_HASH");
+
+			binaryStorageBlobTable
+				.modifyColumn("20240404.4", "BLOB_DATA")
 				.nullable()
 				.withType(ColumnTypeEnum.BLOB);
 
 			binaryStorageBlobTable
-				.addColumn("20240404.1", "STORAGE_CONTENT_BIN")
+				.addColumn("20240404.5", "STORAGE_CONTENT_BIN")
 				.nullable()
 				.type(ColumnTypeEnum.BINARY);
 
-			binaryStorageBlobTable.migratePostgresOidToBinary("20240404.3", "BLOB_DATA", "STORAGE_CONTENT_BIN");
+			binaryStorageBlobTable.migratePostgresOidToBinary("20240404.6", "BLOB_DATA", "STORAGE_CONTENT_BIN");
+
+			binaryStorageBlobTable.renameTable("20240404.7", "HFJ_BINARY_STORAGE");
 
 		}
 	}
