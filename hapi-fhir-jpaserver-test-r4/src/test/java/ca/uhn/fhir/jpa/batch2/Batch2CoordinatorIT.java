@@ -36,6 +36,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -44,6 +45,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageHandler;
+import org.springframework.messaging.MessagingException;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.ArrayList;
@@ -237,6 +241,84 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		assertEquals(StatusEnum.COMPLETED, jobInstance.getStatus());
 		assertEquals(1.0, jobInstance.getProgress());
+	}
+
+	/**
+	 * This test verifies that if we have a workchunks being processed by the queue,
+	 * and the maintenance job kicks in, it won't necessarily advance the steps.
+	 */
+	@Test
+	public void gatedJob_whenMaintenanceRunHappensDuringMsgProcessing_doesNotAdvance() throws InterruptedException {
+		// setup
+		String jobId = new Exception().getStackTrace()[0].getMethodName();
+		int chunksToMake = 5;
+		AtomicInteger secondGateCounter = new AtomicInteger();
+		AtomicBoolean reductionCheck = new AtomicBoolean(false);
+		// we will listen into the message queue so we can force actions on it
+		MessageHandler handler = message -> {
+			/*
+			 * We will force a run of the maintenance job
+			 * to simulate the situation in which a chunk is
+			 * still being processed by the WorkChunkMessageHandler
+			 * (and thus, not available yet).
+			 */
+			myBatch2JobHelper.forceRunMaintenancePass();
+		};
+
+		buildAndDefine3StepReductionJob(jobId, new IReductionStepHandler() {
+
+			@Override
+			public void firstStep(StepExecutionDetails<TestJobParameters, VoidModel> theStep, IJobDataSink<FirstStepOutput> theDataSink) {
+				for (int i = 0; i < chunksToMake; i++) {
+					theDataSink.accept(new FirstStepOutput());
+				}
+			}
+
+			@Override
+			public void secondStep(StepExecutionDetails<TestJobParameters, FirstStepOutput> theStep, IJobDataSink<SecondStepOutput> theDataSink) {
+				// no new chunks
+				SecondStepOutput output = new SecondStepOutput();
+				theDataSink.accept(output);
+			}
+
+			@Override
+			public void reductionStepConsume(ChunkExecutionDetails<TestJobParameters, SecondStepOutput> theChunkDetails, IJobDataSink<ReductionStepOutput> theDataSink) {
+				// we expect to get one here
+				int val = secondGateCounter.getAndIncrement();
+			}
+
+			@Override
+			public void reductionStepRun(StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails, IJobDataSink<ReductionStepOutput> theDataSink) {
+				reductionCheck.set(true);
+				theDataSink.accept(new ReductionStepOutput(new ArrayList<>()));
+			}
+		});
+
+		try {
+			myWorkChannel.subscribe(handler);
+
+			// test
+			JobInstanceStartRequest request = buildRequest(jobId);
+			myFirstStepLatch.setExpectedCount(1);
+			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
+
+			String instanceId = startResponse.getInstanceId();
+
+			// wait
+			myBatch2JobHelper.awaitJobCompletion(instanceId);
+
+			// verify
+			Optional<JobInstance> instanceOp = myJobPersistence.fetchInstance(instanceId);
+			assertTrue(instanceOp.isPresent());
+			JobInstance jobInstance = instanceOp.get();
+			assertTrue(reductionCheck.get());
+			assertEquals(chunksToMake, secondGateCounter.get());
+
+			assertEquals(StatusEnum.COMPLETED, jobInstance.getStatus());
+			assertEquals(1.0, jobInstance.getProgress());
+		} finally {
+			myWorkChannel.unsubscribe(handler);
+		}
 	}
 
 	@Test
