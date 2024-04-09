@@ -4,11 +4,15 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -24,6 +28,8 @@ import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Questionnaire;
+import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Task;
@@ -50,7 +56,9 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_AUTO_VERSION_REFERENCES_AT_PATH;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -1055,5 +1063,33 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// the bundle above contains an observation, so we'll verify it was created here
 		Observation obs = myObservationDao.read(idType);
 		Assertions.assertNotNull(obs);
+	}
+
+	@Test
+	public void test_canonical_lookup(){
+		String canonicalUrl = "http://foo";
+		Questionnaire questionnaire = (Questionnaire) myQuestionnaireDao.create(new Questionnaire().setUrl(canonicalUrl)).getResource();
+		QuestionnaireResponse questionnaireResponse = (QuestionnaireResponse) myQuestionnaireResponseDao.create(new QuestionnaireResponse().setQuestionnaire(canonicalUrl)).getResource();
+		List<IBaseResource> result = myQuestionnaireResponseDao.search(
+			SearchParameterMap.newSynchronous("_id", new StringParam(questionnaireResponse.getIdElement().getIdPart()))
+				.addInclude(new Include("QuestionnaireResponse:questionnaire"))).getAllResources();
+		assertThat(result, hasSize(2));
+		assertThat(questionnaireResponse.getId(), equalTo(result.get(0).getIdElement().getValue()));
+		assertThat(questionnaire.getId(), equalTo(result.get(1).getIdElement().getValue()));
+		// If one could only do ... assertThat(result, containsInAnyOrder(questionnaireResponse, questionnaire));
+	}
+
+	@Test
+	public void test_canonical_versioned_lookup(){
+		String canonicalUrl = "http://foo";
+		String version = "2.4";
+		Questionnaire questionnaire = (Questionnaire) myQuestionnaireDao.create(new Questionnaire().setUrl(canonicalUrl).setVersion(version)).getResource();
+		QuestionnaireResponse questionnaireResponse = (QuestionnaireResponse) myQuestionnaireResponseDao.create(new QuestionnaireResponse().setQuestionnaire(canonicalUrl + "|" + version)).getResource();
+		List<IBaseResource> result = myQuestionnaireResponseDao.search(
+			SearchParameterMap.newSynchronous("_id", new StringParam(questionnaireResponse.getIdElement().getIdPart()))
+				.addInclude(new Include("QuestionnaireResponse:questionnaire"))).getAllResources();
+		assertThat(result, hasSize(2));
+		assertThat(questionnaireResponse.getId(), equalTo(result.get(0).getIdElement().getValue()));
+		assertThat(questionnaire.getId(), equalTo(result.get(1).getIdElement().getValue()));
 	}
 }
