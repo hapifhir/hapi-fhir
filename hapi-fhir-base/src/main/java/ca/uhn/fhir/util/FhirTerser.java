@@ -1785,12 +1785,12 @@ public class FhirTerser {
 
 	public static class ContainedResources extends EmbeddedResources {
 		private long myNextContainedId = 1;
-		private Map<IBaseResource, Integer> myResourceToOrdMap;
+		private Map<IBaseResource, Short> myResourceToOrdMap;
 
 		@Override
 		protected void addResource(IIdType theId, IBaseResource theResource) {
 			super.addResource(theId, theResource);
-			int ordinal = getOrCreateResourceList().size();
+			short ordinal = Integer.valueOf(getOrCreateResourceList().size()).shortValue();
 			getOrCreateResourceToOrdMap().put(theResource, ordinal);
 		}
 
@@ -1823,14 +1823,14 @@ public class FhirTerser {
 			return getOrCreateResourceList();
 		}
 
-		private Map<IBaseResource, Integer> getOrCreateResourceToOrdMap() {
+		private Map<IBaseResource, Short> getOrCreateResourceToOrdMap() {
 			if (myResourceToOrdMap == null) {
 				myResourceToOrdMap = new IdentityHashMap<>();
 			}
 			return myResourceToOrdMap;
 		}
 
-		public Integer getContainedResourceOrd(IBaseResource theResource) {
+		public Short getContainedResourceOrd(IBaseResource theResource) {
 			return getOrCreateResourceToOrdMap().get(theResource);
 		}
 	}

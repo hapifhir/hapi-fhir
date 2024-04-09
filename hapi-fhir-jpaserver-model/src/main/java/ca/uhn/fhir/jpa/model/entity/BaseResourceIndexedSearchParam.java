@@ -66,7 +66,7 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 
 	@GenericField
 	@Column(name = "CONTAINED_ORD", nullable = true)
-	private Integer myContainedOrd;
+	private Short myContainedOrd;
 
 	@Override
 	public abstract Long getId();
@@ -143,11 +143,11 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 		return myHashIdentity;
 	}
 
-	public Integer getContainedOrd() {
+	public Short getContainedOrd() {
 		return myContainedOrd;
 	}
 
-	public void setContainedOrd(Integer theContainedOrd) {
+	public void setContainedOrd(Short theContainedOrd) {
 		if (!Objects.equals(theContainedOrd, myContainedOrd)) {
 			myContainedOrd = theContainedOrd;
 			clearHashes();

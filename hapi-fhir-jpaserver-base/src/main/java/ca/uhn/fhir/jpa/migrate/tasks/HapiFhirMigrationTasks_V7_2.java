@@ -45,6 +45,5 @@ public class HapiFhirMigrationTasks_V7_2 {
 			Builder.BuilderWithTableName tableBuilder = myVersion.onTable(idxTable);
 			tableBuilder.addColumn(subVersionName, "contained_ord").nullable().type(ColumnTypeEnum.TINYINT);
 		});
-
 	}
 }

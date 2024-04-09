@@ -135,7 +135,6 @@ public class GiantTransactionPerfTest {
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	private SearchParamWithInlineReferencesExtractor mySearchParamWithInlineReferencesExtractor;
 	private PartitionSettings myPartitionSettings;
-	private ResourceIndexHasher myResourceIndexHasher;
 	private SearchParamExtractorService mySearchParamExtractorSvc;
 	private SearchParamExtractorR4 mySearchParamExtractor;
 	private SearchParamRegistryImpl mySearchParamRegistry;
@@ -179,8 +178,6 @@ public class GiantTransactionPerfTest {
 		myDaoRegistry = new DaoRegistry(ourFhirContext);
 
 		myPartitionSettings = new PartitionSettings();
-		myResourceIndexHasher = new ResourceIndexHasher(myPartitionSettings, new StorageSettings());
-
 		myMetaTagSorter = new MetaTagSorterAlphabetical();
 
 		myHapiTransactionService = new HapiTransactionService();
@@ -236,23 +233,25 @@ public class GiantTransactionPerfTest {
 		mySearchParamRegistry.setStorageSettings(myStorageSettings);
 		mySearchParamRegistry.registerListener();
 
+		ResourceIndexHasher resourceIndexHasher = new ResourceIndexHasher(myPartitionSettings, new StorageSettings());
+
 		mySearchParamExtractor = new SearchParamExtractorR4();
 		mySearchParamExtractor.setContext(ourFhirContext);
 		mySearchParamExtractor.setSearchParamRegistry(mySearchParamRegistry);
 		mySearchParamExtractor.setStorageSettings(myStorageSettings);
-		mySearchParamExtractor.setResourceIndexHasher(myResourceIndexHasher);
+		mySearchParamExtractor.setResourceIndexHasher(resourceIndexHasher);
 		mySearchParamExtractor.start();
 
 		mySearchParamExtractorSvc = new SearchParamExtractorService();
 		mySearchParamExtractorSvc.setContext(ourFhirContext);
 		mySearchParamExtractorSvc.setSearchParamExtractor(mySearchParamExtractor);
 		mySearchParamExtractorSvc.setStorageSettings(myStorageSettings);
-		mySearchParamExtractorSvc.setResourceIndexHasher(myResourceIndexHasher);
+		mySearchParamExtractorSvc.setResourceIndexHasher(resourceIndexHasher);
 
 
 		myDaoSearchParamSynchronizer = new DaoSearchParamSynchronizer();
 		myDaoSearchParamSynchronizer.setEntityManager(myEntityManager);
-		myDaoSearchParamSynchronizer.setResourceIndexHasher(myResourceIndexHasher);
+		myDaoSearchParamSynchronizer.setResourceIndexHasher(resourceIndexHasher);
 
 		mySearchParamWithInlineReferencesExtractor = new SearchParamWithInlineReferencesExtractor();
 		mySearchParamWithInlineReferencesExtractor.setStorageSettings(myStorageSettings);

@@ -48,12 +48,12 @@ public class IdentityHasher {
 							Object value = pd.getReadMethod().invoke(bean);
 							hashValue(value, hasher);
 						} catch (Exception e) {
-							throw new RuntimeException(
+							throw new IllegalStateException(
 									Msg.code(2510) + "Failed to access " + targetClass + "#" + pd.getName(), e);
 						}
 					});
 		} catch (IntrospectionException e) {
-			throw new RuntimeException(Msg.code(2510) + "Failed to introspect " + targetClass, e);
+			throw new IllegalStateException(Msg.code(2511) + "Failed to introspect " + targetClass, e);
 		}
 		return hasher.hash().asLong();
 	}

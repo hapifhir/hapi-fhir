@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
@@ -118,6 +119,19 @@ public class ResourceIndexedSearchParamToken extends BaseResourceIndexedSearchPa
 	 * Constructor
 	 */
 	public ResourceIndexedSearchParamToken() {}
+
+	@Deprecated(since = "7.2")
+	public ResourceIndexedSearchParamToken(
+			PartitionSettings thePartitionSettings,
+			String theResourceType,
+			String theParamName,
+			String theSystem,
+			String theValue) {
+		setResourceType(theResourceType);
+		setParamName(theParamName);
+		setSystem(theSystem);
+		setValue(theValue);
+	}
 
 	/**
 	 * Constructor

@@ -143,23 +143,7 @@ public class ResourceIndexHasher {
 	 * @return the hash value
 	 */
 	public long hash(@Nullable RequestPartitionId theRequestPartitionId, @NotNull String... theValues) {
-		HashIdentity identity = new HashIdentity(theValues);
-
-		if (myPartitionSettings.isPartitioningEnabled()
-				&& myPartitionSettings.isIncludePartitionInSearchHashes()
-				&& theRequestPartitionId != null
-				&& theRequestPartitionId.hasPartitionIds()) {
-			if (theRequestPartitionId.getPartitionIds().size() > 1) {
-				throw new InternalErrorException(Msg.code(1527)
-						+ "Can not search multiple partitions when partitions are included in search hashes");
-			}
-			Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();
-			identity.setPartitionId(partitionId);
-		}
-
-		identity.setContained(false);
-
-		return IdentityHasher.hash(identity);
+		return hash(theRequestPartitionId, false, theValues);
 	}
 
 	/**
@@ -178,7 +162,7 @@ public class ResourceIndexHasher {
 				&& theRequestPartitionId != null
 				&& theRequestPartitionId.hasPartitionIds()) {
 			if (theRequestPartitionId.getPartitionIds().size() > 1) {
-				throw new InternalErrorException(Msg.code(1527)
+				throw new InternalErrorException(Msg.code(2512)
 						+ "Can not search multiple partitions when partitions are included in search hashes");
 			}
 			Integer partitionId = theRequestPartitionId.getFirstPartitionIdOrNull();

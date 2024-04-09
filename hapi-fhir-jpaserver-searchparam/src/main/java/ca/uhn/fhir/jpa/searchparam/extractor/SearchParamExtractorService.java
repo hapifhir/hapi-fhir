@@ -312,7 +312,7 @@ public class SearchParamExtractorService {
 			}
 
 			@Override
-			public Integer getContainedOrd(IBaseResource theResource) {
+			public Short getContainedOrd(IBaseResource theResource) {
 				return containedResources.getContainedResourceOrd(theResource);
 			}
 		};
@@ -502,7 +502,7 @@ public class SearchParamExtractorService {
 		return theEmbeddedResources.getResource(reference.getReferenceElement());
 	}
 
-	private void setContainerOrd(ResourceIndexedSearchParams theParams, Integer theContainerOrd) {
+	private void setContainerOrd(ResourceIndexedSearchParams theParams, Short theContainerOrd) {
 		setContainerOrd(theParams.myStringParams, theContainerOrd);
 		setContainerOrd(theParams.myNumberParams, theContainerOrd);
 		setContainerOrd(theParams.myQuantityParams, theContainerOrd);
@@ -514,7 +514,7 @@ public class SearchParamExtractorService {
 	}
 
 	private void setContainerOrd(
-			Collection<? extends BaseResourceIndexedSearchParam> theParams, Integer theContainerOrd) {
+			Collection<? extends BaseResourceIndexedSearchParam> theParams, Short theContainerOrd) {
 		theParams.forEach(param -> {
 			param.setContainedOrd(theContainerOrd);
 			param.calculateHashes(myResourceIndexHasher);
@@ -1243,7 +1243,7 @@ public class SearchParamExtractorService {
 
 		boolean isIndexOnContainedResources();
 
-		default Integer getContainedOrd(IBaseResource theResource) {
+		default Short getContainedOrd(IBaseResource theResource) {
 			return null;
 		}
 	}
