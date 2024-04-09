@@ -163,6 +163,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			termConceptPropertyTable.migratePostgresOidToBinary("20240409.1", "PROP_VAL_LOB", "PROP_VAL_BIN");
 		}
 
+		{
+			Builder.BuilderWithTableName termValueSetConceptTable = version.onTable("TRM_VALUESET_CONCEPT");
+			termValueSetConceptTable
+				.addColumn("20240409.2", "SOURCE_DIRECT_PARENT_PIDS_VC")
+				.nullable()
+				.type(ColumnTypeEnum.TEXT);
+
+			termValueSetConceptTable.migratePostgresOidToText("20240409.3", "SOURCE_DIRECT_PARENT_PIDS", "SOURCE_DIRECT_PARENT_PIDS_VC");
+
+		}
 
 	}
 

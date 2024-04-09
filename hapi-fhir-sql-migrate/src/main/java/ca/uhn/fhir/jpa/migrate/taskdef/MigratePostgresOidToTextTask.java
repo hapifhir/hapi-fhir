@@ -7,13 +7,13 @@ import org.slf4j.LoggerFactory;
 import java.sql.SQLException;
 import java.util.Set;
 
-public class MigratePostgresOidToBinaryTask extends BaseTableColumnTask {
-	private static final Logger ourLog = LoggerFactory.getLogger(MigratePostgresOidToBinaryTask.class);
+public class MigratePostgresOidToTextTask extends BaseTableColumnTask {
+	private static final Logger ourLog = LoggerFactory.getLogger(MigratePostgresOidToTextTask.class);
 
 	private final String myFromColumName;
 	private final String myToColumName;
 
-	public MigratePostgresOidToBinaryTask(
+	public MigratePostgresOidToTextTask(
 			String theProductVersion,
 			String theSchemaVersion,
 			String theTableName,
@@ -32,7 +32,7 @@ public class MigratePostgresOidToBinaryTask extends BaseTableColumnTask {
 	public void validate() {
 		super.validate();
 
-		setDescription("Migrating Lob (oid) from colum  " + myFromColumName + " to BINARY on colum " + myToColumName
+		setDescription("Migrating Lob (oid) from colum  " + myFromColumName + " to TEXT on colum " + myToColumName
 				+ " for table " + getTableName() + " (only affects Postgresql)");
 	}
 
@@ -44,7 +44,7 @@ public class MigratePostgresOidToBinaryTask extends BaseTableColumnTask {
 
 		executeSql(
 				tableName,
-				"update " + tableName + " set " + toColumName + " = lo_get(" + fromColumName + ")  where "
+				"update " + tableName + " set " + toColumName + " = convert_from(lo_get(" + fromColumName + "), 'UTF8')  where "
 						+ fromColumName + " is not null");
 	}
 }

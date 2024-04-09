@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteTaskPrecondition;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.MigratePostgresOidToBinaryTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.MigratePostgresOidToTextTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.MigratePostgresTextClobToBinaryClobTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ModifyColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
@@ -338,6 +339,13 @@ public class Builder {
 		public void migratePostgresOidToBinary(String theVersion, String theFromColumName, String theToColumName) {
 			MigratePostgresOidToBinaryTask task = new MigratePostgresOidToBinaryTask(
 					myRelease, theVersion, getTableName(), theFromColumName, theToColumName);
+
+			addTask(task);
+		}
+
+		public void migratePostgresOidToText(String theVersion, String theFromColumName, String theToColumName) {
+			MigratePostgresOidToTextTask task = new MigratePostgresOidToTextTask(
+				myRelease, theVersion, getTableName(), theFromColumName, theToColumName);
 
 			addTask(task);
 		}
