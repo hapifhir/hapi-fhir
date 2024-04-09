@@ -118,7 +118,7 @@ public class DatabaseBinaryContentStorageSvcImpl extends BaseBinaryStorageSvcImp
 	}
 
 	@Override
-	public StoredDetails binafetchBinaryContentDetails(IIdType theResourceId, String theBinaryContentId) {
+	public StoredDetails fetchBinaryContentDetails(IIdType theResourceId, String theBinaryContentId) {
 
 		Optional<BinaryStorageEntity> entityOpt = myBinaryStorageEntityDao.findByIdAndResourceId(
 				theBinaryContentId, theResourceId.toUnqualifiedVersionless().getValue());
