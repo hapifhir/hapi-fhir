@@ -1,15 +1,26 @@
+/*-
+ * #%L
+ * HAPI FHIR JPA Server - Batch2 specification tests
+ * %%
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.hapi.fhir.batch2.test;
 
-import ca.uhn.fhir.batch2.api.IJobPersistence;
-import ca.uhn.fhir.batch2.channel.BatchJobSender;
-import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
-import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
-import ca.uhn.hapi.fhir.batch2.test.support.TestJobParameters;
-import ca.uhn.test.concurrency.PointcutLatch;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.support.TransactionTemplate;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 
 public interface IWorkChunkCommon extends WorkChunkTestConstants {
 
@@ -17,106 +28,15 @@ public interface IWorkChunkCommon extends WorkChunkTestConstants {
 	 * Returns the concrete class that is implementing this stuff.
 	 * Used primarily for structure
 	 */
-	IWorkChunkCommon getTestManager();
-
-	default String createAndStoreJobInstance(JobDefinition<?> theJobDefinition) {
-		return getTestManager().createAndStoreJobInstance(theJobDefinition);
-	}
-
-	default String createAndDequeueWorkChunk(String theJobInstanceId) {
-		return getTestManager().createAndDequeueWorkChunk(theJobInstanceId);
-	}
-
-	default WorkChunk freshFetchWorkChunk(String theChunkId) {
-		return getTestManager().freshFetchWorkChunk(theChunkId);
-	}
+	ITestFixture getTestManager();
 
 	default JobInstance createInstance() {
-		return getTestManager().createInstance();
-	}
-
-	default String storeWorkChunk(String theJobDefinitionId, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData, boolean theGatedExecution) {
-		return getTestManager().storeWorkChunk(theJobDefinitionId, theTargetStepId, theInstanceId, theSequence, theSerializedData, theGatedExecution);
-	}
-
-	default void runInTransaction(Runnable theRunnable) {
-		getTestManager().runInTransaction(theRunnable);
-	}
-
-	default void sleepUntilTimeChanges() {
-		getTestManager().sleepUntilTimeChanges();
-	}
-
-	default JobDefinition<TestJobParameters> withJobDefinition(boolean theIsGatedJob) {
-		return getTestManager().withJobDefinition(theIsGatedJob);
-	}
-
-	default TransactionTemplate newTxTemplate() {
-		return getTestManager().newTxTemplate();
-	}
-
-	default JobInstance freshFetchJobInstance(String theInstanceId) {
-		return getTestManager().freshFetchJobInstance(theInstanceId);
-	}
-
-	default void runMaintenancePass() {
-		getTestManager().runMaintenancePass();
-	}
-
-	default PlatformTransactionManager getTransactionManager() {
-		return getTestManager().getTransactionManager();
-	}
-
-	default IJobPersistence getSvc() {
-		return getTestManager().getSvc();
-	}
-
-	/**
-	 * This assumes a creation of JOB_DEFINITION already
-	 * @param theJobInstanceId
-	 * @return
-	 */
-	default String createChunk(String theJobInstanceId) {
-		return getTestManager().createChunk(theJobInstanceId);
-	}
-
-	default String createChunk(String theJobInstanceId, boolean theGatedExecution) {
-		return getTestManager().createChunk(theJobInstanceId, theGatedExecution);
-	}
-
-	/**
-	 * Enable/disable the maintenance runner (So it doesn't run on a scheduler)
-	 */
-	default void enableMaintenanceRunner(boolean theToEnable) {
-		getTestManager().enableMaintenanceRunner(theToEnable);
-	}
-
-	/**
-	 * Uses the JobMaintenanceState information and the format:
-	 * "step_number|initialstate,step_number|finalstate" to construct
-	 * an initial state for a test scenario
-	 */
-	default void createChunksInStates(JobMaintenanceStateInformation theInitialState) {
-		getTestManager().createChunksInStates(theInitialState);
-	}
-
-	/**
-	 * Disables the workchunk message handler
-	 * so that we do not actually send messages to the queue;
-	 * useful if mocking state transitions and we don't want to test
-	 * dequeuing.
-	 * Returns a latch that will fire each time a message is sent.
-	 */
-	default PointcutLatch disableWorkChunkMessageHandler() {
-		return getTestManager().disableWorkChunkMessageHandler();
-	}
-
-	/**
-	 *
-	 * @param theSendingLatch the latch sent back from the disableWorkChunkMessageHandler method above
-	 * @param theNumberOfTimes the number of invocations to expect
-	 */
-	default void verifyWorkChunkMessageHandlerCalled(PointcutLatch theSendingLatch, int theNumberOfTimes) throws InterruptedException {
-		getTestManager().verifyWorkChunkMessageHandlerCalled(theSendingLatch, theNumberOfTimes);
+		JobInstance instance = new JobInstance();
+		instance.setJobDefinitionId(JOB_DEFINITION_ID);
+		instance.setStatus(StatusEnum.QUEUED);
+		instance.setJobDefinitionVersion(JOB_DEF_VER);
+		instance.setParameters(CHUNK_DATA);
+		instance.setReport("TEST");
+		return instance;
 	}
 }

@@ -64,7 +64,7 @@ import static org.mockito.Mockito.verify;
  * These tests are abstract, and do not depend on JPA.
  * Test setups should use the public batch2 api to create scenarios.
  */
-public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMaintenanceActions, IInProgressActionsTests, IInstanceStateTransitions, IWorkChunkCommon, WorkChunkTestConstants {
+public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMaintenanceActions, IInProgressActionsTests, IInstanceStateTransitions, ITestFixture, IWorkChunkCommon, WorkChunkTestConstants {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AbstractIJobPersistenceSpecificationTest.class);
 
@@ -107,6 +107,11 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 		return builder.build();
 	}
 
+	@Override
+	public ITestFixture getTestManager() {
+		return this;
+	}
+
 	@AfterEach
 	public void after() {
 		myJobDefinitionRegistry.removeJobDefinition(JOB_DEFINITION_ID, JOB_DEF_VER);
@@ -123,7 +128,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 	class WorkChunkStorage implements IWorkChunkStorageTests {
 
 		@Override
-		public IWorkChunkCommon getTestManager() {
+		public ITestFixture getTestManager() {
 			return AbstractIJobPersistenceSpecificationTest.this;
 		}
 
@@ -131,7 +136,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 		class StateTransitions implements IWorkChunkStateTransitions {
 
 			@Override
-			public IWorkChunkCommon getTestManager() {
+			public ITestFixture getTestManager() {
 				return AbstractIJobPersistenceSpecificationTest.this;
 			}
 
@@ -139,16 +144,11 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 			class ErrorActions implements IWorkChunkErrorActionsTests {
 
 				@Override
-				public IWorkChunkCommon getTestManager() {
+				public ITestFixture getTestManager() {
 					return AbstractIJobPersistenceSpecificationTest.this;
 				}
 			}
 		}
-	}
-
-	@Override
-	public IWorkChunkCommon getTestManager() {
-		return this;
 	}
 
 	@Nonnull
@@ -182,6 +182,9 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 	public JobInstance freshFetchJobInstance(String theInstanceId) {
 		return runInTransaction(() -> mySvc.fetchInstance(theInstanceId).orElseThrow());
 	}
+
+	@Override
+	public abstract void runMaintenancePass();
 
 	public TransactionTemplate newTxTemplate() {
 		TransactionTemplate retVal = new TransactionTemplate(getTxManager());
@@ -259,6 +262,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 			.sendWorkChannelMessage(notificationCaptor.capture());
 	}
 
+	@Override
 	public void createChunksInStates(JobMaintenanceStateInformation theJobMaintenanceStateInformation) {
 		theJobMaintenanceStateInformation.initialize(mySvc);
 	}

@@ -1,3 +1,22 @@
+/*-
+ * #%L
+ * HAPI FHIR JPA Server - Batch2 specification tests
+ * %%
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.hapi.fhir.batch2.test;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
@@ -20,6 +39,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.emptyString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -30,12 +50,12 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 	@Test
 	default void createInstance_createsInQueuedWithChunkInReady() {
 		// given
-		JobDefinition<?> jd = withJobDefinition(false);
+		JobDefinition<?> jd = getTestManager().withJobDefinition(false);
 
 		// when
 		IJobPersistence.CreateResult createResult =
-			newTxTemplate().execute(status->
-				getSvc().onCreateWithFirstChunk(jd, "{}"));
+			getTestManager().newTxTemplate().execute(status->
+				getTestManager().getSvc().onCreateWithFirstChunk(jd, "{}"));
 
 		// then
 		ourLog.info("job and chunk created {}", createResult);
@@ -43,11 +63,11 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		assertThat(createResult.jobInstanceId, not(emptyString()));
 		assertThat(createResult.workChunkId, not(emptyString()));
 
-		JobInstance jobInstance = freshFetchJobInstance(createResult.jobInstanceId);
+		JobInstance jobInstance = getTestManager().freshFetchJobInstance(createResult.jobInstanceId);
 		assertThat(jobInstance.getStatus(), equalTo(StatusEnum.QUEUED));
 		assertThat(jobInstance.getParameters(), equalTo("{}"));
 
-		WorkChunk firstChunk = freshFetchWorkChunk(createResult.workChunkId);
+		WorkChunk firstChunk = getTestManager().freshFetchWorkChunk(createResult.workChunkId);
 		assertThat(firstChunk.getStatus(), equalTo(WorkChunkStatusEnum.READY));
 		assertNull(firstChunk.getData(), "First chunk data is null - only uses parameters");
 	}
@@ -55,16 +75,16 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 	@Test
 	default void testCreateInstance_firstChunkDequeued_movesToInProgress() {
 		// given
-		JobDefinition<?> jd = withJobDefinition(false);
-		IJobPersistence.CreateResult createResult = newTxTemplate().execute(status->
-			getSvc().onCreateWithFirstChunk(jd, "{}"));
+		JobDefinition<?> jd = getTestManager().withJobDefinition(false);
+		IJobPersistence.CreateResult createResult = getTestManager().newTxTemplate().execute(status->
+			getTestManager().getSvc().onCreateWithFirstChunk(jd, "{}"));
 		assertNotNull(createResult);
 
 		// when
-		newTxTemplate().execute(status -> getSvc().onChunkDequeued(createResult.jobInstanceId));
+		getTestManager().newTxTemplate().execute(status -> getTestManager().getSvc().onChunkDequeued(createResult.jobInstanceId));
 
 		// then
-		JobInstance jobInstance = freshFetchJobInstance(createResult.jobInstanceId);
+		JobInstance jobInstance = getTestManager().freshFetchJobInstance(createResult.jobInstanceId);
 		assertThat(jobInstance.getStatus(), equalTo(StatusEnum.IN_PROGRESS));
 	}
 
@@ -74,20 +94,20 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		// given
 		JobInstance cancelledInstance = createInstance();
 		cancelledInstance.setStatus(theState);
-		String instanceId1 = getSvc().storeNewInstance(cancelledInstance);
-		getSvc().cancelInstance(instanceId1);
+		String instanceId1 = getTestManager().getSvc().storeNewInstance(cancelledInstance);
+		getTestManager().getSvc().cancelInstance(instanceId1);
 
 		JobInstance normalInstance = createInstance();
 		normalInstance.setStatus(theState);
-		String instanceId2 = getSvc().storeNewInstance(normalInstance);
+		String instanceId2 = getTestManager().getSvc().storeNewInstance(normalInstance);
 
 		JobDefinitionRegistry jobDefinitionRegistry = new JobDefinitionRegistry();
-		jobDefinitionRegistry.addJobDefinitionIfNotRegistered(withJobDefinition(false));
+		jobDefinitionRegistry.addJobDefinitionIfNotRegistered(getTestManager().withJobDefinition(false));
 
 		// when
-		runInTransaction(()-> {
+		getTestManager().runInTransaction(()-> {
 			new JobInstanceProcessor(
-				getSvc(),
+				getTestManager().getSvc(),
 				null,
 				instanceId1,
 				new JobChunkProgressAccumulator(),
@@ -97,7 +117,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 		});
 
 		// then
-		JobInstance freshInstance1 = getSvc().fetchInstance(instanceId1).orElseThrow();
+		JobInstance freshInstance1 = getTestManager().getSvc().fetchInstance(instanceId1).orElseThrow();
 		if (theState.isCancellable()) {
 			assertEquals(StatusEnum.CANCELLED, freshInstance1.getStatus(), "cancel request processed");
 			assertThat(freshInstance1.getErrorMessage(), containsString("Job instance cancelled"));
@@ -105,17 +125,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 			assertEquals(theState, freshInstance1.getStatus(), "cancel request ignored - state unchanged");
 			assertNull(freshInstance1.getErrorMessage(), "no error message");
 		}
-		JobInstance freshInstance2 = getSvc().fetchInstance(instanceId2).orElseThrow();
+		JobInstance freshInstance2 = getTestManager().getSvc().fetchInstance(instanceId2).orElseThrow();
 		assertEquals(theState, freshInstance2.getStatus(), "cancel request ignored - cancelled not set");
-	}
-
-	default JobInstance createInstance() {
-		JobInstance instance = new JobInstance();
-		instance.setJobDefinitionId(JOB_DEFINITION_ID);
-		instance.setStatus(StatusEnum.QUEUED);
-		instance.setJobDefinitionVersion(JOB_DEF_VER);
-		instance.setParameters(CHUNK_DATA);
-		instance.setReport("TEST");
-		return instance;
 	}
 }
