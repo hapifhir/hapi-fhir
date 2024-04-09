@@ -50,7 +50,7 @@ public class SearchQueryBuilderDialectPostgresTest extends BaseSearchQueryBuilde
 
 		assertEquals(4, StringUtils.countMatches(sql, "?"));
 		assertEquals(4, generatedSql.getBindVariables().size());
-		assertEquals(123682819940570799L, generatedSql.getBindVariables().get(0));
+		assertEquals(45648902074593574L, generatedSql.getBindVariables().get(0));
 		assertEquals(20220101, generatedSql.getBindVariables().get(1));
 		assertEquals(20221231, generatedSql.getBindVariables().get(2));
 		assertEquals(500, generatedSql.getBindVariables().get(3));
