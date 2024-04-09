@@ -150,8 +150,20 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			binaryStorageBlobTable.migratePostgresOidToBinary("20240404.6", "BLOB_DATA", "STORAGE_CONTENT_BIN");
 
 			binaryStorageBlobTable.renameTable("20240404.7", "HFJ_BINARY_STORAGE");
-
 		}
+
+		{
+			Builder.BuilderWithTableName termConceptPropertyTable = version.onTable("TRM_CONCEPT_PROPERTY");
+
+			termConceptPropertyTable
+				.addColumn("20240409.1", "PROP_VAL_BIN")
+				.nullable()
+				.type(ColumnTypeEnum.BINARY);
+
+			termConceptPropertyTable.migratePostgresOidToBinary("20240409.1", "PROP_VAL_LOB", "PROP_VAL_BIN");
+		}
+
+
 	}
 
 	protected void init700() {
