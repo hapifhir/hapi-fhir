@@ -57,23 +57,6 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 	@Configuration
 	public static class MyConfig {
 
-		@Bean
-		public FhirContext fhirContext() {
-			return FhirContext.forR4();
-		}
-
-		@Bean
-		public PartitionSettings partitionSettings() {
-			return new PartitionSettings();
-		}
-
-		@Bean
-		public JpaStorageSettings storageSettings() {
-			JpaStorageSettings storageSettings = new JpaStorageSettings();
-			storageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
-			return storageSettings;
-		}
-
 		@MockBean
 		private ISearchParamProvider mySearchParamProvider;
 		@MockBean
@@ -94,6 +77,23 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 		private IHapiTransactionService myHapiTransactionService;
 		@MockBean
 		private ResourceIndexHasher myResourceIndexHasher;
+
+		@Bean
+		public FhirContext fhirContext() {
+			return FhirContext.forR4();
+		}
+
+		@Bean
+		public PartitionSettings partitionSettings() {
+			return new PartitionSettings();
+		}
+
+		@Bean
+		public JpaStorageSettings storageSettings() {
+			JpaStorageSettings storageSettings = new JpaStorageSettings();
+			storageSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
+			return storageSettings;
+		}
 	}
 
 
