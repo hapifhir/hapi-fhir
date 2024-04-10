@@ -4,10 +4,12 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
@@ -19,6 +21,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r5.model.BaseDateTimeType;
 import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
@@ -35,9 +38,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import jakarta.annotation.Nonnull;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.Date;
 
 import static org.hamcrest.CoreMatchers.is;
@@ -417,17 +420,27 @@ public class InMemoryResourceMatcherR5Test {
 	@Nonnull
 	private ResourceIndexedSearchParamDate extractEffectiveDateParam(Observation theObservation) {
 		BaseDateTimeType dateValue = (BaseDateTimeType) theObservation.getEffective();
-		return new ResourceIndexedSearchParamDate(new PartitionSettings(), "Patient", "date", dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValueAsString());
+		ResourceIndexedSearchParamDate param = new ResourceIndexedSearchParamDate("Patient", "date", dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValue(), dateValue.getValueAsString(), dateValue.getValueAsString());
+		calculateHashes(param);
+		return param;
 	}
 
 	private ResourceIndexedSearchParamToken extractCodeTokenParam(Observation theObservation) {
 		Coding coding = theObservation.getCode().getCodingFirstRep();
-		return new ResourceIndexedSearchParamToken(new PartitionSettings(), "Observation", "code", coding.getSystem(), coding.getCode());
+		ResourceIndexedSearchParamToken param = new ResourceIndexedSearchParamToken("Observation", "code", coding.getSystem(), coding.getCode());
+		calculateHashes(param);
+		return param;
 	}
 
 	private ResourceIndexedSearchParamUri extractSourceUriParam(Observation theObservation) {
 		String source = theObservation.getMeta().getSource();
-		return new ResourceIndexedSearchParamUri(new PartitionSettings(), "Observation", "_source", source);
+		ResourceIndexedSearchParamUri param = new ResourceIndexedSearchParamUri("Observation", "_source", source);
+		calculateHashes(param);
+		return param;
+	}
+
+	private void calculateHashes(BaseResourceIndex... theParams) {
+		Arrays.stream(theParams).forEach(param -> param.calculateHashes(new ResourceIndexHasher(new PartitionSettings(), new StorageSettings())));
 	}
 
 	@Configuration

@@ -19,8 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -38,8 +37,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
-
-import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
 
 @Entity
 @Table(
@@ -74,9 +71,6 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 	private String myIndexString;
 
 	@Transient
-	private transient PartitionSettings myPartitionSettings;
-
-	@Transient
 	private IIdType mySearchParameterId;
 
 	/**
@@ -86,12 +80,9 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 		super();
 	}
 
-	public ResourceIndexedComboTokenNonUnique(
-			PartitionSettings thePartitionSettings, ResourceTable theEntity, String theQueryString) {
-		myPartitionSettings = thePartitionSettings;
+	public ResourceIndexedComboTokenNonUnique(ResourceTable theEntity, String theQueryString) {
 		myResource = theEntity;
 		myIndexString = theQueryString;
-		calculateHashes();
 	}
 
 	@Override
@@ -123,7 +114,6 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 	@Override
 	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
 		ResourceIndexedComboTokenNonUnique source = (ResourceIndexedComboTokenNonUnique) theSource;
-		myPartitionSettings = source.myPartitionSettings;
 		myHashComplete = source.myHashComplete;
 		myIndexString = source.myIndexString;
 	}
@@ -144,28 +134,17 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 	}
 
 	@Override
-	public void calculateHashes() {
+	public void calculateHashes(ResourceIndexHasher theHasher) {
 		if (myHashComplete != null) {
 			return;
 		}
-
-		PartitionSettings partitionSettings = getPartitionSettings();
-		PartitionablePartitionId partitionId = getPartitionId();
 		String queryString = myIndexString;
-		setHashComplete(calculateHashComplete(partitionSettings, partitionId, queryString));
+		setHashComplete(theHasher.hash(getPartitionId(), false, queryString));
 	}
 
 	@Override
 	public int hashCode() {
 		return new HashCodeBuilder(17, 37).append(myIndexString).toHashCode();
-	}
-
-	public PartitionSettings getPartitionSettings() {
-		return myPartitionSettings;
-	}
-
-	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
-		myPartitionSettings = thePartitionSettings;
 	}
 
 	@Override
@@ -201,17 +180,6 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 				.append("hashComplete", myHashComplete)
 				.append("indexString", myIndexString)
 				.toString();
-	}
-
-	public static long calculateHashComplete(
-			PartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String queryString) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(thePartitionId);
-		return hash(partitionSettings, requestPartitionId, queryString);
-	}
-
-	public static long calculateHashComplete(
-			PartitionSettings partitionSettings, RequestPartitionId partitionId, String queryString) {
-		return hash(partitionSettings, partitionId, queryString);
 	}
 
 	/**

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import jakarta.persistence.MappedSuperclass;
 import org.apache.commons.lang3.ObjectUtils;
 
@@ -31,7 +32,7 @@ public abstract class BaseResourceIndex extends BasePartitionable implements Ser
 
 	public abstract void setId(Long theId);
 
-	public abstract void calculateHashes();
+	public abstract void calculateHashes(ResourceIndexHasher theHasher);
 
 	public abstract void clearHashes();
 

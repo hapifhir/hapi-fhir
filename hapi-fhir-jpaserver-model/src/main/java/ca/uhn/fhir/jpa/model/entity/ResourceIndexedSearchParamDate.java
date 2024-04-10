@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -59,7 +58,7 @@ import java.util.Date;
 @Table(
 		name = "HFJ_SPIDX_DATE",
 		indexes = {
-			// We previously had an index called IDX_SP_DATE - Dont reuse
+			// We previously had an index called IDX_SP_DATE - Don't reuse
 			@Index(
 					name = "IDX_SP_DATE_HASH_V2",
 					columnList = "HASH_IDENTITY,SP_VALUE_LOW,SP_VALUE_HIGH,RES_ID,PARTITION_ID"),
@@ -109,14 +108,6 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@Column(name = "SP_ID")
 	private Long myId;
 
-	/**
-	 * Composite of resourceType, paramName, and partition info if configured.
-	 * Combined with the various date fields for a query.
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
-
 	@ManyToOne(
 			optional = false,
 			fetch = FetchType.LAZY,
@@ -139,7 +130,6 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	 * Constructor
 	 */
 	public ResourceIndexedSearchParamDate(
-			PartitionSettings thePartitionSettings,
 			String theResourceType,
 			String theParamName,
 			Date theLow,
@@ -147,7 +137,6 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 			Date theHigh,
 			String theHighString,
 			String theOriginalValue) {
-		setPartitionSettings(thePartitionSettings);
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setValueLow(theLow);
@@ -162,7 +151,6 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		computeValueLowDateOrdinal(theLowString);
 		reComputeValueHighDate(theHigh, theHighString);
 		myOriginalValue = theOriginalValue;
-		calculateHashes();
 	}
 
 	private void computeValueHighDateOrdinal(String theHigh) {
@@ -196,7 +184,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 
 		theDateString = DateUtils.getCompletedDate(theDateString).getLeft();
 		theDateString = theDateString.replace("-", "");
-		return Integer.valueOf(theDateString);
+		return Integer.parseInt(theDateString);
 	}
 
 	private int generateHighOrdinalDateInteger(String theDateString) {
@@ -207,7 +195,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 
 		theDateString = DateUtils.getCompletedDate(theDateString).getRight();
 		theDateString = theDateString.replace("-", "");
-		return Integer.valueOf(theDateString);
+		return Integer.parseInt(theDateString);
 	}
 
 	private void computeValueLowDateOrdinal(String theLow) {
@@ -232,23 +220,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		myValueLow = source.myValueLow;
 		myValueHighDateOrdinal = source.myValueHighDateOrdinal;
 		myValueLowDateOrdinal = source.myValueLowDateOrdinal;
-		myHashIdentity = source.myHashIdentity;
-	}
-
-	@Override
-	public void clearHashes() {
-		myHashIdentity = null;
-	}
-
-	@Override
-	public void calculateHashes() {
-		if (myHashIdentity != null) {
-			return;
-		}
-
-		String resourceType = getResourceType();
-		String paramName = getParamName();
-		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
+		clearHashes();
 	}
 
 	@Override
@@ -266,16 +238,14 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
+		b.append(isMissing(), obj.isMissing());
+		b.append(getContainedOrd(), obj.getContainedOrd());
+		b.append(getPartitionId(), obj.getPartitionId());
 		b.append(getTimeFromDate(getValueHigh()), getTimeFromDate(obj.getValueHigh()));
 		b.append(getTimeFromDate(getValueLow()), getTimeFromDate(obj.getValueLow()));
 		b.append(getValueLowDateOrdinal(), obj.getValueLowDateOrdinal());
 		b.append(getValueHighDateOrdinal(), obj.getValueHighDateOrdinal());
-		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
-	}
-
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
 	}
 
 	@Override
@@ -318,6 +288,9 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getResourceType());
 		b.append(getParamName());
+		b.append(isMissing());
+		b.append(getContainedOrd());
+		b.append(getPartitionId());
 		b.append(getTimeFromDate(getValueHigh()));
 		b.append(getTimeFromDate(getValueLow()));
 		return b.toHashCode();
@@ -335,15 +308,16 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("partitionId", getPartitionId());
-		b.append("paramName", getParamName());
 		b.append("resourceId", getResourcePid());
+		b.append("resourceType", getResourceType());
+		b.append("paramName", getParamName());
+		b.append("missing", isMissing());
+		b.append("containedOrd", getContainedOrd());
+		b.append("partitionId", getPartitionId());
 		b.append("valueLow", new InstantDt(getValueLow()));
 		b.append("valueHigh", new InstantDt(getValueHigh()));
 		b.append("ordLow", myValueLowDateOrdinal);
 		b.append("ordHigh", myValueHighDateOrdinal);
-		b.append("hashIdentity", myHashIdentity);
-		b.append("missing", isMissing());
 		return b.build();
 	}
 

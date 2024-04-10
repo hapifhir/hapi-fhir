@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.module.config;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.InMemorySubscriptionMatcher;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import org.springframework.context.annotation.Bean;
@@ -39,5 +40,10 @@ public class TestSubscriptionConfig {
 		IResourceVersionSvc retval = mock(IResourceVersionSvc.class);
 		when(retval.getVersionMap(any(), any())).thenReturn(ResourceVersionMap.empty());
 		return retval;
+	}
+
+	@Bean
+	public ResourceIndexHasher resourceIndexHasher() {
+		return mock(ResourceIndexHasher.class);
 	}
 }

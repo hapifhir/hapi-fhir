@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.search.lastn.json;
 
-import ca.uhn.fhir.jpa.model.util.CodeSystemHash;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -58,13 +57,6 @@ public class CodeJson {
 
 	public void setCodeableConceptId(String theCodeableConceptId) {
 		myCodeableConceptId = theCodeableConceptId;
-	}
-
-	public void addCoding(String theCoding_system, String theCoding_code, String theCoding_display) {
-		myCoding_code.add(theCoding_code);
-		myCoding_system.add(theCoding_system);
-		myCoding_display.add(theCoding_display);
-		myCoding_code_system_hash.add(String.valueOf(CodeSystemHash.hashCodeSystem(theCoding_system, theCoding_code)));
 	}
 
 	public String getCodeableConceptId() {

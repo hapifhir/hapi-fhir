@@ -19,8 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.UriParam;
 import jakarta.persistence.Column;
@@ -84,11 +83,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	 */
 	@Column(name = "HASH_URI", nullable = true)
 	private Long myHashUri;
-	/**
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
 
 	@ManyToOne(
 			optional = false,
@@ -111,13 +105,10 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 	/**
 	 * Constructor
 	 */
-	public ResourceIndexedSearchParamUri(
-			PartitionSettings thePartitionSettings, String theResourceType, String theParamName, String theUri) {
-		setPartitionSettings(thePartitionSettings);
+	public ResourceIndexedSearchParamUri(String theResourceType, String theParamName, String theUri) {
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setUri(theUri);
-		calculateHashes();
 	}
 
 	@Override
@@ -126,26 +117,21 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		ResourceIndexedSearchParamUri source = (ResourceIndexedSearchParamUri) theSource;
 		myUri = source.myUri;
 		myHashUri = source.myHashUri;
-		myHashIdentity = source.myHashIdentity;
 	}
 
 	@Override
 	public void clearHashes() {
-		myHashIdentity = null;
+		super.clearHashes();
 		myHashUri = null;
 	}
 
 	@Override
-	public void calculateHashes() {
-		if (myHashIdentity != null || myHashUri != null) {
+	public void calculateHashes(ResourceIndexHasher theHasher) {
+		super.calculateHashes(theHasher);
+		if (isHashPopulated(myHashUri)) {
 			return;
 		}
-
-		String resourceType = getResourceType();
-		String paramName = getParamName();
-		String uri = getUri();
-		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
-		setHashUri(calculateHashUri(getPartitionSettings(), getPartitionId(), resourceType, paramName, uri));
+		myHashUri = theHasher.hash(getPartitionId(), isContained(), getResourceType(), getParamName(), getUri());
 	}
 
 	@Override
@@ -163,18 +149,11 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
+		b.append(isMissing(), obj.isMissing());
+		b.append(getContainedOrd(), obj.getContainedOrd());
+		b.append(getPartitionId(), obj.getPartitionId());
 		b.append(getUri(), obj.getUri());
-		b.append(getHashUri(), obj.getHashUri());
-		b.append(getHashIdentity(), obj.getHashIdentity());
 		return b.isEquals();
-	}
-
-	private Long getHashIdentity() {
-		return myHashIdentity;
-	}
-
-	private void setHashIdentity(long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
 	}
 
 	public Long getHashUri() {
@@ -209,9 +188,11 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getResourceType());
 		b.append(getParamName());
+		b.append(isMissing());
+		b.append(getContainedOrd());
+		b.append(getPartitionId());
 		b.append(getUri());
 		b.append(getHashUri());
-		b.append(getHashIdentity());
 		return b.toHashCode();
 	}
 
@@ -225,7 +206,11 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		ToStringBuilder b = new ToStringBuilder(this);
 		b.append("id", getId());
 		b.append("resourceId", getResourcePid());
+		b.append("resourceType", getResourceType());
 		b.append("paramName", getParamName());
+		b.append("missing", isMissing());
+		b.append("containedOrd", getContainedOrd());
+		b.append("partitionId", getPartitionId());
 		b.append("uri", myUri);
 		b.append("hashUri", myHashUri);
 		return b.toString();
@@ -238,25 +223,6 @@ public class ResourceIndexedSearchParamUri extends BaseResourceIndexedSearchPara
 		}
 		UriParam uri = (UriParam) theParam;
 		return defaultString(getUri()).equalsIgnoreCase(uri.getValueNotNull());
-	}
-
-	public static long calculateHashUri(
-			PartitionSettings thePartitionSettings,
-			PartitionablePartitionId theRequestPartitionId,
-			String theResourceType,
-			String theParamName,
-			String theUri) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashUri(thePartitionSettings, requestPartitionId, theResourceType, theParamName, theUri);
-	}
-
-	public static long calculateHashUri(
-			PartitionSettings thePartitionSettings,
-			RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			String theParamName,
-			String theUri) {
-		return hash(thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, theUri);
 	}
 
 	@Override

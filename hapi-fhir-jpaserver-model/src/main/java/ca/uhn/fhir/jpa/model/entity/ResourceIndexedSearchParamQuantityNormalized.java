@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.QuantityParam;
@@ -37,6 +36,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.fhir.ucum.Pair;
@@ -48,6 +48,11 @@ import java.util.Objects;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
+/**
+ * Support UCUM service
+ * @since 5.3.0
+ *
+ */
 // @formatter:off
 @Embeddable
 @Entity
@@ -66,11 +71,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 					columnList =
 							"RES_ID,HASH_IDENTITY,HASH_IDENTITY_SYS_UNITS,HASH_IDENTITY_AND_UNITS,SP_VALUE,PARTITION_ID")
 		})
-/**
- * Support UCUM service
- * @since 5.3.0
- *
- */
 public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIndexedSearchParamQuantity {
 
 	private static final long serialVersionUID = 1L;
@@ -99,37 +99,23 @@ public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIn
 			nullable = false)
 	private ResourceTable myResource;
 
-	public ResourceIndexedSearchParamQuantityNormalized() {
-		super();
-	}
+	public ResourceIndexedSearchParamQuantityNormalized() {}
 
 	public ResourceIndexedSearchParamQuantityNormalized(
-			PartitionSettings thePartitionSettings,
-			String theResourceType,
-			String theParamName,
-			double theValue,
-			String theSystem,
-			String theUnits) {
-		this();
-		setPartitionSettings(thePartitionSettings);
+			String theResourceType, String theParamName, double theValue, String theSystem, String theUnits) {
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setSystem(theSystem);
 		setValue(theValue);
 		setUnits(theUnits);
-		calculateHashes();
 	}
 
 	@Override
 	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
 		super.copyMutableValuesFrom(theSource);
 		ResourceIndexedSearchParamQuantityNormalized source = (ResourceIndexedSearchParamQuantityNormalized) theSource;
-		mySystem = source.mySystem;
-		myUnits = source.myUnits;
+		// 3. copy other fields that are not part of any hash
 		myValue = source.myValue;
-		setHashIdentity(source.getHashIdentity());
-		setHashIdentityAndUnits(source.getHashIdentityAndUnits());
-		setHashIdentitySystemAndUnits(source.getHashIdentitySystemAndUnits());
 	}
 
 	// - myValue
@@ -166,13 +152,15 @@ public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIn
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("paramName", getParamName());
 		b.append("resourceId", getResourcePid());
+		b.append("resourceType", getResourceType());
+		b.append("paramName", getParamName());
+		b.append("missing", isMissing());
+		b.append("containedOrd", getContainedOrd());
+		b.append("partitionId", getPartitionId());
 		b.append("system", getSystem());
 		b.append("units", getUnits());
 		b.append("value", getValue());
-		b.append("missing", isMissing());
-		b.append("hashIdentitySystemAndUnits", getHashIdentitySystemAndUnits());
 		return b.build();
 	}
 
@@ -191,12 +179,27 @@ public class ResourceIndexedSearchParamQuantityNormalized extends BaseResourceIn
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
-		b.append(getHashIdentity(), obj.getHashIdentity());
-		b.append(getHashIdentityAndUnits(), obj.getHashIdentityAndUnits());
-		b.append(getHashIdentitySystemAndUnits(), obj.getHashIdentitySystemAndUnits());
 		b.append(isMissing(), obj.isMissing());
+		b.append(getContainedOrd(), obj.getContainedOrd());
+		b.append(getPartitionId(), obj.getPartitionId());
+		b.append(getSystem(), obj.getSystem());
+		b.append(getUnits(), obj.getUnits());
 		b.append(getValue(), obj.getValue());
 		return b.isEquals();
+	}
+
+	@Override
+	public int hashCode() {
+		HashCodeBuilder b = new HashCodeBuilder();
+		b.append(getResourceType());
+		b.append(getParamName());
+		b.append(isMissing());
+		b.append(getContainedOrd());
+		b.append(getPartitionId());
+		b.append(getSystem());
+		b.append(getUnits());
+		b.append(getValue());
+		return b.toHashCode();
 	}
 
 	@Override

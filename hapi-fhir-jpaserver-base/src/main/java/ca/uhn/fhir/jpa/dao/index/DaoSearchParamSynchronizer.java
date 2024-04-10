@@ -21,14 +21,14 @@ package ca.uhn.fhir.jpa.dao.index;
 
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -40,10 +40,12 @@ import java.util.Set;
 
 @Service
 public class DaoSearchParamSynchronizer {
-	private static final Logger ourLog = LoggerFactory.getLogger(DaoSearchParamSynchronizer.class);
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
+
+	@Autowired
+	private ResourceIndexHasher myResourceIndexHasher;
 
 	public AddRemoveCount synchronizeSearchParamsToDatabase(
 			ResourceIndexedSearchParams theParams,
@@ -73,6 +75,11 @@ public class DaoSearchParamSynchronizer {
 		myEntityManager = theEntityManager;
 	}
 
+	@VisibleForTesting
+	public void setResourceIndexHasher(ResourceIndexHasher theHasher) {
+		myResourceIndexHasher = theHasher;
+	}
+
 	private <T extends BaseResourceIndex> void synchronize(
 			ResourceTable theEntity,
 			AddRemoveCount theAddRemoveCount,
@@ -81,7 +88,7 @@ public class DaoSearchParamSynchronizer {
 		Collection<T> newParams = theNewParams;
 		for (T next : newParams) {
 			next.setPartitionId(theEntity.getPartitionId());
-			next.calculateHashes();
+			next.calculateHashes(myResourceIndexHasher);
 		}
 
 		/*
@@ -100,6 +107,7 @@ public class DaoSearchParamSynchronizer {
 		Set<T> existingParamsAsSet = new HashSet<>(theExistingParams.size());
 		for (Iterator<T> iterator = theExistingParams.iterator(); iterator.hasNext(); ) {
 			T next = iterator.next();
+			next.calculateHashes(myResourceIndexHasher); // calculate hashes if they are missing for any reason
 			if (!existingParamsAsSet.add(next)) {
 				iterator.remove();
 				myEntityManager.remove(next);

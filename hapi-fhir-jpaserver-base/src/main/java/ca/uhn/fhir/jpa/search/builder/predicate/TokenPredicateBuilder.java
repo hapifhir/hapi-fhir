@@ -33,7 +33,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
@@ -246,8 +245,7 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			 * param name) but not the actual provided token value.
 			 */
 
-			long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-					getPartitionSettings(), theRequestPartitionId, theResourceName, paramName);
+			long hashIdentity = getResourceIndexHasher().hash(theRequestPartitionId, theResourceName, paramName);
 			Condition hashIdentityPredicate =
 					BinaryCondition.equalTo(getColumnHashIdentity(), generatePlaceholder(hashIdentity));
 
@@ -391,29 +389,21 @@ public class TokenPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			long hash;
 			DbColumn column;
 			if (nextToken.getSystem() == null) {
-				hash = ResourceIndexedSearchParamToken.calculateHashValue(
-						getPartitionSettings(),
-						getRequestPartitionId(),
-						theResourceType,
-						theSearchParamName,
-						nextToken.getCode());
+				hash = getResourceIndexHasher()
+						.hash(getRequestPartitionId(), theResourceType, theSearchParamName, nextToken.getCode());
 				column = myColumnHashValue;
 			} else if (isBlank(nextToken.getCode())) {
-				hash = ResourceIndexedSearchParamToken.calculateHashSystem(
-						getPartitionSettings(),
-						getRequestPartitionId(),
-						theResourceType,
-						theSearchParamName,
-						nextToken.getSystem());
+				hash = getResourceIndexHasher()
+						.hash(getRequestPartitionId(), theResourceType, theSearchParamName, nextToken.getSystem());
 				column = myColumnHashSystem;
 			} else {
-				hash = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
-						getPartitionSettings(),
-						getRequestPartitionId(),
-						theResourceType,
-						theSearchParamName,
-						nextToken.getSystem(),
-						nextToken.getCode());
+				hash = getResourceIndexHasher()
+						.hash(
+								getRequestPartitionId(),
+								theResourceType,
+								theSearchParamName,
+								nextToken.getSystem(),
+								nextToken.getCode());
 				column = myColumnHashSystemAndValue;
 			}
 			hashes[i] = hash;

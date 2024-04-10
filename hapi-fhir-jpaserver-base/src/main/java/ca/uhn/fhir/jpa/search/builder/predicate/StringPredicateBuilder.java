@@ -172,8 +172,8 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	@Nonnull
 	public Condition createPredicateExact(String theResourceType, String theParamName, String theTheValueExact) {
-		long hash = ResourceIndexedSearchParamString.calculateHashExact(
-				getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName, theTheValueExact);
+		long hash =
+				getResourceIndexHasher().hash(getRequestPartitionId(), theResourceType, theParamName, theTheValueExact);
 		String placeholderValue = generatePlaceholder(hash);
 		return BinaryCondition.equalTo(myColumnHashExact, placeholderValue);
 	}
@@ -181,13 +181,8 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	@Nonnull
 	public Condition createPredicateNormalLike(
 			String theResourceType, String theParamName, String theNormalizedString, String theLikeExpression) {
-		Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(
-				getPartitionSettings(),
-				getRequestPartitionId(),
-				getStorageSettings(),
-				theResourceType,
-				theParamName,
-				theNormalizedString);
+		Long hash = getResourceIndexHasher()
+				.hashNormalized(getRequestPartitionId(), theResourceType, theParamName, theNormalizedString);
 		Condition hashPredicate = BinaryCondition.equalTo(myColumnHashNormPrefix, generatePlaceholder(hash));
 		Condition valuePredicate =
 				BinaryCondition.like(myColumnValueNormalized, generatePlaceholder(theLikeExpression));
@@ -196,13 +191,8 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
 	@Nonnull
 	public Condition createPredicateNormal(String theResourceType, String theParamName, String theNormalizedString) {
-		Long hash = ResourceIndexedSearchParamString.calculateHashNormalized(
-				getPartitionSettings(),
-				getRequestPartitionId(),
-				getStorageSettings(),
-				theResourceType,
-				theParamName,
-				theNormalizedString);
+		Long hash = getResourceIndexHasher()
+				.hashNormalized(getRequestPartitionId(), theResourceType, theParamName, theNormalizedString);
 		Condition hashPredicate = BinaryCondition.equalTo(myColumnHashNormPrefix, generatePlaceholder(hash));
 		Condition valuePredicate =
 				BinaryCondition.equalTo(myColumnValueNormalized, generatePlaceholder(theNormalizedString));
@@ -244,8 +234,7 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 	@Nonnull
 	public Condition createPredicateLikeExpressionOnly(
 			String theResourceType, String theParamName, String theLikeExpression, boolean theInverse) {
-		long hashIdentity = ResourceIndexedSearchParamString.calculateHashIdentity(
-				getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName);
+		long hashIdentity = getResourceIndexHasher().hash(getRequestPartitionId(), theResourceType, theParamName);
 		BinaryCondition identityPredicate =
 				BinaryCondition.equalTo(myColumnHashIdentity, generatePlaceholder(hashIdentity));
 		BinaryCondition likePredicate;

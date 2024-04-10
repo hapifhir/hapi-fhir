@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
 import com.google.common.annotations.VisibleForTesting;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,9 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private ResourceIndexHasher myResourceIndexHasher;
 
 	@VisibleForTesting
 	public void setStorageSettings(JpaStorageSettings theStorageSettings) {
@@ -86,10 +90,11 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 		}
 
 		// Try to reuse any entities we can
-		while (toDelete.size() > 0 && toAdd.size() > 0) {
+		while (!toDelete.isEmpty() && !toAdd.isEmpty()) {
 			SearchParamPresentEntity nextToDelete = toDelete.remove(toDelete.size() - 1);
 			SearchParamPresentEntity nextToAdd = toAdd.remove(toAdd.size() - 1);
-			nextToDelete.updateValues(nextToAdd);
+			nextToDelete.copyMutableValuesFrom(nextToAdd);
+			nextToAdd.calculateHashes(myResourceIndexHasher);
 			mySearchParamPresentDao.save(nextToDelete);
 			retVal.addToAddCount(1);
 			retVal.addToRemoveCount(1);

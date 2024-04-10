@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -114,6 +115,9 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 
 	@Autowired
 	private IRequestPartitionHelperSvc myRequestPartitionSvc;
+
+	@Autowired
+	private ResourceIndexHasher myResourceIndexHasher;
 
 	public void setEntityManagerForUnitTest(EntityManager theEntityManager) {
 		myEntityManager = theEntityManager;
@@ -502,8 +506,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			Set<Long> theSysAndValuePredicates,
 			Set<Long> theValuePredicates) {
 		if (isNotBlank(theTokenParam.getValue()) && isNotBlank(theTokenParam.getSystem())) {
-			theMatchUrl.myHashSystemAndValue = ResourceIndexedSearchParamToken.calculateHashSystemAndValue(
-					myPartitionSettings,
+			theMatchUrl.myHashSystemAndValue = myResourceIndexHasher.hash(
 					theRequestPartitionId,
 					theMatchUrl.myResourceDefinition.getName(),
 					theMatchUrl.myMatchUrlSearchMap.keySet().iterator().next(),
@@ -511,8 +514,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 					theTokenParam.getValue());
 			theSysAndValuePredicates.add(theMatchUrl.myHashSystemAndValue);
 		} else if (isNotBlank(theTokenParam.getValue())) {
-			theMatchUrl.myHashValue = ResourceIndexedSearchParamToken.calculateHashValue(
-					myPartitionSettings,
+			theMatchUrl.myHashValue = myResourceIndexHasher.hash(
 					theRequestPartitionId,
 					theMatchUrl.myResourceDefinition.getName(),
 					theMatchUrl.myMatchUrlSearchMap.keySet().iterator().next(),

@@ -38,7 +38,6 @@ import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ISupportsUndeclaredExtensions;
 import ca.uhn.fhir.model.base.composite.BaseContainedDt;
 import ca.uhn.fhir.model.base.composite.BaseResourceReferenceDt;
-import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.DataFormatException;
 import com.google.common.collect.Lists;
@@ -77,7 +76,6 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.apache.commons.lang3.StringUtils.substring;
 
 public class FhirTerser {
 
@@ -1331,6 +1329,19 @@ public class FhirTerser {
 	}
 
 	/**
+	 * Returns the resources embedded in the provided resource.
+	 * @param theResource the resource to scan
+	 * @param theRecurse true if recursion should be applied when discovering embedded resources
+	 * @return the embedded resources object
+	 */
+	public EmbeddedResources getEmbeddedResources(IBaseResource theResource, boolean theRecurse) {
+		Collection<IBaseResource> resourceList = getAllEmbeddedResources(theResource, theRecurse);
+		EmbeddedResources embeddedResources = new EmbeddedResources();
+		resourceList.forEach(embeddedResources::addResource);
+		return embeddedResources;
+	}
+
+	/**
 	 * Returns all embedded resources that are found embedded within <code>theResource</code>.
 	 * An embedded resource is a resource that can be found as a direct child within a resource,
 	 * as opposed to being referenced by the resource.
@@ -1348,31 +1359,15 @@ public class FhirTerser {
 		Validate.notNull(theResource, "theResource must not be null");
 		ArrayList<IBaseResource> retVal = new ArrayList<>();
 
-		visit(theResource, new IModelVisitor2() {
-			@Override
-			public boolean acceptElement(
-					IBase theElement,
-					List<IBase> theContainingElementPath,
-					List<BaseRuntimeChildDefinition> theChildDefinitionPath,
-					List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
-				if (theElement == theResource) {
-					return true;
-				}
-				if (theElement instanceof IBaseResource) {
-					retVal.add((IBaseResource) theElement);
-					return theRecurse;
-				}
+		visit(theResource, (theElement, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath) -> {
+			if (theElement == theResource) {
 				return true;
 			}
-
-			@Override
-			public boolean acceptUndeclaredExtension(
-					IBaseExtension<?, ?> theNextExt,
-					List<IBase> theContainingElementPath,
-					List<BaseRuntimeChildDefinition> theChildDefinitionPath,
-					List<BaseRuntimeElementDefinition<?>> theElementDefinitionPath) {
-				return true;
+			if (theElement instanceof IBaseResource) {
+				retVal.add((IBaseResource) theElement);
+				return theRecurse;
 			}
+			return true;
 		});
 
 		return retVal;
@@ -1408,25 +1403,9 @@ public class FhirTerser {
 		});
 	}
 
-	private void containResourcesForEncoding(
+	private void containReferenceTargetsWithNoId(
 			ContainedResources theContained, IBaseResource theResource, boolean theModifyResource) {
-		List<IBaseReference> allReferences = getAllPopulatedChildElementsOfType(theResource, IBaseReference.class);
-		for (IBaseReference next : allReferences) {
-			IBaseResource resource = next.getResource();
-			if (resource == null && next.getReferenceElement().isLocal()) {
-				if (theContained.hasExistingIdToContainedResource()) {
-					IBaseResource potentialTarget = theContained
-							.getExistingIdToContainedResource()
-							.remove(next.getReferenceElement().getValue());
-					if (potentialTarget != null) {
-						theContained.addContained(next.getReferenceElement(), potentialTarget);
-						containResourcesForEncoding(theContained, potentialTarget, theModifyResource);
-					}
-				}
-			}
-		}
-
-		for (IBaseReference next : allReferences) {
+		for (IBaseReference next : getAllPopulatedChildElementsOfType(theResource, IBaseReference.class)) {
 			IBaseResource resource = next.getResource();
 			if (resource != null) {
 				if (resource.getIdElement().isEmpty() || resource.getIdElement().isLocal()) {
@@ -1438,11 +1417,6 @@ public class FhirTerser {
 					if (theModifyResource) {
 						getContainedResourceList(theResource).add(resource);
 						next.setReference(id.getValue());
-					}
-					if (resource.getIdElement().isLocal() && theContained.hasExistingIdToContainedResource()) {
-						theContained
-								.getExistingIdToContainedResource()
-								.remove(resource.getIdElement().getValue());
 					}
 				}
 			}
@@ -1492,7 +1466,7 @@ public class FhirTerser {
 		}
 
 		if (myContext.getParserOptions().isAutoContainReferenceTargetsWithNoId()) {
-			containResourcesForEncoding(contained, theResource, modifyResource);
+			containReferenceTargetsWithNoId(contained, theResource, modifyResource);
 		}
 
 		if (storeAndReuse) {
@@ -1760,129 +1734,104 @@ public class FhirTerser {
 		boolean consume(IIdType theCompartmentOwner);
 	}
 
-	public static class ContainedResources {
-		private long myNextContainedId = 1;
-
+	public static class EmbeddedResources {
 		private List<IBaseResource> myResourceList;
-		private IdentityHashMap<IBaseResource, IIdType> myResourceToIdMap;
-		private Map<String, IBaseResource> myExistingIdToContainedResourceMap;
+		private Map<IBaseResource, IIdType> myResourceToIdMap;
+		private Map<IIdType, IBaseResource> myIdToResourceMap;
 
-		public Map<String, IBaseResource> getExistingIdToContainedResource() {
-			if (myExistingIdToContainedResourceMap == null) {
-				myExistingIdToContainedResourceMap = new HashMap<>();
-			}
-			return myExistingIdToContainedResourceMap;
+		void addResource(IBaseResource theResource) {
+			addResource(theResource.getIdElement(), theResource);
 		}
 
-		public IIdType addContained(IBaseResource theResource) {
-			IIdType existing = getResourceToIdMap().get(theResource);
-			if (existing != null) {
-				return existing;
-			}
-
-			IIdType newId = theResource.getIdElement();
-			if (isBlank(newId.getValue())) {
-				newId.setValue("#" + myNextContainedId++);
-			} else {
-				// Avoid auto-assigned contained IDs colliding with pre-existing ones
-				String idPart = newId.getValue();
-				if (substring(idPart, 0, 1).equals("#")) {
-					idPart = idPart.substring(1);
-					if (StringUtils.isNumeric(idPart)) {
-						myNextContainedId = Long.parseLong(idPart) + 1;
-					}
-				}
-			}
-
-			getResourceToIdMap().put(theResource, newId);
+		void addResource(IIdType theId, IBaseResource theResource) {
 			getOrCreateResourceList().add(theResource);
-			return newId;
-		}
-
-		public void addContained(IIdType theId, IBaseResource theResource) {
-			if (!getResourceToIdMap().containsKey(theResource)) {
-				getResourceToIdMap().put(theResource, theId);
-				getOrCreateResourceList().add(theResource);
-			}
-		}
-
-		public List<IBaseResource> getContainedResources() {
-			if (getResourceToIdMap() == null) {
-				return Collections.emptyList();
-			}
-			return getOrCreateResourceList();
+			getOrCreateResourceToIdMap().put(theResource, theId);
+			getOrCreateIdToResourceMap().put(theId, theResource);
 		}
 
 		public IIdType getResourceId(IBaseResource theNext) {
-			if (getResourceToIdMap() == null) {
-				return null;
-			}
-			return getResourceToIdMap().get(theNext);
+			return getOrCreateResourceToIdMap().get(theNext);
 		}
 
-		private List<IBaseResource> getOrCreateResourceList() {
+		public IBaseResource getResource(IIdType theId) {
+			return getOrCreateIdToResourceMap().get(theId);
+		}
+
+		protected List<IBaseResource> getOrCreateResourceList() {
 			if (myResourceList == null) {
 				myResourceList = new ArrayList<>();
 			}
 			return myResourceList;
 		}
 
-		private IdentityHashMap<IBaseResource, IIdType> getResourceToIdMap() {
+		protected Map<IBaseResource, IIdType> getOrCreateResourceToIdMap() {
 			if (myResourceToIdMap == null) {
 				myResourceToIdMap = new IdentityHashMap<>();
 			}
 			return myResourceToIdMap;
 		}
 
+		protected Map<IIdType, IBaseResource> getOrCreateIdToResourceMap() {
+			if (myIdToResourceMap == null) {
+				myIdToResourceMap = new HashMap<>();
+			}
+			return myIdToResourceMap;
+		}
+
 		public boolean isEmpty() {
-			if (myResourceToIdMap == null) {
-				return true;
-			}
-			return myResourceToIdMap.isEmpty();
+			return myResourceList == null || myResourceList.isEmpty();
+		}
+	}
+
+	public static class ContainedResources extends EmbeddedResources {
+		private long myNextContainedId = 1;
+		private Map<IBaseResource, Short> myResourceToOrdMap;
+
+		@Override
+		protected void addResource(IIdType theId, IBaseResource theResource) {
+			super.addResource(theId, theResource);
+			short ordinal = Integer.valueOf(getOrCreateResourceList().size()).shortValue();
+			getOrCreateResourceToOrdMap().put(theResource, ordinal);
 		}
 
-		public boolean hasExistingIdToContainedResource() {
-			return myExistingIdToContainedResourceMap != null;
+		public IIdType addContained(IBaseResource theResource) {
+			IIdType id = assignIdIfNeeded(theResource);
+			addResource(id, theResource);
+			return id;
 		}
 
-		public void assignIdsToContainedResources() {
-
-			if (!getContainedResources().isEmpty()) {
-
-				/*
-				 * The idea with the code block below:
-				 *
-				 * We want to preserve any IDs that were user-assigned, so that if it's really
-				 * important to someone that their contained resource have the ID of #FOO
-				 * or #1 we will keep that.
-				 *
-				 * For any contained resources where no ID was assigned by the user, we
-				 * want to manually create an ID but make sure we don't reuse an existing ID.
-				 */
-
-				Set<String> ids = new HashSet<>();
-
-				// Gather any user assigned IDs
-				for (IBaseResource nextResource : getContainedResources()) {
-					if (getResourceToIdMap().get(nextResource) != null) {
-						ids.add(getResourceToIdMap().get(nextResource).getValue());
-					}
-				}
-
-				// Automatically assign IDs to the rest
-				for (IBaseResource nextResource : getContainedResources()) {
-
-					while (getResourceToIdMap().get(nextResource) == null) {
-						String nextCandidate = "#" + myNextContainedId;
-						myNextContainedId++;
-						if (!ids.add(nextCandidate)) {
-							continue;
-						}
-
-						getResourceToIdMap().put(nextResource, new IdDt(nextCandidate));
-					}
-				}
+		private IIdType assignIdIfNeeded(IBaseResource theResource) {
+			/*
+			 * We want to preserve any IDs that were user-assigned, so that if it's really
+			 * important to someone that their contained resource have the ID of #FOO
+			 * or #1 we will keep that.
+			 * For any contained resources where no ID was assigned by the user, we
+			 * want to manually create an ID but make sure we don't reuse an existing ID.
+			 */
+			IIdType newId = theResource.getIdElement();
+			while (newId.isEmpty() || getOrCreateIdToResourceMap().containsKey(newId)) {
+				newId.setValue("#" + myNextContainedId++);
 			}
+
+			return newId;
+		}
+
+		public List<IBaseResource> getContainedResources() {
+			if (getOrCreateResourceToIdMap() == null) {
+				return Collections.emptyList();
+			}
+			return getOrCreateResourceList();
+		}
+
+		private Map<IBaseResource, Short> getOrCreateResourceToOrdMap() {
+			if (myResourceToOrdMap == null) {
+				myResourceToOrdMap = new IdentityHashMap<>();
+			}
+			return myResourceToOrdMap;
+		}
+
+		public Short getContainedResourceOrd(IBaseResource theResource) {
+			return getOrCreateResourceToOrdMap().get(theResource);
 		}
 	}
 }

@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.eclipse.jetty.util.StringUtil;
 import org.hl7.fhir.r4.model.Identifier;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class FhirSystemDaoR4SearchTest extends BaseJpaR4SystemTest {
+	private final ResourceIndexHasher hasher = new ResourceIndexHasher(new PartitionSettings(), new StorageSettings());
 
 	@Test
 	public void testSearchParameter_WithIdentifierValueUnderMaxLength_ShouldSuccess() {
@@ -34,9 +37,9 @@ public class FhirSystemDaoR4SearchTest extends BaseJpaR4SystemTest {
 
 		// verify hash
 		final long tokensHashSystem = resultSearchTokens.getHashSystem();
-		final long expectedHashSystem = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierSystem);
+		final long expectedHashSystem = hasher.hash(RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierSystem);
 		final long tokensHashValue = resultSearchTokens.getHashValue();
-		final long expectedHashValue = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierValue);
+		final long expectedHashValue = hasher.hash(RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierValue);
 
 		assertEquals(expectedHashSystem, tokensHashSystem);
 		assertEquals(expectedHashValue, tokensHashValue);
@@ -65,9 +68,9 @@ public class FhirSystemDaoR4SearchTest extends BaseJpaR4SystemTest {
 
 		// verify hash
 		final long tokensHashSystem = resultSearchTokens.getHashSystem();
-		final long expectedHashSystem = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierSystem);
+		final long expectedHashSystem = hasher.hash(RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierSystem);
 		final long tokensHashValue = resultSearchTokens.getHashValue();
-		final long expectedHashValue = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierValue);
+		final long expectedHashValue = hasher.hash(RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierValue);
 
 		assertEquals(expectedHashSystem, tokensHashSystem);
 		assertEquals(expectedHashValue, tokensHashValue);

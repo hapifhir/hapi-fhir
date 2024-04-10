@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.util.VersionEnum;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -15,6 +15,7 @@ import java.util.function.Supplier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CalculateHashesTest extends BaseTest {
+	private final ResourceIndexHasher hasher = new ResourceIndexHasher(new PartitionSettings(), new StorageSettings());
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
@@ -28,10 +29,10 @@ public class CalculateHashesTest extends BaseTest {
 		CalculateHashesTask task = new CalculateHashesTask(VersionEnum.V3_5_0, "1");
 		task.setTableName("HFJ_SPIDX_TOKEN");
 		task.setColumnName("HASH_IDENTITY");
-		task.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(), RequestPartitionId.defaultPartition(), t.getResourceType(), t.getString("SP_NAME")));
-		task.addCalculator("HASH_SYS", t -> ResourceIndexedSearchParamToken.calculateHashSystem(new PartitionSettings(), RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM")));
-		task.addCalculator("HASH_SYS_AND_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM"), t.getString("SP_VALUE")));
-		task.addCalculator("HASH_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_VALUE")));
+		task.addCalculator("HASH_IDENTITY", t -> hasher.hash(RequestPartitionId.defaultPartition(), t.getResourceType(), t.getString("SP_NAME")));
+		task.addCalculator("HASH_SYS", t -> hasher.hash(RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM")));
+		task.addCalculator("HASH_SYS_AND_VALUE", t -> hasher.hash(RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM"), t.getString("SP_VALUE")));
+		task.addCalculator("HASH_VALUE", t -> hasher.hash(RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_VALUE")));
 		task.setBatchSize(1);
 		getMigrator().addTask(task);
 
@@ -43,16 +44,16 @@ public class CalculateHashesTest extends BaseTest {
 			JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
 
 			map = jdbcTemplate.queryForMap("select * from HFJ_SPIDX_TOKEN where SP_ID = 1");
-			assertEquals(7001889285610424179L, map.get("HASH_IDENTITY"));
-			assertEquals(2686400398917843456L, map.get("HASH_SYS"));
-			assertEquals(-3943098850992523411L, map.get("HASH_SYS_AND_VALUE"));
-			assertEquals(845040519142030272L, map.get("HASH_VALUE"));
+			assertEquals(792023395537367244L, map.get("HASH_IDENTITY"));
+			assertEquals(3234227391249831252L, map.get("HASH_SYS"));
+			assertEquals(9195454949267654659L, map.get("HASH_SYS_AND_VALUE"));
+			assertEquals(4905282360287126028L, map.get("HASH_VALUE"));
 
 			map = jdbcTemplate.queryForMap("select * from HFJ_SPIDX_TOKEN where SP_ID = 2");
-			assertEquals(7001889285610424179L, map.get("HASH_IDENTITY"));
-			assertEquals(2686400398917843456L, map.get("HASH_SYS"));
-			assertEquals(-6583685191951870327L, map.get("HASH_SYS_AND_VALUE"));
-			assertEquals(8271382783311609619L, map.get("HASH_VALUE"));
+			assertEquals(792023395537367244L, map.get("HASH_IDENTITY"));
+			assertEquals(3234227391249831252L, map.get("HASH_SYS"));
+			assertEquals(9081870298460263153L, map.get("HASH_SYS_AND_VALUE"));
+			assertEquals(8599736225628469090L, map.get("HASH_VALUE"));
 
 			return null;
 		});
@@ -78,10 +79,10 @@ public class CalculateHashesTest extends BaseTest {
 		CalculateHashesTask task = new CalculateHashesTask(VersionEnum.V3_5_0, "1");
 		task.setTableName("HFJ_SPIDX_TOKEN");
 		task.setColumnName("HASH_IDENTITY");
-		task.addCalculator("HASH_IDENTITY", t -> BaseResourceIndexedSearchParam.calculateHashIdentity(new PartitionSettings(), RequestPartitionId.defaultPartition(), t.getResourceType(), t.getString("SP_NAME")));
-		task.addCalculator("HASH_SYS", t -> ResourceIndexedSearchParamToken.calculateHashSystem(new PartitionSettings(), RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM")));
-		task.addCalculator("HASH_SYS_AND_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashSystemAndValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM"), t.getString("SP_VALUE")));
-		task.addCalculator("HASH_VALUE", t -> ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_VALUE")));
+		task.addCalculator("HASH_IDENTITY", t -> hasher.hash(RequestPartitionId.defaultPartition(), t.getResourceType(), t.getString("SP_NAME")));
+		task.addCalculator("HASH_SYS", t -> hasher.hash(RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM")));
+		task.addCalculator("HASH_SYS_AND_VALUE", t -> hasher.hash(RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_SYSTEM"), t.getString("SP_VALUE")));
+		task.addCalculator("HASH_VALUE", t -> hasher.hash(RequestPartitionId.defaultPartition(), t.getResourceType(), t.getParamName(), t.getString("SP_VALUE")));
 		task.setBatchSize(3);
 		getMigrator().addTask(task);
 

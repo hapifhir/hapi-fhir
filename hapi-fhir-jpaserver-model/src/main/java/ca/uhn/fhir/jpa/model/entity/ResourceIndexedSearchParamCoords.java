@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
@@ -69,11 +68,6 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_COORDS")
 	@Column(name = "SP_ID")
 	private Long myId;
-	/**
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
 
 	@ManyToOne(
 			optional = false,
@@ -89,33 +83,11 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	public ResourceIndexedSearchParamCoords() {}
 
 	public ResourceIndexedSearchParamCoords(
-			PartitionSettings thePartitionSettings,
-			String theResourceType,
-			String theParamName,
-			double theLatitude,
-			double theLongitude) {
-		setPartitionSettings(thePartitionSettings);
+			String theResourceType, String theParamName, double theLatitude, double theLongitude) {
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setLatitude(theLatitude);
 		setLongitude(theLongitude);
-		calculateHashes();
-	}
-
-	@Override
-	public void clearHashes() {
-		myHashIdentity = null;
-	}
-
-	@Override
-	public void calculateHashes() {
-		if (myHashIdentity != null) {
-			return;
-		}
-
-		String resourceType = getResourceType();
-		String paramName = getParamName();
-		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
 	}
 
 	@Override
@@ -133,23 +105,21 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
+		b.append(isMissing(), obj.isMissing());
+		b.append(getContainedOrd(), obj.getContainedOrd());
+		b.append(getPartitionId(), obj.getPartitionId());
 		b.append(getLatitude(), obj.getLatitude());
 		b.append(getLongitude(), obj.getLongitude());
-		b.append(isMissing(), obj.isMissing());
 		return b.isEquals();
 	}
 
 	@Override
 	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
 		super.copyMutableValuesFrom(theSource);
+
 		ResourceIndexedSearchParamCoords source = (ResourceIndexedSearchParamCoords) theSource;
 		myLatitude = source.getLatitude();
 		myLongitude = source.getLongitude();
-		myHashIdentity = source.myHashIdentity;
-	}
-
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
 	}
 
 	@Override
@@ -183,8 +153,11 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	@Override
 	public int hashCode() {
 		HashCodeBuilder b = new HashCodeBuilder();
-		b.append(getParamName());
 		b.append(getResourceType());
+		b.append(getParamName());
+		b.append(isMissing());
+		b.append(getContainedOrd());
+		b.append(getPartitionId());
 		b.append(getLatitude());
 		b.append(getLongitude());
 		return b.toHashCode();
@@ -198,14 +171,14 @@ public class ResourceIndexedSearchParamCoords extends BaseResourceIndexedSearchP
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
-		b.append("paramName", getParamName());
 		b.append("resourceId", getResourcePid());
-		if (isMissing()) {
-			b.append("missing", isMissing());
-		} else {
-			b.append("lat", getLatitude());
-			b.append("lon", getLongitude());
-		}
+		b.append("resourceType", getResourceType());
+		b.append("paramName", getParamName());
+		b.append("missing", isMissing());
+		b.append("containedOrd", getContainedOrd());
+		b.append("partitionId", getPartitionId());
+		b.append("lat", getLatitude());
+		b.append("lon", getLongitude());
 		return b.build();
 	}
 

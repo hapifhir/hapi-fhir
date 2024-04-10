@@ -41,11 +41,11 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 		ResourceIndexedSearchParamComposite composite = new ResourceIndexedSearchParamComposite("component-code-value-concept", "Observation.component");
 
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> codeParams = new ISearchParamExtractor.SearchParamSet<>();
-		codeParams.add(new ResourceIndexedSearchParamToken(new PartitionSettings(), "Observation", "component-code", "https://example.com", "8480-6"));
+		codeParams.add(new ResourceIndexedSearchParamToken("Observation", "component-code", "https://example.com", "8480-6"));
 		composite.addComponentIndexedSearchParams("component-code", RestSearchParameterTypeEnum.TOKEN, codeParams);
 
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> valueParams = new ISearchParamExtractor.SearchParamSet<>();
-		valueParams.add(new ResourceIndexedSearchParamToken(new PartitionSettings(), "Observation", "component-value-concept", "https://example.com", "some_other_value"));
+		valueParams.add(new ResourceIndexedSearchParamToken("Observation", "component-value-concept", "https://example.com", "some_other_value"));
 		composite.addComponentIndexedSearchParams("component-value-concept", RestSearchParameterTypeEnum.TOKEN, valueParams);
 
 		ResourceIndexedSearchParams extractedParams = ResourceIndexedSearchParams.withSets();
@@ -66,11 +66,11 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 	void testExtract_withParamMarkedAsMissing_willBeIgnored() {
 		//setup
 		ResourceIndexedSearchParams searchParams = ResourceIndexedSearchParams.withSets();
-		ResourceIndexedSearchParamDate searchParamDate = new ResourceIndexedSearchParamDate(new PartitionSettings(), "SearchParameter", "Date", null, null, null, null, null);
+		ResourceIndexedSearchParamDate searchParamDate = new ResourceIndexedSearchParamDate("SearchParameter", "Date", null, null, null, null, null);
 		searchParamDate.setMissing(true);
 		searchParams.myDateParams.add(searchParamDate);
 
-		ResourceIndexedSearchParamQuantity searchParamQuantity = new ResourceIndexedSearchParamQuantity(new PartitionSettings(), "SearchParameter", "Quantity", null, null, null);
+		ResourceIndexedSearchParamQuantity searchParamQuantity = new ResourceIndexedSearchParamQuantity("SearchParameter", "Quantity", null, null, null);
 		searchParamQuantity.setMissing(true);
 		searchParams.myQuantityParams.add(searchParamQuantity);
 

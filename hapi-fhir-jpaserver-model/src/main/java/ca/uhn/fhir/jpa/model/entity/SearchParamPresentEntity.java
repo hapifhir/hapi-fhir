@@ -19,9 +19,19 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import jakarta.persistence.*;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -68,9 +78,6 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 	@Column(name = "HASH_PRESENCE")
 	private Long myHashPresence;
 
-	@Transient
-	private transient PartitionSettings myPartitionSettings;
-
 	/**
 	 * Constructor
 	 */
@@ -86,25 +93,23 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 		myPresent = thePresent;
 	}
 
-	@SuppressWarnings("unused")
-	@PrePersist
-	public void calculateHashes() {
+	private void clearHashes() {
+		myHashPresence = null;
+	}
+
+	public void calculateHashes(ResourceIndexHasher theHasher) {
 		if (myHashPresence == null && getParamName() != null) {
 			String resourceType = getResource().getResourceType();
 			String paramName = getParamName();
 			boolean present = myPresent;
-			setHashPresence(
-					calculateHashPresence(getPartitionSettings(), getPartitionId(), resourceType, paramName, present));
+			myHashPresence =
+					theHasher.hash(getPartitionId(), false, resourceType, paramName, Boolean.toString(present));
 		}
 	}
 
 	public Long getHashPresence() {
 		Validate.notNull(myHashPresence);
 		return myHashPresence;
-	}
-
-	public void setHashPresence(Long theHashPresence) {
-		myHashPresence = theHashPresence;
 	}
 
 	public String getParamName() {
@@ -128,7 +133,10 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 	}
 
 	public void setPresent(boolean thePresent) {
-		myPresent = thePresent;
+		if (myPresent != thePresent) {
+			myPresent = thePresent;
+			clearHashes();
+		}
 	}
 
 	@Override
@@ -162,45 +170,14 @@ public class SearchParamPresentEntity extends BasePartitionable implements Seria
 		return b.build();
 	}
 
-	public PartitionSettings getPartitionSettings() {
-		return myPartitionSettings;
-	}
-
-	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
-		myPartitionSettings = thePartitionSettings;
-	}
-
 	/**
 	 * Copy all mutable values from the given source
 	 */
-	public void updateValues(SearchParamPresentEntity theSource) {
+	public void copyMutableValuesFrom(SearchParamPresentEntity theSource) {
 		super.setPartitionId(theSource.getPartitionId());
 		setResource(theSource.getResource());
-		setPartitionSettings(theSource.getPartitionSettings());
-		setHashPresence(theSource.getHashPresence());
 		setParamName(theSource.getParamName());
 		setPresent(theSource.isPresent());
-	}
-
-	public static long calculateHashPresence(
-			PartitionSettings thePartitionSettings,
-			PartitionablePartitionId theRequestPartitionId,
-			String theResourceType,
-			String theParamName,
-			Boolean thePresent) {
-		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(theRequestPartitionId);
-		return calculateHashPresence(
-				thePartitionSettings, requestPartitionId, theResourceType, theParamName, thePresent);
-	}
-
-	public static long calculateHashPresence(
-			PartitionSettings thePartitionSettings,
-			RequestPartitionId theRequestPartitionId,
-			String theResourceType,
-			String theParamName,
-			Boolean thePresent) {
-		String string = thePresent != null ? Boolean.toString(thePresent) : Boolean.toString(false);
-		return BaseResourceIndexedSearchParam.hash(
-				thePartitionSettings, theRequestPartitionId, theResourceType, theParamName, string);
+		clearHashes();
 	}
 }

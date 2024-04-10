@@ -34,5 +34,5 @@ public interface IResourceIndexedSearchParamDateDao
 	void deleteByResourceId(@Param("resid") Long theResourcePid);
 
 	@Query("SELECT t FROM ResourceIndexedSearchParamDate t WHERE t.myResourcePid = :resId")
-	List<ResourceIndexedSearchParamDate> findAllForResourceId(@Param("resId") Long thePatientId);
+	List<ResourceIndexedSearchParamDate> findAllForResourceId(@Param("resId") Long theResourcePid);
 }

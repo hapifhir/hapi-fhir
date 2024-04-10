@@ -121,7 +121,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 			assertEquals("identifier", values.get(0).get("SP_NAME"));
 			assertEquals("12345678", values.get(0).get("SP_VALUE"));
 			assertTrue(values.get(0).keySet().contains("HASH_IDENTITY"));
-			assertEquals(7001889285610424179L, values.get(0).get("HASH_IDENTITY"));
+			assertEquals(792023395537367244L, values.get(0).get("HASH_IDENTITY"));
 			return null;
 		});
 	}

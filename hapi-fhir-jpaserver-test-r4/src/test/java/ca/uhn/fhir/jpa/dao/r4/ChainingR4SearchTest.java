@@ -38,14 +38,19 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Date;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -108,6 +113,62 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			assertEquals(1, myResourceIndexedSearchParamTokenDao.count());
 			assertEquals(0, myResourceLinkDao.count());
 		});
+	}
+
+	@Test
+	public void testIndexSearchParamContainedOrdPopulated() {
+		// Setup
+		myStorageSettings.setIndexOnContainedResources(true);
+
+		Patient p1 = new Patient();
+		p1.setId("#p1");
+		p1.addName().setFamily("Smith1").addGiven("John");
+
+		Patient p2  = new Patient();
+		p2.setId("#p2");
+		p2.addName().setFamily("Smith2").addGiven("John");
+
+		Patient p3 = new Patient();
+		p3.setId("#p3");
+		p3.addName().setFamily("Smith3").addGiven("John");
+
+		Patient p4 = new Patient();
+		p4.setId("#p4");
+		p4.addName().setFamily("Smith4").addGiven("John");
+
+		Observation obs = new Observation();
+		obs.getCode().setText("Observation 1");
+		obs.getSubject().setReference(p1.getId());
+		obs.getPerformer().add(new Reference(p2.getId()));
+		obs.getPerformer().add(new Reference(p3.getId()));
+		obs.getPerformer().add(new Reference(p4.getId()));
+		obs.getContained().addAll(List.of(p1, p2, p3, p4));
+
+		final Map<String, List<Short>> containerOrdMap = new HashMap<>();
+		IIdType obsId = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+		runInTransaction(()-> {
+			myResourceIndexedSearchParamStringDao.findAllForResourceId(obsId.getIdPartAsLong()).forEach(param -> {
+				String paramName = param.getParamName();
+				if (paramName.startsWith("patient.") || paramName.startsWith("performer.")) {
+					Short containerOrd = param.getContainedOrd();
+					assertNotNull(containerOrd);
+					assertTrue(containerOrd > 0L);
+					List<Short> list = containerOrdMap.get(paramName);
+					if (list == null) {
+						list = new ArrayList<>();
+					}
+					list.add(containerOrd);
+					containerOrdMap.put(paramName, list);
+				}
+			});
+		});
+
+		List<Short> patientFamilyOrdinalList = containerOrdMap.get("patient.family");
+		assertNotNull(patientFamilyOrdinalList);
+		assertThat(patientFamilyOrdinalList, contains((short)1));
+		List<Short>  performerFamilyOrdinalList = containerOrdMap.get("performer.family");
+		assertNotNull(performerFamilyOrdinalList);
+		assertThat(performerFamilyOrdinalList, containsInAnyOrder((short)2, (short)3, (short)4));
 	}
 
 
@@ -496,14 +557,14 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			orgId = myOrganizationDao.create(org, mySrd).getId();
 
 			Patient p = new Patient();
+			p.setId("pat");
 			p.addName().setFamily("Smith").addGiven("John");
 			p.getManagingOrganization().setReference(org.getId());
-			myPatientDao.create(p, mySrd);
 
 			Observation obs = new Observation();
 			obs.getContained().add(p);
 			obs.getCode().setText("Observation 1");
-			obs.getSubject().setReference(p.getId());
+			obs.getSubject().setReference("#pat");
 
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 

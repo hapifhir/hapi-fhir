@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.param.NumberParam;
 import jakarta.persistence.Column;
@@ -51,7 +50,7 @@ import java.util.Objects;
 @Table(
 		name = "HFJ_SPIDX_NUMBER",
 		indexes = {
-			//	We used to have an index with name IDX_SP_NUMBER - Dont reuse
+			//	We used to have an index with name IDX_SP_NUMBER - Don't reuse
 			@Index(name = "IDX_SP_NUMBER_HASH_VAL_V2", columnList = "HASH_IDENTITY,SP_VALUE,RES_ID,PARTITION_ID"),
 			@Index(name = "IDX_SP_NUMBER_RESID_V2", columnList = "RES_ID, HASH_IDENTITY, SP_VALUE, PARTITION_ID")
 		})
@@ -69,11 +68,6 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_NUMBER")
 	@Column(name = "SP_ID")
 	private Long myId;
-	/**
-	 * @since 3.5.0 - At some point this should be made not-null
-	 */
-	@Column(name = "HASH_IDENTITY", nullable = true)
-	private Long myHashIdentity;
 
 	@ManyToOne(
 			optional = false,
@@ -88,13 +82,10 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 
 	public ResourceIndexedSearchParamNumber() {}
 
-	public ResourceIndexedSearchParamNumber(
-			PartitionSettings thePartitionSettings, String theResourceType, String theParamName, BigDecimal theValue) {
-		setPartitionSettings(thePartitionSettings);
+	public ResourceIndexedSearchParamNumber(String theResourceType, String theParamName, BigDecimal theValue) {
 		setResourceType(theResourceType);
 		setParamName(theParamName);
 		setValue(theValue);
-		calculateHashes();
 	}
 
 	@Override
@@ -102,26 +93,6 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		super.copyMutableValuesFrom(theSource);
 		ResourceIndexedSearchParamNumber source = (ResourceIndexedSearchParamNumber) theSource;
 		myValue = source.myValue;
-		myHashIdentity = source.myHashIdentity;
-	}
-
-	@Override
-	public void clearHashes() {
-		myHashIdentity = null;
-	}
-
-	@Override
-	public void calculateHashes() {
-		if (myHashIdentity != null) {
-			return;
-		}
-		String resourceType = getResourceType();
-		String paramName = getParamName();
-		setHashIdentity(calculateHashIdentity(getPartitionSettings(), getPartitionId(), resourceType, paramName));
-	}
-
-	public Long getHashIdentity() {
-		return myHashIdentity;
 	}
 
 	@Override
@@ -139,9 +110,10 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		EqualsBuilder b = new EqualsBuilder();
 		b.append(getResourceType(), obj.getResourceType());
 		b.append(getParamName(), obj.getParamName());
-		b.append(getHashIdentity(), obj.getHashIdentity());
-		b.append(normalizeForEqualityComparison(getValue()), normalizeForEqualityComparison(obj.getValue()));
 		b.append(isMissing(), obj.isMissing());
+		b.append(getContainedOrd(), obj.getContainedOrd());
+		b.append(getPartitionId(), obj.getPartitionId());
+		b.append(normalizeForEqualityComparison(getValue()), normalizeForEqualityComparison(obj.getValue()));
 		return b.isEquals();
 	}
 
@@ -150,10 +122,6 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 			return null;
 		}
 		return theValue.doubleValue();
-	}
-
-	public void setHashIdentity(Long theHashIdentity) {
-		myHashIdentity = theHashIdentity;
 	}
 
 	@Override
@@ -179,9 +147,10 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 		HashCodeBuilder b = new HashCodeBuilder();
 		b.append(getResourceType());
 		b.append(getParamName());
-		b.append(getHashIdentity());
-		b.append(normalizeForEqualityComparison(getValue()));
 		b.append(isMissing());
+		b.append(getContainedOrd());
+		b.append(getPartitionId());
+		b.append(normalizeForEqualityComparison(getValue()));
 		return b.toHashCode();
 	}
 
@@ -193,8 +162,12 @@ public class ResourceIndexedSearchParamNumber extends BaseResourceIndexedSearchP
 	@Override
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("resourceId", getResourcePid());
+		b.append("resourceType", getResourceType());
 		b.append("paramName", getParamName());
-		b.append("resourceId", getResource().getId()); // TODO: add a field so we don't need to resolve this
+		b.append("missing", isMissing());
+		b.append("containedOrd", getContainedOrd());
+		b.append("partitionId", getPartitionId());
 		b.append("value", getValue());
 		return b.build();
 	}

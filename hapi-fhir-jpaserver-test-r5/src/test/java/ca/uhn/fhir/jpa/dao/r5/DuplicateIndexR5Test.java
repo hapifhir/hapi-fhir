@@ -4,23 +4,31 @@ import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Enumerations;
-import org.hl7.fhir.r5.model.SearchParameter;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.SearchParameter;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class DuplicateIndexR5Test extends BaseJpaR5Test {
+	@Autowired
+	private ResourceIndexHasher myResourceIndexHasher;
 
 	@Test
 	public void testDuplicateTokensClearedOnUpdate() {
@@ -163,23 +171,20 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 
 			// Create a dupe
 			ResourceIndexedComboTokenNonUnique dupe0 = new ResourceIndexedComboTokenNonUnique();
-			dupe0.setPartitionSettings(param.getPartitionSettings());
 			dupe0.setResource(param.getResource());
 			dupe0.setHashComplete(param.getHashComplete());
 			dupe0.setIndexString(param.getIndexString());
 			dupe0.setSearchParameterId(param.getSearchParameterId());
-			dupe0.calculateHashes();
-			myResourceIndexedComboTokensNonUniqueDao.save(dupe0);
 
 			// Create a second dupe
 			ResourceIndexedComboTokenNonUnique dupe1 = new ResourceIndexedComboTokenNonUnique();
-			dupe1.setPartitionSettings(param.getPartitionSettings());
 			dupe1.setResource(param.getResource());
 			dupe1.setHashComplete(param.getHashComplete());
 			dupe1.setIndexString(param.getIndexString());
-			dupe1.setSearchParameterId(param.getSearchParameterId());
-			dupe1.calculateHashes();
-			myResourceIndexedComboTokensNonUniqueDao.save(dupe1);
+			dupe0.setSearchParameterId(param.getSearchParameterId());
+
+			calculateHashes(dupe0, dupe1);
+			myResourceIndexedComboTokensNonUniqueDao.saveAll(List.of(dupe0, dupe1));
 		});
 		return id1;
 	}
@@ -200,8 +205,6 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 			dupe0.setSourcePath(existingLink.getSourcePath());
 			dupe0.setTargetResource(existingLink.getTargetResourceType(), existingLink.getTargetResourcePid(), existingLink.getTargetResourceId());
 			dupe0.setTargetResourceVersion(existingLink.getTargetResourceVersion());
-			dupe0.calculateHashes();
-			myResourceLinkDao.save(dupe0);
 
 			// Create a second dupe
 			ResourceLink dupe1 = new ResourceLink();
@@ -210,8 +213,9 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 			dupe1.setSourcePath(existingLink.getSourcePath());
 			dupe1.setTargetResource(existingLink.getTargetResourceType(), existingLink.getTargetResourcePid(), existingLink.getTargetResourceId());
 			dupe1.setTargetResourceVersion(existingLink.getTargetResourceVersion());
-			dupe1.calculateHashes();
-			myResourceLinkDao.save(dupe1);
+
+			calculateHashes(dupe0, dupe1);
+			myResourceLinkDao.saveAll(List.of(dupe0, dupe1));
 		});
 		return id1;
 	}
@@ -223,16 +227,15 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 			ResourceTable table = myResourceTableDao.findAll().get(0);
 
 			// Create a dupe
-			ResourceIndexedSearchParamString dupe0 = new ResourceIndexedSearchParamString(myPartitionSettings, myStorageSettings, "Patient", "family", "FAMILY", "FAMILY");
+			ResourceIndexedSearchParamString dupe0 = new ResourceIndexedSearchParamString("Patient", "family", "FAMILY", "FAMILY");
 			dupe0.setResource(table);
-			dupe0.calculateHashes();
-			myResourceIndexedSearchParamStringDao.save(dupe0);
 
 			// Create a second dupe
-			ResourceIndexedSearchParamString dupe1 = new ResourceIndexedSearchParamString(myPartitionSettings, myStorageSettings, "Patient", "family", "FAMILY", "FAMILY");
+			ResourceIndexedSearchParamString dupe1 = new ResourceIndexedSearchParamString("Patient", "family", "FAMILY", "FAMILY");
 			dupe1.setResource(table);
-			dupe1.calculateHashes();
-			myResourceIndexedSearchParamStringDao.save(dupe1);
+
+			calculateHashes(dupe0, dupe1);
+			myResourceIndexedSearchParamStringDao.saveAll(List.of(dupe0, dupe1));
 		});
 		return id1;
 	}
@@ -244,20 +247,22 @@ public class DuplicateIndexR5Test extends BaseJpaR5Test {
 			ResourceTable table = myResourceTableDao.findAll().get(0);
 
 			// Create a dupe
-			ResourceIndexedSearchParamToken dupe0 = new ResourceIndexedSearchParamToken(myPartitionSettings, "Patient", "identifier", "http://foo", "bar");
+			ResourceIndexedSearchParamToken dupe0 = new ResourceIndexedSearchParamToken("Patient", "identifier", "http://foo", "bar");
 			dupe0.setResource(table);
-			dupe0.calculateHashes();
-			myResourceIndexedSearchParamTokenDao.save(dupe0);
 
 			// Create a second dupe
-			ResourceIndexedSearchParamToken dupe1 = new ResourceIndexedSearchParamToken(myPartitionSettings, "Patient", "identifier", "http://foo", "bar");
+			ResourceIndexedSearchParamToken dupe1 = new ResourceIndexedSearchParamToken("Patient", "identifier", "http://foo", "bar");
 			dupe1.setResource(table);
-			dupe1.calculateHashes();
-			myResourceIndexedSearchParamTokenDao.save(dupe1);
+
+			calculateHashes(dupe0, dupe1);
+			myResourceIndexedSearchParamTokenDao.saveAll(List.of(dupe0, dupe1));
 		});
 		return id;
 	}
 
+	private void calculateHashes(BaseResourceIndex... theParams) {
+		Arrays.stream(theParams).forEach(param -> param.calculateHashes(new ResourceIndexHasher(myPartitionSettings, myStorageSettings)));
+	}
 
 	private void createNamesAndGenderSp() {
 		SearchParameter sp = new SearchParameter();
