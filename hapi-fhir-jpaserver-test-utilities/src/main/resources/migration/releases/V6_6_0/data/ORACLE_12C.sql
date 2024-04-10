@@ -129,7 +129,7 @@ INSERT INTO HFJ_RESOURCE_MODIFIED (
 ) VALUES (
    '1',
    '1',
-   '2024-03-30 10:14:41.70',
+   SYSDATE,
    'Observation',
    '{"operationType":"CREATE","attributes":{"attKey":"attValue"},"transactionId":"txId","mediaType":"json","messageKey":"messageKey","payloadId":"Observation/1","partitionId":{"allPartitions":true},"payloadVersion":"1","subscriptionId":"subId"}'
 );
