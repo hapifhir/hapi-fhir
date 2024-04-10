@@ -27,7 +27,6 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTagDao;
@@ -46,7 +45,6 @@ import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -78,9 +76,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Service
 public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid> {
 	private static final Logger ourLog = LoggerFactory.getLogger(JpaResourceExpungeService.class);
-
-	@Autowired
-	private IForcedIdDao myForcedIdDao;
 
 	@Autowired
 	private IResourceTableDao myResourceTableDao;
@@ -321,11 +316,6 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		try {
 			if (resource.isHasTags()) {
 				myResourceTagDao.deleteByResourceId(resource.getId());
-			}
-
-			if (resource.getForcedId() != null) {
-				ForcedId forcedId = resource.getForcedId();
-				myForcedIdDao.deleteByPid(forcedId.getId());
 			}
 
 			myResourceTableDao.deleteByPid(resource.getId());

@@ -132,6 +132,13 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.modifyColumn("20240327.1", "TARGET_CODE")
 				.nullable()
 				.withType(ColumnTypeEnum.STRING, 500);
+
+		// Stop writing to hfj_forced_id https://github.com/hapifhir/hapi-fhir/pull/5817
+		Builder.BuilderWithTableName forcedId = version.onTable("HFJ_FORCED_ID");
+		forcedId.dropForeignKey("20240402.1", "FK_FORCEDID_RESOURCE", "HFJ_RESOURCE");
+		forcedId.dropIndex("20240402.2", "IDX_FORCEDID_RESID");
+		forcedId.dropIndex("20240402.3", "IDX_FORCEDID_TYPE_FID");
+		forcedId.dropIndex("20240402.4", "IDX_FORCEID_FID");
 	}
 
 	protected void init700() {
@@ -1403,9 +1410,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addIndex("20211210.4", "FK_FORCEDID_RESOURCE")
 				.unique(true)
 				.withColumns("RESOURCE_PID")
-				.doNothing() // This migration was added in error, as this table already has a unique constraint on
 				// RESOURCE_PID and every database creates an index on anything that is unique.
-				.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+				.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS)
+				.doNothing(); // This migration was added in error, as this table already has a unique constraint on
 	}
 
 	private void init570() {

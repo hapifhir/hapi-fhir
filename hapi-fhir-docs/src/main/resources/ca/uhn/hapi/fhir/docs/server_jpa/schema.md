@@ -85,6 +85,15 @@ The HFJ_RESOURCE table indicates a single resource of any type in the database. 
             </td>        
         </tr>
         <tr>
+            <td>FHIR_ID</td>
+            <td></td>
+            <td>String</td>
+            <td></td>
+            <td>
+                Contains the FHIR Resource id element.  Either the PID, or the client-assigned id. 
+            </td>        
+        </tr>
+        <tr>
             <td>HASH_SHA256</td>
             <td></td>
             <td>Long</td>
@@ -242,30 +251,6 @@ The complete raw contents of the resource is stored in either the `RES_TEXT` or 
         </tr>
     </tbody>
 </table>     
-
-<a name="HFJ_FORCED_ID"/>
-
-# HFJ_FORCED_ID: Client Assigned/Visible Resource IDs
-
-By default, the **HFJ_RESOURCE.RES_ID** column is used as the resource ID for all server-assigned IDs. For example, if a Patient resource is created in a completely empty database, it will be assigned the ID `Patient/1` by the server and RES_ID will have a value of 1.
-
-However, when client-assigned IDs are used, these may contain text values to allow a client to create an ID such
-as `Patient/ABC`. When a client-assigned ID is given to a resource, a row is created in the **HFJ_RESOURCE** table. When
-an **HFJ_FORCED_ID** row exists corresponding to the equivalent **HFJ_RESOURCE** row, the RES_ID value is no longer
-visible or usable by FHIR clients and it becomes purely an internal ID to the JPA server.
-
-If the server has been configured with
-a [Resource Server ID Strategy](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#setResourceServerIdStrategy(ca.uhn.fhir.jpa.api.config.JpaStorageSettings.IdStrategyEnum))
-of [UUID](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.IdStrategyEnum.html#UUID), or the
-server has been configured with
-a [Resource Client ID Strategy](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#setResourceClientIdStrategy(ca.uhn.fhir.jpa.api.config.JpaStorageSettings.ClientIdStrategyEnum))
-of [ANY](/apidocs/hapi-fhir-storage/undefined/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.ClientIdStrategyEnum.html#ANY)
-the server will create a Forced ID for all resources (not only resources having textual IDs).
-
-The **HFJ_RESOURCE** table now has a FHIR_ID column.
-This column is always populated; both for server-assigned ids and for client-assigned ids.
-As of Hapi release 6.10, this column is used in place of the **HFJ_FORCED_ID** table for id search and sort.
-A future version of Hapi will stop populating the **HFJ_FORCED_ID** table.
 
 ## Columns
 
