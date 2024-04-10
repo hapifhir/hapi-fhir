@@ -82,8 +82,11 @@ public class HapiSchemaMigrationTest {
 			VersionEnum.V5_3_0,
 			VersionEnum.V5_4_0,
 			VersionEnum.V5_5_0,
+			VersionEnum.V5_7_0,
 			VersionEnum.V6_0_0,
+			VersionEnum.V6_3_0,
 			VersionEnum.V6_6_0,
+			VersionEnum.V6_8_0,
 			VersionEnum.V7_2_0
 		);
 
