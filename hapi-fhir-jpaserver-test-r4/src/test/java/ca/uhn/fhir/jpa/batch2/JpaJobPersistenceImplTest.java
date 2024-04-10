@@ -400,7 +400,10 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		runInTransaction(() -> assertEquals(TARGET_STEP_ID, findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()));
 
 		// execute
-		runInTransaction(() -> mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID));
+		runInTransaction(() -> {
+			boolean changed = mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID);
+			assertTrue(changed);
+		});
 
 		// verify
 		runInTransaction(() -> {
@@ -421,7 +424,10 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		runInTransaction(() -> assertEquals(TARGET_STEP_ID, findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()));
 
 		// execute
-		runInTransaction(() -> mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, TARGET_STEP_ID));
+		runInTransaction(() -> {
+			boolean changed = mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, TARGET_STEP_ID);
+			assertFalse(changed);
+		});
 
 		// verify
 		runInTransaction(() -> {
@@ -447,7 +453,10 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		});
 
 		// execute
-		runInTransaction(() -> mySvc.updateAllChunksForStepFromGateWaitingToReady(instanceId, LAST_STEP_ID));
+		runInTransaction(() -> {
+			int numChanged = mySvc.updateAllChunksForStepFromGateWaitingToReady(instanceId, LAST_STEP_ID);
+			assertEquals(2, numChanged);
+		});
 
 		// verify
 		runInTransaction(() -> {

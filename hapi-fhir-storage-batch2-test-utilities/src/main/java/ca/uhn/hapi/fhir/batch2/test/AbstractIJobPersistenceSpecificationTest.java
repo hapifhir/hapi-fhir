@@ -166,7 +166,7 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 		instance.setJobDefinitionVersion(JOB_DEF_VER);
 		instance.setParameters(CHUNK_DATA);
 		instance.setReport("TEST");
-        if (jobDefinition.isGatedExecution()) {
+		if (jobDefinition.isGatedExecution()) {
 			instance.setCurrentGatedStepId(jobDefinition.getFirstStepId());
 		}
 		return instance;

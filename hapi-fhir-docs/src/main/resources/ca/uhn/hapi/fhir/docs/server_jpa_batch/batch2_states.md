@@ -56,10 +56,10 @@ stateDiagram-v2
     state FAILED
     state COMPLETED
    direction LR
-   [*]             --> READY         : on create - normal
-   [*]             --> GATE_WAITING  : on create - gated
-   GATE_WAITING    --> READY         : on gate release - gated (new)
-   QUEUED          --> READY         : on gate release - gated (for compatibility with old "fake QUEUED" state)
+   [*]             --> READY         : on create - normal or gated first chunk
+   [*]             --> GATE_WAITING  : on create - gated non-first chunk
+   GATE_WAITING    --> READY         : on gate release - gated
+   QUEUED          --> READY         : on gate release - gated (for compatibility with legacy QUEUED state up to 7.1.8-SNAPSHOT)
    READY           --> QUEUED        : placed on kafka (maint.)
   
   %% worker processing states

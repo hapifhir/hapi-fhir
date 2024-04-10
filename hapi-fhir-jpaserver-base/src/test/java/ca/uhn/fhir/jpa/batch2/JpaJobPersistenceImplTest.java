@@ -182,9 +182,10 @@ class JpaJobPersistenceImplTest {
 		String nextStepId = "nextStep";
 
 		// execute
-		mySvc.updateAllChunksForStepFromGateWaitingToReady(instanceId, nextStepId);
+		int changed = mySvc.updateAllChunksForStepFromGateWaitingToReady(instanceId, nextStepId);
 
 		// verify
+		assertEquals(0, changed);
 		verify(myWorkChunkRepository).updateAllChunksForStepFromGateWaitingToReady(instanceId, nextStepId);
 	}
 
