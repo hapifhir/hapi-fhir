@@ -64,11 +64,15 @@ public class WorkChunkCreateEvent {
 		isGatedExecution = theGatedExecution;
 	}
 
+	/**
+	 * Creates the WorkChunkCreateEvent for the first chunk of a job.
+	 */
 	public static WorkChunkCreateEvent firstChunk(JobDefinition<?> theJobDefinition, String theInstanceId) {
 		String firstStepId = theJobDefinition.getFirstStepId();
 		String jobDefinitionId = theJobDefinition.getJobDefinitionId();
 		int jobDefinitionVersion = theJobDefinition.getJobDefinitionVersion();
-		boolean isGatedExecution = theJobDefinition.isGatedExecution();
+		// the first chunk of a job is always READY, no matter whether the job is gated
+		boolean isGatedExecution = false;
 		return new WorkChunkCreateEvent(
 				jobDefinitionId, jobDefinitionVersion, firstStepId, theInstanceId, 0, null, isGatedExecution);
 	}

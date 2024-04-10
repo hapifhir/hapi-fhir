@@ -19,9 +19,6 @@
  */
 package ca.uhn.hapi.fhir.batch2.test;
 
-import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
-
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
@@ -61,7 +58,8 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 		PointcutLatch sendLatch = getTestManager().disableWorkChunkMessageHandler();
 		sendLatch.setExpectedCount(1);
 
-		String jobInstanceId = getTestManager().createAndStoreJobInstance(withJobDefinition(theGatedExecution));
+		JobDefinition<?> jobDef = getTestManager().withJobDefinition(false);
+		String jobInstanceId = getTestManager().createAndStoreJobInstance(jobDef);
 		String myChunkId = getTestManager().createChunk(jobInstanceId, theGatedExecution);
 
 		getTestManager().runMaintenancePass();
