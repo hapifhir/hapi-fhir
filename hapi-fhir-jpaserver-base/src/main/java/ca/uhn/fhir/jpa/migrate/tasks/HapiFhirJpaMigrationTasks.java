@@ -174,6 +174,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		}
 
+		{
+			Builder.BuilderWithTableName termConceptTable = version.onTable("TRM_CONCEPT");
+			termConceptTable
+				.addColumn("20240410.1", "PARENT_PIDS_VC")
+				.nullable()
+				.type(ColumnTypeEnum.TEXT);
+
+			termConceptTable.migratePostgresOidToText("20240410.2", "PARENT_PIDS", "PARENT_PIDS_VC");
+		}
+
 	}
 
 	protected void init700() {
