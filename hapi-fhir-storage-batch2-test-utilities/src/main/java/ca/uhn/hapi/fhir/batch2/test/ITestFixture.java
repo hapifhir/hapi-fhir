@@ -64,6 +64,10 @@ public interface ITestFixture {
 
 	String createChunk(String theJobInstanceId, boolean theGatedExecution);
 
+	String createChunkInStep(String theJobInstanceId, String theStepId, boolean theGatedExecution);
+
+	String createFirstChunk(JobDefinition<TestJobParameters> theJobDefinition, String theJobInstanceId);
+
 	/**
 	 * Enable/disable the maintenance runner (So it doesn't run on a scheduler)
 	 */

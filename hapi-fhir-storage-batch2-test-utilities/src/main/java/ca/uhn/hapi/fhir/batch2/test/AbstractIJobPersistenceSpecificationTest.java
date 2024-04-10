@@ -98,9 +98,9 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 			.setJobDefinitionVersion(JOB_DEF_VER)
 			.setJobDescription("A job description")
 			.setParametersType(TestJobParameters.class)
-			.addFirstStep(TARGET_STEP_ID, "the first step", TestJobStep2InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
-			.addIntermediateStep("2nd-step-id", "the second step", TestJobStep3InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
-			.addLastStep("last-step-id", "the final step", (theStepExecutionDetails, theDataSink) -> new RunOutcome(0));
+			.addFirstStep(FIRST_STEP_ID, "the first step", TestJobStep2InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
+			.addIntermediateStep(SECOND_STEP_ID, "the second step", TestJobStep3InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
+			.addLastStep(LAST_STEP_ID, "the final step", (theStepExecutionDetails, theDataSink) -> new RunOutcome(0));
 		if (theIsGatedBoolean) {
 			builder.gatedExecution();
 		}
@@ -177,6 +177,11 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 		return mySvc.onWorkChunkCreate(batchWorkChunk);
 	}
 
+	public String storeFirstWorkChunk(JobDefinition<TestJobParameters> theJobDefinition, String theInstanceId) {
+		WorkChunkCreateEvent batchWorkChunk = WorkChunkCreateEvent.firstChunk(theJobDefinition, theInstanceId);
+		return mySvc.onWorkChunkCreate(batchWorkChunk);
+	}
+
 	public abstract PlatformTransactionManager getTxManager();
 
 	public JobInstance freshFetchJobInstance(String theInstanceId) {
@@ -233,11 +238,19 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 	}
 
 	public String createChunk(String theInstanceId) {
-		return storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, theInstanceId, 0, CHUNK_DATA, false);
+		return storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, theInstanceId, 0, CHUNK_DATA, false);
 	}
 
 	public String createChunk(String theInstanceId, boolean theGatedExecution) {
-		return storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, theInstanceId, 0, CHUNK_DATA, theGatedExecution);
+		return storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, theInstanceId, 0, CHUNK_DATA, theGatedExecution);
+	}
+
+	public String createChunkInStep(String theInstanceId, String theStepId, boolean theGatedExecution) {
+		return storeWorkChunk(JOB_DEFINITION_ID, theStepId, theInstanceId, 0, CHUNK_DATA, theGatedExecution);
+	}
+
+	public String createFirstChunk(JobDefinition<TestJobParameters> theJobDefinition, String theJobInstanceId){
+		return storeFirstWorkChunk(theJobDefinition, theJobInstanceId);
 	}
 
 	public void enableMaintenanceRunner(boolean theToEnable) {

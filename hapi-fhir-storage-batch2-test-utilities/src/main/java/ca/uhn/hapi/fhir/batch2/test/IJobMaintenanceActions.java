@@ -79,8 +79,8 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
    		1|COMPLETED
    		2|COMPLETED
    		2|IN_PROGRESS
-   		3|READY
-   		3|READY
+   		3|GATE_WAITING
+   		3|GATE_WAITING
 	""",
 	"""
 		# when current step is not all queued, should queue READY chunks

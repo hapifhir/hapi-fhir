@@ -132,13 +132,18 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		return mySvc.onWorkChunkCreate(batchWorkChunk);
 	}
 
+	private String storeFirstWorkChunk(String theJobDefinitionId, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData) {
+		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(theJobDefinitionId, TestJobDefinitionUtils.TEST_JOB_VERSION, theTargetStepId, theInstanceId, theSequence, theSerializedData, false);
+		return mySvc.onWorkChunkCreate(batchWorkChunk);
+	}
+
 	@Test
 	public void testStoreAndFetchInstance() {
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);
 
 		runInTransaction(() -> {
-			Batch2JobInstanceEntity instanceEntity = myJobInstanceRepository.findById(instanceId).orElseThrow(IllegalStateException::new);
+			Batch2JobInstanceEntity instanceEntity = findInstanceByIdOrThrow(instanceId);
 			assertEquals(StatusEnum.QUEUED, instanceEntity.getStatus());
 		});
 
@@ -151,7 +156,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(instance.getReport(), foundInstance.getReport());
 
 		runInTransaction(() -> {
-			Batch2JobInstanceEntity instanceEntity = myJobInstanceRepository.findById(instanceId).orElseThrow(IllegalStateException::new);
+			Batch2JobInstanceEntity instanceEntity = findInstanceByIdOrThrow(instanceId);
 			assertEquals(StatusEnum.QUEUED, instanceEntity.getStatus());
 		});
 	}
@@ -372,7 +377,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		JobInstance instance = createInstance(true, false);
 		String instanceId = mySvc.storeNewInstance(instance);
 
-		Date updateTime = runInTransaction(() -> new Date(myJobInstanceRepository.findById(instanceId).orElseThrow().getUpdateTime().getTime()));
+		Date updateTime = runInTransaction(() -> new Date(findInstanceByIdOrThrow(instanceId).getUpdateTime().getTime()));
 
 		sleepUntilTimeChange();
 
@@ -380,7 +385,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		runInTransaction(() -> mySvc.updateInstanceUpdateTime(instanceId));
 
 		// Verify
-		Date updateTime2 = runInTransaction(() -> new Date(myJobInstanceRepository.findById(instanceId).orElseThrow().getUpdateTime().getTime()));
+		Date updateTime2 = runInTransaction(() -> new Date(findInstanceByIdOrThrow(instanceId).getUpdateTime().getTime()));
 		assertNotEquals(updateTime, updateTime2);
 	}
 
@@ -389,20 +394,20 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// setup
 		JobInstance instance = createInstance(true, true);
 		String instanceId = mySvc.storeNewInstance(instance);
-		String chunkIdFirstStep = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, null, true);
 		String chunkIdSecondStep1 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, true);
 		String chunkIdSecondStep2 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, true);
 
-		runInTransaction(() -> assertEquals(TARGET_STEP_ID, myJobInstanceRepository.findById(instanceId).orElseThrow(IllegalArgumentException::new).getCurrentGatedStepId()));
+		runInTransaction(() -> assertEquals(TARGET_STEP_ID, findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()));
 
 		// execute
 		runInTransaction(() -> mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID));
 
 		// verify
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.GATE_WAITING, myWorkChunkRepository.findById(chunkIdFirstStep).orElseThrow(IllegalArgumentException::new).getStatus()));
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, myWorkChunkRepository.findById(chunkIdSecondStep1).orElseThrow(IllegalArgumentException::new).getStatus()));
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, myWorkChunkRepository.findById(chunkIdSecondStep2).orElseThrow(IllegalArgumentException::new).getStatus()));
-		runInTransaction(() -> assertEquals(LAST_STEP_ID, myJobInstanceRepository.findById(instanceId).orElseThrow(IllegalArgumentException::new).getCurrentGatedStepId()));
+		runInTransaction(() -> {
+			assertEquals(WorkChunkStatusEnum.READY, findChunkByIdOrThrow(chunkIdSecondStep1).getStatus());
+			assertEquals(WorkChunkStatusEnum.READY, findChunkByIdOrThrow(chunkIdSecondStep2).getStatus());
+			assertEquals(LAST_STEP_ID, findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId());
+		});
 	}
 
 	@Test
@@ -416,17 +421,21 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String chunkIdSecondStep1 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, true);
 		String chunkIdSecondStep2 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, true);
 
-		runInTransaction(() -> assertEquals(expectedNoChangeStatus, myWorkChunkRepository.findById(chunkIdFirstStep).orElseThrow(IllegalArgumentException::new).getStatus()));
-		runInTransaction(() -> assertEquals(expectedNoChangeStatus, myWorkChunkRepository.findById(chunkIdSecondStep1).orElseThrow(IllegalArgumentException::new).getStatus()));
-		runInTransaction(() -> assertEquals(expectedNoChangeStatus, myWorkChunkRepository.findById(chunkIdSecondStep2).orElseThrow(IllegalArgumentException::new).getStatus()));
+		runInTransaction(() -> {
+			assertEquals(expectedNoChangeStatus, findChunkByIdOrThrow(chunkIdFirstStep).getStatus());
+			assertEquals(expectedNoChangeStatus, findChunkByIdOrThrow(chunkIdSecondStep1).getStatus());
+			assertEquals(expectedNoChangeStatus, findChunkByIdOrThrow(chunkIdSecondStep2).getStatus());
+		});
 
 		// execute
 		runInTransaction(() -> mySvc.updateAllChunksForStepWithStatus(instanceId, LAST_STEP_ID, expectedChangedStatus, WorkChunkStatusEnum.GATE_WAITING));
 
 		// verify
-		runInTransaction(() -> assertEquals(expectedNoChangeStatus, myWorkChunkRepository.findById(chunkIdFirstStep).orElseThrow(IllegalArgumentException::new).getStatus()));
-		runInTransaction(() -> assertEquals(expectedChangedStatus, myWorkChunkRepository.findById(chunkIdSecondStep1).orElseThrow(IllegalArgumentException::new).getStatus()));
-		runInTransaction(() -> assertEquals(expectedChangedStatus, myWorkChunkRepository.findById(chunkIdSecondStep2).orElseThrow(IllegalArgumentException::new).getStatus()));
+		runInTransaction(() -> {
+			assertEquals(expectedNoChangeStatus, findChunkByIdOrThrow(chunkIdFirstStep).getStatus());
+			assertEquals(expectedChangedStatus, findChunkByIdOrThrow(chunkIdSecondStep1).getStatus());
+			assertEquals(expectedChangedStatus, findChunkByIdOrThrow(chunkIdSecondStep2).getStatus());
+		});
 	}
 
 	@Test
@@ -445,15 +454,10 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String instanceId = mySvc.storeNewInstance(instance);
 
 		// execute & verify
-		String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, null, theGatedExecution);
-		runInTransaction(() -> assertEquals(theExpectedStatusOnCreate, myWorkChunkRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStatus()));
+		String id = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, theGatedExecution);
+		runInTransaction(() -> assertEquals(theExpectedStatusOnCreate, findChunkByIdOrThrow(id).getStatus()));
 		myBatch2JobHelper.runMaintenancePass();
-		runInTransaction(() -> assertEquals(theExpectedStatusAfterTransition, myWorkChunkRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStatus()));
-
-		if (WorkChunkStatusEnum.READY.equals(theExpectedStatusAfterTransition)) {
-			myBatch2JobHelper.runMaintenancePass();
-			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, myWorkChunkRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStatus()));
-		}
+		runInTransaction(() -> assertEquals(theExpectedStatusAfterTransition, findChunkByIdOrThrow(id).getStatus()));
 
 		WorkChunk chunk = mySvc.onWorkChunkDequeue(id).orElseThrow(IllegalArgumentException::new);
 		assertNull(chunk.getData());
@@ -469,30 +473,38 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String instanceId = mySvc.storeNewInstance(instance);
 
 		// execute & verify
-		String firstChunkId = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, expectedFirstChunkData, isGatedExecution);
+		String firstChunkId = storeFirstWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, expectedFirstChunkData);
 		String secondChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, expectedSecondChunkData, isGatedExecution);
 
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.GATE_WAITING, myWorkChunkRepository.findById(firstChunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.GATE_WAITING, myWorkChunkRepository.findById(secondChunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
+		runInTransaction(() -> {
+			assertEquals(WorkChunkStatusEnum.READY, findChunkByIdOrThrow(firstChunkId).getStatus());
+			assertEquals(WorkChunkStatusEnum.GATE_WAITING, findChunkByIdOrThrow(secondChunkId).getStatus());
+		});
 
 		myBatch2JobHelper.runMaintenancePass();
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, myWorkChunkRepository.findById(firstChunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.GATE_WAITING, myWorkChunkRepository.findById(secondChunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
+		runInTransaction(() -> {
+			assertEquals(WorkChunkStatusEnum.QUEUED, findChunkByIdOrThrow(firstChunkId).getStatus());
+			assertEquals(WorkChunkStatusEnum.GATE_WAITING, findChunkByIdOrThrow(secondChunkId).getStatus());
+		});
 
 		WorkChunk actualFirstChunkData = mySvc.onWorkChunkDequeue(firstChunkId).orElseThrow(IllegalArgumentException::new);
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, myWorkChunkRepository.findById(firstChunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
+		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, findChunkByIdOrThrow(firstChunkId).getStatus()));
 		assertEquals(expectedFirstChunkData, actualFirstChunkData.getData());
 
 		mySvc.onWorkChunkCompletion(new WorkChunkCompletionEvent(firstChunkId, 50, 0));
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.COMPLETED, myWorkChunkRepository.findById(firstChunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.GATE_WAITING, myWorkChunkRepository.findById(secondChunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
+		runInTransaction(() -> {
+			assertEquals(WorkChunkStatusEnum.COMPLETED, findChunkByIdOrThrow(firstChunkId).getStatus());
+			assertEquals(WorkChunkStatusEnum.GATE_WAITING, findChunkByIdOrThrow(secondChunkId).getStatus());
+		});
 
 		myBatch2JobHelper.runMaintenancePass();
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.COMPLETED, myWorkChunkRepository.findById(firstChunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, myWorkChunkRepository.findById(secondChunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
+		runInTransaction(() -> {
+			assertEquals(WorkChunkStatusEnum.COMPLETED, findChunkByIdOrThrow(firstChunkId).getStatus());
+			assertEquals(WorkChunkStatusEnum.QUEUED, findChunkByIdOrThrow(secondChunkId).getStatus());
+		});
 
 		WorkChunk actualSecondChunkData = mySvc.onWorkChunkDequeue(secondChunkId).orElseThrow(IllegalArgumentException::new);
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, myWorkChunkRepository.findById(secondChunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
+		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, findChunkByIdOrThrow(secondChunkId).getStatus()));
 		assertEquals(expectedSecondChunkData, actualSecondChunkData.getData());
 	}
 
@@ -572,16 +584,11 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		JobInstance instance = createInstance(true, theGatedExecution);
 		String instanceId = mySvc.storeNewInstance(instance);
 
-		String id = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, CHUNK_DATA, theGatedExecution);
+		String id = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, CHUNK_DATA, theGatedExecution);
 		assertNotNull(id);
-		runInTransaction(() -> assertEquals(theExpectedCreatedStatus, myWorkChunkRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStatus()));
+		runInTransaction(() -> assertEquals(theExpectedCreatedStatus, findChunkByIdOrThrow(id).getStatus()));
 		myBatch2JobHelper.runMaintenancePass();
-		runInTransaction(() -> assertEquals(theExpectedTransitionStatus, myWorkChunkRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStatus()));
-
-		if (WorkChunkStatusEnum.READY.equals(theExpectedTransitionStatus)){
-			myBatch2JobHelper.runMaintenancePass();
-			runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, myWorkChunkRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStatus()));
-		}
+		runInTransaction(() -> assertEquals(theExpectedTransitionStatus, findChunkByIdOrThrow(id).getStatus()));
 
 		WorkChunk chunk = mySvc.onWorkChunkDequeue(id).orElseThrow(IllegalArgumentException::new);
 		assertEquals(36, chunk.getInstanceId().length());
@@ -590,7 +597,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
 		assertEquals(CHUNK_DATA, chunk.getData());
 
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, myWorkChunkRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStatus()));
+		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, findChunkByIdOrThrow(id).getStatus()));
 	}
 
 	@Test
@@ -601,9 +608,9 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, CHUNK_DATA, isGatedExecution);
 		assertNotNull(chunkId);
 
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
+		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, findChunkByIdOrThrow(chunkId).getStatus()));
 		myBatch2JobHelper.runMaintenancePass();
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
+		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, findChunkByIdOrThrow(chunkId).getStatus()));
 
 		WorkChunk chunk = mySvc.onWorkChunkDequeue(chunkId).orElseThrow(IllegalArgumentException::new);
 		assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
@@ -613,13 +620,13 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		assertNull(chunk.getEndTime());
 		assertNull(chunk.getRecordsProcessed());
 		assertNotNull(chunk.getData());
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
+		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, findChunkByIdOrThrow(chunkId).getStatus()));
 
 		sleepUntilTimeChange();
 
 		mySvc.onWorkChunkCompletion(new WorkChunkCompletionEvent(chunkId, 50, 0));
 		runInTransaction(() -> {
-			Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
+			Batch2WorkChunkEntity entity = findChunkByIdOrThrow(chunkId);
 			assertEquals(WorkChunkStatusEnum.COMPLETED, entity.getStatus());
 			assertEquals(50, entity.getRecordsProcessed());
 			assertNotNull(entity.getCreateTime());
@@ -639,9 +646,9 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String chunkId = storeWorkChunk(JOB_DEFINITION_ID, TestJobDefinitionUtils.FIRST_STEP_ID, instanceId, SEQUENCE_NUMBER, null, isGatedExecution);
 		assertNotNull(chunkId);
 
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
+		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, findChunkByIdOrThrow(chunkId).getStatus()));
 		myBatch2JobHelper.runMaintenancePass();
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
+		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, findChunkByIdOrThrow(chunkId).getStatus()));
 
 		WorkChunk chunk = mySvc.onWorkChunkDequeue(chunkId).orElseThrow(IllegalArgumentException::new);
 		assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
@@ -652,7 +659,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		WorkChunkErrorEvent request = new WorkChunkErrorEvent(chunkId).setErrorMsg("This is an error message");
 		mySvc.onWorkChunkError(request);
 		runInTransaction(() -> {
-			Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
+			Batch2WorkChunkEntity entity = findChunkByIdOrThrow(chunkId);
 			assertEquals(WorkChunkStatusEnum.ERRORED, entity.getStatus());
 			assertEquals("This is an error message", entity.getErrorMessage());
 			assertNotNull(entity.getCreateTime());
@@ -668,7 +675,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		WorkChunkErrorEvent request2 = new WorkChunkErrorEvent(chunkId).setErrorMsg("This is an error message 2");
 		mySvc.onWorkChunkError(request2);
 		runInTransaction(() -> {
-			Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
+			Batch2WorkChunkEntity entity = findChunkByIdOrThrow(chunkId);
 			assertEquals(WorkChunkStatusEnum.ERRORED, entity.getStatus());
 			assertEquals("This is an error message 2", entity.getErrorMessage());
 			assertNotNull(entity.getCreateTime());
@@ -692,9 +699,9 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null, isGatedExecution);
 		assertNotNull(chunkId);
 
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
+		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, findChunkByIdOrThrow(chunkId).getStatus()));
 		myBatch2JobHelper.runMaintenancePass();
-		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new).getStatus()));
+		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.QUEUED, findChunkByIdOrThrow(chunkId).getStatus()));
 
 		WorkChunk chunk = mySvc.onWorkChunkDequeue(chunkId).orElseThrow(IllegalArgumentException::new);
 		assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
@@ -704,7 +711,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		mySvc.onWorkChunkFailed(chunkId, "This is an error message");
 		runInTransaction(() -> {
-			Batch2WorkChunkEntity entity = myWorkChunkRepository.findById(chunkId).orElseThrow(IllegalArgumentException::new);
+			Batch2WorkChunkEntity entity = findChunkByIdOrThrow(chunkId);
 			assertEquals(WorkChunkStatusEnum.FAILED, entity.getStatus());
 			assertEquals("This is an error message", entity.getErrorMessage());
 			assertNotNull(entity.getCreateTime());
@@ -862,5 +869,13 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			Arguments.of(WorkChunkStatusEnum.FAILED, false),
 			Arguments.of(WorkChunkStatusEnum.COMPLETED, false)
 		);
+	}
+
+	private Batch2JobInstanceEntity findInstanceByIdOrThrow(String instanceId) {
+		return myJobInstanceRepository.findById(instanceId).orElseThrow(IllegalStateException::new);
+	}
+
+	private Batch2WorkChunkEntity findChunkByIdOrThrow(String secondChunkId) {
+		return myWorkChunkRepository.findById(secondChunkId).orElseThrow(IllegalArgumentException::new);
 	}
 }

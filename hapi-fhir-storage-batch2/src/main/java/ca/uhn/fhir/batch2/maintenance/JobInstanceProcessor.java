@@ -99,9 +99,9 @@ public class JobInstanceProcessor {
 		JobDefinition<? extends IModelJson> jobDefinition =
 				myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
 
-		enqueueReadyChunks(theInstance, jobDefinition, false);
 		cleanupInstance(theInstance);
 		triggerGatedExecutions(theInstance, jobDefinition);
+		enqueueReadyChunks(theInstance, jobDefinition);
 
 		ourLog.debug("Finished job processing: {} - {}", myInstanceId, stopWatch);
 	}
@@ -192,19 +192,15 @@ public class JobInstanceProcessor {
 
 		String instanceId = theInstance.getInstanceId();
 		String currentStepId = jobWorkCursor.getCurrentStepId();
-		boolean canAdvance = canAdvanceGatedJob(theJobDefinition, theInstance, jobWorkCursor);
+		boolean canAdvance = canAdvanceGatedJob(theInstance);
 		if (canAdvance) {
 			if (jobWorkCursor.isReductionStep()) {
 				// current step is the reduction step (all reduction steps are final)
 				JobWorkCursor<?, ?, ?> nextJobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
 						jobWorkCursor.getJobDefinition(), jobWorkCursor.getCurrentStepId());
 				myReductionStepExecutorService.triggerReductionStep(instanceId, nextJobWorkCursor);
-			} else if (jobWorkCursor.isFinalStep()) {
-				// current step is the final step in a non-reduction gated job
-				processChunksForNextGatedSteps(
-						theInstance, theJobDefinition, jobWorkCursor, jobWorkCursor.getCurrentStepId());
-			} else {
-				// all other gated job steps
+			} else if (!jobWorkCursor.isFinalStep()) {
+				// all other gated job steps except for final steps
 				String nextStepId = jobWorkCursor.nextStep.getStepId();
 				ourLog.info(
 						"All processing is complete for gated execution of instance {} step {}. Proceeding to step {}",
@@ -213,7 +209,7 @@ public class JobInstanceProcessor {
 						nextStepId);
 
 				// otherwise, continue processing as expected
-				processChunksForNextGatedSteps(theInstance, theJobDefinition, jobWorkCursor, nextStepId);
+				processChunksForNextGatedSteps(theInstance, nextStepId);
 			}
 		} else {
 			String stepId = jobWorkCursor.nextStep != null
@@ -227,8 +223,7 @@ public class JobInstanceProcessor {
 		}
 	}
 
-	private boolean canAdvanceGatedJob(
-			JobDefinition<?> theJobDefinition, JobInstance theInstance, JobWorkCursor<?, ?, ?> theWorkCursor) {
+	private boolean canAdvanceGatedJob(JobInstance theInstance) {
 		// make sure our instance still exists
 		if (myJobPersistence.fetchInstance(theInstance.getInstanceId()).isEmpty()) {
 			// no more job
@@ -245,49 +240,9 @@ public class JobInstanceProcessor {
 			return true;
 		}
 
-		if (workChunkStatuses.equals(Set.of(WorkChunkStatusEnum.GATE_WAITING)) && theWorkCursor.isFirstStep()) {
-			// We are in the first step and all chunks are in GATE_WAITING
-			// this means that the job has just started, no workchunks have been queued yet -> proceed.
-			return true;
-		}
-
-		if (workChunkStatuses.equals(Set.of(WorkChunkStatusEnum.COMPLETED))) {
-			// all workchunks for the current step are in COMPLETED -> proceed.
-			return true;
-		}
-
-		// all workchunks for gated jobs should be turned to QUEUED immediately after they are set to READY
-		// but in case we die in between, this conditional ought to catch the READY chunks.
-		if (workChunkStatuses.contains(WorkChunkStatusEnum.READY)) {
-			if (theWorkCursor.isFirstStep()) {
-				// first step - all ready means we're ready to proceed to enqueue
-				return true;
-			} else {
-				// it's a future step;
-				// make sure previous step's workchunks are completed
-				JobDefinitionStep<?, ?, ?> previousStep =
-						theJobDefinition.getSteps().get(0);
-				for (JobDefinitionStep<?, ?, ?> step : theJobDefinition.getSteps()) {
-					if (step.getStepId().equalsIgnoreCase(currentGatedStepId)) {
-						break;
-					}
-					previousStep = step;
-				}
-				Set<WorkChunkStatusEnum> previousStepWorkChunkStates =
-						myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(
-								theInstance.getInstanceId(), previousStep.getStepId());
-
-				// completed means "all in COMPLETE state" or no previous chunks (they're cleaned up or never existed)
-				if (previousStepWorkChunkStates.isEmpty()
-						|| previousStepWorkChunkStates.equals(Set.of(WorkChunkStatusEnum.COMPLETED))) {
-					return true;
-				}
-			}
-		}
-
-		// anything else
-		return false;
-	}
+        // all workchunks for the current step are in COMPLETED -> proceed.
+        return workChunkStatuses.equals(Set.of(WorkChunkStatusEnum.COMPLETED));
+    }
 
 	protected PagingIterator<WorkChunkMetadata> getReadyChunks() {
 		return new PagingIterator<>(WORK_CHUNK_METADATA_BATCH_SIZE, (index, batchsize, consumer) -> {
@@ -311,27 +266,12 @@ public class JobInstanceProcessor {
 	 * completing prematurely.
 	 */
 	private void enqueueReadyChunks(
-			JobInstance theJobInstance, JobDefinition<?> theJobDefinition, boolean theIsGatedExecutionBool) {
+			JobInstance theJobInstance, JobDefinition<?> theJobDefinition) {
 		Iterator<WorkChunkMetadata> iter = getReadyChunks();
 
 		AtomicInteger counter = new AtomicInteger();
-		ConcurrentHashMap<String, JobWorkCursor<?, ?, ?>> stepToWorkCursor = new ConcurrentHashMap<>();
 		while (iter.hasNext()) {
 			WorkChunkMetadata metadata = iter.next();
-			JobWorkCursor<?, ?, ?> jobWorkCursor = stepToWorkCursor.computeIfAbsent(metadata.getTargetStepId(), (e) -> {
-				return JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, metadata.getTargetStepId());
-			});
-			counter.getAndIncrement();
-			if (!theIsGatedExecutionBool && (theJobDefinition.isGatedExecution() || jobWorkCursor.isReductionStep())) {
-				/*
-				 * Gated executions are queued later when all work chunks are ready.
-				 *
-				 * Reduction steps are not submitted to the queue at all, but processed inline.
-				 * Currently all reduction steps are also gated, but this might not always
-				 * be true.
-				 */
-				return;
-			}
 
 			/*
 			 * For each chunk id
@@ -343,7 +283,7 @@ public class JobInstanceProcessor {
 			updateChunkAndSendToQueue(metadata);
 		}
 		ourLog.debug(
-				"Encountered {} READY work chunks for job {}", counter.get(), theJobDefinition.getJobDefinitionId());
+				"Encountered {} READY work chunks for job {} of type {}", counter.get(), theJobInstance.getInstanceId(), theJobDefinition.getJobDefinitionId());
 	}
 
 	/**
@@ -388,8 +328,6 @@ public class JobInstanceProcessor {
 
 	private void processChunksForNextGatedSteps(
 			JobInstance theInstance,
-			JobDefinition<?> theJobDefinition,
-			JobWorkCursor<?, ?, ?> theWorkCursor,
 			String nextStepId) {
 		String instanceId = theInstance.getInstanceId();
 		List<String> readyChunksForNextStep =
@@ -404,38 +342,7 @@ public class JobInstanceProcessor {
 					readyChunksForNextStep.size());
 		}
 
-		boolean isEnqueue;
-		String currentStepId = theWorkCursor.getCurrentStepId();
-		Set<WorkChunkStatusEnum> workChunkStatusesForCurrentStep =
-				myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(theInstance.getInstanceId(), currentStepId);
-		if (workChunkStatusesForCurrentStep.equals(Set.of(WorkChunkStatusEnum.GATE_WAITING))
-				&& theWorkCursor.isFirstStep()) {
-			// this means that the job has just started, no workchunks have been queued yet
-			// turn the first chunk to READY, do NOT advance the step.
-			isEnqueue = myJobPersistence.updateAllChunksForStepWithStatus(
-							instanceId, currentStepId, WorkChunkStatusEnum.READY, WorkChunkStatusEnum.GATE_WAITING)
-					!= 0;
-		} else if (workChunkStatusesForCurrentStep.equals(Set.of(WorkChunkStatusEnum.COMPLETED))) {
-			// update the job step so the workers will process them.
-			// if it's the last (gated) step, there will be no change - but we should
-			// queue up the chunks anyway
-			isEnqueue = theWorkCursor.isFinalStep()
-					|| myJobPersistence.advanceJobStepAndUpdateChunkStatus(instanceId, nextStepId);
-		} else {
-			// this means that the current step's chunks contains only READY and QUEUED chunks, possibly leftover from
-			// other maintenance job who died in the middle
-			// should enqueue the rest of the ready chunks
-			isEnqueue = true;
-		}
-
-		if (!isEnqueue) {
-			// we collided with another maintenance job.
-			ourLog.warn("Skipping gate advance to {} for instance {} - already advanced.", nextStepId, instanceId);
-			return;
-		}
-
-		// because we now have all gated job chunks in READY state,
-		// we can enqueue them
-		enqueueReadyChunks(theInstance, theJobDefinition, true);
+		// update the job step so the workers will process them.
+		myJobPersistence.advanceJobStepAndUpdateChunkStatus(instanceId, nextStepId);
 	}
 }
