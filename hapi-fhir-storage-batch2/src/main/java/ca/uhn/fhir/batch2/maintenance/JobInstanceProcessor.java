@@ -24,7 +24,6 @@ import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
-import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
@@ -45,7 +44,6 @@ import org.springframework.data.domain.Pageable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class JobInstanceProcessor {
@@ -240,9 +238,9 @@ public class JobInstanceProcessor {
 			return true;
 		}
 
-        // all workchunks for the current step are in COMPLETED -> proceed.
-        return workChunkStatuses.equals(Set.of(WorkChunkStatusEnum.COMPLETED));
-    }
+		// all workchunks for the current step are in COMPLETED -> proceed.
+		return workChunkStatuses.equals(Set.of(WorkChunkStatusEnum.COMPLETED));
+	}
 
 	protected PagingIterator<WorkChunkMetadata> getReadyChunks() {
 		return new PagingIterator<>(WORK_CHUNK_METADATA_BATCH_SIZE, (index, batchsize, consumer) -> {
@@ -265,8 +263,7 @@ public class JobInstanceProcessor {
 	 * we'd need a new GATE_WAITING state to move chunks to prevent jobs from
 	 * completing prematurely.
 	 */
-	private void enqueueReadyChunks(
-			JobInstance theJobInstance, JobDefinition<?> theJobDefinition) {
+	private void enqueueReadyChunks(JobInstance theJobInstance, JobDefinition<?> theJobDefinition) {
 		Iterator<WorkChunkMetadata> iter = getReadyChunks();
 
 		AtomicInteger counter = new AtomicInteger();
@@ -283,7 +280,10 @@ public class JobInstanceProcessor {
 			updateChunkAndSendToQueue(metadata);
 		}
 		ourLog.debug(
-				"Encountered {} READY work chunks for job {} of type {}", counter.get(), theJobInstance.getInstanceId(), theJobDefinition.getJobDefinitionId());
+				"Encountered {} READY work chunks for job {} of type {}",
+				counter.get(),
+				theJobInstance.getInstanceId(),
+				theJobDefinition.getJobDefinitionId());
 	}
 
 	/**
@@ -326,9 +326,7 @@ public class JobInstanceProcessor {
 		myBatchJobSender.sendWorkChannelMessage(workNotification);
 	}
 
-	private void processChunksForNextGatedSteps(
-			JobInstance theInstance,
-			String nextStepId) {
+	private void processChunksForNextGatedSteps(JobInstance theInstance, String nextStepId) {
 		String instanceId = theInstance.getInstanceId();
 		List<String> readyChunksForNextStep =
 				myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.READY);

@@ -114,15 +114,13 @@ public interface IBatch2WorkChunkRepository
 	// In order to keep them compatible, turn QUEUED chunks into READY, too.
 	// TODO: remove QUEUED from the in clause when we are certain that no one is still running the old code.
 	@Modifying
-	@Query(
-			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = ca.uhn.fhir.batch2.model.WorkChunkStatusEnum.READY WHERE "
-				+ "e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId AND e.myStatus in ("
-				+ "ca.uhn.fhir.batch2.model.WorkChunkStatusEnum.GATE_WAITING,"
-				+ "ca.uhn.fhir.batch2.model.WorkChunkStatusEnum.QUEUED"
-				+ ")")
+	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = ca.uhn.fhir.batch2.model.WorkChunkStatusEnum.READY WHERE "
+			+ "e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId AND e.myStatus in ("
+			+ "ca.uhn.fhir.batch2.model.WorkChunkStatusEnum.GATE_WAITING,"
+			+ "ca.uhn.fhir.batch2.model.WorkChunkStatusEnum.QUEUED"
+			+ ")")
 	int updateAllChunksForStepFromGateWaitingToReady(
-			@Param("instanceId") String theInstanceId,
-			@Param("stepId") String theStepId);
+			@Param("instanceId") String theInstanceId, @Param("stepId") String theStepId);
 
 	@Modifying
 	@Query("DELETE FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId")

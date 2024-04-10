@@ -297,7 +297,5 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @return
 	 */
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	int updateAllChunksForStepFromGateWaitingToReady(
-			String theJobInstanceId,
-			String theStepId);
+	int updateAllChunksForStepFromGateWaitingToReady(String theJobInstanceId, String theStepId);
 }

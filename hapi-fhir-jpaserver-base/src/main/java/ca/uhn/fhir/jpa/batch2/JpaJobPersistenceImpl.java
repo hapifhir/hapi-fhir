@@ -598,7 +598,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 					theJobInstanceId,
 					theNextStepId);
 			// when we reach here, the current step id is equal to theNextStepId
-			int numChanged = myWorkChunkRepository.updateAllChunksForStepFromGateWaitingToReady(theJobInstanceId, theNextStepId);
+			int numChanged =
+					myWorkChunkRepository.updateAllChunksForStepFromGateWaitingToReady(theJobInstanceId, theNextStepId);
 			ourLog.debug(
 					"Updated {} chunks of gated instance {} for step {} from fake QUEUED to READY.",
 					numChanged,
