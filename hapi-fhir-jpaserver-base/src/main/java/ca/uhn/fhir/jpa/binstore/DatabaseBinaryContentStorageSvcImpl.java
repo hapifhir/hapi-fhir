@@ -96,7 +96,8 @@ public class DatabaseBinaryContentStorageSvcImpl extends BaseBinaryStorageSvcImp
 		Blob dataBlob = lobHelper.createBlob(loadedStream);
 		entity.setBlob(dataBlob);
 
-		String id = super.provideIdForNewBinaryContent(theBinaryContentIdOrNull, loadedStream, theRequestDetails, theContentType);
+		String id = super.provideIdForNewBinaryContent(
+				theBinaryContentIdOrNull, loadedStream, theRequestDetails, theContentType);
 
 		entity.setContentId(id);
 
@@ -136,7 +137,8 @@ public class DatabaseBinaryContentStorageSvcImpl extends BaseBinaryStorageSvcImp
 	}
 
 	@Override
-	public boolean writeBinaryContent(IIdType theResourceId, String theBinaryContentId, OutputStream theOutputStream) throws IOException {
+	public boolean writeBinaryContent(IIdType theResourceId, String theBinaryContentId, OutputStream theOutputStream)
+			throws IOException {
 		Optional<BinaryStorageEntity> entityOpt = myBinaryStorageEntityDao.findByIdAndResourceId(
 				theBinaryContentId, theResourceId.toUnqualifiedVersionless().getValue());
 		if (entityOpt.isEmpty()) {
@@ -160,14 +162,16 @@ public class DatabaseBinaryContentStorageSvcImpl extends BaseBinaryStorageSvcImp
 	public byte[] fetchBinaryContent(IIdType theResourceId, String theBinaryContentId) throws IOException {
 		BinaryStorageEntity entityOpt = myBinaryStorageEntityDao
 				.findByIdAndResourceId(
-						theBinaryContentId, theResourceId.toUnqualifiedVersionless().getValue())
+						theBinaryContentId,
+						theResourceId.toUnqualifiedVersionless().getValue())
 				.orElseThrow(() -> new ResourceNotFoundException(
 						"Unknown BinaryContent ID: " + theBinaryContentId + " for resource ID " + theResourceId));
 
 		return copyBinaryContentToByteArray(entityOpt);
 	}
 
-	void copyBinaryContentToOutputStream(OutputStream theOutputStream, BinaryStorageEntity theEntity) throws IOException {
+	void copyBinaryContentToOutputStream(OutputStream theOutputStream, BinaryStorageEntity theEntity)
+			throws IOException {
 
 		try (InputStream inputStream = getBinaryContent(theEntity)) {
 			IOUtils.copy(inputStream, theOutputStream);
@@ -201,7 +205,7 @@ public class DatabaseBinaryContentStorageSvcImpl extends BaseBinaryStorageSvcImp
 
 		if (theEntity.hasStorageContent()) {
 			retVal = new ByteArrayInputStream(theEntity.getStorageContentBin());
-		} else if (theEntity.hasBlob()){
+		} else if (theEntity.hasBlob()) {
 			retVal = theEntity.getBlob().getBinaryStream();
 		} else {
 			retVal = new ByteArrayInputStream(new byte[0]);
@@ -209,5 +213,4 @@ public class DatabaseBinaryContentStorageSvcImpl extends BaseBinaryStorageSvcImp
 
 		return retVal;
 	}
-
 }

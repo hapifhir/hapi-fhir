@@ -101,7 +101,8 @@ public interface IBinaryStorageSvc {
 	default StoredDetails storeBinaryContent(
 			IIdType theResourceId, String theBlobIdOrNull, String theContentType, InputStream theInputStream)
 			throws IOException {
-		return storeBinaryContent(theResourceId, theBlobIdOrNull, theContentType, theInputStream, new ServletRequestDetails());
+		return storeBinaryContent(
+				theResourceId, theBlobIdOrNull, theContentType, theInputStream, new ServletRequestDetails());
 	}
 
 	/**
@@ -128,7 +129,8 @@ public interface IBinaryStorageSvc {
 	/**
 	 * @return Returns <code>true</code> if the blob was found and written, of <code>false</code> if the blob was not found (i.e. it was expunged or the ID was invalid)
 	 */
-	boolean writeBinaryContent(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException;
+	boolean writeBinaryContent(IIdType theResourceId, String theBlobId, OutputStream theOutputStream)
+			throws IOException;
 
 	void expungeBinaryContent(IIdType theResourceId, String theBlobId);
 

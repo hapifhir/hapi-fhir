@@ -323,7 +323,7 @@ public class Builder {
 			addTask(task);
 		}
 
-		public void renameTable(String theVersion, String theNewTableName){
+		public void renameTable(String theVersion, String theNewTableName) {
 			RenameTableTask task = new RenameTableTask(myRelease, theVersion, theNewTableName);
 			addTask(task);
 		}
@@ -345,7 +345,7 @@ public class Builder {
 
 		public void migratePostgresOidToText(String theVersion, String theFromColumName, String theToColumName) {
 			MigratePostgresOidToTextTask task = new MigratePostgresOidToTextTask(
-				myRelease, theVersion, getTableName(), theFromColumName, theToColumName);
+					myRelease, theVersion, getTableName(), theFromColumName, theToColumName);
 
 			addTask(task);
 		}

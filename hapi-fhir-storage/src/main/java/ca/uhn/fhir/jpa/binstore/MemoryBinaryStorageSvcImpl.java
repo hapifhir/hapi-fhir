@@ -83,7 +83,8 @@ public class MemoryBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl impleme
 	}
 
 	@Override
-	public boolean writeBinaryContent(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException {
+	public boolean writeBinaryContent(IIdType theResourceId, String theBlobId, OutputStream theOutputStream)
+			throws IOException {
 		String key = toKey(theResourceId, theBlobId);
 		byte[] bytes = myDataMap.get(key);
 		if (bytes == null) {

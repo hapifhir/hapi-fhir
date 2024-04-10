@@ -363,13 +363,11 @@ public class TermConcept implements Serializable {
 
 	@Transient
 	@FullTextField(
-		name = "myParentPids",
-		searchable = Searchable.YES,
-		projectable = Projectable.YES,
-		analyzer = "conceptParentPidsAnalyzer")
-	@IndexingDependency(derivedFrom = @ObjectPath({
-		@PropertyValue(propertyName = "myParentPidsVc")
-	}))
+			name = "myParentPids",
+			searchable = Searchable.YES,
+			projectable = Projectable.YES,
+			analyzer = "conceptParentPidsAnalyzer")
+	@IndexingDependency(derivedFrom = @ObjectPath({@PropertyValue(propertyName = "myParentPidsVc")}))
 	public String getParentPidsAsString() {
 		return nonNull(myParentPidsVc) ? myParentPidsVc : myParentPids;
 	}

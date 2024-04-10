@@ -44,7 +44,7 @@ public class MigratePostgresOidToTextTask extends BaseTableColumnTask {
 
 		executeSql(
 				tableName,
-				"update " + tableName + " set " + toColumName + " = convert_from(lo_get(" + fromColumName + "), 'UTF8')  where "
-						+ fromColumName + " is not null");
+				"update " + tableName + " set " + toColumName + " = convert_from(lo_get(" + fromColumName
+						+ "), 'UTF8')  where " + fromColumName + " is not null");
 	}
 }

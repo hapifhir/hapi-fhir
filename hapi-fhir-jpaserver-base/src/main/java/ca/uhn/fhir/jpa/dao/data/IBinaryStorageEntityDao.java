@@ -31,7 +31,7 @@ public interface IBinaryStorageEntityDao extends JpaRepository<BinaryStorageEnti
 
 	@Query("SELECT e FROM BinaryStorageEntity e WHERE e.myContentId = :content_id AND e.myResourceId = :resource_id")
 	Optional<BinaryStorageEntity> findByIdAndResourceId(
-		@Param("content_id") String theContentId, @Param("resource_id") String theResourceId);
+			@Param("content_id") String theContentId, @Param("resource_id") String theResourceId);
 
 	@Modifying
 	@Query("DELETE FROM BinaryStorageEntity t WHERE t.myContentId = :pid")

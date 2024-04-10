@@ -290,7 +290,9 @@ public class TermValueSetConcept implements Serializable {
 		mySourceConceptDirectParentPidsVc = theSourceConceptDirectParentPids;
 	}
 
-	public String getSourceConceptDirectParentPids(){
-		return isNotEmpty(mySourceConceptDirectParentPidsVc) ? mySourceConceptDirectParentPidsVc : mySourceConceptDirectParentPids;
+	public String getSourceConceptDirectParentPids() {
+		return isNotEmpty(mySourceConceptDirectParentPidsVc)
+				? mySourceConceptDirectParentPidsVc
+				: mySourceConceptDirectParentPids;
 	}
 }

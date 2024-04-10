@@ -307,24 +307,22 @@ public class TermConceptProperty implements Serializable {
 	}
 
 	@VisibleForTesting
-	public byte[] getValueBlobForTesting(){
+	public byte[] getValueBlobForTesting() {
 		return myValueLob;
 	}
 
 	@VisibleForTesting
-	public void setValueBlobForTesting(byte[] theValueLob){
+	public void setValueBlobForTesting(byte[] theValueLob) {
 		myValueLob = theValueLob;
 	}
 
 	@VisibleForTesting
-	public byte[] getValueBinForTesting(){
+	public byte[] getValueBinForTesting() {
 		return myValueBin;
 	}
 
 	@VisibleForTesting
-	public void setValueBinForTesting(byte[] theValuebin){
+	public void setValueBinForTesting(byte[] theValuebin) {
 		myValueBin = theValuebin;
 	}
-
-
 }

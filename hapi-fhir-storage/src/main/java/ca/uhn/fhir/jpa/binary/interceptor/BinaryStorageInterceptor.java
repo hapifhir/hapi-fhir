@@ -257,7 +257,8 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 							newDeferredBinaryTarget.setBlobIdPrefixHookApplied(true);
 						} else {
 							throw new InternalErrorException(Msg.code(2341)
-									+ "Invalid binaryContent ID for backing storage service.[binaryContentId=" + newBinaryContentId + ",service="
+									+ "Invalid binaryContent ID for backing storage service.[binaryContentId="
+									+ newBinaryContentId + ",service="
 									+ myBinaryStorageSvc.getClass().getName() + "]");
 						}
 					}
@@ -275,10 +276,10 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 	private String invokeAssignBinaryContentPrefix(RequestDetails theRequest, IBaseResource theResource) {
 		// TODO: to be removed when pointcut STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX has exceeded the grace period
 		boolean hasStorageBinaryAssignBlobIdPrefix = CompositeInterceptorBroadcaster.hasHooks(
-			Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, myInterceptorBroadcaster, theRequest);
+				Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, myInterceptorBroadcaster, theRequest);
 
 		boolean hasStorageBinaryAssignBinaryContentIdPrefix = CompositeInterceptorBroadcaster.hasHooks(
-			Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX, myInterceptorBroadcaster, theRequest);
+				Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX, myInterceptorBroadcaster, theRequest);
 
 		if (!(hasStorageBinaryAssignBlobIdPrefix || hasStorageBinaryAssignBinaryContentIdPrefix)) {
 			return null;
@@ -292,12 +293,12 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 		Pointcut pointcutToInvoke = Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX;
 
 		// TODO: to be removed when pointcut STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX has exceeded the grace period
-		if (hasStorageBinaryAssignBlobIdPrefix){
+		if (hasStorageBinaryAssignBlobIdPrefix) {
 			pointcutToInvoke = Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX;
 		}
 
 		return (String) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
-			myInterceptorBroadcaster, theRequest, pointcutToInvoke, params);
+				myInterceptorBroadcaster, theRequest, pointcutToInvoke, params);
 	}
 
 	@Nonnull
@@ -386,7 +387,8 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 			Optional<String> attachmentId = nextTarget.getAttachmentId();
 			if (attachmentId.isPresent()) {
 
-				StoredDetails blobDetails = myBinaryStorageSvc.fetchBinaryContentDetails(resourceId, attachmentId.get());
+				StoredDetails blobDetails =
+						myBinaryStorageSvc.fetchBinaryContentDetails(resourceId, attachmentId.get());
 				if (blobDetails == null) {
 					String msg = myCtx.getLocalizer().getMessage(BinaryAccessProvider.class, "unknownBlobId");
 					throw new InvalidRequestException(Msg.code(1330) + msg);

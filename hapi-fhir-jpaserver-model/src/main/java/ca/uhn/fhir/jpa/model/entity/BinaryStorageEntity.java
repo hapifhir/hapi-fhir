@@ -126,11 +126,11 @@ public class BinaryStorageEntity {
 		return this;
 	}
 
-	public boolean hasStorageContent(){
+	public boolean hasStorageContent() {
 		return nonNull(myStorageContentBin);
 	}
 
-	public boolean hasBlob(){
+	public boolean hasBlob() {
 		return nonNull(myBlob);
 	}
 }

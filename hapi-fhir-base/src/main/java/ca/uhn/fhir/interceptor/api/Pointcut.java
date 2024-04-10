@@ -2959,10 +2959,9 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX(
-		String.class,
-		"ca.uhn.fhir.rest.api.server.RequestDetails",
-		"org.hl7.fhir.instance.model.api.IBaseResource"),
-
+			String.class,
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"org.hl7.fhir.instance.model.api.IBaseResource"),
 
 	/**
 	 * <b>Storage Hook:</b>

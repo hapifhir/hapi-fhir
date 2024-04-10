@@ -153,7 +153,8 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 			return binaryContentId;
 		}
 
-		String binaryContentIdPrefixFromHooksOrNull = callBinaryContentIdPointcut(theBytes, theRequestDetails, theContentType);
+		String binaryContentIdPrefixFromHooksOrNull =
+				callBinaryContentIdPointcut(theBytes, theRequestDetails, theContentType);
 		String binaryContentIdPrefixFromHooks = StringUtils.defaultString(binaryContentIdPrefixFromHooksOrNull);
 		return binaryContentIdPrefixFromHooks + binaryContentId;
 	}
@@ -171,18 +172,19 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	 * @return A string, which will be used to prefix the binary content ID. May be null.
 	 */
 	@Nullable
-	private String callBinaryContentIdPointcut(byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
+	private String callBinaryContentIdPointcut(
+			byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
 		// TODO: to be removed when pointcut STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX has exceeded the grace period
 		boolean hasStorageBinaryAssignBlobIdPrefix = CompositeInterceptorBroadcaster.hasHooks(
-			Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, myInterceptorBroadcaster, theRequestDetails);
+				Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, myInterceptorBroadcaster, theRequestDetails);
 
 		boolean hasStorageBinaryAssignBinaryContentIdPrefix = CompositeInterceptorBroadcaster.hasHooks(
-			Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX, myInterceptorBroadcaster, theRequestDetails);
+				Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX, myInterceptorBroadcaster, theRequestDetails);
 
 		if (!(hasStorageBinaryAssignBlobIdPrefix || hasStorageBinaryAssignBinaryContentIdPrefix)) {
 			return null;
 		}
-		
+
 		IBaseBinary binary =
 				BinaryUtil.newBinary(myFhirContext).setContent(theBytes).setContentType(theContentType);
 
@@ -194,12 +196,12 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 		Pointcut pointcutToInvoke = Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX;
 
 		// TODO: to be removed when pointcut STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX has exceeded the grace period
-		if (hasStorageBinaryAssignBlobIdPrefix){
+		if (hasStorageBinaryAssignBlobIdPrefix) {
 			pointcutToInvoke = Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX;
 		}
 
 		return (String) CompositeInterceptorBroadcaster.doCallHooksAndReturnObject(
-			myInterceptorBroadcaster, theRequestDetails, pointcutToInvoke, hookParams);
+				myInterceptorBroadcaster, theRequestDetails, pointcutToInvoke, hookParams);
 	}
 
 	@Override

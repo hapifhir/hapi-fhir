@@ -84,7 +84,6 @@ public class RenameTableTask extends BaseTableTask {
 				throw new IllegalStateException(Msg.code(58));
 		}
 		return retVal;
-
 	}
 
 	public String getTableNewName() {
