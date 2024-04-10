@@ -69,5 +69,5 @@ INSERT INTO BT2_WORK_CHUNK (
    'COMPLETED',
    'ReadInResourcesFromFileStep',
    NULL,
-   HEXTORAW('453d7a34'),
+   HEXTORAW('453d7a34')
 );
