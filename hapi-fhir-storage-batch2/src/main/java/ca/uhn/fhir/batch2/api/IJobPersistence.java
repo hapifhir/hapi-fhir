@@ -282,7 +282,8 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	WorkChunk createWorkChunk(WorkChunk theWorkChunk);
 
 	/**
-	 * Atomically advance the given job to the given step and change the status of all chunks in the next step to READY
+	 * Atomically advance the given job to the given step and change the status of all QUEUED and GATE_WAITING chunks
+	 * in the next step to READY
 	 * @param theJobInstanceId the id of the job instance to be updated
 	 * @param theNextStepId the id of the next job step
 	 * @return whether any changes were made

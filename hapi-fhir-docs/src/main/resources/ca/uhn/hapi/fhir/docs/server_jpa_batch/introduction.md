@@ -28,7 +28,7 @@ A Scheduled Job runs periodically (once a minute).  For each Job Instance in the
 
 1. Calculates job progress (% of work chunks in `COMPLETE` status). If the job is finished, purges any left over work chunks still in the database.
 1. Cleans up any complete, failed, or cancelled jobs that need to be removed.
-1. When the current step is complete, moves any gated jobs onto their next step and update all chunks in `GATE_WAITING` to `READY`.
+1. When the current step is complete, moves any gated jobs onto their next step and updates all chunks in `GATE_WAITING` to `READY`.
 1. If the final step of a gated job is a reduction step, a reduction step execution will be triggered.
 1. Moves all `READY` work chunks into the `QUEUED` state and publishes a message to the Batch Notification Message Channel to inform worker threads that a work chunk is now ready for processing. \*
 

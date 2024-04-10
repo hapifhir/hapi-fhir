@@ -44,7 +44,6 @@ import org.springframework.data.domain.Pageable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class JobInstanceProcessor {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
@@ -99,6 +98,18 @@ public class JobInstanceProcessor {
 
 		cleanupInstance(theInstance);
 		triggerGatedExecutions(theInstance, jobDefinition);
+
+		if (theInstance.hasGatedStep()) {
+			JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
+					jobDefinition, theInstance.getCurrentGatedStepId());
+			if (jobWorkCursor.isReductionStep()) {
+				// Reduction step work chunks should never be sent to the queue but to its specific service instead.
+				triggerReductionStep(theInstance, jobWorkCursor);
+				return;
+			}
+		}
+
+		// enqueue the chunks as normal
 		enqueueReadyChunks(theInstance, jobDefinition);
 
 		ourLog.debug("Finished job processing: {} - {}", myInstanceId, stopWatch);
@@ -187,18 +198,12 @@ public class JobInstanceProcessor {
 
 		JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
 				theJobDefinition, theInstance.getCurrentGatedStepId());
-
 		String instanceId = theInstance.getInstanceId();
 		String currentStepId = jobWorkCursor.getCurrentStepId();
 		boolean canAdvance = canAdvanceGatedJob(theInstance);
 		if (canAdvance) {
-			if (jobWorkCursor.isReductionStep()) {
-				// current step is the reduction step (all reduction steps are final)
-				JobWorkCursor<?, ?, ?> nextJobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
-						jobWorkCursor.getJobDefinition(), jobWorkCursor.getCurrentStepId());
-				myReductionStepExecutorService.triggerReductionStep(instanceId, nextJobWorkCursor);
-			} else if (!jobWorkCursor.isFinalStep()) {
-				// all other gated job steps except for final steps
+			if (!jobWorkCursor.isFinalStep()) {
+				// all other gated job steps except for final steps - final steps does not need to be advanced
 				String nextStepId = jobWorkCursor.nextStep.getStepId();
 				ourLog.info(
 						"All processing is complete for gated execution of instance {} step {}. Proceeding to step {}",
@@ -206,8 +211,12 @@ public class JobInstanceProcessor {
 						currentStepId,
 						nextStepId);
 
-				// otherwise, continue processing as expected
 				processChunksForNextGatedSteps(theInstance, nextStepId);
+			} else {
+				ourLog.info(
+						"Ready to advance gated execution of instance {} but already at the final step {}. Not proceeding to advance steps.",
+						instanceId,
+						jobWorkCursor.getCurrentStepId());
 			}
 		} else {
 			String stepId = jobWorkCursor.nextStep != null
@@ -254,19 +263,23 @@ public class JobInstanceProcessor {
 	}
 
 	/**
+	 * Trigger the reduction step for the given job instance. Reduction step chunks should never be queued.
+	 */
+	private void triggerReductionStep(JobInstance theInstance, JobWorkCursor<?, ?, ?> jobWorkCursor) {
+		String instanceId = theInstance.getInstanceId();
+		ourLog.debug("Triggering Reduction step {} of instance {}.", jobWorkCursor.getCurrentStepId(), instanceId);
+		myReductionStepExecutorService.triggerReductionStep(instanceId, jobWorkCursor);
+	}
+
+	/**
 	 * Chunks are initially created in READY state.
 	 * We will move READY chunks to QUEUE'd and send them to the queue/topic (kafka)
 	 * for processing.
-	 *
-	 * We could block chunks from being moved from QUEUE'd to READY here for gated steps
-	 * but currently, progress is calculated by looking at completed chunks only;
-	 * we'd need a new GATE_WAITING state to move chunks to prevent jobs from
-	 * completing prematurely.
 	 */
 	private void enqueueReadyChunks(JobInstance theJobInstance, JobDefinition<?> theJobDefinition) {
 		Iterator<WorkChunkMetadata> iter = getReadyChunks();
 
-		AtomicInteger counter = new AtomicInteger();
+		int counter = 0;
 		while (iter.hasNext()) {
 			WorkChunkMetadata metadata = iter.next();
 
@@ -278,10 +291,11 @@ public class JobInstanceProcessor {
 			 * * commit
 			 */
 			updateChunkAndSendToQueue(metadata);
+			counter++;
 		}
 		ourLog.debug(
 				"Encountered {} READY work chunks for job {} of type {}",
-				counter.get(),
+				counter,
 				theJobInstance.getInstanceId(),
 				theJobDefinition.getJobDefinitionId());
 	}

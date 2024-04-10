@@ -4,7 +4,6 @@ import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -21,7 +20,7 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 	}
 
 	@Test
-	default void test_gatedJob_stepReady_advances() throws InterruptedException {
+	default void test_gatedJob_stepReady_stepAdvances() throws InterruptedException {
 		// setup
 		String initialState = 	"""
       		# chunks ready - move to queued
@@ -108,7 +107,7 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 		3|GATE_WAITING
 	"""
 	})
-	default void testGatedStep2NotReady_notAdvance(String theChunkState) throws InterruptedException {
+	default void testGatedStep2NotReady_stepNotAdvance(String theChunkState) throws InterruptedException {
 		// setup
 		int expectedLatchCount = getLatchCountFromState(theChunkState);
 		PointcutLatch sendingLatch = getTestManager().disableWorkChunkMessageHandler();

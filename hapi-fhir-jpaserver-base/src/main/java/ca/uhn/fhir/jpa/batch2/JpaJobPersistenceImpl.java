@@ -128,7 +128,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setSerializedData(theBatchWorkChunk.serializedData);
 		entity.setCreateTime(new Date());
 		entity.setStartTime(new Date());
-		// set to GATE_WAITING if job is gated, to READY if not
+		// set gated job chunks to GATE_WAITING; they will be transitioned to READY during maintenance pass when all
+		// chunks in the previous step are COMPLETED
 		entity.setStatus(
 				theBatchWorkChunk.isGatedExecution ? WorkChunkStatusEnum.GATE_WAITING : WorkChunkStatusEnum.READY);
 
