@@ -411,10 +411,29 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void advanceJobStepAndUpdateChunkStatus_whenAlreadyInTargetStep_DoesNotUpdateStepOrChunks() {
+		// setup
+		JobInstance instance = createInstance(true, true);
+		String instanceId = mySvc.storeNewInstance(instance);
+		String chunkIdSecondStep1 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, true);
+		String chunkIdSecondStep2 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, true);
+
+		runInTransaction(() -> assertEquals(TARGET_STEP_ID, findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()));
+
+		// execute
+		runInTransaction(() -> mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, TARGET_STEP_ID));
+
+		// verify
+		runInTransaction(() -> {
+			assertEquals(WorkChunkStatusEnum.GATE_WAITING, findChunkByIdOrThrow(chunkIdSecondStep1).getStatus());
+			assertEquals(WorkChunkStatusEnum.GATE_WAITING, findChunkByIdOrThrow(chunkIdSecondStep2).getStatus());
+			assertEquals(TARGET_STEP_ID, findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId());
+		});
+	}
+
+	@Test
 	public void updateAllChunksForStepWithStatus_forGatedJob_updatesChunkStatus() {
 		// setup
-		WorkChunkStatusEnum expectedNoChangeStatus = WorkChunkStatusEnum.GATE_WAITING;
-		WorkChunkStatusEnum expectedChangedStatus = WorkChunkStatusEnum.COMPLETED;
 		JobInstance instance = createInstance(true, true);
 		String instanceId = mySvc.storeNewInstance(instance);
 		String chunkIdFirstStep = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, null, true);
@@ -422,19 +441,19 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String chunkIdSecondStep2 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, true);
 
 		runInTransaction(() -> {
-			assertEquals(expectedNoChangeStatus, findChunkByIdOrThrow(chunkIdFirstStep).getStatus());
-			assertEquals(expectedNoChangeStatus, findChunkByIdOrThrow(chunkIdSecondStep1).getStatus());
-			assertEquals(expectedNoChangeStatus, findChunkByIdOrThrow(chunkIdSecondStep2).getStatus());
+			assertEquals(WorkChunkStatusEnum.GATE_WAITING, findChunkByIdOrThrow(chunkIdFirstStep).getStatus());
+			assertEquals(WorkChunkStatusEnum.GATE_WAITING, findChunkByIdOrThrow(chunkIdSecondStep1).getStatus());
+			assertEquals(WorkChunkStatusEnum.GATE_WAITING, findChunkByIdOrThrow(chunkIdSecondStep2).getStatus());
 		});
 
 		// execute
-		runInTransaction(() -> mySvc.updateAllChunksForStepWithStatus(instanceId, LAST_STEP_ID, expectedChangedStatus, WorkChunkStatusEnum.GATE_WAITING));
+		runInTransaction(() -> mySvc.updateAllChunksForStepFromGateWaitingToReady(instanceId, LAST_STEP_ID));
 
 		// verify
 		runInTransaction(() -> {
-			assertEquals(expectedNoChangeStatus, findChunkByIdOrThrow(chunkIdFirstStep).getStatus());
-			assertEquals(expectedChangedStatus, findChunkByIdOrThrow(chunkIdSecondStep1).getStatus());
-			assertEquals(expectedChangedStatus, findChunkByIdOrThrow(chunkIdSecondStep2).getStatus());
+			assertEquals(WorkChunkStatusEnum.GATE_WAITING, findChunkByIdOrThrow(chunkIdFirstStep).getStatus());
+			assertEquals(WorkChunkStatusEnum.READY, findChunkByIdOrThrow(chunkIdSecondStep1).getStatus());
+			assertEquals(WorkChunkStatusEnum.READY, findChunkByIdOrThrow(chunkIdSecondStep2).getStatus());
 		});
 	}
 

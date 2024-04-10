@@ -109,14 +109,20 @@ public interface IBatch2WorkChunkRepository
 			@Param("newStatus") WorkChunkStatusEnum theNewStatus,
 			@Param("oldStatus") WorkChunkStatusEnum theOldStatus);
 
+	// In the old code, gated jobs' workchunks are created in status QUEUED but not actually queued for the
+	// workers.
+	// In order to keep them compatible, turn QUEUED chunks into READY, too.
+	// TODO: remove QUEUED from the in clause when we are certain that no one is still running the old code.
 	@Modifying
 	@Query(
-			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :newStatus WHERE e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId AND e.myStatus = :oldStatus")
-	int updateAllChunksForStepWithStatus(
+			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = ca.uhn.fhir.batch2.model.WorkChunkStatusEnum.READY WHERE "
+				+ "e.myInstanceId = :instanceId AND e.myTargetStepId = :stepId AND e.myStatus in ("
+				+ "ca.uhn.fhir.batch2.model.WorkChunkStatusEnum.GATE_WAITING,"
+				+ "ca.uhn.fhir.batch2.model.WorkChunkStatusEnum.QUEUED"
+				+ ")")
+	int updateAllChunksForStepFromGateWaitingToReady(
 			@Param("instanceId") String theInstanceId,
-			@Param("stepId") String theStepId,
-			@Param("newStatus") WorkChunkStatusEnum theNewStatus,
-			@Param("oldStatus") WorkChunkStatusEnum theOldStatus);
+			@Param("stepId") String theStepId);
 
 	@Modifying
 	@Query("DELETE FROM Batch2WorkChunkEntity e WHERE e.myInstanceId = :instanceId")

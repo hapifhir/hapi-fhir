@@ -598,22 +598,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 					theJobInstanceId,
 					theNextStepId);
 			// when we reach here, the current step id is equal to theNextStepId
-			myWorkChunkRepository.updateAllChunksForStepWithStatus(
-					theJobInstanceId, theNextStepId, WorkChunkStatusEnum.READY, WorkChunkStatusEnum.GATE_WAITING);
-
-			// In the old code, gated jobs' workchunks are created in status QUEUED but not actually queued for the
-			// workers.
-			// In order to keep them compatible, turn QUEUED chunks into READY, too.
-			// TODO: remove this when we are certain that no one is still running the old code.
-			int numChanged = myWorkChunkRepository.updateAllChunksForStepWithStatus(
-					theJobInstanceId, theNextStepId, WorkChunkStatusEnum.READY, WorkChunkStatusEnum.QUEUED);
-			if (numChanged > 0) {
-				ourLog.debug(
-						"Updated {} chunks of gated instance {} for step {} from fake QUEUED to READY.",
-						numChanged,
-						theJobInstanceId,
-						theNextStepId);
-			}
+			int numChanged = myWorkChunkRepository.updateAllChunksForStepFromGateWaitingToReady(theJobInstanceId, theNextStepId);
+			ourLog.debug(
+					"Updated {} chunks of gated instance {} for step {} from fake QUEUED to READY.",
+					numChanged,
+					theJobInstanceId,
+					theNextStepId);
 		}
 
 		return changed;
@@ -621,18 +611,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public int updateAllChunksForStepWithStatus(
-			String theJobInstanceId,
-			String theStepId,
-			WorkChunkStatusEnum theNewStatus,
-			WorkChunkStatusEnum theOldStatus) {
+	public int updateAllChunksForStepFromGateWaitingToReady(String theJobInstanceId, String theStepId) {
 		ourLog.debug(
-				"Updating chunk status from {} to {} for gated instance {} in step {}.",
-				theOldStatus,
-				theNewStatus,
+				"Updating chunk status from GATE_WAITING to READY for gated instance {} in step {}.",
 				theJobInstanceId,
 				theStepId);
-		return myWorkChunkRepository.updateAllChunksForStepWithStatus(
-				theJobInstanceId, theStepId, theNewStatus, theOldStatus);
+		return myWorkChunkRepository.updateAllChunksForStepFromGateWaitingToReady(theJobInstanceId, theStepId);
 	}
 }

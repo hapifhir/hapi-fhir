@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -175,33 +176,16 @@ class JpaJobPersistenceImplTest {
 	}
 
 	@Test
-	void advanceJobStepAndUpdateChunkStatus_validRequest_callsPersistenceUpdateAndReturnsChanged() {
-		// setup
-		String instanceId = "jobId";
-		String nextStepId = "nextStep";
-
-		// execute
-		mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, nextStepId);
-
-		// verify
-		verify(mySvc).updateInstance(instanceId, any());
-		verify(myWorkChunkRepository).updateAllChunksForStepWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.READY, WorkChunkStatusEnum.GATE_WAITING);
-		verify(myWorkChunkRepository).updateAllChunksForStepWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.READY, WorkChunkStatusEnum.QUEUED);
-	}
-
-	@Test
 	void updateAllChunksForStepWithStatus_validRequest_callsPersistenceUpdateAndReturnsChanged() {
 		// setup
 		String instanceId = "jobId";
 		String nextStepId = "nextStep";
-		WorkChunkStatusEnum expectedNewStatus = WorkChunkStatusEnum.READY;
-		WorkChunkStatusEnum expectedOldStatus = WorkChunkStatusEnum.GATE_WAITING;
 
 		// execute
-		mySvc.updateAllChunksForStepWithStatus(instanceId, nextStepId, expectedNewStatus, expectedOldStatus);
+		mySvc.updateAllChunksForStepFromGateWaitingToReady(instanceId, nextStepId);
 
 		// verify
-		verify(myWorkChunkRepository).updateAllChunksForStepWithStatus(instanceId, nextStepId, expectedNewStatus, expectedOldStatus);
+		verify(myWorkChunkRepository).updateAllChunksForStepFromGateWaitingToReady(instanceId, nextStepId);
 	}
 
 	private JobInstance createJobInstanceFromEntity(Batch2JobInstanceEntity theEntity) {
