@@ -81,7 +81,7 @@ public class RenameTableTask extends BaseTableTask {
 				retVal = "sp_rename '" + oldTableName + "', '" + newTableName + "'";
 				break;
 			default:
-				throw new IllegalStateException(Msg.code(58));
+				throw new IllegalStateException(Msg.code(2513));
 		}
 		return retVal;
 	}
