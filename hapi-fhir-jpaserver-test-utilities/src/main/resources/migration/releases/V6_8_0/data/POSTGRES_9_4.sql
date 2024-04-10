@@ -183,7 +183,7 @@ INSERT INTO HFJ_SEARCH (
    NULL,
    'MEDICATIONREQUEST',
    NULL,
-   7368816,
+   '013d7d16d7ad4fefb61bd95b765c8ceb',
    NULL,
    1212873581,
    '?_lastUpdated=le2021-05-31',
