@@ -28,6 +28,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 import java.util.ArrayList;
@@ -267,6 +268,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 
 			codeValidationResult.setMessage(msg);
+			codeValidationResult.addCodeValidationIssue(e.getCodeValidationIssue());
 			return codeValidationResult;
 		}
 
@@ -413,6 +415,24 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			codeSystemToValidateResource = theValidationSupportContext
 					.getRootValidationSupport()
 					.fetchCodeSystem(theCodeSystemUrlAndVersionToValidate);
+			if (codeSystemToValidateResource == null) {
+
+				List<OperationOutcome.OperationOutcomeIssueComponent> issues = new ArrayList<>();
+
+				// FIXME match
+				// validation.validation-simple-codeableconcept-bad-system
+				// validation.validation-simple-codeableconcept-bad-version2
+				// validation.validation-simple-coding-bad-system
+				// validation.validation-simple-coding-bad-system-local
+				// validation.validation-simple-coding-bad-system2
+
+				String theMessage = "Unknown CodeSystem: " + theCodeSystemUrlAndVersionToValidate;
+				return new CodeValidationResult()
+						.setSeverityCode("error")
+						.setMessage(theMessage)
+						.addCodeValidationIssue(new CodeValidationIssue(
+								theMessage, CodeValidationIssueCode.NOT_FOUND, CodeValidationIssueCoding.NOT_FOUND));
+			}
 		}
 
 		List<FhirVersionIndependentConcept> codes = new ArrayList<>();
@@ -588,7 +608,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 		ValidationMessage.IssueSeverity severity;
 		String message;
-
+		CodeValidationIssueCode issueCode = CodeValidationIssueCode.CODE_INVALID;
+		CodeValidationIssueCoding issueCoding = CodeValidationIssueCoding.INVALID_CODE;
 		if ("fragment".equals(codeSystemResourceContentMode)) {
 			severity = ValidationMessage.IssueSeverity.WARNING;
 			message = "Unknown code in fragment CodeSystem '"
@@ -606,9 +627,13 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		}
 		if (isNotBlank(theValueSetUrl)) {
 			message += " for in-memory expansion of ValueSet '" + theValueSetUrl + "'";
+			issueCoding = CodeValidationIssueCoding.NOT_IN_VS;
 		}
 
-		return new CodeValidationResult().setSeverityCode(severity.toCode()).setMessage(message);
+		return new CodeValidationResult()
+				.setSeverityCode(severity.toCode())
+				.setMessage(message)
+				.addCodeValidationIssue(new CodeValidationIssue(message, issueCode, issueCoding));
 	}
 
 	@Override
@@ -916,7 +941,6 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 			boolean ableToHandleCode = false;
 			String failureMessage = null;
-			FailureType failureType = FailureType.OTHER;
 
 			boolean isIncludeCodeSystemIgnored = includeOrExcludeSystemResource != null
 					&& includeOrExcludeSystemResource.getContent() == Enumerations.CodeSystemContentMode.NOTPRESENT;
@@ -1026,16 +1050,21 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			}
 
 			if (!ableToHandleCode) {
-				if (includeOrExcludeSystemResource == null && failureMessage == null) {
-					failureMessage = getFailureMessageForMissingOrUnusableCodeSystem(
+				if (failureMessage == null) {
+					if (includeOrExcludeSystemResource == null) {
+						failureMessage = getFailureMessageForMissingOrUnusableCodeSystem(
 							includeOrExcludeSystemResource, loadedCodeSystemUrl);
+					} else {
+						failureMessage = "Unable to expand value set";
+					}
 				}
 
-				if (includeOrExcludeSystemResource == null) {
-					failureType = FailureType.UNKNOWN_CODE_SYSTEM;
-				}
-
-				throw new ExpansionCouldNotBeCompletedInternallyException(Msg.code(702) + failureMessage, failureType);
+				throw new ExpansionCouldNotBeCompletedInternallyException(
+						Msg.code(702) + failureMessage,
+						new CodeValidationIssue(
+								failureMessage,
+								CodeValidationIssueCode.NOT_FOUND,
+								CodeValidationIssueCoding.NOT_FOUND));
 			}
 
 			if (includeOrExcludeSystemResource != null
@@ -1055,9 +1084,11 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				org.hl7.fhir.r5.model.ValueSet subExpansion =
 						expandValueSetR5(theValidationSupportContext, vs, theWantSystemUrlAndVersion, theWantCode);
 				if (subExpansion == null) {
+					String theMessage = "Failed to expand ValueSet: " + nextValueSetInclude.getValueAsString();
 					throw new ExpansionCouldNotBeCompletedInternallyException(
-							Msg.code(703) + "Failed to expand ValueSet: " + nextValueSetInclude.getValueAsString(),
-							FailureType.OTHER);
+							Msg.code(703) + theMessage,
+							new CodeValidationIssue(
+									theMessage, CodeValidationIssueCode.OTHER, CodeValidationIssueCoding.OTHER));
 				}
 				for (org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent next :
 						subExpansion.getExpansion().getContains()) {
@@ -1302,7 +1333,9 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				.setMessage(message)
 				.setCode(theCode)
 				.setCodeSystemVersion(theCodeSystemVersion)
-				.setDisplay(theExpectedDisplay);
+				.setDisplay(theExpectedDisplay)
+				.setCodeValidationIssues(Collections.singletonList(new CodeValidationIssue(
+						message, CodeValidationIssueCode.INVALID, CodeValidationIssueCoding.INVALID_DISPLAY)));
 	}
 
 	private static void flattenAndConvertCodesDstu2(
@@ -1365,23 +1398,19 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		}
 	}
 
-	public enum FailureType {
-		UNKNOWN_CODE_SYSTEM,
-		OTHER
-	}
-
 	public static class ExpansionCouldNotBeCompletedInternallyException extends Exception {
 
 		private static final long serialVersionUID = -2226561628771483085L;
-		private final FailureType myFailureType;
+		private final CodeValidationIssue myCodeValidationIssue;
 
-		public ExpansionCouldNotBeCompletedInternallyException(String theMessage, FailureType theFailureType) {
+		public ExpansionCouldNotBeCompletedInternallyException(
+				String theMessage, CodeValidationIssue theCodeValidationIssue) {
 			super(theMessage);
-			myFailureType = theFailureType;
+			myCodeValidationIssue = theCodeValidationIssue;
 		}
 
-		public FailureType getFailureType() {
-			return myFailureType;
+		public CodeValidationIssue getCodeValidationIssue() {
+			return myCodeValidationIssue;
 		}
 	}
 }

@@ -55,6 +55,7 @@ import org.hl7.fhir.dstu3.model.StructureDefinition.StructureDefinitionKind;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.dstu3.model.ValueSet.ValueSetExpansionComponent;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+
 import org.hl7.fhir.r5.utils.validation.IValidationPolicyAdvisor;
 import org.hl7.fhir.r5.utils.validation.IValidatorResourceFetcher;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
@@ -71,6 +72,7 @@ import org.mockito.stubbing.Answer;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -223,7 +225,10 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
-					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code (for '" + system + "#" + code + "')");
+					final String message = "Unknown code (for '" + system + "#" + code + "')";
+
+					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage(message).setCodeValidationIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(message, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
+
 				} else if (myCodeSystems.containsKey(system)) {
 					CodeSystem cs = myCodeSystems.get(system);
 					Optional<ConceptDefinitionComponent> found = cs.getConcept().stream().filter(t -> t.getCode().equals(code)).findFirst();
@@ -347,7 +352,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 			List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 			assertEquals(2, all.size());
 			assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
-			assertEquals("Unknown code (for 'urn:iso:std:iso:3166#QQ')", all.get(0).getMessage());
+			assertEquals("Unknown code 'urn:iso:std:iso:3166#QQ'", all.get(0).getMessage());
 		}
 	}
 
@@ -813,6 +818,8 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		myCodeSystems.put("http://hl7.org/fhir/v3/RoleCode", mockOfRoleCode);
 
 		addValidConcept("http://hl7.org/fhir/v3/RoleCode", "GPARNT");
+		addValidConcept("http://hl7.org/fhir/v3/RoleCode", "PRN");
+
 
 		org.hl7.fhir.dstu3.model.CodeSystem mockOfLoinc = new org.hl7.fhir.dstu3.model.CodeSystem();
 		mockOfLoinc.setUrl("http://hl7.org/fhir/uv/ips/CodeSystem/absent-unknown-uv-ips");
@@ -1174,6 +1181,9 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		input.setStatus(ObservationStatus.FINAL);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("12345");
 
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
+
+
 		myInstanceVal.setValidationSupport(myValidationSupport);
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
@@ -1368,10 +1378,10 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 		ValidationResult output = myVal.validateWithResult(patient);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(1, all.size());
+		assertEquals(2, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertThat(
-			all.get(0).getMessage(),
+			all.get(1).getMessage(),
 			containsString("None of the codings provided are in the value set 'Identifier Type Codes'"));
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 

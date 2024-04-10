@@ -41,7 +41,6 @@ import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.ValidationContextCarrier;
 import org.hl7.fhir.utilities.FhirPublication;
 import org.hl7.fhir.utilities.TimeTracker;
-import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.i18n.I18nBase;
 import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -285,7 +284,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					theResult.getCodeSystemVersion(),
 					conceptDefinitionComponent,
 					display,
-					null);
+					getIssuesForCodeValidation(theResult.getCodeValidationIssues()));
 		}
 
 		if (retVal == null) {
@@ -293,6 +292,58 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		}
 
 		return retVal;
+	}
+
+	private List<OperationOutcome.OperationOutcomeIssueComponent> getIssuesForCodeValidation(
+			List<IValidationSupport.CodeValidationIssue> codeValidationIssues) {
+		List<OperationOutcome.OperationOutcomeIssueComponent> issues = new ArrayList<>();
+
+		for (IValidationSupport.CodeValidationIssue codeValidationIssue : codeValidationIssues) {
+
+			CodeableConcept codeableConcept = new CodeableConcept().setText(codeValidationIssue.getMessage());
+			codeableConcept.addCoding("http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
+				getIssueCodingFromCodeValidationIssue(codeValidationIssue),
+				null);
+
+			OperationOutcome.OperationOutcomeIssueComponent issue =
+					new OperationOutcome.OperationOutcomeIssueComponent()
+							.setSeverity(OperationOutcome.IssueSeverity.ERROR)
+							.setCode(getIssueTypeFromCodeValidationIssue(codeValidationIssue))
+							.setDetails(codeableConcept);
+			issue.getDetails().setText(codeValidationIssue.getMessage());
+
+			issues.add(issue);
+		}
+		return issues;
+	}
+
+	private String getIssueCodingFromCodeValidationIssue(IValidationSupport.CodeValidationIssue codeValidationIssue) {
+		switch (codeValidationIssue.getCoding()) {
+			case VS_INVALID:
+				return "vs-invalid";
+			case NOT_FOUND:
+				return "not-found";
+			case NOT_IN_VS:
+				return "not-in-vs";
+			case INVALID_CODE:
+				return "invalid-code";
+			case INVALID_DISPLAY:
+				return "invalid-display";
+		}
+		return null;
+	}
+
+	private OperationOutcome.IssueType getIssueTypeFromCodeValidationIssue(
+			IValidationSupport.CodeValidationIssue codeValidationIssue) {
+		switch (codeValidationIssue.getCode()) {
+			case NOT_FOUND:
+				return OperationOutcome.IssueType.NOTFOUND;
+			case CODE_INVALID:
+				return OperationOutcome.IssueType.CODEINVALID;
+			case INVALID:
+				return OperationOutcome.IssueType.INVALID;
+		}
+		return null;
 	}
 
 	@Override
@@ -627,11 +678,6 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public TranslationServices translator() {
-		throw new UnsupportedOperationException(Msg.code(688));
-	}
-
-	@Override
 	public ValueSetExpansionOutcome expandVS(
 			ValueSet source, boolean cacheOk, boolean heiarchical, boolean incompleteOk) {
 		return null;
@@ -748,6 +794,19 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 							theCode,
 							theDisplay,
 							theValueSet);
+			if (result != null && !result.isOk()) {
+				// So the code isn't in the ValueSet, but it might also be invalid in the code system.
+				IValidationSupport.CodeValidationResult codeSystemResult = myValidationSupportContext
+						.getRootValidationSupport()
+						.validateCode(
+								myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, null);
+				if (codeSystemResult != null) {
+					for (IValidationSupport.CodeValidationIssue codeValidationIssue :
+							codeSystemResult.getCodeValidationIssues()) {
+						result.addCodeValidationIssue(codeValidationIssue);
+					}
+				}
+			}
 		} else {
 			result = myValidationSupportContext
 					.getRootValidationSupport()
@@ -787,15 +846,22 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 					return retVal;
 				}
 			} else {
-
+				/*
 				final String message = "Unknown code (for '" + next.getSystem() + "#" + next.getCode() + "')";
 				final String txIssueTypeCode = getTxIssueTypeCode(next.getSystem(), theVs);
 				OperationOutcome.OperationOutcomeIssueComponent issue = getOperationOutcomeTxIssueComponent(
 						message, OperationOutcome.IssueType.CODEINVALID, txIssueTypeCode);
 				if (myValidationSupportContext.isEnabledValidationForCodingsLogicalAnd()) {
 					issue.setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
+				}*/
+				for (OperationOutcome.OperationOutcomeIssueComponent issue : retVal.getIssues()) {
+					// if ((issue.getSeverity().equals(OperationOutcome.IssueSeverity.ERROR)
+					//	|| issue.getSeverity().equals(OperationOutcome.IssueSeverity.WARNING))
+					//	&& myValidationSupportContext.isEnabledValidationForCodingsLogicalAnd()) {
+					//	issue.setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
+					// }
+					issues.add(issue);
 				}
-				issues.add(issue);
 			}
 		}
 
@@ -804,27 +870,16 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 			return validationResultsOk.get(0);
 		}
 
-		if (theVs == null && issues.isEmpty()) {
-			String message = "Unknown code (for '" + code.getCodingFirstRep().getSystem() + "#"
-					+ code.getCodingFirstRep().getCode() + "')";
-			OperationOutcome.OperationOutcomeIssueComponent issue = getOperationOutcomeTxIssueComponent(
-					message, OperationOutcome.IssueType.NOTFOUND, OperationOutcome.IssueType.NOTFOUND.toCode());
-			issues.add(issue);
-		}
-
+		/*
+				if (theVs == null) {
+					String message = "Unknown code (for '" + code.getCodingFirstRep().getSystem() + "#"
+							+ code.getCodingFirstRep().getCode() + "')";
+					OperationOutcome.OperationOutcomeIssueComponent issue = getOperationOutcomeTxIssueComponent(
+							message, OperationOutcome.IssueType.CODEINVALID, OperationOutcome.IssueType.CODEINVALID.toCode());
+					issues.add(issue);
+				}
+		*/
 		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, issues);
-	}
-
-	private String getTxIssueTypeCode(String theSystem, ValueSet theVs) {
-		if (theVs == null) {
-			return OperationOutcome.IssueType.CODEINVALID.toCode();
-		}
-		if (myValidationSupportContext
-				.getRootValidationSupport()
-				.isCodeSystemSupported(myValidationSupportContext, theSystem)) {
-			return OperationOutcome.IssueType.CODEINVALID.toCode();
-		}
-		return "not-in-vs";
 	}
 
 	private static OperationOutcome.OperationOutcomeIssueComponent getOperationOutcomeTxIssueComponent(

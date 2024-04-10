@@ -80,6 +80,7 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -207,8 +208,8 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
-					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code (for '" + system + "#" +
-						code + "')");
+					final String message = "Unknown code (for '" + system + "#" + code + "')";
+					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage(message).setCodeValidationIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(message, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
 				}
@@ -220,9 +221,11 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 			@Override
 			public CodeSystem answer(InvocationOnMock theInvocation) {
 				String system = theInvocation.getArgument(0, String.class);
-				if ("http://loinc.org".equals(system)) {
+				if ("http://loinc.org".equals(system)
+					|| "http://unitsofmeasure.org".equals(system)
+				) {
 					CodeSystem retVal = new CodeSystem();
-					retVal.setUrl("http://loinc.org");
+					retVal.setUrl(system);
 					retVal.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 					ourLog.debug("fetchCodeSystem({}) : {}", new Object[]{theInvocation.getArguments()[0], retVal});
 					return retVal;
@@ -263,7 +266,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 			if (myValidConcepts.contains(system + "___" + code)) {
 				return new IValidationSupport.LookupCodeResult().setFound(true);
 			} else {
-				return null;
+				return new IValidationSupport.LookupCodeResult().setFound(false);
 			}
 		});
 		when(myMockSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenAnswer(t -> {
@@ -673,8 +676,8 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		String input = IOUtils.toString(FhirInstanceValidatorR4BTest.class.getResourceAsStream("/r4/diagnosticreport-example-gingival-mass.json"), Constants.CHARSET_UTF8);
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> messages = logResultsAndReturnAll(output);
-		assertEquals(2, messages.size());
-		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", messages.get(1).getMessage());
+		assertEquals(1, messages.size());
+		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", messages.get(0).getMessage());
 	}
 
 	@Test
@@ -1356,12 +1359,14 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 		p.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		p.addIdentifier().setSystem("http://example.com/").setValue("12345").getType().addCoding().setSystem("http://example.com/foo/bar").setCode("bar");
 
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+
 		ValidationResult output = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(1, all.size());
+		assertEquals(2, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 
-		assertThat(all.get(0).getMessage(), containsString("None of the codings provided are in the value set 'IdentifierType'"));
+		assertThat(all.get(1).getMessage(), containsString("None of the codings provided are in the value set 'IdentifierType'"));
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}
@@ -1370,6 +1375,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 	@Test
 	public void testValidateWithUcum() throws IOException {
 		addValidConcept("http://loinc.org", "8310-5");
+		addValidConcept("http://unitsofmeasure.org", "Cel");
 
 		Observation input = loadResource(ourCtx, Observation.class, "/r4/observation-with-body-temp-ucum.json");
 		ValidationResult output = myFhirValidator.validateWithResult(input);
@@ -1414,6 +1420,8 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 			.addCoding()
 			.setSystem("http://terminology.hl7.org/CodeSystem/v2-0203")
 			.setCode("MR");
+
+		
 
 		ValidationResult output = myFhirValidator.validateWithResult(patient);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
@@ -1691,7 +1699,12 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 
 		myMockSupport = mock(IValidationSupport.class);
 		when(myMockSupport.getFhirContext()).thenReturn(ourCtx);
-		ValidationSupportChain chain = new ValidationSupportChain(myDefaultValidationSupport, myMockSupport, new InMemoryTerminologyServerValidationSupport(ourCtx), new CommonCodeSystemsTerminologyService(ourCtx), new SnapshotGeneratingValidationSupport(ourCtx));
+		ValidationSupportChain chain = new ValidationSupportChain(
+			myDefaultValidationSupport,
+			myMockSupport,
+			new CommonCodeSystemsTerminologyService(ourCtx),
+			new InMemoryTerminologyServerValidationSupport(ourCtx),
+			new SnapshotGeneratingValidationSupport(ourCtx));
 		myValidationSupport = new CachingValidationSupport(chain, theLogicalAnd);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 		myFhirValidator.registerValidatorModule(myInstanceVal);

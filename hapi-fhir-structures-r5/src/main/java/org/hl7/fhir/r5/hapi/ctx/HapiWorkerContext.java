@@ -37,7 +37,6 @@ import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.ValidationContextCarrier;
 import org.hl7.fhir.utilities.FhirPublication;
 import org.hl7.fhir.utilities.TimeTracker;
-import org.hl7.fhir.utilities.TranslationServices;
 import org.hl7.fhir.utilities.i18n.I18nBase;
 import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -352,11 +351,6 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public Set<String> getCodeSystemsUsed() {
 		throw new UnsupportedOperationException(Msg.code(218));
-	}
-
-	@Override
-	public TranslationServices translator() {
-		throw new UnsupportedOperationException(Msg.code(219));
 	}
 
 	@Override

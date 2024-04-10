@@ -60,6 +60,7 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -192,7 +193,8 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
-					return new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage("Unknown code (for '" + system + "#" + code + "')");
+					String theMessage = "Unknown code (for '" + system + "#" + code + "')";
+					return new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage(theMessage).setCodeValidationIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(theMessage, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
 				}
@@ -780,7 +782,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 
 		assertEquals(2, outcome.size());
-		assertThat(outcome.get(0).getMessage(), containsString("Unknown code (for 'http://terminology.hl7.org/CodeSystem/v2-0131#GAGAGAGA')"));
+		assertThat(outcome.get(0).getMessage(), containsString("Unknown code 'http://terminology.hl7.org/CodeSystem/v2-0131#GAGAGAGA'"));
 		assertEquals(ResultSeverityEnum.ERROR, outcome.get(0).getSeverity());
 		assertThat(outcome.get(1).getMessage(), containsString("None of the codings provided are in the value set 'Patient Relationship Type'"));
 		assertEquals(ResultSeverityEnum.INFORMATION, outcome.get(1).getSeverity());
@@ -1008,11 +1010,11 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myVal.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(1, all.size());
+		assertEquals(2, all.size());
 
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertThat(
-			all.get(0).getMessage(),
+			all.get(1).getMessage(),
 			containsString("None of the codings provided are in the value set 'Identifier Type Codes'"));
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 

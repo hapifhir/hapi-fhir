@@ -88,6 +88,7 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -285,7 +286,8 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 				if (myValidConcepts.contains(system + "___" + code)) {
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
-					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage("Unknown code");
+					final String message = "Unknown code (for '" + system + "#" + code + "')";
+					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage(message).setCodeValidationIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(message, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
 				}
@@ -385,7 +387,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
 		assertFalse(result.isSuccessful(), all.toString());
-		assertThat(result.getMessages().get(0).getMessage(), startsWith("Unknown code (for 'https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code#foo')"));
+		assertThat(result.getMessages().get(0).getMessage(), startsWith("Unknown code 'https://hapifhir.io/fhir/CodeSystem/hapi-fhir-storage-response-code#foo'"));
 
 	}
 
@@ -1477,11 +1479,14 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		p.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		p.addIdentifier().setSystem("http://example.com/").setValue("12345").getType().addCoding().setSystem("http://example.com/foo/bar").setCode("bar");
 
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
+
+
 		ValidationResult output = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(1, all.size());
+		assertEquals(2, all.size());
 
-		assertThat(all.get(0).getMessage(), containsString("None of the codings provided are in the value set 'IdentifierType'"));
+		assertThat(all.get(1).getMessage(), containsString("None of the codings provided are in the value set 'IdentifierType'"));
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}
@@ -1770,7 +1775,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		OperationOutcome oo = (OperationOutcome) result.toOperationOutcome();
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
-		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah' (for 'urn:iso:std:iso:4217#blah')", result.getMessages().get(0).getMessage());
+		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah'", result.getMessages().get(0).getMessage());
 		assertEquals(ResultSeverityEnum.ERROR, result.getMessages().get(0).getSeverity());
 		assertEquals(22, result.getMessages().get(0).getLocationLine());
 		assertEquals(4, result.getMessages().get(0).getLocationCol());

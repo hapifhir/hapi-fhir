@@ -459,6 +459,49 @@ public interface IValidationSupport {
 		INFORMATION
 	}
 
+	enum CodeValidationIssueCode {
+		NOT_FOUND,
+		CODE_INVALID,
+		INVALID,
+		OTHER
+	}
+
+	enum CodeValidationIssueCoding {
+		VS_INVALID,
+		NOT_FOUND,
+		NOT_IN_VS,
+
+		INVALID_CODE,
+		INVALID_DISPLAY,
+		OTHER
+	}
+
+	class CodeValidationIssue {
+
+		private final String myMessage;
+		private final CodeValidationIssueCode myCode;
+		private final CodeValidationIssueCoding myCoding;
+
+		public CodeValidationIssue(
+				String theMessage, CodeValidationIssueCode theCode, CodeValidationIssueCoding theCoding) {
+			this.myMessage = theMessage;
+			this.myCode = theCode;
+			this.myCoding = theCoding;
+		}
+
+		public String getMessage() {
+			return myMessage;
+		}
+
+		public CodeValidationIssueCode getCode() {
+			return myCode;
+		}
+
+		public CodeValidationIssueCoding getCoding() {
+			return myCoding;
+		}
+	}
+
 	class ConceptDesignation {
 
 		private String myLanguage;
@@ -604,6 +647,10 @@ public interface IValidationSupport {
 		private String myDisplay;
 		private String mySourceDetails;
 
+		// List<OperationOutcomeIssueComponent>
+
+		private List<CodeValidationIssue> myCodeValidationIssues;
+
 		public CodeValidationResult() {
 			super();
 		}
@@ -684,6 +731,23 @@ public interface IValidationSupport {
 
 		public CodeValidationResult setSeverity(IssueSeverity theSeverity) {
 			mySeverity = theSeverity;
+			return this;
+		}
+
+		public List<CodeValidationIssue> getCodeValidationIssues() {
+			if (myCodeValidationIssues == null) {
+				myCodeValidationIssues = new ArrayList<>();
+			}
+			return myCodeValidationIssues;
+		}
+
+		public CodeValidationResult setCodeValidationIssues(List<CodeValidationIssue> theCodeValidationIssues) {
+			myCodeValidationIssues = new ArrayList<>(theCodeValidationIssues);
+			return this;
+		}
+
+		public CodeValidationResult addCodeValidationIssue(CodeValidationIssue theCodeValidationIssue) {
+			getCodeValidationIssues().add(theCodeValidationIssue);
 			return this;
 		}
 

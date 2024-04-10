@@ -1035,8 +1035,8 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				} catch (InMemoryTerminologyServerValidationSupport.ExpansionCouldNotBeCompletedInternallyException e) {
 					if (theExpansionOptions != null
 							&& !theExpansionOptions.isFailOnMissingCodeSystem()
-							&& e.getFailureType()
-									== InMemoryTerminologyServerValidationSupport.FailureType.UNKNOWN_CODE_SYSTEM) {
+							// Code system is unknown, therefore NOT_FOUND
+							&& e.getCodeValidationIssue().getCoding() == CodeValidationIssueCoding.NOT_FOUND) {
 						return;
 					}
 					throw new InternalErrorException(Msg.code(888) + e);
