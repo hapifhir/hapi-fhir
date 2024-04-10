@@ -156,7 +156,7 @@ INSERT INTO TRM_VALUESET (
 ) VALUES (
    60,
    'EXPANDED',
-   '2024-04-04 16:09:14.488',
+   SYSDATE,
    'v2.0926',
    1654,
    0,
