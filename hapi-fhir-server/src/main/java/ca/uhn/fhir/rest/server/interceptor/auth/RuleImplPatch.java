@@ -27,6 +27,11 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Set;
 
+/**
+ * @deprecated Users should be instead be granted more granular write permissions that cover PATCH operations.
+ * @since 7.2.0
+ */
+@Deprecated
 class RuleImplPatch extends BaseRule {
 	private boolean myAllRequests;
 

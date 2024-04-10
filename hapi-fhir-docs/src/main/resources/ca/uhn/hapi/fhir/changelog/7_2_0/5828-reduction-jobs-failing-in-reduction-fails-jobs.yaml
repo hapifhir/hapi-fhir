@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 5828
+title: "When batch 2 jobs with Reduction steps fail in the final part
+        of the reduction step, this would often leave the job
+        stuck in the FINALIZE state.
+        This has been fixed; the job will now FAIL.
+"

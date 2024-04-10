@@ -44,14 +44,12 @@ import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.model.ExpungeOutcome;
 import ca.uhn.fhir.jpa.api.model.LazyDaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.index.IdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.delete.DeleteConflictUtil;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.BaseHasResource;
 import ca.uhn.fhir.jpa.model.entity.BaseTag;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -517,18 +515,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			}
 		}
 
-		String resourceIdBeforeStorage = theResource.getIdElement().getIdPart();
-		boolean resourceHadIdBeforeStorage = isNotBlank(resourceIdBeforeStorage);
-		boolean resourceIdWasServerAssigned =
-				theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE;
-		if (resourceHadIdBeforeStorage) {
-			entity.setFhirId(resourceIdBeforeStorage);
-		}
+		boolean isClientAssignedId = storeNonPidResourceId(theResource, entity);
 
 		HookParams hookParams;
 
 		// Notify interceptor for accepting/rejecting client assigned ids
-		if (!resourceIdWasServerAssigned && resourceHadIdBeforeStorage) {
+		if (isClientAssignedId) {
 			hookParams = new HookParams().add(IBaseResource.class, theResource).add(RequestDetails.class, theRequest);
 			doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_CLIENT_ASSIGNED_ID, hookParams);
 		}
@@ -542,7 +534,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.add(TransactionDetails.class, theTransactionDetails);
 		doCallHooks(theTransactionDetails, theRequest, Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, hookParams);
 
-		if (resourceHadIdBeforeStorage && !resourceIdWasServerAssigned) {
+		if (isClientAssignedId) {
 			validateResourceIdCreation(theResource, theRequest);
 		}
 
@@ -569,31 +561,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// Store the resource forced ID if necessary
 		JpaPid jpaPid = JpaPid.fromId(updatedEntity.getResourceId());
-		if (resourceHadIdBeforeStorage) {
-			if (resourceIdWasServerAssigned) {
-				boolean createForPureNumericIds = true;
-				createForcedIdIfNeeded(entity, resourceIdBeforeStorage, createForPureNumericIds);
-			} else {
-				boolean createForPureNumericIds = getStorageSettings().getResourceClientIdStrategy()
-						!= JpaStorageSettings.ClientIdStrategyEnum.ALPHANUMERIC;
-				createForcedIdIfNeeded(entity, resourceIdBeforeStorage, createForPureNumericIds);
-			}
-		} else {
-			switch (getStorageSettings().getResourceClientIdStrategy()) {
-				case NOT_ALLOWED:
-				case ALPHANUMERIC:
-					break;
-				case ANY:
-					boolean createForPureNumericIds = true;
-					createForcedIdIfNeeded(
-							updatedEntity, theResource.getIdElement().getIdPart(), createForPureNumericIds);
-					// for client ID mode ANY, we will always have a forced ID. If we ever
-					// stop populating the transient forced ID be warned that we use it
-					// (and expect it to be set correctly) farther below.
-					assert updatedEntity.getTransientForcedId() != null;
-					break;
-			}
-		}
 
 		// Populate the resource with its actual final stored ID from the entity
 		theResource.setId(entity.getIdDt());
@@ -601,7 +568,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		// Pre-cache the resource ID
 		jpaPid.setAssociatedResourceId(entity.getIdType(myFhirContext));
 		myIdHelperService.addResolvedPidToForcedId(
-				jpaPid, theRequestPartitionId, getResourceName(), entity.getTransientForcedId(), null);
+				jpaPid, theRequestPartitionId, getResourceName(), entity.getFhirId(), null);
 		theTransactionDetails.addResolvedResourceId(jpaPid.getAssociatedResourceId(), jpaPid);
 		theTransactionDetails.addResolvedResource(jpaPid.getAssociatedResourceId(), theResource);
 
@@ -646,40 +613,34 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		return outcome;
 	}
 
-	private void createForcedIdIfNeeded(
-			ResourceTable theEntity, String theResourceId, boolean theCreateForPureNumericIds) {
-		// TODO MB delete this in step 3
-		if (isNotBlank(theResourceId) && theEntity.getForcedId() == null) {
-			if (theCreateForPureNumericIds || !IdHelperService.isValidPid(theResourceId)) {
-				ForcedId forcedId = new ForcedId();
-				forcedId.setResourceType(theEntity.getResourceType());
-				forcedId.setForcedId(theResourceId);
-				forcedId.setResource(theEntity);
-				forcedId.setPartitionId(theEntity.getPartitionId());
+	/**
+	 * Check for an id on the resource and if so,
+	 * store it in ResourceTable.
+	 *
+	 * The fhirId property is either set here with the resource id
+	 * OR by hibernate once the PK is generated for a server-assigned id.
+	 *
+	 * Used for both client-assigned id and for server-assigned UUIDs.
+	 *
+	 * @return true if this is a client-assigned id
+	 *
+	 * @see ca.uhn.fhir.jpa.model.entity.ResourceTable.FhirIdGenerator
+	 */
+	private boolean storeNonPidResourceId(T theResource, ResourceTable entity) {
+		String resourceIdBeforeStorage = theResource.getIdElement().getIdPart();
+		boolean resourceHadIdBeforeStorage = isNotBlank(resourceIdBeforeStorage);
+		boolean resourceIdWasServerAssigned =
+				theResource.getUserData(JpaConstants.RESOURCE_ID_SERVER_ASSIGNED) == Boolean.TRUE;
 
-				/*
-				 * As of Hibernate 5.6.2, assigning the forced ID to the
-				 * resource table causes an extra update to happen, even
-				 * though the ResourceTable entity isn't actually changed
-				 * (there is a @OneToOne reference on ResourceTable to the
-				 * ForcedId table, but the actual column is on the ForcedId
-				 * table so it doesn't actually make sense to update the table
-				 * when this is set). But to work around that we avoid
-				 * actually assigning ResourceTable#myForcedId here.
-				 *
-				 * It's conceivable they may fix this in the future, or
-				 * they may not.
-				 *
-				 * If you want to try assigning the forced it to the resource
-				 * entity (by calling ResourceTable#setForcedId) try running
-				 * the tests FhirResourceDaoR4QueryCountTest to verify that
-				 * nothing has broken as a result.
-				 * JA 20220121
-				 */
-				theEntity.setTransientForcedId(forcedId.getForcedId());
-				myForcedIdDao.save(forcedId);
-			}
+		// We distinguish actual client-assigned ids from UUIDs which the server assigned.
+		boolean isClientAssigned = resourceHadIdBeforeStorage && !resourceIdWasServerAssigned;
+
+		// But both need to be set on the entity fhirId field.
+		if (resourceHadIdBeforeStorage) {
+			entity.setFhirId(resourceIdBeforeStorage);
 		}
+
+		return isClientAssigned;
 	}
 
 	void validateResourceIdCreation(T theResource, RequestDetails theRequest) {
@@ -1891,7 +1852,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			throw new ResourceNotFoundException(Msg.code(1998) + theId);
 		}
 		validateGivenIdIsAppropriateToRetrieveResource(theId, entity);
-		entity.setTransientForcedId(theId.getIdPart());
 		return entity;
 	}
 
@@ -2634,18 +2594,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	private void validateGivenIdIsAppropriateToRetrieveResource(IIdType theId, BaseHasResource entity) {
-		if (entity.getForcedId() != null) {
-			if (getStorageSettings().getResourceClientIdStrategy() != JpaStorageSettings.ClientIdStrategyEnum.ANY) {
-				if (theId.isIdPartValidLong()) {
-					// This means that the resource with the given numeric ID exists, but it has a "forced ID", meaning
-					// that
-					// as far as the outside world is concerned, the given ID doesn't exist (it's just an internal
-					// pointer
-					// to the
-					// forced ID)
-					throw new ResourceNotFoundException(Msg.code(2000) + theId);
-				}
-			}
+		if (!entity.getIdDt().getIdPart().equals(theId.getIdPart())) {
+			// This means that the resource with the given numeric ID exists, but it has a "forced ID", meaning
+			// that
+			// as far as the outside world is concerned, the given ID doesn't exist (it's just an internal
+			// pointer
+			// to the
+			// forced ID)
+			throw new ResourceNotFoundException(Msg.code(2000) + theId);
 		}
 	}
 
