@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.search.hash.ResourceIndexHasher;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
@@ -95,6 +96,11 @@ public class DaoSubscriptionMatcherTest {
 		@Bean
 		public IResourceModifiedMessagePersistenceSvc resourceModifiedMessagePersistenceSvc() {
 			return mock(IResourceModifiedMessagePersistenceSvc.class);
+		}
+
+		@Bean
+		public ResourceIndexHasher resourceIndexHasher() {
+			return mock(ResourceIndexHasher.class);
 		}
 	}
 
