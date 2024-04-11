@@ -27,8 +27,6 @@ public class MigrateColumBlobTypeToBinaryTypeTask extends BaseTableColumnTask {
 
 	@Override
 	public void validate() {
-		super.validate();
-
 		setDescription("Migrating BLob (oid) from colum  " + myFromColumName + " to BINARY on colum " + myToColumName
 				+ " for table " + getTableName() + " (only affects Postgresql)");
 	}
