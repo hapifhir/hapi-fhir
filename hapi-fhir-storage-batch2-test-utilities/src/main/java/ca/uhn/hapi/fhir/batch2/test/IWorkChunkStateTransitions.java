@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobParameters;
 import ca.uhn.test.concurrency.PointcutLatch;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -37,6 +38,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkTestConstants {
 
 	Logger ourLog = LoggerFactory.getLogger(IWorkChunkStateTransitions.class);
+
+	@BeforeEach
+	default void before() {
+		getTestManager().enableMaintenanceRunner(false);
+	}
 
 	@ParameterizedTest
 	@CsvSource({
@@ -89,7 +95,6 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 	default void advanceJobStepAndUpdateChunkStatus_forGatedJob_updatesBothREADYAndQUEUEDChunks() {
 		// setup
 		getTestManager().disableWorkChunkMessageHandler();
-		getTestManager().enableMaintenanceRunner(false);
 
 		String state = """
    			1|COMPLETED
@@ -117,7 +122,6 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 	default void enqueueWorkChunkForProcessing_enqueuesOnlyREADYChunks() throws InterruptedException {
 		// setup
 		getTestManager().disableWorkChunkMessageHandler();
-		getTestManager().enableMaintenanceRunner(false);
 
 		StringBuilder sb = new StringBuilder();
 		// first step is always complete

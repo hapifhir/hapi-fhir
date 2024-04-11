@@ -21,6 +21,7 @@ package ca.uhn.hapi.fhir.batch2.test;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -47,6 +48,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestConstants {
 
+	@BeforeEach
+	default void before() {
+		getTestManager().enableMaintenanceRunner(false);
+	}
+
 	@Test
 	default void testStoreAndFetchWorkChunk_NoData() {
 		JobInstance instance = createInstance();
@@ -69,8 +75,6 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 		JobInstance instance = createInstance();
 		String instanceId = getTestManager().getSvc().storeNewInstance(instance);
 
-		getTestManager().enableMaintenanceRunner(false);
-
 		String id = getTestManager().storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA, theGatedExecution);
 		assertNotNull(id);
 
@@ -81,7 +85,6 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 	default void testNonGatedWorkChunkInReady_IsQueuedDuringMaintenance() throws InterruptedException {
 		// setup
 		int expectedCalls = 1;
-		getTestManager().enableMaintenanceRunner(false);
 		PointcutLatch sendingLatch = getTestManager().disableWorkChunkMessageHandler();
 		sendingLatch.setExpectedCount(expectedCalls);
 		String state = "1|READY,1|QUEUED";
@@ -107,7 +110,6 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 	default void testStoreAndFetchWorkChunk_WithData() {
 		// setup
 		getTestManager().disableWorkChunkMessageHandler();
-		getTestManager().enableMaintenanceRunner(false);
 		JobDefinition<?> jobDefinition = getTestManager().withJobDefinition(false);
 		JobInstance instance = createInstance();
 		String instanceId = getTestManager().getSvc().storeNewInstance(instance);
@@ -142,7 +144,6 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 		// setup
 		String state = "2|IN_PROGRESS,2|COMPLETED";
 		getTestManager().disableWorkChunkMessageHandler();
-		getTestManager().enableMaintenanceRunner(false);
 
 		JobDefinition<?> jobDefinition = getTestManager().withJobDefinition(false);
 		String instanceId = getTestManager().createAndStoreJobInstance(jobDefinition);
@@ -172,7 +173,6 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 		// setup
 		String state = "1|IN_PROGRESS,1|ERRORED";
 		getTestManager().disableWorkChunkMessageHandler();
-		getTestManager().enableMaintenanceRunner(false);
 		JobDefinition<?> jobDef = getTestManager().withJobDefinition(false);
 		String instanceId = getTestManager().createAndStoreJobInstance(jobDef);
 		JobMaintenanceStateInformation info = new JobMaintenanceStateInformation(
@@ -214,7 +214,6 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
 		// setup
 		String state = "1|IN_PROGRESS,1|FAILED";
 		getTestManager().disableWorkChunkMessageHandler();
-		getTestManager().enableMaintenanceRunner(false);
 		JobDefinition<?> jobDef = getTestManager().withJobDefinition(false);
 		String instanceId = getTestManager().createAndStoreJobInstance(jobDef);
 		JobMaintenanceStateInformation info = new JobMaintenanceStateInformation(
@@ -246,7 +245,6 @@ public interface IWorkChunkStorageTests extends IWorkChunkCommon, WorkChunkTestC
    			1|IN_PROGRESS,1|COMPLETED
 		""";
 		getTestManager().disableWorkChunkMessageHandler();
-		getTestManager().enableMaintenanceRunner(false);
 		JobDefinition<?> jobDef = getTestManager().withJobDefinition(false);
 		String instanceId = getTestManager().createAndStoreJobInstance(jobDef);
 		JobMaintenanceStateInformation info = new JobMaintenanceStateInformation(
