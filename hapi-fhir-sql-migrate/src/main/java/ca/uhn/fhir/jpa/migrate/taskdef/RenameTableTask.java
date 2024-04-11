@@ -33,7 +33,8 @@ public class RenameTableTask extends BaseTableTask {
 
 	private final String myTableNewName;
 
-	public RenameTableTask(String theProductVersion, String theSchemaVersion, String theOldTableName, String theNewTableName) {
+	public RenameTableTask(
+			String theProductVersion, String theSchemaVersion, String theOldTableName, String theNewTableName) {
 		super(theProductVersion, theSchemaVersion);
 		setTableName(theOldTableName);
 		myTableNewName = theOldTableName;

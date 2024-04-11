@@ -39,7 +39,7 @@ public class MigrateColumnClobTypeToTextTypeTask extends BaseTableColumnTask {
 		executeSql(getTableName(), sql);
 	}
 
-	String buildSqlStatement(){
+	String buildSqlStatement() {
 		String tableName = getTableName().toLowerCase();
 		String fromColumName = myFromColumName.toLowerCase();
 		String toColumName = myToColumName.toLowerCase();
@@ -54,11 +54,12 @@ public class MigrateColumnClobTypeToTextTypeTask extends BaseTableColumnTask {
 			case COCKROACHDB_21_1:
 			case H2_EMBEDDED:
 			case MSSQL_2012:
-				retVal = "update " + tableName + " set " + toColumName + " = " + fromColumName + " where "	+ fromColumName + " is not null";
+				retVal = "update " + tableName + " set " + toColumName + " = " + fromColumName + " where "
+						+ fromColumName + " is not null";
 				break;
 			case POSTGRES_9_4:
 				retVal = "update " + tableName + " set " + toColumName + " = convert_from(lo_get(" + fromColumName
-					+ "), 'UTF8')  where " + fromColumName + " is not null";
+						+ "), 'UTF8')  where " + fromColumName + " is not null";
 				break;
 			default:
 				throw new IllegalStateException(Msg.code(2514));
@@ -66,5 +67,4 @@ public class MigrateColumnClobTypeToTextTypeTask extends BaseTableColumnTask {
 
 		return retVal;
 	}
-
 }
