@@ -245,10 +245,6 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 		return storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, theInstanceId, 0, CHUNK_DATA, theGatedExecution);
 	}
 
-	public String createChunkInStep(String theInstanceId, String theStepId, boolean theGatedExecution) {
-		return storeWorkChunk(JOB_DEFINITION_ID, theStepId, theInstanceId, 0, CHUNK_DATA, theGatedExecution);
-	}
-
 	public String createFirstChunk(JobDefinition<TestJobParameters> theJobDefinition, String theJobInstanceId){
 		return storeFirstWorkChunk(theJobDefinition, theJobInstanceId);
 	}

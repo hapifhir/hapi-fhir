@@ -64,8 +64,10 @@ public interface ITestFixture {
 
 	String createChunk(String theJobInstanceId, boolean theGatedExecution);
 
-	String createChunkInStep(String theJobInstanceId, String theStepId, boolean theGatedExecution);
-
+	/**
+	 * Create chunk as the first chunk of a job.
+	 * @return the id of the created chunk
+	 */
 	String createFirstChunk(JobDefinition<TestJobParameters> theJobDefinition, String theJobInstanceId);
 
 	/**

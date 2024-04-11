@@ -290,13 +290,4 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 */
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
 	boolean advanceJobStepAndUpdateChunkStatus(String theJobInstanceId, String theNextStepId);
-
-	/**
-	 * Update all chunks of the given step id for the given job from GATE_WAITING to READY
-	 * @param theJobInstanceId the id of the job instance to be updated
-	 * @param theStepId the id of the step which the chunks belong to
-	 * @return the number of chunks updated
-	 */
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	int updateAllChunksForStepFromGateWaitingToReady(String theJobInstanceId, String theStepId);
 }

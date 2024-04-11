@@ -438,35 +438,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void updateAllChunksForStepWithStatus_forGatedJob_updatesChunkStatus() {
-		// setup
-		JobInstance instance = createInstance(true, true);
-		String instanceId = mySvc.storeNewInstance(instance);
-		String chunkIdFirstStep = storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, 0, null, true);
-		String chunkIdSecondStep1 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, true);
-		String chunkIdSecondStep2 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, true);
-
-		runInTransaction(() -> {
-			assertEquals(WorkChunkStatusEnum.GATE_WAITING, findChunkByIdOrThrow(chunkIdFirstStep).getStatus());
-			assertEquals(WorkChunkStatusEnum.GATE_WAITING, findChunkByIdOrThrow(chunkIdSecondStep1).getStatus());
-			assertEquals(WorkChunkStatusEnum.GATE_WAITING, findChunkByIdOrThrow(chunkIdSecondStep2).getStatus());
-		});
-
-		// execute
-		runInTransaction(() -> {
-			int numChanged = mySvc.updateAllChunksForStepFromGateWaitingToReady(instanceId, LAST_STEP_ID);
-			assertEquals(2, numChanged);
-		});
-
-		// verify
-		runInTransaction(() -> {
-			assertEquals(WorkChunkStatusEnum.GATE_WAITING, findChunkByIdOrThrow(chunkIdFirstStep).getStatus());
-			assertEquals(WorkChunkStatusEnum.READY, findChunkByIdOrThrow(chunkIdSecondStep1).getStatus());
-			assertEquals(WorkChunkStatusEnum.READY, findChunkByIdOrThrow(chunkIdSecondStep2).getStatus());
-		});
-	}
-
-	@Test
 	public void testFetchUnknownWork() {
 		assertFalse(myWorkChunkRepository.findById("FOO").isPresent());
 	}

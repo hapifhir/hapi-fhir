@@ -610,14 +610,4 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 		return changed;
 	}
-
-	@Override
-	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public int updateAllChunksForStepFromGateWaitingToReady(String theJobInstanceId, String theStepId) {
-		ourLog.debug(
-				"Updating chunk status from GATE_WAITING to READY for gated instance {} in step {}.",
-				theJobInstanceId,
-				theStepId);
-		return myWorkChunkRepository.updateAllChunksForStepFromGateWaitingToReady(theJobInstanceId, theStepId);
-	}
 }

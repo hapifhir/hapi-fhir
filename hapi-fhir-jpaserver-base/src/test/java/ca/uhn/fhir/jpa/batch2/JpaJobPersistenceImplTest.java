@@ -175,20 +175,6 @@ class JpaJobPersistenceImplTest {
 		assertEquals(instance.getInstanceId(), retInstance.get().getInstanceId());
 	}
 
-	@Test
-	void updateAllChunksForStepWithStatus_validRequest_callsPersistenceUpdateAndReturnsChanged() {
-		// setup
-		String instanceId = "jobId";
-		String nextStepId = "nextStep";
-
-		// execute
-		int changed = mySvc.updateAllChunksForStepFromGateWaitingToReady(instanceId, nextStepId);
-
-		// verify
-		assertEquals(0, changed);
-		verify(myWorkChunkRepository).updateAllChunksForStepFromGateWaitingToReady(instanceId, nextStepId);
-	}
-
 	private JobInstance createJobInstanceFromEntity(Batch2JobInstanceEntity theEntity) {
 		return JobInstanceUtil.fromEntityToInstance(theEntity);
 	}
