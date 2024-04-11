@@ -62,7 +62,7 @@ public class MigrateColumnClobTypeToTextTypeTask extends BaseTableColumnTask {
 						+ "), 'UTF8')  where " + fromColumName + " is not null";
 				break;
 			default:
-				throw new IllegalStateException(Msg.code(2514));
+				throw new IllegalStateException(Msg.code(2515));
 		}
 
 		return retVal;

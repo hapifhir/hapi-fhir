@@ -63,7 +63,7 @@ public class MigrateColumBlobTypeToBinaryTypeTask extends BaseTableColumnTask {
 						+ fromColumName + " is not null";
 				break;
 			default:
-				throw new IllegalStateException(Msg.code(2513));
+				throw new IllegalStateException(Msg.code(2514));
 		}
 
 		return retVal;
