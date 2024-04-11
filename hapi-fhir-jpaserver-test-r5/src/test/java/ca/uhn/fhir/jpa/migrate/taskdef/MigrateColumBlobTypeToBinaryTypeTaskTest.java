@@ -18,7 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
-public class MigratePostgresOidToBinaryTaskTest {
+public class MigrateColumBlobTypeToBinaryTypeTaskTest {
 
 	private static PostgresEmbeddedDatabase ourPostgresEmbeddedDatabase;
 
@@ -48,7 +48,7 @@ public class MigratePostgresOidToBinaryTaskTest {
 		));
 
 		// when
-		BaseTask task = new MigratePostgresOidToBinaryTask(
+		BaseTask task = new MigrateColumBlobTypeToBinaryTypeTask(
 			VersionEnum.V7_2_0.toString(),
 			"1",
 			"HFJ_STORAGE_WITH_BLOB",

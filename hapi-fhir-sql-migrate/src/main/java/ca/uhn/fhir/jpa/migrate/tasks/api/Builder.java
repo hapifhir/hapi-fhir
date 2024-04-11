@@ -39,8 +39,8 @@ import ca.uhn.fhir.jpa.migrate.taskdef.DropTableTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteTaskPrecondition;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
-import ca.uhn.fhir.jpa.migrate.taskdef.MigratePostgresOidToBinaryTask;
-import ca.uhn.fhir.jpa.migrate.taskdef.MigratePostgresOidToTextTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.MigrateColumBlobTypeToBinaryTypeTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.MigrateColumnClobTypeToTextTypeTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.MigratePostgresTextClobToBinaryClobTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ModifyColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
@@ -324,7 +324,7 @@ public class Builder {
 		}
 
 		public void renameTable(String theVersion, String theNewTableName) {
-			RenameTableTask task = new RenameTableTask(myRelease, theVersion, theNewTableName);
+			RenameTableTask task = new RenameTableTask(myRelease, theVersion, getTableName(), theNewTableName);
 			addTask(task);
 		}
 
@@ -336,15 +336,15 @@ public class Builder {
 			addTask(task);
 		}
 
-		public void migratePostgresOidToBinary(String theVersion, String theFromColumName, String theToColumName) {
-			MigratePostgresOidToBinaryTask task = new MigratePostgresOidToBinaryTask(
+		public void migrateBlobToBinary(String theVersion, String theFromColumName, String theToColumName) {
+			MigrateColumBlobTypeToBinaryTypeTask task = new MigrateColumBlobTypeToBinaryTypeTask(
 					myRelease, theVersion, getTableName(), theFromColumName, theToColumName);
 
 			addTask(task);
 		}
 
-		public void migratePostgresOidToText(String theVersion, String theFromColumName, String theToColumName) {
-			MigratePostgresOidToTextTask task = new MigratePostgresOidToTextTask(
+		public void migrateClobToText(String theVersion, String theFromColumName, String theToColumName) {
+			MigrateColumnClobTypeToTextTypeTask task = new MigrateColumnClobTypeToTextTypeTask(
 					myRelease, theVersion, getTableName(), theFromColumName, theToColumName);
 
 			addTask(task);

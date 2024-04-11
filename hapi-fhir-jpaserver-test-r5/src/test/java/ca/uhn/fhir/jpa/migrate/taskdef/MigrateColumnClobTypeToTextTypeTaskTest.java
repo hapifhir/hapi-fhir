@@ -18,7 +18,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
-public class MigratePostgresOidToTextTaskTest {
+public class MigrateColumnClobTypeToTextTypeTaskTest {
 
 	private static PostgresEmbeddedDatabase ourPostgresEmbeddedDatabase;
 
@@ -48,7 +48,7 @@ public class MigratePostgresOidToTextTaskTest {
 		));
 
 		// when
-		BaseTask task = new MigratePostgresOidToTextTask(
+		BaseTask task = new MigrateColumnClobTypeToTextTypeTask(
 			VersionEnum.V7_2_0.toString(),
 			"1",
 			"HFJ_STORAGE_WITH_OID",

@@ -25,7 +25,7 @@ public class RenameTableTaskTest extends BaseTest {
 
 		executeSql("create table " + oldTableName + " (PID bigint not null, TEXTCOL varchar(255))");
 
-		RenameTableTask task = new RenameTableTask("1", "1", newTableName);
+		RenameTableTask task = new RenameTableTask("1", "1", oldTableName, newTableName);
 		task.setTableName(oldTableName);
 		getMigrator().addTask(task);
 
@@ -49,8 +49,7 @@ public class RenameTableTaskTest extends BaseTest {
 
 		executeSql("create table " + anotherTableName + " (PID bigint not null, TEXTCOL varchar(255))");
 
-		RenameTableTask task = new RenameTableTask("1", "1", newTableName);
-		task.setTableName(oldTableName);
+		RenameTableTask task = new RenameTableTask("1", "1", oldTableName, newTableName);
 		getMigrator().addTask(task);
 
 		// when

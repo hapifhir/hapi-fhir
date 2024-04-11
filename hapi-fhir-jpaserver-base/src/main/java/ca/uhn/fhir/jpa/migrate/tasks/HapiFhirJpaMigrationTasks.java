@@ -140,7 +140,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		forcedId.dropIndex("20240402.3", "IDX_FORCEDID_TYPE_FID");
 		forcedId.dropIndex("20240402.4", "IDX_FORCEID_FID");
 
-		// Postgres migration from LOB
+		// Migration from LOB
 		{
 			Builder.BuilderWithTableName binaryStorageBlobTable = version.onTable("HFJ_BINARY_STORAGE_BLOB");
 
@@ -159,7 +159,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.nullable()
 					.type(ColumnTypeEnum.BINARY);
 
-			binaryStorageBlobTable.migratePostgresOidToBinary("20240404.6", "BLOB_DATA", "STORAGE_CONTENT_BIN");
+			binaryStorageBlobTable.migrateBlobToBinary("20240404.6", "BLOB_DATA", "STORAGE_CONTENT_BIN");
 
 			binaryStorageBlobTable.renameTable("20240404.7", "HFJ_BINARY_STORAGE");
 		}
@@ -172,7 +172,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.nullable()
 					.type(ColumnTypeEnum.BINARY);
 
-			termConceptPropertyTable.migratePostgresOidToBinary("20240409.1", "PROP_VAL_LOB", "PROP_VAL_BIN");
+			termConceptPropertyTable.migrateBlobToBinary("20240409.1", "PROP_VAL_LOB", "PROP_VAL_BIN");
 		}
 
 		{
@@ -182,7 +182,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.nullable()
 					.type(ColumnTypeEnum.TEXT);
 
-			termValueSetConceptTable.migratePostgresOidToText(
+			termValueSetConceptTable.migrateClobToText(
 					"20240409.3", "SOURCE_DIRECT_PARENT_PIDS", "SOURCE_DIRECT_PARENT_PIDS_VC");
 		}
 
@@ -193,7 +193,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.nullable()
 					.type(ColumnTypeEnum.TEXT);
 
-			termConceptTable.migratePostgresOidToText("20240410.2", "PARENT_PIDS", "PARENT_PIDS_VC");
+			termConceptTable.migrateClobToText("20240410.2", "PARENT_PIDS", "PARENT_PIDS_VC");
 		}
 	}
 

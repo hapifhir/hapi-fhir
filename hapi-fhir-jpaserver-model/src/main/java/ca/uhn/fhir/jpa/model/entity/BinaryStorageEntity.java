@@ -34,12 +34,12 @@ import java.util.Date;
 import static java.util.Objects.nonNull;
 
 @Entity
-@Table(name = "HFJ_BINARY_STORAGE_BLOB")
+@Table(name = "HFJ_BINARY_STORAGE")
 public class BinaryStorageEntity {
 
 	@Id
 	@Column(name = "CONTENT_ID", length = 200, nullable = false)
-	// N.B GGG: Note that the `blob id` is the same as the `externalized binary id`.
+	// N.B GGG: Note that the `content id` is the same as the `externalized binary id`.
 	private String myContentId;
 
 	@Column(name = "RESOURCE_ID", length = 100, nullable = false)
