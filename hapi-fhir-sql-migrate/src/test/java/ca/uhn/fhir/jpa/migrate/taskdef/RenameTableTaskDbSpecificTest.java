@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class RenameTableTaskDbSpecificTest {
 
 	private String createRenameTableSql(DriverTypeEnum theDriverTypeEnum) {
-		RenameTableTask task = new RenameTableTask("1", "1", "OLDTABLE","NEWNAME");
+		RenameTableTask task = new RenameTableTask("1", "1", "oldname","newname");
 		task.setDriverType(theDriverTypeEnum);
 
 		return task.buildRenameTableSqlStatement();
@@ -16,37 +16,37 @@ public class RenameTableTaskDbSpecificTest {
 
 	@Test
 	public void testBuildSqlStatementForMySql() {
-		assertEquals("RENAME TABLE OLDTABLE TO NEWNAME", createRenameTableSql(DriverTypeEnum.MYSQL_5_7));
+		assertEquals("rename table oldname to newname", createRenameTableSql(DriverTypeEnum.MYSQL_5_7));
 	}
 
 	@Test
 	public void testBuildSqlStatementForDerby() {
-		assertEquals("RENAME TABLE OLDTABLE TO NEWNAME", createRenameTableSql(DriverTypeEnum.DERBY_EMBEDDED));
+		assertEquals("rename table oldname to newname", createRenameTableSql(DriverTypeEnum.DERBY_EMBEDDED));
 	}
 
 	@Test
 	public void testBuildSqlStatementForOracle() {
-		assertEquals("ALTER TABLE OLDTABLE RENAME TO NEWNAME", createRenameTableSql(DriverTypeEnum.ORACLE_12C));
+		assertEquals("alter table oldname rename to newname", createRenameTableSql(DriverTypeEnum.ORACLE_12C));
 	}
 
 	@Test
 	public void testBuildSqlStatementForMariaDB() {
-		assertEquals("ALTER TABLE OLDTABLE RENAME TO NEWNAME", createRenameTableSql(DriverTypeEnum.MARIADB_10_1));
+		assertEquals("alter table oldname rename to newname", createRenameTableSql(DriverTypeEnum.MARIADB_10_1));
 	}
 
 	@Test
 	public void testBuildSqlStatementForPostgres() {
-		assertEquals("ALTER TABLE OLDTABLE RENAME TO NEWNAME", createRenameTableSql(DriverTypeEnum.POSTGRES_9_4));
+		assertEquals("alter table oldname rename to newname", createRenameTableSql(DriverTypeEnum.POSTGRES_9_4));
 	}
 
 	@Test
 	public void testBuildSqlStatementForH2() {
-		assertEquals("ALTER TABLE OLDTABLE RENAME TO NEWNAME", createRenameTableSql(DriverTypeEnum.H2_EMBEDDED));
+		assertEquals("alter table oldname rename to newname", createRenameTableSql(DriverTypeEnum.H2_EMBEDDED));
 	}
 
 	@Test
 	public void testBuildSqlStatementForMsSql() {
-		assertEquals("sp_rename 'OLDTABLE', 'NEWNAME'", createRenameTableSql(DriverTypeEnum.MSSQL_2012));
+		assertEquals("sp_rename 'oldname', 'newname'", createRenameTableSql(DriverTypeEnum.MSSQL_2012));
 	}
 
 }

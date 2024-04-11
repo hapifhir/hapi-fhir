@@ -22,15 +22,15 @@ public class MigrateColumBlobTypeToBinaryTypeTaskDbSpecificTest {
 
 	static Stream<Arguments> paramArguments(){
 		return Stream.of(
-			Arguments.of("update SOMETABLE set BIN_COLUM_NAME = BLOB_COLUM_NAME  where BLOB_COLUM_NAME is not null", MYSQL_5_7),
-			Arguments.of("update SOMETABLE set BIN_COLUM_NAME = BLOB_COLUM_NAME  where BLOB_COLUM_NAME is not null", DERBY_EMBEDDED),
-			Arguments.of("update SOMETABLE set BIN_COLUM_NAME = BLOB_COLUM_NAME  where BLOB_COLUM_NAME is not null", ORACLE_12C),
-			Arguments.of("update SOMETABLE set BIN_COLUM_NAME = BLOB_COLUM_NAME  where BLOB_COLUM_NAME is not null", MARIADB_10_1),
-			Arguments.of("update SOMETABLE set BIN_COLUM_NAME = BLOB_COLUM_NAME  where BLOB_COLUM_NAME is not null", COCKROACHDB_21_1),
-			Arguments.of("update SOMETABLE set BIN_COLUM_NAME = BLOB_COLUM_NAME  where BLOB_COLUM_NAME is not null", H2_EMBEDDED),
-			Arguments.of("update SOMETABLE set BIN_COLUM_NAME = BLOB_COLUM_NAME  where BLOB_COLUM_NAME is not null", MSSQL_2012),
+			Arguments.of("update sometable set bin_colum_name = blob_colum_name where blob_colum_name is not null", MYSQL_5_7),
+			Arguments.of("update sometable set bin_colum_name = blob_colum_name where blob_colum_name is not null", DERBY_EMBEDDED),
+			Arguments.of("update sometable set bin_colum_name = blob_colum_name where blob_colum_name is not null", ORACLE_12C),
+			Arguments.of("update sometable set bin_colum_name = blob_colum_name where blob_colum_name is not null", MARIADB_10_1),
+			Arguments.of("update sometable set bin_colum_name = blob_colum_name where blob_colum_name is not null", COCKROACHDB_21_1),
+			Arguments.of("update sometable set bin_colum_name = blob_colum_name where blob_colum_name is not null", H2_EMBEDDED),
+			Arguments.of("update sometable set bin_colum_name = blob_colum_name where blob_colum_name is not null", MSSQL_2012),
 
-			Arguments.of("update SOMETABLE set BIN_COLUM_NAME = lo_get(BLOB_COLUM_NAME)  where BLOB_COLUM_NAME is not null", DriverTypeEnum.POSTGRES_9_4)
+			Arguments.of("update sometable set bin_colum_name = lo_get(blob_colum_name)  where blob_colum_name is not null", DriverTypeEnum.POSTGRES_9_4)
 		);
 	}
 	@ParameterizedTest

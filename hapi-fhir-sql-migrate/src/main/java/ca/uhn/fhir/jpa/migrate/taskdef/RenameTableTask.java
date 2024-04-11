@@ -31,53 +31,53 @@ public class RenameTableTask extends BaseTableTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(RenameTableTask.class);
 
+	private final String myOldTableName;
 	private final String myTableNewName;
 
 	public RenameTableTask(
 			String theProductVersion, String theSchemaVersion, String theOldTableName, String theNewTableName) {
 		super(theProductVersion, theSchemaVersion);
-		setTableName(theOldTableName);
-		myTableNewName = theOldTableName;
+		myOldTableName = theOldTableName;
+		myTableNewName = theNewTableName;
 	}
 
 	@Override
 	public void validate() {
-		super.validate();
-		setDescription("Rename table " + getTableName());
+		setDescription("Rename table " + getOldTableName());
 	}
 
 	@Override
 	public void doExecute() throws SQLException {
 
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
-		if (!tableNames.contains(getTableName())) {
-			logInfo(ourLog, "Table {} does not exist - No action performed", getTableName());
+		if (!tableNames.contains(getOldTableName())) {
+			logInfo(ourLog, "Table {} does not exist - No action performed", getOldTableName());
 			return;
 		}
 
 		String sql = buildRenameTableSqlStatement();
-		logInfo(ourLog, "Renaming table: {}", getTableName());
+		logInfo(ourLog, "Renaming table: {}", getOldTableName());
 
-		executeSql(getTableName(), sql);
+		executeSql(getOldTableName(), sql);
 	}
 
 	String buildRenameTableSqlStatement() {
 		String retVal;
 
-		final String oldTableName = getTableName();
+		final String oldTableName = getOldTableName();
 		final String newTableName = getTableNewName();
 
 		switch (getDriverType()) {
 			case MYSQL_5_7:
 			case DERBY_EMBEDDED:
-				retVal = "RENAME TABLE " + oldTableName + " TO " + newTableName;
+				retVal = "rename table " + oldTableName + " to " + newTableName;
 				break;
 			case ORACLE_12C:
 			case MARIADB_10_1:
 			case POSTGRES_9_4:
 			case COCKROACHDB_21_1:
 			case H2_EMBEDDED:
-				retVal = "ALTER TABLE " + oldTableName + " RENAME TO " + newTableName;
+				retVal = "alter table " + oldTableName + " rename to " + newTableName;
 				break;
 			case MSSQL_2012:
 				retVal = "sp_rename '" + oldTableName + "', '" + newTableName + "'";
@@ -90,5 +90,9 @@ public class RenameTableTask extends BaseTableTask {
 
 	public String getTableNewName() {
 		return myTableNewName;
+	}
+
+	public String getOldTableName() {
+		return myOldTableName;
 	}
 }
