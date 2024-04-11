@@ -20,8 +20,7 @@ INSERT INTO HFJ_RESOURCE (
    SP_URI_PRESENT,
    RES_TYPE,
    RES_VER
-)
-   VALUES (
+) VALUES (
    1670,
    'R4',
    'false',

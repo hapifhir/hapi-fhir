@@ -94,6 +94,6 @@ INSERT INTO HFJ_RES_LINK (
    1906,
    'Patient',
    NULL,
-   NULL,
+   1,
    '2024-03-01 18:01:12.921'
 );
