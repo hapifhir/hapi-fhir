@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -130,7 +131,8 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 			tpe.execute(() -> myClient.transaction().withBundle(bundle).execute());
 		}
 		tpe.shutdown();
-		tpe.awaitTermination(100, TimeUnit.SECONDS);
+		await().atMost(100, TimeUnit.SECONDS)
+			.until(tpe::isShutdown);
 	}
 
 
