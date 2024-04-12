@@ -17,27 +17,33 @@ INSERT INTO BT2_JOB_INSTANCE (
    TOT_ELAPSED_MILLIS,
    ERROR_MSG,
    PARAMS_JSON_LOB,
-   WORK_CHUNKS_PURGED
+   WORK_CHUNKS_PURGED,
+   REPORT,
+   FAST_TRACKING,
+   UPDATE_TIME
 ) VALUES (
-   '00161699-bcfe-428e-9ca2-caceb9645f8a',
+   'cf969d58-44a5-4493-89c1-437e637532eb',
    0,
    0,
    0,
-   '2023-07-06 14:24:10.845',
+   SYSDATE,
    'WriteBundleForImportStep',
    'bulkImportJob',
    1,
-   '2023-07-06 14:25:11.098',
+   SYSDATE,
    0,
    '0ms',
-   '{"jobId":"42bfa0dd-ab7b-4991-8284-e4b2902c696b","batchSize":100}',
+   '{"jobId":"37698660-4a0f-4c9c-84d5-b6f231def870","batchSize":100}',
    1,
-   '2023-07-06 14:24:10.875',
+   SYSDATE,
    'COMPLETED',
    200,
    'Error message',
-   83006,
-   1
+   HEXTORAW('8B9D5255'),
+   1,
+   HEXTORAW('453d7a34'),
+   0,
+   SYSDATE
 );
 
 INSERT INTO BT2_WORK_CHUNK (
@@ -54,20 +60,22 @@ INSERT INTO BT2_WORK_CHUNK (
    STAT,
    TGT_STEP_ID,
    ERROR_MSG,
-   CHUNK_DATA
+   CHUNK_DATA,
+   UPDATE_TIME
 ) VALUES (
-   '01d26875-8d1a-4e37-b554-62a3219f009b',
-   '2023-07-06 15:20:20.797',
-   '2023-07-06 15:21:11.142',
+   '3a8d1bce-3a49-4f3d-98ac-f813b053772f',
+   SYSDATE,
+   SYSDATE,
    0,
-   '00161699-bcfe-428e-9ca2-caceb9645f8a',
+   'cf969d58-44a5-4493-89c1-437e637532eb',
    'bulkImportJob',
    1,
    0,
    0,
-   '2023-07-06 15:21:11.14',
+   SYSDATE,
    'COMPLETED',
    'ReadInResourcesFromFileStep',
    'Error message',
-   72995
+   HEXTORAW('453d7a34'),
+   SYSDATE
 );
