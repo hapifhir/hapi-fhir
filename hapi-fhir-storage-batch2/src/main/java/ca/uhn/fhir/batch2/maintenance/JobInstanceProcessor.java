@@ -99,18 +99,19 @@ public class JobInstanceProcessor {
 		cleanupInstance(theInstance);
 		triggerGatedExecutions(theInstance, jobDefinition);
 
+		JobInstance updatedInstance = myJobPersistence.fetchInstance(theInstance.getInstanceId()).orElseThrow();
 		if (theInstance.hasGatedStep()) {
 			JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
-					jobDefinition, theInstance.getCurrentGatedStepId());
+					jobDefinition, updatedInstance.getCurrentGatedStepId());
 			if (jobWorkCursor.isReductionStep()) {
 				// Reduction step work chunks should never be sent to the queue but to its specific service instead.
-				triggerReductionStep(theInstance, jobWorkCursor);
+				triggerReductionStep(updatedInstance, jobWorkCursor);
 				return;
 			}
 		}
 
 		// enqueue the chunks as normal
-		enqueueReadyChunks(theInstance, jobDefinition);
+		enqueueReadyChunks(updatedInstance, jobDefinition);
 
 		ourLog.debug("Finished job processing: {} - {}", myInstanceId, stopWatch);
 	}
@@ -241,6 +242,12 @@ public class JobInstanceProcessor {
 		Set<WorkChunkStatusEnum> workChunkStatuses = myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(
 				theInstance.getInstanceId(), currentGatedStepId);
 
+		if (workChunkStatuses.isEmpty()) {
+			// no work chunks = no output
+			// trivial to advance to next step
+			return true;
+		}
+
 		// all workchunks for the current step are in COMPLETED -> proceed.
 		return workChunkStatuses.equals(Set.of(WorkChunkStatusEnum.COMPLETED));
 	}
@@ -337,11 +344,11 @@ public class JobInstanceProcessor {
 	private void processChunksForNextGatedSteps(JobInstance theInstance, String nextStepId) {
 		String instanceId = theInstance.getInstanceId();
 		List<String> readyChunksForNextStep =
-				myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.READY);
+				myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.GATE_WAITING);
 		int totalChunksForNextStep = myProgressAccumulator.getTotalChunkCountForInstanceAndStep(instanceId, nextStepId);
 		if (totalChunksForNextStep != readyChunksForNextStep.size()) {
 			ourLog.debug(
-					"Total ProgressAccumulator READY chunk count does not match READY chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]",
+					"Total ProgressAccumulator GATE_WAITING chunk count does not match GATE_WAITING chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]",
 					instanceId,
 					nextStepId,
 					totalChunksForNextStep,
