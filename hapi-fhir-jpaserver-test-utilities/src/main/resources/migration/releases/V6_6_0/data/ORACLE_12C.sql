@@ -99,8 +99,8 @@ INSERT INTO MPI_LINK_AUD (
    SYSDATE,
    SYSDATE,
    3,
-   SYSDATE,
-   1
+   1,
+   SYSDATE
 );
 
 INSERT INTO HFJ_TAG_DEF (
@@ -114,11 +114,11 @@ INSERT INTO HFJ_TAG_DEF (
 ) VALUES (
    3,
    'http://hl7.org/fhir/us/core/StructureDefinition/us-core-patient',
-   NULL,
+   'display',
    'https://github.com/hapifhir/hapi-fhir/ns/jpa/profile',
    1,
    0,
-   NULL
+   'V 1.0'
 );
 
 INSERT INTO HFJ_RESOURCE_MODIFIED (

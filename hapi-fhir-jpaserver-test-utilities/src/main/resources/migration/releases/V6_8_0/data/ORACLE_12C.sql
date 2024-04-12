@@ -137,7 +137,7 @@ INSERT INTO HFJ_BLK_IMPORT_JOBFILE (
 ) VALUES (
    66,
    61,
-   NULL,
+   HEXTORAW('453d7a34'),
    'content_1',
    'Rows 0 - 10',
    0,
