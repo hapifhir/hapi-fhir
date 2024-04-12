@@ -1,6 +1,7 @@
 package ca.uhn.hapi.fhir.batch2.test;
 
 import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,6 +10,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestConstants {
 
@@ -107,14 +110,14 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 		3|GATE_WAITING
 	"""
 	})
-	default void testGatedStep2NotReady_stepNotAdvance(String theChunkState) throws InterruptedException {
+	default void testGatedStep2NotReady_stepNotAdvanceToStep3(String theChunkState) throws InterruptedException {
 		// setup
 		int expectedLatchCount = getLatchCountFromState(theChunkState);
 		PointcutLatch sendingLatch = getTestManager().disableWorkChunkMessageHandler();
 		sendingLatch.setExpectedCount(expectedLatchCount);
-		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(theChunkState, true);
+		JobMaintenanceStateInformation state = setupGatedWorkChunkTransitionTest(theChunkState, true);
 
-		getTestManager().createChunksInStates(result);
+		getTestManager().createChunksInStates(state);
 
 		// test
 		getTestManager().runMaintenancePass();
@@ -122,7 +125,8 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 		// verify
 		// nothing ever queued -> nothing ever sent to queue
 		getTestManager().verifyWorkChunkMessageHandlerCalled(sendingLatch, expectedLatchCount);
-		verifyWorkChunkFinalStates(result);
+		assertEquals(SECOND_STEP_ID, getJobInstanceFromState(state).getCurrentGatedStepId());
+		verifyWorkChunkFinalStates(state);
 	}
 
 	/**
@@ -167,15 +171,16 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 		// setup
 		PointcutLatch sendingLatch = getTestManager().disableWorkChunkMessageHandler();
 		sendingLatch.setExpectedCount(2);
-		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(theChunkState, true);
-		getTestManager().createChunksInStates(result);
+		JobMaintenanceStateInformation state = setupGatedWorkChunkTransitionTest(theChunkState, true);
+		getTestManager().createChunksInStates(state);
 
 		// test
 		getTestManager().runMaintenancePass();
 
 		// verify
 		getTestManager().verifyWorkChunkMessageHandlerCalled(sendingLatch, 2);
-		verifyWorkChunkFinalStates(result);
+		assertEquals(LAST_STEP_ID, getJobInstanceFromState(state).getCurrentGatedStepId());
+		verifyWorkChunkFinalStates(state);
 	}
 
 	@Test
@@ -221,5 +226,9 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 
 	private void verifyWorkChunkFinalStates(JobMaintenanceStateInformation theStateInformation) {
 		theStateInformation.verifyFinalStates(getTestManager().getSvc());
+	}
+
+	private JobInstance getJobInstanceFromState(JobMaintenanceStateInformation state) {
+		return getTestManager().freshFetchJobInstance(state.getInstanceId());
 	}
 }

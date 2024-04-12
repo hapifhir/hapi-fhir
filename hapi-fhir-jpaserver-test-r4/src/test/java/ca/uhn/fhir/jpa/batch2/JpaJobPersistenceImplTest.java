@@ -374,7 +374,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	@Test
 	public void testUpdateTime() {
 		// Setup
-		JobInstance instance = createInstance(true, false);
+		boolean isGatedExecution = false;
+		JobInstance instance = createInstance(true, isGatedExecution);
 		String instanceId = mySvc.storeNewInstance(instance);
 
 		Date updateTime = runInTransaction(() -> new Date(findInstanceByIdOrThrow(instanceId).getUpdateTime().getTime()));
@@ -392,10 +393,11 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	@Test
 	public void advanceJobStepAndUpdateChunkStatus_forGatedJob_updatesCurrentStepAndChunkStatus() {
 		// setup
-		JobInstance instance = createInstance(true, true);
+		boolean isGatedExecution = true;
+		JobInstance instance = createInstance(true, isGatedExecution);
 		String instanceId = mySvc.storeNewInstance(instance);
-		String chunkIdSecondStep1 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, true);
-		String chunkIdSecondStep2 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, true);
+		String chunkIdSecondStep1 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
+		String chunkIdSecondStep2 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
 
 		runInTransaction(() -> assertEquals(TARGET_STEP_ID, findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()));
 
@@ -416,10 +418,11 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	@Test
 	public void advanceJobStepAndUpdateChunkStatus_whenAlreadyInTargetStep_DoesNotUpdateStepOrChunks() {
 		// setup
-		JobInstance instance = createInstance(true, true);
+		boolean isGatedExecution = true;
+		JobInstance instance = createInstance(true, isGatedExecution);
 		String instanceId = mySvc.storeNewInstance(instance);
-		String chunkIdSecondStep1 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, true);
-		String chunkIdSecondStep2 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, true);
+		String chunkIdSecondStep1 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
+		String chunkIdSecondStep2 = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, null, isGatedExecution);
 
 		runInTransaction(() -> assertEquals(TARGET_STEP_ID, findInstanceByIdOrThrow(instanceId).getCurrentGatedStepId()));
 
@@ -447,7 +450,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		"false, READY, QUEUED",
 		"true, GATE_WAITING, QUEUED"
 	})
-	public void testStoreAndFetchWorkChunk_withOrWithoutGatedExecution_createdAndTransitionToExpectedStatus(boolean theGatedExecution, WorkChunkStatusEnum theExpectedStatusOnCreate, WorkChunkStatusEnum theExpectedStatusAfterTransition) {
+	public void testStoreAndFetchWorkChunk_withOrWithoutGatedExecutionNoData_createdAndTransitionToExpectedStatus(boolean theGatedExecution, WorkChunkStatusEnum theExpectedStatusOnCreate, WorkChunkStatusEnum theExpectedStatusAfterTransition) {
 		// setup
 		JobInstance instance = createInstance(true, theGatedExecution);
 		String instanceId = mySvc.storeNewInstance(instance);
@@ -459,6 +462,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		runInTransaction(() -> assertEquals(theExpectedStatusAfterTransition, findChunkByIdOrThrow(id).getStatus()));
 
 		WorkChunk chunk = mySvc.onWorkChunkDequeue(id).orElseThrow(IllegalArgumentException::new);
+		// assert null since we did not input any data when creating the chunks
 		assertNull(chunk.getData());
 	}
 
@@ -476,6 +480,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String secondChunkId = storeWorkChunk(JOB_DEFINITION_ID, LAST_STEP_ID, instanceId, 0, expectedSecondChunkData, isGatedExecution);
 
 		runInTransaction(() -> {
+			// check chunks created in expected states
 			assertEquals(WorkChunkStatusEnum.READY, findChunkByIdOrThrow(firstChunkId).getStatus());
 			assertEquals(WorkChunkStatusEnum.GATE_WAITING, findChunkByIdOrThrow(secondChunkId).getStatus());
 		});
@@ -483,6 +488,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		myBatch2JobHelper.runMaintenancePass();
 		runInTransaction(() -> {
 			assertEquals(WorkChunkStatusEnum.QUEUED, findChunkByIdOrThrow(firstChunkId).getStatus());
+			// maintenance should not affect chunks in step 2
 			assertEquals(WorkChunkStatusEnum.GATE_WAITING, findChunkByIdOrThrow(secondChunkId).getStatus());
 		});
 
@@ -499,6 +505,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		myBatch2JobHelper.runMaintenancePass();
 		runInTransaction(() -> {
 			assertEquals(WorkChunkStatusEnum.COMPLETED, findChunkByIdOrThrow(firstChunkId).getStatus());
+			// now that all chunks for step 1 is COMPLETED, should enqueue chunks in step 2
 			assertEquals(WorkChunkStatusEnum.QUEUED, findChunkByIdOrThrow(secondChunkId).getStatus());
 		});
 
@@ -579,7 +586,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		"false, READY, QUEUED",
 		"true, GATE_WAITING, QUEUED"
 	})
-	public void testStoreAndFetchWorkChunk_WithData(boolean theGatedExecution, WorkChunkStatusEnum theExpectedCreatedStatus, WorkChunkStatusEnum theExpectedTransitionStatus) {
+	public void testStoreAndFetchWorkChunk_withOrWithoutGatedExecutionwithData_createdAndTransitionToExpectedStatus(boolean theGatedExecution, WorkChunkStatusEnum theExpectedCreatedStatus, WorkChunkStatusEnum theExpectedTransitionStatus) {
 		JobInstance instance = createInstance(true, theGatedExecution);
 		String instanceId = mySvc.storeNewInstance(instance);
 

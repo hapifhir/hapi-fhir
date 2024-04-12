@@ -31,7 +31,6 @@ import java.util.Set;
  * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
  */
 public enum WorkChunkStatusEnum {
-	// wipmb For 6.8 Add WAITING for gated, and READY for in db, but not yet sent to channel.
 	GATE_WAITING,
 	READY,
 	QUEUED,
