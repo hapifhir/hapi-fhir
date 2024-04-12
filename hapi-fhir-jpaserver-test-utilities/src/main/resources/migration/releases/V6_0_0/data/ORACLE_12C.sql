@@ -35,8 +35,8 @@ INSERT INTO BT2_JOB_INSTANCE (
    SYSDATE,
    'COMPLETED',
    200,
-   NULL,
-   NULL,
+   'Error message',
+   HEXTORAW('8B9D5255'),
    1
 );
 
@@ -68,6 +68,6 @@ INSERT INTO BT2_WORK_CHUNK (
    SYSDATE,
    'COMPLETED',
    'ReadInResourcesFromFileStep',
-   NULL,
+   'Error message',
    HEXTORAW('453d7a34')
 );

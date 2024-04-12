@@ -43,7 +43,7 @@ INSERT INTO BT2_JOB_INSTANCE (
    SYSDATE,
    'COMPLETED',
    200,
-   NULL,
+   'Error message',
    NULL,
    '{"jobId":"7be85199-0136-406e-93b8-cbe44f15aa6c","batchSize":100}',
    1,

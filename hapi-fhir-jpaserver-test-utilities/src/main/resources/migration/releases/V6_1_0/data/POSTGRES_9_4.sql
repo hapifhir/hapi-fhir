@@ -36,8 +36,8 @@ INSERT INTO BT2_JOB_INSTANCE (
    '2023-08-06 14:24:10.875',
    'COMPLETED',
    200,
-   NULL,
-   NULL,
+   'Error message',
+   83006,
    true,
    72995
 );

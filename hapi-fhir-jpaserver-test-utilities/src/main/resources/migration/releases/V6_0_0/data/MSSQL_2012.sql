@@ -35,8 +35,8 @@ INSERT INTO BT2_JOB_INSTANCE (
    '2023-07-06 14:24:10.875',
    'COMPLETED',
    200,
-   NULL,
-   NULL,
+   'Error message',
+   83006,
    1
 );
 
@@ -68,6 +68,6 @@ INSERT INTO BT2_WORK_CHUNK (
    '2023-07-06 15:21:11.14',
    'COMPLETED',
    'ReadInResourcesFromFileStep',
-   NULL,
+   'Error message',
    72995
 );
