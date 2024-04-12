@@ -1,15 +1,17 @@
 package ca.uhn.hapi.fhir.batch2.test;
 
 import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestConstants {
 
@@ -21,7 +23,7 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 	}
 
 	@Test
-	default void test_gatedJob_stepReady_advances() throws InterruptedException {
+	default void test_gatedJob_stepReady_stepAdvances() throws InterruptedException {
 		// setup
 		String initialState = 	"""
       		# chunks ready - move to queued
@@ -47,7 +49,7 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 	@ValueSource(strings = {
 	"""
    		1|COMPLETED
-   		2|GATED
+   		2|GATE_WAITING
 	""",
 	"""
    		# Chunk already queued -> waiting for complete
@@ -69,8 +71,9 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 	""",
 	"""
     	# Not all steps ready to advance
+		# Latch Count: 1
    		1|COMPLETED
-   		2|READY  # a single ready chunk
+   		2|READY,2|QUEUED  # a single ready chunk
    		2|IN_PROGRESS
 	""",
 	"""
@@ -78,50 +81,65 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
    		1|COMPLETED
    		2|COMPLETED
    		2|IN_PROGRESS
-   		3|READY
-   		3|READY
+   		3|GATE_WAITING
+   		3|GATE_WAITING
 	""",
 	"""
-   		1|COMPLETED
-   		2|READY
-   		2|QUEUED
-   		2|COMPLETED
-   		2|ERRORED
-   		2|FAILED
-   		2|IN_PROGRESS
-   		3|GATED
-   		3|GATED
+		# when current step is not all queued, should queue READY chunks
+		# Latch Count: 1
+		1|COMPLETED
+		2|READY,2|QUEUED
+		2|QUEUED
+		2|COMPLETED
+		2|ERRORED
+		2|FAILED
+		2|IN_PROGRESS
+		3|GATE_WAITING
+		3|QUEUED
 	""",
 	"""
-   		1|COMPLETED
-   		2|READY
-   		2|QUEUED
-   		2|COMPLETED
-   		2|ERRORED
-   		2|FAILED
-   		2|IN_PROGRESS
-   		3|QUEUED  # a lie
-   		3|GATED
+		# when current step is all queued but not done, should not proceed
+		1|COMPLETED
+		2|COMPLETED
+		2|QUEUED
+		2|COMPLETED
+		2|ERRORED
+		2|FAILED
+		2|IN_PROGRESS
+		3|GATE_WAITING
+		3|GATE_WAITING
 	"""
 	})
-	default void testGatedStep2NotReady_notAdvance(String theChunkState) throws InterruptedException {
+	default void testGatedStep2NotReady_stepNotAdvanceToStep3(String theChunkState) throws InterruptedException {
 		// setup
+		int expectedLatchCount = getLatchCountFromState(theChunkState);
 		PointcutLatch sendingLatch = getTestManager().disableWorkChunkMessageHandler();
-		sendingLatch.setExpectedCount(0);
-		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(theChunkState, true);
+		sendingLatch.setExpectedCount(expectedLatchCount);
+		JobMaintenanceStateInformation state = setupGatedWorkChunkTransitionTest(theChunkState, true);
 
-		getTestManager().createChunksInStates(result);
+		getTestManager().createChunksInStates(state);
 
 		// test
 		getTestManager().runMaintenancePass();
 
 		// verify
 		// nothing ever queued -> nothing ever sent to queue
-		getTestManager().verifyWorkChunkMessageHandlerCalled(sendingLatch, 0);
-		verifyWorkChunkFinalStates(result);
+		getTestManager().verifyWorkChunkMessageHandlerCalled(sendingLatch, expectedLatchCount);
+		assertEquals(SECOND_STEP_ID, getJobInstanceFromState(state).getCurrentGatedStepId());
+		verifyWorkChunkFinalStates(state);
 	}
 
-	@Disabled
+	/**
+	 * Returns the expected latch count specified in the state. Defaults to 0 if not found.
+	 * Expected format: # Latch Count: {}
+	 * e.g. # Latch Count: 3
+	 */
+	private int getLatchCountFromState(String theState){
+		String keyStr = "# Latch Count: ";
+		int index = theState.indexOf(keyStr);
+		return index == -1 ? 0 : theState.charAt(index + keyStr.length()) - '0';
+	}
+
 	@ParameterizedTest
 	@ValueSource(strings = {
     """
@@ -129,37 +147,40 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 		1|COMPLETED
 		2|COMPLETED
 		2|COMPLETED
-		3|GATED|READY
-		3|GATED|READY
+		3|GATE_WAITING,3|QUEUED
+		3|GATE_WAITING,3|QUEUED
     """,
     """
 		# OLD code only
 		1|COMPLETED
-		2|QUEUED,2|READY
-		2|QUEUED,2|READY
+		2|COMPLETED
+		2|COMPLETED
+		3|QUEUED,3|QUEUED
+		3|QUEUED,3|QUEUED
 	""",
 	"""
-		# mixed code only
+		# mixed code
 		1|COMPLETED
 		2|COMPLETED
 		2|COMPLETED
-		3|GATED|READY
-		3|QUEUED|READY
+		3|GATE_WAITING,3|QUEUED
+		3|QUEUED,3|QUEUED
 	"""
 	})
 	default void testGatedStep2ReadyToAdvance_advanceToStep3(String theChunkState) throws InterruptedException {
 		// setup
 		PointcutLatch sendingLatch = getTestManager().disableWorkChunkMessageHandler();
-		JobMaintenanceStateInformation result = setupGatedWorkChunkTransitionTest(theChunkState, true);
-		getTestManager().createChunksInStates(result);
+		sendingLatch.setExpectedCount(2);
+		JobMaintenanceStateInformation state = setupGatedWorkChunkTransitionTest(theChunkState, true);
+		getTestManager().createChunksInStates(state);
 
 		// test
 		getTestManager().runMaintenancePass();
 
 		// verify
-		// things are being set to READY; is anything being queued?
-		getTestManager().verifyWorkChunkMessageHandlerCalled(sendingLatch, 0);
-		verifyWorkChunkFinalStates(result);
+		getTestManager().verifyWorkChunkMessageHandlerCalled(sendingLatch, 2);
+		assertEquals(LAST_STEP_ID, getJobInstanceFromState(state).getCurrentGatedStepId());
+		verifyWorkChunkFinalStates(state);
 	}
 
 	@Test
@@ -205,5 +226,9 @@ public interface IJobMaintenanceActions extends IWorkChunkCommon, WorkChunkTestC
 
 	private void verifyWorkChunkFinalStates(JobMaintenanceStateInformation theStateInformation) {
 		theStateInformation.verifyFinalStates(getTestManager().getSvc());
+	}
+
+	private JobInstance getJobInstanceFromState(JobMaintenanceStateInformation state) {
+		return getTestManager().freshFetchJobInstance(state.getInstanceId());
 	}
 }

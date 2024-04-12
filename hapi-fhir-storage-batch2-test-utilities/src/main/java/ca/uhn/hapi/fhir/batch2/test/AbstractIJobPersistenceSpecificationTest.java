@@ -39,6 +39,7 @@ import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep3InputType;
 import ca.uhn.test.concurrency.PointcutLatch;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -91,15 +92,16 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 		return mySvc;
 	}
 
+	@Nonnull
 	public JobDefinition<TestJobParameters> withJobDefinition(boolean theIsGatedBoolean) {
 		JobDefinition.Builder<TestJobParameters, ?> builder = JobDefinition.newBuilder()
 			.setJobDefinitionId(theIsGatedBoolean ? GATED_JOB_DEFINITION_ID : JOB_DEFINITION_ID)
 			.setJobDefinitionVersion(JOB_DEF_VER)
 			.setJobDescription("A job description")
 			.setParametersType(TestJobParameters.class)
-			.addFirstStep(TARGET_STEP_ID, "the first step", TestJobStep2InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
-			.addIntermediateStep("2nd-step-id", "the second step", TestJobStep3InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
-			.addLastStep("last-step-id", "the final step", (theStepExecutionDetails, theDataSink) -> new RunOutcome(0));
+			.addFirstStep(FIRST_STEP_ID, "the first step", TestJobStep2InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
+			.addIntermediateStep(SECOND_STEP_ID, "the second step", TestJobStep3InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
+			.addLastStep(LAST_STEP_ID, "the final step", (theStepExecutionDetails, theDataSink) -> new RunOutcome(0));
 		if (theIsGatedBoolean) {
 			builder.gatedExecution();
 		}
@@ -165,11 +167,19 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 		instance.setJobDefinitionVersion(JOB_DEF_VER);
 		instance.setParameters(CHUNK_DATA);
 		instance.setReport("TEST");
+		if (jobDefinition.isGatedExecution()) {
+			instance.setCurrentGatedStepId(jobDefinition.getFirstStepId());
+		}
 		return instance;
 	}
 
-	public String storeWorkChunk(String theJobDefinitionId, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData) {
-		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(theJobDefinitionId, JOB_DEF_VER, theTargetStepId, theInstanceId, theSequence, theSerializedData);
+	public String storeWorkChunk(String theJobDefinitionId, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData, boolean theGatedExecution) {
+		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(theJobDefinitionId, JOB_DEF_VER, theTargetStepId, theInstanceId, theSequence, theSerializedData, theGatedExecution);
+		return mySvc.onWorkChunkCreate(batchWorkChunk);
+	}
+
+	public String storeFirstWorkChunk(JobDefinition<TestJobParameters> theJobDefinition, String theInstanceId) {
+		WorkChunkCreateEvent batchWorkChunk = WorkChunkCreateEvent.firstChunk(theJobDefinition, theInstanceId);
 		return mySvc.onWorkChunkCreate(batchWorkChunk);
 	}
 
@@ -229,7 +239,15 @@ public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMa
 	}
 
 	public String createChunk(String theInstanceId) {
-		return storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, theInstanceId, 0, CHUNK_DATA);
+		return storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, theInstanceId, 0, CHUNK_DATA, false);
+	}
+
+	public String createChunk(String theInstanceId, boolean theGatedExecution) {
+		return storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, theInstanceId, 0, CHUNK_DATA, theGatedExecution);
+	}
+
+	public String createFirstChunk(JobDefinition<TestJobParameters> theJobDefinition, String theJobInstanceId){
+		return storeFirstWorkChunk(theJobDefinition, theJobInstanceId);
 	}
 
 	public void enableMaintenanceRunner(boolean theToEnable) {

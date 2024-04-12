@@ -57,10 +57,11 @@ stateDiagram-v2
     state FAILED
     state COMPLETED
    direction LR
-   [*]         --> READY         : on create - normal
-   [*]         --> GATED         : on create - gated
-   GATED       --> READY         : on create - gated
-   READY       --> QUEUED        : placed on kafka (maint.)
+   [*]             --> READY         : on create - normal or gated first chunk
+   [*]             --> GATE_WAITING  : on create - gated jobs for all but the first chunk
+   GATE_WAITING    --> READY         : on gate release - gated
+   QUEUED          --> READY         : on gate release - gated (for compatibility with legacy QUEUED state up to Hapi-fhir version 7.1)
+   READY           --> QUEUED        : placed on kafka (maint.)
    POLL_WAITING --> READY        : after a poll delay on a POLL_WAITING work chunk has elapsed
   
   %% worker processing states

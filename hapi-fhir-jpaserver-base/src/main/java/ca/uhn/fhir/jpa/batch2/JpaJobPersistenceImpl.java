@@ -129,7 +129,11 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setSerializedData(theBatchWorkChunk.serializedData);
 		entity.setCreateTime(new Date());
 		entity.setStartTime(new Date());
-		entity.setStatus(WorkChunkStatusEnum.READY);
+		// set gated job chunks to GATE_WAITING; they will be transitioned to READY during maintenance pass when all
+		// chunks in the previous step are COMPLETED
+		entity.setStatus(
+				theBatchWorkChunk.isGatedExecution ? WorkChunkStatusEnum.GATE_WAITING : WorkChunkStatusEnum.READY);
+
 		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
 		ourLog.trace(
 				"Create work chunk data {}/{}: {}", entity.getInstanceId(), entity.getId(), entity.getSerializedData());
@@ -594,5 +598,36 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_BATCH_JOB_CREATE, params);
 		}
+	}
+
+	@Override
+	@Transactional(propagation = Propagation.REQUIRES_NEW)
+	public boolean advanceJobStepAndUpdateChunkStatus(String theJobInstanceId, String theNextStepId) {
+		boolean changed = updateInstance(theJobInstanceId, instance -> {
+			if (instance.getCurrentGatedStepId().equals(theNextStepId)) {
+				// someone else beat us here.  No changes
+				return false;
+			}
+			ourLog.debug("Moving gated instance {} to the next step {}.", theJobInstanceId, theNextStepId);
+			instance.setCurrentGatedStepId(theNextStepId);
+			return true;
+		});
+
+		if (changed) {
+			ourLog.debug(
+					"Updating chunk status from GATE_WAITING to READY for gated instance {} in step {}.",
+					theJobInstanceId,
+					theNextStepId);
+			// when we reach here, the current step id is equal to theNextStepId
+			int numChanged =
+					myWorkChunkRepository.updateAllChunksForStepFromGateWaitingToReady(theJobInstanceId, theNextStepId);
+			ourLog.debug(
+					"Updated {} chunks of gated instance {} for step {} from fake QUEUED to READY.",
+					numChanged,
+					theJobInstanceId,
+					theNextStepId);
+		}
+
+		return changed;
 	}
 }

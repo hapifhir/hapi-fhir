@@ -19,16 +19,16 @@
  */
 package ca.uhn.hapi.fhir.batch2.test;
 
-import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
-
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
+import ca.uhn.hapi.fhir.batch2.test.support.TestJobParameters;
 import ca.uhn.test.concurrency.PointcutLatch;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,21 +44,44 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 
 	Logger ourLog = LoggerFactory.getLogger(IWorkChunkStateTransitions.class);
 
-	@Test
-	default void chunkCreation_isQueued() {
+	@BeforeEach
+	default void before() {
+		getTestManager().enableMaintenanceRunner(false);
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"false, READY",
+		"true, GATE_WAITING"
+	})
+	default void chunkCreation_nonFirstChunk_isInExpectedStatus(boolean theGatedExecution, WorkChunkStatusEnum expectedStatus) {
 		String jobInstanceId = getTestManager().createAndStoreJobInstance(null);
-		String myChunkId = getTestManager().createChunk(jobInstanceId);
+		String myChunkId = getTestManager().createChunk(jobInstanceId, theGatedExecution);
 
 		WorkChunk fetchedWorkChunk = getTestManager().freshFetchWorkChunk(myChunkId);
-		assertEquals(WorkChunkStatusEnum.READY, fetchedWorkChunk.getStatus(), "New chunks are READY");
+		assertEquals(expectedStatus, fetchedWorkChunk.getStatus(), "New chunks are " + expectedStatus);
+	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	default void chunkCreation_firstChunk_isInReady(boolean theGatedExecution) {
+		JobDefinition<TestJobParameters> jobDef = getTestManager().withJobDefinition(theGatedExecution);
+		String jobInstanceId = getTestManager().createAndStoreJobInstance(jobDef);
+		String myChunkId = getTestManager().createFirstChunk(jobDef, jobInstanceId);
+
+		WorkChunk fetchedWorkChunk = getTestManager().freshFetchWorkChunk(myChunkId);
+		// the first chunk of both gated and non-gated job should start in READY
+		assertEquals(WorkChunkStatusEnum.READY, fetchedWorkChunk.getStatus(), "New chunks are " + WorkChunkStatusEnum.READY);
 	}
 
 	@Test
-	default void chunkReceived_queuedToInProgress() throws InterruptedException {
+	default void chunkReceived_forNongatedJob_queuedToInProgress() throws InterruptedException {
 		PointcutLatch sendLatch = getTestManager().disableWorkChunkMessageHandler();
 		sendLatch.setExpectedCount(1);
-		String jobInstanceId = getTestManager().createAndStoreJobInstance(null);
-		String myChunkId = getTestManager().createChunk(jobInstanceId);
+
+		JobDefinition<TestJobParameters> jobDef = getTestManager().withJobDefinition(false);
+		String jobInstanceId = getTestManager().createAndStoreJobInstance(jobDef);
+		String myChunkId = getTestManager().createChunk(jobInstanceId, false);
 
 		getTestManager().runMaintenancePass();
 		// the worker has received the chunk, and marks it started.
@@ -74,10 +97,36 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 	}
 
 	@Test
+	default void advanceJobStepAndUpdateChunkStatus_forGatedJob_updatesBothREADYAndQUEUEDChunks() {
+		// setup
+		getTestManager().disableWorkChunkMessageHandler();
+
+		String state = """
+   			1|COMPLETED
+   			2|COMPLETED
+   			3|GATE_WAITING,3|READY
+   			3|QUEUED,3|READY
+		""";
+
+		JobDefinition<TestJobParameters> jobDef = getTestManager().withJobDefinition(true);
+		String jobInstanceId = getTestManager().createAndStoreJobInstance(jobDef);
+
+		JobMaintenanceStateInformation info = new JobMaintenanceStateInformation(jobInstanceId, jobDef, state);
+		getTestManager().createChunksInStates(info);
+		assertEquals(SECOND_STEP_ID, getTestManager().freshFetchJobInstance(jobInstanceId).getCurrentGatedStepId());
+
+		// execute
+		getTestManager().runInTransaction(() -> getTestManager().getSvc().advanceJobStepAndUpdateChunkStatus(jobInstanceId, LAST_STEP_ID));
+
+		// verify
+		assertEquals(LAST_STEP_ID, getTestManager().freshFetchJobInstance(jobInstanceId).getCurrentGatedStepId());
+		info.verifyFinalStates(getTestManager().getSvc());
+	}
+
+	@Test
 	default void enqueueWorkChunkForProcessing_enqueuesOnlyREADYChunks() throws InterruptedException {
 		// setup
 		getTestManager().disableWorkChunkMessageHandler();
-		getTestManager().enableMaintenanceRunner(false);
 
 		StringBuilder sb = new StringBuilder();
 		// first step is always complete

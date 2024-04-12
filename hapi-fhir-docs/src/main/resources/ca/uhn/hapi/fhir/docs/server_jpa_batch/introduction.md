@@ -19,19 +19,20 @@ A HAPI-FHIR batch job definition consists of a job name, version, parameter json
 After a job has been defined, *instances* of that job can be submitted for batch processing by populating a `JobInstanceStartRequest` with the job name and job parameters json and then submitting that request to the Batch Job Coordinator.
 
 The Batch Job Coordinator will then store two records in the database:
-- Job Instance with status QUEUED: that is the parent record for all data concerning this job
-- Batch Work Chunk with status READY: this describes the first "chunk" of work required for this job.  The first Batch Work Chunk contains no data.
+- Job Instance with status `QUEUED`: that is the parent record for all data concerning this job
+- Batch Work Chunk with status `READY`: this describes the first "chunk" of work required for this job. The first Batch Work Chunk contains no data.
 
 ### The Maintenance Job
 
 A Scheduled Job runs periodically (once a minute).  For each Job Instance in the database, it:
 
+1. Calculates job progress (% of work chunks in `COMPLETE` status). If the job is finished, purges any left over work chunks still in the database.
 1. Moves all `POLL_WAITING` work chunks to `READY` if their `nextPollTime` has expired.
-1. Moves all `READY` work chunks into the `QUEUED` state and publishes a message to the Batch Notification Message Channel to inform worker threads that a work chunk is now ready for processing. \*
 1. Calculates job progress (% of work chunks in `COMPLETE` status). If the job is finished, purges any leftover work chunks still in the database.
 1. Cleans up any complete, failed, or cancelled jobs that need to be removed.
-1. Moves any gated jobs onto their next step when complete.
+1. When the current step is complete, moves any gated jobs onto their next step and updates all chunks in `GATE_WAITING` to `READY`.
 1. If the final step of a gated job is a reduction step, a reduction step execution will be triggered.
+1. Moves all `READY` work chunks into the `QUEUED` state and publishes a message to the Batch Notification Message Channel to inform worker threads that a work chunk is now ready for processing. \*
 
 \* An exception is for the final reduction step, where work chunks are not published to the Batch Notification Message Channel,
 but instead processed inline.

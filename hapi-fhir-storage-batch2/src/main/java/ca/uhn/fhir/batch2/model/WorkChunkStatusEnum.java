@@ -31,17 +31,17 @@ import java.util.Set;
  * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
  */
 public enum WorkChunkStatusEnum {
-	// wipmb For 6.8 Add WAITING for gated, and READY for in db, but not yet sent to channel.
 	/**
 	 * The initial state all workchunks start in
 	 */
 	READY,
+	GATE_WAITING,
+	QUEUED,
 	/**
 	 * The state of workchunks that have been sent to the queue;
 	 * or of workchunks that are about to be processed in a final
 	 * reduction step (these workchunks are never queued)
 	 */
-	QUEUED,
 	/**
 	 * The state of workchunks that are doing work.
 	 */
@@ -84,6 +84,8 @@ public enum WorkChunkStatusEnum {
 
 	public Set<WorkChunkStatusEnum> getNextStates() {
 		switch (this) {
+			case GATE_WAITING:
+				return EnumSet.of(READY);
 			case READY:
 				return EnumSet.of(QUEUED);
 			case QUEUED:

@@ -37,7 +37,7 @@ public interface ITestFixture {
 
 	WorkChunk freshFetchWorkChunk(String theChunkId);
 
-	String storeWorkChunk(String theJobDefinitionId, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData);
+	String storeWorkChunk(String theJobDefinitionId, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData, boolean theGatedExecution);
 
 	void runInTransaction(Runnable theRunnable);
 
@@ -61,6 +61,14 @@ public interface ITestFixture {
 	 * @return
 	 */
 	String createChunk(String theJobInstanceId);
+
+	String createChunk(String theJobInstanceId, boolean theGatedExecution);
+
+	/**
+	 * Create chunk as the first chunk of a job.
+	 * @return the id of the created chunk
+	 */
+	String createFirstChunk(JobDefinition<TestJobParameters> theJobDefinition, String theJobInstanceId);
 
 	/**
 	 * Enable/disable the maintenance runner (So it doesn't run on a scheduler)
