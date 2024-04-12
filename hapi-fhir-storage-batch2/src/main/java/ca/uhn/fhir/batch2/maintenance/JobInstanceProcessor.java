@@ -99,7 +99,8 @@ public class JobInstanceProcessor {
 		cleanupInstance(theInstance);
 		triggerGatedExecutions(theInstance, jobDefinition);
 
-		JobInstance updatedInstance = myJobPersistence.fetchInstance(theInstance.getInstanceId()).orElseThrow();
+		JobInstance updatedInstance =
+				myJobPersistence.fetchInstance(theInstance.getInstanceId()).orElseThrow();
 		if (theInstance.hasGatedStep()) {
 			JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
 					jobDefinition, updatedInstance.getCurrentGatedStepId());
