@@ -181,10 +181,7 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 				initializeResourceLists();
 				for (String next : myTerminologyResources) {
 					loadCodeSystems(codeSystems, valueSets, next);
-					System.out.println("ContainsKey: " + valueSets.containsKey("http://hl7.org/fhir/ValueSet/ucum-vitals-common") + " " + valueSets.get("http://hl7.org/fhir/ValueSet/ucum-vitals-common"));
-
 				}
-
 
 				myCodeSystems = codeSystems;
 				myValueSets = valueSets;
