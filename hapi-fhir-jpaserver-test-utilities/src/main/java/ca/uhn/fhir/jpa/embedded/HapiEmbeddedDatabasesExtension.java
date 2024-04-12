@@ -55,7 +55,7 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 		if (DockerRequiredCondition.isDockerAvailable()) {
 			myEmbeddedDatabases.add(new H2EmbeddedDatabase());
 			myEmbeddedDatabases.add(new PostgresEmbeddedDatabase());
-			//			myEmbeddedDatabases.add(new MsSqlEmbeddedDatabase());
+			myEmbeddedDatabases.add(new MsSqlEmbeddedDatabase());
 			if (canUseOracle()) {
 				//				myEmbeddedDatabases.add(new OracleEmbeddedDatabase());
 			} else {

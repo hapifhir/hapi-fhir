@@ -57,7 +57,7 @@ public class MigrateColumnClobTypeToTextTypeTask extends BaseTableColumnTask {
 				break;
 			case POSTGRES_9_4:
 				retVal = "update " + tableName + " set " + toColumName + " = convert_from(lo_get(" + fromColumName
-						+ "), 'UTF8')  where " + fromColumName + " is not null";
+						+ "), 'UTF8') where " + fromColumName + " is not null";
 				break;
 			default:
 				throw new IllegalStateException(Msg.code(2515));
