@@ -241,12 +241,6 @@ public class JobInstanceProcessor {
 		Set<WorkChunkStatusEnum> workChunkStatuses = myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(
 				theInstance.getInstanceId(), currentGatedStepId);
 
-		if (workChunkStatuses.isEmpty()) {
-			// no work chunks = no output
-			// trivial to advance to next step
-			return true;
-		}
-
 		// all workchunks for the current step are in COMPLETED -> proceed.
 		return workChunkStatuses.equals(Set.of(WorkChunkStatusEnum.COMPLETED));
 	}
