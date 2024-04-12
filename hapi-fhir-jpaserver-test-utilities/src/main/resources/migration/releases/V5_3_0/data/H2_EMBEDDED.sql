@@ -69,8 +69,8 @@ INSERT INTO HFJ_SPIDX_QUANTITY_NRML (
    6382255012744790145,
    -1901136387361512731,
    0.012,
-   NULL,
-   NULL
+   '2024-04-05',
+   1
 );
 
 INSERT INTO HFJ_RES_LINK (
@@ -87,14 +87,14 @@ INSERT INTO HFJ_RES_LINK (
    SP_UPDATED
 ) VALUES (
    701,
-   NULL,
-   NULL,
+   '2024-04-05',
+   1,
    'Observation.subject.where(resolve() is Patient)',
    1702,
    'Observation',
    1906,
    'Patient',
-   NULL,
+   'http://localhost:8000/Patient/123',
    1,
    '2024-03-01 18:01:12.921'
 );
