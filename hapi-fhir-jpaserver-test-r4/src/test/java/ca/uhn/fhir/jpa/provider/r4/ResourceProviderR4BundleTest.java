@@ -160,9 +160,8 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		for (BundleEntryComponent bundleEntry : bundleEntries) {
 			assertEquals(ids.get(i++),  bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 		}
-
-
 	}
+
 	@Test
 	public void testBundleBatchWithError() {
 		List<String> ids = createPatients(5);
