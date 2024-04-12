@@ -253,7 +253,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addColumn("20240322.1", "NEXT_POLL_TIME")
 				.nullable()
 				.type(ColumnTypeEnum.DATE_TIMESTAMP);
-		batch2WorkChunkTable.addColumn("20240315.2", "POLL_ATTEMPTS").nullable().type(ColumnTypeEnum.INT);
+		batch2WorkChunkTable.addColumn("20240322.2", "POLL_ATTEMPTS").nullable().type(ColumnTypeEnum.INT);
 	}
 
 	private void init680_Part2() {
