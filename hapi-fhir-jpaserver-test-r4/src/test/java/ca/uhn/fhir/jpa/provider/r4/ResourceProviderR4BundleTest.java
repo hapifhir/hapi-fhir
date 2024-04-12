@@ -146,8 +146,9 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		Bundle input = new Bundle();
 		input.setType(BundleType.BATCH);
 
-		for (String id : ids)
-		    input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(id);
+		for (String id : ids) {
+			input.addEntry().getRequest().setMethod(HTTPVerb.GET).setUrl(id);
+		}
 
 		Bundle output = myClient.transaction().withBundle(input).execute();
 
