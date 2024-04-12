@@ -416,8 +416,8 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					.getRootValidationSupport()
 					.fetchCodeSystem(theCodeSystemUrlAndVersionToValidate);
 			if (codeSystemToValidateResource == null) {
-
-				List<OperationOutcome.OperationOutcomeIssueComponent> issues = new ArrayList<>();
+				if (!theValidationSupportContext.getRootValidationSupport().isCodeSystemSupported(theValidationSupportContext, theCodeSystemUrlAndVersionToValidate)) {
+					List<OperationOutcome.OperationOutcomeIssueComponent> issues = new ArrayList<>();
 
 				// FIXME match
 				// validation.validation-simple-codeableconcept-bad-system
@@ -428,10 +428,11 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 
 				String theMessage = "Unknown CodeSystem: " + theCodeSystemUrlAndVersionToValidate;
 				return new CodeValidationResult()
-						.setSeverityCode("error")
-						.setMessage(theMessage)
-						.addCodeValidationIssue(new CodeValidationIssue(
-								theMessage, CodeValidationIssueCode.NOT_FOUND, CodeValidationIssueCoding.NOT_FOUND));
+					.setSeverityCode("error")
+					.setMessage(theMessage)
+					.addCodeValidationIssue(new CodeValidationIssue(
+						theMessage, CodeValidationIssueCode.NOT_FOUND, CodeValidationIssueCoding.NOT_FOUND));
+				}
 			}
 		}
 
