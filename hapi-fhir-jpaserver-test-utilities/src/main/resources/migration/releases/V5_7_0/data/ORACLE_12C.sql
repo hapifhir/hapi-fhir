@@ -15,9 +15,9 @@ INSERT INTO HFJ_RES_VER (
    RES_TEXT_VC
 ) VALUES (
    1653,
-   NULL,
-   NULL,
-   NULL,
+   SYSDATE,
+   1,
+   SYSDATE,
    'R4',
    0,
    SYSDATE,
@@ -57,13 +57,13 @@ INSERT INTO MPI_LINK (
    2,
    1,
    1906,
-   NULL,
+   1.0,
    1702,
    SYSDATE,
-   NULL,
+   61,
    '1',
    1653,
    1,
-   NULL,
-   NULL
+   SYSDATE,
+   1
 );

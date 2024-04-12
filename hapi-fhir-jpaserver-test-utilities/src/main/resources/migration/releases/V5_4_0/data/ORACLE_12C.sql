@@ -53,7 +53,7 @@ INSERT INTO TRM_VALUESET_CONCEPT (
    1,
    'HTTP://LOINC.ORG',
    59,
-   NULL,
+   1,
    '10820244',
    4824
 );

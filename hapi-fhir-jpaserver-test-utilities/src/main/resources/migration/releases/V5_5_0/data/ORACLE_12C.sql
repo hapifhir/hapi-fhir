@@ -96,8 +96,8 @@ INSERT INTO HFJ_IDX_CMB_TOK_NU (
    RES_ID
 ) VALUES (
    10,
-   NULL,
-   NULL,
+   SYSDATE,
+   1,
    '5570851350247697202',
    'Patient?birthdate=1974-12-25&family=WINDSOR&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale',
    1653
