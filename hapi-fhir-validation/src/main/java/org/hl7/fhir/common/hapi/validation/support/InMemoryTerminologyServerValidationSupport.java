@@ -419,7 +419,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				if (!theValidationSupportContext.getRootValidationSupport().isCodeSystemSupported(theValidationSupportContext, theCodeSystemUrlAndVersionToValidate)) {
 					List<OperationOutcome.OperationOutcomeIssueComponent> issues = new ArrayList<>();
 
-				// FIXME match
+				// TODO These should match the following cases in the core FHIR validation test cases.
 				// validation.validation-simple-codeableconcept-bad-system
 				// validation.validation-simple-codeableconcept-bad-version2
 				// validation.validation-simple-coding-bad-system

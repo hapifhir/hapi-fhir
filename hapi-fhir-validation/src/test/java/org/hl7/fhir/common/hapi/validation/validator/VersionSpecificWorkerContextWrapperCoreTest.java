@@ -107,7 +107,7 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 							public ValueSet answer(InvocationOnMock theInvocation) {
 								String url = (String) theInvocation.getArguments()[1];
 
-								System.out.println("Looking for valueSet: " + url);
+								System.out.println("Looking for valueSet: " + url + "... " + (myValueSets.containsKey(url) ? "found" : "not found"));
 								return myValueSets.get(url);
 							}
 						}
@@ -119,7 +119,7 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 							public ValueSet answer(InvocationOnMock theInvocation) {
 								String url = (String) theInvocation.getArguments()[0];
 
-								System.out.println("Looking for valueSet: " + url);
+								System.out.println("Looking for valueSet: " + url + "... " + (myValueSets.containsKey(url) ? "found" : "not found"));
 								return myValueSets.get(url);
 							}
 						}
@@ -164,7 +164,7 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 				Arguments.of(entry[0], data, entry[1]));
 	}
 
-	@Disabled
+	//@Disabled
 	@ParameterizedTest(name = "{0}")
 	@MethodSource("argumentSource")
 	public void fhirTestCasesCodeValidationTest(String name, TxTestData testData, TxTestSetup setup) throws IOException {
