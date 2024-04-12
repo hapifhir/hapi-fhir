@@ -222,7 +222,6 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 			public CodeSystem answer(InvocationOnMock theInvocation) {
 				String system = theInvocation.getArgument(0, String.class);
 				if ("http://loinc.org".equals(system)
-					|| "http://unitsofmeasure.org".equals(system)
 				) {
 					CodeSystem retVal = new CodeSystem();
 					retVal.setUrl(system);
@@ -266,7 +265,7 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 			if (myValidConcepts.contains(system + "___" + code)) {
 				return new IValidationSupport.LookupCodeResult().setFound(true);
 			} else {
-				return new IValidationSupport.LookupCodeResult().setFound(false);
+				return null; //return new IValidationSupport.LookupCodeResult().setFound(false);
 			}
 		});
 		when(myMockSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenAnswer(t -> {
@@ -1375,7 +1374,6 @@ public class FhirInstanceValidatorR4BTest extends BaseValidationTestWithInlineMo
 	@Test
 	public void testValidateWithUcum() throws IOException {
 		addValidConcept("http://loinc.org", "8310-5");
-		addValidConcept("http://unitsofmeasure.org", "Cel");
 
 		Observation input = loadResource(ourCtx, Observation.class, "/r4/observation-with-body-temp-ucum.json");
 		ValidationResult output = myFhirValidator.validateWithResult(input);
