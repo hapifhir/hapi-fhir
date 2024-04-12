@@ -170,7 +170,10 @@ public class BulkDataExportProvider {
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 		CompositeInterceptorBroadcaster.doCallHooks(
-				this.myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_INITIATE_BULK_EXPORT, initiateBulkExportHookParams);
+				this.myInterceptorBroadcaster,
+				theRequestDetails,
+				Pointcut.STORAGE_INITIATE_BULK_EXPORT,
+				initiateBulkExportHookParams);
 
 		// get cache boolean
 		boolean useCache = shouldUseCache(theRequestDetails);
@@ -203,8 +206,8 @@ public class BulkDataExportProvider {
 
 		// Determine and validate partition permissions (if needed).
 		RequestPartitionId partitionId =
-			myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
-				theRequestDetails, ProviderConstants.OPERATION_EXPORT);
+				myRequestPartitionHelperService.determineReadPartitionForRequestForServerOperation(
+						theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 		theOptions.setPartitionId(partitionId);
 
@@ -214,11 +217,10 @@ public class BulkDataExportProvider {
 		preInitiateBulkExportHookParams.add(RequestDetails.class, theRequestDetails);
 		preInitiateBulkExportHookParams.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 		CompositeInterceptorBroadcaster.doCallHooks(
-			myInterceptorBroadcaster,
-			theRequestDetails,
-			Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT,
-			preInitiateBulkExportHookParams
-		);
+				myInterceptorBroadcaster,
+				theRequestDetails,
+				Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT,
+				preInitiateBulkExportHookParams);
 	}
 
 	private boolean shouldUseCache(ServletRequestDetails theRequestDetails) {

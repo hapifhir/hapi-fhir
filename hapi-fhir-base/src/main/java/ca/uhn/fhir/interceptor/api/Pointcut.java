@@ -1113,10 +1113,10 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	STORAGE_PRE_INITIATE_BULK_EXPORT(
-		void.class,
-		"ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters",
-		"ca.uhn.fhir.rest.api.server.RequestDetails",
-		"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
+			void.class,
+			"ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails"),
 
 	/**
 	 * <b>Storage Hook:</b>
