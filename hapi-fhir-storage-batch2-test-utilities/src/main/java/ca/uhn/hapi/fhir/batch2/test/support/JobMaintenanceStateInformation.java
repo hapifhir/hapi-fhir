@@ -97,6 +97,10 @@ public class JobMaintenanceStateInformation {
 	}
 
 	public void verifyFinalStates(IJobPersistence theJobPersistence) {
+		verifyFinalStates(theJobPersistence, (chunk) -> {});
+	}
+
+	public void verifyFinalStates(IJobPersistence theJobPersistence, Consumer<WorkChunk> theChunkConsumer) {
 		assertEquals(getInitialWorkChunks().size(), getFinalWorkChunk().size());
 
 		HashMap<String, WorkChunk> workchunkMap = new HashMap<>();
@@ -119,6 +123,7 @@ public class JobMaintenanceStateInformation {
 			// verify status and step id
 			assertEquals(expected.getTargetStepId(), wc.getTargetStepId());
 			assertEquals(expected.getStatus(), wc.getStatus());
+			theChunkConsumer.accept(wc);
 		}
 	}
 

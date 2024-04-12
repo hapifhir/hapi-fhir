@@ -10,6 +10,7 @@ import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.ILastJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -49,11 +50,18 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.test.context.ContextConfiguration;
+import org.testcontainers.shaded.org.awaitility.Awaitility;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -565,6 +573,95 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	@Test
+	public void testJobWithLongPollingStep() throws InterruptedException {
+		// create job definition
+		int callsToMake = 3;
+		int chunksToAwait = 2;
+		String jobId = new Exception().getStackTrace()[0].getMethodName();
+
+		ConcurrentHashMap<String, AtomicInteger> chunkToCounter = new ConcurrentHashMap<>();
+		HashMap<String, Integer> chunkToCallsToMake = new HashMap<>();
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> first = (step, sink) -> {
+			for (int i = 0; i < chunksToAwait; i++) {
+				String cv = "chunk" + i;
+				chunkToCallsToMake.put(cv, callsToMake);
+				sink.accept(new FirstStepOutput().setValue(cv));
+			}
+			return RunOutcome.SUCCESS;
+		};
+
+		// step 2
+		IJobStepWorker<TestJobParameters, FirstStepOutput, SecondStepOutput> second = (step, sink) -> {
+			// simulate a call
+			Awaitility.await().atMost(100, TimeUnit.MICROSECONDS);
+
+			// we use Batch2FastSchedulerConfig, so we have a fast scheduler
+			// that should catch and call repeatedly pretty quickly
+			String chunkValue = step.getData().myTestValue;
+			AtomicInteger pollCounter = chunkToCounter.computeIfAbsent(chunkValue, (key) -> {
+				return new AtomicInteger();
+			});
+			int count = pollCounter.getAndIncrement();
+
+			if (chunkToCallsToMake.get(chunkValue) <= count) {
+				sink.accept(new SecondStepOutput());
+				return RunOutcome.SUCCESS;
+			}
+			throw new RetryChunkLaterException(Duration.of(200, ChronoUnit.MILLIS));
+		};
+
+		// step 3
+		ILastJobStepWorker<TestJobParameters, SecondStepOutput> last = (step, sink) -> {
+			myLastStepLatch.call(1);
+			return RunOutcome.SUCCESS;
+		};
+
+		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
+			.setJobDefinitionId(jobId)
+			.setJobDescription("test job")
+			.setJobDefinitionVersion(TEST_JOB_VERSION)
+			.setParametersType(TestJobParameters.class)
+			.gatedExecution()
+			.addFirstStep(
+				FIRST_STEP_ID,
+				"First step",
+				FirstStepOutput.class,
+				first
+			)
+			.addIntermediateStep(SECOND_STEP_ID,
+				"Second step",
+				SecondStepOutput.class,
+				second)
+			.addLastStep(
+				LAST_STEP_ID,
+				"Final step",
+				last
+			)
+			.completionHandler(myCompletionHandler)
+			.build();
+		myJobDefinitionRegistry.addJobDefinition(jd);
+
+		// test
+		JobInstanceStartRequest request = buildRequest(jobId);
+		myLastStepLatch.setExpectedCount(chunksToAwait);
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
+		String instanceId = startResponse.getInstanceId();
+
+		// waiting for the job
+		myBatch2JobHelper.awaitJobCompletion(startResponse);
+		// ensure final step fired
+		myLastStepLatch.awaitExpected();
+
+		// verify
+		assertEquals(chunksToAwait, chunkToCounter.size());
+		for (Map.Entry<String, AtomicInteger> set : chunkToCounter.entrySet()) {
+			// +1 because after 0 indexing; it will make callsToMake failed calls (0, 1... callsToMake)
+			// and one more successful call (callsToMake + 1)
+			assertEquals(callsToMake + 1, set.getValue().get());
+		}
+	}
+
+	@Test
 	public void testFirstStepToSecondStep_doubleChunk_doesNotFastTrack() throws InterruptedException {
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
 			sink.accept(new FirstStepOutput());
@@ -596,7 +693,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 
 	@Test
-	public void JobExecutionFailedException_CausesInstanceFailure() {
+	public void jobExecutionFailedException_CausesInstanceFailure() {
 		// setup
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
 			throw new JobExecutionFailedException("Expected Test Exception");
@@ -816,7 +913,15 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	}
 
 	static class FirstStepOutput implements IModelJson {
+		@JsonProperty("test")
+		private String myTestValue;
+
 		FirstStepOutput() {
+		}
+
+		public FirstStepOutput setValue(String theV) {
+			myTestValue = theV;
+			return this;
 		}
 	}
 

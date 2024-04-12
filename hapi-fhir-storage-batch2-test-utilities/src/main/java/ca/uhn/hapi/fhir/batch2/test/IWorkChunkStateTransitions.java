@@ -28,10 +28,17 @@ import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
 import ca.uhn.test.concurrency.PointcutLatch;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Date;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkTestConstants {
 
@@ -106,5 +113,166 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 			});
 		}
 		latch.awaitExpected();
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"2|READY",
+		"2|QUEUED",
+		//"2|GATED,", // TODO - update/enable when gated status is available
+		"2|POLL_WAITING",
+		"2|ERRORED",
+		"2|FAILED",
+		"2|COMPLETED"
+	})
+	default void onWorkChunkPollDelay_withNoInProgressChunks_doNotTransitionNorSetTime(String theState) {
+		// setup
+		getTestManager().disableWorkChunkMessageHandler();
+		getTestManager().enableMaintenanceRunner(false);
+		JobDefinition<?> jobDef = getTestManager().withJobDefinition(false);
+		String jobInstanceId = getTestManager().createAndStoreJobInstance(jobDef);
+
+		// the time we set it to
+		Date newTime = Date.from(
+			Instant.now().plus(Duration.ofSeconds(100))
+		);
+		JobMaintenanceStateInformation stateInformation = new JobMaintenanceStateInformation(
+			jobInstanceId,
+			jobDef,
+			theState
+		);
+		stateInformation.initialize(getTestManager().getSvc());
+
+		String chunkId = stateInformation.getInitialWorkChunks()
+			.stream().findFirst().orElseThrow().getId();
+
+		// test
+		getTestManager().getSvc().onWorkChunkPollDelay(chunkId, newTime);
+
+		// verify
+		stateInformation.verifyFinalStates(getTestManager().getSvc(), chunk -> {
+			assertNull(chunk.getNextPollTime());
+		});
+	}
+
+	@Test
+	default void onWorkChunkPollDelay_withInProgressChunks_transitionsAndSetsNewTime() {
+		// setup
+		getTestManager().disableWorkChunkMessageHandler();
+		getTestManager().enableMaintenanceRunner(false);
+		JobDefinition<?> jobDef = getTestManager().withJobDefinition(false);
+		String jobInstanceId = getTestManager().createAndStoreJobInstance(jobDef);
+
+		// the time we set it to
+		Date newTime = Date.from(
+			Instant.now().plus(Duration.ofSeconds(100))
+		);
+
+		String state = "2|IN_PROGRESS,2|POLL_WAITING";
+		JobMaintenanceStateInformation stateInformation = new JobMaintenanceStateInformation(
+			jobInstanceId, jobDef,
+			state
+		);
+		stateInformation.initialize(getTestManager().getSvc());
+
+		String chunkId = stateInformation.getInitialWorkChunks()
+			.stream().findFirst().orElseThrow().getId();
+
+		// test
+		getTestManager().getSvc().onWorkChunkPollDelay(chunkId, newTime);
+
+		// verify
+		stateInformation.verifyFinalStates(getTestManager().getSvc(), (chunk) -> {
+			// verify the time has been set
+			assertEquals(newTime, chunk.getNextPollTime());
+			assertEquals(1, chunk.getPollAttempts());
+		});
+	}
+
+	@Test
+	default void updatePollWaitingChunksForJobIfReady_pollWaitingChunkWithExpiredTime_transition() {
+		updatePollWaitingChunksForJobIfReady_POLL_WAITING_chunksTest(true);
+	}
+
+	@Test
+	default void updatePollWaitingChunksForJobIfReady_pollWaitingChunkWithNonExpiredTime_doesNotTransition() {
+		updatePollWaitingChunksForJobIfReady_POLL_WAITING_chunksTest(false);
+	}
+
+	private void updatePollWaitingChunksForJobIfReady_POLL_WAITING_chunksTest(boolean theDeadlineIsExpired) {
+		// setup
+		getTestManager().disableWorkChunkMessageHandler();
+		getTestManager().enableMaintenanceRunner(false);
+		String state = "1|POLL_WAITING";
+		if (theDeadlineIsExpired) {
+			state += ",1|READY";
+		}
+
+		JobDefinition<?> jobDef = getTestManager().withJobDefinition(false);
+		String jobInstanceId = getTestManager().createAndStoreJobInstance(jobDef);
+		JobMaintenanceStateInformation stateInformation = new JobMaintenanceStateInformation(
+			jobInstanceId,
+			jobDef,
+			state
+		);
+		Date nextPollTime = theDeadlineIsExpired ?
+			Date.from(Instant.now().minus(Duration.ofSeconds(10))) : Date.from(Instant.now().plus(Duration.ofSeconds(10)));
+		stateInformation.addWorkChunkModifier(chunk -> {
+			chunk.setNextPollTime(nextPollTime);
+		});
+		stateInformation.initialize(getTestManager().getSvc());
+
+		// test
+		int updateCount = getTestManager().getSvc().updatePollWaitingChunksForJobIfReady(jobInstanceId);
+
+		// verify
+		if (theDeadlineIsExpired) {
+			assertEquals(1, updateCount);
+		} else {
+			assertEquals(0, updateCount);
+		}
+		stateInformation.verifyFinalStates(getTestManager().getSvc());
+	}
+
+	/**
+	 * Only POLL_WAITING chunks should be able to transition to READY via
+	 * updatePollWaitingChunksForJobIfReady
+	 */
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"2|READY",
+		// "2|GATED", // TODO - update/enable whenever gated status is ready
+		"2|QUEUED",
+		"2|IN_PROGRESS",
+		"2|ERRORED",
+		"2|FAILED",
+		"2|COMPLETED"
+	})
+	default void updatePollWaitingChunksForJobIfReady_withNoPollWaitingChunks_doNotTransitionNorUpdateTime(String theState) {
+		// setup
+		getTestManager().disableWorkChunkMessageHandler();
+		getTestManager().enableMaintenanceRunner(false);
+
+		JobDefinition<?> jobDef = getTestManager().withJobDefinition(false);
+		String jobInstanceId = getTestManager().createAndStoreJobInstance(jobDef);
+
+		JobMaintenanceStateInformation stateInformation = new JobMaintenanceStateInformation(jobInstanceId,
+			jobDef,
+			theState);
+		stateInformation.addWorkChunkModifier((chunk) -> {
+			// make sure time is in the past, so we aren't testing the
+			// time <= now aspect
+			chunk.setNextPollTime(
+				Date.from(Instant.now().minus(Duration.ofSeconds(10)))
+			);
+		});
+		stateInformation.initialize(getTestManager().getSvc());
+
+		// test
+		int updateCount = getTestManager().getSvc().updatePollWaitingChunksForJobIfReady(jobInstanceId);
+
+		// verify
+		assertEquals(0, updateCount);
+		stateInformation.verifyFinalStates(getTestManager().getSvc());
 	}
 }

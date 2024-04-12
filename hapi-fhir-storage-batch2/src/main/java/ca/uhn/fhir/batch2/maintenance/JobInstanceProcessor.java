@@ -99,6 +99,7 @@ public class JobInstanceProcessor {
 		JobDefinition<? extends IModelJson> jobDefinition =
 				myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
 
+		processPollingChunks(theInstance.getInstanceId());
 		enqueueReadyChunks(theInstance, jobDefinition, false);
 		cleanupInstance(theInstance);
 		triggerGatedExecutions(theInstance, jobDefinition);
@@ -416,5 +417,16 @@ public class JobInstanceProcessor {
 		// because we now have all gated job chunks in READY state,
 		// we can enqueue them
 		enqueueReadyChunks(theInstance, theJobDefinition, true);
+	}
+
+	/**
+	 * Moves all POLL_WAITING work chunks to READY for work chunks whose
+	 * nextPollTime has expired.
+	 */
+	private void processPollingChunks(String theInstanceId) {
+		int updatedChunkCount = myJobPersistence.updatePollWaitingChunksForJobIfReady(theInstanceId);
+
+		ourLog.debug(
+				"Moved {} Work Chunks in POLL_WAITING to READY for Job Instance {}", updatedChunkCount, theInstanceId);
 	}
 }

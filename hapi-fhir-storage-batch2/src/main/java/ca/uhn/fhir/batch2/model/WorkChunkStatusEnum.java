@@ -32,11 +32,36 @@ import java.util.Set;
  */
 public enum WorkChunkStatusEnum {
 	// wipmb For 6.8 Add WAITING for gated, and READY for in db, but not yet sent to channel.
+	/**
+	 * The initial state all workchunks start in
+	 */
 	READY,
+	/**
+	 * The state of workchunks that have been sent to the queue;
+	 * or of workchunks that are about to be processed in a final
+	 * reduction step (these workchunks are never queued)
+	 */
 	QUEUED,
+	/**
+	 * The state of workchunks that are doing work.
+	 */
 	IN_PROGRESS,
+	/**
+	 * A workchunk status for workchunks that are doing long-polling work
+	 * that will not complete in a reasonably short amount of time
+	 */
+	POLL_WAITING,
+	/**
+	 * A transient state on retry when a chunk throws an error, but hasn't FAILED yet. Will move back to IN_PROGRESS on retry.
+	 */
 	ERRORED,
+	/**
+	 * Chunk has failed with a non-retriable error, or has run out of retry attempts.
+	 */
 	FAILED,
+	/**
+	 * The state of workchunks that have finished their job's step.
+	 */
 	COMPLETED;
 
 	private static final EnumMap<WorkChunkStatusEnum, Set<WorkChunkStatusEnum>> ourPriorStates;
@@ -64,7 +89,9 @@ public enum WorkChunkStatusEnum {
 			case QUEUED:
 				return EnumSet.of(IN_PROGRESS);
 			case IN_PROGRESS:
-				return EnumSet.of(IN_PROGRESS, ERRORED, FAILED, COMPLETED);
+				return EnumSet.of(IN_PROGRESS, ERRORED, FAILED, COMPLETED, POLL_WAITING);
+			case POLL_WAITING:
+				return EnumSet.of(POLL_WAITING, READY);
 			case ERRORED:
 				return EnumSet.of(IN_PROGRESS, FAILED, COMPLETED);
 				// terminal states

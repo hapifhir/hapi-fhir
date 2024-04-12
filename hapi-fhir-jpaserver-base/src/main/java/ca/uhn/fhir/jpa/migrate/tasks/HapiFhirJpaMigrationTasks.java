@@ -245,6 +245,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addIndex("20240321.1", "IDX_BT2WC_II_SI_S_SEQ_ID")
 				.unique(true)
 				.withColumns("INSTANCE_ID", "TGT_STEP_ID", "STAT", "SEQ", "ID");
+
+		// add columns to Batch2WorkChunkEntity
+		Builder.BuilderWithTableName batch2WorkChunkTable = version.onTable("BT2_WORK_CHUNK");
+
+		batch2WorkChunkTable
+				.addColumn("20240322.1", "NEXT_POLL_TIME")
+				.nullable()
+				.type(ColumnTypeEnum.DATE_TIMESTAMP);
+		batch2WorkChunkTable.addColumn("20240322.2", "POLL_ATTEMPTS").nullable().type(ColumnTypeEnum.INT);
 	}
 
 	private void init680_Part2() {

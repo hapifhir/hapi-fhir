@@ -58,6 +58,7 @@
  * This runs every minute and does the following:
  *
  * <ul>
+ *     <li>Moves POLL_WAITING work chunks to READY if their nextPollTime has expired.</li>
  *     <li>Moves READY work chunks to QUEUE and publishes it to the Batch2 Notification topic</li>
  *     <li>Calculates job progress (% of workchunks in complete status).</li>
  *     <li>If the job is finished, purges any left over work chunks.</li>
@@ -74,6 +75,7 @@
  *     <li>If the Job Instance is cancelled, change the status to CANCELLED and abort processing</li>
  *     <li>If the step creates new work chunks, each work chunk will be created in the READY state</li>
  *     <li>If the step succeeds, the work chunk status is changed from IN_PROGRESS to COMPLETE</li>
+ *     <li>If the step throws a RetryChunkLaterException, the work chunk status is changed from IN_PROGRESS to POLL_WAITING and a nextPollTime value set.</li>
  *     <li>If the step fails, the work chunk status is changed from IN_PROGRESS to either ERRORED or FAILED depending on the severity of the error</li>
  * </ul>
  *
@@ -88,6 +90,7 @@
  *    <li>
  *       On normal execution, the chunk advances IN_PROGRESS->COMPLETED {@link ca.uhn.fhir.batch2.api.IWorkChunkPersistence#onWorkChunkCompletion} </li>
  *    <li> On a retryiable error, IN_PROGRESS->ERROR with an error message and the chunk is put back on the queue. {@link ca.uhn.fhir.batch2.api.IWorkChunkPersistence#onWorkChunkError} </li>
+ *    <li> On a RetryChunkLaterException, IN_PROGRESS->POLL_WAITING with a nextPollTime set. The chunk is *not* put back on the queue, but is left for the maintenance job to manage.</li>
  *    <li> On a hard failure, or too many errors, IN_PROGRESS->FAILED with the error message. {@link ca.uhn.fhir.batch2.api.IWorkChunkPersistence#onWorkChunkFailed} </li>
  * </ul>
  *
