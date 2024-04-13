@@ -134,6 +134,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	@Autowired
 	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
+	public SubscriptionTriggeringSvcImpl() {}
+
 	@Override
 	public IBaseParameters triggerSubscription(
 			@Nullable List<IPrimitiveType<String>> theResourceIds,
