@@ -100,20 +100,20 @@ public class JobInstanceProcessor {
 		cleanupInstance(theInstance);
 		triggerGatedExecutions(theInstance, jobDefinition);
 
-		if (theInstance.hasGatedStep() && theInstance.isRunning()) {
-			JobInstance updatedInstance =
-					myJobPersistence.fetchInstance(theInstance.getInstanceId()).orElseThrow();
+		JobInstance updatedInstance =
+				myJobPersistence.fetchInstance(theInstance.getInstanceId()).orElseThrow();
+		if (theInstance.hasGatedStep()) {
 			JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
 					jobDefinition, updatedInstance.getCurrentGatedStepId());
 			if (jobWorkCursor.isReductionStep()) {
 				// Reduction step work chunks should never be sent to the queue but to its specific service instead.
-				triggerReductionStep(theInstance, jobWorkCursor);
+				triggerReductionStep(updatedInstance, jobWorkCursor);
 				return;
 			}
 		}
 
 		// enqueue the chunks as normal
-		enqueueReadyChunks(theInstance, jobDefinition);
+		enqueueReadyChunks(updatedInstance, jobDefinition);
 
 		ourLog.debug("Finished job processing: {} - {}", myInstanceId, stopWatch);
 	}
