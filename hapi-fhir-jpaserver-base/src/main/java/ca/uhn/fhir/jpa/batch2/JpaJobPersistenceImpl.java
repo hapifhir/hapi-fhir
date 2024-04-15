@@ -619,8 +619,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 					theJobInstanceId,
 					theNextStepId);
 			// when we reach here, the current step id is equal to theNextStepId
-			int numChanged =
-					myWorkChunkRepository.updateAllChunksForStepFromGateWaitingToReady(theJobInstanceId, theNextStepId);
+			// Up to 7.1, gated jobs' work chunks are created in status QUEUED but not actually queued for the
+			// workers.
+			// In order to keep them compatible, turn QUEUED chunks into READY, too.
+			// TODO: remove QUEUED from the IN clause when we are certain that no one is still running the old code.
+			int numChanged = myWorkChunkRepository.updateAllChunksForStepWithStatus(
+					theJobInstanceId,
+					theNextStepId,
+					List.of(WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED),
+					WorkChunkStatusEnum.READY);
 			ourLog.debug(
 					"Updated {} chunks of gated instance {} for step {} from fake QUEUED to READY.",
 					numChanged,
