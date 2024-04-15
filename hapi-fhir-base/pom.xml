@@ -138,6 +138,11 @@
 			<artifactId>system-stubs-jupiter</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- OpenTelemetry -->
+		<dependency>
+			<groupId>io.opentelemetry</groupId>
+			<artifactId>opentelemetry-api</artifactId>
+		</dependency>
 	</dependencies>
 
 	<build>
