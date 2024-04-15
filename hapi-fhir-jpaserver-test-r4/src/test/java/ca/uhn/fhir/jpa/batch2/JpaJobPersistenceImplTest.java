@@ -265,12 +265,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// Setup
 		JobInstance instance = createInstance();
 		String instanceId = mySvc.storeNewInstance(instance);
-//		PointcutLatch latch = new PointcutLatch("senderlatch");
-//		doAnswer(a -> {
-//			latch.call(1);
-//			return Void.class;
-//		}).when(myBatchSender).sendWorkChannelMessage(any(JobWorkNotification.class));
-//		latch.setExpectedCount(1);
 		myMaintenanceService.enableMaintenancePass(false);
 
 		storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA, false);
