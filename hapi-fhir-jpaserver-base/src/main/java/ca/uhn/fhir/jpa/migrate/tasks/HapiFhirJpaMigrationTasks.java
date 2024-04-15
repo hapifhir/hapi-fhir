@@ -127,11 +127,18 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		Builder version = forVersion(VersionEnum.V7_2_0);
 
-		// allow null codes in concept map targets
+		// allow null codes in concept map targets (see comment on "20190722.27" if you are going to change this)
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
 				.modifyColumn("20240327.1", "TARGET_CODE")
 				.nullable()
 				.withType(ColumnTypeEnum.STRING, 500);
+
+		// Stop writing to hfj_forced_id https://github.com/hapifhir/hapi-fhir/pull/5817
+		Builder.BuilderWithTableName forcedId = version.onTable("HFJ_FORCED_ID");
+		forcedId.dropForeignKey("20240402.1", "FK_FORCEDID_RESOURCE", "HFJ_RESOURCE");
+		forcedId.dropIndex("20240402.2", "IDX_FORCEDID_RESID");
+		forcedId.dropIndex("20240402.3", "IDX_FORCEDID_TYPE_FID");
+		forcedId.dropIndex("20240402.4", "IDX_FORCEID_FID");
 	}
 
 	protected void init700() {
@@ -1403,9 +1410,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addIndex("20211210.4", "FK_FORCEDID_RESOURCE")
 				.unique(true)
 				.withColumns("RESOURCE_PID")
-				.doNothing() // This migration was added in error, as this table already has a unique constraint on
 				// RESOURCE_PID and every database creates an index on anything that is unique.
-				.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS);
+				.onlyAppliesToPlatforms(NON_AUTOMATIC_FK_INDEX_PLATFORMS)
+				.doNothing(); // This migration was added in error, as this table already has a unique constraint on
 	}
 
 	private void init570() {
@@ -2482,10 +2489,26 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.modifyColumn("20190722.26", "SYSTEM_VERSION")
 				.nullable()
 				.withType(ColumnTypeEnum.STRING, 200);
+
+		/*
+		DISABLED THIS STEP (20190722.27) ON PURPOSE BECAUSE IT STARTED CAUSING FAILURES ON MSSQL FOR A FRESH DB.
+		I left it here for historical purposes.
+		The reason for the failure is as follows. The TARGET_CODE column was originally 'not nullable' when it was
+		first introduced. And in 7_2_0, it is being changed to a nullable column (see 20240327.1 in init720()).
+		Starting with 7_2_0, on a fresh db, we create the table with nullable TARGET_CODE (as it is made nullable now).
+		Since we run all migration steps on fresh db, this step will try to convert the column which is created as nullable
+		to not nullable (which will then need to be coverted back to nullable in 7_2_0 migration).
+		Changing a nullable column to not nullable is not allowed in
+		MSSQL if there is an index on the column, which is the case here, as there is IDX_CNCPT_MP_GRP_ELM_TGT_CD
+		on this column. Since init720() has the right migration
+		step, where the column is set to nullable and has the right type and length, this statement is also
+		not necessary anymore even for not fresh dbs.
+
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
 				.modifyColumn("20190722.27", "TARGET_CODE")
 				.nonNullable()
 				.withType(ColumnTypeEnum.STRING, 500);
+		*/
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
 				.modifyColumn("20190722.28", "VALUESET_URL")
 				.nullable()
