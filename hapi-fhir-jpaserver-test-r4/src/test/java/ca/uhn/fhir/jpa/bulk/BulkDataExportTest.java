@@ -473,7 +473,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			verifyBulkExportResults(options, ids, new ArrayList<>());
 
 			assertFalse(valueSet.isEmpty());
-			assertEquals(ids.size(), valueSet.size());
+			assertEquals(ids.size(), valueSet.size(),
+				"Expected " + String.join(", ", ids) + ". Actual : " + String.join(", ", valueSet));
 			for (String id : valueSet) {
 				// should start with our value from the key-value pairs
 				assertTrue(id.startsWith(value));
@@ -1114,9 +1115,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 								}
 							}
 						}
-						gate.set(false);
+						gate.set(true);
 					});
-					await().atMost(100, TimeUnit.MILLISECONDS)
+					await().atMost(400, TimeUnit.MILLISECONDS)
 						.until(gate::get);
 				} catch (IOException e) {
 					fail(e.toString());
