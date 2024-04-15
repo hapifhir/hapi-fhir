@@ -161,17 +161,38 @@ public class BulkDataExportProvider {
 	}
 
 	private void startJob(ServletRequestDetails theRequestDetails, BulkExportJobParameters theOptions) {
+		// parameter massaging
+		expandParameters(theRequestDetails, theOptions);
+
 		// permission check
-		HookParams params = (new HookParams())
+		HookParams initiateBulkExportHookParams = (new HookParams())
 				.add(BulkExportJobParameters.class, theOptions)
 				.add(RequestDetails.class, theRequestDetails)
 				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
 		CompositeInterceptorBroadcaster.doCallHooks(
-				this.myInterceptorBroadcaster, theRequestDetails, Pointcut.STORAGE_INITIATE_BULK_EXPORT, params);
+				this.myInterceptorBroadcaster,
+				theRequestDetails,
+				Pointcut.STORAGE_INITIATE_BULK_EXPORT,
+				initiateBulkExportHookParams);
 
 		// get cache boolean
 		boolean useCache = shouldUseCache(theRequestDetails);
 
+		// start job
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setParameters(theOptions);
+		startRequest.setUseCache(useCache);
+		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, startRequest);
+
+		writePollingLocationToResponseHeaders(theRequestDetails, response.getInstanceId());
+	}
+
+	/**
+	 * This method changes any parameters (limiting the _type parameter, for instance)
+	 * so that later steps in the export do not have to handle them.
+	 */
+	private void expandParameters(ServletRequestDetails theRequestDetails, BulkExportJobParameters theOptions) {
 		// Set the original request URL as part of the job information, as this is used in the poll-status-endpoint, and
 		// is needed for the report.
 		theOptions.setOriginalRequestUrl(theRequestDetails.getCompleteUrl());
@@ -190,14 +211,16 @@ public class BulkDataExportProvider {
 		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 		theOptions.setPartitionId(partitionId);
 
-		// start job
-		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-		startRequest.setParameters(theOptions);
-		startRequest.setUseCache(useCache);
-		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
-		Batch2JobStartResponse response = myJobCoordinator.startInstance(theRequestDetails, startRequest);
-
-		writePollingLocationToResponseHeaders(theRequestDetails, response.getInstanceId());
+		// call hook so any other parameter manipulation can be done
+		HookParams preInitiateBulkExportHookParams = new HookParams();
+		preInitiateBulkExportHookParams.add(BulkExportJobParameters.class, theOptions);
+		preInitiateBulkExportHookParams.add(RequestDetails.class, theRequestDetails);
+		preInitiateBulkExportHookParams.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+		CompositeInterceptorBroadcaster.doCallHooks(
+				myInterceptorBroadcaster,
+				theRequestDetails,
+				Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT,
+				preInitiateBulkExportHookParams);
 	}
 
 	private boolean shouldUseCache(ServletRequestDetails theRequestDetails) {
