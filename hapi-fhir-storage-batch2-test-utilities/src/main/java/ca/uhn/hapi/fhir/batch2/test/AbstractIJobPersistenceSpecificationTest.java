@@ -39,7 +39,6 @@ import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep3InputType;
 import ca.uhn.test.concurrency.PointcutLatch;
 import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
@@ -65,7 +64,8 @@ import static org.mockito.Mockito.verify;
  * These tests are abstract, and do not depend on JPA.
  * Test setups should use the public batch2 api to create scenarios.
  */
-public abstract class AbstractIJobPersistenceSpecificationTest implements IJobMaintenanceActions, IInProgressActionsTests, IInstanceStateTransitions, ITestFixture, IWorkChunkCommon, WorkChunkTestConstants {
+public abstract class AbstractIJobPersistenceSpecificationTest
+	implements ITestFixture, IWorkChunkCommon, WorkChunkTestConstants, IJobMaintenanceActions, IInProgressActionsTests, IInstanceStateTransitions {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AbstractIJobPersistenceSpecificationTest.class);
 
