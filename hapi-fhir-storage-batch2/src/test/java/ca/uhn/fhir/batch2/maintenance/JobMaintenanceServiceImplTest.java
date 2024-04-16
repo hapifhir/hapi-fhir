@@ -71,6 +71,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -246,16 +247,18 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	@Test
 	public void testInProgress_GatedExecution_FirstStepComplete() {
 		// Setup
+		List<WorkChunk> completedChunks = List.of(createWorkChunkStep1().setStatus(WorkChunkStatusEnum.COMPLETED).setId(CHUNK_ID));
+
 		List<WorkChunk> chunks = Arrays.asList(
-			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.READY).setId(CHUNK_ID),
-			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.READY).setId(CHUNK_ID_2)
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.GATE_WAITING).setId(CHUNK_ID),
+			JobCoordinatorImplTest.createWorkChunkStep2().setStatus(WorkChunkStatusEnum.QUEUED).setId(CHUNK_ID_2)
 		);
 		myJobDefinitionRegistry.addJobDefinition(createJobDefinition(JobDefinition.Builder::gatedExecution));
 
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), eq(false)))
 			.thenReturn(chunks.iterator());
 		when(myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(anyString(), anyString()))
-			.thenReturn(chunks.stream().map(WorkChunk::getStatus).collect(Collectors.toSet()));
+			.thenReturn(completedChunks.stream().map(WorkChunk::getStatus).collect(Collectors.toSet()));
 
 		JobInstance instance1 = createInstance();
 		instance1.setCurrentGatedStepId(STEP_1);
@@ -278,7 +281,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		// Verify
 		verify(myWorkChannelProducer, times(2)).send(myMessageCaptor.capture());
-		verify(myJobPersistence, times(2)).updateInstance(eq(INSTANCE_ID), any());
+		verify(myJobPersistence, times(1)).updateInstance(eq(INSTANCE_ID), any());
+		verify(myJobPersistence, times(1)).advanceJobStepAndUpdateChunkStatus(eq(INSTANCE_ID), eq(STEP_2));
 		verify(myJobPersistence).updatePollWaitingChunksForJobIfReady(eq(INSTANCE_ID));
 		verifyNoMoreInteractions(myJobPersistence);
 		JobWorkNotification payload0 = myMessageCaptor.getAllValues().get(0).getPayload();
@@ -399,8 +403,6 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		// mocks
 		when(myJobPersistence.fetchInstances(anyInt(), eq(0))).thenReturn(Lists.newArrayList(instance));
 		when(myJobPersistence.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(instance));
-		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(any(Pageable.class), eq(INSTANCE_ID), eq(Set.of(WorkChunkStatusEnum.READY))))
-			.thenReturn(getPageOfData(theChunks));
 		when(myJobPersistence.fetchAllWorkChunksIterator(eq(INSTANCE_ID), anyBoolean()))
 			.thenAnswer(t -> theChunks.stream().map(c -> c.setStatus(WorkChunkStatusEnum.READY)).toList().iterator());
 
@@ -409,7 +411,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 	}
 
 	@Test
-	public void testMaintenancePass_withREADYworkChunksForReductionSteps_notQueuedButProcessed() {
+	public void testMaintenancePass_withREADYWorkChunksForReductionSteps_notQueuedButProcessed() {
 		// setup
 		List<WorkChunk> chunks = List.of(
 			createWorkChunkStep3().setStatus(WorkChunkStatusEnum.READY),
@@ -421,18 +423,16 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		);
 
 		String lastStepId = chunks.get(0).getTargetStepId();
-		String previousStepId = previousChunks.get(0).getTargetStepId();
 
 		// when
 		when(myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(eq(INSTANCE_ID), eq(lastStepId)))
 			.thenReturn(chunks.stream().map(WorkChunk::getStatus).collect(Collectors.toSet()));
-		when(myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(eq(INSTANCE_ID), eq(previousStepId)))
-			.thenReturn(previousChunks.stream().map(WorkChunk::getStatus).collect(Collectors.toSet()));
 
 		// test
 		runEnqueueReadyChunksTest(chunks, createJobDefinitionWithReduction());
 
 		// verify never updated (should remain in ready state)
+		verify(myJobPersistence, never()).fetchAllWorkChunkMetadataForJobInStates(any(), anyString(), any());
 		verify(myJobPersistence, never()).enqueueWorkChunkForProcessing(anyString(), any());
 		verify(myWorkChannelProducer, never()).send(any());
 		verify(myReductionStepExecutorService)
