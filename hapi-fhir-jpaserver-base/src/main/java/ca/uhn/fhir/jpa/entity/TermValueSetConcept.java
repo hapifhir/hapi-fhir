@@ -100,6 +100,7 @@ public class TermValueSetConcept implements Serializable {
 	@Column(name = "SOURCE_PID", nullable = true)
 	private Long mySourceConceptPid;
 
+	@Deprecated(since = "7.2.0")
 	@Lob
 	@Column(name = "SOURCE_DIRECT_PARENT_PIDS", nullable = true)
 	private String mySourceConceptDirectParentPids;

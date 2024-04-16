@@ -108,6 +108,7 @@ public class TermConceptProperty implements Serializable {
 	@GenericField(name = "myValueString", searchable = Searchable.YES)
 	private String myValue;
 
+	@Deprecated(since = "7.2.0")
 	@Column(name = "PROP_VAL_LOB")
 	@Lob()
 	private byte[] myValueLob;

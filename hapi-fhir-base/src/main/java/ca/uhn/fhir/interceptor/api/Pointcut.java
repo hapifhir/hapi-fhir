@@ -2951,7 +2951,7 @@ public enum Pointcut implements IPointcut {
 			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
 			"ca.uhn.fhir.jpa.util.SqlQueryList"),
 
-	@Deprecated
+	@Deprecated(since = "7.2.0 - Use STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX instead.")
 	/**
 	 * <b> Deprecated but still supported.  Will eventually be removed.  <code>Please use Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX</code>  </b>
 	 * <b> Binary Blob Prefix Assigning Hook:</b>

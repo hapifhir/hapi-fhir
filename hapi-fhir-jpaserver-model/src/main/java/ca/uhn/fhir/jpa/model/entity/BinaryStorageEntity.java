@@ -51,6 +51,7 @@ public class BinaryStorageEntity {
 	@Column(name = "CONTENT_TYPE", nullable = false, length = 100)
 	private String myContentType;
 
+	@Deprecated(since = "7.2.0")
 	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "BLOB_DATA", nullable = true, insertable = true, updatable = false)
 	private Blob myBlob;

@@ -172,6 +172,7 @@ public class TermConcept implements Serializable {
 	@Column(name = "INDEX_STATUS", nullable = true)
 	private Long myIndexStatus;
 
+	@Deprecated(since = "7.2.0")
 	@Lob
 	@Column(name = "PARENT_PIDS", nullable = true)
 	private String myParentPids;

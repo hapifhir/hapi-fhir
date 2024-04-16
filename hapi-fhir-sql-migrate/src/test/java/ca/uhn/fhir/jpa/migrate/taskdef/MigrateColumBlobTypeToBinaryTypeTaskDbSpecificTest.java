@@ -30,7 +30,7 @@ public class MigrateColumBlobTypeToBinaryTypeTaskDbSpecificTest {
 			Arguments.of("update sometable set bin_colum_name = blob_colum_name where blob_colum_name is not null", H2_EMBEDDED),
 			Arguments.of("update sometable set bin_colum_name = blob_colum_name where blob_colum_name is not null", MSSQL_2012),
 
-			Arguments.of("update sometable set bin_colum_name = lo_get(blob_colum_name)  where blob_colum_name is not null", DriverTypeEnum.POSTGRES_9_4)
+			Arguments.of("update sometable set bin_colum_name = lo_get(blob_colum_name)  where blob_colum_name is not null", POSTGRES_9_4)
 		);
 	}
 	@ParameterizedTest

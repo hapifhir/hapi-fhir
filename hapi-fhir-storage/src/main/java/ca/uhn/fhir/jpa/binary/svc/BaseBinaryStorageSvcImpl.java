@@ -174,7 +174,8 @@ public abstract class BaseBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	@Nullable
 	private String callBinaryContentIdPointcut(
 			byte[] theBytes, RequestDetails theRequestDetails, String theContentType) {
-		// TODO: to be removed when pointcut STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX has exceeded the grace period
+		// TODO: to be removed when pointcut STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX has exceeded the grace period.
+		// Deprecated in 7.2.0.
 		boolean hasStorageBinaryAssignBlobIdPrefixHooks = CompositeInterceptorBroadcaster.hasHooks(
 				Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, myInterceptorBroadcaster, theRequestDetails);
 

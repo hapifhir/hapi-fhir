@@ -77,7 +77,7 @@ public class MigrateColumBlobTypeToBinaryTypeTask extends BaseTableColumnTask {
 						+ fromColumName + " is not null";
 				break;
 			default:
-				throw new IllegalStateException(Msg.code(2514));
+				throw new IllegalStateException(Msg.code(2514) + "Driver is not supported or null.");
 		}
 
 		return retVal;
