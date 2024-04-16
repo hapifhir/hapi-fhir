@@ -43,6 +43,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public class JobInstanceProcessor {
@@ -101,10 +102,14 @@ public class JobInstanceProcessor {
 		triggerGatedExecutions(theInstance, jobDefinition);
 
 		if (theInstance.hasGatedStep() && theInstance.isRunning()) {
-			JobInstance updatedInstance =
-					myJobPersistence.fetchInstance(theInstance.getInstanceId()).orElseThrow();
+			Optional<JobInstance> updatedInstance = myJobPersistence.fetchInstance(theInstance.getInstanceId());
+
+			if (updatedInstance.isEmpty()){
+				return;
+			}
+
 			JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
-					jobDefinition, updatedInstance.getCurrentGatedStepId());
+					jobDefinition, updatedInstance.get().getCurrentGatedStepId());
 			if (jobWorkCursor.isReductionStep()) {
 				// Reduction step work chunks should never be sent to the queue but to its specific service instead.
 				triggerReductionStep(theInstance, jobWorkCursor);
