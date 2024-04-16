@@ -264,8 +264,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	public void testStartChunkOnlyWorksOnValidChunks(WorkChunkStatusEnum theStatus, boolean theShouldBeStartedByConsumer) throws InterruptedException {
 		// Setup
 		JobInstance instance = createInstance();
-		String instanceId = mySvc.storeNewInstance(instance);
 		myMaintenanceService.enableMaintenancePass(false);
+		String instanceId = mySvc.storeNewInstance(instance);
 
 		storeWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA, false);
 		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(JOB_DEFINITION_ID, JOB_DEF_VER, FIRST_STEP_ID, instanceId, 0, CHUNK_DATA, false);
@@ -475,7 +475,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	public void testStoreAndFetchWorkChunk_withOrWithoutGatedExecutionNoData_createdAndTransitionToExpectedStatus(boolean theGatedExecution, WorkChunkStatusEnum theExpectedStatusOnCreate, WorkChunkStatusEnum theExpectedStatusAfterTransition) throws InterruptedException {
 		// setup
 		JobInstance instance = createInstance(true, theGatedExecution);
-		String instanceId = mySvc.storeNewInstance(instance);
 
 		// when
 		PointcutLatch latch = new PointcutLatch("senderlatch");
@@ -485,6 +484,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		}).when(myBatchSender).sendWorkChannelMessage(any(JobWorkNotification.class));
 		latch.setExpectedCount(1);
 		myMaintenanceService.enableMaintenancePass(false);
+		String instanceId = mySvc.storeNewInstance(instance);
 
 		// execute & verify
 		String firstChunkId = storeFirstWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, null);
@@ -512,6 +512,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		String expectedFirstChunkData = "IAmChunk1";
 		String expectedSecondChunkData = "IAmChunk2";
 		JobInstance instance = createInstance(true, isGatedExecution);
+		myMaintenanceService.enableMaintenancePass(false);
 		String instanceId = mySvc.storeNewInstance(instance);
 		PointcutLatch latch = new PointcutLatch("senderlatch");
 		doAnswer(a -> {
@@ -519,7 +520,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			return Void.class;
 		}).when(myBatchSender).sendWorkChannelMessage(any(JobWorkNotification.class));
 		latch.setExpectedCount(2);
-		myMaintenanceService.enableMaintenancePass(false);
 
 		// execute & verify
 		String firstChunkId = storeFirstWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, expectedFirstChunkData);
@@ -639,6 +639,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	public void testStoreAndFetchWorkChunk_withOrWithoutGatedExecutionwithData_createdAndTransitionToExpectedStatus(boolean theGatedExecution, WorkChunkStatusEnum theExpectedCreatedStatus, WorkChunkStatusEnum theExpectedTransitionStatus) throws InterruptedException {
 		// setup
 		JobInstance instance = createInstance(true, theGatedExecution);
+		myMaintenanceService.enableMaintenancePass(false);
 		String instanceId = mySvc.storeNewInstance(instance);
 		PointcutLatch latch = new PointcutLatch("senderlatch");
 		doAnswer(a -> {
@@ -646,7 +647,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			return Void.class;
 		}).when(myBatchSender).sendWorkChannelMessage(any(JobWorkNotification.class));
 		latch.setExpectedCount(1);
-		myMaintenanceService.enableMaintenancePass(false);
 
 		// execute & verify
 		String firstChunkId = storeFirstWorkChunk(JOB_DEFINITION_ID, FIRST_STEP_ID, instanceId, 0, null);
@@ -675,6 +675,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	@Test
 	public void testMarkChunkAsCompleted_Success() throws InterruptedException {
 		boolean isGatedExecution = false;
+		myMaintenanceService.enableMaintenancePass(false);
 		JobInstance instance = createInstance(true, isGatedExecution);
 		String instanceId = mySvc.storeNewInstance(instance);
 		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, CHUNK_DATA, isGatedExecution);
@@ -685,7 +686,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			return Void.class;
 		}).when(myBatchSender).sendWorkChannelMessage(any(JobWorkNotification.class));
 		latch.setExpectedCount(1);
-		myMaintenanceService.enableMaintenancePass(false);
 
 		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, findChunkByIdOrThrow(chunkId).getStatus()));
 		myBatch2JobHelper.runMaintenancePass();
@@ -787,6 +787,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	@Test
 	public void testMarkChunkAsCompleted_Fail() throws InterruptedException {
 		boolean isGatedExecution = false;
+		myMaintenanceService.enableMaintenancePass(false);
 		JobInstance instance = createInstance(true, isGatedExecution);
 		String instanceId = mySvc.storeNewInstance(instance);
 		String chunkId = storeWorkChunk(DEF_CHUNK_ID, STEP_CHUNK_ID, instanceId, SEQUENCE_NUMBER, null, isGatedExecution);
@@ -797,7 +798,6 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			return Void.class;
 		}).when(myBatchSender).sendWorkChannelMessage(any(JobWorkNotification.class));
 		latch.setExpectedCount(1);
-		myMaintenanceService.enableMaintenancePass(false);
 
 		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.READY, findChunkByIdOrThrow(chunkId).getStatus()));
 		myBatch2JobHelper.runMaintenancePass();

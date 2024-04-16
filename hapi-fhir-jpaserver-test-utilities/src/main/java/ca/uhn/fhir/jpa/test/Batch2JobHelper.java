@@ -32,10 +32,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.thymeleaf.util.ArrayUtils;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
@@ -89,10 +92,12 @@ public class Batch2JobHelper {
 	public JobInstance awaitJobHasStatus(String theInstanceId, int theSecondsToWait, StatusEnum... theExpectedStatus) {
 		assert !TransactionSynchronizationManager.isActualTransactionActive();
 
+		AtomicInteger checkCount = new AtomicInteger();
 		try {
 			await()
 				.atMost(theSecondsToWait, TimeUnit.SECONDS)
 				.until(() -> {
+					checkCount.getAndIncrement();
 					boolean inFinalStatus = false;
 					if (ArrayUtils.contains(theExpectedStatus, StatusEnum.COMPLETED) && !ArrayUtils.contains(theExpectedStatus, StatusEnum.FAILED)) {
 						inFinalStatus = hasStatus(theInstanceId, StatusEnum.FAILED);
@@ -113,7 +118,9 @@ public class Batch2JobHelper {
 				.map(t -> t.getInstanceId() + " " + t.getJobDefinitionId() + "/" + t.getStatus().name())
 				.collect(Collectors.joining("\n"));
 			String currentStatus = myJobCoordinator.getInstance(theInstanceId).getStatus().name();
-			fail("Job " + theInstanceId + " still has status " + currentStatus + " - All statuses:\n" + statuses);
+			fail("Job " + theInstanceId + " still has status " + currentStatus
+				+ " after " + checkCount.get() + " checks in " + theSecondsToWait + " seconds."
+				+ " - All statuses:\n" + statuses);
 		}
 		return myJobCoordinator.getInstance(theInstanceId);
 	}
@@ -162,8 +169,39 @@ public class Batch2JobHelper {
 		return awaitJobHasStatus(theInstanceId, StatusEnum.ERRORED, StatusEnum.FAILED);
 	}
 
+	public void awaitJobHasStatusWithForcedMaintenanceRuns(String theInstanceId, StatusEnum theStatusEnum) {
+		AtomicInteger counter = new AtomicInteger();
+		try {
+			await()
+				.atMost(Duration.of(10, ChronoUnit.SECONDS))
+				.until(() -> {
+					counter.getAndIncrement();
+					forceRunMaintenancePass();
+					return hasStatus(theInstanceId, theStatusEnum);
+				});
+		} catch (ConditionTimeoutException ex) {
+			StatusEnum status = getStatus(theInstanceId);
+			String msg = String.format(
+				"Job %s has state %s after 10s timeout and %d checks",
+				theInstanceId,
+				status.name(),
+				counter.get()
+			);
+		}
+	}
+
 	public void awaitJobInProgress(String theInstanceId) {
-		await().until(() -> checkStatusWithMaintenancePass(theInstanceId, StatusEnum.IN_PROGRESS));
+		try {
+			await()
+				.atMost(Duration.of(10, ChronoUnit.SECONDS))
+				.until(() -> checkStatusWithMaintenancePass(theInstanceId, StatusEnum.IN_PROGRESS));
+		} catch (ConditionTimeoutException ex) {
+			StatusEnum statusEnum = getStatus(theInstanceId);
+			String msg = String.format("Job %s still has status %s after 10 seconds.",
+				theInstanceId,
+				statusEnum.name());
+			fail(msg);
+		}
 	}
 
 	public void assertNotFastTracking(String theInstanceId) {
@@ -175,10 +213,21 @@ public class Batch2JobHelper {
 	}
 
 	public void awaitGatedStepId(String theExpectedGatedStepId, String theInstanceId) {
-		await().until(() -> {
-			String currentGatedStepId = myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId();
-			return theExpectedGatedStepId.equals(currentGatedStepId);
-		});
+		try {
+			await().until(() -> {
+				String currentGatedStepId = myJobCoordinator.getInstance(theInstanceId).getCurrentGatedStepId();
+				return theExpectedGatedStepId.equals(currentGatedStepId);
+			});
+		} catch (ConditionTimeoutException ex) {
+			JobInstance instance = myJobCoordinator.getInstance(theInstanceId);
+			String msg = String.format("Instance %s of Job %s never got to step %s. Current step %s, current status %s.",
+				theInstanceId,
+				instance.getJobDefinitionId(),
+				theExpectedGatedStepId,
+				instance.getCurrentGatedStepId(),
+				instance.getStatus().name());
+			fail(msg);
+		}
 	}
 
 	public long getCombinedRecordsProcessed(String theInstanceId) {

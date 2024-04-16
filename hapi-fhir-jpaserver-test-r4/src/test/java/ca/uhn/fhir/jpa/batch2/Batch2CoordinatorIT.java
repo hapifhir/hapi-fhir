@@ -31,13 +31,14 @@ import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.config.Batch2FastSchedulerConfig;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
+import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -46,10 +47,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.TestPropertySource;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 import java.time.Duration;
@@ -67,6 +67,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -76,6 +77,10 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @ContextConfiguration(classes = {
 	Batch2FastSchedulerConfig.class
+})
+@TestPropertySource(properties = {
+	// These tests require scheduling to work
+	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_FALSE
 })
 public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(Batch2CoordinatorIT.class);
@@ -718,37 +723,47 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	@Test
 	public void testUnknownException_KeepsInProgress_CanCancelManually() throws InterruptedException {
 		// setup
-		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
-			callLatch(myFirstStepLatch, step);
-			throw new RuntimeException("Expected Test Exception");
-		};
-		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
-		String jobDefId = new Exception().getStackTrace()[0].getMethodName();
-		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
+		// we want to control the maintenance runner ourselves in this case
+		// to prevent intermittent test failures
+		myJobMaintenanceService.enableMaintenancePass(false);
 
-		myJobDefinitionRegistry.addJobDefinition(definition);
+		try {
+			IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
+				callLatch(myFirstStepLatch, step);
+				throw new RuntimeException("Expected Test Exception");
+			};
+			IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
-		JobInstanceStartRequest request = buildRequest(jobDefId);
+			String jobDefId = new Exception().getStackTrace()[0].getMethodName();
+			JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
 
-		// execute
-		ourLog.info("Starting job");
-		myFirstStepLatch.setExpectedCount(1);
-		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
-		String instanceId = startResponse.getInstanceId();
-		myBatch2JobHelper.runMaintenancePass();
-		myFirstStepLatch.awaitExpected();
+			myJobDefinitionRegistry.addJobDefinition(definition);
 
-		// validate
-		myBatch2JobHelper.awaitJobInProgress(instanceId);
+			JobInstanceStartRequest request = buildRequest(jobDefId);
 
-		// execute
-		ourLog.info("Cancel job {}", instanceId);
-		myJobCoordinator.cancelInstance(instanceId);
-		ourLog.info("Cancel job {} done", instanceId);
+			// execute
+			ourLog.info("Starting job");
+			myFirstStepLatch.setExpectedCount(1);
+			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
+			String instanceId = startResponse.getInstanceId();
+			myBatch2JobHelper.forceRunMaintenancePass();
+			myFirstStepLatch.awaitExpected();
 
-		// validate
-		myBatch2JobHelper.awaitJobCancelled(instanceId);
+			// validate
+			myBatch2JobHelper.awaitJobHasStatusWithForcedMaintenanceRuns(instanceId, StatusEnum.IN_PROGRESS);
+
+			// execute
+			ourLog.info("Cancel job {}", instanceId);
+			myJobCoordinator.cancelInstance(instanceId);
+			ourLog.info("Cancel job {} done", instanceId);
+
+			// validate
+			myBatch2JobHelper.awaitJobHasStatusWithForcedMaintenanceRuns(instanceId,
+				StatusEnum.CANCELLED);
+		} finally {
+			myJobMaintenanceService.enableMaintenancePass(true);
+		}
 	}
 
 	@Test
