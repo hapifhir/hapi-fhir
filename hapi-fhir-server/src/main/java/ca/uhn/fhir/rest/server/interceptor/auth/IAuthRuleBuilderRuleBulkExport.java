@@ -22,6 +22,9 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 /**
  * @since 5.5.0
  */
@@ -53,9 +56,16 @@ public interface IAuthRuleBuilderRuleBulkExport {
 	}
 
 	IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull String theFocusResourceId);
+	IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatientStrings(@Nonnull Collection<String> theFocusResourceIds);
 
 	default IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull IIdType theFocusResourceId) {
 		return patientExportOnPatient(theFocusResourceId.getValue());
+	}
+
+	default IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatients(@Nonnull Collection<IIdType> theFocusResourceIds) {
+		return patientExportOnPatient((IIdType) theFocusResourceIds.stream()
+			.map(IIdType::getValue)
+			.collect(Collectors.toList()));
 	}
 
 	/**

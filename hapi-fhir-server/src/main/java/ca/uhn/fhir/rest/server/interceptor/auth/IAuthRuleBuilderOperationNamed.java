@@ -22,6 +22,8 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.Collection;
+
 public interface IAuthRuleBuilderOperationNamed {
 
 	/**
@@ -43,6 +45,7 @@ public interface IAuthRuleBuilderOperationNamed {
 	 * Rule applies to invocations of this operation at the <code>instance</code> level
 	 */
 	IAuthRuleBuilderOperationNamedAndScoped onInstance(IIdType theInstanceId);
+	IAuthRuleBuilderOperationNamedAndScoped onInstances(Collection<IIdType> theInstanceIds);
 
 	/**
 	 * Rule applies to invocations of this operation at the <code>instance</code> level on any instance of the given type

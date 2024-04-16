@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
@@ -737,6 +738,18 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 
 				@Override
+				public IAuthRuleBuilderOperationNamedAndScoped onInstances(Collection<IIdType> theInstanceIds) {
+					Validate.notNull(theInstanceIds, "theInstanceIds must not be null");
+					// LUKETODO:  implement
+//					Validate.notBlank(theInstanceId.getResourceType(), "theInstanceIds do not all have a resource type");
+//					Validate.notBlank(theInstanceId.getIdPart(), "theInstanceId does not have an ID part");
+
+					final OperationRule rule = createRule();
+					rule.appliesToInstances(new ArrayList<>(theInstanceIds));
+					return new RuleBuilderOperationNamedAndScoped(rule);
+				}
+
+				@Override
 				public IAuthRuleBuilderOperationNamedAndScoped onInstancesOfType(
 						Class<? extends IBaseResource> theType) {
 					validateType(theType);
@@ -890,6 +903,25 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					ruleBulkExport = rule;
 				} else {
 					ruleBulkExport.setAppliesToPatientExport(theFocusResourceId);
+				}
+
+				// prevent duplicate rules being added
+				if (!myRules.contains(ruleBulkExport)) {
+					myRules.add(ruleBulkExport);
+				}
+
+				return new RuleBuilderBulkExportWithTarget(ruleBulkExport);
+			}
+
+			@Override
+			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatientStrings(@Nonnull Collection<String> theFocusResourceIds) {
+				if (ruleBulkExport == null) {
+					RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
+					rule.setAppliesToPatientExport(theFocusResourceIds);
+					rule.setMode(myRuleMode);
+					ruleBulkExport = rule;
+				} else {
+					ruleBulkExport.setAppliesToPatientExport(theFocusResourceIds);
 				}
 
 				// prevent duplicate rules being added

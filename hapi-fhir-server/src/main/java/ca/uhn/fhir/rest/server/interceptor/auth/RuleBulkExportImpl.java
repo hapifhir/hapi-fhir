@@ -193,6 +193,11 @@ public class RuleBulkExportImpl extends BaseRule {
 		myPatientIds.add(thePatientId);
 	}
 
+	public void setAppliesToPatientExport(Collection<String> thePatientIds) {
+		myWantExportStyle = BulkExportJobParameters.ExportStyle.PATIENT;
+		myPatientIds.addAll(thePatientIds);
+	}
+
 	public void setAppliesToSystem() {
 		myWantExportStyle = BulkExportJobParameters.ExportStyle.SYSTEM;
 	}
