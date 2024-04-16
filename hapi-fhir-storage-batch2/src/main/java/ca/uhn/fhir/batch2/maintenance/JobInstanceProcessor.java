@@ -43,6 +43,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public class JobInstanceProcessor {
@@ -101,10 +102,14 @@ public class JobInstanceProcessor {
 		triggerGatedExecutions(theInstance, jobDefinition);
 
 		if (theInstance.hasGatedStep() && theInstance.isRunning()) {
-			JobInstance updatedInstance =
-					myJobPersistence.fetchInstance(theInstance.getInstanceId()).orElseThrow();
+			Optional<JobInstance> updatedInstance = myJobPersistence.fetchInstance(theInstance.getInstanceId());
+
+			if (updatedInstance.isEmpty()) {
+				return;
+			}
+
 			JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
-					jobDefinition, updatedInstance.getCurrentGatedStepId());
+					jobDefinition, updatedInstance.get().getCurrentGatedStepId());
 			if (jobWorkCursor.isReductionStep()) {
 				// Reduction step work chunks should never be sent to the queue but to its specific service instead.
 				triggerReductionStep(theInstance, jobWorkCursor);
@@ -345,16 +350,16 @@ public class JobInstanceProcessor {
 
 	private void processChunksForNextGatedSteps(JobInstance theInstance, String nextStepId) {
 		String instanceId = theInstance.getInstanceId();
-		List<String> readyChunksForNextStep =
-				myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.GATE_WAITING);
+		List<String> gateWaitingChunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(
+				instanceId, nextStepId, WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED);
 		int totalChunksForNextStep = myProgressAccumulator.getTotalChunkCountForInstanceAndStep(instanceId, nextStepId);
-		if (totalChunksForNextStep != readyChunksForNextStep.size()) {
+		if (totalChunksForNextStep != gateWaitingChunksForNextStep.size()) {
 			ourLog.debug(
 					"Total ProgressAccumulator GATE_WAITING chunk count does not match GATE_WAITING chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]",
 					instanceId,
 					nextStepId,
 					totalChunksForNextStep,
-					readyChunksForNextStep.size());
+					gateWaitingChunksForNextStep.size());
 		}
 
 		// update the job step so the workers will process them.
