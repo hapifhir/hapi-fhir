@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
-class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
+class MeasureOperationProviderTest extends BaseCrR4TestServer {
 
 	public MeasureReport runEvaluateMeasure(String periodStart, String periodEnd, String subject, String measureId, String reportType, String practitioner){
 
@@ -160,6 +160,4 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 			String.format("expected count for population \"%s\" did not match", populationName)
 		);
 	}
-
-
 }

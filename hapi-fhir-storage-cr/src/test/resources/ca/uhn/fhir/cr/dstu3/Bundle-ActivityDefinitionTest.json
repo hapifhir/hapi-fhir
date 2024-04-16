@@ -1,0 +1,78 @@
+{
+	"resourceType": "Bundle",
+	"id": "bundle-test",
+	"type": "transaction",
+	"entry" : [{
+		"resource": {
+			"resourceType": "ActivityDefinition",
+			"id": "activityDefinition-test",
+			"name": "ActivityDefinition_CreateAProcedure",
+			"title": "CreateProcedure",
+			"status": "draft",
+			"description": "Create the procedure.",
+			"library": [
+				{
+					"reference": "http://test/fhir/Library/TestActivityDefinition|1.0.0"
+				}
+			],
+			"kind": "ProcedureRequest",
+			"code": {
+				"coding": [
+					{
+						"system": "http://test/fhir/System",
+						"code": "code"
+					}
+				]
+			},
+			"dynamicValue": [
+				{
+					"path": "doNotPerform",
+					"language": "text/cql.name",
+					"expression": "ActiveProcedureStatus"
+				}
+			]
+		},
+		"request": {
+			"method": "PUT",
+			"url": "ActivityDefinition/activityDefinition-test"
+		}
+	},
+		{
+			"resource": {
+				"resourceType": "Library",
+				"id": "TestActivityDefinition",
+				"url": "http://test/fhir/Library/TestActivityDefinition|1.0.0",
+				"version": "1.0.0",
+				"name": "TestActivityDefinition",
+				"parameter": [
+					{
+						"name": "ActiveProcedureStatus",
+						"use": "out",
+						"min": 0,
+						"max": "1",
+						"type": "boolean"
+					}
+				],
+				"content": [
+					{
+						"contentType": "text/cql",
+						"data": "bGlicmFyeSBUZXN0QWN0aXZpdHlEZWZpbml0aW9uIHZlcnNpb24gJzEuMC4wJwoKZGVmaW5lICJBY3RpdmVQcm9jZWR1cmVTdGF0dXMiOgogIHRydWU="
+					}
+				]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Library/TestActivityDefinition"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Patient",
+				"id": "patient-1"
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Patient/patient-1"
+			}
+		}]
+}
