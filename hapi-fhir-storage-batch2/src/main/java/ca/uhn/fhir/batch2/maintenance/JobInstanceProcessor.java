@@ -41,7 +41,6 @@ import org.slf4j.Logger;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -346,8 +345,8 @@ public class JobInstanceProcessor {
 
 	private void processChunksForNextGatedSteps(JobInstance theInstance, String nextStepId) {
 		String instanceId = theInstance.getInstanceId();
-		List<String> gateWaitingChunksForNextStep =
-				myProgressAccumulator.getChunkIdsWithStatus(instanceId, nextStepId, WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED);
+		List<String> gateWaitingChunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(
+				instanceId, nextStepId, WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED);
 		int totalChunksForNextStep = myProgressAccumulator.getTotalChunkCountForInstanceAndStep(instanceId, nextStepId);
 		if (totalChunksForNextStep != gateWaitingChunksForNextStep.size()) {
 			ourLog.debug(
