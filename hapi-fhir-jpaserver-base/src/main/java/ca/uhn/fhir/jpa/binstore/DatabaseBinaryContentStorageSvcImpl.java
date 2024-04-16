@@ -89,17 +89,16 @@ public class DatabaseBinaryContentStorageSvcImpl extends BaseBinaryStorageSvcImp
 		Session session = (Session) myEntityManager.getDelegate();
 		LobHelper lobHelper = session.getLobHelper();
 
-		// TODO: remove writing Blob in a future release
 		byte[] loadedStream = IOUtils.toByteArray(countingInputStream);
-		entity.setStorageContentBin(loadedStream);
-
-		Blob dataBlob = lobHelper.createBlob(loadedStream);
-		entity.setBlob(dataBlob);
-
 		String id = super.provideIdForNewBinaryContent(
 				theBinaryContentIdOrNull, loadedStream, theRequestDetails, theContentType);
 
 		entity.setContentId(id);
+		entity.setStorageContentBin(loadedStream);
+
+		// TODO: remove writing Blob in a future release
+		Blob dataBlob = lobHelper.createBlob(loadedStream);
+		entity.setBlob(dataBlob);
 
 		// Update the entity with the final byte count and hash
 		long bytes = countingInputStream.getByteCount();

@@ -275,13 +275,13 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 	 */
 	private String invokeAssignBinaryContentPrefix(RequestDetails theRequest, IBaseResource theResource) {
 		// TODO: to be removed when pointcut STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX has exceeded the grace period
-		boolean hasStorageBinaryAssignBlobIdPrefix = CompositeInterceptorBroadcaster.hasHooks(
+		boolean hasStorageBinaryAssignBlobIdPrefixHooks = CompositeInterceptorBroadcaster.hasHooks(
 				Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX, myInterceptorBroadcaster, theRequest);
 
-		boolean hasStorageBinaryAssignBinaryContentIdPrefix = CompositeInterceptorBroadcaster.hasHooks(
+		boolean hasStorageBinaryAssignBinaryContentIdPrefixHooks = CompositeInterceptorBroadcaster.hasHooks(
 				Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX, myInterceptorBroadcaster, theRequest);
 
-		if (!(hasStorageBinaryAssignBlobIdPrefix || hasStorageBinaryAssignBinaryContentIdPrefix)) {
+		if (!(hasStorageBinaryAssignBlobIdPrefixHooks || hasStorageBinaryAssignBinaryContentIdPrefixHooks)) {
 			return null;
 		}
 
@@ -293,7 +293,7 @@ public class BinaryStorageInterceptor<T extends IPrimitiveType<byte[]>> {
 		Pointcut pointcutToInvoke = Pointcut.STORAGE_BINARY_ASSIGN_BINARY_CONTENT_ID_PREFIX;
 
 		// TODO: to be removed when pointcut STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX has exceeded the grace period
-		if (hasStorageBinaryAssignBlobIdPrefix) {
+		if (hasStorageBinaryAssignBlobIdPrefixHooks) {
 			pointcutToInvoke = Pointcut.STORAGE_BINARY_ASSIGN_BLOB_ID_PREFIX;
 		}
 

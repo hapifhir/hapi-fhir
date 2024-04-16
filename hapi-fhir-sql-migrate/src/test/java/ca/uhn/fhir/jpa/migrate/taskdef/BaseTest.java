@@ -29,7 +29,7 @@ public abstract class BaseTest {
 	private static final String DATABASE_NAME = "DATABASE";
 	static final String H2 = "H2";
 	static final String DERBY = "Derby";
-	protected static final Logger ourLog = LoggerFactory.getLogger(BaseTest.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(BaseTest.class);
 	private static int ourDatabaseUrl = 0;
 	private static final Supplier<TestDatabaseDetails> TEST_DATABASE_DETAILS_DERBY_SUPPLIER = new Supplier<>() {
 		@Override

@@ -93,10 +93,6 @@ public abstract class JpaEmbeddedDatabase {
 		return myUrl;
 	}
 
-	public DriverTypeEnum.ConnectionProperties getConnectionProperties() {
-		return myConnectionProperties;
-	}
-
 	public JdbcTemplate getJdbcTemplate() {
 		return myJdbcTemplate;
 	}

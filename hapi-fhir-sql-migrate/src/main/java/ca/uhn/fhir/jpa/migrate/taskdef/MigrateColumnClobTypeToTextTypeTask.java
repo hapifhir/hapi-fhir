@@ -1,13 +1,10 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 
 public class MigrateColumnClobTypeToTextTypeTask extends BaseTableColumnTask {
-	private static final Logger ourLog = LoggerFactory.getLogger(MigrateColumnClobTypeToTextTypeTask.class);
 
 	private final String myFromColumName;
 	private final String myToColumName;
