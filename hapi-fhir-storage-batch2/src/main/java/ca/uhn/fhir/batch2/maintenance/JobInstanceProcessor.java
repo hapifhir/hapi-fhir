@@ -104,7 +104,7 @@ public class JobInstanceProcessor {
 		if (theInstance.hasGatedStep() && theInstance.isRunning()) {
 			Optional<JobInstance> updatedInstance = myJobPersistence.fetchInstance(theInstance.getInstanceId());
 
-			if (updatedInstance.isEmpty()){
+			if (updatedInstance.isEmpty()) {
 				return;
 			}
 
