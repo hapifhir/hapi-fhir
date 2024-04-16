@@ -1,0 +1,11 @@
+---
+type: add
+issue: 5845
+title: "Added a new pointcut: STORAGE_PRE_INITIATE_BULK_EXPORT.
+        This pointcut is meant to be called explicitly before
+        STORAGE_INITIATE_BULK_EXPORT, so that parameter
+        manipulation that needs to be done before permission
+        checks (currently done using STORAGE_INITIATE_BULK_EXPORT)
+        can safely be done without risk of affecting permission checks/
+        authorization.
+"
