@@ -86,7 +86,7 @@ public class BaseMigrationTasks<T extends Enum> {
 		return retval;
 	}
 
-	public boolean hasTasksForVersion(T theRelease){
+	public boolean hasTasksForVersion(T theRelease) {
 		Collection<BaseTask> baseTasks = myTasks.get(theRelease);
 		return nonNull(baseTasks) && !baseTasks.isEmpty();
 	}
