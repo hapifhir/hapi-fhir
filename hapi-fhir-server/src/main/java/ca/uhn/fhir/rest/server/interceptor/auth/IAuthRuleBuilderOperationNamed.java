@@ -45,6 +45,7 @@ public interface IAuthRuleBuilderOperationNamed {
 	 * Rule applies to invocations of this operation at the <code>instance</code> level
 	 */
 	IAuthRuleBuilderOperationNamedAndScoped onInstance(IIdType theInstanceId);
+
 	IAuthRuleBuilderOperationNamedAndScoped onInstances(Collection<IIdType> theInstanceIds);
 
 	/**

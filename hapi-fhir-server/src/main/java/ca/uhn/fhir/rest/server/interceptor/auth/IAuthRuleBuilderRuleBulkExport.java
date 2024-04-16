@@ -56,16 +56,18 @@ public interface IAuthRuleBuilderRuleBulkExport {
 	}
 
 	IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull String theFocusResourceId);
-	IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatientStrings(@Nonnull Collection<String> theFocusResourceIds);
+
+	IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatientStrings(
+			@Nonnull Collection<String> theFocusResourceIds);
 
 	default IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull IIdType theFocusResourceId) {
 		return patientExportOnPatient(theFocusResourceId.getValue());
 	}
 
-	default IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatients(@Nonnull Collection<IIdType> theFocusResourceIds) {
-		return patientExportOnPatient((IIdType) theFocusResourceIds.stream()
-			.map(IIdType::getValue)
-			.collect(Collectors.toList()));
+	default IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatients(
+			@Nonnull Collection<IIdType> theFocusResourceIds) {
+		return patientExportOnPatient(
+				(IIdType) theFocusResourceIds.stream().map(IIdType::getValue).collect(Collectors.toList()));
 	}
 
 	/**
