@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
 public class DataRequirementsTest extends BaseCrR4TestServer{
-	public void runDataRequirements(String periodStart, String periodEnd, String measureId){
+	public Library runDataRequirements(String periodStart, String periodEnd, String measureId){
 
 		var parametersEval = new Parameters();
 		parametersEval.addParameter("periodStart", new DateType(periodStart));
@@ -28,13 +28,14 @@ public class DataRequirementsTest extends BaseCrR4TestServer{
 			.returnResourceType(Library.class)
 			.execute();
 
-        Assertions.assertFalse(report.getDataRequirement().isEmpty());
+		return report;
 
 	}
 	@Test
 	void testMeasureDataRequirements_EXM130() {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
-		runDataRequirements("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR");
+		var report = runDataRequirements("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR");
+		Assertions.assertFalse(report.getDataRequirement().isEmpty());
 	}
 
 	@Test
