@@ -739,10 +739,8 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				@Override
 				public IAuthRuleBuilderOperationNamedAndScoped onInstances(Collection<IIdType> theInstanceIds) {
 					Validate.notNull(theInstanceIds, "theInstanceIds must not be null");
-					// LUKETODO:  implement
-					//					Validate.notBlank(theInstanceId.getResourceType(), "theInstanceIds do not all have a resource
-					// type");
-					//					Validate.notBlank(theInstanceId.getIdPart(), "theInstanceId does not have an ID part");
+					theInstanceIds.forEach(instanceId -> Validate.notBlank(instanceId.getResourceType(), "at least one of theInstanceIds does not have a resource type"));
+					theInstanceIds.forEach(instanceId -> Validate.notBlank(instanceId.getIdPart(), "at least one of theInstanceIds does not have an ID part"));
 
 					final OperationRule rule = createRule();
 					rule.appliesToInstances(new ArrayList<>(theInstanceIds));
