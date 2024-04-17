@@ -33,38 +33,38 @@ public class CollectDataTest extends BaseCrR4TestServer{
 	}
 
 	@Test
-	void testCollectData_EXM130_InvalidInterval() {
+	void testCollectData_InvalidInterval() {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		assertThrows(InternalErrorException.class, ()->runCollectData("2020-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR", null, null));
 	}
 
 	@Test
-	void testCollectData_EXM130_InvalidMeasure() {
+	void testCollectData_InvalidMeasure() {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		assertThrows(ResourceNotFoundException.class, ()->runCollectData("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHI", null, null));
 	}
 	@Test
-	void testMeasureDataRequirements_EXM130_allSubjects() {
+	void testMeasureDataRequirements_allSubjects() {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		var report = runCollectData("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR", null, null);
 		Assertions.assertFalse(report.getParameter().isEmpty());
 	}
 	@Test
-	void testCollectData_EXM130_Subject() {
+	void testCollectData_Subject() {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		var report = runCollectData("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR", "Patient/numer-EXM130", null);
 		Assertions.assertFalse(report.getParameter().isEmpty());
 	}
 
 	@Test
-	void testCollectData_EXM130_Group() {
+	void testCollectData_Group() {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		var report = runCollectData("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR", "Group/group-EXM130", null);
 		Assertions.assertFalse(report.getParameter().isEmpty());
 	}
 
 	@Test
-	void testCollectData_EXM130_Practitioner() {
+	void testCollectData_Practitioner() {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		var report = runCollectData("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR", null, "Practitioner/practitioner-EXM130");
 		Assertions.assertFalse(report.getParameter().isEmpty());
