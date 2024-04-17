@@ -33,38 +33,38 @@ public class CollectDataTest extends BaseCrR4TestServer{
 	}
 
 	@Test
-	void testCollectData_InvalidInterval() {
+	void testCollectDataInvalidInterval() {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		assertThrows(InternalErrorException.class, ()->runCollectData("2020-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR", null, null));
 	}
 
 	@Test
-	void testCollectData_InvalidMeasure() {
+	void testCollectDataInvalidMeasure() {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		assertThrows(ResourceNotFoundException.class, ()->runCollectData("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHI", null, null));
 	}
 	@Test
-	void testMeasureDataRequirements_allSubjects() {
+	void testMeasureDataRequirementsAllSubjects() {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		var report = runCollectData("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR", null, null);
 		Assertions.assertFalse(report.getParameter().isEmpty());
 	}
 	@Test
-	void testCollectData_Subject() {
+	void testCollectDataSubject() {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		var report = runCollectData("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR", "Patient/numer-EXM130", null);
 		Assertions.assertFalse(report.getParameter().isEmpty());
 	}
 
 	@Test
-	void testCollectData_Group() {
+	void testCollectDataGroup() {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		var report = runCollectData("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR", "Group/group-EXM130", null);
 		Assertions.assertFalse(report.getParameter().isEmpty());
 	}
 
 	@Test
-	void testCollectData_Practitioner() {
+	void testCollectDataPractitioner() {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		var report = runCollectData("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR", null, "Practitioner/practitioner-EXM130");
 		Assertions.assertFalse(report.getParameter().isEmpty());
