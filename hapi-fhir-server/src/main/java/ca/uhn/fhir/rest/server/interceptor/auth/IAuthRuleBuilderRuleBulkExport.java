@@ -57,18 +57,17 @@ public interface IAuthRuleBuilderRuleBulkExport {
 
 	IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull String theFocusResourceId);
 
-	IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatientStrings(
-			@Nonnull Collection<String> theFocusResourceIds);
-
 	default IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatient(@Nonnull IIdType theFocusResourceId) {
 		return patientExportOnPatient(theFocusResourceId.getValue());
 	}
 
 	default IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatients(
 			@Nonnull Collection<IIdType> theFocusResourceIds) {
-		return patientExportOnPatient(
-				(IIdType) theFocusResourceIds.stream().map(IIdType::getValue).collect(Collectors.toList()));
+		return patientExportOnPatientStrings(
+				theFocusResourceIds.stream().map(IIdType::getValue).collect(Collectors.toList()));
 	}
+
+	IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatientStrings(Collection<String> theFocusResourceIds);
 
 	/**
 	 * Allow/deny <b>patient-level</b> export rule applies to the Group with the given resource ID, e.g. <code>Group/123</code>
