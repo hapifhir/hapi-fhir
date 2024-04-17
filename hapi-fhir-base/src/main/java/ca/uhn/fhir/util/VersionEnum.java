@@ -147,4 +147,8 @@ public enum VersionEnum {
 		VersionEnum[] values = VersionEnum.values();
 		return values[values.length - 1];
 	}
+
+	public boolean isNewerThan(VersionEnum theVersionEnum){
+		return ordinal() > theVersionEnum.ordinal();
+	}
 }

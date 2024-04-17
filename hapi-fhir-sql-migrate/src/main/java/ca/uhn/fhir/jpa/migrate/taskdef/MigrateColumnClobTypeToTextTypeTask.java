@@ -43,8 +43,8 @@ public class MigrateColumnClobTypeToTextTypeTask extends BaseTableColumnTask {
 
 	@Override
 	public void validate() {
-		setDescription("Migrating CLob (oid) from colum  " + myFromColumName + " to TEXT on colum " + myToColumName
-				+ " for table " + getTableName() + " (only affects Postgresql)");
+		setDescription("Migrating CLob (oid) from colum  " + myFromColumName + " to " + myToColumName
+				+ ".TEXT for table " + getTableName() + " (only affects Postgresql)");
 	}
 
 	@Override
