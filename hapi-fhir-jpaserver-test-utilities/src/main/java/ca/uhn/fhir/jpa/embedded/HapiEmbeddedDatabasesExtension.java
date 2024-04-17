@@ -108,7 +108,10 @@ public class HapiEmbeddedDatabasesExtension implements AfterAllCallback {
 		try {
 			myDatabaseInitializerHelper.insertPersistenceTestData(getEmbeddedDatabase(theDriverType), theVersionEnum);
 		} catch (Exception theE) {
-			ourLog.info("Could not insert persistence test data most likely because we don't have any for version {} and driver {}", theVersionEnum, theDriverType);
+			ourLog.info(
+					"Could not insert persistence test data most likely because we don't have any for version {} and driver {}",
+					theVersionEnum,
+					theDriverType);
 		}
 	}
 
