@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -10,6 +9,7 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
@@ -29,20 +29,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.equalTo;
@@ -133,12 +135,13 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		ExecutorService executorService = new ThreadPoolExecutor(workerCount, workerCount,
 			0L, TimeUnit.MILLISECONDS,
 			workQueue);
+		CompletionService<Boolean> completionService = new ExecutorCompletionService<>(executorService);
 
 		ourLog.info("Starting task creation");
 
-		List<Future<Boolean>> futures = new ArrayList<>();
+		int maxFuturesToProcess = 500;
 		for (int i = 0; i < taskExecutions; i++) {
-			futures.add(executorService.submit(() -> {
+			Future<Boolean> f = executorService.submit(() -> {
 				String instanceId = null;
 				try {
 					instanceId = startJob(options);
@@ -153,14 +156,12 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 					ourLog.error("Caught an error during processing instance {}", instanceId, theError);
 					throw new InternalErrorException("Caught an error during processing instance " + instanceId, theError);
 				}
-			}));
+			});
+			completionService.submit(f::get);
 
 			// Don't let the list of futures grow so big we run out of memory
-			if (futures.size() > 1000) {
-				while (futures.size() > 500) {
-					// This should always return true, but it'll throw an exception if we failed
-					assertTrue(futures.remove(0).get());
-				}
+			if (i != 0 && i % maxFuturesToProcess == 0) {
+				executeFutures(completionService, maxFuturesToProcess);
 			}
 		}
 
@@ -168,16 +169,37 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 
 		// wait for completion to avoid stranding background tasks.
 		executorService.shutdown();
-		assertTrue(executorService.awaitTermination(60, TimeUnit.SECONDS), "Finished before timeout");
+		await()
+			.atMost(60, TimeUnit.SECONDS)
+			.until(executorService::isTerminated);
 
 		// verify that all requests succeeded
 		ourLog.info("All tasks complete.  Verify results.");
-		for (var next : futures) {
-			// This should always return true, but it'll throw an exception if we failed
-			assertTrue(next.get());
-		}
+		executeFutures(completionService, taskExecutions % maxFuturesToProcess);
+
+		executorService.shutdown();
+		await()
+			.atMost(60, TimeUnit.SECONDS)
+				.until(() -> {
+					return executorService.isTerminated() && executorService.isShutdown();
+				});
 
 		ourLog.info("Finished task execution");
+	}
+
+	private void executeFutures(CompletionService<Boolean> theCompletionService, int theTotal) {
+		int count = 0;
+
+		while (count < theTotal) {
+			try {
+				Future<Boolean> future = theCompletionService.take();
+				boolean r = future.get();
+				assertTrue(r);
+				count++;
+			} catch (Exception ex) {
+				fail(ex.getMessage());
+			}
+		}
 	}
 
 
