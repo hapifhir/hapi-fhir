@@ -160,6 +160,4 @@ public class TestCrR4Config {
 		evaluationSettings.setValueSetCache(theGlobalValueSetCache);
 		return evaluationSettings;
 	}
-
-
 }
