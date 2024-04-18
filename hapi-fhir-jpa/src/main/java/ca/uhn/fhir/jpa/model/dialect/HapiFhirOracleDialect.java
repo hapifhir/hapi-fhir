@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
-import org.hibernate.dialect.DatabaseVersion;
 import org.hibernate.dialect.OracleDialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
@@ -33,11 +32,9 @@ public class HapiFhirOracleDialect extends OracleDialect {
 		super();
 	}
 
-
 	public HapiFhirOracleDialect(DialectResolutionInfo info) {
 		super(info);
 	}
-
 
 	/**
 	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this

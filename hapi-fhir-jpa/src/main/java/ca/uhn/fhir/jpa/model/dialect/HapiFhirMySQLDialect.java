@@ -36,7 +36,6 @@ public class HapiFhirMySQLDialect extends MySQLDialect {
 		super(info);
 	}
 
-
 	/**
 	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this
 	 */
