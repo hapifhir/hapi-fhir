@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.model.dialect;
 
 import org.hibernate.dialect.CockroachDialect;
-import org.hibernate.dialect.DatabaseVersion;
+import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
 /**
  * Dialect for CockroachDB database.
@@ -29,8 +29,13 @@ import org.hibernate.dialect.DatabaseVersion;
 public class HapiFhirCockroachDialect extends CockroachDialect {
 
 	public HapiFhirCockroachDialect() {
-		super(DatabaseVersion.make(21, 1));
+		super();
 	}
+
+	public HapiFhirCockroachDialect(DialectResolutionInfo info) {
+		super(info);
+	}
+
 
 	/**
 	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this

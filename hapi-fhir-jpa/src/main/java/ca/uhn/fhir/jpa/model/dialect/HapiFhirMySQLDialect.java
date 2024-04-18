@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
-import org.hibernate.dialect.DatabaseVersion;
 import org.hibernate.dialect.MySQLDialect;
+import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
 /**
  * Dialect for MySQL database.
@@ -28,13 +28,14 @@ import org.hibernate.dialect.MySQLDialect;
  */
 public class HapiFhirMySQLDialect extends MySQLDialect {
 
-	public HapiFhirMySQLDialect(DatabaseVersion theDatabaseVersion) {
-		super(theDatabaseVersion);
+	public HapiFhirMySQLDialect() {
+		super();
 	}
 
-	public HapiFhirMySQLDialect() {
-		super(DatabaseVersion.make(5, 7));
+	public HapiFhirMySQLDialect(DialectResolutionInfo info) {
+		super(info);
 	}
+
 
 	/**
 	 * @see HapiFhirH2Dialect#supportsColumnCheck() for an explanation of why we disable this

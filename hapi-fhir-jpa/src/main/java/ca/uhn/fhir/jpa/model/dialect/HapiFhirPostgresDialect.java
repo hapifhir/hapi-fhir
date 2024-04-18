@@ -19,20 +19,16 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
-import org.hibernate.dialect.DatabaseVersion;
 import org.hibernate.dialect.PostgreSQLDialect;
+import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
 public class HapiFhirPostgresDialect extends PostgreSQLDialect {
 
-	public HapiFhirPostgresDialect(DatabaseVersion theDatabaseVersion) {
-		super(theDatabaseVersion);
-	}
-
 	public HapiFhirPostgresDialect() {
-		super(DatabaseVersion.make(10, 0, 0));
+		super();
 	}
 
-		public HapiFhirPostgresDialect(DialectResolutionInfo info) {
+	public HapiFhirPostgresDialect(DialectResolutionInfo info) {
 		super(info);
 	}
 
