@@ -106,8 +106,8 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			IHapiTransactionService theTransactionService,
 			EntityManager theEntityManager,
 			IInterceptorBroadcaster theInterceptorBroadcaster) {
-		Validate.notNull(theJobInstanceRepository);
-		Validate.notNull(theWorkChunkRepository);
+		Validate.notNull(theJobInstanceRepository, "theJobInstanceRepository");
+		Validate.notNull(theWorkChunkRepository, "theWorkChunkRepository");
 		myJobInstanceRepository = theJobInstanceRepository;
 		myWorkChunkRepository = theWorkChunkRepository;
 		myWorkChunkMetadataViewRepo = theWorkChunkMetadataViewRepo;
@@ -145,6 +145,12 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
 	public Optional<WorkChunk> onWorkChunkDequeue(String theChunkId) {
+		// take a lock on the chunk id to ensure that the maintenance run isn't doing anything.
+		Batch2WorkChunkEntity chunkLock =
+				myEntityManager.find(Batch2WorkChunkEntity.class, theChunkId, LockModeType.PESSIMISTIC_WRITE);
+		// remove from the current state to avoid stale data.
+		myEntityManager.detach(chunkLock);
+
 		// NOTE: Ideally, IN_PROGRESS wouldn't be allowed here.  On chunk failure, we probably shouldn't be allowed.
 		// But how does re-run happen if k8s kills a processor mid run?
 		List<WorkChunkStatusEnum> priorStates =
@@ -386,15 +392,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	public void onWorkChunkCompletion(WorkChunkCompletionEvent theEvent) {
-		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> {
-			myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
-					theEvent.getChunkId(),
-					new Date(),
-					theEvent.getRecordsProcessed(),
-					theEvent.getRecoveredErrorCount(),
-					WorkChunkStatusEnum.COMPLETED,
-					theEvent.getRecoveredWarningMessage());
-		});
+		myTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.execute(() -> myWorkChunkRepository.updateChunkStatusAndClearDataForEndSuccess(
+						theEvent.getChunkId(),
+						new Date(),
+						theEvent.getRecordsProcessed(),
+						theEvent.getRecoveredErrorCount(),
+						WorkChunkStatusEnum.COMPLETED,
+						theEvent.getRecoveredWarningMessage()));
 	}
 
 	@Nullable

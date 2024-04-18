@@ -24,7 +24,9 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.hapi.fhir.batch2.test.support.JobMaintenanceStateInformation;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobParameters;
+import ca.uhn.test.concurrency.LockstepEnumPhaser;
 import ca.uhn.test.concurrency.PointcutLatch;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -37,9 +39,17 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Optional;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Nested
 public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkTestConstants {
@@ -104,10 +114,10 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 		getTestManager().disableWorkChunkMessageHandler();
 
 		String state = """
-   			1|COMPLETED
-   			2|COMPLETED
-   			3|GATE_WAITING,3|READY
-   			3|QUEUED,3|READY
+						1|COMPLETED
+						2|COMPLETED
+						3|GATE_WAITING,3|READY
+						3|QUEUED,3|READY
 		""";
 
 		JobDefinition<TestJobParameters> jobDef = getTestManager().withJobDefinition(true);
@@ -166,6 +176,84 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 		latch.awaitExpected();
 	}
 
+	/**
+	 * Nasty test for a nasty bug.
+	 * We use the transactional-outbox pattern to guarantee at-least-once delivery to the kafka queue by sending to
+	 * kafka before the READY->QUEUED tx commits.
+	 * BUT, kakfa is so fast, the listener may deque before the transition.  Our listener is confused if the chunk
+	 * is still in READY.
+	 * This test uses a lock-step phaser to create this scenario, and makes sure the dequeue is lock-consistent with the enqueue.
+	 *
+	 */
+	@Test
+	default void testSimultaneousDeque_beforeEnqueCommit_doesNotDropChunk() throws ExecutionException, InterruptedException, TimeoutException {
+	    // given
+		PointcutLatch pointcutLatch = getTestManager().disableWorkChunkMessageHandler();
+		getTestManager().enableMaintenanceRunner(false);
+
+		JobDefinition<?> jobDef = getTestManager().withJobDefinition(false);
+		String jobInstanceId = getTestManager().createAndStoreJobInstance(jobDef);
+
+		JobMaintenanceStateInformation stateInformation = new JobMaintenanceStateInformation(
+			jobInstanceId,
+			jobDef,
+			"""
+       2|READY,2|IN_PROGRESS
+       		"""
+		);
+		stateInformation.initialize(getTestManager().getSvc());
+		String chunkId = stateInformation.getInitialWorkChunks()
+			.stream().findFirst().orElseThrow().getId();
+
+		enum Steps {
+			STARTING, SENT_TO_KAFA_BEFORE_COMMIT, COMMIT_QUEUED_STATUS, FINISHED
+		}
+		LockstepEnumPhaser<Steps> phaser = new LockstepEnumPhaser<>(3, Steps.class);
+		phaser.assertInPhase(Steps.STARTING);
+
+		// test
+		ExecutorService workerThreads = Executors.newFixedThreadPool(2, new BasicThreadFactory.Builder().namingPattern("Deque-race-%d").build());
+		try {
+
+			// thread 1 - mimic the maintenance queueing a chunk notification to kafka
+			workerThreads.submit(()-> getTestManager().getSvc().enqueueWorkChunkForProcessing(chunkId, (i)->{
+				phaser.arriveAndAwaitSharedEndOf(Steps.STARTING);
+				ourLog.info("Fake send chunk to kafka {}", chunkId);
+				phaser.arriveAndAwaitSharedEndOf(Steps.SENT_TO_KAFA_BEFORE_COMMIT);
+				// wait for listener to "receive" our notification
+				phaser.arriveAndAwaitSharedEndOf(Steps.COMMIT_QUEUED_STATUS);
+				// wait here.
+			}));
+
+			// thread 2 - mimic the kafka listener receiving a notification before the maintenance tx has committed
+			Future<Optional<WorkChunk>> dequeueResult = workerThreads.submit(() -> {
+				phaser.arriveAndAwaitSharedEndOf(Steps.STARTING);
+				phaser.arriveAndAwaitSharedEndOf(Steps.SENT_TO_KAFA_BEFORE_COMMIT);
+				phaser.arriveAndDeregister();
+				Optional<WorkChunk> workChunk = getTestManager().getSvc().onWorkChunkDequeue(chunkId);
+
+				return workChunk;
+			});
+
+			phaser.arriveAndAwaitSharedEndOf(Steps.STARTING);
+			phaser.arriveAndAwaitSharedEndOf(Steps.SENT_TO_KAFA_BEFORE_COMMIT);
+			// wait while the deque tries to run
+			Thread.sleep(100);
+			phaser.arriveAndAwaitSharedEndOf(Steps.COMMIT_QUEUED_STATUS);
+			Optional<WorkChunk> workChunk = dequeueResult.get(1, TimeUnit.SECONDS);
+
+			assertTrue(workChunk.isPresent(), "Found the chunk despite being simultaneous");
+			stateInformation.verifyFinalStates(getTestManager().getSvc());
+
+		} finally {
+			workerThreads.shutdownNow();
+			pointcutLatch.clear();
+
+		}
+
+	}
+
+
 	@ParameterizedTest
 	@ValueSource(strings = {
 		"2|READY",
@@ -201,9 +289,7 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 		getTestManager().getSvc().onWorkChunkPollDelay(chunkId, newTime);
 
 		// verify
-		stateInformation.verifyFinalStates(getTestManager().getSvc(), chunk -> {
-			assertNull(chunk.getNextPollTime());
-		});
+		stateInformation.verifyFinalStates(getTestManager().getSvc(), chunk -> assertNull(chunk.getNextPollTime()));
 	}
 
 	@Test
@@ -268,9 +354,7 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 		);
 		Date nextPollTime = theDeadlineIsExpired ?
 			Date.from(Instant.now().minus(Duration.ofSeconds(10))) : Date.from(Instant.now().plus(Duration.ofSeconds(10)));
-		stateInformation.addWorkChunkModifier(chunk -> {
-			chunk.setNextPollTime(nextPollTime);
-		});
+		stateInformation.addWorkChunkModifier(chunk -> chunk.setNextPollTime(nextPollTime));
 		stateInformation.initialize(getTestManager().getSvc());
 
 		// test
