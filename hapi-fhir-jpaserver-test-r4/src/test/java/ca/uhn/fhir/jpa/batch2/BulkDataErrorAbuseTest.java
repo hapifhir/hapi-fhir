@@ -80,7 +80,6 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	@Disabled
 	public void testGroupBulkExportNotInGroup_DoesNotShowUp() throws InterruptedException, ExecutionException {
 		duAbuseTest(100);
 	}
