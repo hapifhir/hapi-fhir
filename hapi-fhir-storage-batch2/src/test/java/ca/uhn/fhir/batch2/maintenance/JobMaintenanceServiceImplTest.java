@@ -454,6 +454,9 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 			return 1;
 		}).when(myJobPersistence).enqueueWorkChunkForProcessing(anyString(), any());
 
+		Page<WorkChunkMetadata> page = getPageOfData(chunks);
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(any(Pageable.class), eq(INSTANCE_ID), any())).thenReturn(page);
+
 		// test
 		runEnqueueReadyChunksTest(chunks, createJobDefinition());
 
@@ -494,6 +497,9 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		}).when(myJobPersistence).updateInstance(any(), any());
 		when(myJobPersistence.getDistinctWorkChunkStatesForJobAndStep(eq(instance.getInstanceId()), eq(STEP_2)))
 			.thenReturn(chunks.stream().map(WorkChunkMetadata::getStatus).collect(Collectors.toSet()));
+		Page<WorkChunkMetadata> page = getPageOfData(chunks);
+		when(myJobPersistence.fetchAllWorkChunkMetadataForJobInStates(any(Pageable.class), eq(INSTANCE_ID), any())).thenReturn(page);
+
 
 		// test
 		runEnqueueReadyChunksTest(chunks, createJobDefinitionWithReduction());
