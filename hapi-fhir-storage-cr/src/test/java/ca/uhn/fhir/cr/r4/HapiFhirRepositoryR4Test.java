@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.param.*;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -44,11 +43,11 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 		canSearchWithPagination(repository);
 		transactionReadsPatientResources(repository);
 		transactionReadsEncounterResources(repository);
-		crudTest(repository);
+		assertTrue(crudTest(repository));
 	}
 
 
-	void crudTest(HapiFhirRepository theRepository) {
+	Boolean crudTest(HapiFhirRepository theRepository) {
 
 		var result = theRepository
 			.create(new Patient().addName(new HumanName().setFamily("Test").addGiven("Name1")));
@@ -64,7 +63,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 		theRepository.delete(Patient.class, patient.getIdElement());
 		var ex = assertThrows(Exception.class,
 			() -> theRepository.read(Patient.class, new IdType(patient.getIdElement().getIdPart())));
-		assertTrue(ex.getMessage().contains("Resource was deleted"));
+		return ex.getMessage().contains("Resource was deleted");
 	}
 
 	void canSearchMoreThan50Patients(HapiFhirRepository theRepository) {

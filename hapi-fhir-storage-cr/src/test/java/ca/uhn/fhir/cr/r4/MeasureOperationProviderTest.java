@@ -36,12 +36,12 @@ class MeasureOperationProviderTest extends BaseCrR4TestServer {
 	@Test
 	void runMeasureTests(){
 		// run tests
-		assertNotNull(testMeasureEvaluate_EXM130());
-		assertNotNull(testMeasureEvaluate_EXM104());
+		assertNotNull(testMeasureEvaluateExm130());
+		assertNotNull(testMeasureEvaluateExm104());
 		testClientNonPatientBasedMeasureEvaluate();
 		testMeasureEvaluateMultiVersion();
 		testLargeValuesetMeasure();
-		testBCSEHEDISMY2022();
+		testHedis2022();
 	}
 
 	public MeasureReport runEvaluateMeasure(String periodStart, String periodEnd, String subject, String measureId, String reportType, String practitioner){
@@ -59,15 +59,15 @@ class MeasureOperationProviderTest extends BaseCrR4TestServer {
 			.returnResourceType(MeasureReport.class)
 			.execute();
 	}
-	MeasureReport testMeasureEvaluate_EXM130() {
+	MeasureReport testMeasureEvaluateExm130() {
 		return runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
 	}
 
-	MeasureReport testMeasureEvaluate_EXM104() {
+	MeasureReport testMeasureEvaluateExm104() {
 		return runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM104", "measure-EXM104-8.2.000", "Individual", null);
 	}
 
-	void testBCSEHEDISMY2022() {
+	void testHedis2022() {
 
 		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-5", 0, 0, 0, 0, false,
 			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
