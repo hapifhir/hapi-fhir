@@ -97,7 +97,7 @@ public class StorageSettings {
 	private boolean myDefaultSearchParamsCanBeOverridden = true;
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private boolean myAutoCreatePlaceholderReferenceTargets;
-	private boolean myCrossPartitionSubscriptionEnabled = false;
+	private boolean myCrossPartitionSubscriptionEnabled = true;
 	private Integer myBundleBatchPoolSize = DEFAULT_BUNDLE_BATCH_POOL_SIZE;
 	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
 	private boolean myEnableInMemorySubscriptionMatching = true;

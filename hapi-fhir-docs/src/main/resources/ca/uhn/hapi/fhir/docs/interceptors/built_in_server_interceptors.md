@@ -193,7 +193,7 @@ HAPI FHIR provides an interceptor that can be used to implement consent rules an
 
 # Security: Search Narrowing
 
-HAPI FHIR provides an interceptor that can be used to implement consent rules and directives. See [Consent Interceptor](/docs/security/consent_interceptor.html) for more information.
+HAPI FHIR provides an interceptor that can be used to implement consent rules and directives. See [Search Narrowing Interceptor](/docs/security/search_narrowing_interceptor.html) for more information.
 
 
 # Security: Rejecting Unsupported HTTP Verbs

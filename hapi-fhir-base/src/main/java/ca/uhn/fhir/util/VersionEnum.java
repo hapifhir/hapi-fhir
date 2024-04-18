@@ -115,6 +115,10 @@ public enum VersionEnum {
 	V6_4_0,
 	V6_4_1,
 	V6_4_2,
+	V6_4_3,
+	V6_4_4,
+	V6_4_5,
+	V6_4_6,
 	V6_5_0,
 	V6_6_0,
 	V6_6_1,
@@ -136,7 +140,6 @@ public enum VersionEnum {
 
 	V7_0_0,
 	V7_0_1,
-
 	V7_1_0,
 	V7_2_0;
 

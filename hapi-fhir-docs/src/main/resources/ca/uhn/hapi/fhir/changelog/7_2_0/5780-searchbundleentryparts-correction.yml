@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 5780
+title: "SearchBundleEntryParts now correctly respects `OUTCOME` and `null` search modes in a bundle entry. In the public space, this means `BundleUtil#getSearchBundleEntryParts()` no longer incorrectly infers information about the entry mode "

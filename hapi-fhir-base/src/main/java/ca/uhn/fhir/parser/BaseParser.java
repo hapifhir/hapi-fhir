@@ -609,12 +609,14 @@ public abstract class BaseParser implements IParser {
 	private boolean isStripVersionsFromReferences(
 			CompositeChildElement theCompositeChildElement, IBaseResource theResource) {
 
-		Set<String> autoVersionReferencesAtPathExtensions =
-				MetaUtil.getAutoVersionReferencesAtPath(theResource.getMeta(), myContext.getResourceType(theResource));
+		if (theResource != null) {
+			Set<String> autoVersionReferencesAtPathExtensions = MetaUtil.getAutoVersionReferencesAtPath(
+					theResource.getMeta(), myContext.getResourceType(theResource));
 
-		if (!autoVersionReferencesAtPathExtensions.isEmpty()
-				&& theCompositeChildElement.anyPathMatches(autoVersionReferencesAtPathExtensions)) {
-			return false;
+			if (!autoVersionReferencesAtPathExtensions.isEmpty()
+					&& theCompositeChildElement.anyPathMatches(autoVersionReferencesAtPathExtensions)) {
+				return false;
+			}
 		}
 
 		Boolean stripVersionsFromReferences = myStripVersionsFromReferences;
@@ -622,21 +624,20 @@ public abstract class BaseParser implements IParser {
 			return stripVersionsFromReferences;
 		}
 
-		if (myContext.getParserOptions().isStripVersionsFromReferences() == false) {
+		if (!myContext.getParserOptions().isStripVersionsFromReferences()) {
 			return false;
 		}
 
 		Set<String> dontStripVersionsFromReferencesAtPaths = myDontStripVersionsFromReferencesAtPaths;
-		if (dontStripVersionsFromReferencesAtPaths != null) {
-			if (dontStripVersionsFromReferencesAtPaths.isEmpty() == false
-					&& theCompositeChildElement.anyPathMatches(dontStripVersionsFromReferencesAtPaths)) {
-				return false;
-			}
+		if (dontStripVersionsFromReferencesAtPaths != null
+				&& !dontStripVersionsFromReferencesAtPaths.isEmpty()
+				&& theCompositeChildElement.anyPathMatches(dontStripVersionsFromReferencesAtPaths)) {
+			return false;
 		}
 
 		dontStripVersionsFromReferencesAtPaths =
 				myContext.getParserOptions().getDontStripVersionsFromReferencesAtPaths();
-		return dontStripVersionsFromReferencesAtPaths.isEmpty() != false
+		return dontStripVersionsFromReferencesAtPaths.isEmpty()
 				|| !theCompositeChildElement.anyPathMatches(dontStripVersionsFromReferencesAtPaths);
 	}
 
