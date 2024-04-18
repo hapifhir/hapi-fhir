@@ -30,22 +30,36 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 public class CpgOperationProviderTest extends BaseCrR4TestServer{
 	@BeforeEach
 	void setup() {
-		var reqDeets = setupRequestDetails();
-		loadResource(Library.class, "SimpleR4Library.json", reqDeets);
-		loadResource(Patient.class, "SimplePatient.json", reqDeets);
-		loadResource(Observation.class, "SimpleObservation.json", reqDeets);
-		loadResource(Condition.class, "SimpleCondition.json", reqDeets);
+		var requestDetails = setupRequestDetails();
+		loadResource(Library.class, "SimpleR4Library.json", requestDetails);
+		loadResource(Patient.class, "SimplePatient.json", requestDetails);
+		loadResource(Observation.class, "SimpleObservation.json", requestDetails);
+		loadResource(Condition.class, "SimpleCondition.json", requestDetails);
+	}
+	@Test
+	void cpgProviderTest(){
+		// reuse loaded resources for all tests
+		assertTrue(cqlExecutionProvider_testSimpleDate());
+		cqlExecutionProvider_testSimpleArithmetic();
+		evaluateLibraryProvider_testLibraryWithSubject();
+		evaluateLibraryProvider_testSimpleExpression();
+		cqlExecutionProvider_testReferencedLibrary();
+		cqlExecutionProvider_testDataBundle();
+		cqlExecutionProvider_testDataBundleWithSubject();
+		cqlExecutionProvider_testSimpleParameters();
+		cqlExecutionProvider_testExpression();
+		cqlExecutionProvider_testErrorExpression();
 	}
 
-	@Test
-	void cqlExecutionProvider_testSimpleDate() {
+
+	private Boolean cqlExecutionProvider_testSimpleDate() {
 		// execute cql expression on date interval
 		Parameters params = parameters(stringPart("expression", "Interval[Today() - 2 years, Today())"));
 		Parameters results = runCqlExecution(params);
-		assertTrue(results.getParameter("return").getValue() instanceof Period);
+		return results.getParameter("return").getValue() instanceof Period;
 	}
 
-	@Test
+
 	void cqlExecutionProvider_testSimpleArithmetic() {
 		// execute simple cql expression
 		Parameters params = parameters(stringPart("expression", "5 * 5"));
@@ -54,7 +68,6 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		assertEquals("25", ((IntegerType) results.getParameter("return").getValue()).asStringValue());
 	}
 
-	@Test
 	void evaluateLibraryProvider_testLibraryWithSubject() {
 		// evaluate library resource for a subject
 		var params = new Parameters();
@@ -71,7 +84,7 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		assertTrue(((BooleanType) report.getParameter("Denominator").getValue()).booleanValue());
 	}
 
-	@Test
+
 	void evaluateLibraryProvider_testSimpleExpression() {
 		// evaluate expression for subject from specified library resource
 		var params = new Parameters();
@@ -84,7 +97,6 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		assertTrue(((BooleanType) report.getParameter("Numerator").getValue()).booleanValue());
 	}
 
-	@Test
 	void cqlExecutionProvider_testReferencedLibrary() {
 		// execute cql expression from referenced library on subject
 		Parameters libraryParameter = parameters(
@@ -100,7 +112,6 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
 	}
 
-	@Test
 	void cqlExecutionProvider_testDataBundle() {
 		// execute cql expression from library over data from bundle with no subject
 		Parameters libraryParameter = parameters(
@@ -118,7 +129,7 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		assertTrue(results.getParameter().get(0).getResource() instanceof Observation);
 	}
 
-	@Test
+
 	void cqlExecutionProvider_testDataBundleWithSubject() {
 		// execute cql expression from library over data from bundle with subject
 		Parameters libraryParameter = parameters(
@@ -135,7 +146,7 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		assertTrue(results.getParameter().get(0).getResource() instanceof Observation);
 	}
 
-	@Test
+
 	void cqlExecutionProvider_testSimpleParameters() {
 		// execute inline cql date expression with input valuemv
 		Parameters evaluationParams = parameters(
@@ -148,7 +159,6 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
 	}
 
-	@Test
 	void cqlExecutionProvider_testExpression() {
 		// execute cql expression from referenced library
 		Parameters libraryParameter = parameters(
@@ -168,7 +178,6 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
 	}
 
-	@Test
 	void cqlExecutionProvider_testErrorExpression() {
 		// execute invalid cql expression
 		Parameters params = parameters(stringPart("expression", "Interval[1,5]"));

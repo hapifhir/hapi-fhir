@@ -34,19 +34,15 @@ public class DataRequirementsTest extends BaseCrR4TestServer{
 	@Test
 	void testMeasureDataRequirements() {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
-		var report = runDataRequirements("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR");
-		Assertions.assertFalse(report.getDataRequirement().isEmpty());
+		Assertions.assertFalse(runDataRequirements("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR").getDataRequirement().isEmpty());
+		testMeasureDataRequirementsInvalidInterval();
+		testMeasureDataRequirementsInvalidMeasure();
 	}
-
-	@Test
 	void testMeasureDataRequirementsInvalidInterval() {
-		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		assertThrows(InternalErrorException.class, ()->runDataRequirements("2020-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR"));
 	}
 
-	@Test
 	void testMeasureDataRequirementsInvalidMeasure() {
-		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		assertThrows(ResourceNotFoundException.class, ()->runDataRequirements("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHI"));
 	}
 

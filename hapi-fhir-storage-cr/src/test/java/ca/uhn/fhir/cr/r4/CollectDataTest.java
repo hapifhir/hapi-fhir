@@ -31,42 +31,43 @@ public class CollectDataTest extends BaseCrR4TestServer{
 
 		return report;
 	}
-
 	@Test
-	void testCollectDataInvalidInterval() {
+	void testMeasureDataRequirements() {
 		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
-		assertThrows(InternalErrorException.class, ()->runCollectData("2020-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR", null, null));
+		var reportAllSubjects = runCollectData("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR", null, null);
+		Assertions.assertFalse(reportAllSubjects.getParameter().isEmpty());
+		// use same loaded bundle for all tests
+		testCollectDataSubject();
+		testCollectDataGroup();
+		testCollectDataPractitioner();
+		testCollectDataInvalidInterval();
+		testCollectDataInvalidMeasure();
 	}
 
-	@Test
-	void testCollectDataInvalidMeasure() {
-		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
-		assertThrows(ResourceNotFoundException.class, ()->runCollectData("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHI", null, null));
-	}
-	@Test
-	void testMeasureDataRequirementsAllSubjects() {
-		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
-		var report = runCollectData("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR", null, null);
-		Assertions.assertFalse(report.getParameter().isEmpty());
-	}
-	@Test
 	void testCollectDataSubject() {
-		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		var report = runCollectData("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR", "Patient/numer-EXM130", null);
 		Assertions.assertFalse(report.getParameter().isEmpty());
 	}
 
-	@Test
+
 	void testCollectDataGroup() {
-		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		var report = runCollectData("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR", "Group/group-EXM130", null);
 		Assertions.assertFalse(report.getParameter().isEmpty());
 	}
 
-	@Test
+
 	void testCollectDataPractitioner() {
-		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
 		var report = runCollectData("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR", null, "Practitioner/practitioner-EXM130");
 		Assertions.assertFalse(report.getParameter().isEmpty());
+	}
+
+
+	void testCollectDataInvalidInterval() {
+		assertThrows(InternalErrorException.class, ()->runCollectData("2020-01-01", "2019-12-31", "ColorectalCancerScreeningsFHIR", null, null));
+	}
+
+
+	void testCollectDataInvalidMeasure() {
+		assertThrows(ResourceNotFoundException.class, ()->runCollectData("2019-01-01", "2019-12-31", "ColorectalCancerScreeningsFHI", null, null));
 	}
 }
