@@ -120,16 +120,17 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 
 	@Test
-	public void testHighConcurrencyWorks() throws IOException, InterruptedException {
+	public void testHighConcurrencyWorks() throws IOException {
 		List<Bundle> bundles = new ArrayList<>();
 		for (int i =0 ; i < 10; i ++) {
 			bundles.add(myFhirContext.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/r4/identical-tags-batch.json"), Charsets.UTF_8)));
 		}
 
 		ExecutorService tpe = Executors.newFixedThreadPool(4);
-		for (Bundle bundle :bundles) {
+		for (Bundle bundle : bundles) {
 			tpe.execute(() -> myClient.transaction().withBundle(bundle).execute());
 		}
+
 		tpe.shutdown();
 		await().atMost(100, TimeUnit.SECONDS)
 			.until(tpe::isShutdown);
