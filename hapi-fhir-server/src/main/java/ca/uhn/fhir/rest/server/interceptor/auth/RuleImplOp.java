@@ -48,6 +48,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -56,6 +57,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.rest.server.interceptor.auth.AppliesTypeEnum.ALL_RESOURCES;
+import static ca.uhn.fhir.rest.server.interceptor.auth.AppliesTypeEnum.TYPES;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -267,13 +270,14 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			case DELETE:
 				if (theOperation == RestOperationTypeEnum.DELETE) {
 					if (thePointcut == Pointcut.STORAGE_PRE_DELETE_EXPUNGE && myAppliesToDeleteExpunge) {
-						return newVerdict(
-								theOperation,
-								theRequestDetails,
-								theInputResource,
-								theInputResourceId,
-								theOutputResource,
-								theRuleApplier);
+
+						String[] resourceIds = theRequestDetails.getParameters().get("_id");
+						if (resourceIds != null) {
+							target.resourceIds =
+									extractResourceIdsFromRequestParameters(theRequestDetails, resourceIds);
+						}
+
+						break;
 					}
 					if (myAppliesToDeleteCascade != (thePointcut == Pointcut.STORAGE_CASCADE_DELETE)) {
 						return null;
@@ -429,6 +433,18 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				ctx,
 				target,
 				theRuleApplier);
+	}
+
+	private static List<IIdType> extractResourceIdsFromRequestParameters(
+			RequestDetails theRequestDetails, String[] resourceIds) {
+		return Arrays.stream(resourceIds)
+				.map(id -> {
+					IIdType inputResourceId =
+							theRequestDetails.getFhirContext().getVersion().newIdType();
+					inputResourceId.setParts(null, theRequestDetails.getResourceName(), id, null);
+					return inputResourceId;
+				})
+				.collect(Collectors.toList());
 	}
 
 	/**

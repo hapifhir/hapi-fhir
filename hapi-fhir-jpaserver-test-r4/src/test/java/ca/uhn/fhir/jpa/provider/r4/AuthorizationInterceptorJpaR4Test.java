@@ -1487,7 +1487,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		validateDeleteConditionalByUrlIsForbidden("Patient?_expunge=true&_id=" + id.getIdPart());
 	}
 
-	private void createCompartmentRule(IIdType id) {
+	private void createPatientCompartmentRule(IIdType id) {
 		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1504,7 +1504,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	@Test
 	public void testDeleteExpunge_compartmentPermission_allowed() {
 		IIdType id = createPatient();
-		createCompartmentRule(id);
+		createPatientCompartmentRule(id);
 		executeDeleteConditionalByUrl("Patient?_expunge=true&_id=" + id.getIdPart());
 	}
 
@@ -1513,11 +1513,18 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		IIdType id = createPatient();
 		IdDt compartmentId = new IdDt();
 		compartmentId.setParts(null, "Patient", "123", null);
-		createCompartmentRule(compartmentId);
+		createPatientCompartmentRule(compartmentId);
 		validateDeleteConditionalByUrlIsForbidden("Patient?_expunge=true&_id=" + id.getIdPart());
 	}
 
-	private void createTypeInCompartmentRule(IIdType theId) {
+	@Test
+	public void testDeleteExpunge_compartmentPermissionMultipleIds_forbidden() {
+		IIdType id = createPatient();
+		createPatientCompartmentRule(id);
+		validateDeleteConditionalByUrlIsForbidden("Patient?_expunge=true&_id=" + id.getIdPart()+"_id=123");
+	}
+
+	private void createTypeInPatientCompartmentRule(IIdType theId) {
 		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1534,14 +1541,14 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	@Test
 	public void testDeleteExpunge_typeInCompartmentPermission_allowed() {
 		IIdType id = createPatient();
-		createTypeInCompartmentRule(id);
+		createTypeInPatientCompartmentRule(id);
 		executeDeleteConditionalByUrl("Patient?_expunge=true&_id=" + id.getIdPart());
 	}
 
 	@Test
 	public void testDeleteExpunge_typeInCompartmentPermission_forbidden() {
 		IIdType id = createPatient();
-		createTypeInCompartmentRule(id);
+		createTypeInPatientCompartmentRule(id);
 		validateDeleteConditionalByUrlIsForbidden("Observation?_expunge=true&_id=" + id.getIdPart());
 	}
 
