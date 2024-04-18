@@ -4,7 +4,6 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.junit.jupiter.api.AfterEach;
@@ -23,8 +22,6 @@ import static org.hamcrest.Matchers.hasSize;
 
 public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 
-	@Autowired
-	private IBatch2JobInstanceRepository myJobInstanceRepository;
 	@Autowired
 	private IJobPersistence myJobPersistenceSvc;
 	private static final String PARAMS = "{\"param1\":\"value1\"}";
