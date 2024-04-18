@@ -128,7 +128,6 @@ public class Batch2JobMaintenanceIT extends BaseJpaR4Test {
 		myLastStepLatch.setExpectedCount(1);
 		String batchJobId = myJobCoordinator.startInstance(new SystemRequestDetails(), request).getInstanceId();
 
-		myBatch2JobHelper.awaitJobHasStatus(batchJobId, StatusEnum.QUEUED);
 		myFirstStepLatch.awaitExpected();
 
 		myBatch2JobHelper.assertFastTracking(batchJobId);

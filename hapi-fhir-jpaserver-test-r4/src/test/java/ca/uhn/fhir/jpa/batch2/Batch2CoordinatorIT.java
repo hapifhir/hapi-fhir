@@ -36,7 +36,6 @@ import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
-import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,7 +66,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

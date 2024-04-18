@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.test;
 
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -247,7 +248,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected ISearchDao mySearchEntityDao;
 	@Autowired
-	private IBatch2JobInstanceRepository myJobInstanceRepository;
+	protected IBatch2JobInstanceRepository myJobInstanceRepository;
 	@Autowired
 	private IBatch2WorkChunkRepository myWorkChunkRepository;
 
@@ -553,11 +554,20 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@Autowired
 	protected TestDaoSearch myTestDaoSearch;
 
+	@Autowired
+	protected IJobMaintenanceService myJobMaintenanceService;
+
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
 
 	@AfterEach()
+	@Order(0)
 	public void afterCleanupDao() {
+		// this is lame, but so are multiple "aftereachs".
+		// to stop maintenance jobs from running while we clean up db, we'll pause it here
+		// see afterResetInterceptors for when we re-enable it
+		myJobMaintenanceService.enableMaintenancePass(false);
+
 		myStorageSettings.setExpireSearchResults(new JpaStorageSettings().isExpireSearchResults());
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
 		myStorageSettings.setExpireSearchResultsAfterMillis(new JpaStorageSettings().getExpireSearchResultsAfterMillis());
@@ -572,6 +582,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		myPagingProvider.setMaximumPageSize(BasePagingProvider.DEFAULT_MAX_PAGE_SIZE);
 
 		myPartitionSettings.setPartitioningEnabled(false);
+		ourLog.debug(getClass().getSimpleName() + ".afterCleanupDao");
 	}
 
 	@Override
@@ -580,6 +591,11 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	public void afterResetInterceptors() {
 		super.afterResetInterceptors();
 		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
+
+		// re-enable the maintenance service
+		// see afterCleanupDao for when we disabled it
+		myJobMaintenanceService.enableMaintenancePass(true);
+		ourLog.debug(getClass().getSimpleName() + ".afterResetInterceptors");
 	}
 
 	@AfterEach
@@ -590,6 +606,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		TermConceptMappingSvcImpl.clearOurLastResultsFromTranslationWithReverseCache();
 		TermDeferredStorageSvcImpl termDeferredStorageSvc = AopTestUtils.getTargetObject(myTerminologyDeferredStorageSvc);
 		termDeferredStorageSvc.clearDeferred();
+
+		ourLog.debug(getClass().getSimpleName() + ".afterClearTerminologyCaches");
 	}
 
 	@BeforeEach
@@ -635,6 +653,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 				myInterceptorService.unregisterInterceptor(myMdmStorageInterceptor);
 			}
 		}
+
+		ourLog.debug(getClass().getSimpleName() + ".afterPurgeDatabases");
 	}
 
 	@BeforeEach
@@ -819,6 +839,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@AfterEach
 	public void afterEachClearCaches() {
 		myJpaValidationSupportChainR4.invalidateCaches();
+		ourLog.debug(getClass().getSimpleName() + ".afterEachClearCaches");
 	}
 
 	private static void flattenExpansionHierarchy(List<String> theFlattenedHierarchy, List<TermConcept> theCodes, String thePrefix) {
