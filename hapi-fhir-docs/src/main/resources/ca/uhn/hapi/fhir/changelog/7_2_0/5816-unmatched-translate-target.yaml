@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5816
+title: "The ConceptMap/$translate operation will include targets with an equivalence code of `unmatched` in the response 
+regardless of whether the target has a code."

@@ -82,8 +82,15 @@ public class HapiSchemaMigrationTest {
 			VersionEnum.V5_3_0,
 			VersionEnum.V5_4_0,
 			VersionEnum.V5_5_0,
+			VersionEnum.V5_7_0,
 			VersionEnum.V6_0_0,
-			VersionEnum.V6_6_0
+			VersionEnum.V6_1_0,
+			VersionEnum.V6_2_0,
+			VersionEnum.V6_3_0,
+			VersionEnum.V6_6_0,
+			VersionEnum.V6_8_0,
+			VersionEnum.V7_0_0,
+			VersionEnum.V7_2_0
 		);
 
 		int fromVersion = 0;
@@ -92,6 +99,7 @@ public class HapiSchemaMigrationTest {
 
 		for (int i = 0; i < allVersions.length; i++) {
 			toVersion = allVersions[i];
+			ourLog.info("Applying migrations for {}", toVersion);
 			migrate(theDriverType, dataSource, hapiMigrationStorageSvc, toVersion);
 			if (dataVersions.contains(toVersion)) {
 				myEmbeddedServersExtension.insertPersistenceTestData(theDriverType, toVersion);

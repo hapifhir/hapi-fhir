@@ -36,6 +36,7 @@ import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hibernate.Length;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -95,12 +96,16 @@ public class Batch2JobInstanceEntity implements Serializable {
 	@Column(name = "FAST_TRACKING", nullable = true)
 	private Boolean myFastTracking;
 
+	// TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "PARAMS_JSON", length = PARAMS_JSON_MAX_LENGTH, nullable = true)
 	private String myParamsJson;
 
-	@Lob
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Column(name = "PARAMS_JSON_LOB", nullable = true)
 	private String myParamsJsonLob;
+
+	@Column(name = "PARAMS_JSON_VC", nullable = true, length = Length.LONG32)
+	private String myParamsJsonVc;
 
 	@Column(name = "CMB_RECS_PROCESSED", nullable = true)
 	private Integer myCombinedRecordsProcessed;
@@ -142,10 +147,13 @@ public class Batch2JobInstanceEntity implements Serializable {
 	 * Any output from the job can be held in this column
 	 * Even serialized json
 	 */
-	@Lob
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
 	@Basic(fetch = FetchType.LAZY)
 	@Column(name = "REPORT", nullable = true, length = Integer.MAX_VALUE - 1)
 	private String myReport;
+
+	@Column(name = "REPORT_VC", nullable = true, length = Length.LONG32)
+	private String myReportVc;
 
 	public String getCurrentGatedStepId() {
 		return myCurrentGatedStepId;
@@ -260,6 +268,9 @@ public class Batch2JobInstanceEntity implements Serializable {
 	}
 
 	public String getParams() {
+		if (myParamsJsonVc != null) {
+			return myParamsJsonVc;
+		}
 		if (myParamsJsonLob != null) {
 			return myParamsJsonLob;
 		}
@@ -267,13 +278,9 @@ public class Batch2JobInstanceEntity implements Serializable {
 	}
 
 	public void setParams(String theParams) {
+		myParamsJsonVc = theParams;
 		myParamsJsonLob = null;
 		myParamsJson = null;
-		if (theParams != null && theParams.length() > PARAMS_JSON_MAX_LENGTH) {
-			myParamsJsonLob = theParams;
-		} else {
-			myParamsJson = theParams;
-		}
 	}
 
 	public boolean getWorkChunksPurged() {
@@ -309,11 +316,12 @@ public class Batch2JobInstanceEntity implements Serializable {
 	}
 
 	public String getReport() {
-		return myReport;
+		return myReportVc != null ? myReportVc : myReport;
 	}
 
 	public void setReport(String theReport) {
-		myReport = theReport;
+		myReportVc = theReport;
+		myReport = null;
 	}
 
 	public String getWarningMessages() {
@@ -362,7 +370,7 @@ public class Batch2JobInstanceEntity implements Serializable {
 				.append("progress", myProgress)
 				.append("errorMessage", myErrorMessage)
 				.append("estimatedTimeRemaining", myEstimatedTimeRemaining)
-				.append("report", myReport)
+				.append("report", getReport())
 				.append("warningMessages", myWarningMessages)
 				.append("initiatingUsername", myTriggeringUsername)
 				.append("initiatingclientId", myTriggeringClientId)

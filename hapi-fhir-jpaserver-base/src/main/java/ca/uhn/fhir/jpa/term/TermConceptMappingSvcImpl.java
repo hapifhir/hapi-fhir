@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ConceptMap;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
@@ -218,13 +219,17 @@ public class TermConceptMappingSvcImpl extends TermConceptClientMappingSvcImpl i
 						if (element.hasTarget()) {
 							TermConceptMapGroupElementTarget termConceptMapGroupElementTarget;
 							for (ConceptMap.TargetElementComponent elementTarget : element.getTarget()) {
-								if (isBlank(elementTarget.getCode())) {
+								if (isBlank(elementTarget.getCode())
+										&& elementTarget.getEquivalence()
+												!= Enumerations.ConceptMapEquivalence.UNMATCHED) {
 									continue;
 								}
 								termConceptMapGroupElementTarget = new TermConceptMapGroupElementTarget();
 								termConceptMapGroupElementTarget.setConceptMapGroupElement(termConceptMapGroupElement);
-								termConceptMapGroupElementTarget.setCode(elementTarget.getCode());
-								termConceptMapGroupElementTarget.setDisplay(elementTarget.getDisplay());
+								if (isNotBlank(elementTarget.getCode())) {
+									termConceptMapGroupElementTarget.setCode(elementTarget.getCode());
+									termConceptMapGroupElementTarget.setDisplay(elementTarget.getDisplay());
+								}
 								termConceptMapGroupElementTarget.setEquivalence(elementTarget.getEquivalence());
 								termConceptMapGroupElement
 										.getConceptMapGroupElementTargets()

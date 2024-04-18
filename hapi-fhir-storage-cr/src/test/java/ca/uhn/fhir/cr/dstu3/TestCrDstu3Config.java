@@ -6,7 +6,6 @@ import ca.uhn.fhir.cr.TestCrConfig;
 
 import ca.uhn.fhir.cr.config.dstu3.CrDstu3Config;
 
-
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.Model;
@@ -30,9 +29,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 @Configuration
-@Import({TestCrConfig.class, CrDstu3Config.class})
+@Import({
+	TestCrConfig.class,
+	CrDstu3Config.class
+})
 public class TestCrDstu3Config {
 
 	@Bean

@@ -44,7 +44,6 @@ public class ResourceTableFKProvider {
 		retval.add(new ResourceForeignKey("HFJ_RES_VER_PROV", "RES_PID"));
 
 		// These have the possibility of touching all resource types.
-		retval.add(new ResourceForeignKey("HFJ_FORCED_ID", "RESOURCE_PID"));
 		retval.add(new ResourceForeignKey("HFJ_IDX_CMP_STRING_UNIQ", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_IDX_CMB_TOK_NU", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_RES_LINK", "SRC_RESOURCE_ID"));
@@ -83,7 +82,6 @@ public class ResourceTableFKProvider {
 		// These have the possibility of touching all resource types.
 		retval.add(new ResourceForeignKey("HFJ_HISTORY_TAG", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_RES_VER_PROV", "RES_PID"));
-		retval.add(new ResourceForeignKey("HFJ_FORCED_ID", "RESOURCE_PID"));
 		retval.add(new ResourceForeignKey("HFJ_IDX_CMP_STRING_UNIQ", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_IDX_CMB_TOK_NU", "RES_ID"));
 		retval.add(new ResourceForeignKey("HFJ_RES_LINK", "SRC_RESOURCE_ID"));

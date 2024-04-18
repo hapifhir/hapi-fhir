@@ -51,13 +51,13 @@ import java.util.stream.Collectors;
  * is complete so that other beans can use the stuff it creates.
  */
 public class CdsHooksContextBooter {
-	private static final Logger ourLog = LoggerFactory.getLogger(CdsHooksContextBooter.class);
-	private static final String CDS_SERVICES_BEAN_NAME = "cdsServices";
-	private Class<?> myDefinitionsClass;
-	private AnnotationConfigApplicationContext myAppCtx;
+	protected static final Logger ourLog = LoggerFactory.getLogger(CdsHooksContextBooter.class);
+	protected static final String CDS_SERVICES_BEAN_NAME = "cdsServices";
+	protected Class<?> myDefinitionsClass;
+	protected AnnotationConfigApplicationContext myAppCtx;
 
-	private List<Object> myCdsServiceBeans = new ArrayList<>();
-	private final CdsServiceCache myCdsServiceCache = new CdsServiceCache();
+	protected List<Object> myCdsServiceBeans = new ArrayList<>();
+	protected final CdsServiceCache myCdsServiceCache = new CdsServiceCache();
 
 	public void setDefinitionsClass(Class<?> theDefinitionsClass) {
 		myDefinitionsClass = theDefinitionsClass;
@@ -70,7 +70,7 @@ public class CdsHooksContextBooter {
 		return myCdsServiceCache;
 	}
 
-	private void extractCdsServices(Object theServiceBean) {
+	protected void extractCdsServices(Object theServiceBean) {
 		Method[] methods = theServiceBean.getClass().getMethods();
 		// Sort alphabetically so service list output is deterministic (to ensure GET /cds-services is idempotent).
 		// This also simplifies testing :-)
@@ -104,7 +104,7 @@ public class CdsHooksContextBooter {
 		}
 	}
 
-	String validateJson(String theExtension) {
+	protected String validateJson(String theExtension) {
 		if (StringUtils.isEmpty(theExtension)) {
 			return null;
 		}

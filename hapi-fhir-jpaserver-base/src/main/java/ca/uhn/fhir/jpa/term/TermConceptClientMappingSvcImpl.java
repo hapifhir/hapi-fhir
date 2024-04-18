@@ -51,6 +51,7 @@ import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -416,11 +417,30 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 			theTranslationResult.setResult(false);
 			msg = myContext.getLocalizer().getMessage(TermConceptMappingSvcImpl.class, "noMatchesFound");
 			theTranslationResult.setMessage(msg);
+		} else if (isOnlyNegativeMatches(theTranslationResult)) {
+			theTranslationResult.setResult(false);
+			msg = myContext.getLocalizer().getMessage(TermConceptMappingSvcImpl.class, "onlyNegativeMatchesFound");
+			theTranslationResult.setMessage(msg);
 		} else {
 			theTranslationResult.setResult(true);
 			msg = myContext.getLocalizer().getMessage(TermConceptMappingSvcImpl.class, "matchesFound");
 			theTranslationResult.setMessage(msg);
 		}
+	}
+
+	/**
+	 * Evaluates whether a translation result contains any positive matches or only negative ones. This is required
+	 * because the <a href="https://hl7.org/fhir/R4/conceptmap-operation-translate.html">FHIR specification</a> states
+	 * that the result field "can only be true if at least one returned match has an equivalence which is not unmatched
+	 * or disjoint".
+	 * @param theTranslationResult the translation result to be evaluated
+	 * @return true if all the potential matches in the result have a negative valence (i.e., "unmatched" and "disjoint")
+	 */
+	private boolean isOnlyNegativeMatches(TranslateConceptResults theTranslationResult) {
+		return theTranslationResult.getResults().stream()
+				.map(TranslateConceptResult::getEquivalence)
+				.allMatch(t -> StringUtils.equals(Enumerations.ConceptMapEquivalence.UNMATCHED.toCode(), t)
+						|| StringUtils.equals(Enumerations.ConceptMapEquivalence.DISJOINT.toCode(), t));
 	}
 
 	private boolean alreadyContainsMapping(
