@@ -176,13 +176,6 @@ public class TestDstu3Config {
 	}
 
 	@Bean
-	public IEmailSender emailSender() {
-		final MailConfig mailConfig = new MailConfig().setSmtpHostname("localhost").setSmtpPort(3025);
-		final IMailSvc mailSvc = new MailSvc(mailConfig);
-		return new EmailSenderImpl(mailSvc);
-	}
-
-	@Bean
 	public LocalContainerEntityManagerFactoryBean entityManagerFactory(ConfigurableListableBeanFactory theConfigurableListableBeanFactory, FhirContext theFhirContext, JpaStorageSettings theStorageSettings) {
 		LocalContainerEntityManagerFactoryBean retVal = HapiEntityManagerFactoryUtil.newEntityManagerFactory(theConfigurableListableBeanFactory, theFhirContext, theStorageSettings);
 		retVal.setPersistenceUnitName("PU_HapiFhirJpaDstu3");
