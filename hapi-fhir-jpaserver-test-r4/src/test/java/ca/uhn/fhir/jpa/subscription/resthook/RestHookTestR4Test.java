@@ -735,7 +735,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	@Test
 	public void testRestHookSubscriptionApplicationJsonDatabase() throws Exception {
 		// Same test as above, but now run it using database matching
-		myStorageSettings.setEnableInMemorySubscriptionMatching(false);
+		mySubscriptionSettings.setEnableInMemorySubscriptionMatching(false);
 		String payload = "application/json";
 
 		String code = "1000000050";
@@ -1176,8 +1176,8 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	 */
 	@Test
 	public void testSubscriptionDoesntActivateIfRestHookIsNotEnabled() throws InterruptedException {
-		Set<org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType> existingSupportedSubscriptionTypes = myStorageSettings.getSupportedSubscriptionTypes();
-		myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
+		Set<org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType> existingSupportedSubscriptionTypes = mySubscriptionSettings.getSupportedSubscriptionTypes();
+		mySubscriptionSettings.clearSupportedSubscriptionTypesForUnitTest();
 		try {
 
 			Subscription subscription = newSubscription("Observation?", "application/fhir+json");
@@ -1188,7 +1188,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 			assertEquals(Subscription.SubscriptionStatus.REQUESTED, subscription.getStatus());
 
 		} finally {
-			existingSupportedSubscriptionTypes.forEach(t -> myStorageSettings.addSupportedSubscriptionType(t));
+			existingSupportedSubscriptionTypes.forEach(t -> mySubscriptionSettings.addSupportedSubscriptionType(t));
 		}
 	}
 

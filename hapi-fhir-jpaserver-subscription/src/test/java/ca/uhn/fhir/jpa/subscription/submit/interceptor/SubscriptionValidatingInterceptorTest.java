@@ -10,6 +10,7 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
+import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSettings;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
@@ -227,7 +228,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 		@Bean
 		SubscriptionCanonicalizer subscriptionCanonicalizer(FhirContext theFhirContext) {
-			return new SubscriptionCanonicalizer(theFhirContext, new StorageSettings());
+			return new SubscriptionCanonicalizer(theFhirContext, new SubscriptionSettings());
 		}
 
 		@Bean

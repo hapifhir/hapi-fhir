@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.ISubscriptionDeliveryChannelNamer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
+import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSettings;
 import ca.uhn.fhir.subscription.SubscriptionTestDataHelper;
 import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.r4.model.Extension;
@@ -34,7 +35,7 @@ public class SubscriptionRegistryTest {
 	static FhirContext ourFhirContext = FhirContext.forR4Cached();
 
 	@Spy
-	SubscriptionCanonicalizer mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(ourFhirContext, new StorageSettings());
+	SubscriptionCanonicalizer mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(ourFhirContext, new SubscriptionSettings());
 
 	@Spy
 	ISubscriptionDeliveryChannelNamer mySubscriptionDeliveryChannelNamer = new TestChannelNamer();

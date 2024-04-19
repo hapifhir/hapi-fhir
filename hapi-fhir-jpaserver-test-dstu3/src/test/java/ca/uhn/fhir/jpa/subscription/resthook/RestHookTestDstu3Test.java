@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.dao.DaoTestUtils;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.NotificationServlet;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
+import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
@@ -125,7 +126,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		ourLog.info("After re-registering interceptors");
 		DaoTestUtils.logAllInterceptors(myInterceptorRegistry);
 
-		myStorageSettings.setOnlyAllowInMemorySubscriptions(new JpaStorageSettings().isOnlyAllowInMemorySubscriptions());
+		mySubscriptionSettings.setOnlyAllowInMemorySubscriptions(new SubscriptionSettings().isOnlyAllowInMemorySubscriptions());
 	}
 
 	@BeforeEach
@@ -217,14 +218,14 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 	@Test
 	public void testForcedInMemoryPreventsDatabaseSubscriptions() throws InterruptedException {
-		myStorageSettings.setOnlyAllowInMemorySubscriptions(true);
+		mySubscriptionSettings.setOnlyAllowInMemorySubscriptions(true);
 		String databaseCriteria = "Observation?code=17861-6&context.type=IHD";
 		try {
 			createSubscription(databaseCriteria, null, ourNotificationListenerServer);
 		} catch (UnprocessableEntityException e) {
 			assertThat(e.getMessage(), is(containsString("HAPI-2367: This server is configured to only allow in-memory subscriptions.")));
 		}
-		myStorageSettings.setOnlyAllowInMemorySubscriptions(false);
+		mySubscriptionSettings.setOnlyAllowInMemorySubscriptions(false);
 	}
 
 

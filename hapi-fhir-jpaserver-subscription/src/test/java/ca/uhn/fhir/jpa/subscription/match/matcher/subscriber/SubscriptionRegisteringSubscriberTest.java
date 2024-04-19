@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSettings;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -51,7 +52,7 @@ public class SubscriptionRegisteringSubscriberTest {
 	@Mock
 	private SubscriptionRegistry mySubscriptionRegistry;
 	@Spy
-	private SubscriptionCanonicalizer mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(myFhirContext, new StorageSettings());
+	private SubscriptionCanonicalizer mySubscriptionCanonicalizer = new SubscriptionCanonicalizer(myFhirContext, new SubscriptionSettings());
 	@Mock
 	private DaoRegistry myDaoRegistry;
 	@Mock

@@ -57,12 +57,12 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 	@AfterEach
 	public void afterUnregisterRestHookListener() {
 		mySubscriptionTestUtil.unregisterSubscriptionInterceptor();
-		myStorageSettings.clearSupportedSubscriptionTypesForUnitTest();
+		mySubscriptionSettings.clearSupportedSubscriptionTypesForUnitTest();
 	}
 
 	@BeforeEach
 	public void beforeSetSubscriptionActivatingInterceptor() {
-		myStorageSettings.addSupportedSubscriptionType(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.RESTHOOK);
+		mySubscriptionSettings.addSupportedSubscriptionType(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.RESTHOOK);
 		myResourceModifiedSubmitterSvc.startIfNeeded();
 		mySubscriptionLoader.doSyncSubscriptionsForUnitTest();
 	}
