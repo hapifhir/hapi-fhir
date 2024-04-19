@@ -439,9 +439,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				theRuleApplier);
 	}
 
-	private static List<IIdType> extractResourceIdsFromRequestParameters(
-			RequestDetails theRequestDetails, String[] resourceIds) {
-		return Arrays.stream(resourceIds)
+	private List<IIdType> extractResourceIdsFromRequestParameters(
+			RequestDetails theRequestDetails, String[] theResourceIds) {
+		return Arrays.stream(theResourceIds)
 				.map(id -> {
 					IIdType inputResourceId =
 							theRequestDetails.getFhirContext().getVersion().newIdType();
