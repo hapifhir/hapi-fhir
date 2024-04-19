@@ -139,6 +139,62 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		forcedId.dropIndex("20240402.2", "IDX_FORCEDID_RESID");
 		forcedId.dropIndex("20240402.3", "IDX_FORCEDID_TYPE_FID");
 		forcedId.dropIndex("20240402.4", "IDX_FORCEID_FID");
+
+		// Migration from LOB
+		{
+			Builder.BuilderWithTableName binaryStorageBlobTable = version.onTable("HFJ_BINARY_STORAGE_BLOB");
+
+			binaryStorageBlobTable
+					.renameColumn("20240404.1", "BLOB_ID", "CONTENT_ID")
+					.renameColumn("20240404.2", "BLOB_SIZE", "CONTENT_SIZE")
+					.renameColumn("20240404.3", "BLOB_HASH", "CONTENT_HASH");
+
+			binaryStorageBlobTable
+					.modifyColumn("20240404.4", "BLOB_DATA")
+					.nullable()
+					.withType(ColumnTypeEnum.BLOB);
+
+			binaryStorageBlobTable
+					.addColumn("20240404.5", "STORAGE_CONTENT_BIN")
+					.nullable()
+					.type(ColumnTypeEnum.BINARY);
+
+			binaryStorageBlobTable.migrateBlobToBinary("20240404.6", "BLOB_DATA", "STORAGE_CONTENT_BIN");
+
+			binaryStorageBlobTable.renameTable("20240404.7", "HFJ_BINARY_STORAGE");
+		}
+
+		{
+			Builder.BuilderWithTableName termConceptPropertyTable = version.onTable("TRM_CONCEPT_PROPERTY");
+
+			termConceptPropertyTable
+					.addColumn("20240409.1", "PROP_VAL_BIN")
+					.nullable()
+					.type(ColumnTypeEnum.BINARY);
+
+			termConceptPropertyTable.migrateBlobToBinary("20240409.2", "PROP_VAL_LOB", "PROP_VAL_BIN");
+		}
+
+		{
+			Builder.BuilderWithTableName termValueSetConceptTable = version.onTable("TRM_VALUESET_CONCEPT");
+			termValueSetConceptTable
+					.addColumn("20240409.3", "SOURCE_DIRECT_PARENT_PIDS_VC")
+					.nullable()
+					.type(ColumnTypeEnum.TEXT);
+
+			termValueSetConceptTable.migrateClobToText(
+					"20240409.4", "SOURCE_DIRECT_PARENT_PIDS", "SOURCE_DIRECT_PARENT_PIDS_VC");
+		}
+
+		{
+			Builder.BuilderWithTableName termConceptTable = version.onTable("TRM_CONCEPT");
+			termConceptTable
+					.addColumn("20240410.1", "PARENT_PIDS_VC")
+					.nullable()
+					.type(ColumnTypeEnum.TEXT);
+
+			termConceptTable.migrateClobToText("20240410.2", "PARENT_PIDS", "PARENT_PIDS_VC");
+		}
 	}
 
 	protected void init700() {

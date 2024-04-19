@@ -264,7 +264,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 
-		myBinaryStorageSvc.expungeBlob(id, attachmentId);
+		myBinaryStorageSvc.expungeBinaryContent(id, attachmentId);
 
 		path = myServerBase +
 			"/DocumentReference/" + id.getIdPart() + "/" +
@@ -721,7 +721,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();
-		myStorageSvc.writeBlob(id, attachmentId, capture);
+		myStorageSvc.writeBinaryContent(id, attachmentId, capture);
 		assertEquals(15, capture.size());
 
 		// Now delete (logical delete- should not expunge the binary)
@@ -734,7 +734,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		capture = new ByteArrayOutputStream();
-		myStorageSvc.writeBlob(id, attachmentId, capture);
+		myStorageSvc.writeBinaryContent(id, attachmentId, capture);
 		assertEquals(15, capture.size());
 
 		// Now expunge
@@ -748,7 +748,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		capture = new ByteArrayOutputStream();
-		assertFalse(myStorageSvc.writeBlob(id, attachmentId, capture));
+		assertFalse(myStorageSvc.writeBinaryContent(id, attachmentId, capture));
 		assertEquals(0, capture.size());
 
 	}

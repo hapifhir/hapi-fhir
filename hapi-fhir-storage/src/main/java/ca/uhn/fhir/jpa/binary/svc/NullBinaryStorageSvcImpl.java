@@ -38,7 +38,7 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
-	public boolean isValidBlobId(String theNewBlobId) {
+	public boolean isValidBinaryContentId(String theNewBlobId) {
 		return true;
 	}
 
@@ -58,18 +58,18 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
-	public boolean shouldStoreBlob(long theSize, IIdType theResourceId, String theContentType) {
+	public boolean shouldStoreBinaryContent(long theSize, IIdType theResourceId, String theContentType) {
 		return false;
 	}
 
 	@Override
-	public String newBlobId() {
+	public String newBinaryContentId() {
 		throw new UnsupportedOperationException(Msg.code(1345));
 	}
 
 	@Nonnull
 	@Override
-	public StoredDetails storeBlob(
+	public StoredDetails storeBinaryContent(
 			IIdType theResourceId,
 			String theBlobIdOrNull,
 			String theContentType,
@@ -79,27 +79,27 @@ public class NullBinaryStorageSvcImpl implements IBinaryStorageSvc {
 	}
 
 	@Override
-	public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) {
+	public StoredDetails fetchBinaryContentDetails(IIdType theResourceId, String theBlobId) {
 		throw new UnsupportedOperationException(Msg.code(1347));
 	}
 
 	@Override
-	public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) {
+	public boolean writeBinaryContent(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) {
 		throw new UnsupportedOperationException(Msg.code(1348));
 	}
 
 	@Override
-	public void expungeBlob(IIdType theIdElement, String theBlobId) {
+	public void expungeBinaryContent(IIdType theIdElement, String theBlobId) {
 		throw new UnsupportedOperationException(Msg.code(1349));
 	}
 
 	@Override
-	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) {
+	public byte[] fetchBinaryContent(IIdType theResourceId, String theBlobId) {
 		throw new UnsupportedOperationException(Msg.code(1350));
 	}
 
 	@Override
-	public byte[] fetchDataBlobFromBinary(IBaseBinary theResource) {
+	public byte[] fetchDataByteArrayFromBinary(IBaseBinary theResource) {
 		throw new UnsupportedOperationException(Msg.code(1351));
 	}
 }
