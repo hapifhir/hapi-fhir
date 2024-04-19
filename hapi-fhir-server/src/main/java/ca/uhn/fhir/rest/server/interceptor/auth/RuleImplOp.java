@@ -270,15 +270,13 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			case DELETE:
 				if (theOperation == RestOperationTypeEnum.DELETE) {
 					if (thePointcut == Pointcut.STORAGE_PRE_DELETE_EXPUNGE && myAppliesToDeleteExpunge) {
-
+						target.resourceType = theRequestDetails.getResourceName();
 						String[] resourceIds = theRequestDetails.getParameters().get("_id");
 						if (resourceIds != null) {
 							target.resourceIds =
 									extractResourceIdsFromRequestParameters(theRequestDetails, resourceIds);
-						}
-
-						if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
-							target.resourceType = theRequestDetails.getResourceName();
+						} else {
+							target.setSearchParams(theRequestDetails);
 						}
 
 						break;
