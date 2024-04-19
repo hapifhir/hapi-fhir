@@ -3,9 +3,11 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -32,6 +34,8 @@ import static org.awaitility.Awaitility.await;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
@@ -77,7 +81,6 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 	@Test
 	public void testProcessMessage() {
-
 		Bundle bundle = new Bundle();
 		bundle.setType(BundleType.MESSAGE);
 
@@ -126,7 +129,12 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 			bundles.add(myFhirContext.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/r4/identical-tags-batch.json"), Charsets.UTF_8)));
 		}
 
-		ExecutorService tpe = Executors.newFixedThreadPool(4);
+		int desiredMaxThreads = 4;
+		int maxThreads = TestR4Config.getMaxThreads();
+		// we want strictly > because we want at least 1 extra thread hanging around for
+		// any spun off threads needed internally during the transaction
+		assertTrue(maxThreads > desiredMaxThreads, String.format("Wanted %d threads, but we only have %d", desiredMaxThreads, maxThreads));
+		ExecutorService tpe = Executors.newFixedThreadPool(desiredMaxThreads);
 		for (Bundle bundle : bundles) {
 			tpe.execute(() -> myClient.transaction().withBundle(bundle).execute());
 		}
@@ -354,7 +362,8 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		bundle.getEntry().forEach(entry -> carePlans.add((CarePlan) entry.getResource()));
 
 		// Post CarePlans should not get: HAPI-2006: Unable to perform PUT, URL provided is invalid...
-		myClient.transaction().withResources(carePlans).execute();
+		List<IBaseResource> result = myClient.transaction().withResources(carePlans).execute();
+		assertFalse(result.isEmpty());
 	}
 
 }
