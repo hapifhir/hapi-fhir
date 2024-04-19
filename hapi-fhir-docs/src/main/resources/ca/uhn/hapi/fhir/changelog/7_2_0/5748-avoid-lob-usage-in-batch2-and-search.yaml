@@ -1,6 +1,7 @@
 ---
 type: perf
 issue: 5748
+backport: 6.8.7
 title: "In the JPA server, several database columns related to Batch2 jobs and searching
    have been reworked so that they no will longer use LOB datatypes going forward. This
    is a significant advantage on Postgresql databases as it removes a significant use
