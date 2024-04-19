@@ -7,6 +7,7 @@ import org.hl7.fhir.r4.model.MeasureReport;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -21,6 +22,27 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(SpringExtension.class)
 class MeasureOperationProviderTest extends BaseCrR4TestServer {
+	@BeforeEach
+	void setup() {
+		// load resources
+		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
+		loadBundle("Exm104FhirR4MeasureBundle.json");
+		loadBundle("ClientNonPatientBasedMeasureBundle.json");
+		loadBundle("multiversion/EXM124-7.0.000-bundle.json");
+		loadBundle("multiversion/EXM124-9.0.000-bundle.json");
+		loadBundle("largeValueSetMeasureTest-Bundle.json");
+		loadBundle("BCSEHEDISMY2022-bundle.json");
+	}
+	@Test
+	void runMeasureTests(){
+		// run tests
+		assertNotNull(testMeasureEvaluateExm130());
+		assertNotNull(testMeasureEvaluateExm104());
+		testClientNonPatientBasedMeasureEvaluate();
+		testMeasureEvaluateMultiVersion();
+		testLargeValuesetMeasure();
+		testHedis2022();
+	}
 
 	public MeasureReport runEvaluateMeasure(String periodStart, String periodEnd, String subject, String measureId, String reportType, String practitioner){
 
@@ -31,67 +53,21 @@ class MeasureOperationProviderTest extends BaseCrR4TestServer {
 		parametersEval.addParameter("reportType", reportType);
 		parametersEval.addParameter("subject", subject);
 
-		var report = ourClient.operation().onInstance("Measure/" + measureId)
+		return  ourClient.operation().onInstance("Measure/" + measureId)
 			.named(ProviderConstants.CR_OPERATION_EVALUATE_MEASURE)
 			.withParameters(parametersEval)
 			.returnResourceType(MeasureReport.class)
 			.execute();
-
-		assertNotNull(report);
-
-		return report;
+	}
+	MeasureReport testMeasureEvaluateExm130() {
+		return runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
 	}
 
-	@Test
-	void testMeasureEvaluate_EXM130() {
-		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
-		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM130", "ColorectalCancerScreeningsFHIR", "Individual", null);
-	}
-	@Test
-	void testMeasureEvaluate_EXM104() {
-		loadBundle("Exm104FhirR4MeasureBundle.json");
-		runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM104", "measure-EXM104-8.2.000", "Individual", null);
+	MeasureReport testMeasureEvaluateExm104() {
+		return runEvaluateMeasure("2019-01-01", "2019-12-31", "Patient/numer-EXM104", "measure-EXM104-8.2.000", "Individual", null);
 	}
 
-	private void runWithPatient(String measureId, String patientId, int initialPopulationCount, int denominatorCount,
-										 int denominatorExclusionCount, int numeratorCount, boolean enrolledDuringParticipationPeriod,
-										 String participationPeriod) {
-
-
-		var returnMeasureReport = runEvaluateMeasure("2022-01-01", "2022-12-31", patientId, measureId, "Individual", null);
-
-		for (MeasureReport.MeasureReportGroupPopulationComponent population : returnMeasureReport.getGroupFirstRep()
-			.getPopulation())
-            switch (population.getCode().getCodingFirstRep().getCode()) {
-                case "initial-population" -> assertEquals(initialPopulationCount, population.getCount());
-                case "denominator" -> assertEquals(denominatorCount, population.getCount());
-                case "denominator-exclusion" -> assertEquals(denominatorExclusionCount, population.getCount());
-                case "numerator" -> assertEquals(numeratorCount, population.getCount());
-            }
-
-		Observation enrolledDuringParticipationPeriodObs = null;
-		Observation participationPeriodObs = null;
-		for (Resource r : returnMeasureReport.getContained()) {
-			if (r instanceof Observation o) {
-				if (o.getCode().getText().equals("Enrolled During Participation Period")) {
-					enrolledDuringParticipationPeriodObs = o;
-				} else if (o.getCode().getText().equals("Participation Period")) {
-					participationPeriodObs = o;
-				}
-			}
-		}
-
-		assertNotNull(enrolledDuringParticipationPeriodObs);
-		assertEquals(Boolean.toString(enrolledDuringParticipationPeriod).toLowerCase(),
-			enrolledDuringParticipationPeriodObs.getValueCodeableConcept().getCodingFirstRep().getCode());
-
-		assertNotNull(participationPeriodObs);
-		assertEquals(participationPeriod, participationPeriodObs.getValueCodeableConcept().getCodingFirstRep().getCode());
-	}
-
-	@Test
-	void testBCSEHEDISMY2022() {
-		loadBundle("BCSEHEDISMY2022-bundle.json");
+	void testHedis2022() {
 
 		runWithPatient("BCSEHEDISMY2022", "Patient/Patient-5", 0, 0, 0, 0, false,
 			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
@@ -107,9 +83,7 @@ class MeasureOperationProviderTest extends BaseCrR4TestServer {
 			"Interval[2020-10-01T00:00:00.000, 2022-12-31T23:59:59.999]");
 	}
 
-	@Test
 	void testClientNonPatientBasedMeasureEvaluate() {
-		this.loadBundle("ClientNonPatientBasedMeasureBundle.json");
 
 		var measure = read(new IdType("Measure", "InitialInpatientPopulation"));
 		assertNotNull(measure);
@@ -129,20 +103,14 @@ class MeasureOperationProviderTest extends BaseCrR4TestServer {
 		assertEquals(population.get().getCount(), expectedCount,
 			String.format("expected count for population \"%s\" did not match", populationName));
 	}
-
-	@Test
 	void testMeasureEvaluateMultiVersion() {
-		this.loadBundle("multiversion/EXM124-7.0.000-bundle.json");
-		this.loadBundle("multiversion/EXM124-9.0.000-bundle.json");
 
-		runEvaluateMeasure("2019-01-01", "2020-01-01", "Patient/numer-EXM124", "measure-EXM124-7.0.000", "Individual", null);
-		runEvaluateMeasure("2019-01-01", "2020-01-01", "Patient/numer-EXM124", "measure-EXM124-9.0.000", "Individual", null);
+		assertNotNull(runEvaluateMeasure("2019-01-01", "2020-01-01", "Patient/numer-EXM124", "measure-EXM124-7.0.000", "Individual", null));
+		assertNotNull(runEvaluateMeasure("2019-01-01", "2020-01-01", "Patient/numer-EXM124", "measure-EXM124-9.0.000", "Individual", null));
 
 	}
 
-	@Test
 	void testLargeValuesetMeasure() throws NoSuchElementException {
-		this.loadBundle("largeValueSetMeasureTest-Bundle.json");
 
 		var returnMeasureReport = runEvaluateMeasure("2023-01-01", "2024-01-01", null, "CMSTest", "population", null);
 
@@ -159,5 +127,40 @@ class MeasureOperationProviderTest extends BaseCrR4TestServer {
 			population.get().getCount(),
 			String.format("expected count for population \"%s\" did not match", populationName)
 		);
+	}
+	private void runWithPatient(String measureId, String patientId, int initialPopulationCount, int denominatorCount,
+								int denominatorExclusionCount, int numeratorCount, boolean enrolledDuringParticipationPeriod,
+								String participationPeriod) {
+
+
+		var returnMeasureReport = runEvaluateMeasure("2022-01-01", "2022-12-31", patientId, measureId, "Individual", null);
+
+		for (MeasureReport.MeasureReportGroupPopulationComponent population : returnMeasureReport.getGroupFirstRep()
+			.getPopulation())
+			switch (population.getCode().getCodingFirstRep().getCode()) {
+				case "initial-population" -> assertEquals(initialPopulationCount, population.getCount());
+				case "denominator" -> assertEquals(denominatorCount, population.getCount());
+				case "denominator-exclusion" -> assertEquals(denominatorExclusionCount, population.getCount());
+				case "numerator" -> assertEquals(numeratorCount, population.getCount());
+			}
+
+		Observation enrolledDuringParticipationPeriodObs = null;
+		Observation participationPeriodObs = null;
+		for (Resource r : returnMeasureReport.getContained()) {
+			if (r instanceof Observation o) {
+				if (o.getCode().getText().equals("Enrolled During Participation Period")) {
+					enrolledDuringParticipationPeriodObs = o;
+				} else if (o.getCode().getText().equals("Participation Period")) {
+					participationPeriodObs = o;
+				}
+			}
+		}
+
+		assertNotNull(enrolledDuringParticipationPeriodObs);
+		assertEquals(Boolean.toString(enrolledDuringParticipationPeriod).toLowerCase(),
+			enrolledDuringParticipationPeriodObs.getValueCodeableConcept().getCodingFirstRep().getCode());
+
+		assertNotNull(participationPeriodObs);
+		assertEquals(participationPeriod, participationPeriodObs.getValueCodeableConcept().getCodingFirstRep().getCode());
 	}
 }

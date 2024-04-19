@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
-import org.hibernate.dialect.DatabaseVersion;
 import org.hibernate.dialect.H2Dialect;
+import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
 /**
  * Dialect for H2 database.
@@ -28,12 +28,12 @@ import org.hibernate.dialect.H2Dialect;
  */
 public class HapiFhirH2Dialect extends H2Dialect {
 
-	public HapiFhirH2Dialect(DatabaseVersion theDatabaseVersion) {
-		super(theDatabaseVersion);
+	public HapiFhirH2Dialect() {
+		super();
 	}
 
-	public HapiFhirH2Dialect() {
-		super(DatabaseVersion.make(2, 2, 220));
+	public HapiFhirH2Dialect(DialectResolutionInfo info) {
+		super(info);
 	}
 
 	/**

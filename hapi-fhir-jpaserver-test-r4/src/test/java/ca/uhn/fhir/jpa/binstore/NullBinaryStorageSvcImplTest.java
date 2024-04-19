@@ -12,37 +12,37 @@ public class NullBinaryStorageSvcImplTest {
 	private final NullBinaryStorageSvcImpl mySvc = new NullBinaryStorageSvcImpl();
 
 	@Test
-	public void shouldStoreBlob() {
-		assertFalse(mySvc.shouldStoreBlob(1, new IdType("Patient/2"), "application/json"));
+	public void shouldStoreBinaryContent() {
+		assertFalse(mySvc.shouldStoreBinaryContent(1, new IdType("Patient/2"), "application/json"));
 	}
 
 	@Test
-	public void storeBlob() {
-		assertThrows(UnsupportedOperationException.class, () -> mySvc.storeBlob(null, null, null, null, null));
+	public void storeBinaryContent() {
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.storeBinaryContent(null, null, null, null, null));
 	}
 
 	@Test
-	public void fetchBlobDetails() {
-		assertThrows(UnsupportedOperationException.class, () -> mySvc.fetchBlobDetails(null, null));
+	public void fetchBinaryContentDetails() {
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.fetchBinaryContentDetails(null, null));
 	}
 
 	@Test
-	public void writeBlob() {
-		assertThrows(UnsupportedOperationException.class, () -> mySvc.writeBlob(null, null, null));
+	public void writeBinaryContent() {
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.writeBinaryContent(null, null, null));
 	}
 
 	@Test
-	public void expungeBlob() {
-		assertThrows(UnsupportedOperationException.class, () -> mySvc.expungeBlob(null, null));
+	public void expungeBinaryContent() {
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.expungeBinaryContent(null, null));
 	}
 
 	@Test
-	public void fetchBlob() {
-		assertThrows(UnsupportedOperationException.class, () -> mySvc.fetchBlob(null, null));
+	public void fetchBinaryContent() {
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.fetchBinaryContent(null, null));
 	}
 
 	@Test
-	public void newBlobId() {
-		assertThrows(UnsupportedOperationException.class, () -> mySvc.newBlobId());
+	public void newBinaryContentId() {
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.newBinaryContentId());
 	}
 }

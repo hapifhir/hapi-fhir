@@ -850,8 +850,16 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		return isBlank(url) || "/".equals(url);
 	}
 
+	/**
+	 * Ascertain whether this transaction request contains a nested operations or nested transactions.
+	 * This is done carefully because a bundle can contain a nested PATCH with Parameters, which is supported but
+	 * a non-PATCH nested Parameters resource may be problematic.
+	 *
+	 * @return true if we should reject this reject
+	 */
 	private boolean isInvalidNestedParametersRequest(
 			FhirContext theContext, BundleEntryParts theEntry, RestOperationTypeEnum theOperation) {
+
 		IBaseResource resource = theEntry.getResource();
 		if (resource == null) {
 			return false;
@@ -859,9 +867,10 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 		RuntimeResourceDefinition resourceDefinition = theContext.getResourceDefinition(resource);
 		final boolean isResourceParameters = PARAMETERS.equals(resourceDefinition.getName());
+		final boolean isResourceBundle = BUNDLE.equals(resourceDefinition.getName());
 		final boolean isOperationPatch = theOperation == RestOperationTypeEnum.PATCH;
 
-		return isResourceParameters && !isOperationPatch;
+		return (isResourceParameters && !isOperationPatch) || isResourceBundle;
 	}
 
 	private void setTargetFromResourceId(RequestDetails theRequestDetails, FhirContext ctx, RuleTarget target) {

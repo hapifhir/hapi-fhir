@@ -218,6 +218,8 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 			"-p", "SA"
 		};
 
+		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BINARY_STORAGE_BLOB"));
+		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BINARY_STORAGE"));
 		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_RESOURCE"));
 		assertFalse(JdbcUtils.getTableNames(connectionProperties).contains("HFJ_BLK_EXPORT_JOB"));
 		App.main(args);

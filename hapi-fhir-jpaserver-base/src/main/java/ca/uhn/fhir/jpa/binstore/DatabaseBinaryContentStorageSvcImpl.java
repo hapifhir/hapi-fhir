@@ -41,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -50,7 +51,7 @@ import java.util.Date;
 import java.util.Optional;
 
 @Transactional
-public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
+public class DatabaseBinaryContentStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	private EntityManager myEntityManager;
@@ -61,9 +62,9 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	@Nonnull
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED)
-	public StoredDetails storeBlob(
+	public StoredDetails storeBinaryContent(
 			IIdType theResourceId,
-			String theBlobIdOrNull,
+			String theBinaryContentIdOrNull,
 			String theContentType,
 			InputStream theInputStream,
 			RequestDetails theRequestDetails)
@@ -82,14 +83,20 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 
 		BinaryStorageEntity entity = new BinaryStorageEntity();
 		entity.setResourceId(theResourceId.toUnqualifiedVersionless().getValue());
-		entity.setBlobContentType(theContentType);
+		entity.setContentType(theContentType);
 		entity.setPublished(publishedDate);
 
 		Session session = (Session) myEntityManager.getDelegate();
 		LobHelper lobHelper = session.getLobHelper();
+
 		byte[] loadedStream = IOUtils.toByteArray(countingInputStream);
-		String id = super.provideIdForNewBlob(theBlobIdOrNull, loadedStream, theRequestDetails, theContentType);
-		entity.setBlobId(id);
+		String id = super.provideIdForNewBinaryContent(
+				theBinaryContentIdOrNull, loadedStream, theRequestDetails, theContentType);
+
+		entity.setContentId(id);
+		entity.setStorageContentBin(loadedStream);
+
+		// TODO: remove writing Blob in a future release
 		Blob dataBlob = lobHelper.createBlob(loadedStream);
 		entity.setBlob(dataBlob);
 
@@ -103,7 +110,7 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 		myEntityManager.persist(entity);
 
 		return new StoredDetails()
-				.setBlobId(id)
+				.setBinaryContentId(id)
 				.setBytes(bytes)
 				.setPublished(publishedDate)
 				.setHash(hash)
@@ -111,68 +118,98 @@ public class DatabaseBlobBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	}
 
 	@Override
-	public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) {
+	public StoredDetails fetchBinaryContentDetails(IIdType theResourceId, String theBinaryContentId) {
 
 		Optional<BinaryStorageEntity> entityOpt = myBinaryStorageEntityDao.findByIdAndResourceId(
-				theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
+				theBinaryContentId, theResourceId.toUnqualifiedVersionless().getValue());
 		if (entityOpt.isEmpty()) {
 			return null;
 		}
 
 		BinaryStorageEntity entity = entityOpt.get();
 		return new StoredDetails()
-				.setBlobId(theBlobId)
-				.setContentType(entity.getBlobContentType())
+				.setBinaryContentId(theBinaryContentId)
+				.setContentType(entity.getContentType())
 				.setHash(entity.getHash())
 				.setPublished(entity.getPublished())
 				.setBytes(entity.getSize());
 	}
 
 	@Override
-	public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException {
+	public boolean writeBinaryContent(IIdType theResourceId, String theBinaryContentId, OutputStream theOutputStream)
+			throws IOException {
 		Optional<BinaryStorageEntity> entityOpt = myBinaryStorageEntityDao.findByIdAndResourceId(
-				theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
+				theBinaryContentId, theResourceId.toUnqualifiedVersionless().getValue());
 		if (entityOpt.isEmpty()) {
 			return false;
 		}
 
-		copyBlobToOutputStream(theOutputStream, entityOpt.get());
+		copyBinaryContentToOutputStream(theOutputStream, entityOpt.get());
 
 		return true;
 	}
 
 	@Override
-	public void expungeBlob(IIdType theResourceId, String theBlobId) {
+	public void expungeBinaryContent(IIdType theResourceId, String theBinaryContentId) {
 		Optional<BinaryStorageEntity> entityOpt = myBinaryStorageEntityDao.findByIdAndResourceId(
-				theBlobId, theResourceId.toUnqualifiedVersionless().getValue());
+				theBinaryContentId, theResourceId.toUnqualifiedVersionless().getValue());
 		entityOpt.ifPresent(
-				theBinaryStorageEntity -> myBinaryStorageEntityDao.deleteByPid(theBinaryStorageEntity.getBlobId()));
+				theBinaryStorageEntity -> myBinaryStorageEntityDao.deleteByPid(theBinaryStorageEntity.getContentId()));
 	}
 
 	@Override
-	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) throws IOException {
+	public byte[] fetchBinaryContent(IIdType theResourceId, String theBinaryContentId) throws IOException {
 		BinaryStorageEntity entityOpt = myBinaryStorageEntityDao
 				.findByIdAndResourceId(
-						theBlobId, theResourceId.toUnqualifiedVersionless().getValue())
+						theBinaryContentId,
+						theResourceId.toUnqualifiedVersionless().getValue())
 				.orElseThrow(() -> new ResourceNotFoundException(
-						"Unknown blob ID: " + theBlobId + " for resource ID " + theResourceId));
+						"Unknown BinaryContent ID: " + theBinaryContentId + " for resource ID " + theResourceId));
 
-		return copyBlobToByteArray(entityOpt);
+		return copyBinaryContentToByteArray(entityOpt);
 	}
 
-	void copyBlobToOutputStream(OutputStream theOutputStream, BinaryStorageEntity theEntity) throws IOException {
-		try (InputStream inputStream = theEntity.getBlob().getBinaryStream()) {
+	void copyBinaryContentToOutputStream(OutputStream theOutputStream, BinaryStorageEntity theEntity)
+			throws IOException {
+
+		try (InputStream inputStream = getBinaryContent(theEntity)) {
 			IOUtils.copy(inputStream, theOutputStream);
 		} catch (SQLException e) {
 			throw new IOException(Msg.code(1341) + e);
 		}
 	}
 
-	byte[] copyBlobToByteArray(BinaryStorageEntity theEntity) throws IOException {
-		try {
-			return ByteStreams.toByteArray(theEntity.getBlob().getBinaryStream());
+	byte[] copyBinaryContentToByteArray(BinaryStorageEntity theEntity) throws IOException {
+		byte[] retVal;
+
+		try (InputStream inputStream = getBinaryContent(theEntity)) {
+			retVal = ByteStreams.toByteArray(inputStream);
 		} catch (SQLException e) {
 			throw new IOException(Msg.code(1342) + e);
 		}
+
+		return retVal;
+	}
+
+	/**
+	 *
+	 * The caller is responsible for closing the returned stream.
+	 *
+	 * @param theEntity
+	 * @return
+	 * @throws SQLException
+	 */
+	private InputStream getBinaryContent(BinaryStorageEntity theEntity) throws SQLException {
+		InputStream retVal;
+
+		if (theEntity.hasStorageContent()) {
+			retVal = new ByteArrayInputStream(theEntity.getStorageContentBin());
+		} else if (theEntity.hasBlob()) {
+			retVal = theEntity.getBlob().getBinaryStream();
+		} else {
+			retVal = new ByteArrayInputStream(new byte[0]);
+		}
+
+		return retVal;
 	}
 }

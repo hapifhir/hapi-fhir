@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.model.dialect;
 
-import org.hibernate.dialect.DatabaseVersion;
 import org.hibernate.dialect.SQLServerDialect;
+import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
 
 /**
  * Dialect for MS SQL Server database.
@@ -28,12 +28,12 @@ import org.hibernate.dialect.SQLServerDialect;
  */
 public class HapiFhirSQLServerDialect extends SQLServerDialect {
 
-	public HapiFhirSQLServerDialect(DatabaseVersion theDatabaseVersion) {
-		super(theDatabaseVersion);
+	public HapiFhirSQLServerDialect() {
+		super();
 	}
 
-	public HapiFhirSQLServerDialect() {
-		super(DatabaseVersion.make(11));
+	public HapiFhirSQLServerDialect(DialectResolutionInfo info) {
+		super(info);
 	}
 
 	/**
