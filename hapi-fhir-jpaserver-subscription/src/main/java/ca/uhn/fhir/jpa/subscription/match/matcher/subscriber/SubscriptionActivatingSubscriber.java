@@ -126,7 +126,9 @@ public class SubscriptionActivatingSubscriber implements MessageHandler {
 
 		// Only activate supported subscriptions
 		if (subscriptionChannelType == null
-				|| !mySubscriptionSettings.getSupportedSubscriptionTypes().contains(subscriptionChannelType.toCanonical())) {
+				|| !mySubscriptionSettings
+						.getSupportedSubscriptionTypes()
+						.contains(subscriptionChannelType.toCanonical())) {
 			return false;
 		}
 

@@ -23,7 +23,6 @@ package ca.uhn.fhir.jpa.subscription.submit.svc;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessage;
 import ca.uhn.fhir.jpa.model.entity.IPersistedResourceModifiedMessagePK;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -211,7 +210,8 @@ public class ResourceModifiedSubmitterSvc implements IResourceModifiedConsumer, 
 
 	private ChannelProducerSettings getChannelProducerSettings() {
 		ChannelProducerSettings channelProducerSettings = new ChannelProducerSettings();
-		channelProducerSettings.setQualifyChannelName(mySubscriptionSettings.isQualifySubscriptionMatchingChannelName());
+		channelProducerSettings.setQualifyChannelName(
+				mySubscriptionSettings.isQualifySubscriptionMatchingChannelName());
 		return channelProducerSettings;
 	}
 

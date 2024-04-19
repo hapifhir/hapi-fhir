@@ -57,7 +57,9 @@ public class MdmSubmitterInterceptorLoader {
 			return;
 		}
 
-		if (!mySubscriptionSettings.getSupportedSubscriptionTypes().contains(Subscription.SubscriptionChannelType.MESSAGE)) {
+		if (!mySubscriptionSettings
+				.getSupportedSubscriptionTypes()
+				.contains(Subscription.SubscriptionChannelType.MESSAGE)) {
 			throw new ConfigurationException(
 					Msg.code(2421) + "MDM requires Message Subscriptions to be enabled in the Storage Settings");
 		}

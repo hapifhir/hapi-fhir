@@ -92,7 +92,8 @@ public class MatchingQueueSubscriberLoader {
 
 	private ChannelConsumerSettings getChannelConsumerSettings() {
 		ChannelConsumerSettings channelConsumerSettings = new ChannelConsumerSettings();
-		channelConsumerSettings.setQualifyChannelName(mySubscriptionSettings.isQualifySubscriptionMatchingChannelName());
+		channelConsumerSettings.setQualifyChannelName(
+				mySubscriptionSettings.isQualifySubscriptionMatchingChannelName());
 		return channelConsumerSettings;
 	}
 

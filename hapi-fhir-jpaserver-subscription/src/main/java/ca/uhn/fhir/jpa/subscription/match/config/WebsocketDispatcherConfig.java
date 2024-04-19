@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.config;
 
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.match.deliver.websocket.SubscriptionWebsocketHandler;
 import ca.uhn.fhir.jpa.subscription.match.deliver.websocket.WebsocketConnectionValidator;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSettings;
