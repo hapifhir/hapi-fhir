@@ -301,9 +301,10 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		for (IValidationSupport.CodeValidationIssue codeValidationIssue : codeValidationIssues) {
 
 			CodeableConcept codeableConcept = new CodeableConcept().setText(codeValidationIssue.getMessage());
-			codeableConcept.addCoding("http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
-				getIssueCodingFromCodeValidationIssue(codeValidationIssue),
-				null);
+			codeableConcept.addCoding(
+					"http://hl7.org/fhir/tools/CodeSystem/tx-issue-type",
+					getIssueCodingFromCodeValidationIssue(codeValidationIssue),
+					null);
 
 			OperationOutcome.OperationOutcomeIssueComponent issue =
 					new OperationOutcome.OperationOutcomeIssueComponent()
@@ -830,13 +831,14 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 						"Coding has no system. A code with no system has no defined meaning, and it cannot be validated. A system should be provided";
 				OperationOutcome.OperationOutcomeIssueComponent issue =
 						new OperationOutcome.OperationOutcomeIssueComponent()
-								.setSeverity(OperationOutcome.IssueSeverity.ERROR)
+								.setSeverity(OperationOutcome.IssueSeverity.WARNING)
 								.setCode(OperationOutcome.IssueType.NOTFOUND)
 								.setDiagnostics(message)
 								.setDetails(new CodeableConcept().setText(message));
 
-				return new ValidationResult(
-						ValidationMessage.IssueSeverity.ERROR, null, Collections.singletonList(issue));
+				//return new ValidationResult(
+				//		ValidationMessage.IssueSeverity.ERROR, null, Collections.singletonList(issue));
+				issues.add(issue);
 			}
 			ValidationResult retVal = validateCode(theOptions, next, theVs);
 			if (retVal.isOk()) {
@@ -1013,5 +1015,10 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	@Override
 	public Boolean subsumes(ValidationOptions optionsArg, Coding parent, Coding child) {
 		throw new UnsupportedOperationException(Msg.code(2489));
+	}
+
+	@Override
+	public boolean isServerSideSystem(String url) {
+		return false;
 	}
 }

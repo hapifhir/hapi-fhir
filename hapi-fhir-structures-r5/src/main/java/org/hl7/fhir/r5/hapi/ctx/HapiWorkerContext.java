@@ -639,4 +639,9 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	public Boolean subsumes(ValidationOptions optionsArg, Coding parent, Coding child) {
 		throw new UnsupportedOperationException(Msg.code(2488));
 	}
+
+	@Override
+	public boolean isServerSideSystem(String url) {
+		return false;
+	}
 }

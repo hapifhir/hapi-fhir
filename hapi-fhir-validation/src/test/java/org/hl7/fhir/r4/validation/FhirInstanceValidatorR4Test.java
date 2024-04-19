@@ -1760,6 +1760,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		input.setStatus(ObservationStatus.AMENDED);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234").setDisplay("FOO");
+		/*
 		input.setValue(new Quantity(
 			null,
 			123,
@@ -1767,6 +1768,17 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 			"blah",
 			"blah"
 		));
+*/
+
+
+		input.setValue(new Quantity(
+			null,
+			123,
+			"http://unitsofmeasure.org",
+			"MG/DL",
+			"MG/DL"
+		));
+
 		String inputString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ourLog.info("Results:\n{}", inputString);
 
@@ -1811,7 +1823,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		final ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		final List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
-		assertFalse(output.isSuccessful());;
+		assertTrue(errors.isEmpty());
 	}
 
 	@Test

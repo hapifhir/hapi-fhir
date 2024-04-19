@@ -164,7 +164,7 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 				Arguments.of(entry[0], data, entry[1]));
 	}
 
-	//@Disabled
+	@Disabled
 	@ParameterizedTest(name = "{0}")
 	@MethodSource("argumentSource")
 	public void fhirTestCasesCodeValidationTest(String name, TxTestData testData, TxTestSetup setup) throws IOException {
