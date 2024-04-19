@@ -20,11 +20,11 @@
 package ca.uhn.fhir.jpa.subscription.match.deliver.email;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.match.deliver.BaseSubscriptionDeliverySubscriber;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSettings;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.StringUtils;
@@ -44,7 +44,7 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 	private Logger ourLog = LoggerFactory.getLogger(SubscriptionDeliveringEmailSubscriber.class);
 
 	@Autowired
-	private StorageSettings myStorageSettings;
+	private SubscriptionSettings mySubscriptionSettings;
 
 	@Autowired
 	private FhirContext myCtx;
@@ -80,7 +80,7 @@ public class SubscriptionDeliveringEmailSubscriber extends BaseSubscriptionDeliv
 		}
 
 		String from = processEmailAddressUri(
-				defaultString(subscription.getEmailDetails().getFrom(), myStorageSettings.getEmailFromAddress()));
+				defaultString(subscription.getEmailDetails().getFrom(), mySubscriptionSettings.getEmailFromAddress()));
 		String subjectTemplate =
 				defaultString(subscription.getEmailDetails().getSubjectTemplate(), provideDefaultSubjectTemplate());
 

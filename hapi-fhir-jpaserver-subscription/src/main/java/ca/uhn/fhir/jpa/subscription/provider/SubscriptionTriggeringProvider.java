@@ -43,6 +43,8 @@ public class SubscriptionTriggeringProvider implements IResourceProvider {
 	@Autowired
 	private ISubscriptionTriggeringSvc mySubscriptionTriggeringSvc;
 
+	public SubscriptionTriggeringProvider() {}
+
 	@Operation(name = JpaConstants.OPERATION_TRIGGER_SUBSCRIPTION)
 	public IBaseParameters triggerSubscription(
 			ca.uhn.fhir.rest.api.server.RequestDetails theRequestDetails,

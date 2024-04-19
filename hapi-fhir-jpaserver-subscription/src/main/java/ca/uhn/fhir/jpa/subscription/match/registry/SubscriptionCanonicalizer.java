@@ -29,6 +29,7 @@ import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
+import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSettings;
 import ca.uhn.fhir.model.api.BasePrimitive;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.dstu2.resource.Subscription;
@@ -69,12 +70,12 @@ public class SubscriptionCanonicalizer {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionCanonicalizer.class);
 
 	final FhirContext myFhirContext;
-	private final StorageSettings myStorageSettings;
+	private final SubscriptionSettings mySubscriptionSettings;
 
 	@Autowired
-	public SubscriptionCanonicalizer(FhirContext theFhirContext, StorageSettings theStorageSettings) {
+	public SubscriptionCanonicalizer(FhirContext theFhirContext, SubscriptionSettings theSubscriptionSettings) {
 		myFhirContext = theFhirContext;
-		myStorageSettings = theStorageSettings;
+		mySubscriptionSettings = theSubscriptionSettings;
 	}
 
 	// TODO:  LD:  remove this constructor once all callers call the 2 arg constructor above
@@ -85,7 +86,7 @@ public class SubscriptionCanonicalizer {
 	@Deprecated
 	public SubscriptionCanonicalizer(FhirContext theFhirContext) {
 		myFhirContext = theFhirContext;
-		myStorageSettings = new StorageSettings();
+		mySubscriptionSettings = new SubscriptionSettings();
 	}
 
 	public CanonicalSubscription canonicalize(IBaseResource theSubscription) {
@@ -782,7 +783,7 @@ public class SubscriptionCanonicalizer {
 	}
 
 	private void handleCrossPartition(IBaseResource theSubscription, CanonicalSubscription retVal) {
-		if (myStorageSettings.isCrossPartitionSubscriptionEnabled()) {
+		if (mySubscriptionSettings.isCrossPartitionSubscriptionEnabled()) {
 			retVal.setCrossPartitionEnabled(true);
 		} else {
 			retVal.setCrossPartitionEnabled(SubscriptionUtil.isCrossPartition(theSubscription));

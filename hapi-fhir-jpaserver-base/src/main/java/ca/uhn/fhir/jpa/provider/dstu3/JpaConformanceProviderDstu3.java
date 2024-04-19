@@ -176,17 +176,6 @@ public class JpaConformanceProviderDstu3 extends org.hl7.fhir.dstu3.hapi.rest.se
 
 		massage(retVal);
 
-		if (myStorageSettings
-				.getSupportedSubscriptionTypes()
-				.contains(org.hl7.fhir.dstu2.model.Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
-				Extension websocketExtension = new Extension();
-				websocketExtension.setUrl(Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL);
-				websocketExtension.setValue(new UriType(myStorageSettings.getWebsocketContextPath()));
-				retVal.getRestFirstRep().addExtension(websocketExtension);
-			}
-		}
-
 		retVal.getImplementation().setDescription(myImplementationDescription);
 		myCachedValue = retVal;
 		return retVal;

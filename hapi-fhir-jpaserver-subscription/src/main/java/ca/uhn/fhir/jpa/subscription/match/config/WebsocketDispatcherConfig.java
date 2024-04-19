@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.subscription.match.config;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.match.deliver.websocket.SubscriptionWebsocketHandler;
 import ca.uhn.fhir.jpa.subscription.match.deliver.websocket.WebsocketConnectionValidator;
+import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,7 +39,7 @@ import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
 public class WebsocketDispatcherConfig implements WebSocketConfigurer {
 
 	@Autowired
-	StorageSettings myStorageSettings;
+	SubscriptionSettings mySubscriptionSettings;
 
 	@Bean
 	public WebsocketConnectionValidator websocketConnectionValidator() {
@@ -48,7 +49,7 @@ public class WebsocketDispatcherConfig implements WebSocketConfigurer {
 	@Override
 	public void registerWebSocketHandlers(WebSocketHandlerRegistry theRegistry) {
 		theRegistry
-				.addHandler(subscriptionWebSocketHandler(), myStorageSettings.getWebsocketContextPath())
+				.addHandler(subscriptionWebSocketHandler(), mySubscriptionSettings.getWebsocketContextPath())
 				.setAllowedOrigins("*");
 	}
 

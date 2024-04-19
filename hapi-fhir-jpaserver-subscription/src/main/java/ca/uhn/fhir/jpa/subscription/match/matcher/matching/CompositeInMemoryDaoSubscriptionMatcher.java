@@ -19,10 +19,10 @@
  */
 package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class CompositeInMemoryDaoSubscriptionMatcher implements ISubscriptionMat
 	private final InMemorySubscriptionMatcher myInMemorySubscriptionMatcher;
 
 	@Autowired
-	StorageSettings myStorageSettings;
+	SubscriptionSettings mySubscriptionSettings;
 
 	public CompositeInMemoryDaoSubscriptionMatcher(
 			DaoSubscriptionMatcher theDaoSubscriptionMatcher,
@@ -46,7 +46,7 @@ public class CompositeInMemoryDaoSubscriptionMatcher implements ISubscriptionMat
 	@Override
 	public InMemoryMatchResult match(CanonicalSubscription theSubscription, ResourceModifiedMessage theMsg) {
 		InMemoryMatchResult result;
-		if (myStorageSettings.isEnableInMemorySubscriptionMatching()) {
+		if (mySubscriptionSettings.isEnableInMemorySubscriptionMatching()) {
 			result = myInMemorySubscriptionMatcher.match(theSubscription, theMsg);
 			if (result.supported()) {
 				result.setInMemory(true);

@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor;
 
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicValidatingInterceptor;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.PostConstruct;
@@ -44,7 +44,7 @@ public class SubscriptionSubmitInterceptorLoader {
 	private SubscriptionTopicValidatingInterceptor mySubscriptionTopicValidatingInterceptor;
 
 	@Autowired
-	private StorageSettings myStorageSettings;
+	private SubscriptionSettings myStorageSettings;
 
 	@Autowired
 	private IInterceptorService myInterceptorRegistry;

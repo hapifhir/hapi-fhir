@@ -135,17 +135,6 @@ public class JpaConformanceProviderDstu2 extends ServerConformanceProvider {
 			}
 		}
 
-		if (myStorageSettings
-				.getSupportedSubscriptionTypes()
-				.contains(Subscription.SubscriptionChannelType.WEBSOCKET)) {
-			if (isNotBlank(myStorageSettings.getWebsocketContextPath())) {
-				ExtensionDt websocketExtension = new ExtensionDt();
-				websocketExtension.setUrl(Constants.CAPABILITYSTATEMENT_WEBSOCKET_URL);
-				websocketExtension.setValue(new UriDt(myStorageSettings.getWebsocketContextPath()));
-				retVal.getRestFirstRep().addUndeclaredExtension(websocketExtension);
-			}
-		}
-
 		if (isNotBlank(myImplementationDescription)) {
 			retVal.getImplementation().setDescription(myImplementationDescription);
 		}
