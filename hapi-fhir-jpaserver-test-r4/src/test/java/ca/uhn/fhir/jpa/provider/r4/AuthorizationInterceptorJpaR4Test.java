@@ -1487,7 +1487,13 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		validateDeleteConditionalByUrlIsForbidden("Patient?_expunge=true&_id=" + id.getIdPart());
 	}
 
-	private void createPatientCompartmentRule(IIdType id) {
+	@Test
+	public void testDeleteExpunge_noIdTypePermission_forbidden() {
+		createDeleteByTypeRule("Observation");
+		validateDeleteConditionalByUrlIsForbidden("Patient?_expunge=true");
+	}
+
+	private void createPatientCompartmentRule(IIdType theId) {
 		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1495,7 +1501,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 					.delete()
 					.onExpunge()
 					.allResources()
-					.inCompartment("Patient", id)
+					.inCompartment("Patient", theId)
 					.andThen().build();
 			}
 		});
@@ -1518,10 +1524,19 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	public void testDeleteExpunge_compartmentPermissionMultipleIds_forbidden() {
+	public void testDeleteExpunge_urlWithSearchParameterCompartmentPermission_forbidden() {
+		IIdType id = createPatient();
+		IdDt compartmentId = new IdDt();
+		compartmentId.setParts(null, "Patient", "123", null);
+		createPatientCompartmentRule(compartmentId);
+		validateDeleteConditionalByUrlIsForbidden("Observation?_expunge=true&patient=" + id.getIdPart());
+	}
+
+	@Test
+	public void testDeleteExpunge_multipleIdsCompartmentPermission_forbidden() {
 		IIdType id = createPatient();
 		createPatientCompartmentRule(id);
-		validateDeleteConditionalByUrlIsForbidden("Patient?_expunge=true&_id=" + id.getIdPart()+"_id=123");
+		validateDeleteConditionalByUrlIsForbidden("Patient?_expunge=true&_id=" + id.getIdPart() + "_id=123");
 	}
 
 	private void createTypeInPatientCompartmentRule(IIdType theId) {

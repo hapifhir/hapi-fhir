@@ -277,6 +277,10 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 									extractResourceIdsFromRequestParameters(theRequestDetails, resourceIds);
 						}
 
+						if (myClassifierType == ClassifierTypeEnum.ANY_ID) {
+							target.resourceType = theRequestDetails.getResourceName();
+						}
+
 						break;
 					}
 					if (myAppliesToDeleteCascade != (thePointcut == Pointcut.STORAGE_CASCADE_DELETE)) {
