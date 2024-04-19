@@ -37,6 +37,7 @@ public class SubscriptionSettings {
 	private boolean myQualifySubscriptionMatchingChannelName = true;
 	private boolean myCrossPartitionSubscriptionEnabled = true;
 	private boolean myEnableInMemorySubscriptionMatching = true;
+	private boolean myTriggerSubscriptionsForNonVersioningChanges;
 
 	/**
 	 * @since 6.8.0
@@ -217,5 +218,25 @@ public class SubscriptionSettings {
 	 */
 	public void setEnableInMemorySubscriptionMatching(boolean theEnableInMemorySubscriptionMatching) {
 		myEnableInMemorySubscriptionMatching = theEnableInMemorySubscriptionMatching;
+	}
+
+	/**
+	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
+	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
+	 *
+	 * @since 5.5.0
+	 */
+	public boolean isTriggerSubscriptionsForNonVersioningChanges() {
+		return myTriggerSubscriptionsForNonVersioningChanges;
+	}
+
+	/**
+	 * If set to true (default is false) then subscriptions will be triggered for resource updates even if they
+	 * do not trigger a new version (e.g. $meta-add and $meta-delete).
+	 *
+	 * @since 5.5.0
+	 */
+	public void setTriggerSubscriptionsForNonVersioningChanges(boolean theTriggerSubscriptionsForNonVersioningChanges) {
+		myTriggerSubscriptionsForNonVersioningChanges = theTriggerSubscriptionsForNonVersioningChanges;
 	}
 }
