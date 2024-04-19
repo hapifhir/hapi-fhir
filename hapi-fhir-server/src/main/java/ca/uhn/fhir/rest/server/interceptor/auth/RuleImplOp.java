@@ -879,7 +879,6 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	 */
 	private boolean isInvalidNestedParametersRequest(
 			FhirContext theContext, BundleEntryParts theEntry, RestOperationTypeEnum theOperation) {
-
 		IBaseResource resource = theEntry.getResource();
 		if (resource == null) {
 			return false;
@@ -887,10 +886,9 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 
 		RuntimeResourceDefinition resourceDefinition = theContext.getResourceDefinition(resource);
 		final boolean isResourceParameters = PARAMETERS.equals(resourceDefinition.getName());
-		final boolean isResourceBundle = BUNDLE.equals(resourceDefinition.getName());
 		final boolean isOperationPatch = theOperation == RestOperationTypeEnum.PATCH;
 
-		return (isResourceParameters && !isOperationPatch) || isResourceBundle;
+		return (isResourceParameters && !isOperationPatch);
 	}
 
 	private void setTargetFromResourceId(RequestDetails theRequestDetails, FhirContext ctx, RuleTarget target) {
