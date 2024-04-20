@@ -31,6 +31,8 @@ import ca.uhn.fhir.util.ReflectionUtil;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.instrumentation.annotations.WithSpan;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
@@ -547,7 +549,7 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 
 			// Invoke the method
 			try {
-				return myMethod.invoke(getInterceptor(), args);
+				return invokeMethod(args);
 			} catch (InvocationTargetException e) {
 				Throwable targetException = e.getTargetException();
 				if (myPointcut.isShouldLogAndSwallowException(targetException)) {
@@ -565,6 +567,19 @@ public abstract class BaseInterceptorService<POINTCUT extends Enum<POINTCUT> & I
 			} catch (Exception e) {
 				throw new InternalErrorException(Msg.code(1911) + e);
 			}
+		}
+
+		@WithSpan("hapifhir.interceptor")
+		private Object invokeMethod(Object[] args) throws InvocationTargetException, IllegalAccessException {
+			// Add attributes to the opentelemetry span
+			Span currentSpan = Span.current();
+			currentSpan.setAttribute("hapifhir.interceptor.pointcut_name", myPointcut.name());
+			currentSpan.setAttribute(
+					"hapifhir.interceptor.class_name",
+					myMethod.getDeclaringClass().getName());
+			currentSpan.setAttribute("hapifhir.interceptor.method_name", myMethod.getName());
+
+			return myMethod.invoke(getInterceptor(), args);
 		}
 	}
 
