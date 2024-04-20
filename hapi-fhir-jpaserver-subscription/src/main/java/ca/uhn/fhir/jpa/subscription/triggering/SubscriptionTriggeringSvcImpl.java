@@ -356,7 +356,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		List<? extends IResourcePersistentId<?>> allResourceIds;
 		RequestPartitionId requestPartitionId = theJobDetails.getRequestPartitionId();
 		try {
-			allResourceIds = mySearchSupportSvc.getResources(theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, requestPartitionId);
+			allResourceIds = mySearchSupportSvc.getResources(
+					theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, requestPartitionId);
 		} catch (ResourceGoneException e) {
 			ourLog.trace("Search has expired, submission is done.");
 			allResourceIds = new ArrayList<>();
@@ -371,7 +372,8 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				String resourceType = myFhirContext.getResourceType(theJobDetails.getCurrentSearchResourceType());
 				RuntimeResourceDefinition resourceDef =
 						myFhirContext.getResourceDefinition(theJobDetails.getCurrentSearchResourceType());
-				ISearchBuilder searchBuilder = mySearchSupportSvc.getSearchBuilder(resourceDao, resourceType, resourceDef.getImplementingClass());
+				ISearchBuilder searchBuilder = mySearchSupportSvc.getSearchBuilder(
+						resourceDao, resourceType, resourceDef.getImplementingClass());
 				List<IBaseResource> listToPopulate = new ArrayList<>();
 
 				myTransactionService.withRequest(null).execute(() -> {

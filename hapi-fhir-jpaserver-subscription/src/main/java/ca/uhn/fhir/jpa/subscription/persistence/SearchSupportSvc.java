@@ -25,29 +25,27 @@ public class SearchSupportSvc {
 	@Autowired
 	private ISearchCoordinatorSvc<? extends IResourcePersistentId<?>> mySearchCoordinatorSvc;
 
-
-	public IBundleProvider search(IFhirResourceDao<?> callingDao, SearchParameterMap params, String resourceType, RequestPartitionId thePartitionId) {
+	public IBundleProvider search(
+			IFhirResourceDao<?> callingDao,
+			SearchParameterMap params,
+			String resourceType,
+			RequestPartitionId thePartitionId) {
 		return mySearchCoordinatorSvc.registerSearch(
-			callingDao,
-			params,
-			resourceType,
-			new CacheControlDirective(),
-			null,
-			thePartitionId);
+				callingDao, params, resourceType, new CacheControlDirective(), null, thePartitionId);
 	}
 
-	public List<? extends IResourcePersistentId<?>> getResources(String theCurrentSearchUuid, int fromIndex, int toIndex, RequestPartitionId requestPartitionId) {
-		return mySearchCoordinatorSvc.getResources(
-			theCurrentSearchUuid, fromIndex, toIndex, null, requestPartitionId);
+	public List<? extends IResourcePersistentId<?>> getResources(
+			String theCurrentSearchUuid, int fromIndex, int toIndex, RequestPartitionId requestPartitionId) {
+		return mySearchCoordinatorSvc.getResources(theCurrentSearchUuid, fromIndex, toIndex, null, requestPartitionId);
 	}
 
-	public ISearchBuilder getSearchBuilder(IFhirResourceDao<?> resourceDao, String resourceType, Class<? extends IBaseResource> theResourceClass) {
-		return mySearchBuilderFactory.newSearchBuilder(
-			resourceDao, resourceType, theResourceClass);
+	public ISearchBuilder getSearchBuilder(
+			IFhirResourceDao<?> resourceDao, String resourceType, Class<? extends IBaseResource> theResourceClass) {
+		return mySearchBuilderFactory.newSearchBuilder(resourceDao, resourceType, theResourceClass);
 	}
 
-
-	public IBundleProvider search(SearchParameterMap params, String theResourceName, RequestPartitionId thePartitionId) {
+	public IBundleProvider search(
+			SearchParameterMap params, String theResourceName, RequestPartitionId thePartitionId) {
 		return mySearchService.executeQuery(theResourceName, params, thePartitionId);
 	}
 }
