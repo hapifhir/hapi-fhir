@@ -25,10 +25,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
-import ca.uhn.fhir.jpa.api.svc.ISearchSvc;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
-import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -40,8 +37,8 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.IResourceModifiedConsumer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.subscription.persistence.SearchSupportSvc;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSettings;
-import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -93,6 +90,8 @@ import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+// FIXME split out search stuff
+
 public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc, IHasScheduledJobs {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionTriggeringSvcImpl.class);
 	private static final int DEFAULT_MAX_SUBMIT = 10000;
@@ -108,9 +107,6 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	private SubscriptionSettings mySubscriptionSettings;
 
 	@Autowired
-	private ISearchCoordinatorSvc<? extends IResourcePersistentId<?>> mySearchCoordinatorSvc;
-
-	@Autowired
 	private MatchUrlService myMatchUrlService;
 
 	@Autowired
@@ -123,16 +119,13 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 	private ExecutorService myExecutorService;
 
 	@Autowired
-	private ISearchSvc mySearchService;
-
-	@Autowired
 	IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@Autowired
-	private SearchBuilderFactory mySearchBuilderFactory;
+	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
 
 	@Autowired
-	private SubscriptionCanonicalizer mySubscriptionCanonicalizer;
+	private SearchSupportSvc mySearchSupportSvc;
 
 	public SubscriptionTriggeringSvcImpl() {}
 
@@ -300,13 +293,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 			IFhirResourceDao<?> callingDao = myDaoRegistry.getResourceDao(resourceType);
 
 			ourLog.info("Triggering job[{}] is starting a search for {}", theJobDetails.getJobId(), nextSearchUrl);
-			search = mySearchCoordinatorSvc.registerSearch(
-					callingDao,
-					params,
-					resourceType,
-					new CacheControlDirective(),
-					null,
-					theJobDetails.getRequestPartitionId());
+			search = mySearchSupportSvc.search(callingDao, params, resourceType, theJobDetails.getRequestPartitionId());
 
 			if (isNull(search.getUuid())) {
 				// we don't have a search uuid i.e. we're setting up for synchronous processing
@@ -369,8 +356,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 		List<? extends IResourcePersistentId<?>> allResourceIds;
 		RequestPartitionId requestPartitionId = theJobDetails.getRequestPartitionId();
 		try {
-			allResourceIds = mySearchCoordinatorSvc.getResources(
-					theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, null, requestPartitionId);
+			allResourceIds = mySearchSupportSvc.getResources(theJobDetails.getCurrentSearchUuid(), fromIndex, toIndex, requestPartitionId);
 		} catch (ResourceGoneException e) {
 			ourLog.trace("Search has expired, submission is done.");
 			allResourceIds = new ArrayList<>();
@@ -385,8 +371,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 				String resourceType = myFhirContext.getResourceType(theJobDetails.getCurrentSearchResourceType());
 				RuntimeResourceDefinition resourceDef =
 						myFhirContext.getResourceDefinition(theJobDetails.getCurrentSearchResourceType());
-				ISearchBuilder searchBuilder = mySearchBuilderFactory.newSearchBuilder(
-						resourceDao, resourceType, resourceDef.getImplementingClass());
+				ISearchBuilder searchBuilder = mySearchSupportSvc.getSearchBuilder(resourceDao, resourceType, resourceDef.getImplementingClass());
 				List<IBaseResource> listToPopulate = new ArrayList<>();
 
 				myTransactionService.withRequest(null).execute(() -> {
@@ -478,7 +463,7 @@ public class SubscriptionTriggeringSvcImpl implements ISubscriptionTriggeringSvc
 					toIndex,
 					offset);
 
-			search = mySearchService.executeQuery(resourceDef.getName(), params, theJobDetails.getRequestPartitionId());
+			search = mySearchSupportSvc.search(params, resourceDef.getName(), theJobDetails.getRequestPartitionId());
 			allCurrentResources = search.getResources(0, submittableCount);
 		}
 

@@ -149,6 +149,7 @@ import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.sp.ISearchParamPresenceSvc;
 import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.jpa.subscription.ResourceModifiedMessagePersistenceSvcImpl;
+import ca.uhn.fhir.jpa.subscription.persistence.SearchSupportSvc;
 import ca.uhn.fhir.jpa.term.TermCodeSystemStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermConceptMappingSvcImpl;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
@@ -285,6 +286,11 @@ public class JpaConfig {
 		b.setPoolSize(5);
 		b.afterPropertiesSet();
 		return b;
+	}
+
+	@Bean
+	public SearchSupportSvc searchSupportSvc() {
+		return new SearchSupportSvc();
 	}
 
 	@Bean
