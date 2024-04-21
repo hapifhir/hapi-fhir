@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.subscription.resthook;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
+import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.test.util.StoppableSubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicDispatcher;
@@ -86,7 +87,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		ourLog.info("@AfterEach");
 		myStoppableSubscriptionDeliveringRestHookSubscriber.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
-		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(new JpaStorageSettings().isTriggerSubscriptionsForNonVersioningChanges());
+		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
 	}
 
 	@Test
@@ -406,7 +407,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 	@Test
 	public void testRestHookSubscriptionMetaAddDoesTriggerNewDeliveryIfConfiguredToDoSo() throws Exception {
-		myStorageSettings.setTriggerSubscriptionsForNonVersioningChanges(true);
+		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(true);
 
 		String payload = "application/fhir+json";
 
@@ -534,7 +535,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		idElement = ourObservationProvider.getResourceUpdates().get(1).getIdElement();
 		assertEquals(observation2.getIdElement().getIdPart(), idElement.getIdPart());
 		// Now VersionId is stripped
-		assertEquals(null, idElement.getVersionIdPart());
+		assertNull(idElement.getVersionIdPart());
 	}
 
 	@Test

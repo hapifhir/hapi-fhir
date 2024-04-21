@@ -54,7 +54,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@MockBean
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 	@MockBean
-	private JpaStorageSettings myStorageSettings;
+	private SubscriptionSettings mySubscriptionSettings;
 	@MockBean
 	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 	@Mock

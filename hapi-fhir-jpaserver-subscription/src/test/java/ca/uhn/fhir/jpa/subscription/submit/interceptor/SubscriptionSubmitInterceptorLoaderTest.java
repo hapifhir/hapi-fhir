@@ -6,12 +6,15 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
+import ca.uhn.fhir.jpa.subscription.persistence.SearchSupportSvc;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSubmitterConfig;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
@@ -42,6 +45,7 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
+
 	@MockBean
 	private IInterceptorService myInterceptorService;
 
@@ -68,7 +72,7 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 		}
 
 		@Bean
-		public SubscriptionSettings storageSettings() {
+		public SubscriptionSettings subscriptionSettings() {
 			SubscriptionSettings subscriptionSettings = new SubscriptionSettings();
 			subscriptionSettings.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
 			return subscriptionSettings;
@@ -92,6 +96,10 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 		private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
 		@MockBean
 		private IHapiTransactionService myHapiTransactionService;
+		@MockBean
+		private StorageSettings myStorageSettings;
+		@MockBean
+		private SearchSupportSvc mySearchSupportSvc;
 
 	}
 

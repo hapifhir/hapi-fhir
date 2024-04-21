@@ -39,6 +39,8 @@ public class SubscriptionSettings {
 	private boolean myEnableInMemorySubscriptionMatching = true;
 	private boolean myTriggerSubscriptionsForNonVersioningChanges;
 
+	public SubscriptionSettings() {}
+
 	/**
 	 * @since 6.8.0
 	 * Prevents any non IN-MEMORY Search params from being created by users.
