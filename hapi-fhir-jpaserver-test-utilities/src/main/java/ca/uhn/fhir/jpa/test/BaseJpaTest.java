@@ -303,6 +303,7 @@ public abstract class BaseJpaTest extends BaseTest {
 
 		for (int count = 0; ; count++) {
 			try {
+				ourLog.info("Calling Expunge count {}", count);
 				theSystemDao.expunge(new ExpungeOptions().setExpungeEverything(true), new SystemRequestDetails());
 				break;
 			} catch (Exception e) {

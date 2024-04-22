@@ -198,8 +198,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.quartz.SchedulerException;
-import org.quartz.utils.Key;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -571,19 +569,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	public void afterCleanupDao() {
 		// make sure there are no running jobs
 		assertFalse(myBatch2JobHelper.hasRunningJobs());
-//		mySearchParamRegistry.forceRefresh();
-		if (!mySchedulerService.isSchedulingDisabled()) {
-			try {
-				ourLog.warn("Found running jobs: " +
-					mySchedulerService.getLocalJobKeysForUnitTest()
-						.stream().map(Key::getName).collect(Collectors.joining(",")));
-				mySchedulerService.purgeAllScheduledJobsForUnitTest();
-			} catch (SchedulerException ex) {
-				ourLog.error("Exception in purging scheduled jobs.", ex);
-				mySchedulerService.logStatusForUnitTest();
-			}
-		}
-
 
 		// this is lame, but so are multiple "aftereachs".
 		// to stop maintenance jobs from running while we clean up db, we'll pause it here
