@@ -1,16 +1,23 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import com.google.common.collect.Lists;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.contains;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.mockito.Mockito.mock;
 
 public class RuleBuilderTest {
@@ -98,7 +105,72 @@ public class RuleBuilderTest {
 		builder.allow().bulkExport().patientExportOnPatient("Patient/pat2").withResourceTypes(resourceTypes);
 		List<IAuthRule> rules = builder.build();
 		assertEquals(rules.size(),1);
-		assertTrue(rules.get(0) instanceof RuleBulkExportImpl);
+		assertInstanceOf(RuleBulkExportImpl.class, rules.get(0));
+	}
+
+	public static Stream<Arguments> multipleInstancesParams() {
+		return Stream.of(
+			Arguments.of(List.of("Patient/pat1"), List.of("Patient"), PolicyEnum.ALLOW),
+			Arguments.of(List.of("Patient/pat1", "Patient/pat2"), List.of("Patient"), PolicyEnum.ALLOW),
+			Arguments.of(List.of("Patient/pat1", "Patient/pat2"), List.of("Patient", "Observation"), PolicyEnum.ALLOW),
+			Arguments.of(List.of("Patient/pat1"), List.of("Patient"), PolicyEnum.DENY),
+			Arguments.of(List.of("Patient/pat1", "Patient/pat2"), List.of("Patient"), PolicyEnum.DENY),
+			Arguments.of(List.of("Patient/pat1", "Patient/pat2"), List.of("Patient", "Observation"), PolicyEnum.DENY)
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("multipleInstancesParams")
+	public void testBulkExport_PatientExportOnPatients_MultiplePatientsSingleRule(Collection<String> theExpectedPatientIds, Collection<String> theExpectedResourceTypes, PolicyEnum thePolicyEnum) {
+		final RuleBuilder builder = new RuleBuilder();
+		final IAuthRuleBuilderRule rule = switch (thePolicyEnum) {
+			case ALLOW -> builder.allow();
+			case DENY -> builder.deny();
+		};
+		rule.bulkExport().patientExportOnPatientStrings(theExpectedPatientIds).withResourceTypes(theExpectedResourceTypes);
+		final List<IAuthRule> rules = builder.build();
+		assertEquals(rules.size(),1);
+		final IAuthRule authRule = rules.get(0);
+		assertInstanceOf(RuleBulkExportImpl.class, authRule);
+		final RuleBulkExportImpl ruleBulkExport = (RuleBulkExportImpl) authRule;
+		assertEquals(theExpectedPatientIds, ruleBulkExport.getPatientIds());
+		assertEquals(theExpectedResourceTypes, ruleBulkExport.getResourceTypes());
+		assertEquals(thePolicyEnum, ruleBulkExport.getMode());
+	}
+
+	public static Stream<Arguments> owners() {
+		return Stream.of(
+			Arguments.of(List.of(new IdDt("Patient/pat1")), PolicyEnum.ALLOW),
+			Arguments.of(List.of(new IdDt("Patient/pat1")), PolicyEnum.DENY),
+			Arguments.of(List.of(new IdDt("Patient/pat1"), new IdDt("Patient/pat2")), PolicyEnum.ALLOW),
+			Arguments.of(List.of(new IdDt("Patient/pat1"), new IdDt("Patient/pat2")), PolicyEnum.DENY)
+		);
+	}
+
+	@ParameterizedTest
+	@MethodSource("owners")
+	public void testBulkExport_PatientExportOnPatients_onInstances(List<IIdType> theExpectedOwners, PolicyEnum thePolicyEnum) {
+		final RuleBuilder builder = new RuleBuilder();
+		final IAuthRuleBuilderRule rule = switch (thePolicyEnum) {
+			case ALLOW -> builder.allow();
+			case DENY -> builder.deny();
+		};
+
+		final List<IAuthRule> rules = rule
+			.operation()
+			.named(ProviderConstants.OPERATION_EXPORT)
+			.onInstances(theExpectedOwners)
+			.andAllowAllResponses()
+			.andThen()
+			.build();
+
+		assertEquals(rules.size(),1);
+		final IAuthRule authRule = rules.get(0);
+		assertInstanceOf(OperationRule.class, authRule);
+		final OperationRule operationRule = (OperationRule) authRule;
+		assertEquals(theExpectedOwners, operationRule.getAppliesToIds());
+		assertEquals(ProviderConstants.OPERATION_EXPORT, operationRule.getOperationName());
+		assertEquals(thePolicyEnum, operationRule.getMode());
 	}
 
 	@Test

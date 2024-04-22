@@ -24,6 +24,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import com.google.common.annotations.VisibleForTesting;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -193,6 +194,11 @@ public class RuleBulkExportImpl extends BaseRule {
 		myPatientIds.add(thePatientId);
 	}
 
+	public void setAppliesToPatientExport(Collection<String> thePatientIds) {
+		myWantExportStyle = BulkExportJobParameters.ExportStyle.PATIENT;
+		myPatientIds.addAll(thePatientIds);
+	}
+
 	public void setAppliesToSystem() {
 		myWantExportStyle = BulkExportJobParameters.ExportStyle.SYSTEM;
 	}
@@ -211,5 +217,15 @@ public class RuleBulkExportImpl extends BaseRule {
 
 	BulkExportJobParameters.ExportStyle getWantExportStyle() {
 		return myWantExportStyle;
+	}
+
+	@VisibleForTesting
+	Collection<String> getPatientIds() {
+		return myPatientIds;
+	}
+
+	@VisibleForTesting
+	Collection<String> getResourceTypes() {
+		return myResourceTypes;
 	}
 }

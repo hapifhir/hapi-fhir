@@ -737,6 +737,20 @@ public class RuleBuilder implements IAuthRuleBuilder {
 				}
 
 				@Override
+				public IAuthRuleBuilderOperationNamedAndScoped onInstances(Collection<IIdType> theInstanceIds) {
+					Validate.notNull(theInstanceIds, "theInstanceIds must not be null");
+					theInstanceIds.forEach(instanceId -> Validate.notBlank(
+							instanceId.getResourceType(),
+							"at least one of theInstanceIds does not have a resource type"));
+					theInstanceIds.forEach(instanceId -> Validate.notBlank(
+							instanceId.getIdPart(), "at least one of theInstanceIds does not have an ID part"));
+
+					final OperationRule rule = createRule();
+					rule.appliesToInstances(new ArrayList<>(theInstanceIds));
+					return new RuleBuilderOperationNamedAndScoped(rule);
+				}
+
+				@Override
 				public IAuthRuleBuilderOperationNamedAndScoped onInstancesOfType(
 						Class<? extends IBaseResource> theType) {
 					validateType(theType);
@@ -890,6 +904,26 @@ public class RuleBuilder implements IAuthRuleBuilder {
 					ruleBulkExport = rule;
 				} else {
 					ruleBulkExport.setAppliesToPatientExport(theFocusResourceId);
+				}
+
+				// prevent duplicate rules being added
+				if (!myRules.contains(ruleBulkExport)) {
+					myRules.add(ruleBulkExport);
+				}
+
+				return new RuleBuilderBulkExportWithTarget(ruleBulkExport);
+			}
+
+			@Override
+			public IAuthRuleBuilderRuleBulkExportWithTarget patientExportOnPatientStrings(
+					@Nonnull Collection<String> theFocusResourceIds) {
+				if (ruleBulkExport == null) {
+					RuleBulkExportImpl rule = new RuleBulkExportImpl(myRuleName);
+					rule.setAppliesToPatientExport(theFocusResourceIds);
+					rule.setMode(myRuleMode);
+					ruleBulkExport = rule;
+				} else {
+					ruleBulkExport.setAppliesToPatientExport(theFocusResourceIds);
 				}
 
 				// prevent duplicate rules being added
