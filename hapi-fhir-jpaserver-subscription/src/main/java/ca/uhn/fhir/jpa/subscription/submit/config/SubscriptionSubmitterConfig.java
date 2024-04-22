@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.subscription.submit.config;
 
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.subscription.async.AsyncResourceModifiedProcessingSchedulerSvc;
@@ -27,18 +28,23 @@ import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFact
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.model.config.SubscriptionModelConfig;
 import ca.uhn.fhir.jpa.subscription.provider.SubscriptionTriggeringProvider;
+import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionMatcherInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionQueryValidator;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionSubmitInterceptorLoader;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.SubscriptionValidatingInterceptor;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.ISubscriptionTriggeringSvc;
 import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicValidatingInterceptor;
 import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * This Spring config should be imported by a system that submits resources to the
@@ -60,8 +66,8 @@ public class SubscriptionSubmitterConfig {
 	}
 
 	@Bean
-	public SubscriptionSubmitInterceptorLoader subscriptionMatcherInterceptorLoader() {
-		return new SubscriptionSubmitInterceptorLoader();
+	public SubscriptionSubmitInterceptorLoader subscriptionMatcherInterceptorLoader(@Nonnull IInterceptorService theInterceptorService, @Nonnull SubscriptionSettings theSubscriptionSettings, @Nonnull SubscriptionMatcherInterceptor theSubscriptionMatcherInterceptor, @Nonnull SubscriptionValidatingInterceptor theSubscriptionValidatingInterceptor, @Nullable SubscriptionTopicValidatingInterceptor theSubscriptionTopicValidatingInterceptor) {
+		return new SubscriptionSubmitInterceptorLoader(theInterceptorService, theSubscriptionSettings, theSubscriptionMatcherInterceptor, theSubscriptionValidatingInterceptor, theSubscriptionTopicValidatingInterceptor);
 	}
 
 	@Bean
