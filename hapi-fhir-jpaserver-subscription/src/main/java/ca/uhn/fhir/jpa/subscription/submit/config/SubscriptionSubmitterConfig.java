@@ -66,8 +66,18 @@ public class SubscriptionSubmitterConfig {
 	}
 
 	@Bean
-	public SubscriptionSubmitInterceptorLoader subscriptionMatcherInterceptorLoader(@Nonnull IInterceptorService theInterceptorService, @Nonnull SubscriptionSettings theSubscriptionSettings, @Nonnull SubscriptionMatcherInterceptor theSubscriptionMatcherInterceptor, @Nonnull SubscriptionValidatingInterceptor theSubscriptionValidatingInterceptor, @Nullable SubscriptionTopicValidatingInterceptor theSubscriptionTopicValidatingInterceptor) {
-		return new SubscriptionSubmitInterceptorLoader(theInterceptorService, theSubscriptionSettings, theSubscriptionMatcherInterceptor, theSubscriptionValidatingInterceptor, theSubscriptionTopicValidatingInterceptor);
+	public SubscriptionSubmitInterceptorLoader subscriptionMatcherInterceptorLoader(
+			@Nonnull IInterceptorService theInterceptorService,
+			@Nonnull SubscriptionSettings theSubscriptionSettings,
+			@Nonnull SubscriptionMatcherInterceptor theSubscriptionMatcherInterceptor,
+			@Nonnull SubscriptionValidatingInterceptor theSubscriptionValidatingInterceptor,
+			@Nullable SubscriptionTopicValidatingInterceptor theSubscriptionTopicValidatingInterceptor) {
+		return new SubscriptionSubmitInterceptorLoader(
+				theInterceptorService,
+				theSubscriptionSettings,
+				theSubscriptionMatcherInterceptor,
+				theSubscriptionValidatingInterceptor,
+				theSubscriptionTopicValidatingInterceptor);
 	}
 
 	@Bean

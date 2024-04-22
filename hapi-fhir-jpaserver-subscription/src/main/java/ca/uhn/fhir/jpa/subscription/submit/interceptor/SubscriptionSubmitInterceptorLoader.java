@@ -28,9 +28,9 @@ import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Set;
 
 public class SubscriptionSubmitInterceptorLoader {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionSubmitInterceptorLoader.class);
@@ -50,13 +50,16 @@ public class SubscriptionSubmitInterceptorLoader {
 	@Nullable
 	private final SubscriptionTopicValidatingInterceptor mySubscriptionTopicValidatingInterceptor;
 
-
-
 	private boolean mySubscriptionValidatingInterceptorRegistered;
 	private boolean mySubscriptionMatcherInterceptorRegistered;
 	private boolean mySubscriptionTopicValidatingInterceptorRegistered;
 
-	public SubscriptionSubmitInterceptorLoader(@Nonnull IInterceptorService theInterceptorService, @Nonnull SubscriptionSettings theSubscriptionSettings, @Nonnull SubscriptionMatcherInterceptor theSubscriptionMatcherInterceptor, @Nonnull SubscriptionValidatingInterceptor theSubscriptionValidatingInterceptor, @Nullable SubscriptionTopicValidatingInterceptor theSubscriptionTopicValidatingInterceptor) {
+	public SubscriptionSubmitInterceptorLoader(
+			@Nonnull IInterceptorService theInterceptorService,
+			@Nonnull SubscriptionSettings theSubscriptionSettings,
+			@Nonnull SubscriptionMatcherInterceptor theSubscriptionMatcherInterceptor,
+			@Nonnull SubscriptionValidatingInterceptor theSubscriptionValidatingInterceptor,
+			@Nullable SubscriptionTopicValidatingInterceptor theSubscriptionTopicValidatingInterceptor) {
 		myInterceptorService = theInterceptorService;
 		mySubscriptionSettings = theSubscriptionSettings;
 		mySubscriptionMatcherInterceptor = theSubscriptionMatcherInterceptor;
