@@ -36,7 +36,7 @@ public class SubscriptionSubmitInterceptorLoader {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionSubmitInterceptorLoader.class);
 
 	@Nonnull
-	private final IInterceptorService myInterceptorService;
+	private IInterceptorService myInterceptorService;
 
 	@Nonnull
 	private final SubscriptionSettings mySubscriptionSettings;
@@ -60,7 +60,7 @@ public class SubscriptionSubmitInterceptorLoader {
 			@Nonnull SubscriptionMatcherInterceptor theSubscriptionMatcherInterceptor,
 			@Nonnull SubscriptionValidatingInterceptor theSubscriptionValidatingInterceptor,
 			@Nullable SubscriptionTopicValidatingInterceptor theSubscriptionTopicValidatingInterceptor) {
-		myInterceptorService = theInterceptorService;
+		setInterceptorService(theInterceptorService);
 		mySubscriptionSettings = theSubscriptionSettings;
 		mySubscriptionMatcherInterceptor = theSubscriptionMatcherInterceptor;
 		mySubscriptionValidatingInterceptor = theSubscriptionValidatingInterceptor;
@@ -92,6 +92,14 @@ public class SubscriptionSubmitInterceptorLoader {
 			myInterceptorService.registerInterceptor(mySubscriptionTopicValidatingInterceptor);
 			mySubscriptionTopicValidatingInterceptorRegistered = true;
 		}
+	}
+
+	protected void setInterceptorService(IInterceptorService theInterceptorService) {
+		myInterceptorService = theInterceptorService;
+	}
+
+	protected IInterceptorService getInterceptorService() {
+		return myInterceptorService;
 	}
 
 	@VisibleForTesting
