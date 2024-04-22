@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5865
+title: "Update name of the full text search index in terminology concept database layer as part of the Postgre LOB 
+migration."
