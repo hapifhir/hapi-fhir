@@ -123,7 +123,8 @@ public class ProviderConstants {
 	public static final String CR_OPERATION_EXTRACT = "$extract";
 	public static final String CR_OPERATION_PACKAGE = "$package";
 	public static final String CR_OPERATION_QUESTIONNAIRE = "$questionnaire";
-
+	public static final String CR_OPERATION_COLLECTDATA = "$collect-data";
+	public static final String CR_OPERATION_DATAREQUIREMENTS = "$data-requirements";
 	/**
 	 * Operation name for the $meta operation
 	 */

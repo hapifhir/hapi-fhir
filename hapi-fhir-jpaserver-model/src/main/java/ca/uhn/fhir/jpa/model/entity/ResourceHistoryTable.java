@@ -22,7 +22,26 @@ package ca.uhn.fhir.jpa.model.entity;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Length;
@@ -111,6 +130,12 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 
 	@Transient
 	private transient ResourceHistoryProvenanceEntity myNewHistoryProvenanceEntity;
+	/**
+	 * This is stored as an optimization to avoid needing to fetch ResourceTable
+	 * to access the resource id.
+	 */
+	@Transient
+	private transient String myTransientForcedId;
 
 	/**
 	 * Constructor
@@ -280,16 +305,6 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 		return new IdDt(getResourceType() + '/' + resourceIdPart + '/' + Constants.PARAM_HISTORY + '/' + getVersion());
 	}
 
-	@Override
-	public ForcedId getForcedId() {
-		return getResourceTable().getForcedId();
-	}
-
-	@Override
-	public void setForcedId(ForcedId theForcedId) {
-		getResourceTable().setForcedId(theForcedId);
-	}
-
 	/**
 	 * Returns <code>true</code> if there is a populated resource text (i.e.
 	 * either {@link #getResource()} or {@link #getResourceTextVc()} return a non null
@@ -310,5 +325,13 @@ public class ResourceHistoryTable extends BaseHasResource implements Serializabl
 			myNewHistoryProvenanceEntity = new ResourceHistoryProvenanceEntity();
 		}
 		return myNewHistoryProvenanceEntity;
+	}
+
+	public String getTransientForcedId() {
+		return myTransientForcedId;
+	}
+
+	public void setTransientForcedId(String theTransientForcedId) {
+		myTransientForcedId = theTransientForcedId;
 	}
 }

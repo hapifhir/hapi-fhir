@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5861
+title: "Enhance RuleBuilder code to support multiple instance IDs."

@@ -60,6 +60,7 @@ create table TRM_CONCEPT_MAP_GRP_ELEMENT (PID bigint not null, SOURCE_CODE varch
 create table TRM_CONCEPT_MAP_GRP_ELM_TGT (PID bigint not null, TARGET_CODE varchar(50) not null, myConceptMapUrl varchar(255), TARGET_DISPLAY varchar(400), TARGET_EQUIVALENCE varchar(50), mySystem varchar(255), mySystemVersion varchar(255), myValueSet varchar(255), CONCEPT_MAP_GRP_ELM_PID bigint not null, primary key (PID));
 create table TRM_CONCEPT_PC_LINK (PID bigint not null, CHILD_PID bigint, PARENT_PID bigint, REL_TYPE integer, CODESYSTEM_PID bigint not null, primary key (PID));
 create table TRM_CONCEPT_PROPERTY (PID bigint not null, PROP_CODESYSTEM varchar(500), PROP_DISPLAY varchar(500), PROP_KEY varchar(500) not null, PROP_TYPE integer not null, PROP_VAL varchar(500), CONCEPT_PID bigint, primary key (PID));
+create table HFJ_BINARY_STORAGE_BLOB ( BLOB_ID varchar(200) not null, BLOB_DATA blob not null, CONTENT_TYPE varchar(100) not null, BLOB_HASH varchar(128), PUBLISHED_DATE timestamp(6) not null, RESOURCE_ID varchar(100) not null, BLOB_SIZE bigint, primary key (BLOB_ID) );
 create index IDX_FORCEDID_TYPE_FORCEDID on HFJ_FORCED_ID (RESOURCE_TYPE, FORCED_ID);
 create unique index IDX_FORCEDID_RESID on HFJ_FORCED_ID (RESOURCE_PID);
 create unique index IDX_FORCEDID_TYPE_RESID on HFJ_FORCED_ID (RESOURCE_TYPE, RESOURCE_PID);
