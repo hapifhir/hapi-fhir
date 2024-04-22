@@ -43,7 +43,6 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
-import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -58,10 +57,7 @@ import org.hibernate.search.mapper.pojo.bridge.mapping.annotation.RoutingBinderR
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.GenericField;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.Indexed;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.IndexingDependency;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.ObjectPath;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyBinding;
-import org.hibernate.search.mapper.pojo.mapping.definition.annotation.PropertyValue;
 import org.hl7.fhir.r4.model.Coding;
 
 import java.io.Serializable;
@@ -178,10 +174,10 @@ public class TermConcept implements Serializable {
 	private String myParentPids;
 
 	@FullTextField(
-		name = "myParentPids",
-		searchable = Searchable.YES,
-		projectable = Projectable.YES,
-		analyzer = "conceptParentPidsAnalyzer")
+			name = "myParentPids",
+			searchable = Searchable.YES,
+			projectable = Projectable.YES,
+			analyzer = "conceptParentPidsAnalyzer")
 	@Column(name = "PARENT_PIDS_VC", nullable = true, length = Length.LONG32)
 	private String myParentPidsVc;
 
