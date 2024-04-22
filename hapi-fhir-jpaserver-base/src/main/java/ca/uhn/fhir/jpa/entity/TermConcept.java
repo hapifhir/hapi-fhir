@@ -177,6 +177,11 @@ public class TermConcept implements Serializable {
 	@Column(name = "PARENT_PIDS", nullable = true)
 	private String myParentPids;
 
+	@FullTextField(
+		name = "myParentPids",
+		searchable = Searchable.YES,
+		projectable = Projectable.YES,
+		analyzer = "conceptParentPidsAnalyzer")
 	@Column(name = "PARENT_PIDS_VC", nullable = true, length = Length.LONG32)
 	private String myParentPidsVc;
 
@@ -362,13 +367,6 @@ public class TermConcept implements Serializable {
 		return this;
 	}
 
-	@Transient
-	@FullTextField(
-			name = "myParentPids",
-			searchable = Searchable.YES,
-			projectable = Projectable.YES,
-			analyzer = "conceptParentPidsAnalyzer")
-	@IndexingDependency(derivedFrom = @ObjectPath({@PropertyValue(propertyName = "myParentPidsVc")}))
 	public String getParentPidsAsString() {
 		return nonNull(myParentPidsVc) ? myParentPidsVc : myParentPids;
 	}

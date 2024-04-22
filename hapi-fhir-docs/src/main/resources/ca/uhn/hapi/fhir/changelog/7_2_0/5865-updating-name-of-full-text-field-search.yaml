@@ -1,5 +1,5 @@
 ---
 type: fix
 issue: 5865
-title: "Update name of the full text search index in terminology concept database layer as part of the PostgreSQL LOB 
-migration."
+title: "Moving the Hibernate.Search annotation for text indexing from the lob column to the column added as part of the
+  PostgreSql LOB migration."
