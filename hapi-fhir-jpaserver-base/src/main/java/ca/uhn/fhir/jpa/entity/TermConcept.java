@@ -364,7 +364,7 @@ public class TermConcept implements Serializable {
 
 	@Transient
 	@FullTextField(
-			name = "myParentPidsVc",
+			name = "myParentPids",
 			searchable = Searchable.YES,
 			projectable = Projectable.YES,
 			analyzer = "conceptParentPidsAnalyzer")
