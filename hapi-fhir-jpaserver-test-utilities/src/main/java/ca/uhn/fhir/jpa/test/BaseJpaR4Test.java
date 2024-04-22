@@ -219,6 +219,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(SpringExtension.class)
@@ -567,6 +568,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		// to stop maintenance jobs from running while we clean up db, we'll pause it here
 		// see afterResetInterceptors for when we re-enable it
 		myJobMaintenanceService.enableMaintenancePass(false);
+		assertFalse(myBatch2JobHelper.hasRunningJobs());
 
 		myStorageSettings.setExpireSearchResults(new JpaStorageSettings().isExpireSearchResults());
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());

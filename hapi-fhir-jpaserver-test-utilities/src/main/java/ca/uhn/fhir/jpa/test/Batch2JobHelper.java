@@ -275,6 +275,33 @@ public class Batch2JobHelper {
 		awaitNoJobsRunning(false);
 	}
 
+	public boolean hasRunningJobs() {
+		HashMap<String, String> map = new HashMap<>();
+		List<JobInstance> jobs = myJobCoordinator.getInstances(1000, 1);
+		// "All Jobs" assumes at least one job exists
+		if (jobs.isEmpty()) {
+			return false;
+		}
+
+		for (JobInstance job : jobs) {
+			if (job.getStatus().isIncomplete()) {
+				map.put(job.getInstanceId(), job.getStatus().name());
+			}
+		}
+
+		if (!map.isEmpty()) {
+			ourLog.error(
+				"Found Running Jobs "
+				+ map.keySet().stream()
+					.map(k -> k + " : " + map.get(k))
+					.collect(Collectors.joining("\n"))
+			);
+
+			return true;
+		}
+		return false;
+	}
+
 	public void awaitNoJobsRunning(boolean theExpectAtLeastOneJobToExist) {
 		HashMap<String, String> map = new HashMap<>();
 		Awaitility.await().atMost(10, TimeUnit.SECONDS)

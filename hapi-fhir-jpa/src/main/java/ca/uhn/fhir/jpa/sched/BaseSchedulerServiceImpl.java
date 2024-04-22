@@ -136,7 +136,7 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 		return retval;
 	}
 
-	private boolean isSchedulingDisabled() {
+	public boolean isSchedulingDisabled() {
 		return !isLocalSchedulingEnabled() || isSchedulingDisabledForUnitTests();
 	}
 

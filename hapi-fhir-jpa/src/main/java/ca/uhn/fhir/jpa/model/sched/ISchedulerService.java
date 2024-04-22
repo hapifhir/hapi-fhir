@@ -52,6 +52,9 @@ public interface ISchedulerService {
 	@VisibleForTesting
 	Set<JobKey> getClusteredJobKeysForUnitTest() throws SchedulerException;
 
+	@VisibleForTesting
+	boolean isSchedulingDisabled();
+
 	boolean isStopping();
 
 	/**

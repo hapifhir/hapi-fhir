@@ -250,6 +250,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			assertEquals("Patient?", allJobs.get(0).getParameters(ReindexJobParameters.class).getPartitionedUrls().get(0).getUrl());
 		});
 
+		myBatch2JobHelper.awaitNoJobsRunning();
 	}
 
 	@Test
