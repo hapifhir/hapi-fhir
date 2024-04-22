@@ -81,13 +81,13 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	 * This implementation prevents: \ / | .
 	 */
 	@Override
-	public boolean isValidBlobId(String theNewBlobId) {
-		return !StringUtils.containsAny(theNewBlobId, '\\', '/', '|', '.');
+	public boolean isValidBinaryContentId(String theNewBinaryContentId) {
+		return !StringUtils.containsAny(theNewBinaryContentId, '\\', '/', '|', '.');
 	}
 
 	@Nonnull
 	@Override
-	public StoredDetails storeBlob(
+	public StoredDetails storeBinaryContent(
 			IIdType theResourceId,
 			String theBlobIdOrNull,
 			String theContentType,
@@ -95,7 +95,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 			RequestDetails theRequestDetails)
 			throws IOException {
 
-		String id = super.provideIdForNewBlob(theBlobIdOrNull, null, theRequestDetails, theContentType);
+		String id = super.provideIdForNewBinaryContent(theBlobIdOrNull, null, theRequestDetails, theContentType);
 		File storagePath = getStoragePath(id, true);
 
 		// Write binary file
@@ -126,7 +126,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	}
 
 	@Override
-	public StoredDetails fetchBlobDetails(IIdType theResourceId, String theBlobId) throws IOException {
+	public StoredDetails fetchBinaryContentDetails(IIdType theResourceId, String theBlobId) throws IOException {
 		StoredDetails retVal = null;
 
 		File storagePath = getStoragePath(theBlobId, false);
@@ -145,7 +145,8 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	}
 
 	@Override
-	public boolean writeBlob(IIdType theResourceId, String theBlobId, OutputStream theOutputStream) throws IOException {
+	public boolean writeBinaryContent(IIdType theResourceId, String theBlobId, OutputStream theOutputStream)
+			throws IOException {
 		InputStream inputStream = getInputStream(theResourceId, theBlobId);
 
 		if (inputStream != null) {
@@ -172,7 +173,7 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	}
 
 	@Override
-	public void expungeBlob(IIdType theResourceId, String theBlobId) {
+	public void expungeBinaryContent(IIdType theResourceId, String theBlobId) {
 		File storagePath = getStoragePath(theBlobId, false);
 		if (storagePath != null) {
 			File storageFile = getStorageFilename(storagePath, theResourceId, theBlobId);
@@ -187,8 +188,8 @@ public class FilesystemBinaryStorageSvcImpl extends BaseBinaryStorageSvcImpl {
 	}
 
 	@Override
-	public byte[] fetchBlob(IIdType theResourceId, String theBlobId) throws IOException {
-		StoredDetails details = fetchBlobDetails(theResourceId, theBlobId);
+	public byte[] fetchBinaryContent(IIdType theResourceId, String theBlobId) throws IOException {
+		StoredDetails details = fetchBinaryContentDetails(theResourceId, theBlobId);
 		try (InputStream inputStream = getInputStream(theResourceId, theBlobId)) {
 
 			if (inputStream != null) {

@@ -626,16 +626,9 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 				.getSingleResult();
 			assertNotNull(readBackView, "found search view");
 
-			// verify the forced id join still works
-			if (readBackResource.getForcedId() != null) {
-				assertEquals(myExpectedId, readBackResource.getForcedId().getForcedId(),
-					"legacy join populated");
-				assertEquals(myExpectedId, readBackView.getFhirId(),
-					"legacy join populated");
-			} else {
-				assertEquals(IdStrategyEnum.SEQUENTIAL_NUMERIC, theServerIdStrategy,
-					"hfj_forced_id join column is only empty when using server-assigned ids");
-			}		}
+			assertEquals(myExpectedId, readBackView.getFhirId(),
+				"fhir_id populated");
+		}
 	}
 
 	@Test

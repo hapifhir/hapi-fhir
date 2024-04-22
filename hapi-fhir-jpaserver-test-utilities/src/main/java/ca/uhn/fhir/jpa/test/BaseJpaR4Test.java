@@ -20,8 +20,6 @@
 package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
-import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
-import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -45,7 +43,6 @@ import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
@@ -116,6 +113,7 @@ import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import jakarta.persistence.EntityManager;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -208,7 +206,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumSet;
@@ -935,6 +932,28 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		target.setCode("34567");
 		target.setDisplay("Target Code 34567");
 		target.setEquivalence(ConceptMapEquivalence.NARROWER);
+
+		group = conceptMap.addGroup();
+		group.setSource(CS_URL_4);
+		group.setSourceVersion("Version 1");
+		group.setTarget(CS_URL_3);
+		group.setTargetVersion("Version 1");
+
+		// This one should not show up in the results because it doesn't have a code
+		element = group.addElement();
+		element.setCode("89012");
+		element.setDisplay("Source Code 89012");
+
+		target = element.addTarget();
+		target.setEquivalence(ConceptMapEquivalence.DISJOINT);
+
+		// This one should show up in the results because unmatched targets are allowed to be codeless
+		element = group.addElement();
+		element.setCode("89123");
+		element.setDisplay("Source Code 89123");
+
+		target = element.addTarget();
+		target.setEquivalence(ConceptMapEquivalence.UNMATCHED);
 
 		return conceptMap;
 	}

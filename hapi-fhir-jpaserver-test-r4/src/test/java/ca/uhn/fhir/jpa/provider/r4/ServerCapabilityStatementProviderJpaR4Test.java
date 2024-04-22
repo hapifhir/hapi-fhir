@@ -346,7 +346,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 		for (CapabilityStatement.CapabilityStatementRestResourceComponent nextResource : cs.getRestFirstRep().getResource()) {
 			for (CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent nextSp : nextResource.getSearchParam()) {
-				if (nextSp.getName().equals("_has") || nextSp.getName().equals("_list")) {
+				if (nextSp.getName().equals("_has") || nextSp.getName().equals("_list") || nextSp.getName().equals("_language")) {
 					if (nextSp.getDefinition() == null) {
 						continue;
 					}

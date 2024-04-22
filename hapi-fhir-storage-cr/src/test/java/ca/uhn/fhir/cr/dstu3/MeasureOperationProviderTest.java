@@ -28,8 +28,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ContextConfiguration(classes = {TestCrDstu3Config.class})
-public class CrDstu3MeasureOperationProviderIT extends BaseCrDstu3TestServer {
-	private static final Logger ourLog = LoggerFactory.getLogger(CrDstu3MeasureOperationProviderIT.class);
+public class MeasureOperationProviderTest extends BaseCrDstu3TestServer {
+	private static final Logger ourLog = LoggerFactory.getLogger(MeasureOperationProviderTest.class);
 
 	@Autowired
 	MeasureOperationsProvider myMeasureOperationsProvider;
