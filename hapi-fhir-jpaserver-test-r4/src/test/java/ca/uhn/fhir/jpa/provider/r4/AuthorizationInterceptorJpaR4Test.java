@@ -1425,12 +1425,8 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 
 	@Test
-	public void testDeleteExpungeBlocked() {
-		// Create Patient, and Observation that refers to it
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().setFamily("Tester").addGiven("Siobhan");
-		myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+	public void testDeleteExpunge_allResourcesPermission_forbidden() {
+		createPatient();
 
 		// Allow any deletes, but don't allow expunge
 		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -1442,25 +1438,12 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			}
 		});
 
-		try {
-			myClient
-				.delete()
-				.resourceConditionalByUrl("Patient?name=Siobhan&_expunge=true")
-				.execute();
-			fail();
-		} catch (ForbiddenOperationException e) {
-			// good
-		}
+		validateDeleteConditionalByUrlIsForbidden("Patient?name=Siobhan&_expunge=true");
 	}
 
 	@Test
-	public void testDeleteExpungeAllowed() {
-
-		// Create Patient, and Observation that refers to it
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
-		patient.addName().setFamily("Tester").addGiven("Raghad");
-		myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
+	public void testDeleteExpunge_allResourcesPermission_allowed() {
+		createPatient();
 
 		// Allow deletes and allow expunge
 		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -1473,10 +1456,137 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			}
 		});
 
-		myClient
-			.delete()
-			.resourceConditionalByUrl("Patient?name=Siobhan&_expunge=true")
+		executeDeleteConditionalByUrl("Patient?name=Siobhan&_expunge=true");
+	}
+
+	private void createDeleteByTypeRule(String theType) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder().allow()
+					.delete()
+					.onExpunge()
+					.resourcesOfType(theType)
+					.withAnyId()
+					.andThen().build();
+			}
+		});
+	}
+
+	@Test
+	public void testDeleteExpunge_typePermission_allowed() {
+		IIdType id = createPatient();
+		createDeleteByTypeRule("Patient");
+		executeDeleteConditionalByUrl("Patient?_expunge=true&_id=" + id.getIdPart());
+	}
+
+	@Test
+	public void testDeleteExpunge_typePermission_forbidden() {
+		IIdType id = createPatient();
+		createDeleteByTypeRule("Observation");
+		validateDeleteConditionalByUrlIsForbidden("Patient?_expunge=true&_id=" + id.getIdPart());
+	}
+
+	@Test
+	public void testDeleteExpunge_noIdTypePermission_forbidden() {
+		createDeleteByTypeRule("Observation");
+		validateDeleteConditionalByUrlIsForbidden("Patient?_expunge=true");
+	}
+
+	private void createPatientCompartmentRule(IIdType theId) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder().allow()
+					.delete()
+					.onExpunge()
+					.allResources()
+					.inCompartment("Patient", theId)
+					.andThen().build();
+			}
+		});
+	}
+
+	@Test
+	public void testDeleteExpunge_compartmentPermission_allowed() {
+		IIdType id = createPatient();
+		createPatientCompartmentRule(id);
+		executeDeleteConditionalByUrl("Patient?_expunge=true&_id=" + id.getIdPart());
+	}
+
+	@Test
+	public void testDeleteExpunge_compartmentPermission_forbidden() {
+		IIdType id = createPatient();
+		IdDt compartmentId = new IdDt();
+		compartmentId.setParts(null, "Patient", "123", null);
+		createPatientCompartmentRule(compartmentId);
+		validateDeleteConditionalByUrlIsForbidden("Patient?_expunge=true&_id=" + id.getIdPart());
+	}
+
+	@Test
+	public void testDeleteExpunge_urlWithSearchParameterCompartmentPermission_forbidden() {
+		IIdType id = createPatient();
+		IdDt compartmentId = new IdDt();
+		compartmentId.setParts(null, "Patient", "123", null);
+		createPatientCompartmentRule(compartmentId);
+		validateDeleteConditionalByUrlIsForbidden("Observation?_expunge=true&patient=" + id.getIdPart());
+	}
+
+	@Test
+	public void testDeleteExpunge_multipleIdsCompartmentPermission_forbidden() {
+		IIdType id = createPatient();
+		createPatientCompartmentRule(id);
+		validateDeleteConditionalByUrlIsForbidden("Patient?_expunge=true&_id=" + id.getIdPart() + "_id=123");
+	}
+
+	private void createTypeInPatientCompartmentRule(IIdType theId) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder().allow()
+					.delete()
+					.onExpunge()
+					.resourcesOfType("Patient")
+					.inCompartment("Patient", theId)
+					.andThen().build();
+			}
+		});
+	}
+
+	@Test
+	public void testDeleteExpunge_typeInCompartmentPermission_allowed() {
+		IIdType id = createPatient();
+		createTypeInPatientCompartmentRule(id);
+		executeDeleteConditionalByUrl("Patient?_expunge=true&_id=" + id.getIdPart());
+	}
+
+	@Test
+	public void testDeleteExpunge_typeInCompartmentPermission_forbidden() {
+		IIdType id = createPatient();
+		createTypeInPatientCompartmentRule(id);
+		validateDeleteConditionalByUrlIsForbidden("Observation?_expunge=true&_id=" + id.getIdPart());
+	}
+
+	private void validateDeleteConditionalByUrlIsForbidden(String theUrl) {
+		try {
+			executeDeleteConditionalByUrl(theUrl);
+			fail();
+		} catch (ForbiddenOperationException e) {
+			// good
+		}
+	}
+
+	private void executeDeleteConditionalByUrl(String theUrl) {
+		myClient.delete()
+			.resourceConditionalByUrl(theUrl)
 			.execute();
+	}
+
+	private IIdType createPatient() {
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://uhn.ca/mrns").setValue("100");
+		patient.addName().setFamily("Tester").addGiven("Raghad");
+		return myClient.create().resource(patient).execute().getId().toUnqualifiedVersionless();
 	}
 
 	@Test
