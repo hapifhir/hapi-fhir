@@ -285,7 +285,7 @@ public class Batch2JobHelper {
 
 		for (JobInstance job : jobs) {
 			if (job.getStatus().isIncomplete()) {
-				map.put(job.getInstanceId(), job.getStatus().name());
+				map.put(job.getInstanceId(), job.getJobDefinitionId() + " : " + job.getStatus().name());
 			}
 		}
 
