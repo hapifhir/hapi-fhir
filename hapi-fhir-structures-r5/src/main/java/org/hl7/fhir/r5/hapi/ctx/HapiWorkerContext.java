@@ -616,7 +616,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	}
 
 	@Override
-	public Set<String> urlsForOid(boolean codeSystem, String oid) {
+	public OIDSummary urlsForOid(String oid, String resourceType) {
 		throw new UnsupportedOperationException(Msg.code(2473));
 	}
 

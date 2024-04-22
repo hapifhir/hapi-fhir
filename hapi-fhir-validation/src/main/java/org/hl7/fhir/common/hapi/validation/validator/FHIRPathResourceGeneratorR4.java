@@ -272,8 +272,6 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
 				break;
 			case MatchesFull:
 			case Aggregate:
-			case Alias:
-			case AliasAs:
 			case All:
 			case AllFalse:
 			case AllTrue:
@@ -294,6 +292,7 @@ public class FHIRPathResourceGeneratorR4<T extends Resource> {
 			case ConvertsToTime:
 			case Count:
 			case Custom:
+			case DefineVariable:
 			case Descendants:
 			case Distinct:
 			case Empty:

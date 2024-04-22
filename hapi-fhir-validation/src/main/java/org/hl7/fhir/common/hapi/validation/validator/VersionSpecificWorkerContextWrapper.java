@@ -836,7 +836,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 								.setDiagnostics(message)
 								.setDetails(new CodeableConcept().setText(message));
 
-				//return new ValidationResult(
+				// return new ValidationResult(
 				//		ValidationMessage.IssueSeverity.ERROR, null, Collections.singletonList(issue));
 				issues.add(issue);
 			}
@@ -924,7 +924,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 	}
 
 	@Override
-	public Set<String> urlsForOid(boolean codeSystem, String oid) {
+	public OIDSummary urlsForOid(String oid, String resourceType) {
 		return null;
 	}
 
