@@ -1605,13 +1605,13 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					code.getDisplay());
 
 			b.must(f.bool()
-					.should(f.match().field("myParentPids").matching("" + code.getId()))
+					.should(f.match().field("myParentPidsVc").matching("" + code.getId()))
 					.should(f.match().field("myId").matching(code.getId())));
 		} else if (theFilter.getOp() == ValueSet.FilterOperator.DESCENDENTOF) {
 			ourLog.debug(
 					" * Filtering on codes with a parent of {}/{}/{}", code.getId(), code.getCode(), code.getDisplay());
 
-			b.must(f.match().field("myParentPids").matching("" + code.getId()));
+			b.must(f.match().field("myParentPidsVc").matching("" + code.getId()));
 		} else {
 			throwInvalidFilter(theFilter, "");
 		}
@@ -1688,7 +1688,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				.orElseThrow(() -> new InvalidRequestException("Invalid filter criteria - code does not exist: {"
 						+ Constants.codeSystemWithDefaultDescription(theSystem) + "}" + theValue));
 
-		retVal.add(new Term("myParentPids", "" + code.getId()));
+		retVal.add(new Term("myParentPidsVc", "" + code.getId()));
 		logFilteringValueOnProperty(theValue, theProperty);
 
 		return retVal;
@@ -2664,7 +2664,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				.search(TermConcept.class)
 				.where(f -> f.bool()
 						.must(f.match().field("myId").matching(theRight.getId()))
-						.must(f.match().field("myParentPids").matching(Long.toString(theLeft.getId()))))
+						.must(f.match().field("myParentPidsVc").matching(Long.toString(theLeft.getId()))))
 				.fetchHits(1);
 
 		if (fetch.size() > 0) {
