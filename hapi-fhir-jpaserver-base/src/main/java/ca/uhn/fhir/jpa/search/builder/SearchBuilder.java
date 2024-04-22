@@ -1688,12 +1688,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	private void attemptComboUniqueSpProcessing(
-			QueryStack theQueryStack3, @Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
+			QueryStack theQueryStack, @Nonnull SearchParameterMap theParams, RequestDetails theRequest) {
 		RuntimeSearchParam comboParam = null;
 		List<String> comboParamNames = null;
 		List<RuntimeSearchParam> exactMatchParams =
 				mySearchParamRegistry.getActiveComboSearchParams(myResourceName, theParams.keySet());
-		if (exactMatchParams.size() > 0) {
+		if (!exactMatchParams.isEmpty()) {
 			comboParam = exactMatchParams.get(0);
 			comboParamNames = new ArrayList<>(theParams.keySet());
 		}
@@ -1704,7 +1704,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			for (RuntimeSearchParam nextCandidate : candidateComboParams) {
 				List<String> nextCandidateParamNames =
 						JpaParamUtil.resolveComponentParameters(mySearchParamRegistry, nextCandidate).stream()
-								.map(t -> t.getName())
+								.map(RuntimeSearchParam::getName)
 								.collect(Collectors.toList());
 				if (theParams.keySet().containsAll(nextCandidateParamNames)) {
 					comboParam = nextCandidate;
@@ -1715,98 +1715,116 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 
 		if (comboParam != null) {
-			// Since we're going to remove elements below
-			theParams.values().forEach(nextAndList -> ensureSubListsAreWritable(nextAndList));
-
-			StringBuilder sb = new StringBuilder();
-			sb.append(myResourceName);
-			sb.append("?");
-
-			boolean first = true;
-
 			Collections.sort(comboParamNames);
-			for (String nextParamName : comboParamNames) {
-				List<List<IQueryParameterType>> nextValues = theParams.get(nextParamName);
 
-				// TODO Hack to fix weird IOOB on the next stanza until James comes back and makes sense of this.
-				if (nextValues.isEmpty()) {
-					ourLog.error(
-							"query parameter {} is unexpectedly empty. Encountered while considering {} index for {}",
-							nextParamName,
-							comboParam.getName(),
-							theRequest.getCompleteUrl());
-					sb = null;
-					break;
-				}
-
-				if (nextValues.get(0).size() != 1) {
-					sb = null;
-					break;
-				}
-
-				// Reference params are only eligible for using a composite index if they
-				// are qualified
-				RuntimeSearchParam nextParamDef =
-						mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
-				if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
-					ReferenceParam param = (ReferenceParam) nextValues.get(0).get(0);
-					if (isBlank(param.getResourceType())) {
-						sb = null;
-						break;
-					}
-				}
-
-				List<? extends IQueryParameterType> nextAnd = nextValues.remove(0);
-				IQueryParameterType nextOr = nextAnd.remove(0);
-				String nextOrValue = nextOr.getValueAsQueryToken(myContext);
-
-				if (comboParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE) {
-					if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.STRING) {
-						nextOrValue = StringUtil.normalizeStringForSearchIndexing(nextOrValue);
-					}
-				}
-
-				if (first) {
-					first = false;
-				} else {
-					sb.append('&');
-				}
-
-				nextParamName = UrlUtil.escapeUrlParam(nextParamName);
-				nextOrValue = UrlUtil.escapeUrlParam(nextOrValue);
-
-				sb.append(nextParamName).append('=').append(nextOrValue);
+            if (!validateParamValuesAreValidForComboParam(theParams, comboParamNames)) {
+				return;
 			}
 
-			if (sb != null) {
-				String indexString = sb.toString();
-				ourLog.debug(
-						"Checking for {} combo index for query: {}", comboParam.getComboSearchParamType(), indexString);
+			applyComboSearchParam(theQueryStack, theParams, theRequest, comboParamNames, comboParam);
+		}
+	}
 
-				// Interceptor broadcast: JPA_PERFTRACE_INFO
-				StorageProcessingMessage msg = new StorageProcessingMessage()
-						.setMessage("Using " + comboParam.getComboSearchParamType() + " index for query for search: "
-								+ indexString);
-				HookParams params = new HookParams()
-						.add(RequestDetails.class, theRequest)
-						.addIfMatchesType(ServletRequestDetails.class, theRequest)
-						.add(StorageProcessingMessage.class, msg);
-				CompositeInterceptorBroadcaster.doCallHooks(
-						myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+	private void applyComboSearchParam(QueryStack theQueryStack, @Nonnull SearchParameterMap theParams, RequestDetails theRequest, List<String> theComboParamNames, RuntimeSearchParam theComboParam) {
+		// Since we're going to remove elements below
+		theParams.values().forEach(this::ensureSubListsAreWritable);
 
-				switch (comboParam.getComboSearchParamType()) {
-					case UNIQUE:
-						theQueryStack3.addPredicateCompositeUnique(indexString, myRequestPartitionId);
-						break;
-					case NON_UNIQUE:
-						theQueryStack3.addPredicateCompositeNonUnique(indexString, myRequestPartitionId);
-						break;
+		StringBuilder theSearchBuilder = new StringBuilder();
+		theSearchBuilder.append(myResourceName);
+		theSearchBuilder.append("?");
+
+		boolean first = true;
+		for (String nextParamName : theComboParamNames) {
+			List<List<IQueryParameterType>> nextValues = theParams.get(nextParamName);
+
+			// TODO Hack to fix weird IOOB on the next stanza until James comes back and makes sense of this.
+			if (nextValues.isEmpty()) {
+				ourLog.error(
+						"query parameter {} is unexpectedly empty. Encountered while considering {} index for {}",
+						nextParamName,
+						theComboParam.getName(),
+						theRequest.getCompleteUrl());
+				continue;
+			}
+
+			List<? extends IQueryParameterType> nextAnd = nextValues.remove(0);
+			IQueryParameterType nextOr = nextAnd.remove(0);
+			String nextOrValue = nextOr.getValueAsQueryToken(myContext);
+
+			RuntimeSearchParam nextParamDef =
+				mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
+			if (theComboParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE) {
+				if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.STRING) {
+					nextOrValue = StringUtil.normalizeStringForSearchIndexing(nextOrValue);
 				}
+			}
 
-				// Remove any empty parameters remaining after this
-				theParams.clean();
+			if (first) {
+				first = false;
+			} else {
+				theSearchBuilder.append('&');
+			}
+
+			nextParamName = UrlUtil.escapeUrlParam(nextParamName);
+			nextOrValue = UrlUtil.escapeUrlParam(nextOrValue);
+
+			theSearchBuilder.append(nextParamName).append('=').append(nextOrValue);
+		}
+
+		if (theSearchBuilder != null) {
+			String indexString = theSearchBuilder.toString();
+			ourLog.debug(
+					"Checking for {} combo index for query: {}", theComboParam.getComboSearchParamType(), indexString);
+
+			// Interceptor broadcast: JPA_PERFTRACE_INFO
+			StorageProcessingMessage msg = new StorageProcessingMessage()
+					.setMessage("Using " + theComboParam.getComboSearchParamType() + " index for query for search: "
+							+ indexString);
+			HookParams params = new HookParams()
+					.add(RequestDetails.class, theRequest)
+					.addIfMatchesType(ServletRequestDetails.class, theRequest)
+					.add(StorageProcessingMessage.class, msg);
+			CompositeInterceptorBroadcaster.doCallHooks(
+					myInterceptorBroadcaster, theRequest, Pointcut.JPA_PERFTRACE_INFO, params);
+
+			switch (theComboParam.getComboSearchParamType()) {
+				case UNIQUE:
+					theQueryStack.addPredicateCompositeUnique(indexString, myRequestPartitionId);
+					break;
+				case NON_UNIQUE:
+					theQueryStack.addPredicateCompositeNonUnique(indexString, myRequestPartitionId);
+					break;
+			}
+
+			// Remove any empty parameters remaining after this
+			theParams.clean();
+		}
+	}
+
+	private boolean validateParamValuesAreValidForComboParam(@Nonnull SearchParameterMap theParams, List<String> comboParamNames) {
+		boolean paramValuesAreValidForCombo = true;
+		for (String nextParamName : comboParamNames) {
+			List<List<IQueryParameterType>> nextValues = theParams.get(nextParamName);
+
+			// Multiple AND parameters are not supported for unique combo params
+			if (nextValues.get(0).size() != 1) {
+				paramValuesAreValidForCombo = false;
+				break;
+			}
+
+			// Reference params are only eligible for using a composite index if they
+			// are qualified
+			RuntimeSearchParam nextParamDef =
+				mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
+			if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
+				ReferenceParam param = (ReferenceParam) nextValues.get(0).get(0);
+				if (isBlank(param.getResourceType())) {
+					paramValuesAreValidForCombo = false;
+					break;
+				}
 			}
 		}
+		return paramValuesAreValidForCombo;
 	}
 
 	private <T> void ensureSubListsAreWritable(List<List<T>> theListOfLists) {

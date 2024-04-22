@@ -369,7 +369,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 					.collect(Collectors.joining(" or ")));
 		} else {
 			builder.append("If you know what you're looking for, try qualifying it using the form: '");
-			builder.append(theParamName).append(":[resourceType]");
+			builder.append(theParamName).append(":[resourceType]=[id] or ");
+			builder.append(theParamName).append("=[resourceType]/[id]");
 			builder.append("'");
 		}
 		String message = builder.toString();

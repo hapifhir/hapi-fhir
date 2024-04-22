@@ -20,6 +20,8 @@
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
@@ -27,7 +29,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 
 public class ComboNonUniqueSearchParameterPredicateBuilder extends BaseSearchParamPredicateBuilder {
 
-	private final DbColumn myColumnIndexString;
+	private final DbColumn myColumnHashComplete;
 
 	/**
 	 * Constructor
@@ -35,11 +37,15 @@ public class ComboNonUniqueSearchParameterPredicateBuilder extends BaseSearchPar
 	public ComboNonUniqueSearchParameterPredicateBuilder(SearchQueryBuilder theSearchSqlBuilder) {
 		super(theSearchSqlBuilder, theSearchSqlBuilder.addTable("HFJ_IDX_CMB_TOK_NU"));
 
-		myColumnIndexString = getTable().addColumn("IDX_STRING");
+		myColumnHashComplete = getTable().addColumn("HASH_COMPLETE");
 	}
 
 	public Condition createPredicateHashComplete(RequestPartitionId theRequestPartitionId, String theIndexString) {
-		BinaryCondition predicate = BinaryCondition.equalTo(myColumnIndexString, generatePlaceholder(theIndexString));
+		// FIXME: add test with multiple partitions
+		// FIXME: update indexes on entity
+		PartitionablePartitionId partitionId = PartitionablePartitionId.toStoragePartition(theRequestPartitionId, getPartitionSettings());
+		long hash = ResourceIndexedComboTokenNonUnique.calculateHashComplete(getPartitionSettings(), partitionId, theIndexString);
+		BinaryCondition predicate = BinaryCondition.equalTo(myColumnHashComplete, generatePlaceholder(hash));
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
 }

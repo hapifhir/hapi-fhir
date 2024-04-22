@@ -45,7 +45,8 @@ import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
 @Table(
 		name = "HFJ_IDX_CMB_TOK_NU",
 		indexes = {
-			@Index(name = "IDX_IDXCMBTOKNU_STR", columnList = "IDX_STRING", unique = false),
+			@Index(name = "IDX_IDXCMBTOKNU_HASHC", columnList = "HASH_COMPLETE", unique = false),
+			@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
 			@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
 		})
 public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
@@ -105,6 +106,8 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 
 	@Override
 	public boolean equals(Object theO) {
+		calculateHashes();
+
 		if (this == theO) {
 			return true;
 		}
@@ -116,7 +119,7 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 		ResourceIndexedComboTokenNonUnique that = (ResourceIndexedComboTokenNonUnique) theO;
 
 		EqualsBuilder b = new EqualsBuilder();
-		b.append(myIndexString, that.myIndexString);
+		b.append(getHashComplete(), that.getHashComplete());
 		return b.isEquals();
 	}
 
@@ -157,7 +160,11 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37).append(myIndexString).toHashCode();
+		calculateHashes();
+
+		HashCodeBuilder builder = new HashCodeBuilder(17, 37);
+		builder.append(getHashComplete());
+		return builder.toHashCode();
 	}
 
 	public PartitionSettings getPartitionSettings() {
@@ -207,11 +214,6 @@ public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
 			PartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String queryString) {
 		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(thePartitionId);
 		return hash(partitionSettings, requestPartitionId, queryString);
-	}
-
-	public static long calculateHashComplete(
-			PartitionSettings partitionSettings, RequestPartitionId partitionId, String queryString) {
-		return hash(partitionSettings, partitionId, queryString);
 	}
 
 	/**

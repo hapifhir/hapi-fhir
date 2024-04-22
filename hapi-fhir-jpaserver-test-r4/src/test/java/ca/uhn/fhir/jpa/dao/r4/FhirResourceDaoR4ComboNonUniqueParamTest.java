@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInter
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -23,13 +22,10 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -37,11 +33,10 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4ComboNonUniqueParamTest.class);
-	public static final String ORG_ID = "Organization/my-org";
+	public static final String ORG_ID_UNQUALIFIED = "my-org";
+	public static final String ORG_ID_QUALIFIED = "Organization/" + ORG_ID_UNQUALIFIED;
 
 	@Autowired
 	SearchParamValidatingInterceptor mySearchParamValidatingInterceptor;
@@ -61,60 +56,8 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		}
 	}
 
-	private void createStringAndTokenCombo_NameAndGender() {
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-family");
-		sp.setType(Enumerations.SearchParamType.STRING);
-		sp.setCode("family");
-		sp.setExpression("Patient.name.family + '|'");
-		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
-		mySearchParameterDao.update(sp);
-
-		sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-given");
-		sp.setType(Enumerations.SearchParamType.STRING);
-		sp.setCode("given");
-		sp.setExpression("Patient.name.given");
-		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
-		mySearchParameterDao.update(sp);
-
-		sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-gender");
-		sp.setType(Enumerations.SearchParamType.TOKEN);
-		sp.setCode("gender");
-		sp.setExpression("Patient.gender");
-		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
-		mySearchParameterDao.update(sp);
-
-		sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-names-and-gender");
-		sp.setType(Enumerations.SearchParamType.COMPOSITE);
-		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
-		sp.addComponent()
-			.setExpression("Patient")
-			.setDefinition("SearchParameter/patient-family");
-		sp.addComponent()
-			.setExpression("Patient")
-			.setDefinition("SearchParameter/patient-given");
-		sp.addComponent()
-			.setExpression("Patient")
-			.setDefinition("SearchParameter/patient-gender");
-		sp.addExtension()
-			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
-			.setValue(new BooleanType(false));
-		mySearchParameterDao.update(sp);
-
-		mySearchParamRegistry.forceRefresh();
-
-		myMessages.clear();
-	}
-
 	@Test
-	public void testCreate_StringAndToken() {
+	public void testStringAndToken_Create() {
 		createStringAndTokenCombo_NameAndGender();
 
 		IIdType id1 = createPatient1(null);
@@ -126,8 +69,10 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		logAllNonUniqueIndexes();
 		runInTransaction(() -> {
 			List<ResourceIndexedComboTokenNonUnique> indexedTokens = myResourceIndexedComboTokensNonUniqueDao.findAll();
-			indexedTokens.sort(Comparator.comparing(t -> t.getId()));
+			indexedTokens.sort(Comparator.comparing(ResourceIndexedComboTokenNonUnique::getId));
 			assertEquals(2, indexedTokens.size());
+			String expected = "Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1";
+			assertEquals(expected, indexedTokens.get(0).getIndexString());
 			assertEquals(-7504889232313729794L, indexedTokens.get(0).getHashComplete().longValue());
 		});
 
@@ -142,14 +87,8 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
 
-		boolean found = false;
-		for (SqlQuery query : myCaptureQueriesListener.getSelectQueries()) {
-			String sql = query.getSql(true, false);
-			if ("SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.IDX_STRING = 'Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1')".equals(sql)) {
-				found = true;
-			}
-		}
-		assertTrue(found, "Found expected sql");
+		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '-7504889232313729794')";
+		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
 
 		logCapturedMessages();
 		assertThat(myMessages.toString(), containsString("[INFO Using NON_UNIQUE index for query for search: Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1]"));
@@ -157,7 +96,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 		// Remove 1, add another
 
-		myPatientDao.delete(id1);
+		myPatientDao.delete(id1, mySrd);
 
 		IIdType id3 = createPatient1(null);
 		assertNotNull(id3);
@@ -174,7 +113,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 	@Test
-	public void testCreateAndUpdate_StringAndToken() {
+	public void testStringAndToken_CreateAndUpdate() {
 		createStringAndTokenCombo_NameAndGender();
 
 		// Create a resource patching the unique SP
@@ -183,7 +122,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertNotNull(id1);
 
 		assertEquals(0, myCaptureQueriesListener.countSelectQueries(),
-			String.join(",", "\n" + myCaptureQueriesListener.getSelectQueries().stream().map(q -> q.getThreadName()).collect(Collectors.toList()))
+			String.join(",", "\n" + myCaptureQueriesListener.getSelectQueries().stream().map(SqlQuery::getThreadName).toList())
 		);
 		assertEquals(12, myCaptureQueriesListener.countInsertQueries());
 		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
@@ -229,7 +168,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 	@Test
-	public void testSearchWithExtraParameters_StringAndToken() {
+	public void testStringAndToken_SearchWithExtraParameters() {
 		createStringAndTokenCombo_NameAndGender();
 
 		IIdType id1 = createPatient1(null);
@@ -241,7 +180,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		logAllNonUniqueIndexes();
 		runInTransaction(() -> {
 			List<ResourceIndexedComboTokenNonUnique> indexedTokens = myResourceIndexedComboTokensNonUniqueDao.findAll();
-			indexedTokens.sort(Comparator.comparing(t -> t.getId()));
+			indexedTokens.sort(Comparator.comparing(ResourceIndexedComboTokenNonUnique::getId));
 			assertEquals(2, indexedTokens.size());
 			assertEquals(-7504889232313729794L, indexedTokens.get(0).getHashComplete().longValue());
 		});
@@ -259,7 +198,8 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
 
 		String sql = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false);
-		assertEquals("SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_IDX_CMB_TOK_NU t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_DATE t2 ON (t1.RES_ID = t2.RES_ID) WHERE ((t0.IDX_STRING = 'Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1') AND ((t2.HASH_IDENTITY = '5247847184787287691') AND ((t2.SP_VALUE_LOW_DATE_ORDINAL >= '20210202') AND (t2.SP_VALUE_HIGH_DATE_ORDINAL <= '20210202'))))", sql);
+		String expected = "SELECT t1.RES_ID FROM HFJ_RESOURCE t1 INNER JOIN HFJ_IDX_CMB_TOK_NU t0 ON (t1.RES_ID = t0.RES_ID) INNER JOIN HFJ_SPIDX_DATE t2 ON (t1.RES_ID = t2.RES_ID) WHERE ((t0.HASH_COMPLETE = '-7504889232313729794') AND ((t2.HASH_IDENTITY = '5247847184787287691') AND ((t2.SP_VALUE_LOW_DATE_ORDINAL >= '20210202') AND (t2.SP_VALUE_HIGH_DATE_ORDINAL <= '20210202'))))";
+		assertEquals(expected, sql);
 
 		logCapturedMessages();
 		assertThat(myMessages.toString(), containsString("[INFO Using NON_UNIQUE index for query for search: Patient?family=FAMILY1%5C%7C&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale&given=GIVEN1]"));
@@ -268,40 +208,123 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 	@Test
-	public void testCreate_StringAndReference() {
+	public void testStringAndReference_Create() {
 		createStringAndReferenceCombo_FamilyAndOrganization();
 
 		createOrg();
 
-		IIdType id1 = createPatient1(ORG_ID);
-		assertNotNull(id1);
+		IIdType id1 = createPatient1(ORG_ID_QUALIFIED);
+		createPatient2(ORG_ID_QUALIFIED);
 
 		logAllNonUniqueIndexes();
 		runInTransaction(() -> {
 			List<ResourceIndexedComboTokenNonUnique> indexedTokens = myResourceIndexedComboTokensNonUniqueDao.findAll();
-			indexedTokens.sort(Comparator.comparing(t -> t.getId()));
-			assertEquals(1, indexedTokens.size());
+			indexedTokens.sort(Comparator.comparing(ResourceIndexedComboTokenNonUnique::getId));
+			assertEquals(2, indexedTokens.size());
 			assertEquals("Patient?family=FAMILY1%5C%7C&organization=Organization%2Fmy-org", indexedTokens.get(0).getIndexString());
 		});
 
 		myMessages.clear();
 		SearchParameterMap params = SearchParameterMap.newSynchronous();
 		params.add("family", new StringParam("fAmIlY1|")); // weird casing to test normalization
-		params.add("organization", new ReferenceParam(ORG_ID));
+		params.add("organization", new ReferenceParam(ORG_ID_QUALIFIED));
 		myCaptureQueriesListener.clear();
 		IBundleProvider results = myPatientDao.search(params, mySrd);
 		List<String> actual = toUnqualifiedVersionlessIdValues(results);
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
 
-		assertEquals("SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.IDX_STRING = 'Patient?family=FAMILY1%5C%7C&organization=Organization%2Fmy-org')", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
+		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '2277801301223576208')";
+		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
+	}
+
+	@Test
+	public void testStringAndReference_SearchByUnqualifiedReference() {
+		createStringAndReferenceCombo_FamilyAndOrganization();
+
+		createOrg();
+
+		IIdType id1 = createPatient1(ORG_ID_QUALIFIED);
+		createPatient2(ORG_ID_QUALIFIED);
+
+		myMessages.clear();
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add("family", new StringParam("family1"));
+		// "orgid" instead of "Organization/orgid"
+		params.add("organization", new ReferenceParam(ORG_ID_UNQUALIFIED));
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myPatientDao.search(params, mySrd);
+		List<String> actual = toUnqualifiedVersionlessIdValues(results);
+		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
+
+		myCaptureQueriesListener.logSelectQueries();
+		String expected;
+        expected = "select rt1_0.RES_ID,rt1_0.RES_TYPE,rt1_0.FHIR_ID from HFJ_RESOURCE rt1_0 where rt1_0.FHIR_ID='my-org'";
+        assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
+		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
+		assertThat(sql, sql, containsString("SP_VALUE_NORMALIZED LIKE 'FAMILY1%'"));
+		assertThat(sql, sql, containsString("t1.TARGET_RESOURCE_ID"));
+
+		assertThat(myMessages.toString(), myMessages.get(0), containsString("This search uses an unqualified resource"));
 	}
 
 	private void createOrg() {
 		Organization org = new Organization();
 		org.setName("Some Org");
-		org.setId(ORG_ID);
+		org.setId(ORG_ID_QUALIFIED);
 		myOrganizationDao.update(org, mySrd);
+	}
+
+	private void createStringAndTokenCombo_NameAndGender() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-family");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setCode("family");
+		sp.setExpression("Patient.name.family + '|'");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-given");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setCode("given");
+		sp.setExpression("Patient.name.given");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-gender");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setCode("gender");
+		sp.setExpression("Patient.gender");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-names-and-gender");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-family");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-given");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-gender");
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(false));
+		mySearchParameterDao.update(sp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
+
+		myMessages.clear();
 	}
 
 	private void createStringAndReferenceCombo_FamilyAndOrganization() {
@@ -312,7 +335,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		sp.setExpression("Patient.name.family + '|'");
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-managingorg");
@@ -321,7 +344,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		sp.setExpression("Patient.managingOrganization");
 		sp.setStatus(PublicationStatus.ACTIVE);
 		sp.addBase("Patient");
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-family-and-org");
@@ -337,7 +360,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(false));
-		mySearchParameterDao.update(sp);
+		mySearchParameterDao.update(sp, mySrd);
 
 		mySearchParamRegistry.forceRefresh();
 
@@ -345,23 +368,22 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 
-	private IIdType createPatient2(String theOrgId) {
-		Patient pt2 = new Patient();
-		pt2.getNameFirstRep().setFamily("Family2").addGiven("Given2");
-		pt2.setGender(Enumerations.AdministrativeGender.MALE);
-		pt2.setBirthDateElement(new DateType("2021-02-02"));
-		pt2.getManagingOrganization().setReference(theOrgId);
-		IIdType id2 = myPatientDao.create(pt2).getId().toUnqualified();
-		return id2;
-	}
-
 	private IIdType createPatient1(String theOrgId) {
 		Patient pt1 = new Patient();
 		pt1.getNameFirstRep().setFamily("Family1").addGiven("Given1");
 		pt1.setGender(Enumerations.AdministrativeGender.MALE);
 		pt1.setBirthDateElement(new DateType("2021-02-02"));
 		pt1.getManagingOrganization().setReference(theOrgId);
-		return myPatientDao.create(pt1).getId().toUnqualified();
+		return myPatientDao.create(pt1, mySrd).getId().toUnqualified();
+	}
+
+	private IIdType createPatient2(String theOrgId) {
+		Patient pt2 = new Patient();
+		pt2.getNameFirstRep().setFamily("Family2").addGiven("Given2");
+		pt2.setGender(Enumerations.AdministrativeGender.MALE);
+		pt2.setBirthDateElement(new DateType("2021-02-02"));
+		pt2.getManagingOrganization().setReference(theOrgId);
+		return myPatientDao.create(pt2, mySrd).getId().toUnqualified();
 	}
 
 
