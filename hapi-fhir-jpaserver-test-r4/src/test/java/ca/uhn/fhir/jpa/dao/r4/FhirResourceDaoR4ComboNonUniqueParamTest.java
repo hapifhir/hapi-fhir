@@ -57,6 +57,71 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 	}
 
 	@Test
+	public void testTokenFromCodeableConcept_Create() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-family");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setCode("given");
+		sp.setExpression("Patient.name.family");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-maritalstatus");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setCode("gender");
+		sp.setExpression("Patient.maritalStatus");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-names-and-maritalstatus");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-family");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-maritalstatus");
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(false));
+		mySearchParameterDao.update(sp, mySrd);
+		mySearchParamRegistry.forceRefresh();
+		myMessages.clear();
+
+
+		Patient pt = new Patient();
+		pt.addName().setFamily("FAMILY1");
+		pt.addName().setFamily("FAMILY2");
+		pt.getMaritalStatus().addCoding().setSystem("http://foo1").setCode("bar1");
+		pt.getMaritalStatus().addCoding().setSystem("http://foo2").setCode("bar2");
+		myPatientDao.create(pt, mySrd);
+		IIdType id1 = createPatient1(null);
+
+		logAllNonUniqueIndexes();
+		runInTransaction(() -> {
+			List<ResourceIndexedComboTokenNonUnique> indexedTokens = myResourceIndexedComboTokensNonUniqueDao.findAll();
+			indexedTokens.sort(Comparator.comparing(ResourceIndexedComboTokenNonUnique::getIndexString));
+			assertEquals(4, indexedTokens.size());
+			String expected;
+            expected = "Patient?gender=http%3A%2F%2Ffoo1%7Cbar1&given=FAMILY1";
+            assertEquals(expected, indexedTokens.get(0).getIndexString());
+			expected = "Patient?gender=http%3A%2F%2Ffoo1%7Cbar1&given=FAMILY2";
+			assertEquals(expected, indexedTokens.get(1).getIndexString());
+			expected = "Patient?gender=http%3A%2F%2Ffoo2%7Cbar2&given=FAMILY1";
+			assertEquals(expected, indexedTokens.get(2).getIndexString());
+			expected = "Patient?gender=http%3A%2F%2Ffoo2%7Cbar2&given=FAMILY2";
+			assertEquals(expected, indexedTokens.get(3).getIndexString());
+		});
+	}
+
+
+	@Test
 	public void testStringAndToken_Create() {
 		createStringAndTokenCombo_NameAndGender();
 

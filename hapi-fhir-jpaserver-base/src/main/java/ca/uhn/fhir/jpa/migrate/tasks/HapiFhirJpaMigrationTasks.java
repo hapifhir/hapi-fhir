@@ -120,6 +120,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init680_Part2();
 		init700();
 		init720();
+		init740();
+	}
+
+	protected void init740() {
+		Builder version = forVersion(VersionEnum.V7_4_0);
+
+		version.onTable("HFJ_IDX_CMB_TOK_NU")
+			.addIndex("20240422.1", "IDX_IDXCMBTOKNU_HASHC")
+			.unique(false)
+			.withColumns("HASH_COMPLETE", "RES_ID", "PARTITION_ID");
 	}
 
 	protected void init720() {

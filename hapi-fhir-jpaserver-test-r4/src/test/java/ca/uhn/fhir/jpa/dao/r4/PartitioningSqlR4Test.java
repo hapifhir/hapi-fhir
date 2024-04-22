@@ -69,6 +69,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +95,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
@@ -2584,6 +2588,67 @@ public class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		assertThat(ids, Matchers.empty());
 
 	}
+
+
+	@ParameterizedTest
+	@ValueSource(strings = {"ALL", "ONE", "MANY"})
+	public void testSearch_NonUniqueComboParam(String theReadPartitions) {
+		createNonUniqueCompositeSp();
+
+		IIdType orgId = createOrganization(withId("A"), withPartition(myPartitionId), withName("My Org")).toUnqualifiedVersionless();
+		IIdType orgId2 = createOrganization(withId("B"), withPartition(myPartitionId2), withName("My Org")).toUnqualifiedVersionless();
+		// Matching
+		IIdType patientId = createPatient(withPartition(myPartitionId), withFamily("FAMILY"), withOrganization(orgId));
+		// Non matching
+		createPatient(withPartition(myPartitionId), withFamily("WRONG"), withOrganization(orgId));
+		createPatient(withPartition(myPartitionId2), withFamily("FAMILY"), withOrganization(orgId2));
+
+		logAllNonUniqueIndexes();
+
+		switch (theReadPartitions) {
+			case "ALL":
+				addReadAllPartitions();
+				break;
+			case "ONE":
+				addReadPartition(myPartitionId);
+				break;
+			case "MANY":
+				addReadPartition(myPartitionId, myPartitionId4);
+				break;
+			default:
+				throw new IllegalStateException();
+		}
+		myCaptureQueriesListener.clear();
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Patient.SP_FAMILY, new StringParam("FAMILY"));
+		map.add(Patient.SP_ORGANIZATION, new ReferenceParam(orgId));
+		map.setLoadSynchronous(true);
+		IBundleProvider results = myPatientDao.search(map, mySrd);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
+		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+		assertThat(ids, contains(patientId));
+
+		ourLog.info("Search SQL:\n{}", myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true));
+		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
+
+		switch (theReadPartitions) {
+			case "ALL":
+				assertThat(searchSql,is(not( containsString( "t0.PARTITION_ID"))));
+				break;
+			case "ONE":
+				assertThat(searchSql, containsString( "t0.PARTITION_ID = '1'"));
+				break;
+			case "MANY":
+				assertThat(searchSql, containsString( "t0.PARTITION_ID IN ('1','4')"));
+				break;
+			default:
+				throw new IllegalStateException();
+		}
+
+		assertEquals(1, StringUtils.countMatches(searchSql, "t0.HASH_COMPLETE = '-2879121558074554863'"), searchSql);
+
+	}
+
 
 	@Test
 	public void testSearch_RefParam_TargetPid_SearchOnePartition() {

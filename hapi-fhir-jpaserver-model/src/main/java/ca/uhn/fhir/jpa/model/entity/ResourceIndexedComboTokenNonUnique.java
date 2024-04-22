@@ -45,8 +45,9 @@ import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
 @Table(
 		name = "HFJ_IDX_CMB_TOK_NU",
 		indexes = {
-			@Index(name = "IDX_IDXCMBTOKNU_HASHC", columnList = "HASH_COMPLETE", unique = false),
-			@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
+			// TODO: The hash index was added in 7.4.0 - In 7.6.0 we should drop the string index
+			@Index(name = "IDX_IDXCMBTOKNU_STR", columnList = "IDX_STRING", unique = false),
+			@Index(name = "IDX_IDXCMBTOKNU_HASHC", columnList = "HASH_COMPLETE,RES_ID,PARTITION_ID", unique = false),
 			@Index(name = "IDX_IDXCMBTOKNU_RES", columnList = "RES_ID", unique = false)
 		})
 public class ResourceIndexedComboTokenNonUnique extends BaseResourceIndex
