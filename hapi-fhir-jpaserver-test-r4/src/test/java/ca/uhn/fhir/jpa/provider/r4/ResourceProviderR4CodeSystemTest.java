@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.term.TermTestUtil;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.apache.commons.io.IOUtils;
@@ -26,6 +27,7 @@ import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -42,6 +44,9 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	private static final String CS_ACME_URL = "http://acme.org";
 	private Long parentChildCsId;
 	private IIdType myCsId;
+
+	@Autowired
+	private ITermDeferredStorageSvc myITermDeferredStorageSvc;
 
 	@BeforeEach
 	@Transactional
@@ -63,6 +68,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		DaoMethodOutcome parentChildCsOutcome = myCodeSystemDao.create(parentChildCs);
 		parentChildCsId = ((ResourceTable) parentChildCsOutcome.getEntity()).getId();
 
+		myITermDeferredStorageSvc.saveDeferred();
 	}
 
 	@Test

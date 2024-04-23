@@ -112,6 +112,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
+import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -566,7 +567,17 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
 
 	@RegisterExtension
-	private final Batch2JobAndSearchCacheManagerExtension myBatch2JobAndSearchCacheManagerExtension = new Batch2JobAndSearchCacheManagerExtension();
+	private final Batch2JobAndSearchCacheManagerExtension myBatch2JobAndSearchCacheManagerExtension = new Batch2JobAndSearchCacheManagerExtension(new Batch2JobAndSearchCacheManagerExtension.ServiceSupplier() {
+		@Override
+		public ISearchParamRegistry getSearchParamRegistry() {
+			return mySearchParamRegistry;
+		}
+
+		@Override
+		public IJobMaintenanceService getJobMaintenanceSvc() {
+			return myJobMaintenanceService;
+		}
+	});
 
 	@AfterEach()
 	@Order(0)
