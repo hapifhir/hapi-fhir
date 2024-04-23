@@ -107,12 +107,10 @@ public class SubscriptionSettings {
 		myWebsocketContextPath = theWebsocketContextPath;
 	}
 
-	// FIXME KHS fix javadoc errors
 	/**
-	 * This setting return whether the {@link BaseChannelSettings#isQualifyChannelName}
-	 * should be qualified or not.
+	 * This setting return whether the channel name should be qualified or not.
 	 *
-	 * @return whether the {@link BaseChannelSettings#isQualifyChannelName} is qualified or not
+	 * @return whether the channel name is qualified or not
 	 * @since 6.4.0
 	 */
 	public boolean isQualifySubscriptionMatchingChannelName() {
@@ -120,7 +118,7 @@ public class SubscriptionSettings {
 	}
 
 	/**
-	 * This setting controls whether the {@link  BaseChannelSettings#isQualifyChannelName}
+	 * This setting controls whether the channel name
 	 * should be qualified or not.
 	 * Default is true, ie, the channel name will be qualified.
 	 *
