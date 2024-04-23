@@ -54,6 +54,11 @@ public class HapiNullScheduler implements IHapiScheduler {
 	public void logStatusForUnitTest() {}
 
 	@Override
+	public void pause(boolean theIsPausedBool) {
+		// nothing to do
+	}
+
+	@Override
 	public void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
 		ourLog.debug("Skipping scheduling job {} since scheduling is disabled", theJobDefinition.getId());
 	}

@@ -244,6 +244,8 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		mySearchParameterDao.create(fooSp, mySrd);
 
 		runInTransaction(() -> {
+			myBatch2JobHelper.forceRunMaintenancePass();
+
 			List<JobInstance> allJobs = myBatch2JobHelper.findJobsByDefinition(ReindexAppCtx.JOB_REINDEX);
 			assertEquals(1, allJobs.size());
 			assertEquals(1, allJobs.get(0).getParameters(ReindexJobParameters.class).getPartitionedUrls().size());

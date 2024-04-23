@@ -259,7 +259,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	private DaoRegistry myDaoRegistry;
 	@Autowired
-	private ITermDeferredStorageSvc myTermDeferredStorageSvc;
+	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
 	private final List<Object> myRegisteredInterceptors = new ArrayList<>(1);
 
 	@SuppressWarnings("BusyWait")
@@ -295,17 +295,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	@SuppressWarnings("BusyWait")
-	protected void purgeDatabase(JpaStorageSettings theStorageSettings, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
+	public static void purgeDatabase(JpaStorageSettings theStorageSettings, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
 		theSearchCoordinatorSvc.cancelAllActiveSearches();
 		theResourceReindexingSvc.cancelAndPurgeAllJobs();
 		theBulkDataJobActivator.cancelAndPurgeAllJobs();
-
-		if (!myTermDeferredStorageSvc.isStorageQueueEmpty(true)) {
-			ourLog.warn("There is deferred terminology storage stuff still in the queue. Please verify your tests clean up ok.");
-			if (myTermDeferredStorageSvc instanceof TermDeferredStorageSvcImpl t) {
-				t.clearDeferred();
-			}
-		}
 
 		boolean expungeEnabled = theStorageSettings.isExpungeEnabled();
 		boolean multiDeleteEnabled = theStorageSettings.isAllowMultipleDelete();

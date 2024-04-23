@@ -101,7 +101,7 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
-import ca.uhn.fhir.jpa.test.util.Batch2JobAndSearchCacheManagerExtension;
+import ca.uhn.fhir.jpa.test.util.SchedulerManagerExtension;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
@@ -112,7 +112,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
-import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -567,15 +566,10 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
 
 	@RegisterExtension
-	private final Batch2JobAndSearchCacheManagerExtension myBatch2JobAndSearchCacheManagerExtension = new Batch2JobAndSearchCacheManagerExtension(new Batch2JobAndSearchCacheManagerExtension.ServiceSupplier() {
+	private final SchedulerManagerExtension myBatch2JobAndSearchCacheManagerExtension = new SchedulerManagerExtension(new SchedulerManagerExtension.ServiceSupplier() {
 		@Override
-		public ISearchParamRegistry getSearchParamRegistry() {
-			return mySearchParamRegistry;
-		}
-
-		@Override
-		public IJobMaintenanceService getJobMaintenanceSvc() {
-			return myJobMaintenanceService;
+		public ISchedulerService getSchedulerService() {
+			return mySchedulerService;
 		}
 	});
 
@@ -645,6 +639,14 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterPurgeDatabase() {
+		myTerminologyDeferredStorageSvc.logQueueForUnitTest();
+		if (!myTermDeferredStorageSvc.isStorageQueueEmpty(true)) {
+			ourLog.warn("There is deferred terminology storage stuff still in the queue. Please verify your tests clean up ok.");
+			if (myTermDeferredStorageSvc instanceof TermDeferredStorageSvcImpl t) {
+				t.clearDeferred();
+			}
+		}
+
 		boolean registeredStorageInterceptor = false;
 		if (myMdmStorageInterceptor != null && !myInterceptorService.getAllRegisteredInterceptors().contains(myMdmStorageInterceptor)) {
 			myInterceptorService.registerInterceptor(myMdmStorageInterceptor);

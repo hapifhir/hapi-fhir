@@ -33,6 +33,15 @@ public interface ISchedulerService {
 	void logStatusForUnitTest();
 
 	/**
+	 * Pauses (or unpauses) all scheduled jobs for this scheduling service.
+	 * Useful in tests when cleanup needs to happen but scheduled jobs may
+	 * be running
+	 * @param theToPause whether or not to pause the scheduler; true pauses, false unpauses
+	 */
+	@VisibleForTesting
+	void pauseAllJobs(boolean theToPause);
+
+	/**
 	 * This task will execute locally (and should execute on all nodes of the cluster if there is a cluster)
 	 * @param theIntervalMillis How many milliseconds between passes should this job run
 	 * @param theJobDefinition  The Job to fire

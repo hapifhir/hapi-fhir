@@ -199,6 +199,12 @@ public abstract class BaseSchedulerServiceImpl implements ISchedulerService {
 	}
 
 	@Override
+	public void pauseAllJobs(boolean theToPause) {
+		myLocalScheduler.pause(theToPause);
+		myClusteredScheduler.pause(theToPause);
+	}
+
+	@Override
 	public void scheduleLocalJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
 		scheduleJob("local", myLocalScheduler, theIntervalMillis, theJobDefinition);
 	}

@@ -37,6 +37,12 @@ public interface IHapiScheduler {
 
 	void logStatusForUnitTest();
 
+	/**
+	 * Pauses (or unpauses) this scheduler.
+	 * @param theIsPausedBool whether or not to pause the scheduler. True pauses, false unpauses
+	 */
+	void pause(boolean theIsPausedBool);
+
 	void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
 
 	Set<JobKey> getJobKeysForUnitTest() throws SchedulerException;

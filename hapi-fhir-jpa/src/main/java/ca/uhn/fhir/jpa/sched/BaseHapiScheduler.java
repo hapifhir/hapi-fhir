@@ -151,6 +151,20 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		}
 	}
 
+	public void pause(boolean theIsPaused) {
+		try {
+			if (theIsPaused) {
+				myScheduler.pauseAll();
+			} else {
+				myScheduler.resumeAll();
+			}
+		} catch (SchedulerException ex) {
+			ourLog.error("Encountered exception while "
+					+ (theIsPaused ? "pausing" : "unpausing")
+					+ " scheduler. This may affect test cleanup.");
+		}
+	}
+
 	@Override
 	public void clear() throws SchedulerException {
 		myScheduler.clear();
