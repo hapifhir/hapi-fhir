@@ -128,7 +128,7 @@ public class IpsGeneratorSvcImplTest {
 	private void initializeGenerationStrategy(List<Function<Section, Section>> theGlobalSectionCustomizers) {
 		myStrategy = new DefaultJpaIpsGenerationStrategy() {
 			@Override
-			public IIdType massageResourceId(@Nullable IpsContext theIpsContext, @javax.annotation.Nonnull IBaseResource theResource) {
+			public IIdType massageResourceId(@Nullable IpsContext theIpsContext, @jakarta.annotation.Nonnull IBaseResource theResource) {
 				return IdType.newRandomUuid();
 			}
 		};
