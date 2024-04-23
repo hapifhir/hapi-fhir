@@ -57,11 +57,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -96,7 +92,7 @@ public class TestR4Config {
 		 * starvation
 		 */
 		if (ourMaxThreads == null) {
-			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
+			ourMaxThreads = (int) (Math.random() * 6.0) + 4;
 
 			if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 				ourMaxThreads = 1;
@@ -108,7 +104,7 @@ public class TestR4Config {
 		ourLog.warn("ourMaxThreads={}", ourMaxThreads);
 	}
 
-	private Map<Connection, Exception> myConnectionRequestStackTraces = Collections.synchronizedMap(new LinkedHashMap<>());
+	private final Map<Connection, Exception> myConnectionRequestStackTraces = Collections.synchronizedMap(new LinkedHashMap<>());
 
 	@Autowired
 	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;

@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -58,6 +59,9 @@ public interface ISearchParamRegistry {
 	 * Request that the cache be refreshed at the next convenient time (in a different thread)
 	 */
 	default void requestRefresh() {}
+
+	@VisibleForTesting
+	default void enableResourceChangeCache(boolean theToEnabled) {}
 
 	/**
 	 * When indexing a HumanName, if a StringEncoder is set in the context, then the "phonetic" search parameter will normalize

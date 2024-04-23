@@ -887,7 +887,8 @@ public class ConsentInterceptorTest {
 		assertEquals(2, response.getTotal());
 	}
 
-	@Nested class CacheUsage {
+	@Nested
+	class CacheUsage {
 		@Mock ICachedSearchDetails myCachedSearchDetails;
 		ServletRequestDetails myRequestDetails = new ServletRequestDetails();
 

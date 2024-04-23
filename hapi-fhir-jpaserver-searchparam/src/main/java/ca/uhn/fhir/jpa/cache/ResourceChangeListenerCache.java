@@ -62,6 +62,8 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 	private boolean myInitialized = false;
 	private Instant myNextRefreshTime = Instant.MIN;
 
+	private boolean myEnabledFlag = true;
+
 	public ResourceChangeListenerCache(
 			String theResourceName,
 			IResourceChangeListener theResourceChangeListener,
@@ -119,8 +121,16 @@ public class ResourceChangeListenerCache implements IResourceChangeListenerCache
 		return retval;
 	}
 
+	@Override
+	public void setEnabled(boolean theToEnable) {
+		myEnabledFlag = theToEnable;
+	}
+
 	protected boolean isTimeToRefresh() {
-		return myNextRefreshTime.isBefore(now());
+		if (!myEnabledFlag) {
+			ourLog.warn("Cache refresh is disabled. This will prevent Search Parameters from being refreshed.");
+		}
+		return myEnabledFlag && myNextRefreshTime.isBefore(now());
 	}
 
 	private static Instant now() {

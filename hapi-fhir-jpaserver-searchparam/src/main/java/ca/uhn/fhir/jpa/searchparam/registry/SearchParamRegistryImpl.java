@@ -125,6 +125,11 @@ public class SearchParamRegistryImpl
 		return getActiveSearchParams().getSearchParamMap(theResourceName);
 	}
 
+	@Override
+	public void enableResourceChangeCache(boolean theToEnable) {
+		myResourceChangeListenerCache.setEnabled(theToEnable);
+	}
+
 	private void requiresActiveSearchParams() {
 		if (myActiveSearchParams == null) {
 			myResourceChangeListenerCache.forceRefresh();

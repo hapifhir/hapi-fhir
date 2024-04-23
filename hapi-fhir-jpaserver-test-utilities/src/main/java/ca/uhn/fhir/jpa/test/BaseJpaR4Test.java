@@ -101,6 +101,7 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
+import ca.uhn.fhir.jpa.test.util.Batch2JobAndSearchCacheManagerExtension;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
@@ -564,16 +565,14 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
 
+	@RegisterExtension
+	private final Batch2JobAndSearchCacheManagerExtension myBatch2JobAndSearchCacheManagerExtension = new Batch2JobAndSearchCacheManagerExtension();
+
 	@AfterEach()
 	@Order(0)
 	public void afterCleanupDao() {
 		// make sure there are no running jobs
 		assertFalse(myBatch2JobHelper.hasRunningJobs());
-
-		// this is lame, but so are multiple "aftereachs".
-		// to stop maintenance jobs from running while we clean up db, we'll pause it here
-		// see afterResetInterceptors for when we re-enable it
-		myJobMaintenanceService.enableMaintenancePass(false);
 
 		myStorageSettings.setExpireSearchResults(new JpaStorageSettings().isExpireSearchResults());
 		myStorageSettings.setEnforceReferentialIntegrityOnDelete(new JpaStorageSettings().isEnforceReferentialIntegrityOnDelete());
@@ -599,9 +598,6 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		super.afterResetInterceptors();
 		myInterceptorRegistry.unregisterInterceptor(myPerformanceTracingLoggingInterceptor);
 
-		// re-enable the maintenance service
-		// see afterCleanupDao for when we disabled it
-		myJobMaintenanceService.enableMaintenancePass(true);
 		ourLog.info("2 - " + getClass().getSimpleName() + ".afterResetInterceptors");
 	}
 
