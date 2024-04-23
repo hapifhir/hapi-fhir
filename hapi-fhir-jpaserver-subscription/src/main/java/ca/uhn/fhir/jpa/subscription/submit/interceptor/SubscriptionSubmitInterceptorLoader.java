@@ -23,14 +23,14 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.subscription.submit.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicValidatingInterceptor;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Set;
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 public class SubscriptionSubmitInterceptorLoader {
 	private static final Logger ourLog = LoggerFactory.getLogger(SubscriptionSubmitInterceptorLoader.class);

@@ -38,13 +38,12 @@ import ca.uhn.fhir.jpa.subscription.triggering.SubscriptionTriggeringSvcImpl;
 import ca.uhn.fhir.jpa.topic.SubscriptionTopicValidatingInterceptor;
 import ca.uhn.fhir.subscription.api.IResourceModifiedConsumerWithRetries;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
-
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 
 /**
  * This Spring config should be imported by a system that submits resources to the
