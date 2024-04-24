@@ -1999,10 +1999,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				+ "' - Server knows how to handle: " + knownDistinctAndSortedResourceTypes);
 	}
 
-
 	private static String getKnownDistinctAndSortedResourceTypes(IResourceProvider theResourceProvider) {
 		String simpleName = theResourceProvider.getResourceType().getSimpleName();
-		if(NAME_MAPPINGS.containsKey(simpleName)) {
+		if (NAME_MAPPINGS.containsKey(simpleName)) {
 			return NAME_MAPPINGS.get(simpleName);
 		}
 		return simpleName;
