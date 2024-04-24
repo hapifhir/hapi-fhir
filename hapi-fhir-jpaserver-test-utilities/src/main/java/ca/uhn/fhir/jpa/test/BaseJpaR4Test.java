@@ -101,7 +101,6 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
-import ca.uhn.fhir.jpa.test.util.SchedulerManagerExtension;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.jpa.util.ResourceCountCache;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
@@ -228,7 +227,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @ContextConfiguration(classes = {
 	TestR4Config.class
 })
-public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuilder {
+public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuilder, ISchedulerManager {
 	public static final String MY_VALUE_SET = "my-value-set";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";
@@ -559,19 +558,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@Autowired
 	protected IJobMaintenanceService myJobMaintenanceService;
-	@Autowired
-	protected ISchedulerService mySchedulerService;
 
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
-
-	@RegisterExtension
-	private final SchedulerManagerExtension myBatch2JobAndSearchCacheManagerExtension = new SchedulerManagerExtension(new SchedulerManagerExtension.ServiceSupplier() {
-		@Override
-		public ISchedulerService getSchedulerService() {
-			return mySchedulerService;
-		}
-	});
 
 	@AfterEach()
 	@Order(0)
@@ -639,6 +628,13 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 	@AfterEach
 	public void afterPurgeDatabase() {
+		/*
+		 * We have to stop all scheduled jobs or they will
+		 * interfere with the database cleanup!
+		 */
+		ourLog.info("Pausing Schedulers");
+		mySchedulerService.pauseAllJobs(true);
+
 		myTerminologyDeferredStorageSvc.logQueueForUnitTest();
 		if (!myTermDeferredStorageSvc.isStorageQueueEmpty(true)) {
 			ourLog.warn("There is deferred terminology storage stuff still in the queue. Please verify your tests clean up ok.");
@@ -670,6 +666,9 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 			}
 		}
 
+		// restart the jobs
+		ourLog.info("Restarting the schedulers");
+		mySchedulerService.pauseAllJobs(false);
 		ourLog.info("5 - " + getClass().getSimpleName() + ".afterPurgeDatabases");
 	}
 
