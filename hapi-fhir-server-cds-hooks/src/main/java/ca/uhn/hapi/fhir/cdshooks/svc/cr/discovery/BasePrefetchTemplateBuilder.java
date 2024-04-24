@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - Clinical Reasoning
+ * HAPI FHIR - CDS Hooks
  * %%
  * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
@@ -17,12 +17,19 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.r4;
+package ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.opencds.cqf.fhir.cr.measure.r4.R4DataRequirementsService;
+import org.opencds.cqf.fhir.api.Repository;
 
-@FunctionalInterface
-public interface IDataRequirementsServiceFactory {
-	R4DataRequirementsService create(RequestDetails theRequestDetails);
+public abstract class BasePrefetchTemplateBuilder {
+	protected final String PATIENT_ID_CONTEXT = "{{context.patientId}}";
+	protected final int DEFAULT_MAX_URI_LENGTH = 8000;
+	protected int myMaxUriLength;
+
+	protected final Repository myRepository;
+
+	public BasePrefetchTemplateBuilder(Repository theRepository) {
+		myRepository = theRepository;
+		myMaxUriLength = DEFAULT_MAX_URI_LENGTH;
+	}
 }
