@@ -291,7 +291,10 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public SearchSupportSvc searchSupportSvc(ISearchSvc theSearchService, SearchBuilderFactory theSearchBuilderFactory, ISearchCoordinatorSvc<? extends IResourcePersistentId<?>> theSearchCoordinatorSvc) {
+	public SearchSupportSvc searchSupportSvc(
+			ISearchSvc theSearchService,
+			SearchBuilderFactory theSearchBuilderFactory,
+			ISearchCoordinatorSvc<? extends IResourcePersistentId<?>> theSearchCoordinatorSvc) {
 		return new SearchSupportSvc(theSearchService, theSearchBuilderFactory, theSearchCoordinatorSvc);
 	}
 

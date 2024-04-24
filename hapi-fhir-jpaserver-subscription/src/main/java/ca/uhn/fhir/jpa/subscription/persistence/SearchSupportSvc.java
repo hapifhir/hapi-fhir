@@ -30,7 +30,6 @@ import ca.uhn.fhir.rest.api.CacheControlDirective;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -41,12 +40,14 @@ public class SearchSupportSvc {
 
 	private final ISearchCoordinatorSvc<? extends IResourcePersistentId<?>> mySearchCoordinatorSvc;
 
-	public SearchSupportSvc(ISearchSvc theSearchService, SearchBuilderFactory theSearchBuilderFactory, ISearchCoordinatorSvc<? extends IResourcePersistentId<?>> theSearchCoordinatorSvc) {
+	public SearchSupportSvc(
+			ISearchSvc theSearchService,
+			SearchBuilderFactory theSearchBuilderFactory,
+			ISearchCoordinatorSvc<? extends IResourcePersistentId<?>> theSearchCoordinatorSvc) {
 		mySearchService = theSearchService;
 		mySearchBuilderFactory = theSearchBuilderFactory;
 		mySearchCoordinatorSvc = theSearchCoordinatorSvc;
 	}
-
 
 	public IBundleProvider search(
 			IFhirResourceDao<?> callingDao,
