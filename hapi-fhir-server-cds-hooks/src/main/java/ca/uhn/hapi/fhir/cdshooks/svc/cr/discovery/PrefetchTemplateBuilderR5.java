@@ -174,14 +174,14 @@ public class PrefetchTemplateBuilderR5 extends BasePrefetchTemplateBuilder {
 	}
 
 	protected StringBuilder getCodesStringBuilder(
-			List<String> theList, StringBuilder theCodes, String theSystem, String theCode) {
+			List<String> theStrings, StringBuilder theCodes, String theSystem, String theCode) {
 		String codeToken = theSystem + "|" + theCode;
 		int postAppendLength = theCodes.length() + codeToken.length();
 
 		if (theCodes.length() > 0 && postAppendLength < myMaxUriLength) {
 			theCodes.append(",");
 		} else if (postAppendLength > myMaxUriLength) {
-			theList.add(theCodes.toString());
+			theStrings.add(theCodes.toString());
 			theCodes = new StringBuilder();
 		}
 		theCodes.append(codeToken);
@@ -414,8 +414,9 @@ public class PrefetchTemplateBuilderR5 extends BasePrefetchTemplateBuilder {
 				return "subject";
 			case "VisionPrescription":
 				return "patient";
-		}
 
-		return null;
+			default:
+				return null;
+		}
 	}
 }

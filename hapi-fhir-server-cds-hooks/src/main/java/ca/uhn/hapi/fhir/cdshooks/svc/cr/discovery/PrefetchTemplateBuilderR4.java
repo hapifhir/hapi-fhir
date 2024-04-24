@@ -127,11 +127,11 @@ public class PrefetchTemplateBuilderR4 extends BasePrefetchTemplateBuilder {
 		}
 	}
 
-	protected List<String> resolveValueCodingCodes(List<Coding> valueCodings) {
+	protected List<String> resolveValueCodingCodes(List<Coding> theValueCodings) {
 		List<String> result = new ArrayList<>();
 
 		StringBuilder codes = new StringBuilder();
-		for (Coding coding : valueCodings) {
+		for (Coding coding : theValueCodings) {
 			if (coding.hasCode()) {
 				String system = coding.getSystem();
 				String code = coding.getCode();
@@ -144,8 +144,8 @@ public class PrefetchTemplateBuilderR4 extends BasePrefetchTemplateBuilder {
 		return result;
 	}
 
-	protected List<String> resolveValueSetCodes(CanonicalType valueSetId) {
-		ValueSet valueSet = (ValueSet) SearchHelper.searchRepositoryByCanonical(myRepository, valueSetId);
+	protected List<String> resolveValueSetCodes(CanonicalType theValueSetId) {
+		ValueSet valueSet = (ValueSet) SearchHelper.searchRepositoryByCanonical(myRepository, theValueSetId);
 		List<String> result = new ArrayList<>();
 		StringBuilder codes = new StringBuilder();
 		if (valueSet.hasExpansion() && valueSet.getExpansion().hasContains()) {
@@ -172,18 +172,19 @@ public class PrefetchTemplateBuilderR4 extends BasePrefetchTemplateBuilder {
 		return result;
 	}
 
-	protected StringBuilder getCodesStringBuilder(List<String> ret, StringBuilder codes, String system, String code) {
-		String codeToken = system + "|" + code;
-		int postAppendLength = codes.length() + codeToken.length();
+	protected StringBuilder getCodesStringBuilder(
+			List<String> theStrings, StringBuilder theCodes, String system, String theCode) {
+		String codeToken = system + "|" + theCode;
+		int postAppendLength = theCodes.length() + codeToken.length();
 
-		if (codes.length() > 0 && postAppendLength < myMaxUriLength) {
-			codes.append(",");
+		if (theCodes.length() > 0 && postAppendLength < myMaxUriLength) {
+			theCodes.append(",");
 		} else if (postAppendLength > myMaxUriLength) {
-			ret.add(codes.toString());
-			codes = new StringBuilder();
+			theStrings.add(theCodes.toString());
+			theCodes = new StringBuilder();
 		}
-		codes.append(codeToken);
-		return codes;
+		theCodes.append(codeToken);
+		return theCodes;
 	}
 
 	protected String mapCodePathToSearchParam(String theDataType, String thePath) {
@@ -406,8 +407,9 @@ public class PrefetchTemplateBuilderR4 extends BasePrefetchTemplateBuilder {
 				return "subject";
 			case "VisionPrescription":
 				return "patient";
-		}
 
-		return null;
+			default:
+				return null;
+		}
 	}
 }

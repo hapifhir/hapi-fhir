@@ -20,8 +20,6 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.cr;
 
 public class CdsCrConstants {
-	private CdsCrConstants() {}
-
 	public static final String CDS_CR_MODULE_ID = "CR";
 
 	public static final String CRMI_EFFECTIVE_DATA_REQUIREMENTS =
