@@ -136,6 +136,8 @@ To create CDS Services from PlanDefinitions the dependencies for a FHIR Storage 
 
 Any PlanDefinition resource with an action that has a trigger of type [named-event](http://hl7.org/fhir/R4/codesystem-trigger-type.html#trigger-type-named-event) will have a CDS Service created using the PlanDefinition.id as the service id and the name of the trigger as the hook that the service is created for per the [CDS on FHIR Specification](https://hl7.org/fhir/clinicalreasoning-cds-on-fhir.html#surfacing-clinical-decision-support).
 
+The [CRMI Effective Data Requirements](https://hl7.org/fhir/uv/crmi/1.0.0-snapshot/StructureDefinition-crmi-effectiveDataRequirements.html) extension, if present, will be used to determine the library to use when creating the prefetch templates.  Otherwise, the primary library of the PlanDefinition will be used.
+
 CDS Services created this way will show up as registered services and can be called just as other services are called. The CDS Service request will be converted into parameters for the [$apply operation](/docs/clinical_reasoning/plan_definitions.html#apply), the results of which are then converted into a CDS Response per the [CDS on FHIR Specification](https://hl7.org/fhir/clinicalreasoning-cds-on-fhir.html#consuming-decision-support).
 
 These CDS Services will take advantage of the [Auto Prefetch](/docs/cds_hooks/#auto-prefetch) feature.  Prefetch data is included as a Bundle in the `data` parameter of the $apply call.
