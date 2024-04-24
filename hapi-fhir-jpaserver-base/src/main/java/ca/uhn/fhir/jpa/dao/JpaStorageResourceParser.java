@@ -58,6 +58,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.IMetaTagSorter;
 import ca.uhn.fhir.util.MetaUtil;
 import jakarta.annotation.Nullable;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -470,7 +471,7 @@ public class JpaStorageResourceParser implements IJpaStorageResourceParser {
 		res.getMeta().setLastUpdated(theEntity.getUpdatedDate());
 		IDao.RESOURCE_PID.put(res, theEntity.getResourceId());
 
-		if (theTagList != null) {
+		if (CollectionUtils.isNotEmpty(theTagList)) {
 			res.getMeta().getTag().clear();
 			res.getMeta().getProfile().clear();
 			res.getMeta().getSecurity().clear();
