@@ -31,7 +31,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -68,7 +70,12 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		DaoMethodOutcome parentChildCsOutcome = myCodeSystemDao.create(parentChildCs);
 		parentChildCsId = ((ResourceTable) parentChildCsOutcome.getEntity()).getId();
 
-		myITermDeferredStorageSvc.saveDeferred();
+		await().atMost(5, TimeUnit.SECONDS)
+				.until(() -> {
+					myBatch2JobHelper.forceRunMaintenancePass();
+					myITermDeferredStorageSvc.saveDeferred();
+					return myITermDeferredStorageSvc.isStorageQueueEmpty(true);
+				});
 	}
 
 	@Test

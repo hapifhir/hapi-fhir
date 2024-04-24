@@ -74,7 +74,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		Bundle retBundle = myClient.read().resource(Bundle.class).withId(id).execute();
 
-    ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(retBundle));
+    	ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(retBundle));
 
 		assertEquals("http://foo/", bundle.getEntry().get(0).getFullUrl());
 	}
