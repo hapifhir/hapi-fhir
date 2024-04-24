@@ -227,7 +227,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 @ContextConfiguration(classes = {
 	TestR4Config.class
 })
-public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuilder, ISchedulerManager {
+public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuilder {
 	public static final String MY_VALUE_SET = "my-value-set";
 	public static final String URL_MY_VALUE_SET = "http://example.com/my_value_set";
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";

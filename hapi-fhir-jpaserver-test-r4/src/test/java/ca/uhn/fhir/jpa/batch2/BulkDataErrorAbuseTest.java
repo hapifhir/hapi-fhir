@@ -256,19 +256,6 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 						}
 					}
 				}
-
-//				lines.stream()
-//					.map(line -> myFhirContext.newJsonParser().parseResource(line))
-//					.map(r -> r.getIdElement().toUnqualifiedVersionless())
-//					.forEach(nextId -> {
-//						if (!resourceType.equals(nextId.getResourceType())) {
-//							fail("Found resource of type " + nextId.getResourceType() + " in file for type " + resourceType);
-//						} else {
-//							if (!foundIds.add(nextId.getValue())) {
-//								fail("Found duplicate ID: " + nextId.getValue());
-//							}
-//						}
-//					});
 			}
 		}
 
