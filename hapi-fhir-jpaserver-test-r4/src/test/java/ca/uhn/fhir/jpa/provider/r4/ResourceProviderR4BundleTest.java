@@ -42,6 +42,14 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4BundleTest.class);
 
+	private static final int DESIRED_MAX_THREADS = 5;
+
+	static {
+		if (TestR4Config.ourMaxThreads == null || TestR4Config.ourMaxThreads < DESIRED_MAX_THREADS) {
+			TestR4Config.ourMaxThreads = DESIRED_MAX_THREADS;
+		}
+	}
+
 	@BeforeEach
 	@Override
 	public void before() throws Exception {
@@ -129,11 +137,11 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 			bundles.add(myFhirContext.newJsonParser().parseResource(Bundle.class, IOUtils.toString(getClass().getResourceAsStream("/r4/identical-tags-batch.json"), Charsets.UTF_8)));
 		}
 
-		int desiredMaxThreads = 4;
+		int desiredMaxThreads = DESIRED_MAX_THREADS - 1;
 		int maxThreads = TestR4Config.getMaxThreads();
 		// we want strictly > because we want at least 1 extra thread hanging around for
-		// any spun off threads needed internally during the transaction
-		assertTrue(maxThreads > desiredMaxThreads, String.format("Wanted %d threads, but we only have %d", desiredMaxThreads, maxThreads));
+		// any spun off processes needed internally during the transaction
+		assertTrue(maxThreads > desiredMaxThreads, String.format("Wanted > %d threads, but we only have %d available", desiredMaxThreads, maxThreads));
 		ExecutorService tpe = Executors.newFixedThreadPool(desiredMaxThreads);
 		for (Bundle bundle : bundles) {
 			tpe.execute(() -> myClient.transaction().withBundle(bundle).execute());

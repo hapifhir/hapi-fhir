@@ -70,6 +70,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		DaoMethodOutcome parentChildCsOutcome = myCodeSystemDao.create(parentChildCs);
 		parentChildCsId = ((ResourceTable) parentChildCsOutcome.getEntity()).getId();
 
+		// ensure all terms are loaded
 		await().atMost(5, TimeUnit.SECONDS)
 				.until(() -> {
 					myBatch2JobHelper.forceRunMaintenancePass();

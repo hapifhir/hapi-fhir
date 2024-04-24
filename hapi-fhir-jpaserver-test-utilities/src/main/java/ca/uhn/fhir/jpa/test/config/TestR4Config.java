@@ -81,6 +81,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class TestR4Config {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR4Config.class);
+
 	public static Integer ourMaxThreads;
 	private final AtomicInteger myBorrowedConnectionCount = new AtomicInteger(0);
 	private final AtomicInteger myReturnedConnectionCount = new AtomicInteger(0);
@@ -296,5 +297,4 @@ public class TestR4Config {
 	public static int getMaxThreads() {
 		return ourMaxThreads;
 	}
-
 }
