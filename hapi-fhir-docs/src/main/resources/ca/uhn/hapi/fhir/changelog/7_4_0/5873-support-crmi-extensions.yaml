@@ -1,0 +1,7 @@
+---
+type: add
+issue: 5873
+title: "Added support for CDS on FHIR PlanDefinitions that use the CRMI Effective Data Requirements extension when
+    creating the JSON for the Service Discovery. Also added support for use of the FHIR Query Pattern extension when
+    generating Prefetch Templates for Service Discovery. If a DataRequirement has FHIR Query Pattern extensions they
+    will be used, otherwise Prefetch Templates will be generated."
