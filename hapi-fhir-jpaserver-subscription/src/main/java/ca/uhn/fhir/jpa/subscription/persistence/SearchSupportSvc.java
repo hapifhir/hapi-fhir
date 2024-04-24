@@ -35,14 +35,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 public class SearchSupportSvc {
-	@Autowired
-	private ISearchSvc mySearchService;
+	private final ISearchSvc mySearchService;
 
-	@Autowired
-	private SearchBuilderFactory mySearchBuilderFactory;
+	private final SearchBuilderFactory mySearchBuilderFactory;
 
-	@Autowired
-	private ISearchCoordinatorSvc<? extends IResourcePersistentId<?>> mySearchCoordinatorSvc;
+	private final ISearchCoordinatorSvc<? extends IResourcePersistentId<?>> mySearchCoordinatorSvc;
+
+	public SearchSupportSvc(ISearchSvc theSearchService, SearchBuilderFactory theSearchBuilderFactory, ISearchCoordinatorSvc<? extends IResourcePersistentId<?>> theSearchCoordinatorSvc) {
+		mySearchService = theSearchService;
+		mySearchBuilderFactory = theSearchBuilderFactory;
+		mySearchCoordinatorSvc = theSearchCoordinatorSvc;
+	}
+
 
 	public IBundleProvider search(
 			IFhirResourceDao<?> callingDao,

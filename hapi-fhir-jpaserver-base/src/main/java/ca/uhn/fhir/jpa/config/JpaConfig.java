@@ -33,6 +33,8 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
+import ca.uhn.fhir.jpa.api.svc.ISearchSvc;
 import ca.uhn.fhir.jpa.api.svc.ISearchUrlJobMaintenanceSvc;
 import ca.uhn.fhir.jpa.binary.interceptor.BinaryStorageInterceptor;
 import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
@@ -289,8 +291,8 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public SearchSupportSvc searchSupportSvc() {
-		return new SearchSupportSvc();
+	public SearchSupportSvc searchSupportSvc(ISearchSvc theSearchService, SearchBuilderFactory theSearchBuilderFactory, ISearchCoordinatorSvc<? extends IResourcePersistentId<?>> theSearchCoordinatorSvc) {
+		return new SearchSupportSvc(theSearchService, theSearchBuilderFactory, theSearchCoordinatorSvc);
 	}
 
 	@Bean
