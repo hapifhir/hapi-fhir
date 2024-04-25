@@ -26,6 +26,8 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletionService;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -65,6 +67,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		myStorageSettings.setBundleBatchPoolSize(JpaStorageSettings.DEFAULT_BUNDLE_BATCH_POOL_SIZE);
 		myStorageSettings.setBundleBatchMaxPoolSize(JpaStorageSettings.DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE);
 	}
+
 	/**
 	 * See #401
 	 */
@@ -129,7 +132,6 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 	}
 
-
 	@Test
 	public void testHighConcurrencyWorks() throws IOException {
 		List<Bundle> bundles = new ArrayList<>();
@@ -143,15 +145,28 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		// any spun off processes needed internally during the transaction
 		assertTrue(maxThreads > desiredMaxThreads, String.format("Wanted > %d threads, but we only have %d available", desiredMaxThreads, maxThreads));
 		ExecutorService tpe = Executors.newFixedThreadPool(desiredMaxThreads);
+		CompletionService<Bundle> completionService = new ExecutorCompletionService<>(tpe);
+
 		for (Bundle bundle : bundles) {
-			tpe.execute(() -> myClient.transaction().withBundle(bundle).execute());
+			completionService.submit(() -> myClient.transaction().withBundle(bundle).execute());
+		}
+
+		int count = 0;
+		int expected = bundles.size();
+		while (count < expected) {
+			try {
+				completionService.take();
+				count++;
+			} catch (Exception ex) {
+				ourLog.error(ex.getMessage());
+				fail(ex.getMessage());
+			}
 		}
 
 		tpe.shutdown();
 		await().atMost(100, TimeUnit.SECONDS)
 			.until(tpe::isShutdown);
 	}
-
 
 	@Test
 	public void testBundleBatchWithSingleThread() {
