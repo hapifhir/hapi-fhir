@@ -173,6 +173,7 @@ public class PrefetchTemplateBuilderR5 extends BasePrefetchTemplateBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("ReassignedVariable")
 	protected StringBuilder getCodesStringBuilder(
 			List<String> theStrings, StringBuilder theCodes, String theSystem, String theCode) {
 		String codeToken = theSystem + "|" + theCode;
