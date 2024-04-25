@@ -141,7 +141,6 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
 	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServer.class);
 	private static final long serialVersionUID = 1L;
-	private static final Map<String, String> NAME_MAPPINGS = Map.of("ListResource", "List");
 	private final List<Object> myPlainProviders = new ArrayList<>();
 	private final List<IResourceProvider> myResourceProviders = new ArrayList<>();
 	private IInterceptorService myInterceptorService;
@@ -1991,20 +1990,13 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		/* perform a 'distinct' in case there are multiple concrete IResourceProviders declared for the same FHIR-Resource. (A concrete IResourceProvider for Patient@Read and a separate concrete for Patient@Search for example */
 		/* perform a 'sort' to provide an easier to read alphabetized list (vs how the different FHIR-resource IResourceProviders happened to be registered */
 		List<String> knownDistinctAndSortedResourceTypes = myResourceProviders.stream()
-				.map(RestfulServer::getKnownDistinctAndSortedResourceTypes)
+				.map(t ->
+						myFhirContext.getResourceDefinition(t.getResourceType()).getName())
 				.distinct()
 				.sorted()
 				.collect(toList());
 		throw new ResourceNotFoundException(Msg.code(302) + "Unknown resource type '" + theResourceName
 				+ "' - Server knows how to handle: " + knownDistinctAndSortedResourceTypes);
-	}
-
-	private static String getKnownDistinctAndSortedResourceTypes(IResourceProvider theResourceProvider) {
-		String simpleName = theResourceProvider.getResourceType().getSimpleName();
-		if (NAME_MAPPINGS.containsKey(simpleName)) {
-			return NAME_MAPPINGS.get(simpleName);
-		}
-		return simpleName;
 	}
 
 	/**
