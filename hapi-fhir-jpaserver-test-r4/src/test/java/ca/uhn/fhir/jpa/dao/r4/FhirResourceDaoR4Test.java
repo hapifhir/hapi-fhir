@@ -159,9 +159,11 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasLength;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -250,27 +252,40 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testUpdateResource_whenTokenPropertyAssignedTooLargeValue_willTruncateLargeValue(){
+	public void testUpdateResource_whenTokenPropertyAssignedTooLargeValue_willTruncateLargeValueOnUpdate(){
+		// given
+		final String modifiedEmailPrefix = "modified";
 		final String originalEmail = "test200andmoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusssancoresusancoresusancoresusancorew@abcdusancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresuselasticsearchisworking.com";
-		final String modifiedEmail = "modified" + originalEmail;
+		final String modifiedEmail = modifiedEmailPrefix + originalEmail;
 
+		// when
 		Patient pt1 = new Patient();
 		pt1.setActive(true);
 		pt1.addName().setFamily("FAM");
 		pt1.addTelecom().setSystem(ContactPoint.ContactPointSystem.EMAIL).setValue(originalEmail);
-			IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 
-		runInTransaction(() -> {
-			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong()), greaterThan(0));
-			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
-			assertTrue(tableOpt.isPresent());
-			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
-		});
+		myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 
 		pt1.getTelecomFirstRep().setValue(modifiedEmail);
 
-		DaoMethodOutcome methodOutcome = myPatientDao.update(pt1);
+		IIdType id1 = myPatientDao.update(pt1).getId().toUnqualifiedVersionless();
 
+		// then
+		runInTransaction(() -> {
+			List<String> paramValues = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t -> defaultString(t.getSystem()).equals("email"))
+				.map(t -> t.getValue())
+				.collect(Collectors.toList());
+
+			assertThat(paramValues, hasSize(2));
+
+			for (String tokenValue : paramValues) {
+				assertThat(tokenValue, startsWith(modifiedEmailPrefix));
+				assertThat(tokenValue, hasLength(ResourceIndexedSearchParamToken.MAX_LENGTH));
+			}
+		});
 	}
 
 	@Test
