@@ -51,6 +51,8 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 public abstract class BaseHapiScheduler implements IHapiScheduler {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseHapiScheduler.class);
 
@@ -153,9 +155,9 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		}
 	}
 
-	// TODO - do not make this a toggle
 	public void pause() {
-
+		String errorMsg = null;
+		Throwable ex = null;
 		try {
 			int count = 0;
 			myScheduler.standby();
@@ -166,9 +168,21 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 				Thread.sleep(100);
 				count++;
 			}
+			if (count >= 3) {
+				errorMsg = "Failed to set to standby after " + count
+						+ " attempts. Execution will continue, but may cause bugs.";
+			}
+		} catch (Exception x) {
+			ex = x;
+			errorMsg = "Failed to set to standby. Execution will continue, but may cause bugs.";
+		}
 
-		} catch (Exception ex) {
-			throw new RuntimeException(ex);
+		if (isNotBlank(errorMsg)) {
+			if (ex != null) {
+				ourLog.warn(errorMsg, ex);
+			} else {
+				ourLog.warn(errorMsg);
+			}
 		}
 	}
 
@@ -198,8 +212,8 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 			List<JobExecutionContext> currentlyExecutingJobs = myScheduler.getCurrentlyExecutingJobs();
 			ourLog.info("Checking for running jobs: {}", currentlyExecutingJobs);
 			return !currentlyExecutingJobs.isEmpty();
-		} catch (SchedulerException theE) {
-			throw new RuntimeException(theE);
+		} catch (SchedulerException ex) {
+			throw new RuntimeException(Msg.code(2521) + " Failed during  check for scheduled jobs", ex);
 		}
 	}
 
