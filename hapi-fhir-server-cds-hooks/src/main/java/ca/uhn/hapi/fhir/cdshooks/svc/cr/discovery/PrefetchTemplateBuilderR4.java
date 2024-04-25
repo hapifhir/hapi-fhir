@@ -79,7 +79,7 @@ public class PrefetchTemplateBuilderR4 extends BasePrefetchTemplateBuilder {
 		List<Extension> fhirQueryExtList = theDataRequirement.getExtension().stream()
 				.filter(e -> e.getUrl().equals(CQF_FHIR_QUERY_PATTERN) && e.hasValue())
 				.collect(Collectors.toList());
-		if (fhirQueryExtList != null && !fhirQueryExtList.isEmpty()) {
+		if (!fhirQueryExtList.isEmpty()) {
 			for (Extension fhirQueryExt : fhirQueryExtList) {
 				urlList.add(fhirQueryExt.getValueAsPrimitive().getValueAsString());
 			}
@@ -102,6 +102,7 @@ public class PrefetchTemplateBuilderR4 extends BasePrefetchTemplateBuilder {
 		return urlList;
 	}
 
+	@SuppressWarnings("ReassignedVariable")
 	protected void resolveCodeFilter(DataRequirement theDataRequirement, List<String> theUrlList, String theBaseQuery) {
 		for (DataRequirement.DataRequirementCodeFilterComponent codeFilterComponent :
 				theDataRequirement.getCodeFilter()) {
@@ -127,6 +128,7 @@ public class PrefetchTemplateBuilderR4 extends BasePrefetchTemplateBuilder {
 		}
 	}
 
+	@SuppressWarnings("ReassignedVariable")
 	protected List<String> resolveValueCodingCodes(List<Coding> theValueCodings) {
 		List<String> result = new ArrayList<>();
 
@@ -144,6 +146,7 @@ public class PrefetchTemplateBuilderR4 extends BasePrefetchTemplateBuilder {
 		return result;
 	}
 
+	@SuppressWarnings("ReassignedVariable")
 	protected List<String> resolveValueSetCodes(CanonicalType theValueSetId) {
 		ValueSet valueSet = (ValueSet) SearchHelper.searchRepositoryByCanonical(myRepository, theValueSetId);
 		List<String> result = new ArrayList<>();
@@ -174,18 +177,19 @@ public class PrefetchTemplateBuilderR4 extends BasePrefetchTemplateBuilder {
 
 	@SuppressWarnings("ReassignedVariable")
 	protected StringBuilder getCodesStringBuilder(
-			List<String> theStrings, StringBuilder theCodes, String system, String theCode) {
-		String codeToken = system + "|" + theCode;
-		int postAppendLength = theCodes.length() + codeToken.length();
+			List<String> theStrings, StringBuilder theCodes, String theSystem, String theCode) {
+		StringBuilder codes = theCodes;
+		String codeToken = theSystem + "|" + theCode;
+		int postAppendLength = codes.length() + codeToken.length();
 
-		if (theCodes.length() > 0 && postAppendLength < myMaxUriLength) {
-			theCodes.append(",");
+		if (codes.length() > 0 && postAppendLength < myMaxUriLength) {
+			codes.append(",");
 		} else if (postAppendLength > myMaxUriLength) {
-			theStrings.add(theCodes.toString());
-			theCodes = new StringBuilder();
+			theStrings.add(codes.toString());
+			codes = new StringBuilder();
 		}
-		theCodes.append(codeToken);
-		return theCodes;
+		codes.append(codeToken);
+		return codes;
 	}
 
 	protected String mapCodePathToSearchParam(String theDataType, String thePath) {
