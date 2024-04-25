@@ -308,11 +308,10 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 			OperationOutcome.OperationOutcomeIssueComponent issue =
 					new OperationOutcome.OperationOutcomeIssueComponent()
-							.setSeverity(OperationOutcome.IssueSeverity.ERROR)
+							.setSeverity(getIssueSeverityFromCodeValidationIssue(codeValidationIssue))
 							.setCode(getIssueTypeFromCodeValidationIssue(codeValidationIssue))
 							.setDetails(codeableConcept);
 			issue.getDetails().setText(codeValidationIssue.getMessage());
-
 			issues.add(issue);
 		}
 		return issues;
@@ -343,6 +342,19 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 				return OperationOutcome.IssueType.CODEINVALID;
 			case INVALID:
 				return OperationOutcome.IssueType.INVALID;
+		}
+		return null;
+	}
+
+	private OperationOutcome.IssueSeverity getIssueSeverityFromCodeValidationIssue(
+			IValidationSupport.CodeValidationIssue codeValidationIssue) {
+		switch (codeValidationIssue.getSeverity()) {
+			case ERROR:
+				return OperationOutcome.IssueSeverity.ERROR;
+			case WARNING:
+				return OperationOutcome.IssueSeverity.WARNING;
+			case INFORMATION:
+				return OperationOutcome.IssueSeverity.INFORMATION;
 		}
 		return null;
 	}

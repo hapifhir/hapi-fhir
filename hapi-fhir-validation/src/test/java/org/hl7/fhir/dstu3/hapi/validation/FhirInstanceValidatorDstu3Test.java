@@ -227,7 +227,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 				} else if (myValidSystems.contains(system)) {
 					final String message = "Unknown code (for '" + system + "#" + code + "')";
 
-					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage(message).setCodeValidationIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(message, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
+					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage(message).setCodeValidationIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(message, IValidationSupport.IssueSeverity.ERROR, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
 
 				} else if (myCodeSystems.containsKey(system)) {
 					CodeSystem cs = myCodeSystems.get(system);
@@ -1378,10 +1378,10 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 		ValidationResult output = myVal.validateWithResult(patient);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(2, all.size());
+		assertEquals(1, all.size());
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertThat(
-			all.get(1).getMessage(),
+			all.get(0).getMessage(),
 			containsString("None of the codings provided are in the value set 'Identifier Type Codes'"));
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 

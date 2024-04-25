@@ -14,6 +14,7 @@ import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.UnknownCodeSystemWarningValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_10_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_14_50;
@@ -137,12 +138,16 @@ public class VersionSpecificWorkerContextWrapperCoreTest {
 						}
 			);
 
+		UnknownCodeSystemWarningValidationSupport unknownCodeSystemWarningValidationSupport = new UnknownCodeSystemWarningValidationSupport(ourCtx);
+		unknownCodeSystemWarningValidationSupport.setNonExistentCodeSystemSeverity(IValidationSupport.IssueSeverity.WARNING);
 		myValidationSupport = new CachingValidationSupport(
 			new ValidationSupportChain(
 				mockSupport,
 				myDefaultValidationSupport,
 				new InMemoryTerminologyServerValidationSupport(ourCtx),
-				new CommonCodeSystemsTerminologyService(ourCtx)));
+				new CommonCodeSystemsTerminologyService(ourCtx),
+				unknownCodeSystemWarningValidationSupport)
+		);
 		myInstanceVal = new FhirInstanceValidator(myValidationSupport);
 
 		wrapper = new VersionSpecificWorkerContextWrapper(new ValidationSupportContext(myValidationSupport), versionCanonicalizer);

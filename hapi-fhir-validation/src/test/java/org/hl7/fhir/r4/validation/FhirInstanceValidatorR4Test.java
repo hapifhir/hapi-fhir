@@ -287,7 +287,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
 					final String message = "Unknown code (for '" + system + "#" + code + "')";
-					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage(message).setCodeValidationIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(message, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
+					return new IValidationSupport.CodeValidationResult().setSeverityCode(ValidationMessage.IssueSeverity.ERROR.toCode()).setMessage(message).setCodeValidationIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(message, IValidationSupport.IssueSeverity.ERROR, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
 				}
@@ -1484,9 +1484,9 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(2, all.size());
+		assertEquals(1, all.size());
 
-		assertThat(all.get(1).getMessage(), containsString("None of the codings provided are in the value set 'IdentifierType'"));
+		assertThat(all.get(0).getMessage(), containsString("None of the codings provided are in the value set 'IdentifierType'"));
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}
@@ -1760,7 +1760,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		input.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
 		input.setStatus(ObservationStatus.AMENDED);
 		input.getCode().addCoding().setSystem("http://loinc.org").setCode("1234").setDisplay("FOO");
-		/*
+
 		input.setValue(new Quantity(
 			null,
 			123,
@@ -1768,9 +1768,9 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 			"blah",
 			"blah"
 		));
-*/
 
 
+/*
 		input.setValue(new Quantity(
 			null,
 			123,
@@ -1778,7 +1778,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 			"MG/DL",
 			"MG/DL"
 		));
-
+*/
 		String inputString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 		ourLog.info("Results:\n{}", inputString);
 

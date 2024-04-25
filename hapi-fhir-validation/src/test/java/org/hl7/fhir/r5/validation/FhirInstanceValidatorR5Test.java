@@ -194,7 +194,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 					retVal = new IValidationSupport.CodeValidationResult().setCode(code);
 				} else if (myValidSystems.contains(system)) {
 					String theMessage = "Unknown code (for '" + system + "#" + code + "')";
-					return new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage(theMessage).setCodeValidationIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(theMessage, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
+					return new IValidationSupport.CodeValidationResult().setSeverity(IValidationSupport.IssueSeverity.ERROR).setMessage(theMessage).setCodeValidationIssues(Collections.singletonList(new IValidationSupport.CodeValidationIssue(theMessage, IValidationSupport.IssueSeverity.ERROR, IValidationSupport.CodeValidationIssueCode.CODE_INVALID, IValidationSupport.CodeValidationIssueCoding.INVALID_CODE)));
 				} else {
 					retVal = myDefaultValidationSupport.validateCode(new ValidationSupportContext(myDefaultValidationSupport), options, system, code, display, valueSetUrl);
 				}
@@ -1010,11 +1010,11 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myVal.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
-		assertEquals(2, all.size());
+		assertEquals(1, all.size());
 
 		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertThat(
-			all.get(1).getMessage(),
+			all.get(0).getMessage(),
 			containsString("None of the codings provided are in the value set 'Identifier Type Codes'"));
 		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 

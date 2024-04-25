@@ -479,18 +479,27 @@ public interface IValidationSupport {
 	class CodeValidationIssue {
 
 		private final String myMessage;
+		private final IssueSeverity mySeverity;
 		private final CodeValidationIssueCode myCode;
 		private final CodeValidationIssueCoding myCoding;
 
 		public CodeValidationIssue(
-				String theMessage, CodeValidationIssueCode theCode, CodeValidationIssueCoding theCoding) {
+				String theMessage,
+				IssueSeverity mySeverity,
+				CodeValidationIssueCode theCode,
+				CodeValidationIssueCoding theCoding) {
 			this.myMessage = theMessage;
+			this.mySeverity = mySeverity;
 			this.myCode = theCode;
 			this.myCoding = theCoding;
 		}
 
 		public String getMessage() {
 			return myMessage;
+		}
+
+		public IssueSeverity getSeverity() {
+			return mySeverity;
 		}
 
 		public CodeValidationIssueCode getCode() {

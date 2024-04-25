@@ -28,7 +28,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Enumerations;
-import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 import java.util.ArrayList;
@@ -579,29 +578,10 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			codeValidationResult = new CodeValidationResult()
 					.setSeverityCode(severity.toCode())
 					.setMessage(message)
-					.addCodeValidationIssue(new CodeValidationIssue(message, issueCode, issueCoding));
+					.addCodeValidationIssue(
+							new CodeValidationIssue(message, IssueSeverity.ERROR, issueCode, issueCoding));
 		}
 
-		if (!theOptions.isInferSystem() && isNotBlank(theCodeSystemUrlAndVersionToValidate)) {
-			if (codeSystemToValidateResource == null) {
-				if (!theValidationSupportContext
-						.getRootValidationSupport()
-						.isCodeSystemSupported(theValidationSupportContext, theCodeSystemUrlAndVersionToValidate)) {
-					List<OperationOutcome.OperationOutcomeIssueComponent> issues = new ArrayList<>();
-
-					// TODO These should match the following cases in the core FHIR validation test cases.
-					// validation.validation-simple-codeableconcept-bad-system
-					// validation.validation-simple-codeableconcept-bad-version2
-					// validation.validation-simple-coding-bad-system
-					// validation.validation-simple-coding-bad-system-local
-					// validation.validation-simple-coding-bad-system2
-
-					String theMessage = "Unknown CodeSystem: " + theCodeSystemUrlAndVersionToValidate;
-					codeValidationResult.addCodeValidationIssue(new CodeValidationIssue(
-							theMessage, CodeValidationIssueCode.NOT_FOUND, CodeValidationIssueCoding.NOT_FOUND));
-				}
-			}
-		}
 		return codeValidationResult;
 	}
 
@@ -1097,6 +1077,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 						Msg.code(702) + failureMessage,
 						new CodeValidationIssue(
 								failureMessage,
+								IssueSeverity.ERROR,
 								CodeValidationIssueCode.NOT_FOUND,
 								CodeValidationIssueCoding.NOT_FOUND));
 			}
@@ -1122,7 +1103,10 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					throw new ExpansionCouldNotBeCompletedInternallyException(
 							Msg.code(703) + theMessage,
 							new CodeValidationIssue(
-									theMessage, CodeValidationIssueCode.OTHER, CodeValidationIssueCoding.OTHER));
+									theMessage,
+									IssueSeverity.ERROR,
+									CodeValidationIssueCode.OTHER,
+									CodeValidationIssueCoding.OTHER));
 				}
 				for (org.hl7.fhir.r5.model.ValueSet.ValueSetExpansionContainsComponent next :
 						subExpansion.getExpansion().getContains()) {
@@ -1362,14 +1346,21 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 									theExpectedDisplay)
 					+ theMessageAppend;
 		}
-		return new CodeValidationResult()
+		CodeValidationResult codeValidationResult = new CodeValidationResult()
 				.setSeverity(issueSeverity)
 				.setMessage(message)
 				.setCode(theCode)
 				.setCodeSystemVersion(theCodeSystemVersion)
-				.setDisplay(theExpectedDisplay)
-				.setCodeValidationIssues(Collections.singletonList(new CodeValidationIssue(
-						message, CodeValidationIssueCode.INVALID, CodeValidationIssueCoding.INVALID_DISPLAY)));
+				.setDisplay(theExpectedDisplay);
+		if (issueSeverity != null) {
+			codeValidationResult.setCodeValidationIssues(Collections.singletonList(new CodeValidationIssue(
+					message,
+					theIssueSeverityForCodeDisplayMismatch,
+					CodeValidationIssueCode.INVALID,
+					CodeValidationIssueCoding.INVALID_DISPLAY)));
+		}
+
+		return codeValidationResult;
 	}
 
 	private static void flattenAndConvertCodesDstu2(

@@ -2134,9 +2134,9 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		if (theDisplayCodeMismatchIssueSeverity == IValidationSupport.IssueSeverity.ERROR) {
 
 			assertEquals(2, oo.getIssue().size());
-			badDisplayIssue = oo.getIssue().get(1);
+			badDisplayIssue = oo.getIssue().get(0);
 
-			OperationOutcome.OperationOutcomeIssueComponent noGoodCodings = oo.getIssue().get(0);
+			OperationOutcome.OperationOutcomeIssueComponent noGoodCodings = oo.getIssue().get(1);
 			assertEquals("error", noGoodCodings.getSeverity().toCode());
 			assertEquals("None of the codings provided are in the value set 'ValueSet[http://vs]' (http://vs), and a coding from this value set is required) (codes = http://cs#8302-2)", noGoodCodings.getDiagnostics());
 
