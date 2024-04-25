@@ -56,6 +56,7 @@ public class PrefetchTemplateBuilderR4 extends BasePrefetchTemplateBuilder {
 		return prefetchList;
 	}
 
+	@SuppressWarnings("ReassignedVariable")
 	protected Library resolvePrimaryLibrary(PlanDefinition thePlanDefinition) {
 		Library library = null;
 		Extension dataReqExt = thePlanDefinition.getExtensionByUrl(CRMI_EFFECTIVE_DATA_REQUIREMENTS);
@@ -121,7 +122,6 @@ public class PrefetchTemplateBuilderR4 extends BasePrefetchTemplateBuilder {
 					} else {
 						theUrlList.add("," + code);
 					}
-
 					isFirstCodingInFilter = false;
 				}
 			}
@@ -131,17 +131,14 @@ public class PrefetchTemplateBuilderR4 extends BasePrefetchTemplateBuilder {
 	@SuppressWarnings("ReassignedVariable")
 	protected List<String> resolveValueCodingCodes(List<Coding> theValueCodings) {
 		List<String> result = new ArrayList<>();
-
 		StringBuilder codes = new StringBuilder();
 		for (Coding coding : theValueCodings) {
 			if (coding.hasCode()) {
 				String system = coding.getSystem();
 				String code = coding.getCode();
-
 				codes = getCodesStringBuilder(result, codes, system, code);
 			}
 		}
-
 		result.add(codes.toString());
 		return result;
 	}
@@ -156,7 +153,6 @@ public class PrefetchTemplateBuilderR4 extends BasePrefetchTemplateBuilder {
 					valueSet.getExpansion().getContains()) {
 				String system = contains.getSystem();
 				String code = contains.getCode();
-
 				codes = getCodesStringBuilder(result, codes, system, code);
 			}
 		} else if (valueSet.hasCompose() && valueSet.getCompose().hasInclude()) {
@@ -165,7 +161,6 @@ public class PrefetchTemplateBuilderR4 extends BasePrefetchTemplateBuilder {
 				if (concepts.hasConcept()) {
 					for (ValueSet.ConceptReferenceComponent concept : concepts.getConcept()) {
 						String code = concept.getCode();
-
 						codes = getCodesStringBuilder(result, codes, system, code);
 					}
 				}
@@ -181,7 +176,6 @@ public class PrefetchTemplateBuilderR4 extends BasePrefetchTemplateBuilder {
 		StringBuilder codes = theCodes;
 		String codeToken = theSystem + "|" + theCode;
 		int postAppendLength = codes.length() + codeToken.length();
-
 		if (codes.length() > 0 && postAppendLength < myMaxUriLength) {
 			codes.append(",");
 		} else if (postAppendLength > myMaxUriLength) {

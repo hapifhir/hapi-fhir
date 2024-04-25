@@ -46,7 +46,6 @@ public class PrefetchTemplateBuilderDstu3 extends BasePrefetchTemplateBuilder {
 		PrefetchUrlList prefetchList = new PrefetchUrlList();
 		if (thePlanDefinition == null) return null;
 		Library library = resolvePrimaryLibrary(thePlanDefinition);
-		// TODO: resolve data requirements
 		if (!library.hasDataRequirement()) return null;
 		for (DataRequirement dataRequirement : library.getDataRequirement()) {
 			List<String> requestUrls = createRequestUrl(dataRequirement);
@@ -58,6 +57,7 @@ public class PrefetchTemplateBuilderDstu3 extends BasePrefetchTemplateBuilder {
 		return prefetchList;
 	}
 
+	@SuppressWarnings("ReassignedVariable")
 	protected Library resolvePrimaryLibrary(PlanDefinition thePlanDefinition) {
 		Library library = null;
 		Extension dataReqExt = thePlanDefinition.getExtensionByUrl(CRMI_EFFECTIVE_DATA_REQUIREMENTS);
@@ -82,7 +82,7 @@ public class PrefetchTemplateBuilderDstu3 extends BasePrefetchTemplateBuilder {
 		List<Extension> fhirQueryExtList = theDataRequirement.getExtension().stream()
 				.filter(e -> e.getUrl().equals(CQF_FHIR_QUERY_PATTERN) && e.hasValue())
 				.collect(Collectors.toList());
-		if (fhirQueryExtList != null && !fhirQueryExtList.isEmpty()) {
+		if (!fhirQueryExtList.isEmpty()) {
 			for (Extension fhirQueryExt : fhirQueryExtList) {
 				urlList.add(fhirQueryExt.getValueAsPrimitive().getValueAsString());
 			}
@@ -105,12 +105,12 @@ public class PrefetchTemplateBuilderDstu3 extends BasePrefetchTemplateBuilder {
 		return urlList;
 	}
 
+	@SuppressWarnings("ReassignedVariable")
 	protected void resolveCodeFilter(DataRequirement theDataRequirement, List<String> theUrlList, String theBaseQuery) {
 		for (DataRequirement.DataRequirementCodeFilterComponent codeFilterComponent :
 				theDataRequirement.getCodeFilter()) {
 			if (!codeFilterComponent.hasPath()) continue;
 			String path = mapCodePathToSearchParam(theDataRequirement.getType(), codeFilterComponent.getPath());
-
 			StringType codeFilterComponentString = null;
 			if (codeFilterComponent.hasValueSetStringType()) {
 				codeFilterComponentString = codeFilterComponent.getValueSetStringType();
@@ -126,7 +126,6 @@ public class PrefetchTemplateBuilderDstu3 extends BasePrefetchTemplateBuilder {
 					} else {
 						theUrlList.add("," + code);
 					}
-
 					isFirstCodingInFilter = false;
 				}
 			}
@@ -139,23 +138,22 @@ public class PrefetchTemplateBuilderDstu3 extends BasePrefetchTemplateBuilder {
 		}
 	}
 
+	@SuppressWarnings("ReassignedVariable")
 	protected List<String> resolveValueCodingCodes(List<Coding> theValueCodings) {
 		List<String> result = new ArrayList<>();
-
 		StringBuilder codes = new StringBuilder();
 		for (Coding coding : theValueCodings) {
 			if (coding.hasCode()) {
 				String system = coding.getSystem();
 				String code = coding.getCode();
-
 				codes = getCodesStringBuilder(result, codes, system, code);
 			}
 		}
-
 		result.add(codes.toString());
 		return result;
 	}
 
+	@SuppressWarnings("ReassignedVariable")
 	protected List<String> resolveValueSetCodes(StringType theValueSetId) {
 		ValueSet valueSet = (ValueSet) SearchHelper.searchRepositoryByCanonical(myRepository, theValueSetId);
 		List<String> result = new ArrayList<>();
@@ -187,17 +185,17 @@ public class PrefetchTemplateBuilderDstu3 extends BasePrefetchTemplateBuilder {
 	@SuppressWarnings("ReassignedVariable")
 	protected StringBuilder getCodesStringBuilder(
 			List<String> theStrings, StringBuilder theCodes, String theSystem, String theCode) {
+		StringBuilder codes = theCodes;
 		String codeToken = theSystem + "|" + theCode;
-		int postAppendLength = theCodes.length() + codeToken.length();
-
-		if (theCodes.length() > 0 && postAppendLength < myMaxUriLength) {
-			theCodes.append(",");
+		int postAppendLength = codes.length() + codeToken.length();
+		if (codes.length() > 0 && postAppendLength < myMaxUriLength) {
+			codes.append(",");
 		} else if (postAppendLength > myMaxUriLength) {
-			theStrings.add(theCodes.toString());
-			theCodes = new StringBuilder();
+			theStrings.add(codes.toString());
+			codes = new StringBuilder();
 		}
-		theCodes.append(codeToken);
-		return theCodes;
+		codes.append(codeToken);
+		return codes;
 	}
 
 	protected String mapCodePathToSearchParam(String theDataType, String thePath) {
