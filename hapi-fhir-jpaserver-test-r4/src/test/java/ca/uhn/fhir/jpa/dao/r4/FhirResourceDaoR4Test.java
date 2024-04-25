@@ -4,6 +4,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -83,6 +84,7 @@ import org.hl7.fhir.r4.model.CompartmentDefinition;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Device;
@@ -247,6 +249,29 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		return retVal;
 	}
 
+	@Test
+	public void testUpdateResource_whenTokenPropertyAssignedTooLargeValue_willTruncateLargeValue(){
+		final String originalEmail = "test200andmoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusssancoresusancoresusancoresusancorew@abcdusancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresuselasticsearchisworking.com";
+		final String modifiedEmail = "modified" + originalEmail;
+
+		Patient pt1 = new Patient();
+		pt1.setActive(true);
+		pt1.addName().setFamily("FAM");
+		pt1.addTelecom().setSystem(ContactPoint.ContactPointSystem.EMAIL).setValue(originalEmail);
+			IIdType id1 = myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+
+		runInTransaction(() -> {
+			assertThat(myResourceIndexedSearchParamTokenDao.countForResourceId(id1.getIdPartAsLong()), greaterThan(0));
+			Optional<ResourceTable> tableOpt = myResourceTableDao.findById(id1.getIdPartAsLong());
+			assertTrue(tableOpt.isPresent());
+			assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, tableOpt.get().getIndexStatus().longValue());
+		});
+
+		pt1.getTelecomFirstRep().setValue(modifiedEmail);
+
+		DaoMethodOutcome methodOutcome = myPatientDao.update(pt1);
+
+	}
 
 	@Test
 	public void testDeletedResourcesAreReindexed() {
