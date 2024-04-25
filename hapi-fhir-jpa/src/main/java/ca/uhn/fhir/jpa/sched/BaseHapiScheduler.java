@@ -29,6 +29,7 @@ import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.quartz.JobDataMap;
+import org.quartz.JobExecutionContext;
 import org.quartz.JobKey;
 import org.quartz.ScheduleBuilder;
 import org.quartz.Scheduler;
@@ -44,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.quartz.SchedulerFactoryBean;
 
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -151,48 +153,27 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		}
 	}
 
-	public void pause(boolean theIsPaused) {
-		//		try {
-		//			if (theIsPaused) {
-		//				myScheduler.pauseAll();
-		//			} else {
-		//				myScheduler.resumeAll();
-		//			}
-		//		} catch (SchedulerException ex) {
-		//			ourLog.error("Encountered exception while "
-		//					+ (theIsPaused ? "pausing" : "unpausing")
-		//					+ " scheduler. This may affect test cleanup.");
-		//		}
+	// TODO - do not make this a toggle
+	public void pause() {
 
 		try {
 			int count = 0;
-			if (theIsPaused) {
-				myScheduler.standby();
-				while (count < 3) {
-					if (myScheduler.isInStandbyMode()) {
-						break;
-					}
-					Thread.sleep(100);
-					count++;
+			myScheduler.standby();
+			while (count < 3) {
+				if (!hasRunningJobs()) {
+					break;
 				}
-			} else {
-				myScheduler.start();
-				while (count < 3) {
-					if (myScheduler.isStarted()) {
-						break;
-					}
-					Thread.sleep(100);
-					count++;
-				}
+				Thread.sleep(100);
+				count++;
 			}
-			if (count >= 3) {
-				String msg =
-						(theIsPaused ? "Pausing" : "Resuming") + " failed to complete as expected; continuing anyways.";
-				ourLog.warn(msg);
-			}
+
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
 		}
+	}
+
+	public void restart() {
+		start();
 	}
 
 	@Override
@@ -209,6 +190,16 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		} catch (SchedulerException e) {
 			ourLog.error("Failed to get log status for scheduler", e);
 			throw new InternalErrorException(Msg.code(1637) + "Failed to get log status for scheduler", e);
+		}
+	}
+
+	private boolean hasRunningJobs() {
+		try {
+			List<JobExecutionContext> currentlyExecutingJobs = myScheduler.getCurrentlyExecutingJobs();
+			ourLog.info("Checking for running jobs: {}", currentlyExecutingJobs);
+			return !currentlyExecutingJobs.isEmpty();
+		} catch (SchedulerException theE) {
+			throw new RuntimeException(theE);
 		}
 	}
 

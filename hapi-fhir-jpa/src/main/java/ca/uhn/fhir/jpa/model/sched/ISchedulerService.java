@@ -39,7 +39,10 @@ public interface ISchedulerService {
 	 * @param theToPause whether or not to pause the scheduler; true pauses, false unpauses
 	 */
 	@VisibleForTesting
-	void pauseAllJobs(boolean theToPause);
+	void pauseAllJobs();
+
+	@VisibleForTesting
+	void restart();
 
 	/**
 	 * This task will execute locally (and should execute on all nodes of the cluster if there is a cluster)

@@ -83,7 +83,6 @@ import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.interceptor.PerformanceTracingLoggingInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.packages.IPackageInstallerSvc;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.provider.JpaSystemProvider;
@@ -633,7 +632,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		 * interfere with the database cleanup!
 		 */
 		ourLog.info("Pausing Schedulers");
-		mySchedulerService.pauseAllJobs(true);
+		mySchedulerService.pauseAllJobs();
 
 		myTerminologyDeferredStorageSvc.logQueueForUnitTest();
 		if (!myTermDeferredStorageSvc.isStorageQueueEmpty(true)) {
@@ -668,7 +667,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 		// restart the jobs
 		ourLog.info("Restarting the schedulers");
-		mySchedulerService.pauseAllJobs(false);
+		mySchedulerService.restart();
 		ourLog.info("5 - " + getClass().getSimpleName() + ".afterPurgeDatabases");
 	}
 

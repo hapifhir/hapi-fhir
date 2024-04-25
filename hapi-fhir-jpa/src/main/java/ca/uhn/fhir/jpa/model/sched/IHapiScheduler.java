@@ -41,7 +41,9 @@ public interface IHapiScheduler {
 	 * Pauses (or unpauses) this scheduler.
 	 * @param theIsPausedBool whether or not to pause the scheduler. True pauses, false unpauses
 	 */
-	void pause(boolean theIsPausedBool);
+	void pause();
+
+	void restart();
 
 	void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
 

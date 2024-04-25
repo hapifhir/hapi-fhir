@@ -54,7 +54,12 @@ public class HapiNullScheduler implements IHapiScheduler {
 	public void logStatusForUnitTest() {}
 
 	@Override
-	public void pause(boolean theIsPausedBool) {
+	public void pause() {
+		// nothing to do
+	}
+
+	@Override
+	public void restart() {
 		// nothing to do
 	}
 
