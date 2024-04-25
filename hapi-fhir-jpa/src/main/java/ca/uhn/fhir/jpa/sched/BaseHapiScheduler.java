@@ -152,16 +152,46 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 	}
 
 	public void pause(boolean theIsPaused) {
+		//		try {
+		//			if (theIsPaused) {
+		//				myScheduler.pauseAll();
+		//			} else {
+		//				myScheduler.resumeAll();
+		//			}
+		//		} catch (SchedulerException ex) {
+		//			ourLog.error("Encountered exception while "
+		//					+ (theIsPaused ? "pausing" : "unpausing")
+		//					+ " scheduler. This may affect test cleanup.");
+		//		}
+
 		try {
+			int count = 0;
 			if (theIsPaused) {
-				myScheduler.pauseAll();
+				myScheduler.standby();
+				while (count < 3) {
+					if (myScheduler.isInStandbyMode()) {
+						break;
+					}
+					Thread.sleep(100);
+					count++;
+				}
 			} else {
-				myScheduler.resumeAll();
+				myScheduler.start();
+				while (count < 3) {
+					if (myScheduler.isStarted()) {
+						break;
+					}
+					Thread.sleep(100);
+					count++;
+				}
 			}
-		} catch (SchedulerException ex) {
-			ourLog.error("Encountered exception while "
-					+ (theIsPaused ? "pausing" : "unpausing")
-					+ " scheduler. This may affect test cleanup.");
+			if (count >= 3) {
+				String msg =
+						(theIsPaused ? "Pausing" : "Resuming") + " failed to complete as expected; continuing anyways.";
+				ourLog.warn(msg);
+			}
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
 		}
 	}
 
