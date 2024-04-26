@@ -962,7 +962,7 @@
 		<junit_version>5.10.1</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>9.4.0</flyway_version>
-		<hibernate_version>6.4.1.Final</hibernate_version>
+		<hibernate_version>6.4.4.Final</hibernate_version>
 		<logback_version>1.4.14</logback_version>
 	 	<!-- Update lucene version when you update hibernate-search version - These go together! -->
 		<hibernate_search_version>7.0.0.Final</hibernate_search_version>

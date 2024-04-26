@@ -65,8 +65,9 @@ import java.util.Date;
 		+ "               p.REQUEST_ID        as PROV_REQUEST_ID,"
 		+ "               r.fhir_id         as FHIR_ID      "
 		+ "FROM HFJ_RESOURCE r "
-		+ "    INNER JOIN HFJ_RES_VER h ON r.res_id = h.res_id and r.res_ver = h.res_ver"
-		+ "    LEFT OUTER JOIN HFJ_RES_VER_PROV p ON p.res_ver_pid = h.pid ")
+	// fixme cosmos hack
+		+ "    INNER JOIN HFJ_RES_VER h ON r.res_id = h.res_id and r.res_ver = h.res_ver and r.partition_id = h.partition_id"
+		+ "    LEFT OUTER JOIN HFJ_RES_VER_PROV p ON p.res_ver_pid = h.pid and p.partition_id = h.partition_id")
 public class ResourceSearchView implements IBaseResourceEntity, Serializable {
 
 	private static final long serialVersionUID = 1L;

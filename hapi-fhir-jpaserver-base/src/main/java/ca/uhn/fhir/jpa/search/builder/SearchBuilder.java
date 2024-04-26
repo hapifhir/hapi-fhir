@@ -672,7 +672,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 		// If we haven't added any predicates yet, we're doing a search for all resources. Make sure we add the
 		// partition ID predicate in that case.
-		if (!sqlBuilder.haveAtLeastOnePredicate()) {
+		// fixme cosmos hack
+		if (!sqlBuilder.haveAtLeastOnePredicate() || true) {
 			Condition partitionIdPredicate = sqlBuilder
 					.getOrCreateResourceTablePredicateBuilder()
 					.createPartitionIdPredicate(myRequestPartitionId);
