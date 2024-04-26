@@ -127,7 +127,7 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 		Builder version = forVersion(VersionEnum.V7_2_0);
 
-		// allow null codes in concept map targets
+		// allow null codes in concept map targets (see comment on "20190722.27" if you are going to change this)
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
 				.modifyColumn("20240327.1", "TARGET_CODE")
 				.nullable()
@@ -139,6 +139,62 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		forcedId.dropIndex("20240402.2", "IDX_FORCEDID_RESID");
 		forcedId.dropIndex("20240402.3", "IDX_FORCEDID_TYPE_FID");
 		forcedId.dropIndex("20240402.4", "IDX_FORCEID_FID");
+
+		// Migration from LOB
+		{
+			Builder.BuilderWithTableName binaryStorageBlobTable = version.onTable("HFJ_BINARY_STORAGE_BLOB");
+
+			binaryStorageBlobTable
+					.renameColumn("20240404.1", "BLOB_ID", "CONTENT_ID")
+					.renameColumn("20240404.2", "BLOB_SIZE", "CONTENT_SIZE")
+					.renameColumn("20240404.3", "BLOB_HASH", "CONTENT_HASH");
+
+			binaryStorageBlobTable
+					.modifyColumn("20240404.4", "BLOB_DATA")
+					.nullable()
+					.withType(ColumnTypeEnum.BLOB);
+
+			binaryStorageBlobTable
+					.addColumn("20240404.5", "STORAGE_CONTENT_BIN")
+					.nullable()
+					.type(ColumnTypeEnum.BINARY);
+
+			binaryStorageBlobTable.migrateBlobToBinary("20240404.6", "BLOB_DATA", "STORAGE_CONTENT_BIN");
+
+			binaryStorageBlobTable.renameTable("20240404.7", "HFJ_BINARY_STORAGE");
+		}
+
+		{
+			Builder.BuilderWithTableName termConceptPropertyTable = version.onTable("TRM_CONCEPT_PROPERTY");
+
+			termConceptPropertyTable
+					.addColumn("20240409.1", "PROP_VAL_BIN")
+					.nullable()
+					.type(ColumnTypeEnum.BINARY);
+
+			termConceptPropertyTable.migrateBlobToBinary("20240409.2", "PROP_VAL_LOB", "PROP_VAL_BIN");
+		}
+
+		{
+			Builder.BuilderWithTableName termValueSetConceptTable = version.onTable("TRM_VALUESET_CONCEPT");
+			termValueSetConceptTable
+					.addColumn("20240409.3", "SOURCE_DIRECT_PARENT_PIDS_VC")
+					.nullable()
+					.type(ColumnTypeEnum.TEXT);
+
+			termValueSetConceptTable.migrateClobToText(
+					"20240409.4", "SOURCE_DIRECT_PARENT_PIDS", "SOURCE_DIRECT_PARENT_PIDS_VC");
+		}
+
+		{
+			Builder.BuilderWithTableName termConceptTable = version.onTable("TRM_CONCEPT");
+			termConceptTable
+					.addColumn("20240410.1", "PARENT_PIDS_VC")
+					.nullable()
+					.type(ColumnTypeEnum.TEXT);
+
+			termConceptTable.migrateClobToText("20240410.2", "PARENT_PIDS", "PARENT_PIDS_VC");
+		}
 	}
 
 	protected void init700() {
@@ -2489,10 +2545,26 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.modifyColumn("20190722.26", "SYSTEM_VERSION")
 				.nullable()
 				.withType(ColumnTypeEnum.STRING, 200);
+
+		/*
+		DISABLED THIS STEP (20190722.27) ON PURPOSE BECAUSE IT STARTED CAUSING FAILURES ON MSSQL FOR A FRESH DB.
+		I left it here for historical purposes.
+		The reason for the failure is as follows. The TARGET_CODE column was originally 'not nullable' when it was
+		first introduced. And in 7_2_0, it is being changed to a nullable column (see 20240327.1 in init720()).
+		Starting with 7_2_0, on a fresh db, we create the table with nullable TARGET_CODE (as it is made nullable now).
+		Since we run all migration steps on fresh db, this step will try to convert the column which is created as nullable
+		to not nullable (which will then need to be coverted back to nullable in 7_2_0 migration).
+		Changing a nullable column to not nullable is not allowed in
+		MSSQL if there is an index on the column, which is the case here, as there is IDX_CNCPT_MP_GRP_ELM_TGT_CD
+		on this column. Since init720() has the right migration
+		step, where the column is set to nullable and has the right type and length, this statement is also
+		not necessary anymore even for not fresh dbs.
+
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
 				.modifyColumn("20190722.27", "TARGET_CODE")
 				.nonNullable()
 				.withType(ColumnTypeEnum.STRING, 500);
+		*/
 		version.onTable("TRM_CONCEPT_MAP_GRP_ELM_TGT")
 				.modifyColumn("20190722.28", "VALUESET_URL")
 				.nullable()

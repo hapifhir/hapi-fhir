@@ -208,8 +208,7 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 			if (idChunk.size() >= 2) {
 				List<ResourceTable> entityChunk = prefetchResourceTableHistoryAndProvenance(idChunk);
 
-				// fixme mb
-				if (thePreFetchIndexes && false) {
+				if (thePreFetchIndexes) {
 
 					prefetchByField("string", "myParamsString", ResourceTable::isParamsStringPopulated, entityChunk);
 					prefetchByField("token", "myParamsToken", ResourceTable::isParamsTokenPopulated, entityChunk);
@@ -240,10 +239,8 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 		Query query = myEntityManager.createQuery("select r, h "
 				+ " FROM ResourceTable r "
 				+ " LEFT JOIN fetch ResourceHistoryTable h "
-				// fixme make null safe
-				+ "      on r.myVersion = h.myResourceVersion and r.id = h.myResourceId and r.myPartitionIdValue = h.myPartitionIdValue "
-				+ " left join fetch ResourceHistoryProvenanceEntity p "
-				+ "      on p.myResourceHistoryTable = h and p.myPartitionIdValue = h.myPartitionIdValue "
+				+ "      on r.myVersion = h.myResourceVersion and r.id = h.myResourceId "
+				+ " left join fetch h.myProvenance "
 				+ " WHERE r.myId IN ( :IDS ) ");
 		query.setParameter("IDS", idChunk);
 
