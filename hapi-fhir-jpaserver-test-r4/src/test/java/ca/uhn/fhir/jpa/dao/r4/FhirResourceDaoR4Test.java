@@ -4,7 +4,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -55,7 +54,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.ClasspathUtil;
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -255,7 +253,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	public void testUpdateResource_whenTokenPropertyAssignedTooLargeValue_willTruncateLargeValueOnUpdate(){
 		// given
 		final String modifiedEmailPrefix = "modified";
-		final String originalEmail = "test200andmoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusancoresusssancoresusancoresusancoresusancorew@abcdusancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresususancoresusancoresuselasticsearchisworking.com";
+		final String originalEmail = RandomStringUtils.randomAlphanumeric(ResourceIndexedSearchParamToken.MAX_LENGTH) + "@acme.corp";
 		final String modifiedEmail = modifiedEmailPrefix + originalEmail;
 
 		// when
