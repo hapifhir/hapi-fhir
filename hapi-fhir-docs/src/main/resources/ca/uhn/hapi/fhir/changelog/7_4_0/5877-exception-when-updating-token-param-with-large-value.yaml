@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5877
+title: "Previously, updating a tokenParam with a value greater than 200 characters would raise a SQLException.  
+This issue has been fixed."
