@@ -905,6 +905,10 @@
 			<id>pano-smals</id>
 			<name>pano-smals</name>
 		</developer>
+		<developer>
+			<id>jbonzohln</id>
+			<name>Jesse Bonzo</name>
+		</developer>
 	</developers>
 
 	<licenses>
