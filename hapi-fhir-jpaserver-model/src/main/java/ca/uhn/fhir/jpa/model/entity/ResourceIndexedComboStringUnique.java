@@ -79,6 +79,9 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndex
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourceId;
 
+	// TODO: These hashes were added in 7.4.0 - They aren't used or indexed yet, but
+	// eventually we should replace the string index with a hash index in order to
+	// reduce the space usage.
 	@Column(name = "HASH_IDENTITY")
 	private Long myHashIdentity;
 

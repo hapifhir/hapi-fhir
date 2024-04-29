@@ -1744,7 +1744,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		for (String nextParamName : theComboParamNames) {
 			List<List<IQueryParameterType>> nextValues = theParams.get(nextParamName);
 
-			// TODO Hack to fix weird IOOB on the next stanza until James comes back and makes sense of this.
+			// This should never happen, but this safety check was added along the way and
+			// presumably must save us in some specific race condition. I am preserving it
+			// in a refactor of this code base. 20240429
 			if (nextValues.isEmpty()) {
 				ourLog.error(
 						"query parameter {} is unexpectedly empty. Encountered while considering {} index for {}",

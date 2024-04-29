@@ -389,6 +389,26 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		IIdType id = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
 		myCaptureQueriesListener.logInsertQueries();
 
+		runInTransaction(()->{
+			List<ResourceIndexedComboStringUnique> values = myResourceIndexedCompositeStringUniqueDao.findAllForResourceIdForUnitTest(id.getIdPartAsLong());
+			assertEquals(2, values.size());
+			values.sort(Comparator.comparing(ResourceIndexedComboStringUnique::getIndexString));
+			assertEquals("Patient?identifier=urn%7C111", values.get(0).getIndexString());
+			assertEquals(2540757258130705957L, values.get(0).getHashIdentity());
+			assertEquals(1719691123901055728L, values.get(0).getHashComplete());
+			assertEquals("Patient?identifier=urn%7C222", values.get(1).getIndexString());
+			assertEquals(2540757258130705957L, values.get(1).getHashIdentity());
+			assertEquals(7615522755370797441L, values.get(1).getHashComplete());
+		});
+
+		// Update the values
+
+		pt = new Patient();
+		pt.setId(id.toUnqualifiedVersionless());
+		pt.setActive(true);
+		pt.addIdentifier().setSystem("urn").setValue("111");
+		pt.addIdentifier().setSystem("urn").setValue("333");
+		myPatientDao.update(pt, mySrd);
 
 		runInTransaction(()->{
 			List<ResourceIndexedComboStringUnique> values = myResourceIndexedCompositeStringUniqueDao.findAllForResourceIdForUnitTest(id.getIdPartAsLong());
@@ -397,7 +417,11 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 			assertEquals("Patient?identifier=urn%7C111", values.get(0).getIndexString());
 			assertEquals(2540757258130705957L, values.get(0).getHashIdentity());
 			assertEquals(1719691123901055728L, values.get(0).getHashComplete());
+			assertEquals("Patient?identifier=urn%7C333", values.get(1).getIndexString());
+			assertEquals(2540757258130705957L, values.get(1).getHashIdentity());
+			assertEquals(3049342026616784675L, values.get(1).getHashComplete());
 		});
+
 	}
 
 	@Test
