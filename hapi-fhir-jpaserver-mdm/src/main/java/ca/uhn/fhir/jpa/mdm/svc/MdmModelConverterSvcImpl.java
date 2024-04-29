@@ -41,7 +41,6 @@ public class MdmModelConverterSvcImpl implements IMdmModelConverterSvc {
 				.resourceIdFromPidOrThrowException(theLink.getSourcePersistenceId(), theLink.getMdmSourceType())
 				.toVersionless()
 				.getValue();
-		// LUKETODO:  we set the source ID to Patient/pat-b NOT Patient/1328
 		retVal.setSourceId(sourceId);
 		String goldenResourceId = myIdHelperService
 				.resourceIdFromPidOrThrowException(theLink.getGoldenResourcePersistenceId(), theLink.getMdmSourceType())

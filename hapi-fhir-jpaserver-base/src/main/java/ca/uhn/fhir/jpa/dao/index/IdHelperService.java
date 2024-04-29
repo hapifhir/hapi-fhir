@@ -825,7 +825,6 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 
 	@Override
 	public JpaPid newPidFromStringIdAndResourceName(String thePid, String theResourceName) {
-		// LUKETODO:  the NumberFormatException happens here
 		return JpaPid.fromIdAndResourceType(Long.parseLong(thePid), theResourceName);
 	}
 }

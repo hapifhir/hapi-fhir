@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
-import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
@@ -19,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MdmSurvivorshipSvcImplIT extends BaseMdmR4Test {
-	// LUKETODO:  add a test here instead?
 
 	@Autowired
 	private IMdmSurvivorshipService myMdmSurvivorshipService;
@@ -77,8 +75,7 @@ class MdmSurvivorshipSvcImplIT extends BaseMdmR4Test {
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, frankPatient1, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, frankPatient2, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 
-		final List<MdmLink> all = myMdmLinkDao.findAll();
-
+		// We're testing that this method does NOT throw a NumberFormatException on the non-numeric FHIR IDs as it did previously
 		myMdmSurvivorshipService.rebuildGoldenResourceWithSurvivorshipRules(goldenPatient, new MdmTransactionContext(MdmTransactionContext.OperationType.UPDATE_LINK));
 	}
 }

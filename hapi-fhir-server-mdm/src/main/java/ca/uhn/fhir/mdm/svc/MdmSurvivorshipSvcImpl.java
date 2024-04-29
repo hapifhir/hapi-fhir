@@ -133,13 +133,14 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		searchParameters.setMatchResult(MdmMatchResultEnum.MATCH);
 		Page<MdmLinkJson> linksQuery = myMdmLinkQuerySvc.queryLinks(searchParameters, theMdmTransactionContext);
 
-		// LUKETODO:  so we query for the JSON:  why don't we just query the dao instead?  the JSON only contains the FHIR ID
 		return linksQuery.get().map(link -> {
 			String sourceId = link.getSourceId();
 
 			final String sourceIdUnqualified = sourceId.substring(resourceType.length() + 1);
-			// LUKETODO:  what do we do here if the sourceId is not a Long??????
-//			if (isNumericOrUuid(sourceIdUnqualified)) {
+			// myMdmLinkQuerySvc.queryLinks populates sourceId with the FHIR_ID, not the RES_ID, so if we don't
+			// add this conditional logic, on JPA, myIIdHelperService.newPidFromStringIdAndResourceName will fail with
+			// NumberFormatException
+			if (isNumericOrUuid(sourceIdUnqualified)) {
 				// +1 because of "/" in id: "ResourceType/Id"
 				IResourcePersistentId<?> pid = getResourcePID(sourceIdUnqualified, resourceType);
 
@@ -147,9 +148,9 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 				// but it depends how many links there are
 				// per golden resource (unlikely to be thousands)
 				return dao.readByPid(pid);
-//			} else {
-//				return dao.read(new IdDt(sourceId), new SystemRequestDetails());
-//			}
+			} else {
+				return dao.read(new IdDt(sourceId), new SystemRequestDetails());
+			}
 		});
 	}
 
