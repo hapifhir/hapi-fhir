@@ -31,6 +31,7 @@ import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.model.mdmevents.MdmLinkJson;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
+import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.util.TerserUtil;
@@ -39,9 +40,12 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.data.domain.Page;
 
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
+	private static final Pattern IS_NUMERIC = Pattern.compile("^\\d+$");
+	private static final Pattern IS_UUID = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
 
 	protected final FhirContext myFhirContext;
 
@@ -129,20 +133,32 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		searchParameters.setMatchResult(MdmMatchResultEnum.MATCH);
 		Page<MdmLinkJson> linksQuery = myMdmLinkQuerySvc.queryLinks(searchParameters, theMdmTransactionContext);
 
+		// LUKETODO:  so we query for the JSON:  why don't we just query the dao instead?  the JSON only contains the FHIR ID
 		return linksQuery.get().map(link -> {
 			String sourceId = link.getSourceId();
 
-			// +1 because of "/" in id: "ResourceType/Id"
-			IResourcePersistentId<?> pid = getResourcePID(sourceId.substring(resourceType.length() + 1), resourceType);
+			final String sourceIdUnqualified = sourceId.substring(resourceType.length() + 1);
+			// LUKETODO:  what do we do here if the sourceId is not a Long??????
+//			if (isNumericOrUuid(sourceIdUnqualified)) {
+				// +1 because of "/" in id: "ResourceType/Id"
+				IResourcePersistentId<?> pid = getResourcePID(sourceIdUnqualified, resourceType);
 
-			// this might be a bit unperformant
-			// but it depends how many links there are
-			// per golden resource (unlikely to be thousands)
-			return dao.readByPid(pid);
+				// this might be a bit unperformant
+				// but it depends how many links there are
+				// per golden resource (unlikely to be thousands)
+				return dao.readByPid(pid);
+//			} else {
+//				return dao.read(new IdDt(sourceId), new SystemRequestDetails());
+//			}
 		});
 	}
 
 	private IResourcePersistentId<?> getResourcePID(String theId, String theResourceType) {
 		return myIIdHelperService.newPidFromStringIdAndResourceName(theId, theResourceType);
+	}
+
+	private boolean isNumericOrUuid(String theLongCandidate) {
+		return IS_NUMERIC.matcher(theLongCandidate).matches() ||
+			IS_UUID.matcher(theLongCandidate).matches();
 	}
 }
