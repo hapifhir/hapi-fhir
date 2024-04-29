@@ -160,7 +160,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private BaseRuntimeChildDefinition myCodeableReferenceReference;
 
 	// allow extraction of Resource-level search param values
-	private boolean myExtractResourceTypeParams = false;
+	private boolean myExtractResourceLevelParams = false;
 
 	/**
 	 * Constructor
@@ -1601,7 +1601,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 
 			// See the method javadoc for an explanation of this
-			if (!myExtractResourceTypeParams && RuntimeSearchParamHelper.isResourceLevel(nextSpDef)) {
+			if (!myExtractResourceLevelParams && RuntimeSearchParamHelper.isResourceLevel(nextSpDef)) {
 				continue;
 			}
 
@@ -2512,7 +2512,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 	}
 
-	public void setExtractResourceTypeParams(boolean theExtractResourceTypeParams) {
-		myExtractResourceTypeParams = theExtractResourceTypeParams;
+	public void setExtractResourceLevelParams(boolean theExtractResourceLevelParams) {
+		myExtractResourceLevelParams = theExtractResourceLevelParams;
 	}
 }
