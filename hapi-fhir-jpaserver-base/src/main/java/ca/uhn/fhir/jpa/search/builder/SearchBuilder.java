@@ -72,6 +72,7 @@ import ca.uhn.fhir.jpa.util.SqlQueryList;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
@@ -80,6 +81,7 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.ReferenceParam;
@@ -1810,6 +1812,16 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			if (nextValues.get(0).size() != 1) {
 				paramValuesAreValidForCombo = false;
 				break;
+			}
+
+			List<IQueryParameterType> nextAndValue = nextValues.get(0);
+			for (IQueryParameterType nextOrValue : nextAndValue) {
+				if (nextOrValue instanceof DateParam) {
+					if (((DateParam) nextOrValue).getPrecision() != TemporalPrecisionEnum.DAY) {
+						paramValuesAreValidForCombo = false;
+						break;
+					}
+				}
 			}
 
 			// Reference params are only eligible for using a composite index if they

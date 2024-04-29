@@ -61,6 +61,8 @@ public class DaoSearchParamSynchronizer {
 		synchronize(theEntity, retVal, theParams.myCoordsParams, existingParams.myCoordsParams);
 		synchronize(theEntity, retVal, theParams.myLinks, existingParams.myLinks);
 		synchronize(theEntity, retVal, theParams.myComboTokenNonUnique, existingParams.myComboTokenNonUnique);
+		// FIXME: migrate code from SearchParamWithInlineReferencesExtractor here
+		synchronize(theEntity, retVal, theParams.myComboStringUniques, existingParams.myComboStringUniques);
 
 		// make sure links are indexed
 		theEntity.setResourceLinks(theParams.myLinks);

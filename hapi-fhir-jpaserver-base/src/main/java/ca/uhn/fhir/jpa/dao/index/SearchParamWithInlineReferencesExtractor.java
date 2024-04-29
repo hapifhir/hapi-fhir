@@ -164,6 +164,11 @@ public class SearchParamWithInlineReferencesExtractor extends BaseSearchParamWit
 			ResourceTable theEntity,
 			ResourceIndexedSearchParams theExistingParams) {
 
+		// FIXME: remove this whole method
+		if (true) {
+			return;
+		}
+
 		/*
 		 * String Uniques
 		 */
@@ -208,6 +213,7 @@ public class SearchParamWithInlineReferencesExtractor extends BaseSearchParamWit
 					}
 				}
 				ourLog.debug("Persisting unique index: {}", next);
+				next.calculateHashes();
 				myEntityManager.persist(next);
 				haveNewStringUniqueParams = true;
 			}

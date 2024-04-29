@@ -31,6 +31,9 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -272,6 +275,80 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 
 	}
 
+
+	@Test
+	public void testStringAndDate_Create() {
+		createStringAndTokenCombo_NameAndBirthdate();
+
+		IIdType id1 = createPatient1(null);
+		assertNotNull(id1);
+
+		IIdType id2 = createPatient2(null);
+		assertNotNull(id2);
+
+		logAllNonUniqueIndexes();
+		runInTransaction(() -> {
+			List<ResourceIndexedComboTokenNonUnique> indexedTokens = myResourceIndexedComboTokensNonUniqueDao.findAll();
+			indexedTokens.sort(Comparator.comparing(ResourceIndexedComboTokenNonUnique::getId));
+			assertEquals(2, indexedTokens.size());
+			String expected = "Patient?birthdate=2021-02-02&family=FAMILY1";
+			assertEquals(expected, indexedTokens.get(0).getIndexString());
+			assertEquals(7196518367857292879L, indexedTokens.get(0).getHashComplete().longValue());
+		});
+
+		myMessages.clear();
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add("family", new StringParam("family1"));
+		params.add("birthdate", new DateParam("2021-02-02"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myPatientDao.search(params, mySrd);
+		List<String> actual = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
+
+		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE = '7196518367857292879')";
+		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
+
+		logCapturedMessages();
+		assertThat(myMessages.toString(), containsString("[INFO Using NON_UNIQUE index for query for search: Patient?birthdate=2021-02-02&family=FAMILY1]"));
+		myMessages.clear();
+	}
+
+	/**
+	 * Can't create or search for combo params with partial dates
+	 */
+	@Test
+	public void testStringAndDate_Create_PartialDate() {
+		createStringAndTokenCombo_NameAndBirthdate();
+
+		Patient pt1 = new Patient();
+		pt1.getNameFirstRep().setFamily("Family1").addGiven("Given1");
+		pt1.setBirthDateElement(new DateType("2021-02"));
+		IIdType id1 = myPatientDao.create(pt1, mySrd).getId().toUnqualified();
+
+		logAllNonUniqueIndexes();
+		runInTransaction(() -> {
+			List<ResourceIndexedComboTokenNonUnique> indexedTokens = myResourceIndexedComboTokensNonUniqueDao.findAll();
+			assertEquals(0, indexedTokens.size());
+		});
+
+		myMessages.clear();
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add("family", new StringParam("family1"));
+		params.add("birthdate", new DateParam("2021-02"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myPatientDao.search(params, mySrd);
+		List<String> actual = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(actual, containsInAnyOrder(id1.toUnqualifiedVersionless().getValue()));
+
+		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false),
+			is(not(containsString("HFJ_IDX_CMB_TOK_NU"))));
+
+		logCapturedMessages();
+		assertThat(myMessages, empty());
+	}
+
 	@Test
 	public void testStringAndReference_Create() {
 		createStringAndReferenceCombo_FamilyAndOrganization();
@@ -338,6 +415,46 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		org.setName("Some Org");
 		org.setId(ORG_ID_QUALIFIED);
 		myOrganizationDao.update(org, mySrd);
+	}
+
+	private void createStringAndTokenCombo_NameAndBirthdate() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-family");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setCode("family");
+		sp.setExpression("Patient.name.family");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-birthdate");
+		sp.setType(Enumerations.SearchParamType.DATE);
+		sp.setCode("birthdate");
+		sp.setExpression("Patient.birthDate");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-names-and-birthdate");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-family");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-birthdate");
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(false));
+		mySearchParameterDao.update(sp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
+
+		myMessages.clear();
 	}
 
 	private void createStringAndTokenCombo_NameAndGender() {

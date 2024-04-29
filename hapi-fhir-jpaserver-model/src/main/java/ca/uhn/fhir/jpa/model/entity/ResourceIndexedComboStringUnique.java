@@ -19,7 +19,20 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import jakarta.persistence.*;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -28,21 +41,23 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import static ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam.hash;
+
 @Entity()
 @Table(
-		name = "HFJ_IDX_CMP_STRING_UNIQ",
-		indexes = {
-			@Index(
-					name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING,
-					columnList = "IDX_STRING",
-					unique = true),
-			@Index(
-					name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_RESOURCE,
-					columnList = "RES_ID",
-					unique = false)
-		})
-public class ResourceIndexedComboStringUnique extends BasePartitionable
-		implements Comparable<ResourceIndexedComboStringUnique>, IResourceIndexComboSearchParameter {
+	name = "HFJ_IDX_CMP_STRING_UNIQ",
+	indexes = {
+		@Index(
+			name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_STRING,
+			columnList = "IDX_STRING",
+			unique = true),
+		@Index(
+			name = ResourceIndexedComboStringUnique.IDX_IDXCMPSTRUNIQ_RESOURCE,
+			columnList = "RES_ID",
+			unique = false)
+	})
+public class ResourceIndexedComboStringUnique extends BaseResourceIndex
+	implements Comparable<ResourceIndexedComboStringUnique>, IResourceIndexComboSearchParameter {
 
 	public static final int MAX_STRING_LENGTH = 500;
 	public static final String IDX_IDXCMPSTRUNIQ_STRING = "IDX_IDXCMPSTRUNIQ_STRING";
@@ -56,13 +71,19 @@ public class ResourceIndexedComboStringUnique extends BasePartitionable
 
 	@ManyToOne
 	@JoinColumn(
-			name = "RES_ID",
-			referencedColumnName = "RES_ID",
-			foreignKey = @ForeignKey(name = "FK_IDXCMPSTRUNIQ_RES_ID"))
+		name = "RES_ID",
+		referencedColumnName = "RES_ID",
+		foreignKey = @ForeignKey(name = "FK_IDXCMPSTRUNIQ_RES_ID"))
 	private ResourceTable myResource;
 
 	@Column(name = "RES_ID", insertable = false, updatable = false)
 	private Long myResourceId;
+
+	@Column(name = "HASH_IDENTITY")
+	private Long myHashIdentity;
+
+	@Column(name = "HASH_COMPLETE")
+	private Long myHashComplete;
 
 	@Column(name = "IDX_STRING", nullable = false, length = MAX_STRING_LENGTH)
 	private String myIndexString;
@@ -77,6 +98,9 @@ public class ResourceIndexedComboStringUnique extends BasePartitionable
 	@Transient
 	private IIdType mySearchParameterId;
 
+	@Transient
+	private PartitionSettings myPartitionSettings;
+
 	/**
 	 * Constructor
 	 */
@@ -88,7 +112,7 @@ public class ResourceIndexedComboStringUnique extends BasePartitionable
 	 * Constructor
 	 */
 	public ResourceIndexedComboStringUnique(
-			ResourceTable theResource, String theIndexString, IIdType theSearchParameterId) {
+		ResourceTable theResource, String theIndexString, IIdType theSearchParameterId) {
 		setResource(theResource);
 		setIndexString(theIndexString);
 		setPartitionId(theResource.getPartitionId());
@@ -110,9 +134,23 @@ public class ResourceIndexedComboStringUnique extends BasePartitionable
 			return false;
 		}
 
+		calculateHashes();
+
 		ResourceIndexedComboStringUnique that = (ResourceIndexedComboStringUnique) theO;
 
-		return new EqualsBuilder().append(myIndexString, that.myIndexString).isEquals();
+		EqualsBuilder b = new EqualsBuilder();
+		b.append(myHashIdentity, that.myHashIdentity);
+		b.append(myHashComplete, that.myHashComplete);
+		return	b.isEquals();
+	}
+
+	@Override
+	public <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource) {
+		ResourceIndexedComboStringUnique source = (ResourceIndexedComboStringUnique) theSource;
+		myPartitionSettings = source.myPartitionSettings;
+		myIndexString = source.myIndexString;
+		myHashIdentity = source.myHashIdentity;
+		myHashComplete = source.myHashComplete;
 	}
 
 	@Override
@@ -124,28 +162,91 @@ public class ResourceIndexedComboStringUnique extends BasePartitionable
 		myIndexString = theIndexString;
 	}
 
+	@Override
 	public ResourceTable getResource() {
 		return myResource;
 	}
 
+	@Override
 	public void setResource(ResourceTable theResource) {
-		Validate.notNull(theResource);
+		Validate.notNull(theResource, "theResource must not be null");
 		myResource = theResource;
+	}
+
+	public PartitionSettings getPartitionSettings() {
+		return myPartitionSettings;
+	}
+
+	public void setPartitionSettings(PartitionSettings thePartitionSettings) {
+		myPartitionSettings = thePartitionSettings;
+	}
+
+	@Override
+	public Long getId() {
+		return myId;
+	}
+
+	@Override
+	public void setId(Long theId) {
+		myId = theId;
+	}
+
+	public Long getHashComplete() {
+		return myHashComplete;
+	}
+
+	public void setHashComplete(Long theHashComplete) {
+		myHashComplete = theHashComplete;
+	}
+
+	public Long getHashIdentity() {
+		return myHashIdentity;
+	}
+
+	public void setHashIdentity(Long theHashIdentity) {
+		myHashIdentity = theHashIdentity;
+	}
+
+	@Override
+	public void calculateHashes() {
+		if (myHashIdentity == null) {
+			PartitionSettings partitionSettings = getPartitionSettings();
+			PartitionablePartitionId partitionId = getPartitionId();
+			String queryString = myIndexString;
+			setHashIdentity(calculateHash(partitionSettings, partitionId, mySearchParameterId.toUnqualifiedVersionless().getValue()));
+			setHashComplete(calculateHash(partitionSettings, partitionId, queryString));
+		}
+	}
+
+	@Override
+	public void clearHashes() {
+		myHashIdentity = null;
+		myHashComplete = null;
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37).append(myIndexString).toHashCode();
+		calculateHashes();
+
+		return new HashCodeBuilder(17, 37).append(myHashComplete).toHashCode();
 	}
 
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("id", myId)
-				.append("resourceId", myResourceId)
-				.append("indexString", myIndexString)
-				.append("partition", getPartitionId())
-				.toString();
+			.append("id", myId)
+			.append("resourceId", myResourceId)
+			.append("indexString", myIndexString)
+			.append("partition", getPartitionId())
+			.toString();
+	}
+
+	/**
+	 * Note: This field is not persisted, so it will only be populated for new indexes
+	 */
+	@Override
+	public IIdType getSearchParameterId() {
+		return mySearchParameterId;
 	}
 
 	/**
@@ -156,11 +257,10 @@ public class ResourceIndexedComboStringUnique extends BasePartitionable
 		mySearchParameterId = theSearchParameterId;
 	}
 
-	/**
-	 * Note: This field is not persisted, so it will only be populated for new indexes
-	 */
-	@Override
-	public IIdType getSearchParameterId() {
-		return mySearchParameterId;
+	public static long calculateHash(
+		PartitionSettings partitionSettings, PartitionablePartitionId thePartitionId, String queryString) {
+		RequestPartitionId requestPartitionId = PartitionablePartitionId.toRequestPartitionId(thePartitionId);
+		return hash(partitionSettings, requestPartitionId, queryString);
 	}
+
 }

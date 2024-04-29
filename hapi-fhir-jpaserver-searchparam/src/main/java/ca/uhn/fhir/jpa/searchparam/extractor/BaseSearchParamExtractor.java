@@ -36,9 +36,11 @@ import ca.uhn.fhir.jpa.searchparam.SearchParamConstants;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.FhirTerser;
@@ -459,6 +461,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			ResourceIndexedComboStringUnique uniqueParam = new ResourceIndexedComboStringUnique();
 			uniqueParam.setIndexString(nextQueryString);
 			uniqueParam.setSearchParameterId(theRuntimeParam.getId());
+			uniqueParam.setPartitionSettings(myPartitionSettings);
 			retVal.add(uniqueParam);
 		}
 		return retVal;
@@ -548,6 +551,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			if (paramsListForCompositePart != null) {
 				for (BaseResourceIndexedSearchParam nextParam : paramsListForCompositePart) {
 					IQueryParameterType nextParamAsClientParam = nextParam.toQueryParameterType();
+
+					if (nextParamAsClientParam instanceof DateParam) {
+						DateParam date = (DateParam) nextParamAsClientParam;
+						if (date.getPrecision() != TemporalPrecisionEnum.DAY) {
+							continue;
+						}
+					}
+
 					String value = nextParamAsClientParam.getValueAsQueryToken(myContext);
 
 					RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam(theResourceType, key);

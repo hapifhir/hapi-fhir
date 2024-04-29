@@ -9,6 +9,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
@@ -46,6 +47,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import jakarta.annotation.Nonnull;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -373,6 +375,30 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		}
 	}
 
+	@Test
+	public void testHashesCalculated() {
+		myStorageSettings.setAdvancedHSearchIndexing(false);
+		createUniqueIndexPatientIdentifier();
+
+		Patient pt = new Patient();
+		pt.setActive(true);
+		pt.addIdentifier().setSystem("urn").setValue("111");
+		pt.addIdentifier().setSystem("urn").setValue("222");
+
+		myCaptureQueriesListener.clear();
+		IIdType id = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
+		myCaptureQueriesListener.logInsertQueries();
+
+
+		runInTransaction(()->{
+			List<ResourceIndexedComboStringUnique> values = myResourceIndexedCompositeStringUniqueDao.findAllForResourceIdForUnitTest(id.getIdPartAsLong());
+			assertEquals(2, values.size());
+			values.sort(Comparator.comparing(ResourceIndexedComboStringUnique::getIndexString));
+			assertEquals("Patient?identifier=urn%7C111", values.get(0).getIndexString());
+			assertEquals(2540757258130705957L, values.get(0).getHashIdentity());
+			assertEquals(1719691123901055728L, values.get(0).getHashComplete());
+		});
+	}
 
 	@Test
 	public void testDoubleMatchingOnAnd_Search() {
