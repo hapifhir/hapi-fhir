@@ -35,9 +35,4 @@ public class MdmSubmitterConfig {
 	MdmSubmitterInterceptorLoader mdmSubmitterInterceptorLoader() {
 		return new MdmSubmitterInterceptorLoader();
 	}
-
-	@Bean
-	IMdmSubmitSvc mdmSubmitService() {
-		return new MdmSubmitSvcImpl();
-	}
 }
