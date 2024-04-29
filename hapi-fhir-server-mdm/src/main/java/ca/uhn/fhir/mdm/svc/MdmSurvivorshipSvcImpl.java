@@ -45,7 +45,8 @@ import java.util.stream.Stream;
 
 public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 	private static final Pattern IS_NUMERIC = Pattern.compile("^\\d+$");
-	private static final Pattern IS_UUID = Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+	private static final Pattern IS_UUID =
+			Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
 
 	protected final FhirContext myFhirContext;
 
@@ -159,7 +160,7 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 	}
 
 	private boolean isNumericOrUuid(String theLongCandidate) {
-		return IS_NUMERIC.matcher(theLongCandidate).matches() ||
-			IS_UUID.matcher(theLongCandidate).matches();
+		return IS_NUMERIC.matcher(theLongCandidate).matches()
+				|| IS_UUID.matcher(theLongCandidate).matches();
 	}
 }
