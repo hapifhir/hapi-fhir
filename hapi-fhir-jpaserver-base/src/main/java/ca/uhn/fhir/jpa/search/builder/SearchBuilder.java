@@ -1719,7 +1719,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		if (comboParam != null) {
 			Collections.sort(comboParamNames);
 
-            if (!validateParamValuesAreValidForComboParam(theParams, comboParamNames)) {
+			if (!validateParamValuesAreValidForComboParam(theParams, comboParamNames)) {
 				return;
 			}
 
@@ -1727,7 +1727,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private void applyComboSearchParam(QueryStack theQueryStack, @Nonnull SearchParameterMap theParams, RequestDetails theRequest, List<String> theComboParamNames, RuntimeSearchParam theComboParam) {
+	private void applyComboSearchParam(
+			QueryStack theQueryStack,
+			@Nonnull SearchParameterMap theParams,
+			RequestDetails theRequest,
+			List<String> theComboParamNames,
+			RuntimeSearchParam theComboParam) {
 		// Since we're going to remove elements below
 		theParams.values().forEach(this::ensureSubListsAreWritable);
 
@@ -1753,8 +1758,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			IQueryParameterType nextOr = nextAnd.remove(0);
 			String nextOrValue = nextOr.getValueAsQueryToken(myContext);
 
-			RuntimeSearchParam nextParamDef =
-				mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
+			RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
 			if (theComboParam.getComboSearchParamType() == ComboSearchParamType.NON_UNIQUE) {
 				if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.STRING) {
 					nextOrValue = StringUtil.normalizeStringForSearchIndexing(nextOrValue);
@@ -1803,7 +1807,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		}
 	}
 
-	private boolean validateParamValuesAreValidForComboParam(@Nonnull SearchParameterMap theParams, List<String> comboParamNames) {
+	private boolean validateParamValuesAreValidForComboParam(
+			@Nonnull SearchParameterMap theParams, List<String> comboParamNames) {
 		boolean paramValuesAreValidForCombo = true;
 		for (String nextParamName : comboParamNames) {
 			List<List<IQueryParameterType>> nextValues = theParams.get(nextParamName);
@@ -1826,8 +1831,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			// Reference params are only eligible for using a composite index if they
 			// are qualified
-			RuntimeSearchParam nextParamDef =
-				mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
+			RuntimeSearchParam nextParamDef = mySearchParamRegistry.getActiveSearchParam(myResourceName, nextParamName);
 			if (nextParamDef.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
 				ReferenceParam param = (ReferenceParam) nextValues.get(0).get(0);
 				if (isBlank(param.getResourceType())) {

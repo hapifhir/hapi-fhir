@@ -19,16 +19,25 @@
  */
 package ca.uhn.fhir.jpa.dao.index;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
+import ca.uhn.fhir.jpa.dao.data.IResourceIndexedComboStringUniqueDao;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -37,6 +46,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 @Service
 public class DaoSearchParamSynchronizer {
@@ -45,29 +55,80 @@ public class DaoSearchParamSynchronizer {
 	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
 	protected EntityManager myEntityManager;
 
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
+
+	@Autowired
+	private IResourceIndexedComboStringUniqueDao myResourceIndexedCompositeStringUniqueDao;
+
+	@Autowired
+	private FhirContext myFhirContext;
+
 	public AddRemoveCount synchronizeSearchParamsToDatabase(
 			ResourceIndexedSearchParams theParams,
 			ResourceTable theEntity,
 			ResourceIndexedSearchParams existingParams) {
 		AddRemoveCount retVal = new AddRemoveCount();
 
-		synchronize(theEntity, retVal, theParams.myStringParams, existingParams.myStringParams);
-		synchronize(theEntity, retVal, theParams.myTokenParams, existingParams.myTokenParams);
-		synchronize(theEntity, retVal, theParams.myNumberParams, existingParams.myNumberParams);
-		synchronize(theEntity, retVal, theParams.myQuantityParams, existingParams.myQuantityParams);
-		synchronize(theEntity, retVal, theParams.myQuantityNormalizedParams, existingParams.myQuantityNormalizedParams);
-		synchronize(theEntity, retVal, theParams.myDateParams, existingParams.myDateParams);
-		synchronize(theEntity, retVal, theParams.myUriParams, existingParams.myUriParams);
-		synchronize(theEntity, retVal, theParams.myCoordsParams, existingParams.myCoordsParams);
-		synchronize(theEntity, retVal, theParams.myLinks, existingParams.myLinks);
-		synchronize(theEntity, retVal, theParams.myComboTokenNonUnique, existingParams.myComboTokenNonUnique);
-		// FIXME: migrate code from SearchParamWithInlineReferencesExtractor here
-		synchronize(theEntity, retVal, theParams.myComboStringUniques, existingParams.myComboStringUniques);
+		synchronize(theEntity, retVal, theParams.myStringParams, existingParams.myStringParams, null);
+		synchronize(theEntity, retVal, theParams.myTokenParams, existingParams.myTokenParams, null);
+		synchronize(theEntity, retVal, theParams.myNumberParams, existingParams.myNumberParams, null);
+		synchronize(theEntity, retVal, theParams.myQuantityParams, existingParams.myQuantityParams, null);
+		synchronize(
+				theEntity,
+				retVal,
+				theParams.myQuantityNormalizedParams,
+				existingParams.myQuantityNormalizedParams,
+				null);
+		synchronize(theEntity, retVal, theParams.myDateParams, existingParams.myDateParams, null);
+		synchronize(theEntity, retVal, theParams.myUriParams, existingParams.myUriParams, null);
+		synchronize(theEntity, retVal, theParams.myCoordsParams, existingParams.myCoordsParams, null);
+		synchronize(theEntity, retVal, theParams.myLinks, existingParams.myLinks, null);
+		synchronize(theEntity, retVal, theParams.myComboTokenNonUnique, existingParams.myComboTokenNonUnique, null);
+		synchronize(
+				theEntity,
+				retVal,
+				theParams.myComboStringUniques,
+				existingParams.myComboStringUniques,
+				this::checkForComboUniqueExistence);
 
 		// make sure links are indexed
 		theEntity.setResourceLinks(theParams.myLinks);
 
 		return retVal;
+	}
+
+	private void checkForComboUniqueExistence(ResourceIndexedComboStringUnique theIndex) {
+		if (myStorageSettings.isUniqueIndexesCheckedBeforeSave()) {
+			ResourceIndexedComboStringUnique existing =
+					myResourceIndexedCompositeStringUniqueDao.findByQueryString(theIndex.getIndexString());
+			if (existing != null) {
+
+				String searchParameterId = "(unknown)";
+				if (theIndex.getSearchParameterId() != null) {
+					searchParameterId = theIndex.getSearchParameterId()
+							.toUnqualifiedVersionless()
+							.getValue();
+				}
+
+				String msg = myFhirContext
+						.getLocalizer()
+						.getMessage(
+								BaseHapiFhirDao.class,
+								"uniqueIndexConflictFailure",
+								existing.getResource().getResourceType(),
+								theIndex.getIndexString(),
+								existing.getResource()
+										.getIdDt()
+										.toUnqualifiedVersionless()
+										.getValue(),
+								searchParameterId);
+
+				// Use ResourceVersionConflictException here because the HapiTransactionService
+				// catches this and can retry it if needed
+				throw new ResourceVersionConflictException(Msg.code(1093) + msg);
+			}
+		}
 	}
 
 	@VisibleForTesting
@@ -79,7 +140,8 @@ public class DaoSearchParamSynchronizer {
 			ResourceTable theEntity,
 			AddRemoveCount theAddRemoveCount,
 			Collection<T> theNewParams,
-			Collection<T> theExistingParams) {
+			Collection<T> theExistingParams,
+			@Nullable Consumer<T> theAddParamPreSaveHook) {
 		Collection<T> newParams = theNewParams;
 		for (T next : newParams) {
 			next.setPartitionId(theEntity.getPartitionId());
@@ -116,6 +178,13 @@ public class DaoSearchParamSynchronizer {
 
 		List<T> paramsToRemove = subtract(theExistingParams, newParams);
 		List<T> paramsToAdd = subtract(newParams, theExistingParams);
+
+		if (theAddParamPreSaveHook != null) {
+			for (T next : paramsToAdd) {
+				theAddParamPreSaveHook.accept(next);
+			}
+		}
+
 		tryToReuseIndexEntities(paramsToRemove, paramsToAdd);
 
 		for (T next : paramsToRemove) {

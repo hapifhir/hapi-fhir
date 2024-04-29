@@ -127,9 +127,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder version = forVersion(VersionEnum.V7_4_0);
 
 		version.onTable("HFJ_IDX_CMB_TOK_NU")
-			.addIndex("20240422.1", "IDX_IDXCMBTOKNU_HASHC")
-			.unique(false)
-			.withColumns("HASH_COMPLETE", "RES_ID", "PARTITION_ID");
+				.addIndex("20240422.1", "IDX_IDXCMBTOKNU_HASHC")
+				.unique(false)
+				.withColumns("HASH_COMPLETE", "RES_ID", "PARTITION_ID");
 	}
 
 	protected void init720() {

@@ -41,10 +41,11 @@ public class ComboNonUniqueSearchParameterPredicateBuilder extends BaseSearchPar
 	}
 
 	public Condition createPredicateHashComplete(RequestPartitionId theRequestPartitionId, String theIndexString) {
-		PartitionablePartitionId partitionId = PartitionablePartitionId.toStoragePartition(theRequestPartitionId, getPartitionSettings());
-		long hash = ResourceIndexedComboTokenNonUnique.calculateHashComplete(getPartitionSettings(), partitionId, theIndexString);
+		PartitionablePartitionId partitionId =
+				PartitionablePartitionId.toStoragePartition(theRequestPartitionId, getPartitionSettings());
+		long hash = ResourceIndexedComboTokenNonUnique.calculateHashComplete(
+				getPartitionSettings(), partitionId, theIndexString);
 		BinaryCondition predicate = BinaryCondition.equalTo(myColumnHashComplete, generatePlaceholder(hash));
 		return combineWithRequestPartitionIdPredicate(theRequestPartitionId, predicate);
 	}
-
 }
