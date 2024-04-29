@@ -21,8 +21,6 @@ package ca.uhn.fhir.jpa.mdm.config;
 
 import ca.uhn.fhir.jpa.mdm.interceptor.MdmSubmitterInterceptorLoader;
 import ca.uhn.fhir.mdm.MdmStorageConfig;
-import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
-import ca.uhn.fhir.mdm.svc.MdmSubmitSvcImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
