@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5874
+jira: SMILE-8149
+title: "Fixed a bug where 'List' would be incorrectly shown as 'ListResource' in the error response for a GET for an invalid resource."
