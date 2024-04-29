@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4597
+jira: SMILE-5993
+backport: 6.4.4
+title: "Simultaneous conditional create or create-on-update operations no longer create duplicate matching resources."

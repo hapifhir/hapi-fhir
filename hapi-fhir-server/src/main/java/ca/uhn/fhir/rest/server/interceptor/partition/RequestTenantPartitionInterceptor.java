@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.interceptor.partition;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.interceptor.partition;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.interceptor.partition;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -29,8 +28,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.tenant.ITenantIdentificationStrategy;
-
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -71,6 +69,4 @@ public class RequestTenantPartitionInterceptor {
 
 		return RequestPartitionId.fromPartitionName(tenantId);
 	}
-
-
 }

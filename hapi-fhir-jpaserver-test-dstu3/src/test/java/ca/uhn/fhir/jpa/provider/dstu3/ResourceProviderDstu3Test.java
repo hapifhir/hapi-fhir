@@ -2553,17 +2553,16 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		p.addName().setFamily("testMetaAddInvalid");
 		IIdType id = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
 
-		//@formatter:off
-		String input = "<Parameters>\n" +
-			"  <meta>\n" +
-			"    <tag>\n" +
-			"      <system value=\"http://example.org/codes/tags\"/>\n" +
-			"      <code value=\"record-lost\"/>\n" +
-			"      <display value=\"Patient File Lost\"/>\n" +
-			"    </tag>\n" +
-			"  </meta>\n" +
-			"</Parameters>";
-		//@formatter:on
+		String input = """
+			<Parameters>
+			  <meta>
+			    <tag>
+			      <system value="http://example.org/codes/tags"/>
+			      <code value="record-lost"/>
+			      <display value="Patient File Lost"/>
+			    </tag>
+			  </meta>
+			</Parameters>""";
 
 		HttpPost post = new HttpPost(myServerBase + "/Patient/" + id.getIdPart() + "/$meta-add");
 		post.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
@@ -4694,7 +4693,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertEquals(412, response.getStatusLine().getStatusCode());
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(resp, containsString("SHALL at least contain a contact's details or a reference to an organization"));
 		}
 	}

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IElement;
@@ -84,16 +83,13 @@ public class CanonicalIdentifier extends BaseIdentifierDt {
 		CanonicalIdentifier that = (CanonicalIdentifier) theO;
 
 		return new EqualsBuilder()
-			.append(mySystem, that.mySystem)
-			.append(myValue, that.myValue)
-			.isEquals();
+				.append(mySystem, that.mySystem)
+				.append(myValue, that.myValue)
+				.isEquals();
 	}
 
 	@Override
 	public int hashCode() {
-		return new HashCodeBuilder(17, 37)
-			.append(mySystem)
-			.append(myValue)
-			.toHashCode();
+		return new HashCodeBuilder(17, 37).append(mySystem).append(myValue).toHashCode();
 	}
 }

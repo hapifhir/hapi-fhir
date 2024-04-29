@@ -1,10 +1,8 @@
-package ca.uhn.fhir.context.support;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +17,19 @@ package ca.uhn.fhir.context.support;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.context.support;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -35,8 +37,6 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -65,14 +65,14 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * and calling code is expected to be able to handle this. Generally, a
  * series of implementations of this interface will be joined together using
  * the
- * <a href="https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/ValidationSupportChain2.html">ValidationSupportChain</a>
+ * <a href="https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/ValidationSupportChain.html">ValidationSupportChain</a>
  * class.
  * </p>
  * <p>
  * See <a href="https://hapifhir.io/hapi-fhir/docs/validation/validation_support_modules.html">Validation Support Modules</a>
  * for information on how to assemble and configure implementations of this interface. See also
  * the <code>org.hl7.fhir.common.hapi.validation.support</code>
- * <a href="https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/package-summary.html">package summary</a>
+ * <a href="./package-summary.html">package summary</a>
  * in the <code>hapi-fhir-validation</code> module for many implementations of this interface.
  * </p>
  *
@@ -80,7 +80,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public interface IValidationSupport {
 	String URL_PREFIX_VALUE_SET = "http://hl7.org/fhir/ValueSet/";
-
 
 	/**
 	 * Expands the given portion of a ValueSet
@@ -92,7 +91,10 @@ public interface IValidationSupport {
 	 * @return The expansion, or null
 	 */
 	@Nullable
-	default ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull IBaseResource theValueSetToExpand) {
+	default ValueSetExpansionOutcome expandValueSet(
+			ValidationSupportContext theValidationSupportContext,
+			@Nullable ValueSetExpansionOptions theExpansionOptions,
+			@Nonnull IBaseResource theValueSetToExpand) {
 		return null;
 	}
 
@@ -108,11 +110,16 @@ public interface IValidationSupport {
 	 * @since 6.0.0
 	 */
 	@Nullable
-	default ValueSetExpansionOutcome expandValueSet(ValidationSupportContext theValidationSupportContext, @Nullable ValueSetExpansionOptions theExpansionOptions, @Nonnull String theValueSetUrlToExpand) throws ResourceNotFoundException {
+	default ValueSetExpansionOutcome expandValueSet(
+			ValidationSupportContext theValidationSupportContext,
+			@Nullable ValueSetExpansionOptions theExpansionOptions,
+			@Nonnull String theValueSetUrlToExpand)
+			throws ResourceNotFoundException {
 		Validate.notBlank(theValueSetUrlToExpand, "theValueSetUrlToExpand must not be null or blank");
 		IBaseResource valueSet = fetchValueSet(theValueSetUrlToExpand);
 		if (valueSet == null) {
-			throw new ResourceNotFoundException(Msg.code(2024) + "Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSetUrlToExpand));
+			throw new ResourceNotFoundException(
+					Msg.code(2024) + "Unknown ValueSet: " + UrlUtil.escapeUrlParam(theValueSetUrlToExpand));
 		}
 		return expandValueSet(theValidationSupportContext, theExpansionOptions, valueSet);
 	}
@@ -124,6 +131,16 @@ public interface IValidationSupport {
 	 */
 	@Nullable
 	default List<IBaseResource> fetchAllConformanceResources() {
+		return null;
+	}
+
+	/**
+	 * Load and return all possible search parameters
+	 *
+	 * @since 6.6.0
+	 */
+	@Nullable
+	default <T extends IBaseResource> List<T> fetchAllSearchParameters() {
 		return null;
 	}
 
@@ -191,17 +208,14 @@ public interface IValidationSupport {
 		Validate.notBlank(theUri, "theUri must not be null or blank");
 
 		if (theClass == null) {
-			Supplier<IBaseResource>[] sources = new Supplier[]{
-				() -> fetchStructureDefinition(theUri),
-				() -> fetchValueSet(theUri),
-				() -> fetchCodeSystem(theUri)
+			Supplier<IBaseResource>[] sources = new Supplier[] {
+				() -> fetchStructureDefinition(theUri), () -> fetchValueSet(theUri), () -> fetchCodeSystem(theUri)
 			};
-			return (T) Arrays
-				.stream(sources)
-				.map(t -> t.get())
-				.filter(t -> t != null)
-				.findFirst()
-				.orElse(null);
+			return (T) Arrays.stream(sources)
+					.map(t -> t.get())
+					.filter(t -> t != null)
+					.findFirst()
+					.orElse(null);
 		}
 
 		switch (getFhirContext().getResourceType(theClass)) {
@@ -280,7 +294,13 @@ public interface IValidationSupport {
 	 * @return Returns a validation result object
 	 */
 	@Nullable
-	default CodeValidationResult validateCode(@Nonnull ValidationSupportContext theValidationSupportContext, @Nonnull ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, String theValueSetUrl) {
+	default CodeValidationResult validateCode(
+			ValidationSupportContext theValidationSupportContext,
+			ConceptValidationOptions theOptions,
+			String theCodeSystem,
+			String theCode,
+			String theDisplay,
+			String theValueSetUrl) {
 		return null;
 	}
 
@@ -298,39 +318,73 @@ public interface IValidationSupport {
 	 * @return Returns a validation result object, or <code>null</code> if this validation support module can not handle this kind of request
 	 */
 	@Nullable
-	default CodeValidationResult validateCodeInValueSet(ValidationSupportContext theValidationSupportContext, ConceptValidationOptions theOptions, String theCodeSystem, String theCode, String theDisplay, @Nonnull IBaseResource theValueSet) {
+	default CodeValidationResult validateCodeInValueSet(
+			ValidationSupportContext theValidationSupportContext,
+			ConceptValidationOptions theOptions,
+			String theCodeSystem,
+			String theCode,
+			String theDisplay,
+			@Nonnull IBaseResource theValueSet) {
 		return null;
 	}
 
 	/**
-	 * Look up a code using the system and code value
+	 * Look up a code using the system and code value.
+	 * @deprecated This method has been deprecated in HAPI FHIR 7.0.0. Use {@link IValidationSupport#lookupCode(ValidationSupportContext, LookupCodeRequest)} instead.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @param theSystem                   The CodeSystem URL
 	 * @param theCode                     The code
-	 * @param theDisplayLanguage          to filter out the designation by the display language. To return all designation, set this value to <code>null</code>.
+	 * @param theDisplayLanguage          Used to filter out the designation by the display language. To return all designation, set this value to <code>null</code>.
 	 */
+	@Deprecated
 	@Nullable
-	default LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode, String theDisplayLanguage) {
+	default LookupCodeResult lookupCode(
+			ValidationSupportContext theValidationSupportContext,
+			String theSystem,
+			String theCode,
+			String theDisplayLanguage) {
 		return null;
 	}
 
 	/**
 	 * Look up a code using the system and code value
+	 * @deprecated This method has been deprecated in HAPI FHIR 7.0.0. Use {@link IValidationSupport#lookupCode(ValidationSupportContext, LookupCodeRequest)} instead.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
 	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
 	 * @param theSystem                   The CodeSystem URL
 	 * @param theCode                     The code
 	 */
+	@Deprecated
 	@Nullable
-	default LookupCodeResult lookupCode(ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
+	default LookupCodeResult lookupCode(
+			ValidationSupportContext theValidationSupportContext, String theSystem, String theCode) {
 		return lookupCode(theValidationSupportContext, theSystem, theCode, null);
 	}
 
 	/**
-	 * Returns <code>true</code> if the given valueset can be validated by the given
+	 * Look up a code using the system, code and other parameters captured in {@link LookupCodeRequest}.
+	 * @since 7.0.0
+	 *
+	 * @param theValidationSupportContext      The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
+	 *                                         other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param theLookupCodeRequest             The parameters used to perform the lookup, including system and code.
+	 */
+	@Nullable
+	default LookupCodeResult lookupCode(
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
+		// TODO: can change to return null once the deprecated methods are removed
+		return lookupCode(
+				theValidationSupportContext,
+				theLookupCodeRequest.getSystem(),
+				theLookupCodeRequest.getCode(),
+				theLookupCodeRequest.getDisplayLanguage());
+	}
+
+	/**
+	 * Returns <code>true</code> if the given ValueSet can be validated by the given
 	 * validation support module
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
@@ -349,7 +403,12 @@ public interface IValidationSupport {
 	 * @return Returns null if this module does not know how to handle this request
 	 */
 	@Nullable
-	default IBaseResource generateSnapshot(ValidationSupportContext theValidationSupportContext, IBaseResource theInput, String theUrl, String theWebUrl, String theProfileName) {
+	default IBaseResource generateSnapshot(
+			ValidationSupportContext theValidationSupportContext,
+			IBaseResource theInput,
+			String theUrl,
+			String theWebUrl,
+			String theProfileName) {
 		return null;
 	}
 
@@ -372,6 +431,13 @@ public interface IValidationSupport {
 	@Nullable
 	default TranslateConceptResults translateConcept(TranslateCodeRequest theRequest) {
 		return null;
+	}
+
+	/**
+	 * This field is used by the Terminology Troubleshooting Log to log which validation support module was used for the operation being logged.
+	 */
+	default String getName() {
+		return "Unknown " + getFhirContext().getVersion().getVersion() + " Validation Support";
 	}
 
 	enum IssueSeverity {
@@ -460,7 +526,12 @@ public interface IValidationSupport {
 		public String getPropertyName() {
 			return myPropertyName;
 		}
+
+		public abstract String getType();
 	}
+
+	String TYPE_STRING = "string";
+	String TYPE_CODING = "Coding";
 
 	class StringConceptProperty extends BaseConceptProperty {
 		private final String myValue;
@@ -477,6 +548,10 @@ public interface IValidationSupport {
 
 		public String getValue() {
 			return myValue;
+		}
+
+		public String getType() {
+			return TYPE_STRING;
 		}
 	}
 
@@ -508,9 +583,18 @@ public interface IValidationSupport {
 		public String getDisplay() {
 			return myDisplay;
 		}
+
+		public String getType() {
+			return TYPE_CODING;
+		}
 	}
 
 	class CodeValidationResult {
+		public static final String SOURCE_DETAILS = "sourceDetails";
+		public static final String RESULT = "result";
+		public static final String MESSAGE = "message";
+		public static final String DISPLAY = "display";
+
 		private String myCode;
 		private String myMessage;
 		private IssueSeverity mySeverity;
@@ -518,9 +602,27 @@ public interface IValidationSupport {
 		private String myCodeSystemVersion;
 		private List<BaseConceptProperty> myProperties;
 		private String myDisplay;
+		private String mySourceDetails;
 
 		public CodeValidationResult() {
 			super();
+		}
+
+		/**
+		 * This field may contain information about what the source of the
+		 * validation information was.
+		 */
+		public String getSourceDetails() {
+			return mySourceDetails;
+		}
+
+		/**
+		 * This field may contain information about what the source of the
+		 * validation information was.
+		 */
+		public CodeValidationResult setSourceDetails(String theSourceDetails) {
+			mySourceDetails = theSourceDetails;
+			return this;
 		}
 
 		public String getDisplay() {
@@ -621,6 +723,23 @@ public interface IValidationSupport {
 			setSeverity(IssueSeverity.valueOf(theIssueSeverity.toUpperCase()));
 			return this;
 		}
+
+		public IBaseParameters toParameters(FhirContext theContext) {
+			IBaseParameters retVal = ParametersUtil.newInstance(theContext);
+
+			ParametersUtil.addParameterToParametersBoolean(theContext, retVal, RESULT, isOk());
+			if (isNotBlank(getMessage())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, MESSAGE, getMessage());
+			}
+			if (isNotBlank(getDisplay())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, DISPLAY, getDisplay());
+			}
+			if (isNotBlank(getSourceDetails())) {
+				ParametersUtil.addParameterToParametersString(theContext, retVal, SOURCE_DETAILS, getSourceDetails());
+			}
+
+			return retVal;
+		}
 	}
 
 	class ValueSetExpansionOutcome {
@@ -656,8 +775,9 @@ public interface IValidationSupport {
 		private boolean myFound;
 		private String mySearchedForCode;
 		private String mySearchedForSystem;
-		private List<IValidationSupport.BaseConceptProperty> myProperties;
+		private List<BaseConceptProperty> myProperties;
 		private List<ConceptDesignation> myDesignations;
+		private String myErrorMessage;
 
 		/**
 		 * Constructor
@@ -673,7 +793,7 @@ public interface IValidationSupport {
 			return myProperties;
 		}
 
-		public void setProperties(List<IValidationSupport.BaseConceptProperty> theProperties) {
+		public void setProperties(List<BaseConceptProperty> theProperties) {
 			myProperties = theProperties;
 		}
 
@@ -746,11 +866,13 @@ public interface IValidationSupport {
 
 		public void throwNotFoundIfAppropriate() {
 			if (isFound() == false) {
-				throw new ResourceNotFoundException(Msg.code(1738) + "Unable to find code[" + getSearchedForCode() + "] in system[" + getSearchedForSystem() + "]");
+				throw new ResourceNotFoundException(Msg.code(1738) + "Unable to find code[" + getSearchedForCode()
+						+ "] in system[" + getSearchedForSystem() + "]");
 			}
 		}
 
-		public IBaseParameters toParameters(FhirContext theContext, List<? extends IPrimitiveType<String>> theProperties) {
+		public IBaseParameters toParameters(
+				FhirContext theContext, List<? extends IPrimitiveType<String>> thePropertyNames) {
 
 			IBaseParameters retVal = ParametersUtil.newInstance(theContext);
 			if (isNotBlank(getCodeSystemDisplayName())) {
@@ -765,32 +887,42 @@ public interface IValidationSupport {
 			if (myProperties != null) {
 
 				Set<String> properties = Collections.emptySet();
-				if (theProperties != null) {
-					properties = theProperties
-						.stream()
-						.map(IPrimitiveType::getValueAsString)
-						.collect(Collectors.toSet());
+				if (thePropertyNames != null) {
+					properties = thePropertyNames.stream()
+							.map(IPrimitiveType::getValueAsString)
+							.collect(Collectors.toSet());
 				}
 
-				for (IValidationSupport.BaseConceptProperty next : myProperties) {
+				for (BaseConceptProperty next : myProperties) {
+					String propertyName = next.getPropertyName();
 
-					if (!properties.isEmpty()) {
-						if (!properties.contains(next.getPropertyName())) {
-							continue;
-						}
+					if (!properties.isEmpty() && !properties.contains(propertyName)) {
+						continue;
 					}
 
 					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "property");
-					ParametersUtil.addPartCode(theContext, property, "code", next.getPropertyName());
+					ParametersUtil.addPartCode(theContext, property, "code", propertyName);
 
-					if (next instanceof IValidationSupport.StringConceptProperty) {
-						IValidationSupport.StringConceptProperty prop = (IValidationSupport.StringConceptProperty) next;
-						ParametersUtil.addPartString(theContext, property, "value", prop.getValue());
-					} else if (next instanceof IValidationSupport.CodingConceptProperty) {
-						IValidationSupport.CodingConceptProperty prop = (IValidationSupport.CodingConceptProperty) next;
-						ParametersUtil.addPartCoding(theContext, property, "value", prop.getCodeSystem(), prop.getCode(), prop.getDisplay());
-					} else {
-						throw new IllegalStateException(Msg.code(1739) + "Don't know how to handle " + next.getClass());
+					String propertyType = next.getType();
+					switch (propertyType) {
+						case TYPE_STRING:
+							StringConceptProperty stringConceptProperty = (StringConceptProperty) next;
+							ParametersUtil.addPartString(
+									theContext, property, "value", stringConceptProperty.getValue());
+							break;
+						case TYPE_CODING:
+							CodingConceptProperty codingConceptProperty = (CodingConceptProperty) next;
+							ParametersUtil.addPartCoding(
+									theContext,
+									property,
+									"value",
+									codingConceptProperty.getCodeSystem(),
+									codingConceptProperty.getCode(),
+									codingConceptProperty.getDisplay());
+							break;
+						default:
+							throw new IllegalStateException(
+									Msg.code(1739) + "Don't know how to handle " + next.getClass());
 					}
 				}
 			}
@@ -800,7 +932,8 @@ public interface IValidationSupport {
 
 					IBase property = ParametersUtil.addParameterToParameters(theContext, retVal, "designation");
 					ParametersUtil.addPartCode(theContext, property, "language", next.getLanguage());
-					ParametersUtil.addPartCoding(theContext, property, "use", next.getUseSystem(), next.getUseCode(), next.getUseDisplay());
+					ParametersUtil.addPartCoding(
+							theContext, property, "use", next.getUseSystem(), next.getUseCode(), next.getUseDisplay());
 					ParametersUtil.addPartString(theContext, property, "value", next.getValue());
 				}
 			}
@@ -808,14 +941,21 @@ public interface IValidationSupport {
 			return retVal;
 		}
 
+		public void setErrorMessage(String theErrorMessage) {
+			myErrorMessage = theErrorMessage;
+		}
+
+		public String getErrorMessage() {
+			return myErrorMessage;
+		}
+
 		public static LookupCodeResult notFound(String theSearchedForSystem, String theSearchedForCode) {
 			return new LookupCodeResult()
-				.setFound(false)
-				.setSearchedForSystem(theSearchedForSystem)
-				.setSearchedForCode(theSearchedForCode);
+					.setFound(false)
+					.setSearchedForSystem(theSearchedForSystem)
+					.setSearchedForCode(theSearchedForCode);
 		}
 	}
-
 
 	class TranslateCodeRequest {
 		private final String myTargetSystemUrl;
@@ -839,14 +979,14 @@ public interface IValidationSupport {
 		}
 
 		public TranslateCodeRequest(
-			List<IBaseCoding> theCodings,
-			String theTargetSystemUrl,
-			String theConceptMapUrl,
-			String theConceptMapVersion,
-			String theSourceValueSetUrl,
-			String theTargetValueSetUrl,
-			IIdType theResourceId,
-			boolean theReverse) {
+				List<IBaseCoding> theCodings,
+				String theTargetSystemUrl,
+				String theConceptMapUrl,
+				String theConceptMapVersion,
+				String theSourceValueSetUrl,
+				String theTargetValueSetUrl,
+				IIdType theResourceId,
+				boolean theReverse) {
 			myCodings = theCodings;
 			myTargetSystemUrl = theTargetSystemUrl;
 			myConceptMapUrl = theConceptMapUrl;
@@ -870,29 +1010,29 @@ public interface IValidationSupport {
 			TranslateCodeRequest that = (TranslateCodeRequest) theO;
 
 			return new EqualsBuilder()
-				.append(myCodings, that.myCodings)
-				.append(myTargetSystemUrl, that.myTargetSystemUrl)
-				.append(myConceptMapUrl, that.myConceptMapUrl)
-				.append(myConceptMapVersion, that.myConceptMapVersion)
-				.append(mySourceValueSetUrl, that.mySourceValueSetUrl)
-				.append(myTargetValueSetUrl, that.myTargetValueSetUrl)
-				.append(myResourceId, that.myResourceId)
-				.append(myReverse, that.myReverse)
-				.isEquals();
+					.append(myCodings, that.myCodings)
+					.append(myTargetSystemUrl, that.myTargetSystemUrl)
+					.append(myConceptMapUrl, that.myConceptMapUrl)
+					.append(myConceptMapVersion, that.myConceptMapVersion)
+					.append(mySourceValueSetUrl, that.mySourceValueSetUrl)
+					.append(myTargetValueSetUrl, that.myTargetValueSetUrl)
+					.append(myResourceId, that.myResourceId)
+					.append(myReverse, that.myReverse)
+					.isEquals();
 		}
 
 		@Override
 		public int hashCode() {
 			return new HashCodeBuilder(17, 37)
-				.append(myCodings)
-				.append(myTargetSystemUrl)
-				.append(myConceptMapUrl)
-				.append(myConceptMapVersion)
-				.append(mySourceValueSetUrl)
-				.append(myTargetValueSetUrl)
-				.append(myResourceId)
-				.append(myReverse)
-				.toHashCode();
+					.append(myCodings)
+					.append(myTargetSystemUrl)
+					.append(myConceptMapUrl)
+					.append(myConceptMapVersion)
+					.append(mySourceValueSetUrl)
+					.append(myTargetValueSetUrl)
+					.append(myResourceId)
+					.append(myReverse)
+					.toHashCode();
 		}
 
 		public List<IBaseCoding> getCodings() {
@@ -925,6 +1065,16 @@ public interface IValidationSupport {
 
 		public boolean isReverse() {
 			return myReverse;
+		}
+
+		@Override
+		public String toString() {
+			return new ToStringBuilder(this)
+					.append("sourceValueSetUrl", mySourceValueSetUrl)
+					.append("targetSystemUrl", myTargetSystemUrl)
+					.append("targetValueSetUrl", myTargetValueSetUrl)
+					.append("reverse", myReverse)
+					.toString();
 		}
 	}
 

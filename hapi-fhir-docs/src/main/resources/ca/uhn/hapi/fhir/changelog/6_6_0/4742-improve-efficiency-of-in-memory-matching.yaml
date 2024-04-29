@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4742
+title: "The in-memory matcher used by the JPA server subscription processor has been 
+   optimized to reduce the number of FHIRPath expressions executed while processing
+   in-memory matching."

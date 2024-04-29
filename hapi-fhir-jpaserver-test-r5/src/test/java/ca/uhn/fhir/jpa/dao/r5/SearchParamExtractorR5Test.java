@@ -38,7 +38,7 @@ public class SearchParamExtractorR5Test {
 		appointment.setStart(new Date());
 		appointment.setEnd(new Date());
 		Appointment.AppointmentParticipantComponent participant = new Appointment.AppointmentParticipantComponent();
-		participant.setStatus(Enumerations.ParticipationStatus.ACCEPTED);
+		participant.setStatus(Appointment.ParticipationStatus.ACCEPTED);
 		appointment.setParticipant(Collections.singletonList(participant));
 
 

@@ -38,18 +38,22 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 	@BeforeEach
 	public void before() {
 		mySynchronousSearchSvc.setContext(ourCtx);
+		mySynchronousSearchSvc.mySearchBuilderFactory = mySearchBuilderFactory;
 	}
 
 	@Test
 	public void testSynchronousSearch() {
-		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any())).thenReturn(mySearchBuilder);
+		when(mySearchBuilderFactory.newSearchBuilder(any(), any(), any()))
+			.thenReturn(mySearchBuilder);
 
 		SearchParameterMap params = new SearchParameterMap();
 
 		List<JpaPid> pids = createPidSequence(800);
-		when(mySearchBuilder.createQuery(same(params), any(), any(), nullable(RequestPartitionId.class))).thenReturn(new BaseSearchSvc.ResultIterator(pids.iterator()));
+		when(mySearchBuilder.createQuery(any(SearchParameterMap.class), any(), any(), nullable(RequestPartitionId.class)))
+			.thenReturn(new BaseSearchSvc.ResultIterator(pids.iterator()));
 
-		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
+		doAnswer(loadPids()).when(mySearchBuilder)
+			.loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
 		IBundleProvider result = mySynchronousSearchSvc.executeQuery( "Patient", params, RequestPartitionId.allPartitions());
 		assertNull(result.getUuid());
@@ -71,8 +75,8 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 		params.setSearchTotalMode(SearchTotalModeEnum.ACCURATE);
 
 		List<JpaPid> pids = createPidSequence(30);
-		when(mySearchBuilder.createCountQuery(same(params), any(String.class),nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(20L);
-		when(mySearchBuilder.createQuery(same(params), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(new BaseSearchSvc.ResultIterator(pids.subList(10, 20).iterator()));
+		when(mySearchBuilder.createCountQuery(any(SearchParameterMap.class), any(String.class),nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(20L);
+		when(mySearchBuilder.createQuery(any(SearchParameterMap.class), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(new BaseSearchSvc.ResultIterator(pids.subList(10, 20).iterator()));
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
@@ -92,7 +96,8 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 		params.setLoadSynchronousUpTo(100);
 
 		List<JpaPid> pids = createPidSequence(800);
-		when(mySearchBuilder.createQuery(same(params), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class))).thenReturn(new BaseSearchSvc.ResultIterator(pids.iterator()));
+		when(mySearchBuilder.createQuery(any(SearchParameterMap.class), any(), nullable(RequestDetails.class), nullable(RequestPartitionId.class)))
+			.thenReturn(new BaseSearchSvc.ResultIterator(pids.iterator()));
 
 		pids = createPidSequence(110);
 		List<JpaPid> finalPids = pids;

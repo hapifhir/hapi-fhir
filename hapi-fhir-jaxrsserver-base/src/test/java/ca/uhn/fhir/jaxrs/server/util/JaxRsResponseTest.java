@@ -10,7 +10,7 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.Set;
 
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response;
 
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
@@ -71,8 +71,9 @@ public class JaxRsResponseTest {
 		boolean theAddContentLocationHeader = false;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theSummaryMode, 200, theAddContentLocationHeader, respondGzip, this.request);
 		assertEquals(200, result.getStatus());
-		assertEquals(null, result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
-		assertEquals(null, result.getEntity());
+		assertEquals("{\n" +
+			"  \"resourceType\": \"Binary\"\n" +
+			"}", result.getEntity().toString());
 	}
 
 	@Test

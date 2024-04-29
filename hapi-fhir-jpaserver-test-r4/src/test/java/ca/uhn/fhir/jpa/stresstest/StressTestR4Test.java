@@ -121,7 +121,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		myPagingProvider.setMaximumPageSize(300);
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testNoDuplicatesInSearchResults() throws Exception {
 		int resourceCount = 1000;
@@ -198,7 +198,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(resourceCount, ids.size());
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testPageThroughLotsOfPages() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
@@ -270,7 +270,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(count - 1000, Sets.newHashSet(ids).size());
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testPageThroughLotsOfPages2() {
 		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
@@ -306,7 +306,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testSearchWithLargeNumberOfIncludes() {
 
@@ -355,7 +355,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		assertEquals(1001, resultsAndIncludes.size());
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testUpdateListWithLargeNumberOfEntries() {
 		int numPatients = 3000;
@@ -395,7 +395,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testMultithreadedSearch() throws Exception {
 		Bundle input = new Bundle();
@@ -532,7 +532,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 	 * JpaValidationSupportDstuXX be transactional, which it should have been
 	 * anyhow.
 	 */
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testMultithreadedSearchWithValidation() throws Exception {
 		myServer.registerInterceptor(myRequestValidatingInterceptor);
@@ -571,7 +571,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		validateNoErrors(tasks);
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void test_DeleteExpunge_withLargeBatchSizeManyResources() {
 		// setup
@@ -613,7 +613,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		assertThat(deleteCount, is(equalTo(59)));
 	}
 
-	@Disabled
+	@Disabled("Stress test")
 	@Test
 	public void testDeleteExpungeOperationOverLargeDataset() {
 		myStorageSettings.setAllowMultipleDelete(true);

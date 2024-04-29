@@ -2,17 +2,18 @@ package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFilterParser;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect;
 import ca.uhn.fhir.jpa.search.builder.predicate.DatePredicateBuilder;
 import ca.uhn.fhir.rest.param.DateParam;
 import com.healthmarketscience.sqlbuilder.Condition;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.dialect.Dialect;
-import org.hibernate.dialect.PostgreSQL10Dialect;
+import org.hibernate.dialect.PostgreSQLDialect;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -45,7 +46,7 @@ public class SearchQueryBuilderDialectPostgresTest extends BaseSearchQueryBuilde
 		logSql(generatedSql);
 
 		String sql = generatedSql.getSql();
-		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_DATE t0 WHERE ((t0.HASH_IDENTITY = ?) AND ((t0.SP_VALUE_LOW_DATE_ORDINAL >= ?) AND (t0.SP_VALUE_HIGH_DATE_ORDINAL <= ?))) limit ?", sql);
+		assertEquals("SELECT t0.RES_ID FROM HFJ_SPIDX_DATE t0 WHERE ((t0.HASH_IDENTITY = ?) AND ((t0.SP_VALUE_LOW_DATE_ORDINAL >= ?) AND (t0.SP_VALUE_HIGH_DATE_ORDINAL <= ?))) fetch first ? rows only", sql);
 
 		assertEquals(4, StringUtils.countMatches(sql, "?"));
 		assertEquals(4, generatedSql.getBindVariables().size());
@@ -58,6 +59,6 @@ public class SearchQueryBuilderDialectPostgresTest extends BaseSearchQueryBuilde
 	@Nonnull
 	@Override
 	protected Dialect createDialect() {
-		return new PostgreSQL10Dialect();
+		return new HapiFhirPostgresDialect();
 	}
 }

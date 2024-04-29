@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -20,7 +21,6 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -370,7 +370,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		assertEquals("http://foo", outcome.getUrl());
 		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, outcome.getContent());
 
-		IValidationSupport.LookupCodeResult lookup = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "CBC", null);
+		IValidationSupport.LookupCodeResult lookup = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo", "CBC"));
 		assertEquals("Complete Blood Count", lookup.getCodeDisplay());
 	}
 
@@ -434,7 +434,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA0", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea", null).getCodeDisplay());
+		assertEquals("CODEA0", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport),
+				new LookupCodeRequest("http://foo", "codea")).getCodeDisplay());
 
 		// Add codes again with different display
 		delta = new CustomTerminologySet();
@@ -442,16 +443,17 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("codeb", "CODEB1");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA1", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea", null).getCodeDisplay());
+		assertEquals("CODEA1", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport),
+				new LookupCodeRequest("http://foo", "codea")).getCodeDisplay());
 
 		// Add codes again with no changes
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
 		assertEquals(2, outcome.getUpdatedConceptCount());
-		assertEquals("CODEA1", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo", "codea", null).getCodeDisplay());
+		assertEquals("CODEA1", myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport),
+				new LookupCodeRequest("http://foo", "codea")).getCodeDisplay());
 	}
 
 	@Test
-	@Disabled
 	public void testAddWithPropertiesAndDesignations() {
 
 		// Create not-present
@@ -460,10 +462,8 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		cs.setUrl("http://foo/cs");
 		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		cs.setVersion("1.2.3");
-		myCodeSystemDao.create(cs);
 
-		CodeSystem delta = new CodeSystem();
-		CodeSystem.ConceptDefinitionComponent concept = delta
+		CodeSystem.ConceptDefinitionComponent concept = cs
 			.addConcept()
 			.setCode("lunch")
 			.setDisplay("I'm having dog food");
@@ -483,8 +483,10 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		concept.addProperty()
 			.setCode("useless_sct_code")
 			.setValue(new Coding("http://snomed.info", "1234567", "Choked on large meal (finding)"));
+		myCodeSystemDao.create(cs, mySrd);
 
-		IValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), "http://foo/cs", "lunch", null);
+		IValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport),
+				new LookupCodeRequest("http://foo/cs", "lunch"));
 		assertEquals(true, result.isFound());
 		assertEquals("lunch", result.getSearchedForCode());
 		assertEquals("http://foo/cs", result.getSearchedForSystem());
@@ -508,7 +510,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		List<Parameters.ParametersParameterComponent> properties = output.getParameter().stream().filter(t -> t.getName().equals("property")).collect(Collectors.toList());
 		assertEquals("code", properties.get(0).getPart().get(0).getName());
-		assertEquals("flavour", ((CodeType) properties.get(0).getPart().get(0).getValue()).getValueAsString());
+		assertEquals("flavour", ((StringType) properties.get(0).getPart().get(0).getValue()).getValueAsString());
 		assertEquals("value", properties.get(0).getPart().get(1).getName());
 		assertEquals("Hints of lime", ((StringType) properties.get(0).getPart().get(1).getValue()).getValueAsString());
 

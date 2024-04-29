@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5009
+title: "Previously, all revincludes would always be evaluated before all includes.  Now the system checks if any
+revincludes are recursive (i.e. are modified :iterate) and if so, it evaluates all the includes first."

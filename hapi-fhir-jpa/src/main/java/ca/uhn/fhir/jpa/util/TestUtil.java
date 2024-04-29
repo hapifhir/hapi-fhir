@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.util;
-
 /*-
  * #%L
- * hapi-fhir-jpa
+ * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.util;
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.InstantType;
@@ -34,7 +33,6 @@ public class TestUtil {
 		super();
 	}
 
-
 	public static InstantType getTimestamp(IBaseResource resource) {
 		return new InstantType(new Date(resource.getMeta().getLastUpdated().getTime()));
 	}
@@ -42,6 +40,4 @@ public class TestUtil {
 	public static void sleepOneClick() {
 		ca.uhn.fhir.util.TestUtil.sleepAtLeast(1, false);
 	}
-
-
 }

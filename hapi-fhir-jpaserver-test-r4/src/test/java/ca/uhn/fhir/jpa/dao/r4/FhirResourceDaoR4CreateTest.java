@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -9,13 +10,14 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
+import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -27,6 +29,8 @@ import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
+import org.exparity.hamcrest.date.DateMatchers;
+import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -37,6 +41,8 @@ import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -45,8 +51,12 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SampledData;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StructureDefinition;
+import org.hl7.fhir.r4.model.Task;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -57,19 +67,25 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -84,8 +100,33 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 		myStorageSettings.setIndexOnContainedResources(new JpaStorageSettings().isIndexOnContainedResources());
 		myStorageSettings.setIndexOnContainedResourcesRecursively(new JpaStorageSettings().isIndexOnContainedResourcesRecursively());
-		myStorageSettings.setInlineResourceTextBelowSize(new JpaStorageSettings().getInlineResourceTextBelowSize());
 	}
+
+	@Test
+	public void testCreateDoesntIndexForMetaSearchTags() {
+		Observation obs = new Observation();
+		obs.setId("A");
+		obs.addNote().setText("A non indexed value");
+		obs.getMeta().setLastUpdatedElement(InstantType.now());
+		obs.getMeta().addTag().setSystem("http://foo").setCode("blah");
+		obs.getMeta().addTag().setSystem("http://foo").setCode("blah2");
+		obs.getMeta().addSecurity().setSystem("http://foo").setCode("blah");
+		obs.getMeta().addSecurity().setSystem("http://foo").setCode("blah2");
+		obs.getMeta().addProfile("http://blah");
+		obs.getMeta().addProfile("http://blah2");
+		obs.getMeta().setSource("http://foo#bar");
+		myObservationDao.update(obs, new SystemRequestDetails());
+
+		runInTransaction(()->{
+			logAllTokenIndexes();
+			logAllStringIndexes();
+			assertEquals(0, myResourceIndexedSearchParamStringDao.count());
+			assertEquals(0, myResourceIndexedSearchParamTokenDao.count());
+			assertEquals(0, myResourceIndexedSearchParamUriDao.count());
+		});
+
+	}
+
 
 
 	@Test
@@ -314,14 +355,14 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 	public void testConditionalCreateWithPlusInUrl() {
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue("20210427133226.444+0800");
-		DaoMethodOutcome outcome = myObservationDao.create(obs, "identifier=20210427133226.444+0800", new SystemRequestDetails());
+		DaoMethodOutcome outcome = myObservationDao.create(obs, "identifier=20210427133226.444%2B0800", new SystemRequestDetails());
 		assertTrue(outcome.getCreated());
 
 		logAllTokenIndexes();
 		myCaptureQueriesListener.clear();
 		obs = new Observation();
 		obs.addIdentifier().setValue("20210427133226.444+0800");
-		outcome = myObservationDao.create(obs, "identifier=20210427133226.444+0800", new SystemRequestDetails());
+		outcome = myObservationDao.create(obs, "identifier=20210427133226.444%2B0800", new SystemRequestDetails());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertFalse(outcome.getCreated());
 	}
@@ -364,6 +405,29 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
 		}
+	}
+
+	@Test
+	public void testCreateResource_withConditionalCreate_willAddSearchUrlEntity(){
+		// given
+		String identifierCode = "20210427133226.4440+800";
+		String matchUrl = "identifier=" + identifierCode.replace("+", "%2B");
+		Observation obs = new Observation();
+		obs.addIdentifier().setValue(identifierCode);
+		// when
+		DaoMethodOutcome outcome = myObservationDao.create(obs, matchUrl, new SystemRequestDetails());
+
+		// then
+		Long expectedResId = outcome.getId().getIdPartAsLong();
+		String expectedNormalizedMatchUrl = obs.fhirType() + "?" + matchUrl;
+
+		assertTrue(outcome.getCreated());
+		ResourceSearchUrlEntity searchUrlEntity = myResourceSearchUrlDao.findAll().get(0);
+		assertThat(searchUrlEntity, is(notNullValue()) );
+		assertThat(searchUrlEntity.getResourcePid(), equalTo(expectedResId));
+		assertThat(searchUrlEntity.getCreatedTime(), DateMatchers.within(1, SECONDS, new Date()));
+		assertThat(searchUrlEntity.getSearchUrl(), equalTo(expectedNormalizedMatchUrl));
+
 	}
 
 	@Test
@@ -1169,4 +1233,116 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertEquals(1, ids.size());
 	}
 
+	@Nested
+	class ConditionalCreates {
+		private static final String SYSTEM = "http://tempuri.org";
+		private static final String VALUE_1 = "1";
+		private static final String VALUE_2 = "2";
+
+		private final Task myTask1 = new Task()
+			.setStatus(Task.TaskStatus.DRAFT)
+			.setIntent(Task.TaskIntent.UNKNOWN)
+			.addIdentifier(new Identifier()
+				.setSystem(SYSTEM)
+				.setValue(VALUE_1));
+
+		private final Task myTask2 = new Task()
+			.setStatus(Task.TaskStatus.DRAFT)
+			.setIntent(Task.TaskIntent.UNKNOWN)
+			.addIdentifier(new Identifier()
+				.setSystem(SYSTEM)
+				.setValue(VALUE_2))
+			.addBasedOn(new Reference().setReference("urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea"));
+
+		@ParameterizedTest
+		@ValueSource(booleans = {true, false})
+		public void testConditionalCreateDependsOnPOSTedResource(boolean theHasQuestionMark) {
+			final IFhirResourceDao<Task> taskDao = getTaskDao();
+			taskDao.create(myTask1, new SystemRequestDetails());
+
+			final List<Task> allTasksPreBundle = searchAllTasks();
+			assertEquals(1, allTasksPreBundle.size());
+			final Task taskPreBundle = allTasksPreBundle.get(0);
+			assertEquals(VALUE_1, taskPreBundle.getIdentifier().get(0).getValue());
+			assertEquals(SYSTEM, taskPreBundle.getIdentifier().get(0).getSystem());
+
+			final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+
+			final String entryConditionalTemplate = "%sidentifier=http://tempuri.org|1";
+			final String matchUrl = String.format(entryConditionalTemplate, theHasQuestionMark ? "?" : "");
+
+			bundleBuilder.addTransactionCreateEntry(myTask2)
+				.conditional(matchUrl);
+
+			final List<Bundle.BundleEntryComponent> responseEntries = sendBundleAndGetResponse(bundleBuilder.getBundle());
+
+			assertEquals(1, responseEntries.size());
+
+			final Bundle.BundleEntryComponent bundleEntry = responseEntries.get(0);
+
+			assertEquals("200 OK", bundleEntry.getResponse().getStatus());
+
+			final List<Task> allTasksPostBundle = searchAllTasks();
+			assertEquals(1, allTasksPostBundle.size());
+			final Task taskPostBundle = allTasksPostBundle.get(0);
+			assertEquals(VALUE_1, taskPostBundle.getIdentifier().get(0).getValue());
+			assertEquals(SYSTEM, taskPostBundle.getIdentifier().get(0).getSystem());
+		}
+
+		@ParameterizedTest
+		@ValueSource(booleans = {true, false})
+		public void testConditionalCreateDependsOnFirstEntryExisting(boolean theHasQuestionMark) {
+			final BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+
+			bundleBuilder.addTransactionCreateEntry(myTask1, "urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea")
+				.conditional("identifier=http://tempuri.org|1");
+
+			final String secondEntryConditionalTemplate = "%sidentifier=http://tempuri.org|2&based-on=urn:uuid:59cda086-4763-4ef0-8e36-8c90058686ea";
+			final String secondMatchUrl = String.format(secondEntryConditionalTemplate, theHasQuestionMark ? "?" : "");
+
+			bundleBuilder.addTransactionCreateEntry(myTask2)
+				.conditional(secondMatchUrl);
+
+			final IBaseBundle requestBundle = bundleBuilder.getBundle();
+			assertTrue(requestBundle instanceof Bundle);
+
+			final List<Bundle.BundleEntryComponent> responseEntries = sendBundleAndGetResponse(requestBundle);
+
+			assertEquals(2, responseEntries.size());
+			assertEquals(Set.of("201 Created"), responseEntries.stream().map(Bundle.BundleEntryComponent::getResponse).map(Bundle.BundleEntryResponseComponent::getStatus).collect(Collectors.toUnmodifiableSet()));
+
+			final List<Task> allTasksPostBundle = searchAllTasks();
+			assertEquals(2, allTasksPostBundle.size());
+			final Task taskPostBundle1 = allTasksPostBundle.get(0);
+			assertEquals(VALUE_1, taskPostBundle1.getIdentifier().get(0).getValue());
+			assertEquals(SYSTEM, taskPostBundle1.getIdentifier().get(0).getSystem());
+			final Task taskPostBundle2 = allTasksPostBundle.get(1);
+			assertEquals(VALUE_2, taskPostBundle2.getIdentifier().get(0).getValue());
+			assertEquals(SYSTEM, taskPostBundle2.getIdentifier().get(0).getSystem());
+
+			final List<Reference> task2BasedOn = taskPostBundle2.getBasedOn();
+			assertEquals(1, task2BasedOn.size());
+			final Reference task2BasedOnReference = task2BasedOn.get(0);
+			assertEquals(taskPostBundle1.getIdElement().toUnqualifiedVersionless().asStringValue(), task2BasedOnReference.getReference());
+		}
+	}
+
+	private List<Bundle.BundleEntryComponent> sendBundleAndGetResponse(IBaseBundle theRequestBundle) {
+		assertTrue(theRequestBundle instanceof Bundle);
+
+		return mySystemDao.transaction(new SystemRequestDetails(), (Bundle)theRequestBundle).getEntry();
+	}
+
+	private List<Task> searchAllTasks() {
+		return unsafeCast(getTaskDao().search(SearchParameterMap.newSynchronous(), new SystemRequestDetails()).getAllResources());
+	}
+
+	private IFhirResourceDao<Task> getTaskDao() {
+		return unsafeCast(myDaoRegistry.getResourceDao("Task"));
+	}
+
+	@SuppressWarnings("unchecked")
+	private static <T> T unsafeCast(Object theObject) {
+		return (T)theObject;
+	}
 }

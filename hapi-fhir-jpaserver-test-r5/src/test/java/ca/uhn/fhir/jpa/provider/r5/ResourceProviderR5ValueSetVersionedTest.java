@@ -20,7 +20,7 @@ import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeSystem;
-import org.hl7.fhir.r5.model.CodeSystem.CodeSystemContentMode;
+import org.hl7.fhir.r5.model.Enumerations.CodeSystemContentMode;
 import org.hl7.fhir.r5.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.CodeableConcept;
@@ -40,7 +40,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -102,7 +102,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 				myExtensionalCsId_v1 = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 			}
 		});
-		myCodeSystemDao.readEntity(myExtensionalCsId_v1, null).getId();
+		myCodeSystemDao.readEntity(myExtensionalCsId_v1, null);
 
 		theCodeSystem.setId("CodeSystem/cs2");
 		theCodeSystem.setVersion("2");
@@ -115,7 +115,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 				myExtensionalCsId_v2 = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 			}
 		});
-		myCodeSystemDao.readEntity(myExtensionalCsId_v2, null).getId();
+		myCodeSystemDao.readEntity(myExtensionalCsId_v2, null);
 
 	}
 
@@ -125,13 +125,13 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		valueSet.setId("ValueSet/vs1");
 		valueSet.getCompose().getInclude().get(0).setVersion("1");
 		myExtensionalVsId_v1 = persistSingleValueSet(valueSet, HttpVerb.POST);
-		myExtensionalVsIdOnResourceTable_v1 = myValueSetDao.readEntity(myExtensionalVsId_v1, null).getId();
+		myExtensionalVsIdOnResourceTable_v1 = (Long) myValueSetDao.readEntity(myExtensionalVsId_v1, null).getPersistentId().getId();
 
 		valueSet.setVersion("2");
 		valueSet.setId("ValueSet/vs2");
 		valueSet.getCompose().getInclude().get(0).setVersion("2");
 		myExtensionalVsId_v2 = persistSingleValueSet(valueSet, HttpVerb.POST);
-		myExtensionalVsIdOnResourceTable_v2 = myValueSetDao.readEntity(myExtensionalVsId_v2, null).getId();
+		myExtensionalVsIdOnResourceTable_v2 = (Long) myValueSetDao.readEntity(myExtensionalVsId_v2, null).getPersistentId().getId();
 
 	}
 
@@ -231,7 +231,7 @@ public class ResourceProviderR5ValueSetVersionedTest extends BaseResourceProvide
 		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
 		include.setSystem(theCodeSystemUrl);
 		include.setVersion(theValueSetVersion);
-		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("ParentA");
+		include.addFilter().setProperty("concept").setOp(FilterOperator.DESCENDENTOF).setValue("ParentA");
 		return myLocalVs;
 
 	}

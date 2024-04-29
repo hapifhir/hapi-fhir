@@ -12,7 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -53,8 +53,8 @@ public class DaoSearchParamSynchronizerTest {
 		when(existingEntity.isParamsNumberPopulated()).thenReturn(true);
 		when(existingEntity.getParamsNumber()).thenReturn(List.of(EXISTING_SEARCH_PARAM_NUMBER));
 
-		theParams = new ResourceIndexedSearchParams(theEntity);
-		existingParams = new ResourceIndexedSearchParams(existingEntity);
+		theParams = ResourceIndexedSearchParams.withLists(theEntity);
+		existingParams = ResourceIndexedSearchParams.withLists(existingEntity);
 
 		final ResourceTable resourceTable = new ResourceTable();
 		resourceTable.setId(1L);

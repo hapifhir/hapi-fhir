@@ -10,21 +10,25 @@ import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.IFhirVersionServer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.Serializable;
 import java.util.List;
 
@@ -88,6 +92,20 @@ public class RestfulServerTest {
 		}
 	}
 
+	@Test
+	public void exceptionHandling() {
+		final SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRequestType(RequestTypeEnum.GET);
+		requestDetails.setResourceName("InvalidResourceName");
+		myRestfulServer.registerProvider(new MyListResourceProvider());
+		ResourceNotFoundException thrown = assertThrows(
+			 ResourceNotFoundException.class,
+			 () -> myRestfulServer.determineResourceMethod(requestDetails, "1234"),
+		 "Expected request to fail, but it succeeded.");
+
+		assertTrue(thrown.getMessage().contains("List"));
+		assertFalse(thrown.getMessage().contains("ListResource"));
+	}
 
 	//--------- Scaffolding ---------//
 	private static class MyClassWithoutRestInterface implements Serializable {
@@ -138,6 +156,18 @@ public class RestfulServerTest {
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
 			return Patient.class;
+		}
+	}
+
+	private static class MyListResourceProvider implements IResourceProvider {
+		@Create
+		public MethodOutcome create(@ResourceParam IBaseResource theResource) {
+			return mock(MethodOutcome.class);
+		}
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return ListResource.class;
 		}
 	}
 

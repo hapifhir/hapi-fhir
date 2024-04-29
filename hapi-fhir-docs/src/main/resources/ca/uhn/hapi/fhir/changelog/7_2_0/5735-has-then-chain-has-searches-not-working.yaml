@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5735
+jira: SMILE-7592
+title: "Previously, complex _has then chain then _has searches would fail to return results when expected 
+        (ex: 'Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:List:item:_id=list1')
+        This has been fixed."

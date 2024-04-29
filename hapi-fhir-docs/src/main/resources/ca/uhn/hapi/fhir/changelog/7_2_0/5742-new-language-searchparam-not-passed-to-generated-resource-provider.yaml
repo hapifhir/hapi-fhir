@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5742
+backport: 7.0.1
+title: "Fixed behaviour of the _language query parameter. Now it is picked up as search parameter in the resource provider and filters accordingly. Thanks to Jens Villadsen (@jkiddo) for the contribution!"

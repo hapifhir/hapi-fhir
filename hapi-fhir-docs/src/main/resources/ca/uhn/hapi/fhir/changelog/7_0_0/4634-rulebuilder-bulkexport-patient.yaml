@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4634
+title: "Previously, rule builder could not effectively handle Patient Type-Level Exports. It would over-permit requests
+    in certain scenarios. This fix allows for accumulation of ids on a Patient Type-Level Bulk export to enable us to 
+    properly match the requested Patient IDs against the users permitted Patient IDs."

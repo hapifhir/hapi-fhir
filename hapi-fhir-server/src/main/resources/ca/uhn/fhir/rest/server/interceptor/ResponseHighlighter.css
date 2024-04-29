@@ -1,0 +1,143 @@
+.httpStatusDiv {
+   font-size: 1.2em;
+   font-weight: bold;
+}
+
+.hlQuot {
+   color: #88F;
+}
+
+.hlQuot a {
+   text-decoration: underline;
+   text-decoration-color: #CCC;
+}
+
+.hlQuot a:HOVER {
+   text-decoration: underline;
+   text-decoration-color: #008;
+}
+
+.hlQuot .uuid, .hlQuot .dateTime {
+   user-select: all;
+   -moz-user-select: all;
+   -webkit-user-select: all;
+   -ms-user-select: element;
+}
+
+.hlAttr {
+   color: #888;
+}
+
+.hlTagName {
+   color: #006699;
+}
+
+.hlControl {
+   color: #660000;
+}
+
+.hlText {
+   color: #000000;
+}
+
+.hlUrlBase {
+}
+
+.headersDiv {
+   padding: 10px;
+   margin-left: 10px;
+   border: 1px solid #CCC;
+   border-radius: 10px;
+}
+
+.headersRow {
+}
+
+.headerName {
+   color: #888;
+   font-family: monospace;
+}
+
+.headerValue {
+   color: #88F;
+   font-family: monospace;
+}
+
+.narrativeBody {
+   padding: 10px;
+   margin-left: 10px;
+   border: 1px solid #CCC;
+   border-radius: 10px;
+}
+
+.narrativeBody DIV,
+.narrativeBody TABLE {
+   font-size: 0.9em;
+}
+
+.narrativeBody TABLE > THEAD {
+   background: #AAA;
+}
+
+.narrativeBody TABLE > TBODY > TR:nth-child(odd) > TD {
+   background: #CCC;
+}
+
+.narrativeBody TABLE > TBODY > TR:nth-child(even) > TD {
+   background: #EEE;
+}
+
+.narrativeBody TABLE TD, .narrativeBody TABLE TH {
+   padding: 5px;
+}
+
+.responseBodyTable {
+   width: 100%;
+   margin-left: 0px;
+   margin-top: -10px;
+   position: relative;
+}
+
+.responseBodyTableFirstColumn {
+}
+
+.responseBodyTableSecondColumn {
+   position: absolute;
+   margin-left: 70px;
+   vertical-align: top;
+   left: 0px;
+   right: 0px;
+}
+
+.responseBodyTableSecondColumn PRE {
+   margin: 0px;
+}
+
+.sizeInfo {
+   margin-top: 20px;
+   font-size: 0.8em;
+}
+
+.lineAnchor A {
+   text-decoration: none;
+   padding-left: 20px;
+}
+
+.lineAnchor {
+   display: block;
+   padding-right: 20px;
+}
+
+.selectedLine {
+   background-color: #EEF;
+   font-weight: bold;
+}
+
+H1 {
+   font-size: 1.1em;
+   color: #666;
+}
+
+BODY {
+   font-family: Arial;
+}

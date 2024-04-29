@@ -10,22 +10,30 @@ import ca.uhn.fhir.parser.json.BaseJsonLikeWriter;
 import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import ca.uhn.fhir.parser.view.ExtPatient;
+import ca.uhn.fhir.util.AttachmentUtil;
+import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -61,6 +69,43 @@ public class JsonLikeParserTest {
 		
 		IBaseResource resource = jsonLikeparser.parseResource(jsonLikeStructure);
 		assertEquals(parsed.getClass().getName(), resource.getClass().getName(), "reparsed resource classes not equal");
+	}
+
+	@Test
+	public void testJacksonStructureCanLoadLoincTerminogy() throws IOException {
+		// given
+		IBaseParameters inputParametersForLoinc = getUploadTerminologyCommandInputParametersForLoinc();
+		String s = ourCtx.newJsonParser().encodeResourceToString(inputParametersForLoinc);
+		StringReader stringReader = new StringReader(s);
+
+		// when
+		JsonLikeStructure jsonLikeStructure = new JacksonStructure();
+		jsonLikeStructure.load(stringReader);
+
+		// then
+		assertNotNull(jsonLikeStructure.getRootObject());
+
+	}
+
+	/**
+	 * Test that json number values with a leading plus sign are parsed without exception.
+	 * Previously, it was possible to save resources with leading plus sign numbers, e.g., "value": +3.0.
+	 * To ensure that we could read such resources back, the ObjectMapper configuration was updated by enabling:
+	 * {@link com.fasterxml.jackson.core.json.JsonReadFeature#ALLOW_LEADING_PLUS_SIGN_FOR_NUMBERS}
+	 * Reproduces: https://github.com/hapifhir/hapi-fhir/issues/5667
+	 */
+	@Test
+	public void testJsonLikeParser_resourceHasDecimalElementWithLeadingPlus_isParsedCorrectly() {
+		// setup
+		String text = ClasspathUtil.loadResource("observation-decimal-element-with-leading-plus.json");
+		IJsonLikeParser jsonLikeParser = (IJsonLikeParser) ourCtx.newJsonParser();
+
+		// execute
+		IBaseResource resource = jsonLikeParser.parseResource(text);
+
+		// validate
+		Observation observation = (Observation) resource;
+		assertEquals("3.0", observation.getReferenceRange().get(0).getHigh().getValueElement().getValueAsString());
 	}
 
 	/**
@@ -151,14 +196,34 @@ public class JsonLikeParserTest {
 
 		assertEquals(0, va.getExtension().size());
 	}
-	
+
+	private IBaseParameters getUploadTerminologyCommandInputParametersForLoinc() throws IOException {
+		IBaseParameters inputParameters = ParametersUtil.newInstance(ourCtx);
+		ParametersUtil.addParameterToParametersUri(
+			ourCtx, inputParameters, "system", "http://loinc.org");
+
+		try(InputStream inputStream = JsonLikeParserTest.class.getResourceAsStream("/Loinc_2.72.zip")) {
+
+			ICompositeType attachment = AttachmentUtil.newInstance(ourCtx);
+			AttachmentUtil.setContentType(ourCtx, attachment, "application/zip");
+			AttachmentUtil.setUrl(ourCtx, attachment, "Loinc_2.72.zip");
+
+			AttachmentUtil.setData(ourCtx, attachment, IOUtils.toByteArray(inputStream));
+
+			ParametersUtil.addParameterToParameters(
+				ourCtx, inputParameters, "file", attachment);
+
+		}
+
+		return inputParameters;
+
+	}
+
 	@AfterAll
 	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
-	
-	
-	
+
 	public static class JsonLikeMapWriter extends BaseJsonLikeWriter {
 
 		private Map<String,Object> target;

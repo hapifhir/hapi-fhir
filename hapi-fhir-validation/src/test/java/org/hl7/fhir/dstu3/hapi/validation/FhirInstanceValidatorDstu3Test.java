@@ -5,7 +5,9 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -63,11 +65,11 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.mockito.invocation.InvocationOnMock;
+import org.mockito.quality.Strictness;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -90,17 +92,19 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
-public class FhirInstanceValidatorDstu3Test {
+public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInlineMocks {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirInstanceValidatorDstu3Test.class);
-	private static FhirContext ourCtx = FhirContext.forDstu3();
+	private static FhirContext ourCtx = FhirContext.forDstu3Cached();
 	private static IValidationSupport myDefaultValidationSupport = ourCtx.getValidationSupport();
 	@RegisterExtension
 	public LoggingExtension myLoggingExtension = new LoggingExtension();
@@ -127,7 +131,7 @@ public class FhirInstanceValidatorDstu3Test {
 		myVal.setValidateAgainstStandardSchema(false);
 		myVal.setValidateAgainstStandardSchematron(false);
 
-		IValidationSupport mockSupport = mock(IValidationSupport.class);
+		IValidationSupport mockSupport = mock(IValidationSupport.class, withSettings().strictness(Strictness.LENIENT));
 		when(mockSupport.getFhirContext()).thenReturn(ourCtx);
 		myValidationSupport = new CachingValidationSupport(new ValidationSupportChain(
 			mockSupport,
@@ -288,10 +292,6 @@ public class FhirInstanceValidatorDstu3Test {
 
 	private Object defaultString(Integer theLocationLine) {
 		return theLocationLine != null ? theLocationLine.toString() : "";
-	}
-
-	private String loadResource(String theFileName) throws IOException {
-		return IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream(theFileName), Charsets.UTF_8);
 	}
 
 	private <T extends IBaseResource> T loadResource(String theFilename, Class<T> theType) throws IOException {
@@ -630,7 +630,7 @@ public class FhirInstanceValidatorDstu3Test {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
 		String vsContents;
-		vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/org/hl7/fhir/dstu3/model/profile/" + name + ".xml"), StandardCharsets.UTF_8);
+		vsContents = ClasspathUtil.loadResource("/org/hl7/fhir/dstu3/model/profile/" + name + ".xml");
 
 		TreeSet<String> ids = new TreeSet<String>();
 
@@ -666,13 +666,23 @@ public class FhirInstanceValidatorDstu3Test {
 					} else if (t.getMessage().contains("ValueSet as a URI SHALL start with http:// or https:// or urn:")) {
 						// Some DSTU3 structures have missing binding information
 						return false;
-					} else if (t.getMessage().contains("The valueSet reference http://www.rfc-editor.org/bcp/bcp13.txt on element")) {
-						return false;
 					} else if (t.getMessage().contains("The Unicode sequence has unterminated bi-di control characters")) {
 						// Some DSTU3 structures contain bi-di control characters, and a check for this was added recently.
 						return false;
 					} else if (t.getMessage().contains("The markdown contains content that appears to be an embedded")) {
 						// Some DSTU3 structures contain URLs with <> around them
+						return false;
+					} else if (t.getMessage().startsWith("value should not start or finish with whitespace") && t.getMessage().endsWith("\\u00a0'")) {
+						// Some DSTU3 messages end with a unicode Non-breaking space character
+						return false;
+					}  else if (t.getMessage().contains("Found # expecting a token name")) {
+						// Some DSTU3 messages contain incomplete encoding for single quotes (#39 vs &#39)
+						return false;
+					} else if (t.getMessage().contains("sdf-15") && t.getMessage().contains("The name 'kind' is not valid for any of the possible types")) {
+						// Find constraint sdf-15 fails with stricter core validation.
+						return false;
+					} else if (t.getMessage().contains("side is inherently a collection") && t.getMessage().endsWith("may fail or return false if there is more than one item in the content being evaluated")) {
+						// Some DSTU3 FHIRPath expressions now produce warnings if a singleton is compared to a collection that potentially has > 1 elements
 						return false;
 					} else {
 						return true;
@@ -697,7 +707,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateBundleWithNoType() throws Exception {
-		String vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/dstu3/bundle-with-no-type.json"), StandardCharsets.UTF_8);
+		String vsContents = ClasspathUtil.loadResource("/dstu3/bundle-with-no-type.json");
 
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
@@ -710,7 +720,7 @@ public class FhirInstanceValidatorDstu3Test {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
 		String inputString;
-		inputString = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/brian_reinhold_bundle.json"), StandardCharsets.UTF_8);
+		inputString = ClasspathUtil.loadResource("/brian_reinhold_bundle.json");
 		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, inputString);
 
 		FHIRPathEngine fp = new FHIRPathEngine(new HapiWorkerContext(ourCtx, myDefaultValidationSupport));
@@ -763,7 +773,7 @@ public class FhirInstanceValidatorDstu3Test {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
 		String vsContents;
-		vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/crucible-condition.xml"), StandardCharsets.UTF_8);
+		vsContents = ClasspathUtil.loadResource("/crucible-condition.xml");
 
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
@@ -771,7 +781,7 @@ public class FhirInstanceValidatorDstu3Test {
 
 	@Test
 	public void testValidateDocument() throws Exception {
-		String vsContents = IOUtils.toString(FhirInstanceValidatorDstu3Test.class.getResourceAsStream("/sample-document.xml"), StandardCharsets.UTF_8);
+		String vsContents = ClasspathUtil.loadResource("/sample-document.xml");
 
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
@@ -786,7 +796,7 @@ public class FhirInstanceValidatorDstu3Test {
 		Patient resource = loadResource("/dstu3/nl/nl-core-patient-01.json", Patient.class);
 		ValidationResult results = myVal.validateWithResult(resource);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome.toString(), containsString("Could not confirm that the codes provided are in the value set 'LandGBACodelijst'"));
+		assertThat(outcome.toString(), containsString("The Coding provided (urn:oid:2.16.840.1.113883.2.4.4.16.34#6030) is not in the value set 'LandGBACodelijst'"));
 	}
 
 	private void loadNL() throws IOException {
@@ -977,7 +987,7 @@ public class FhirInstanceValidatorDstu3Test {
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
 		assertEquals("/f:Patient", output.getMessages().get(0).getLocationString());
-		assertEquals("Undefined element 'foo'", output.getMessages().get(0).getMessage());
+		assertEquals("Undefined element 'foo' at /f:Patient", output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -1329,7 +1339,7 @@ public class FhirInstanceValidatorDstu3Test {
 		myInstanceVal.setValidatorPolicyAdvisor(policyAdvisor);
 		myVal.validateWithResult(input);
 
-		verify(fetcher, times(3)).resolveURL(any(), any(), anyString(), anyString(), anyString());
+		verify(fetcher, times(3)).resolveURL(any(), any(), anyString(), anyString(), anyString(), anyBoolean());
 		verify(policyAdvisor, times(4)).policyForReference(any(), any(), anyString(), anyString());
 		verify(fetcher, times(4)).fetch(any(), any(), anyString());
 	}

@@ -2,14 +2,11 @@ package ca.uhn.fhir.rest.server.interceptor;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -21,8 +18,8 @@ import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
-import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.base.Charsets;
 import com.helger.commons.collection.iterate.EmptyEnumeration;
@@ -39,6 +36,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -49,10 +47,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.util.Assert;
 
-import javax.servlet.ReadListener;
-import javax.servlet.ServletInputStream;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.ReadListener;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -64,18 +62,17 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.not;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.timeout;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
 
 @ExtendWith(MockitoExtension.class)
 public class ConsentInterceptorTest {
@@ -83,15 +80,13 @@ public class ConsentInterceptorTest {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ConsentInterceptorTest.class);
 	@RegisterExtension
 	private final HttpClientExtension myClient = new HttpClientExtension();
-	@RegisterExtension
-	private final LoggingExtension myLoggingExtension = new LoggingExtension();
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private int myPort;
 	private static final DummyPatientResourceProvider ourPatientProvider = new DummyPatientResourceProvider(ourCtx);
 	private static final DummySystemProvider ourSystemProvider = new DummySystemProvider();
 
 	@RegisterExtension
-	private static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+	static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
 		.registerProvider(ourPatientProvider)
 		.registerProvider(ourSystemProvider)
 		.withPagingProvider(new FifoMemoryPagingProvider(10));
@@ -365,9 +360,7 @@ public class ConsentInterceptorTest {
 
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.canSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.PROCEED);
-		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> {
-			return ConsentOutcome.REJECT;
-		});
+		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t-> ConsentOutcome.REJECT);
 
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
@@ -518,7 +511,7 @@ public class ConsentInterceptorTest {
 		when(myConsentSvc.canSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenReturn(ConsentOutcome.PROCEED);
 
-			String nextPageLink;
+		String nextPageLink;
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_count=1");
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertEquals(200, status.getStatusLine().getStatusCode());
@@ -533,6 +526,7 @@ public class ConsentInterceptorTest {
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		when(myConsentSvc.willSeeResource(any(RequestDetails.class), any(IBaseResource.class), any())).thenAnswer(t->{
 			IBaseResource resource = (IBaseResource) t.getArguments()[1];
+			ourLog.info(resource.getIdElement().getIdPart() + " == PTB");
 			if (resource.getIdElement().getIdPart().equals("PTB")) {
 				Patient replacement = new Patient();
 				replacement.setId("PTB");
@@ -868,7 +862,7 @@ public class ConsentInterceptorTest {
 
 
 	@Test
-	public void testNoServicesRegistered() throws IOException {
+	public void testNoServicesRegistered() {
 		myInterceptor.unregisterConsentService(myConsentSvc);
 
 		Patient patientA = new Patient();
@@ -892,6 +886,52 @@ public class ConsentInterceptorTest {
 			.execute();
 		assertEquals(2, response.getTotal());
 	}
+
+	@Nested class CacheUsage {
+		@Mock ICachedSearchDetails myCachedSearchDetails;
+		ServletRequestDetails myRequestDetails = new ServletRequestDetails();
+
+		@Test
+		void testAuthorizedRequestsMayBeCachedAndUseCache() {
+			when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.AUTHORIZED);
+			myInterceptor.interceptPreHandled(myRequestDetails);
+
+			assertTrue(myInterceptor.interceptPreCheckForCachedSearch(myRequestDetails), "AUTHORIZED requests can use cache");
+
+			myInterceptor.interceptPreSearchRegistered(myRequestDetails, myCachedSearchDetails);
+			verify(myCachedSearchDetails, never()).setCannotBeReused();
+		}
+
+		@Test
+		void testCanSeeResourceFilteredRequestsMayNotBeCachedNorUseCache() {
+			when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+			when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+			when(myConsentSvc.shouldProcessCanSeeResource(any(), any())).thenReturn(true);
+			when(myConsentSvc2.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+			when(myConsentSvc2.shouldProcessCanSeeResource(any(), any())).thenReturn(false);
+			myInterceptor.registerConsentService(myConsentSvc2);
+			myInterceptor.interceptPreHandled(myRequestDetails);
+
+			assertFalse(myInterceptor.interceptPreCheckForCachedSearch(myRequestDetails), "PROCEED requests can not use cache");
+
+			myInterceptor.interceptPreSearchRegistered(myRequestDetails, myCachedSearchDetails);
+			verify(myCachedSearchDetails).setCannotBeReused();
+		}
+
+		@Test
+		void testRequestsWithNoCanSeeFilteringMayBeCachedAndUseCache() {
+			when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.PROCEED);
+			when(myConsentSvc.shouldProcessCanSeeResource(any(), any())).thenReturn(false);
+			myInterceptor.interceptPreHandled(myRequestDetails);
+
+			assertTrue(myInterceptor.interceptPreCheckForCachedSearch(myRequestDetails), "PROCEED requests that promise not to filter can not use cache");
+
+			myInterceptor.interceptPreSearchRegistered(myRequestDetails, myCachedSearchDetails);
+			verify(myCachedSearchDetails, never()).setCannotBeReused();
+		}
+	}
+
+
 
 	public static class DummyPatientResourceProvider extends HashMapResourceProvider<Patient> {
 

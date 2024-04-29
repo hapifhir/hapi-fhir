@@ -47,7 +47,7 @@ public class TerminologyLoaderSvcImgthlaTest extends BaseLoaderTest {
 	}
 
 	@Test
-	@Disabled
+	@Disabled("Throws exception: HLA nomenclature terminology upload not yet fully implemented.")
 	public void testLoadImgthlaMandatoryFilesOnly() throws IOException {
 		addImgthlaMandatoryFilesToZip(myFiles);
 

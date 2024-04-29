@@ -30,7 +30,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -229,7 +229,6 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		String id = expectedIds.get(0);
 
 		HashMap<String, String[]> queryParameters = new HashMap<>();
-		queryParameters.put("_mdm", new String[]{"true"});
 
 		HttpServletRequest req = Mockito.mock(HttpServletRequest.class);
 		RequestDetails theDetails = Mockito.mock(RequestDetails.class);
@@ -240,9 +239,11 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		// test
 		myStorageSettings.setAllowMdmExpansion(true);
 		IFhirResourceDaoPatient<Patient> dao = (IFhirResourceDaoPatient<Patient>) myPatientDao;
+		final PatientEverythingParameters queryParams = new PatientEverythingParameters();
+		queryParams.setMdmExpand(true);
 		IBundleProvider outcome = dao.patientInstanceEverything(
 			req,
-			theDetails, new PatientEverythingParameters(), new IdDt(id)
+			theDetails, queryParams, new IdDt(id)
 		);
 
 		// verify return results
@@ -257,12 +258,11 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testReferenceExpansionQuietlyFailsOnMissingMdmMatches() {
+	public void testReferenceExpansionQuietlyFailsOnMissingMdmMatches() throws InterruptedException {
 		myStorageSettings.setAllowMdmExpansion(true);
 		Patient patient = buildJanePatient();
 		patient.getMeta().addTag(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_NO_MDM_MANAGED, "Don't MDM on me!");
-		DaoMethodOutcome daoMethodOutcome = myMdmHelper.doCreateResource(patient, true);
-		String id = daoMethodOutcome.getId().getIdPart();
+		String id = myMdmHelper.executeWithLatch(() -> myMdmHelper.doCreateResource(patient, true)).getId().getIdPart();
 		createObservationWithSubject(id);
 
 		//Even though the user has NO mdm links, that should not cause a request failure.

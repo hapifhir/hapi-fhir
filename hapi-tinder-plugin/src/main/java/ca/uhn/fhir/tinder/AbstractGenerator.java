@@ -1,4 +1,3 @@
-package ca.uhn.fhir.tinder;
 /*
  * #%L
  * HAPI FHIR Tinder Plug-In
@@ -8,9 +7,9 @@ package ca.uhn.fhir.tinder;
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *      http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -18,10 +17,11 @@ package ca.uhn.fhir.tinder;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.tinder;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tinder.GeneratorContext.ResourceSource;
 import ca.uhn.fhir.tinder.parser.DatatypeGeneratorUsingSpreadsheet;
 import ca.uhn.fhir.tinder.parser.ResourceGeneratorUsingModel;
@@ -33,11 +33,11 @@ import java.util.*;
 
 public abstract class AbstractGenerator {
 
-	protected abstract void logDebug (String message);
+	protected abstract void logDebug(String message);
 
-	protected abstract void logInfo (String message);
-	
-	public void prepare (GeneratorContext context) throws FailureException, MojoFailureException {
+	protected abstract void logInfo(String message);
+
+	public void prepare(GeneratorContext context) throws FailureException, MojoFailureException {
 
 		/*
 		 * Deal with the FHIR spec version
@@ -59,18 +59,19 @@ public abstract class AbstractGenerator {
 			throw new FailureException(Msg.code(95) + "Unknown version configured: " + context.getVersion());
 		}
 		context.setPackageSuffix(packageSuffix);
-		
+
 		/*
 		 * Deal with which resources to process
 		 */
 		List<String> includeResources = context.getIncludeResources();
 		List<String> excludeResources = context.getExcludeResources();
-		
+
 		if (includeResources == null || includeResources.isEmpty()) {
 			includeResources = new ArrayList<>();
-			
-			logInfo("No resource names supplied, going to use all resources from version: "+fhirContext.getVersion().getVersion());
-			
+
+			logInfo("No resource names supplied, going to use all resources from version: "
+					+ fhirContext.getVersion().getVersion());
+
 			Properties p = new Properties();
 			try {
 				p.load(fhirContext.getVersion().getFhirVersionPropertiesFile());
@@ -78,10 +79,10 @@ public abstract class AbstractGenerator {
 				throw new FailureException(Msg.code(96) + "Failed to load version property file", e);
 			}
 
-			logDebug("Property file contains: "+p);
+			logDebug("Property file contains: " + p);
 
 			TreeSet<String> keys = new TreeSet<>();
-			for(Object next : p.keySet()) {
+			for (Object next : p.keySet()) {
 				keys.add((String) next);
 			}
 			for (String next : keys) {
@@ -89,7 +90,7 @@ public abstract class AbstractGenerator {
 					includeResources.add(next.substring("resource.".length()).toLowerCase());
 				}
 			}
-			
+
 			if (fhirContext.getVersion().getVersion() == FhirVersionEnum.DSTU3) {
 				includeResources.remove("conformance");
 			}
@@ -106,9 +107,8 @@ public abstract class AbstractGenerator {
 			includeResources.removeAll(excludeResources);
 		}
 		context.setIncludeResources(includeResources);
-		
-		logInfo("Including the following elements: "+includeResources);
-		
+
+		logInfo("Including the following elements: " + includeResources);
 
 		/*
 		 * Fill in ValueSet and DataTypes used by the resources
@@ -126,7 +126,7 @@ public abstract class AbstractGenerator {
 			} catch (Exception e) {
 				throw new FailureException(Msg.code(97) + "Failed to load valuesets", e);
 			}
-	
+
 			/*
 			 * A few enums are not found by default because none of the generated classes
 			 * refer to them, but we still want them.
@@ -134,7 +134,7 @@ public abstract class AbstractGenerator {
 			vsp.getClassForValueSetIdAndMarkAsNeeded("NarrativeStatus");
 
 			logInfo("Loading Datatypes...");
-	
+
 			dtp = new DatatypeGeneratorUsingSpreadsheet(context.getVersion(), context.getBaseDir());
 			context.setDatatypeGenerator(dtp);
 			try {
@@ -144,20 +144,21 @@ public abstract class AbstractGenerator {
 				throw new FailureException(Msg.code(98) + "Failed to load datatypes", e);
 			}
 			dtp.bindValueSets(vsp);
-	
+
 			datatypeLocalImports = dtp.getLocalImports();
 		}
 
 		/*
 		 * Load the requested resources
 		 */
-		
+
 		logInfo("Loading Resources...");
 		try {
 			switch (context.getResourceSource()) {
 				case SPREADSHEET: {
 					logInfo("... resource definitions from spreadsheets");
-					ResourceGeneratorUsingSpreadsheet rp = new ResourceGeneratorUsingSpreadsheet(context.getVersion(), context.getBaseDir());
+					ResourceGeneratorUsingSpreadsheet rp =
+							new ResourceGeneratorUsingSpreadsheet(context.getVersion(), context.getBaseDir());
 					context.setResourceGenerator(rp);
 
 					rp.setBaseResourceNames(includeResources);
@@ -168,16 +169,17 @@ public abstract class AbstractGenerator {
 
 					rp.getLocalImports().putAll(datatypeLocalImports);
 					datatypeLocalImports.putAll(rp.getLocalImports());
-					
+
 					rp.combineContentMaps(dtp);
 					dtp.combineContentMaps(rp);
 					break;
 				}
 				case MODEL: {
 					logInfo("... resource definitions from model structures");
-					ResourceGeneratorUsingModel rp = new ResourceGeneratorUsingModel(context.getVersion(), context.getBaseDir());
+					ResourceGeneratorUsingModel rp =
+							new ResourceGeneratorUsingModel(context.getVersion(), context.getBaseDir());
 					context.setResourceGenerator(rp);
-					
+
 					rp.setBaseResourceNames(includeResources);
 					rp.parse();
 					rp.markResourcesForImports();
@@ -187,7 +189,6 @@ public abstract class AbstractGenerator {
 		} catch (Exception e) {
 			throw new FailureException(Msg.code(99) + "Failed to load resources", e);
 		}
-
 	}
 
 	public static class FailureException extends Exception {
@@ -199,7 +200,6 @@ public abstract class AbstractGenerator {
 		FailureException(String message) {
 			super(message);
 		}
-
 	}
 
 	public static class ExecutionException extends Exception {
@@ -207,6 +207,5 @@ public abstract class AbstractGenerator {
 		public ExecutionException(String message) {
 			super(message);
 		}
-
 	}
 }

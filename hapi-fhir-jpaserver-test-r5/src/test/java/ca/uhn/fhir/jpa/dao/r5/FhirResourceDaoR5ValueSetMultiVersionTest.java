@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ public class FhirResourceDaoR5ValueSetMultiVersionTest extends BaseJpaR5Test {
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(URL_MY_CODE_SYSTEM);
 		codeSystem.setVersion(theVersion);
-		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem.setContent(Enumerations.CodeSystemContentMode.COMPLETE);
 		for (String codeSystemCode : theCodeSystemCodes) {
 			codeSystem.addConcept().setCode(codeSystemCode);
 		}

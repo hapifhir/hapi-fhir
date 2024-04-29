@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 4763
+title: "The SQL column type used for inline resource storage mode in the JPA server has been
+  changed in order to avoid abitrary database size limits. We now use `text` on PostgreSQL,
+  `long` on Oracle, and `varchar(MAX)` on MSSQL. Previously `varchar(4000)` was used
+  in all cases, requiring manual resizing in order to support longer values."

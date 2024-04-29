@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
@@ -32,6 +31,10 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AddColumnTask.class);
 
+	public static AddColumnTask lowerCase(Set<ColumnDriverMappingOverride> theColumnDriverMappingOverrides) {
+		return new AddColumnTask(null, null, ColumnNameCase.ALL_LOWER, theColumnDriverMappingOverrides);
+	}
+
 	public AddColumnTask() {
 		this(null, null);
 		setDryRun(true);
@@ -40,6 +43,14 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 
 	public AddColumnTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
+	}
+
+	private AddColumnTask(
+			String theProductVersion,
+			String theSchemaVersion,
+			ColumnNameCase theColumnNameCase,
+			Set<ColumnDriverMappingOverride> theColumnDriverMappingOverrides) {
+		super(theProductVersion, theSchemaVersion, theColumnNameCase, theColumnDriverMappingOverrides);
 	}
 
 	@Override
@@ -53,7 +64,11 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 		if (myCheckForExistingTables) {
 			Set<String> columnNames = JdbcUtils.getColumnNames(getConnectionProperties(), getTableName());
 			if (columnNames.contains(getColumnName())) {
-				logInfo(ourLog, "Column {} already exists on table {} - No action performed", getColumnName(), getTableName());
+				logInfo(
+						ourLog,
+						"Column {} already exists on table {} - No action performed",
+						getColumnName(),
+						getTableName());
 				return;
 			}
 		}
@@ -96,5 +111,4 @@ public class AddColumnTask extends BaseTableColumnTypeTask {
 		String space = isNullable() ? "" : " ";
 		return type + space + nullable;
 	}
-
 }

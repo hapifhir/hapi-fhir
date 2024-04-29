@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.provider;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.provider;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.provider;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.match.config.WebsocketDispatcherConfig;
@@ -36,11 +35,10 @@ public class ServerConfiguration {
 	@Bean
 	public RestfulServerExtension restfulServerExtension(FhirContext theFhirContext) {
 		return new RestfulServerExtension(configureFhirContext(theFhirContext))
-			.keepAliveBetweenTests()
-			.withValidationMode(ServerValidationModeEnum.NEVER)
-			.withContextPath("/fhir")
-			.withServletPath("/context/*")
-			.withSpringWebsocketSupport(BaseJpaTest.WEBSOCKET_CONTEXT, WebsocketDispatcherConfig.class);
+				.keepAliveBetweenTests()
+				.withValidationMode(ServerValidationModeEnum.NEVER)
+				.withContextPath("/fhir")
+				.withServletPath("/context/*")
+				.withSpringWebsocketSupport(BaseJpaTest.WEBSOCKET_CONTEXT, WebsocketDispatcherConfig.class);
 	}
-
 }

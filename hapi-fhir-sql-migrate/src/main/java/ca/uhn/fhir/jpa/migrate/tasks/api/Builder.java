@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.tasks.api;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,9 +17,11 @@ package ca.uhn.fhir.jpa.migrate.tasks.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.tasks.api;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.MigrationJdbcUtils;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddForeignKeyTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.AddIdGeneratorTask;
@@ -37,14 +37,20 @@ import ca.uhn.fhir.jpa.migrate.taskdef.DropIdGeneratorTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropTableTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteRawSqlTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteTaskPrecondition;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.MigrateColumBlobTypeToBinaryTypeTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.MigrateColumnClobTypeToTextTypeTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.MigratePostgresTextClobToBinaryClobTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ModifyColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameIndexTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.RenameTableTask;
 import org.apache.commons.lang3.Validate;
 import org.intellij.lang.annotations.Language;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -55,6 +61,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class Builder {
+	private static final Logger ourLog = LoggerFactory.getLogger(Builder.class);
 
 	private final String myRelease;
 	private final BaseMigrationTasks.IAcceptsTasks mySink;
@@ -85,21 +92,24 @@ public class Builder {
 		executeRawSqlOptional(true, theVersion, theSql);
 	}
 
-	private ExecuteRawSqlTask executeRawSqlOptional(boolean theDoNothing, String theVersion, @Language("SQL") String theSql) {
+	private ExecuteRawSqlTask executeRawSqlOptional(
+			boolean theDoNothing, String theVersion, @Language("SQL") String theSql) {
 		ExecuteRawSqlTask task = new ExecuteRawSqlTask(myRelease, theVersion).addSql(theSql);
 		task.setDoNothing(theDoNothing);
 		mySink.addTask(task);
 		return task;
 	}
 
-	public InitializeSchemaTask initializeSchema(String theVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
+	public InitializeSchemaTask initializeSchema(
+			String theVersion, ISchemaInitializationProvider theSchemaInitializationProvider) {
 		InitializeSchemaTask task = new InitializeSchemaTask(myRelease, theVersion, theSchemaInitializationProvider);
 		mySink.addTask(task);
 		return task;
 	}
 
 	@SuppressWarnings("unused")
-	public InitializeSchemaTask initializeSchema(String theVersion, String theSchemaName, ISchemaInitializationProvider theSchemaInitializationProvider) {
+	public InitializeSchemaTask initializeSchema(
+			String theVersion, String theSchemaName, ISchemaInitializationProvider theSchemaInitializationProvider) {
 		InitializeSchemaTask task = new InitializeSchemaTask(myRelease, theVersion, theSchemaInitializationProvider);
 		task.setDescription("Initialize " + theSchemaName + " schema");
 		mySink.addTask(task);
@@ -120,10 +130,9 @@ public class Builder {
 	 */
 	public Builder executeRawSql(String theVersion, Map<DriverTypeEnum, String> theDriverToSql) {
 		Map<DriverTypeEnum, List<String>> singleSqlStatementMap = new HashMap<>();
-		theDriverToSql.entrySet().stream()
-			.forEach(entry -> {
-					singleSqlStatementMap.put(entry.getKey(), Collections.singletonList(entry.getValue()));
-				});
+		theDriverToSql.entrySet().stream().forEach(entry -> {
+			singleSqlStatementMap.put(entry.getKey(), Collections.singletonList(entry.getValue()));
+		});
 		return executeRawSqls(theVersion, singleSqlStatementMap);
 	}
 
@@ -137,10 +146,9 @@ public class Builder {
 	 */
 	public Builder executeRawSqls(String theVersion, Map<DriverTypeEnum, List<String>> theDriverToSqls) {
 		ExecuteRawSqlTask executeRawSqlTask = new ExecuteRawSqlTask(myRelease, theVersion);
-		theDriverToSqls.entrySet().stream()
-			.forEach(entry -> {
-				entry.getValue().forEach(sql -> executeRawSqlTask.addSql(entry.getKey(), sql));
-			});
+		theDriverToSqls.entrySet().stream().forEach(entry -> {
+			entry.getValue().forEach(sql -> executeRawSqlTask.addSql(entry.getKey(), sql));
+		});
 		mySink.addTask(executeRawSqlTask);
 		return this;
 	}
@@ -152,8 +160,10 @@ public class Builder {
 		return this;
 	}
 
-	public BuilderAddTableByColumns addTableByColumns(String theVersion, String theTableName, String... thePkColumnNames) {
-		return new BuilderAddTableByColumns(myRelease, theVersion, mySink, theTableName, Arrays.asList(thePkColumnNames));
+	public BuilderAddTableByColumns addTableByColumns(
+			String theVersion, String theTableName, String... thePkColumnNames) {
+		return new BuilderAddTableByColumns(
+				myRelease, theVersion, mySink, theTableName, Arrays.asList(thePkColumnNames));
 	}
 
 	public void addIdGenerator(String theVersion, String theGeneratorName) {
@@ -161,9 +171,10 @@ public class Builder {
 		addTask(task);
 	}
 
-	public void dropIdGenerator(String theVersion, String theIdGeneratorName) {
+	public DropIdGeneratorTask dropIdGenerator(String theVersion, String theIdGeneratorName) {
 		DropIdGeneratorTask task = new DropIdGeneratorTask(myRelease, theVersion, theIdGeneratorName);
 		addTask(task);
+		return task;
 	}
 
 	public void addNop(String theVersion) {
@@ -227,7 +238,8 @@ public class Builder {
 			renameIndexOptional(true, theVersion, theOldIndexName, theNewIndexName);
 		}
 
-		private void renameIndexOptional(boolean theDoNothing, String theVersion, String theOldIndexName, String theNewIndexName) {
+		private void renameIndexOptional(
+				boolean theDoNothing, String theVersion, String theOldIndexName, String theNewIndexName) {
 			RenameIndexTask task = new RenameIndexTask(myRelease, theVersion);
 			task.setOldIndexName(theOldIndexName);
 			task.setNewIndexName(theNewIndexName);
@@ -283,7 +295,12 @@ public class Builder {
 		 * @param isOkayIfNeitherColumnExists           Setting this to true means that it's not an error if neither column exists
 		 * @param theDeleteTargetColumnFirstIfBothExist Setting this to true causes the migrator to be ok with the target column existing. It will make sure that there is no data in the column with the new name, then delete it if so in order to make room for the renamed column. If there is data it will still bomb out.
 		 */
-		public BuilderWithTableName renameColumn(String theVersion, String theOldName, String theNewName, boolean isOkayIfNeitherColumnExists, boolean theDeleteTargetColumnFirstIfBothExist) {
+		public BuilderWithTableName renameColumn(
+				String theVersion,
+				String theOldName,
+				String theNewName,
+				boolean isOkayIfNeitherColumnExists,
+				boolean theDeleteTargetColumnFirstIfBothExist) {
 			RenameColumnTask task = new RenameColumnTask(myRelease, theVersion);
 			task.setTableName(myTableName);
 			task.setOldName(theOldName);
@@ -306,10 +323,30 @@ public class Builder {
 			addTask(task);
 		}
 
+		public void renameTable(String theVersion, String theNewTableName) {
+			RenameTableTask task = new RenameTableTask(myRelease, theVersion, getTableName(), theNewTableName);
+			addTask(task);
+		}
+
 		public void migratePostgresTextClobToBinaryClob(String theVersion, String theColumnName) {
-			MigratePostgresTextClobToBinaryClobTask task = new MigratePostgresTextClobToBinaryClobTask(myRelease, theVersion);
+			MigratePostgresTextClobToBinaryClobTask task =
+					new MigratePostgresTextClobToBinaryClobTask(myRelease, theVersion);
 			task.setTableName(getTableName());
 			task.setColumnName(theColumnName);
+			addTask(task);
+		}
+
+		public void migrateBlobToBinary(String theVersion, String theFromColumName, String theToColumName) {
+			MigrateColumBlobTypeToBinaryTypeTask task = new MigrateColumBlobTypeToBinaryTypeTask(
+					myRelease, theVersion, getTableName(), theFromColumName, theToColumName);
+
+			addTask(task);
+		}
+
+		public void migrateClobToText(String theVersion, String theFromColumName, String theToColumName) {
+			MigrateColumnClobTypeToTextTypeTask task = new MigrateColumnClobTypeToTextTypeTask(
+					myRelease, theVersion, getTableName(), theFromColumName, theToColumName);
+
 			addTask(task);
 		}
 
@@ -390,11 +427,14 @@ public class Builder {
 			}
 
 			public BuilderWithTableName.BuilderModifyColumnWithName.BuilderModifyColumnWithNameAndNullable nullable() {
-				return new BuilderWithTableName.BuilderModifyColumnWithName.BuilderModifyColumnWithNameAndNullable(myVersion, true);
+				return new BuilderWithTableName.BuilderModifyColumnWithName.BuilderModifyColumnWithNameAndNullable(
+						myVersion, true);
 			}
 
-			public BuilderWithTableName.BuilderModifyColumnWithName.BuilderModifyColumnWithNameAndNullable nonNullable() {
-				return new BuilderWithTableName.BuilderModifyColumnWithName.BuilderModifyColumnWithNameAndNullable(myVersion, false);
+			public BuilderWithTableName.BuilderModifyColumnWithName.BuilderModifyColumnWithNameAndNullable
+					nonNullable() {
+				return new BuilderWithTableName.BuilderModifyColumnWithName.BuilderModifyColumnWithNameAndNullable(
+						myVersion, false);
 			}
 
 			public class BuilderModifyColumnWithNameAndNullable {
@@ -414,11 +454,13 @@ public class Builder {
 				public void withType(ColumnTypeEnum theColumnType, Integer theLength) {
 					if (theColumnType == ColumnTypeEnum.STRING) {
 						if (theLength == null || theLength == 0) {
-							throw new IllegalArgumentException(Msg.code(52) + "Can not specify length 0 for column of type " + theColumnType);
+							throw new IllegalArgumentException(
+									Msg.code(52) + "Can not specify length 0 for column of type " + theColumnType);
 						}
 					} else {
 						if (theLength != null) {
-							throw new IllegalArgumentException(Msg.code(53) + "Can not specify length for column of type " + theColumnType);
+							throw new IllegalArgumentException(
+									Msg.code(53) + "Can not specify length for column of type " + theColumnType);
 						}
 					}
 
@@ -450,8 +492,10 @@ public class Builder {
 				myForeignKeyName = theForeignKeyName;
 			}
 
-			public BuilderWithTableName.BuilderAddForeignKey.BuilderAddForeignKeyToColumn toColumn(String theColumnName) {
-				return new BuilderWithTableName.BuilderAddForeignKey.BuilderAddForeignKeyToColumn(myVersion, theColumnName);
+			public BuilderWithTableName.BuilderAddForeignKey.BuilderAddForeignKeyToColumn toColumn(
+					String theColumnName) {
+				return new BuilderWithTableName.BuilderAddForeignKey.BuilderAddForeignKeyToColumn(
+						myVersion, theColumnName);
 			}
 
 			public class BuilderAddForeignKeyToColumn extends BuilderWithTableName.BuilderModifyColumnWithName {
@@ -478,7 +522,11 @@ public class Builder {
 			private final String myColumnName;
 			private final BaseMigrationTasks.IAcceptsTasks myTaskSink;
 
-			public BuilderAddColumnWithName(String theRelease, String theVersion, String theColumnName, BaseMigrationTasks.IAcceptsTasks theTaskSink) {
+			public BuilderAddColumnWithName(
+					String theRelease,
+					String theVersion,
+					String theColumnName,
+					BaseMigrationTasks.IAcceptsTasks theTaskSink) {
 				myRelease = theRelease;
 				myVersion = theVersion;
 				myColumnName = theColumnName;
@@ -486,11 +534,13 @@ public class Builder {
 			}
 
 			public BuilderWithTableName.BuilderAddColumnWithName.BuilderAddColumnWithNameNullable nullable() {
-				return new BuilderWithTableName.BuilderAddColumnWithName.BuilderAddColumnWithNameNullable(myRelease, myVersion, true);
+				return new BuilderWithTableName.BuilderAddColumnWithName.BuilderAddColumnWithNameNullable(
+						myRelease, myVersion, true);
 			}
 
 			public BuilderWithTableName.BuilderAddColumnWithName.BuilderAddColumnWithNameNullable nonNullable() {
-				return new BuilderWithTableName.BuilderAddColumnWithName.BuilderAddColumnWithNameNullable(myRelease, myVersion, false);
+				return new BuilderWithTableName.BuilderAddColumnWithName.BuilderAddColumnWithNameNullable(
+						myRelease, myVersion, false);
 			}
 
 			public class BuilderAddColumnWithNameNullable {
@@ -520,7 +570,6 @@ public class Builder {
 
 					return new BuilderCompleteTask(task);
 				}
-
 			}
 		}
 	}
@@ -549,8 +598,47 @@ public class Builder {
 			return this;
 		}
 
+		/**
+		 * Introduce precondition checking logic into the execution of the enclosed task.  This conditional logic will
+		 * be implemented by running an SQL SELECT (including CTEs) to obtain a boolean indicating whether a certain
+		 * condition has been met.
+		 * One example is to check for a specific collation on a column to decide whether to create a new index.
+		 * <p/>
+		 * This method may be called multiple times to add multiple preconditions.  The precondition that evaluates to
+		 * false will stop execution of the task irrespective of any or all other tasks evaluating to true.
+		 *
+		 * @param theSql The SELECT or CTE used to determine if the precondition is valid.
+		 * @param reason A String to indicate the text that is logged if the precondition is not met.
+		 * @return The BuilderCompleteTask in order to chain further method calls on this builder.
+		 */
+		public BuilderCompleteTask onlyIf(@Language("SQL") String theSql, String reason) {
+			if (!theSql.toUpperCase().startsWith("WITH")
+					&& !theSql.toUpperCase().startsWith("SELECT")) {
+				throw new IllegalArgumentException(Msg.code(2455)
+						+ String.format(
+								"Only SELECT statements (including CTEs) are allowed here.  Please check your SQL: [%s]",
+								theSql));
+			}
+			ourLog.debug("SQL to evaluate: {}", theSql);
+
+			myTask.addPrecondition(new ExecuteTaskPrecondition(
+					() -> {
+						ourLog.debug("Checking precondition for SQL: {}", theSql);
+						return MigrationJdbcUtils.queryForSingleBooleanResultMultipleThrowsException(
+								theSql, myTask.newJdbcTemplate());
+					},
+					reason));
+
+			return this;
+		}
+
 		public BuilderCompleteTask runEvenDuringSchemaInitialization() {
 			myTask.setRunDuringSchemaInitialization(true);
+			return this;
+		}
+
+		public BuilderCompleteTask setTransactional(boolean theFlag) {
+			myTask.setTransactional(theFlag);
 			return this;
 		}
 	}
@@ -564,7 +652,6 @@ public class Builder {
 			myTask.setTableName(theTableName);
 			addTask(myTask);
 		}
-
 
 		public BuilderAddTableRawSql addSql(DriverTypeEnum theDriverTypeEnum, @Language("SQL") String theSql) {
 			myTask.addSql(theDriverTypeEnum, theSql);
@@ -580,7 +667,12 @@ public class Builder {
 		private final String myVersion;
 		private final AddTableByColumnTask myTask;
 
-		public BuilderAddTableByColumns(String theRelease, String theVersion, BaseMigrationTasks.IAcceptsTasks theSink, String theTableName, List<String> thePkColumnNames) {
+		public BuilderAddTableByColumns(
+				String theRelease,
+				String theVersion,
+				BaseMigrationTasks.IAcceptsTasks theSink,
+				String theTableName,
+				List<String> thePkColumnNames) {
 			super(theRelease, theSink, theTableName);
 			myVersion = theVersion;
 			myTask = new AddTableByColumnTask(myRelease, theVersion);
@@ -608,4 +700,7 @@ public class Builder {
 		}
 	}
 
+	public String getRelease() {
+		return myRelease;
+	}
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.util;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.util;
 
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
@@ -26,18 +25,17 @@ import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.i18n.Msg;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
-
 
 	private final List<RuntimeSearchParam> myExtraSearchParams = new ArrayList<>();
 	private final FhirContext myCtx;
@@ -89,10 +87,10 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 	public RuntimeSearchParam getActiveSearchParamByUrl(String theUrl) {
 		// simple implementation for test support
 		return myCtx.getResourceTypes().stream()
-			.flatMap(type->getActiveSearchParams(type).values().stream())
-			.filter(rsp->theUrl.equals(rsp.getUri()))
-			.findFirst()
-			.orElse(null);
+				.flatMap(type -> getActiveSearchParams(type).values().stream())
+				.filter(rsp -> theUrl.equals(rsp.getUri()))
+				.findFirst()
+				.orElse(null);
 	}
 
 	@Override
@@ -101,7 +99,8 @@ public class FhirContextSearchParamRegistry implements ISearchParamRegistry {
 	}
 
 	@Override
-	public List<RuntimeSearchParam> getActiveComboSearchParams(String theResourceName, ComboSearchParamType theParamType) {
+	public List<RuntimeSearchParam> getActiveComboSearchParams(
+			String theResourceName, ComboSearchParamType theParamType) {
 		throw new UnsupportedOperationException(Msg.code(2209));
 	}
 

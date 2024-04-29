@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,22 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
-import javax.annotation.Nullable;
-import javax.persistence.Column;
-import javax.persistence.Embedded;
-import javax.persistence.MappedSuperclass;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.MappedSuperclass;
+
 import java.io.Serializable;
 
+/**
+ * This is the base class for entities with partitioning that does NOT include Hibernate Envers logging.
+ * <p>
+ * If your entity needs Envers auditing, please have it extend {@link AuditableBasePartitionable} instead.
+ */
 @MappedSuperclass
 public abstract class BasePartitionable implements Serializable {
-
 
 	@Embedded
 	private PartitionablePartitionId myPartitionId;
@@ -51,9 +55,8 @@ public abstract class BasePartitionable implements Serializable {
 
 	@Override
 	public String toString() {
-		return "BasePartitionable{" +
-			"myPartitionId=" + myPartitionId +
-			", myPartitionIdValue=" + myPartitionIdValue +
-			'}';
+		return "BasePartitionable{" + "myPartitionId="
+				+ myPartitionId + ", myPartitionIdValue="
+				+ myPartitionIdValue + '}';
 	}
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao.r4b;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao.r4b;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.r4b;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -35,7 +34,8 @@ import org.hl7.fhir.r4b.model.Resource;
 import java.util.Date;
 import java.util.List;
 
-public class TransactionProcessorVersionAdapterR4B implements ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> {
+public class TransactionProcessorVersionAdapterR4B
+		implements ITransactionProcessorVersionAdapter<Bundle, Bundle.BundleEntryComponent> {
 	@Override
 	public void setResponseStatus(Bundle.BundleEntryComponent theBundleEntry, String theStatus) {
 		theBundleEntry.getResponse().setStatus(theStatus);
@@ -65,12 +65,13 @@ public class TransactionProcessorVersionAdapterR4B implements ITransactionProces
 	}
 
 	@Override
-	public void populateEntryWithOperationOutcome(BaseServerResponseException theCaughtEx, Bundle.BundleEntryComponent theEntry) {
+	public void populateEntryWithOperationOutcome(
+			BaseServerResponseException theCaughtEx, Bundle.BundleEntryComponent theEntry) {
 		OperationOutcome oo = new OperationOutcome();
 		oo.addIssue()
-			.setSeverity(OperationOutcome.IssueSeverity.ERROR)
-			.setDiagnostics(theCaughtEx.getMessage())
-			.setCode(OperationOutcome.IssueType.EXCEPTION);
+				.setSeverity(OperationOutcome.IssueSeverity.ERROR)
+				.setDiagnostics(theCaughtEx.getMessage())
+				.setCode(OperationOutcome.IssueType.EXCEPTION);
 		theEntry.getResponse().setOutcome(oo);
 	}
 
@@ -114,7 +115,6 @@ public class TransactionProcessorVersionAdapterR4B implements ITransactionProces
 	public String getFullUrl(Bundle.BundleEntryComponent theEntry) {
 		return theEntry.getFullUrl();
 	}
-
 
 	@Override
 	public void setFullUrl(Bundle.BundleEntryComponent theEntry, String theFullUrl) {
@@ -170,5 +170,4 @@ public class TransactionProcessorVersionAdapterR4B implements ITransactionProces
 	public void setRequestUrl(Bundle.BundleEntryComponent theEntry, String theUrl) {
 		theEntry.getRequest().setUrl(theUrl);
 	}
-
 }

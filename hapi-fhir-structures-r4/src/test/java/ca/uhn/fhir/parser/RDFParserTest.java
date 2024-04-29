@@ -36,8 +36,13 @@ import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.Rio;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Base;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Parameters;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.core.io.Resource;
@@ -57,6 +62,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds;
+import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.hamcrest.core.IsNot.not;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class RDFParserTest extends BaseTest {
@@ -88,6 +99,7 @@ public class RDFParserTest extends BaseTest {
 	 */
 	@ParameterizedTest
 	@MethodSource("getInputFiles")
+	@Execution(ExecutionMode.CONCURRENT)
 	public void testRDFRoundTrip(String referenceFilePath) throws IOException {
 		String referenceFileName = referenceFilePath.substring(referenceFilePath.lastIndexOf("/")+1);
 		IBaseResource referenceResource = parseJson(new FileInputStream(referenceFilePath));
@@ -211,6 +223,29 @@ public class RDFParserTest extends BaseTest {
 		public String toString() {
 			return "<" + node.toString() + ">@" + shape.toPrettyString();
 		}
+	}
+
+
+	@Test
+	public void testEncodeBundleWithCrossReferenceFullUrlsAndNoIds() {
+		Bundle bundle = createBundleWithCrossReferenceFullUrlsAndNoIds();
+
+		String output = ourCtx.newRDFParser().setPrettyPrint(true).encodeResourceToString(bundle);
+		ourLog.info(output);
+
+		assertThat(output, not(containsString("contained ")));
+		assertThat(output, not(containsString("id ")));
+	}
+
+	@Test
+	public void testEncodeBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters() {
+		Parameters parameters = createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters();
+
+		String output = ourCtx.newRDFParser().setPrettyPrint(true).encodeResourceToString(parameters);
+		ourLog.info(output);
+
+		assertThat(output, not(containsString("contained ")));
+		assertThat(output, not(containsString("id ")));
 	}
 
 }

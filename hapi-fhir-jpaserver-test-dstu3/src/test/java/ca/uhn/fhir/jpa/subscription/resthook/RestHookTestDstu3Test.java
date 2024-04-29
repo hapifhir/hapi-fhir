@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.subscription.NotificationServlet;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.util.SubscriptionDebugLogInterceptor;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
+import ca.uhn.fhir.jpa.topic.SubscriptionTopicRegistry;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -25,8 +26,8 @@ import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MetaUtil;
 import com.google.common.collect.Lists;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
 import org.hl7.fhir.dstu3.model.Coding;
@@ -50,8 +51,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Nonnull;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -62,6 +63,7 @@ import static ca.uhn.fhir.util.HapiExtensions.EX_SEND_DELETE_MESSAGES;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -91,6 +93,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	private final List<IIdType> mySubscriptionIds = Collections.synchronizedList(new ArrayList<>());
 	@Autowired
 	private SubscriptionTestUtil mySubscriptionTestUtil;
+	@Autowired(required = false)
+	SubscriptionTopicRegistry mySubscriptionTopicRegistry;
 
 	@AfterEach
 	public void afterUnregisterRestHookListener() {
@@ -120,6 +124,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		myInterceptorRegistry.registerInterceptor(ourSubscriptionDebugLogInterceptor);
 		ourLog.info("After re-registering interceptors");
 		DaoTestUtils.logAllInterceptors(myInterceptorRegistry);
+
+		myStorageSettings.setOnlyAllowInMemorySubscriptions(new JpaStorageSettings().isOnlyAllowInMemorySubscriptions());
 	}
 
 	@BeforeEach
@@ -186,6 +192,12 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
+	public void testSubscriptionTopicRegistryBean() {
+		// This bean should not exist in DSTU3
+		assertNull(mySubscriptionTopicRegistry);
+	}
+
+	@Test
 	public void testDatabaseStrategyMeta() throws InterruptedException {
 		String databaseCriteria = "Observation?code=17861-6&context.type=IHD";
 		Subscription subscription = createSubscription(databaseCriteria, null, ourNotificationListenerServer);
@@ -203,6 +215,19 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
 		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.get(0).getCode());
 	}
+	@Test
+	public void testForcedInMemoryPreventsDatabaseSubscriptions() throws InterruptedException {
+		myStorageSettings.setOnlyAllowInMemorySubscriptions(true);
+		String databaseCriteria = "Observation?code=17861-6&context.type=IHD";
+		try {
+			createSubscription(databaseCriteria, null, ourNotificationListenerServer);
+		} catch (UnprocessableEntityException e) {
+			assertThat(e.getMessage(), is(containsString("HAPI-2367: This server is configured to only allow in-memory subscriptions.")));
+		}
+		myStorageSettings.setOnlyAllowInMemorySubscriptions(false);
+	}
+
+
 	@ParameterizedTest
 	@ValueSource(strings = {"[*]", "[Observation]", "Observation?"})
 	public void RestHookSubscriptionWithPayloadSendsDeleteRequest(String theCriteria) throws Exception {

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 3231
+title: "Previously, conditional updates always followed the STU3 specifications. 
+Now, conditional updates in an R4 server follow the R4 specifications."

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.cli;
-
 /*-
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.cli;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.system.HapiSystemProperties;
@@ -53,7 +52,8 @@ import static org.fusesource.jansi.Ansi.ansi;
 public abstract class BaseApp {
 	protected static final org.slf4j.Logger ourLog;
 	static final String LINESEP = System.getProperty("line.separator");
-	private static final String STACKFILTER_PATTERN = "%xEx{full, sun.reflect, org.junit, org.eclipse, java.lang.reflect.Method, org.springframework, org.hibernate, com.sun.proxy, org.attoparser, org.thymeleaf}";
+	private static final String STACKFILTER_PATTERN =
+			"%xEx{full, sun.reflect, org.junit, org.eclipse, java.lang.reflect.Method, org.springframework, org.hibernate, com.sun.proxy, org.attoparser, org.thymeleaf}";
 	private static List<BaseCommand> ourCommands;
 	private static boolean ourDebugMode;
 
@@ -65,7 +65,7 @@ public abstract class BaseApp {
 		ourLog = LoggerFactory.getLogger(App.class);
 	}
 
-	private Consumer<BaseApp> myStartupHook = noop->{};
+	private Consumer<BaseApp> myStartupHook = noop -> {};
 	private MyShutdownHook myShutdownHook;
 	private boolean myShutdownHookHasNotRun;
 
@@ -75,8 +75,10 @@ public abstract class BaseApp {
 		printMessageToStdout(msg);
 		logProductName();
 		printMessageToStdout("------------------------------------------------------------");
-		printMessageToStdout("Process ID                      : " + ManagementFactory.getRuntimeMXBean().getName());
-		printMessageToStdout("Max configured JVM memory (Xmx) : " + FileHelper.getFileSizeDisplay(Runtime.getRuntime().maxMemory(), 1));
+		printMessageToStdout("Process ID                      : "
+				+ ManagementFactory.getRuntimeMXBean().getName());
+		printMessageToStdout("Max configured JVM memory (Xmx) : "
+				+ FileHelper.getFileSizeDisplay(Runtime.getRuntime().maxMemory(), 1));
 		printMessageToStdout("Detected Java version           : " + System.getProperty("java.version"));
 		printMessageToStdout("------------------------------------------------------------");
 	}
@@ -91,7 +93,8 @@ public abstract class BaseApp {
 	}
 
 	protected void logProductName() {
-		printMessageToStdout("\ud83d\udd25 " + ansi().bold() + " " + provideProductName() + ansi().boldOff() + " " + provideProductVersion() + " - Command Line Tool");
+		printMessageToStdout("\ud83d\udd25 " + ansi().bold() + " " + provideProductName() + ansi().boldOff() + " "
+				+ provideProductVersion() + " - Command Line Tool");
 	}
 
 	private void logCommandUsage(BaseCommand theCommand) {
@@ -156,16 +159,20 @@ public abstract class BaseApp {
 
 		int longestCommandLength = 0;
 		for (BaseCommand next : ourCommands) {
-			longestCommandLength = Math.max(longestCommandLength, next.getCommandName().length());
+			longestCommandLength =
+					Math.max(longestCommandLength, next.getCommandName().length());
 		}
 
 		for (BaseCommand next : ourCommands) {
 			String left = "  " + StringUtils.rightPad(next.getCommandName(), longestCommandLength);
-			String[] rightParts = WordUtils.wrap(next.getCommandDescription(), 80 - (left.length() + 3)).split("\\n");
+			String[] rightParts = WordUtils.wrap(next.getCommandDescription(), 80 - (left.length() + 3))
+					.split("\\n");
 			for (int i = 1; i < rightParts.length; i++) {
 				rightParts[i] = StringUtils.leftPad("", left.length() + 3) + rightParts[i];
 			}
-			printMessageToStdout(ansi().bold().fg(Ansi.Color.GREEN) + left + ansi().boldOff().fg(Ansi.Color.WHITE) + " - " + ansi().bold() + StringUtils.join(rightParts, LINESEP));
+			printMessageToStdout(
+					ansi().bold().fg(Ansi.Color.GREEN) + left + ansi().boldOff().fg(Ansi.Color.WHITE) + " - "
+							+ ansi().bold() + StringUtils.join(rightParts, LINESEP));
 		}
 		printMessageToStdout("");
 		printMessageToStdout(ansi().boldOff().fg(Ansi.Color.WHITE) + "See what options are available:");
@@ -177,7 +184,6 @@ public abstract class BaseApp {
 
 	protected List<BaseCommand> provideCommands() {
 		ArrayList<BaseCommand> commands = new ArrayList<>();
-		commands.add(new RunServerCommand());
 		commands.add(new ExampleDataUploader());
 		commands.add(new ValidateCommand());
 		commands.add(new ValidationDataUploader());
@@ -214,7 +220,6 @@ public abstract class BaseApp {
 		ourCommands.addAll(provideCommands());
 		Collections.sort(ourCommands);
 
-
 		if (theArgs.length == 0) {
 			logUsage();
 			return;
@@ -226,7 +231,7 @@ public abstract class BaseApp {
 		}
 
 		Optional<BaseCommand> commandOpt = parseCommand(theArgs);
-		if (commandOpt.isEmpty())  return;
+		if (commandOpt.isEmpty()) return;
 
 		BaseCommand command = commandOpt.get();
 
@@ -252,7 +257,8 @@ public abstract class BaseApp {
 			String[] args = Arrays.copyOfRange(theArgs, 1, theArgs.length);
 			parsedOptions = parser.parse(options, args, true);
 			if (!parsedOptions.getArgList().isEmpty()) {
-				throw new ParseException(Msg.code(1555) + "Unrecognized argument: " + parsedOptions.getArgList().get(0));
+				throw new ParseException(Msg.code(1555) + "Unrecognized argument: "
+						+ parsedOptions.getArgList().get(0));
 			}
 
 			if (parsedOptions.hasOption("debug")) {
@@ -264,14 +270,6 @@ public abstract class BaseApp {
 
 			// Actually execute the command
 			command.run(parsedOptions);
-
-			myShutdownHookHasNotRun = true;
-			runCleanupHookAndUnregister();
-
-			if (!HapiSystemProperties.isTestModeEnabled()) {
-				System.exit(0);
-			}
-
 		} catch (ParseException e) {
 			if (!HapiSystemProperties.isTestModeEnabled()) {
 				LogbackUtil.loggingConfigOff();
@@ -290,15 +288,22 @@ public abstract class BaseApp {
 			ourLog.error("Error during execution: ", t);
 			runCleanupHookAndUnregister();
 			exitDueToException(new CommandFailureException("Error: " + t, t));
-		}
+		} finally {
+			myShutdownHookHasNotRun = true;
+			runCleanupHookAndUnregister();
 
+			if (!HapiSystemProperties.isTestModeEnabled()) {
+				System.exit(0);
+			}
+		}
 	}
 
 	private Optional<BaseCommand> parseCommand(String[] theArgs) {
 		Optional<BaseCommand> commandOpt = getNextCommand(theArgs, 0);
 
 		if (commandOpt.isEmpty()) {
-			String message = "Unrecognized command: " + ansi().bold().fg(Ansi.Color.RED) + theArgs[0] + ansi().boldOff().fg(Ansi.Color.WHITE);
+			String message = "Unrecognized command: " + ansi().bold().fg(Ansi.Color.RED) + theArgs[0]
+					+ ansi().boldOff().fg(Ansi.Color.WHITE);
 			printMessageToStdout(message);
 			printMessageToStdout("");
 			logUsage();
@@ -308,7 +313,9 @@ public abstract class BaseApp {
 	}
 
 	private Optional<BaseCommand> getNextCommand(String[] theArgs, int thePosition) {
-		return ourCommands.stream().filter(cmd -> cmd.getCommandName().equals(theArgs[thePosition])).findFirst();
+		return ourCommands.stream()
+				.filter(cmd -> cmd.getCommandName().equals(theArgs[thePosition]))
+				.findFirst();
 	}
 
 	private void processHelp(String[] theArgs) {
@@ -325,7 +332,6 @@ public abstract class BaseApp {
 		}
 		logCommandUsage(commandOpt.get());
 	}
-
 
 	private void exitDueToProblem(String theDescription) {
 		if (HapiSystemProperties.isTestModeEnabled()) {

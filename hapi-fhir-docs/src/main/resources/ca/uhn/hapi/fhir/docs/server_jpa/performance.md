@@ -60,3 +60,11 @@ X-Upsert-Extistence-Check: disabled
 This should improve write performance, so this header can be useful when large amounts of data will be created using client assigned IDs in a controlled fashion.
 
 If this setting is used and a resource already exists with a given client-assigned ID, a database constraint error will prevent any duplicate records from being created, and the operation will fail.
+
+# Disabling Non Resource DB History
+
+This setting controls whether non-resource (ex: Patient is a resource, MdmLink is not) DB history is enabled.  Presently, this only affects the history for MDM links, but the functionality may be extended to other domains.
+
+Clients may want to disable this setting for performance reasons as it populates a new set of database tables when enabled.
+
+Setting this property explicitly to false disables the feature:  [Non Resource DB History](/apidocs/hapi-fhir-storage/ca/uhn/fhir/jpa/api/config/JpaStorageSettings.html#isNonResourceDbHistoryEnabled())

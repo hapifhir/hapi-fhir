@@ -1744,6 +1744,7 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 
 	@Test
 	public void testCompositeWithInvalidTarget() {
+		// Setup
 		SearchParameter sp = new SearchParameter();
 		sp.addBase("Patient");
 		sp.setCode("myDoctor");
@@ -1752,14 +1753,15 @@ public class FhirResourceDaoR4SearchCustomSearchParamTest extends BaseJpaR4Test 
 		sp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
 		sp.addComponent()
 			.setDefinition("http://foo");
-		mySearchParameterDao.create(sp);
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.JPA_PERFTRACE_WARNING, interceptor);
 
 		try {
-			mySearchParamRegistry.forceRefresh();
+			// Test
+			mySearchParameterDao.create(sp);
 
+			// Verify
 			ArgumentCaptor<HookParams> paramsCaptor = ArgumentCaptor.forClass(HookParams.class);
 			verify(interceptor, times(1)).invoke(any(), paramsCaptor.capture());
 

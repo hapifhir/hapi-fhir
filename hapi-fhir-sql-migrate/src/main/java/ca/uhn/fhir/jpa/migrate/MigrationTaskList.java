@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,11 +17,12 @@ package ca.uhn.fhir.jpa.migrate;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
+import jakarta.annotation.Nonnull;
 import org.flywaydb.core.api.MigrationVersion;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -57,8 +56,9 @@ public class MigrationTaskList implements Iterable<BaseTask> {
 
 	public MigrationTaskList diff(Set<MigrationVersion> theAppliedMigrationVersions) {
 		List<BaseTask> unappliedTasks = myTasks.stream()
-			.filter(task -> !theAppliedMigrationVersions.contains(MigrationVersion.fromVersion(task.getMigrationVersion())))
-			.collect(Collectors.toList());
+				.filter(task ->
+						!theAppliedMigrationVersions.contains(MigrationVersion.fromVersion(task.getMigrationVersion())))
+				.collect(Collectors.toList());
 		return new MigrationTaskList(unappliedTasks);
 	}
 
@@ -88,11 +88,11 @@ public class MigrationTaskList implements Iterable<BaseTask> {
 
 	public String getLastVersion() {
 		return myTasks.stream()
-			.map(BaseTask::getMigrationVersion)
-			.map(MigrationVersion::fromVersion)
-			.sorted()
-			.map(MigrationVersion::toString)
-			.reduce((first, second) -> second)
-			.orElse(null);
+				.map(BaseTask::getMigrationVersion)
+				.map(MigrationVersion::fromVersion)
+				.sorted()
+				.map(MigrationVersion::toString)
+				.reduce((first, second) -> second)
+				.orElse(null);
 	}
 }

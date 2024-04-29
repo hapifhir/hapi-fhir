@@ -21,12 +21,12 @@ import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.HumanName;
-import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.MedicationDispense;
@@ -36,6 +36,7 @@ import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Narrative;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PrimitiveType;
@@ -52,6 +53,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -173,6 +175,36 @@ public class JsonParserR4Test extends BaseTest {
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(parsed);
 		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><text><div xmlns=\"http://www.w3.org/1999/xhtml\"><img src=\"foo\"/>@fhirabend</div></text></Patient>", encoded);
 	}
+
+
+	@Test
+	public void testDontEncodeEmptyExtensionList() {
+		String asXml = """
+			<Bundle xmlns="http://hl7.org/fhir">
+			     <entry>
+			        <resource>
+			            <Composition>
+			                <section>
+			                    <entry>
+			                        <!--  Referenz auf PractitionerRole  -->
+			                        <reference value="PractitionerRole/8f1ba38d-c4c1-4c49-ac2a-7ff0e56bc150" />
+			                    </entry>
+			                </section>
+			            </Composition>
+			        </resource>
+			    </entry>
+			</Bundle>
+			""";
+
+		ourLog.info(asXml);
+
+		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, asXml);
+
+		String asString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+		ourLog.info(asString);
+		assertThat(asString, not(containsString("{ }")));
+	}
+
 
 
 	@Test
@@ -473,7 +505,6 @@ public class JsonParserR4Test extends BaseTest {
 
 	}
 
-
 	@Test
 	public void testEncodeWithInvalidExtensionContainingValueAndNestedExtensions() {
 
@@ -485,14 +516,15 @@ public class JsonParserR4Test extends BaseTest {
 		child.setUrl("http://child");
 		child.setValue(new StringType("CHILD_VALUE"));
 
+		// According to issue4129, all error handlers should reject malformed resources
 		// Lenient error handler
 		IParser parser = ourCtx.newJsonParser();
-		String output = parser.encodeResourceToString(p);
-		ourLog.info("Output: {}", output);
-		assertThat(output, containsString("http://root"));
-		assertThat(output, containsString("ROOT_VALUE"));
-		assertThat(output, containsString("http://child"));
-		assertThat(output, containsString("CHILD_VALUE"));
+		try {
+			parser.encodeResourceToString(p);
+			fail();
+		} catch (DataFormatException e) {
+			assertEquals(Msg.code(1827) + "[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
+		}
 
 		// Strict error handler
 		try {
@@ -503,6 +535,30 @@ public class JsonParserR4Test extends BaseTest {
 			assertEquals(Msg.code(1827) + "[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
 		}
 
+	}
+
+	@Test
+	public void testEncodeWithInvalidExtensionContainingValueAndNestedExtensions_withDisableAllErrorsShouldSucceed() {
+
+		Patient p = new Patient();
+		Extension root = p.addExtension();
+		root.setUrl("http://root");
+		root.setValue(new StringType("ROOT_VALUE"));
+		Extension child = root.addExtension();
+		child.setUrl("http://child");
+		child.setValue(new StringType("CHILD_VALUE"));
+
+		// Lenient error handler - should parse successfully with no error
+		LenientErrorHandler errorHandler = new LenientErrorHandler(true).disableAllErrors();
+		IParser parser = ourCtx.newJsonParser().setParserErrorHandler(errorHandler);
+		String output = parser.encodeResourceToString(p);
+		ourLog.info("Output: {}", output);
+		assertThat(output, containsString("http://root"));
+		assertThat(output, containsString("ROOT_VALUE"));
+		assertThat(output, containsString("http://child"));
+		assertThat(output, containsString("CHILD_VALUE"));
+		assertEquals(false, errorHandler.isErrorOnInvalidExtension());
+		assertEquals(false, errorHandler.isErrorOnInvalidValue());
 	}
 
 	@Test
@@ -1101,6 +1157,141 @@ public class JsonParserR4Test extends BaseTest {
 		String serialized = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(ae);
 		assertEquals(auditEvent, serialized);
 
+	}
+
+
+	@Test
+	public void testEncodeToString_PrimitiveDataType() {
+		DecimalType object = new DecimalType("123.456000");
+		String expected = "123.456000";
+		String actual = ourCtx.newJsonParser().encodeToString(object);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testEncodeToString_CompoundTypeWithReference() {
+		Identifier identifier = new Identifier();
+		identifier.setSystem("http://system.org");
+		identifier.setValue("123");
+		Reference reference = new Reference("Organization/1");
+		identifier.setAssigner(reference);
+		String expected = "{\"system\":\"http://system.org\",\"value\":\"123\",\"assigner\":{\"reference\":\"Organization/1\"}}";
+		String actual = ourCtx.newJsonParser().encodeToString(identifier);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testEncodeToString_Resource() {
+		Patient p = new Patient();
+		p.setId("Patient/123");
+		p.setActive(true);
+		String expected = "{\"resourceType\":\"Patient\",\"id\":\"123\",\"active\":true}";
+		String actual = ourCtx.newJsonParser().encodeToString(p);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testEncodeToString_GeneralPurposeDataType() {
+		HumanName name = new HumanName();
+		name.setFamily("Simpson").addGiven("Homer").addGiven("Jay");
+		name.addExtension("http://foo", new StringType("bar"));
+
+		String expected = "{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"bar\"}],\"family\":\"Simpson\",\"given\":[\"Homer\",\"Jay\"]}";
+		String actual = ourCtx.newJsonParser().encodeToString(name);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testEncodeToString_BackboneElement() {
+		Patient.PatientCommunicationComponent communication = new Patient().addCommunication();
+		communication.setPreferred(true);
+		communication.getLanguage().setText("English");
+
+		String expected = "{\"language\":{\"text\":\"English\"},\"preferred\":true}";
+		String actual = ourCtx.newJsonParser().encodeToString(communication);
+		assertEquals(expected, actual);
+	}
+
+	@Test
+	public void testEncodeBundleWithCrossReferenceFullUrlsAndNoIds() {
+		Bundle bundle = createBundleWithCrossReferenceFullUrlsAndNoIds();
+
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+		ourLog.info(output);
+
+		assertThat(output, not(containsString("\"contained\"")));
+		assertThat(output, not(containsString("\"id\"")));
+		assertThat(output, stringContainsInOrder(
+			 "\"fullUrl\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\",",
+			 "\"resourceType\": \"Patient\"",
+			 "\"fullUrl\": \"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"",
+			 "\"resourceType\": \"Observation\"",
+			 "\"reference\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\""
+		));
+
+	}
+
+	@Test
+	public void testEncodeBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters() {
+		Parameters parameters = createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters();
+
+		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parameters);
+		ourLog.info(output);
+
+		assertThat(output, not(containsString("\"contained\"")));
+		assertThat(output, not(containsString("\"id\"")));
+		assertThat(output, stringContainsInOrder(
+			 "\"resourceType\": \"Parameters\"",
+			 "\"name\": \"resource\"",
+			 "\"fullUrl\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\",",
+			 "\"resourceType\": \"Patient\"",
+			 "\"fullUrl\": \"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"",
+			 "\"resourceType\": \"Observation\"",
+			 "\"reference\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\""
+		));
+
+	}
+
+	@Test
+	public void testParseBundleWithCrossReferenceFullUrlsAndNoIds() {
+		Bundle bundle = createBundleWithCrossReferenceFullUrlsAndNoIds();
+		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
+
+		Bundle parsedBundle = ourCtx.newJsonParser().parseResource(Bundle.class, encoded);
+		assertEquals("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7", parsedBundle.getEntry().get(0).getFullUrl());
+		assertEquals("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7", parsedBundle.getEntry().get(0).getResource().getId());
+		assertEquals("urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb", parsedBundle.getEntry().get(1).getFullUrl());
+		assertEquals("urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb", parsedBundle.getEntry().get(1).getResource().getId());
+	}
+
+	@Nonnull
+	public static Bundle createBundleWithCrossReferenceFullUrlsAndNoIds() {
+		Bundle bundle = new Bundle();
+
+		Patient patient = new Patient();
+		patient.setActive(true);
+		bundle
+			 .addEntry()
+			 .setResource(patient)
+			 .setFullUrl("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7");
+
+		Observation observation = new Observation();
+		observation.getSubject().setReference("urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7").setResource(patient);
+		bundle
+			 .addEntry()
+			 .setResource(observation)
+			 .setFullUrl("urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb");
+		return bundle;
+	}
+
+	@Nonnull
+	public static Parameters createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters() {
+		Parameters retVal = new Parameters();
+		retVal
+			 .addParameter()
+			 .setName("resource")
+			 .setResource(createBundleWithCrossReferenceFullUrlsAndNoIds());
+		return retVal;
 	}
 
 	@Test

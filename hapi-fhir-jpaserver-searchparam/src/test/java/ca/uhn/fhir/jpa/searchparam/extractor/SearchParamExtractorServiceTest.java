@@ -36,9 +36,11 @@ public class SearchParamExtractorServiceTest {
 		searchParamSet.addWarning("help i'm a bug");
 		searchParamSet.addWarning("Spiff");
 
+		when(myJpaInterceptorBroadcaster.hasHooks(any())).thenReturn(true);
 		when(myJpaInterceptorBroadcaster.callHooks(any(), any())).thenReturn(true);
 
-		SearchParamExtractorService.handleWarnings(new ServletRequestDetails(myRequestInterceptorBroadcaster), myJpaInterceptorBroadcaster, searchParamSet);
+		ServletRequestDetails requestDetails = new ServletRequestDetails(myRequestInterceptorBroadcaster);
+		SearchParamExtractorService.handleWarnings(requestDetails, myJpaInterceptorBroadcaster, searchParamSet);
 
 		verify(myJpaInterceptorBroadcaster, times(2)).callHooks(eq(Pointcut.JPA_PERFTRACE_WARNING), any());
 		verify(myRequestInterceptorBroadcaster, times(2)).callHooks(eq(Pointcut.JPA_PERFTRACE_WARNING), any());

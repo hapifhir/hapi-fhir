@@ -1,0 +1,9 @@
+---
+type: add
+issue: 4679
+title: "When executing FHIR transactions in the JPA server where the transaction contained large numbers
+  of inline match URLs, the transaction processor will now prefetch the match URL targets in a single 
+  optimized batch. This avoids a potentially significant number of database round trips. In addition, 
+  the SQL query used for pre-resolving resource update targets in the transaction processor has been 
+  reworked to fully leverage available database indexes. This should result in significant performance
+  improvements for certain large FHIR transactions."

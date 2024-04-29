@@ -50,9 +50,17 @@ public class ErrorHandlerTest {
 		new LenientErrorHandler().unknownReference(null, null);
 		new LenientErrorHandler().incorrectJsonType(null, null, ValueType.ARRAY, null, ValueType.SCALAR, null);
 		new LenientErrorHandler().setErrorOnInvalidValue(false).invalidValue(null, "FOO", "");
+		new LenientErrorHandler().setErrorOnInvalidExtension(false).extensionContainsValueAndNestedExtensions(null);
 		new LenientErrorHandler().invalidValue(null, null, "");
 		try {
 			new LenientErrorHandler().invalidValue(null, "FOO", "");
+			fail();
+		} catch (DataFormatException e) {
+			// good, this one method defaults to causing an error
+		}
+
+		try {
+			new LenientErrorHandler().extensionContainsValueAndNestedExtensions(null);
 			fail();
 		} catch (DataFormatException e) {
 			// good, this one method defaults to causing an error

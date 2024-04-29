@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4548
+backport: 6.4.2
+title: "Simultaneous DELETE and $reindex operations could corrupt the search index.  This has been fixed."

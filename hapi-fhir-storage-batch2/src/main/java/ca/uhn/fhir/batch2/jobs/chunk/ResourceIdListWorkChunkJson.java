@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.chunk;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,7 +17,9 @@ package ca.uhn.fhir.batch2.jobs.chunk;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.chunk;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -35,13 +35,31 @@ import java.util.stream.Collectors;
 
 public class ResourceIdListWorkChunkJson implements IModelJson {
 
+	@JsonProperty("requestPartitionId")
+	private RequestPartitionId myRequestPartitionId;
+
 	@JsonProperty("ids")
 	private List<TypedPidJson> myTypedPids;
 
-	public ResourceIdListWorkChunkJson() {}
+	/**
+	 * Constructor
+	 */
+	public ResourceIdListWorkChunkJson() {
+		super();
+	}
 
-	public ResourceIdListWorkChunkJson(Collection<TypedPidJson> theTypedPids) {
+	/**
+	 * Constructor
+	 */
+	public ResourceIdListWorkChunkJson(
+			Collection<TypedPidJson> theTypedPids, RequestPartitionId theRequestPartitionId) {
+		this();
 		getTypedPids().addAll(theTypedPids);
+		myRequestPartitionId = theRequestPartitionId;
+	}
+
+	public RequestPartitionId getRequestPartitionId() {
+		return myRequestPartitionId;
 	}
 
 	private List<TypedPidJson> getTypedPids() {
@@ -54,8 +72,8 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-			.append("ids", myTypedPids)
-			.toString();
+				.append("ids", myTypedPids)
+				.toString();
 	}
 
 	public <T extends IResourcePersistentId> List<T> getResourcePersistentIds(IIdHelperService<T> theIdHelperService) {
@@ -63,13 +81,12 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 			return Collections.emptyList();
 		}
 
-		return myTypedPids
-			.stream()
-			.map(t -> {
-				T retval = theIdHelperService.newPidFromStringIdAndResourceName(t.getPid(), t.getResourceType());
-				return retval;
-			})
-			.collect(Collectors.toList());
+		return myTypedPids.stream()
+				.map(t -> {
+					T retval = theIdHelperService.newPidFromStringIdAndResourceName(t.getPid(), t.getResourceType());
+					return retval;
+				})
+				.collect(Collectors.toList());
 	}
 
 	public int size() {
@@ -83,5 +100,4 @@ public class ResourceIdListWorkChunkJson implements IModelJson {
 	public String getResourceType(int index) {
 		return getTypedPids().get(index).getResourceType();
 	}
-
 }

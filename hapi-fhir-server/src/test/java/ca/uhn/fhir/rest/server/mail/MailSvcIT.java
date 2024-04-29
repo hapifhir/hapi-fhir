@@ -10,7 +10,7 @@ import org.simplejavamail.MailException;
 import org.simplejavamail.api.email.Email;
 import org.simplejavamail.email.EmailBuilder;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import javax.mail.internet.MimeMessage;
 import java.util.Arrays;
 import java.util.List;
@@ -42,7 +42,8 @@ public class MailSvcIT {
 		// execute
 		fixture.sendMail(email);
 		// validate
-		assertTrue(ourGreenMail.waitForIncomingEmail(5000, 1));
+		boolean condition = ourGreenMail.waitForIncomingEmail(5000, 1);
+		assertTrue(condition);
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
 		assertEquals(1, receivedMessages.length);
 		assertEquals(SUBJECT, receivedMessages[0].getSubject());

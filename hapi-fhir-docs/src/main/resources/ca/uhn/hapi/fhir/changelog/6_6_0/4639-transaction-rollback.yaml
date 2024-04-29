@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4639
+title: "When executing FHIR transactions in the JPA server with automatic retry enabled, if
+   automatic placeholder-reference creation is enabled the system could sometimes fail to
+   automatically retry. This has been corrected."

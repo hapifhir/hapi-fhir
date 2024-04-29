@@ -6,7 +6,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
-import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherEnum;
+import ca.uhn.fhir.mdm.rules.matcher.models.MatchTypeEnum;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
@@ -55,19 +55,21 @@ public class ResourceMatcherR4Test extends BaseMdmRulesR4Test {
 
 	@Test
 	public void testMetaphoneMatchResult() {
-		MdmResourceMatcherSvc matcherSvc = buildMatcher(buildNamePhoneRules(MdmMatcherEnum.METAPHONE));
-			MdmMatchOutcome result = matcherSvc.match(myLeft, myRight);
-			assertMatchResult(MdmMatchResultEnum.MATCH, 7L, 3.0, false, false, result);
+		MdmResourceMatcherSvc matcherSvc = buildMatcher(buildNamePhoneRules(MatchTypeEnum.METAPHONE));
+
+		MdmMatchOutcome result = matcherSvc.match(myLeft, myRight);
+		assertMatchResult(MdmMatchResultEnum.MATCH, 7L, 3.0, false, false, result);
 	}
 
 	@Test
 	public void testStringMatchResult() {
-		MdmResourceMatcherSvc matcherSvc = buildMatcher(buildNamePhoneRules(MdmMatcherEnum.STRING));
+		MdmResourceMatcherSvc matcherSvc = buildMatcher(buildNamePhoneRules(MatchTypeEnum.STRING));
+
 		MdmMatchOutcome result = matcherSvc.match(myLeft, myRight);
 		assertMatchResult(MdmMatchResultEnum.NO_MATCH, 5L, 2.0, false, false, result);
 	}
 
-	protected MdmRulesJson buildNamePhoneRules(MdmMatcherEnum theMatcherEnum) {
+	protected MdmRulesJson buildNamePhoneRules(MatchTypeEnum theMatcherEnum) {
 		MdmFieldMatchJson lastNameMatchField = new MdmFieldMatchJson()
 			.setName(PATIENT_FAMILY)
 			.setResourceType("Patient")
@@ -84,7 +86,7 @@ public class ResourceMatcherR4Test extends BaseMdmRulesR4Test {
 			.setName(PATIENT_PHONE)
 			.setResourceType("Patient")
 			.setResourcePath("telecom.value")
-			.setMatcher(new MdmMatcherJson().setAlgorithm(MdmMatcherEnum.STRING));
+			.setMatcher(new MdmMatcherJson().setAlgorithm(MatchTypeEnum.STRING));
 
 		MdmRulesJson retval = new MdmRulesJson();
 		retval.setVersion("test version");

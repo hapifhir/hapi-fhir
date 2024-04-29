@@ -42,7 +42,7 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 		parentChildCs.setUrl(SYSTEM_PARENTCHILD);
 		parentChildCs.setName("Parent Child CodeSystem");
 		parentChildCs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		parentChildCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		parentChildCs.setContent(Enumerations.CodeSystemContentMode.COMPLETE);
 		parentChildCs.setHierarchyMeaning(CodeSystem.CodeSystemHierarchyMeaning.ISA);
 
 		CodeSystem.ConceptDefinitionComponent parentA = parentChildCs.addConcept().setCode("ParentA").setDisplay("Parent A");
@@ -193,47 +193,59 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 	@Test
 	public void testLookupOperationByCodeAndSystemBuiltInCode() {
 		// First test with no version specified (should return the one and only version defined).
-		Parameters respParam = myClient
-			.operation()
-			.onType(CodeSystem.class)
-			.named("lookup")
-			.withParameter(Parameters.class, "code", new CodeType("ACSN"))
-			.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/v2-0203"))
-			.execute();
+		{
+			Parameters respParam = myClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "code", new CodeType("ACSN"))
+				.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/v2-0203"))
+				.execute();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-		ourLog.info(resp);
+			String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+			ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals("v2.0203", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("2.9", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Accession ID", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+			Parameters.ParametersParameterComponent param0 = respParam.getParameter().get(0);
+			assertEquals("name", param0.getName());
+			assertEquals("IdentifierType", ((StringType) param0.getValue()).getValue());
+			Parameters.ParametersParameterComponent param1 = respParam.getParameter().get(1);
+			assertEquals("version", param1.getName());
+			assertEquals("2.9.0", ((StringType) param1.getValue()).getValue());
+			Parameters.ParametersParameterComponent param2 = respParam.getParameter().get(2);
+			assertEquals("display", param2.getName());
+			assertEquals("Accession ID", ((StringType) param2.getValue()).getValue());
+			Parameters.ParametersParameterComponent param3 = respParam.getParameter().get(3);
+			assertEquals("abstract", param3.getName());
+			assertEquals(false, ((BooleanType) param3.getValue()).getValue());
+		}
 
 		// Repeat with version specified.
-		respParam = myClient
-			.operation()
-			.onType(CodeSystem.class)
-			.named("lookup")
-			.withParameter(Parameters.class, "code", new CodeType("ACSN"))
-			.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/v2-0203"))
-			.andParameter("version", new StringType("2.9"))
-			.execute();
+		{
+			Parameters respParam = myClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named("lookup")
+				.withParameter(Parameters.class, "code", new CodeType("ACSN"))
+				.andParameter("system", new UriType("http://terminology.hl7.org/CodeSystem/v2-0203"))
+				.andParameter("version", new StringType("2.9.0"))
+				.execute();
 
-		resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
-		ourLog.info(resp);
+			String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
+			ourLog.info(resp);
 
-		assertEquals("name", respParam.getParameter().get(0).getName());
-		assertEquals("v2.0203", ((StringType) respParam.getParameter().get(0).getValue()).getValue());
-		assertEquals("version", respParam.getParameter().get(1).getName());
-		assertEquals("2.9", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
-		assertEquals("display", respParam.getParameter().get(2).getName());
-		assertEquals("Accession ID", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
-		assertEquals("abstract", respParam.getParameter().get(3).getName());
-		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
+			Parameters.ParametersParameterComponent param0 = respParam.getParameter().get(0);
+			assertEquals("name", param0.getName());
+			assertEquals("IdentifierType", ((StringType) param0.getValue()).getValue());
+			Parameters.ParametersParameterComponent param1 = respParam.getParameter().get(1);
+			assertEquals("version", param1.getName());
+			assertEquals("2.9.0", ((StringType) param1.getValue()).getValue());
+			Parameters.ParametersParameterComponent param2 = respParam.getParameter().get(2);
+			assertEquals("display", param2.getName());
+			assertEquals("Accession ID", ((StringType) param2.getValue()).getValue());
+			Parameters.ParametersParameterComponent param3 = respParam.getParameter().get(3);
+			assertEquals("abstract", param3.getName());
+			assertEquals(false, ((BooleanType) param3.getValue()).getValue());
+		}
 	}
 
 

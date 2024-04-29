@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.coordinator;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.coordinator;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import org.apache.commons.collections4.CollectionUtils;
@@ -32,7 +31,7 @@ public class ReductionStepChunkProcessingResponse {
 	private List<String> myFailedChunksIds;
 	private boolean myIsSuccessful;
 
-	public ReductionStepChunkProcessingResponse(boolean theDefaultSuccessValue){
+	public ReductionStepChunkProcessingResponse(boolean theDefaultSuccessValue) {
 		mySuccessfulChunkIds = new ArrayList<>();
 		myFailedChunksIds = new ArrayList<>();
 		myIsSuccessful = theDefaultSuccessValue;
@@ -42,11 +41,11 @@ public class ReductionStepChunkProcessingResponse {
 		return mySuccessfulChunkIds;
 	}
 
-	public boolean hasSuccessfulChunksIds(){
+	public boolean hasSuccessfulChunksIds() {
 		return !CollectionUtils.isEmpty(mySuccessfulChunkIds);
 	}
 
-	public void addSuccessfulChunkId(WorkChunk theWorkChunk){
+	public void addSuccessfulChunkId(WorkChunk theWorkChunk) {
 		mySuccessfulChunkIds.add(theWorkChunk.getId());
 	}
 
@@ -54,19 +53,19 @@ public class ReductionStepChunkProcessingResponse {
 		return myFailedChunksIds;
 	}
 
-	public boolean hasFailedChunkIds(){
+	public boolean hasFailedChunkIds() {
 		return !CollectionUtils.isEmpty(myFailedChunksIds);
 	}
 
-	public void addFailedChunkId(WorkChunk theWorChunk){
+	public void addFailedChunkId(WorkChunk theWorChunk) {
 		myFailedChunksIds.add(theWorChunk.getId());
 	}
 
-	public boolean isSuccessful(){
+	public boolean isSuccessful() {
 		return myIsSuccessful;
 	}
 
-	public void setSuccessful(boolean theSuccessValue){
+	public void setSuccessful(boolean theSuccessValue) {
 		myIsSuccessful = theSuccessValue;
 	}
 }

@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
@@ -611,7 +610,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 
 		searchAndReturnUnqualifiedVersionlessIdValues(uri);
 
-		List<String> queries = myCaptureQueriesListener.getSelectQueries().stream().map(t -> t.getSql(true, false)).collect(Collectors.toList());
+		List<String> queries = myCaptureQueriesListener.getSelectQueries().stream().map(t -> t.getSql(true, false)).toList();
 
 		List<String> notInListQueries = new ArrayList<>();
 		for (String query : queries) {
@@ -623,7 +622,7 @@ public class ResourceProviderHasParamR4Test extends BaseResourceProviderR4Test {
 		assertNotEquals(0, notInListQueries.size());
 	}
 
-	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
+	public List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
 		List<String> ids;
 		HttpGet get = new HttpGet(uri);
 

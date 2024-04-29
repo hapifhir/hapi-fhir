@@ -10,7 +10,10 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.JettyUtil;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpResponse;
@@ -20,8 +23,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hamcrest.core.IsEqual;
 import org.hamcrest.core.StringStartsWith;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -31,6 +34,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
@@ -38,6 +42,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,47 +56,26 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class PlainProviderR4Test {
 
-	private static FhirContext ourCtx = FhirContext.forR4();
+	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PlainProviderR4Test.class);
-	private CloseableHttpClient myClient;
-	private int myPort;
-	private RestfulServer myRestfulServer;
-	private Server myServer;
 
-	@AfterEach
-	public void after() throws Exception {
-		JettyUtil.closeServer(myServer);
-	}
+	@RegisterExtension
+	public RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
+		 .registerProvider(new HashMapResourceProvider<>(ourCtx, Observation.class))
+		 .withPagingProvider(new FifoMemoryPagingProvider(100))
+		 .setDefaultResponseEncoding(EncodingEnum.XML)
+		 .withServletPath("/fhir/context/*");
 
-	@BeforeEach
-	public void before() throws Exception {
-		myServer = new Server(0);
-
-		ServletHandler proxyHandler = new ServletHandler();
-		ServletHolder servletHolder = new ServletHolder();
-		myRestfulServer = new RestfulServer(ourCtx);
-		myRestfulServer.setDefaultResponseEncoding(EncodingEnum.XML);
-		servletHolder.setServlet(myRestfulServer);
-		proxyHandler.addServletWithMapping(servletHolder, "/fhir/context/*");
-		myServer.setHandler(proxyHandler);
-
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		
-		builder.setConnectionManager(connectionManager);
-		myClient = builder.build();
-
-	}
+	@RegisterExtension
+	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@Test
 	public void testGlobalHistory() throws Exception {
 		GlobalHistoryProvider provider = new GlobalHistoryProvider();
-		myRestfulServer.setProviders(provider);
-		JettyUtil.startServer(myServer);
-        myPort = JettyUtil.getPortForStartedServer(myServer);
+		ourServer.registerProvider(provider);
 
-		String baseUri = "http://localhost:" + myPort + "/fhir/context";
-		HttpResponse status = myClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02&_count=12"));
+		String baseUri = ourServer.getBaseUrl();
+		HttpResponse status = ourClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02&_count=12"));
 
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
@@ -103,7 +87,7 @@ public class PlainProviderR4Test {
 		assertThat(provider.myLastSince.getValueAsString(), StringStartsWith.startsWith("2012-01-02T00:01:02"));
 		assertThat(provider.myLastCount.getValueAsString(), IsEqual.equalTo("12"));
 
-		status = myClient.execute(new HttpGet(baseUri + "/_history?&_count=12"));
+		status = ourClient.execute(new HttpGet(baseUri + "/_history?&_count=12"));
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -112,7 +96,7 @@ public class PlainProviderR4Test {
 		assertNull(provider.myLastSince);
 		assertThat(provider.myLastCount.getValueAsString(), IsEqual.equalTo("12"));
 		
-		status =myClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02"));
+		status =ourClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02"));
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -125,12 +109,10 @@ public class PlainProviderR4Test {
 	@Test
 	public void testGlobalHistoryNoParams() throws Exception {
 		GlobalHistoryProvider provider = new GlobalHistoryProvider();
-		myRestfulServer.setProviders(provider);
-		JettyUtil.startServer(myServer);
-        myPort = JettyUtil.getPortForStartedServer(myServer);
+		ourServer.registerProvider(provider);
 
-		String baseUri = "http://localhost:" + myPort + "/fhir/context";
-		CloseableHttpResponse status = myClient.execute(new HttpGet(baseUri + "/_history"));
+		String baseUri = ourServer.getBaseUrl();
+		CloseableHttpResponse status = ourClient.execute(new HttpGet(baseUri + "/_history"));
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		assertEquals(200, status.getStatusLine().getStatusCode());
@@ -143,14 +125,12 @@ public class PlainProviderR4Test {
 
 	@Test
 	public void testSearchByParamIdentifier() throws Exception {
-		myRestfulServer.setProviders(new SearchProvider());
-		JettyUtil.startServer(myServer);
-        myPort = JettyUtil.getPortForStartedServer(myServer);
+		ourServer.registerProvider(new SearchProvider());
 
-		String baseUri = "http://localhost:" + myPort + "/fhir/context";
+		String baseUri = ourServer.getBaseUrl();
 		String uri = baseUri + "/Patient?identifier=urn:hapitest:mrns%7C00001";
 		HttpGet httpGet = new HttpGet(uri);
-		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
+		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());

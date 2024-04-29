@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.api.svc;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.svc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.svc;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -27,12 +26,12 @@ import ca.uhn.fhir.jpa.api.model.PersistentIdToForcedIdMap;
 import ca.uhn.fhir.jpa.model.cross.IResourceLookup;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +53,8 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 * @param theOnlyForcedIds If <code>true</code>, resources which are not existing forced IDs will not be resolved
 	 */
 	@Nonnull
-	List<T> resolveResourcePersistentIdsWithCache(@Nonnull RequestPartitionId theRequestPartitionId, List<IIdType> theIds, boolean theOnlyForcedIds);
+	List<T> resolveResourcePersistentIdsWithCache(
+			@Nonnull RequestPartitionId theRequestPartitionId, List<IIdType> theIds, boolean theOnlyForcedIds);
 
 	/**
 	 * Given a resource type and ID, determines the internal persistent ID for the resource.
@@ -62,7 +62,8 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	T resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId);
+	T resolveResourcePersistentIds(
+			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId);
 
 	/**
 	 * Given a resource type and ID, determines the internal persistent ID for a resource.
@@ -71,7 +72,11 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	T resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theId, boolean theExcludeDeleted);
+	T resolveResourcePersistentIds(
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			String theResourceType,
+			String theId,
+			boolean theExcludeDeleted);
 
 	/**
 	 * Returns a mapping of Id -> IResourcePersistentId.
@@ -79,7 +84,8 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 * (and no map will be returned)
 	 */
 	@Nonnull
-	Map<String, T> resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, List<String> theIds);
+	Map<String, T> resolveResourcePersistentIds(
+			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, List<String> theIds);
 
 	/**
 	 * Returns a mapping of Id -> IResourcePersistentId.
@@ -87,7 +93,11 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 * Optionally filters out deleted resources.
 	 */
 	@Nonnull
-	Map<String, T> resolveResourcePersistentIds(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, List<String> theIds, boolean theExcludeDeleted);
+	Map<String, T> resolveResourcePersistentIds(
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			String theResourceType,
+			List<String> theIds,
+			boolean theExcludeDeleted);
 
 	/**
 	 * Given a persistent ID, returns the associated resource ID
@@ -102,7 +112,9 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId) throws ResourceNotFoundException;
+	IResourceLookup resolveResourceIdentity(
+			@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId)
+			throws ResourceNotFoundException;
 
 	/**
 	 * Given a forced ID, convert it to it's Long value. Since you are allowed to use string IDs for resources, we need to
@@ -112,7 +124,12 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 	 * @throws ResourceNotFoundException If the ID can not be found
 	 */
 	@Nonnull
-	IResourceLookup resolveResourceIdentity(@Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, String theResourceId, boolean theExcludeDeleted) throws ResourceNotFoundException;
+	IResourceLookup resolveResourceIdentity(
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			String theResourceType,
+			String theResourceId,
+			boolean theExcludeDeleted)
+			throws ResourceNotFoundException;
 
 	/**
 	 * Returns true if the given resource ID should be stored in a forced ID. Under default config
@@ -134,12 +151,17 @@ public interface IIdHelperService<T extends IResourcePersistentId> {
 
 	Optional<String> translatePidIdToForcedIdWithCache(T theResourcePersistentId);
 
-	PersistentIdToForcedIdMap translatePidsToForcedIds(Set<T> theResourceIds);
+	PersistentIdToForcedIdMap<T> translatePidsToForcedIds(Set<T> theResourceIds);
 
 	/**
 	 * Pre-cache a PID-to-Resource-ID mapping for later retrieval by {@link #translatePidsToForcedIds(Set)} and related methods
 	 */
-	void addResolvedPidToForcedId(T theResourcePersistentId, @Nonnull RequestPartitionId theRequestPartitionId, String theResourceType, @Nullable String theForcedId, @Nullable Date theDeletedAt);
+	void addResolvedPidToForcedId(
+			T theResourcePersistentId,
+			@Nonnull RequestPartitionId theRequestPartitionId,
+			String theResourceType,
+			@Nullable String theForcedId,
+			@Nullable Date theDeletedAt);
 
 	@Nonnull
 	List<T> getPidsOrThrowException(RequestPartitionId theRequestPartitionId, List<IIdType> theIds);

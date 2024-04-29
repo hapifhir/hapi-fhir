@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.api.model;
-
 /*
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.model;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.model;
 
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -99,7 +98,6 @@ public class LazyDaoMethodOutcome extends DaoMethodOutcome {
 		myIdSupplier = theIdSupplier;
 	}
 
-
 	public static class EntityAndResource {
 		private final IBasePersistedResource myEntity;
 		private final IBaseResource myResource;
@@ -117,5 +115,4 @@ public class LazyDaoMethodOutcome extends DaoMethodOutcome {
 			return myResource;
 		}
 	}
-
 }

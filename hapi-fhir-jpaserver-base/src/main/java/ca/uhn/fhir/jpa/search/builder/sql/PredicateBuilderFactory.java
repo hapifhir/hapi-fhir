@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.builder.sql;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.builder.sql;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
@@ -39,10 +38,7 @@ public class PredicateBuilderFactory {
 	private static final Logger ourLog = LoggerFactory.getLogger(PredicateBuilderFactory.class);
 
 	public static ICanMakeMissingParamPredicate createPredicateBuilderForParamType(
-		RestSearchParameterTypeEnum theParamType,
-		SearchQueryBuilder theBuilder,
-		QueryStack theQueryStack
-	) {
+			RestSearchParameterTypeEnum theParamType, SearchQueryBuilder theBuilder, QueryStack theQueryStack) {
 		switch (theParamType) {
 			case NUMBER:
 				return createNumberPredicateBuilder(theBuilder);
@@ -104,9 +100,10 @@ public class PredicateBuilderFactory {
 		return up;
 	}
 
-	private static ResourceLinkPredicateBuilder createReferencePredicateBuilder(QueryStack theQueryStack, SearchQueryBuilder theBuilder) {
-		ResourceLinkPredicateBuilder retVal = theBuilder.getSqlBuilderFactory().referenceIndexTable(theQueryStack, theBuilder, false);
+	private static ResourceLinkPredicateBuilder createReferencePredicateBuilder(
+			QueryStack theQueryStack, SearchQueryBuilder theBuilder) {
+		ResourceLinkPredicateBuilder retVal =
+				theBuilder.getSqlBuilderFactory().referenceIndexTable(theQueryStack, theBuilder, false);
 		return retVal;
 	}
-
 }

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.param;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.UriDt;
@@ -62,7 +61,7 @@ public class SpecialParam extends BaseParam /*implements IQueryParameterType*/ {
 
 	/**
 	 * Returns the value for the token (generally the value to the right of the
-	 * vertical bar on the URL) 
+	 * vertical bar on the URL)
 	 */
 	public String getValue() {
 		return myValue;
@@ -75,7 +74,6 @@ public class SpecialParam extends BaseParam /*implements IQueryParameterType*/ {
 	public boolean isEmpty() {
 		return StringUtils.isEmpty(myValue);
 	}
-
 
 	public SpecialParam setValue(String theValue) {
 		myValue = theValue;
@@ -95,5 +93,4 @@ public class SpecialParam extends BaseParam /*implements IQueryParameterType*/ {
 	private static String toSystemValue(UriDt theSystem) {
 		return theSystem.getValueAsString();
 	}
-
 }

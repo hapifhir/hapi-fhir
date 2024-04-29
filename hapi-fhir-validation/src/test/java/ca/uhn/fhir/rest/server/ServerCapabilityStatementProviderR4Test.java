@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -70,7 +71,6 @@ import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
 import org.hl7.fhir.r4.model.Extension;
-import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationDefinition;
@@ -83,8 +83,10 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import org.mockito.quality.Strictness;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -96,7 +98,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.test.utilities.server.MockServletUtil.createServletConfig;
+import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.empty;
@@ -110,8 +114,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.withSettings;
 
-public class ServerCapabilityStatementProviderR4Test {
+public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestWithInlineMocks {
 
 	public static final String PATIENT_SUB = "PatientSub";
 	public static final String PATIENT_SUB_SUB = "PatientSubSub";
@@ -141,7 +146,7 @@ public class ServerCapabilityStatementProviderR4Test {
 	}
 
 	private HttpServletRequest createHttpServletRequest() {
-		HttpServletRequest req = mock(HttpServletRequest.class);
+		HttpServletRequest req = mock(HttpServletRequest.class, withSettings().strictness(Strictness.LENIENT));
 		when(req.getRequestURI()).thenReturn("/FhirStorm/fhir/Patient/_search");
 		when(req.getServletPath()).thenReturn("/fhir");
 		when(req.getRequestURL()).thenReturn(new StringBuffer().append("http://fhirstorm.dyndns.org:8080/FhirStorm/fhir/Patient/_search"));
@@ -210,6 +215,24 @@ public class ServerCapabilityStatementProviderR4Test {
 		assertTrue(res.getConditionalCreate());
 		assertEquals(ConditionalDeleteStatus.MULTIPLE, res.getConditionalDelete());
 		assertTrue(res.getConditionalUpdate());
+	}
+
+	@Test
+	public void testMethodGetServerConformance_whenServerSupportsExportOperation_willIncludeInstantiatesElement() throws Exception {
+		// given
+		RestfulServer rs = new RestfulServer(myCtx);
+		rs.setProviders(new BulkDataExportProvider());
+		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
+		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
+		rs.setServerConformanceProvider(sc);
+
+		// when
+		rs.init(createServletConfig());
+		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
+
+		// then
+		String instantiatesFirstRepValue = conformance.getInstantiates().get(0).getValue();
+		assertThat(instantiatesFirstRepValue, equalTo(Constants.BULK_DATA_ACCESS_IG_URL));
 	}
 
 	private RequestDetails createRequestDetails(RestfulServer theServer) {
@@ -1274,7 +1297,7 @@ public class ServerCapabilityStatementProviderR4Test {
 	@Test
 	public void testBulkDataExport() throws ServletException {
 		RestfulServer rs = new RestfulServer(myCtx);
-		rs.setResourceProviders(new BulkDataExportProvider());
+		rs.setProviders(new BulkDataExportProvider());
 		rs.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://localhost/baseR4"));
 
 		ServerCapabilityStatementProvider sc = new ServerCapabilityStatementProvider(rs);
@@ -1289,7 +1312,13 @@ public class ServerCapabilityStatementProviderR4Test {
 			.filter(resource -> "Group".equals(resource.getType()))
 			.findFirst().get();
 
-		assertThat(toOperationNames(groupResource.getOperation()),containsInAnyOrder("export", "export-poll-status"));
+		boolean hasExportPollStatusOperationAtSystemLevel = conformance.getRestFirstRep().getOperation().stream()
+			.filter(CapabilityStatementRestResourceOperationComponent::hasName)
+			.map(CapabilityStatementRestResourceOperationComponent::getName)
+			.filter("export-poll-status"::equals).findFirst().isPresent();
+
+		assertThat(toOperationNames(groupResource.getOperation()),contains("export"));
+		assertThat(hasExportPollStatusOperationAtSystemLevel, is(true));
 	}
 
 	@Test
@@ -1353,8 +1382,8 @@ public class ServerCapabilityStatementProviderR4Test {
 		return myCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(theResource);
 	}
 
-	public static class BulkDataExportProvider implements IResourceProvider {
-		@Operation(name = JpaConstants.OPERATION_EXPORT, global = false /* set to true once we can handle this */, manualResponse = true, idempotent = true)
+	public static class BulkDataExportProvider {
+		@Operation(name = ProviderConstants.OPERATION_EXPORT, global = false /* set to true once we can handle this */, manualResponse = true, idempotent = true)
 		public void export(
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
@@ -1364,7 +1393,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		) {
 		}
 
-		@Operation(name = JpaConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Group")
+		@Operation(name = ProviderConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Group")
 		public void groupExport(
 			@IdParam IIdType theIdParam,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
@@ -1376,7 +1405,7 @@ public class ServerCapabilityStatementProviderR4Test {
 		) {
 		}
 
-		@Operation(name = JpaConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Patient")
+		@Operation(name = ProviderConstants.OPERATION_EXPORT, manualResponse = true, idempotent = true, typeName = "Patient")
 		public void patientExport(
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theOutputFormat,
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_TYPE, min = 0, max = 1, typeName = "string") IPrimitiveType<String> theType,
@@ -1386,17 +1415,13 @@ public class ServerCapabilityStatementProviderR4Test {
 		) {
 		}
 
-		@Operation(name = JpaConstants.OPERATION_EXPORT_POLL_STATUS, manualResponse = true, idempotent = true)
+		@Operation(name = ProviderConstants.OPERATION_EXPORT_POLL_STATUS, manualResponse = true, idempotent = true)
 		public void exportPollStatus(
 			@OperationParam(name = JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, typeName = "string", min = 0, max = 1) IPrimitiveType<String> theJobId,
 			ServletRequestDetails theRequestDetails
 		) throws IOException {
 		}
 
-		@Override
-		public Class<? extends IBaseResource> getResourceType() {
-			return Group.class;
-		}
 	}
 
 	@SuppressWarnings("unused")

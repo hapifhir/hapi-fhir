@@ -8,6 +8,8 @@ import ca.uhn.fhir.parser.PatientWithExtendedContactDstu3.CustomContactComponent
 import ca.uhn.fhir.parser.XmlParserDstu3Test.TestPatientFor327;
 import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
+import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
@@ -147,7 +149,7 @@ public class JsonParserDstu3Test {
 	 */
 	@Test
 	public void testBadMessageForUnknownElement() throws IOException {
-		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bad_parse_bundle_1.json"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/bad_parse_bundle_1.json");
 
 		IParser p = ourCtx.newJsonParser();
 		p.setParserErrorHandler(new StrictErrorHandler());
@@ -156,7 +158,7 @@ public class JsonParserDstu3Test {
 			fail();
 		} catch (DataFormatException e) {
 			assertEquals(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: Unexpected character ('=' (code 61)): was expecting a colon to separate field name and value\n" +
-				" at [Source: UNKNOWN; line: 4, column: 18]", e.getMessage());
+				" at [line: 4, column: 18]", e.getMessage());
 		}
 	}
 
@@ -165,7 +167,7 @@ public class JsonParserDstu3Test {
 	 */
 	@Test
 	public void testBadMessageForUnknownElement2() throws IOException {
-		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bad_parse_bundle_2.json"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/bad_parse_bundle_2.json");
 
 		IParser p = ourCtx.newJsonParser();
 		p.setParserErrorHandler(new StrictErrorHandler());
@@ -1730,7 +1732,7 @@ public class JsonParserDstu3Test {
 	@Test
 	@Disabled
 	public void testParseAndEncodeBundle() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bundle-example.json"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/bundle-example.json");
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, content);
 		assertEquals("Bundle/example/_history/1", parsed.getIdElement().getValue());
@@ -1779,7 +1781,7 @@ public class JsonParserDstu3Test {
 	@Test
 	@Disabled
 	public void testParseAndEncodeBundleFromXmlToJson() throws Exception {
-		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bundle-example2.xml"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/bundle-example2.xml");
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, content);
 
@@ -1954,7 +1956,7 @@ public class JsonParserDstu3Test {
 	 */
 	@Test
 	public void testParseCommunicationWithThreeTypes() throws IOException {
-		String content = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/tara-test.json"), StandardCharsets.UTF_8);
+		String content = ClasspathUtil.loadResource("/tara-test.json");
 		Communication comm = ourCtx.newJsonParser().parseResource(Communication.class, content);
 
 		assertEquals(3, comm.getPayload().size());
@@ -2199,7 +2201,7 @@ public class JsonParserDstu3Test {
 
 		// We're lenient so we accept it. Maybe this could change, or be a warning in future though
 
-		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/missing_array.json"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/missing_array.json");
 		RelatedPerson rp = ourCtx.newJsonParser().parseResource(RelatedPerson.class, input);
 		assertEquals(1, rp.getName().size());
 		assertEquals("Doe", rp.getName().get(0).getFamily());
@@ -2213,11 +2215,11 @@ public class JsonParserDstu3Test {
 	public void testParseNarrativeWithEmptyDiv() {
 		String input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div/>\"}}";
 		Basic basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
-		assertEquals("<div/>", basic.getText().getDivAsString());
+		assertNull(null, basic.getText().getDivAsString());
 
 		input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div></div>\"}}";
 		basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
-		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\"></div>", basic.getText().getDivAsString());
+		assertNull(basic.getText().getDivAsString());
 
 		input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div> </div>\"}}";
 		basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
@@ -2323,8 +2325,10 @@ public class JsonParserDstu3Test {
 			ourCtx.newJsonParser().parseResource(Bundle.class, bundle);
 			fail();
 		} catch (DataFormatException e) {
-			assertEquals(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: Unexpected close marker '}': expected ']' (for root starting at [Source: UNKNOWN; line: 1])\n" +
-				" at [Source: UNKNOWN; line: 4, column: 3]", e.getMessage());
+			// I'm hoping at some point we can get rid of the REDACTED message entirely.
+			// Request filed with Jackson: https://github.com/FasterXML/jackson-core/issues/1158
+			assertEquals(Msg.code(1861) + "Failed to parse JSON encoded FHIR content: Unexpected close marker '}': expected ']' (for root starting at [line: 1])\n" +
+				" at [line: 4, column: 3]", e.getMessage());
 		}
 	}
 
@@ -2424,7 +2428,7 @@ public class JsonParserDstu3Test {
 	 */
 	@Test
 	public void testUnexpectedElementsWithUnderscoreAtStartOfName() throws Exception {
-		String input = IOUtils.toString(JsonParserDstu3Test.class.getResourceAsStream("/bug477.json"), StandardCharsets.UTF_8);
+		String input = ClasspathUtil.loadResource("/bug477.json");
 
 		IParserErrorHandler errorHandler = mock(IParserErrorHandler.class);
 

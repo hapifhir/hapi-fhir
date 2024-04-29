@@ -1,0 +1,824 @@
+{
+	"resourceType": "Bundle",
+	"type": "transaction",
+	"entry": [
+		{
+			"resource": {
+				"resourceType": "StructureDefinition",
+				"id": "aslp-bmi",
+				"url": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-bmi",
+				"name": "ASLPBMI",
+				"title": "ASLP BMI",
+				"status": "draft",
+				"experimental": false,
+				"description": "ASLP BMI",
+				"useContext": [
+					{
+						"code": {
+							"system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+							"code": "task",
+							"display": "Workflow Task"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://fhir.org/guides/nachc/hiv-cds/CodeSystem/activity-codes",
+									"code": "ASLP.A1",
+									"display": "Adult Sleep Studies"
+								}
+							]
+						}
+					}
+				],
+				"fhirVersion": "4.0.1",
+				"mapping": [
+					{
+						"identity": "ASLP"
+					}
+				],
+				"kind": "resource",
+				"abstract": false,
+				"type": "Observation",
+				"baseDefinition": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation",
+				"derivation": "constraint",
+				"differential": {
+					"element": [
+						{
+							"id": "Observation",
+							"path": "Observation",
+							"mustSupport": false
+						},
+						{
+							"id": "Observation.code",
+							"path": "Observation.code",
+							"short": "BMI",
+							"definition": "Body mass index (BMI)",
+							"min": 1,
+							"max": "1",
+							"mustSupport": true,
+							"mapping": [
+								{
+									"identity": "ASLP",
+									"map": "ASLP.A1.DE22"
+								}
+							]
+						},
+						{
+							"id": "Observation.value[x]",
+							"path": "Observation.value[x]",
+							"short": "BMI",
+							"definition": "Body mass index (BMI)",
+							"min": 1,
+							"max": "1",
+							"type": [
+								{
+									"code": "Quantity"
+								}
+							],
+							"mustSupport": true,
+							"mapping": [
+								{
+									"identity": "ASLP",
+									"map": "ASLP.A1.DE22"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "StructureDefinition/aslp-bmi"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "StructureDefinition",
+				"id": "aslp-diagnosis-of-obstructive-sleep-apnea",
+				"url": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-diagnosis-of-obstructive-sleep-apnea",
+				"name": "ASLPDiagnosisofObstructiveSleepApnea",
+				"title": "ASLP Diagnosis of Obstructive Sleep Apnea",
+				"status": "draft",
+				"experimental": false,
+				"description": "ASLP Diagnosis of Obstructive Sleep Apnea",
+				"useContext": [
+					{
+						"code": {
+							"system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+							"code": "task",
+							"display": "Workflow Task"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://fhir.org/guides/nachc/hiv-cds/CodeSystem/activity-codes",
+									"code": "ASLP.A1",
+									"display": "Adult Sleep Studies"
+								}
+							]
+						}
+					}
+				],
+				"fhirVersion": "4.0.1",
+				"mapping": [
+					{
+						"identity": "ASLP"
+					}
+				],
+				"kind": "resource",
+				"abstract": false,
+				"type": "Condition",
+				"baseDefinition": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition",
+				"derivation": "constraint",
+				"differential": {
+					"element": [
+						{
+							"id": "Condition",
+							"path": "Condition",
+							"mustSupport": false
+						},
+						{
+							"id": "Condition.code",
+							"path": "Condition.code",
+							"short": "Diagnosis of Obstructive Sleep Apnea",
+							"definition": "Diagnosis of Obstructive Sleep Apnea",
+							"min": 1,
+							"max": "1",
+							"mustSupport": true,
+							"binding": {
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+										"valueString": "Diagnosis of Obstructive Sleep Apnea Codes"
+									}
+								],
+								"strength": "required",
+								"valueSet": "http://example.org/sdh/dtr/aslp/ValueSet/aslp-a1-de17"
+							},
+							"mapping": [
+								{
+									"identity": "ASLP",
+									"map": "ASLP.A1.DE16"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "StructureDefinition/aslp-diagnosis-of-obstructive-sleep-apnea"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "StructureDefinition",
+				"id": "aslp-height",
+				"url": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-height",
+				"name": "ASLPHeight",
+				"title": "ASLP Height",
+				"status": "draft",
+				"experimental": false,
+				"description": "ASLP Height",
+				"useContext": [
+					{
+						"code": {
+							"system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+							"code": "task",
+							"display": "Workflow Task"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://fhir.org/guides/nachc/hiv-cds/CodeSystem/activity-codes",
+									"code": "ASLP.A1",
+									"display": "Adult Sleep Studies"
+								}
+							]
+						}
+					}
+				],
+				"fhirVersion": "4.0.1",
+				"mapping": [
+					{
+						"identity": "ASLP"
+					}
+				],
+				"kind": "resource",
+				"abstract": false,
+				"type": "Observation",
+				"baseDefinition": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation",
+				"derivation": "constraint",
+				"differential": {
+					"element": [
+						{
+							"id": "Observation",
+							"path": "Observation",
+							"mustSupport": false
+						},
+						{
+							"id": "Observation.code",
+							"path": "Observation.code",
+							"short": "Height",
+							"definition": "Height (in inches)",
+							"min": 1,
+							"max": "1",
+							"mustSupport": true,
+							"mapping": [
+								{
+									"identity": "ASLP",
+									"map": "ASLP.A1.DE20"
+								}
+							]
+						},
+						{
+							"id": "Observation.value[x]",
+							"path": "Observation.value[x]",
+							"short": "Height",
+							"definition": "Height (in inches)",
+							"min": 1,
+							"max": "1",
+							"type": [
+								{
+									"code": "Quantity"
+								}
+							],
+							"mustSupport": true,
+							"mapping": [
+								{
+									"identity": "ASLP",
+									"map": "ASLP.A1.DE20"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "StructureDefinition/aslp-height"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "StructureDefinition",
+				"id": "aslp-history-of-diabetes",
+				"url": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-history-of-diabetes",
+				"name": "ASLPHistoryofDiabetes",
+				"title": "ASLP History of Diabetes",
+				"status": "draft",
+				"experimental": false,
+				"description": "ASLP History of Diabetes",
+				"useContext": [
+					{
+						"code": {
+							"system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+							"code": "task",
+							"display": "Workflow Task"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://fhir.org/guides/nachc/hiv-cds/CodeSystem/activity-codes",
+									"code": "ASLP.A1",
+									"display": "Adult Sleep Studies"
+								}
+							]
+						}
+					}
+				],
+				"fhirVersion": "4.0.1",
+				"mapping": [
+					{
+						"identity": "ASLP"
+					}
+				],
+				"kind": "resource",
+				"abstract": false,
+				"type": "Observation",
+				"baseDefinition": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation",
+				"derivation": "constraint",
+				"differential": {
+					"element": [
+						{
+							"id": "Observation",
+							"path": "Observation",
+							"mustSupport": false
+						},
+						{
+							"id": "Observation.code",
+							"path": "Observation.code",
+							"short": "History of Diabetes",
+							"definition": "History of Diabetes",
+							"min": 1,
+							"max": "1",
+							"mustSupport": true,
+							"mapping": [
+								{
+									"identity": "ASLP",
+									"map": "ASLP.A1.DE19"
+								}
+							]
+						},
+						{
+							"id": "Observation.value[x]",
+							"path": "Observation.value[x]",
+							"short": "History of Diabetes",
+							"definition": "History of Diabetes",
+							"min": 1,
+							"max": "1",
+							"type": [
+								{
+									"code": "boolean"
+								}
+							],
+							"mustSupport": true,
+							"mapping": [
+								{
+									"identity": "ASLP",
+									"map": "ASLP.A1.DE19"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "StructureDefinition/aslp-history-of-diabetes"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "StructureDefinition",
+				"id": "aslp-history-of-hypertension",
+				"url": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-history-of-hypertension",
+				"name": "ASLPHistoryofHypertension",
+				"title": "ASLP History of Hypertension",
+				"status": "draft",
+				"experimental": false,
+				"description": "ASLP History of Hypertension",
+				"useContext": [
+					{
+						"code": {
+							"system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+							"code": "task",
+							"display": "Workflow Task"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://fhir.org/guides/nachc/hiv-cds/CodeSystem/activity-codes",
+									"code": "ASLP.A1",
+									"display": "Adult Sleep Studies"
+								}
+							]
+						}
+					}
+				],
+				"fhirVersion": "4.0.1",
+				"mapping": [
+					{
+						"identity": "ASLP"
+					}
+				],
+				"kind": "resource",
+				"abstract": false,
+				"type": "Observation",
+				"baseDefinition": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation",
+				"derivation": "constraint",
+				"differential": {
+					"element": [
+						{
+							"id": "Observation",
+							"path": "Observation",
+							"mustSupport": false
+						},
+						{
+							"id": "Observation.code",
+							"path": "Observation.code",
+							"short": "History of Hypertension",
+							"definition": "History of Hypertension",
+							"min": 1,
+							"max": "1",
+							"mustSupport": true,
+							"mapping": [
+								{
+									"identity": "ASLP",
+									"map": "ASLP.A1.DE18"
+								}
+							]
+						},
+						{
+							"id": "Observation.value[x]",
+							"path": "Observation.value[x]",
+							"short": "History of Hypertension",
+							"definition": "History of Hypertension",
+							"min": 1,
+							"max": "1",
+							"type": [
+								{
+									"code": "boolean"
+								}
+							],
+							"mustSupport": true,
+							"mapping": [
+								{
+									"identity": "ASLP",
+									"map": "ASLP.A1.DE18"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "StructureDefinition/aslp-history-of-hypertension"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "StructureDefinition",
+				"id": "aslp-neck-circumference",
+				"url": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-neck-circumference",
+				"name": "ASLPNeckCircumference",
+				"title": "ASLP Neck Circumference",
+				"status": "draft",
+				"experimental": false,
+				"description": "ASLP Neck Circumference",
+				"useContext": [
+					{
+						"code": {
+							"system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+							"code": "task",
+							"display": "Workflow Task"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://fhir.org/guides/nachc/hiv-cds/CodeSystem/activity-codes",
+									"code": "ASLP.A1",
+									"display": "Adult Sleep Studies"
+								}
+							]
+						}
+					}
+				],
+				"fhirVersion": "4.0.1",
+				"mapping": [
+					{
+						"identity": "ASLP"
+					}
+				],
+				"kind": "resource",
+				"abstract": false,
+				"type": "Observation",
+				"baseDefinition": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation",
+				"derivation": "constraint",
+				"differential": {
+					"element": [
+						{
+							"id": "Observation",
+							"path": "Observation",
+							"mustSupport": false
+						},
+						{
+							"id": "Observation.code",
+							"path": "Observation.code",
+							"short": "Neck Circumference",
+							"definition": "Neck circumference (in inches)",
+							"min": 1,
+							"max": "1",
+							"mustSupport": true,
+							"mapping": [
+								{
+									"identity": "ASLP",
+									"map": "ASLP.A1.DE20"
+								}
+							]
+						},
+						{
+							"id": "Observation.value[x]",
+							"path": "Observation.value[x]",
+							"short": "Neck Circumference",
+							"definition": "Neck circumference (in inches)",
+							"min": 1,
+							"max": "1",
+							"type": [
+								{
+									"code": "Quantity"
+								}
+							],
+							"mustSupport": true,
+							"mapping": [
+								{
+									"identity": "ASLP",
+									"map": "ASLP.A1.DE20"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "StructureDefinition/aslp-neck-circumference"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "StructureDefinition",
+				"id": "aslp-servicerequest",
+				"url": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-servicerequest",
+				"name": "ASLPServiceRequest",
+				"title": "ASLP ServiceRequest",
+				"status": "draft",
+				"experimental": false,
+				"description": "ASLP ServiceRequest",
+				"useContext": [
+					{
+						"code": {
+							"system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+							"code": "task",
+							"display": "Workflow Task"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://fhir.org/guides/nachc/hiv-cds/CodeSystem/activity-codes",
+									"code": "ASLP.A1",
+									"display": "Adult Sleep Studies"
+								}
+							]
+						}
+					}
+				],
+				"fhirVersion": "4.0.1",
+				"mapping": [
+					{
+						"identity": "ASLP"
+					}
+				],
+				"kind": "resource",
+				"abstract": false,
+				"type": "ServiceRequest",
+				"baseDefinition": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-servicerequest",
+				"derivation": "constraint",
+				"differential": {
+					"element": [
+						{
+							"id": "ServiceRequest",
+							"path": "ServiceRequest",
+							"mustSupport": false
+						},
+						{
+							"id": "ServiceRequest.code",
+							"path": "ServiceRequest.code",
+							"short": "Procedure Code",
+							"definition": "The procedures being approved",
+							"comment": "The procedures for which approval is being requested",
+							"min": 1,
+							"max": "1",
+							"mustSupport": true,
+							"binding": {
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+										"valueString": "Procedure Code Codes Grouper"
+									}
+								],
+								"strength": "required",
+								"valueSet": "http://example.org/sdh/dtr/aslp/ValueSet/aslp-a1-de1-codes-grouper"
+							},
+							"mapping": [
+								{
+									"identity": "ASLP",
+									"map": "ASLP.A1.DE1"
+								}
+							]
+						},
+						{
+							"id": "ServiceRequest.occurrence[x]",
+							"path": "ServiceRequest.occurrence[x]",
+							"short": "Procedure Date",
+							"definition": "Date of the procedure",
+							"min": 1,
+							"max": "1",
+							"type": [
+								{
+									"code": "dateTime"
+								}
+							],
+							"mustSupport": true,
+							"mapping": [
+								{
+									"identity": "ASLP",
+									"map": "ALSP.A1.DE15"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "StructureDefinition/aslp-servicerequest"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "StructureDefinition",
+				"id": "aslp-sleep-study-order",
+				"url": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-sleep-study-order",
+				"name": "ASLPSleepStudyOrder",
+				"title": "ASLP Sleep Study Order",
+				"status": "draft",
+				"experimental": false,
+				"description": "ASLP Sleep Study Order",
+				"useContext": [
+					{
+						"code": {
+							"system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+							"code": "task",
+							"display": "Workflow Task"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://fhir.org/guides/nachc/hiv-cds/CodeSystem/activity-codes",
+									"code": "ASLP.A1",
+									"display": "Adult Sleep Studies"
+								}
+							]
+						}
+					}
+				],
+				"fhirVersion": "4.0.1",
+				"mapping": [
+					{
+						"identity": "ASLP"
+					}
+				],
+				"kind": "resource",
+				"abstract": false,
+				"type": "ServiceRequest",
+				"baseDefinition": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-servicerequest",
+				"derivation": "constraint",
+				"differential": {
+					"element": [
+						{
+							"id": "ServiceRequest",
+							"path": "ServiceRequest",
+							"mustSupport": false
+						},
+						{
+							"id": "ServiceRequest.code",
+							"path": "ServiceRequest.code",
+							"short": "Sleep Study",
+							"definition": "A sleep study procedure being ordered",
+							"comment": "The procedures for which approval is being requested",
+							"min": 1,
+							"max": "1",
+							"type": [
+								{
+									"code": "CodeableConcept"
+								}
+							],
+							"mustSupport": true,
+							"binding": {
+								"extension": [
+									{
+										"url": "http://hl7.org/fhir/StructureDefinition/elementdefinition-bindingName",
+										"valueString": "Sleep Study Codes Grouper"
+									}
+								],
+								"strength": "required",
+								"valueSet": "http://example.org/sdh/dtr/aslp/ValueSet/aslp-a1-de1-codes-grouper"
+							},
+							"mapping": [
+								{
+									"identity": "ASLP",
+									"map": "ASLP.A1.DE1"
+								}
+							]
+						},
+						{
+							"id": "ServiceRequest.occurrence[x]",
+							"path": "ServiceRequest.occurrence[x]",
+							"short": "Sleep Study Date",
+							"definition": "Date of the procedure",
+							"min": 1,
+							"max": "1",
+							"type": [
+								{
+									"code": "dateTime"
+								}
+							],
+							"mustSupport": true,
+							"mapping": [
+								{
+									"identity": "ASLP",
+									"map": "ALSP.A1.DE15"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "StructureDefinition/aslp-sleep-study-order"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "StructureDefinition",
+				"id": "aslp-weight",
+				"url": "http://example.org/sdh/dtr/aslp/StructureDefinition/aslp-weight",
+				"name": "ASLPWeight",
+				"title": "ASLP Weight",
+				"status": "draft",
+				"experimental": false,
+				"description": "ASLP Weight",
+				"useContext": [
+					{
+						"code": {
+							"system": "http://terminology.hl7.org/CodeSystem/usage-context-type",
+							"code": "task",
+							"display": "Workflow Task"
+						},
+						"valueCodeableConcept": {
+							"coding": [
+								{
+									"system": "http://fhir.org/guides/nachc/hiv-cds/CodeSystem/activity-codes",
+									"code": "ASLP.A1",
+									"display": "Adult Sleep Studies"
+								}
+							]
+						}
+					}
+				],
+				"fhirVersion": "4.0.1",
+				"mapping": [
+					{
+						"identity": "ASLP"
+					}
+				],
+				"kind": "resource",
+				"abstract": false,
+				"type": "Observation",
+				"baseDefinition": "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-observation",
+				"derivation": "constraint",
+				"differential": {
+					"element": [
+						{
+							"id": "Observation",
+							"path": "Observation",
+							"mustSupport": false
+						},
+						{
+							"id": "Observation.code",
+							"path": "Observation.code",
+							"short": "Weight",
+							"definition": "Weight (in pounds)",
+							"min": 1,
+							"max": "1",
+							"mustSupport": true,
+							"mapping": [
+								{
+									"identity": "ASLP",
+									"map": "ASLP.A1.DE21"
+								}
+							]
+						},
+						{
+							"id": "Observation.value[x]",
+							"path": "Observation.value[x]",
+							"short": "Weight",
+							"definition": "Weight (in pounds)",
+							"min": 1,
+							"max": "1",
+							"type": [
+								{
+									"code": "Quantity"
+								}
+							],
+							"mustSupport": true,
+							"mapping": [
+								{
+									"identity": "ASLP",
+									"map": "ASLP.A1.DE21"
+								}
+							]
+						}
+					]
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"url": "StructureDefinition/aslp-weight"
+			}
+		}
+	]
+}

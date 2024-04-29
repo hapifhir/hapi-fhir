@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4742
+title: "The JPA server in-memory resource matcher, which is used to improve the efficiency of
+   subscription processing on eligible criteria, now has support for the `_tag`, 
+   `_tag:not`, `_security`, `_security:not` and `_profile` parameters."

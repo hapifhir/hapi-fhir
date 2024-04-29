@@ -5,15 +5,18 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
+import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
@@ -32,6 +35,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -49,7 +53,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import com.google.common.base.Charsets;
+import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -78,6 +82,7 @@ import org.hl7.fhir.r4.model.CompartmentDefinition;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Device;
@@ -117,24 +122,27 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
@@ -149,9 +157,11 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasLength;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.matchesPattern;
 import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -162,6 +172,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"unchecked", "deprecation", "Duplicates"})
 public class FhirResourceDaoR4Test extends BaseJpaR4Test {
+
+	@Autowired
+	IHapiTransactionService myHapiTransactionService;
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4Test.class);
 
@@ -176,30 +189,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		myStorageSettings.setNormalizedQuantitySearchLevel(NormalizedQuantitySearchLevel.NORMALIZED_QUANTITY_SEARCH_NOT_SUPPORTED);
 		myStorageSettings.setHistoryCountMode(JpaStorageSettings.DEFAULT_HISTORY_COUNT_MODE);
 		myStorageSettings.setMassIngestionMode(false);
-	}
-
-	private void assertGone(IIdType theId) {
-		try {
-			assertNotGone(theId);
-			fail();
-		} catch (ResourceGoneException e) {
-			// good
-		}
-	}
-
-	/**
-	 * This gets called from assertGone too! Careful about exceptions...
-	 */
-	private void assertNotGone(IIdType theId) {
-		if ("Patient".equals(theId.getResourceType())) {
-			myPatientDao.read(theId, mySrd);
-		} else if ("Organization".equals(theId.getResourceType())) {
-			myOrganizationDao.read(theId, mySrd);
-		} else if ("CodeSystem".equals(theId.getResourceType())) {
-			myCodeSystemDao.read(theId, mySrd);
-		} else {
-			fail("Can't handle type: " + theId.getResourceType());
-		}
 	}
 
 	@BeforeEach
@@ -260,6 +249,42 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		return retVal;
 	}
 
+	@Test
+	public void testUpdateResource_whenTokenPropertyAssignedTooLargeValue_willTruncateLargeValueOnUpdate(){
+		// given
+		final String modifiedEmailPrefix = "modified";
+		final String originalEmail = RandomStringUtils.randomAlphanumeric(ResourceIndexedSearchParamToken.MAX_LENGTH) + "@acme.corp";
+		final String modifiedEmail = modifiedEmailPrefix + originalEmail;
+
+		// when
+		Patient pt1 = new Patient();
+		pt1.setActive(true);
+		pt1.addName().setFamily("FAM");
+		pt1.addTelecom().setSystem(ContactPoint.ContactPointSystem.EMAIL).setValue(originalEmail);
+
+		myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+
+		pt1.getTelecomFirstRep().setValue(modifiedEmail);
+
+		IIdType id1 = myPatientDao.update(pt1).getId().toUnqualifiedVersionless();
+
+		// then
+		runInTransaction(() -> {
+			List<String> paramValues = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t -> defaultString(t.getSystem()).equals("email"))
+				.map(t -> t.getValue())
+				.collect(Collectors.toList());
+
+			assertThat(paramValues, hasSize(2));
+
+			for (String tokenValue : paramValues) {
+				assertThat(tokenValue, startsWith(modifiedEmailPrefix));
+				assertThat(tokenValue, hasLength(ResourceIndexedSearchParamToken.MAX_LENGTH));
+			}
+		});
+	}
 
 	@Test
 	public void testDeletedResourcesAreReindexed() {
@@ -287,7 +312,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			ResourceHistoryTable newHistory = table.toHistory(true);
 			ResourceHistoryTable currentHistory = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(table.getId(), 1L);
 			newHistory.setEncoding(currentHistory.getEncoding());
-			newHistory.setResource(currentHistory.getResource());
+			newHistory.setResourceTextVc(currentHistory.getResourceTextVc());
 			myResourceHistoryTableDao.save(newHistory);
 		});
 
@@ -334,12 +359,10 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertEquals("#", observation.getSubject().getReference());
 	}
 
-
 	@Tag("intermittent")
 	//	@Test
 	public void testTermConceptReindexingDoesntDuplicateData() {
 		myStorageSettings.setSchedulingDisabled(true);
-
 
 		CodeSystem cs = new CodeSystem();
 		cs.setId("nhin-use");
@@ -839,7 +862,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		String name = "profiles-resources";
 		ourLog.info("Uploading " + name);
 		String vsContents;
-		vsContents = IOUtils.toString(FhirResourceDaoR4Test.class.getResourceAsStream("/org/hl7/fhir/r4/model/profile/" + name + ".xml"), StandardCharsets.UTF_8);
+		vsContents = ClasspathUtil.loadResource("/org/hl7/fhir/r4/model/profile/" + name + ".xml");
 
 		bundle = myFhirContext.newXmlParser().parseResource(org.hl7.fhir.r4.model.Bundle.class, vsContents);
 		for (BundleEntryComponent i : bundle.getEntry()) {
@@ -1419,7 +1442,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IBundleProvider history = myPatientDao.history(null, null, null, mySrd);
 		assertEquals(4 + initialHistory, history.size().intValue());
 		List<IBaseResource> resources = history.getResources(0, 4);
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(resources.get(0)));
+		assertTrue(resources.get(0).isDeleted());
 
 		try {
 			myPatientDao.delete(id2, mySrd);
@@ -1594,10 +1617,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
 		assertEquals(2, history.size().intValue());
 
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(0, 1).get(0)));
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(0, 1).get(0)).getValue());
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(history.getResources(1, 2).get(0)));
-
+		assertTrue(history.getResources(0, 1).get(0).isDeleted());
+		assertFalse(history.getResources(1, 2).get(0).isDeleted());
 	}
 
 	@Test
@@ -2074,13 +2095,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertEquals(id.withVersion("2"), entries.get(1).getIdElement());
 		assertEquals(id.withVersion("1"), entries.get(2).getIdElement());
 
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(entries.get(0)));
+		assertFalse(entries.get(0).isDeleted());
 		assertEquals(BundleEntryTransactionMethodEnum.PUT, ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(0)));
 
-		assertNotNull(ResourceMetadataKeyEnum.DELETED_AT.get(entries.get(1)));
+		assertTrue(entries.get(1).isDeleted());
 		assertEquals(BundleEntryTransactionMethodEnum.DELETE, ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(1)));
 
-		assertNull(ResourceMetadataKeyEnum.DELETED_AT.get(entries.get(2)));
+		assertFalse(entries.get(2).isDeleted());
 		assertEquals(BundleEntryTransactionMethodEnum.POST, ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(2)));
 	}
 
@@ -2945,7 +2966,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(id.getIdPartAsLong(), 1L);
 				String newContent = myFhirContext.newJsonParser().encodeResourceToString(p);
 				newContent = newContent.replace("male", "foo");
-				table.setResource(newContent.getBytes(Charsets.UTF_8));
+				table.setResourceTextVc(newContent);
 				table.setEncoding(ResourceEncodingEnum.JSON);
 				myResourceHistoryTableDao.save(table);
 			}
@@ -3377,63 +3398,6 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		}
 	}
 
-
-	@Test
-	public void testSortById() {
-		String methodName = "testSortBTyId";
-
-		Patient p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id1 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id2 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-
-		p = new Patient();
-		p.setId(methodName + "1");
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType idMethodName1 = myPatientDao.update(p, mySrd).getId().toUnqualifiedVersionless();
-		assertEquals(methodName + "1", idMethodName1.getIdPart());
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id3 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-
-		p = new Patient();
-		p.setId(methodName + "2");
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType idMethodName2 = myPatientDao.update(p, mySrd).getId().toUnqualifiedVersionless();
-		assertEquals(methodName + "2", idMethodName2.getIdPart());
-
-		p = new Patient();
-		p.addIdentifier().setSystem("urn:system").setValue(methodName);
-		IIdType id4 = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
-
-		SearchParameterMap pm;
-		List<IIdType> actual;
-
-		pm = SearchParameterMap.newSynchronous();
-		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID));
-		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertEquals(6, actual.size());
-		assertThat(actual, contains(idMethodName1, idMethodName2, id1, id2, id3, id4));
-
-		pm = SearchParameterMap.newSynchronous();
-		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.ASC));
-		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertEquals(6, actual.size());
-		assertThat(actual, contains(idMethodName1, idMethodName2, id1, id2, id3, id4));
-
-		pm = SearchParameterMap.newSynchronous();
-		pm.add(Patient.SP_IDENTIFIER, new TokenParam("urn:system", methodName));
-		pm.setSort(new SortSpec(IAnyResource.SP_RES_ID).setOrder(SortOrderEnum.DESC));
-		actual = toUnqualifiedVersionlessIds(myPatientDao.search(pm));
-		assertEquals(6, actual.size());
-		assertThat(actual, contains(id4, id3, id2, id1, idMethodName2, idMethodName1));
-	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
@@ -4181,8 +4145,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 	@Test
 	public void testTokenParamWhichIsTooLong() {
 
-		String longStr1 = RandomStringUtils.randomAlphanumeric(ResourceIndexedSearchParamString.MAX_LENGTH + 100);
-		String longStr2 = RandomStringUtils.randomAlphanumeric(ResourceIndexedSearchParamString.MAX_LENGTH + 100);
+		String longStr1 = RandomStringUtils.randomAlphanumeric(ResourceIndexedSearchParamToken.MAX_LENGTH + 100);
+		String longStr2 = RandomStringUtils.randomAlphanumeric(ResourceIndexedSearchParamToken.MAX_LENGTH + 100);
 
 		Organization org = new Organization();
 		org.getNameElement().setValue("testTokenParamWhichIsTooLong");
@@ -4195,22 +4159,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		myOrganizationDao.create(org, mySrd);
 
+		// search should have 0 result since it is hashed before truncation
 		val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, subStr2)), null);
+		assertEquals(initial, val.size());
+
+		// search using the original string should success
+		val = myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(longStr1, longStr2)), null);
 		assertEquals(initial + 1, val.size());
-
-		try {
-			myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(longStr1, subStr2)), null);
-			fail();
-		} catch (InvalidRequestException e) {
-			// ok
-		}
-
-		try {
-			myOrganizationDao.searchForIds(new SearchParameterMap("type", new TokenParam(subStr1, longStr2)), null);
-			fail();
-		} catch (InvalidRequestException e) {
-			// ok
-		}
 	}
 
 	@Test
@@ -4278,7 +4233,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			search.setStatus(SearchStatusEnum.FAILED);
 			search.setFailureCode(500);
 			search.setFailureMessage("FOO");
-			mySearchCacheSvc.save(search);
+			mySearchCacheSvc.save(search, RequestPartitionId.defaultPartition());
 		});
 
 		IBundleProvider results = myEncounterDao.search(map);
@@ -4350,6 +4305,30 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		assertEquals(amountOfPatients, actual.size());
 		assertThat(actualNameList, contains(namesInAlpha));
+	}
+
+
+	@Test
+	void testSearchForStream_carriesTxContext() {
+		// given
+		Set<String> createdIds = IntStream.range(1, 5)
+			.mapToObj(i -> createObservation().getIdPart())
+			.collect(Collectors.toSet());
+
+		SystemRequestDetails request = new SystemRequestDetails();
+
+		// call within a tx, but carry the tx definition in the StreamTemplate
+		StreamTemplate<IResourcePersistentId<?>> streamTemplate =
+			StreamTemplate.fromSupplier(() -> myObservationDao.searchForIdStream(new SearchParameterMap(), request, null))
+				.withTransactionAdvice(newTxTemplate());
+
+
+		// does the stream work?
+		Set<String> ids = streamTemplate.call(stream->
+			stream.map(typedId->typedId.getId().toString())
+				.collect(Collectors.toSet()));
+
+		assertEquals(ids, createdIds);
 	}
 
 	public static void assertConflictException(String theResourceType, ResourceVersionConflictException e) {

@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -217,12 +217,12 @@ class HapiMigratorIT {
 		protected void doExecute() {
 			try {
 				myLatch.call(this);
-				myWaitLatch.awaitExpected();
-				ourLog.info("Latch released with parameter {}", myWaitLatch.getLatchInvocationParameter());
+				List<HookParams> hookParams = myWaitLatch.awaitExpected();
+				ourLog.info("Latch released with parameter {}", PointcutLatch.getLatchInvocationParameter(hookParams));
 				// We sleep a bit to ensure the other thread has a chance to try to get the lock.  We don't have a hook there, so sleep instead
 				// Maybe we can await on a log message?
 				Thread.sleep(200);
-				ourLog.info("Completing execution of {}", myWaitLatch.getLatchInvocationParameter());
+				ourLog.info("Completing execution of {}", PointcutLatch.getLatchInvocationParameter(hookParams));
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
 			}

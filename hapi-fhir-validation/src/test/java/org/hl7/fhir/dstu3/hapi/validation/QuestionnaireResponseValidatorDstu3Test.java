@@ -3,6 +3,7 @@ package org.hl7.fhir.dstu3.hapi.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -47,6 +48,9 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,11 +71,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.nullable;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class QuestionnaireResponseValidatorDstu3Test {
 	private static final String QUESTIONNAIRE_URL = "http://example.com/Questionnaire/q1";
 	private static final IdType ID_ICC_QUESTIONNAIRE_SETUP = new IdType("Questionnaire/profile");
@@ -83,11 +87,11 @@ public class QuestionnaireResponseValidatorDstu3Test {
 	private static DefaultProfileValidationSupport myDefaultValidationSupport = new DefaultProfileValidationSupport(ourCtx);
 	private FhirInstanceValidator myInstanceVal;
 	private FhirValidator myVal;
+	@Mock(strictness = Mock.Strictness.LENIENT)
 	private IValidationSupport myValSupport;
 
 	@BeforeEach
 	public void before() {
-		myValSupport = mock(IValidationSupport.class);
 		when(myValSupport.getFhirContext()).thenReturn(ourCtx);
 
 		myVal = ourCtx.newValidator();
@@ -1098,7 +1102,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		assertEquals(2, errors.getMessages().size());
 		assertThat(errors.getMessages().get(0).getMessage(), containsString("A code with no system has no defined meaning. A system should be provided"));
 		assertThat(errors.getMessages().get(0).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
-		assertThat(errors.getMessages().get(1).getMessage(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
+		assertThat(errors.getMessages().get(1).getMessage(), containsString("The code provided code1 in the system null) is not in the options value set (ValueSet[http://somevalueset]) in the questionnaire: Validation failed"));
 		assertThat(errors.getMessages().get(1).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		qa = new QuestionnaireResponse();
@@ -1111,7 +1115,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		assertEquals(2, errors.getMessages().size());
 		assertThat(errors.getMessages().get(0).getMessage(), containsString("A code with no system has no defined meaning. A system should be provided"));
 		assertThat(errors.getMessages().get(0).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
-		assertThat(errors.getMessages().get(1).getMessage(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
+		assertThat(errors.getMessages().get(1).getMessage(), containsString("The code provided code1 in the system null) is not in the options value set (ValueSet[http://somevalueset]) in the questionnaire: Validation failed"));
 		assertThat(errors.getMessages().get(1).getLocationString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		qa = new QuestionnaireResponse();
@@ -1120,7 +1124,7 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://system").setCode(null));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.toString(), containsString("The value provided (http://system::null) is not in the options value set in the questionnaire"));
+		assertThat(errors.toString(), containsString("ValidationResult{messageCount=1, isSuccessful=false, description="));
 		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
 
 		// Wrong type

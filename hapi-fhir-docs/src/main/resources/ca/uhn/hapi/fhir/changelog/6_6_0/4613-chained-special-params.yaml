@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4613
+jira: SMILE-6091
+title: "Previously, SPECIAL search parameters that were _not_ nearness parameters, such as simple string Search Parameters, could not be used in chained queries. This has been resolved, and now queries like `OrganizationAffiliation?location.some-special-param=abc` will work as intended."

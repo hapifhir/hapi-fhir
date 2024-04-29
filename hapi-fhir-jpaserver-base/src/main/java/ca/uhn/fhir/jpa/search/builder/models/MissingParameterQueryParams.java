@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.builder.models;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.builder.models;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.builder.models;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -72,21 +71,19 @@ public class MissingParameterQueryParams {
 	private final RequestPartitionId myRequestPartitionId;
 
 	public MissingParameterQueryParams(
-		SearchQueryBuilder theSqlBuilder,
-		RestSearchParameterTypeEnum theParamType,
-		List<? extends IQueryParameterType> theList,
-		String theParamName,
-		String theResourceType,
-		DbColumn theSourceJoinColumn,
-		RequestPartitionId theRequestPartitionId
-	) {
+			SearchQueryBuilder theSqlBuilder,
+			RestSearchParameterTypeEnum theParamType,
+			List<? extends IQueryParameterType> theList,
+			String theParamName,
+			String theResourceType,
+			DbColumn theSourceJoinColumn,
+			RequestPartitionId theRequestPartitionId) {
 		mySqlBuilder = theSqlBuilder;
 		myParamType = theParamType;
 		myQueryParameterTypes = theList;
 		if (theList.isEmpty()) {
 			// this will never happen
-			throw new InvalidParameterException(Msg.code(2140)
-				+ " Invalid search parameter list. Cannot be empty!");
+			throw new InvalidParameterException(Msg.code(2140) + " Invalid search parameter list. Cannot be empty!");
 		}
 		myIsMissing = theList.get(0).getMissing();
 		myParamName = theParamName;

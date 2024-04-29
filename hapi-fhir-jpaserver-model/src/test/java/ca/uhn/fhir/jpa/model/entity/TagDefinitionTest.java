@@ -13,7 +13,11 @@ public class TagDefinitionTest {
 		def.setCode("my_code");
 		def.setSystem("my_system");
 		def.setDisplay("my_display");
-		assertEquals("TagDefinition[id=<null>,system=my_system,code=my_code,display=my_display]", def.toString());
+		def.setVersion("V 1.0");
+		def.setUserSelected(true);
+		assertEquals(
+			"TagDefinition[id=<null>,system=my_system,code=my_code,display=my_display,version=V 1.0,userSelected=true]",
+			def.toString());
 	}
 
 	@Test
@@ -39,7 +43,8 @@ public class TagDefinitionTest {
 		def.setCode("my_code");
 		def.setSystem("my_system");
 		def.setDisplay("my_display");
-		assertEquals (-2125810377,def.hashCode());
-		assertEquals (-2125810377,def.hashCode());
+		def.setVersion("V 1.0");
+		def.setUserSelected(true);
+		assertEquals (434167707,def.hashCode());
 	}
 }

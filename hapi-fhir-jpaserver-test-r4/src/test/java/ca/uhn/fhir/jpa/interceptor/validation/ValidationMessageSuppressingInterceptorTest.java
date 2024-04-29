@@ -54,12 +54,8 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 		String input = loadResource("/r4/uscore/observation-pulseox.json");
 		Observation inputObs = loadResource(myFhirContext, Observation.class, "/r4/uscore/observation-pulseox.json");
 
-		try {
-			myObservationDao.validate(inputObs, null, input, null, null, null, null);
-			fail();
-		} catch (PreconditionFailedException e) {
-			// good
-		}
+		MethodOutcome result = myObservationDao.validate(inputObs, null, input, null, null, null, null);
+
 
 		ValidationMessageSuppressingInterceptor interceptor = new ValidationMessageSuppressingInterceptor();
 		interceptor.addMessageSuppressionPatterns("Unknown code 'http://loinc.org#59408-5'");
@@ -67,6 +63,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 
 		MethodOutcome validationOutcome = myObservationDao.validate(inputObs, null, input, null, null, null, null);
 		OperationOutcome oo = (OperationOutcome) validationOutcome.getOperationOutcome();
+		assertHasWarnings(oo);
 		String encode = encode(oo);
 		ourLog.info(encode);
 		assertThat(encode, containsString("All observations should have a performer"));

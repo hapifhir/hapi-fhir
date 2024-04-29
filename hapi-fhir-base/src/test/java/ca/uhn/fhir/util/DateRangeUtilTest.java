@@ -18,7 +18,9 @@ import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
 
 class DateRangeUtilTest {
 
@@ -59,6 +61,11 @@ class DateRangeUtilTest {
 				new DateParam(theResultStartPrefix, theResultStart), new DateParam(theResultEndPrefix, theResultEnd));
 		}
 
+		static NarrowCase from(String theMessage, DateRangeParam theRange, Date theNarrowStart, Date theNarrowEnd,
+									  DateParam theResultStart, DateParam theResultEnd) {
+			return new NarrowCase(theMessage, theRange, theNarrowStart, theNarrowEnd, theResultStart, theResultEnd);
+		}
+
 		@Override
 		public String toString() {
 			return new ToStringBuilder(this, ToStringStyle.SIMPLE_STYLE)
@@ -89,8 +96,23 @@ class DateRangeUtilTest {
 			// half-open cases
 			NarrowCase.from("end inside open end", new DateRangeParam(dateTwo, null),  null, dateFour, dateTwo, dateFour),
 			NarrowCase.from("start inside open start", new DateRangeParam(null, dateFour),  dateTwo, null, GREATERTHAN_OR_EQUALS, dateTwo, LESSTHAN_OR_EQUALS, dateFour),
-			NarrowCase.from("gt case preserved", new DateRangeParam(new DateParam(GREATERTHAN, dateTwo), null),  null, dateFour, GREATERTHAN, dateTwo, LESSTHAN, dateFour)
+			NarrowCase.from("gt case preserved", new DateRangeParam(new DateParam(GREATERTHAN, dateTwo), null),  null, dateFour, GREATERTHAN, dateTwo, LESSTHAN, dateFour),
 
+			NarrowCase.from("lt date level precision date, narrow from is inside date",
+				new DateRangeParam(new DateParam(LESSTHAN, "2023-05-06")),
+				Date.from(Instant.parse("2023-05-06T10:00:20.512+00:00")),
+				Date.from(Instant.parse("2023-05-10T00:00:00.000+00:00")),
+				new DateParam(GREATERTHAN_OR_EQUALS, Date.from(Instant.parse("2023-05-06T10:00:20.512+00:00"))),
+				new DateParam(LESSTHAN, "2023-05-06")
+			),
+
+			NarrowCase.from("gt date level precision date, narrow to is inside date",
+				new DateRangeParam(new DateParam(GREATERTHAN_OR_EQUALS, "2023-05-06")),
+				Date.from(Instant.parse("2023-05-01T00:00:00.000+00:00")),
+				Date.from(Instant.parse("2023-05-06T10:00:20.512+00:00")),
+				new DateParam(GREATERTHAN_OR_EQUALS, "2023-05-06"),
+				new DateParam(LESSTHAN, Date.from(Instant.parse("2023-05-06T10:00:20.512+00:00")))
+			)
 
 		);
 	}

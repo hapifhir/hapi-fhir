@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.api;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.api;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api;
 
 import ca.uhn.fhir.util.CoverageIgnore;
 import org.apache.commons.lang3.Validate;
@@ -41,7 +40,7 @@ public class MethodOutcome {
 	private IBaseResource myResource;
 	private Map<String, List<String>> myResponseHeaders;
 	private Collection<Runnable> myResourceViewCallbacks;
-	private int myResponseStatusCode;
+	private Integer myResponseStatusCode;
 
 	/**
 	 * Constructor
@@ -215,7 +214,6 @@ public class MethodOutcome {
 		}
 	}
 
-
 	/**
 	 * Registers a callback to be invoked before the resource in this object gets
 	 * returned to the client. Note that this is an experimental API and may change.
@@ -255,11 +253,15 @@ public class MethodOutcome {
 		return myResource != null;
 	}
 
-	public void setStatusCode(int theResponseStatusCode) {
+	public void setResponseStatusCode(int theResponseStatusCode) {
 		myResponseStatusCode = theResponseStatusCode;
 	}
 
 	public int getResponseStatusCode() {
-		return myResponseStatusCode;
+		return isResponseStatusCodeSet() ? myResponseStatusCode : 0;
+	}
+
+	public boolean isResponseStatusCodeSet() {
+		return myResponseStatusCode != null;
 	}
 }

@@ -1,0 +1,4 @@
+---
+type: perf
+issue: 4629
+title: "String and URI indexing has been improved in some multi-clause queries."

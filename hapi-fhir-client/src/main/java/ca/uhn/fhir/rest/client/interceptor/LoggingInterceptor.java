@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.client.interceptor;
-
 /*
  * #%L
  * HAPI FHIR - Client Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.client.interceptor;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.client.interceptor;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -95,7 +94,8 @@ public class LoggingInterceptor implements IClientInterceptor {
 					myLog.debug("Client request body:\n{}", content);
 				}
 			} catch (IllegalStateException | IOException e) {
-				myLog.warn("Failed to replay request contents (during logging attempt, actual FHIR call did not fail)", e);
+				myLog.warn(
+						"Failed to replay request contents (during logging attempt, actual FHIR call did not fail)", e);
 			}
 		}
 	}
@@ -197,43 +197,48 @@ public class LoggingInterceptor implements IClientInterceptor {
 	/**
 	 * Should a summary (one line) for each request be logged, containing the URL and other information
 	 */
-	public void setLogRequestBody(boolean theValue) {
+	public LoggingInterceptor setLogRequestBody(boolean theValue) {
 		myLogRequestBody = theValue;
+		return this;
 	}
 
 	/**
 	 * Should headers for each request be logged, containing the URL and other information
 	 */
-	public void setLogRequestHeaders(boolean theValue) {
+	public LoggingInterceptor setLogRequestHeaders(boolean theValue) {
 		myLogRequestHeaders = theValue;
+		return this;
 	}
 
 	/**
 	 * Should a summary (one line) for each request be logged, containing the URL and other information
 	 */
-	public void setLogRequestSummary(boolean theValue) {
+	public LoggingInterceptor setLogRequestSummary(boolean theValue) {
 		myLogRequestSummary = theValue;
+		return this;
 	}
 
 	/**
 	 * Should a summary (one line) for each request be logged, containing the URL and other information
 	 */
-	public void setLogResponseBody(boolean theValue) {
+	public LoggingInterceptor setLogResponseBody(boolean theValue) {
 		myLogResponseBody = theValue;
+		return this;
 	}
 
 	/**
 	 * Should headers for each request be logged, containing the URL and other information
 	 */
-	public void setLogResponseHeaders(boolean theValue) {
+	public LoggingInterceptor setLogResponseHeaders(boolean theValue) {
 		myLogResponseHeaders = theValue;
+		return this;
 	}
 
 	/**
 	 * Should a summary (one line) for each request be logged, containing the URL and other information
 	 */
-	public void setLogResponseSummary(boolean theValue) {
+	public LoggingInterceptor setLogResponseSummary(boolean theValue) {
 		myLogResponseSummary = theValue;
+		return this;
 	}
-
 }

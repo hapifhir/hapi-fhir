@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4812
+title: "The tag being added on golden resources does not have a version, might as well add one."

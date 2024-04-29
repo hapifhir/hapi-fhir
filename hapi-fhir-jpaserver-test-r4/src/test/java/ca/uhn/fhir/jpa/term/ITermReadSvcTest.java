@@ -4,7 +4,7 @@ package ca.uhn.fhir.jpa.term;
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2021 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -49,8 +49,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NonUniqueResultException;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NonUniqueResultException;
 import javax.sql.DataSource;
 import java.util.Arrays;
 import java.util.Collections;
@@ -224,7 +224,7 @@ class ITermReadSvcTest {
 
 		@Test
 		void getNoneReturnsOptionalEmpty() {
-			when(myEntityManager.createQuery(anyString()).getResultList())
+			when(myEntityManager.createQuery(anyString()).setParameter(anyString(), any()).getResultList())
 				.thenReturn(Collections.emptyList());
 
 			Optional<IBaseResource> result = testedClass.readCodeSystemByForcedId("a-cs-id");
@@ -233,7 +233,7 @@ class ITermReadSvcTest {
 
 		@Test
 		void getMultipleThrows() {
-			when(myEntityManager.createQuery(anyString()).getResultList())
+			when(myEntityManager.createQuery(anyString()).setParameter(anyString(), any()).getResultList())
 				.thenReturn(Lists.newArrayList(resource1, resource2));
 
 			NonUniqueResultException thrown = assertThrows(
@@ -247,7 +247,7 @@ class ITermReadSvcTest {
 		void getOneConvertToResource() {
 			ReflectionTestUtils.setField(testedClass, "myDaoRegistry", myDaoRegistry);
 
-			when(myEntityManager.createQuery(anyString()).getResultList())
+			when(myEntityManager.createQuery(anyString()).setParameter(anyString(), any()).getResultList())
 				.thenReturn(Lists.newArrayList(resource1));
 			when(myDaoRegistry.getResourceDao("CodeSystem")).thenReturn(myFhirResourceDao);
 			when(myJpaStorageResourceParser.toResource(resource1, false)).thenReturn(myCodeSystemResource);

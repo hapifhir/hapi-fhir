@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.parameters;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,17 +17,18 @@ package ca.uhn.fhir.batch2.jobs.parameters;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.parameters;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.annotation.Nullable;
+import jakarta.annotation.Nullable;
 
 public class PartitionedJobParameters implements IModelJson {
 	@JsonProperty(value = "partitionId")
 	@Nullable
 	private RequestPartitionId myRequestPartitionId;
+
 	@JsonProperty("batchSize")
 	@Nullable
 	private Integer myBatchSize;

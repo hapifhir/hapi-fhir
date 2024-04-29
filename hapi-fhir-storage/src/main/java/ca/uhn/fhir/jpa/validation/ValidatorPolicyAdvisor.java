@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.validation;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.validation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r5.elementmodel.Element;
@@ -43,11 +42,13 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 
 	@Autowired
 	private ValidationSettings myValidationSettings;
+
 	@Autowired
 	private FhirContext myFhirContext;
 
 	@Override
-	public ReferenceValidationPolicy policyForReference(IResourceValidator validator, Object appContext, String path, String url) {
+	public ReferenceValidationPolicy policyForReference(
+			IResourceValidator validator, Object appContext, String path, String url) {
 		int slashIdx = url.indexOf("/");
 		if (slashIdx > 0 && myFhirContext.getResourceTypes().contains(url.substring(0, slashIdx))) {
 			return myValidationSettings.getLocalReferenceValidationDefaultPolicy();
@@ -57,12 +58,27 @@ public class ValidatorPolicyAdvisor implements IValidationPolicyAdvisor {
 	}
 
 	@Override
-	public CodedContentValidationPolicy policyForCodedContent(IResourceValidator iResourceValidator, Object o, String s, ElementDefinition elementDefinition, StructureDefinition structureDefinition, BindingKind bindingKind, ValueSet valueSet, List<String> list) {
+	public CodedContentValidationPolicy policyForCodedContent(
+			IResourceValidator iResourceValidator,
+			Object o,
+			String s,
+			ElementDefinition elementDefinition,
+			StructureDefinition structureDefinition,
+			BindingKind bindingKind,
+			ValueSet valueSet,
+			List<String> list) {
 		return CodedContentValidationPolicy.CODE;
 	}
 
 	@Override
-	public ContainedReferenceValidationPolicy policyForContained(IResourceValidator validator, Object appContext, String containerType, String containerId, Element.SpecialElement containingResourceType, String path, String url) {
+	public ContainedReferenceValidationPolicy policyForContained(
+			IResourceValidator validator,
+			Object appContext,
+			String containerType,
+			String containerId,
+			Element.SpecialElement containingResourceType,
+			String path,
+			String url) {
 		return ContainedReferenceValidationPolicy.CHECK_VALID;
 	}
 }

@@ -40,7 +40,7 @@ public class ExportConceptMapToCsvCommandR4Test {
 	}
 
 	@RegisterExtension
-	public final RestServerR4Helper myRestServerR4Helper = new RestServerR4Helper(true);
+	public final RestServerR4Helper myRestServerR4Helper = RestServerR4Helper.newInitialized();
 	@RegisterExtension
 	public TlsAuthenticationTestHelper myTlsAuthenticationTestHelper = new TlsAuthenticationTestHelper();
 
@@ -93,7 +93,8 @@ public class ExportConceptMapToCsvCommandR4Test {
 			"\"http://example.com/codesystem/2\",\"Version 2s\",\"http://example.com/codesystem/3\",\"Version 3t\",\"Code 2a\",\"Display 2a\",\"Code 3a\",\"Display 3a\",\"equal\",\"3a This is a comment.\"\n" +
 			"\"http://example.com/codesystem/2\",\"Version 2s\",\"http://example.com/codesystem/3\",\"Version 3t\",\"Code 2b\",\"Display 2b\",\"Code 3b\",\"Display 3b\",\"equal\",\"3b This is a comment.\"\n" +
 			"\"http://example.com/codesystem/2\",\"Version 2s\",\"http://example.com/codesystem/3\",\"Version 3t\",\"Code 2c\",\"Display 2c\",\"Code 3c\",\"Display 3c\",\"equal\",\"3c This is a comment.\"\n" +
-			"\"http://example.com/codesystem/2\",\"Version 2s\",\"http://example.com/codesystem/3\",\"Version 3t\",\"Code 2d\",\"Display 2d\",\"Code 3d\",\"Display 3d\",\"equal\",\"3d This is a comment.\"\n";
+			"\"http://example.com/codesystem/2\",\"Version 2s\",\"http://example.com/codesystem/3\",\"Version 3t\",\"Code 2d\",\"Display 2d\",\"Code 3d\",\"Display 3d\",\"equal\",\"3d This is a comment.\"\n" +
+			"\"http://example.com/codesystem/2\",\"Version 2s\",\"http://example.com/codesystem/3\",\"Version 3t\",\"Code 2e\",\"Display 2e\",\"\",\"\",\"unmatched\",\"3e This is a comment.\"\n";
 		String result = IOUtils.toString(new FileInputStream(FILE), Charsets.UTF_8);
 		assertEquals(expected, result);
 
@@ -271,6 +272,16 @@ public class ExportConceptMapToCsvCommandR4Test {
 			.setDisplay("Display 3d")
 			.setEquivalence(ConceptMapEquivalence.EQUAL)
 			.setComment("3d This is a comment.");
+
+		element = group.addElement();
+		element
+			.setCode("Code 2e")
+			.setDisplay("Display 2e");
+
+		target = element.addTarget();
+		target
+			.setEquivalence(ConceptMapEquivalence.UNMATCHED)
+			.setComment("3e This is a comment.");
 
 		return conceptMap;
 	}

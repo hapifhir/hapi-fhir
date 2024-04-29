@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.dao;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,16 @@ package ca.uhn.fhir.jpa.model.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.dao;
 
 import ca.uhn.fhir.rest.api.server.storage.BaseResourcePersistentId;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * JPA implementation of IResourcePersistentId.  JPA uses a Long as the primary key.  This class should be used in any
@@ -62,7 +63,15 @@ public class JpaPid extends BaseResourcePersistentId<Long> {
 		return retVal;
 	}
 
-	public static List<JpaPid> fromLongList(List<Long> theResultList) {
+	public static Set<Long> toLongSet(Collection<JpaPid> thePids) {
+		Set<Long> retVal = new HashSet<>(thePids.size());
+		for (JpaPid next : thePids) {
+			retVal.add(next.getId());
+		}
+		return retVal;
+	}
+
+	public static List<JpaPid> fromLongList(Collection<Long> theResultList) {
 		List<JpaPid> retVal = new ArrayList<>(theResultList.size());
 		for (Long next : theResultList) {
 			retVal.add(fromId(next));

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
@@ -212,12 +211,14 @@ public abstract class BaseTask {
 				ourLog.debug("Error was: {}", e.getMessage(), e);
 				return 0;
 			} else {
-				throw new HapiMigrationException(Msg.code(61) + "Failed during task " + getMigrationVersion() + ": " + e, e);
+				throw new HapiMigrationException(
+						Msg.code(61) + "Failed during task " + getMigrationVersion() + ": " + e, e);
 			}
 		}
 	}
 
-	protected void captureExecutedStatement(String theTableName, @Language("SQL") String theSql, Object... theArguments) {
+	protected void captureExecutedStatement(
+			String theTableName, @Language("SQL") String theSql, Object... theArguments) {
 		myExecutedStatements.add(new ExecutedStatement(theTableName, theSql, theArguments));
 	}
 
@@ -249,6 +250,8 @@ public abstract class BaseTask {
 		return getConnectionProperties().newJdbcTemplate();
 	}
 
+	private final List<ExecuteTaskPrecondition> myPreconditions = new ArrayList<>();
+
 	public void execute() throws SQLException {
 		if (myDoNothing) {
 			ourLog.info("Skipping stubbed task: {}", getDescription());
@@ -256,7 +259,17 @@ public abstract class BaseTask {
 		}
 		if (!myOnlyAppliesToPlatforms.isEmpty()) {
 			if (!myOnlyAppliesToPlatforms.contains(getDriverType())) {
-				ourLog.debug("Skipping task {} as it does not apply to {}", getDescription(), getDriverType());
+				ourLog.info("Skipping task {} as it does not apply to {}", getDescription(), getDriverType());
+				return;
+			}
+		}
+
+		for (ExecuteTaskPrecondition precondition : myPreconditions) {
+			ourLog.debug("precondition to evaluate: {}", precondition);
+			if (!precondition.getPreconditionRunner().get()) {
+				ourLog.info(
+						"Skipping task since one of the preconditions was not met: {}",
+						precondition.getPreconditionReason());
 				return;
 			}
 		}
@@ -290,7 +303,8 @@ public abstract class BaseTask {
 	public void validateVersion() {
 		Matcher matcher = versionPattern.matcher(mySchemaVersion);
 		if (!matcher.matches()) {
-			throw new IllegalStateException(Msg.code(62) + "The version " + mySchemaVersion + " does not match the expected pattern " + MIGRATION_VERSION_PATTERN);
+			throw new IllegalStateException(Msg.code(62) + "The version " + mySchemaVersion
+					+ " does not match the expected pattern " + MIGRATION_VERSION_PATTERN);
 		}
 	}
 
@@ -301,6 +315,10 @@ public abstract class BaseTask {
 	public BaseTask setDoNothing(boolean theDoNothing) {
 		myDoNothing = theDoNothing;
 		return this;
+	}
+
+	public void addPrecondition(ExecuteTaskPrecondition thePrecondition) {
+		myPreconditions.add(thePrecondition);
 	}
 
 	@Override

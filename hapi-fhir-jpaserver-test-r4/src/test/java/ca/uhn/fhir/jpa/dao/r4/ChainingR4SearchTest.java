@@ -1,43 +1,51 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.searchparam.ResourceSearch;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.parser.StrictErrorHandler;
-import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Device;
-import org.hl7.fhir.r4.model.DomainResource;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
-import java.util.ArrayList;
+import java.sql.Date;
 import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -69,10 +77,42 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myStorageSettings.setAllowMultipleDelete(true);
 		myStorageSettings.setSearchPreFetchThresholds(new JpaStorageSettings().getSearchPreFetchThresholds());
 		myStorageSettings.setReuseCachedSearchResultsForMillis(null);
+		myStorageSettings.setIndexMissingFields(JpaStorageSettings.IndexEnabledEnum.DISABLED);
 	}
 
 	@Test
-	public void testShouldResolveATwoLinkChainWithStandAloneResourcesWithoutContainedResourceIndexing() throws Exception {
+	public void testIndexSearchParamPointingToResource() {
+		// Setup
+
+		myStorageSettings.setIndexOnContainedResources(true);
+
+		Bundle inputBundle = new Bundle();
+		inputBundle.setType(Bundle.BundleType.MESSAGE);
+
+		MessageHeader msgHeader = new MessageHeader();
+		msgHeader.setEvent(new Coding("http://foo", "bar", "blah"));
+		inputBundle.addEntry().setResource(msgHeader);
+
+		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Bundle", "message");
+		assertEquals("Bundle.entry[0].resource", sp.getPath());
+		assertThat(sp.getBase(), contains("Bundle"));
+		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, sp.getStatus());
+
+		// Test
+		myBundleDao.create(inputBundle, mySrd);
+
+		// Verify - We'll check that the right indexes got written, but the main test is that
+		// the create step didn't crash
+		runInTransaction(()->{
+			assertEquals(0, myResourceIndexedSearchParamStringDao.count());
+			assertEquals(1, myResourceIndexedSearchParamTokenDao.count());
+			assertEquals(0, myResourceLinkDao.count());
+		});
+	}
+
+
+	@Test
+	public void testShouldResolveATwoLinkChainWithStandAloneResourcesWithoutContainedResourceIndexing() {
 
 		// setup
 		IIdType oid1;
@@ -96,7 +136,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject.name=Smith";
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -104,7 +144,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveATwoLinkChainWithStandAloneResources() throws Exception {
+	public void testShouldResolveATwoLinkChainWithStandAloneResources() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -130,7 +170,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject.name=Smith";
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -138,7 +178,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveATwoLinkChainWithStandAloneResources_CommonReference() throws Exception {
+	public void testShouldResolveATwoLinkChainWithStandAloneResources_CommonReference() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -173,7 +213,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// execute
 		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
@@ -182,7 +222,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveATwoLinkChainWithStandAloneResources_CompoundReference() throws Exception {
+	public void testShouldResolveATwoLinkChainWithStandAloneResources_CompoundReference() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -220,7 +260,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// execute
 		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url, myAuditEventDao);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
@@ -229,7 +269,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveATwoLinkChainWithContainedResources_CompoundReference() throws Exception {
+	public void testShouldResolveATwoLinkChainWithContainedResources_CompoundReference() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -264,10 +304,11 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		}
 
 		String url = "/AuditEvent?patient.name=Smith";
+		logAllStringIndexes();
 
 		// execute
 		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url, myAuditEventDao);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
@@ -276,7 +317,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveATwoLinkChainWithAContainedResource() throws Exception {
+	public void testShouldResolveATwoLinkChainWithAContainedResource() {
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
 
@@ -309,7 +350,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject.name=Smith";
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -317,7 +358,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldNotResolveATwoLinkChainWithAContainedResourceWhenContainedResourceIndexingIsTurnedOff() throws Exception {
+	public void testShouldNotResolveATwoLinkChainWithAContainedResourceWhenContainedResourceIndexingIsTurnedOff() {
 		// setup
 		IIdType oid1;
 
@@ -332,24 +373,24 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs.setValue(new StringType("Test"));
 			obs.getSubject().setReference("#pat");
 
-			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+            myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+            // Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject.name=Smith";
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(0L, oids.size());
 	}
 
 	@Test
-	@Disabled
-	public void testShouldResolveATwoLinkChainWithQualifiersWithAContainedResource() throws Exception {
+	@Disabled("Known limitation")
+	public void testShouldResolveATwoLinkChainWithQualifiersWithAContainedResource() {
 		// TODO: This test fails because of a known limitation in qualified searches over contained resources.
 		//       Type information for intermediate resources in the chain is not being retained in the indexes.
 		// setup
@@ -389,7 +430,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject:Patient.name=Smith";
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -397,7 +438,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveATwoLinkChainToAContainedReference() throws Exception {
+	public void testShouldResolveATwoLinkChainToAContainedReference() {
 		// Adding support for this case in SMILE-3151
 
 		// setup
@@ -431,7 +472,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject.organization=" + orgId.getValueAsString();
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -439,7 +480,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveATwoLinkChainToAStandAloneReference() throws Exception {
+	public void testShouldResolveATwoLinkChainToAStandAloneReference() {
 		// Adding support for this case in SMILE-3151
 
 		// setup
@@ -473,7 +514,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject.organization=" + orgId.getValueAsString();
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -481,7 +522,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveATwoLinkChainWithAContainedResource_CommonReference() throws Exception {
+	public void testShouldResolveATwoLinkChainWithAContainedResource_CommonReference() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -512,7 +553,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// execute
 		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
@@ -521,7 +562,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAThreeLinkChainWhereAllResourcesStandAloneWithoutContainedResourceIndexing() throws Exception {
+	public void testShouldResolveAThreeLinkChainWhereAllResourcesStandAloneWithoutContainedResourceIndexing() {
 
 		// setup
 		IIdType oid1;
@@ -565,7 +606,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject.organization.name=HealthCo";
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -573,7 +614,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAThreeLinkChainWhereAllResourcesStandAlone() throws Exception {
+	public void testShouldResolveAThreeLinkChainWhereAllResourcesStandAlone() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -619,7 +660,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject.organization.name=HealthCo";
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -627,7 +668,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheEndOfTheChain() throws Exception {
+	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheEndOfTheChain() {
 		// This is the case that is most relevant to SMILE-2899
 
 		// setup
@@ -660,7 +701,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject.organization.name=HealthCo";
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -668,7 +709,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheEndOfTheChain_CommonReference() throws Exception {
+	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheEndOfTheChain_CommonReference() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -704,7 +745,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// execute
 		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
@@ -713,7 +754,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheBeginningOfTheChain() throws Exception {
+	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheBeginningOfTheChain() {
 		// Adding support for this case in SMILE-3151
 
 		// setup
@@ -746,7 +787,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject.organization.name=HealthCo";
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -754,7 +795,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheBeginningOfTheChain_CommonReference() throws Exception {
+	public void testShouldResolveAThreeLinkChainWithAContainedResourceAtTheBeginningOfTheChain_CommonReference() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -789,7 +830,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// execute
 		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
@@ -798,7 +839,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldNotResolveAThreeLinkChainWithAllContainedResourcesWhenRecursiveContainedIndexesAreDisabled() throws Exception {
+	public void testShouldNotResolveAThreeLinkChainWithAllContainedResourcesWhenRecursiveContainedIndexesAreDisabled() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -821,23 +862,23 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			obs.getCode().setText("Observation 1");
 			obs.getSubject().setReference("#pat");
 
-			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
+            myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
 
-			// Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
+            // Create a dummy record so that an unconstrained query doesn't pass the test due to returning the only record
 			myObservationDao.create(new Observation(), mySrd);
 		}
 
 		String url = "/Observation?subject.organization.name=HealthCo";
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(0L, oids.size());
 	}
 
 	@Test
-	public void testShouldResolveAThreeLinkChainWithAllContainedResources() throws Exception {
+	public void testShouldResolveAThreeLinkChainWithAllContainedResources() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -868,10 +909,11 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		}
 
 		String url = "/Observation?subject.organization.name=HealthCo";
+		logAllStringIndexes();
 
 		// execute
 		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
@@ -880,7 +922,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAThreeLinkChainWithQualifiersWhereAllResourcesStandAlone() throws Exception {
+	public void testShouldResolveAThreeLinkChainWithQualifiersWhereAllResourcesStandAlone() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -922,7 +964,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject:Patient.organization:Organization.name=HealthCo";
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -930,7 +972,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAThreeLinkChainWithQualifiersWithAContainedResourceAtTheEndOfTheChain() throws Exception {
+	public void testShouldResolveAThreeLinkChainWithQualifiersWithAContainedResourceAtTheEndOfTheChain() {
 		// This is the case that is most relevant to SMILE-2899
 
 		// setup
@@ -978,7 +1020,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject:Patient.organization:Organization.name=HealthCo";
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -986,7 +1028,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAThreeLinkChainWithQualifiersWithAContainedResourceAtTheBeginning() throws Exception {
+	public void testShouldResolveAThreeLinkChainWithQualifiersWithAContainedResourceAtTheBeginning() {
 		// Adding support for this case in SMILE-3151
 
 		// setup
@@ -1031,7 +1073,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// execute
 		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
@@ -1040,8 +1082,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled
-	public void testShouldResolveAThreeLinkChainWithQualifiersWithAContainedResourceAtTheBeginning_NotDistinctSourcePaths() throws Exception {
+	@Disabled("Known limitation")
+	public void testShouldResolveAThreeLinkChainWithQualifiersWithAContainedResourceAtTheBeginning_NotDistinctSourcePaths() {
 		// TODO: This test fails because of a known limitation in qualified searches over contained resources.
 		//       Type information for intermediate resources in the chain is not being retained in the indexes.
 
@@ -1089,7 +1131,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// execute
 		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
@@ -1098,8 +1140,8 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	@Disabled
-	public void testShouldResolveAThreeLinkChainWithQualifiersWithAllContainedResources() throws Exception {
+	@Disabled("Known limitation")
+	public void testShouldResolveAThreeLinkChainWithQualifiersWithAllContainedResources() {
 		// TODO: This test fails because of a known limitation in qualified searches over contained resources.
 		//       Type information for intermediate resources in the chain is not being retained in the indexes.
 
@@ -1151,7 +1193,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// execute
 		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
@@ -1160,7 +1202,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAFourLinkChainWhereAllResourcesStandAlone() throws Exception {
+	public void testShouldResolveAFourLinkChainWhereAllResourcesStandAlone() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -1197,7 +1239,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject.organization.partof.name=HealthCo";
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -1205,7 +1247,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAFourLinkChainWhereTheLastReferenceIsContained() throws Exception {
+	public void testShouldResolveAFourLinkChainWhereTheLastReferenceIsContained() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -1242,7 +1284,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject.organization.partof.name=HealthCo";
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -1250,7 +1292,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAFourLinkChainWhereTheLastTwoReferencesAreContained() throws Exception {
+	public void testShouldResolveAFourLinkChainWhereTheLastTwoReferencesAreContained() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -1287,7 +1329,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject.organization.partof.name=HealthCo";
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -1295,7 +1337,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAFourLinkChainWithAContainedResourceInTheMiddle() throws Exception {
+	public void testShouldResolveAFourLinkChainWithAContainedResourceInTheMiddle() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -1337,7 +1379,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// execute
 		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
@@ -1346,7 +1388,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAFourLinkChainWhereTheFirstTwoReferencesAreContained() throws Exception {
+	public void testShouldResolveAFourLinkChainWhereTheFirstTwoReferencesAreContained() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -1384,7 +1426,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject.organization.partof.name=HealthCo";
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -1392,7 +1434,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAFourLinkChainWhereTheFirstReferenceAndTheLastReferenceAreContained() throws Exception {
+	public void testShouldResolveAFourLinkChainWhereTheFirstReferenceAndTheLastReferenceAreContained() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -1429,7 +1471,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		String url = "/Observation?subject.organization.partof.name=HealthCo";
 
 		// execute
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 
 		// validate
 		assertEquals(1L, oids.size());
@@ -1437,7 +1479,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldResolveAFourLinkChainWhereAllReferencesAreContained() throws Exception {
+	public void testShouldResolveAFourLinkChainWhereAllReferencesAreContained() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -1477,7 +1519,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		// execute
 		myCaptureQueriesListener.clear();
-		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
+		List<String> oids = myTestDaoSearch.searchForIds(url);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		// validate
@@ -1486,7 +1528,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testShouldThrowAnExceptionForAFiveLinkChain() throws Exception {
+	public void testShouldThrowAnExceptionForAFiveLinkChain() {
 
 		// setup
 		myStorageSettings.setIndexOnContainedResources(true);
@@ -1496,7 +1538,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 
 		try {
 			// execute
-			searchAndReturnUnqualifiedVersionlessIdValues(url);
+			myTestDaoSearch.searchForIds(url);
 			fail("Expected an exception to be thrown");
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(2007) + "The search chain subject.organization.partof.partof.name is too long. Only chains up to three references are supported.", e.getMessage());
@@ -1504,7 +1546,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testQueryStructure() throws Exception {
+	public void testQueryStructure() {
 
 		// With indexing of contained resources turned off, we should not see UNION clauses in the query
 		countUnionStatementsInGeneratedQuery("/Observation?patient.name=Smith", 0);
@@ -1527,34 +1569,94 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		countUnionStatementsInGeneratedQuery("/Observation?patient.organization.partof.name=Smith", 7);
 
 		// If a reference in the chain has multiple potential target resource types, the number of subselects increases
-		countUnionStatementsInGeneratedQuery("/Observation?subject.name=Smith", 3);
+		// Note: This previously had 3 unions but 2 of the selects within were duplicates of each other
+		countUnionStatementsInGeneratedQuery("/Observation?subject.name=Smith", 2);
 
 		// If such a reference if qualified to restrict the type, the number goes back down
 		countUnionStatementsInGeneratedQuery("/Observation?subject:Location.name=Smith", 1);
 	}
 
-	private void countUnionStatementsInGeneratedQuery(String theUrl, int theExpectedNumberOfUnions) throws IOException {
+	@ParameterizedTest
+	@CsvSource({
+		// search url                                                                                       expected count
+		"/Bundle?composition.patient.identifier=system|value-1&composition.patient.birthdate=1980-01-01,    1,     correct identifier correct birthdate",
+		"/Bundle?composition.patient.birthdate=1980-01-01&composition.patient.identifier=system|value-1,    1,     correct birthdate  correct identifier",
+		"/Bundle?composition.patient.identifier=system|value-1&composition.patient.birthdate=2000-01-01,    0,     correct identifier incorrect birthdate",
+		"/Bundle?composition.patient.birthdate=2000-01-01&composition.patient.identifier=system|value-1,    0,     incorrect birthdate correct identifier",
+		"/Bundle?composition.patient.identifier=system|value-2&composition.patient.birthdate=1980-01-01,    0,     incorrect identifier correct birthdate",
+		"/Bundle?composition.patient.birthdate=1980-01-01&composition.patient.identifier=system|value-2,    0,     correct birthdate  incorrect identifier",
+		"/Bundle?composition.patient.identifier=system|value-2&composition.patient.birthdate=2000-01-01,    0,     incorrect identifier incorrect birthdate",
+		"/Bundle?composition.patient.birthdate=2000-01-01&composition.patient.identifier=system|value-2,    0,     incorrect birthdate  incorrect identifier",
+		// try sort by composition sp
+		"/Bundle?composition.patient.identifier=system|value-1&_sort=composition.patient.birthdate,    1,     correct identifier sort by birthdate",
+
+	})
+	public void testMultipleChainedBundleCompositionSearchParameters(String theSearchUrl, int theExpectedCount, String theMessage) {
+		createSearchParameter("bundle-composition-patient-birthdate",
+			"composition.patient.birthdate",
+			"Bundle",
+			"Bundle.entry.resource.ofType(Patient).birthDate",
+			Enumerations.SearchParamType.DATE
+		);
+
+		createSearchParameter("bundle-composition-patient-identifier",
+			"composition.patient.identifier",
+			"Bundle",
+			"Bundle.entry.resource.ofType(Patient).identifier",
+			Enumerations.SearchParamType.TOKEN
+		);
+
+		createDocumentBundleWithPatientDetails("1980-01-01", "system", "value-1");
+
+		List<String> ids = myTestDaoSearch.searchForIds(theSearchUrl);
+		assertThat(theMessage, ids, hasSize(theExpectedCount));
+	}
+
+	private void createSearchParameter(String theId, String theCode, String theBase, String theExpression, Enumerations.SearchParamType theType) {
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setId(theId);
+		searchParameter.setCode(theCode);
+		searchParameter.setName(theCode);
+		searchParameter.setUrl("http://example.org/SearchParameter/" + theId);
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.addBase(theBase);
+		searchParameter.setType(theType);
+		searchParameter.setExpression(theExpression);
+		searchParameter = (SearchParameter) mySearchParameterDao.update(searchParameter, mySrd).getResource();
+		mySearchParamRegistry.forceRefresh();
+		assertNotNull(mySearchParamRegistry.getActiveSearchParam(theBase, searchParameter.getName()));
+	}
+
+	private void createDocumentBundleWithPatientDetails(String theBirthDate, String theIdentifierSystem, String theIdentifierValue) {
+		Patient patient = new Patient();
+		patient.setBirthDate(Date.valueOf(theBirthDate));
+		patient.addIdentifier().setSystem(theIdentifierSystem).setValue(theIdentifierValue);
+		patient = (Patient) myPatientDao.create(patient, mySrd).getResource();
+		assertSearchReturns(myPatientDao, SearchParameterMap.newSynchronous(), 1);
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.DOCUMENT);
+		Composition composition = new Composition();
+		composition.setType(new CodeableConcept().addCoding(new Coding().setCode("code").setSystem("http://example.org")));
+		bundle.addEntry().setResource(composition);
+		composition.getSubject().setReference(patient.getIdElement().getValue());
+		bundle.addEntry().setResource(patient);
+		myBundleDao.create(bundle, mySrd);
+		assertSearchReturns(myBundleDao, SearchParameterMap.newSynchronous(), 1);
+	}
+
+	private void assertSearchReturns(IFhirResourceDao<?> theDao, SearchParameterMap theSearchParams, int theExpectedCount){
+		assertEquals(theExpectedCount, theDao.search(theSearchParams, mySrd).size());
+	}
+
+	private void countUnionStatementsInGeneratedQuery(String theUrl, int theExpectedNumberOfUnions) {
 		myCaptureQueriesListener.clear();
-		searchAndReturnUnqualifiedVersionlessIdValues(theUrl);
+		myTestDaoSearch.searchForIds(theUrl);
 		List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 		assertEquals(1, selectQueries.size());
 
 		String sqlQuery = selectQueries.get(0).getSql(true, true).toLowerCase();
 		assertEquals(theExpectedNumberOfUnions, countMatches(sqlQuery, "union"), sqlQuery);
-	}
-
-	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String theUrl) throws IOException {
-		return searchAndReturnUnqualifiedVersionlessIdValues(theUrl, myObservationDao);
-	}
-
-	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String theUrl, IFhirResourceDao<? extends DomainResource> theObservationDao) {
-		List<String> ids = new ArrayList<>();
-
-		ResourceSearch search = myMatchUrlService.getResourceSearch(theUrl);
-		SearchParameterMap map = search.getSearchParameterMap();
-		map.setLoadSynchronous(true);
-		IBundleProvider result = theObservationDao.search(map);
-		return result.getAllResourceIds();
 	}
 
 }

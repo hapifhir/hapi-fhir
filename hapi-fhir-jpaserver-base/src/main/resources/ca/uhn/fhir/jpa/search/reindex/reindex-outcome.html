@@ -1,0 +1,229 @@
+<div xmlns:th="http://www.thymeleaf.org">
+
+   <!--/* Messages */-->
+   <div th:if="${resource.hasParameter('Message')}" id="Messages">
+      <h1>Outcome</h1>
+      <ul>
+         <li th:each="part : ${resource.getParameters('Message')}">
+            [[${part.getValue().getValue()}]]
+         </li>
+      </ul>
+   </div>
+
+   <!--/* Number Indexes */-->
+   <div th:if="${resource.hasParameter('NumberIndexes')}" id="NumberIndexes">
+      <h1>Number Indexes</h1>
+      <table id="NumberIndexesTable">
+         <thead>
+         <tr>
+            <th>Name</th>
+            <th>Action</th>
+            <th>Type</th>
+            <th>Value</th>
+         </tr>
+         </thead>
+         <tbody>
+         <tr th:each="part : ${resource.getParameter('NumberIndexes').part}">
+            <td th:text="${part.name}"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'Action')"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'Type')"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'Value')"></td>
+         </tr>
+         </tbody>
+      </table>
+   </div>
+
+   <!--/* Quantity Indexes */-->
+   <div th:if="${resource.hasParameter('QuantityIndexes')}" id="QuantityIndexes">
+      <h1>Quantity Indexes</h1>
+      <table id="QuantityIndexesTable">
+         <thead>
+         <tr>
+            <th>Name</th>
+            <th>Action</th>
+            <th>Type</th>
+            <th>Value</th>
+            <th>System</th>
+            <th>Units</th>
+         </tr>
+         </thead>
+         <tbody>
+         <tr th:each="part : ${resource.getParameter('QuantityIndexes').part}">
+            <td th:text="${part.name}"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'Action')"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'Type')"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'Value')"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'System')"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'Units')"></td>
+         </tr>
+         </tbody>
+      </table>
+   </div>
+
+   <!--/* String Indexes */-->
+   <div th:if="${resource.hasParameter('StringIndexes')}" id="StringIndexes">
+      <h1>String Indexes</h1>
+      <table id="StringIndexesTable">
+         <thead>
+         <tr>
+            <th>Name</th>
+            <th>Action</th>
+            <th>Type</th>
+            <th>ValueNormalized</th>
+            <th>ValueExact</th>
+         </tr>
+         </thead>
+         <tbody>
+         <tr th:each="part : ${resource.getParameter('StringIndexes').part}">
+            <td th:text="${part.name}"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'Action')"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'Type')"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'ValueNormalized')"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'ValueExact')"></td>
+         </tr>
+         </tbody>
+      </table>
+   </div>
+
+   <!--/* Token Indexes */-->
+   <div th:if="${resource.hasParameter('TokenIndexes')}" id="TokenIndexes">
+      <h1>Token Indexes</h1>
+      <table id="TokenIndexesTable">
+         <thead>
+         <tr>
+            <th>Name</th>
+            <th>Action</th>
+            <th>Type</th>
+            <th>System</th>
+            <th>Value</th>
+         </tr>
+         </thead>
+         <tbody>
+         <tr th:each="part : ${resource.getParameter('TokenIndexes').part}">
+            <td th:text="${part.name}"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'Action')"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'Type')"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'System')"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'Value')"></td>
+         </tr>
+         </tbody>
+      </table>
+   </div>
+
+   <!--/* URI Indexes */-->
+   <div th:if="${resource.hasParameter('UriIndexes')}" id="UriIndexes">
+      <h1>URI Indexes</h1>
+      <table id="UriIndexesTable">
+         <thead>
+            <tr>
+               <th>Name</th>
+               <th>Action</th>
+               <th>Type</th>
+               <th>Value</th>
+            </tr>
+         </thead>
+         <tbody>
+            <tr th:each="part : ${resource.getParameter('UriIndexes').part}">
+               <td th:text="${part.name}"></td>
+               <td th:insert="ParametersFragments :: renderPart(${part}, 'Action')"></td>
+               <td th:insert="ParametersFragments :: renderPart(${part}, 'Type')"></td>
+               <td th:insert="ParametersFragments :: renderPart(${part}, 'Value')"></td>
+            </tr>
+         </tbody>
+      </table>
+   </div>
+
+   <!--/* Resource Links */-->
+   <div th:if="${resource.hasParameter('ResourceLinks')}" id="ResourceLinks">
+      <h1>Resource Links</h1>
+      <table id="ResourceLinksTable">
+         <thead>
+         <tr>
+            <th>Name</th>
+            <th>Action</th>
+            <th>Type</th>
+            <th>Target ID (Local)</th>
+            <th>Target Version (Local)</th>
+            <th>Target URL (Non-Local)</th>
+         </tr>
+         </thead>
+         <tbody>
+         <tr th:each="part : ${resource.getParameter('ResourceLinks').part}">
+            <td th:text="${part.name}"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'Action')"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'Type')"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'TargetId')"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'TargetVersion')"></td>
+            <td th:insert="ParametersFragments :: renderPart(${part}, 'TargetUrl')"></td>
+         </tr>
+         </tbody>
+      </table>
+   </div>
+
+   <!--/* Missing Indexes */-->
+   <div th:if="${resource.hasParameter('MissingIndexes')}" id="MissingIndexes">
+      <h1>Missing Indexes (:missing)</h1>
+      <table id="MissingIndexesTable">
+         <thead>
+            <tr>
+               <th>Name</th>
+               <th>Action</th>
+               <th>Type</th>
+               <th>Missing</th>
+            </tr>
+         </thead>
+         <tbody>
+            <tr th:each="part : ${resource.getParameter('MissingIndexes').part}">
+               <td th:text="${part.name}"></td>
+               <td th:insert="ParametersFragments :: renderPart(${part}, 'Action')"></td>
+               <td th:insert="ParametersFragments :: renderPart(${part}, 'Type')"></td>
+               <td th:insert="ParametersFragments :: renderPart(${part}, 'Missing')"></td>
+            </tr>
+         </tbody>
+      </table>
+   </div>
+
+   <!--/* Combo Non-Unique Indexes */-->
+   <div th:if="${resource.hasParameter('NonUniqueIndexes')}" id="NonUniqueIndexes">
+      <h1>Combo Indexes (Non-Unique)</h1>
+      <table id="NonUniqueIndexesTable">
+         <thead>
+            <tr>
+               <th>Action</th>
+               <th>Type</th>
+               <th>Value</th>
+            </tr>
+         </thead>
+         <tbody>
+            <tr th:each="part : ${resource.getParameter('NonUniqueIndexes').part}">
+               <td th:insert="ParametersFragments :: renderPart(${part}, 'Action')"></td>
+               <td th:insert="ParametersFragments :: renderPart(${part}, 'Type')"></td>
+               <td th:text="${part.name}"></td>
+            </tr>
+         </tbody>
+      </table>
+   </div>
+
+   <!--/* Combo Unique Indexes */-->
+   <div th:if="${resource.hasParameter('UniqueIndexes')}" id="UniqueIndexes">
+      <h1>Combo Indexes (Unique)</h1>
+      <table id="UniqueIndexesTable">
+         <thead>
+            <tr>
+               <th>Action</th>
+               <th>Type</th>
+               <th>Value</th>
+            </tr>
+         </thead>
+         <tbody>
+            <tr th:each="part : ${resource.getParameter('UniqueIndexes').part}">
+               <td th:insert="ParametersFragments :: renderPart(${part}, 'Action')"></td>
+               <td th:insert="ParametersFragments :: renderPart(${part}, 'Type')"></td>
+               <td th:text="${part.name}"></td>
+            </tr>
+         </tbody>
+      </table>
+   </div>
+
+</div>
+

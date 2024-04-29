@@ -1,0 +1,4 @@
+---
+type: add
+issue: 4562
+title: "Added support for the $care-gaps operation defined by the DaVinci DEQM IG"

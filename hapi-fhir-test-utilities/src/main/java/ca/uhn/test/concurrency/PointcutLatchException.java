@@ -1,0 +1,34 @@
+/*-
+ * #%L
+ * HAPI FHIR Test Utilities
+ * %%
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package ca.uhn.test.concurrency;
+
+import ca.uhn.fhir.interceptor.api.HookParams;
+
+class PointcutLatchException extends IllegalStateException {
+	private static final long serialVersionUID = 1372636272233536829L;
+
+	PointcutLatchException(String theMessage, String theName, HookParams theArgs) {
+		super(theName + ": " + theMessage + " called with values:\n" + theArgs);
+	}
+
+	public PointcutLatchException(String theMessage, String theName) {
+		super(theName + ": " + theMessage);
+	}
+}

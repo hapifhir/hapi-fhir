@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.migrate.taskdef;
-
 /*-
  * #%L
  * HAPI FHIR Server - SQL Migration
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.util.VersionEnum;
@@ -75,9 +74,14 @@ public class ArbitrarySqlTask extends BaseTask {
 		}
 
 		for (TableAndColumn next : myConditionalOnExistenceOf) {
-			JdbcUtils.ColumnType columnType = JdbcUtils.getColumnType(getConnectionProperties(), next.getTable(), next.getColumn());
+			JdbcUtils.ColumnType columnType =
+					JdbcUtils.getColumnType(getConnectionProperties(), next.getTable(), next.getColumn());
 			if (columnType == null) {
-				logInfo(ourLog, "Table {} does not have column {} - No action performed", next.getTable(), next.getColumn());
+				logInfo(
+						ourLog,
+						"Table {} does not have column {} - No action performed",
+						next.getTable(),
+						next.getColumn());
 				return;
 			}
 		}
@@ -85,7 +89,6 @@ public class ArbitrarySqlTask extends BaseTask {
 		for (BaseTask next : myTask) {
 			next.execute();
 		}
-
 	}
 
 	public void setBatchSize(int theBatchSize) {
@@ -149,7 +152,6 @@ public class ArbitrarySqlTask extends BaseTask {
 			myConsumer = theConsumer;
 			setDescription("Execute raw sql");
 		}
-
 
 		@Override
 		public void execute() {

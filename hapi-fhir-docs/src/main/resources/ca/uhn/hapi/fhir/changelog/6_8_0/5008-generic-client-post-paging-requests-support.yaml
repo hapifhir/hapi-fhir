@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5008
+jira: SMILE-6727
+backport: 6.4.6
+title: "Previously, the GenericClient would only support the HTTP GET method for paging requests. 
+This has been corrected by adding the possibility for paging with an HTTP POST."

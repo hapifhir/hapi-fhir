@@ -1,0 +1,6 @@
+---
+type: add
+issue: 4699
+title: "Two new operations have been added to the JPA server:
+   * Instance level $reindex performs a synchronous reindex of a single resource and returns a Parameters object containing all previous and new indexes
+   * Instance level $reindex-dryrun simulates a reindex and shows the previous and new indexes generated"

@@ -76,7 +76,6 @@ public class ReadR4Test {
 		}
 	}
 
-
 	@Test
 	public void testReadUsingPlainProvider() throws Exception {
 		myRestfulServerExtension.getRestfulServer().registerProvider(new PlainGenericPatientProvider());

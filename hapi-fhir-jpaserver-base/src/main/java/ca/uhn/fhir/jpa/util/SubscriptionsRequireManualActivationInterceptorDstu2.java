@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.i18n.Msg;
@@ -16,26 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-/*
- * #%L
- * HAPI FHIR JPA Server
- * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 /**
  * Interceptor which requires newly created {@link Subscription subscriptions} to be in
@@ -61,12 +60,12 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Server
 		}
 	}
 
-
 	public void setDao(IFhirResourceDao<Subscription> theDao) {
 		myDao = theDao;
 	}
 
-	private void verifyStatusOk(RestOperationTypeEnum theOperation, IBaseResource theOldResourceOrNull, IBaseResource theResource) {
+	private void verifyStatusOk(
+			RestOperationTypeEnum theOperation, IBaseResource theOldResourceOrNull, IBaseResource theResource) {
 		Subscription subscription = (Subscription) theResource;
 		SubscriptionStatusEnum newStatus = subscription.getStatusElement().getValueAsEnum();
 
@@ -76,13 +75,16 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Server
 
 		if (newStatus == null) {
 			String actualCode = subscription.getStatusElement().getValueAsString();
-			throw new UnprocessableEntityException(Msg.code(800) + "Can not " + theOperation.getCode() + " resource: Subscription.status must be populated on this server" + ((isNotBlank(actualCode)) ? " (invalid value " + actualCode + ")" : ""));
+			throw new UnprocessableEntityException(Msg.code(800) + "Can not " + theOperation.getCode()
+					+ " resource: Subscription.status must be populated on this server"
+					+ ((isNotBlank(actualCode)) ? " (invalid value " + actualCode + ")" : ""));
 		}
 
 		if (theOldResourceOrNull != null) {
 			try {
 				Subscription existing = (Subscription) theOldResourceOrNull;
-				SubscriptionStatusEnum existingStatus = existing.getStatusElement().getValueAsEnum();
+				SubscriptionStatusEnum existingStatus =
+						existing.getStatusElement().getValueAsEnum();
 				if (existingStatus != newStatus) {
 					verifyActiveStatus(theOperation, subscription, newStatus, existingStatus);
 				}
@@ -94,8 +96,13 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Server
 		}
 	}
 
-	private void verifyActiveStatus(RestOperationTypeEnum theOperation, Subscription theSubscription, SubscriptionStatusEnum newStatus, SubscriptionStatusEnum theExistingStatus) {
-		SubscriptionChannelTypeEnum channelType = theSubscription.getChannel().getTypeElement().getValueAsEnum();
+	private void verifyActiveStatus(
+			RestOperationTypeEnum theOperation,
+			Subscription theSubscription,
+			SubscriptionStatusEnum newStatus,
+			SubscriptionStatusEnum theExistingStatus) {
+		SubscriptionChannelTypeEnum channelType =
+				theSubscription.getChannel().getTypeElement().getValueAsEnum();
 
 		if (channelType == null) {
 			throw new UnprocessableEntityException(Msg.code(801) + "Subscription.channel.type must be populated");
@@ -106,14 +113,19 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Server
 		}
 
 		if (theExistingStatus != null) {
-			throw new UnprocessableEntityException(Msg.code(802) + "Subscription.status can not be changed from " + describeStatus(theExistingStatus) + " to " + describeStatus(newStatus));
+			throw new UnprocessableEntityException(Msg.code(802) + "Subscription.status can not be changed from "
+					+ describeStatus(theExistingStatus) + " to " + describeStatus(newStatus));
 		}
 
 		if (theSubscription.getStatus() == null) {
-			throw new UnprocessableEntityException(Msg.code(803) + "Can not " + theOperation.getCode().toLowerCase() + " resource: Subscription.status must be populated on this server");
+			throw new UnprocessableEntityException(
+					Msg.code(803) + "Can not " + theOperation.getCode().toLowerCase()
+							+ " resource: Subscription.status must be populated on this server");
 		}
 
-		throw new UnprocessableEntityException(Msg.code(804) + "Subscription.status must be '" + SubscriptionStatusEnum.OFF.getCode() + "' or '" + SubscriptionStatusEnum.REQUESTED.getCode() + "' on a newly created subscription");
+		throw new UnprocessableEntityException(
+				Msg.code(804) + "Subscription.status must be '" + SubscriptionStatusEnum.OFF.getCode() + "' or '"
+						+ SubscriptionStatusEnum.REQUESTED.getCode() + "' on a newly created subscription");
 	}
 
 	private String describeStatus(SubscriptionStatusEnum existingStatus) {
@@ -125,5 +137,4 @@ public class SubscriptionsRequireManualActivationInterceptorDstu2 extends Server
 		}
 		return existingStatusString;
 	}
-
 }

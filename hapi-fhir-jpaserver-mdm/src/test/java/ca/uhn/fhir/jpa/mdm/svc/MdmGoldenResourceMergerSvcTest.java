@@ -13,7 +13,9 @@ import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.interceptor.IMdmStorageInterceptor;
+import ca.uhn.fhir.mdm.model.MdmMergeGoldenResourcesParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -107,11 +109,15 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 		assertEquals(0, redirectLinkCount());
 		Patient from = theFlipToAndFromGoldenResources ? myToGoldenPatient : myFromGoldenPatient;
 		Patient to = theFlipToAndFromGoldenResources ? myFromGoldenPatient : myToGoldenPatient;
+
+		MdmMergeGoldenResourcesParams params = new MdmMergeGoldenResourcesParams();
+		params.setFromGoldenResource(from);
+		params.setToGoldenResource(to);
+		params.setMdmTransactionContext(createMdmContext());
+		params.setRequestDetails(new SystemRequestDetails());
+
 		Patient retval = (Patient) myGoldenResourceMergerSvc.mergeGoldenResources(
-			from,
-			null,
-			to,
-			createMdmContext()
+			params
 		);
 		assertEquals(1, redirectLinkCount());
 		return retval;
@@ -214,8 +220,15 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 
 		MdmTransactionContext ctx = createMdmContext();
 		ctx.setRestOperation(MdmTransactionContext.OperationType.MANUAL_MERGE_GOLDEN_RESOURCES);
+
+		MdmMergeGoldenResourcesParams params = new MdmMergeGoldenResourcesParams();
+		params.setFromGoldenResource(myFromGoldenPatient);
+		params.setManuallyMergedResource(manuallyMergedPatient);
+		params.setToGoldenResource(myToGoldenPatient);
+		params.setMdmTransactionContext(ctx);
+		params.setRequestDetails(new SystemRequestDetails());
 		Patient mergedSourcePatient = (Patient) myGoldenResourceMergerSvc
-			.mergeGoldenResources(myFromGoldenPatient, manuallyMergedPatient, myToGoldenPatient, ctx);
+			.mergeGoldenResources(params);
 
 		HumanName returnedName = mergedSourcePatient.getNameFirstRep();
 		assertEquals("TestGiven TestFamily", returnedName.getNameAsSingleString());
@@ -243,11 +256,13 @@ public class MdmGoldenResourceMergerSvcTest extends BaseMdmR4Test {
 	}
 
 	private Patient mergeGoldenResources(Patient theFrom, Patient theTo) {
+		MdmMergeGoldenResourcesParams params = new MdmMergeGoldenResourcesParams();
+		params.setFromGoldenResource(theFrom);
+		params.setToGoldenResource(theTo);
+		params.setMdmTransactionContext(createMdmContext());
+		params.setRequestDetails(new SystemRequestDetails());
 		Patient retval = (Patient) myGoldenResourceMergerSvc.mergeGoldenResources(
-			theFrom,
-			null,
-			theTo,
-			createMdmContext()
+			params
 		);
 		assertEquals(1, redirectLinkCount());
 		return retval;

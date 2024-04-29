@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5460
+jira: SMILE-7594
+title: "Previously, expanding a ValueSet using hierarchical CodeSystem would fail in different scenarios 
+with a constraint violation exception when codes (term concepts) were being persisted. This is now fixed."

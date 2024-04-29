@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.packages.loader;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.packages.loader;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.packages.loader;
 
 import org.hl7.fhir.utilities.npm.NpmPackage;
 
@@ -57,13 +56,12 @@ public class NpmPackageData {
 	private final InputStream myInputStream;
 
 	public NpmPackageData(
-		String thePackageId,
-		String thePackageVersionId,
-		String theSourceDesc,
-		byte[] theBytes,
-		NpmPackage thePackage,
-		InputStream theStream
-	) {
+			String thePackageId,
+			String thePackageVersionId,
+			String theSourceDesc,
+			byte[] theBytes,
+			NpmPackage thePackage,
+			InputStream theStream) {
 		myPackageId = thePackageId;
 		myPackageVersionId = thePackageVersionId;
 		mySourceDesc = theSourceDesc;
@@ -81,7 +79,7 @@ public class NpmPackageData {
 	}
 
 	public InputStream getInputStream() {
-		 return myInputStream;
+		return myInputStream;
 	}
 
 	public String getPackageId() {

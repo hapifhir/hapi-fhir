@@ -8,10 +8,13 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.SubscriptionDeliveringEmailSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.deliver.message.SubscriptionDeliveringMessageSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.deliver.resthook.SubscriptionDeliveringRestHookSubscriber;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
@@ -26,14 +29,16 @@ import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
@@ -45,7 +50,7 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.GenericMessage;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -58,6 +63,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -72,7 +78,8 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 	private SubscriptionDeliveringRestHookSubscriber mySubscriber;
 	private SubscriptionDeliveringMessageSubscriber myMessageSubscriber;
-	private final FhirContext myCtx = FhirContext.forR4();
+	private SubscriptionDeliveringEmailSubscriber myEmailSubscriber;
+	private final FhirContext myCtx = FhirContext.forR4Cached();
 
 	@Mock
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
@@ -97,6 +104,12 @@ public class BaseSubscriptionDeliverySubscriberTest {
 	@Mock
 	private MatchUrlService myMatchUrlService;
 
+	@Mock
+	private IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
+
+	@Mock
+	private IEmailSender myEmailSender;
+
 	@BeforeEach
 	public void before() {
 		mySubscriber = new SubscriptionDeliveringRestHookSubscriber();
@@ -110,8 +123,15 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		myMessageSubscriber.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
 		myMessageSubscriber.setDaoRegistryForUnitTest(myDaoRegistry);
 		myMessageSubscriber.setMatchUrlServiceForUnitTest(myMatchUrlService);
+		myMessageSubscriber.setResourceModifiedMessagePersistenceSvcForUnitTest(myResourceModifiedMessagePersistenceSvc);
 		myCtx.setRestfulClientFactory(myRestfulClientFactory);
 		when(myRestfulClientFactory.newGenericClient(any())).thenReturn(myGenericClient);
+
+		myEmailSubscriber = new SubscriptionDeliveringEmailSubscriber(myEmailSender);
+		myEmailSubscriber.setFhirContextForUnitTest(myCtx);
+		myEmailSubscriber.setInterceptorBroadcasterForUnitTest(myInterceptorBroadcaster);
+		myEmailSubscriber.setSubscriptionRegistryForUnitTest(mySubscriptionRegistry);
+		myEmailSubscriber.setResourceModifiedMessagePersistenceSvcForUnitTest(myResourceModifiedMessagePersistenceSvc);
 	}
 
 	@Test
@@ -167,7 +187,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 			mySubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload));
 			fail();
 		} catch (MessagingException e) {
-			assertEquals(Msg.code(2) + "Failure handling subscription payload for subscription: Subscription/123; nested exception is ca.uhn.fhir.rest.server.exceptions.InternalErrorException: FOO", e.getMessage());
+			assertEquals(Msg.code(2) + "Failure handling subscription payload for subscription: Subscription/123", e.getMessage());
 		}
 
 		verify(myGenericClient, times(1)).update();
@@ -399,6 +419,38 @@ public class BaseSubscriptionDeliverySubscriberTest {
 			String messageExceptionAsString = e.toString();
 			assertFalse(messageExceptionAsString.contains(familyName));
 		}
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"message", "email"})
+	public void testMessageAndEmailSubscriber_whenPayloadIsNull_shouldTryInflateMessage(String theSubscriber) {
+		// setup
+		when(myInterceptorBroadcaster.callHooks(any(), any())).thenReturn(true);
+
+		Patient patient = generatePatient();
+
+		CanonicalSubscription subscription = generateSubscription();
+
+		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
+		payload.setSubscription(subscription);
+		payload.setPayload(myCtx, patient, EncodingEnum.JSON);
+		payload.setOperationType(ResourceModifiedMessage.OperationTypeEnum.CREATE);
+
+		// mock the inflated message
+		when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(any())).thenReturn(any());
+
+		// this will null out the payload but keep the resource id and version.
+		payload.setPayloadToNull();
+
+		// execute & verify
+        switch (theSubscriber) {
+            case "message" ->
+                    assertThrows(MessagingException.class, () -> myMessageSubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload)));
+            case "email" ->
+                    assertThrows(MessagingException.class, () -> myEmailSubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload)));
+        }
+
+		verify(myResourceModifiedMessagePersistenceSvc, times(1)).inflatePersistedResourceModifiedMessageOrNull(any());
 	}
 
 	@Nonnull

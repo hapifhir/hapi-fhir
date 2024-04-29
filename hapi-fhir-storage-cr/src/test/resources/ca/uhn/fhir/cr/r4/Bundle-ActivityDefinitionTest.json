@@ -1,0 +1,73 @@
+{
+	"resourceType": "Bundle",
+	"id": "bundle-test",
+	"type": "transaction",
+	"entry" : [{
+		"resource": {
+			"resourceType": "ActivityDefinition",
+			"id": "activityDefinition-test",
+			"name": "ActivityDefinition_CreateAProcedure",
+			"title": "CreateProcedure",
+			"status": "draft",
+			"description": "Create the procedure.",
+			"library": [ "http://test/fhir/Library/TestActivityDefinition|1.0.0" ],
+			"kind": "MedicationRequest",
+			"productCodeableConcept": {
+				"coding": [{
+					"system": "http://test/fhir/System",
+					"code": "productCode"
+				}]
+			},
+			"dynamicValue": [
+				{
+					"path": "doNotPerform",
+					"expression": {
+						"language": "text/cql.name",
+						"expression": "ActiveProcedureStatus"
+					}
+				}
+			]
+		},
+		"request": {
+			"method": "PUT",
+			"url": "ActivityDefinition/activityDefinition-test"
+		}
+	},
+		{
+			"resource": {
+				"resourceType": "Library",
+				"id": "TestActivityDefinition",
+				"url": "http://test/fhir/Library/TestActivityDefinition|1.0.0",
+				"version": "1.0.0",
+				"name": "TestActivityDefinition",
+				"parameter": [ {
+					"name": "ActiveProcedureStatus",
+					"use": "out",
+					"min": 0,
+					"max": "1",
+					"type": "boolean"
+				} ],
+				"content": [ {
+					"contentType": "text/cql",
+					"data": "bGlicmFyeSBUZXN0QWN0aXZpdHlEZWZpbml0aW9uIHZlcnNpb24gJzEuMC4wJw0KDQpkZWZpbmUgIkFjdGl2ZVByb2NlZHVyZVN0YXR1cyI6IHRydWUNCg=="
+				}, {
+					"contentType": "application/elm+xml",
+					"data": "PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxsaWJyYXJ5IHhtbG5zPSJ1cm46aGw3LW9yZzplbG06cjEiIHhtbG5zOnQ9InVybjpobDctb3JnOmVsbS10eXBlczpyMSIgeG1sbnM6eHNpPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxL1hNTFNjaGVtYS1pbnN0YW5jZSIgeG1sbnM6eHNkPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxL1hNTFNjaGVtYSIgeG1sbnM6Zmhpcj0iaHR0cDovL2hsNy5vcmcvZmhpciIgeG1sbnM6cWRtNDM9InVybjpoZWFsdGhpdC1nb3Y6cWRtOnY0XzMiIHhtbG5zOnFkbTUzPSJ1cm46aGVhbHRoaXQtZ292OnFkbTp2NV8zIiB4bWxuczphPSJ1cm46aGw3LW9yZzpjcWwtYW5ub3RhdGlvbnM6cjEiPg0KICAgPGFubm90YXRpb24gdHJhbnNsYXRvck9wdGlvbnM9IkVuYWJsZUFubm90YXRpb25zLEVuYWJsZUxvY2F0b3JzLERpc2FibGVMaXN0RGVtb3Rpb24sRGlzYWJsZUxpc3RQcm9tb3Rpb24iIHhzaTp0eXBlPSJhOkNxbFRvRWxtSW5mbyIvPg0KICAgPGFubm90YXRpb24geHNpOnR5cGU9ImE6QW5ub3RhdGlvbiI+DQogICAgICA8YTpzIHI9IjIiPg0KICAgICAgICAgPGE6cz5saWJyYXJ5IFRlc3RBY3Rpdml0eURlZmluaXRpb24gdmVyc2lvbiAnMS4wLjAnPC9hOnM+DQogICAgICA8L2E6cz4NCiAgIDwvYW5ub3RhdGlvbj4NCiAgIDxpZGVudGlmaWVyIGlkPSJUZXN0QWN0aXZpdHlEZWZpbml0aW9uIiBzeXN0ZW09Imh0dHA6Ly9hcGhsLm9yZy9maGlyL2VjciIgdmVyc2lvbj0iMS4wLjAiLz4NCiAgIDxzY2hlbWFJZGVudGlmaWVyIGlkPSJ1cm46aGw3LW9yZzplbG0iIHZlcnNpb249InIxIi8+DQogICA8dXNpbmdzPg0KICAgICAgPGRlZiBsb2NhbElkZW50aWZpZXI9IlN5c3RlbSIgdXJpPSJ1cm46aGw3LW9yZzplbG0tdHlwZXM6cjEiLz4NCiAgIDwvdXNpbmdzPg0KICAgPHN0YXRlbWVudHM+DQogICAgICA8ZGVmIGxvY2FsSWQ9IjIiIGxvY2F0b3I9IjM6MS0zOjM2IiBuYW1lPSJBY3RpdmVQcm9jZWR1cmVTdGF0dXMiIGNvbnRleHQ9IlBhdGllbnQiIGFjY2Vzc0xldmVsPSJQdWJsaWMiPg0KICAgICAgICAgPGFubm90YXRpb24geHNpOnR5cGU9ImE6QW5ub3RhdGlvbiI+DQogICAgICAgICAgICA8YTpzIHI9IjIiPg0KICAgICAgICAgICAgICAgPGE6cyByPSIxIj5kZWZpbmUgJnF1b3Q7QWN0aXZlUHJvY2VkdXJlU3RhdHVzJnF1b3Q7OiB0cnVlPC9hOnM+DQogICAgICAgICAgICA8L2E6cz4NCiAgICAgICAgIDwvYW5ub3RhdGlvbj4NCiAgICAgICAgIDxleHByZXNzaW9uIGxvY2FsSWQ9IjEiIGxvY2F0b3I9IjM6MzMtMzozNiIgdmFsdWVUeXBlPSJ0OkJvb2xlYW4iIHZhbHVlPSJ0cnVlIiB4c2k6dHlwZT0iTGl0ZXJhbCIvPg0KICAgICAgPC9kZWY+DQogICA8L3N0YXRlbWVudHM+DQo8L2xpYnJhcnk+DQo="
+				} ]
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Library/TestActivityDefinition"
+			}
+		},
+		{
+			"resource": {
+				"resourceType": "Patient",
+				"id": "patient-1"
+			},
+			"request": {
+				"method": "PUT",
+				"url": "Patient/patient-1"
+			}
+		}]
+}

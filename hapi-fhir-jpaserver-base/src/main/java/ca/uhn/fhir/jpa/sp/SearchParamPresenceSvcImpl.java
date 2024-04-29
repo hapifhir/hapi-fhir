@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.sp;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,10 @@ package ca.uhn.fhir.jpa.sp;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.sp;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ISearchParamPresentDao;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.util.AddRemoveCount;
@@ -44,8 +42,6 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 	private ISearchParamPresentDao mySearchParamPresentDao;
 
 	@Autowired
-	private PartitionSettings myPartitionSettings;
-	@Autowired
 	private JpaStorageSettings myStorageSettings;
 
 	@VisibleForTesting
@@ -54,13 +50,12 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 	}
 
 	@Override
-	public AddRemoveCount updatePresence(ResourceTable theResource, Map<String, Boolean> theParamNameToPresence) {
+	public AddRemoveCount updatePresence(
+			ResourceTable theResource, Collection<SearchParamPresentEntity> thePresenceEntities) {
 		AddRemoveCount retVal = new AddRemoveCount();
 		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.DISABLED) {
 			return retVal;
 		}
-
-		Map<String, Boolean> presenceMap = new HashMap<>(theParamNameToPresence);
 
 		// Find existing entries
 		Collection<SearchParamPresentEntity> existing = theResource.getSearchParamPresents();
@@ -71,18 +66,8 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 
 		// Find newly wanted set of entries
 		Map<Long, SearchParamPresentEntity> newHashToPresence = new HashMap<>();
-		for (Entry<String, Boolean> next : presenceMap.entrySet()) {
-			String paramName = next.getKey();
-
-			SearchParamPresentEntity present = new SearchParamPresentEntity();
-			present.setPartitionSettings(myPartitionSettings);
-			present.setResource(theResource);
-			present.setParamName(paramName);
-			present.setPresent(next.getValue());
-			present.setPartitionId(theResource.getPartitionId());
-			present.calculateHashes();
-
-			newHashToPresence.put(present.getHashPresence(), present);
+		for (SearchParamPresentEntity next : thePresenceEntities) {
+			newHashToPresence.put(next.getHashPresence(), next);
 		}
 
 		// Delete any that should be deleted
@@ -118,5 +103,4 @@ public class SearchParamPresenceSvcImpl implements ISearchParamPresenceSvc {
 
 		return retVal;
 	}
-
 }

@@ -1,9 +1,9 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
-import ca.uhn.fhir.batch2.jobs.export.models.BulkExportJobParameters;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.bulk.BulkDataExportOptions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -27,6 +28,9 @@ public class BulkExportJobParametersValidatorTest {
 	@Mock
 	private DaoRegistry myDaoRegistry;
 
+	@Mock
+	private IBinaryStorageSvc myIBinaryStorageSvc;
+
 	@InjectMocks
 	private BulkExportJobParametersValidator myValidator;
 
@@ -34,7 +38,7 @@ public class BulkExportJobParametersValidatorTest {
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
 		parameters.setResourceTypes(Arrays.asList("Patient", "Observation"));
 		parameters.setOutputFormat(Constants.CT_FHIR_NDJSON);
-		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
 		return parameters;
 	}
 
@@ -48,25 +52,57 @@ public class BulkExportJobParametersValidatorTest {
 			.thenReturn(true);
 
 		// test
-		List<String> result = myValidator.validate(parameters);
+		List<String> result = myValidator.validate(null, parameters);
 
 		// verify
 		assertNotNull(result);
 		assertTrue(result.isEmpty());
 	}
 
+
+	@Test
+	public void validate_exportId_illegal_characters() {
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setExportIdentifier("exportId&&&");
+		// when
+		when(myDaoRegistry.isResourceTypeSupported(anyString()))
+			.thenReturn(true);
+		when(myIBinaryStorageSvc.isValidBinaryContentId(any())).thenReturn(false);
+		List<String> errors = myValidator.validate(null, parameters);
+
+		// verify
+		assertNotNull(errors);
+		assertEquals(1, errors.size());
+		assertEquals(errors.get(0), "Export ID does not conform to the current blob storage implementation's limitations.");
+	}
+
+	@Test
+	public void validate_exportId_legal_characters() {
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setExportIdentifier("HELLO!/WORLD/");
+		// when
+		when(myDaoRegistry.isResourceTypeSupported(anyString()))
+			.thenReturn(true);
+
+		when(myIBinaryStorageSvc.isValidBinaryContentId(any())).thenReturn(true);
+		List<String> errors = myValidator.validate(null, parameters);
+
+		// verify
+		assertNotNull(errors);
+		assertEquals(0, errors.size());
+	}
 	@Test
 	public void validate_validParametersForPatient_returnsEmptyList() {
 		// setup
 		BulkExportJobParameters parameters = createSystemExportParameters();
-		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.PATIENT);
+		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 
 		// when
 		when(myDaoRegistry.isResourceTypeSupported(anyString()))
 			.thenReturn(true);
 
 		// test
-		List<String> result = myValidator.validate(parameters);
+		List<String> result = myValidator.validate(null, parameters);
 
 		// verify
 		assertNotNull(result);
@@ -78,11 +114,11 @@ public class BulkExportJobParametersValidatorTest {
 		// setup
 		String resourceType = "notValid";
 		BulkExportJobParameters parameters = createSystemExportParameters();
-		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.SYSTEM);
+		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
 		parameters.setResourceTypes(Collections.singletonList(resourceType));
 
 		// test
-		List<String> result = myValidator.validate(parameters);
+		List<String> result = myValidator.validate(null, parameters);
 
 		// verify
 		assertNotNull(result);
@@ -94,7 +130,7 @@ public class BulkExportJobParametersValidatorTest {
 	public void validate_validateParametersForGroup_returnsEmptyList() {
 		// setup
 		BulkExportJobParameters parameters = createSystemExportParameters();
-		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
 		parameters.setGroupId("groupId");
 		parameters.setExpandMdm(true);
 
@@ -103,7 +139,7 @@ public class BulkExportJobParametersValidatorTest {
 			.thenReturn(true);
 
 		// test
-		List<String> result = myValidator.validate(parameters);
+		List<String> result = myValidator.validate(null, parameters);
 
 		// verify
 		assertNotNull(result);
@@ -114,10 +150,10 @@ public class BulkExportJobParametersValidatorTest {
 	public void validate_groupParametersWithoutGroupId_returnsError() {
 		// setup
 		BulkExportJobParameters parameters = createSystemExportParameters();
-		parameters.setExportStyle(BulkDataExportOptions.ExportStyle.GROUP);
+		parameters.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
 
 		// test
-		List<String> result = myValidator.validate(parameters);
+		List<String> result = myValidator.validate(null, parameters);
 
 		// verify
 		assertNotNull(result);
@@ -132,7 +168,7 @@ public class BulkExportJobParametersValidatorTest {
 		parameters.setResourceTypes(null);
 
 		// test
-		List<String> results = myValidator.validate(parameters);
+		List<String> results = myValidator.validate(null, parameters);
 
 		// verify
 		assertNotNull(results);
@@ -148,7 +184,7 @@ public class BulkExportJobParametersValidatorTest {
 		parameters.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		// test
-		List<String> errors = myValidator.validate(parameters);
+		List<String> errors = myValidator.validate(null, parameters);
 
 		// validate
 		assertNotNull(errors);
@@ -164,7 +200,7 @@ public class BulkExportJobParametersValidatorTest {
 		parameters.setOutputFormat("json");
 
 		// test
-		List<String> errors = myValidator.validate(parameters);
+		List<String> errors = myValidator.validate(null, parameters);
 
 		// validate
 		assertNotNull(errors);

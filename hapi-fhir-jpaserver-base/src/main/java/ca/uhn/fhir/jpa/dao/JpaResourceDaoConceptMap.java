@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
@@ -36,24 +35,45 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 
-public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResourceDao<T> implements IFhirResourceDaoConceptMap<T> {
+public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResourceDao<T>
+		implements IFhirResourceDaoConceptMap<T> {
 	@Autowired
 	private ITermConceptMappingSvc myTermConceptMappingSvc;
+
 	@Autowired
 	private IValidationSupport myValidationSupport;
+
 	@Autowired
 	private VersionCanonicalizer myVersionCanonicalizer;
 
 	@Override
-	public TranslateConceptResults translate(TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
+	public TranslateConceptResults translate(
+			TranslationRequest theTranslationRequest, RequestDetails theRequestDetails) {
 		IValidationSupport.TranslateCodeRequest translateCodeRequest = theTranslationRequest.asTranslateCodeRequest();
 		return myValidationSupport.translateConcept(translateCodeRequest);
 	}
 
 	@Override
-	public ResourceTable updateEntity(RequestDetails theRequestDetails, IBaseResource theResource, IBasePersistedResource theEntity, Date theDeletedTimestampOrNull, boolean thePerformIndexing,
-												 boolean theUpdateVersion, TransactionDetails theTransactionDetails, boolean theForceUpdate, boolean theCreateNewHistoryEntry) {
-		ResourceTable retVal = super.updateEntity(theRequestDetails, theResource, theEntity, theDeletedTimestampOrNull, thePerformIndexing, theUpdateVersion, theTransactionDetails, theForceUpdate, theCreateNewHistoryEntry);
+	public ResourceTable updateEntity(
+			RequestDetails theRequestDetails,
+			IBaseResource theResource,
+			IBasePersistedResource theEntity,
+			Date theDeletedTimestampOrNull,
+			boolean thePerformIndexing,
+			boolean theUpdateVersion,
+			TransactionDetails theTransactionDetails,
+			boolean theForceUpdate,
+			boolean theCreateNewHistoryEntry) {
+		ResourceTable retVal = super.updateEntity(
+				theRequestDetails,
+				theResource,
+				theEntity,
+				theDeletedTimestampOrNull,
+				thePerformIndexing,
+				theUpdateVersion,
+				theTransactionDetails,
+				theForceUpdate,
+				theCreateNewHistoryEntry);
 
 		boolean entityWasSaved = !retVal.isUnchangedInCurrentOperation();
 		boolean shouldProcessUpdate = entityWasSaved && thePerformIndexing;

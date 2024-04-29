@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.reindex;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,124 +17,165 @@ package ca.uhn.fhir.jpa.reindex;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.reindex;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.api.pid.EmptyResourcePidList;
-import ca.uhn.fhir.jpa.api.pid.HomogeneousResourcePidList;
 import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
-import ca.uhn.fhir.jpa.api.pid.MixedResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
+import ca.uhn.fhir.jpa.api.pid.StreamTemplate;
+import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
+import ca.uhn.fhir.jpa.api.pid.TypedResourceStream;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
-import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
-import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.DateRangeUtil;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.transaction.annotation.Transactional;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-import static org.apache.commons.collections4.CollectionUtils.isNotEmpty;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
+	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(Batch2DaoSvcImpl.class);
 
-	@Autowired
-	private IResourceTableDao myResourceTableDao;
+	private final IResourceTableDao myResourceTableDao;
 
-	@Autowired
-	private MatchUrlService myMatchUrlService;
+	private final MatchUrlService myMatchUrlService;
 
-	@Autowired
-	private DaoRegistry myDaoRegistry;
+	private final DaoRegistry myDaoRegistry;
 
-	@Autowired
-	private FhirContext myFhirContext;
+	private final FhirContext myFhirContext;
+
+	private final IHapiTransactionService myTransactionService;
 
 	@Override
 	public boolean isAllResourceTypeSupported() {
 		return true;
 	}
 
-	@Override
-	@Transactional
-	public IResourcePidList fetchResourceIdsPage(Date theStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl) {
+	public Batch2DaoSvcImpl(
+			IResourceTableDao theResourceTableDao,
+			MatchUrlService theMatchUrlService,
+			DaoRegistry theDaoRegistry,
+			FhirContext theFhirContext,
+			IHapiTransactionService theTransactionService) {
+		myResourceTableDao = theResourceTableDao;
+		myMatchUrlService = theMatchUrlService;
+		myDaoRegistry = theDaoRegistry;
+		myFhirContext = theFhirContext;
+		myTransactionService = theTransactionService;
+	}
 
+	@Override
+	public IResourcePidStream fetchResourceIdStream(
+			Date theStart, Date theEnd, RequestPartitionId theRequestPartitionId, String theUrl) {
 		if (theUrl == null) {
-			return fetchResourceIdsPageNoUrl(theStart, theEnd, thePageSize, theRequestPartitionId);
+			return makeStreamResult(
+					theRequestPartitionId, () -> streamResourceIdsNoUrl(theStart, theEnd, theRequestPartitionId));
 		} else {
-			return fetchResourceIdsPageWithUrl(theStart, theEnd, thePageSize, theUrl, theRequestPartitionId);
+			return makeStreamResult(
+					theRequestPartitionId,
+					() -> streamResourceIdsWithUrl(theStart, theEnd, theUrl, theRequestPartitionId));
 		}
 	}
 
-	private IResourcePidList fetchResourceIdsPageWithUrl(Date theStart, Date theEnd, int thePageSize, String theUrl, RequestPartitionId theRequestPartitionId) {
+	private Stream<TypedResourcePid> streamResourceIdsWithUrl(
+			Date theStart, Date theEnd, String theUrl, RequestPartitionId theRequestPartitionId) {
+		validateUrl(theUrl);
 
+		SearchParameterMap searchParamMap = parseQuery(theUrl);
+		searchParamMap.setLastUpdated(DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd));
+
+		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
+
+		SystemRequestDetails request = new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId);
+
+		return dao.searchForIdStream(searchParamMap, request, null).map(pid -> new TypedResourcePid(resourceType, pid));
+	}
+
+	private static TypedResourcePid typedPidFromQueryArray(Object[] thePidTypeDateArray) {
+		String resourceType = (String) thePidTypeDateArray[1];
+		Long pid = (Long) thePidTypeDateArray[0];
+		return new TypedResourcePid(resourceType, JpaPid.fromId(pid));
+	}
+
+	@Nonnull
+	private TypedResourceStream makeStreamResult(
+			RequestPartitionId theRequestPartitionId, Supplier<Stream<TypedResourcePid>> streamSupplier) {
+
+		IHapiTransactionService.IExecutionBuilder txSettings =
+				myTransactionService.withSystemRequest().withRequestPartitionId(theRequestPartitionId);
+
+		StreamTemplate<TypedResourcePid> streamTemplate =
+				StreamTemplate.fromSupplier(streamSupplier).withTransactionAdvice(txSettings);
+
+		return new TypedResourceStream(theRequestPartitionId, streamTemplate);
+	}
+
+	@Nonnull
+	private Stream<TypedResourcePid> streamResourceIdsNoUrl(
+			Date theStart, Date theEnd, RequestPartitionId theRequestPartitionId) {
+		Stream<Object[]> rowStream;
+		if (theRequestPartitionId == null || theRequestPartitionId.isAllPartitions()) {
+			ourLog.debug("Search for resources - all partitions");
+			rowStream = myResourceTableDao.streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(
+					theStart, theEnd);
+		} else if (theRequestPartitionId.isDefaultPartition()) {
+			ourLog.debug("Search for resources - default partition");
+			rowStream =
+					myResourceTableDao
+							.streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForDefaultPartition(
+									theStart, theEnd);
+		} else {
+			ourLog.debug("Search for resources - partition {}", theRequestPartitionId);
+			rowStream =
+					myResourceTableDao
+							.streamIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForPartitionIds(
+									theStart, theEnd, theRequestPartitionId.getPartitionIds());
+		}
+
+		return rowStream.map(Batch2DaoSvcImpl::typedPidFromQueryArray);
+	}
+
+	@Deprecated(since = "6.11", forRemoval = true) // delete once the default method in the interface is gone.
+	@Override
+	public IResourcePidList fetchResourceIdsPage(
+			Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, @Nullable String theUrl) {
+		Validate.isTrue(false, "Unimplemented");
+		return null;
+	}
+
+	private static void validateUrl(@Nonnull String theUrl) {
+		if (!theUrl.contains("?")) {
+			throw new InternalErrorException(Msg.code(2422) + "this should never happen: URL is missing a '?'");
+		}
+	}
+
+	@Nonnull
+	private SearchParameterMap parseQuery(String theUrl) {
 		String resourceType = theUrl.substring(0, theUrl.indexOf('?'));
 		RuntimeResourceDefinition def = myFhirContext.getResourceDefinition(resourceType);
 
 		SearchParameterMap searchParamMap = myMatchUrlService.translateMatchUrl(theUrl, def);
-		searchParamMap.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
-		DateRangeParam chunkDateRange = DateRangeUtil.narrowDateRange(searchParamMap.getLastUpdated(), theStart, theEnd);
-		searchParamMap.setLastUpdated(chunkDateRange);
-		searchParamMap.setCount(thePageSize);
-
-		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
-		SystemRequestDetails request = new SystemRequestDetails();
-		request.setRequestPartitionId(theRequestPartitionId);
-		List<IResourcePersistentId> ids = dao.searchForIds(searchParamMap, request);
-
-		Date lastDate = null;
-		if (isNotEmpty(ids)) {
-			IResourcePersistentId lastResourcePersistentId = ids.get(ids.size() - 1);
-			lastDate = dao.readByPid(lastResourcePersistentId, true).getMeta().getLastUpdated();
-		}
-
-		return new HomogeneousResourcePidList(resourceType, ids, lastDate);
-	}
-
-	@Nonnull
-	private IResourcePidList fetchResourceIdsPageNoUrl(Date theStart, Date theEnd, int thePagesize, RequestPartitionId theRequestPartitionId) {
-		Pageable page = Pageable.ofSize(thePagesize);
-		Slice<Object[]> slice;
-		if (theRequestPartitionId == null || theRequestPartitionId.isAllPartitions()) {
-			slice = myResourceTableDao.findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldest(page, theStart, theEnd);
-		} else if (theRequestPartitionId.isDefaultPartition()) {
-			slice = myResourceTableDao.findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForDefaultPartition(page, theStart, theEnd);
-		} else {
-			slice = myResourceTableDao.findIdsTypesAndUpdateTimesOfResourcesWithinUpdatedRangeOrderedFromOldestForPartitionIds(page, theStart, theEnd, theRequestPartitionId.getPartitionIds());
-		}
-
-		List<Object[]> content = slice.getContent();
-		if (content.isEmpty()) {
-			return new EmptyResourcePidList();
-		}
-
-		List<IResourcePersistentId> ids = content
-			.stream()
-			.map(t -> JpaPid.fromId((Long) t[0]))
-			.collect(Collectors.toList());
-
-		List<String> types = content
-			.stream()
-			.map(t -> (String) t[1])
-			.collect(Collectors.toList());
-
-		Date lastDate = (Date) content.get(content.size() - 1)[2];
-
-		return new MixedResourcePidList(types, ids, lastDate);
+		// this matches idx_res_type_del_updated
+		searchParamMap.setSort(new SortSpec(Constants.PARAM_LASTUPDATED).setChain(new SortSpec(Constants.PARAM_PID)));
+		// TODO this limits us to 2G resources.
+		searchParamMap.setLoadSynchronousUpTo(Integer.MAX_VALUE);
+		return searchParamMap;
 	}
 }

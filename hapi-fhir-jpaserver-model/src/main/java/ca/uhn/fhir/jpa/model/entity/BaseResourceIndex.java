@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,10 +17,11 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
+import jakarta.persistence.MappedSuperclass;
 import org.apache.commons.lang3.ObjectUtils;
 
-import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
 @MappedSuperclass
@@ -57,5 +56,4 @@ public abstract class BaseResourceIndex extends BasePartitionable implements Ser
 	public abstract boolean equals(Object obj);
 
 	public abstract <T extends BaseResourceIndex> void copyMutableValuesFrom(T theSource);
-
 }

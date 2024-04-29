@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5634
+title: "Previously, expanding a 'ValueSet' with no concepts based on system `urn:ietf:bcp:13` would fail with 
+`ExpansionCouldNotBeCompletedInternallyException`. This has been fixed."

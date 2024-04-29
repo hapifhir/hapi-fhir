@@ -3,14 +3,15 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.model.MdmCreateOrUpdateParams;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.MessageHelper;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
@@ -40,12 +41,10 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 	private IMdmLinkUpdaterSvc myMdmLinkUpdaterSvc;
 
 	@Autowired
-	private MdmResourceDaoSvc myMdmResourceDaoSvc;
+	private MdmResourceDaoSvcImpl myMdmResourceDaoSvc;
 
 	@Autowired
 	private MessageHelper myMessageHelper;
-
-
 
 	@Test
 	void testUpdateLinkToMatchWhenAnotherLinkToDifferentGoldenExistsMustFail() throws Exception {
@@ -61,18 +60,56 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 		Patient patientC = createPatientFromJsonInputFileWithPossibleMatches( List.of(goldenA, goldenB) );
 
 		MdmTransactionContext mdmTransactionContext = getPatientUpdateLinkContext();
-		// update POSSIBLE_MATCH Patient C -> GR A to MATCH (should work OK)
-		myMdmLinkUpdaterSvc.updateLink(goldenA, patientC, MdmMatchResultEnum.MATCH, mdmTransactionContext);
 
+		MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
+		params.setMdmContext(mdmTransactionContext);
+		params.setRequestDetails(new SystemRequestDetails());
+		params.setGoldenResource(goldenA);
+		params.setSourceResource(patientC);
+		params.setMatchResult(MdmMatchResultEnum.MATCH);
+
+		// update POSSIBLE_MATCH Patient C -> GR A to MATCH (should work OK)
+		myMdmLinkUpdaterSvc.updateLink(params);
+
+		params.setGoldenResource(goldenB);
 		// update POSSIBLE_MATCH Patient C -> GR B to MATCH (should throw exception)
 		InvalidRequestException thrown = assertThrows(InvalidRequestException.class,
-			() -> myMdmLinkUpdaterSvc.updateLink(goldenB, patientC, MdmMatchResultEnum.MATCH, mdmTransactionContext));
+			() -> myMdmLinkUpdaterSvc.updateLink(params));
 
 		String expectedExceptionMessage = Msg.code(2218) + myMessageHelper.getMessageForAlreadyAcceptedLink(goldenA, patientC);
 		assertEquals(expectedExceptionMessage, thrown.getMessage());
 	}
 
+	@Test
+	void testUpdateLinkToNoMatchWhenAnotherLinkToDifferentGoldenExistsShouldNotFail() throws Exception {
+		// create Patient A -> MATCH GR A
+		Patient patientA = createPatientFromJsonInputFile(Patient_A_JSON_PATH);
+		// create Patient B -> MATCH GR B
+		Patient patientB = createPatientFromJsonInputFile(Patient_B_JSON_PATH);
 
+		Patient goldenA = getGoldenFor(patientA);
+		Patient goldenB = getGoldenFor(patientB);
+
+		// create Patient C -> no MATCH link. Only POSSIBLE_MATCH GR A and POSSIBLE_MATCH GR B
+		Patient patientC = createPatientFromJsonInputFileWithPossibleMatches( List.of(goldenA, goldenB) );
+		MdmTransactionContext mdmTransactionContext = getPatientUpdateLinkContext();
+
+		MdmCreateOrUpdateParams params = new MdmCreateOrUpdateParams();
+		params.setGoldenResource(goldenA);
+		params.setSourceResource(patientC);
+		params.setMdmContext(mdmTransactionContext);
+		params.setMatchResult(MdmMatchResultEnum.MATCH);
+		params.setRequestDetails(new SystemRequestDetails());
+
+		// update POSSIBLE_MATCH Patient C -> GR A to MATCH (should work OK)
+		myMdmLinkUpdaterSvc.updateLink(params);
+
+		params.setMatchResult(MdmMatchResultEnum.NO_MATCH);
+		params.setGoldenResource(goldenB);
+
+		// update POSSIBLE_MATCH Patient C -> GR B to NO_MATCH (should work OK)
+		myMdmLinkUpdaterSvc.updateLink(params);
+	}
 
 	private Patient createPatientFromJsonInputFileWithPossibleMatches(List<Patient> theGoldens) throws Exception {
 		Patient patient = createPatientFromJsonInputFile(Patient_C_JSON_PATH, false);
@@ -98,7 +135,6 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 		return golden;
 	}
 
-
 	private Patient createPatientFromJsonInputFile(String thePath)  throws Exception {
 		return createPatientFromJsonInputFile(thePath, true);
 	}
@@ -107,7 +143,11 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 		File jsonInputUrl = ResourceUtils.getFile(ResourceUtils.CLASSPATH_URL_PREFIX + thePath);
 		String jsonPatient = Files.readString(Paths.get(jsonInputUrl.toURI()), StandardCharsets.UTF_8);
 
-		Patient patient = (Patient) myFhirContext.newJsonParser().parseResource(jsonPatient);
+		return createPatientFromJsonString(jsonPatient, theCreateGolden);
+	}
+
+	private Patient createPatientFromJsonString(String theStr, boolean theCreateGolden) {
+		Patient patient = (Patient) myFhirContext.newJsonParser().parseResource(theStr);
 		DaoMethodOutcome daoOutcome = myPatientDao.create(patient, new SystemRequestDetails());
 
 		if (theCreateGolden) {

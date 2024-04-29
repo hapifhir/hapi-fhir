@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4721
+title: "Previously, clicking the '$diff' button on FHIRweb module would direct the user to an empty page. Now it 
+   displays the correct page."

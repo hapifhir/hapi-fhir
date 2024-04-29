@@ -1,9 +1,18 @@
+# Every night, at midnight, we want to run a SNAPSHOT publish of HAPI
+schedules:
+   - cron: "0 0 * * *" #midnight
+     displayName: Nightly SNAPSHOT Publish
+     branches:
+        include:
+           - master
+     always: false #set this to true if you want this job to run even when no changes where made to the code
+
 # This is manually run to deploy SNAPSHOT versions of HAPI to oss.sonaypte.org
 # We don't need to trigger on any pull request or branch change, so we disable such behavior
 pr: none
 trigger: none
 
-# We'll run the process on the latest version of unbuntu because they tend to be the fastest
+# We'll run the process on the latest version of ubuntu because they tend to be the fastest
 pool:
   vmImage: 'ubuntu-latest'
 
@@ -15,7 +24,9 @@ variables:
 - group: GPG_VARIABLE_GROUP
 - group: SONATYPE_VARIABLE_GROUP
 
-container: maven:3.8-openjdk-17
+container:
+    image: smilecdr/hapi-build:latest
+
 steps:
 
   # We need a valid signing key to sign our builds for deployment to sonatype. We have uploaded
@@ -35,7 +46,6 @@ steps:
 
   # Although we have imported the key files into our workspace, GPG has no knowledge that these keys exist.
   # We use a bash script to import both the private and puablic keys into gpg for future signing.
-
   # 3. Import keys into gpg
   - bash: |
       gpg --import --no-tty --batch --yes $(Agent.TempDirectory)/public.key
@@ -83,7 +93,7 @@ steps:
   # 5. Deploy SNAPSHOT build to sonatype
   - task: Maven@3
     env:
-      JAVA_HOME_11_X64: /usr/java/openjdk-17
+      JAVA_HOME_11_X64: /opt/java/openjdk
     displayName: 'Deploy to Sonatype staging'
     inputs:
       mavenPomFile: '$(System.DefaultWorkingDirectory)/pom.xml'

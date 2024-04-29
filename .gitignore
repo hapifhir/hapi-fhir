@@ -167,6 +167,6 @@ Snap.*
 .vscode
 
 
-/database/
+/database*/
 /activemq-data/
 /.run/

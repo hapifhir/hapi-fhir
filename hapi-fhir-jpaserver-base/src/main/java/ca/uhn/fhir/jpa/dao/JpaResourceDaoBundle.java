@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -28,12 +27,14 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
-import static org.apache.commons.lang3.StringUtils.defaultString;
-
 public class JpaResourceDaoBundle<T extends IBaseBundle> extends BaseHapiFhirResourceDao<T> {
 
 	@Override
-	protected void preProcessResourceForStorage(IBaseResource theResource, RequestDetails theRequestDetails, TransactionDetails theTransactionDetails, boolean thePerformIndexing) {
+	protected void preProcessResourceForStorage(
+			IBaseResource theResource,
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails,
+			boolean thePerformIndexing) {
 		super.preProcessResourceForStorage(theResource, theRequestDetails, theTransactionDetails, thePerformIndexing);
 
 		if (getContext().getVersion().getVersion() == FhirVersionEnum.DSTU2) {
@@ -42,7 +43,4 @@ public class JpaResourceDaoBundle<T extends IBaseBundle> extends BaseHapiFhirRes
 			}
 		}
 	}
-
-
-
 }

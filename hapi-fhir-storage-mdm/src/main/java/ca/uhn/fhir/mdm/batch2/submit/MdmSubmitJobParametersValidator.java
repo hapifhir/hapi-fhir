@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.batch2.submit;
-
 /*-
  * #%L
  * hapi-fhir-storage-mdm
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,22 +17,20 @@ package ca.uhn.fhir.mdm.batch2.submit;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.batch2.submit;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.annotation.Nonnull;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-
 
 public class MdmSubmitJobParametersValidator implements IJobParametersValidator<MdmSubmitJobParameters> {
 
@@ -42,7 +38,8 @@ public class MdmSubmitJobParametersValidator implements IJobParametersValidator<
 	private MatchUrlService myMatchUrlService;
 	private FhirContext myFhirContext;
 
-	public MdmSubmitJobParametersValidator(IMdmSettings theMdmSettings, MatchUrlService theMatchUrlService, FhirContext theFhirContext) {
+	public MdmSubmitJobParametersValidator(
+			IMdmSettings theMdmSettings, MatchUrlService theMatchUrlService, FhirContext theFhirContext) {
 		myMdmSettings = theMdmSettings;
 		myMatchUrlService = theMatchUrlService;
 		myFhirContext = theFhirContext;
@@ -50,7 +47,7 @@ public class MdmSubmitJobParametersValidator implements IJobParametersValidator<
 
 	@Nonnull
 	@Override
-	public List<String> validate(@Nonnull MdmSubmitJobParameters theParameters) {
+	public List<String> validate(RequestDetails theRequestDetails, @Nonnull MdmSubmitJobParameters theParameters) {
 		List<String> errorMsgs = new ArrayList<>();
 		for (PartitionedUrl partitionedUrl : theParameters.getPartitionedUrls()) {
 			String url = partitionedUrl.getUrl();
@@ -62,11 +59,17 @@ public class MdmSubmitJobParametersValidator implements IJobParametersValidator<
 		return errorMsgs;
 	}
 
-	private void validateAllSearchParametersApplyToResourceType(List<String> errorMsgs, PartitionedUrl partitionedUrl, String resourceType, RuntimeResourceDefinition resourceDefinition) {
+	private void validateAllSearchParametersApplyToResourceType(
+			List<String> errorMsgs,
+			PartitionedUrl partitionedUrl,
+			String resourceType,
+			RuntimeResourceDefinition resourceDefinition) {
 		try {
 			myMatchUrlService.translateMatchUrl(partitionedUrl.getUrl(), resourceDefinition);
 		} catch (MatchUrlService.UnrecognizedSearchParameterException e) {
-			String errorMsg = String.format("Search parameter %s is not recognized for resource type %s. Source error is %s", e.getParamName(), resourceType, e.getMessage());
+			String errorMsg = String.format(
+					"Search parameter %s is not recognized for resource type %s. Source error is %s",
+					e.getParamName(), resourceType, e.getMessage());
 			errorMsgs.add(errorMsg);
 		} catch (InvalidRequestException e) {
 			errorMsgs.add("Invalid request detected: " + e.getMessage());

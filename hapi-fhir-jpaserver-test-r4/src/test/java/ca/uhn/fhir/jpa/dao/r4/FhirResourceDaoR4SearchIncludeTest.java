@@ -6,11 +6,15 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
+import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import org.hamcrest.Matcher;
 import org.hamcrest.Matchers;
 import org.hamcrest.collection.IsIterableContainingInAnyOrder;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BodyStructure;
 import org.hl7.fhir.r4.model.CarePlan;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -22,7 +26,11 @@ import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import java.sql.Date;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -263,4 +271,43 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 			myCarePlanDao.update(carePlan);
 		}
 	}
+
+	/**
+	 * https://github.com/hapifhir/hapi-fhir/issues/4896
+	 */
+	@Test
+	void testLastUpdatedDoesNotApplyToForwardOrRevIncludes() {
+	    // given
+		Instant now = Instant.now();
+		IIdType org = createOrganization();
+		IIdType patId = createPatient(withReference("managingOrganization", org));
+		IIdType groupId = createGroup(withGroupMember(patId));
+		IIdType careTeam = createResource("CareTeam", withSubject(patId));
+
+		// backdate the Group and CareTeam
+		int updatedCount = new TransactionTemplate(myTxManager).execute((status)->
+			myEntityManager
+				.createQuery("update ResourceTable set myUpdated = :new_updated where myId in (:target_ids)")
+				.setParameter("new_updated", Date.from(now.minus(1, ChronoUnit.HOURS)))
+				.setParameter("target_ids", List.of(groupId.getIdPartAsLong(), careTeam.getIdPartAsLong(), org.getIdPartAsLong()))
+				.executeUpdate());
+		assertEquals(3, updatedCount, "backdated the Organization, CareTeam and Group");
+
+
+		// when
+		// "Patient?_lastUpdated=gt2023-01-01&_revinclude=Group:member&_revinclude=CareTeam:subject&_include=Patient:organization");
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLastUpdated(new DateRangeParam(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, Date.from(now))));
+		map.addInclude(new Include("Patient:organization"));
+		map.addRevInclude(new Include("Group:member"));
+		map.addRevInclude(new Include("CareTeam:subject"));
+
+		IBundleProvider outcome = myPatientDao.search(map, mySrd);
+		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
+
+
+		// then
+		assertThat(ids, Matchers.containsInAnyOrder(patId.getValue(), groupId.getValue(), careTeam.getValue(), org.getValue()));
+	}
+
 }

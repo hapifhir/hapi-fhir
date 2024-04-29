@@ -57,8 +57,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.ServletContextHandler;
-import org.eclipse.jetty.servlet.ServletHolder;
+import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -72,6 +72,7 @@ import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.DiagnosticReport;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.IntegerType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationDefinition;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -566,12 +567,13 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		MyAnonymousInterceptor1 interceptor1 = new MyAnonymousInterceptor1();
 		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, interceptor1);
 		MySearchNarrowingInterceptor interceptor2 = new MySearchNarrowingInterceptor();
+		interceptor2.setNarrowConditionalUrls(true);
 		ourRestServer.getInterceptorService().registerInterceptor(interceptor2);
 		try {
 			myClient.transaction().withBundle(input).execute();
 			assertEquals(1, counter0.get());
 			assertEquals(1, counter1.get());
-			assertEquals(5, counter2.get());
+			assertEquals(1, counter2.get());
 
 		} finally {
 			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor1);
@@ -664,19 +666,6 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		assertEquals(id1_2.toVersionless(), id2_2.toVersionless());
 		assertEquals(id1_3.toVersionless(), id2_3.toVersionless());
 		assertEquals(id1_4.toVersionless(), id2_4.toVersionless());
-	}
-
-	/**
-	 * This is Gramahe's test transaction - it requires some set up in order to work
-	 */
-	@Test
-	@Disabled
-	public void testTransactionFromBundle3() throws Exception {
-
-		InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/grahame-transaction.xml");
-		String bundle = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
-		String response = myClient.transaction().withBundle(bundle).prettyPrint().execute();
-		ourLog.info(response);
 	}
 
 	@Test
@@ -850,7 +839,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	 * FOrmat has changed, source is no longer valid
 	 */
 	@Test
-	@Disabled
+	@Disabled("input file needs to be upgraded to R4 format")
 	public void testValidateUsingIncomingResources() throws Exception {
 		FhirInstanceValidator val = new FhirInstanceValidator(myValidationSupport);
 		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
@@ -969,7 +958,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "Observation?subject.active=false");
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "DiagnosticReport?subject.active=false");
 		int batchSize = 2;
-		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new DecimalType(batchSize));
+		input.addParameter(ProviderConstants.OPERATION_DELETE_BATCH_SIZE, new IntegerType(batchSize));
 
 		// execute
 

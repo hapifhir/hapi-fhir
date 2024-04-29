@@ -45,7 +45,7 @@ import java.util.List;
 /**
  * Ignored because this feature isn't implemented yet
  */
-@Disabled
+@Disabled("Not implemented yet")
 public class RestHookWithEventDefinitionR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestHookWithEventDefinitionR4Test.class);

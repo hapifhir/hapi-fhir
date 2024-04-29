@@ -1,10 +1,8 @@
-package ca.uhn.fhir.parser;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.parser;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.parser;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -26,6 +25,7 @@ import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.hl7.fhir.instance.model.api.IAnyResource;
+import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 
@@ -47,9 +47,55 @@ import java.util.Set;
  */
 public interface IParser {
 
+	/**
+	 * Encodes a resource using the parser's given encoding format.
+	 *
+	 * @param theResource The resource to encode. Must not be null.
+	 * @return A string representation of the encoding
+	 * @throws DataFormatException If any invalid elements within the contents to be encoded prevent successful encoding.
+	 */
 	String encodeResourceToString(IBaseResource theResource) throws DataFormatException;
 
+	/**
+	 * Encodes a resource using the parser's given encoding format.
+	 *
+	 * @param theResource The resource to encode. Must not be null.
+	 * @param theWriter   The writer to write to.
+	 * @throws DataFormatException If any invalid elements within the contents to be encoded prevent successful encoding.
+	 */
 	void encodeResourceToWriter(IBaseResource theResource, Writer theWriter) throws IOException, DataFormatException;
+
+	/**
+	 * Encodes any FHIR element to a string.
+	 * If a {@link IBaseResource resource object} is passed in, the resource will be encoded using standard FHIR
+	 * encoding rules. If a {@link org.hl7.fhir.instance.model.api.IPrimitiveType primitive datatype} is passed in,
+	 * the string value of the primitive type is encoded. Any extensions on the primitive type are not encoded.
+	 * If any other object is passed in, a fragment is encoded. The format of the fragment depends on the encoding:
+	 * <ul>
+	 *    <li><b>JSON</b>: The fragment is output as a simple JSON object, exactly as it would appear within an encoded resource.</li>
+	 *    <li><b>XML</b>: The fragment is output as an XML element as it would appear within an encoded resource, however it is wrapped in an element called <code>&lt;element&gt;</code> in order to avoid producing a document with multiple root tags.</li>
+	 *    <li><b>RDF/Turtle</b>: This mode is not supported and will throw an {@link ca.uhn.fhir.rest.server.exceptions.InternalErrorException}</li>
+	 * </ul>
+	 *
+	 * @since 6.8.0
+	 */
+	String encodeToString(IBase theElement) throws DataFormatException;
+
+	/**
+	 * Encodes any FHIR element to a writer.
+	 * If a {@link IBaseResource resource object} is passed in, the resource will be encoded using standard FHIR
+	 * encoding rules. If a {@link org.hl7.fhir.instance.model.api.IPrimitiveType primitive datatype} is passed in,
+	 * the string value of the primitive type is encoded. Any extensions on the primitive type are not encoded.
+	 * If any other object is passed in, a fragment is encoded. The format of the fragment depends on the encoding:
+	 * <ul>
+	 *    <li><b>JSON</b>: The fragment is output as a simple JSON object, exactly as it would appear within an encoded resource.</li>
+	 *    <li><b>XML</b>: The fragment is output as an XML element as it would appear within an encoded resource, however it is wrapped in an element called <code>&lt;element&gt;</code> in order to avoid producing a document with multiple root tags.</li>
+	 *    <li><b>RDF/Turtle</b>: This mode is not supported and will throw an {@link ca.uhn.fhir.rest.server.exceptions.InternalErrorException}</li>
+	 * </ul>
+	 *
+	 * @since 6.8.0
+	 */
+	void encodeToWriter(IBase theElement, Writer theWriter) throws DataFormatException, IOException;
 
 	/**
 	 * If not set to null (as is the default) this ID will be used as the ID in any
@@ -185,7 +231,8 @@ public interface IParser {
 	 * @return A parsed resource
 	 * @throws DataFormatException If the resource can not be parsed because the data is not recognized or invalid for any reason
 	 */
-	<T extends IBaseResource> T parseResource(Class<T> theResourceType, InputStream theInputStream) throws DataFormatException;
+	<T extends IBaseResource> T parseResource(Class<T> theResourceType, InputStream theInputStream)
+			throws DataFormatException;
 
 	/**
 	 * Parses a resource
@@ -380,5 +427,4 @@ public interface IParser {
 	 * @see ParserOptions
 	 */
 	IParser setDontStripVersionsFromReferencesAtPaths(Collection<String> thePaths);
-
 }

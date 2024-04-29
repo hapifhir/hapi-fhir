@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +17,16 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
 import ca.uhn.fhir.context.ParserOptions;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.model.dialect.ISequenceValueMassager;
+import ca.uhn.fhir.jpa.util.ISequenceValueMassager;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.server.interceptor.ResponseTerminologyTranslationSvc;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.annotations.VisibleForTesting;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.Subscription;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -42,12 +42,17 @@ import java.util.Set;
 
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 
+/**
+ * This class contains configuration options common to all hapi-fhir-storage implementations.
+ * Ultimately it should live in that project
+ */
 public class StorageSettings {
 	/**
 	 * @since 5.6.0
 	 */
 	// Thread Pool size used by batch in bundle
 	public static final int DEFAULT_BUNDLE_BATCH_POOL_SIZE = 20; // 1 for single thread
+
 	public static final int DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE = 100; // 1 for single thread
 	/**
 	 * Default {@link #getTreatReferencesAsLogical() logical URL bases}. Includes the following
@@ -58,7 +63,13 @@ public class StorageSettings {
 	 * <li><code>"http://hl7.org/fhir/StructureDefinition/*"</code></li>
 	 * </ul>
 	 */
-	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList("http://hl7.org/fhir/ValueSet/*", "http://hl7.org/fhir/CodeSystem/*", "http://hl7.org/fhir/valueset-*", "http://hl7.org/fhir/codesystem-*", "http://hl7.org/fhir/StructureDefinition/*")));
+	public static final Set<String> DEFAULT_LOGICAL_BASE_URLS = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+			"http://hl7.org/fhir/ValueSet/*",
+			"http://hl7.org/fhir/CodeSystem/*",
+			"http://hl7.org/fhir/valueset-*",
+			"http://hl7.org/fhir/codesystem-*",
+			"http://hl7.org/fhir/StructureDefinition/*")));
+
 	public static final String DEFAULT_WEBSOCKET_CONTEXT_PATH = "/websocket";
 	/*
 	 * <p>
@@ -79,13 +90,14 @@ public class StorageSettings {
 	 * update setter javadoc if default changes
 	 */
 	private boolean myAllowContainsSearches = false;
+
 	private boolean myAllowExternalReferences = false;
 	private Set<String> myTreatBaseUrlsAsLocal = new HashSet<>();
 	private Set<String> myTreatReferencesAsLogical = new HashSet<>(DEFAULT_LOGICAL_BASE_URLS);
 	private boolean myDefaultSearchParamsCanBeOverridden = true;
 	private Set<Subscription.SubscriptionChannelType> mySupportedSubscriptionTypes = new HashSet<>();
 	private boolean myAutoCreatePlaceholderReferenceTargets;
-	private boolean myCrossPartitionSubscriptionEnabled = false;
+	private boolean myCrossPartitionSubscriptionEnabled = true;
 	private Integer myBundleBatchPoolSize = DEFAULT_BUNDLE_BATCH_POOL_SIZE;
 	private Integer myBundleBatchMaxPoolSize = DEFAULT_BUNDLE_BATCH_MAX_POOL_SIZE;
 	private boolean myEnableInMemorySubscriptionMatching = true;
@@ -99,6 +111,7 @@ public class StorageSettings {
 	 * Update setter javadoc if default changes.
 	 */
 	private boolean myUseOrdinalDatesForDayPrecisionSearches = true;
+
 	private boolean mySuppressStringIndexingInTokens = false;
 	private Class<? extends ISequenceValueMassager> mySequenceValueMassagerClass;
 	private IPrimitiveType<Date> myPeriodIndexStartOfTime;
@@ -107,16 +120,60 @@ public class StorageSettings {
 	private Set<String> myAutoVersionReferenceAtPaths = Collections.emptySet();
 	private Map<String, Set<String>> myTypeToAutoVersionReferenceAtPaths = Collections.emptyMap();
 	private boolean myRespectVersionsForSearchIncludes;
+	private boolean myIndexOnUpliftedRefchains = false;
 	private boolean myIndexOnContainedResources = false;
 	private boolean myIndexOnContainedResourcesRecursively = false;
 	private boolean myAllowMdmExpansion = false;
 	private boolean myAutoSupportDefaultSearchParams = true;
 	private boolean myIndexIdentifierOfType = false;
+	private IndexEnabledEnum myIndexMissingFieldsEnabled = IndexEnabledEnum.DISABLED;
+
+	/**
+	 * @since 6.8.0
+	 * Prevents any non IN-MEMORY Search params from being created by users.
+	 */
+	private boolean myAllowOnlyInMemorySubscriptions = false;
+
 	/**
 	 * Since 6.4.0
 	 */
 	private boolean myQualifySubscriptionMatchingChannelName = true;
+	/**
+	 * Should the {@literal _lamguage} SearchParameter be supported
+	 * on this server?
+	 *
+	 * @since 7.0.0
+	 */
+	private boolean myLanguageSearchParameterEnabled = false;
 
+	/**
+	 * If set to false, all resource types will be installed via package installer, regardless of their status.
+	 * Otherwise, resources will be filtered based on status according to some criteria which can be found in
+	 * <code>PackageInstallerSvcImpl#isValidResourceStatusForPackageUpload<code>
+	 * @since 7.0.0
+	 */
+	private boolean myValidateResourceStatusForPackageUpload = true;
+
+	/**
+	 * If set to true, the server will prevent the creation of Subscriptions which cannot be evaluated IN-MEMORY. This can improve
+	 * overall server performance.
+	 *
+	 * @since 6.8.0
+	 */
+	public void setOnlyAllowInMemorySubscriptions(boolean theAllowOnlyInMemorySearchParams) {
+		myAllowOnlyInMemorySubscriptions = theAllowOnlyInMemorySearchParams;
+	}
+
+	/**
+	 * If set to true, the server will prevent the creation of Subscriptions which cannot be evaluated IN-MEMORY. This can improve
+	 * overall server performance.
+	 *
+	 * @since 6.8.0
+	 * @return Returns the value of {@link #setOnlyAllowInMemorySubscriptions(boolean)}
+	 */
+	public boolean isOnlyAllowInMemorySubscriptions() {
+		return myAllowOnlyInMemorySubscriptions;
+	}
 	/**
 	 * Constructor
 	 */
@@ -253,6 +310,53 @@ public class StorageSettings {
 	 */
 	public void setEnableInMemorySubscriptionMatching(boolean theEnableInMemorySubscriptionMatching) {
 		myEnableInMemorySubscriptionMatching = theEnableInMemorySubscriptionMatching;
+	}
+
+	/**
+	 * If set to {@link IndexEnabledEnum#DISABLED} (default is {@link IndexEnabledEnum#DISABLED})
+	 * the server will not create search indexes for search parameters with no values in resources.
+	 * <p>
+	 * Disabling this feature means that the <code>:missing</code> search modifier will not be
+	 * supported on the server, but also means that storage and indexing (i.e. writes to the
+	 * database) may be much faster on servers which have lots of search parameters and need
+	 * to write quickly.
+	 * </p>
+	 * <p>
+	 * This feature may be enabled on servers where supporting the use of the :missing parameter is
+	 * of higher importance than raw write performance
+	 * </p>
+	 */
+	public IndexEnabledEnum getIndexMissingFields() {
+		return myIndexMissingFieldsEnabled;
+	}
+
+	/**
+	 * If set to {@link IndexEnabledEnum#DISABLED} (default is {@link IndexEnabledEnum#DISABLED})
+	 * the server will not create search indexes for search parameters with no values in resources.
+	 * <p>
+	 * Disabling this feature means that the <code>:missing</code> search modifier will not be
+	 * supported on the server, but also means that storage and indexing (i.e. writes to the
+	 * database) may be much faster on servers which have lots of search parameters and need
+	 * to write quickly.
+	 * </p>
+	 * <p>
+	 * This feature may be enabled on servers where supporting the use of the :missing parameter is
+	 * of higher importance than raw write performance
+	 * </p>
+	 * <p>
+	 * Note that this setting also has an impact on sorting (i.e. using the
+	 * <code>_sort</code> parameter on searches): If the server is configured
+	 * to not index missing field.
+	 * </p>
+	 * <p>
+	 * The following index may need to be added into the indexed tables such as <code>HFJ_SPIDX_TOKEN</code>
+	 * to improve the search performance while <code>:missing</code> is enabled.
+	 * <code>RES_TYPE, SP_NAME, SP_MISSING</code>
+	 * </p>
+	 */
+	public void setIndexMissingFields(IndexEnabledEnum theIndexMissingFields) {
+		Validate.notNull(theIndexMissingFields, "theIndexMissingFields must not be null");
+		myIndexMissingFieldsEnabled = theIndexMissingFields;
 	}
 
 	/**
@@ -675,12 +779,12 @@ public class StorageSettings {
 		return this;
 	}
 
-
 	/**
 	 * This setting indicates which subscription channel types are supported by the server.  Any subscriptions submitted
 	 * to the server matching these types will be activated.
 	 */
-	public StorageSettings addSupportedSubscriptionType(Subscription.SubscriptionChannelType theSubscriptionChannelType) {
+	public StorageSettings addSupportedSubscriptionType(
+			Subscription.SubscriptionChannelType theSubscriptionChannelType) {
 		mySupportedSubscriptionTypes.add(theSubscriptionChannelType);
 		return this;
 	}
@@ -693,6 +797,15 @@ public class StorageSettings {
 		return Collections.unmodifiableSet(mySupportedSubscriptionTypes);
 	}
 
+	/**
+	 * Indicate whether a subscription channel type is supported by this server.
+	 *
+	 * @return true if at least one subscription channel type is supported by this server false otherwise.
+	 */
+	public boolean hasSupportedSubscriptionTypes() {
+		return CollectionUtils.isNotEmpty(mySupportedSubscriptionTypes);
+	}
+
 	@VisibleForTesting
 	public void clearSupportedSubscriptionTypesForUnitTest() {
 		mySupportedSubscriptionTypes.clear();
@@ -701,7 +814,6 @@ public class StorageSettings {
 	/**
 	 * If e-mail subscriptions are supported, the From address used when sending e-mails
 	 */
-
 	public String getEmailFromAddress() {
 		return myEmailFromAddress;
 	}
@@ -709,7 +821,6 @@ public class StorageSettings {
 	/**
 	 * If e-mail subscriptions are supported, the From address used when sending e-mails
 	 */
-
 	public void setEmailFromAddress(String theEmailFromAddress) {
 		myEmailFromAddress = theEmailFromAddress;
 	}
@@ -717,7 +828,6 @@ public class StorageSettings {
 	/**
 	 * If websocket subscriptions are enabled, this specifies the context path that listens to them.  Default value "/websocket".
 	 */
-
 	public String getWebsocketContextPath() {
 		return myWebsocketContextPath;
 	}
@@ -725,7 +835,6 @@ public class StorageSettings {
 	/**
 	 * If websocket subscriptions are enabled, this specifies the context path that listens to them.  Default value "/websocket".
 	 */
-
 	public void setWebsocketContextPath(String theWebsocketContextPath) {
 		myWebsocketContextPath = theWebsocketContextPath;
 	}
@@ -1018,7 +1127,6 @@ public class StorageSettings {
 			byType.computeIfAbsent(type, t -> new HashSet<>()).add(nextPath);
 		}
 
-
 		myAutoVersionReferenceAtPaths = paths;
 		myTypeToAutoVersionReferenceAtPaths = byType;
 	}
@@ -1057,6 +1165,28 @@ public class StorageSettings {
 	}
 
 	/**
+	 * If enabled, "Uplifted Refchains" will be enabled. This feature causes
+	 * HAPI FHIR to generate indexes for stored resources that include the current
+	 * value of the target of a chained reference, such as "Encounter?subject.name".
+	 *
+	 * @since 6.6.0
+	 */
+	public boolean isIndexOnUpliftedRefchains() {
+		return myIndexOnUpliftedRefchains;
+	}
+
+	/**
+	 * If enabled, "Uplifted Refchains" will be enabled. This feature causes
+	 * HAPI FHIR to generate indexes for stored resources that include the current
+	 * value of the target of a chained reference, such as "Encounter?subject.name".
+	 *
+	 * @since 6.6.0
+	 */
+	public void setIndexOnUpliftedRefchains(boolean theIndexOnUpliftedRefchains) {
+		myIndexOnUpliftedRefchains = theIndexOnUpliftedRefchains;
+	}
+
+	/**
 	 * Should indexing and searching on contained resources be enabled on this server.
 	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
 	 *
@@ -1087,7 +1217,7 @@ public class StorageSettings {
 	}
 
 	/**
-	 * Should indexing and searching on contained resources be enabled on this server.
+	 * Should recursive indexing and searching on contained resources be enabled on this server.
 	 * This may have performance impacts, and should be enabled only if it is needed. Default is <code>false</code>.
 	 *
 	 * @since 5.6.0
@@ -1180,7 +1310,38 @@ public class StorageSettings {
 		return myQualifySubscriptionMatchingChannelName;
 	}
 
+	/**
+	 * @return Should the {@literal _lamguage} SearchParameter be supported on this server? Defaults to {@literal false}.
+	 * @since 7.0.0
+	 */
+	public boolean isLanguageSearchParameterEnabled() {
+		return myLanguageSearchParameterEnabled;
+	}
 
+	/**
+	 * Should the {@literal _lamguage} SearchParameter be supported on this server? Defaults to {@literal false}.
+	 *
+	 * @since 7.0.0
+	 */
+	public void setLanguageSearchParameterEnabled(boolean theLanguageSearchParameterEnabled) {
+		myLanguageSearchParameterEnabled = theLanguageSearchParameterEnabled;
+	}
+
+	/**
+	 * @return true if the filter is enabled for resources installed via package installer, false otherwise
+	 * @since 7.0.0
+	 */
+	public boolean isValidateResourceStatusForPackageUpload() {
+		return myValidateResourceStatusForPackageUpload;
+	}
+
+	/**
+	 * Should resources being installed via package installer be filtered.
+	 * @since 7.0.0
+	 */
+	public void setValidateResourceStatusForPackageUpload(boolean theValidateResourceStatusForPackageUpload) {
+		myValidateResourceStatusForPackageUpload = theValidateResourceStatusForPackageUpload;
+	}
 
 	private static void validateTreatBaseUrlsAsLocal(String theUrl) {
 		Validate.notBlank(theUrl, "Base URL must not be null or empty");
@@ -1188,10 +1349,14 @@ public class StorageSettings {
 		int starIdx = theUrl.indexOf('*');
 		if (starIdx != -1) {
 			if (starIdx != theUrl.length() - 1) {
-				throw new IllegalArgumentException(Msg.code(1525) + "Base URL wildcard character (*) can only appear at the end of the string: " + theUrl);
+				throw new IllegalArgumentException(Msg.code(1525)
+						+ "Base URL wildcard character (*) can only appear at the end of the string: " + theUrl);
 			}
 		}
-
 	}
 
+	public enum IndexEnabledEnum {
+		ENABLED,
+		DISABLED
+	}
 }

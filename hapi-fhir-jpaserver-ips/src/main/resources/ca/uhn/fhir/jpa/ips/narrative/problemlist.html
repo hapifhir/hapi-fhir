@@ -1,13 +1,13 @@
 <!--/* ProblemList -->
 <!--
-Medical Problem: Condition.code.text || Condition.code.coding[x].display
-Status: Condition.clinicalStatus.coding[x].display
-Comments: Condition.note[x].text (display all notes separated by <br /> )
-Onset Date: Condition.onsetDateTime
+Medical Problems: Condition.code.text || Condition.code.coding[x].display (separated by <br />)
+Status: Condition.clinicalStatus.text || Condition.clinicalStatus.coding[x].display (separated by <br />)
+Comments: Condition.note[x].text (separated by <br />)
+Onset Date: Condition.onsetDateTime || Condition.onsetPeriod.start && “-“ && Condition.onsetPeriod.end || Condition.onsetAge || Condition.onsetRange.low && “-“ && Condition.onsetRange.high || Condition.onsetString
 */-->
 <div xmlns:th="http://www.thymeleaf.org">
+   <h5>Problem List</h5>
    <table class="hapiPropertyTable">
-      <caption>Problem List</caption>
       <thead>
       <tr>
          <th>Medical Problems</th>
@@ -21,10 +21,10 @@ Onset Date: Condition.onsetDateTime
          <th:block th:unless='*{getResourceType().name() == "Composition"}'>
             <th:block th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink').getValue().getValue()}">
                <tr th:id="${#strings.arraySplit(extension, '#')[1]}">
-                  <td th:insert="IpsUtilityFragments :: codeableConcept (cc=*{getCode()},attr='display')">Medical Problems</td>
-                  <td th:insert="IpsUtilityFragments :: codeableConcept (cc=*{getClinicalStatus()},attr='code')">Status</td>
-                  <td th:insert="IpsUtilityFragments :: concat (list=*{getNote()},attr='text')">Comments</td>
-                  <td th:insert="IpsUtilityFragments :: renderOnset (onset=*{getOnset()})">Onset Date</td>
+                  <td th:insert="~{IpsUtilityFragments :: codeableConcept (cc=*{getCode()},attr='display')}">Medical Problems</td>
+                  <td th:insert="~{IpsUtilityFragments :: codeableConcept (cc=*{getClinicalStatus()},attr='code')}">Status</td>
+                  <td th:insert="~{IpsUtilityFragments :: concat (list=*{getNote()},attr='text')}">Comments</td>
+                  <td th:insert="~{IpsUtilityFragments :: renderOnset (onset=*{getOnset()})}">Onset Date</td>
                </tr>
             </th:block>
          </th:block>

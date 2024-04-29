@@ -13,6 +13,9 @@ import ca.uhn.fhir.batch2.model.JobDefinitionStep;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobWorkCursor;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -23,13 +26,14 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -52,7 +56,8 @@ class JobDataSinkTest {
 	@Captor
 	private ArgumentCaptor<JobWorkNotification> myJobWorkNotificationCaptor;
 	@Captor
-	private ArgumentCaptor<BatchWorkChunk> myBatchWorkChunkCaptor;
+	private ArgumentCaptor<WorkChunkCreateEvent> myBatchWorkChunkCaptor;
+	private final IHapiTransactionService myHapiTransactionService = new NonTransactionalHapiTransactionService();
 
 	@Test
 	public void test_sink_accept() {
@@ -93,11 +98,11 @@ class JobDataSinkTest {
 
 		// execute
 		// Let's test our first step worker by calling run on it:
-		when(myJobPersistence.storeWorkChunk(myBatchWorkChunkCaptor.capture())).thenReturn(CHUNK_ID);
+		when(myJobPersistence.onWorkChunkCreate(myBatchWorkChunkCaptor.capture())).thenReturn(CHUNK_ID);
 		JobInstance instance = JobInstance.fromInstanceId(JOB_INSTANCE_ID);
 		StepExecutionDetails<TestJobParameters, VoidModel> details = new StepExecutionDetails<>(new TestJobParameters().setParam1("" + PID_COUNT), null, instance, CHUNK_ID);
 		JobWorkCursor<TestJobParameters, VoidModel, Step1Output> cursor = new JobWorkCursor<>(job, true, firstStep, lastStep);
-		JobDataSink<TestJobParameters, VoidModel, Step1Output> sink = new JobDataSink<>(myBatchJobSender, myJobPersistence, job, JOB_INSTANCE_ID, cursor);
+		JobDataSink<TestJobParameters, VoidModel, Step1Output> sink = new JobDataSink<>(myBatchJobSender, myJobPersistence, job, JOB_INSTANCE_ID, cursor, myHapiTransactionService);
 
 		RunOutcome result = firstStepWorker.run(details, sink);
 
@@ -115,12 +120,13 @@ class JobDataSinkTest {
 		assertEquals(JOB_DEF_VERSION, notification.getJobDefinitionVersion());
 		assertEquals(LAST_STEP_ID, notification.getTargetStepId());
 
-		BatchWorkChunk batchWorkChunk = myBatchWorkChunkCaptor.getValue();
+		WorkChunkCreateEvent batchWorkChunk = myBatchWorkChunkCaptor.getValue();
 		assertEquals(JOB_DEF_VERSION, batchWorkChunk.jobDefinitionVersion);
 		assertEquals(0, batchWorkChunk.sequence);
 		assertEquals(JOB_DEF_ID, batchWorkChunk.jobDefinitionId);
 		assertEquals(JOB_INSTANCE_ID, batchWorkChunk.instanceId);
 		assertEquals(LAST_STEP_ID, batchWorkChunk.targetStepId);
+		assertNotNull(batchWorkChunk.serializedData);
 		Step1Output stepOutput = JsonUtil.deserialize(batchWorkChunk.serializedData, Step1Output.class);
 		assertThat(stepOutput.getPids(), hasSize(PID_COUNT));
 	}

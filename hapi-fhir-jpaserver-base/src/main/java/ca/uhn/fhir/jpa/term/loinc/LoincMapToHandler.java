@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term.loinc;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term.loinc;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term.loinc;
 
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.IZipContentsHandlerCsv;
@@ -66,14 +65,13 @@ public class LoincMapToHandler implements IZipContentsHandlerCsv {
 
 		TermConcept concept = myCode2Concept.get(code);
 		if (concept == null) {
-			ourLog.warn("A TermConcept was not found for MapTo '" + CONCEPT_CODE_PROP_NAME +
-				"' property: '" + code + "' MapTo record ignored.");
+			ourLog.warn("A TermConcept was not found for MapTo '" + CONCEPT_CODE_PROP_NAME + "' property: '" + code
+					+ "' MapTo record ignored.");
 			return;
 		}
 
 		concept.addPropertyCoding(MAP_TO_PROP_NAME, ITermLoaderSvc.LOINC_URI, mapTo, display);
-		ourLog.trace("Adding " + MAP_TO_PROP_NAME + " coding property: {} to concept.code {}", mapTo, concept.getCode());
+		ourLog.trace(
+				"Adding " + MAP_TO_PROP_NAME + " coding property: {} to concept.code {}", mapTo, concept.getCode());
 	}
-
-
 }

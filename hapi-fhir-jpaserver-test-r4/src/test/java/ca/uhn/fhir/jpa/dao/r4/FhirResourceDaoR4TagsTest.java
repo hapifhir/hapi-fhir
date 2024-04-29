@@ -18,7 +18,7 @@ import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -495,16 +495,8 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 	public void testInlineTags_Search_Security() {
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
 
-		SearchParameter searchParameter = new SearchParameter();
-		searchParameter.setId("SearchParameter/resource-security");
-		for (String next : myFhirContext.getResourceTypes().stream().sorted().collect(Collectors.toList())) {
-			searchParameter.addBase(next);
-		}
-		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
-		searchParameter.setCode("_security");
-		searchParameter.setName("Security");
-		searchParameter.setExpression("meta.security");
+		FhirContext fhirContext = myFhirContext;
+		SearchParameter searchParameter = createSecuritySearchParameter(fhirContext);
 		ourLog.debug("SearchParam:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(searchParameter));
 		mySearchParameterDao.update(searchParameter, mySrd);
 		mySearchParamRegistry.forceRefresh();
@@ -518,6 +510,21 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), containsInAnyOrder("Patient/A", "Patient/B"));
 
 		validatePatientSearchResultsForInlineTags(outcome);
+	}
+
+	@Nonnull
+	public static SearchParameter createSecuritySearchParameter(FhirContext fhirContext) {
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setId("SearchParameter/resource-security");
+		for (String next : fhirContext.getResourceTypes().stream().sorted().collect(Collectors.toList())) {
+			searchParameter.addBase(next);
+		}
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.setType(Enumerations.SearchParamType.TOKEN);
+		searchParameter.setCode("_security");
+		searchParameter.setName("Security");
+		searchParameter.setExpression("meta.security");
+		return searchParameter;
 	}
 
 	private void validatePatientSearchResultsForInlineTags(Bundle outcome) {
@@ -595,32 +602,32 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 	}
 
 	@Nonnull
-	private List<String> toTags(Patient patient) {
+	static List<String> toTags(Patient patient) {
 		return toTags(patient.getMeta());
 	}
 
 	@Nonnull
-	private List<String> toSecurityLabels(Patient patient) {
+	static List<String> toSecurityLabels(Patient patient) {
 		return toSecurityLabels(patient.getMeta());
 	}
 
 	@Nonnull
-	private List<String> toProfiles(Patient patient) {
+	static List<String> toProfiles(Patient patient) {
 		return toProfiles(patient.getMeta());
 	}
 
 	@Nonnull
-	private static List<String> toTags(Meta meta) {
+	static List<String> toTags(Meta meta) {
 		return meta.getTag().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
 	}
 
 	@Nonnull
-	private static List<String> toSecurityLabels(Meta meta) {
+	static List<String> toSecurityLabels(Meta meta) {
 		return meta.getSecurity().stream().map(t -> t.getSystem() + "|" + t.getCode() + "|" + t.getDisplay()).collect(Collectors.toList());
 	}
 
 	@Nonnull
-	private static List<String> toProfiles(Meta meta) {
+	static List<String> toProfiles(Meta meta) {
 		return meta.getProfile().stream().map(t -> t.getValue()).collect(Collectors.toList());
 	}
 

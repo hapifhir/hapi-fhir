@@ -12,6 +12,7 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -32,6 +33,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Patient.LinkType;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.ResourceType;
@@ -56,6 +58,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -509,6 +512,54 @@ public class FhirTerserR4Test {
 		assertEquals(1, strings.size());
 		assertThat(toStrings(strings), containsInAnyOrder("BUNDLE"));
 
+	}
+
+	@Test
+	public void testGetAllResourceReferences() {
+		// setup
+		Provenance p = new Provenance();
+		p.addTarget(new Reference("Observation/1"));
+		p.addTarget(new Reference("Observation/2"));
+		p.setLocation(new Reference("Location/3"));
+		p.getAgentFirstRep().setWho(new Reference("Practitioner/4"));
+		p.getAgentFirstRep().setOnBehalfOf(new Reference("Organization/5"));
+		p.getEntityFirstRep().setWhat(new Reference("DocumentReference/6"));
+
+		// execute
+		FhirTerser t = myCtx.newTerser();
+		List<ResourceReferenceInfo> references = t.getAllResourceReferences(p);
+
+		// validate
+		assertEquals(6, references.size());
+		assertThat(toResourceIds(references), containsInAnyOrder("Observation/1", "Observation/2", "Location/3", "Practitioner/4", "Organization/5", "DocumentReference/6"));
+	}
+
+	@Test
+	public void testGetAllResourceReferencesExcluding() {
+		// setup
+		Provenance p = new Provenance();
+		p.addTarget(new Reference("Observation/1"));
+		p.addTarget(new Reference("Observation/2"));
+		p.setLocation(new Reference("Location/3"));
+		p.getAgentFirstRep().setWho(new Reference("Practitioner/4"));
+		p.getAgentFirstRep().setOnBehalfOf(new Reference("Organization/5"));
+		p.getEntityFirstRep().setWhat(new Reference("DocumentReference/6"));
+
+		// execute
+		FhirTerser t = myCtx.newTerser();
+		List<ResourceReferenceInfo> references = t.getAllResourceReferencesExcluding(p, List.of("target"));
+
+		// validate
+		assertEquals(4, references.size());
+		assertThat(toResourceIds(references), containsInAnyOrder("Location/3", "Practitioner/4", "Organization/5", "DocumentReference/6"));
+	}
+
+	private List<String> toResourceIds(List<ResourceReferenceInfo> references) {
+		return references.stream()
+			 .map(ResourceReferenceInfo::getResourceReference)
+			 .map(IBaseReference::getReferenceElement)
+			 .map(IIdType::getValue)
+			 .collect(Collectors.toList());
 	}
 
 	@Test
@@ -1465,7 +1516,24 @@ public class FhirTerserR4Test {
 		}
 	}
 
+	@Test
+	void extensionWithEnumeration() {
+		final FhirContext ctx = FhirContext.forR4();
+		final FhirTerser fhirTerser = ctx.newTerser();
 
+		final String url = "http://hl7.org/fhir/StructureDefinition/data-absent-reason]";
+		final Enumeration<Enumerations.DataAbsentReason> enumerationUnknown = new Enumeration<>(new Enumerations.DataAbsentReasonEnumFactory(), "unknown");
+		final Extension extensionUnknown = new Extension(url, enumerationUnknown);
+
+		final AtomicBoolean result = new AtomicBoolean(false);
+		final IModelVisitor2 iModelVisitor2 = (theElement, theContainingElementPath, theChildDefinitionPath, theElementDefinitionPath) -> {
+            result.set(true);
+            return true;
+        };
+
+		fhirTerser.visit(extensionUnknown, iModelVisitor2);
+		assertTrue(result.get());
+	}
 
 	private List<String> toStrings(List<StringType> theStrings) {
 		ArrayList<String> retVal = new ArrayList<>();
@@ -1503,17 +1571,19 @@ public class FhirTerserR4Test {
 	/**
 	 * See http://stackoverflow.com/questions/182636/how-to-determine-the-class-of-a-generic-type
 	 */
+	@SuppressWarnings({"UnnecessaryLocalVariable", "unchecked"})
 	private static <T> Class<List<T>> getListClass(Class<T> theClass) {
-		return new ClassGetter<List<T>>() {
-		}.get();
+		Class listClass = List.class;
+		return listClass;
 	}
 
 	/**
 	 * See http://stackoverflow.com/questions/182636/how-to-determine-the-class-of-a-generic-type
 	 */
+	@SuppressWarnings({"UnnecessaryLocalVariable", "unchecked"})
 	private static Class<List<BaseRuntimeElementDefinition<?>>> getListClass2() {
-		return new ClassGetter<List<BaseRuntimeElementDefinition<?>>>() {
-		}.get();
+		Class listClass = List.class;
+		return listClass;
 	}
 
 }

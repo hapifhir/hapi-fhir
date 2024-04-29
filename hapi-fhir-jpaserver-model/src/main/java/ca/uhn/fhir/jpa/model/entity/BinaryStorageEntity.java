@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.model.entity;
-
 /*-
  * #%L
  * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,38 +17,53 @@ package ca.uhn.fhir.jpa.model.entity;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.model.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Lob;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
+import jakarta.persistence.Table;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import org.hibernate.Length;
+
 import java.sql.Blob;
 import java.util.Date;
 
+import static java.util.Objects.nonNull;
+
 @Entity
-@Table(name = "HFJ_BINARY_STORAGE_BLOB")
+@Table(name = "HFJ_BINARY_STORAGE")
 public class BinaryStorageEntity {
 
 	@Id
-	@Column(name = "BLOB_ID", length = 200, nullable = false)
-	//N.B GGG: Note that the `blob id` is the same as the `externalized binary id`.
-	private String myBlobId;
+	@Column(name = "CONTENT_ID", length = 200, nullable = false)
+	// N.B GGG: Note that the `content id` is the same as the `externalized binary id`.
+	private String myContentId;
+
 	@Column(name = "RESOURCE_ID", length = 100, nullable = false)
 	private String myResourceId;
-	@Column(name = "BLOB_SIZE", nullable = true)
+
+	@Column(name = "CONTENT_SIZE", nullable = true)
 	private long mySize;
+
 	@Column(name = "CONTENT_TYPE", nullable = false, length = 100)
-	private String myBlobContentType;
-	@Lob
-	@Column(name = "BLOB_DATA", nullable = false, insertable = true, updatable = false)
+	private String myContentType;
+
+	@Deprecated(since = "7.2.0")
+	@Lob // TODO: VC column added in 7.2.0 - Remove non-VC column later
+	@Column(name = "BLOB_DATA", nullable = true, insertable = true, updatable = false)
 	private Blob myBlob;
+
+	@Column(name = "STORAGE_CONTENT_BIN", nullable = true, length = Length.LONG32)
+	private byte[] myStorageContentBin;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "PUBLISHED_DATE", nullable = false)
 	private Date myPublished;
-	@Column(name = "BLOB_HASH", length = 128, nullable = true)
+
+	@Column(name = "CONTENT_HASH", length = 128, nullable = true)
 	private String myHash;
 
 	public Date getPublished() {
@@ -65,8 +78,8 @@ public class BinaryStorageEntity {
 		return myHash;
 	}
 
-	public void setBlobId(String theBlobId) {
-		myBlobId = theBlobId;
+	public void setContentId(String theContentId) {
+		myContentId = theContentId;
 	}
 
 	public void setResourceId(String theResourceId) {
@@ -77,12 +90,12 @@ public class BinaryStorageEntity {
 		return mySize;
 	}
 
-	public String getBlobContentType() {
-		return myBlobContentType;
+	public String getContentType() {
+		return myContentType;
 	}
 
-	public void setBlobContentType(String theBlobContentType) {
-		myBlobContentType = theBlobContentType;
+	public void setContentType(String theContentType) {
+		myContentType = theContentType;
 	}
 
 	public Blob getBlob() {
@@ -93,8 +106,8 @@ public class BinaryStorageEntity {
 		myBlob = theBlob;
 	}
 
-	public String getBlobId() {
-		return myBlobId;
+	public String getContentId() {
+		return myContentId;
 	}
 
 	public void setSize(long theSize) {
@@ -103,5 +116,22 @@ public class BinaryStorageEntity {
 
 	public void setHash(String theHash) {
 		myHash = theHash;
+	}
+
+	public byte[] getStorageContentBin() {
+		return myStorageContentBin;
+	}
+
+	public BinaryStorageEntity setStorageContentBin(byte[] theStorageContentBin) {
+		myStorageContentBin = theStorageContentBin;
+		return this;
+	}
+
+	public boolean hasStorageContent() {
+		return nonNull(myStorageContentBin);
+	}
+
+	public boolean hasBlob() {
+		return nonNull(myBlob);
 	}
 }

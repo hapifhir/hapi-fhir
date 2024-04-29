@@ -36,7 +36,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 	}
 
 	@Test
-	public void testMatch() throws Exception {
+	public void testMatch() {
 		Patient jane = buildJanePatient();
 		jane.setActive(true);
 		Patient createdJane = createPatient(jane);

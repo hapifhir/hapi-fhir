@@ -5,7 +5,10 @@ import org.junit.jupiter.api.Test;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TagTest {
 
@@ -27,7 +30,7 @@ public class TagTest {
 	@Test
 	public void testHashCode() {
 		Tag tag1 = new Tag().setScheme("scheme").setTerm("term").setLabel("label");
-		assertEquals(1920714536, tag1.hashCode());
+		assertEquals(-1029268184, tag1.hashCode());
 	}
 
 	@Test

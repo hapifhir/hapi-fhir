@@ -1,0 +1,23 @@
+{
+	"resourceType": "Group",
+	"id": "gic-gr-parallel",
+	"meta": {
+		"profile": [
+			"http://hl7.org/fhir/us/davinci-deqm/StructureDefinition/gaps-group-deqm"
+		]
+	},
+	"type": "person",
+	"actual": true,
+	"member": [
+		{
+			"entity": {
+				"reference": "Patient/numer-EXM125"
+			}
+		},
+		{
+			"entity": {
+				"reference": "Patient/denom-EXM125"
+			}
+		}
+	]
+}

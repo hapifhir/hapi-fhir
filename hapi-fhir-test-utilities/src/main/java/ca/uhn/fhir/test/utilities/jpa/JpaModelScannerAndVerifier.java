@@ -1,10 +1,8 @@
-package ca.uhn.fhir.test.utilities.jpa;
-
 /*-
  * #%L
  * HAPI FHIR Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,15 +17,17 @@ package ca.uhn.fhir.test.utilities.jpa;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.test.utilities.jpa;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import com.google.common.base.Ascii;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import com.google.common.collect.Multimap;
 import com.google.common.reflect.ClassPath;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -36,25 +36,25 @@ import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.Subselect;
 import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Embedded;
-import javax.persistence.EmbeddedId;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Index;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
-import javax.persistence.Transient;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.Size;
+import jakarta.persistence.Column;
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
+import jakarta.persistence.Entity;
+import jakarta.persistence.ForeignKey;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Size;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.AnnotatedElement;
@@ -62,6 +62,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -71,6 +72,7 @@ import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * This class is only used at build-time. It scans the various Hibernate entity classes
@@ -81,16 +83,26 @@ public class JpaModelScannerAndVerifier {
 	public static final int MAX_COL_LENGTH = 4000;
 	private static final int MAX_LENGTH = 30;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(JpaModelScannerAndVerifier.class);
-	// Exceptions set because H2 sets indexes for FKs automatically so this index had to be called as the target FK field
-	// it is indexing to avoid SchemaMigrationTest to complain about the extra index (which doesn't exist in H2)
-	private static final Set<String> duplicateNameValidationExceptionList = Sets.newHashSet(
-		"FK_CONCEPTPROP_CONCEPT",
-		"FK_CONCEPTDESIG_CONCEPT",
-		"FK_TERM_CONCEPTPC_CHILD",
-		"FK_TERM_CONCEPTPC_PARENT",
-		"FK_TRM_VALUESET_CONCEPT_PID",
-		"FK_SEARCHINC_SEARCH"
-	);
+
+	/**
+	 * We will keep track of all the index names and the columns they
+	 * refer to.
+	 * ---
+	 * H2 automatically adds Indexes to ForeignKey constraints.
+	 * This *does not happen* in other databases.
+	 * ---
+	 * But because we should be indexing foreign keys, we have to explicitly
+	 * add an index to a foreign key.
+	 * But if we give it a new name, SchemaMigrationTest will complain about an extra
+	 * index that doesn't exist in H2.
+	 * ---
+	 * tl;dr
+	 * Due to the quirks of supported DBs, we must have index names that duplicate their
+	 * foreign key constraint names.
+	 * So we'll be keeping a list of them here.
+	 */
+	private static final Multimap<String, String> ourIndexNameToColumn = HashMultimap.create();
+
 	private static Set<String> ourReservedWords;
 	public JpaModelScannerAndVerifier() {
 		super();
@@ -185,19 +197,20 @@ public class JpaModelScannerAndVerifier {
 					if (generatedValue != null) {
 						Validate.notBlank(generatedValue.generator(), "Field has no @GeneratedValue.generator(): %s", nextField);
 						assertNotADuplicateName(generatedValue.generator(), theNames);
-						assertEquals(generatedValue.strategy(), GenerationType.AUTO);
+						assertEqualsForIdGenerator(nextField, generatedValue.strategy(), GenerationType.AUTO);
 
 						GenericGenerator genericGenerator = nextField.getAnnotation(GenericGenerator.class);
 						SequenceGenerator sequenceGenerator = nextField.getAnnotation(SequenceGenerator.class);
 						Validate.isTrue(sequenceGenerator != null ^ genericGenerator != null);
 
 						if (genericGenerator != null) {
-							assertEquals("ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator", genericGenerator.strategy());
-							assertEquals(generatedValue.generator(), genericGenerator.name());
+							assertEqualsForIdGenerator(nextField, "ca.uhn.fhir.jpa.model.dialect.HapiSequenceStyleGenerator", genericGenerator.type().getName());
+							assertEqualsForIdGenerator(nextField, "native", genericGenerator.strategy());
+							assertEqualsForIdGenerator(nextField, generatedValue.generator(), genericGenerator.name());
 						} else {
 							Validate.notNull(sequenceGenerator);
-							assertEquals(generatedValue.generator(), sequenceGenerator.name());
-							assertEquals(generatedValue.generator(), sequenceGenerator.sequenceName());
+							assertEqualsForIdGenerator(nextField, generatedValue.generator(), sequenceGenerator.name());
+							assertEqualsForIdGenerator(nextField, generatedValue.generator(), sequenceGenerator.sequenceName());
 						}
 					}
 				}
@@ -284,6 +297,12 @@ public class JpaModelScannerAndVerifier {
 				assertNotADuplicateName(nextConstraint.name(), theNames);
 				Validate.isTrue(nextConstraint.name().startsWith("IDX_") || nextConstraint.name().startsWith("FK_"),
 					nextConstraint.name() + " must start with IDX_ or FK_ (last one when indexing a FK column)");
+
+				// add the index names to the collection of allowable duplicate fk names
+				String[] cols = nextConstraint.columnList().split(",");
+				for (String col : cols) {
+					ourIndexNameToColumn.put(nextConstraint.name(), col);
+				}
 			}
 		}
 
@@ -307,7 +326,13 @@ public class JpaModelScannerAndVerifier {
 				Validate.isTrue(fk.name().startsWith("FK_") || legacySPHibernateFKNames.contains(fk.name()),
 					"Foreign key " + fk.name() + " on " + theAnnotatedElement + " must start with FK_");
 
-				if (!duplicateNameValidationExceptionList.contains(fk.name())) {
+				if (ourIndexNameToColumn.containsKey(fk.name())) {
+					// this foreign key has the same name as an existing index
+					// let's make sure it's on the same column
+					Collection<String> columns = ourIndexNameToColumn.get(fk.name());
+					assertTrue(columns.contains(columnName), String.format("Foreign key %s duplicates index name, but column %s is not part of the index!", fk.name(), columnName));
+				} else {
+					// verify it's not a duplicate
 					assertNotADuplicateName(fk.name(), theNames);
 				}
 			}
@@ -335,9 +360,6 @@ public class JpaModelScannerAndVerifier {
 				if (!hasLob) {
 					if (!theIsView && column.length() == 255) {
 						throw new IllegalStateException(Msg.code(1626) + "Field does not have an explicit maximum length specified: " + field);
-					}
-					if (column.length() > MAX_COL_LENGTH) {
-						throw new IllegalStateException(Msg.code(1627) + "Field is too long: " + field);
 					}
 				}
 
@@ -384,8 +406,8 @@ public class JpaModelScannerAndVerifier {
 		return retVal;
 	}
 
-	private static void assertEquals(Object theGenerator, Object theName) {
-		Validate.isTrue(theGenerator.equals(theName));
+	private static void assertEqualsForIdGenerator(Field theSource, Object theExpectedGenerator, Object theActualGenerator) {
+		Validate.isTrue(theExpectedGenerator.equals(theActualGenerator), "Value " + theActualGenerator + " doesn't match expected " + theExpectedGenerator + " for ID generator on " + theSource);
 	}
 
 	private static void assertNotADuplicateName(String theName, Set<String> theNames) {

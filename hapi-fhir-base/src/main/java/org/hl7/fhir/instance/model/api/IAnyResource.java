@@ -1,13 +1,8 @@
-package org.hl7.fhir.instance.model.api;
-
-import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
-import ca.uhn.fhir.rest.gclient.TokenClientParam;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +17,10 @@ import ca.uhn.fhir.rest.gclient.TokenClientParam;
  * limitations under the License.
  * #L%
  */
+package org.hl7.fhir.instance.model.api;
+
+import ca.uhn.fhir.model.api.annotation.SearchParamDefinition;
+import ca.uhn.fhir.rest.gclient.TokenClientParam;
 
 /**
  * An IBaseResource that has a FHIR version of DSTU3 or higher
@@ -31,7 +30,7 @@ public interface IAnyResource extends IBaseResource {
 	/**
 	 * Search parameter constant for <b>_id</b>
 	 */
-	@SearchParamDefinition(name="_id", path="", description="The ID of the resource", type="token")
+	@SearchParamDefinition(name = "_id", path = "", description = "The ID of the resource", type = "token")
 	String SP_RES_ID = "_id";
 
 	/**
@@ -55,5 +54,4 @@ public interface IAnyResource extends IBaseResource {
 	IAnyResource setId(String theId);
 
 	void setUserData(String name, Object value);
-
 }

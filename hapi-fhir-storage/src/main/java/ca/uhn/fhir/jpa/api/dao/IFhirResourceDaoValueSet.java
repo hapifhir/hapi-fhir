@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.api.dao;
-
 /*
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.api.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.api.dao;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -35,9 +34,29 @@ public interface IFhirResourceDaoValueSet<T extends IBaseResource> extends IFhir
 
 	T expand(T theSource, ValueSetExpansionOptions theOptions);
 
-	T expand(IIdType theId, T theValueSet, IPrimitiveType<String> theUrl, IPrimitiveType<String> theValueSetVersion, IPrimitiveType<String> theFilter, IPrimitiveType<String> theContext, IPrimitiveType<String> theContextDirection, IPrimitiveType<Integer> theOffset, IPrimitiveType<Integer> theCount, IPrimitiveType<String> theDisplayLanguage, IPrimitiveType<Boolean> theIncludeHierarchy, RequestDetails theRequestDetails);
+	T expand(
+			IIdType theId,
+			T theValueSet,
+			IPrimitiveType<String> theUrl,
+			IPrimitiveType<String> theValueSetVersion,
+			IPrimitiveType<String> theFilter,
+			IPrimitiveType<String> theContext,
+			IPrimitiveType<String> theContextDirection,
+			IPrimitiveType<Integer> theOffset,
+			IPrimitiveType<Integer> theCount,
+			IPrimitiveType<String> theDisplayLanguage,
+			IPrimitiveType<Boolean> theIncludeHierarchy,
+			RequestDetails theRequestDetails);
 
 	T expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions);
 
-	IValidationSupport.CodeValidationResult validateCode(IPrimitiveType<String> theValueSetIdentifier, IIdType theId, IPrimitiveType<String> theCode, IPrimitiveType<String> theSystem, IPrimitiveType<String> theDisplay, IBaseCoding theCoding, IBaseDatatype theCodeableConcept, RequestDetails theRequestDetails);
+	IValidationSupport.CodeValidationResult validateCode(
+			IPrimitiveType<String> theValueSetIdentifier,
+			IIdType theId,
+			IPrimitiveType<String> theCode,
+			IPrimitiveType<String> theSystem,
+			IPrimitiveType<String> theDisplay,
+			IBaseCoding theCoding,
+			IBaseDatatype theCodeableConcept,
+			RequestDetails theRequestDetails);
 }

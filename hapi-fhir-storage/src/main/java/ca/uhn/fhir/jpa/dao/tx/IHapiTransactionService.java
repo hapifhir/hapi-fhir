@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao.tx;
-
 /*-
  * #%L
  * HAPI FHIR Storage api
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,18 +17,22 @@ package ca.uhn.fhir.jpa.dao.tx;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao.tx;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.util.ICallable;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionOperations;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 /**
  * This class is used to execute code within the context of a database transaction,
@@ -50,12 +52,45 @@ public interface IHapiTransactionService {
 	IExecutionBuilder withRequest(@Nullable RequestDetails theRequestDetails);
 
 	/**
+	 * Fluent builder for internal system requests with no external
+	 * requestdetails associated
+	 */
+	IExecutionBuilder withSystemRequest();
+
+	/**
+	 * Fluent builder for internal system requests with no external
+	 * {@link RequestDetails} associated and a pre-specified partition ID.
+	 * This method is sugar for
+	 * <pre>
+	 *    withSystemRequest()
+	 * 			.withRequestPartitionId(thePartitionId);
+	 * </pre>
+	 *
+	 * @since 6.6.0
+	 */
+	default IExecutionBuilder withSystemRequestOnPartition(RequestPartitionId theRequestPartitionId) {
+		return withSystemRequest().withRequestPartitionId(theRequestPartitionId);
+	}
+
+	/**
+	 * Convenience for TX working with non-partitioned entities.
+	 */
+	default IExecutionBuilder withSystemRequestOnDefaultPartition() {
+		return withSystemRequestOnPartition(RequestPartitionId.defaultPartition());
+	}
+
+	/**
 	 * @deprecated It is highly recommended to use {@link #withRequest(RequestDetails)} instead of this method, for increased visibility.
 	 */
-	@Deprecated
-	<T> T withRequest(@Nullable RequestDetails theRequestDetails, @Nullable TransactionDetails theTransactionDetails, @Nonnull Propagation thePropagation, @Nonnull Isolation theIsolation, @Nonnull ICallable<T> theCallback);
+	@Deprecated(since = "6.10")
+	<T> T withRequest(
+			@Nullable RequestDetails theRequestDetails,
+			@Nullable TransactionDetails theTransactionDetails,
+			@Nonnull Propagation thePropagation,
+			@Nonnull Isolation theIsolation,
+			@Nonnull ICallable<T> theCallback);
 
-	interface IExecutionBuilder {
+	interface IExecutionBuilder extends TransactionOperations {
 
 		IExecutionBuilder withIsolation(Isolation theIsolation);
 
@@ -73,6 +108,28 @@ public interface IHapiTransactionService {
 
 		<T> T execute(Callable<T> theTask);
 
-		<T> T execute(TransactionCallback<T> callback);
+		<T> T execute(@Nonnull TransactionCallback<T> callback);
+
+		/**
+		 * Read query path.
+		 */
+		default <T> T read(Callable<T> theCallback) {
+			return execute(theCallback);
+		}
+
+		/**
+		 * Search for open Stream.
+		 * The Stream may not be readable outside an outermost transaction.
+		 */
+		default <T> Stream<T> search(Callable<Stream<T>> theCallback) {
+			return execute(theCallback);
+		}
+
+		/**
+		 * Search for concrete List.
+		 */
+		default <T> List<T> searchList(Callable<List<T>> theCallback) {
+			return execute(theCallback);
+		}
 	}
 }

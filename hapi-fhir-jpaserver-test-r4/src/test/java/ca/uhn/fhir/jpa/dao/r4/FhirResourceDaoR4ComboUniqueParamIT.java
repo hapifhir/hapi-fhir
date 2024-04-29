@@ -17,7 +17,6 @@ import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.HapiExtensions;
@@ -45,13 +44,14 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXED;
+import static ca.uhn.fhir.jpa.dao.BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.containsString;
@@ -766,8 +766,8 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		try {
 			myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 			fail();
-		} catch (PreconditionFailedException e) {
-			assertEquals(Msg.code(1093) + "Can not create resource of type Patient as it would create a duplicate unique index matching query: Patient?birthdate=2011-01-01&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale (existing index belongs to Patient/" + id1.getIdPart() + ", new unique index created by SearchParameter/patient-gender-birthdate)", e.getMessage());
+		} catch (ResourceVersionConflictException e) {
+			assertThat(e.getMessage(), containsString("new unique index created by SearchParameter/patient-gender-birthdate"));
 		}
 	}
 
@@ -786,7 +786,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		try {
 			myPatientDao.create(pt);
 			fail();
-		} catch (PreconditionFailedException e) {
+		} catch (ResourceVersionConflictException e) {
 			// good
 		}
 
@@ -854,15 +854,22 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 
 		createUniqueIndexCoverageBeneficiary();
 
+		runInTransaction(() -> {
+			List<ResourceIndexedComboStringUnique> uniques = myResourceIndexedCompositeStringUniqueDao.findAll();
+			assertEquals(0, uniques.size(), uniques.toString());
+		});
+
 		executeReindex("Coverage?");
 
 		runInTransaction(() -> {
-			List<ResourceTable> tables = myResourceTableDao.findAll();
-			String resourceIds = tables.stream().map(t -> t.getIdDt().getValue()).collect(Collectors.joining(", "));
+			List<ResourceTable> resources = myResourceTableDao.findAll();
+			String resourceIds = resources.stream().map(t -> t.getIdDt().getValue()).collect(Collectors.joining(", "));
 			// 1 patient, 1 coverage, 3 search parameters
-			assertEquals(5, tables.size(), resourceIds);
-			for (int i = 0; i < tables.size(); i++) {
-				assertEquals(INDEX_STATUS_INDEXED, tables.get(i).getIndexStatus().intValue());
+			assertEquals(5, resources.size(), resourceIds);
+			for (int i = 0; i < resources.size(); i++) {
+				int indexStatus = resources.get(i).getIndexStatus().intValue();
+				assertEquals(INDEX_STATUS_INDEXED, indexStatus, "Expected resource " + i + " to have index status INDEXED but was " +
+					(indexStatus == INDEX_STATUS_INDEXING_FAILED ? "FAILED" : "UNKNOWN(" + indexStatus + ")"));
 			}
 		});
 
@@ -885,7 +892,8 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(ReindexAppCtx.JOB_REINDEX);
 		startRequest.setParameters(parameters);
-		Batch2JobStartResponse res = myJobCoordinator.startInstance(startRequest);
+		Batch2JobStartResponse res = myJobCoordinator.startInstance(mySrd, startRequest);
+		ourLog.info("Started reindex job with id {}", res.getInstanceId());
 		myBatch2JobHelper.awaitJobCompletion(res);
 	}
 
@@ -1536,7 +1544,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		try {
 			myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
 			fail();
-		} catch (PreconditionFailedException e) {
+		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage(), containsString("new unique index created by SearchParameter/patient-gender-birthdate"));
 		}
 
@@ -1551,7 +1559,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		try {
 			myPatientDao.update(pt2);
 			fail();
-		} catch (PreconditionFailedException e) {
+		} catch (ResourceVersionConflictException e) {
 			assertThat(e.getMessage(), containsString("new unique index created by SearchParameter/patient-gender-birthdate"));
 		}
 

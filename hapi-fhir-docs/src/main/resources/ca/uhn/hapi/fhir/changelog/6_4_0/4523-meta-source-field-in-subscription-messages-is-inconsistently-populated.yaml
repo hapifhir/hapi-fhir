@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4523
+title: "Previously, meta source field in subscription messages was inconsistently populated regarding different requests.
+Now, this has been fixed and meta source will be included in all subscription messages."

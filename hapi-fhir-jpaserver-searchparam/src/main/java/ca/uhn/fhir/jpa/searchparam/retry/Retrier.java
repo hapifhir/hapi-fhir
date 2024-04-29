@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.searchparam.retry;
-
 /*-
  * #%L
- * HAPI FHIR Search Parameters
+ * HAPI FHIR JPA - Search Parameters
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.searchparam.retry;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.searchparam.retry;
 
 import ca.uhn.fhir.system.HapiSystemProperties;
 import org.apache.commons.lang3.Validate;
@@ -55,7 +54,7 @@ public class Retrier<T> {
 		backOff.setMultiplier(2);
 		myRetryTemplate.setBackOffPolicy(backOff);
 
-		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(){
+		SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy() {
 			private static final long serialVersionUID = -4522467251787518700L;
 
 			@Override
@@ -72,12 +71,21 @@ public class Retrier<T> {
 
 		RetryListener listener = new RetryListenerSupport() {
 			@Override
-			public <T, E extends Throwable> void onError(RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
+			public <T, E extends Throwable> void onError(
+					RetryContext context, RetryCallback<T, E> callback, Throwable throwable) {
 				super.onError(context, callback, throwable);
-				if (throwable instanceof NullPointerException || throwable instanceof UnsupportedOperationException || HapiSystemProperties.isUnitTestModeEnabled()) {
-					ourLog.error("Retry failure {}/{}: {}", context.getRetryCount(), theMaxRetries, throwable.getMessage(), throwable);
+				if (throwable instanceof NullPointerException
+						|| throwable instanceof UnsupportedOperationException
+						|| HapiSystemProperties.isUnitTestModeEnabled()) {
+					ourLog.error(
+							"Retry failure {}/{}: {}",
+							context.getRetryCount(),
+							theMaxRetries,
+							throwable.getMessage(),
+							throwable);
 				} else {
-					ourLog.error("Retry failure {}/{}: {}", context.getRetryCount(), theMaxRetries, throwable.toString());
+					ourLog.error(
+							"Retry failure {}/{}: {}", context.getRetryCount(), theMaxRetries, throwable.toString());
 				}
 			}
 		};

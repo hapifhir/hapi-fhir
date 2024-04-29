@@ -10,6 +10,7 @@
 	<suppress files="[\\/]hapi-fhir-docs[\\/]" checks="[a-zA-Z0-9]*" />
 	<suppress files="[\\/]hapi-fhir-checkstyle[\\/]" checks="[a-zA-Z0-9]*" />
 	<suppress files="[\\/]hapi-fhir-jpaserver-test-utilities[\\/]" checks="[a-zA-Z0-9]*" />
+	<suppress files="[\\/]hapi-fhir-test-utilities[\\/]" checks="[a-zA-Z0-9]*" />
 	<suppress files="[\\/]hapi-tinder-plugin[\\/]" checks="[a-zA-Z0-9]*" />
 	<suppress files="[\\/]osgi[\\/]" checks="[a-zA-Z0-9]*"/>
 

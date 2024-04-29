@@ -1,10 +1,8 @@
-package ca.uhn.fhir.mdm.rules.json;
-
 /*-
  * #%L
  * HAPI FHIR - Master Data Management
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,12 +17,13 @@ package ca.uhn.fhir.mdm.rules.json;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.mdm.rules.json;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.context.ConfigurationException;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import jakarta.annotation.Nonnull;
 
-import javax.annotation.Nonnull;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -44,7 +43,8 @@ public class VectorMatchResultMap {
 	}
 
 	private void initMap() {
-		for (Map.Entry<String, MdmMatchResultEnum> entry : myMdmRulesJson.getMatchResultMap().entrySet()) {
+		for (Map.Entry<String, MdmMatchResultEnum> entry :
+				myMdmRulesJson.getMatchResultMap().entrySet()) {
 			put(entry.getKey(), entry.getValue());
 		}
 	}
@@ -101,7 +101,7 @@ public class VectorMatchResultMap {
 		return -1;
 	}
 
-    public String getFieldMatchNames(long theVector) {
+	public String getFieldMatchNames(long theVector) {
 		return myVectorToFieldMatchNamesMap.get(theVector);
-    }
+	}
 }

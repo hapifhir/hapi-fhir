@@ -52,7 +52,7 @@ public class ResourceProviderR5CodeSystemVersionedTest extends BaseResourceProvi
 		parentChildCs.setVersion("1");
 		parentChildCs.setName("Parent Child CodeSystem 1");
 		parentChildCs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		parentChildCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		parentChildCs.setContent(Enumerations.CodeSystemContentMode.COMPLETE);
 		parentChildCs.setHierarchyMeaning(CodeSystem.CodeSystemHierarchyMeaning.ISA);
 
 		CodeSystem.ConceptDefinitionComponent parentA = parentChildCs.addConcept().setCode("ParentA").setDisplay("Parent A");
@@ -68,7 +68,7 @@ public class ResourceProviderR5CodeSystemVersionedTest extends BaseResourceProvi
 		parentChildCs.setName("Parent Child CodeSystem 2");
 		parentChildCs.setUrl(SYSTEM_PARENTCHILD);
 		parentChildCs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		parentChildCs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		parentChildCs.setContent(Enumerations.CodeSystemContentMode.COMPLETE);
 		parentChildCs.setHierarchyMeaning(CodeSystem.CodeSystemHierarchyMeaning.ISA);
 
 		parentA = parentChildCs.addConcept().setCode("ParentA").setDisplay("Parent A v2");

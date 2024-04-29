@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.server.messaging;
-
 /*-
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.server.messaging;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.server.messaging;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -28,18 +27,27 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 
 public class ResourceOperationMessage extends BaseResourceModifiedMessage {
 
-	public ResourceOperationMessage() {
-	}
+	public ResourceOperationMessage() {}
 
-	public ResourceOperationMessage(FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
+	public ResourceOperationMessage(
+			FhirContext theFhirContext, IBaseResource theResource, OperationTypeEnum theOperationType) {
 		super(theFhirContext, theResource, theOperationType);
 	}
 
-	public ResourceOperationMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest) {
+	public ResourceOperationMessage(
+			FhirContext theFhirContext,
+			IBaseResource theNewResource,
+			OperationTypeEnum theOperationType,
+			RequestDetails theRequest) {
 		super(theFhirContext, theNewResource, theOperationType, theRequest);
 	}
 
-	public ResourceOperationMessage(FhirContext theFhirContext, IBaseResource theNewResource, OperationTypeEnum theOperationType, RequestDetails theRequest, RequestPartitionId theRequestPartitionId) {
+	public ResourceOperationMessage(
+			FhirContext theFhirContext,
+			IBaseResource theNewResource,
+			OperationTypeEnum theOperationType,
+			RequestDetails theRequest,
+			RequestPartitionId theRequestPartitionId) {
 		super(theFhirContext, theNewResource, theOperationType, theRequest, theRequestPartitionId);
 	}
 
@@ -54,9 +62,9 @@ public class ResourceOperationMessage extends BaseResourceModifiedMessage {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this)
-			.append("operationType", myOperationType)
-			.append("payloadId", myPayloadId)
-			.append("partitionId", myPartitionId)
-			.toString();
+				.append("operationType", myOperationType)
+				.append("payloadId", myPayloadId)
+				.append("partitionId", myPartitionId)
+				.toString();
 	}
 }

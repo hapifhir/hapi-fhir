@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.batch2;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,42 +17,36 @@ package ca.uhn.fhir.jpa.batch2;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.config.BaseBatch2Config;
-import ca.uhn.fhir.batch2.coordinator.SynchronizedJobPersistenceWrapper;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.bulk.export.job.BulkExportJobConfig;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
-import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import jakarta.persistence.EntityManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Primary;
-import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
-@Import({
-	BulkExportJobConfig.class
-})
+@Import({BulkExportJobConfig.class})
 public class JpaBatch2Config extends BaseBatch2Config {
 
 	@Bean
-	public IJobPersistence batch2JobInstancePersister(IBatch2JobInstanceRepository theJobInstanceRepository, IBatch2WorkChunkRepository theWorkChunkRepository, PlatformTransactionManager theTransactionManager) {
-		return new JpaJobPersistenceImpl(theJobInstanceRepository, theWorkChunkRepository, theTransactionManager);
+	public IJobPersistence batch2JobInstancePersister(
+			IBatch2JobInstanceRepository theJobInstanceRepository,
+			IBatch2WorkChunkRepository theWorkChunkRepository,
+			IHapiTransactionService theTransactionService,
+			EntityManager theEntityManager,
+			IInterceptorBroadcaster theInterceptorBroadcaster) {
+		return new JpaJobPersistenceImpl(
+				theJobInstanceRepository,
+				theWorkChunkRepository,
+				theTransactionService,
+				theEntityManager,
+				theInterceptorBroadcaster);
 	}
-
-	@Primary
-	@Bean
-	public IJobPersistence batch2JobInstancePersisterWrapper(IBatch2JobInstanceRepository theJobInstanceRepository, IBatch2WorkChunkRepository theWorkChunkRepository, PlatformTransactionManager theTransactionManager) {
-		IJobPersistence retVal = batch2JobInstancePersister(theJobInstanceRepository, theWorkChunkRepository, theTransactionManager);
-		// Avoid H2 synchronization issues caused by
-		// https://github.com/h2database/h2database/issues/1808
-		if (HapiSystemProperties.isUnitTestModeEnabled()) {
-			retVal = new SynchronizedJobPersistenceWrapper(retVal);
-		}
-		return retVal;
-	}
-
-
 }

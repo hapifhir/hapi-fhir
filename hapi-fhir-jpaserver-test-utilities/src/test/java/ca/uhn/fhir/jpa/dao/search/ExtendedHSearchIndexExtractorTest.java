@@ -48,7 +48,7 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 		valueParams.add(new ResourceIndexedSearchParamToken(new PartitionSettings(), "Observation", "component-value-concept", "https://example.com", "some_other_value"));
 		composite.addComponentIndexedSearchParams("component-value-concept", RestSearchParameterTypeEnum.TOKEN, valueParams);
 
-		ResourceIndexedSearchParams extractedParams = new ResourceIndexedSearchParams();
+		ResourceIndexedSearchParams extractedParams = ResourceIndexedSearchParams.withSets();
 		extractedParams.myCompositeParams.add(composite);
 
 		// run: now translate to HSearch
@@ -65,7 +65,7 @@ class ExtendedHSearchIndexExtractorTest implements ITestDataBuilder.WithSupport 
 	@Test
 	void testExtract_withParamMarkedAsMissing_willBeIgnored() {
 		//setup
-		ResourceIndexedSearchParams searchParams = new ResourceIndexedSearchParams();
+		ResourceIndexedSearchParams searchParams = ResourceIndexedSearchParams.withSets();
 		ResourceIndexedSearchParamDate searchParamDate = new ResourceIndexedSearchParamDate(new PartitionSettings(), "SearchParameter", "Date", null, null, null, null, null);
 		searchParamDate.setMissing(true);
 		searchParams.myDateParams.add(searchParamDate);

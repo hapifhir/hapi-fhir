@@ -1,0 +1,7 @@
+---
+type: change
+issue: 5039
+title: "The class `BulkDataExportOptions` has been removed and replaced with an equivalent class called
+   `BulkExportJobParameters`. This change is a breaking change unfortunately, but should be easily remedied
+   as the replacement class has a very similar signature. This change reduces a large amount of duplication
+   in the bulk export codebase and should make for more maintainable code in the future."

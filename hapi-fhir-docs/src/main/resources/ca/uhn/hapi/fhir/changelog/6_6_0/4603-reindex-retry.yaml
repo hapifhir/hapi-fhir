@@ -1,0 +1,5 @@
+---
+type: change
+issue: 4603
+title: "Transaction retry will now also apply to ObjectOptimisticLockingFailureException.  This enables retry of
+  $reindex work chunks when they collide with a DELETE operation."

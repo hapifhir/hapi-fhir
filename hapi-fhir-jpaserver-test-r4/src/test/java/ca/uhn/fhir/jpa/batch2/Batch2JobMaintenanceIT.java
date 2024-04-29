@@ -31,14 +31,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 
-import javax.annotation.Nonnull;
-import javax.annotation.PostConstruct;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/**
+ * The on-enter actions are defined in
+ * {@link ca.uhn.fhir.batch2.progress.JobInstanceStatusUpdater#handleStatusChange}
+ * {@link ca.uhn.fhir.batch2.progress.InstanceProgress#updateStatus(JobInstance)}
+ * {@link JobInstanceProcessor#cleanupInstance()}
+
+ * For chunks:
+ *   {@link ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl#onWorkChunkCreate}
+ *   {@link JpaJobPersistenceImpl#onWorkChunkDequeue(String)}
+ *   Chunk execution {@link ca.uhn.fhir.batch2.coordinator.StepExecutor#executeStep}
+*/
 @TestPropertySource(properties = {
 	UnregisterScheduledProcessor.SCHEDULING_DISABLED_EQUALS_FALSE
 })

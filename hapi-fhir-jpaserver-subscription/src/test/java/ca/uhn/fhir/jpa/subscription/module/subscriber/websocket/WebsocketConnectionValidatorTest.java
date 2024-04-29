@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.jpa.subscription.channel.config.SubscriptionChannelConfig;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.match.config.SubscriptionProcessorConfig;
+import ca.uhn.fhir.jpa.subscription.match.deliver.email.IEmailSender;
 import ca.uhn.fhir.jpa.subscription.match.deliver.websocket.WebsocketConnectionValidator;
 import ca.uhn.fhir.jpa.subscription.match.deliver.websocket.WebsocketValidationResponse;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
@@ -19,6 +20,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -139,6 +141,15 @@ public class WebsocketConnectionValidatorTest {
 		@Bean
 		public IResourceChangeListenerRegistry resourceChangeListenerRegistry() {
 			return mock(IResourceChangeListenerRegistry.class, RETURNS_DEEP_STUBS);
+		}
+		@Bean
+		public IEmailSender emailSender(){
+			return mock(IEmailSender.class);
+		}
+
+		@Bean
+		public IResourceModifiedMessagePersistenceSvc resourceModifiedMessagePersistenceSvc(){
+			return mock(IResourceModifiedMessagePersistenceSvc.class);
 		}
 
 	}

@@ -1,0 +1,4 @@
+---
+type: change
+issue: 4621
+title: "Batch2 work-chunk processing now aligns transaction boundaries with event transitions."

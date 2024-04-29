@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 4468
+title: "When performing a search using a plain server without a cache, pagination links
+  could contain invalid offsets in the _prev_ link. Thanks to Aleksej Parovysnik for the 
+  pull request!"

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.chunk;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.chunk;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.chunk;
 
 import ca.uhn.fhir.jpa.api.pid.TypedResourcePid;
 import ca.uhn.fhir.model.api.IModelJson;
@@ -30,11 +29,11 @@ public class TypedPidJson implements IModelJson {
 
 	@JsonProperty("type")
 	private String myResourceType;
+
 	@JsonProperty("id")
 	private String myPid;
 
-	public TypedPidJson() {
-	}
+	public TypedPidJson() {}
 
 	public TypedPidJson(String theResourceType, String theId) {
 		myResourceType = theResourceType;
@@ -79,7 +78,10 @@ public class TypedPidJson implements IModelJson {
 
 		TypedPidJson id = (TypedPidJson) theO;
 
-		return new EqualsBuilder().append(myResourceType, id.myResourceType).append(myPid, id.myPid).isEquals();
+		return new EqualsBuilder()
+				.append(myResourceType, id.myResourceType)
+				.append(myPid, id.myPid)
+				.isEquals();
 	}
 
 	@Override

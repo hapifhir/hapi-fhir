@@ -1,10 +1,8 @@
-package ca.uhn.fhir.util.rdf;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,15 @@ package ca.uhn.fhir.util.rdf;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.util.rdf;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.riot.Lang;
 import org.apache.jena.riot.RDFDataMgr;
 
-import java.io.*;
+import java.io.Reader;
+import java.io.Writer;
 
 public class RDFUtil {
 

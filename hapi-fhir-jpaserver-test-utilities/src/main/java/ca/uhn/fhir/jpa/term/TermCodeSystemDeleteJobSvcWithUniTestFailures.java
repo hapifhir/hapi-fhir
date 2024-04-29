@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.term;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.term;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.api.TermCodeSystemDeleteJobSvc;
@@ -27,8 +26,8 @@ import com.google.common.annotations.VisibleForTesting;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TermCodeSystemDeleteJobSvcWithUniTestFailures extends TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
-
+public class TermCodeSystemDeleteJobSvcWithUniTestFailures extends TermCodeSystemDeleteJobSvc
+		implements ITermCodeSystemDeleteJobSvc {
 
 	private static final AtomicBoolean ourFailNextDeleteCodeSystemVersion = new AtomicBoolean(false);
 
@@ -40,7 +39,6 @@ public class TermCodeSystemDeleteJobSvcWithUniTestFailures extends TermCodeSyste
 		ourFailNextDeleteCodeSystemVersion.set(theFailNextDeleteCodeSystemVersion);
 	}
 
-
 	@Override
 	public void deleteCodeSystemVersion(long theVersionPid) {
 		// Force a failure for unit tests
@@ -50,6 +48,4 @@ public class TermCodeSystemDeleteJobSvcWithUniTestFailures extends TermCodeSyste
 
 		super.deleteCodeSystemVersion(theVersionPid);
 	}
-
-
-	}
+}

@@ -1,0 +1,4 @@
+---
+type: add
+issue: 5480
+title: "Updated Consent storage in $member-match operation."

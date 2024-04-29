@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 5511
+backport: 6.8.6,6.10.1
+title: "Previously, when creating an index as a part of a migration, if the index already existed with a different name
+on Oracle, the migration would fail. This has been fixed so that the create index migration task now recovers with
+ a warning message if the index already exists with a different name."

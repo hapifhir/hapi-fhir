@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4886
+title: "Requests to start an $export of Patient or Group will now fail with 404 ResourceNotFound when the target
+  resources  do not exist.  Before, the system would start a bulk export background job which would then fail."

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirSQLServerDialect;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.dialect.Dialect;
@@ -8,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import javax.annotation.Nonnull;
+import jakarta.annotation.Nonnull;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -25,10 +26,17 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		logSql(generatedSql);
 
 		String sql = generatedSql.getSql();
-		assertTrue(sql.endsWith("ORDER BY -t1.SP_VALUE_LOW DESC offset 0 rows fetch next ? rows only"), sql);
+		sql = massageSql(sql);
+		assertTrue(sql.endsWith("ORDER BY -t1.SP_VALUE_LOW DESC offset 0 rows fetch first ? rows only"), sql);
 
 		assertEquals(3, StringUtils.countMatches(sql, "?"));
 		assertEquals(3, generatedSql.getBindVariables().size());
+	}
+
+	@Nonnull
+	private static String massageSql(String sql) {
+		sql = sql.replace("\n", " ").replaceAll(" +", " ");
+		return sql;
 	}
 
 	@Test
@@ -40,7 +48,8 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		logSql(generatedSql);
 
 		String sql = generatedSql.getSql();
-		assertTrue(sql.endsWith("select page0_ from query where __row__ >= ? and __row__ < ?"), sql);
+		sql = massageSql(sql);
+		assertTrue(sql.endsWith("order by @@version offset ? rows fetch next ? rows only"), sql);
 
 		assertEquals(3, StringUtils.countMatches(sql, "?"));
 		assertEquals(3, generatedSql.getBindVariables().size());
@@ -55,7 +64,8 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		logSql(generatedSql);
 
 		String sql = generatedSql.getSql();
-		assertTrue(sql.toUpperCase(Locale.ROOT).contains("SELECT TOP(?) T0.RES_ID FROM"), sql);
+		sql = massageSql(sql);
+		assertTrue(sql.endsWith("order by @@version offset 0 rows fetch first ? rows only"), sql);
 
 		assertEquals(2, StringUtils.countMatches(sql, "?"));
 		assertEquals(2, generatedSql.getBindVariables().size());
@@ -64,6 +74,6 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 	@Nonnull
 	@Override
 	protected Dialect createDialect() {
-		return new SQLServer2012Dialect();
+		return new HapiFhirSQLServerDialect();
 	}
 }

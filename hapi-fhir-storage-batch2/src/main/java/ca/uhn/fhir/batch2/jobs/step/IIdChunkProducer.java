@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.step;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,13 +17,13 @@ package ca.uhn.fhir.batch2.jobs.step;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.step;
 
 import ca.uhn.fhir.batch2.jobs.chunk.ChunkRangeJson;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.pid.IResourcePidList;
+import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
+import jakarta.annotation.Nullable;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Date;
 
 /**
@@ -36,14 +34,6 @@ import java.util.Date;
  * @param <IT> This parameter defines constraints on the types of pids we are pulling (e.g. resource type, url, etc).
  */
 public interface IIdChunkProducer<IT extends ChunkRangeJson> {
-	/**
-	 * Actually fetch the resource pids
-	 * @param theNextStart pids are pulled with lastUpdated >= this date
-	 * @param theEnd pids are pulled with lastUpdate <= this date
-	 * @param thePageSize the number of pids to query at a time
-	 * @param theRequestPartitionId partition for operation if rtequired
-	 * @param theData defines the query we are using
-	 * @return a list of Resource pids
-	 */
-	IResourcePidList fetchResourceIdsPage(Date theNextStart, Date theEnd, @Nonnull Integer thePageSize, @Nullable RequestPartitionId theRequestPartitionId, IT theData);
+	IResourcePidStream fetchResourceIdStream(
+			Date theStart, Date theEnd, @Nullable RequestPartitionId theRequestPartitionId, IT theData);
 }

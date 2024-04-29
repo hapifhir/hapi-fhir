@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.param;
-
 /*-
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,19 +17,25 @@ package ca.uhn.fhir.rest.param;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.param;
 
 import java.util.Map;
 
 public class HistorySearchDateRangeParam extends DateRangeParam {
-	public HistorySearchDateRangeParam(Map<String, String[]> theParameters, DateRangeParam theDateRange,
-												  Integer theOffset){
+	public HistorySearchDateRangeParam(
+			Map<String, String[]> theParameters, DateRangeParam theDateRange, Integer theOffset) {
 		super(theDateRange);
 		this.myOffset = theOffset;
 
-		this.myHistorySearchType = theParameters == null? null
-			: theParameters.keySet().stream().map(key -> HistorySearchStyleEnum.parse(key))
-			.filter(type -> type != null).findAny().orElse(null);
+		this.myHistorySearchType = theParameters == null
+				? null
+				: theParameters.keySet().stream()
+						.map(key -> HistorySearchStyleEnum.parse(key))
+						.filter(type -> type != null)
+						.findAny()
+						.orElse(null);
 	}
+
 	private HistorySearchStyleEnum myHistorySearchType;
 
 	private Integer myOffset;

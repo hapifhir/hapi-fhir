@@ -1,4 +1,4 @@
-# Changelog: 2022
+# Changelog: 2023
 
-<th:block th:insert="fragment_changelog.md :: changelog('2022', '')"/>
+<th:block th:insert="~{fragment_changelog.md :: changelog('2023', '')}"/>
 

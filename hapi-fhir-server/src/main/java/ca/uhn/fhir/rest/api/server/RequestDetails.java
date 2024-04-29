@@ -1,41 +1,8 @@
-package ca.uhn.fhir.rest.api.server;
-
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
-import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
-import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.lang3.Validate;
-import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 /*
  * #%L
  * HAPI FHIR - Server Framework
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,6 +17,36 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.api.server;
+
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.RequestTypeEnum;
+import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
+import ca.uhn.fhir.rest.server.IRestfulServerDefaults;
+import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import ca.uhn.fhir.util.StopWatch;
+import ca.uhn.fhir.util.UrlUtil;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public abstract class RequestDetails {
 
@@ -92,7 +89,7 @@ public abstract class RequestDetails {
 	/**
 	 * Copy constructor
 	 */
-	public RequestDetails(ServletRequestDetails theRequestDetails) {
+	public RequestDetails(RequestDetails theRequestDetails) {
 		myInterceptorBroadcaster = theRequestDetails.getInterceptorBroadcaster();
 		myRequestStopwatch = theRequestDetails.getRequestStopwatch();
 		myTenantId = theRequestDetails.getTenantId();
@@ -252,6 +249,24 @@ public abstract class RequestDetails {
 
 	public abstract List<String> getHeaders(String name);
 
+	/**
+	 * Adds a new header
+	 *
+	 * @param theName The header name
+	 * @param theValue The header value
+	 * @since 7.2.0
+	 */
+	public abstract void addHeader(String theName, String theValue);
+
+	/**
+	 * Replaces any existing header(s) with the given name using a List of new header values
+	 *
+	 * @param theName The header name
+	 * @param theValue The header value
+	 * @since 7.2.0
+	 */
+	public abstract void setHeaders(String theName, List<String> theValue);
+
 	public IIdType getId() {
 		return myId;
 	}
@@ -312,10 +327,10 @@ public abstract class RequestDetails {
 			}
 		}
 		if (needsSanitization) {
-			myParameters = myParameters
-				.entrySet()
-				.stream()
-				.collect(Collectors.toMap(t -> UrlUtil.sanitizeUrlPart((String) ((Map.Entry<?, ?>) t).getKey()), t -> (String[]) ((Map.Entry<?, ?>) t).getValue()));
+			myParameters = myParameters.entrySet().stream()
+					.collect(
+							Collectors.toMap(t -> UrlUtil.sanitizeUrlPart((String) ((Map.Entry<?, ?>) t).getKey()), t ->
+									(String[]) ((Map.Entry<?, ?>) t).getValue()));
 		}
 	}
 
@@ -328,7 +343,7 @@ public abstract class RequestDetails {
 	 * @throws UnsupportedEncodingException if the character set encoding used is not supported and the text cannot be decoded
 	 * @throws IllegalStateException        if {@link #getInputStream} method has been called on this request
 	 * @throws IOException                  if an input or output exception occurred
-	 * @see javax.servlet.http.HttpServletRequest#getInputStream
+	 * @see jakarta.servlet.http.HttpServletRequest#getInputStream
 	 */
 	public abstract Reader getReader() throws IOException;
 
@@ -400,7 +415,10 @@ public abstract class RequestDetails {
 
 	/**
 	 * Returns the server base URL (with no trailing '/') for a given request
+	 *
+	 * @deprecated Use {@link #getFhirServerBase()} instead. Deprecated in HAPI FHIR 7.0.0
 	 */
+	@Deprecated
 	public abstract String getServerBaseForRequest();
 
 	/**
@@ -435,7 +453,8 @@ public abstract class RequestDetails {
 							myUnqualifiedToQualifiedNames = new HashMap<>();
 						}
 						String unqualified = next.substring(0, i);
-						List<String> list = myUnqualifiedToQualifiedNames.computeIfAbsent(unqualified, k -> new ArrayList<>(4));
+						List<String> list =
+								myUnqualifiedToQualifiedNames.computeIfAbsent(unqualified, k -> new ArrayList<>(4));
 						list.add(next);
 						break;
 					}
@@ -548,7 +567,6 @@ public abstract class RequestDetails {
 	public void setTransactionGuid(String theTransactionGuid) {
 		myTransactionGuid = theTransactionGuid;
 	}
-
 
 	public boolean isRewriteHistory() {
 		return myRewriteHistory;

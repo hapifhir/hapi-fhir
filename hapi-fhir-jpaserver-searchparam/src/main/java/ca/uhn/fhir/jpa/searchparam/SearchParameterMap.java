@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * HAPI FHIR JPA - Search Parameters
+ * %%
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.jpa.searchparam;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -18,13 +37,13 @@ import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import javax.annotation.Nonnull;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,28 +60,9 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.GREATERTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.LESSTHAN_OR_EQUALS;
 import static ca.uhn.fhir.rest.param.ParamPrefixEnum.NOT_EQUAL;
+import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-/*
- * #%L
- * HAPI FHIR Search Parameters
- * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 public class SearchParameterMap implements Serializable {
 	public static final Integer INTEGER_0 = 0;
@@ -133,7 +133,6 @@ public class SearchParameterMap implements Serializable {
 			}
 			map.put(entry.getKey(), newAndParams);
 		}
-
 
 		return map;
 	}
@@ -404,7 +403,6 @@ public class SearchParameterMap implements Serializable {
 		return this;
 	}
 
-
 	/**
 	 * If set, tells the server the maximum number of observations to return for each
 	 * observation code in the result set of a lastn operation
@@ -421,7 +419,6 @@ public class SearchParameterMap implements Serializable {
 		myLastNMax = theLastNMax;
 		return this;
 	}
-
 
 	/**
 	 * This method creates a URL query string representation of the parameters in this
@@ -455,7 +452,6 @@ public class SearchParameterMap implements Serializable {
 				if (nextValuesOrsOut.size() > 0) {
 					nextValuesAndsOut.add(nextValuesOrsOut);
 				}
-
 			} // for AND
 
 			nextValuesAndsOut.sort(new QueryParameterOrComparator(theCtx));
@@ -488,10 +484,10 @@ public class SearchParameterMap implements Serializable {
 						b.append(',');
 					}
 					String valueAsQueryToken = nextValueOr.getValueAsQueryToken(theCtx);
+					valueAsQueryToken = defaultString(valueAsQueryToken);
 					b.append(UrlUtil.escapeUrlParam(valueAsQueryToken));
 				}
 			}
-
 		} // for keys
 
 		SortSpec sort = getSort();
@@ -564,8 +560,9 @@ public class SearchParameterMap implements Serializable {
 			b.append(getSearchTotalMode().getCode());
 		}
 
-		//Contained mode
-		//For some reason, instead of null here, we default to false. That said, ommitting it is identical to setting it to false.
+		// Contained mode
+		// For some reason, instead of null here, we default to false. That said, ommitting it is identical to setting
+		// it to false.
 		if (getSearchContainedMode() != SearchContainedModeEnum.FALSE) {
 			addUrlParamSeparator(b);
 			b.append(Constants.PARAM_CONTAINED);
@@ -581,7 +578,10 @@ public class SearchParameterMap implements Serializable {
 	}
 
 	private boolean isNotEqualsComparator(DateParam theLowerBound, DateParam theUpperBound) {
-		return theLowerBound != null && theUpperBound != null && theLowerBound.getPrefix().equals(NOT_EQUAL) && theUpperBound.getPrefix().equals(NOT_EQUAL);
+		return theLowerBound != null
+				&& theUpperBound != null
+				&& theLowerBound.getPrefix().equals(NOT_EQUAL)
+				&& theUpperBound.getPrefix().equals(NOT_EQUAL);
 	}
 
 	/**
@@ -610,7 +610,6 @@ public class SearchParameterMap implements Serializable {
 		return b.toString();
 	}
 
-
 	public void clean() {
 		for (Map.Entry<String, List<List<IQueryParameterType>>> nextParamEntry : this.entrySet()) {
 			String nextParamName = nextParamEntry.getKey();
@@ -623,19 +622,16 @@ public class SearchParameterMap implements Serializable {
 	 * Given a particular named parameter, e.g. `name`, iterate over AndOrParams and remove any which are empty.
 	 */
 	private void cleanParameter(String theParamName, List<List<IQueryParameterType>> theAndOrParams) {
-		theAndOrParams
-			.forEach(
-				orList -> {
-					List<IQueryParameterType> emptyParameters = orList.stream()
-						.filter(nextOr -> nextOr.getMissing() == null)
-						.filter(nextOr -> nextOr instanceof QuantityParam)
-						.filter(nextOr -> isBlank(((QuantityParam) nextOr).getValueAsString()))
-						.collect(Collectors.toList());
+		theAndOrParams.forEach(orList -> {
+			List<IQueryParameterType> emptyParameters = orList.stream()
+					.filter(nextOr -> nextOr.getMissing() == null)
+					.filter(nextOr -> nextOr instanceof QuantityParam)
+					.filter(nextOr -> isBlank(((QuantityParam) nextOr).getValueAsString()))
+					.collect(Collectors.toList());
 
-					ourLog.debug("Ignoring empty parameter: {}", theParamName);
-					orList.removeAll(emptyParameters);
-				}
-			);
+			ourLog.debug("Ignoring empty parameter: {}", theParamName);
+			orList.removeAll(emptyParameters);
+		});
 		theAndOrParams.removeIf(List::isEmpty);
 	}
 
@@ -718,9 +714,9 @@ public class SearchParameterMap implements Serializable {
 		List<List<IQueryParameterType>> andList = mySearchParameterMap.remove(theName);
 		if (andList != null) {
 			for (List<IQueryParameterType> orList : andList) {
-				if (!orList.isEmpty() &&
-					StringUtils.defaultString(orList.get(0).getQueryParameterQualifier(), "")
-						.equals(theModifier)) {
+				if (!orList.isEmpty()
+						&& StringUtils.defaultString(orList.get(0).getQueryParameterQualifier(), "")
+								.equals(theModifier)) {
 					matchingParameters.add(orList);
 				} else {
 					remainderParameters.add(orList);
@@ -733,10 +729,10 @@ public class SearchParameterMap implements Serializable {
 			mySearchParameterMap.put(theName, remainderParameters);
 		}
 		return matchingParameters;
-
 	}
 
-	public List<List<IQueryParameterType>> removeByNameAndModifier(String theName, @Nonnull TokenParamModifier theModifier) {
+	public List<List<IQueryParameterType>> removeByNameAndModifier(
+			String theName, @Nonnull TokenParamModifier theModifier) {
 		return removeByNameAndModifier(theName, theModifier.getValue());
 	}
 
@@ -766,7 +762,6 @@ public class SearchParameterMap implements Serializable {
 		}
 
 		return retVal;
-
 	}
 
 	public Map<String, List<List<IQueryParameterType>>> removeByQualifier(@Nonnull TokenParamModifier theModifier) {
@@ -870,7 +865,6 @@ public class SearchParameterMap implements Serializable {
 			}
 			return retVal;
 		}
-
 	}
 
 	public static class QueryParameterOrComparator implements Comparator<List<IQueryParameterType>> {
@@ -885,7 +879,6 @@ public class SearchParameterMap implements Serializable {
 			// These lists will never be empty
 			return SearchParameterMap.compare(myCtx, theO1.get(0), theO2.get(0));
 		}
-
 	}
 
 	public static class QueryParameterTypeComparator implements Comparator<IQueryParameterType> {
@@ -900,8 +893,5 @@ public class SearchParameterMap implements Serializable {
 		public int compare(IQueryParameterType theO1, IQueryParameterType theO2) {
 			return SearchParameterMap.compare(myCtx, theO1, theO2);
 		}
-
 	}
-
-
 }

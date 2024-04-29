@@ -1,3 +1,22 @@
+/*
+ * #%L
+ * HAPI FHIR - Server Framework
+ * %%
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
 package ca.uhn.fhir.rest.server.provider;
 
 import ca.uhn.fhir.context.FhirContext;
@@ -33,6 +52,9 @@ import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.TreeMultimap;
+import jakarta.annotation.Nonnull;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.text.WordUtils;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -44,9 +66,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -62,26 +81,6 @@ import java.util.stream.Collectors;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-/*
- * #%L
- * HAPI FHIR - Server Framework
- * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
- * %%
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- * #L%
- */
 
 /**
  * Server FHIR Provider which serves the conformance statement for a RESTful server implementation
@@ -115,7 +114,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	/**
 	 * Constructor
 	 */
-	public ServerCapabilityStatementProvider(FhirContext theContext, RestfulServerConfiguration theServerConfiguration) {
+	public ServerCapabilityStatementProvider(
+			FhirContext theContext, RestfulServerConfiguration theServerConfiguration) {
 		myContext = theContext;
 		myServerConfiguration = theServerConfiguration;
 		mySearchParamRegistry = null;
@@ -126,7 +126,10 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	/**
 	 * Constructor
 	 */
-	public ServerCapabilityStatementProvider(RestfulServer theRestfulServer, ISearchParamRegistry theSearchParamRegistry, IValidationSupport theValidationSupport) {
+	public ServerCapabilityStatementProvider(
+			RestfulServer theRestfulServer,
+			ISearchParamRegistry theSearchParamRegistry,
+			IValidationSupport theValidationSupport) {
 		myContext = theRestfulServer.getFhirContext();
 		mySearchParamRegistry = theSearchParamRegistry;
 		myServer = theRestfulServer;
@@ -134,7 +137,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		myValidationSupport = theValidationSupport;
 	}
 
-	private void checkBindingForSystemOps(FhirTerser theTerser, IBase theRest, Set<String> theSystemOps, BaseMethodBinding theMethodBinding) {
+	private void checkBindingForSystemOps(
+			FhirTerser theTerser, IBase theRest, Set<String> theSystemOps, BaseMethodBinding theMethodBinding) {
 		RestOperationTypeEnum restOperationType = theMethodBinding.getRestOperationType();
 		if (restOperationType.isSystemLevel()) {
 			String sysOp = restOperationType.getCode();
@@ -145,7 +149,6 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 			}
 		}
 	}
-
 
 	private String conformanceDate(RestfulServerConfiguration theServerConfiguration) {
 		IPrimitiveType<Date> buildDate = theServerConfiguration.getConformanceDate();
@@ -165,7 +168,6 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		}
 		return myServerConfiguration;
 	}
-
 
 	/**
 	 * Gets the value of the "publisher" that will be placed in the generated conformance statement. As this is a mandatory element, the value should not be null (although this is not enforced). The
@@ -195,7 +197,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		RestfulServerConfiguration configuration = getServerConfiguration();
 		Bindings bindings = configuration.provideBindings();
 
-		IBaseConformance retVal = (IBaseConformance) myContext.getResourceDefinition("CapabilityStatement").newInstance();
+		IBaseConformance retVal = (IBaseConformance)
+				myContext.getResourceDefinition("CapabilityStatement").newInstance();
 
 		FhirTerser terser = myContext.newTerser();
 
@@ -205,9 +208,11 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		terser.addElement(retVal, "name", "RestServer");
 		terser.addElement(retVal, "publisher", myPublisher);
 		terser.addElement(retVal, "date", conformanceDate(configuration));
-		terser.addElement(retVal, "fhirVersion", myContext.getVersion().getVersion().getFhirVersionString());
+		terser.addElement(
+				retVal, "fhirVersion", myContext.getVersion().getVersion().getFhirVersionString());
 
-		ServletContext servletContext = (ServletContext) (theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
+		ServletContext servletContext = (ServletContext)
+				(theRequest == null ? null : theRequest.getAttribute(RestfulServer.SERVLET_CONTEXT_ATTRIBUTE));
 		String serverBase = configuration.getServerAddressStrategy().determineServerBase(servletContext, theRequest);
 		terser.addElement(retVal, "implementation.url", serverBase);
 		terser.addElement(retVal, "implementation.description", configuration.getImplementationDescription());
@@ -237,7 +242,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		Set<String> systemOps = new HashSet<>();
 
 		Map<String, List<BaseMethodBinding>> resourceToMethods = configuration.collectMethodBindings();
-		Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype = configuration.getNameToSharedSupertype();
+		Map<String, Class<? extends IBaseResource>> resourceNameToSharedSupertype =
+				configuration.getNameToSharedSupertype();
 		List<BaseMethodBinding> globalMethodBindings = configuration.getGlobalBindings();
 
 		TreeMultimap<String, String> resourceNameToIncludes = TreeMultimap.create();
@@ -250,7 +256,6 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					resourceNameToRevIncludes.putAll(resourceName, nextMethod.getRevIncludes());
 				}
 			}
-
 		}
 
 		for (Entry<String, List<BaseMethodBinding>> nextEntry : resourceToMethods.entrySet()) {
@@ -341,7 +346,9 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 
 					// Resource Operations
 					if (nextMethodBinding instanceof SearchMethodBinding) {
-						addSearchMethodIfSearchIsNamedQuery(theRequestDetails, bindings, terser, operationNames, resource, (SearchMethodBinding) nextMethodBinding);
+						addSearchMethodIfSearchIsNamedQuery(
+								theRequestDetails, bindings, terser, operationNames, resource, (SearchMethodBinding)
+										nextMethodBinding);
 					} else if (nextMethodBinding instanceof OperationMethodBinding) {
 						OperationMethodBinding methodBinding = (OperationMethodBinding) nextMethodBinding;
 						String opName = bindings.getOperationBindingToId().get(methodBinding);
@@ -351,7 +358,6 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 							populateOperation(theRequestDetails, terser, methodBinding, opName, operation);
 						}
 					}
-
 				}
 
 				// Find any global operations (Operations defines at the system level but with the
@@ -362,8 +368,10 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 						if (next instanceof OperationMethodBinding) {
 							OperationMethodBinding methodBinding = (OperationMethodBinding) next;
 							if (methodBinding.isGlobalMethod()) {
-								if (methodBinding.isCanOperateAtInstanceLevel() || methodBinding.isCanOperateAtTypeLevel()) {
-									String opName = bindings.getOperationBindingToId().get(methodBinding);
+								if (methodBinding.isCanOperateAtInstanceLevel()
+										|| methodBinding.isCanOperateAtTypeLevel()) {
+									String opName =
+											bindings.getOperationBindingToId().get(methodBinding);
 									// Only add each operation (by name) once
 									if (globalOperationNames.add(opName)) {
 										IBase operation = terser.addElement(resource, "operation");
@@ -389,22 +397,25 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				 */
 				ResourceSearchParams searchParams;
 				ISearchParamRegistry searchParamRegistry;
-				ResourceSearchParams serverConfigurationActiveSearchParams = serverConfiguration.getActiveSearchParams(resourceName);
+				ResourceSearchParams serverConfigurationActiveSearchParams =
+						serverConfiguration.getActiveSearchParams(resourceName);
 				if (mySearchParamRegistry != null) {
 					searchParamRegistry = mySearchParamRegistry;
-					searchParams = mySearchParamRegistry.getActiveSearchParams(resourceName).makeCopy();
+					searchParams = mySearchParamRegistry
+							.getActiveSearchParams(resourceName)
+							.makeCopy();
 					for (String nextBuiltInSpName : serverConfigurationActiveSearchParams.getSearchParamNames()) {
-						if (nextBuiltInSpName.startsWith("_") &&
-							!searchParams.containsParamName(nextBuiltInSpName) &&
-							searchParamEnabled(nextBuiltInSpName)) {
-							searchParams.put(nextBuiltInSpName, serverConfigurationActiveSearchParams.get(nextBuiltInSpName));
+						if (nextBuiltInSpName.startsWith("_")
+								&& !searchParams.containsParamName(nextBuiltInSpName)
+								&& searchParamEnabled(nextBuiltInSpName)) {
+							searchParams.put(
+									nextBuiltInSpName, serverConfigurationActiveSearchParams.get(nextBuiltInSpName));
 						}
 					}
 				} else {
 					searchParamRegistry = serverConfiguration;
 					searchParams = serverConfigurationActiveSearchParams;
 				}
-
 
 				for (RuntimeSearchParam next : searchParams.values()) {
 					IBase searchParam = terser.addElement(resource, "searchParam");
@@ -424,13 +435,11 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				// Add Include to CapabilityStatement.rest.resource
 				NavigableSet<String> resourceIncludes = resourceNameToIncludes.get(resourceName);
 				if (resourceIncludes.isEmpty()) {
-					List<String> includes = searchParams
-						.values()
-						.stream()
-						.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
-						.map(t -> resourceName + ":" + t.getName())
-						.sorted()
-						.collect(Collectors.toList());
+					List<String> includes = searchParams.values().stream()
+							.filter(t -> t.getParamType() == RestSearchParameterTypeEnum.REFERENCE)
+							.map(t -> resourceName + ":" + t.getName())
+							.sorted()
+							.collect(Collectors.toList());
 					terser.addElement(resource, "searchInclude", "*");
 					for (String nextInclude : includes) {
 						terser.addElement(resource, "searchInclude", nextInclude);
@@ -451,11 +460,14 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 								continue;
 							}
 
-							for (RuntimeSearchParam t : searchParamRegistry.getActiveSearchParams(nextResourceName).values()) {
+							for (RuntimeSearchParam t : searchParamRegistry
+									.getActiveSearchParams(nextResourceName)
+									.values()) {
 								if (t.getParamType() == RestSearchParameterTypeEnum.REFERENCE) {
 									if (isNotBlank(t.getName())) {
 										boolean appropriateTarget = false;
-										if (t.getTargets().contains(resourceName) || t.getTargets().isEmpty()) {
+										if (t.getTargets().contains(resourceName)
+												|| t.getTargets().isEmpty()) {
 											appropriateTarget = true;
 										}
 
@@ -495,13 +507,13 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 							}
 						}
 					} else if (nextMethodBinding instanceof SearchMethodBinding) {
-						addSearchMethodIfSearchIsNamedQuery(theRequestDetails, bindings, terser, operationNames, rest, (SearchMethodBinding) nextMethodBinding);
+						addSearchMethodIfSearchIsNamedQuery(
+								theRequestDetails, bindings, terser, operationNames, rest, (SearchMethodBinding)
+										nextMethodBinding);
 					}
 				}
 			}
-
 		}
-
 
 		// Find any global operations (Operations defines at the system level but with the
 		// global flag set to true, meaning they apply to all resource types)
@@ -524,11 +536,25 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 			}
 		}
 
+		maybeAddBulkDataDeclarationToConformingToIg(terser, retVal, configuration.getServerBindings());
 
 		postProcessRest(terser, rest);
 		postProcess(terser, retVal);
 
 		return retVal;
+	}
+
+	private void maybeAddBulkDataDeclarationToConformingToIg(
+			FhirTerser theTerser, IBaseConformance theBaseConformance, List<BaseMethodBinding> theServerBindings) {
+		boolean bulkExportEnabled = theServerBindings.stream()
+				.filter(OperationMethodBinding.class::isInstance)
+				.map(OperationMethodBinding.class::cast)
+				.map(OperationMethodBinding::getName)
+				.anyMatch(ProviderConstants.OPERATION_EXPORT::equals);
+
+		if (bulkExportEnabled) {
+			theTerser.addElement(theBaseConformance, "instantiates", Constants.BULK_DATA_ACCESS_IG_URL);
+		}
 	}
 
 	/**
@@ -540,7 +566,13 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		return true;
 	}
 
-	private void addSearchMethodIfSearchIsNamedQuery(RequestDetails theRequestDetails, Bindings theBindings, FhirTerser theTerser, Set<String> theOperationNamesAlreadyAdded, IBase theElementToAddTo, SearchMethodBinding theSearchMethodBinding) {
+	private void addSearchMethodIfSearchIsNamedQuery(
+			RequestDetails theRequestDetails,
+			Bindings theBindings,
+			FhirTerser theTerser,
+			Set<String> theOperationNamesAlreadyAdded,
+			IBase theElementToAddTo,
+			SearchMethodBinding theSearchMethodBinding) {
 		if (theSearchMethodBinding.getQueryName() != null) {
 			String queryName = theBindings.getNamedSearchMethodBindingToName().get(theSearchMethodBinding);
 			if (theOperationNamesAlreadyAdded.add(queryName)) {
@@ -551,15 +583,19 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		}
 	}
 
-	private void populateOperation(RequestDetails theRequestDetails, FhirTerser theTerser, OperationMethodBinding theMethodBinding, String theOpName, IBase theOperation) {
+	private void populateOperation(
+			RequestDetails theRequestDetails,
+			FhirTerser theTerser,
+			OperationMethodBinding theMethodBinding,
+			String theOpName,
+			IBase theOperation) {
 		String operationName = theMethodBinding.getName().substring(1);
 		theTerser.addElement(theOperation, "name", operationName);
 		String operationCanonicalUrl = theMethodBinding.getCanonicalUrl();
 		if (isNotBlank(operationCanonicalUrl)) {
 			theTerser.addElement(theOperation, "definition", operationCanonicalUrl);
 			operationCanonicalUrlToId.put(operationCanonicalUrl, theOpName);
-		}
-		else {
+		} else {
 			theTerser.addElement(theOperation, "definition", createOperationUrl(theRequestDetails, theOpName));
 		}
 		if (isNotBlank(theMethodBinding.getDescription())) {
@@ -583,8 +619,10 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					String baseDefinition = defaultString(terser.getSinglePrimitiveValueOrNull(next, "baseDefinition"));
 					if ("resource".equals(kind) && isNotBlank(url)) {
 
-						// Don't include the base resource definitions in the supported profile list - This isn't helpful
-						if (baseDefinition.equals("http://hl7.org/fhir/StructureDefinition/DomainResource") || baseDefinition.equals("http://hl7.org/fhir/StructureDefinition/Resource")) {
+						// Don't include the base resource definitions in the supported profile list - This isn't
+						// helpful
+						if (baseDefinition.equals("http://hl7.org/fhir/StructureDefinition/DomainResource")
+								|| baseDefinition.equals("http://hl7.org/fhir/StructureDefinition/Resource")) {
 							continue;
 						}
 
@@ -631,7 +669,6 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		return theRequestDetails.getServerBaseForRequest() + "/";
 	}
 
-
 	@Override
 	@Read(typeName = "OperationDefinition")
 	public IBaseResource readOperationDefinition(@IdParam IIdType theId, RequestDetails theRequestDetails) {
@@ -641,12 +678,14 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		RestfulServerConfiguration configuration = getServerConfiguration();
 		Bindings bindings = configuration.provideBindings();
 		String operationId = getOperationId(theId);
-		List<OperationMethodBinding> operationBindings = bindings.getOperationIdToBindings().get(operationId);
+		List<OperationMethodBinding> operationBindings =
+				bindings.getOperationIdToBindings().get(operationId);
 		if (operationBindings != null && !operationBindings.isEmpty()) {
 			return readOperationDefinitionForOperation(theRequestDetails, bindings, operationBindings);
 		}
 
-		List<SearchMethodBinding> searchBindings = bindings.getSearchNameToBindings().get(theId.getIdPart());
+		List<SearchMethodBinding> searchBindings =
+				bindings.getSearchNameToBindings().get(theId.getIdPart());
 		if (searchBindings != null && !searchBindings.isEmpty()) {
 			return readOperationDefinitionForNamedSearch(searchBindings);
 		}
@@ -654,14 +693,15 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 	}
 
 	private String getOperationId(IIdType theId) {
-		if (operationCanonicalUrlToId.get(theId.getValue()) !=null ) {
+		if (operationCanonicalUrlToId.get(theId.getValue()) != null) {
 			return operationCanonicalUrlToId.get(theId.getValue());
 		}
 		return theId.getIdPart();
 	}
 
 	private IBaseResource readOperationDefinitionForNamedSearch(List<SearchMethodBinding> bindings) {
-		IBaseResource op = myContext.getResourceDefinition("OperationDefinition").newInstance();
+		IBaseResource op =
+				myContext.getResourceDefinition("OperationDefinition").newInstance();
 		FhirTerser terser = myContext.newTerser();
 
 		terser.addElement(op, "status", "active");
@@ -700,13 +740,13 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					IBase param = terser.addElement(op, "parameter");
 					terser.addElement(param, "use", "in");
 					terser.addElement(param, "type", "string");
-					terser.addElement(param, "searchType", nextParam.getParamType().getCode());
+					terser.addElement(
+							param, "searchType", nextParam.getParamType().getCode());
 					terser.addElement(param, "min", nextParam.isRequired() ? "1" : "0");
 					terser.addElement(param, "max", "1");
 					terser.addElement(param, "name", nextParam.getName());
 				}
 			}
-
 		}
 
 		terser.addElement(op, "code", operationCode);
@@ -717,8 +757,12 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 		return op;
 	}
 
-	private IBaseResource readOperationDefinitionForOperation(RequestDetails theRequestDetails, Bindings theBindings, List<OperationMethodBinding> theOperationMethodBindings) {
-		IBaseResource op = myContext.getResourceDefinition("OperationDefinition").newInstance();
+	private IBaseResource readOperationDefinitionForOperation(
+			RequestDetails theRequestDetails,
+			Bindings theBindings,
+			List<OperationMethodBinding> theOperationMethodBindings) {
+		IBaseResource op =
+				myContext.getResourceDefinition("OperationDefinition").newInstance();
 		FhirTerser terser = myContext.newTerser();
 
 		terser.addElement(op, "status", "active");
@@ -770,19 +814,19 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 				}
 			}
 
-
 			for (IParameter nextParamUntyped : operationMethodBinding.getParameters()) {
 				if (nextParamUntyped instanceof OperationParameter) {
 					OperationParameter nextParam = (OperationParameter) nextParamUntyped;
 
 					IBase param = inParams.get(nextParam.getName());
-					if (param == null){
+					if (param == null) {
 						param = terser.addElement(op, "parameter");
 						inParams.put(nextParam.getName(), param);
 					}
 
 					IBase existingParam = inParams.get(nextParam.getName());
-					if (isNotBlank(nextParam.getDescription()) && terser.getValues(existingParam, "documentation").isEmpty()) {
+					if (isNotBlank(nextParam.getDescription())
+							&& terser.getValues(existingParam, "documentation").isEmpty()) {
 						terser.addElement(existingParam, "documentation", nextParam.getDescription());
 					}
 
@@ -802,23 +846,28 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 						terser.setElement(param, "searchType", nextParam.getSearchParamType());
 					}
 					terser.setElement(param, "min", Integer.toString(nextParam.getMin()));
-					terser.setElement(param, "max", (nextParam.getMax() == -1 ? "*" : Integer.toString(nextParam.getMax())));
+					terser.setElement(
+							param, "max", (nextParam.getMax() == -1 ? "*" : Integer.toString(nextParam.getMax())));
 					terser.setElement(param, "name", nextParam.getName());
 
-					List<IBaseExtension<?, ?>> existingExampleExtensions = ExtensionUtil.getExtensionsByUrl((IBaseHasExtensions) param, HapiExtensions.EXT_OP_PARAMETER_EXAMPLE_VALUE);
-					Set<String> existingExamples = existingExampleExtensions
-						.stream()
-						.map(t -> t.getValue())
-						.filter(t -> t != null)
-						.map(t -> (IPrimitiveType<?>) t)
-						.map(t -> t.getValueAsString())
-						.collect(Collectors.toSet());
+					List<IBaseExtension<?, ?>> existingExampleExtensions = ExtensionUtil.getExtensionsByUrl(
+							(IBaseHasExtensions) param, HapiExtensions.EXT_OP_PARAMETER_EXAMPLE_VALUE);
+					Set<String> existingExamples = existingExampleExtensions.stream()
+							.map(t -> t.getValue())
+							.filter(t -> t != null)
+							.map(t -> (IPrimitiveType<?>) t)
+							.map(t -> t.getValueAsString())
+							.collect(Collectors.toSet());
 					for (String nextExample : nextParam.getExampleValues()) {
 						if (!existingExamples.contains(nextExample)) {
-							ExtensionUtil.addExtension(myContext, param, HapiExtensions.EXT_OP_PARAMETER_EXAMPLE_VALUE, "string", nextExample);
+							ExtensionUtil.addExtension(
+									myContext,
+									param,
+									HapiExtensions.EXT_OP_PARAMETER_EXAMPLE_VALUE,
+									"string",
+									nextExample);
 						}
 					}
-
 				}
 			}
 
@@ -835,7 +884,8 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 					terser.addElement(param, "type", nextParam.getType());
 				}
 				terser.addElement(param, "min", Integer.toString(nextParam.getMin()));
-				terser.addElement(param, "max", (nextParam.getMax() == -1 ? "*" : Integer.toString(nextParam.getMax())));
+				terser.addElement(
+						param, "max", (nextParam.getMax() == -1 ? "*" : Integer.toString(nextParam.getMax())));
 				terser.addElement(param, "name", nextParam.getName());
 			}
 		}

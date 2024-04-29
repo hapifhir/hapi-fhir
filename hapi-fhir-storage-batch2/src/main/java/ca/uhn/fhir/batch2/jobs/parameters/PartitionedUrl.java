@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.parameters;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server - Batch2 Task Processor
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,16 +17,30 @@ package ca.uhn.fhir.batch2.jobs.parameters;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.parameters;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import javax.validation.constraints.Pattern;
+import jakarta.validation.constraints.Pattern;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 
 public class PartitionedUrl implements IModelJson {
+	@Override
+	public String toString() {
+		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
+		b.append("partition", myRequestPartitionId);
+		b.append("myUrl", myUrl);
+		return b.toString();
+	}
+
 	@JsonProperty("url")
-	@Pattern(regexp = "^[A-Z][A-Za-z0-9]+\\?.*", message = "If populated, URL must be a search URL in the form '{resourceType}?[params]'") String myUrl;
+	@Pattern(
+			regexp = "^[A-Z][A-Za-z0-9]+\\?.*",
+			message = "If populated, URL must be a search URL in the form '{resourceType}?[params]'")
+	String myUrl;
+
 	@JsonProperty("requestPartitionId")
 	RequestPartitionId myRequestPartitionId;
 

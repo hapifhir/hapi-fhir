@@ -19,13 +19,22 @@ import org.hl7.fhir.r4.model.CarePlan.CarePlanStatus;
 import org.hl7.fhir.r4.model.ClinicalImpression;
 import org.hl7.fhir.r4.model.ClinicalImpression.ClinicalImpressionStatus;
 import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.Encounter.EncounterStatus;
 import org.hl7.fhir.r4.model.HumanName;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Medication;
+import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
+import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r4.model.RiskAssessment;
 import org.hl7.fhir.r4.model.RiskAssessment.RiskAssessmentStatus;
@@ -37,6 +46,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -988,7 +998,51 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 
 	}
 
-	private List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
+	/**
+	 * See #5307
+	 */
+	@Test
+	public void testContainedSearchByTokenWithParentheticalExpression()  throws IOException {
+
+		IIdType mid1;
+		{
+			Medication m1 = new Medication();
+			m1.setId("med0312");
+			m1.setCode(new CodeableConcept().addCoding(new Coding()
+				.setSystem("http://snomed.info/sct")
+				.setCode("324689003")
+				.setDisplay("Nystatin 100,000 units/ml oral suspension (product)")
+			));
+
+			MedicationRequest medReq = new MedicationRequest();
+			medReq.addIdentifier()
+				.setUse(Identifier.IdentifierUse.OFFICIAL)
+				.setSystem("http://www.bmc.nl/portal/prescriptions")
+				.setValue("12345689");
+			medReq.setStatus(MedicationRequest.MedicationRequestStatus.COMPLETED);
+			medReq.setIntent(MedicationRequest.MedicationRequestIntent.ORDER);
+			medReq.setMedication(new Reference()
+				.setReference("#med0312")
+				.setDisplay("Nystatin 100,000 u/ml oral suspension"));
+			medReq.setAuthoredOnElement(new DateTimeType("2015-01-15"));
+			medReq.addContained(m1);
+
+			// -- update
+			mid1 = myMedicationRequestDao.create(medReq, mySrd).getId().toUnqualifiedVersionless();
+
+			MedicationRequest medReqCreated = myMedicationRequestDao.read(mid1);
+
+			ourLog.debug("Output: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(medReqCreated));
+		}
+
+		String uri = myServerBase + "/MedicationRequest?medication.code=http://" + UrlUtil.escapeUrlParam("snomed.info/sct|324689003");
+		List<String> mids = searchAndReturnUnqualifiedVersionlessIdValues(uri);
+
+		assertEquals(1L, mids.size());
+		assertThat(mids, contains(mid1.getValue()));
+	}
+
+	public List<String> searchAndReturnUnqualifiedVersionlessIdValues(String uri) throws IOException {
 		List<String> ids;
 		HttpGet get = new HttpGet(uri);
 

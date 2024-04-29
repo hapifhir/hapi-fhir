@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.search.elastic;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.search.elastic;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.search.elastic;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
@@ -56,7 +55,7 @@ public class IndexNamePrefixLayoutStrategy implements IndexLayoutStrategy {
 
 	@Override
 	public String createWriteAlias(String hibernateSearchIndexName) {
-		return addPrefixIfNecessary(hibernateSearchIndexName +"-write");
+		return addPrefixIfNecessary(hibernateSearchIndexName + "-write");
 	}
 
 	@Override
@@ -84,7 +83,7 @@ public class IndexNamePrefixLayoutStrategy implements IndexLayoutStrategy {
 		if (!matcher.matches()) {
 			throw log.invalidIndexPrimaryName(elasticsearchIndexName, UNIQUE_KEY_EXTRACTION_PATTERN);
 		} else {
-			String candidateUniqueKey= matcher.group(1);
+			String candidateUniqueKey = matcher.group(1);
 			return removePrefixIfNecessary(candidateUniqueKey);
 		}
 	}
@@ -97,9 +96,12 @@ public class IndexNamePrefixLayoutStrategy implements IndexLayoutStrategy {
 			return theCandidateUniqueKey;
 		}
 	}
+
 	private void validateStorageSettingsIsPresent() {
 		if (myStorageSettings == null) {
-			throw new ConfigurationException(Msg.code(1168) + "While attempting to boot HAPI FHIR, the Hibernate Search bootstrapper failed to find the StorageSettings. This probably means Hibernate Search has been recently upgraded, or somebody modified HapiFhirLocalContainerEntityManagerFactoryBean.");
+			throw new ConfigurationException(
+					Msg.code(1168)
+							+ "While attempting to boot HAPI FHIR, the Hibernate Search bootstrapper failed to find the StorageSettings. This probably means Hibernate Search has been recently upgraded, or somebody modified HapiFhirLocalContainerEntityManagerFactoryBean.");
 		}
 	}
 }

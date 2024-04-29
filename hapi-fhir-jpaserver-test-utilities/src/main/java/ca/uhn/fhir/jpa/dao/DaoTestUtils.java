@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.dao;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.dao;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.dao;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -37,18 +36,20 @@ public final class DaoTestUtils {
 
 	private DaoTestUtils() {}
 
-    public static void assertConflictException(ResourceVersionConflictException e) {
-        assertThat(e.getMessage(), matchesPattern(
-            Msg.code(550) + Msg.code(515) + "Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource [a-zA-Z]+/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+"));
-    }
+	public static void assertConflictException(ResourceVersionConflictException e) {
+		assertThat(
+				e.getMessage(),
+				matchesPattern(
+						Msg.code(550) + Msg.code(515)
+								+ "Unable to delete [a-zA-Z]+/[0-9]+ because at least one resource has a reference to this resource. First reference found was resource [a-zA-Z]+/[0-9]+ in path [a-zA-Z]+.[a-zA-Z]+"));
+	}
 
 	public static void logAllInterceptors(IInterceptorService theInterceptorRegistry) {
 		List<Object> allInterceptors = theInterceptorRegistry.getAllRegisteredInterceptors();
-		String interceptorList = allInterceptors
-			.stream()
-			.map(t -> t.getClass().toString())
-			.sorted()
-			.collect(Collectors.joining("\n * "));
+		String interceptorList = allInterceptors.stream()
+				.map(t -> t.getClass().toString())
+				.sorted()
+				.collect(Collectors.joining("\n * "));
 		ourLog.info("Registered interceptors:\n * {}", interceptorList);
 	}
 }

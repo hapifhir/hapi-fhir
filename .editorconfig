@@ -3,35 +3,35 @@ root = true
 [*]
 end_of_line = lf
 insert_final_newline = true
-tab_width = 3
-indent_size = 3
+indent_style = space
+tab_width = 4
+indent_size = 4
 charset = utf-8
 
+[*.html]
+indent_style = tab
+tab_width = 3
+indent_size = 3
+
 [*.xml]
-charset = utf-8
 indent_style = tab
 tab_width = 3
 indent_size = 3
 
 [*.json]
-charset = utf-8
 indent_style = tab
 tab_width = 3
 indent_size = 3
 
 [*.vm]
-charset = utf-8
 indent_style = tab
 tab_width = 3
 indent_size = 3
 
 
 [*.java]
-charset = utf-8
 indent_style = tab
-tab_width = 3
-indent_size = 3
-continuation_indent_size=3
+ij_continuation_indent_size = 4
 ij_java_align_consecutive_assignments = false
 ij_java_align_consecutive_variable_declarations = false
 ij_java_align_group_field_declarations = false

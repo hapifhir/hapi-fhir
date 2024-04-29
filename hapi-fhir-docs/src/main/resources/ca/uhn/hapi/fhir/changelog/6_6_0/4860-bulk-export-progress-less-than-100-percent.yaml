@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 4860
+title: "Running an $export that completes successfully results in a progress percentage of less than 100%.
+        This has now been fixed."

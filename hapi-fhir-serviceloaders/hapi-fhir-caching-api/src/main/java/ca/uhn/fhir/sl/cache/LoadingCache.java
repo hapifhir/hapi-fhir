@@ -1,7 +1,26 @@
 package ca.uhn.fhir.sl.cache;
 
+/*-
+ * #%L
+ * HAPI FHIR - ServiceLoaders - Caching API
+ * %%
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * This interface is a blend between
@@ -11,9 +30,9 @@ import java.util.concurrent.CompletableFuture;
  * Please check their documentation for information in the methods below.
  */
 public interface LoadingCache<K, V> extends Cache<K, V> {
-    V get(K key);
+	V get(K key);
 
-    Map<K, V> getAll(Iterable<? extends K> keys);
+	Map<K, V> getAll(Iterable<? extends K> keys);
 
-    void refresh(K key);
+	void refresh(K key);
 }

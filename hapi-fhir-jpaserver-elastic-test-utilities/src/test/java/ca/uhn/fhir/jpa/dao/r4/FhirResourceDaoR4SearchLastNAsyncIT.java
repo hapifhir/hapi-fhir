@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -36,6 +37,17 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 	private List<Integer> originalPreFetchThresholds;
 	@Autowired
 	private ISearchDao mySearchDao;
+
+	@BeforeEach
+	public void enableAdvancedHSearchIndexing() {
+		myStorageSettings.setLastNEnabled(true);
+		myStorageSettings.setAdvancedHSearchIndexing(true);
+	}
+
+	@AfterEach
+	public void disableAdvancedHSearchIndex() {
+		myStorageSettings.setAdvancedHSearchIndexing(new JpaStorageSettings().isAdvancedHSearchIndexing());
+	}
 
 	@Override
 	@BeforeEach
@@ -72,9 +84,9 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 	public void testLastNChunking() {
 
 		runInTransaction(() -> {
-			for (Search search : mySearchDao.findAll()) {
-				mySearchDao.updateDeleted(search.getId(), true);
-			}
+			Set<Long> all = mySearchDao.findAll().stream().map(Search::getId).collect(Collectors.toSet());
+
+			mySearchDao.updateDeleted(all, true);
 		});
 
 		// Set up search parameters that will return 75 Observations.
@@ -122,7 +134,7 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 		// The first chunked query should have a full complement of PIDs
 		StringBuilder firstQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");
 		for (int pidIndex = 1; pidIndex < 50; pidIndex++) {
-			firstQueryPattern.append(" , '[0-9]+'");
+			firstQueryPattern.append(",'[0-9]+'");
 		}
 		firstQueryPattern.append("\\).*");
 		assertThat(queries.get(4), matchesPattern(firstQueryPattern.toString()));
@@ -130,10 +142,10 @@ public class FhirResourceDaoR4SearchLastNAsyncIT extends BaseR4SearchLastN {
 		// the second chunked query should be padded with "-1".
 		StringBuilder secondQueryPattern = new StringBuilder(".*RES_ID in \\('[0-9]+'");
 		for (int pidIndex = 1; pidIndex < 25; pidIndex++) {
-			secondQueryPattern.append(" , '[0-9]+'");
+			secondQueryPattern.append(",'[0-9]+'");
 		}
 		for (int pidIndex = 0; pidIndex < 25; pidIndex++) {
-			secondQueryPattern.append(" , '-1'");
+			secondQueryPattern.append(",'-1'");
 		}
 		secondQueryPattern.append("\\).*");
 		assertThat(queries.get(5), matchesPattern(secondQueryPattern.toString()));

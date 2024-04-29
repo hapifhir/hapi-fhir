@@ -123,7 +123,7 @@ public class TerminologyLoaderSvcSnomedCtTest extends BaseLoaderTest {
 	 * This is just for trying stuff, it won't run without
 	 * local files external to the git repo
 	 */
-	@Disabled
+	@Disabled("for manual testing")
 	@Test
 	public void testLoadSnomedCtAgainstRealFile() throws Exception {
 		byte[] bytes = IOUtils.toByteArray(new FileInputStream("/Users/james/Downloads/SnomedCT_Release_INT_20160131_Full.zip"));

@@ -1,10 +1,8 @@
-package ca.uhn.fhir.cli;
-
 /*-
  * #%L
  * HAPI FHIR - Command Line Client - API
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.cli;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.cli;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -37,6 +36,7 @@ import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
 import org.apache.commons.lang3.StringUtils;
@@ -80,10 +80,25 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 	public Options getOptions() {
 		Options options = super.getOptions();
 
-		addRequiredOption(options, "u", "url", true, "The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
-		addOptionalOption(options, "d", "data", true, "Local file to use to upload (can be a raw file or a ZIP containing the raw file)");
+		addRequiredOption(
+				options,
+				"u",
+				"url",
+				true,
+				"The code system URL associated with this upload (e.g. " + ITermLoaderSvc.SCT_URI + ")");
+		addOptionalOption(
+				options,
+				"d",
+				"data",
+				true,
+				"Local file to use to upload (can be a raw file or a ZIP containing the raw file)");
 		addOptionalOption(options, "m", "mode", true, "The upload mode: SNAPSHOT (default), ADD, REMOVE");
-		addOptionalOption(options, "s", "size", true, "The maximum size of a single upload (default: 10MB). Examples: 150 kb, 3 mb, 1GB");
+		addOptionalOption(
+				options,
+				"s",
+				"size",
+				true,
+				"The maximum size of a single upload (default: 10MB). Examples: 150 kb, 3 mb, 1GB");
 
 		return options;
 	}
@@ -134,14 +149,16 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		invokeOperation(termUrl, datafile, client, requestName);
 	}
 
-	private void invokeOperation(String theTermUrl, String[] theDatafile, IGenericClient theClient, String theOperationName) throws ParseException {
+	private void invokeOperation(
+			String theTermUrl, String[] theDatafile, IGenericClient theClient, String theOperationName)
+			throws ParseException {
 		IBaseParameters inputParameters = ParametersUtil.newInstance(myFhirCtx);
 
-		boolean isDeltaOperation =
-			theOperationName.equals(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD) ||
-				theOperationName.equals(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE);
+		boolean isDeltaOperation = theOperationName.equals(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD)
+				|| theOperationName.equals(JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_REMOVE);
 
-		ParametersUtil.addParameterToParametersUri(myFhirCtx, inputParameters, TerminologyUploaderProvider.PARAM_SYSTEM, theTermUrl);
+		ParametersUtil.addParameterToParametersUri(
+				myFhirCtx, inputParameters, TerminologyUploaderProvider.PARAM_SYSTEM, theTermUrl);
 
 		ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
 		ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream, Charsets.UTF_8);
@@ -164,11 +181,14 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 							String contents = IOUtils.toString(fileInputStream, Charsets.UTF_8);
 							EncodingEnum encoding = EncodingEnum.detectEncodingNoDefault(contents);
 							if (encoding == null) {
-								throw new ParseException(Msg.code(1541) + "Could not detect FHIR encoding for file: " + nextDataFile);
+								throw new ParseException(
+										Msg.code(1541) + "Could not detect FHIR encoding for file: " + nextDataFile);
 							}
 
-							IBaseResource resource = encoding.newParser(myFhirCtx).parseResource(contents);
-							ParametersUtil.addParameterToParameters(myFhirCtx, inputParameters, TerminologyUploaderProvider.PARAM_CODESYSTEM, resource);
+							IBaseResource resource =
+									encoding.newParser(myFhirCtx).parseResource(contents);
+							ParametersUtil.addParameterToParameters(
+									myFhirCtx, inputParameters, TerminologyUploaderProvider.PARAM_CODESYSTEM, resource);
 
 						} else {
 
@@ -184,7 +204,6 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 
 							zipOutputStream.flush();
 							ourLog.info("Finished compressing {}", nextDataFile);
-
 						}
 
 					} else if (nextDataFile.endsWith(".zip")) {
@@ -196,10 +215,8 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 					} else {
 
 						throw new ParseException(Msg.code(1542) + "Don't know how to handle file: " + nextDataFile);
-
 					}
 				}
-
 			}
 			zipOutputStream.flush();
 			zipOutputStream.close();
@@ -209,7 +226,11 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 
 		if (haveCompressedContents) {
 			byte[] compressedBytes = byteArrayOutputStream.toByteArray();
-			ourLog.info("Compressed {} bytes in {} file(s) into {} bytes", FileUtil.formatFileSize(compressedSourceBytesCount), compressedFileCount, FileUtil.formatFileSize(compressedBytes.length));
+			ourLog.info(
+					"Compressed {} bytes in {} file(s) into {} bytes",
+					FileUtil.formatFileSize(compressedSourceBytesCount),
+					compressedFileCount,
+					FileUtil.formatFileSize(compressedBytes.length));
 
 			addFileToRequestBundle(inputParameters, "file:/files.zip", compressedBytes);
 		}
@@ -217,37 +238,43 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		ourLog.info("Beginning upload - This may take a while...");
 
 		if (ourLog.isDebugEnabled() || HapiSystemProperties.isTestModeEnabled()) {
-			ourLog.debug("Submitting parameters: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inputParameters));
+			ourLog.debug(
+					"Submitting parameters: {}",
+					myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(inputParameters));
 		}
 
 		IBaseParameters response;
 		try {
 			response = theClient
-				.operation()
-				.onType(myFhirCtx.getResourceDefinition("CodeSystem").getImplementingClass())
-				.named(theOperationName)
-				.withParameters(inputParameters)
-				.execute();
+					.operation()
+					.onType(myFhirCtx.getResourceDefinition("CodeSystem").getImplementingClass())
+					.named(theOperationName)
+					.withParameters(inputParameters)
+					.execute();
 		} catch (BaseServerResponseException e) {
 			if (e.getOperationOutcome() != null) {
-				ourLog.error("Received the following response:\n{}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+				ourLog.error(
+						"Received the following response:\n{}",
+						myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 			}
 			throw e;
 		}
 
-
 		ourLog.info("Upload complete!");
-		ourLog.debug("Response:\n{}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
+		ourLog.debug(
+				"Response:\n{}", myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 	}
 
 	private void addFileToRequestBundle(IBaseParameters theInputParameters, String theFileName, byte[] theBytes) {
 
 		byte[] bytes = theBytes;
 		String fileName = theFileName;
-		String suffix = fileName.substring(fileName.lastIndexOf("."));
+		String suffix = FilenameUtils.getExtension(fileName);
 
 		if (bytes.length > ourTransferSizeLimit) {
-			ourLog.info("File size is greater than {} - Going to use a local file reference instead of a direct HTTP transfer. Note that this will only work when executing this command on the same server as the FHIR server itself.", FileUtil.formatFileSize(ourTransferSizeLimit));
+			ourLog.info(
+					"File size is greater than {} - Going to use a local file reference instead of a direct HTTP transfer. Note that this will only work when executing this command on the same server as the FHIR server itself.",
+					FileUtil.formatFileSize(ourTransferSizeLimit));
 
 			try {
 				File tempFile = File.createTempFile("hapi-fhir-cli", suffix);
@@ -268,7 +295,8 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		if (bytes != null) {
 			AttachmentUtil.setData(myFhirCtx, attachment, bytes);
 		}
-		ParametersUtil.addParameterToParameters(myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_FILE, attachment);
+		ParametersUtil.addParameterToParameters(
+				myFhirCtx, theInputParameters, TerminologyUploaderProvider.PARAM_FILE, attachment);
 	}
 
 	/*
@@ -277,21 +305,35 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 	 */
 	private String getContentType(String theSuffix) {
 		String retVal = "";
-		if(StringUtils.isNotBlank(theSuffix)) {
+		if (StringUtils.isNotBlank(theSuffix)) {
 			switch (theSuffix.toLowerCase()) {
-				case "csv" : retVal = "text/csv"; break;
-				case "xml" : retVal = "application/xml"; break;
-				case "json" : retVal = "application/json"; break;
-				case "zip" : retVal = "application/zip"; break;
-				default: retVal = "text/plain";
+				case "csv":
+					retVal = "text/csv";
+					break;
+				case "xml":
+					retVal = "application/xml";
+					break;
+				case "json":
+					retVal = "application/json";
+					break;
+				case "zip":
+					retVal = "application/zip";
+					break;
+				default:
+					retVal = "text/plain";
 			}
 		}
-		ourLog.debug("File suffix given was {} and contentType is {}, defaulting to content type text/plain", theSuffix, retVal);
+		ourLog.debug(
+				"File suffix given was {} and contentType is {}, defaulting to content type text/plain",
+				theSuffix,
+				retVal);
 		return retVal;
 	}
 
 	private enum ModeEnum {
-		SNAPSHOT, ADD, REMOVE
+		SNAPSHOT,
+		ADD,
+		REMOVE
 	}
 
 	public void setTransferSizeBytes(long theTransferSizeBytes) {
@@ -301,6 +343,7 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 			ourTransferSizeLimit = theTransferSizeBytes;
 		}
 	}
+
 	public void setTransferSizeLimitHuman(String sizeString) {
 		if (isBlank(sizeString)) {
 			setTransferSizeBytes(DEFAULT_TRANSFER_SIZE_LIMIT);
@@ -320,5 +363,4 @@ public class UploadTerminologyCommand extends BaseRequestGeneratingCommand {
 		}
 		return retVal;
 	}
-
 }

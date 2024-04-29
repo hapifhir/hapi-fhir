@@ -10,6 +10,7 @@ import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.parser.CustomResource364R4.CustomResource364CustomDate;
 import ca.uhn.fhir.util.ElementUtil;
+import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -23,10 +24,17 @@ import org.hl7.fhir.r4.model.Type;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
+import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
+import static ca.uhn.fhir.context.FhirVersionEnum.R4;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
@@ -37,6 +45,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class CustomTypeR4Test {
 
 	private static FhirContext ourCtx = FhirContext.forR4();
+	private AnnotationConfigApplicationContext myAppCtx;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomTypeR4Test.class);
 
 	@BeforeEach
@@ -385,6 +394,28 @@ public class CustomTypeR4Test {
 
 		MedicationRequest mo = ctx.newXmlParser().parseResource(MedicationRequest.class, input);
 		assertEquals(MyMedication.class, mo.getContained().get(0).getClass());
+	}
+
+	@Test
+	public void testRegisterCustomResource_whenResourceListIsAlreadyGenerated() {
+		FhirContext newContext = new FhirContext(R4);
+		Set<String> resourceSet = newContext.getResourceTypes();
+		assertEquals(false,resourceSet.contains("CustomResource"));
+		newContext.registerCustomType(CustomResource364R4.class);
+		newContext.getElementDefinition(CustomResource364R4.class);
+		resourceSet = newContext.getResourceTypes();
+		assertEquals(true,resourceSet.contains("CustomResource"));
+	}
+
+	@Test
+	public void testRegisterCustomTypes_whenResourceListIsAlreadyGenerated(){
+		FhirContext newContext = new FhirContext(R4);
+		Set<String> resourceSet = newContext.getResourceTypes();
+		assertEquals(false,resourceSet.contains("CustomResource"));
+		newContext.registerCustomTypes(Collections.singleton(CustomResource364R4.class));
+		newContext.getElementDefinition(CustomResource364R4.class);
+		resourceSet = newContext.getResourceTypes();
+		assertEquals(true,resourceSet.contains("CustomResource"));
 	}
 
 	public static String createBundle(String... theResources) {

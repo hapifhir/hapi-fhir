@@ -17,8 +17,10 @@ import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import ca.uhn.fhir.jpa.cache.ResourcePersistentIdMap;
 import ca.uhn.fhir.jpa.cache.ResourceVersionMap;
+import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.JpaResourceDao;
+import ca.uhn.fhir.jpa.dao.ResourceHistoryCalculator;
 import ca.uhn.fhir.jpa.dao.TransactionProcessor;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.dao.index.DaoSearchParamSynchronizer;
@@ -26,12 +28,10 @@ import ca.uhn.fhir.jpa.dao.index.SearchParamWithInlineReferencesExtractor;
 import ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4;
 import ca.uhn.fhir.jpa.dao.r4.TransactionProcessorVersionAdapterR4;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
-import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
-import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
@@ -43,6 +43,8 @@ import ca.uhn.fhir.jpa.sp.SearchParamPresenceSvcImpl;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.IMetaTagSorter;
+import ca.uhn.fhir.util.MetaTagSorterAlphabetical;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IInstanceValidatorModule;
 import com.google.common.collect.Lists;
@@ -60,7 +62,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.quartz.JobKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
@@ -76,23 +77,24 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.SimpleTransactionStatus;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import javax.persistence.EntityGraph;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.EntityTransaction;
-import javax.persistence.FlushModeType;
-import javax.persistence.LockModeType;
-import javax.persistence.Query;
-import javax.persistence.StoredProcedureQuery;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaDelete;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.CriteriaUpdate;
-import javax.persistence.metamodel.Metamodel;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityGraph;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.EntityTransaction;
+import jakarta.persistence.FlushModeType;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.Query;
+import jakarta.persistence.StoredProcedureQuery;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaDelete;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.CriteriaUpdate;
+import jakarta.persistence.metamodel.Metamodel;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -148,6 +150,8 @@ public class GiantTransactionPerfTest {
 	private IIdHelperService myIdHelperService;
 	@Mock
 	private IJpaStorageResourceParser myJpaStorageResourceParser;
+	private final ResourceHistoryCalculator myResourceHistoryCalculator = new ResourceHistoryCalculator(FhirContext.forR4Cached(), false);
+	private IMetaTagSorter myMetaTagSorter;
 
 	@AfterEach
 	public void afterEach() {
@@ -174,10 +178,13 @@ public class GiantTransactionPerfTest {
 
 		myPartitionSettings = new PartitionSettings();
 
+		myMetaTagSorter = new MetaTagSorterAlphabetical();
+
 		myHapiTransactionService = new HapiTransactionService();
 		myHapiTransactionService.setTransactionManager(myTransactionManager);
 		myHapiTransactionService.setInterceptorBroadcaster(myInterceptorSvc);
 		myHapiTransactionService.setRequestPartitionSvcForUnitTest(myRequestPartitionHelperSvc);
+		myHapiTransactionService.setPartitionSettingsForUnitTest(new PartitionSettings());
 
 		myTransactionProcessor = new TransactionProcessor();
 		myTransactionProcessor.setContext(ourFhirContext);
@@ -265,6 +272,9 @@ public class GiantTransactionPerfTest {
 		myEobDao.setIdHelperSvcForUnitTest(myIdHelperService);
 		myEobDao.setPartitionSettingsForUnitTest(myPartitionSettings);
 		myEobDao.setJpaStorageResourceParserForUnitTest(myJpaStorageResourceParser);
+		myEobDao.setExternallyStoredResourceServiceRegistryForUnitTest(new ExternallyStoredResourceServiceRegistry());
+		myEobDao.setMyMetaTagSorter(myMetaTagSorter);
+		myEobDao.setResourceHistoryCalculator(myResourceHistoryCalculator);
 		myEobDao.start();
 
 		myDaoRegistry.setResourceDaos(Lists.newArrayList(myEobDao));
@@ -281,6 +291,8 @@ public class GiantTransactionPerfTest {
 		requestDetails.setServletRequest(new MockServletRequest());
 
 		mySystemDao.transaction(requestDetails, input);
+
+		ourLog.info("Merges:\n * " + myEntityManager.myMergeCount.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
 
 		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList()), Matchers.contains("ResourceTable"));
 		assertThat(myEntityManager.myMergeCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList()), Matchers.containsInAnyOrder("ResourceTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken"));
@@ -341,7 +353,7 @@ public class GiantTransactionPerfTest {
 		}
 	}
 
-	private class MockResourceHistoryTableDao implements IResourceHistoryTableDao {
+	private static class MockResourceHistoryTableDao implements IResourceHistoryTableDao {
 		private int mySaveCount;
 
 		@Override
@@ -356,6 +368,11 @@ public class GiantTransactionPerfTest {
 
 		@Override
 		public Slice<Long> findForResourceId(Pageable thePage, Long theId, Long theDontWantVersion) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Slice<ResourceHistoryTable> findForResourceIdAndReturnEntitiesAndFetchProvenance(Pageable thePage, Long theId, Long theDontWantVersion) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -385,22 +402,31 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
+		public void updateNonInlinedContents(byte[] theText, long thePid) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Nonnull
+		@Override
 		public List<ResourceHistoryTable> findAll() {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nonnull
 		@Override
-		public List<ResourceHistoryTable> findAll(Sort sort) {
+		public List<ResourceHistoryTable> findAll(@Nonnull Sort sort) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nonnull
 		@Override
-		public Page<ResourceHistoryTable> findAll(Pageable pageable) {
+		public Page<ResourceHistoryTable> findAll(@Nonnull Pageable pageable) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nonnull
 		@Override
-		public List<ResourceHistoryTable> findAllById(Iterable<Long> ids) {
+		public List<ResourceHistoryTable> findAllById(@Nonnull Iterable<Long> ids) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -410,22 +436,22 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public void deleteById(Long theLong) {
+		public void deleteById(@Nonnull Long theLong) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void delete(ResourceHistoryTable entity) {
+		public void delete(@Nonnull ResourceHistoryTable entity) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void deleteAllById(Iterable<? extends Long> ids) {
-
+		public void deleteAllById(@Nonnull Iterable<? extends Long> ids) {
+			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void deleteAll(Iterable<? extends ResourceHistoryTable> entities) {
+		public void deleteAll(@Nonnull Iterable<? extends ResourceHistoryTable> entities) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -434,24 +460,27 @@ public class GiantTransactionPerfTest {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nonnull
 		@Override
-		public <S extends ResourceHistoryTable> S save(S entity) {
+		public <S extends ResourceHistoryTable> S save(@Nonnull S entity) {
 			mySaveCount++;
 			return entity;
 		}
 
+		@Nonnull
 		@Override
-		public <S extends ResourceHistoryTable> List<S> saveAll(Iterable<S> entities) {
+		public <S extends ResourceHistoryTable> List<S> saveAll(@Nonnull Iterable<S> entities) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Nonnull
+		@Override
+		public Optional<ResourceHistoryTable> findById(@Nonnull Long theLong) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public Optional<ResourceHistoryTable> findById(Long theLong) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean existsById(Long theLong) {
+		public boolean existsById(@Nonnull Long theLong) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -460,28 +489,30 @@ public class GiantTransactionPerfTest {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nonnull
 		@Override
-		public <S extends ResourceHistoryTable> S saveAndFlush(S entity) {
+		public <S extends ResourceHistoryTable> S saveAndFlush(@Nonnull S entity) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Nonnull
+		@Override
+		public <S extends ResourceHistoryTable> List<S> saveAllAndFlush(@Nonnull Iterable<S> entities) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public <S extends ResourceHistoryTable> List<S> saveAllAndFlush(Iterable<S> entities) {
+		public void deleteInBatch(@Nonnull Iterable<ResourceHistoryTable> entities) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void deleteInBatch(Iterable<ResourceHistoryTable> entities) {
+		public void deleteAllInBatch(@Nonnull Iterable<ResourceHistoryTable> entities) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public void deleteAllInBatch(Iterable<ResourceHistoryTable> entities) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void deleteAllByIdInBatch(Iterable<Long> ids) {
+		public void deleteAllByIdInBatch(@Nonnull Iterable<Long> ids) {
 			throw new UnsupportedOperationException();
 		}
 
@@ -491,57 +522,62 @@ public class GiantTransactionPerfTest {
 		}
 
 		@Override
-		public ResourceHistoryTable getOne(Long theLong) {
+		public ResourceHistoryTable getOne(@Nonnull Long theLong) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public ResourceHistoryTable getById(Long theLong) {
+		public ResourceHistoryTable getById(@Nonnull Long theLong) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public ResourceHistoryTable getReferenceById(Long theLong) {
+		public ResourceHistoryTable getReferenceById(@Nonnull Long theLong) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nonnull
 		@Override
-		public <S extends ResourceHistoryTable> Optional<S> findOne(Example<S> example) {
+		public <S extends ResourceHistoryTable> Optional<S> findOne(@Nonnull Example<S> example) {
 			return Optional.empty();
 		}
 
+		@Nonnull
 		@Override
-		public <S extends ResourceHistoryTable> List<S> findAll(Example<S> example) {
+		public <S extends ResourceHistoryTable> List<S> findAll(@Nonnull Example<S> example) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Nonnull
+		@Override
+		public <S extends ResourceHistoryTable> List<S> findAll(@Nonnull Example<S> example, @Nonnull Sort sort) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Nonnull
+		@Override
+		public <S extends ResourceHistoryTable> Page<S> findAll(@Nonnull Example<S> example, @Nonnull Pageable pageable) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public <S extends ResourceHistoryTable> List<S> findAll(Example<S> example, Sort sort) {
+		public <S extends ResourceHistoryTable> long count(@Nonnull Example<S> example) {
 			throw new UnsupportedOperationException();
 		}
 
 		@Override
-		public <S extends ResourceHistoryTable> Page<S> findAll(Example<S> example, Pageable pageable) {
+		public <S extends ResourceHistoryTable> boolean exists(@Nonnull Example<S> example) {
 			throw new UnsupportedOperationException();
 		}
 
+		@Nonnull
 		@Override
-		public <S extends ResourceHistoryTable> long count(Example<S> example) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public <S extends ResourceHistoryTable> boolean exists(Example<S> example) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public <S extends ResourceHistoryTable, R> R findBy(Example<S> example, Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
+		public <S extends ResourceHistoryTable, R> R findBy(@Nonnull Example<S> example, @Nonnull Function<FluentQuery.FetchableFluentQuery<S>, R> queryFunction) {
 			throw new UnsupportedOperationException();
 		}
 	}
 
-	private class MockEntityManager implements EntityManager {
+	private static class MockEntityManager implements EntityManager {
 		private final List<Object> myPersistCount = new ArrayList<>();
 		private final List<Object> myMergeCount = new ArrayList<>();
 		private long ourNextId = 0L;
@@ -815,61 +851,13 @@ public class GiantTransactionPerfTest {
 		}
 	}
 
-	private static class MockSchedulerSvc implements ISchedulerService {
-
-		@Override
-		public void purgeAllScheduledJobsForUnitTest() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void logStatusForUnitTest() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void scheduleLocalJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void scheduleClusteredJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public Set<JobKey> getLocalJobKeysForUnitTest() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public Set<JobKey> getClusteredJobKeysForUnitTest() {
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public boolean isStopping() {
-			return false;
-		}
-
-		@Override
-		public void triggerLocalJobImmediately(ScheduledJobDefinition theJobDefinition) {
-			ISchedulerService.super.triggerLocalJobImmediately(theJobDefinition);
-		}
-
-		@Override
-		public void triggerClusteredJobImmediately(ScheduledJobDefinition theJobDefinition) {
-			ISchedulerService.super.triggerClusteredJobImmediately(theJobDefinition);
-		}
-	}
-
 	private static class MockServletRequest extends MockHttpServletRequest {
 	}
 
 	private static class MockRequestPartitionHelperSvc implements ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc {
 		@Nonnull
 		@Override
-		public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, String theResourceType, @Nonnull ReadPartitionIdRequestDetails theDetails) {
+		public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails) {
 			return RequestPartitionId.defaultPartition();
 		}
 
@@ -882,12 +870,6 @@ public class GiantTransactionPerfTest {
 		@Override
 		public RequestPartitionId determineCreatePartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull IBaseResource theResource, @Nonnull String theResourceType) {
 			return RequestPartitionId.defaultPartition();
-		}
-
-		@Override
-		@Nonnull
-		public PartitionablePartitionId toStoragePartition(@Nonnull RequestPartitionId theRequestPartitionId) {
-			return new PartitionablePartitionId(theRequestPartitionId.getFirstPartitionIdOrNull(), theRequestPartitionId.getPartitionDate());
 		}
 
 		@Nonnull
@@ -911,17 +893,18 @@ public class GiantTransactionPerfTest {
 		@Nonnull
 		@Override
 		public TransactionStatus getTransaction(TransactionDefinition definition) throws TransactionException {
+			TransactionSynchronizationManager.setActualTransactionActive(true);
 			return new SimpleTransactionStatus();
 		}
 
 		@Override
 		public void commit(@Nonnull TransactionStatus status) throws TransactionException {
-
+			TransactionSynchronizationManager.setActualTransactionActive(false);
 		}
 
 		@Override
 		public void rollback(@Nonnull TransactionStatus status) throws TransactionException {
-
+			TransactionSynchronizationManager.setActualTransactionActive(false);
 		}
 	}
 }

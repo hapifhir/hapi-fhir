@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.sched;
-
 /*-
  * #%L
- * hapi-fhir-jpa
+ * HAPI FHIR JPA Model
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.jpa.sched;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.sched;
 
 import ca.uhn.fhir.jpa.model.sched.IHapiScheduler;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
@@ -38,14 +37,10 @@ public class HapiNullScheduler implements IHapiScheduler {
 	}
 
 	@Override
-	public void start() {
-
-	}
+	public void start() {}
 
 	@Override
-	public void shutdown() {
-
-	}
+	public void shutdown() {}
 
 	@Override
 	public boolean isStarted() {
@@ -53,14 +48,10 @@ public class HapiNullScheduler implements IHapiScheduler {
 	}
 
 	@Override
-	public void clear() throws SchedulerException {
-
-	}
+	public void clear() throws SchedulerException {}
 
 	@Override
-	public void logStatusForUnitTest() {
-
-	}
+	public void logStatusForUnitTest() {}
 
 	@Override
 	public void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition) {

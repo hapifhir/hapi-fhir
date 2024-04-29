@@ -1,10 +1,8 @@
-package ca.uhn.fhir.jpa.util;
-
 /*-
  * #%L
  * HAPI FHIR JPA Server Test Utilities
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,14 +17,15 @@ package ca.uhn.fhir.jpa.util;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.jpa.util;
 
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.ValueSet;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,6 +51,8 @@ public class ValueSetTestUtil {
 	@Nonnull
 	public List<String> toCodes(IBaseResource theExpandedValueSet) {
 		ValueSet outcome = myCanonicalizer.valueSetToCanonical(theExpandedValueSet);
-		return outcome.getExpansion().getContains().stream().map(t -> t.getCode()).collect(Collectors.toList());
+		return outcome.getExpansion().getContains().stream()
+				.map(t -> t.getCode())
+				.collect(Collectors.toList());
 	}
 }

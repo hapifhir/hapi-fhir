@@ -1,10 +1,8 @@
-package ca.uhn.fhir.batch2.jobs.reindex;
-
 /*-
  * #%L
  * hapi-fhir-storage-batch2-jobs
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.batch2.jobs.reindex;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.batch2.jobs.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
@@ -42,39 +41,36 @@ public class ReindexAppCtx {
 
 	@Bean
 	public JobDefinition<ReindexJobParameters> reindexJobDefinition(IBatch2DaoSvc theBatch2DaoSvc) {
-		return JobDefinition
-			.newBuilder()
-			.setJobDefinitionId(JOB_REINDEX)
-			.setJobDescription("Reindex resources")
-			.setJobDefinitionVersion(1)
-			.setParametersType(ReindexJobParameters.class)
-			.setParametersValidator(reindexJobParametersValidator(theBatch2DaoSvc))
-			.gatedExecution()
-			.addFirstStep(
-				"generate-ranges",
-				"Generate data ranges to reindex",
-				PartitionedUrlChunkRangeJson.class,
-				reindexGenerateRangeChunksStep())
-			.addIntermediateStep(
-				"load-ids",
-				"Load IDs of resources to reindex",
-				ResourceIdListWorkChunkJson.class,
-				new LoadIdsStep(theBatch2DaoSvc))
-			.addLastStep("reindex",
-				"Perform the resource reindex",
-				reindexStep()
-			)
-			.build();
+		return JobDefinition.newBuilder()
+				.setJobDefinitionId(JOB_REINDEX)
+				.setJobDescription("Reindex resources")
+				.setJobDefinitionVersion(1)
+				.setParametersType(ReindexJobParameters.class)
+				.setParametersValidator(reindexJobParametersValidator(theBatch2DaoSvc))
+				.gatedExecution()
+				.addFirstStep(
+						"generate-ranges",
+						"Generate data ranges to reindex",
+						PartitionedUrlChunkRangeJson.class,
+						reindexGenerateRangeChunksStep())
+				.addIntermediateStep(
+						"load-ids",
+						"Load IDs of resources to reindex",
+						ResourceIdListWorkChunkJson.class,
+						new LoadIdsStep(theBatch2DaoSvc))
+				.addLastStep("reindex", "Perform the resource reindex", reindexStep())
+				.build();
 	}
 
 	@Bean
 	public GenerateRangeChunksStep reindexGenerateRangeChunksStep() {
-		return new GenerateRangeChunksStep();
+		return new ReindexGenerateRangeChunksStep();
 	}
 
 	@Bean
 	public ReindexJobParametersValidator reindexJobParametersValidator(IBatch2DaoSvc theBatch2DaoSvc) {
-		return new ReindexJobParametersValidator(new UrlListValidator(ProviderConstants.OPERATION_REINDEX, theBatch2DaoSvc));
+		return new ReindexJobParametersValidator(
+				new UrlListValidator(ProviderConstants.OPERATION_REINDEX, theBatch2DaoSvc));
 	}
 
 	@Bean
@@ -82,11 +78,12 @@ public class ReindexAppCtx {
 		return new ReindexStep();
 	}
 
-
-
 	@Bean
-	public ReindexProvider reindexProvider(FhirContext theFhirContext, IJobCoordinator theJobCoordinator, IRequestPartitionHelperSvc theRequestPartitionHelperSvc, UrlPartitioner theUrlPartitioner) {
+	public ReindexProvider reindexProvider(
+			FhirContext theFhirContext,
+			IJobCoordinator theJobCoordinator,
+			IRequestPartitionHelperSvc theRequestPartitionHelperSvc,
+			UrlPartitioner theUrlPartitioner) {
 		return new ReindexProvider(theFhirContext, theJobCoordinator, theRequestPartitionHelperSvc, theUrlPartitioner);
 	}
-
 }

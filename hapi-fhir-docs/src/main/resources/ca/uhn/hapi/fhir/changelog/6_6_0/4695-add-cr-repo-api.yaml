@@ -1,0 +1,4 @@
+---
+type: add
+issue: 4695
+title: "Add an implementation of the Clinical Reasoning FHIR Repository to allow calling the available CR operations in hapi-fhir."

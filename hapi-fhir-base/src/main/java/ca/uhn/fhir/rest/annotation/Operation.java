@@ -1,10 +1,8 @@
-package ca.uhn.fhir.rest.annotation;
-
 /*
  * #%L
  * HAPI FHIR - Core Library
  * %%
- * Copyright (C) 2014 - 2023 Smile CDR, Inc.
+ * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -19,6 +17,7 @@ package ca.uhn.fhir.rest.annotation;
  * limitations under the License.
  * #L%
  */
+package ca.uhn.fhir.rest.annotation;
 
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -119,7 +118,7 @@ public @interface Operation {
 	 * always the right choice), the framework will not attempt to generate a response to
 	 * this method.
 	 * <p>
-	 * This is useful if you want to include an {@link javax.servlet.http.HttpServletResponse}
+	 * This is useful if you want to include an {@link jakarta.servlet.http.HttpServletResponse}
 	 * in your method parameters and create a response yourself directly from your
 	 * <code>@Operation</code> method.
 	 * </p>
@@ -135,7 +134,7 @@ public @interface Operation {
 	 * always the right choice), the framework will not attempt to parse the request body,
 	 * but will instead delegate it to the <code>@Operation</code> method.
 	 * <p>
-	 * This is useful if you want to include an {@link javax.servlet.http.HttpServletRequest}
+	 * This is useful if you want to include an {@link jakarta.servlet.http.HttpServletRequest}
 	 * in your method parameters and parse the request yourself.
 	 * </p>
 	 */
@@ -159,5 +158,4 @@ public @interface Operation {
 	 * </p>
 	 */
 	String canonicalUrl() default "";
-
 }

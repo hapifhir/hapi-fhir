@@ -71,8 +71,10 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
+	@Override
 	@BeforeEach
-	public void before() {
+	public void before() throws Exception {
+		super.before();
 		myStorageSettings.setMaximumExpansionSize(5000);
 		myCachingValidationSupport.invalidateCaches();
 	}
@@ -351,7 +353,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			.setSystem(codeSystem.getUrl())
 			.addFilter()
 			.setProperty("concept")
-			.setOp(FilterOperator.ISA)
+			.setOp(FilterOperator.DESCENDENTOF)
 			.setValue("dogs");
 
 		myValueSetDao.create(valueSet, mySrd);
@@ -582,7 +584,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		logAndValidateValueSet(result);
 
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
-		assertThat(codes, containsInAnyOrder("childAAA", "childAAB"));
+		assertThat(codes, containsInAnyOrder("childAA", "childAAA", "childAAB"));
 
 	}
 
@@ -608,6 +610,34 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		logAndValidateValueSet(result);
 
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertEquals(3, codes.size());
+		assertThat(codes, containsInAnyOrder("childAA", "childAAA", "childAAB"));
+
+	}
+
+	@Test
+	public void testExpandWithDescendentOfInExternalValueSetReindex() {
+		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(true);
+
+		createExternalCsAndLocalVs();
+
+		myResourceReindexingSvc.markAllResourcesForReindexing();
+		myResourceReindexingSvc.forceReindexingPass();
+		myResourceReindexingSvc.forceReindexingPass();
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		myTerminologyDeferredStorageSvc.saveDeferred();
+
+		ValueSet vs = new ValueSet();
+		ConceptSetComponent include = vs.getCompose().addInclude();
+		include.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM);
+		include.addFilter().setOp(FilterOperator.DESCENDENTOF).setValue("childAA").setProperty("concept");
+
+		ValueSet result = myValueSetDao.expand(vs, null); // breakpoint
+		logAndValidateValueSet(result);
+
+		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+		assertEquals(2, codes.size());
 		assertThat(codes, containsInAnyOrder("childAAA", "childAAB"));
 
 	}
@@ -793,7 +823,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		ValueSet vs = new ValueSet();
 		ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM);
-		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("ParentA");
+		include.addFilter().setProperty("concept").setOp(FilterOperator.DESCENDENTOF).setValue("ParentA");
 
 		ValueSet result = myValueSetDao.expand(vs, null);
 		logAndValidateValueSet(result);
@@ -812,7 +842,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
 		include.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM);
-		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("ParentA");
+		include.addFilter().setProperty("concept").setOp(FilterOperator.DESCENDENTOF).setValue("ParentA");
 		result = myValueSetDao.expand(vs, null);
 		logAndValidateValueSet(result);
 

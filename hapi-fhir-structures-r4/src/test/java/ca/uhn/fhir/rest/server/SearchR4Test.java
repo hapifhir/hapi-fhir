@@ -5,6 +5,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -37,6 +38,7 @@ import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -77,6 +79,12 @@ public class SearchR4Test {
 		ourLastMethod = null;
 		ourIdentifiers = null;
 		myPort = myRestfulServerExtension.getPort();
+		myCtx.setNarrativeGenerator(new DefaultThymeleafNarrativeGenerator());
+	}
+
+	@AfterEach
+	public void after() {
+		myCtx.setNarrativeGenerator(null);
 	}
 
 	private Bundle executeSearchAndValidateHasLinkNext(HttpGet httpGet, EncodingEnum theExpectEncoding) throws IOException {
@@ -139,13 +147,13 @@ public class SearchR4Test {
 		String linkSelf;
 
 		// Initial search
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_elements=name&_elements:exclude=birthDate,active");
+		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_elements=identifier,name&_elements:exclude=birthDate,active");
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
 		assertThat(toJson(bundle), not(containsString("\"active\"")));
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
-		assertThat(linkSelf, containsString("_elements=name"));
+		assertThat(linkSelf, containsString("_elements=identifier%2Cname"));
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_elements=name"));
+		assertThat(linkNext, containsString("_elements=identifier,name"));
 
 		ourLog.info(toJson(bundle));
 
@@ -154,7 +162,7 @@ public class SearchR4Test {
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
 		assertThat(toJson(bundle), not(containsString("\"active\"")));
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_elements=name"));
+		assertThat(linkNext, containsString("_elements=identifier,name"));
 		assertThat(linkNext, containsString("_elements:exclude=active,birthDate"));
 
 		// Fetch the next page
@@ -162,7 +170,7 @@ public class SearchR4Test {
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
 		assertThat(toJson(bundle), not(containsString("\"active\"")));
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_elements=name"));
+		assertThat(linkNext, containsString("_elements=identifier,name"));
 		assertThat(linkNext, containsString("_elements:exclude=active,birthDate"));
 
 		// Fetch the next page
@@ -170,7 +178,7 @@ public class SearchR4Test {
 		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
 		assertThat(toJson(bundle), not(containsString("\"active\"")));
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext, containsString("_elements=name"));
+		assertThat(linkNext, containsString("_elements=identifier,name"));
 		assertThat(linkNext, containsString("_elements:exclude=active,birthDate"));
 
 	}
@@ -519,6 +527,7 @@ public class SearchR4Test {
 				patient.getIdElement().setValue("Patient/" + i + "/_history/222");
 				ResourceMetadataKeyEnum.ENTRY_SEARCH_MODE.put(patient, BundleEntrySearchModeEnum.INCLUDE);
 				patient.addName(new HumanName().setFamily("FAMILY"));
+				patient.addIdentifier().setSystem("http://foo").setValue("bar");
 				patient.setActive(true);
 				retVal.add(patient);
 			}

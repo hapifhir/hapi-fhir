@@ -1,0 +1,7 @@
+---
+type: perf
+issue: 4742
+title: "The SQL generated for the JPA server `$trigger-subscription` operation has been 
+   optimized in order to drastically reduce the number of database round trips for large
+   triggering jobs. In addition, a bug prevented the subscription retriggering from fully 
+   executing in a multithreaded way. This has been corrected."

@@ -3,21 +3,27 @@ package ca.uhn.fhir.jpa.mdm.provider;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.test.concurrency.PointcutLatch;
+import ca.uhn.test.util.LogbackCaptureTestExtension;
+import ch.qos.logback.classic.Logger;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Named;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -29,7 +35,7 @@ import java.util.stream.Stream;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.either;
-import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -44,6 +50,9 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 	protected StringType myMedicationId;
 	protected IAnyResource myGoldenMedication;
 	protected StringType myGoldenMedicationId;
+
+	@RegisterExtension
+	LogbackCaptureTestExtension myLogCapture = new LogbackCaptureTestExtension((Logger) Logs.getMdmTroubleshootingLog());
 
 	@Autowired
 	IInterceptorService myInterceptorService;
@@ -185,5 +194,46 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 				containsString(Msg.code(2039) + "Failed to validate parameters for job"))//Async case
 				.or(containsString(Msg.code(488) + "Failed to parse match URL")));// Sync case
 		}
+	}
+
+	@Test
+	public void testClearAndUpdateResource_WithoutMdmSubmit_LogsError() {
+		// Given
+		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
+		Patient janePatient2 = createPatientAndUpdateLinks(buildJanePatient());
+		assertLinkCount(5);
+
+		// When
+		clearMdmLinks();
+
+		updatePatientAndUpdateLinks(janePatient);
+		try {
+			updatePatientAndUpdateLinks(janePatient2);
+		} catch (InternalErrorException e) {
+			// Then
+			assertLinkCount(1);
+			String expectedMsg = Msg.code(2362) + "Old golden resource was null while updating MDM links with new golden resource. It is likely that a $mdm-clear was performed without a $mdm-submit. Link will not be updated.";
+			assertEquals(expectedMsg, e.getMessage());
+		}
+	}
+
+	@ParameterizedTest
+	@MethodSource("requestTypes")
+	public void testUpdateResource_WithClearAndSubmit_Succeeds(ServletRequestDetails theSyncOrAsyncRequest) throws InterruptedException {
+		// Given
+		Patient janePatient = createPatientAndUpdateLinks(buildJanePatient());
+		Patient janePatient2 = createPatientAndUpdateLinks(buildJanePatient());
+		assertLinkCount(5);
+
+		// When
+		clearMdmLinks();
+		afterMdmLatch.runWithExpectedCount(3, () -> {
+			myMdmProvider.mdmBatchPatientType(null , null, theSyncOrAsyncRequest);
+		});
+
+		// Then
+		updatePatientAndUpdateLinks(janePatient);
+		updatePatientAndUpdateLinks(janePatient2);
+		assertLinkCount(3);
 	}
 }

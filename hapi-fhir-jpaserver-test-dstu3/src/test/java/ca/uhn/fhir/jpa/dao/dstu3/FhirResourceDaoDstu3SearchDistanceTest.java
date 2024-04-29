@@ -67,6 +67,10 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 		assertThat(ids, contains(locId));
 	}
 
+
+	@Test
+	public void testNearSearchChained() {
+	}
 	@Test
 	public void testNearSearchApproximate() {
 		Location loc = new Location();
