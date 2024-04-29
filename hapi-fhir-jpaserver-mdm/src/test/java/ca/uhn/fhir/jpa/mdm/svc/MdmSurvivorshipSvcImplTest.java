@@ -27,6 +27,8 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -45,6 +47,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -96,8 +99,9 @@ public class MdmSurvivorshipSvcImplTest {
 	}
 
 	@SuppressWarnings({"rawtypes", "unchecked"})
-	@Test
-	public void rebuildGoldenResourceCurrentLinksUsingSurvivorshipRules_withManyLinks_rebuildsInUpdateOrder() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true,false})
+	public void rebuildGoldenResourceCurrentLinksUsingSurvivorshipRules_withManyLinks_rebuildsInUpdateOrder(boolean theIsUseNonNumericId) {
 		// setup
 		// create resources
 		Patient goldenPatient = new Patient();
@@ -126,7 +130,7 @@ public class MdmSurvivorshipSvcImplTest {
 			patient.addIdentifier()
 				.setSystem("http://example.com")
 				.setValue("Value" + i);
-			patient.setId("Patient/" + i);
+			patient.setId("Patient/" + (theIsUseNonNumericId ? "pat"+i : Integer.toString(i)));
 			resources.add(patient);
 
 			MdmLinkJson link = createLinkJson(
@@ -149,8 +153,13 @@ public class MdmSurvivorshipSvcImplTest {
 		when(myDaoRegistry.getResourceDao(eq("Patient")))
 			.thenReturn(resourceDao);
 		AtomicInteger counter = new AtomicInteger();
-		when(resourceDao.readByPid(any()))
-			.thenAnswer(params -> resources.get(counter.getAndIncrement()));
+		if (theIsUseNonNumericId) {
+			when(resourceDao.read(any(), any()))
+				.thenAnswer(params -> resources.get(counter.getAndIncrement()));
+		} else {
+			when(resourceDao.readByPid(any()))
+				.thenAnswer(params -> resources.get(counter.getAndIncrement()));
+		}
 		Page<MdmLinkJson> linkPage = mock(Page.class);
 		when(myMdmLinkQuerySvc.queryLinks(any(), any()))
 			.thenReturn(linkPage);
