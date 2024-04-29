@@ -159,6 +159,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private BaseRuntimeChildDefinition myCodeableReferenceConcept;
 	private BaseRuntimeChildDefinition myCodeableReferenceReference;
 
+	// allow extraction of Resource-level search param values
+	private boolean myExtractResourceTypeParams = false;
+
 	/**
 	 * Constructor
 	 */
@@ -174,9 +177,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			PartitionSettings thePartitionSettings,
 			FhirContext theCtx,
 			ISearchParamRegistry theSearchParamRegistry) {
-		Validate.notNull(theStorageSettings);
-		Validate.notNull(theCtx);
-		Validate.notNull(theSearchParamRegistry);
+		Objects.requireNonNull(theStorageSettings);
+		Objects.requireNonNull(theCtx);
+		Objects.requireNonNull(theSearchParamRegistry);
 
 		myStorageSettings = theStorageSettings;
 		myContext = theCtx;
@@ -1305,7 +1308,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		List<IPrimitiveType<Date>> values = extractValuesAsFhirDates(myTimingEventValueChild, theValue);
 
 		TreeSet<Date> dates = new TreeSet<>();
-		TreeSet<String> dateStrings = new TreeSet<>();
 		String firstValue = null;
 		String finalValue = null;
 		for (IPrimitiveType<Date> nextEvent : values) {
@@ -1385,7 +1387,6 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	private void addNumber_Range(
 			String theResourceType,
 			Set<ResourceIndexedSearchParamNumber> theParams,
@@ -1600,7 +1601,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 
 			// See the method javadoc for an explanation of this
-			if (RuntimeSearchParamHelper.isResourceLevel(nextSpDef)) {
+			if (!myExtractResourceTypeParams && RuntimeSearchParamHelper.isResourceLevel(nextSpDef)) {
 				continue;
 			}
 
@@ -1793,17 +1794,12 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	public boolean shouldAttemptToSplitPath(String thePath) {
 		if (getContext().getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4)) {
-			if (thePath.contains("|")) {
-				return true;
-			}
+            return thePath.contains("|");
 		} else {
 			// DSTU 3 and below used "or" as well as "|"
-			if (thePath.contains("|") || thePath.contains(" or ")) {
-				return true;
-			}
+            return thePath.contains("|") || thePath.contains(" or ");
 		}
-		return false;
-	}
+    }
 
 	/**
 	 * Iteratively splits a string on any ` or ` or | that is ** not** contained inside a set of parentheses. e.g.
@@ -1818,10 +1814,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	 */
 	private String[] splitOutOfParensOrs(String thePaths) {
 		List<String> topLevelOrExpressions = splitOutOfParensToken(thePaths, " or ");
-		List<String> retVal = topLevelOrExpressions.stream()
-				.flatMap(s -> splitOutOfParensToken(s, " |").stream())
-				.collect(Collectors.toList());
-		return retVal.toArray(new String[retVal.size()]);
+        return topLevelOrExpressions.stream()
+                .flatMap(s -> splitOutOfParensToken(s, " |").stream()).toArray(String[]::new);
 	}
 
 	private List<String> splitOutOfParensToken(String thePath, String theToken) {
@@ -2040,7 +2034,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 						.findFirst();
 
 		// if the SP doesn't care, use the system default.
-		if (!noSuppressForSearchParam.isPresent()) {
+		if (noSuppressForSearchParam.isEmpty()) {
 			return !theStorageSettings.isSuppressStringIndexingInTokens();
 			// If the SP does care, use its value.
 		} else {
@@ -2409,7 +2403,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			// DSTU2 only
 			if (value instanceof BoundCodeDt) {
 				BoundCodeDt boundCode = (BoundCodeDt) value;
-				Enum valueAsEnum = boundCode.getValueAsEnum();
+				Enum<?> valueAsEnum = boundCode.getValueAsEnum();
 				String system = null;
 				if (valueAsEnum != null) {
 					//noinspection unchecked
@@ -2516,5 +2510,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			myExtractor0.extract(theParams, theSearchParam, theValue, thePath, theWantLocalReferences);
 			myExtractor1.extract(theParams, theSearchParam, theValue, thePath, theWantLocalReferences);
 		}
+	}
+
+	public void setExtractResourceTypeParams(boolean theExtractResourceTypeParams) {
+		myExtractResourceTypeParams = theExtractResourceTypeParams;
 	}
 }
