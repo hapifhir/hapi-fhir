@@ -31,7 +31,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.slf4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.MessageChannel;
 
 import static ca.uhn.fhir.mdm.api.IMdmSettings.EMPI_CHANNEL_NAME;

@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
-import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import ca.uhn.fhir.jpa.searchparam.SearchParamSvc;
+import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;

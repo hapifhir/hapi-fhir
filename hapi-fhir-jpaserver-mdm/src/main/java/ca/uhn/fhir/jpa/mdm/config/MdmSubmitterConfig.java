@@ -19,25 +19,16 @@
  */
 package ca.uhn.fhir.jpa.mdm.config;
 
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.mdm.interceptor.MdmSubmitterInterceptorLoader;
-import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.mdm.MdmStorageConfig;
-import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
 import ca.uhn.fhir.mdm.api.IMdmSubmitSvc;
-import ca.uhn.fhir.mdm.svc.MdmChannelSubmitterSvcImpl;
-import ca.uhn.fhir.jpa.searchparam.SearchParamSvc;
 import ca.uhn.fhir.mdm.svc.MdmSubmitSvcImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.Lazy;
 
 @Configuration
-@Import({
-	MdmStorageConfig.class,
-	MdmCommonConfig.class
-})
+@Import({MdmStorageConfig.class, MdmCommonConfig.class})
 public class MdmSubmitterConfig {
 
 	@Bean
