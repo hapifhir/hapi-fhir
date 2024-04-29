@@ -54,12 +54,11 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmRuleValidator.class);
 
 	private final FhirContext myFhirContext;
-	private final ISearchParamRegistry mySearchParamRetriever;
+	private final ISearchParamRegistry mySearchParamRegistry;
 	private final FhirTerser myTerser;
 	private final IFhirPath myFhirPath;
 
-	@Autowired
-	public MdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
+	public MdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRegistry) {
 		myFhirContext = theFhirContext;
 		myTerser = myFhirContext.newTerser();
 		if (myFhirContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.DSTU3)) {
@@ -68,7 +67,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 			ourLog.debug("Skipping FHIRPath validation as DSTU2 does not support FHIR");
 			myFhirPath = null;
 		}
-		mySearchParamRetriever = theSearchParamRetriever;
+		mySearchParamRegistry = theSearchParamRegistry;
 	}
 
 	public void validate(MdmRulesJson theMdmRules) {
@@ -127,7 +126,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 	}
 
 	public void validateTypeHasIdentifier(String theResourceType) {
-		if (mySearchParamRetriever.getActiveSearchParam(theResourceType, "identifier") == null) {
+		if (mySearchParamRegistry.getActiveSearchParam(theResourceType, "identifier") == null) {
 			throw new ConfigurationException(
 					Msg.code(1510) + "Resource Type " + theResourceType
 							+ " is not supported, as it does not have an 'identifier' field, which is necessary for MDM workflow.");
@@ -162,7 +161,7 @@ public class MdmRuleValidator implements IMdmRuleValidator {
 
 	private void validateResourceSearchParam(String theFieldName, String theResourceType, String theSearchParam) {
 		String searchParam = SearchParameterUtil.stripModifier(theSearchParam);
-		if (mySearchParamRetriever.getActiveSearchParam(theResourceType, searchParam) == null) {
+		if (mySearchParamRegistry.getActiveSearchParam(theResourceType, searchParam) == null) {
 			throw new ConfigurationException(Msg.code(1511) + "Error in " + theFieldName + ": " + theResourceType
 					+ " does not have a search parameter called '" + theSearchParam + "'");
 		}

@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
-import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
+import ca.uhn.fhir.jpa.searchparam.SearchParamSvc;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -37,7 +37,7 @@ import java.util.stream.Collectors;
 public class MdmCandidateSearchCriteriaBuilderSvc {
 
 	@Autowired
-	private MdmSearchParamSvc myMdmSearchParamSvc;
+	private SearchParamSvc mySearchParamSvc;
 
 	/*
 	 * Given a list of criteria upon which to block, a resource search parameter, and a list of values for that given search parameter,
@@ -59,7 +59,7 @@ public class MdmCandidateSearchCriteriaBuilderSvc {
 				// to compare it to all known GOLDEN_RESOURCE objects, using the overlapping search parameters that they
 				// have.
 				List<String> valuesFromResourceForSearchParam =
-						myMdmSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam);
+						mySearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam);
 				if (!valuesFromResourceForSearchParam.isEmpty()) {
 					criteria.add(buildResourceMatchQuery(searchParam, valuesFromResourceForSearchParam));
 				}

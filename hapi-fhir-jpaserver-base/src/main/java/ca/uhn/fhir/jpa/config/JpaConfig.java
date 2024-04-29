@@ -30,6 +30,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.api.config.StorageConfig;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -212,9 +213,9 @@ import java.util.Date;
 	Batch2SupportConfig.class,
 	JpaBulkExportConfig.class,
 	SearchConfig.class,
+	StorageConfig.class,
 	PackageLoaderConfig.class,
-	EnversAuditConfig.class,
-	MdmJpaConfig.class
+	EnversAuditConfig.class
 })
 public class JpaConfig {
 	public static final String JPA_VALIDATION_SUPPORT_CHAIN = "myJpaValidationSupportChain";
@@ -528,11 +529,6 @@ public class JpaConfig {
 	@Bean
 	public PersistedJpaBundleProviderFactory persistedJpaBundleProviderFactory() {
 		return new PersistedJpaBundleProviderFactory();
-	}
-
-	@Bean
-	public SearchBuilderFactory searchBuilderFactory() {
-		return new SearchBuilderFactory();
 	}
 
 	@Bean

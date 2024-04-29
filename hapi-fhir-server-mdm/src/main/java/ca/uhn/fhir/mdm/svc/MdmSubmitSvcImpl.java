@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.dao.IResultIterator;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.model.search.SearchRuntimeDetails;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.searchparam.SearchParamSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmChannelSubmitterSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
@@ -60,7 +61,7 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private MdmSearchParamSvc myMdmSearchParamSvc;
+	private SearchParamSvc mySearchParamSvc;
 
 	@Autowired
 	private IMdmChannelSubmitterSvc myMdmChannelSubmitterSvc;
@@ -99,10 +100,10 @@ public class MdmSubmitSvcImpl implements IMdmSubmitSvc {
 
 		validateSourceType(theSourceResourceType);
 		SearchParameterMap spMap =
-				myMdmSearchParamSvc.getSearchParameterMapFromCriteria(theSourceResourceType, theCriteria);
+				mySearchParamSvc.getSearchParameterMapFromCriteria(theSourceResourceType, theCriteria);
 		spMap.setLoadSynchronous(true);
 		spMap.setCount(myBufferSize);
-		ISearchBuilder searchBuilder = myMdmSearchParamSvc.generateSearchBuilderForType(theSourceResourceType);
+		ISearchBuilder searchBuilder = mySearchParamSvc.generateSearchBuilderForType(theSourceResourceType);
 
 		RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(

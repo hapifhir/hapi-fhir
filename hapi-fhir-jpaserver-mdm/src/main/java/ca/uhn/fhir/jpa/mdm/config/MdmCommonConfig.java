@@ -27,19 +27,15 @@ import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.matcher.IMatcherFactory;
 import ca.uhn.fhir.mdm.rules.matcher.MdmMatcherFactory;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
-import ca.uhn.fhir.mdm.svc.MdmLinkDeleteSvc;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Lazy;
 
 @Configuration
+@Import(MdmPersistenceSupportConfig.class)
 public class MdmCommonConfig {
-	@Bean
-	MdmRuleValidator mdmRuleValidator(FhirContext theFhirContext, ISearchParamRegistry theSearchParamRetriever) {
-		return new MdmRuleValidator(theFhirContext, theSearchParamRetriever);
-	}
-
 	@Bean
 	@Lazy
 	public MdmSearchExpandingInterceptor mdmSearchExpandingInterceptor() {
@@ -47,13 +43,8 @@ public class MdmCommonConfig {
 	}
 
 	@Bean
-	MdmLinkDeleteSvc mdmLinkDeleteSvc() {
-		return new MdmLinkDeleteSvc();
-	}
-
-	@Bean
 	@Lazy
-	MdmResourceMatcherSvc mdmResourceComparatorSvc(
+	MdmResourceMatcherSvc mdmResourceMatcherSvc(
 			FhirContext theFhirContext, IMatcherFactory theIMatcherFactory, IMdmSettings theMdmSettings) {
 		return new MdmResourceMatcherSvc(theFhirContext, theIMatcherFactory, theMdmSettings);
 	}

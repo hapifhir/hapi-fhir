@@ -23,7 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
-import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
+import ca.uhn.fhir.jpa.searchparam.SearchParamSvc;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
@@ -40,7 +40,7 @@ public class MdmResourceFilteringSvc {
 	private IMdmSettings myMdmSettings;
 
 	@Autowired
-	MdmSearchParamSvc myMdmSearchParamSvc;
+	SearchParamSvc mySearchParamSvc;
 
 	@Autowired
 	FhirContext myFhirContext;
@@ -73,9 +73,9 @@ public class MdmResourceFilteringSvc {
 
 		boolean containsValueForSomeSearchParam = candidateSearchParams.stream()
 				.filter(csp ->
-						myMdmSearchParamSvc.searchParamTypeIsValidForResourceType(csp.getResourceType(), resourceType))
+						mySearchParamSvc.searchParamTypeIsValidForResourceType(csp.getResourceType(), resourceType))
 				.flatMap(csp -> csp.getSearchParams().stream())
-				.map(searchParam -> myMdmSearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam))
+				.map(searchParam -> mySearchParamSvc.getValueFromResourceForSearchParam(theResource, searchParam))
 				.anyMatch(valueList -> !valueList.isEmpty());
 
 		ourLog.trace("Is {} suitable for MDM processing? : {}", theResource.getId(), containsValueForSomeSearchParam);

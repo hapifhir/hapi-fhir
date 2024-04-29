@@ -24,7 +24,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
-import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
+import ca.uhn.fhir.jpa.searchparam.SearchParamSvc;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -38,14 +38,14 @@ public class CandidateSearcher {
 	private static final Logger ourLog = LoggerFactory.getLogger(CandidateSearcher.class);
 	private final DaoRegistry myDaoRegistry;
 	private final IMdmSettings myMdmSettings;
-	private final MdmSearchParamSvc myMdmSearchParamSvc;
+	private final SearchParamSvc mySearchParamSvc;
 
 	@Autowired
 	public CandidateSearcher(
-			DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings, MdmSearchParamSvc theMdmSearchParamSvc) {
+			DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings, SearchParamSvc theSearchParamSvc) {
 		myDaoRegistry = theDaoRegistry;
 		myMdmSettings = theMdmSettings;
-		myMdmSearchParamSvc = theMdmSearchParamSvc;
+		mySearchParamSvc = theSearchParamSvc;
 	}
 
 	/**
@@ -60,7 +60,7 @@ public class CandidateSearcher {
 	public Optional<IBundleProvider> search(
 			String theResourceType, String theResourceCriteria, RequestPartitionId partitionId) {
 		SearchParameterMap searchParameterMap =
-				myMdmSearchParamSvc.mapFromCriteria(theResourceType, theResourceCriteria);
+				mySearchParamSvc.mapFromCriteria(theResourceType, theResourceCriteria);
 
 		searchParameterMap.setLoadSynchronousUpTo(myMdmSettings.getCandidateSearchLimit());
 

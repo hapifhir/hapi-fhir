@@ -149,4 +149,5 @@ public class SearchParamConfig {
 	SearchParameterHelper searchParameterHelper(FhirContext theFhirContext) {
 		return new SearchParameterHelper(searchParameterCanonicalizer(theFhirContext));
 	}
+
 }

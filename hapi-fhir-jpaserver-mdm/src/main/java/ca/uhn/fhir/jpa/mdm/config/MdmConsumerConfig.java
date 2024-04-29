@@ -69,7 +69,7 @@ import ca.uhn.fhir.mdm.interceptor.MdmStorageInterceptor;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.provider.MdmControllerHelper;
 import ca.uhn.fhir.mdm.provider.MdmProviderLoader;
-import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
+import ca.uhn.fhir.jpa.searchparam.SearchParamSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MessageHelper;
@@ -195,8 +195,8 @@ public class MdmConsumerConfig {
 
 	@Bean
 	CandidateSearcher candidateSearcher(
-			DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings, MdmSearchParamSvc theMdmSearchParamSvc) {
-		return new CandidateSearcher(theDaoRegistry, theMdmSettings, theMdmSearchParamSvc);
+			DaoRegistry theDaoRegistry, IMdmSettings theMdmSettings, SearchParamSvc theSearchParamSvc) {
+		return new CandidateSearcher(theDaoRegistry, theMdmSettings, theSearchParamSvc);
 	}
 
 	@Bean

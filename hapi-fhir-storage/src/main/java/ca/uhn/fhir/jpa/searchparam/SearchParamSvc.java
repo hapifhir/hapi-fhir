@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.mdm.svc;
+package ca.uhn.fhir.jpa.searchparam;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -26,8 +26,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
-import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
-import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorService;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.SearchParameterUtil;
@@ -40,7 +38,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class MdmSearchParamSvc {
+public class SearchParamSvc {
 	@Autowired
 	FhirContext myFhirContext;
 
@@ -58,6 +56,8 @@ public class MdmSearchParamSvc {
 
 	@Autowired
 	private DaoRegistry myDaoRegistry;
+
+	public SearchParamSvc() {}
 
 	public SearchParameterMap mapFromCriteria(String theResourceType, String theResourceCriteria) {
 		RuntimeResourceDefinition resourceDef = myFhirContext.getResourceDefinition(theResourceType);

@@ -42,11 +42,16 @@ import static ca.uhn.fhir.mdm.api.IMdmSettings.EMPI_CHANNEL_NAME;
 public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
+	private final FhirContext myFhirContext;
+
+	private final IChannelFactory myChannelFactory;
+
 	private MessageChannel myMdmChannelProducer;
 
-	private FhirContext myFhirContext;
-
-	private IChannelFactory myChannelFactory;
+	public MdmChannelSubmitterSvcImpl(FhirContext theFhirContext, IChannelFactory theIChannelFactory) {
+		myFhirContext = theFhirContext;
+		myChannelFactory = theIChannelFactory;
+	}
 
 	@Override
 	public void submitResourceToMdmChannel(IBaseResource theResource) {
@@ -63,12 +68,6 @@ public class MdmChannelSubmitterSvcImpl implements IMdmChannelSubmitterSvc {
 		if (!success) {
 			ourLog.error("Failed to submit {} to MDM Channel.", resourceModifiedMessage.getPayloadId());
 		}
-	}
-
-	@Autowired
-	public MdmChannelSubmitterSvcImpl(FhirContext theFhirContext, IChannelFactory theIChannelFactory) {
-		myFhirContext = theFhirContext;
-		myChannelFactory = theIChannelFactory;
 	}
 
 	private void init() {

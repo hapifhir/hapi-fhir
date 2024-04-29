@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
+import ca.uhn.fhir.jpa.searchparam.SearchParamSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmRuleValidator;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
@@ -33,12 +33,12 @@ class CandidateSearcherTest {
 	private IMdmRuleValidator myMdmRuleValidator;
 	private final MdmSettings myMdmSettings = new MdmSettings(myMdmRuleValidator);
 	@Mock
-	private MdmSearchParamSvc myMdmSearchParamSvc;
+	private SearchParamSvc mySearchParamSvc;
 	private CandidateSearcher myCandidateSearcher;
 
 	@BeforeEach
 	public void before() {
-		myCandidateSearcher = new CandidateSearcher(myDaoRegistry, myMdmSettings, myMdmSearchParamSvc);
+		myCandidateSearcher = new CandidateSearcher(myDaoRegistry, myMdmSettings, mySearchParamSvc);
 	}
 
 	@ParameterizedTest
@@ -48,7 +48,7 @@ class CandidateSearcherTest {
 		String criteria = "?active=true";
 		SearchParameterMap map = new SearchParameterMap();
 		String resourceType = "Patient";
-		when(myMdmSearchParamSvc.mapFromCriteria(resourceType, criteria)).thenReturn(map);
+		when(mySearchParamSvc.mapFromCriteria(resourceType, criteria)).thenReturn(map);
 		IFhirResourceDao<Patient> dao = mock(IFhirResourceDao.class);
 		when(myDaoRegistry.getResourceDao(resourceType)).thenReturn(dao);
 		int candidateSearchLimit = 2401;

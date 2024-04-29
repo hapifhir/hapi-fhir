@@ -33,17 +33,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class MdmJpaConfig {
-
-	@Bean
-	public MdmLinkExpandSvc mdmLinkExpandSvc() {
-		return new MdmLinkExpandSvc();
-	}
-
-	@Bean
-	public IMdmLinkDao<JpaPid, MdmLink> mdmLinkDao() {
-		return new MdmLinkDaoJpaImpl();
-	}
+public class DeprecatedMdmJpaConfig {
 
 	@Bean
 	public IMdmLinkImplFactory<MdmLink> mdmLinkImplFactory() {
