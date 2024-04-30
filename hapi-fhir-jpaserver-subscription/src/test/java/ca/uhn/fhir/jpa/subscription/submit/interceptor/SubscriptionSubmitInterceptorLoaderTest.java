@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.cache.IResourceVersionSvc;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.config.SearchParamConfig;
 import ca.uhn.fhir.jpa.searchparam.registry.ISearchParamProvider;
@@ -37,8 +38,6 @@ import static org.mockito.Mockito.verify;
 })
 public class SubscriptionSubmitInterceptorLoaderTest {
 
-	@Autowired
-	private SubscriptionSubmitInterceptorLoader mySubscriptionSubmitInterceptorLoader;
 	@Autowired
 	private SubscriptionMatcherInterceptor mySubscriptionMatcherInterceptor;
 
@@ -74,6 +73,8 @@ public class SubscriptionSubmitInterceptorLoaderTest {
 			return subscriptionSettings;
 		}
 
+		@MockBean
+		public StorageSettings myStorageSettings;
 		@MockBean
 		private ISearchParamProvider mySearchParamProvider;
 		@MockBean
