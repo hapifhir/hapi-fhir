@@ -115,8 +115,12 @@ public class ResourceIndexedComboStringUnique extends BaseResourceIndex
 	 * Constructor
 	 */
 	public ResourceIndexedComboStringUnique(
-			ResourceTable theResource, String theIndexString, IIdType theSearchParameterId) {
+			ResourceTable theResource,
+			PartitionSettings thePartitionSettings,
+			String theIndexString,
+			IIdType theSearchParameterId) {
 		setResource(theResource);
+		setPartitionSettings(thePartitionSettings);
 		setIndexString(theIndexString);
 		setPartitionId(theResource.getPartitionId());
 		setSearchParameterId(theSearchParameterId);
