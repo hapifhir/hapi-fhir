@@ -242,11 +242,11 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 				+ " FROM ResourceTable r "
 				+ " LEFT JOIN ResourceHistoryTable h "
 				+ "      on r.myVersion = h.myResourceVersion and r.id = h.myResourceId " +
-			// fixme cosmos hack
-					"and r.myPartitionIdValue = h.myPartitionIdValue "
+				// fixme cosmos hack
+				"and r.myPartitionIdValue = h.myPartitionIdValue "
 				+ " left join h.myProvenance p "
-			// fixme cosmos hack
-			+ "on h = p.myResourceHistoryTable and h.myPartitionIdValue = p.myPartitionIdValue"
+				// fixme cosmos hack
+				+ "on h = p.myResourceHistoryTable and h.myPartitionIdValue = p.myPartitionIdValue"
 				+ " WHERE r.myId IN ( :IDS ) ");
 		query.setParameter("IDS", idChunk);
 

@@ -1657,10 +1657,17 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			canonicalUriQueryParams.put("uri_identity_hashes", identityHashesForTypes);
 		}
 
-		canonicalUrlQuery.append("  AND r.target_resource_url = rUri.sp_uri  )" + " WHERE r.src_path = :src_path AND "
-				+ " r.target_resource_id IS NULL AND "
-				+ " r."
-				+ thePidFieldSqlColumn + " IN (:target_pids) ");
+		canonicalUrlQuery.append("  AND r.target_resource_url = rUri.sp_uri ");
+		// fixme cosmos
+		if (true) {
+			canonicalUrlQuery.append("  AND r.partition_id = rUri.partition_id ");
+		}
+		canonicalUrlQuery.append(")");
+		canonicalUrlQuery.append(" WHERE r.src_path = :src_path AND ");
+		canonicalUrlQuery.append(" r.target_resource_id IS NULL AND ");
+		canonicalUrlQuery.append(" r.");
+		canonicalUrlQuery.append(thePidFieldSqlColumn);
+		canonicalUrlQuery.append(" IN (:target_pids) ");
 		return Pair.of(canonicalUrlQuery.toString(), canonicalUriQueryParams);
 	}
 

@@ -458,12 +458,24 @@ public class SearchQueryBuilder {
 			DbColumn theFromColumn,
 			DbColumn theToColumn,
 			SelectQuery.JoinType theJoinType) {
-		Join join = new DbJoin(
-				mySpec, theFromTable, theToTable, new DbColumn[] {theFromColumn}, new DbColumn[] {theToColumn});
+		DbColumn[] fromColumns;
+        DbColumn[] toColumns;
+
+		if (true) {
+			// fixme cosmos hack
+			fromColumns = new DbColumn[]{theFromColumn, theFromTable.findColumn("PARTITION_ID")};
+			toColumns = new DbColumn[]{theToColumn, theToTable.findColumn("PARTITION_ID")};
+		} else {
+			fromColumns = new DbColumn[]{theFromColumn};
+			toColumns = new DbColumn[]{theToColumn};
+		}
+
+        Join join = new DbJoin(mySpec, theFromTable, theToTable, fromColumns, toColumns);
 		mySelect.addJoins(theJoinType, join);
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn theFromColumn, DbColumn theToColumn) {
+		// FIXME: who calls this and not the column above?
 		Join join = new DbJoin(
 				mySpec, theFromTable, theToTable, new DbColumn[] {theFromColumn}, new DbColumn[] {theToColumn});
 		mySelect.addJoins(SelectQuery.JoinType.INNER, join);
