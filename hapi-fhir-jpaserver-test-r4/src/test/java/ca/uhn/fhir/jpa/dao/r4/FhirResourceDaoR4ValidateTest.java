@@ -942,7 +942,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		OperationOutcome oo = validateAndReturnOutcome(vs);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
-		assertEquals("The code '123' is not valid in the system https://bb", oo.getIssue().get(0).getDiagnostics());
+		assertEquals("The code '123' is not valid in the system https://bb (Validation failed)", oo.getIssue().get(0).getDiagnostics());
 	}
 
 	@Test
@@ -997,7 +997,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		obs.getCode().getCodingFirstRep().setDisplay("Some Code");
 		outcome = (OperationOutcome) myObservationDao.validate(obs, null, null, null, ValidationModeEnum.CREATE, "http://example.com/structuredefinition", mySrd).getOperationOutcome();
 		ourLog.debug("Outcome: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertEquals("Unknown code in fragment CodeSystem 'http://example.com/codesystem#foo-foo' for in-memory expansion of ValueSet 'http://example.com/valueset'", outcome.getIssueFirstRep().getDiagnostics());
+		assertEquals("Unknown code in fragment CodeSystem 'http://example.com/codesystem#foo-foo'", outcome.getIssueFirstRep().getDiagnostics());
 		assertEquals(OperationOutcome.IssueSeverity.WARNING, outcome.getIssueFirstRep().getSeverity());
 
 		// Correct codesystem, Code in codesystem
@@ -1400,12 +1400,12 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		// It would be ok for this to produce 0 issues, or just an information message too
 		assertEquals(2, OperationOutcomeUtil.getIssueCount(myFhirContext, oo));
-		assertThat(OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, oo),
+		assertThat(oo.getIssue().get(1).getDiagnostics(),
 			containsString("None of the codings provided are in the value set 'IdentifierType'"));
-		assertThat(OperationOutcomeUtil.getFirstIssueDetails(myFhirContext, oo),
+		assertThat(oo.getIssue().get(1).getDiagnostics(),
 			containsString("a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://foo#bar)"));
-		assertEquals(OperationOutcome.IssueSeverity.WARNING, oo.getIssue().get(1).getSeverity());
-		assertEquals("Concept Display \"not bar code\" does not match expected \"Bar Code\" for 'http://foo#bar'", oo.getIssue().get(1).getDiagnostics());
+		assertEquals(OperationOutcome.IssueSeverity.WARNING, oo.getIssue().get(0).getSeverity());
+		assertEquals("Concept Display \"not bar code\" does not match expected \"Bar Code\" for 'http://foo#bar'", oo.getIssue().get(0).getDiagnostics());
 	}
 
 	private OperationOutcome doTestValidateResourceContainingProfileDeclaration(String methodName, EncodingEnum enc) throws IOException {

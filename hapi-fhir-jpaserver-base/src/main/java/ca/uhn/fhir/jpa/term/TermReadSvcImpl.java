@@ -295,6 +295,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+		if (isBlank(theSystem)) {
+			return false;
+		}
 		TermCodeSystemVersionDetails cs = getCurrentCodeSystemVersion(theSystem);
 		return cs != null;
 	}

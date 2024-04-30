@@ -959,7 +959,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 
 	@Override
 	public <T extends Resource> T findTxResource(Class<T> class_, String canonical, String version) {
-		throw new UnsupportedOperationException(Msg.code(2490));
+		if (canonical == null) {
+			return null;
+		}
+
+		return fetchResource(class_, canonical, version);
 	}
 
 	public static ConceptValidationOptions convertConceptValidationOptions(ValidationOptions theOptions) {

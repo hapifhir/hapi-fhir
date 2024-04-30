@@ -28,6 +28,7 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Enumerations;
+import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 import java.util.ArrayList;
@@ -579,10 +580,23 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 					.setSeverityCode(severity.toCode())
 					.setMessage(message)
 					.addCodeValidationIssue(
-							new CodeValidationIssue(message, IssueSeverity.ERROR, issueCode, issueCoding));
+							new CodeValidationIssue(message, getIssueSeverityFromCodeValidationIssue(severity), issueCode, issueCoding));
 		}
 
 		return codeValidationResult;
+	}
+
+	private IValidationSupport.IssueSeverity getIssueSeverityFromCodeValidationIssue(
+		ValidationMessage.IssueSeverity theSeverity) {
+		switch (theSeverity) {
+			case ERROR:
+				return IValidationSupport.IssueSeverity.ERROR;
+			case WARNING:
+				return IValidationSupport.IssueSeverity.WARNING;
+			case INFORMATION:
+				return IValidationSupport.IssueSeverity.INFORMATION;
+		}
+		return null;
 	}
 
 	private CodeValidationResult findCodeInExpansion(
