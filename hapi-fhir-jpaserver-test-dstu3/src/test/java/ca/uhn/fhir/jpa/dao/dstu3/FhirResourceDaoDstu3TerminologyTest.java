@@ -308,7 +308,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 			.setSystem(codeSystem.getUrl())
 			.addFilter()
 			.setProperty("concept")
-			.setOp(FilterOperator.ISA)
+			.setOp(FilterOperator.DESCENDENTOF)
 			.setValue("dogs");
 
 		myValueSetDao.create(valueSet, mySrd);
@@ -499,7 +499,11 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		logAndValidateValueSet(result);
 
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+<<<<<<< HEAD
 		assertThat(codes).containsExactlyInAnyOrder("childAAA", "childAAB");
+=======
+		assertThat(codes, containsInAnyOrder("childAA", "childAAA", "childAAB"));
+>>>>>>> master
 
 	}
 
@@ -530,7 +534,11 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		logAndValidateValueSet(result);
 
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
+<<<<<<< HEAD
 		assertThat(codes).containsExactlyInAnyOrder("childAAA", "childAAB");
+=======
+		assertThat(codes, containsInAnyOrder("childAA", "childAAA", "childAAB"));
+>>>>>>> master
 
 	}
 
@@ -645,7 +653,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		ValueSet vs = new ValueSet();
 		ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(URL_MY_CODE_SYSTEM);
-		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("ParentA");
+		include.addFilter().setProperty("concept").setOp(FilterOperator.DESCENDENTOF).setValue("ParentA");
 
 		ValueSet result = myValueSetDao.expand(vs, null);
 		logAndValidateValueSet(result);
@@ -664,7 +672,7 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 		vs = new ValueSet();
 		include = vs.getCompose().addInclude();
 		include.setSystem(URL_MY_CODE_SYSTEM);
-		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("ParentA");
+		include.addFilter().setProperty("concept").setOp(FilterOperator.DESCENDENTOF).setValue("ParentA");
 		result = myValueSetDao.expand(vs, null);
 		logAndValidateValueSet(result);
 

@@ -2574,6 +2574,9 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		assertThat(ourHitMethod).isEqualTo(false);
 	}
 
+	// This test is of dubious value since it does NOT exercise DAO code.  It simply exercises the AuthorizationInterceptor.
+	// In functional testing or with a more realistic integration test, this scenario, namely having ONLY a FHIR_PATCH
+	// role, will result in a failure to update the resource.
 	@Test
 	public void testPatchAllowed() throws IOException {
 		Observation obs = new Observation();

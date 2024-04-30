@@ -46,8 +46,13 @@ public class CdsCrServiceR4Test extends BaseCrTest {
 		requestDetails.setId(planDefinitionId);
 		final Parameters params = new CdsCrServiceR4(requestDetails, repository, myCdsConfigService).encodeParams(cdsServiceRequestJson);
 
+<<<<<<< HEAD
 		assertThat(params.getParameter().size() == 3).isTrue();
 		assertThat(params.getParameter("parameters").hasResource()).isTrue();
+=======
+		assertTrue(params.getParameter().size() == 2);
+		assertTrue(params.getParameter("parameters").hasResource());
+>>>>>>> master
 	}
 
 	@Test

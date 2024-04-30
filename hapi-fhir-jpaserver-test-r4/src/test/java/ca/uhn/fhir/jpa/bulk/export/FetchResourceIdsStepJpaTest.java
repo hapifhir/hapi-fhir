@@ -10,15 +10,23 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsTest;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.util.JsonUtil;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 
+<<<<<<< HEAD
 import static org.assertj.core.api.Assertions.assertThat;
+=======
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.lessThanOrEqualTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+>>>>>>> master
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -38,7 +46,9 @@ public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
 	public void afterCleanupDao() {
 		super.afterCleanupDao();
 
-		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
+		JpaStorageSettings defaults = new JpaStorageSettings();
+		myStorageSettings.setTagStorageMode(defaults.getTagStorageMode());
+		myStorageSettings.setBulkExportFileMaximumSize(defaults.getBulkExportFileMaximumSize());
 	}
 
 	@Test
@@ -74,6 +84,39 @@ public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
 		assertThat(idList.getIds()).hasSize(10);
 	}
 
+	@Test
+	public void testChunkMaximumSize() {
+        myStorageSettings.setBulkExportFileMaximumSize(500);
 
+		for (int i = 0; i < 100; i++) {
+			OrganizationAffiliation orgAff = new OrganizationAffiliation();
+			orgAff.setActive(true);
+			myOrganizationAffiliationDao.create(orgAff, mySrd);
+		}
+
+		BulkExportJobParameters params = new BulkExportJobParameters();
+		params.setResourceTypes(List.of("OrganizationAffiliation"));
+		VoidModel data = new VoidModel();
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("instance-id");
+		String chunkId = "chunk-id";
+		StepExecutionDetails<BulkExportJobParameters, VoidModel> executionDetails = new StepExecutionDetails<>(params, data, instance, chunkId);
+
+		// Test
+		myFetchResourceIdsStep.run(executionDetails, mySink);
+
+		// Verify
+		verify(mySink, Mockito.atLeast(1)).accept(myResourceIdListCaptor.capture());
+		List<ResourceIdList> idLists = myResourceIdListCaptor.getAllValues();
+		for (var next : idLists) {
+			String serialized = JsonUtil.serialize(next, false);
+
+			// Note that the 600 is a bit higher than the configured maximum of 500 above,
+			// because our chunk size estimate is not totally accurate, but it's not
+			// going to be way off, less than 100 regardless of how big the maximum is
+			assertThat(serialized, serialized.length(), lessThanOrEqualTo(600));
+		}
+
+	}
 
 }

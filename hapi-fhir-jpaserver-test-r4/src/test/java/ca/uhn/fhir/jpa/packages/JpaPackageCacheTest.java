@@ -15,8 +15,6 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import org.hl7.fhir.utilities.npm.NpmPackage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -31,8 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JpaPackageCacheTest extends BaseJpaR4Test {
-
-	private static final Logger ourLog = LoggerFactory.getLogger(JpaPackageCacheTest.class);
 	@Autowired
 	private IHapiPackageCacheManager myPackageCacheManager;
 	@Autowired
@@ -45,6 +41,8 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	private RequestTenantPartitionInterceptor myRequestTenantPartitionInterceptor;
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
+
+	private PatientIdPartitionInterceptor myPatientIdPartitionInterceptor;
 
 	@AfterEach
 	public void disablePartitioning() {
@@ -80,8 +78,8 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 	public void testSaveAndDeletePackagePartitionsEnabled() throws IOException {
 		myPartitionSettings.setPartitioningEnabled(true);
 		myPartitionSettings.setDefaultPartitionId(1);
-		PatientIdPartitionInterceptor patientIdPartitionInterceptor = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings);
-		myInterceptorService.registerInterceptor(patientIdPartitionInterceptor);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
+		myInterceptorService.registerInterceptor(myPatientIdPartitionInterceptor);
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 		try {
 			try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/basisprofil.de.tar.gz")) {
@@ -109,7 +107,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 			List<String> deleteOutcomeMsgs = deleteOutcomeJson.getMessage();
 			assertThat(deleteOutcomeMsgs.get(0)).isEqualTo("Deleting package basisprofil.de#0.2.40");
 		} finally {
-			myInterceptorService.unregisterInterceptor(patientIdPartitionInterceptor);
+			myInterceptorService.unregisterInterceptor(myPatientIdPartitionInterceptor);
 			myInterceptorService.unregisterInterceptor(myRequestTenantPartitionInterceptor);
 		}
 	}
@@ -120,8 +118,8 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		myPartitionSettings.setDefaultPartitionId(0);
 		boolean isUnnamed = myPartitionSettings.isUnnamedPartitionMode();
 		myPartitionSettings.setUnnamedPartitionMode(true);
-		PatientIdPartitionInterceptor patientIdPartitionInterceptor = new PatientIdPartitionInterceptor(myFhirContext, mySearchParamExtractor, myPartitionSettings);
-		myInterceptorService.registerInterceptor(patientIdPartitionInterceptor);
+		myPatientIdPartitionInterceptor = new PatientIdPartitionInterceptor(getFhirContext(), mySearchParamExtractor, myPartitionSettings);
+		myInterceptorService.registerInterceptor(myPatientIdPartitionInterceptor);
 		myInterceptorService.registerInterceptor(myRequestTenantPartitionInterceptor);
 		try {
 			try (InputStream stream = ClasspathUtil.loadResourceAsStream("/packages/hl7.fhir.uv.shorthand-0.12.0.tgz")) {
@@ -148,7 +146,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 			assertThat(deleteOutcomeMsgs.get(0)).isEqualTo("Deleting package hl7.fhir.uv.shorthand#0.12.0");
 		} finally {
 			myPartitionSettings.setUnnamedPartitionMode(isUnnamed);
-			myInterceptorService.unregisterInterceptor(patientIdPartitionInterceptor);
+			myInterceptorService.unregisterInterceptor(myPatientIdPartitionInterceptor);
 			myInterceptorService.unregisterInterceptor(myRequestTenantPartitionInterceptor);
 		}
 	}

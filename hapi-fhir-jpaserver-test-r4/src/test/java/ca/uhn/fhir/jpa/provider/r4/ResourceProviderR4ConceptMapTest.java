@@ -298,6 +298,86 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 	}
 
 	@Test
+	public void testTranslateByCodeSystemsAndSourceCodeMappedToCodelessTarget() {
+		// ensure that the current behaviour when a target does not have a code is preserved, and no matches returned
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
+
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("system").setValue(new UriType(CS_URL_4));
+		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_3));
+		inParams.addParameter().setName("code").setValue(new CodeType("89012"));
+
+		ourLog.debug("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+
+		Parameters respParams = myClient
+			.operation()
+			.onType(ConceptMap.class)
+			.named("translate")
+			.withParameters(inParams)
+			.execute();
+
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+
+		ParametersParameterComponent param = getParameterByName(respParams, "result");
+		assertFalse(((BooleanType) param.getValue()).booleanValue());
+
+		param = getParameterByName(respParams, "message");
+		assertEquals("No Matches found", ((StringType) param.getValue()).getValueAsString());
+
+		assertFalse(hasParameterByName(respParams, "match"));
+	}
+
+	@Test
+	public void testTranslateByCodeSystemsAndSourceCodeWithEquivalenceUnmatched() {
+		// the equivalence code 'unmatched' is an exception - it does not normally have a target code,
+		// so it will be included in the collection of matches even if there is no code present
+		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId, mySrd);
+
+		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("system").setValue(new UriType(CS_URL_4));
+		inParams.addParameter().setName("targetsystem").setValue(new UriType(CS_URL_3));
+		inParams.addParameter().setName("code").setValue(new CodeType("89123"));
+
+		ourLog.debug("Request Parameters:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(inParams));
+
+		Parameters respParams = myClient
+			.operation()
+			.onType(ConceptMap.class)
+			.named("translate")
+			.withParameters(inParams)
+			.execute();
+
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+
+		ParametersParameterComponent param = getParameterByName(respParams, "result");
+		assertFalse(((BooleanType) param.getValue()).booleanValue());
+
+		param = getParameterByName(respParams, "message");
+		assertEquals("Only negative matches found", ((StringType) param.getValue()).getValueAsString());
+
+		assertEquals(1, getNumberOfParametersByName(respParams, "match"));
+
+		param = getParameterByName(respParams, "match");
+		assertEquals(3, param.getPart().size());
+		ParametersParameterComponent part = getPartByName(param, "equivalence");
+		assertEquals("unmatched", ((CodeType) part.getValue()).getCode());
+		part = getPartByName(param, "concept");
+		Coding coding = (Coding) part.getValue();
+		assertNull(coding.getCode());
+		assertNull(coding.getDisplay());
+		assertFalse(coding.getUserSelected());
+		assertEquals(CS_URL_3, coding.getSystem());
+		assertEquals("Version 1", coding.getVersion());
+		part = getPartByName(param, "source");
+		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
+	}
+
+
+	@Test
 	public void testTranslateUsingPredicatesWithCodeOnly() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
 

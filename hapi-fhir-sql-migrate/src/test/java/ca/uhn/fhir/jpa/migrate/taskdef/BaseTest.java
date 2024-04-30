@@ -136,6 +136,7 @@ public abstract class BaseTest {
 		if (getConnectionProperties() != null) {
 			Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 			if (tableNames.contains(SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME)) {
+				ourLog.info("Deleting entries in " + SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME);
 				executeSql("DELETE from " + SchemaMigrator.HAPI_FHIR_MIGRATION_TABLENAME + " where \"installed_rank\" > 0");
 			}
 		}
@@ -162,6 +163,7 @@ public abstract class BaseTest {
 	public void after() {
 		if (myConnectionProperties != null) {
 			myConnectionProperties.close();
+			ourLog.info("connectionProperties was closed");
 		}
 	}
 

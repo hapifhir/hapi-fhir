@@ -3,10 +3,12 @@ package ca.uhn.fhir.util.bundle;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -25,14 +27,25 @@ import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
-import jakarta.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
 import static ca.uhn.fhir.util.BundleUtil.DIFFERENT_LINK_ERROR_MSG;
+<<<<<<< HEAD
 import static org.assertj.core.api.Assertions.assertThat;
+=======
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+>>>>>>> master
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.DELETE;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.GET;
 import static org.hl7.fhir.r4.model.Bundle.HTTPVerb.POST;
@@ -452,6 +465,96 @@ public class BundleUtilTest {
 		assertThat(searchBundleEntryParts.get(1).getFullUrl()).contains("Condition/");
 		assertThat(searchBundleEntryParts.get(1).getResource()).isNotNull();
 	}
+	@Test
+	public void testConvertingToSearchBundleEntryPartsRespectsMissingMode() {
+
+		//Given
+		String bundleString = """
+			{
+			  "resourceType": "Bundle",
+			  "id": "bd194b7f-ac1e-429a-a206-ee2c470f23b5",
+			  "type": "searchset",
+			  "total": 1,
+			  "link": [
+			    {
+			      "relation": "self",
+			      "url": "http://localhost:8000/Condition?_count=1"
+			    }
+			  ],
+			  "entry": [
+			    {
+			      "fullUrl": "http://localhost:8000/Condition/1626",
+			      "resource": {
+			        "resourceType": "Condition",
+			        "id": "1626",
+			        "identifier": [
+			          {
+			            "system": "urn:hssc:musc:conditionid",
+			            "value": "1064115000.1.5"
+			          }
+			        ]
+			      }
+			    }
+			  ]
+			}""";
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, bundleString);
+
+		//When
+		List<SearchBundleEntryParts> searchBundleEntryParts = BundleUtil.getSearchBundleEntryParts(ourCtx, bundle);
+
+		//Then
+		assertThat(searchBundleEntryParts, hasSize(1));
+		assertThat(searchBundleEntryParts.get(0).getSearchMode(), is(nullValue()));
+		assertThat(searchBundleEntryParts.get(0).getFullUrl(), is(containsString("Condition/1626")));
+		assertThat(searchBundleEntryParts.get(0).getResource(), is(notNullValue()));
+	}
+
+	@Test
+	public void testConvertingToSearchBundleEntryPartsRespectsOutcomeMode() {
+
+		//Given
+		String bundleString = """
+			{
+			  "resourceType": "Bundle",
+			  "id": "bd194b7f-ac1e-429a-a206-ee2c470f23b5",
+			  "type": "searchset",
+			  "total": 1,
+			  "link": [
+			    {
+			      "relation": "self",
+			      "url": "http://localhost:8000/Condition?_count=1"
+			    }
+			  ],
+			  "entry": [
+			    {
+			      "fullUrl": "http://localhost:8000/Condition/1626",
+			      "resource": {
+			        "resourceType": "Condition",
+			        "id": "1626",
+			        "identifier": [
+			          {
+			            "system": "urn:hssc:musc:conditionid",
+			            "value": "1064115000.1.5"
+			          }
+			        ]
+			      },
+			      "search": {
+			        "mode": "outcome"
+			      }
+			    }
+			  ]
+			}""";
+		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, bundleString);
+
+		//When
+		List<SearchBundleEntryParts> searchBundleEntryParts = BundleUtil.getSearchBundleEntryParts(ourCtx, bundle);
+
+		//Then
+		assertThat(searchBundleEntryParts, hasSize(1));
+		assertThat(searchBundleEntryParts.get(0).getSearchMode(), is(equalTo(BundleEntrySearchModeEnum.OUTCOME)));
+		assertThat(searchBundleEntryParts.get(0).getFullUrl(), is(containsString("Condition/1626")));
+		assertThat(searchBundleEntryParts.get(0).getResource(), is(notNullValue()));
+	}
 
 	@Test
 	public void testTransactionSorterReturnsDeletesInCorrectProcessingOrder() {
@@ -544,6 +647,37 @@ public class BundleUtilTest {
 		final IBaseResource actual = BundleUtil.getResourceByReferenceAndResourceType(ourCtx, bundle, reference);
 		// validate
 		assertThat(actual).isNull();
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		 // Actual BundleType            Expected BundleTypeEnum
+		 "TRANSACTION,                   TRANSACTION",
+		 "DOCUMENT,                      DOCUMENT",
+		 "MESSAGE,                       MESSAGE",
+		 "BATCHRESPONSE,                 BATCH_RESPONSE",
+		 "TRANSACTIONRESPONSE,           TRANSACTION_RESPONSE",
+		 "HISTORY,                       HISTORY",
+		 "SEARCHSET,                     SEARCHSET",
+		 "COLLECTION,                    COLLECTION"
+	})
+	public void testGetBundleTypeEnum_withKnownBundleTypes_returnsCorrectBundleTypeEnum(Bundle.BundleType theBundleType, BundleTypeEnum theExpectedBundleTypeEnum){
+		Bundle bundle = new Bundle();
+		bundle.setType(theBundleType);
+		assertEquals(theExpectedBundleTypeEnum, BundleUtil.getBundleTypeEnum(ourCtx, bundle));
+	}
+
+	@Test
+	public void testGetBundleTypeEnum_withNullBundleType_returnsNull(){
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.NULL);
+		assertNull(BundleUtil.getBundleTypeEnum(ourCtx, bundle));
+	}
+
+	@Test
+	public void testGetBundleTypeEnum_withNoBundleType_returnsNull(){
+		Bundle bundle = new Bundle();
+		assertNull(BundleUtil.getBundleTypeEnum(ourCtx, bundle));
 	}
 
 	@Nonnull

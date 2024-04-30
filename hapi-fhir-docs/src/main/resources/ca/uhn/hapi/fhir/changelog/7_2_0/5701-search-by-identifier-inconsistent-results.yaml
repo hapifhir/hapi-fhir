@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5701
+title: "Previously, invoking search URLs containing ':identifier' would result in a HAPI-1250 error complaining about
+        an invalid resource type.
+        This has been fixed by returning a clearer error message for this specific condition: HAPI-2498."

@@ -38,6 +38,7 @@ public interface ILookupCodeTest {
 	}
 
 	@Nested
+<<<<<<< HEAD
 	interface ILookupCodeUnsupportedPropertyTypeTest extends IValidationTest {
 
 		String getInvalidValueErrorCode();
@@ -69,10 +70,12 @@ public interface ILookupCodeTest {
 	}
 
 	@Nested
+=======
+>>>>>>> master
 	interface ILookupCodeSupportedPropertyTest extends IValidationTest {
 		IMyCodeSystemProvider getCodeSystemProvider();
 
-		 Stream<Arguments> getEmptyPropertyValues();
+		Stream<Arguments> getEmptyPropertyValues();
 
 		Stream<Arguments> getPropertyValues();
 

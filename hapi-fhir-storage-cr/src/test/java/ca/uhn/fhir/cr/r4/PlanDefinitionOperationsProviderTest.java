@@ -18,10 +18,11 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-PatientData.json");
 
 		var requestDetails = setupRequestDetails();
-		var planDefinitionID = new IdType(Enumerations.FHIRAllTypes.PLANDEFINITION.toCode(), "ASLPA1");
+		var url = "http://example.org/sdh/dtr/aslp/PlanDefinition/ASLPA1";
+		var version = "1.0.0";
 		var patientID = "positive";
 		var parameters = new Parameters().addParameter("Service Request Id", "SleepStudy").addParameter("Service Request Id", "SleepStudy2");
-		var result = (CarePlan) myPlanDefinitionApplyProvider.apply(planDefinitionID, null, null, patientID,
+		var result = (CarePlan) myPlanDefinitionApplyProvider.apply(null, null, null, url, version, patientID,
 			null, null, null, null, null,
 			null, null, null, parameters, new BooleanType(true), null,
 			null, null, null,
@@ -33,7 +34,7 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
 				.getItem().get(0)
 				.getText()).isEqualTo("Sleep Study");
 
-		var resultR5 = (Bundle) myPlanDefinitionApplyProvider.applyR5(planDefinitionID, null, null, patientID,
+		var resultR5 = (Bundle) myPlanDefinitionApplyProvider.applyR5(null, null, null, url, version, patientID,
 			null, null, null, null, null,
 			null, null, null, parameters, new BooleanType(true), null,
 			null, null, null,

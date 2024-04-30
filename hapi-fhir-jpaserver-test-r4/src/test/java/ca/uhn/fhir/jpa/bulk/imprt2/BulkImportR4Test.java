@@ -33,6 +33,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Pageable;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -40,6 +41,7 @@ import java.util.stream.Collectors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.blankOrNullString;
 import static org.hamcrest.Matchers.equalTo;
@@ -54,7 +56,9 @@ import static org.assertj.core.api.Assertions.fail;
 public class BulkImportR4Test extends BaseJpaR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BulkImportR4Test.class);
-	private final BulkImportFileServlet myBulkImportFileServlet = new BulkImportFileServlet();
+	private static final String USERNAME = "username";
+	private static final String PASSWORD = "password";
+	private final BulkImportFileServlet myBulkImportFileServlet = new BulkImportFileServlet(USERNAME, PASSWORD);
 	@RegisterExtension
 	private final HttpServletExtension myHttpServletExtension = new HttpServletExtension()
 		.withServlet(myBulkImportFileServlet);
@@ -78,6 +82,45 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		await().until(() -> channel.getQueueSizeForUnitTest() == 0);
 	}
 
+
+	@Test
+	public void testBulkImportFailsWith403OnBadCredentials() {
+
+		BulkImportJobParameters parameters = new BulkImportJobParameters();
+		String url = myHttpServletExtension.getBaseUrl() + "/download?index=test"; // Name doesnt matter, its going to fail with 403 anyhow
+		parameters.addNdJsonUrl(url);
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setJobDefinitionId(BulkImportAppCtx.JOB_BULK_IMPORT_PULL);
+		request.setParameters(parameters);
+
+		// Execute
+		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(request);
+		String instanceId = startResponse.getInstanceId();
+		assertThat(instanceId, not(blankOrNullString()));
+		ourLog.info("Execution got ID: {}", instanceId);
+
+		// Verify
+		await().atMost(120, TimeUnit.SECONDS).until(() -> {
+			myJobCleanerService.runMaintenancePass();
+			JobInstance instance = myJobCoordinator.getInstance(instanceId);
+			return instance.getStatus();
+		}, equalTo(StatusEnum.FAILED));
+
+		//No resources stored
+		runInTransaction(() -> {
+			assertEquals(0, myResourceTableDao.count());
+		});
+
+
+		//Should have 403
+		runInTransaction(() -> {
+			JobInstance instance = myJobCoordinator.getInstance(instanceId);
+			ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));
+			assertEquals(1, instance.getErrorCount());
+			assertThat(instance.getErrorMessage(), is(containsString("Received HTTP 403")));
+		});
+
+	}
 	@Test
 	public void testRunBulkImport() {
 		// Setup
@@ -86,6 +129,8 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		List<String> indexes = addFiles(fileCount);
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters();
+
+        parameters.setHttpBasicCredentials(USERNAME + ":" + PASSWORD);
 		for (String next : indexes) {
 			String url = myHttpServletExtension.getBaseUrl() + "/download?index=" + next;
 			parameters.addNdJsonUrl(url);
@@ -134,6 +179,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		List<String> indexes = addFiles(fileCount);
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters();
+		parameters.setHttpBasicCredentials(USERNAME + ":" + PASSWORD);
 		for (String next : indexes) {
 			String url = myHttpServletExtension.getBaseUrl() + "/download?index=" + next;
 			parameters.addNdJsonUrl(url);
@@ -221,6 +267,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		indexes.add(myBulkImportFileServlet.registerFileByContents("{\"resourceType\":\"Foo\"}"));
 
 		BulkImportJobParameters parameters = new BulkImportJobParameters();
+		parameters.setHttpBasicCredentials(USERNAME + ":" + PASSWORD);
 		for (String next : indexes) {
 			String url = myHttpServletExtension.getBaseUrl() + "/download?index=" + next;
 			parameters.addNdJsonUrl(url);
@@ -262,6 +309,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		BulkImportJobParameters parameters = new BulkImportJobParameters();
 		String url = myHttpServletExtension.getBaseUrl() + "/download?index=FOO";
 		parameters.addNdJsonUrl(url);
+		parameters.setHttpBasicCredentials(USERNAME + ":" + PASSWORD);
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(BulkImportAppCtx.JOB_BULK_IMPORT_PULL);
@@ -330,7 +378,9 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setJobDefinitionId(BulkImportAppCtx.JOB_BULK_IMPORT_PULL);
-		request.setParameters(new BulkImportJobParameters());
+		BulkImportJobParameters parameters = new BulkImportJobParameters();
+		parameters.setHttpBasicCredentials(USERNAME + ":" + PASSWORD);
+		request.setParameters(parameters);
 
 		// Execute
 

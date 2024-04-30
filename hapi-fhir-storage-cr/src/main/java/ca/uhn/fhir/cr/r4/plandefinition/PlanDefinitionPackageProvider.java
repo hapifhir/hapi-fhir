@@ -19,7 +19,8 @@
  */
 package ca.uhn.fhir.cr.r4.plandefinition;
 
-import ca.uhn.fhir.cr.r4.IPlanDefinitionProcessorFactory;
+import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.cr.common.IPlanDefinitionProcessorFactory;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -28,40 +29,51 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.PlanDefinition;
+import org.opencds.cqf.fhir.utility.monad.Eithers;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static ca.uhn.fhir.cr.common.CanonicalHelper.getCanonicalType;
 
 public class PlanDefinitionPackageProvider {
 	@Autowired
-	IPlanDefinitionProcessorFactory myR4PlanDefinitionProcessorFactory;
+	IPlanDefinitionProcessorFactory myPlanDefinitionProcessorFactory;
 
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = PlanDefinition.class)
 	public IBaseBundle packagePlanDefinition(
 			@IdParam IdType theId,
 			@OperationParam(name = "canonical") String theCanonical,
-			@OperationParam(name = "usePut") String theIsPut,
+			@OperationParam(name = "url") String theUrl,
+			@OperationParam(name = "version") String theVersion,
+			@OperationParam(name = "usePut") BooleanType theIsPut,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myR4PlanDefinitionProcessorFactory
+		CanonicalType canonicalType = getCanonicalType(FhirVersionEnum.R4, theCanonical, theUrl, theVersion);
+		return myPlanDefinitionProcessorFactory
 				.create(theRequestDetails)
-				.packagePlanDefinition(theId, new CanonicalType(theCanonical), null, Boolean.parseBoolean(theIsPut));
+				.packagePlanDefinition(
+						Eithers.for3(canonicalType, theId, null),
+						theIsPut == null ? Boolean.FALSE : theIsPut.booleanValue());
 	}
 
 	@Operation(name = ProviderConstants.CR_OPERATION_PACKAGE, idempotent = true, type = PlanDefinition.class)
 	public IBaseBundle packagePlanDefinition(
 			@OperationParam(name = "id") String theId,
 			@OperationParam(name = "canonical") String theCanonical,
-			@OperationParam(name = "usePut") String theIsPut,
+			@OperationParam(name = "url") String theUrl,
+			@OperationParam(name = "version") String theVersion,
+			@OperationParam(name = "usePut") BooleanType theIsPut,
 			RequestDetails theRequestDetails)
 			throws InternalErrorException, FHIRException {
-		return myR4PlanDefinitionProcessorFactory
+		IdType id = theId == null ? null : new IdType("PlanDefinition", theId);
+		CanonicalType canonicalType = getCanonicalType(FhirVersionEnum.R4, theCanonical, theUrl, theVersion);
+		return myPlanDefinitionProcessorFactory
 				.create(theRequestDetails)
 				.packagePlanDefinition(
-						new IdType("PlanDefinition", theId),
-						new CanonicalType(theCanonical),
-						null,
-						Boolean.parseBoolean(theIsPut));
+						Eithers.for3(canonicalType, id, null),
+						theIsPut == null ? Boolean.FALSE : theIsPut.booleanValue());
 	}
 }

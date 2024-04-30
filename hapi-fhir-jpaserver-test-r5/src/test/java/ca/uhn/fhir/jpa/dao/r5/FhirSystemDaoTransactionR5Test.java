@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.BundleBuilder;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.CodeType;
@@ -13,19 +14,26 @@ import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.Patient;
 import org.hl7.fhir.r5.model.Quantity;
 import org.hl7.fhir.r5.model.Reference;
+import org.hl7.fhir.r5.model.UriType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.UUID;
 
 import static org.apache.commons.lang3.StringUtils.countMatches;
+<<<<<<< HEAD
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+=======
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.matchesPattern;
+>>>>>>> master
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -146,12 +154,21 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		// Verify
 
+<<<<<<< HEAD
 		assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread()).isEqualTo(theMatchUrlCacheEnabled ? 4 : 5);
 		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countUpdateQueriesForCurrentThread()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countDeleteQueriesForCurrentThread()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
 		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
+=======
+		assertEquals(theMatchUrlCacheEnabled ? 3 : 4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+>>>>>>> master
 
 		assertThat(output.getEntry()).hasSize(4);
 
@@ -198,12 +215,21 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		// Verify
 
+<<<<<<< HEAD
 		assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread()).isEqualTo(theMatchUrlCacheEnabled ? 4 : 5);
 		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countUpdateQueriesForCurrentThread()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countDeleteQueriesForCurrentThread()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
 		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
+=======
+		assertEquals(theMatchUrlCacheEnabled ? 3 : 4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+>>>>>>> master
 
 		assertThat(output.getEntry()).hasSize(3);
 
@@ -665,6 +691,30 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 		assertThat(actual.getMeta().getTagFirstRep().getSystem()).isEqualTo("http://tag");
 
 
+	}
+
+
+	/**
+	 * See #5110
+	 */
+	@Test
+	public void testTransactionWithMissingSystem() {
+        BundleBuilder bb = new BundleBuilder(myFhirContext);
+		Patient patient = new Patient();
+		patient.setId(IdType.newRandomUuid());
+
+		// The identifier has a system URI that has no value, only an extension
+		UriType system = new UriType();
+		system.addExtension("http://hl7.org/fhir/StructureDefinition/data-absent-reason", new CodeType("unknown"));
+		patient.addIdentifier().setValue("m123").setSystemElement(system);
+
+		patient.addName().setText("Jane Doe");
+		bb.addTransactionCreateEntry(patient);
+        Bundle inputBundle = bb.getBundleTyped();
+
+		Bundle outputBundle = mySystemDao.transaction(mySrd, inputBundle);
+
+		assertThat(outputBundle.getEntry().get(0).getResponse().getLocation(), matchesPattern("Patient/[0-9]+/_history/1"));
 	}
 
 

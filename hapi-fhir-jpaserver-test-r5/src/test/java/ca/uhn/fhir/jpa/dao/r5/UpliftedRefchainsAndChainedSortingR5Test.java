@@ -374,7 +374,11 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 
 		// 1- Resolve resource forced IDs, and 2- Resolve Practitioner/PR1 reference
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
+<<<<<<< HEAD
 		assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread()).isEqualTo(10);
+=======
+		assertEquals(9, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+>>>>>>> master
 
 		// Verify correct indexes are written
 
@@ -409,7 +413,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E2, p2Id));
 		bb.addTransactionCreateEntry(newPatientP1_HomerSimpson().setId(p1Id)).conditional("identifier=http://system|200");
 		bb.addTransactionCreateEntry(newPatientP2_MargeSimpson().setId(p2Id)).conditional("identifier=http://system|300");
-		;
+
 		Bundle requestBundle = bb.getBundleTyped();
 
 		myCaptureQueriesListener.clear();
@@ -459,7 +463,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		bb.addTransactionUpdateEntry(newEncounter(ENCOUNTER_E2, p2Id));
 		bb.addTransactionCreateEntry(new Patient().addIdentifier(new Identifier().setSystem("http://system").setValue("200")).setId(p1Id)).conditional("identifier=http://system|200");
 		bb.addTransactionCreateEntry(new Patient().addIdentifier(new Identifier().setSystem("http://system").setValue("300")).setId(p2Id)).conditional("identifier=http://system|300");
-		;
+
 		Bundle requestBundle = bb.getBundleTyped();
 
 		myCaptureQueriesListener.clear();

@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5672
+title: "Previously, when performing a FHIR search using a non-chained relative reference (returns entire resource) with 
+a server assigned id, it ignores the invalid resourceType in the parameter value and proceeds with the id based lookup. e.g. 
+ GET `/MedicationAdministration?context=abc/1352` returns `Encounter/1352`. This has been fixed."

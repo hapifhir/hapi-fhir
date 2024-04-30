@@ -1,0 +1,5 @@
+---
+type: perf
+issue: 4622
+backport: 6.4.3
+title: "The batch system now reads less data during the maintenance pass.  This avoids slowdowns on large systems."

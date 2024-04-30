@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.model.valueset.BundleTypeEnum;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -233,6 +234,14 @@ public class BundleUtil {
 			return typeElement.getValueAsString();
 		}
 		return null;
+	}
+
+	public static BundleTypeEnum getBundleTypeEnum(FhirContext theContext, IBaseBundle theBundle) {
+		String bundleTypeCode = BundleUtil.getBundleType(theContext, theBundle);
+		if (isBlank(bundleTypeCode)) {
+			return null;
+		}
+		return BundleTypeEnum.forCode(bundleTypeCode);
 	}
 
 	public static void setBundleType(FhirContext theContext, IBaseBundle theBundle, String theType) {
@@ -618,6 +627,8 @@ public class BundleUtil {
 				//noinspection EnumSwitchStatementWhichMissesCases
 				switch (requestType) {
 					case PUT:
+					case DELETE:
+					case PATCH:
 						conditionalUrl = url != null && url.contains("?") ? url : null;
 						break;
 					case POST:

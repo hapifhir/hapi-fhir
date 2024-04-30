@@ -14,6 +14,7 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -184,8 +185,14 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	public void testFetchCodeSystem_withCountriesForR5_returnsOk() {
 		CommonCodeSystemsTerminologyService svc = new CommonCodeSystemsTerminologyService(FhirContext.forR5Cached());
 		org.hl7.fhir.r5.model.CodeSystem cs = (org.hl7.fhir.r5.model.CodeSystem) svc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
+<<<<<<< HEAD
 		assertThat(cs).isNotNull();
 		assertThat(cs.getConcept()).hasSize(498);
+=======
+		assertNotNull(cs);
+		assertEquals(498, cs.getConcept().size());
+		assertEquals(Enumerations.CodeSystemContentMode.COMPLETE, cs.getContent());
+>>>>>>> master
 	}
 
 	@Test
@@ -296,7 +303,12 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	@Test
 	public void testFetchCodeSystem_withMimeType_returnsOk() {
 		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem(MIMETYPES_CODESYSTEM_URL);
+<<<<<<< HEAD
 		assertThat(cs).isNull();
+=======
+		assertTrue(cs.getConcept().isEmpty());
+		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, cs.getContent());
+>>>>>>> master
 	}
 
 	@ParameterizedTest

@@ -184,9 +184,13 @@ public class PartitionRunner {
 			}
 			ourLog.info("Slot become available after {}ms", sw.getMillis());
 		};
+
+		// setting corePoolSize and maximumPoolSize to be the same as threadCount
+		// to ensure that the number of allocated threads for the expunge operation does not exceed the configured limit
+		// see ThreadPoolExecutor documentation for details
 		return new ThreadPoolExecutor(
 				threadCount,
-				MAX_POOL_SIZE,
+				threadCount,
 				0L,
 				TimeUnit.MILLISECONDS,
 				executorQueue,

@@ -12,6 +12,7 @@ public class NullBinaryStorageSvcImplTest {
 	private final NullBinaryStorageSvcImpl mySvc = new NullBinaryStorageSvcImpl();
 
 	@Test
+<<<<<<< HEAD
 	public void shouldStoreBlob() {
 		assertThat(mySvc.shouldStoreBlob(1, new IdType("Patient/2"), "application/json")).isFalse();
 	}
@@ -44,5 +45,39 @@ public class NullBinaryStorageSvcImplTest {
 	@Test
 	public void newBlobId() {
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.newBlobId());
+=======
+	public void shouldStoreBinaryContent() {
+		assertFalse(mySvc.shouldStoreBinaryContent(1, new IdType("Patient/2"), "application/json"));
+	}
+
+	@Test
+	public void storeBinaryContent() {
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.storeBinaryContent(null, null, null, null, null));
+	}
+
+	@Test
+	public void fetchBinaryContentDetails() {
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.fetchBinaryContentDetails(null, null));
+	}
+
+	@Test
+	public void writeBinaryContent() {
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.writeBinaryContent(null, null, null));
+	}
+
+	@Test
+	public void expungeBinaryContent() {
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.expungeBinaryContent(null, null));
+	}
+
+	@Test
+	public void fetchBinaryContent() {
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.fetchBinaryContent(null, null));
+	}
+
+	@Test
+	public void newBinaryContentId() {
+		assertThrows(UnsupportedOperationException.class, () -> mySvc.newBinaryContentId());
+>>>>>>> master
 	}
 }

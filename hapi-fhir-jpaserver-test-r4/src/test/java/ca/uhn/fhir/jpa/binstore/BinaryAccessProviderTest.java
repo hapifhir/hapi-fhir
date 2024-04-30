@@ -102,7 +102,7 @@ public class BinaryAccessProviderTest {
 		ServletOutputStream sos = spy(ServletOutputStream.class);
 		when(myDaoRegistry.getResourceDao(eq("DocumentReference"))).thenReturn(myResourceDao);
 		when(myResourceDao.read(any(), any(), anyBoolean())).thenReturn(docRef);
-		when(myBinaryStorageSvc.fetchBlobDetails(any(), any())).thenReturn(blobDetails);
+		when(myBinaryStorageSvc.fetchBinaryContentDetails(any(), any())).thenReturn(blobDetails);
 		when(theServletResponse.getOutputStream()).thenReturn(sos);
 		myBinaryAccessProvider.setTargetAttachmentIdForUnitTest(true);
 
@@ -110,8 +110,8 @@ public class BinaryAccessProviderTest {
 			myBinaryAccessProvider.binaryAccessRead(docRef.getIdElement(), new StringType("DocumentReference.content.attachment"), myRequestDetails, theServletRequest, theServletResponse);
 		} catch (IOException e) {
 		}
-		verify(myBinaryStorageSvc, times(1)).fetchBlobDetails(any(), any());
-		verify(myBinaryStorageSvc, times(1)).writeBlob(any(), any(), any());
+		verify(myBinaryStorageSvc, times(1)).fetchBinaryContentDetails(any(), any());
+		verify(myBinaryStorageSvc, times(1)).writeBinaryContent(any(), any(), any());
 		verify(theServletResponse, times(1)).setStatus(200);
 		verify(theServletResponse, times(1)).setContentType(any());
 		verify(theServletResponse, times(1)).setContentLength(0);
@@ -131,7 +131,7 @@ public class BinaryAccessProviderTest {
 		} catch (InvalidRequestException | IOException e) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(1331) + "Can not find the requested binary content. It may have been deleted.");
 		}
-		verify(myBinaryStorageSvc, times(1)).fetchBlobDetails(any(), any());
+		verify(myBinaryStorageSvc, times(1)).fetchBinaryContentDetails(any(), any());
 	}
 
 	@Test
@@ -246,16 +246,16 @@ public class BinaryAccessProviderTest {
 		DaoMethodOutcome daoOutcome = new DaoMethodOutcome();
 		daoOutcome.setResource(docRef);
 		StoredDetails sd = spy(StoredDetails.class);
-		sd.setBlobId("123");
+		sd.setBinaryContentId("123");
 		sd.setBytes(15);
 		when(myDaoRegistry.getResourceDao(eq("DocumentReference"))).thenReturn(myResourceDao);
 		when(myResourceDao.read(any(), any(), anyBoolean())).thenReturn(docRef);
 		when(myResourceDao.update(docRef, myRequestDetails)).thenReturn(daoOutcome);
 		when(theServletRequest.getContentType()).thenReturn("Integer");
 		when(theServletRequest.getContentLength()).thenReturn(15);
-		when(myBinaryStorageSvc.shouldStoreBlob(15, docRef.getIdElement(), "Integer")).thenReturn(true);
+		when(myBinaryStorageSvc.shouldStoreBinaryContent(15, docRef.getIdElement(), "Integer")).thenReturn(true);
 		myRequestDetails.setServletRequest(theServletRequest);
-		doReturn(sd).when(myBinaryStorageSvc).storeBlob(eq(docRef.getIdElement()), isNull(), eq("Integer"), any(InputStream.class), any(RequestDetails.class));
+		doReturn(sd).when(myBinaryStorageSvc).storeBinaryContent(eq(docRef.getIdElement()), isNull(), eq("Integer"), any(InputStream.class), any(RequestDetails.class));
 		myRequestDetails.setRequestContents(SOME_BYTES);
 
 		try {
@@ -264,7 +264,7 @@ public class BinaryAccessProviderTest {
 			assertThat(outcome.getIdElement().getValue()).isEqualTo(docRef.getId());
 		} catch (IOException e) {
 		}
-		verify(myBinaryStorageSvc, times(1)).storeBlob(any(), any(), any(), any(), any(ServletRequestDetails.class));
+		verify(myBinaryStorageSvc, times(1)).storeBinaryContent(any(), any(), any(), any(), any(ServletRequestDetails.class));
 	}
 
 	@Test

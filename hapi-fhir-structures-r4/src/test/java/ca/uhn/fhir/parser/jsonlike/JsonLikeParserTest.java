@@ -11,6 +11,7 @@ import ca.uhn.fhir.parser.json.JsonLikeStructure;
 import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import ca.uhn.fhir.parser.view.ExtPatient;
 import ca.uhn.fhir.util.AttachmentUtil;
+import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.TestUtil;
 import org.apache.commons.io.IOUtils;
@@ -19,6 +20,7 @@ import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IntegerType;
+import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.AfterAll;
@@ -31,6 +33,7 @@ import java.io.StringReader;
 import java.io.Writer;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -80,6 +83,27 @@ public class JsonLikeParserTest {
 		// then
 		assertThat(jsonLikeStructure.getRootObject()).isNotNull();
 
+	}
+
+	/**
+	 * Test that json number values with a leading plus sign are parsed without exception.
+	 * Previously, it was possible to save resources with leading plus sign numbers, e.g., "value": +3.0.
+	 * To ensure that we could read such resources back, the ObjectMapper configuration was updated by enabling:
+	 * {@link com.fasterxml.jackson.core.json.JsonReadFeature#ALLOW_LEADING_PLUS_SIGN_FOR_NUMBERS}
+	 * Reproduces: https://github.com/hapifhir/hapi-fhir/issues/5667
+	 */
+	@Test
+	public void testJsonLikeParser_resourceHasDecimalElementWithLeadingPlus_isParsedCorrectly() {
+		// setup
+		String text = ClasspathUtil.loadResource("observation-decimal-element-with-leading-plus.json");
+		IJsonLikeParser jsonLikeParser = (IJsonLikeParser) ourCtx.newJsonParser();
+
+		// execute
+		IBaseResource resource = jsonLikeParser.parseResource(text);
+
+		// validate
+		Observation observation = (Observation) resource;
+		assertEquals("3.0", observation.getReferenceRange().get(0).getHigh().getValueElement().getValueAsString());
 	}
 
 	/**

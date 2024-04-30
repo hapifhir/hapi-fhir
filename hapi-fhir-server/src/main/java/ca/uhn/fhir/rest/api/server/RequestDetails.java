@@ -249,6 +249,24 @@ public abstract class RequestDetails {
 
 	public abstract List<String> getHeaders(String name);
 
+	/**
+	 * Adds a new header
+	 *
+	 * @param theName The header name
+	 * @param theValue The header value
+	 * @since 7.2.0
+	 */
+	public abstract void addHeader(String theName, String theValue);
+
+	/**
+	 * Replaces any existing header(s) with the given name using a List of new header values
+	 *
+	 * @param theName The header name
+	 * @param theValue The header value
+	 * @since 7.2.0
+	 */
+	public abstract void setHeaders(String theName, List<String> theValue);
+
 	public IIdType getId() {
 		return myId;
 	}

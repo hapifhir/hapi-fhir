@@ -20,6 +20,7 @@ import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.hapi.fhir.batch2.test.AbstractIJobPersistenceSpecificationTest;
+import ca.uhn.hapi.fhir.batch2.test.configs.SpyOverrideConfig;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import org.junit.jupiter.api.MethodOrderer;
@@ -30,6 +31,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -56,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
+@Import(SpyOverrideConfig.class)
 public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 	public static final String JOB_DEFINITION_ID = "definition-id";
@@ -316,13 +319,18 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	class Batch2SpecTest extends AbstractIJobPersistenceSpecificationTest {
 
 		@Override
-		protected PlatformTransactionManager getTxManager() {
+		public PlatformTransactionManager getTxManager() {
 			return JpaJobPersistenceImplTest.this.getTxManager();
 		}
 
 		@Override
-		protected WorkChunk freshFetchWorkChunk(String chunkId) {
+		public WorkChunk freshFetchWorkChunk(String chunkId) {
 			return JpaJobPersistenceImplTest.this.freshFetchWorkChunk(chunkId);
+		}
+
+		@Override
+		public void runMaintenancePass() {
+			myBatch2JobHelper.forceRunMaintenancePass();
 		}
 	}
 

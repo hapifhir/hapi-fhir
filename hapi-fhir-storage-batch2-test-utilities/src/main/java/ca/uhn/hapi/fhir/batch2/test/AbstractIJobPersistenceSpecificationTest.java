@@ -20,30 +20,28 @@
 
 package ca.uhn.hapi.fhir.batch2.test;
 
+import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.RunOutcome;
+import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
-import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
-import ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
-import ca.uhn.fhir.batch2.model.WorkChunkCompletionEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
-import ca.uhn.fhir.batch2.model.WorkChunkErrorEvent;
-import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobParameters;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep2InputType;
 import ca.uhn.hapi.fhir.batch2.test.support.TestJobStep3InputType;
-import com.google.common.collect.ImmutableList;
-import org.junit.jupiter.api.BeforeEach;
+import ca.uhn.test.concurrency.PointcutLatch;
+import jakarta.annotation.Nonnull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,40 +51,34 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+<<<<<<< HEAD
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+=======
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+>>>>>>> master
 
 /**
  * Specification tests for batch2 storage and event system.
  * These tests are abstract, and do not depend on JPA.
  * Test setups should use the public batch2 api to create scenarios.
  */
-public abstract class AbstractIJobPersistenceSpecificationTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(AbstractIJobPersistenceSpecificationTest.class);
+public abstract class AbstractIJobPersistenceSpecificationTest implements IInProgressActionsTests, IInstanceStateTransitions, ITestFixture, WorkChunkTestConstants {
 
-	public static final String JOB_DEFINITION_ID = "definition-id";
-	public static final String TARGET_STEP_ID = "step-id";
-	public static final String DEF_CHUNK_ID = "definition-chunkId";
-	public static final String STEP_CHUNK_ID = "step-chunkId";
-	public static final int JOB_DEF_VER = 1;
-	public static final int SEQUENCE_NUMBER = 1;
-	public static final String CHUNK_DATA = "{\"key\":\"value\"}";
-	public static final String ERROR_MESSAGE_A = "This is an error message: A";
-	public static final String ERROR_MESSAGE_B = "This is a different error message: B";
-	public static final String ERROR_MESSAGE_C = "This is a different error message: C";
+	private static final Logger ourLog = LoggerFactory.getLogger(AbstractIJobPersistenceSpecificationTest.class);
 
 	@Autowired
 	private IJobPersistence mySvc;
 
+<<<<<<< HEAD
 	@Nested
 	class WorkChunkStorage {
 
@@ -344,8 +336,25 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			assertThat(entity.getCreateTime().getTime() < entity.getStartTime().getTime()).isTrue();
 			assertThat(entity.getStartTime().getTime() < entity.getEndTime().getTime()).isTrue();
 		}
+=======
+	@Autowired
+	private JobDefinitionRegistry myJobDefinitionRegistry;
 
+	@Autowired
+	private PlatformTransactionManager myTransactionManager;
 
+	@Autowired
+	private IJobMaintenanceService myMaintenanceService;
+
+	@Autowired
+	private BatchJobSender myBatchJobSender;
+>>>>>>> master
+
+	public PlatformTransactionManager getTransactionManager() {
+		return myTransactionManager;
+	}
+
+<<<<<<< HEAD
 		@Test
 		public void testMarkChunkAsCompleted_Error() {
 			JobInstance instance = createInstance();
@@ -426,43 +435,57 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 				assertTrue(entity.getCreateTime().getTime() < entity.getStartTime().getTime());
 				assertTrue(entity.getStartTime().getTime() < entity.getEndTime().getTime());
 			});
+=======
+	public IJobPersistence getSvc() {
+		return mySvc;
+	}
+
+	public JobDefinition<TestJobParameters> withJobDefinition(boolean theIsGatedBoolean) {
+		JobDefinition.Builder<TestJobParameters, ?> builder = JobDefinition.newBuilder()
+			.setJobDefinitionId(theIsGatedBoolean ? GATED_JOB_DEFINITION_ID : JOB_DEFINITION_ID)
+			.setJobDefinitionVersion(JOB_DEF_VER)
+			.setJobDescription("A job description")
+			.setParametersType(TestJobParameters.class)
+			.addFirstStep(TARGET_STEP_ID, "the first step", TestJobStep2InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
+			.addIntermediateStep("2nd-step-id", "the second step", TestJobStep3InputType.class, (theStepExecutionDetails, theDataSink) -> new RunOutcome(0))
+			.addLastStep("last-step-id", "the final step", (theStepExecutionDetails, theDataSink) -> new RunOutcome(0));
+		if (theIsGatedBoolean) {
+			builder.gatedExecution();
+>>>>>>> master
 		}
+		return builder.build();
+	}
 
-		@Test
-		public void markWorkChunksWithStatusAndWipeData_marksMultipleChunksWithStatus_asExpected() {
-			JobInstance instance = createInstance();
-			String instanceId = mySvc.storeNewInstance(instance);
-			ArrayList<String> chunkIds = new ArrayList<>();
-			for (int i = 0; i < 10; i++) {
-				WorkChunkCreateEvent chunk = new WorkChunkCreateEvent(
-					"defId",
-					1,
-					"stepId",
-					instanceId,
-					0,
-					"{}"
-				);
-				String id = mySvc.onWorkChunkCreate(chunk);
-				chunkIds.add(id);
-			}
+	@AfterEach
+	public void after() {
+		myJobDefinitionRegistry.removeJobDefinition(JOB_DEFINITION_ID, JOB_DEF_VER);
 
-			runInTransaction(() -> mySvc.markWorkChunksWithStatusAndWipeData(instance.getInstanceId(), chunkIds, WorkChunkStatusEnum.COMPLETED, null));
+		// clear invocations on the batch sender from previous jobs that might be
+		// kicking around
+		Mockito.clearInvocations(myBatchJobSender);
+	}
 
-			Iterator<WorkChunk> reducedChunks = mySvc.fetchAllWorkChunksIterator(instanceId, true);
+	@Override
+	public ITestFixture getTestManager() {
+		return this;
+	}
 
+<<<<<<< HEAD
 			while (reducedChunks.hasNext()) {
 				WorkChunk reducedChunk = reducedChunks.next();
 				assertThat(chunkIds).contains(reducedChunk);
 				assertThat(reducedChunk.getStatus()).isEqualTo(WorkChunkStatusEnum.COMPLETED);
 			}
 		}
+=======
+	@Override
+	public void enableMaintenanceRunner(boolean theToEnable) {
+		myMaintenanceService.enableMaintenancePass(theToEnable);
+>>>>>>> master
 	}
 
-	/**
-	 * Test
-	 *  * @see hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_jpa_batch/batch2_states.md
-	 */
 	@Nested
+<<<<<<< HEAD
 	class InstanceStateTransitions {
 		
 		@Test
@@ -504,32 +527,27 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		    // then
 			JobInstance jobInstance = freshFetchJobInstance(createResult.jobInstanceId);
 			assertThat(jobInstance.getStatus()).isEqualTo(StatusEnum.IN_PROGRESS);
+=======
+	class WorkChunkStorage implements IWorkChunkStorageTests {
+
+		@Override
+		public ITestFixture getTestManager() {
+			return AbstractIJobPersistenceSpecificationTest.this;
+>>>>>>> master
 		}
 
-		
+		@Nested
+		class StateTransitions implements IWorkChunkStateTransitions {
 
-		@ParameterizedTest
-		@EnumSource(StatusEnum.class)
-		void cancelRequest_cancelsJob_whenNotFinalState(StatusEnum theState) {
-			// given
-			JobInstance cancelledInstance = createInstance();
-			cancelledInstance.setStatus(theState);
-			String instanceId1 = mySvc.storeNewInstance(cancelledInstance);
-			mySvc.cancelInstance(instanceId1);
+			@Override
+			public ITestFixture getTestManager() {
+				return AbstractIJobPersistenceSpecificationTest.this;
+			}
 
-			JobInstance normalInstance = createInstance();
-			normalInstance.setStatus(theState);
-			String instanceId2 = mySvc.storeNewInstance(normalInstance);
+			@Nested
+			class ErrorActions implements IWorkChunkErrorActionsTests {
 
-			JobDefinitionRegistry jobDefinitionRegistry = new JobDefinitionRegistry();
-			jobDefinitionRegistry.addJobDefinitionIfNotRegistered(withJobDefinition());
-
-
-			// when
-			runInTransaction(()-> new JobInstanceProcessor(mySvc, null, instanceId1, new JobChunkProgressAccumulator(), null, jobDefinitionRegistry)
-				.process());
-
-
+<<<<<<< HEAD
 			// then
 			JobInstance freshInstance1 = mySvc.fetchInstance(instanceId1).orElseThrow();
 			if (theState.isCancellable()) {
@@ -541,19 +559,24 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 			}
 			JobInstance freshInstance2 = mySvc.fetchInstance(instanceId2).orElseThrow();
 			assertThat(freshInstance2.getStatus()).as("cancel request ignored - cancelled not set").isEqualTo(theState);
+=======
+				@Override
+				public ITestFixture getTestManager() {
+					return AbstractIJobPersistenceSpecificationTest.this;
+				}
+			}
+>>>>>>> master
 		}
 	}
 
-	@Test
-	void testDeleteChunksAndMarkInstanceAsChunksPurged_doesWhatItSays() {
-	    // given
-		JobDefinition<?> jd = withJobDefinition();
-		IJobPersistence.CreateResult createResult = newTxTemplate().execute(status->
-				mySvc.onCreateWithFirstChunk(jd, "{}"));
-		String instanceId = createResult.jobInstanceId;
-		for (int i = 0; i < 10; i++) {
-			storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, instanceId, i, CHUNK_DATA);
+	@Nonnull
+	public JobInstance createInstance(JobDefinition<?> theJobDefinition) {
+		JobDefinition<?> jobDefinition = theJobDefinition == null ? withJobDefinition(false)
+			: theJobDefinition;
+		if (myJobDefinitionRegistry.getJobDefinition(jobDefinition.getJobDefinitionId(), jobDefinition.getJobDefinitionVersion()).isEmpty()) {
+			myJobDefinitionRegistry.addJobDefinition(jobDefinition);
 		}
+<<<<<<< HEAD
 		JobInstance readback = freshFetchJobInstance(instanceId);
 		assertThat(readback.isWorkChunksPurged()).isFalse();
 		assertThat(mySvc.fetchAllWorkChunksIterator(instanceId, true).hasNext()).as("has chunk").isTrue();
@@ -617,8 +640,12 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 
 	@Nonnull
 	private JobInstance createInstance() {
+=======
+
+>>>>>>> master
 		JobInstance instance = new JobInstance();
-		instance.setJobDefinitionId(JOB_DEFINITION_ID);
+		instance.setJobDefinitionId(jobDefinition.getJobDefinitionId());
+		instance.setJobDefinitionVersion(jobDefinition.getJobDefinitionVersion());
 		instance.setStatus(StatusEnum.QUEUED);
 		instance.setJobDefinitionVersion(JOB_DEF_VER);
 		instance.setParameters(CHUNK_DATA);
@@ -626,17 +653,19 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		return instance;
 	}
 
-	private String storeWorkChunk(String theJobDefinitionId, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData) {
+	public String storeWorkChunk(String theJobDefinitionId, String theTargetStepId, String theInstanceId, int theSequence, String theSerializedData) {
 		WorkChunkCreateEvent batchWorkChunk = new WorkChunkCreateEvent(theJobDefinitionId, JOB_DEF_VER, theTargetStepId, theInstanceId, theSequence, theSerializedData);
 		return mySvc.onWorkChunkCreate(batchWorkChunk);
 	}
 
+	public abstract PlatformTransactionManager getTxManager();
 
-	protected abstract PlatformTransactionManager getTxManager();
-	protected abstract WorkChunk freshFetchWorkChunk(String theChunkId);
-	protected JobInstance freshFetchJobInstance(String theInstanceId) {
+	public JobInstance freshFetchJobInstance(String theInstanceId) {
 		return runInTransaction(() -> mySvc.fetchInstance(theInstanceId).orElseThrow());
 	}
+
+	@Override
+	public abstract void runMaintenancePass();
 
 	public TransactionTemplate newTxTemplate() {
 		TransactionTemplate retVal = new TransactionTemplate(getTxManager());
@@ -673,6 +702,39 @@ public abstract class AbstractIJobPersistenceSpecificationTest {
 		await().until(() -> sw.getMillis() > 0);
 	}
 
+	public String createAndStoreJobInstance(JobDefinition<?> theJobDefinition) {
+		JobInstance jobInstance = createInstance(theJobDefinition);
+		return mySvc.storeNewInstance(jobInstance);
+	}
 
+	public String createAndDequeueWorkChunk(String theJobInstanceId) {
+		String chunkId = createChunk(theJobInstanceId);
+		mySvc.onWorkChunkDequeue(chunkId);
+		return chunkId;
+	}
 
+	@Override
+	public abstract WorkChunk freshFetchWorkChunk(String theChunkId);
+
+	public String createChunk(String theInstanceId) {
+		return storeWorkChunk(JOB_DEFINITION_ID, TARGET_STEP_ID, theInstanceId, 0, CHUNK_DATA);
+	}
+
+	public PointcutLatch disableWorkChunkMessageHandler() {
+		PointcutLatch latch = new PointcutLatch(new Exception().getStackTrace()[0].getMethodName());
+
+		doAnswer(a -> {
+			latch.call(1);
+			return Void.class;
+		}).when(myBatchJobSender).sendWorkChannelMessage(any(JobWorkNotification.class));
+		return latch;
+	}
+
+	public void verifyWorkChunkMessageHandlerCalled(PointcutLatch theSendingLatch, int theNumberOfTimes) throws InterruptedException {
+		theSendingLatch.awaitExpected();
+		ArgumentCaptor<JobWorkNotification> notificationCaptor = ArgumentCaptor.forClass(JobWorkNotification.class);
+
+		verify(myBatchJobSender, times(theNumberOfTimes))
+			.sendWorkChannelMessage(notificationCaptor.capture());
+	}
 }

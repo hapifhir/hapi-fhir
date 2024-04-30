@@ -118,6 +118,16 @@ public class JaxRsRequest extends RequestDetails {
 	}
 
 	@Override
+	public void addHeader(String theName, String theValue) {
+		throw new UnsupportedOperationException(Msg.code(2499) + "Headers can not be modified in JAX-RS");
+	}
+
+	@Override
+	public void setHeaders(String theName, List<String> theValue) {
+		throw new UnsupportedOperationException(Msg.code(2500) + "Headers can not be modified in JAX-RS");
+	}
+
+	@Override
 	public Object getAttribute(String theAttributeName) {
 		return myAttributes.get(theAttributeName);
 	}

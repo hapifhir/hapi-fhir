@@ -4,7 +4,15 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import org.junit.jupiter.api.Test;
 
+<<<<<<< HEAD
 import static org.assertj.core.api.Assertions.assertThat;
+=======
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+>>>>>>> master
 
 public class TokenParamTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
@@ -45,6 +53,7 @@ public class TokenParamTest {
 	}
 
 	@Test
+<<<<<<< HEAD
 	public void testNameNickname() {
 		StringParam param = new StringParam();
 		assertThat(param.isNicknameExpand()).isFalse();
@@ -58,6 +67,18 @@ public class TokenParamTest {
 		assertThat(param.isNicknameExpand()).isFalse();
 		param.setValueAsQueryToken(ourCtx, "given", Constants.PARAMQUALIFIER_NICKNAME, "kenny");
 		assertThat(param.isNicknameExpand()).isTrue();
+=======
+	public void testMdmQualifier() {
+		final String value = "Patient/PJANE1";
+
+		TokenParam param = new TokenParam();
+		param.setValueAsQueryToken(ourCtx, "_id", Constants.PARAMQUALIFIER_MDM, value);
+		assertNull(param.getModifier());
+		assertNull(param.getSystem());
+		assertTrue(param.isMdmExpand());
+		assertEquals(value, param.getValue());
+>>>>>>> master
 	}
+
 
 }

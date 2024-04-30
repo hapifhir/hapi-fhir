@@ -3,6 +3,7 @@ package ca.uhn.fhir.cr.r4;
 
 import ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePackageProvider;
 import ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePopulateProvider;
+import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Parameters;
@@ -26,7 +27,7 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 		var theSubject = "positive";
 		var parameters = new Parameters().addParameter("Service Request Id", "SleepStudy").addParameter("Service Request Id", "SleepStudy2");
 		var result = myQuestionnairePopulateProvider.populate(new IdType("Questionnaire", "ASLPA1"),
-			null, null, theSubject, parameters,
+			null, null, null, null, theSubject, parameters, null, null,
 			null, null, null, null,
 			requestDetails);
 
@@ -43,7 +44,7 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 		var theSubject = "positive";
 		var parameters = new Parameters().addParameter("Service Request Id", "SleepStudy").addParameter("Service Request Id", "SleepStudy2");
 		var result = myQuestionnairePopulateProvider.prepopulate(new IdType("Questionnaire", "ASLPA1"),
-			null, null, theSubject, parameters,
+			null, null, null, null, theSubject, parameters, null, null,
 			null, null, null, null,
 			requestDetails);
 
@@ -56,7 +57,7 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 		loadBundle("ca/uhn/fhir/cr/r4/Bundle-QuestionnairePackage.json");
 		var requestDetails = setupRequestDetails();
 		var result = myQuestionnairePackageProvider.packageQuestionnaire(null,
-			"http://example.org/sdh/dtr/aslp/Questionnaire/ASLPA1", "true",
+			"http://example.org/sdh/dtr/aslp/Questionnaire/ASLPA1", null, null, new BooleanType("true"),
 			requestDetails);
 
 		assertThat(result).isNotNull();

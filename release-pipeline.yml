@@ -140,7 +140,9 @@ jobs:
       # want to fail fast if there is an issue, and avoid running the tests more than once, so it doesn't take all day.
      timeoutInMinutes: 360
      dependsOn: ['get_release_version', 'get_branch_id']
-     container: maven:3.9-eclipse-temurin-21-jammy
+     container:
+         image: smilecdr/hapi-build:latest
+
      steps:
         - task: Cache@2
           inputs:
@@ -153,7 +155,7 @@ jobs:
              releaseType: stable
         - task: Maven@3
           env:
-             JAVA_HOME_11_X64: /usr/java/openjdk
+             JAVA_HOME_11_X64: /opt/java/openjdk
           displayName: Checkstyle Build
           inputs:
              mavenPomFile: 'hapi-fhir-checkstyle/pom.xml'

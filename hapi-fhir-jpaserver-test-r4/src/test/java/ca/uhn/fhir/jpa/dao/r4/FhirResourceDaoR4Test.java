@@ -80,6 +80,7 @@ import org.hl7.fhir.r4.model.CompartmentDefinition;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Device;
@@ -145,8 +146,25 @@ import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TER
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.apache.commons.lang3.StringUtils.defaultString;
+<<<<<<< HEAD
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+=======
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasItems;
+import static org.hamcrest.Matchers.hasLength;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.matchesPattern;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.startsWith;
+>>>>>>> master
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -230,6 +248,42 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		return retVal;
 	}
 
+	@Test
+	public void testUpdateResource_whenTokenPropertyAssignedTooLargeValue_willTruncateLargeValueOnUpdate(){
+		// given
+		final String modifiedEmailPrefix = "modified";
+		final String originalEmail = RandomStringUtils.randomAlphanumeric(ResourceIndexedSearchParamToken.MAX_LENGTH) + "@acme.corp";
+		final String modifiedEmail = modifiedEmailPrefix + originalEmail;
+
+		// when
+		Patient pt1 = new Patient();
+		pt1.setActive(true);
+		pt1.addName().setFamily("FAM");
+		pt1.addTelecom().setSystem(ContactPoint.ContactPointSystem.EMAIL).setValue(originalEmail);
+
+		myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+
+		pt1.getTelecomFirstRep().setValue(modifiedEmail);
+
+		IIdType id1 = myPatientDao.update(pt1).getId().toUnqualifiedVersionless();
+
+		// then
+		runInTransaction(() -> {
+			List<String> paramValues = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t -> defaultString(t.getSystem()).equals("email"))
+				.map(t -> t.getValue())
+				.collect(Collectors.toList());
+
+			assertThat(paramValues, hasSize(2));
+
+			for (String tokenValue : paramValues) {
+				assertThat(tokenValue, startsWith(modifiedEmailPrefix));
+				assertThat(tokenValue, hasLength(ResourceIndexedSearchParamToken.MAX_LENGTH));
+			}
+		});
+	}
 
 	@Test
 	public void testDeletedResourcesAreReindexed() {

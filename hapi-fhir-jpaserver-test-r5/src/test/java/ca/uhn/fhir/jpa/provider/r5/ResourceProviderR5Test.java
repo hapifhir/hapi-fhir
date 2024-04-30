@@ -4,9 +4,11 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.parser.StrictErrorHandler;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
@@ -33,15 +35,22 @@ import org.hl7.fhir.r5.model.Quantity;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.comparator.Comparators;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+<<<<<<< HEAD
 import static org.assertj.core.api.Assertions.assertThat;
+=======
+import static org.apache.commons.lang3.StringUtils.leftPad;
+>>>>>>> master
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -275,7 +284,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 
 	@Test
 	public void testSearchWithCompositeSort() throws IOException {
-		
+
 		IIdType pid0;
 		IIdType oid1;
 		IIdType oid2;
@@ -291,76 +300,76 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(200));
-			
+
 			oid1 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(300));
-			
+
 			oid2 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(150));
-			
+
 			oid3 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		{
 			Observation obs = new Observation();
 			obs.addIdentifier().setSystem("urn:system").setValue("FOO");
 			obs.getSubject().setReferenceElement(pid0);
-			
+
 			ObservationComponentComponent comp = obs.addComponent();
 			CodeableConcept cc = new CodeableConcept();
-			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");			
-			comp.setCode(cc);			
+			cc.addCoding().setCode("2345-7").setSystem("http://loinc.org");
+			comp.setCode(cc);
 			comp.setValue(new Quantity().setValue(250));
 			oid4 = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless();
-			
+
 			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
-		
+
 		String uri = myServerBase + "/Observation?_sort=combo-code-value-quantity";
 		Bundle found;
-		
+
 		HttpGet get = new HttpGet(uri);
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			found = myFhirCtx.newXmlParser().parseResource(Bundle.class, output);
 		}
-		
+
 		ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
-		
+
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		assertThat(found.getEntry()).hasSize(4);
 		assertThat(list.get(0)).isEqualTo(oid3);
@@ -493,6 +502,66 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		myClient.transaction().withResources(carePlans).execute();
 	}
 
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	public void testHistoryPaging(boolean theTypeLevel) {
+		// Setup
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		List<String> expectedIdentifiers = new ArrayList<>();
+		for (int i = 0; i < 500; i++) {
+			Patient p = new Patient();
+			String identifier = leftPad(Integer.toString(i), 4, '0');
+			expectedIdentifiers.add(identifier);
+			p.addIdentifier().setValue(identifier);
+			bb.addTransactionCreateEntry(p);
+		}
+
+		ourLog.info("Starting transaction with {} entries...", expectedIdentifiers.size());
+		mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		// Test
+		ourLog.info("Loading type history, expecting identifiers from {} to {}...", expectedIdentifiers.get(0), expectedIdentifiers.get(expectedIdentifiers.size() - 1));
+		List<String> actualIdentifiers = new ArrayList<>();
+		Bundle historyBundle;
+		if (theTypeLevel) {
+			historyBundle = myClient.history().onType(Patient.class).returnBundle(Bundle.class).execute();
+		} else {
+			historyBundle = myClient.history().onServer().returnBundle(Bundle.class).execute();
+		}
+        while (true) {
+			historyBundle
+				.getEntry()
+				.stream()
+				.map(t -> (Patient) t.getResource())
+				.map(t -> t.getIdentifierFirstRep().getValue())
+				.forEach(actualIdentifiers::add);
+
+			BundleEntryComponent firstEntry = historyBundle.getEntry().get(0);
+			BundleEntryComponent lastEntry = historyBundle.getEntry().get(historyBundle.getEntry().size() - 1);
+			ourLog.info("""
+                            Loaded history page:
+                             * First ID[ {} ] LastUpdated: {}
+                             * Last  ID[ {} ] LastUpdated: {}""",
+				((Patient) firstEntry.getResource()).getIdentifierFirstRep().getValue(),
+				firstEntry.getResource().getMeta().getLastUpdatedElement().getValueAsString(),
+				((Patient) lastEntry.getResource()).getIdentifierFirstRep().getValue(),
+				lastEntry.getResource().getMeta().getLastUpdatedElement().getValueAsString()
+			);
+
+			if (historyBundle.getLink(Constants.LINK_NEXT) != null) {
+				historyBundle = myClient.loadPage().next(historyBundle).execute();
+			} else {
+				break;
+			}
+		}
+
+		// Verify
+		actualIdentifiers.sort(Comparators.comparable());
+
+		assertEquals(expectedIdentifiers, actualIdentifiers);
+	}
+
+
 	private IIdType createOrganization(String methodName, String s) {
 		Organization o1 = new Organization();
 		o1.setName(methodName + s);
@@ -540,7 +609,7 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 	protected List<IIdType> toUnqualifiedVersionlessIds(Bundle theFound) {
 		List<IIdType> retVal = new ArrayList<>();
 		for (BundleEntryComponent next : theFound.getEntry()) {
-			if (next.getResource()!= null) {
+			if (next.getResource() != null) {
 				retVal.add(next.getResource().getIdElement().toUnqualifiedVersionless());
 			}
 		}

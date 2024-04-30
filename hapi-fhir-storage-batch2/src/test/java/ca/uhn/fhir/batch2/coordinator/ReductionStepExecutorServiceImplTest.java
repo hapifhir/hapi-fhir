@@ -72,7 +72,6 @@ public class ReductionStepExecutorServiceImplTest {
 		mySvc = new ReductionStepExecutorServiceImpl(myJobPersistence, myTransactionService, myJobDefinitionRegistry);
 	}
 
-
 	@Test
 	public void doExecution_reductionWithChunkFailed_marksAllFutureChunksAsFailedButPreviousAsSuccess() {
 		// setup
@@ -84,7 +83,6 @@ public class ReductionStepExecutorServiceImplTest {
 		JobInstance jobInstance = getTestJobInstance();
 		jobInstance.setStatus(StatusEnum.IN_PROGRESS);
 		JobWorkCursor<TestJobParameters, StepInputData, StepOutputData> workCursor = mock(JobWorkCursor.class);
-
 
 		// when
 		when(workCursor.getCurrentStep()).thenReturn((JobDefinitionStep<TestJobParameters, StepInputData, StepOutputData>) createJobDefinition().getSteps().get(1));

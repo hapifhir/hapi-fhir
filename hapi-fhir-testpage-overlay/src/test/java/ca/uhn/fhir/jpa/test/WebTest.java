@@ -31,6 +31,7 @@ import org.htmlunit.WebClient;
 import org.htmlunit.cssparser.parser.CSSErrorHandler;
 import org.htmlunit.html.HtmlAnchor;
 import org.htmlunit.html.HtmlButton;
+import org.htmlunit.html.HtmlElement;
 import org.htmlunit.html.HtmlPage;
 import org.htmlunit.html.HtmlTable;
 import org.htmlunit.html.HtmlTableCell;
@@ -41,6 +42,9 @@ import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
@@ -56,8 +60,19 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
+<<<<<<< HEAD
 import static org.assertj.core.api.Assertions.assertThat;
+=======
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
+>>>>>>> master
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -186,6 +201,47 @@ public class WebTest {
 			.click();
 
 		assertThat(summaryPage.asNormalizedText()).contains("Result Narrative\t\nHELLO WORLD DOCUMENT");
+	}
+
+	private static Stream<Arguments> getButtonMappingPredicates() {
+		Predicate<HtmlElement> readButtonPredicate = t -> t.getAttribute("value").equals("read");
+		Predicate<HtmlElement> summaryButtonPredicate = t -> t.asNormalizedText().equals("$summary");
+		return Stream.of(arguments(readButtonPredicate), arguments(summaryButtonPredicate));
+	}
+
+	@ParameterizedTest
+	@MethodSource(value = "getButtonMappingPredicates")
+	public void testInvokeOperation_withReflectedXssAttack_resultHtmlIsSanitized(
+		Predicate<HtmlElement> theButtonMappingPredicate) throws IOException {
+
+		register5Patients();
+
+		HtmlPage searchResultPage = searchForPatients();
+		HtmlTable controlsTable = searchResultPage.getHtmlElementById("resultControlsTable");
+		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
+		HtmlTableCell controlsCell = controlRows.get(0).getCell(0);
+
+		// find the button
+		HtmlElement summaryButton = controlsCell
+			.getElementsByTagName("button")
+			.stream()
+			.filter(theButtonMappingPredicate)
+			.findFirst()
+			.orElseThrow();
+
+		// alter button attributes to imitate Reflected XSS attack
+		summaryButton.setAttribute("data2", "A0%3Cscript%3Ealert(2)%3C/script%3E");
+		summaryButton.setAttribute("data3", "%24diff%3Cscript%3Ealert(1)%3C/script%3E");
+		HtmlPage summaryPage = summaryButton.click();
+
+		// validate that there is no <script> span in result summary page
+		Optional<HtmlElement> scriptSpans = summaryPage.getHtmlElementById("requestUrlAnchor")
+			.getElementsByTagName("span")
+			.stream()
+			.filter(span -> span.asXml().contains("<script>"))
+			.findAny();
+
+		assertTrue(scriptSpans.isEmpty());
 	}
 
 	@Test

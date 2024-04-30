@@ -18,6 +18,7 @@ import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -50,7 +51,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -151,7 +151,11 @@ public class BulkDataImportProviderTest {
 
 		JobInstanceStartRequest startRequest = myStartRequestCaptor.getValue();
 		ourLog.info("Parameters: {}", startRequest.getParameters());
+<<<<<<< HEAD
 		assertThat(startRequest.getParameters()).startsWith("{\"ndJsonUrls\":[\"http://example.com/Patient\",\"http://example.com/Observation\"],\"maxBatchResourceCount\":500");
+=======
+		assertTrue(startRequest.getParameters().startsWith("{\"ndJsonUrls\":[\"http://example.com/Patient\",\"http://example.com/Observation\"],\"httpBasicCredentials\":\"admin:password\",\"maxBatchResourceCount\":500,\"partitionId\":{\"allPartitions\":false"));
+>>>>>>> master
 	}
 
 	@Test
@@ -396,7 +400,7 @@ public class BulkDataImportProviderTest {
 	private class MyRequestPartitionHelperSvc implements IRequestPartitionHelperSvc {
 		@Nonnull
 		@Override
-		public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails) {
+		public RequestPartitionId determineReadPartitionForRequest(@Nullable RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails) {
 			assert theRequest != null;
 			if (myPartitionName.equals(theRequest.getTenantId())) {
 				return myRequestPartitionId;
@@ -406,7 +410,7 @@ public class BulkDataImportProviderTest {
 		}
 
 		@Override
-		public void validateHasPartitionPermissions(RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
+		public void validateHasPartitionPermissions(@Nonnull RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
 			if (!myPartitionName.equals(theRequest.getTenantId()) && theRequest.getTenantId() != null) {
 				throw new ForbiddenOperationException("User does not have access to resources on the requested partition");
 			}

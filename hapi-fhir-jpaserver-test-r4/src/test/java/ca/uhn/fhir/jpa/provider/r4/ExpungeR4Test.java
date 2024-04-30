@@ -18,13 +18,13 @@ import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
@@ -377,15 +377,19 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), not(empty())));
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
-		runInTransaction(() -> assertThat(myForcedIdDao.findAll(), not(empty())));
 
 		myPatientDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
 			.setExpungeOldVersions(true), null);
 
+<<<<<<< HEAD
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isEmpty());
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isEmpty());
 		runInTransaction(() -> assertThat(myForcedIdDao.findAll()).isEmpty());
+=======
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), empty()));
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), empty()));
+>>>>>>> master
 
 	}
 
@@ -407,7 +411,6 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), not(empty())));
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), not(empty())));
-		runInTransaction(() -> assertThat(myForcedIdDao.findAll(), not(empty())));
 
 		// Test
 		myCaptureQueriesListener.clear();
@@ -416,6 +419,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 			.setExpungeOldVersions(true), null);
 
 		// Verify
+<<<<<<< HEAD
 		assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread()).isEqualTo(8);
 		assertThat(myCaptureQueriesListener.countUpdateQueriesForCurrentThread()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(0);
@@ -424,6 +428,15 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isEmpty());
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isEmpty());
 		runInTransaction(() -> assertThat(myForcedIdDao.findAll()).isEmpty());
+=======
+		assertEquals(8, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(8, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), empty()));
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), empty()));
+>>>>>>> master
 
 	}
 
@@ -745,9 +758,14 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		myObservationDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
 			.setExpungeOldVersions(true), null);
+<<<<<<< HEAD
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isEmpty());
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isEmpty());
 		runInTransaction(() -> assertThat(myForcedIdDao.findAll()).isEmpty());
+=======
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), empty()));
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), empty()));
+>>>>>>> master
 
 		// Create again with the same forced ID
 		p = new Patient();
@@ -784,9 +802,14 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		myObservationDao.expunge(new ExpungeOptions()
 			.setExpungeDeletedResources(true)
 			.setExpungeOldVersions(true), null);
+<<<<<<< HEAD
 		runInTransaction(() -> assertThat(myResourceTableDao.findAll()).isEmpty());
 		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll()).isEmpty());
 		runInTransaction(() -> assertThat(myForcedIdDao.findAll()).isEmpty());
+=======
+		runInTransaction(() -> assertThat(myResourceTableDao.findAll(), empty()));
+		runInTransaction(() -> assertThat(myResourceHistoryTableDao.findAll(), empty()));
+>>>>>>> master
 
 	}
 
@@ -1051,6 +1074,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 	}
 
 	private void verifyCodeSystemsAndChildrenExpunged() {
+<<<<<<< HEAD
 		assertThat(myTermCodeSystemVersionDao.findAll()).isEmpty();
 		assertThat(myTermConceptDesignationDao.findAll()).isEmpty();
 		assertThat(myTermConceptPropertyDao.findAll()).isEmpty();
@@ -1059,5 +1083,14 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 		assertThat(myResourceTableDao.findAll()).isEmpty();
 		assertThat(myResourceHistoryTableDao.findAll()).isEmpty();
 		assertThat(myForcedIdDao.findAll()).isEmpty();
+=======
+		assertThat(myTermCodeSystemVersionDao.findAll(), empty());
+		assertThat(myTermConceptDesignationDao.findAll(), empty());
+		assertThat(myTermConceptPropertyDao.findAll(), empty());
+		assertThat(myTermConceptParentChildLinkDao.findAll(), empty());
+		assertThat(myTermConceptDao.findAll(), empty());
+		assertThat(myResourceTableDao.findAll(), empty());
+		assertThat(myResourceHistoryTableDao.findAll(), empty());
+>>>>>>> master
 	}
 }

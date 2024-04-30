@@ -81,12 +81,21 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 
 		// Validate
 
+<<<<<<< HEAD
 		assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread()).isEqualTo(7);
 		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).as(myCaptureQueriesListener.getInsertQueriesForCurrentThread().stream().map(t -> t.getSql(true, false)).collect(Collectors.joining("\n"))).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countUpdateQueriesForCurrentThread()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countDeleteQueriesForCurrentThread()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
 		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
+=======
+		assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueriesForCurrentThread(), myCaptureQueriesListener.getInsertQueriesForCurrentThread().stream().map(t->t.getSql(true, false)).collect(Collectors.joining("\n")));
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+>>>>>>> master
 
 		patient = myPatientDao.read(new IdType("Patient/A"));
 		assertThat(patient.getActive()).isTrue();
@@ -142,9 +151,15 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		// Validate
 
 		if (partitionEnabled) {
+<<<<<<< HEAD
 			assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread()).isEqualTo(8);
 		} else {
 			assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread()).isEqualTo(7);
+=======
+			assertEquals(7, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		} else {
+			assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+>>>>>>> master
 		}
 		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(2);
 		assertThat(myCaptureQueriesListener.countUpdateQueriesForCurrentThread()).isEqualTo(4);
@@ -187,11 +202,19 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, false),
 			either(containsString("rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='B' and rt1_0.PARTITION_ID is null or rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A' and rt1_0.PARTITION_ID is null"))
 				.or(containsString("rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='A' and rt1_0.PARTITION_ID is null or rt1_0.RES_TYPE='Patient' and rt1_0.FHIR_ID='B' and rt1_0.PARTITION_ID is null")));
+<<<<<<< HEAD
 		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(52);
 		assertThat(myCaptureQueriesListener.countUpdateQueriesForCurrentThread()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countDeleteQueriesForCurrentThread()).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
 		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
+=======
+		assertEquals(50, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+>>>>>>> master
 
 
 		patient = myPatientDao.read(new IdType("Patient/A"));

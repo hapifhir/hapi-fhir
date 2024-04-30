@@ -7,6 +7,9 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -32,6 +35,7 @@ import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
@@ -67,9 +71,21 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
+<<<<<<< HEAD
 import static org.assertj.core.api.Assertions.assertThat;
+=======
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.nullValue;
+>>>>>>> master
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -100,6 +116,10 @@ public class BulkDataExportProviderTest {
 	IFhirResourceDao myFhirResourceDao;
 	@Mock
 	IJobCoordinator myJobCoordinator;
+
+	@Mock
+	private IInterceptorBroadcaster myInterceptorBroadcaster;
+
 	@InjectMocks
 	private BulkDataExportProvider myProvider;
 	@RegisterExtension
@@ -1024,6 +1044,53 @@ public class BulkDataExportProviderTest {
 		}
 	}
 
+
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"$export",
+		"Patient/$export",
+		"Patient/<id>/$export",
+		"Group/<id>/$export"
+	})
+	public void testBulkDataExport_hookOrder_isMaintained(String theUrl) throws IOException {
+		// setup
+		String url = String.format(
+			"http://localhost:%s/%s",
+			myServer.getPort(),
+			theUrl.replaceAll("<id>", "1"));
+		AtomicBoolean preInitiateCalled = new AtomicBoolean(false);
+		AtomicBoolean initiateCalled = new AtomicBoolean(false);
+
+		// when
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.STORAGE_PRE_INITIATE_BULK_EXPORT), any(HookParams.class)))
+			.thenAnswer((args) -> {
+				assertFalse(initiateCalled.get());
+				assertFalse(preInitiateCalled.getAndSet(true));
+				return true;
+			});
+		when(myInterceptorBroadcaster.callHooks(eq(Pointcut.STORAGE_INITIATE_BULK_EXPORT), any(HookParams.class)))
+			.thenAnswer((args) -> {
+				assertTrue(preInitiateCalled.get());
+				assertFalse(initiateCalled.getAndSet(true));
+				return true;
+			});
+		when(myJobCoordinator.startInstance(isNotNull(), any()))
+			.thenReturn(createJobStartResponse());
+
+		// test
+		HttpGet get = new HttpGet(url);
+		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+		try (CloseableHttpResponse response = myClient.execute(get)) {
+			ourLog.info("Response: {}", response.toString());
+			assertEquals(202, response.getStatusLine().getStatusCode());
+		}
+
+		// verify
+		assertTrue(preInitiateCalled.get());
+		assertTrue(initiateCalled.get());
+	}
+
 	@Test
 	public void testGetBulkExport_outputFormat_FhirNdJson_inHeader() throws IOException {
 		// when
@@ -1219,7 +1286,6 @@ public class BulkDataExportProviderTest {
 			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(403);
 			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Forbidden");
 		}
-
 	}
 
 	static Stream<Arguments> paramsProvider() {
@@ -1231,7 +1297,7 @@ public class BulkDataExportProviderTest {
 
 	private class MyRequestPartitionHelperSvc extends RequestPartitionHelperSvc {
 		@Override
-		public @NotNull RequestPartitionId determineReadPartitionForRequest(RequestDetails theRequest, ReadPartitionIdRequestDetails theDetails) {
+		public @NotNull RequestPartitionId determineReadPartitionForRequest(@Nonnull RequestDetails theRequest, @Nonnull ReadPartitionIdRequestDetails theDetails) {
 			assert theRequest != null;
 			if (myPartitionName.equals(theRequest.getTenantId())) {
 				return myRequestPartitionId;
@@ -1241,13 +1307,11 @@ public class BulkDataExportProviderTest {
 		}
 
 		@Override
-		public void validateHasPartitionPermissions(RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
+		public void validateHasPartitionPermissions(@Nonnull RequestDetails theRequest, String theResourceType, RequestPartitionId theRequestPartitionId) {
 			if (!myPartitionName.equals(theRequest.getTenantId()) && theRequest.getTenantId() != null) {
 				throw new ForbiddenOperationException("User does not have access to resources on the requested partition");
 			}
 		}
 
 	}
-
-
 }

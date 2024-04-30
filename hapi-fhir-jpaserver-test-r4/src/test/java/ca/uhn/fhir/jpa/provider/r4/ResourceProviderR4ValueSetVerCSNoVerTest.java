@@ -166,7 +166,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		myLocalVs.setUrl(URL_MY_VALUE_SET);
 		ConceptSetComponent include = myLocalVs.getCompose().addInclude();
 		include.setSystem(codeSystem.getUrl());
-		include.addFilter().setProperty("concept").setOp(FilterOperator.ISA).setValue("ParentA");
+		include.addFilter().setProperty("concept").setOp(FilterOperator.DESCENDENTOF).setValue("ParentA");
 		myLocalValueSetId = myValueSetDao.create(myLocalVs, mySrd).getId().toUnqualifiedVersionless();
 	}
 

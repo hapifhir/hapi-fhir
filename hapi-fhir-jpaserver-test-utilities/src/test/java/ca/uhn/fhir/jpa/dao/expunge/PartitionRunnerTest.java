@@ -19,7 +19,14 @@ import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
+<<<<<<< HEAD
 import static org.hamcrest.Matchers.isOneOf;
+=======
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.oneOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+>>>>>>> master
 
 public class PartitionRunnerTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionRunnerTest.class);
@@ -97,12 +104,21 @@ public class PartitionRunnerTest {
 		getPartitionRunner(5).runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
 		PartitionCall partitionCall1 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
+<<<<<<< HEAD
 		assertThat(partitionCall1.threadName, isOneOf(TEST_THREADNAME_1, TEST_THREADNAME_2));
 		assertThat(partitionCall1.size).isEqualTo(5);
 		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
 		assertThat(partitionCall2.threadName, isOneOf(TEST_THREADNAME_1, TEST_THREADNAME_2));
 		assertThat(partitionCall2.size).isEqualTo(5);
 		assertThat(partitionCall2.threadName).isNotEqualTo(partitionCall1.threadName);
+=======
+		assertThat(partitionCall1.threadName, is(oneOf(TEST_THREADNAME_1, TEST_THREADNAME_2)));
+		assertEquals(5, partitionCall1.size);
+		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
+		assertThat(partitionCall2.threadName, is(oneOf(TEST_THREADNAME_1, TEST_THREADNAME_2)));
+		assertEquals(5, partitionCall2.size);
+		assertNotEquals(partitionCall1.threadName, partitionCall2.threadName);
+>>>>>>> master
 	}
 
 	@Test
@@ -118,12 +134,45 @@ public class PartitionRunnerTest {
 		getPartitionRunner(5).runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
 		PartitionCall partitionCall1 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
+<<<<<<< HEAD
 		assertThat(partitionCall1.threadName, isOneOf(TEST_THREADNAME_1, TEST_THREADNAME_2));
 		assertThat(nums.remove(partitionCall1.size)).isEqualTo(true);
 		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
 		assertThat(partitionCall2.threadName, isOneOf(TEST_THREADNAME_1, TEST_THREADNAME_2));
 		assertThat(nums.remove(partitionCall2.size)).isEqualTo(true);
 		assertThat(partitionCall2.threadName).isNotEqualTo(partitionCall1.threadName);
+=======
+		assertThat(partitionCall1.threadName, is(oneOf(TEST_THREADNAME_1, TEST_THREADNAME_2)));
+		assertEquals(true, nums.remove(partitionCall1.size));
+		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
+		assertThat(partitionCall2.threadName, is(oneOf(TEST_THREADNAME_1, TEST_THREADNAME_2)));
+		assertEquals(true, nums.remove(partitionCall2.size));
+		assertNotEquals(partitionCall1.threadName, partitionCall2.threadName);
+>>>>>>> master
+	}
+
+
+
+	/**
+	 * See #5636 $expunge operation ignoring ExpungeThreadCount setting in certain cases
+	 */
+	@Test
+	public void testExpunge_withTasksSizeBiggerThanExecutorQueue_usesConfiguredNumberOfThreads() throws InterruptedException {
+		// setup
+		List<IResourcePersistentId> resourceIds = buildPidList(2500);
+		Consumer<List<IResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
+		// with batch size = 2 we expect 2500/2 runnableTasks to be created
+		myLatch.setExpectedCount(1250);
+
+		// execute
+		getPartitionRunner(2, 2).runInPartitionedThreads(resourceIds, partitionConsumer);
+		List<HookParams> calls = myLatch.awaitExpected();
+
+		// validate - only two threads should be used for execution
+		for (int i = 0; i < 1250; i++) {
+			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, i);
+			assertThat(partitionCall.threadName, is(oneOf(TEST_THREADNAME_1, TEST_THREADNAME_2)));
+		}
 	}
 
 	@Test

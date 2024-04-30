@@ -843,6 +843,11 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 
 			RuntimeSearchParam param = null;
 
+			if (param == null) {
+				// do we have a composition param defined for the whole chain?
+				param = mySearchParamRegistry.getActiveSearchParam(myResourceName, theSort.getParamName());
+			}
+
 			/*
 			 * If we have a sort like _sort=subject.name and we  have an
 			 * uplifted refchain for that combination we can do it more efficiently
@@ -851,7 +856,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			 * to "name" in this example) so that we know what datatype it is.
 			 */
 			String paramName = theSort.getParamName();
-			if (myStorageSettings.isIndexOnUpliftedRefchains()) {
+			if (param == null && myStorageSettings.isIndexOnUpliftedRefchains()) {
 				String[] chains = StringUtils.split(paramName, '.');
 				if (chains.length == 2) {
 
@@ -932,7 +937,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					break;
 				case REFERENCE:
 					theQueryStack.addSortOnResourceLink(
-							myResourceName, referenceTargetType, paramName, chainName, ascending);
+							myResourceName, referenceTargetType, paramName, chainName, ascending, theParams);
 					break;
 				case TOKEN:
 					theQueryStack.addSortOnToken(myResourceName, paramName, ascending);

@@ -118,7 +118,7 @@ public class BinaryAccessProvider {
 
 			String blobId = attachmentId.get();
 
-			StoredDetails blobDetails = myBinaryStorageSvc.fetchBlobDetails(theResourceId, blobId);
+			StoredDetails blobDetails = myBinaryStorageSvc.fetchBinaryContentDetails(theResourceId, blobId);
 			if (blobDetails == null) {
 				String msg = myCtx.getLocalizer().getMessage(BinaryAccessProvider.class, "unknownBlobId");
 				throw new InvalidRequestException(Msg.code(1331) + msg);
@@ -138,7 +138,7 @@ public class BinaryAccessProvider {
 			theServletResponse.addHeader(
 					Constants.HEADER_LAST_MODIFIED, DateUtils.formatDate(blobDetails.getPublished()));
 
-			myBinaryStorageSvc.writeBlob(theResourceId, blobId, theServletResponse.getOutputStream());
+			myBinaryStorageSvc.writeBinaryContent(theResourceId, blobId, theServletResponse.getOutputStream());
 			theServletResponse.getOutputStream().close();
 
 		} else {
@@ -212,11 +212,11 @@ public class BinaryAccessProvider {
 						Msg.code(2073)
 								+ "Input stream is empty! Ensure that you are uploading data, and if so, ensure that no interceptors are in use that may be consuming the input stream");
 			}
-			if (myBinaryStorageSvc.shouldStoreBlob(size, theResourceId, requestContentType)) {
-				StoredDetails storedDetails = myBinaryStorageSvc.storeBlob(
+			if (myBinaryStorageSvc.shouldStoreBinaryContent(size, theResourceId, requestContentType)) {
+				StoredDetails storedDetails = myBinaryStorageSvc.storeBinaryContent(
 						theResourceId, null, requestContentType, new ByteArrayInputStream(bytes), theRequestDetails);
 				size = storedDetails.getBytes();
-				blobId = storedDetails.getBlobId();
+				blobId = storedDetails.getBinaryContentId();
 				Validate.notBlank(blobId, "BinaryStorageSvc returned a null blob ID"); // should not happen
 				Validate.isTrue(size == theServletRequest.getContentLength(), "Unexpected stored size"); // Sanity check
 			}

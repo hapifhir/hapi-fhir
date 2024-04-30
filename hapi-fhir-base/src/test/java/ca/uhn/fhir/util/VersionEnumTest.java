@@ -27,7 +27,7 @@ public class VersionEnumTest {
 		int minor = Integer.parseInt(parts[1]);
 		int patch = Integer.parseInt(parts[2]);
 
-		if (major >= 6 && minor >= 3) {
+		if ((major == 6 && minor >= 3) || (major >= 7)) {
 			if (minor % 2 == 1) {
 				patch = 0;
 			}

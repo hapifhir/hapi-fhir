@@ -5,6 +5,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
@@ -61,7 +62,7 @@ public class SubscriptionValidatingInterceptorTest {
 	@BeforeEach
 	public void before() {
 		mySvc = new SubscriptionValidatingInterceptor();
-		mySubscriptionCanonicalizer = spy(new SubscriptionCanonicalizer(myCtx));
+		mySubscriptionCanonicalizer = spy(new SubscriptionCanonicalizer(myCtx, new StorageSettings()));
 		mySvc.setSubscriptionCanonicalizerForUnitTest(mySubscriptionCanonicalizer);
 		mySvc.setDaoRegistryForUnitTest(myDaoRegistry);
 		mySvc.setSubscriptionStrategyEvaluatorForUnitTest(mySubscriptionStrategyEvaluator);
