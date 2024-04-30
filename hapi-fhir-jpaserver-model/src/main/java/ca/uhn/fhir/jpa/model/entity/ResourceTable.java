@@ -369,9 +369,11 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	@OptimisticLock(excluded = true)
 	private Collection<SearchParamPresentEntity> mySearchParamPresents;
 
-	// LUKETODO:   HAPI-0389: Failed to call access method: org.springframework.orm.jpa.JpaSystemException: failed to lazily initialize a collection of role: ca.uhn.fhir.jpa.model.entity.ResourceTable.myTags: could not initialize proxy - no Session
+	// LUKETODO:   HAPI-0389: Failed to call access method: org.springframework.orm.jpa.JpaSystemException: failed to
+	// lazily initialize a collection of role: ca.uhn.fhir.jpa.model.entity.ResourceTable.myTags: could not initialize
+	// proxy - no Session
 	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-//	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+	//	@OneToMany(mappedBy = "myResource", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
 	@OptimisticLock(excluded = true)
 	private Set<ResourceTag> myTags;
 
