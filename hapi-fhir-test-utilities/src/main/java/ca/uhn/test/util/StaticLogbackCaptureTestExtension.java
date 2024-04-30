@@ -20,6 +20,7 @@
 package ca.uhn.test.util;
 
 import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.filter.ThresholdFilter;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import jakarta.annotation.Nonnull;
@@ -31,6 +32,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static org.slf4j.Logger.ROOT_LOGGER_NAME;
 
 /**
  * This is a static wrapper around LogbackCaptureTestExtension for use in IT tests when you need to assert on App
@@ -48,9 +51,21 @@ public class StaticLogbackCaptureTestExtension implements BeforeAllCallback, Aft
 		myLogbackCaptureTestExtension = new LogbackCaptureTestExtension();
 	}
 
+	public static StaticLogbackCaptureTestExtension withThreshold(Level theLevel) {
+		LogbackCaptureTestExtension logbackCaptureTestExtension = new LogbackCaptureTestExtension();
+		logbackCaptureTestExtension.setUp(theLevel);
+		ThresholdFilter thresholdFilter = new ThresholdFilter();
+		thresholdFilter.setLevel(theLevel.levelStr);
+		logbackCaptureTestExtension.getAppender().addFilter(thresholdFilter);
+
+		return new StaticLogbackCaptureTestExtension(logbackCaptureTestExtension);
+	}
+
 	@Override
 	public void beforeAll(ExtensionContext theExtensionContext) throws Exception {
-		myLogbackCaptureTestExtension.beforeEach(theExtensionContext);
+		if (myLogbackCaptureTestExtension.getAppender() == null) {
+			myLogbackCaptureTestExtension.beforeEach(theExtensionContext);
+		}
 	}
 
 	@Override
