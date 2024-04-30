@@ -46,6 +46,7 @@ import ca.uhn.fhir.test.utilities.ProxyUtil;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nonnull;
 import org.hamcrest.CoreMatchers;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -60,6 +61,7 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Group;
 import org.hl7.fhir.r4.model.IdType;
@@ -72,6 +74,7 @@ import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Provenance;
 import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.ServiceRequest;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.Subscription;
@@ -176,6 +179,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myStorageSettings.setRespectVersionsForSearchIncludes(new JpaStorageSettings().isRespectVersionsForSearchIncludes());
 		myStorageSettings.setTagStorageMode(new JpaStorageSettings().getTagStorageMode());
 		myStorageSettings.setExpungeEnabled(false);
+		myStorageSettings.setUniqueIndexesEnabled(new JpaStorageSettings().isUniqueIndexesEnabled());
 
 		myFhirContext.getParserOptions().setStripVersionsFromReferences(true);
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
@@ -1068,6 +1072,114 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertEquals(10, outcome.getRecordsProcessed());
 
 	}
+
+	@Test
+	public void testReindexJob_ComboParamIndexesInUse() {
+        myStorageSettings.setUniqueIndexesEnabled(true);
+
+        {
+            SearchParameter sp = new SearchParameter();
+            sp.setId("SearchParameter/patient-identifier");
+            sp.setCode("identifier");
+            sp.setExpression("Patient.identifier");
+            sp.setType(Enumerations.SearchParamType.TOKEN);
+            sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+            sp.addBase("Patient");
+            mySearchParameterDao.update(sp);
+
+            sp = new SearchParameter();
+            sp.setId("SearchParameter/patient-uniq-identifier");
+            sp.setCode("patient-uniq-identifier");
+            sp.setExpression("Patient");
+            sp.setType(Enumerations.SearchParamType.COMPOSITE);
+            sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+            sp.addBase("Patient");
+            sp.addComponent()
+                    .setExpression("Patient")
+                    .setDefinition("/SearchParameter/patient-identifier");
+            sp.addExtension()
+                    .setUrl(HapiExtensions.EXT_SP_UNIQUE)
+                    .setValue(new BooleanType(true));
+            mySearchParameterDao.update(sp);
+        }
+        {
+            SearchParameter sp = new SearchParameter();
+            sp.setId("SearchParameter/patient-family");
+            sp.setCode("family");
+            sp.setExpression("Patient.name.family");
+            sp.setType(Enumerations.SearchParamType.STRING);
+            sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+            sp.addBase("Patient");
+            mySearchParameterDao.update(sp);
+
+            sp = new SearchParameter();
+            sp.setId("SearchParameter/patient-gender");
+            sp.setCode("gender");
+            sp.setExpression("Patient.gender");
+            sp.setType(Enumerations.SearchParamType.TOKEN);
+            sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+            sp.addBase("Patient");
+            mySearchParameterDao.update(sp);
+
+            sp = new SearchParameter();
+            sp.setId("SearchParameter/patient-nonuniq-family-gender");
+            sp.setCode("patient-nonuniq-family-gender");
+            sp.setExpression("Patient");
+            sp.setType(Enumerations.SearchParamType.COMPOSITE);
+            sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+            sp.addBase("Patient");
+            sp.addComponent()
+                    .setExpression("Patient")
+                    .setDefinition("/SearchParameter/patient-family");
+            sp.addComponent()
+                    .setExpression("Patient")
+                    .setDefinition("/SearchParameter/patient-gender");
+            sp.addExtension()
+                    .setUrl(HapiExtensions.EXT_SP_UNIQUE)
+                    .setValue(new BooleanType(false));
+            mySearchParameterDao.update(sp);
+        }
+        mySearchParamRegistry.forceRefresh();
+
+        BundleBuilder bb = new BundleBuilder(myFhirContext);
+        for (int i = 0; i < 20; i++) {
+            Patient p = new Patient();
+            p.addIdentifier().setSystem("http://foo").setValue("ident" + i);
+            p.addName().setFamily("Family" + i);
+            p.setGender(Enumerations.AdministrativeGender.MALE);
+            bb.addTransactionCreateEntry(p);
+        }
+		Bundle transactionResonse = mySystemDao.transaction(mySrd, bb.getBundleTyped());
+		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
+		transactionResonse
+			.getEntry()
+			.stream()
+			.map(t->new IdType(t.getResponse().getLocation()))
+			.forEach(t->data.addTypedPid("Patient", t.getIdPartAsLong()));
+
+        runInTransaction(() -> {
+            assertEquals(25L, myResourceTableDao.count());
+            assertEquals(20L, myResourceIndexedCompositeStringUniqueDao.count());
+            assertEquals(20L, myResourceIndexedComboTokensNonUniqueDao.count());
+        });
+
+        ReindexJobParameters params = new ReindexJobParameters()
+                .setOptimizeStorage(ReindexParameters.OptimizeStorageModeEnum.NONE)
+                .setReindexSearchParameters(ReindexParameters.ReindexSearchParametersEnum.ALL)
+                .setOptimisticLock(false);
+
+        // execute
+        myCaptureQueriesListener.clear();
+		RunOutcome outcome = myReindexStep.doReindex(data, mock(IJobDataSink.class), "123", "456", params);
+		assertEquals(20, outcome.getRecordsProcessed());
+
+        // validate
+        assertEquals(5, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+        assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
+        assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
+        assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
+
+    }
 
 
 	public void assertNoPartitionSelectors() {

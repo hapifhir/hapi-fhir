@@ -224,6 +224,9 @@ public abstract class BaseHapiFhirSystemDao<T extends IBaseBundle, MT> extends B
 							BaseHasResource::isHasTags,
 							entityChunk);
 
+					prefetchByField("comboStringUnique", "myParamsComboStringUnique", ResourceTable::isParamsComboStringUniquePresent, entityChunk);
+					prefetchByField("comboTokenNonUnique", "myParamsComboTokensNonUnique", ResourceTable::isParamsComboTokensNonUniquePresent, entityChunk);
+
 					if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.ENABLED) {
 						prefetchByField("searchParamPresence", "mySearchParamPresents", r -> true, entityChunk);
 					}
