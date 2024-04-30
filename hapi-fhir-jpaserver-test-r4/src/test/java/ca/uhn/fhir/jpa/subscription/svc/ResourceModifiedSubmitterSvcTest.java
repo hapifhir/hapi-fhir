@@ -3,14 +3,13 @@ package ca.uhn.fhir.jpa.subscription.svc;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
 import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
-import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
@@ -31,7 +30,6 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -42,7 +40,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,7 +50,7 @@ public class ResourceModifiedSubmitterSvcTest {
 	private final ch.qos.logback.classic.Logger ourLogger = (Logger) LoggerFactory.getLogger(ResourceModifiedSubmitterSvc.class);
 
 	@Mock
-	StorageSettings myStorageSettings;
+	SubscriptionSettings mySubscriptionSettings;
 	@Mock
 	SubscriptionChannelFactory mySubscriptionChannelFactory;
 	@Mock
@@ -72,12 +69,12 @@ public class ResourceModifiedSubmitterSvcTest {
 	@BeforeEach
 	public void beforeEach(){
 		myCapturingTransactionStatus = new SimpleTransactionStatus();
-		lenient().when(myStorageSettings.hasSupportedSubscriptionTypes()).thenReturn(true);
+		lenient().when(mySubscriptionSettings.hasSupportedSubscriptionTypes()).thenReturn(true);
 		lenient().when(mySubscriptionChannelFactory.newMatchingSendingChannel(anyString(), any())).thenReturn(myChannelProducer);
 
 		IHapiTransactionService hapiTransactionService = new MockHapiTransactionService(myCapturingTransactionStatus);
 		myResourceModifiedSubmitterSvc = new ResourceModifiedSubmitterSvc(
-			myStorageSettings,
+			mySubscriptionSettings,
 			mySubscriptionChannelFactory,
 			myResourceModifiedMessagePersistenceSvc,
 			hapiTransactionService);
@@ -89,7 +86,7 @@ public class ResourceModifiedSubmitterSvcTest {
 	public void testMethodStartIfNeeded_withQualifySubscriptionMatchingChannelNameProperty_mayQualifyChannelName(boolean theIsQualifySubMatchingChannelName){
 		// given
 		boolean expectedResult = theIsQualifySubMatchingChannelName;
-		when(myStorageSettings.isQualifySubscriptionMatchingChannelName()).thenReturn(theIsQualifySubMatchingChannelName);
+		when(mySubscriptionSettings.isQualifySubscriptionMatchingChannelName()).thenReturn(theIsQualifySubMatchingChannelName);
 
 		// when
 		myResourceModifiedSubmitterSvc.startIfNeeded();

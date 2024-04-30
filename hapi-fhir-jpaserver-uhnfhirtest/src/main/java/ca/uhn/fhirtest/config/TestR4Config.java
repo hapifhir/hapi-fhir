@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.model.dialect.HapiFhirH2Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
 import ca.uhn.fhir.jpa.search.HapiHSearchAnalysisConfigurers;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.util.CurrentThreadCaptureQueriesListener;
 import ca.uhn.fhir.jpa.validation.ValidationSettings;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
@@ -55,12 +56,18 @@ public class TestR4Config {
 	private String myFhirLuceneLocation = System.getProperty(FHIR_LUCENE_LOCATION_R4);
 
 	@Bean
-	public JpaStorageSettings storageSettings() {
-		JpaStorageSettings retVal = new JpaStorageSettings();
+	public SubscriptionSettings subscriptionSettings() {
+		SubscriptionSettings retVal = new SubscriptionSettings();
 		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.EMAIL);
 		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.RESTHOOK);
 		retVal.addSupportedSubscriptionType(Subscription.SubscriptionChannelType.WEBSOCKET);
 		retVal.setWebsocketContextPath("/websocketR4");
+		return retVal;
+	}
+
+	@Bean
+	public JpaStorageSettings storageSettings() {
+		JpaStorageSettings retVal = new JpaStorageSettings();
 		retVal.setAllowContainsSearches(true);
 		retVal.setAllowMultipleDelete(true);
 		retVal.setAllowInlineMatchUrlReferences(false);

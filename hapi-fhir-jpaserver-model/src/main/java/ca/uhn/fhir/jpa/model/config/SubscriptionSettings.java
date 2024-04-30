@@ -1,6 +1,6 @@
 /*-
  * #%L
- * HAPI FHIR - Clinical Reasoning
+ * HAPI FHIR Subscription Server
  * %%
  * Copyright (C) 2014 - 2024 Smile CDR, Inc.
  * %%
@@ -17,12 +17,6 @@
  * limitations under the License.
  * #L%
  */
-package ca.uhn.fhir.cr.r4;
+package ca.uhn.fhir.jpa.model.config;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import org.opencds.cqf.fhir.cr.measure.r4.R4DataRequirementsService;
-
-@FunctionalInterface
-public interface IDataRequirementsServiceFactory {
-	R4DataRequirementsService create(RequestDetails theRequestDetails);
-}
+public class SubscriptionSettings extends BaseSubscriptionSettings {}

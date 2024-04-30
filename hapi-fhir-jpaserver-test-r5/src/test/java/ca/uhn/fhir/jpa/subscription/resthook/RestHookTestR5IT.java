@@ -535,7 +535,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 	@Test
 	public void testRestHookSubscriptionApplicationJsonDatabase() throws Exception {
 		// Same test as above, but now run it using database matching
-		myStorageSettings.setEnableInMemorySubscriptionMatching(false);
+		mySubscriptionSettings.setEnableInMemorySubscriptionMatching(false);
 		testRestHookSubscriptionApplicationJson();
 	}
 

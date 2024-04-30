@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyE
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.subscription.SubscriptionConstants;
@@ -55,7 +56,7 @@ public class SubscriptionActivatingSubscriberTest {
 	private SubscriptionCanonicalizer mySubscriptionCanonicallizer;
 
 	@Mock
-	private JpaStorageSettings myStorageSettings;
+	private SubscriptionSettings myStorageSettings;
 
 	@Mock
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;

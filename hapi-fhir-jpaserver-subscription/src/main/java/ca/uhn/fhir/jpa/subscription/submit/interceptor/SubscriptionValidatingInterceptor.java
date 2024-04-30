@@ -26,10 +26,9 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
+import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
@@ -69,7 +68,7 @@ public class SubscriptionValidatingInterceptor {
 	private DaoRegistry myDaoRegistry;
 
 	@Autowired
-	private StorageSettings myStorageSettings;
+	private SubscriptionSettings mySubscriptionSettings;
 
 	@Autowired
 	private SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
@@ -177,7 +176,7 @@ public class SubscriptionValidatingInterceptor {
 			try {
 				SubscriptionMatchingStrategy strategy = mySubscriptionStrategyEvaluator.determineStrategy(subscription);
 				if (!(SubscriptionMatchingStrategy.IN_MEMORY == strategy)
-						&& myStorageSettings.isOnlyAllowInMemorySubscriptions()) {
+						&& mySubscriptionSettings.isOnlyAllowInMemorySubscriptions()) {
 					throw new InvalidRequestException(
 							Msg.code(2367)
 									+ "This server is configured to only allow in-memory subscriptions. This subscription's criteria cannot be evaluated in-memory.");
@@ -206,7 +205,7 @@ public class SubscriptionValidatingInterceptor {
 		// If the subscription has the cross partition tag
 		if (SubscriptionUtil.isCrossPartition(theSubscription)
 				&& !(theRequestDetails instanceof SystemRequestDetails)) {
-			if (!myStorageSettings.isCrossPartitionSubscriptionEnabled()) {
+			if (!mySubscriptionSettings.isCrossPartitionSubscriptionEnabled()) {
 				throw new UnprocessableEntityException(
 						Msg.code(2009) + "Cross partition subscription is not enabled on this server");
 			}
@@ -318,8 +317,8 @@ public class SubscriptionValidatingInterceptor {
 	}
 
 	@VisibleForTesting
-	public void setStorageSettingsForUnitTest(JpaStorageSettings theStorageSettings) {
-		myStorageSettings = theStorageSettings;
+	public void setSubscriptionSettingsForUnitTest(SubscriptionSettings theSubscriptionSettings) {
+		mySubscriptionSettings = theSubscriptionSettings;
 	}
 
 	@VisibleForTesting
