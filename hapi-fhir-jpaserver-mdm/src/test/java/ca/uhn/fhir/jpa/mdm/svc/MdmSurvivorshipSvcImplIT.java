@@ -62,7 +62,7 @@ class MdmSurvivorshipSvcImplIT extends BaseMdmR4Test {
 	}
 
 	@Test
-	public void testWithPatientsCreatedFromPutWithNonNumericIds() {
+	public void matchingPatientsWith_NON_Numeric_Ids_matches_doesNotThrow_NumberFormatException() {
 		final Patient frankPatient1 = buildFrankPatient();
 		frankPatient1.setId("patA");
 		myPatientDao.update(frankPatient1, new SystemRequestDetails());
@@ -75,7 +75,6 @@ class MdmSurvivorshipSvcImplIT extends BaseMdmR4Test {
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, frankPatient1, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, frankPatient2, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 
-		// We're testing that this method does NOT throw a NumberFormatException on the non-numeric FHIR IDs as it did previously
 		myMdmSurvivorshipService.rebuildGoldenResourceWithSurvivorshipRules(goldenPatient, new MdmTransactionContext(MdmTransactionContext.OperationType.UPDATE_LINK));
 	}
 }

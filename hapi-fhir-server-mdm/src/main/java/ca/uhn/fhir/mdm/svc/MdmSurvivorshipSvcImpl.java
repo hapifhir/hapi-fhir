@@ -35,6 +35,7 @@ import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.util.TerserUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -44,7 +45,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
-	private static final Pattern IS_NUMERIC = Pattern.compile("^\\d+$");
 	private static final Pattern IS_UUID =
 			Pattern.compile("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
 
@@ -137,12 +137,13 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 		return linksQuery.get().map(link -> {
 			String sourceId = link.getSourceId();
 
+			// +1 because of "/" in id: "ResourceType/Id"
 			final String sourceIdUnqualified = sourceId.substring(resourceType.length() + 1);
+
 			// myMdmLinkQuerySvc.queryLinks populates sourceId with the FHIR_ID, not the RES_ID, so if we don't
 			// add this conditional logic, on JPA, myIIdHelperService.newPidFromStringIdAndResourceName will fail with
 			// NumberFormatException
 			if (isNumericOrUuid(sourceIdUnqualified)) {
-				// +1 because of "/" in id: "ResourceType/Id"
 				IResourcePersistentId<?> pid = getResourcePID(sourceIdUnqualified, resourceType);
 
 				// this might be a bit unperformant
@@ -160,7 +161,7 @@ public class MdmSurvivorshipSvcImpl implements IMdmSurvivorshipService {
 	}
 
 	private boolean isNumericOrUuid(String theLongCandidate) {
-		return IS_NUMERIC.matcher(theLongCandidate).matches()
+		return StringUtils.isNumeric(theLongCandidate)
 				|| IS_UUID.matcher(theLongCandidate).matches();
 	}
 }
