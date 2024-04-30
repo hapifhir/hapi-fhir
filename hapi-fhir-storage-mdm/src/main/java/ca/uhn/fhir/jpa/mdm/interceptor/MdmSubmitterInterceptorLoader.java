@@ -38,7 +38,6 @@ public class MdmSubmitterInterceptorLoader {
 	@Autowired
 	private IMdmSettings myMdmSettings;
 
-	// FIXME KHS export this from subscription to mdm
 	@Autowired
 	SubscriptionSettings mySubscriptionSettings;
 
