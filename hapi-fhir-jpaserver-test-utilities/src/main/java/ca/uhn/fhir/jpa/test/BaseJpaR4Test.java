@@ -632,7 +632,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		 * interfere with the database cleanup!
 		 */
 		ourLog.info("Pausing Schedulers");
-		mySchedulerService.pauseAllJobs();
+		mySchedulerService.pause();
 
 		myTerminologyDeferredStorageSvc.logQueueForUnitTest();
 		if (!myTermDeferredStorageSvc.isStorageQueueEmpty(true)) {
@@ -667,7 +667,7 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 
 		// restart the jobs
 		ourLog.info("Restarting the schedulers");
-		mySchedulerService.restart();
+		mySchedulerService.unpause();
 		ourLog.info("5 - " + getClass().getSimpleName() + ".afterPurgeDatabases");
 	}
 

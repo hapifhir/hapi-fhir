@@ -48,7 +48,6 @@ import static ca.uhn.fhir.batch2.model.JobDefinition.ID_MAX_LENGTH;
 import static ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity.STATUS_MAX_LENGTH;
 import static org.apache.commons.lang3.StringUtils.left;
 
-// add index for instance,stepId,status,seq,id
 @Entity
 @Table(
 		name = "BT2_WORK_CHUNK",

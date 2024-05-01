@@ -90,9 +90,9 @@ public interface IBatch2WorkChunkRepository
 			"UPDATE Batch2WorkChunkEntity e SET e.myStatus = :status, e.myNextPollTime = null WHERE e.myInstanceId = :instanceId AND e.myStatus IN(:states) AND e.myNextPollTime <= :pollTime")
 	int updateWorkChunksForPollWaiting(
 			@Param("instanceId") String theInstanceId,
-			@Param("status") WorkChunkStatusEnum theNewStatus,
+			@Param("pollTime") Date theTime,
 			@Param("states") Set<WorkChunkStatusEnum> theInitialStates,
-			@Param("pollTime") Date theTime);
+			@Param("status") WorkChunkStatusEnum theNewStatus);
 
 	@Modifying
 	@Query(
@@ -125,8 +125,9 @@ public interface IBatch2WorkChunkRepository
 	@Query("UPDATE Batch2WorkChunkEntity e SET e.myStatus = :newStatus WHERE e.myId = :id AND e.myStatus = :oldStatus")
 	int updateChunkStatus(
 			@Param("id") String theChunkId,
-			@Param("newStatus") WorkChunkStatusEnum theNewStatus,
-			@Param("oldStatus") WorkChunkStatusEnum theOldStatus);
+			@Param("oldStatus") WorkChunkStatusEnum theOldStatus,
+			@Param("newStatus") WorkChunkStatusEnum theNewStatus
+	);
 
 	@Modifying
 	@Query(

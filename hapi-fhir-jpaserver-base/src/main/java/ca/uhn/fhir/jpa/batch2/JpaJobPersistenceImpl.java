@@ -129,10 +129,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		entity.setSerializedData(theBatchWorkChunk.serializedData);
 		entity.setCreateTime(new Date());
 		entity.setStartTime(new Date());
-		// set gated job chunks to GATE_WAITING; they will be transitioned to READY during maintenance pass when all
-		// chunks in the previous step are COMPLETED
-		entity.setStatus(
-				theBatchWorkChunk.isGatedExecution ? WorkChunkStatusEnum.GATE_WAITING : WorkChunkStatusEnum.READY);
+		entity.setStatus(getOnCreateStatus(theBatchWorkChunk));
 
 		ourLog.debug("Create work chunk {}/{}/{}", entity.getInstanceId(), entity.getId(), entity.getTargetStepId());
 		ourLog.trace(
@@ -140,6 +137,20 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 		myTransactionService.withSystemRequestOnDefaultPartition().execute(() -> myWorkChunkRepository.save(entity));
 
 		return entity.getId();
+	}
+
+	/**
+	 * Gets the initial onCreate state for the given workchunk.
+	 * Gated job chunks start in GATE_WAITING; they will be transitioned to READY during maintenance pass when all
+	 * chunks in the previous step are COMPLETED.
+	 * Non gated job chunks start in READY
+	 */
+	private static WorkChunkStatusEnum getOnCreateStatus(WorkChunkCreateEvent theBatchWorkChunk) {
+		if (theBatchWorkChunk.isGatedExecution) {
+			return WorkChunkStatusEnum.GATE_WAITING;
+		} else {
+			return WorkChunkStatusEnum.READY;
+		}
 	}
 
 	@Override
@@ -312,17 +323,18 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	public void enqueueWorkChunkForProcessing(String theChunkId, Consumer<Integer> theCallback) {
 		int updated = myWorkChunkRepository.updateChunkStatus(
-				theChunkId, WorkChunkStatusEnum.QUEUED, WorkChunkStatusEnum.READY);
+				theChunkId, WorkChunkStatusEnum.READY, WorkChunkStatusEnum.QUEUED);
 		theCallback.accept(updated);
 	}
 
 	@Override
 	public int updatePollWaitingChunksForJobIfReady(String theInstanceId) {
 		return myWorkChunkRepository.updateWorkChunksForPollWaiting(
-				theInstanceId,
-				WorkChunkStatusEnum.READY,
-				Set.of(WorkChunkStatusEnum.POLL_WAITING),
-				Date.from(Instant.now()));
+			theInstanceId,
+			Date.from(Instant.now()),
+			Set.of(WorkChunkStatusEnum.POLL_WAITING),
+			WorkChunkStatusEnum.READY
+		);
 	}
 
 	@Override
@@ -628,7 +640,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			// Up to 7.1, gated jobs' work chunks are created in status QUEUED but not actually queued for the
 			// workers.
 			// In order to keep them compatible, turn QUEUED chunks into READY, too.
-			// TODO: remove QUEUED from the IN clause when we are certain that no one is still running the old code.
+			// TODO: 'QUEUED' from the IN clause will be removed after 7.6.0.
 			int numChanged = myWorkChunkRepository.updateAllChunksForStepWithStatus(
 					theJobInstanceId,
 					theNextStepId,

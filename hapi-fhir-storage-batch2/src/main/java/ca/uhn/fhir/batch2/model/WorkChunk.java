@@ -248,9 +248,8 @@ public class WorkChunk extends WorkChunkMetadata {
 		b.append("RecordsProcessed", myRecordsProcessed);
 		if (myNextPollTime != null) {
 			b.append("NextPollTime", myNextPollTime);
-
-			b.append("PollAttempts", myPollAttempts);
 		}
+		b.append("PollAttempts", myPollAttempts);
 		if (isNotBlank(myErrorMessage)) {
 			b.append("ErrorMessage", myErrorMessage);
 		}

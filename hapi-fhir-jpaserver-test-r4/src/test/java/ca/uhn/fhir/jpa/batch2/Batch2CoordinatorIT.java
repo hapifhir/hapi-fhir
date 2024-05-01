@@ -36,6 +36,7 @@ import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.test.concurrency.PointcutLatch;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -137,7 +138,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		// final step
 		ILastJobStepWorker<TestJobParameters, FirstStepOutput> last = (step, sink) -> RunOutcome.SUCCESS;
 		// job definition
-		String jobId = new Exception().getStackTrace()[0].getMethodName();
+		String jobId = getMethodNameForJobId();
 		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
 			.setJobDefinitionId(jobId)
 			.setJobDescription("test job")
@@ -203,7 +204,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> callLatch(myFirstStepLatch, step);
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
-		String jobId = new Exception().getStackTrace()[0].getMethodName();
+		String jobId = getMethodNameForJobId();
 		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
@@ -261,7 +262,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	@Test
 	public void gatedJob_whenMaintenanceRunHappensDuringMsgProcessing_doesNotAdvance() throws InterruptedException {
 		// setup
-		String jobId = new Exception().getStackTrace()[0].getMethodName();
+		String jobId = getMethodNameForJobId();
 		int chunksToMake = 5;
 		AtomicInteger secondGateCounter = new AtomicInteger();
 		AtomicBoolean reductionCheck = new AtomicBoolean(false);
@@ -335,7 +336,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	@Test
 	public void reductionStepFailing_willFailJob() throws InterruptedException {
 		// setup
-		String jobId = new Exception().getStackTrace()[0].getMethodName();
+		String jobId = getMethodNameForJobId();
 		int totalChunks = 3;
 		AtomicInteger chunkCounter = new AtomicInteger();
 		String error = "this is an error";
@@ -390,7 +391,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	@Test
 	public void testJobWithReductionStepFiresCompletionHandler() throws InterruptedException {
 		// setup
-		String jobId = new Exception().getStackTrace()[0].getMethodName();
+		String jobId = getMethodNameForJobId();
 		String testInfo = "test";
 		int totalCalls = 2;
 		AtomicInteger secondStepInt = new AtomicInteger();
@@ -475,7 +476,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	@ValueSource(booleans = {true, false})
 	public void testJobDefinitionWithReductionStepIT(boolean theDelayReductionStepBool) throws InterruptedException {
 		// setup
-		String jobId = new Exception().getStackTrace()[0].getMethodName() + "_" + theDelayReductionStepBool;
+		String jobId = getMethodNameForJobId() + "_" + theDelayReductionStepBool;
 		String testInfo = "test";
 		AtomicInteger secondStepInt = new AtomicInteger();
 
@@ -580,7 +581,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		// create job definition
 		int callsToMake = 3;
 		int chunksToAwait = 2;
-		String jobId = new Exception().getStackTrace()[0].getMethodName();
+		String jobId = getMethodNameForJobId();
 
 		ConcurrentHashMap<String, AtomicInteger> chunkToCounter = new ConcurrentHashMap<>();
 		HashMap<String, Integer> chunkToCallsToMake = new HashMap<>();
@@ -673,7 +674,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		};
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> callLatch(myLastStepLatch, step);
 
-		String jobDefId = new Exception().getStackTrace()[0].getMethodName();
+		String jobDefId = getMethodNameForJobId();
 		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
@@ -703,7 +704,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		};
 		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
-		String jobDefId = new Exception().getStackTrace()[0].getMethodName();
+		String jobDefId = getMethodNameForJobId();
 		JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
 
 		myJobDefinitionRegistry.addJobDefinition(definition);
@@ -733,7 +734,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			};
 			IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> fail();
 
-			String jobDefId = new Exception().getStackTrace()[0].getMethodName();
+			String jobDefId = getMethodNameForJobId();
 			JobDefinition<? extends IModelJson> definition = buildGatedJobDefinition(jobDefId, firstStep, lastStep);
 
 			myJobDefinitionRegistry.addJobDefinition(definition);
@@ -780,7 +781,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			return RunOutcome.SUCCESS;
 		};
 		// job definition
-		String jobDefId = new Exception().getStackTrace()[0].getMethodName();
+		String jobDefId = getMethodNameForJobId();
 		JobDefinition<? extends IModelJson> jd = JobDefinition.newBuilder()
 			.setJobDefinitionId(jobDefId)
 			.setJobDescription("test job")
@@ -821,6 +822,15 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		TestJobParameters parameters = new TestJobParameters();
 		request.setParameters(parameters);
 		return request;
+	}
+
+	/**
+	 * Returns the method name of the calling method for a unique job id.
+	 * It is best this is called from the test method directly itself, and never
+	 * delegate to a separate child method.s
+	 */
+	private String getMethodNameForJobId() {
+		return new Exception().getStackTrace()[1].getMethodName();
 	}
 
 	@Nonnull

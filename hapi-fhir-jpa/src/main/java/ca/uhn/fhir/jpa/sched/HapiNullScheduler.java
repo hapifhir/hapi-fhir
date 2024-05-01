@@ -59,7 +59,7 @@ public class HapiNullScheduler implements IHapiScheduler {
 	}
 
 	@Override
-	public void restart() {
+	public void unpause() {
 		// nothing to do
 	}
 

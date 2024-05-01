@@ -47,6 +47,7 @@ stateDiagram-v2
 title: Batch2 Job Work Chunk state transitions
 ---
 stateDiagram-v2
+    state GATE_WAITING
     state READY
     state QUEUED
     state on_receive <<choice>>
@@ -58,7 +59,7 @@ stateDiagram-v2
     state COMPLETED
    direction LR
    [*]             --> READY         : on create - normal or gated first chunk
-   [*]             --> GATE_WAITING  : on create - gated jobs for all but the first chunk
+   [*]             --> GATE_WAITING  : on create - gated jobs for all but the first chunks of the first step
    GATE_WAITING    --> READY         : on gate release - gated
    QUEUED          --> READY         : on gate release - gated (for compatibility with legacy QUEUED state up to Hapi-fhir version 7.1)
    READY           --> QUEUED        : placed on kafka (maint.)

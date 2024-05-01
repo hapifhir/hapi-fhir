@@ -67,11 +67,5 @@ public interface IResourceChangeListenerCache {
 	 */
 	ResourceChangeResult refreshCacheIfNecessary();
 
-	/**
-	 * Disables Resource Cache refreshing.
-	 * @param theToEnable
-	 */
-	void setEnabled(boolean theToEnable);
-
 	// TODO KHS in the future support adding new listeners to existing caches
 }

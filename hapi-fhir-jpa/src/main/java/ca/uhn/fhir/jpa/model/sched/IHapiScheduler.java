@@ -38,12 +38,15 @@ public interface IHapiScheduler {
 	void logStatusForUnitTest();
 
 	/**
-	 * Pauses (or unpauses) this scheduler.
-	 * @param theIsPausedBool whether or not to pause the scheduler. True pauses, false unpauses
+	 * Pauses this scheduler (and thus all scheduled jobs).
+	 * To restart call {@link #unpause()}
 	 */
 	void pause();
 
-	void restart();
+	/**
+	 * Restarts this scheduler after {@link #pause()}
+	 */
+	void unpause();
 
 	void scheduleJob(long theIntervalMillis, ScheduledJobDefinition theJobDefinition);
 

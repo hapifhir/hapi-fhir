@@ -46,7 +46,7 @@ When a notification message arrives, the handler does the following:
 1. Change the work chunk status from `QUEUED` to `IN_PROGRESS`
 1. Change the Job Instance status from `QUEUED` to `IN_PROGRESS`
 1. If the Job Instance is cancelled, change the status to `CANCELLED` and abort processing
-1. If the step creates new work chunks, each work chunk will be created in the `READY` state and will be handled in the next maintenance job pass.
+1. If the step creates new work chunks, each work chunk will be created in either the `GATE_WAITING` state (for gated jobs) or `READY` state (for non-gated jobs) and will be handled in the next maintenance job pass.
 1. If the step succeeds, the work chunk status is changed from `IN_PROGRESS` to `COMPLETED`, and the data it contained is deleted.
 1. If the step throws a `RetryChunkLaterException`, the work chunk status is changed from `IN_PROGRESS` to `POLL_WAITING`, and a `nextPollTime` value will be set.
 1. If the step fails, the work chunk status is changed from `IN_PROGRESS` to either `ERRORED` or `FAILED`, depending on the severity of the error.

@@ -65,7 +65,8 @@ public class StepExecutor {
 		} catch (RetryChunkLaterException ex) {
 			Date nextPollTime = Date.from(Instant.now().plus(ex.getNextPollDuration()));
 			ourLog.debug(
-					"Polling job encountered; will retry after {}s",
+					"Polling job encountered; will retry chunk {} after after {}s",
+					theStepExecutionDetails.getChunkId(),
 					ex.getNextPollDuration().get(ChronoUnit.SECONDS));
 			myJobPersistence.onWorkChunkPollDelay(theStepExecutionDetails.getChunkId(), nextPollTime);
 			return false;

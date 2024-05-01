@@ -156,6 +156,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 	}
 
 	public void pause() {
+		int delay = 100;
 		String errorMsg = null;
 		Throwable ex = null;
 		try {
@@ -165,12 +166,12 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 				if (!hasRunningJobs()) {
 					break;
 				}
-				Thread.sleep(100);
+				Thread.sleep(delay);
 				count++;
 			}
 			if (count >= 3) {
-				errorMsg = "Failed to set to standby after " + count
-						+ " attempts. Execution will continue, but may cause bugs.";
+				errorMsg = "Scheduler on standby. But after  " + (count + 1)*delay
+						+ " ms there are still jobs running. Execution will continue, but may cause bugs.";
 			}
 		} catch (Exception x) {
 			ex = x;
@@ -186,7 +187,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 		}
 	}
 
-	public void restart() {
+	public void unpause() {
 		start();
 	}
 
@@ -210,7 +211,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 	private boolean hasRunningJobs() {
 		try {
 			List<JobExecutionContext> currentlyExecutingJobs = myScheduler.getCurrentlyExecutingJobs();
-			ourLog.info("Checking for running jobs: {}", currentlyExecutingJobs);
+			ourLog.info("Checking for running jobs. Found {} running.", currentlyExecutingJobs);
 			return !currentlyExecutingJobs.isEmpty();
 		} catch (SchedulerException ex) {
 			throw new RuntimeException(Msg.code(2521) + " Failed during  check for scheduled jobs", ex);

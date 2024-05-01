@@ -340,7 +340,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		/*
 		 * Reduction steps are done inline and only on gated jobs.
 		 * As such, all workchunks once they get here should either be:
-		 * 1) READY (7.1 new status)
+		 * 1) READY (7.2 new status)
 		 * 2) COMPLETED (7.0 legacy)
 		 */
 		if (theChunk.getStatus() != WorkChunkStatusEnum.READY

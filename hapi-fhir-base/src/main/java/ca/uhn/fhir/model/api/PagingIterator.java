@@ -35,7 +35,7 @@ public class PagingIterator<T> implements Iterator<T> {
 		void fetchNextPage(int thePageIndex, int theBatchSize, Consumer<T> theConsumer);
 	}
 
-	static final int PAGE_SIZE = 100;
+	static final int DEFAULT_PAGE_SIZE = 100;
 
 	private int myPage;
 
@@ -48,7 +48,7 @@ public class PagingIterator<T> implements Iterator<T> {
 	private final int myPageSize;
 
 	public PagingIterator(PageFetcher<T> theFetcher) {
-		this(PAGE_SIZE, theFetcher);
+		this(DEFAULT_PAGE_SIZE, theFetcher);
 	}
 
 	public PagingIterator(int thePageSize, PageFetcher<T> theFetcher) {

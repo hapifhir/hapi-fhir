@@ -13,7 +13,7 @@ import java.util.Collection;
 public interface IBatch2WorkChunkMetadataViewRepository extends JpaRepository<Batch2WorkChunkMetadataView, String> {
 
 	@Query("SELECT v FROM Batch2WorkChunkMetadataView v WHERE v.myInstanceId = :instanceId AND v.myStatus IN :states "
-			+ " ORDER BY v.myInstanceId, v.mySequence, v.myTargetStepId, v.myStatus, v.myId ASC")
+			+ " ORDER BY v.myInstanceId, v.myTargetStepId, v.myStatus, v.mySequence, v.myId ASC")
 	Page<Batch2WorkChunkMetadataView> fetchWorkChunkMetadataForJobInStates(
 			Pageable thePageRequest,
 			@Param("instanceId") String theInstanceId,

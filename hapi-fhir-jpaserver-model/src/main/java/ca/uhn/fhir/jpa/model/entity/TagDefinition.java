@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.model.entity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -70,14 +69,14 @@ public class TagDefinition implements Serializable {
 
 	// one tag definition -> many resource tags
 	@OneToMany(
-			cascade = {CascadeType.ALL},
+			cascade = {},
 			fetch = FetchType.LAZY,
 			mappedBy = "myTag")
 	private Collection<ResourceTag> myResources;
 
 	// one tag definition -> many history
 	@OneToMany(
-			cascade = {CascadeType.ALL},
+			cascade = {},
 			fetch = FetchType.LAZY,
 			mappedBy = "myTag")
 	private Collection<ResourceHistoryTag> myResourceVersions;
