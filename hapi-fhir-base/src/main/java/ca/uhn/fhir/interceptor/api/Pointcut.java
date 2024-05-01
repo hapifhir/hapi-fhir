@@ -2396,7 +2396,10 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	MDM_POST_MERGE_GOLDEN_RESOURCES(
-			void.class, "ca.uhn.fhir.rest.api.server.RequestDetails", "ca.uhn.fhir.mdm.model.mdmevents.MdmMergeEvent", "ca.uhn.fhir.mdm.model.MdmTransactionContext"),
+			void.class,
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.mdm.model.mdmevents.MdmMergeEvent",
+			"ca.uhn.fhir.mdm.model.MdmTransactionContext"),
 
 	/**
 	 * <b>MDM Link History Hook:</b>
