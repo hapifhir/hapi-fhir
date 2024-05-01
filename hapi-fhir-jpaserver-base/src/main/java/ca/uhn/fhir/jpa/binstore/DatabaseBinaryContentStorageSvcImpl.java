@@ -96,6 +96,7 @@ public class DatabaseBinaryContentStorageSvcImpl extends BaseBinaryStorageSvcImp
 		entity.setContentId(id);
 		entity.setStorageContentBin(loadedStream);
 
+		// fixme here
 		// TODO: remove writing Blob in a future release
 		Blob dataBlob = lobHelper.createBlob(loadedStream);
 		entity.setBlob(dataBlob);
