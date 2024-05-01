@@ -19,7 +19,7 @@ public class BaseBinaryStorageSvcImplTest {
 		svc.setFhirContextForTests(FhirContext.forR4Cached());
 		svc.setInterceptorBroadcasterForTests(new InterceptorService());
 
-		String id = svc.newBlobId();
+		String id = svc.newBinaryContentId();
 		ourLog.info(id);
 		assertThat(id, matchesPattern("^[a-zA-Z0-9]{100}$"));
 	}

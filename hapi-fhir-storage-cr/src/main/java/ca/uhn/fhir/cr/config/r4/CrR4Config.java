@@ -26,13 +26,17 @@ import ca.uhn.fhir.cr.config.ProviderLoader;
 import ca.uhn.fhir.cr.config.ProviderSelector;
 import ca.uhn.fhir.cr.config.RepositoryConfig;
 import ca.uhn.fhir.cr.r4.ICareGapsServiceFactory;
+import ca.uhn.fhir.cr.r4.ICollectDataServiceFactory;
 import ca.uhn.fhir.cr.r4.ICqlExecutionServiceFactory;
+import ca.uhn.fhir.cr.r4.IDataRequirementsServiceFactory;
 import ca.uhn.fhir.cr.r4.ILibraryEvaluationServiceFactory;
 import ca.uhn.fhir.cr.r4.IMeasureServiceFactory;
 import ca.uhn.fhir.cr.r4.ISubmitDataProcessorFactory;
 import ca.uhn.fhir.cr.r4.cpg.CqlExecutionOperationProvider;
 import ca.uhn.fhir.cr.r4.cpg.LibraryEvaluationOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.CareGapsOperationProvider;
+import ca.uhn.fhir.cr.r4.measure.CollectDataOperationProvider;
+import ca.uhn.fhir.cr.r4.measure.DataRequirementsOperationProvider;
 import ca.uhn.fhir.cr.r4.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.cr.r4.measure.SubmitDataProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
@@ -42,6 +46,8 @@ import org.opencds.cqf.fhir.cr.cpg.r4.R4LibraryEvaluationService;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
 import org.opencds.cqf.fhir.cr.measure.MeasureEvaluationOptions;
 import org.opencds.cqf.fhir.cr.measure.r4.R4CareGapsService;
+import org.opencds.cqf.fhir.cr.measure.r4.R4CollectDataService;
+import org.opencds.cqf.fhir.cr.measure.r4.R4DataRequirementsService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4MeasureService;
 import org.opencds.cqf.fhir.cr.measure.r4.R4SubmitDataService;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -87,6 +93,28 @@ public class CrR4Config {
 	}
 
 	@Bean
+	CollectDataOperationProvider r4CollectDataOperationProvider() {
+		return new CollectDataOperationProvider();
+	}
+
+	@Bean
+	ICollectDataServiceFactory collectDataServiceFactory(
+			IRepositoryFactory theRepositoryFactory, MeasureEvaluationOptions theMeasureEvaluationOptions) {
+		return rd -> new R4CollectDataService(theRepositoryFactory.create(rd), theMeasureEvaluationOptions);
+	}
+
+	@Bean
+	DataRequirementsOperationProvider r4DataRequirementsOperationProvider() {
+		return new DataRequirementsOperationProvider();
+	}
+
+	@Bean
+	IDataRequirementsServiceFactory dataRequirementsServiceFactory(
+			IRepositoryFactory theRepositoryFactory, MeasureEvaluationOptions theMeasureEvaluationOptions) {
+		return rd -> new R4DataRequirementsService(theRepositoryFactory.create(rd), theMeasureEvaluationOptions);
+	}
+
+	@Bean
 	LibraryEvaluationOperationProvider r4LibraryEvaluationOperationProvider() {
 		return new LibraryEvaluationOperationProvider();
 	}
@@ -101,7 +129,6 @@ public class CrR4Config {
 				theCareGapsProperties,
 				theRepositoryFactory.create(rd),
 				theMeasureEvaluationOptions,
-				theExecutor,
 				rd.getFhirServerBase());
 	}
 
@@ -133,7 +160,9 @@ public class CrR4Config {
 								SubmitDataProvider.class,
 								CareGapsOperationProvider.class,
 								CqlExecutionOperationProvider.class,
-								LibraryEvaluationOperationProvider.class)));
+								LibraryEvaluationOperationProvider.class,
+								CollectDataOperationProvider.class,
+								DataRequirementsOperationProvider.class)));
 
 		return new ProviderLoader(theRestfulServer, theApplicationContext, selector);
 	}

@@ -4,7 +4,6 @@ import ca.uhn.fhir.cr.TestCqlProperties;
 import ca.uhn.fhir.cr.TestCrConfig;
 import ca.uhn.fhir.cr.common.CqlThreadFactory;
 import ca.uhn.fhir.cr.config.r4.CrR4Config;
-import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.model.Model;
@@ -13,7 +12,6 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.opencds.cqf.cql.engine.execution.CqlEngine;
 import org.opencds.cqf.cql.engine.runtime.Code;
 import org.opencds.cqf.fhir.cql.EvaluationSettings;
-import org.opencds.cqf.fhir.cql.engine.retrieve.BaseRetrieveProvider;
 import org.opencds.cqf.fhir.cql.engine.retrieve.RetrieveSettings;
 import org.opencds.cqf.fhir.cql.engine.terminology.TerminologySettings;
 import org.opencds.cqf.fhir.cr.measure.CareGapsProperties;
@@ -49,7 +47,6 @@ public class TestCrR4Config {
 	@Bean
 	CareGapsProperties careGapsProperties()  {
 		var careGapsProperties = new CareGapsProperties();
-		careGapsProperties.setThreadedCareGapsEnabled(false);
 		careGapsProperties.setCareGapsReporter("Organization/alphora");
 		careGapsProperties.setCareGapsCompositionSectionAuthor("Organization/alphora-author");
 		return careGapsProperties;
@@ -161,6 +158,4 @@ public class TestCrR4Config {
 		evaluationSettings.setValueSetCache(theGlobalValueSetCache);
 		return evaluationSettings;
 	}
-
-
 }

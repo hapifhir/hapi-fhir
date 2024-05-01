@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5856
+title: "Previously, it was possible to execute the `$delete-expunge` operation on a resource even if the user did not 
+have delete permissions for the given resource type. This has been fixed."

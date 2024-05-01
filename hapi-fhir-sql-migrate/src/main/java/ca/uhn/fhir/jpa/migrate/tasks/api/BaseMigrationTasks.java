@@ -31,6 +31,8 @@ import org.flywaydb.core.api.MigrationVersion;
 
 import java.util.Collection;
 
+import static java.util.Objects.nonNull;
+
 public class BaseMigrationTasks<T extends Enum> {
 	MigrationVersion lastVersion;
 	private Multimap<T, BaseTask> myTasks =
@@ -71,7 +73,7 @@ public class BaseMigrationTasks<T extends Enum> {
 		return theRelease.name();
 	}
 
-	public MigrationTaskList getAllTasks(T[] theVersionEnumValues) {
+	public MigrationTaskList getAllTasks(T... theVersionEnumValues) {
 		MigrationTaskList retval = new MigrationTaskList();
 		for (T nextVersion : theVersionEnumValues) {
 			Collection<BaseTask> nextValues = myTasks.get(nextVersion);
@@ -82,6 +84,11 @@ public class BaseMigrationTasks<T extends Enum> {
 		}
 
 		return retval;
+	}
+
+	public boolean hasTasksForVersion(T theRelease) {
+		Collection<BaseTask> baseTasks = myTasks.get(theRelease);
+		return nonNull(baseTasks) && !baseTasks.isEmpty();
 	}
 
 	protected BaseTask getTaskWithVersion(String theMigrationVersion) {

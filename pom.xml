@@ -9,7 +9,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>7.1.5-SNAPSHOT</version>
+	<version>7.3.0-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -164,6 +164,11 @@
 			<groupId>org.mockito</groupId>
 			<artifactId>mockito-junit-jupiter</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<!-- OpenTelemetry Annotations-->
+		<dependency>
+			<groupId>io.opentelemetry.instrumentation</groupId>
+			<artifactId>opentelemetry-instrumentation-annotations</artifactId>
 		</dependency>
 	</dependencies>
 
@@ -893,6 +898,10 @@
 			<organization>Fraunhofer FOKUS</organization>
 		</developer>
 		<developer>
+			<id>ArtyomyuS</id>
+			<name>Artiom Darie</name>
+		</developer>
+		<developer>
 			<id>pano-smals</id>
 			<name>pano-smals</name>
 		</developer>
@@ -973,6 +982,7 @@
 		<maven_assembly_plugin_version>3.3.0</maven_assembly_plugin_version>
 		<maven_license_plugin_version>1.8</maven_license_plugin_version>
 		<okhttp_version>4.10.0</okhttp_version>
+		<otel.version>1.32.0</otel.version> <!-- BOM Version -->
 		<poi_version>4.1.2</poi_version>
 		<poi_ooxml_schemas_version>1.4</poi_ooxml_schemas_version>
 		<resteasy_version>6.2.5.Final</resteasy_version>
@@ -985,7 +995,7 @@
 		<swagger_version>2.2.19</swagger_version>
 		<slf4j_version>2.0.9</slf4j_version>
 		<log4j_to_slf4j_version>2.19.0</log4j_to_slf4j_version>
-		<spring_version>6.1.1</spring_version>
+		<spring_version>6.1.5</spring_version>
 		<spring_data_bom_version>2023.1.0</spring_data_bom_version>
 		<spring_batch_version>4.3.3</spring_batch_version>
 		<spring_boot_version>3.2.0</spring_boot_version>
@@ -1002,7 +1012,7 @@
 		<ucum_version>1.0.8</ucum_version>
 
 		<!-- CQL Support -->
-		<clinical-reasoning.version>3.0.0-PRE17</clinical-reasoning.version>
+		<clinical-reasoning.version>3.4.0</clinical-reasoning.version>
 
 		<!-- Site properties -->
 		<fontawesomeVersion>5.4.1</fontawesomeVersion>
@@ -1986,7 +1996,7 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.7.1</version>
+				<version>42.7.3</version>
 			</dependency>
 			<dependency>
 				<groupId>com.oracle.database.jdbc</groupId>
@@ -2259,6 +2269,19 @@
 				<version>2.12.2</version>
 				<scope>provided</scope>
 				<optional>true</optional>
+			</dependency>
+			<!-- OpenTelemetry -->
+			<dependency>
+				<groupId>io.opentelemetry</groupId>
+				<artifactId>opentelemetry-bom</artifactId>
+				<version>${otel.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+			<dependency>
+				<groupId>io.opentelemetry.instrumentation</groupId>
+				<artifactId>opentelemetry-instrumentation-annotations</artifactId>
+				<version>${otel.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

@@ -1325,7 +1325,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	}
 
 	protected void addRequestIdToResponse(ServletRequestDetails theRequestDetails, String theRequestId) {
-		theRequestDetails.getResponse().addHeader(Constants.HEADER_REQUEST_ID, theRequestId);
+		String caseSensitiveRequestIdKey = Constants.HEADER_REQUEST_ID;
+		for (String key : theRequestDetails.getHeaders().keySet()) {
+			if (Constants.HEADER_REQUEST_ID.equalsIgnoreCase(key)) {
+				caseSensitiveRequestIdKey = key;
+				break;
+			}
+		}
+		theRequestDetails.getResponse().addHeader(caseSensitiveRequestIdKey, theRequestId);
 	}
 
 	/**
@@ -1983,7 +1990,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		/* perform a 'distinct' in case there are multiple concrete IResourceProviders declared for the same FHIR-Resource. (A concrete IResourceProvider for Patient@Read and a separate concrete for Patient@Search for example */
 		/* perform a 'sort' to provide an easier to read alphabetized list (vs how the different FHIR-resource IResourceProviders happened to be registered */
 		List<String> knownDistinctAndSortedResourceTypes = myResourceProviders.stream()
-				.map(t -> t.getResourceType().getSimpleName())
+				.map(t ->
+						myFhirContext.getResourceDefinition(t.getResourceType()).getName())
 				.distinct()
 				.sorted()
 				.collect(toList());
