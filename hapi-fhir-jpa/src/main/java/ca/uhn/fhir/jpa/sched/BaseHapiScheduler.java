@@ -170,7 +170,7 @@ public abstract class BaseHapiScheduler implements IHapiScheduler {
 				count++;
 			}
 			if (count >= 3) {
-				errorMsg = "Scheduler on standby. But after  " + (count + 1)*delay
+				errorMsg = "Scheduler on standby. But after  " + (count + 1) * delay
 						+ " ms there are still jobs running. Execution will continue, but may cause bugs.";
 			}
 		} catch (Exception x) {

@@ -330,11 +330,10 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	@Override
 	public int updatePollWaitingChunksForJobIfReady(String theInstanceId) {
 		return myWorkChunkRepository.updateWorkChunksForPollWaiting(
-			theInstanceId,
-			Date.from(Instant.now()),
-			Set.of(WorkChunkStatusEnum.POLL_WAITING),
-			WorkChunkStatusEnum.READY
-		);
+				theInstanceId,
+				Date.from(Instant.now()),
+				Set.of(WorkChunkStatusEnum.POLL_WAITING),
+				WorkChunkStatusEnum.READY);
 	}
 
 	@Override

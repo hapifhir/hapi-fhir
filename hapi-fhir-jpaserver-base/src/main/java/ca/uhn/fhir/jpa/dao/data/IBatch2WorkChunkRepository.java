@@ -126,8 +126,7 @@ public interface IBatch2WorkChunkRepository
 	int updateChunkStatus(
 			@Param("id") String theChunkId,
 			@Param("oldStatus") WorkChunkStatusEnum theOldStatus,
-			@Param("newStatus") WorkChunkStatusEnum theNewStatus
-	);
+			@Param("newStatus") WorkChunkStatusEnum theNewStatus);
 
 	@Modifying
 	@Query(
