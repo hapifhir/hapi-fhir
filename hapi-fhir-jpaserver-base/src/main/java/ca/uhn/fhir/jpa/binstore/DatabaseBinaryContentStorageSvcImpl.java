@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.dao.data.IBinaryStorageEntityDao;
 import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.hash.HashingInputStream;
 import com.google.common.io.ByteStreams;
 import jakarta.annotation.Nonnull;
@@ -58,6 +59,8 @@ public class DatabaseBinaryContentStorageSvcImpl extends BaseBinaryStorageSvcImp
 
 	@Autowired
 	private IBinaryStorageEntityDao myBinaryStorageEntityDao;
+
+	private boolean mySupportLegacyLobServer = false;
 
 	@Nonnull
 	@Override
@@ -96,10 +99,10 @@ public class DatabaseBinaryContentStorageSvcImpl extends BaseBinaryStorageSvcImp
 		entity.setContentId(id);
 		entity.setStorageContentBin(loadedStream);
 
-		// fixme here
-		// TODO: remove writing Blob in a future release
-		Blob dataBlob = lobHelper.createBlob(loadedStream);
-		entity.setBlob(dataBlob);
+		if(mySupportLegacyLobServer) {
+			Blob dataBlob = lobHelper.createBlob(loadedStream);
+			entity.setBlob(dataBlob);
+		}
 
 		// Update the entity with the final byte count and hash
 		long bytes = countingInputStream.getByteCount();
@@ -170,6 +173,11 @@ public class DatabaseBinaryContentStorageSvcImpl extends BaseBinaryStorageSvcImp
 		return copyBinaryContentToByteArray(entityOpt);
 	}
 
+	public DatabaseBinaryContentStorageSvcImpl setSupportLegacyLobServer(boolean theSupportLegacyLobServer) {
+		mySupportLegacyLobServer = theSupportLegacyLobServer;
+		return this;
+	}
+
 	void copyBinaryContentToOutputStream(OutputStream theOutputStream, BinaryStorageEntity theEntity)
 			throws IOException {
 
@@ -212,5 +220,11 @@ public class DatabaseBinaryContentStorageSvcImpl extends BaseBinaryStorageSvcImp
 		}
 
 		return retVal;
+	}
+
+	@VisibleForTesting
+	public DatabaseBinaryContentStorageSvcImpl setEntityManagerForTesting(EntityManager theEntityManager) {
+		myEntityManager = theEntityManager;
+		return this;
 	}
 }
