@@ -32,11 +32,11 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
-import java.util.List;
-import java.util.Map;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
+import java.util.List;
+import java.util.Map;
 
 public abstract class BaseJpaResourceProviderObservation<T extends IBaseResource> extends BaseJpaResourceProvider<T> {
 
