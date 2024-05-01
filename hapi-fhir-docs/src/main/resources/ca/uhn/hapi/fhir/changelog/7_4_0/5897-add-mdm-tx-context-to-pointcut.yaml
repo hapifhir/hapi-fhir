@@ -1,0 +1,5 @@
+---
+type: add
+issue: 5897
+title: "The `MDM_POST_MERGE_GOLDEN_RESOURCES` pointcut can now include an
+  additional parameter of type MdmTransactionContext."
