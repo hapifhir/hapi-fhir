@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 5898
+title: "Previous, triggering a GET $meta on a new patient with Megascale configured resulted in a HAPI-0389. 
+        This has been fixed."
