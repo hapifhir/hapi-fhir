@@ -105,7 +105,7 @@ public class DaoTestDataBuilder implements ITestDataBuilder.WithSupport, ITestDa
 		myIds.keySet().forEach(nextType->{
 			// todo do this in a bundle for perf.
 			IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(nextType);
-			myIds.get(nextType).forEach(dao::delete);
+//			myIds.get(nextType).forEach(dao::delete);
 		});
 		myIds.clear();
 	}

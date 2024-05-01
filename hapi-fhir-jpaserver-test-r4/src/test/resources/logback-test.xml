@@ -31,6 +31,8 @@
 	<logger name="ca.uhn.fhir.jpa.bulk" level="info"/>
 
 	<!-- more debugging -->
+	<logger name="ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor" level="trace"/>
+
 	<!--
 	<logger name="org.elasticsearch.client" level="trace"/>
 	<logger name="org.hibernate.search.elasticsearch.request" level="TRACE"/>
