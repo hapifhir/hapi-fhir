@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.cache;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -53,9 +55,9 @@ class ResourceChangeListenerCacheRefresherImplTest {
 		IResourceChangeListener listener = mock(IResourceChangeListener.class);
 		ResourceChangeListenerCache cache = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
 		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(Collections.emptyList());
-		assertThat(cache.isInitialized()).isFalse();
+		assertFalse(cache.isInitialized());
 		myResourceChangeListenerCacheRefresher.notifyListener(cache, newResourceVersionMap);
-		assertThat(cache.isInitialized()).isTrue();
+		assertTrue(cache.isInitialized());
 		verify(listener, times(1)).handleInit(any());
 	}
 
@@ -65,9 +67,9 @@ class ResourceChangeListenerCacheRefresherImplTest {
 		ResourceChangeListenerCache cache = new ResourceChangeListenerCache(PATIENT_RESOURCE_NAME, listener, ourMap, TEST_REFRESH_INTERVAL_MS);
 		ResourceVersionMap newResourceVersionMap = ResourceVersionMap.fromResourceTableEntities(Collections.emptyList());
 		cache.setInitialized(true);
-		assertThat(cache.isInitialized()).isTrue();
+		assertTrue(cache.isInitialized());
 		myResourceChangeListenerCacheRefresher.notifyListener(cache, newResourceVersionMap);
-		assertThat(cache.isInitialized()).isTrue();
+		assertTrue(cache.isInitialized());
 		verifyNoInteractions(listener);
 	}
 

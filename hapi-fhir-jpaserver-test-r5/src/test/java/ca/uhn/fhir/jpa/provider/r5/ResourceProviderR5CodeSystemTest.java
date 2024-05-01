@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -185,7 +186,7 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValueAsString()).isEqualTo("Systolic blood pressure.inspiration - expiration");
 	}
 

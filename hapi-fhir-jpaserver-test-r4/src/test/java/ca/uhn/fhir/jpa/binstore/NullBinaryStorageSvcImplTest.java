@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.binstore;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.binary.svc.NullBinaryStorageSvcImpl;
 import org.hl7.fhir.r4.model.IdType;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,7 @@ public class NullBinaryStorageSvcImplTest {
 
 	@Test
 	public void shouldStoreBlob() {
-		assertThat(mySvc.shouldStoreBlob(1, new IdType("Patient/2"), "application/json")).isFalse();
+		assertFalse(mySvc.shouldStoreBlob(1, new IdType("Patient/2"), "application/json"));
 	}
 
 	@Test

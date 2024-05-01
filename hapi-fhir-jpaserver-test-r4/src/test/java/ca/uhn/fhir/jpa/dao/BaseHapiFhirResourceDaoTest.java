@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
@@ -209,7 +210,7 @@ class BaseHapiFhirResourceDaoTest {
 		DaoMethodOutcome outcome = mySvc.delete(id, deleteConflicts, requestDetails, transactionDetails);
 
 		// verify
-		assertThat(outcome).isNotNull();
+		assertNotNull(outcome);
 		assertThat(outcome.getId().getValue()).isEqualTo(id.getValue());
 	}
 
@@ -231,8 +232,8 @@ class BaseHapiFhirResourceDaoTest {
 		Mockito.verify(myJobCoordinator).startInstance(isNotNull(), requestCaptor.capture());
 
 		JobInstanceStartRequest actualRequest = requestCaptor.getValue();
-		assertThat(actualRequest).isNotNull();
-		assertThat(actualRequest.getParameters()).isNotNull();
+		assertNotNull(actualRequest);
+		assertNotNull(actualRequest.getParameters());
 		ReindexJobParameters actualParameters = actualRequest.getParameters(ReindexJobParameters.class);
 
 		assertThat(actualParameters.getPartitionedUrls()).hasSize(2);
@@ -252,8 +253,8 @@ class BaseHapiFhirResourceDaoTest {
 		Mockito.verify(myJobCoordinator).startInstance(isNotNull(), requestCaptor.capture());
 
 		JobInstanceStartRequest actualRequest = requestCaptor.getValue();
-		assertThat(actualRequest).isNotNull();
-		assertThat(actualRequest.getParameters()).isNotNull();
+		assertNotNull(actualRequest);
+		assertNotNull(actualRequest.getParameters());
 		ReindexJobParameters actualParameters = actualRequest.getParameters(ReindexJobParameters.class);
 
 		assertThat(actualParameters.getPartitionedUrls()).isEmpty();

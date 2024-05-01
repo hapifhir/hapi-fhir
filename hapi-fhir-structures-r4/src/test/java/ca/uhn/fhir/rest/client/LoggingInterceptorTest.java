@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -83,7 +85,7 @@ public class LoggingInterceptorTest {
 		LoggingInterceptor interceptor = new LoggingInterceptor(false);
 		client.registerInterceptor(interceptor);
 		Patient patient = client.read(Patient.class, "1");
-		assertThat(patient.getIdentifierFirstRep().isEmpty()).isFalse();
+		assertFalse(patient.getIdentifierFirstRep().isEmpty());
 
 		verify(myMockAppender, times(2)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 			@Override
@@ -108,7 +110,7 @@ public class LoggingInterceptorTest {
 		LoggingInterceptor interceptor = new LoggingInterceptor(true);
 		client.registerInterceptor(interceptor);
 		Patient patient = client.read(Patient.class, "1");
-			assertThat(patient.getIdentifierFirstRep().isEmpty()).isFalse();
+			assertFalse(patient.getIdentifierFirstRep().isEmpty());
 
 		verify(myMockAppender, times(1)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 			@Override
@@ -123,7 +125,7 @@ public class LoggingInterceptorTest {
 		client.unregisterInterceptor(interceptor);
 		
 		patient = client.read(Patient.class, "1");
-			assertThat(patient.getIdentifierFirstRep().isEmpty()).isFalse();
+			assertFalse(patient.getIdentifierFirstRep().isEmpty());
 
 		verify(myMockAppender, times(1)).doAppend(argThat(new ArgumentMatcher<ILoggingEvent>() {
 			@Override
@@ -146,7 +148,7 @@ public class LoggingInterceptorTest {
 	public static void beforeClass() throws Exception {
 
 		URL conf = LoggingInterceptor.class.getResource("/logback-test-dstuforce.xml");
-		assertThat(conf).isNotNull();
+		assertNotNull(conf);
 		LoggerContext context = (LoggerContext) LoggerFactory.getILoggerFactory();
 		JoranConfigurator configurator = new JoranConfigurator();
 		configurator.setContext(context);

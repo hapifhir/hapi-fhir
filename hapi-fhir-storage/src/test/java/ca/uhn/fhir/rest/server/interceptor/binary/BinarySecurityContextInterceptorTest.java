@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor.binary;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -83,7 +85,7 @@ class BinarySecurityContextInterceptorTest {
 			.withId("A")
 			.execute();
 		assertThat(actual.getIdElement().getIdPart()).isEqualTo("A");
-		assertThat(actual.getSecurityContext().getIdentifier().getSystem()).isNull();
+		assertNull(actual.getSecurityContext().getIdentifier().getSystem());
 	}
 
 	@Test
@@ -100,7 +102,7 @@ class BinarySecurityContextInterceptorTest {
 			.withId("A")
 			.execute();
 		assertThat(actual.getIdElement().getIdPart()).isEqualTo("A");
-		assertThat(actual.getActive()).isTrue();
+		assertTrue(actual.getActive());
 	}
 
 

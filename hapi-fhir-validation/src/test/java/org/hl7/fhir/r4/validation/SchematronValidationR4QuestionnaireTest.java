@@ -1,5 +1,7 @@
 package org.hl7.fhir.r4.validation;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.validation.FhirValidator;
@@ -49,7 +51,7 @@ public class SchematronValidationR4QuestionnaireTest {
 		ourLog.info(inputXml);
 
 		ValidationResult result = validateSchematron(resource);
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 	}
 
 	@Test
@@ -72,7 +74,7 @@ public class SchematronValidationR4QuestionnaireTest {
 		ourLog.info(inputXml);
 
 		ValidationResult result = validateSchematron(resource);
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 	}
 
 	@Test
@@ -96,7 +98,7 @@ public class SchematronValidationR4QuestionnaireTest {
 		ourLog.info(inputXml);
 
 		ValidationResult result = validateSchematron(resource);
-		assertThat(result.isSuccessful()).isFalse();
+		assertFalse(result.isSuccessful());
 		assertThat(result.getMessages()).hasSize(1);
 		assertThat(result.getMessages().get(0).getMessage()).contains("que-7");
 	}

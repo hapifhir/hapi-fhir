@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -228,7 +229,7 @@ public class ResourceProviderR4CodeSystemDesignationTest extends BaseResourcePro
 	
 	private void verifyDesignationNoLanguage(ParametersParameterComponent designation) {
 		assertThat(designation.getPart().get(0).getName()).isEqualTo("language");
-		assertThat(designation.getPart().get(0).getValue()).isNull();
+		assertNull(designation.getPart().get(0).getValue());
 		assertThat(designation.getPart().get(2).getName()).isEqualTo("value");
 		assertThat(designation.getPart().get(2).getValue().toString()).isEqualTo("Systolic blood pressure 12 hour minimum");
 	}

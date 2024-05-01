@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module.channel;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelFactory;
@@ -45,14 +47,14 @@ public class SubscriptionChannelRegistryTest {
 
 		when(mySubscriptionDeliveryChannelFactory.newDeliverySendingChannel(any(), any())).thenReturn(mock(IChannelProducer.class));
 
-		assertThat(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME)).isNull();
+		assertNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.add(activeSubscriptionA);
-		assertThat(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME)).isNotNull();
+		assertNotNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.add(activeSubscriptionB);
 		mySubscriptionChannelRegistry.remove(activeSubscriptionB);
-		assertThat(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME)).isNotNull();
+		assertNotNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
 		mySubscriptionChannelRegistry.remove(activeSubscriptionA);
-		assertThat(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME)).isNull();
+		assertNull(mySubscriptionChannelRegistry.getDeliveryReceiverChannel(TEST_CHANNEL_NAME));
 	}
 
 	@Configuration

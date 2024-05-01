@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.servlet;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.rest.api.Constants;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +19,7 @@ class ServletRequestDetailsTest {
 		servletRequestDetails.setServletRequest(httpRequest);
 		when(httpRequest.getHeader(Constants.HEADER_REWRITE_HISTORY)).thenReturn("true");
 		servletRequestDetails.setServletRequest(httpRequest);
-		assertThat(servletRequestDetails.isRewriteHistory()).isTrue();
+		assertTrue(servletRequestDetails.isRewriteHistory());
 	}
 
 	@Test
@@ -27,7 +29,7 @@ class ServletRequestDetailsTest {
 		servletRequestDetails.setServletRequest(httpRequest);
 		when(httpRequest.getHeader(Constants.HEADER_REWRITE_HISTORY)).thenReturn(null);
 		servletRequestDetails.setServletRequest(httpRequest);
-		assertThat(servletRequestDetails.isRewriteHistory()).isFalse();
+		assertFalse(servletRequestDetails.isRewriteHistory());
 	}
 
 	@Test
@@ -37,7 +39,7 @@ class ServletRequestDetailsTest {
 		servletRequestDetails.setServletRequest(httpRequest);
 		when(httpRequest.getHeader(Constants.HEADER_REWRITE_HISTORY)).thenReturn("false");
 		servletRequestDetails.setServletRequest(httpRequest);
-		assertThat(servletRequestDetails.isRewriteHistory()).isFalse();
+		assertFalse(servletRequestDetails.isRewriteHistory());
 	}
 
 }

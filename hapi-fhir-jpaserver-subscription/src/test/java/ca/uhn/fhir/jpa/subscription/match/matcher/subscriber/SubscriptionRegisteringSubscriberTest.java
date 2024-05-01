@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -144,8 +145,8 @@ public class SubscriptionRegisteringSubscriberTest {
 		SystemRequestDetails details = (SystemRequestDetails)requestDetailsCaptor.getValue();
 
 		// ensure partitions with list of names containing null use the default partition
-		assertThat(details.getRequestPartitionId().getPartitionNames()).isNull();
-		assertThat(details.getRequestPartitionId().getFirstPartitionIdOrNull()).isNull();
+		assertNull(details.getRequestPartitionId().getPartitionNames());
+		assertNull(details.getRequestPartitionId().getFirstPartitionIdOrNull());
 		verify(mySubscriptionRegistry, never()).unregisterSubscriptionIfRegistered(any());
 		verify(mySubscriptionRegistry, times(1)).registerSubscriptionUnlessAlreadyRegistered(any());
 	}
@@ -165,8 +166,8 @@ public class SubscriptionRegisteringSubscriberTest {
 		SystemRequestDetails details = (SystemRequestDetails)requestDetailsCaptor.getValue();
 
 		// ensure partitions that are null use the default partition
-		assertThat(details.getRequestPartitionId().getPartitionNames()).isNull();
-		assertThat(details.getRequestPartitionId().getFirstPartitionIdOrNull()).isNull();
+		assertNull(details.getRequestPartitionId().getPartitionNames());
+		assertNull(details.getRequestPartitionId().getFirstPartitionIdOrNull());
 		verify(mySubscriptionRegistry, never()).unregisterSubscriptionIfRegistered(any());
 		verify(mySubscriptionRegistry, times(1)).registerSubscriptionUnlessAlreadyRegistered(any());
 	}

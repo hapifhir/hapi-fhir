@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.model;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +21,7 @@ public class MetadataResourceDstu3Test {
         String copiedCodeSystemName = copiedCodeSystem.getName();
         Narrative.NarrativeStatus copiedCodeSystemTextStatus = copiedCodeSystem.getText().getStatus();
 
-			assertThat(copiedCodeSystem instanceof MetadataResource).isTrue(); // Just making sure this assumption still holds up, otherwise this test isn't very useful
+			assertTrue(copiedCodeSystem instanceof MetadataResource); // Just making sure this assumption still holds up, otherwise this test isn't very useful
 			assertThat(copiedCodeSystemID).isEqualTo("1001");
 			assertThat(copiedCodeSystemName).isEqualTo("Name123");
 			assertThat(copiedCodeSystemTextStatus).isEqualTo(new Narrative().setStatus(Narrative.NarrativeStatus.ADDITIONAL).getStatus());

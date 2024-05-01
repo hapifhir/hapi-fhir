@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -108,7 +109,7 @@ public class InterceptorUserDataMapDstu2Test {
 	}
 
 	private void updateMapUsing(Map<Object, Object> theUserData, String theMethod) {
-		assertThat(theUserData).isNotNull();
+		assertNotNull(theUserData);
 		if (myMap == null) {
 			myMap = theUserData;
 			myMap.put(myKey, myValue);

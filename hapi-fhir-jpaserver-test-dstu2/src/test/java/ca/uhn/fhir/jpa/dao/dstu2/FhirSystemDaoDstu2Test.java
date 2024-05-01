@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -110,7 +114,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		meta = mySystemDao.metaGetOperation(mySrd);
 		published = meta.getTag();
 		assertThat(published).hasSize(2);
-		assertThat(published.get(0).getSystem()).isNull();
+		assertNull(published.get(0).getSystem());
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
 		assertThat(published.get(1).getSystem()).isEqualTo("http://foo");
@@ -398,7 +402,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		String patientId = respEntry.getResponse().getLocation();
 		assertThat(patientId).doesNotEndWith("Patient/" + methodName + "/_history/1");
 		assertThat(patientId, (endsWith("/_history/1")));
-		assertThat(patientId, (containsString("Patient/")));
+		assertThat(patientId).contains("Patient/");
 		assertThat(respEntry.getResponse().getEtag()).isEqualTo("1");
 
 		respEntry = resp.getEntry().get(1);
@@ -727,8 +731,8 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
 		assertThat(history.size().intValue()).isEqualTo(2);
 
-		assertThat(history.getResources(0, 1).get(0).isDeleted()).isTrue();
-		assertThat(history.getResources(1, 2).get(0).isDeleted()).isFalse();
+		assertTrue(history.getResources(0, 1).get(0).isDeleted());
+		assertFalse(history.getResources(1, 2).get(0).isDeleted());
 	}
 
 	@Test
@@ -1183,20 +1187,20 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		Entry nextEntry;
 
 		nextEntry = resp.getEntry().get(0);
-		assertThat(nextEntry.getResource()).isNotNull();
+		assertNotNull(nextEntry.getResource());
 		assertThat(nextEntry.getResource().getClass()).isEqualTo(Patient.class);
 		assertThat(nextEntry.getResource().getId().toUnqualified()).isEqualTo(idv2.toUnqualified());
 		assertThat(nextEntry.getResponse().getStatus()).isEqualTo("200 OK");
 
 		nextEntry = resp.getEntry().get(1);
-		assertThat(nextEntry.getResource()).isNotNull();
+		assertNotNull(nextEntry.getResource());
 		assertThat(nextEntry.getResource().getClass()).isEqualTo(Patient.class);
 		assertThat(nextEntry.getResource().getId().toUnqualified()).isEqualTo(idv2.toUnqualified());
 		assertThat(nextEntry.getResponse().getStatus()).isEqualTo("200 OK");
 
 		nextEntry = resp.getEntry().get(2);
 		assertThat(nextEntry.getResponse().getStatus()).isEqualTo("304 Not Modified");
-		assertThat(nextEntry.getResource()).isNull();
+		assertNull(nextEntry.getResource());
 	}
 
 	@Test
@@ -1661,7 +1665,7 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 
 		app2 = myAppointmentDao.read(id2, mySrd);
 		assertThat(app2.getParticipant().get(0).getActor().getDisplay().getValue()).isEqualTo("NO REF");
-		assertThat(app2.getParticipant().get(0).getActor().getReference().getValue()).isNull();
+		assertNull(app2.getParticipant().get(0).getActor().getReference().getValue());
 		assertThat(app2.getParticipant().get(1).getActor().getDisplay().getValue()).isEqualTo("YES REF");
 		assertThat(app2.getParticipant().get(1).getActor().getReference().getValue()).isEqualTo(id0.toUnqualifiedVersionless().getValue());
 	}
@@ -1746,10 +1750,10 @@ public class FhirSystemDaoDstu2Test extends BaseJpaDstu2SystemTest {
 		IdDt medId2 = new IdDt(outcome.getEntry().get(0).getResponse().getLocation());
 		IdDt medOrderId2 = new IdDt(outcome.getEntry().get(1).getResponse().getLocation());
 
-		assertThat(medId1.isIdPartValidLong()).isTrue();
-		assertThat(medId2.isIdPartValidLong()).isTrue();
-		assertThat(medOrderId1.isIdPartValidLong()).isTrue();
-		assertThat(medOrderId2.isIdPartValidLong()).isTrue();
+		assertTrue(medId1.isIdPartValidLong());
+		assertTrue(medId2.isIdPartValidLong());
+		assertTrue(medOrderId1.isIdPartValidLong());
+		assertTrue(medOrderId2.isIdPartValidLong());
 
 		assertThat(medId2).isEqualTo(medId1);
 		assertThat(medOrderId2).isNotEqualTo(medOrderId1);

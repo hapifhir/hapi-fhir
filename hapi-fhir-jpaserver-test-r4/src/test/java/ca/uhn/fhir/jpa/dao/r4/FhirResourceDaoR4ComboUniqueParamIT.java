@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
@@ -406,10 +408,10 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		IBundleProvider outcome = myPatientDao.search(sp);
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(unformattedSql, stringContainsInOrder(
+		assertThat(unformattedSql).containsSequence(
 			"IDX_STRING = 'Patient?identifier=urn%7C111'",
 			"HASH_SYS_AND_VALUE = '-3122824860083758210'"
-		));
+		);
 		assertThat(unformattedSql).doesNotContain(("RES_DELETED_AT"));
 		assertThat(unformattedSql).doesNotContain(("RES_TYPE"));
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(id1);
@@ -543,10 +545,10 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(srId);
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(unformattedSql, stringContainsInOrder(
+		assertThat(unformattedSql).containsSequence(
 			"IDX_STRING = 'ServiceRequest?identifier=sys%7C111&patient=Patient%2F" + ptId.getIdPart() + "&performer=Practitioner%2F" + practId.getIdPart() + "'",
 			"HASH_SYS_AND_VALUE = '6795110643554413877'"
-		));
+		);
 		assertThat(unformattedSql).doesNotContain(("RES_DELETED_AT"));
 		assertThat(unformattedSql).doesNotContain(("RES_TYPE"));
 
@@ -565,10 +567,10 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(srId);
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(unformattedSql, stringContainsInOrder(
+		assertThat(unformattedSql).containsSequence(
 			"SRC_PATH = 'ServiceRequest.subject.where(resolve() is Patient)'",
 			"SRC_PATH = 'ServiceRequest.performer'"
-		));
+		);
 		assertThat(unformattedSql).doesNotContain(("RES_DELETED_AT"));
 		assertThat(unformattedSql).doesNotContain(("RES_TYPE"));
 
@@ -833,7 +835,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		});
 
 		pt = myPatientDao.read(id);
-		assertThat(pt.getActive()).isTrue();
+		assertTrue(pt.getActive());
 
 	}
 
@@ -1571,7 +1573,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		pt1.setGender(Enumerations.AdministrativeGender.MALE);
 		pt1.setBirthDateElement(new DateType("2011-01-01"));
 		IIdType id1 = myPatientDao.create(pt1).getId().toUnqualified();
-		assertThat(id1).isNotNull();
+		assertNotNull(id1);
 
 		ourLog.info("** Replacing");
 
@@ -1580,7 +1582,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		pt1.setGender(Enumerations.AdministrativeGender.FEMALE);
 		pt1.setBirthDateElement(new DateType("2011-01-01"));
 		id1 = myPatientDao.update(pt1).getId().toUnqualified();
-		assertThat(id1).isNotNull();
+		assertNotNull(id1);
 		assertThat(id1.getVersionIdPart()).isEqualTo("2");
 
 		Patient pt2 = new Patient();

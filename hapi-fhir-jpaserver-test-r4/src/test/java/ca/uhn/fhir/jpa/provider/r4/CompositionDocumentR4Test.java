@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -129,7 +130,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 				.forEach(entry -> {
 			assertThat(entry.getFullUrl()).isEqualTo(entry.getResource().getIdElement().toVersionless().toString());
 				});
-		assertThat(bundle.getLink("next")).isNull();
+		assertNull(bundle.getLink("next"));
 
 		Set<String> actual = new HashSet<>();
 		for (Bundle.BundleEntryComponent nextEntry : bundle.getEntry()) {

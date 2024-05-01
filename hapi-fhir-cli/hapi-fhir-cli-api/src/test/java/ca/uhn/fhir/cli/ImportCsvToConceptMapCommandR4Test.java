@@ -1,5 +1,7 @@
 package ca.uhn.fhir.cli;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.system.HapiSystemProperties;
@@ -77,7 +79,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 			.execute();
 
 		// Do not simplify to assertEquals(...)
-		assertThat(Boolean.TRUE.equals(methodOutcome.getCreated())).isTrue();
+		assertTrue(Boolean.TRUE.equals(methodOutcome.getCreated()));
 	}
 
 	@Test
@@ -95,7 +97,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 			.execute();
 
 		// Do not simplify to assertEquals(...)
-		assertThat(!Boolean.TRUE.equals(methodOutcome.getCreated())).isTrue();
+		assertTrue(!Boolean.TRUE.equals(methodOutcome.getCreated()));
 	}
 
 	@Test
@@ -118,10 +120,10 @@ public class ImportCsvToConceptMapCommandR4Test {
 			.withId(resultConceptMap.getIdElement())
 			.execute();
 
-		assertThat(methodOutcome.getCreated()).isNull();
+		assertNull(methodOutcome.getCreated());
 
 		// Do not simplify to assertEquals(...)
-		assertThat(!Boolean.TRUE.equals(methodOutcome.getCreated())).isTrue();
+		assertTrue(!Boolean.TRUE.equals(methodOutcome.getCreated()));
 	}
 
 	@ParameterizedTest
@@ -402,9 +404,9 @@ public class ImportCsvToConceptMapCommandR4Test {
 
 		ConceptMapGroupComponent group = conceptMap.getGroup().get(0);
 		assertThat(group.getSource()).isEqualTo("http://loinc.org");
-		assertThat(group.getSourceVersion()).isNull();
+		assertNull(group.getSourceVersion());
 		assertThat(group.getTarget()).isEqualTo("http://phenxtoolkit.org");
-		assertThat(group.getTargetVersion()).isNull();
+		assertNull(group.getTargetVersion());
 
 		assertThat(group.getElement()).hasSize(1);
 
@@ -418,7 +420,7 @@ public class ImportCsvToConceptMapCommandR4Test {
 		assertThat(target.getCode()).isEqualTo("PX121301010300");
 		assertThat(target.getDisplay()).isEqualTo("PX121301_Restless");
 		assertThat(target.getEquivalence()).isEqualTo(ConceptMapEquivalence.EQUIVALENT);
-		assertThat(target.getComment()).isNull();
+		assertNull(target.getComment());
 
 		App.main(myTlsAuthenticationTestHelper.createBaseRequestGeneratingCommandArgs(
 			new String[]{

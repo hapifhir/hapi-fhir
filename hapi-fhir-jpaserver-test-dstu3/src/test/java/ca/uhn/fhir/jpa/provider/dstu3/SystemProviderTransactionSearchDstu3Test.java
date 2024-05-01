@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.rp.dstu3.ObservationResourceProvider;
@@ -146,7 +148,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		assertThat(output.getEntry()).hasSize(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
 		assertThat(respBundle.getEntry()).hasSize(5);
-		assertThat(respBundle.getLink("next")).isNull();
+		assertNull(respBundle.getLink("next"));
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 	}
@@ -218,8 +220,8 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		assertThat(bundle.getEntry()).hasSize(1);
 		Bundle.BundleEntryResponseComponent response = bundle.getEntry().get(0).getResponse();
 		assertThat(response.getStatus()).isEqualTo("200 OK");
-		assertThat(response.getEtag()).isNotNull();
-		assertThat(response.getLastModified()).isNotNull();
+		assertNotNull(response.getEtag());
+		assertNotNull(response.getLastModified());
 		assertThat(response.getLocation()).isEqualTo(pid1.getValue() + "/_history/2");
 
 		Patient newPt = ourClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
@@ -249,7 +251,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		assertThat(output.getEntry()).hasSize(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
 		assertThat(respBundle.getEntry()).hasSize(5);
-		assertThat(respBundle.getLink("next")).isNull();
+		assertNull(respBundle.getLink("next"));
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 	}
@@ -308,7 +310,7 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		for (int i = 0; i < 30; i++) {
 			Bundle respBundle = (Bundle) output.getEntry().get(i).getResource();
 			assertThat(respBundle.getEntry()).hasSize(5);
-			assertThat(respBundle.getLink("next").getUrl()).isNotNull();
+			assertNotNull(respBundle.getLink("next").getUrl());
 			List<String> actualIds = toIds(respBundle);
 			assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 		}

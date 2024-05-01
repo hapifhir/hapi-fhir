@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
@@ -118,7 +119,7 @@ public class PagingUsingNamedPagesR4Test {
 		assertThat(linkSelf).isEqualTo(ourServer.getBaseUrl() + "/Patient?_format=xml");
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).isEqualTo(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset");
-		assertThat(bundle.getLink(Constants.LINK_PREVIOUS)).isNull();
+		assertNull(bundle.getLink(Constants.LINK_PREVIOUS));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
@@ -135,7 +136,7 @@ public class PagingUsingNamedPagesR4Test {
 		bundle = executeAndReturnBundle(httpGet, EncodingEnum.XML);
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
 		assertThat(linkSelf).isEqualTo(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID2&_format=xml&_bundletype=searchset");
-		assertThat(bundle.getLink(Constants.LINK_NEXT)).isNull();
+		assertNull(bundle.getLink(Constants.LINK_NEXT));
 		linkPrev = bundle.getLink(Constants.LINK_PREVIOUS).getUrl();
 		assertThat(linkPrev).isEqualTo(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset");
 	}

@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.binstore;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.model.entity.BinaryStorageEntity;
@@ -69,7 +73,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		assertThat(details.getBlobId()).isEqualTo(outcome.getBlobId());
 		assertThat(details.getContentType()).isEqualTo("image/png");
 		assertThat(details.getHash()).isEqualTo("dc7197cfab936698bef7818975c185a9b88b71a0a0a2493deea487706ddf20cb");
-		assertThat(details.getPublished()).isNotNull();
+		assertNotNull(details.getPublished());
 
 		/*
 		 * Read back the contents
@@ -122,7 +126,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		assertThat(details.getBlobId()).isEqualTo(outcome.getBlobId());
 		assertThat(details.getContentType()).isEqualTo("image/png");
 		assertThat(details.getHash()).isEqualTo("dc7197cfab936698bef7818975c185a9b88b71a0a0a2493deea487706ddf20cb");
-		assertThat(details.getPublished()).isNotNull();
+		assertNotNull(details.getPublished());
 
 		/*
 		 * Read back the contents
@@ -145,7 +149,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		}
 
 		StoredDetails details = mySvc.fetchBlobDetails(new IdType("Patient/123"), "1111111");
-		assertThat(details).isNull();
+		assertNull(details);
 	}
 
 
@@ -165,7 +169,7 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 		mySvc.expungeBlob(resourceId, blobId);
 
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();
-		assertThat(mySvc.writeBlob(resourceId, outcome.getBlobId(), capture)).isFalse();
+		assertFalse(mySvc.writeBlob(resourceId, outcome.getBlobId(), capture));
 		assertThat(capture.size()).isEqualTo(0);
 
 	}
@@ -184,12 +188,12 @@ public class DatabaseBlobBinaryStorageSvcImplTest extends BaseJpaR4Test {
 
 		// Right ID
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();
-		assertThat(mySvc.writeBlob(resourceId, outcome.getBlobId(), capture)).isTrue();
+		assertTrue(mySvc.writeBlob(resourceId, outcome.getBlobId(), capture));
 		assertThat(capture.size()).isEqualTo(16);
 
 		// Wrong ID
 		capture = new ByteArrayOutputStream();
-		assertThat(mySvc.writeBlob(new IdType("Patient/9999"), outcome.getBlobId(), capture)).isFalse();
+		assertFalse(mySvc.writeBlob(new IdType("Patient/9999"), outcome.getBlobId(), capture));
 		assertThat(capture.size()).isEqualTo(0);
 
 	}

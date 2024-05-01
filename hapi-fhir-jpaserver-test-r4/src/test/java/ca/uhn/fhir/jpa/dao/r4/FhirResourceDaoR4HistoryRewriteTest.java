@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -77,12 +78,12 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		Patient h2 = myPatientDao.read(id.withVersion("2"), mySrd);
 		assertThat(h2.getName().get(0).getFamily()).isEqualTo(testFamilyNameModified);
 		assertThat(h2.getIdElement().toString()).endsWith("/_history/2");
-		assertThat(Math.abs(h2.getMeta().getLastUpdated().getTime() - new Date().getTime()) < 1000L).isTrue();
+		assertTrue(Math.abs(h2.getMeta().getLastUpdated().getTime() - new Date().getTime()) < 1000L);
 
 		Patient h1 = myPatientDao.read(id.withVersion("1"), mySrd);
 		assertThat(h1.getIdentifier().get(0).getValue()).isEqualTo(systemNameModified);
 		assertThat(h1.getIdElement().toString()).endsWith("/_history/1");
-		assertThat(Math.abs(h1.getMeta().getLastUpdated().getTime() - new Date().getTime()) < 1000L).isTrue();
+		assertTrue(Math.abs(h1.getMeta().getLastUpdated().getTime() - new Date().getTime()) < 1000L);
 	}
 
 	@Test
@@ -114,7 +115,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		assertThat(lPatient.getName().get(0).getGiven().get(0).getValue()).isEqualTo(testGivenNameModified);
 		assertThat(resourceVersionsSizeAfterUpdate).isEqualTo(resourceVersionsSizeInit);
 		assertThat(lPatient.getIdElement().toString()).endsWith("/_history/3");
-		assertThat(Math.abs(lPatient.getMeta().getLastUpdated().getTime() - new Date().getTime()) < 1000L).isTrue();
+		assertTrue(Math.abs(lPatient.getMeta().getLastUpdated().getTime() - new Date().getTime()) < 1000L);
 	}
 
 	@Test

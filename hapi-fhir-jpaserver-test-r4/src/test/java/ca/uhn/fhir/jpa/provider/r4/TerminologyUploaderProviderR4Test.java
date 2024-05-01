@@ -255,12 +255,12 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 5",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 	}
 
 	@Test
@@ -296,12 +296,12 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 5",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 		runInTransaction(() -> {
 			TermCodeSystem cs = myTermCodeSystemDao.findByCodeSystemUri("http://foo/cs");
 			TermCodeSystemVersion version = cs.getCurrentVersion();
@@ -343,12 +343,12 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 5",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 
 		assertHierarchyContains(
 			"CHEM seq=0",
@@ -383,12 +383,12 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 5",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 
 		assertHierarchyContains(
 			"CHEM seq=0",
@@ -453,12 +453,12 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 2",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 
 		assertHierarchyContains(
 			"1111222233 seq=0",
@@ -523,12 +523,12 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 2",
 			"\"name\": \"target\"",
 			"\"reference\": \"CodeSystem/"
-		));
+		);
 
 		assertHierarchyContains(
 			"CHEM seq=0",

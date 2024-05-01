@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -145,7 +146,7 @@ public class CascadingDeleteInterceptorTest extends BaseResourceProviderR4Test {
 		verify(mockResourceDao).read(any(IIdType.class), theRequestDetailsCaptor.capture());
 		List<RequestDetails> capturedRequestDetailsParam = theRequestDetailsCaptor.getAllValues();
 		for (RequestDetails requestDetails : capturedRequestDetailsParam) {
-			assertThat(requestDetails).isNotNull();
+			assertNotNull(requestDetails);
 		}
 	}
 

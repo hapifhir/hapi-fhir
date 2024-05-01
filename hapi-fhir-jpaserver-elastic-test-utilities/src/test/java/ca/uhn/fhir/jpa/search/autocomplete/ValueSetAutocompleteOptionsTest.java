@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -43,8 +45,8 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult).isNotNull();
-		assertThat(myOptionsResult.getResourceType()).isNull();
+		assertNotNull(myOptionsResult);
+		assertNull(myOptionsResult.getResourceType());
 		assertThat(myOptionsResult.getSearchParamCode()).isEqualTo("code");
 	}
 
@@ -54,10 +56,10 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult).isNotNull();
+		assertNotNull(myOptionsResult);
 		assertThat(myOptionsResult.getResourceType()).isEqualTo("Observation");
 		assertThat(myOptionsResult.getSearchParamCode()).isEqualTo("code");
-		assertThat(myOptionsResult.getSearchParamModifier()).isNull();
+		assertNull(myOptionsResult.getSearchParamModifier());
 	}
 
 	@Test
@@ -66,7 +68,7 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult).isNotNull();
+		assertNotNull(myOptionsResult);
 		assertThat(myOptionsResult.getResourceType()).isEqualTo("Observation");
 		assertThat(myOptionsResult.getSearchParamCode()).isEqualTo("code");
 		assertThat(myOptionsResult.getSearchParamModifier()).isEqualTo("text");
@@ -79,7 +81,7 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult).isNotNull();
+		assertNotNull(myOptionsResult);
 		assertThat(myOptionsResult.getFilter()).isEqualTo("blood");
 	}
 
@@ -90,7 +92,7 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult).isNotNull();
+		assertNotNull(myOptionsResult);
 		assertThat(myOptionsResult.getFilter()).isEqualTo("");
 	}
 
@@ -110,7 +112,7 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult).isNotNull();
+		assertNotNull(myOptionsResult);
 		assertThat(myOptionsResult.getCount()).isEqualTo(Optional.of(50));
 	}
 

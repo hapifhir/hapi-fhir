@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.partition;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -208,7 +209,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		List<PartitionEntity> actual = myPartitionConfigSvc.listPartitions();
 
 		assertThat(actual).hasSize(2);
-		assertThat(actual.stream().anyMatch(item -> "PARTITION-1".equals(item.getName()))).isTrue();
-		assertThat(actual.stream().anyMatch(item -> "PARTITION-2".equals(item.getName()))).isTrue();
+		assertTrue(actual.stream().anyMatch(item -> "PARTITION-1".equals(item.getName())));
+		assertTrue(actual.stream().anyMatch(item -> "PARTITION-2".equals(item.getName())));
 	}
 }

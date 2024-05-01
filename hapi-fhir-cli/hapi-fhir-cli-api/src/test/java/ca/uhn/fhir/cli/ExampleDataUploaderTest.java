@@ -1,5 +1,7 @@
 package ca.uhn.fhir.cli;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
@@ -61,9 +63,9 @@ class ExampleDataUploaderTest {
 		myRestServerR4Helper.executeWithLatch(() -> runCommand(commandLine));
 
 		// validate
-		assertThat(myCapturingInterceptor.getLastRequest()).isNotNull();
+		assertNotNull(myCapturingInterceptor.getLastRequest());
 		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
-		assertThat(allHeaders.isEmpty()).isFalse();
+		assertFalse(allHeaders.isEmpty());
 
 		assertThat(allHeaders).containsKey(headerKey);
 		assertThat(allHeaders.get(headerKey)).hasSize(1);

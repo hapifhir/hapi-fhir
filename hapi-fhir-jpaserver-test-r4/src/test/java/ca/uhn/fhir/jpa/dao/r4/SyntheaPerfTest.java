@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
@@ -80,7 +81,7 @@ public class SyntheaPerfTest extends BaseJpaTest {
 		myFhirContext.getParserOptions().setAutoContainReferenceTargetsWithNoId(false);
 		myStorageSettings.setInlineResourceTextBelowSize(4000);
 
-		assertThat(myStorageSettings.isMassIngestionMode()).isTrue();
+		assertTrue(myStorageSettings.isMassIngestionMode());
 
 		List<Path> files = Files
 			.list(FileSystems.getDefault().getPath(PATH_TO_SYNTHEA_OUTPUT))

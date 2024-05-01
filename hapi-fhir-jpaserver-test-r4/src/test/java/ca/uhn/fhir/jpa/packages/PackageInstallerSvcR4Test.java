@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.packages;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -163,7 +164,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		patient.setMeta(new Meta().addProfile("https://fhir.nhs.uk/R4/StructureDefinition/UKCore-Patient"));
 
 		ValidationResult validationResultBefore = validateWithResult(patient);
-		assertThat(validationResultBefore.isSuccessful()).isFalse();
+		assertFalse(validationResultBefore.isSuccessful());
 
 		byte[] bytes = ClasspathUtil.loadResourceAsByteArray("/packages/UK.Core.r4-1.1.0.tgz");
 		myFakeNpmServlet.responses.put("/UK.Core.r4/1.1.0", bytes);
@@ -174,7 +175,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myPackageInstallerSvc.install(spec);
 
 		ValidationResult validationResultAfter = validateWithResult(patient);
-		assertThat(validationResultAfter.isSuccessful()).isTrue();
+		assertTrue(validationResultAfter.isSuccessful());
 	}
 
 	@Test
@@ -191,12 +192,12 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		patient.setMeta(new Meta().addProfile("https://fhir.nhs.uk/R4/StructureDefinition/UKCore-Patient"));
 
 		ValidationResult validationResultBefore = validateWithResult(patient);
-		assertThat(validationResultBefore.isSuccessful()).isTrue();
+		assertTrue(validationResultBefore.isSuccessful());
 
 		myPackageInstallerSvc.uninstall(spec);
 
 		ValidationResult validationResultAfter = validateWithResult(patient);
-		assertThat(validationResultAfter.isSuccessful()).isFalse();
+		assertFalse(validationResultAfter.isSuccessful());
 	}
 
 	@Test
@@ -233,7 +234,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		});
 
 		// This was saved but is the wrong version of FHIR for this server
-		assertThat(myNpmJpaValidationSupport.fetchStructureDefinition("http://fhir.de/StructureDefinition/condition-de-basis/0.2")).isNull();
+		assertNull(myNpmJpaValidationSupport.fetchStructureDefinition("http://fhir.de/StructureDefinition/condition-de-basis/0.2"));
 	}
 
 	@Test
@@ -614,7 +615,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		// Make sure we can fetch the package by ID and Version
 		NpmPackage pkg = myPackageCacheManager.loadPackage("UK.Core.r4", "1.1.0");
-		assertThat(pkg.description()).isNull();
+		assertNull(pkg.description());
 		assertThat(pkg.name()).isEqualTo("UK.Core.r4");
 
 	}
@@ -857,8 +858,8 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.11.1").getVersion()).isEqualTo("0.11.1");
 		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.12.0").getVersion()).isEqualTo("0.12.0");
 		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "latest").getVersion()).isEqualTo("0.12.0");
-		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "1.2.3")).isNull();
-		assertThat(myPackageCacheManager.loadPackageContents("foo", "1.2.3")).isNull();
+		assertNull(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "1.2.3"));
+		assertNull(myPackageCacheManager.loadPackageContents("foo", "1.2.3"));
 	}
 
 

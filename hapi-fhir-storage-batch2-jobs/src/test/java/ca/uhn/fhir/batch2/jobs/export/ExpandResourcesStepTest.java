@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -174,9 +175,9 @@ public class ExpandResourcesStepTest {
 		// we'll only verify a single element
 		// but we want to make sure it's as compact as possible
 		String stringifiedElement = expandedResources.getStringifiedResources().get(0);
-		assertThat(stringifiedElement.contains("\t")).isFalse();
-		assertThat(stringifiedElement.contains("\n")).isFalse();
-		assertThat(stringifiedElement.contains(" ")).isFalse();
+		assertFalse(stringifiedElement.contains("\t"));
+		assertFalse(stringifiedElement.contains("\n"));
+		assertFalse(stringifiedElement.contains(" "));
 
 		// Patient Search
 		ArgumentCaptor<SystemRequestDetails> patientSearchCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);

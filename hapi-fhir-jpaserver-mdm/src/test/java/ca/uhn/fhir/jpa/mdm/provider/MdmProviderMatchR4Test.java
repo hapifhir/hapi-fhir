@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import com.google.common.collect.Ordering;
@@ -52,7 +53,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 
 		assertThat(searchComponent.getScore().doubleValue()).isCloseTo(2.0 / 3.0, within(0.01));
 		Extension matchGradeExtension = searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
-		assertThat(matchGradeExtension).isNotNull();
+		assertNotNull(matchGradeExtension);
 		assertThat(matchGradeExtension.getValue().toString()).isEqualTo(MatchGrade.CERTAIN.toCode());
 	}
 
@@ -77,7 +78,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		//Since there is only
 		assertThat(searchComponent.getScore().doubleValue()).isCloseTo(1.0 / 1.0, within(0.01));
 		Extension matchGradeExtension = searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
-		assertThat(matchGradeExtension).isNotNull();
+		assertNotNull(matchGradeExtension);
 		assertThat(matchGradeExtension.getValue().toString()).isEqualTo(MatchGrade.CERTAIN.toCode());
 
 	}
@@ -101,7 +102,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 
 		assertThat(searchComponent.getScore().doubleValue()).isCloseTo(2.0 / 3.0, within(0.01));
 		Extension matchGradeExtension = searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
-		assertThat(matchGradeExtension).isNotNull();
+		assertNotNull(matchGradeExtension);
 		assertThat(matchGradeExtension.getValue().toString()).isEqualTo(MatchGrade.CERTAIN.toCode());
 	}
 

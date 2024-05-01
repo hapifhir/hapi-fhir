@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -101,7 +102,7 @@ class JpaPersistedResourceValidationSupportTest {
 		@Test
 		void fetchValueSetMustUseForcedId() {
 			final String valueSetId = "string-containing-loinc";
-			assertThat(testedClass.fetchValueSet(valueSetId)).isNull();
+			assertNull(testedClass.fetchValueSet(valueSetId));
 		}
 
 

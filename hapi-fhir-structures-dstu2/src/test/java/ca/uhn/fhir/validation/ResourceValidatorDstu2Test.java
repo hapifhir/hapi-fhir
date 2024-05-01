@@ -1,5 +1,8 @@
 package ca.uhn.fhir.validation;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.ExtensionDt;
@@ -103,7 +106,7 @@ public class ResourceValidatorDstu2Test {
 		FhirValidator val = createFhirValidator();
 
 		ValidationResult result = val.validateWithResult(b);
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 
 		MedicationOrder p = (MedicationOrder) b.getEntry().get(0).getResource();
 		TimingDt timing = new TimingDt();
@@ -112,7 +115,7 @@ public class ResourceValidatorDstu2Test {
 		p.getDosageInstructionFirstRep().setTiming(timing);
 
 		result = val.validateWithResult(b);
-		assertThat(result.isSuccessful()).isFalse();
+		assertFalse(result.isSuccessful());
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.getOperationOutcome());
 		ourLog.info(encoded);
 		assertThat(encoded).contains("tim-1:");
@@ -128,7 +131,7 @@ public class ResourceValidatorDstu2Test {
 		FhirValidator val = createFhirValidator();
 
 		ValidationResult validationResult = val.validateWithResult(b);
-		assertThat(validationResult.isSuccessful()).isTrue();
+		assertTrue(validationResult.isSuccessful());
 
 		MedicationOrder p = (MedicationOrder) b.getEntry().get(0).getResource();
 		TimingDt timing = new TimingDt();
@@ -142,7 +145,7 @@ public class ResourceValidatorDstu2Test {
 
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(validationResult.toOperationOutcome()));
 
-		assertThat(validationResult.isSuccessful()).isFalse();
+		assertFalse(validationResult.isSuccessful());
 
 		String encoded = logOperationOutcome(validationResult);
 		assertThat(encoded).contains("tim-1:");
@@ -162,7 +165,7 @@ public class ResourceValidatorDstu2Test {
 		OperationOutcome operationOutcome = (OperationOutcome) result.toOperationOutcome();
 
 		assertThat(result.isSuccessful()).as(result.toString()).isTrue();
-		assertThat(operationOutcome).isNotNull();
+		assertNotNull(operationOutcome);
 		assertThat(operationOutcome.getIssue()).hasSize(1);
 	}
 
@@ -203,11 +206,11 @@ public class ResourceValidatorDstu2Test {
 		val.setValidateAgainstStandardSchematron(false);
 
 		ValidationResult result = val.validateWithResult(p);
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 
 		p.getAnimal().getBreed().setText("The Breed");
 		result = val.validateWithResult(p);
-		assertThat(result.isSuccessful()).isFalse();
+		assertFalse(result.isSuccessful());
 		OperationOutcome operationOutcome = (OperationOutcome) result.getOperationOutcome();
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertThat(operationOutcome.getIssue()).hasSize(1);
@@ -224,11 +227,11 @@ public class ResourceValidatorDstu2Test {
 		val.setValidateAgainstStandardSchematron(true);
 
 		ValidationResult validationResult = val.validateWithResult(p);
-		assertThat(validationResult.isSuccessful()).isTrue();
+		assertTrue(validationResult.isSuccessful());
 
 		p.getTelecomFirstRep().setValue("123-4567");
 		validationResult = val.validateWithResult(p);
-		assertThat(validationResult.isSuccessful()).isFalse();
+		assertFalse(validationResult.isSuccessful());
 		OperationOutcome operationOutcome = (OperationOutcome) validationResult.toOperationOutcome();
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
 		assertThat(operationOutcome.getIssue()).hasSize(1);
@@ -236,7 +239,7 @@ public class ResourceValidatorDstu2Test {
 
 		p.getTelecomFirstRep().setSystem(ContactPointSystemEnum.EMAIL);
 		validationResult = val.validateWithResult(p);
-		assertThat(validationResult.isSuccessful()).isTrue();
+		assertTrue(validationResult.isSuccessful());
 	}
 
 	/**
@@ -273,7 +276,7 @@ public class ResourceValidatorDstu2Test {
 
 		String messageString = logOperationOutcome(result);
 
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 
 		assertThat(messageString).contains("No issues");
 
@@ -298,14 +301,14 @@ public class ResourceValidatorDstu2Test {
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSequence(
 			"meta",
 			"String Extension",
 			"Organization/2.25.79433498044103547197447759549862032393",
 			"furry-grey",
 			"furry-white",
 			"FamilyName"
-		));
+		);
 		assertThat(messageString, not(stringContainsInOrder(
 			"extension",
 			"meta"
@@ -320,7 +323,7 @@ public class ResourceValidatorDstu2Test {
 
 		logOperationOutcome(result);
 
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 
 		assertThat(messageString).contains("valueReference");
 		assertThat(messageString).doesNotContain("valueResource");
@@ -345,14 +348,14 @@ public class ResourceValidatorDstu2Test {
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSequence(
 			"meta",
 			"Organization/2.25.79433498044103547197447759549862032393",
 			"furry-grey",
 			"furry-white",
 			"String Extension",
 			"FamilyName"
-		));
+		);
 		assertThat(messageString, not(stringContainsInOrder(
 			"extension",
 			"meta"
@@ -369,7 +372,7 @@ public class ResourceValidatorDstu2Test {
 
 		logOperationOutcome(result);
 
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 
 		assertThat(messageString).contains("valueReference");
 		assertThat(messageString).doesNotContain("valueResource");

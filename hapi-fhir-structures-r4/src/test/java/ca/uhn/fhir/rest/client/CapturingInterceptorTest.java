@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.client.apache.ApacheHttpResponse;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
@@ -48,8 +49,8 @@ public class CapturingInterceptorTest {
 
 		interceptor.clear();
 
-		assertThat(interceptor.getLastRequest()).isNull();
-		assertThat(interceptor.getLastResponse()).isNull();
+		assertNull(interceptor.getLastRequest());
+		assertNull(interceptor.getLastResponse());
 	}
 
 	@Test

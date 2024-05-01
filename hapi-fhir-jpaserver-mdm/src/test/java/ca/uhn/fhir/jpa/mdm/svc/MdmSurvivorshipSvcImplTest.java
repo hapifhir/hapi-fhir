@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -167,13 +169,13 @@ public class MdmSurvivorshipSvcImplTest {
 		);
 
 		// verify
-		assertThat(goldenPatientRebuilt).isNotNull();
+		assertNotNull(goldenPatientRebuilt);
 		// make sure it doesn't match the previous golden resource
 		assertThat(goldenPatientRebuilt).isNotEqualTo(goldenPatient);
 		assertThat(goldenPatientRebuilt.getName().get(0).getGiven()).isNotEqualTo(goldenPatient.getName().get(0).getGiven());
 		assertThat(goldenPatientRebuilt.getAddress().get(0).getLine().get(0)).isNotEqualTo(goldenPatient.getAddress().get(0).getLine().get(0));
 		// make sure it's still a golden resource
-		assertThat(MdmResourceUtil.isGoldenRecord(goldenPatientRebuilt)).isTrue();
+		assertTrue(MdmResourceUtil.isGoldenRecord(goldenPatientRebuilt));
 
 		verify(resourceDao)
 			.update(eq(goldenPatientRebuilt), any(RequestDetails.class));

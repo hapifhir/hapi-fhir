@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.fql.provider;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutionResult;
@@ -149,7 +150,7 @@ public class HfqlRestProviderTest {
 
 			verify(myFqlExecutor, times(1)).executeContinuation(any(), myStatementCaptor.capture(), myOffsetCaptor.capture(), myLimitCaptor.capture(), notNull());
 			assertThat(myStatementCaptor.getValue()).isEqualTo(continuation);
-			assertThat(myLimitCaptor.getValue()).isNull();
+			assertNull(myLimitCaptor.getValue());
 			assertThat(myOffsetCaptor.getValue()).isEqualTo(99);
 		}
 	}

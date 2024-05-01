@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
@@ -887,7 +888,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			}
 		}
 
-		assertThat(responseBundle.getLink("next")).isNull();
+		assertNull(responseBundle.getLink("next"));
 
 		assertThat(idsSet).contains("List/A161444");
 		assertThat(idsSet).contains("List/A161468");
@@ -1055,7 +1056,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		assertThat(response.getEntry()).hasSize(1);
 		assertThat(response.getTotalElement().getValueAsString()).isEqualTo("21");
-		assertThat(response.getLink("next")).isNull();
+		assertNull(response.getLink("next"));
 
 	}
 
@@ -1089,8 +1090,8 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			.execute();
 
 		assertThat(response.getEntry()).hasSize(10);
-		assertThat(response.getTotalElement().getValue()).isNull();
-		assertThat(response.getLink("next")).isNull();
+		assertNull(response.getTotalElement().getValue());
+		assertNull(response.getLink("next"));
 	}
 
 	@Test

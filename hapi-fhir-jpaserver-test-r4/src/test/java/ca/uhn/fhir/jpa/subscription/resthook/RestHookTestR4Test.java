@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
@@ -84,7 +88,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	@Test
 	public void testSubscriptionTopicRegistryBean() {
 		// This bean should not exist in R4
-		assertThat(mySubscriptionTopicRegistry).isNull();
+		assertNull(mySubscriptionTopicRegistry);
 	}
 
 	/**
@@ -372,7 +376,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		obs = myClient.read().resource(Observation.class).withId(obs.getIdElement().toUnqualifiedVersionless()).execute();
 		Coding tag = obs.getMeta().getTag("http://blah", "blah");
-		assertThat(tag).isNotNull();
+		assertNotNull(tag);
 
 		// Should be no further deliveries
 		Thread.sleep(1000);
@@ -386,7 +390,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		obs = myClient.read().resource(Observation.class).withId(obs.getIdElement().toUnqualifiedVersionless()).execute();
 		tag = obs.getMeta().getTag("http://blah", "blah");
-		assertThat(tag).isNull();
+		assertNull(tag);
 
 		// Should be no further deliveries
 		Thread.sleep(1000);
@@ -424,7 +428,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		obs = myClient.read().resource(Observation.class).withId(obs.getIdElement().toUnqualifiedVersionless()).execute();
 		Coding tag = obs.getMeta().getTag("http://blah", "blah");
-		assertThat(tag).isNotNull();
+		assertNotNull(tag);
 
 		// Should be no further deliveries
 		Thread.sleep(1000);
@@ -438,7 +442,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		obs = myClient.read().resource(Observation.class).withId(obs.getIdElement().toUnqualifiedVersionless()).execute();
 		tag = obs.getMeta().getTag("http://blah", "blah");
-		assertThat(tag).isNull();
+		assertNull(tag);
 
 		// Should be no further deliveries
 		Thread.sleep(1000);
@@ -526,7 +530,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		idElement = ourObservationProvider.getResourceUpdates().get(1).getIdElement();
 		assertThat(idElement.getIdPart()).isEqualTo(observation2.getIdElement().getIdPart());
 		// Now VersionId is stripped
-		assertThat(idElement.getVersionIdPart()).isNull();
+		assertNull(idElement.getVersionIdPart());
 	}
 
 	@Test
@@ -547,7 +551,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		ourLog.info("** About to send observation");
 		Observation observation = sendObservation(code, "SNOMED-CT");
 		assertThat(observation.getIdElement().getVersionIdPart()).isEqualTo("1");
-		assertThat(observation.getNoteFirstRep().getText()).isNull();
+		assertNull(observation.getNoteFirstRep().getText());
 
 		observation.getNoteFirstRep().setText("changed");
 		MethodOutcome methodOutcome = myClient.update().resource(observation).execute();
@@ -555,7 +559,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertThat(observation.getNoteFirstRep().getText()).isEqualTo("changed");
 
 		// Wait for our two delivery channel threads to be paused
-		assertThat(countDownLatch.await(5L, TimeUnit.SECONDS)).isTrue();
+		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 
@@ -567,7 +571,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		Observation observation2 = ourObservationProvider.getResourceUpdates().stream().filter(t->t.getIdElement().getVersionIdPart().equals("2")).findFirst().orElseThrow(()->new IllegalArgumentException());
 
 		assertThat(observation1.getIdElement().getVersionIdPart()).isEqualTo("1");
-		assertThat(observation1.getNoteFirstRep().getText()).isNull();
+		assertNull(observation1.getNoteFirstRep().getText());
 		assertThat(observation2.getIdElement().getVersionIdPart()).isEqualTo("2");
 		assertThat(observation2.getNoteFirstRep().getText()).isEqualTo("changed");
 	}
@@ -621,7 +625,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		ourLog.info("** About to send observation");
 		Observation observation = sendObservation(code, "SNOMED-CT");
 		assertThat(observation.getIdElement().getVersionIdPart()).isEqualTo("1");
-		assertThat(observation.getNoteFirstRep().getText()).isNull();
+		assertNull(observation.getNoteFirstRep().getText());
 
 		observation.getNoteFirstRep().setText("changed");
 		MethodOutcome methodOutcome = myClient.update().resource(observation).execute();
@@ -629,7 +633,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertThat(observation.getNoteFirstRep().getText()).isEqualTo("changed");
 
 		// Wait for our two delivery channel threads to be paused
-		assertThat(countDownLatch.await(5L, TimeUnit.SECONDS)).isTrue();
+		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 
@@ -669,7 +673,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertThat(ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart()).isEqualTo("1");
 
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
-		assertThat(subscriptionTemp).isNotNull();
+		assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
@@ -719,7 +723,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertThat(ourObservationProvider.getCountCreate()).isEqualTo(0);
 		ourObservationProvider.waitForUpdateCount(5);
 
-		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
+		assertFalse(subscription1.getId().equals(subscription2.getId()));
 		assertThat(observation1.getId()).isNotEmpty();
 		assertThat(observation2.getId()).isNotEmpty();
 	}
@@ -749,7 +753,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertThat(ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart()).isEqualTo("1");
 
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
-		assertThat(subscriptionTemp).isNotNull();
+		assertNotNull(subscriptionTemp);
 
 		subscriptionTemp.setCriteria(criteria1);
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
@@ -799,7 +803,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertThat(ourObservationProvider.getCountCreate()).isEqualTo(0);
 		ourObservationProvider.waitForUpdateCount(5);
 
-		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
+		assertFalse(subscription1.getId().equals(subscription2.getId()));
 		assertThat(observation1.getId()).isNotEmpty();
 		assertThat(observation2.getId()).isNotEmpty();
 	}
@@ -825,7 +829,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertThat(ourRestfulServer.getRequestContentTypes().get(0)).isEqualTo(Constants.CT_FHIR_XML_NEW);
 
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
-		assertThat(subscriptionTemp).isNotNull();
+		assertNotNull(subscriptionTemp);
 		subscriptionTemp.setCriteria(criteria1);
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
@@ -873,7 +877,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertThat(ourObservationProvider.getCountCreate()).isEqualTo(0);
 		ourObservationProvider.waitForUpdateCount(5);
 
-		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
+		assertFalse(subscription1.getId().equals(subscription2.getId()));
 		assertThat(observation1.getId()).isNotEmpty();
 		assertThat(observation2.getId()).isNotEmpty();
 	}
@@ -1004,7 +1008,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertThat(ourObservationProvider.getCountUpdate()).isEqualTo(0);
 
 		Subscription subscriptionTemp = myClient.read().resource(Subscription.class).withId(subscription2.getId()).execute();
-		assertThat(subscriptionTemp).isNotNull();
+		assertNotNull(subscriptionTemp);
 		String criteriaGood = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		subscriptionTemp.setCriteria(criteriaGood);
 		ourLog.info("** About to update subscription");
@@ -1315,7 +1319,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 
 		// verify SubscriptionStatus.notificationEvent.focus
 		Optional<Parameters.ParametersParameterComponent> focus = getNotificationEventFocus(resources);
-		assertThat(focus.isPresent()).isFalse();
+		assertFalse(focus.isPresent());
 	}
 
 	@Test
@@ -1339,7 +1343,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		Bundle.BundleEntryComponent patientEntry = bundle.getEntry().get(1);
 		validateRequestParameters(patientEntry);
 		Patient bundlePatient = (Patient) patientEntry.getResource();
-		assertThat(bundlePatient).isNull();
+		assertNull(bundlePatient);
 	}
 
 	@Test
@@ -1363,7 +1367,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		Bundle.BundleEntryComponent patientEntry = bundle.getEntry().get(1);
 		validateRequestParameters(patientEntry);
 		Patient bundlePatient = (Patient) patientEntry.getResource();
-		assertThat(bundlePatient.getActive()).isTrue();
+		assertTrue(bundlePatient.getActive());
 		assertThat(bundlePatient.getGender()).isEqualTo(Enumerations.AdministrativeGender.FEMALE);
 	}
 
@@ -1399,14 +1403,14 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertThat(theResources.get(0).getResourceType().name()).isEqualTo("Parameters");
 		Parameters parameters = (Parameters) theResources.get(0);
 		Parameters.ParametersParameterComponent notificationEvent = parameters.getParameter("notification-event");
-		assertThat(notificationEvent).isNotNull();
+		assertNotNull(notificationEvent);
 		return notificationEvent.getPart().stream()
 				.filter(part -> part.getName().equals("focus"))
 				.findFirst();
 	}
 
 	private void validateRequestParameters(Bundle.BundleEntryComponent thePatientEntry) {
-		assertThat(thePatientEntry.getRequest()).isNotNull();
+		assertNotNull(thePatientEntry.getRequest());
 		assertThat(thePatientEntry.getRequest().getMethod().name()).isEqualTo("POST");
 		assertThat(thePatientEntry.getRequest().getUrl()).isEqualTo("Patient");
 	}

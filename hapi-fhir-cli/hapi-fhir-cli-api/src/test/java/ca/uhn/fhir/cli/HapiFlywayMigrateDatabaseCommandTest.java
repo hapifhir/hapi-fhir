@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cli;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.SchemaMigrator;
@@ -191,7 +192,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		// Verify that foreign key FK_SEARCHRES_RES on HFJ_SEARCH_RESULT still exists
 		foreignKeys = JdbcUtils.getForeignKeys(connectionProperties, "HFJ_RESOURCE", "HFJ_SEARCH_RESULT");
 		assertThat(foreignKeys).contains("FK_SEARCHRES_RES");
-		assertThat(expectedMigrationEntities == hapiMigrationDao.findAll().size()).isTrue();
+		assertTrue(expectedMigrationEntities == hapiMigrationDao.findAll().size());
 
 	}
 
@@ -260,7 +261,7 @@ public class HapiFlywayMigrateDatabaseCommandTest {
 		if (directory.exists()) {
 			FileUtils.forceDelete(directory);
 		}
-		assertThat(directory.exists()).isFalse();
+		assertFalse(directory.exists());
 
 		return new File(myDbDirectory + "/" + theDatabaseName);
 	}

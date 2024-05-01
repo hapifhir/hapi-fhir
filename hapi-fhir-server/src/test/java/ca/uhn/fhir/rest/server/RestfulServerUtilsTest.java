@@ -1,5 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
 import ca.uhn.fhir.rest.api.PreferHandlingEnum;
@@ -42,28 +45,28 @@ public class RestfulServerUtilsTest {
 	public void testParsePreferReturn() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "return=representation");
 		assertThat(header.getReturn()).isEqualTo(PreferReturnEnum.REPRESENTATION);
-		assertThat(header.getRespondAsync()).isFalse();
+		assertFalse(header.getRespondAsync());
 	}
 
 	@Test
 	public void testParsePreferReturnAndAsync() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "return=OperationOutcome; respond-async");
 		assertThat(header.getReturn()).isEqualTo(PreferReturnEnum.OPERATION_OUTCOME);
-		assertThat(header.getRespondAsync()).isTrue();
+		assertTrue(header.getRespondAsync());
 	}
 
 	@Test
 	public void testParsePreferAsync() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "respond-async");
-		assertThat(header.getReturn()).isNull();
-		assertThat(header.getRespondAsync()).isTrue();
+		assertNull(header.getReturn());
+		assertTrue(header.getRespondAsync());
 	}
 
 	@Test
 	public void testParseHandlingLenient() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "handling=lenient");
-		assertThat(header.getReturn()).isNull();
-		assertThat(header.getRespondAsync()).isFalse();
+		assertNull(header.getReturn());
+		assertFalse(header.getRespondAsync());
 		assertThat(header.getHanding()).isEqualTo(PreferHandlingEnum.LENIENT);
 	}
 
@@ -71,7 +74,7 @@ public class RestfulServerUtilsTest {
 	public void testParseHandlingLenientAndReturnRepresentation_CommaSeparatd() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "handling=lenient, return=representation");
 		assertThat(header.getReturn()).isEqualTo(PreferReturnEnum.REPRESENTATION);
-		assertThat(header.getRespondAsync()).isFalse();
+		assertFalse(header.getRespondAsync());
 		assertThat(header.getHanding()).isEqualTo(PreferHandlingEnum.LENIENT);
 	}
 
@@ -79,7 +82,7 @@ public class RestfulServerUtilsTest {
 	public void testParseHandlingLenientAndReturnRepresentation_SemicolonSeparatd() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "handling=lenient; return=representation");
 		assertThat(header.getReturn()).isEqualTo(PreferReturnEnum.REPRESENTATION);
-		assertThat(header.getRespondAsync()).isFalse();
+		assertFalse(header.getRespondAsync());
 		assertThat(header.getHanding()).isEqualTo(PreferHandlingEnum.LENIENT);
 	}
 

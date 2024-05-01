@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchCriteriaBuilderSvc;
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
@@ -24,7 +25,7 @@ public class MdmCandidateSearchCriteriaBuilderSvcTest extends BaseMdmR4Test {
 		MdmResourceSearchParamJson searchParamJson = new MdmResourceSearchParamJson();
 		searchParamJson.addSearchParam("family");
 		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), searchParamJson);
-		assertThat(result.isPresent()).isFalse();
+		assertFalse(result.isPresent());
 	}
 
 	@Test

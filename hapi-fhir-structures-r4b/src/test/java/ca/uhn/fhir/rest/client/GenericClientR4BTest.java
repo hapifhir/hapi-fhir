@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -92,8 +93,8 @@ public class GenericClientR4BTest {
 		MethodOutcome outcome = client.create().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
 		assertThat(myAnswerCount).isEqualTo(2);
-		assertThat(outcome.getOperationOutcome()).isNotNull();
-		assertThat(outcome.getResource()).isNotNull();
+		assertNotNull(outcome.getOperationOutcome());
+		assertNotNull(outcome.getResource());
 
 		assertThat(((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>");
 		assertThat(((Patient) outcome.getResource()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>");

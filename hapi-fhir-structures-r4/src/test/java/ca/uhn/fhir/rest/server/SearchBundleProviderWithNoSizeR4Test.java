@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -95,7 +97,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 			assertThat(respBundle.getEntry()).hasSize(10);
 			assertThat(respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/0");
 			linkNext = respBundle.getLink("next");
-			assertThat(linkNext).isNotNull();
+			assertNotNull(linkNext);
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -116,7 +118,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 			assertThat(respBundle.getEntry()).hasSize(10);
 			assertThat(respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/10");
 			linkNext = respBundle.getLink("next");
-			assertThat(linkNext).isNotNull();
+			assertNotNull(linkNext);
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -134,7 +136,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 			assertThat(respBundle.getEntry()).hasSize(5);
 			assertThat(respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/20");
 			linkNext = respBundle.getLink("next");
-			assertThat(linkNext).isNull();
+			assertNull(linkNext);
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());

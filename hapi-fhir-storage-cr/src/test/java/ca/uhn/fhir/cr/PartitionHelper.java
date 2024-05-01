@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cr;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -55,7 +56,7 @@ public class PartitionHelper implements BeforeEachCallback, AfterEachCallback {
 			if (theRequestDetails == null) {
 				ourLog.info("useful breakpoint :-)");
 			}
-			assertThat(theRequestDetails).isNotNull();
+			assertNotNull(theRequestDetails);
 			return RequestPartitionId.defaultPartition();
 		}
 

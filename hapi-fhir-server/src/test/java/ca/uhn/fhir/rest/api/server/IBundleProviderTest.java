@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.api.server;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.SimpleBundleProvider;
@@ -17,10 +19,10 @@ public class IBundleProviderTest {
 	@Test
 	public void testIsEmptyDefaultMethod_SizePopulated() {
 		SimpleBundleProvider provider = new SimpleBundleProvider();
-		assertThat(provider.isEmpty()).isTrue();
+		assertTrue(provider.isEmpty());
 
 		provider = new SimpleBundleProvider(Lists.newArrayList(mock(IBaseResource.class)));
-		assertThat(provider.isEmpty()).isFalse();
+		assertFalse(provider.isEmpty());
 	}
 
 	@Test
@@ -31,7 +33,7 @@ public class IBundleProviderTest {
 				return null;
 			}
 		};
-		assertThat(provider.isEmpty()).isTrue();
+		assertTrue(provider.isEmpty());
 
 		provider = new SimpleBundleProvider(Lists.newArrayList(mock(IBaseResource.class))) {
 			@Override
@@ -39,7 +41,7 @@ public class IBundleProviderTest {
 				return null;
 			}
 		};
-		assertThat(provider.isEmpty()).isFalse();
+		assertFalse(provider.isEmpty());
 	}
 
 	@Test

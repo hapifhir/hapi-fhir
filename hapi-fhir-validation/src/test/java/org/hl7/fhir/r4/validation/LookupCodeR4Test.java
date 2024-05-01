@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.validation;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
@@ -112,16 +113,16 @@ public class LookupCodeR4Test {
 			String type = theConceptProperty.getType();
 			switch (type) {
 				case IValidationSupport.TYPE_STRING -> {
-					assertThat(theExpectedValue instanceof StringType).isTrue();
+					assertTrue(theExpectedValue instanceof StringType);
 					StringType stringValue = (StringType) theExpectedValue;
-					assertThat(theConceptProperty instanceof IValidationSupport.StringConceptProperty).isTrue();
+					assertTrue(theConceptProperty instanceof IValidationSupport.StringConceptProperty);
 					IValidationSupport.StringConceptProperty stringConceptProperty = (IValidationSupport.StringConceptProperty) theConceptProperty;
 					assertThat(stringConceptProperty.getValue()).isEqualTo(stringValue.getValue());
 				}
 				case IValidationSupport.TYPE_CODING -> {
-					assertThat(theExpectedValue instanceof Coding).isTrue();
+					assertTrue(theExpectedValue instanceof Coding);
 					Coding coding = (Coding) theExpectedValue;
-					assertThat(theConceptProperty instanceof IValidationSupport.CodingConceptProperty).isTrue();
+					assertTrue(theConceptProperty instanceof IValidationSupport.CodingConceptProperty);
 					IValidationSupport.CodingConceptProperty codingConceptProperty = (IValidationSupport.CodingConceptProperty) theConceptProperty;
 					assertThat(codingConceptProperty.getCode()).isEqualTo(coding.getCode());
 					assertThat(codingConceptProperty.getCodeSystem()).isEqualTo(coding.getSystem());

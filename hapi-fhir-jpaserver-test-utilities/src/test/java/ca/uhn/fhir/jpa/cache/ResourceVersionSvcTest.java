@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.cache;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -129,7 +131,7 @@ public class ResourceVersionSvcTest {
 		ResourcePersistentIdMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
 			Collections.singletonList(type));
 
-		assertThat(retMap.containsKey(type)).isTrue();
+		assertTrue(retMap.containsKey(type));
 		assertThat(map.get(type).getVersion()).isEqualTo(jpaPid.getVersion());
 	}
 
@@ -144,7 +146,7 @@ public class ResourceVersionSvcTest {
 		ResourcePersistentIdMap retMap = myResourceVersionSvc.getLatestVersionIdsForResourceIds(RequestPartitionId.allPartitions(),
 			Collections.singletonList(type));
 
-		assertThat(retMap.isEmpty()).isTrue();
+		assertTrue(retMap.isEmpty());
 	}
 
 	@Test
@@ -170,8 +172,8 @@ public class ResourceVersionSvcTest {
 
 		// verify
 		assertThat(retMap.size()).isEqualTo(1);
-		assertThat(retMap.containsKey(type)).isTrue();
-		assertThat(retMap.containsKey(type2)).isFalse();
+		assertTrue(retMap.containsKey(type));
+		assertFalse(retMap.containsKey(type2));
 	}
 
 	@Test

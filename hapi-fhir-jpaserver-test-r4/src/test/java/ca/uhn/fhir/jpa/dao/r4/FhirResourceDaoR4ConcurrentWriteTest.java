@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.interceptor.TransactionConcurrencySemaphoreInterceptor;
@@ -146,7 +147,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		for (Future<Bundle> future : futures) {
 			// make sure no exceptions
 			Bundle b = future.get();
-			assertThat(b).isNotNull();
+			assertNotNull(b);
 		}
 		latch.awaitExpected();
 		assertThat(calls).isEqualTo(counter.get());

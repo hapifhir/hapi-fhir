@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.messaging;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.messaging.json.ResourceOperationJsonMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -24,11 +25,11 @@ class ResourceOperationMessageTest {
 		jsonMessage = mapper.readValue(serialized, ResourceOperationJsonMessage.class);
 
 		assertThat(jsonMessage.getHapiHeaders().getRetryCount()).isEqualTo(0);
-		assertThat(jsonMessage.getHapiHeaders().getFirstFailureTimestamp()).isNull();
-		assertThat(jsonMessage.getHapiHeaders().getLastFailureTimestamp()).isNull();
+		assertNull(jsonMessage.getHapiHeaders().getFirstFailureTimestamp());
+		assertNull(jsonMessage.getHapiHeaders().getLastFailureTimestamp());
 
 		assertThat(jsonMessage.getHeaders().get(RETRY_COUNT_KEY)).isEqualTo(0);
-		assertThat(jsonMessage.getHeaders().get(FIRST_FAILURE_KEY)).isNull();
-		assertThat(jsonMessage.getHeaders().get(LAST_FAILURE_KEY)).isNull();
+		assertNull(jsonMessage.getHeaders().get(FIRST_FAILURE_KEY));
+		assertNull(jsonMessage.getHeaders().get(LAST_FAILURE_KEY));
 	}
 }

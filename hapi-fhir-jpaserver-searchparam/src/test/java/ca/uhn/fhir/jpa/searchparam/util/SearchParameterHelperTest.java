@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.util;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
@@ -42,7 +43,7 @@ class SearchParameterHelperTest {
 
 		Optional<SearchParameterMap> result = myTestedHelper.buildSearchParameterMapFromCanonical(mockedSearchParam);
 
-		assertThat(result.isEmpty()).isTrue();
+		assertTrue(result.isEmpty());
 	}
 
 	@Test
@@ -63,14 +64,14 @@ class SearchParameterHelperTest {
 		List<List<IQueryParameterType>> codeParam = spMap.get("code");
 		assertThat(codeParam).hasSize(1);
 		assertThat(codeParam.get(0)).hasSize(1);
-		assertThat(codeParam.get(0).get(0) instanceof TokenParam).isTrue();
+		assertTrue(codeParam.get(0).get(0) instanceof TokenParam);
 		TokenParam codeTokenParam = (TokenParam) codeParam.get(0).get(0);
 		assertThat(codeTokenParam.getValue()).isEqualTo(codeParamValue);
 
 		List<List<IQueryParameterType>> baseParam = spMap.get("base");
 		assertThat(baseParam).hasSize(1);
 		assertThat(baseParam.get(0)).hasSize(1);
-		assertThat(baseParam.get(0).get(0) instanceof TokenParam).isTrue();
+		assertTrue(baseParam.get(0).get(0) instanceof TokenParam);
 		TokenParam baseTokenParam = (TokenParam) baseParam.get(0).get(0);
 		assertThat(baseTokenParam.getValue()).isEqualTo(baseParamValue);
 	}

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.config;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -110,8 +112,8 @@ class MdmSubscriptionLoaderTest {
 
 		IBaseExtension extension = ExtensionUtil.getExtensionByUrl(subscriptionCaptor.getValue(), HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION);
 
-		assertThat(extension).isNotNull();
+		assertNotNull(extension);
 
-		assertThat(((BooleanType) extension.getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) extension.getValue()).booleanValue());
 	}
 }

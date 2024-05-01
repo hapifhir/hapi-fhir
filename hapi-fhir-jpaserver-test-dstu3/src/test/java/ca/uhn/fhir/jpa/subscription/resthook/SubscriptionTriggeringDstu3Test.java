@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -534,7 +535,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 			List<String> resubmittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
 
-			assertThat(resubmittedPatientIds.size() == submittedPatientIds.size()).isTrue();
+			assertTrue(resubmittedPatientIds.size() == submittedPatientIds.size());
 			assertThat(resubmittedPatientIds).containsAll(submittedPatientIds);
 
 		}
@@ -573,7 +574,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 
 			List<String> resubmittedPatientIds = ourUpdatedPatients.stream().map(patient -> patient.getId()).collect(Collectors.toList());
 
-			assertThat(resubmittedPatientIds.size() == expectedPatientIds.size()).isTrue();
+			assertTrue(resubmittedPatientIds.size() == expectedPatientIds.size());
 			assertThat(resubmittedPatientIds).containsAll(expectedPatientIds);
 		}
 	}

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.cache;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
@@ -138,7 +139,7 @@ class ResourceChangeListenerRegistryImplTest {
 
 		IResourceChangeListenerCache firstcache = entries.iterator().next();
 		// We made a copy
-		assertThat(ourMap != firstcache.getSearchParameterMap()).isTrue();
+		assertTrue(ourMap != firstcache.getSearchParameterMap());
 
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(listener1);
 		assertThat(myResourceChangeListenerRegistry.size()).isEqualTo(1);

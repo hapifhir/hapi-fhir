@@ -302,7 +302,7 @@ public class ResourceValidatorDstu3FeatureTest {
 			"furry-grey",
 			"furry-white",
 			"FamilyName"};
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSequence(
 			Arrays.asList(strings)
 		));
 		String[] strings1 = {"extension",
@@ -327,7 +327,7 @@ public class ResourceValidatorDstu3FeatureTest {
 		assertTrue(result.isSuccessful());
 
 		assertThat(messageString, containsString("valueReference"));
-		assertThat(messageString, not(containsString("valueResource")));
+		assertThat(messageString).doesNotContain("valueResource");
 	}
 
 	/**
@@ -354,7 +354,7 @@ public class ResourceValidatorDstu3FeatureTest {
 			"furry-white",
 			"String Extension",
 			"FamilyName"};
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSequence(
 			Arrays.asList(strings)
 		));
 		String[] strings1 = {"extension",
@@ -382,7 +382,7 @@ public class ResourceValidatorDstu3FeatureTest {
 		assertTrue(result.isSuccessful());
 
 		assertThat(messageString, containsString("valueReference"));
-		assertThat(messageString, not(containsString("valueResource")));
+		assertThat(messageString).doesNotContain("valueResource");
 	}
 
 	@ResourceDef(name = "Patient")

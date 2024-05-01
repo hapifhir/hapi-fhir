@@ -1,5 +1,7 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -120,9 +122,9 @@ class DateRangeUtilTest {
 		DateRangeParam result = DateRangeUtil.narrowDateRange(c.range, c.narrowStart, c.narrowEnd);
 
 		if (c.resultStart == null && c.resultEnd == null) {
-			assertThat(result).isNull();
+			assertNull(result);
 		} else {
-			assertThat(result).isNotNull();
+			assertNotNull(result);
 			assertThat(result.getLowerBound()).as("range start").isEqualTo(c.resultStart);
 			assertThat(result.getUpperBound()).as("range end").isEqualTo(c.resultEnd);
 		}

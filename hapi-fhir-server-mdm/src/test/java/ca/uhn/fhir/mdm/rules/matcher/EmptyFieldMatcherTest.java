@@ -1,5 +1,7 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.EmptyFieldMatcher;
 import ca.uhn.fhir.model.primitive.StringDt;
 import org.junit.jupiter.api.Test;
@@ -17,13 +19,13 @@ public class EmptyFieldMatcherTest extends BaseMatcherR4Test {
 
 		EmptyFieldMatcher fieldMatch = new EmptyFieldMatcher();
 
-		assertThat(fieldMatch.matches(null, null, null)).isTrue();
-		assertThat(fieldMatch.matches(null, rightEmpty, null)).isTrue();
-		assertThat(fieldMatch.matches(leftEmpty, null, null)).isTrue();
-		assertThat(fieldMatch.matches(leftEmpty, rightEmpty, null)).isTrue();
-		assertThat(fieldMatch.matches(null, right, null)).isFalse();
-		assertThat(fieldMatch.matches(left, null, null)).isFalse();
-		assertThat(fieldMatch.matches(left, right, null)).isFalse();
+		assertTrue(fieldMatch.matches(null, null, null));
+		assertTrue(fieldMatch.matches(null, rightEmpty, null));
+		assertTrue(fieldMatch.matches(leftEmpty, null, null));
+		assertTrue(fieldMatch.matches(leftEmpty, rightEmpty, null));
+		assertFalse(fieldMatch.matches(null, right, null));
+		assertFalse(fieldMatch.matches(left, null, null));
+		assertFalse(fieldMatch.matches(left, right, null));
 	}
 
 

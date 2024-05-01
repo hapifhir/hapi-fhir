@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
@@ -163,7 +165,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 			while (iterator.hasNext()) {
 				JobInstance next = iterator.next();
-				assertThat(jobIds).contains(next);
+				assertThat(jobIds).contains(next.getInstanceId());
 				fetched.add(next.getInstanceId());
 			}
 
@@ -327,7 +329,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 				@Nonnull StepExecutionDetails<TestJobParameters, SecondStepOutput> theStepExecutionDetails,
 				@Nonnull IJobDataSink<ReductionStepOutput> theDataSink
 			) {
-				assertThat(myBoolean.get()).isTrue();
+				assertTrue(myBoolean.get());
 				theDataSink.accept(new ReductionStepOutput(myOutput));
 				callLatch(myLastStepLatch, theStepExecutionDetails);
 			}
@@ -341,7 +343,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		String instanceId = startResponse.getInstanceId();
 		myFirstStepLatch.awaitExpected();
-		assertThat(instanceId).isNotNull();
+		assertNotNull(instanceId);
 
 		myBatch2JobHelper.awaitGatedStepId(FIRST_STEP_ID, instanceId);
 
@@ -361,7 +363,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		assertThat(secondStepCalls).isEqualTo(2);
 		JobInstance instance = instanceOp.get();
 		ourLog.info(JsonUtil.serialize(instance, true));
-		assertThat(instance.getReport()).isNotNull();
+		assertNotNull(instance.getReport());
 
 		for (int i = 0; i < secondStepInt.get(); i++) {
 			assertThat(instance.getReport()).contains(testInfo + i);

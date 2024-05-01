@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -113,10 +115,10 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		Map<String, CapabilityStatementRestResourceSearchParamComponent> map = extractSearchParams(conformance, "Patient");
 
 		CapabilityStatementRestResourceSearchParamComponent param = map.get("foo");
-		assertThat(param).isNull();
+		assertNull(param);
 
 		param = map.get("gender");
-		assertThat(param).isNotNull();
+		assertNotNull(param);
 
 		TransactionTemplate txTemplate = newTxTemplate();
 		txTemplate.execute(new TransactionCallbackWithoutResult() {
@@ -169,7 +171,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		assertThat(param.getName()).isEqualTo("foo");
 
 		param = map.get("gender");
-		assertThat(param).isNull();
+		assertNull(param);
 
 	}
 

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.mdm.rules.svc;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
@@ -52,20 +54,20 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 			myMdmRulesJson
 		);
 
-		assertThat(myComparator.match(myJohn, myJohny).match).isFalse();
+		assertFalse(myComparator.match(myJohn, myJohny).match);
 
 		myJohn.getName().clear();
 		myJohny.getName().clear();
 
-		assertThat(myComparator.match(myJohn, myJohny).match).isTrue();
+		assertTrue(myComparator.match(myJohn, myJohny).match);
 
 		myJohn = buildJohn();
 		myJohny.getName().clear();
-		assertThat(myComparator.match(myJohn, myJohny).match).isFalse();
+		assertFalse(myComparator.match(myJohn, myJohny).match);
 
 		myJohn.getName().clear();
 		myJohny = buildJohny();
-		assertThat(myComparator.match(myJohn, myJohny).match).isFalse();
+		assertFalse(myComparator.match(myJohn, myJohny).match);
 	}
 
 	@Test
@@ -73,7 +75,7 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 		Patient patient = new Patient();
 		patient.setActive(true);
 
-		assertThat(myComparator.match(patient, myJohny).match).isFalse();
+		assertFalse(myComparator.match(patient, myJohny).match);
 	}
 
 	@Test
@@ -98,6 +100,6 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 	// and falls through to similarity check
 	@Test
 	public void testMatch() {
-		assertThat(myComparator.match(myJohn, myJohny).match).isTrue();
+		assertTrue(myComparator.match(myJohn, myJohny).match);
 	}
 }

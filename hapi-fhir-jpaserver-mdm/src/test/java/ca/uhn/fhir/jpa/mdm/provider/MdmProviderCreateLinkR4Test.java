@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
@@ -63,7 +64,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 		assertThat(1).isEqualTo(links.size());
 		assertThat(links.get(0).getLinkSource()).isEqualTo(MdmLinkSourceEnum.MANUAL);
 		assertThat(links.get(0).getMatchResult()).isEqualTo(MdmMatchResultEnum.MATCH);
-		assertThat(links.get(0).getPartitionId()).isNotNull();
+		assertNotNull(links.get(0).getPartitionId());
 		assertThat(links.get(0).getPartitionId().getPartitionId()).isEqualTo(1);
 	}
 

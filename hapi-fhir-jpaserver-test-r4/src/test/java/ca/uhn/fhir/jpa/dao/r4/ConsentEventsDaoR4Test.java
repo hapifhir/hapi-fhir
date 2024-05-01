@@ -379,7 +379,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		IIdType pid1 = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 		myPatientIds.add(pid1.getValue());
 
-		assertThat((pid0.getIdPartAsLong() % 2) != (pid1.getIdPartAsLong() % 2)).isTrue();
+		assertTrue((pid0.getIdPartAsLong() % 2) != (pid1.getIdPartAsLong() % 2));
 		String evenPid = pid0.getIdPartAsLong() % 2 == 0 ? pid0.getValue() : pid1.getValue();
 		String oddPid = pid0.getIdPartAsLong() % 2 == 0 ? pid1.getValue() : pid0.getValue();
 

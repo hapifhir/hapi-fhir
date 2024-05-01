@@ -1,5 +1,9 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -318,8 +322,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		MethodOutcome outcome = client.create().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
 		assertThat(myAnswerCount).isEqualTo(2);
-		assertThat(outcome.getOperationOutcome()).isNotNull();
-		assertThat(outcome.getResource()).isNotNull();
+		assertNotNull(outcome.getOperationOutcome());
+		assertNotNull(outcome.getResource());
 
 		assertThat(((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>");
 		assertThat(((Patient) outcome.getResource()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>");
@@ -364,8 +368,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		MethodOutcome outcome = client.create().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
 		assertThat(myAnswerCount).isEqualTo(1);
-		assertThat(outcome.getOperationOutcome()).isNull();
-		assertThat(outcome.getResource()).isNotNull();
+		assertNull(outcome.getOperationOutcome());
+		assertNotNull(outcome.getResource());
 
 		assertThat(((Patient) outcome.getResource()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>");
 
@@ -406,7 +410,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.delete()
 			.resourceById(new IdType("Patient/222"))
 			.execute();
-		assertThat(outcome).isNotNull();
+		assertNotNull(outcome);
 		assertThat(capt.getAllValues()).hasSize(1);
 		assertThat(capt.getAllValues().get(myAnswerCount - 1).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/222");
 		assertThat(capt.getAllValues().get(myAnswerCount - 1).getMethod()).isEqualTo("DELETE");
@@ -417,7 +421,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.resourceById(new IdType("Patient/222"))
 			.cascade(DeleteCascadeModeEnum.NONE)
 			.execute();
-		assertThat(outcome).isNotNull();
+		assertNotNull(outcome);
 		assertThat(capt.getAllValues()).hasSize(2);
 		assertThat(capt.getAllValues().get(myAnswerCount - 1).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/222");
 		assertThat(capt.getAllValues().get(myAnswerCount - 1).getMethod()).isEqualTo("DELETE");
@@ -428,7 +432,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.resourceById(new IdType("Patient/222"))
 			.cascade(DeleteCascadeModeEnum.DELETE)
 			.execute();
-		assertThat(outcome).isNotNull();
+		assertNotNull(outcome);
 		assertThat(capt.getAllValues()).hasSize(myAnswerCount);
 		assertThat(capt.getAllValues().get(myAnswerCount - 1).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/222?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE);
 		assertThat(capt.getAllValues().get(myAnswerCount - 1).getMethod()).isEqualTo("DELETE");
@@ -439,7 +443,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 			.resourceConditionalByUrl("Patient?identifier=sys|val")
 			.cascade(DeleteCascadeModeEnum.DELETE)
 			.execute();
-		assertThat(outcome).isNotNull();
+		assertNotNull(outcome);
 		assertThat(capt.getAllValues()).hasSize(myAnswerCount);
 		assertThat(capt.getAllValues().get(myAnswerCount - 1).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient?identifier=sys%7Cval&" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE);
 		assertThat(capt.getAllValues().get(myAnswerCount - 1).getMethod()).isEqualTo("DELETE");
@@ -1895,7 +1899,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		builder.addTransactionCreateEntry(new Patient().setActive(true));
 
 		IBaseBundle outcome = client.transaction().withBundle(builder.getBundle()).execute();
-		assertThat(outcome).isNull();
+		assertNull(outcome);
 
 		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir");
 
@@ -1980,8 +1984,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		MethodOutcome outcome = client.update().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
 		assertThat(myAnswerCount).isEqualTo(2);
-		assertThat(outcome.getOperationOutcome()).isNotNull();
-		assertThat(outcome.getResource()).isNotNull();
+		assertNotNull(outcome.getOperationOutcome());
+		assertNotNull(outcome.getResource());
 
 		assertThat(((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>");
 		assertThat(((Patient) outcome.getResource()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>");
@@ -2025,8 +2029,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		MethodOutcome outcome = client.update().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
 		assertThat(myAnswerCount).isEqualTo(1);
-		assertThat(outcome.getOperationOutcome()).isNull();
-		assertThat(outcome.getResource()).isNotNull();
+		assertNull(outcome.getOperationOutcome());
+		assertNotNull(outcome.getResource());
 
 		assertThat(((Patient) outcome.getResource()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>");
 
@@ -2154,7 +2158,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		MethodOutcome outcome = client.validate().resource(pt).execute();
 
-		assertThat(outcome.getOperationOutcome()).isNotNull();
+		assertNotNull(outcome.getOperationOutcome());
 		assertThat(((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>");
 
 	}
@@ -2184,8 +2188,8 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		assertThat(read.getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>");
 
 		// Ensure that we haven't overridden the default type for the name
-		assertThat(MyPatientWithExtensions.class.isAssignableFrom(Patient.class)).isFalse();
-		assertThat(Patient.class.isAssignableFrom(MyPatientWithExtensions.class)).isFalse();
+		assertFalse(MyPatientWithExtensions.class.isAssignableFrom(Patient.class));
+		assertFalse(Patient.class.isAssignableFrom(MyPatientWithExtensions.class));
 		Patient pt = new Patient();
 		pt.getText().setDivAsString("A PATIENT");
 		IParser parser = ourCtx.newXmlParser();
@@ -2323,11 +2327,11 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 201, "OK"));
 		MethodOutcome resp = client.create().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).execute();
-		assertThat(resp.getCreated()).isTrue();
+		assertTrue(resp.getCreated());
 
 		when(myHttpResponse.getStatusLine()).thenReturn(new BasicStatusLine(new ProtocolVersion("HTTP", 1, 1), 200, "OK"));
 		resp = client.create().resource(ourCtx.newXmlParser().encodeResourceToString(p1)).execute();
-		assertThat(resp.getCreated()).isNull();
+		assertNull(resp.getCreated());
 
 		ourLog.info("lastRequest: {}", ((GenericClient) client).getLastRequest());
 		ourLog.info("lastResponse: {}", ((GenericClient) client).getLastResponse());
@@ -2494,7 +2498,7 @@ public class GenericClientR4Test extends BaseGenericClientR4Test {
 		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://example.com/fhir/Patient");
 		assertThat(capt.getValue().getMethod()).isEqualTo("POST");
 		Header catH = capt.getValue().getFirstHeader("Category");
-		assertThat(catH).isNull();
+		assertNull(catH);
 	}
 
 	/**

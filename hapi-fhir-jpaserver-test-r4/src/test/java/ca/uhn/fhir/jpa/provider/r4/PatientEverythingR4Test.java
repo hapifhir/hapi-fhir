@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -137,7 +139,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 		// Normal call
 		Bundle bundle = fetchBundle(myServerBase + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
-		assertThat(bundle.getLink("next")).isNull();
+		assertNull(bundle.getLink("next"));
 		Set<String> actual = new TreeSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
 			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
@@ -151,7 +153,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 			assertThat(resp.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", "")).isEqualTo(EncodingEnum.JSON.getResourceContentTypeNonLegacy());
 			bundle = EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
 		}
-		assertThat(bundle.getLink("next")).isNull();
+		assertNull(bundle.getLink("next"));
 		actual = new TreeSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
 			actual.add(nextEntry.getResource().getIdElement().toUnqualifiedVersionless().getValue());
@@ -168,7 +170,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 		Bundle bundle = fetchBundle(myServerBase + "/" + patId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
-		assertThat(bundle.getLink("next")).isNull();
+		assertNull(bundle.getLink("next"));
 
 		Set<String> actual = new TreeSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
@@ -196,7 +198,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		
 		Bundle bundle = fetchBundle(myServerBase + "/" + patId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
-		assertThat(bundle.getLink("next")).isNull();
+		assertNull(bundle.getLink("next"));
 
 		Set<String> actual = new TreeSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
@@ -222,11 +224,11 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 		Bundle bundle = fetchBundle(myServerBase + "/" + patId + "/$everything?_format=json&_count=1", EncodingEnum.JSON);
 
-		assertThat(bundle.getLink("next").getUrl()).isNotNull();
+		assertNotNull(bundle.getLink("next").getUrl());
 		assertThat(bundle.getLink("next").getUrl()).contains("_format=json");
 		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.JSON);
 
-		assertThat(bundle.getLink("next").getUrl()).isNotNull();
+		assertNotNull(bundle.getLink("next").getUrl());
 		assertThat(bundle.getLink("next").getUrl()).contains("_format=json");
 		fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.JSON);
 	}
@@ -239,12 +241,12 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 		Bundle bundle = fetchBundle(myServerBase + "/" + patId + "/$everything?_format=xml&_count=1", EncodingEnum.XML);
 
-		assertThat(bundle.getLink("next").getUrl()).isNotNull();
+		assertNotNull(bundle.getLink("next").getUrl());
 		ourLog.info("Next link: {}", bundle.getLink("next").getUrl());
 		assertThat(bundle.getLink("next").getUrl()).contains("_format=xml");
 		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.XML);
 
-		assertThat(bundle.getLink("next").getUrl()).isNotNull();
+		assertNotNull(bundle.getLink("next").getUrl());
 		ourLog.info("Next link: {}", bundle.getLink("next").getUrl());
 		assertThat(bundle.getLink("next").getUrl()).contains("_format=xml");
 		fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.XML);

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.mdm.BaseR4Test;
@@ -91,6 +92,6 @@ public class EIDHelperR4Test extends BaseR4Test {
 
 		assertThat(internalEid.getSystem()).isEqualTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM);
 		assertThat(internalEid.getValue()).hasSize(36);
-		assertThat(internalEid.getUse()).isNull();
+		assertNull(internalEid.getUse());
 	}
 }

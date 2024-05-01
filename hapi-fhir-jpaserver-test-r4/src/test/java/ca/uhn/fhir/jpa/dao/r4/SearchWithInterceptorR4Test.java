@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -29,8 +30,8 @@ public class SearchWithInterceptorR4Test extends BaseJpaR4Test {
 		IAnonymousInterceptor interceptor = (pointcut, params) -> {
 			RequestDetails requestDetails = params.get(RequestDetails.class);
 			SqlQueryList sqlQueries = params.get(SqlQueryList.class);
-			assertThat(requestDetails).isNotNull();
-			assertThat(sqlQueries).isNotNull();
+			assertNotNull(requestDetails);
+			assertNotNull(sqlQueries);
 			SqlQueryList existing = (SqlQueryList) requestDetails.getUserData().get("QUERIES");
 			if (existing != null) {
 				existing.addAll(sqlQueries);

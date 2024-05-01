@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
@@ -201,7 +203,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
 				assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
 				assertThat(result.getRequiresAccessToken()).isEqualTo(true);
-				assertThat(result.getTransactionTime()).isNotNull();
+				assertNotNull(result.getTransactionTime());
 				assertThat(result.getOutput()).isNotEmpty();
 
 				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
@@ -246,7 +248,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
 				assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
 				assertThat(result.getRequiresAccessToken()).isEqualTo(true);
-				assertThat(result.getTransactionTime()).isNotNull();
+				assertNotNull(result.getTransactionTime());
 				assertThat(result.getOutput()).isNotEmpty();
 
 				//We assert specifically on content as the deserialized version will "helpfully" fill in missing fields.
@@ -286,7 +288,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
 				assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
 				assertThat(result.getRequiresAccessToken()).isEqualTo(true);
-				assertThat(result.getTransactionTime()).isNotNull();
+				assertNotNull(result.getTransactionTime());
 				assertThat(3).isEqualTo(result.getOutput().size());
 				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList())).hasSize(1);
 				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Observation")).collect(Collectors.toList())).hasSize(1);
@@ -325,7 +327,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				BulkExportResponseJson result = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
 				assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
 				assertThat(result.getRequiresAccessToken()).isEqualTo(true);
-				assertThat(result.getTransactionTime()).isNotNull();
+				assertNotNull(result.getTransactionTime());
 				assertThat(1).isEqualTo(result.getOutput().size());
 				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Patient")).collect(Collectors.toList())).hasSize(1);
 				assertThat(result.getOutput().stream().filter(o -> o.getType().equals("Binary")).collect(Collectors.toList())).isEmpty();
@@ -447,7 +449,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			startRequest.setParameters(options);
 			Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 
-			assertThat(startResponse).isNotNull();
+			assertNotNull(startResponse);
 
 			final String jobId = startResponse.getInstanceId();
 
@@ -473,7 +475,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			final Optional<JobInstance> optJobInstance = myJobPersistence.fetchInstance(jobId);
 
-			assertThat(optJobInstance).isNotNull();
+			assertNotNull(optJobInstance);
 			assertThat(optJobInstance).isPresent();
 
 			final JobInstance jobInstance = optJobInstance.get();
@@ -1472,7 +1474,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 				.execute();
 		}
-		assertThat(outcome).isNotNull();
+		assertNotNull(outcome);
 		assertThat(outcome.getResponseStatusCode()).isEqualTo(202);
 		String pollLocation = null;
 		for (String header : outcome.getResponseHeaders().keySet()) {
@@ -1484,14 +1486,14 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				break;
 			}
 		}
-		assertThat(pollLocation).isNotNull();
+		assertNotNull(pollLocation);
 		UrlUtil.UrlParts parts = UrlUtil.parseUrl(pollLocation);
-		assertThat(isNotBlank(parts.getParams())).isTrue();
+		assertTrue(isNotBlank(parts.getParams()));
 		Map<String, String[]> queryParams = UrlUtil.parseQueryString(parts.getParams());
 		assertThat(queryParams).containsKey(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID);
 		String jobInstanceId = queryParams.get(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID)[0];
 
-		assertThat(jobInstanceId).isNotNull();
+		assertNotNull(jobInstanceId);
 
 		myBatch2JobHelper.awaitJobCompletion(jobInstanceId, 60);
 
@@ -1515,7 +1517,7 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		startRequest.setParameters(options);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
 
-		assertThat(startResponse).isNotNull();
+		assertNotNull(startResponse);
 
 		// Run a scheduled pass to build the export
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());

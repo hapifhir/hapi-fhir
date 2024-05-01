@@ -1,5 +1,7 @@
 package ca.uhn.fhir.cr.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -35,13 +37,13 @@ class SearchConverterTest {
 	@Test
 	void isSearchParameterShouldReturnTrue() {
 		boolean result = myFixture.isSearchResultParameter("_elements");
-		assertThat(result).isTrue();
+		assertTrue(result);
 	}
 
 	@Test
 	void isSearchParameterShouldReturnFalse() {
 		boolean result = myFixture.isSearchResultParameter("_id");
-		assertThat(result).isFalse();
+		assertFalse(result);
 	}
 
 	@Test
@@ -50,10 +52,10 @@ class SearchConverterTest {
 		boolean numberOrList = myFixture.isOrList(new NumberOrListParam());
 		boolean specialOrList = myFixture.isOrList(new SpecialOrListParam());
 		boolean tokenOrList = myFixture.isOrList(new TokenOrListParam());
-		assertThat(uriOrList).isTrue();
-		assertThat(numberOrList).isTrue();
-		assertThat(specialOrList).isTrue();
-		assertThat(tokenOrList).isTrue();
+		assertTrue(uriOrList);
+		assertTrue(numberOrList);
+		assertTrue(specialOrList);
+		assertTrue(tokenOrList);
 	}
 
 	@Test
@@ -62,22 +64,22 @@ class SearchConverterTest {
 		boolean numberAndList = myFixture.isAndList(new NumberAndListParam());
 		boolean specialAndList = myFixture.isAndList(new SpecialAndListParam());
 		boolean tokenAndList = myFixture.isAndList(new TokenAndListParam());
-		assertThat(uriAndList).isTrue();
-		assertThat(numberAndList).isTrue();
-		assertThat(specialAndList).isTrue();
-		assertThat(tokenAndList).isTrue();
+		assertTrue(uriAndList);
+		assertTrue(numberAndList);
+		assertTrue(specialAndList);
+		assertTrue(tokenAndList);
 	}
 
 	@Test
 	void isOrListShouldReturnFalse() {
 		boolean uriAndList = myFixture.isOrList(new UriAndListParam());
-		assertThat(uriAndList).isFalse();
+		assertFalse(uriAndList);
 	}
 
 	@Test
 	void isAndListShouldReturnFalse() {
 		boolean uriAndList = myFixture.isAndList(new UriOrListParam());
-		assertThat(uriAndList).isFalse();
+		assertFalse(uriAndList);
 	}
 
 	@Test

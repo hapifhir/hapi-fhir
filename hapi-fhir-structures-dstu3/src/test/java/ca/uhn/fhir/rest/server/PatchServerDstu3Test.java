@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
@@ -100,7 +101,7 @@ public class PatchServerDstu3Test {
 
 		assertThat(ourLastMethod).isEqualTo("patientPatch");
 		assertThat(ourLastConditional).isEqualTo("Patient?_id=123");
-		assertThat(ourLastId).isNull();
+		assertNull(ourLastId);
 		assertThat(ourLastBody).isEqualTo(requestContents);
 		assertThat(ourLastPatchType).isEqualTo(PatchTypeEnum.JSON_PATCH);
 	}

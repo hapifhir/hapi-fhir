@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.hl7.fhir.dstu2.model.DomainResource;
 import org.hl7.fhir.dstu2.model.Narrative;
 import org.hl7.fhir.dstu2.model.Patient;
@@ -22,7 +23,7 @@ public class DomainResourceHL7_Dstu2Test {
         String copiedPatientID = copiedPatient.getIdElement().getIdPart();
         Narrative.NarrativeStatus copiedPatientTextStatus = copiedPatient.getText().getStatus();
 
-			assertThat(copiedPatient instanceof DomainResource).isTrue(); // Just making sure this assumption still holds up, otherwise this test isn't very useful
+			assertTrue(copiedPatient instanceof DomainResource); // Just making sure this assumption still holds up, otherwise this test isn't very useful
 			assertThat(copiedPatientID).isEqualTo("1001");
 			assertThat(copiedPatientTextStatus).isEqualTo(new Narrative().setStatus(Narrative.NarrativeStatus.ADDITIONAL).getStatus());
     }

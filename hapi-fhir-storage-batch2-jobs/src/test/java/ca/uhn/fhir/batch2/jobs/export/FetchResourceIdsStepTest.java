@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -221,7 +222,7 @@ public class FetchResourceIdsStepTest {
 					break;
 				}
 			}
-			assertThat(found).isTrue();
+			assertTrue(found);
 			found = false;
 		}
 	}

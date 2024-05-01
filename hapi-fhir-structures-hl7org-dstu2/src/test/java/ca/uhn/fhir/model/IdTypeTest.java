@@ -1,5 +1,8 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.dstu2.model.Patient;
@@ -23,21 +26,21 @@ public class IdTypeTest {
 		
 		id = new IdType("#123");
 		assertThat(id.getValue()).isEqualTo("#123");
-		assertThat(id.isLocal()).isTrue();
+		assertTrue(id.isLocal());
 		
 		id = new IdType("#Medication/499059CE-CDD4-48BC-9014-528A35D15CED/_history/1");
 		assertThat(id.getValue()).isEqualTo("#Medication/499059CE-CDD4-48BC-9014-528A35D15CED/_history/1");
-		assertThat(id.isLocal()).isTrue();
+		assertTrue(id.isLocal());
 
 		id = new IdType("http://example.com/Patient/33#123");
 		assertThat(id.getValue()).isEqualTo("http://example.com/Patient/33#123");
-		assertThat(id.isLocal()).isFalse();
+		assertFalse(id.isLocal());
 	}
 	
 	 @Test
 	  public void testConstructorsWithNullArguments() {
 	    IdType id = new IdType(null, null, null);
-			assertThat(id.getValue()).isNull();
+			assertNull(id.getValue());
 	  }
 
 	@Test
@@ -62,20 +65,20 @@ public class IdTypeTest {
 	@Test
 	public void testComplicatedLocal() {
 		IdType id = new IdType("#Patient/cid:Patient-72/_history/1");
-		assertThat(id.isLocal()).isTrue();
+		assertTrue(id.isLocal());
 		assertThat(id.getBaseUrl()).isEqualTo("#");
-		assertThat(id.getResourceType()).isNull();
-		assertThat(id.getVersionIdPart()).isNull();
+		assertNull(id.getResourceType());
+		assertNull(id.getVersionIdPart());
 		assertThat(id.getIdPart()).isEqualTo("Patient/cid:Patient-72/_history/1");
 		
 		IdType id2 = new IdType("#Patient/cid:Patient-72/_history/1");
 		assertThat(id2).isEqualTo(id);
 		
 		id2 = id2.toUnqualified();
-		assertThat(id2.isLocal()).isFalse();
-		assertThat(id2.getBaseUrl()).isNull();
-		assertThat(id2.getResourceType()).isNull();
-		assertThat(id2.getVersionIdPart()).isNull();
+		assertFalse(id2.isLocal());
+		assertNull(id2.getBaseUrl());
+		assertNull(id2.getResourceType());
+		assertNull(id2.getVersionIdPart());
 		assertThat(id2.getIdPart()).isEqualTo("Patient/cid:Patient-72/_history/1");
 
 	}
@@ -87,9 +90,9 @@ public class IdTypeTest {
 		assertThat(id.getIdPart()).isEqualTo("foo");
 		assertThat(id.toUnqualified().getValueAsString()).isEqualTo("foo");
 		assertThat(id.toUnqualifiedVersionless().getValueAsString()).isEqualTo("foo");
-		assertThat(id.getVersionIdPart()).isNull();
-		assertThat(id.getResourceType()).isNull();
-		assertThat(id.getBaseUrl()).isNull();
+		assertNull(id.getVersionIdPart());
+		assertNull(id.getResourceType());
+		assertNull(id.getBaseUrl());
 
 		assertThat(id.withResourceType("Patient").getValue()).isEqualTo("Patient/foo");
 		assertThat(id.withServerBase("http://foo", "Patient").getValue()).isEqualTo("http://foo/Patient/foo");
@@ -100,10 +103,10 @@ public class IdTypeTest {
 	public void testBaseUrlFoo1() {
 		IdType id = new IdType("http://my.org/foo");
 		assertThat(id.getValueAsString()).isEqualTo("http://my.org/foo");
-		assertThat(id.getIdPart()).isNull();
+		assertNull(id.getIdPart());
 		assertThat(id.toUnqualified().getValueAsString()).isEqualTo("foo");
 		assertThat(id.toUnqualifiedVersionless().getValueAsString()).isEqualTo("foo");
-		assertThat(id.getVersionIdPart()).isNull();
+		assertNull(id.getVersionIdPart());
 		assertThat(id.getResourceType()).isEqualTo("foo");
 		assertThat(id.getBaseUrl()).isEqualTo("http://my.org");
 
@@ -119,7 +122,7 @@ public class IdTypeTest {
 		assertThat(id.getIdPart()).isEqualTo("foo");
 		assertThat(id.toUnqualified().getValueAsString()).isEqualTo("c/foo");
 		assertThat(id.toUnqualifiedVersionless().getValueAsString()).isEqualTo("c/foo");
-		assertThat(id.getVersionIdPart()).isNull();
+		assertNull(id.getVersionIdPart());
 		assertThat(id.getResourceType()).isEqualTo("c");
 		assertThat(id.getBaseUrl()).isEqualTo("http://my.org/a/b");
 
@@ -140,7 +143,7 @@ public class IdTypeTest {
 		assertThat(rr.getBaseUrl()).isEqualTo("http://foo/fhir");
 		
 		rr = new IdType("Organization/123/_history/123");
-		assertThat(rr.getBaseUrl()).isNull();
+		assertNull(rr.getBaseUrl());
 
 	}
 
@@ -178,7 +181,7 @@ public class IdTypeTest {
 		Reference ref = actual.getManagingOrganization();
 		assertThat(ref.getReferenceElement().getResourceType()).isEqualTo("Organization");
 		assertThat(ref.getReferenceElement().getIdPart()).isEqualTo("123");
-		assertThat(ref.getReferenceElement().getVersionIdPart()).isNull();
+		assertNull(ref.getReferenceElement().getVersionIdPart());
 
 	}
 
@@ -200,9 +203,9 @@ public class IdTypeTest {
 
 		Patient actual = parseAndEncode(patient);
 		Reference ref = actual.getManagingOrganization();
-		assertThat(ref.getReferenceElement().getResourceType()).isNull();
+		assertNull(ref.getReferenceElement().getResourceType());
 		assertThat(ref.getReferenceElement().getIdPart()).isEqualTo("123");
-		assertThat(ref.getReferenceElement().getVersionIdPart()).isNull();
+		assertNull(ref.getReferenceElement().getVersionIdPart());
 
 	}
 
@@ -215,7 +218,7 @@ public class IdTypeTest {
 
 		Patient actual = parseAndEncode(patient);
 		Reference ref = actual.getManagingOrganization();
-		assertThat(ref.getReferenceElement().getResourceType()).isNull();
+		assertNull(ref.getReferenceElement().getResourceType());
 		assertThat(ref.getReferenceElement().getIdPart()).isEqualTo("123");
 
 	}
@@ -229,7 +232,7 @@ public class IdTypeTest {
 
 		Patient actual = parseAndEncode(patient);
 		Reference ref = actual.getManagingOrganization();
-		assertThat(ref.getReferenceElement().getResourceType()).isNull();
+		assertNull(ref.getReferenceElement().getResourceType());
 		assertThat(ref.getReferenceElement().getIdPart()).isEqualTo("123");
 
 	}

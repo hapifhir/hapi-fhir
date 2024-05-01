@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.test;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -1932,7 +1933,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 		@Test
 		public void testShouldNotFindAny() {
 			List<String> hits = search(allCodesNotIncludingSearched);
-			assertThat(hits).isNotNull();
+			assertNotNull(hits);
 			assertThat(hits).isEmpty();
 		}
 

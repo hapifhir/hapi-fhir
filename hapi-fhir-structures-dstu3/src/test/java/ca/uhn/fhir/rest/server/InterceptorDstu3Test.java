@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -124,7 +126,7 @@ public class InterceptorDstu3Test {
 			ourServer.unregisterInterceptor(interceptor);
 		}
 
-		assertThat(resource.get()).isNotNull();
+		assertNotNull(resource.get());
 	}
 
 
@@ -202,7 +204,7 @@ public class InterceptorDstu3Test {
 		order.verify(myInterceptor2, times(1)).incomingRequestPreHandled(nullable(RestOperationTypeEnum.class), nullable(RequestDetails.class));
 
 		assertThat(opTypeCapt.getValue()).isEqualTo(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
-		assertThat(arTypeCapt.getValue().getResource()).isNotNull();
+		assertNotNull(arTypeCapt.getValue().getResource());
 	}
 
 	@Test
@@ -259,7 +261,7 @@ public class InterceptorDstu3Test {
 		verify(myInterceptor1, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), resourceCapt.capture());
 
 		assertThat(resourceCapt.getAllValues()).hasSize(1);
-		assertThat(resourceCapt.getAllValues().get(0)).isNull();
+		assertNull(resourceCapt.getAllValues().get(0));
 //		assertEquals("", rdCapt.getAllValues().get(0).get)
 	}
 

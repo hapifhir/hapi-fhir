@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.util;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
@@ -38,7 +40,7 @@ class RegexpGsonBuilderUtilTest {
 		String workingRegexQuery = "{'regexp':{'P:SYSTEM':{'value':'" + workingRegex + "'}}}";
 
 		JsonObject jsonObj = new Gson().fromJson(workingRegexQuery, JsonObject.class);
-		assertThat(jsonObj.isJsonNull()).isFalse();
+		assertFalse(jsonObj.isJsonNull());
 
 		// same json structure fails with some valid regex strings
 		String failingRegexQuery = "{'regexp':{'P:SYSTEM':{'value':'" + GSON_FAILING_REGEX + "'}}}";
@@ -47,7 +49,7 @@ class RegexpGsonBuilderUtilTest {
 			JsonSyntaxException.class,
 			() -> new Gson().fromJson(failingRegexQuery, JsonObject.class));
 
-		assertThat(thrown.getCause() instanceof MalformedJsonException).isTrue();
+		assertTrue(thrown.getCause() instanceof MalformedJsonException);
 	}
 
 

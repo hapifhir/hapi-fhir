@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -33,7 +34,7 @@ public class DateParamTest {
 		assertThat(zonedDateTime.getYear()).isEqualTo(2020);
 		assertThat(zonedDateTime.getMonth()).isEqualTo(Month.JANUARY);
 		assertThat(zonedDateTime.getDayOfMonth()).isEqualTo(1);
-		assertThat(input.getPrefix()).isNull();
+		assertNull(input.getPrefix());
 	}
 
 	@Test
@@ -119,7 +120,7 @@ public class DateParamTest {
 		DateParam param = new DateParam();
 		param.setValueAsString("2016-06-09T20:38Z");
 
-		assertThat(param.getPrefix()).isNull();
+		assertNull(param.getPrefix());
 		assertThat(param.getValueAsString()).isEqualTo("2016-06-09T20:38Z");
 
 		ourLog.debug("PRE:  " + param.getValue());
@@ -136,7 +137,7 @@ public class DateParamTest {
 		DateParam param = new DateParam();
 		param.setValueAsString("2016-06-09T20:38");
 
-		assertThat(param.getPrefix()).isNull();
+		assertNull(param.getPrefix());
 		assertThat(param.getValueAsString()).isEqualTo("2016-06-09T20:38");
 
 		ourLog.debug("PRE:  " + param.getValue());

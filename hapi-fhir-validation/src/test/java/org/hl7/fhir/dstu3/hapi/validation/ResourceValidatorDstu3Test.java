@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
@@ -305,7 +306,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String ooencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(ooencoded);
 
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 	}
 
 	/**
@@ -388,7 +389,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String ooencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(ooencoded);
 
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 
 		assertThat(ooencoded).contains("Unknown extension http://foo");
 	}
@@ -410,14 +411,14 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String messageString = p.encodeResourceToString(myPatient);
 //		ourLog.info(messageString);
 
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSequence(
 			"meta",
 			"String Extension",
 			"Organization/2.25.79433498044103547197447759549862032393",
 			"furry-grey",
 			"furry-white",
 			"FamilyName"
-		));
+		);
 		assertThat(messageString, not(stringContainsInOrder(
 			"extension",
 			"meta"
@@ -434,7 +435,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(encoded);
 
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 
 		assertThat(messageString).contains("valueReference");
 		assertThat(messageString).doesNotContain("valueResource");
@@ -458,14 +459,14 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSequence(
 			"meta",
 			"Organization/2.25.79433498044103547197447759549862032393",
 			"furry-grey",
 			"furry-white",
 			"String Extension",
 			"FamilyName"
-		));
+		);
 		assertThat(messageString, not(stringContainsInOrder(
 			"extension",
 			"meta"
@@ -485,7 +486,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(encoded);
 
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 
 		assertThat(messageString).contains("valueReference");
 		assertThat(messageString).doesNotContain("valueResource");

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.coordinator;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
@@ -187,7 +188,7 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 
 		// verify
 		assertThat(startResponse.getInstanceId()).isEqualTo(inProgressInstanceId); // make sure it's the completed one
-		assertThat(startResponse.isUsesCachedResult()).isTrue();
+		assertTrue(startResponse.isUsesCachedResult());
 		ArgumentCaptor<FetchJobInstancesRequest> requestArgumentCaptor = ArgumentCaptor.forClass(FetchJobInstancesRequest.class);
 		verify(myJobInstancePersister)
 			.fetchInstances(requestArgumentCaptor.capture(), anyInt(), anyInt());

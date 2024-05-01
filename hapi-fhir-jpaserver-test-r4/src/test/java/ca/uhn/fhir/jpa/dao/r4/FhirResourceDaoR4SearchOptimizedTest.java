@@ -335,11 +335,11 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
-		assertThat(results.size()).isNull();
+		assertNull(results.size());
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
 		assertThat(ids.get(9)).isEqualTo("Patient/PT00009");
-		assertThat(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size()).isNull();
+		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		// Try the same query again. This time we'll request _total=accurate as well
 		// which means the total should be calculated no matter what.
@@ -380,7 +380,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 200, true);
 		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
 		assertThat(ids.get(199)).isEqualTo("Patient/PT00199");
-		assertThat(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size()).isNull();
+		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
 		 * 20 should be prefetched since that's the initial page size
@@ -440,7 +440,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
 		assertThat(ids.get(9)).isEqualTo("Patient/PT00009");
-		assertThat(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size()).isNull();
+		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
 		 * 20 should be prefetched since that's the initial page size
@@ -474,7 +474,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		ids = toUnqualifiedVersionlessIdValues(results, 10, 15, false);
 		assertThat(ids.get(0)).isEqualTo("Patient/PT00010");
 		assertThat(ids.get(4)).isEqualTo("Patient/PT00014");
-		assertThat(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size()).isNull();
+		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
 		 * Search should be untouched
@@ -514,7 +514,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		ids = toUnqualifiedVersionlessIdValues(results, 25, 30, false);
 		assertThat(ids.get(0)).isEqualTo("Patient/PT00025");
 		assertThat(ids.get(4)).isEqualTo("Patient/PT00029");
-		assertThat(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size()).isNull();
+		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
 		 * Search should be untouched
@@ -576,7 +576,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 50, true);
 		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
 		assertThat(ids.get(49)).isEqualTo("Patient/PT00049");
-		assertThat(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size()).isNull();
+		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
 		 * 20 should be prefetched since that's the initial page size
@@ -617,7 +617,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
 		assertThat(ids.get(9)).isEqualTo("Patient/PT00009");
-		assertThat(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size()).isNull();
+		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
 		 * 20 should be prefetched since that's the initial page size
@@ -678,7 +678,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
 		assertThat(ids.get(9)).isEqualTo("Patient/PT00009");
-		assertThat(results.size()).isNull();
+		assertNull(results.size());
 
 		/*
 		 * 20 should be prefetched since that's the initial page size

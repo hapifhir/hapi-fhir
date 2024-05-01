@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -107,7 +108,7 @@ public class SearchCountParamDstu3Test {
 			ourLog.info(responseContent);
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			assertThat(ourLastMethod).isEqualTo("searchWithNoCountParam");
-			assertThat(ourLastParam).isNull();
+			assertNull(ourLastParam);
 
 			assertThat(responseContent).contains(
 				 "<link>",

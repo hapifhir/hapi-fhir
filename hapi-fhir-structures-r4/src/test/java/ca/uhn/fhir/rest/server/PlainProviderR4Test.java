@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.History;
@@ -82,7 +83,7 @@ public class PlainProviderR4Test {
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
-		assertThat(provider.myLastSince).isNull();
+		assertNull(provider.myLastSince);
 		assertThat(provider.myLastCount.getValueAsString(), IsEqual.equalTo("12"));
 		
 		status =ourClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02"));
@@ -92,7 +93,7 @@ public class PlainProviderR4Test {
 		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertThat(provider.myLastSince.getValueAsString(), StringStartsWith.startsWith("2012-01-02T00:01:02"));
-		assertThat(provider.myLastCount).isNull();
+		assertNull(provider.myLastCount);
 	}
 
 	@Test
@@ -107,8 +108,8 @@ public class PlainProviderR4Test {
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
-		assertThat(provider.myLastSince).isNull();
-		assertThat(provider.myLastCount).isNull();
+		assertNull(provider.myLastSince);
+		assertNull(provider.myLastCount);
 		
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -40,7 +41,7 @@ public class JaxRsRequestTest {
 		String headerKey = "key";
 		String headerValue = "location_value";
 		String headerValue2 = "location_value_2";
-		assertThat(StringUtils.isBlank(details.getHeader(headerKey))).isTrue();
+		assertTrue(StringUtils.isBlank(details.getHeader(headerKey)));
 		queryParameters.add(headerKey, headerValue);
 		assertThat(details.getHeader(headerKey)).isEqualTo(headerValue);
 		assertThat(details.getHeaders(headerKey)).isEqualTo(Arrays.asList(headerValue));
@@ -64,7 +65,7 @@ public class JaxRsRequestTest {
 	public void testGetResponse() {
 		JaxRsResponse response = (JaxRsResponse) details.getResponse();
 		assertThat(response.getRequestDetails()).isEqualTo(details);
-		assertThat(response == details.getResponse()).isTrue();
+		assertTrue(response == details.getResponse());
 	}
 
 	@Test

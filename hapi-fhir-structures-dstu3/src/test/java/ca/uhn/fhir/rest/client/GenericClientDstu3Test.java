@@ -1,5 +1,8 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
@@ -597,8 +600,8 @@ public class GenericClientDstu3Test {
 		MethodOutcome outcome = client.create().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
 		assertThat(myAnswerCount).isEqualTo(2);
-		assertThat(outcome.getOperationOutcome()).isNotNull();
-		assertThat(outcome.getResource()).isNotNull();
+		assertNotNull(outcome.getOperationOutcome());
+		assertNotNull(outcome.getResource());
 
 		assertThat(((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>");
 		assertThat(((Patient) outcome.getResource()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>");
@@ -643,8 +646,8 @@ public class GenericClientDstu3Test {
 		MethodOutcome outcome = client.create().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
 		assertThat(myAnswerCount).isEqualTo(1);
-		assertThat(outcome.getOperationOutcome()).isNull();
-		assertThat(outcome.getResource()).isNotNull();
+		assertNull(outcome.getOperationOutcome());
+		assertNotNull(outcome.getResource());
 
 		assertThat(((Patient) outcome.getResource()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>");
 
@@ -1719,8 +1722,8 @@ public class GenericClientDstu3Test {
 		MethodOutcome outcome = client.update().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
 		assertThat(myAnswerCount).isEqualTo(2);
-		assertThat(outcome.getOperationOutcome()).isNotNull();
-		assertThat(outcome.getResource()).isNotNull();
+		assertNotNull(outcome.getOperationOutcome());
+		assertNotNull(outcome.getResource());
 
 		assertThat(((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>");
 		assertThat(((Patient) outcome.getResource()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>");
@@ -1764,8 +1767,8 @@ public class GenericClientDstu3Test {
 		MethodOutcome outcome = client.update().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
 		assertThat(myAnswerCount).isEqualTo(1);
-		assertThat(outcome.getOperationOutcome()).isNull();
-		assertThat(outcome.getResource()).isNotNull();
+		assertNull(outcome.getOperationOutcome());
+		assertNotNull(outcome.getResource());
 
 		assertThat(((Patient) outcome.getResource()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>");
 
@@ -1893,7 +1896,7 @@ public class GenericClientDstu3Test {
 
 		MethodOutcome outcome = client.validate().resource(pt).execute();
 
-		assertThat(outcome.getOperationOutcome()).isNotNull();
+		assertNotNull(outcome.getOperationOutcome());
 		assertThat(((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>");
 
 	}
@@ -1923,8 +1926,8 @@ public class GenericClientDstu3Test {
 		assertThat(read.getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK!</div>");
 
 		// Ensure that we haven't overridden the default type for the name
-		assertThat(MyPatientWithExtensions.class.isAssignableFrom(Patient.class)).isFalse();
-		assertThat(Patient.class.isAssignableFrom(MyPatientWithExtensions.class)).isFalse();
+		assertFalse(MyPatientWithExtensions.class.isAssignableFrom(Patient.class));
+		assertFalse(Patient.class.isAssignableFrom(MyPatientWithExtensions.class));
 		Patient pt = new Patient();
 		pt.getText().setDivAsString("A PATIENT");
 		IParser parser = ourCtx.newXmlParser();

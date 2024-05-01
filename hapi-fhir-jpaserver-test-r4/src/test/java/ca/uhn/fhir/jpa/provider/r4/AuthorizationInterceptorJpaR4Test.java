@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
@@ -388,7 +389,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.elementsSubset("status")
 			.execute();
 		assertThat(response.getStatus()).isEqualTo(ObservationStatus.FINAL);
-		assertThat(response.getSubject().getReference()).isNull();
+		assertNull(response.getSubject().getReference());
 
 		// Read a non-allowed observation
 		try {
@@ -1003,7 +1004,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
-		assertThat(resp.getEntry().get(0).getResource()).isNull();
+		assertNull(resp.getEntry().get(0).getResource());
 
 		// return=OperationOutcome - should succeed
 		resp = myClient
@@ -1012,7 +1013,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			.withAdditionalHeader(Constants.HEADER_PREFER, "return=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
 			.execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
-		assertThat(resp.getEntry().get(0).getResource()).isNull();
+		assertNull(resp.getEntry().get(0).getResource());
 
 		// return=Representation - should fail
 		try {

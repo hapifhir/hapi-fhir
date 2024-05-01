@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
@@ -65,7 +66,7 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 	void insert_delete() {
 		String description = UUID.randomUUID().toString();
 		int initialCount = countRecords();
-		assertThat(ourHapiMigrationStorageSvc.insertLockRecord(description)).isTrue();
+		assertTrue(ourHapiMigrationStorageSvc.insertLockRecord(description));
 		assertThat(countRecords()).isEqualTo(initialCount + 1);
 		ourHapiMigrationStorageSvc.deleteLockRecord(description);
 		assertThat(countRecords()).isEqualTo(initialCount);
@@ -76,7 +77,7 @@ class HapiMigrationStorageSvcTest extends BaseMigrationTest {
 		String otherLock = UUID.randomUUID().toString();
 		String thisLock = UUID.randomUUID().toString();
 		ourHapiMigrationStorageSvc.verifyNoOtherLocksPresent(thisLock);
-		assertThat(ourHapiMigrationStorageSvc.insertLockRecord(otherLock)).isTrue();
+		assertTrue(ourHapiMigrationStorageSvc.insertLockRecord(otherLock));
 		try {
 			ourHapiMigrationStorageSvc.verifyNoOtherLocksPresent(thisLock);
 			fail("");

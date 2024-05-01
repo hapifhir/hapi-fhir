@@ -161,10 +161,10 @@ public class ElementsParamR4Test {
 			patient -> {
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
 				assertThat(responseContent).doesNotContain("<Bundle");
-				assertThat(responseContent, (containsString("<Patient")));
+				assertThat(responseContent).contains("<Patient");
 				assertThat(responseContent).doesNotContain("<div>THE DIV</div>");
-				assertThat(responseContent, (containsString("family")));
-				assertThat(responseContent, (containsString("maritalStatus")));
+				assertThat(responseContent).contains("family");
+				assertThat(responseContent).contains("maritalStatus");
 				assertThat(ourLastElements).containsExactlyInAnyOrder("name", "maritalStatus");
 			}
 		);
@@ -178,7 +178,7 @@ public class ElementsParamR4Test {
 			patient -> {
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
 				assertThat(responseContent).doesNotContain("<div>THE DIV</div>");
-				assertThat(responseContent, (containsString("family")));
+				assertThat(responseContent).contains("family");
 				assertThat(responseContent).doesNotContain("maritalStatus");
 				assertThat(ourLastElements).containsExactlyInAnyOrder("name");
 			}

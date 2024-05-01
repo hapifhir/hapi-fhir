@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -57,7 +58,7 @@ public class DeleteConditionalHl7OrgTest {
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(204);
 
-		assertThat(ourLastIdParam).isNull();
+		assertNull(ourLastIdParam);
 		assertThat(ourLastConditionalUrl).isEqualTo("Patient?identifier=system%7C001");
 	}
 
@@ -74,7 +75,7 @@ public class DeleteConditionalHl7OrgTest {
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(204);
 
 		assertThat(ourLastIdParam.toUnqualified().getValue()).isEqualTo("Patient/2");
-		assertThat(ourLastConditionalUrl).isNull();
+		assertNull(ourLastConditionalUrl);
 	}
 
 	@AfterAll

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -80,7 +81,7 @@ public class IncludedResourceStitchingClientTest {
 		Extension ext = exts.get(0);
 		Reference ref = (Reference) ext.getValue();
 		assertThat(ref.getReferenceElement().getValue()).isEqualTo("Organization/o1");
-		assertThat(ref.getResource()).isNotNull();
+		assertNotNull(ref.getResource());
 		
 	}
 
@@ -105,11 +106,11 @@ public class IncludedResourceStitchingClientTest {
 		ExtPatient p = (ExtPatient) bundle.getEntry().get(0).getResource();
 		Reference ref = p.getSecondOrg();
 		assertThat(ref.getReferenceElement().getValue()).isEqualTo("Organization/o1");
-		assertThat(ref.getResource()).isNotNull();
+		assertNotNull(ref.getResource());
 		
 		Organization o1 = (Organization) ref.getResource();
 		assertThat(o1.getPartOf().getReferenceElement().toUnqualifiedVersionless().getIdPart()).isEqualTo("o2");
-		assertThat(o1.getPartOf().getResource()).isNotNull();
+		assertNotNull(o1.getPartOf().getResource());
 		
 	}
 	

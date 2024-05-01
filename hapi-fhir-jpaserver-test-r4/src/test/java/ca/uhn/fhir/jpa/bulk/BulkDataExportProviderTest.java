@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
@@ -217,7 +220,7 @@ public class BulkDataExportProviderTest {
 		assertThat(params.getResourceTypes()).contains(patientResource);
 		assertThat(params.getResourceTypes()).contains(practitionerResource);
 		assertThat(params.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
-		assertThat(params.getSince()).isNotNull();
+		assertNotNull(params.getSince());
 		assertThat(params.getFilters()).contains(filter);
 		assertThat(params.getPostFetchFilterUrls()).containsExactly("Patient?_tag=foo");
 	}
@@ -276,7 +279,7 @@ public class BulkDataExportProviderTest {
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
 		assertThat(params.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 		assertThat(params.getResourceTypes()).containsExactlyInAnyOrder("Patient", "Practitioner");
-		assertThat(params.getSince()).isNotNull();
+		assertNotNull(params.getSince());
 		assertThat(params.getFilters()).containsExactlyInAnyOrder("Patient?identifier=foo");
 	}
 
@@ -305,7 +308,7 @@ public class BulkDataExportProviderTest {
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
 		assertThat(params.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 		assertThat(params.getResourceTypes()).containsExactlyInAnyOrder("Patient", "EpisodeOfCare");
-		assertThat(params.getSince()).isNull();
+		assertNull(params.getSince());
 		assertThat(params.getFilters()).containsExactlyInAnyOrder("Patient?_id=P999999990", "EpisodeOfCare?patient=P999999990");
 	}
 
@@ -606,8 +609,8 @@ public class BulkDataExportProviderTest {
 
 		assertThat(bp.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 		assertThat(bp.getResourceTypes()).containsExactlyInAnyOrder("Observation", "DiagnosticReport");
-		assertThat(bp.getSince()).isNotNull();
-		assertThat(bp.getFilters()).isNotNull();
+		assertNotNull(bp.getSince());
+		assertNotNull(bp.getFilters());
 		assertThat(bp.getGroupId()).isEqualTo(GROUP_ID);
 		assertThat(bp.isExpandMdm()).isEqualTo(true);
 	}
@@ -641,8 +644,8 @@ public class BulkDataExportProviderTest {
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 		assertThat(bp.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 		assertThat(bp.getResourceTypes()).containsExactlyInAnyOrder("Patient", "Practitioner");
-		assertThat(bp.getSince()).isNotNull();
-		assertThat(bp.getFilters()).isNotNull();
+		assertNotNull(bp.getSince());
+		assertNotNull(bp.getFilters());
 		assertThat(bp.getGroupId()).isEqualTo(GROUP_ID);
 		assertThat(bp.isExpandMdm()).isEqualTo(true);
 	}
@@ -673,8 +676,8 @@ public class BulkDataExportProviderTest {
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 		assertThat(bp.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 		assertThat(bp.getResourceTypes()).as(bp.getResourceTypes().toString()).containsExactlyInAnyOrder("DiagnosticReport", "Group", "Observation", "Device", "Patient", "Encounter");
-		assertThat(bp.getSince()).isNotNull();
-		assertThat(bp.getFilters()).isNotNull();
+		assertNotNull(bp.getSince());
+		assertNotNull(bp.getFilters());
 		assertThat(bp.getGroupId()).isEqualTo(GROUP_ID);
 		assertThat(bp.isExpandMdm()).isEqualTo(false);
 	}
@@ -851,7 +854,7 @@ public class BulkDataExportProviderTest {
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 		assertThat(bp.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
 		assertThat(bp.getResourceTypes()).containsExactlyInAnyOrder("Immunization", "Observation");
-		assertThat(bp.getSince()).isNotNull();
+		assertNotNull(bp.getSince());
 		assertThat(bp.getFilters()).containsExactlyInAnyOrder("Immunization?vaccine-code=foo");
 	}
 
@@ -884,7 +887,7 @@ public class BulkDataExportProviderTest {
 
 		// verify
 		JobInstanceStartRequest parameters = verifyJobStart();
-		assertThat(parameters.isUseCache()).isFalse();
+		assertFalse(parameters.isUseCache());
 	}
 
 	@Test
@@ -917,7 +920,7 @@ public class BulkDataExportProviderTest {
 
 		// verify
 		JobInstanceStartRequest parameters = verifyJobStart();
-		assertThat(parameters.isUseCache()).isFalse();
+		assertFalse(parameters.isUseCache());
 	}
 
 	@Test

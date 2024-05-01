@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -125,7 +126,7 @@ public class ServerFeaturesDstu2Test {
 	public void testHeadJson() throws Exception {
 		HttpHead httpGet = new HttpHead(ourServer.getBaseUrl() + "/Patient/123");
 		HttpResponse status = ourClient.execute(httpGet);
-		assertThat(status.getEntity()).isNull();
+		assertNull(status.getEntity());
 
 		ourLog.info(status.toString());
 

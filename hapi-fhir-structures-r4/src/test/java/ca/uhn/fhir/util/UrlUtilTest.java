@@ -1,5 +1,8 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
@@ -72,19 +75,19 @@ public class UrlUtilTest {
 
 	@Test
 	public void testIsValid() {
-		assertThat(UrlUtil.isValid("http://foo")).isTrue();
-		assertThat(UrlUtil.isValid("https://foo")).isTrue();
-		assertThat(UrlUtil.isValid("HTTP://Foo")).isTrue();
-		assertThat(UrlUtil.isValid("HTTPS://Foo")).isTrue();
+		assertTrue(UrlUtil.isValid("http://foo"));
+		assertTrue(UrlUtil.isValid("https://foo"));
+		assertTrue(UrlUtil.isValid("HTTP://Foo"));
+		assertTrue(UrlUtil.isValid("HTTPS://Foo"));
 
-		assertThat(UrlUtil.isValid("file://foo")).isFalse();
-		assertThat(UrlUtil.isValid("://foo")).isFalse();
-		assertThat(UrlUtil.isValid("http:/ss")).isFalse();
-		assertThat(UrlUtil.isValid("http:/")).isFalse();
-		assertThat(UrlUtil.isValid("http:")).isFalse();
-		assertThat(UrlUtil.isValid("h")).isFalse();
-		assertThat(UrlUtil.isValid("")).isFalse();
-		assertThat(UrlUtil.isValid(null)).isFalse();
+		assertFalse(UrlUtil.isValid("file://foo"));
+		assertFalse(UrlUtil.isValid("://foo"));
+		assertFalse(UrlUtil.isValid("http:/ss"));
+		assertFalse(UrlUtil.isValid("http:/"));
+		assertFalse(UrlUtil.isValid("http:"));
+		assertFalse(UrlUtil.isValid("h"));
+		assertFalse(UrlUtil.isValid(""));
+		assertFalse(UrlUtil.isValid(null));
 	}
 
 	@Test
@@ -92,7 +95,7 @@ public class UrlUtilTest {
 		assertThat(UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde").getResourceType()).isEqualTo("ConceptMap");
 		assertThat(UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde").getResourceType()).isEqualTo("ConceptMap");
 		assertThat(UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde").getResourceId()).isEqualTo("ussgfht-loincde");
-		assertThat(UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde?").getParams()).isNull();
+		assertNull(UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde?").getParams());
 		assertThat(UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde?a=b").getParams()).isEqualTo("a=b");
 
 		assertThat(UrlUtil.parseUrl("ConceptMap/ussgfht-loincde?a=b").getParams()).isEqualTo("a=b");
@@ -160,7 +163,7 @@ public class UrlUtilTest {
 		String actual = UrlUtil.determineResourceTypeInResourceUrl(myCtx, url);
 
 		if (theExpected.equals("null")) {
-			assertThat(actual).isNull();
+			assertNull(actual);
 		} else {
 			assertThat(actual).isEqualTo(theExpected);
 		}

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.cache;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -168,8 +170,8 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		IIdType patientIdFemale = new IdDt(myPatientDao.create(patientFemale).getId());
 		ResourceChangeResult result = cache.forceRefresh();
 		assertEmptyResult(result);
-		assertThat(patientIdFemale.toString()).isNotNull();
-		assertThat(myMaleTestCallback.getResourceChangeEvent()).isNull();
+		assertNotNull(patientIdFemale.toString());
+		assertNull(myMaleTestCallback.getResourceChangeEvent());
 	}
 
 	@Test
@@ -197,8 +199,8 @@ public class ResourceChangeListenerRegistryImplIT extends BaseJpaR4Test {
 		IIdType patientIdFemale = new IdDt(myPatientDao.create(patientFemale).getId());
 		ResourceChangeResult result = cache.forceRefresh();
 		assertEmptyResult(result);
-		assertThat(patientIdFemale.toString()).isNotNull();
-		assertThat(myMaleTestCallback.getResourceChangeEvent()).isNull();
+		assertNotNull(patientIdFemale.toString());
+		assertNull(myMaleTestCallback.getResourceChangeEvent());
 
 		// Pretend we're on a different process in the cluster and so our cache doesn't have the cache yet
 		myResourceChangeListenerRegistry.clearCachesForUnitTest();

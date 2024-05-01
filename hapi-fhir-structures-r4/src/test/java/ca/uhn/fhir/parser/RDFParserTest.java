@@ -20,6 +20,7 @@
 
 package ca.uhn.fhir.parser;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.test.BaseTest;
 import fr.inria.lille.shexjava.GlobalFactory;
@@ -108,7 +109,7 @@ public class RDFParserTest extends BaseTest {
 
 		// Parse RDF content as resource
 		IBaseResource viaTurtleResource = parseRdf(ourCtx, new StringReader(turtleString));
-		assertThat(viaTurtleResource).isNotNull();
+		assertNotNull(viaTurtleResource);
 
 		// Compare original JSON-based resource against RDF-based resource
 		String viaTurtleJson = serializeJson(ourCtx, viaTurtleResource);
@@ -140,7 +141,7 @@ public class RDFParserTest extends BaseTest {
 		refParser.setStripVersionsFromReferences(false);
 		// parser.setDontStripVersionsFromReferencesAtPaths();
 		IBaseResource ret = refParser.parseResource(inputStream);
-		assertThat(ret).isNotNull();
+		assertNotNull(ret);
 		return ret;
 	}
 
@@ -148,7 +149,7 @@ public class RDFParserTest extends BaseTest {
 		IParser jsonParser = ctx.newJsonParser();
 		jsonParser.setStripVersionsFromReferences(false);
 		String ret = jsonParser.encodeResourceToString(resource);
-		assertThat(ret).isNotNull();
+		assertNotNull(ret);
 		return ret;
 	}
 
@@ -156,7 +157,7 @@ public class RDFParserTest extends BaseTest {
 	public IBaseResource parseRdf(FhirContext ctx, StringReader inputStream) {
 		IParser refParser = ctx.newRDFParser();
 		IBaseResource ret = refParser.parseResource(inputStream);
-		assertThat(ret).isNotNull();
+		assertNotNull(ret);
 		return ret;
 	}
 
@@ -165,7 +166,7 @@ public class RDFParserTest extends BaseTest {
 		rdfParser.setStripVersionsFromReferences(false);
 		rdfParser.setServerBaseUrl("http://a.example/fhir/");
 		String ret = rdfParser.encodeResourceToString(resource);
-		assertThat(ret).isNotNull();
+		assertNotNull(ret);
 		return ret;
 	}
 
@@ -228,8 +229,8 @@ public class RDFParserTest extends BaseTest {
 		String output = ourCtx.newRDFParser().setPrettyPrint(true).encodeResourceToString(bundle);
 		ourLog.info(output);
 
-		assertThat(output, not(containsString("contained ")));
-		assertThat(output, not(containsString("id ")));
+		assertThat(output).doesNotContain("contained ");
+		assertThat(output).doesNotContain("id ");
 	}
 
 	@Test
@@ -239,8 +240,8 @@ public class RDFParserTest extends BaseTest {
 		String output = ourCtx.newRDFParser().setPrettyPrint(true).encodeResourceToString(parameters);
 		ourLog.info(output);
 
-		assertThat(output, not(containsString("contained ")));
-		assertThat(output, not(containsString("id ")));
+		assertThat(output).doesNotContain("contained ");
+		assertThat(output).doesNotContain("id ");
 	}
 
 }

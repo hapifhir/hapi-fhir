@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -13,7 +14,7 @@ class HistorySearchDateRangeParamTest {
 	@Test
 	public void testSearchDateRangeParamWithInvalidSearchType() {
 		HistorySearchDateRangeParam param = new HistorySearchDateRangeParam(Map.of("Some key", new String[]{"value"}), dateRangeParam, theOffset);
-		assertThat(param.getHistorySearchType()).isNull();
+		assertNull(param.getHistorySearchType());
 		assertThat(param.getOffset()).isEqualTo(theOffset);
 	}
 

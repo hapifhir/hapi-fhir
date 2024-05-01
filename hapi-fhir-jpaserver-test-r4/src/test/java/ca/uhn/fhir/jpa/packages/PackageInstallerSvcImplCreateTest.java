@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.packages;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
@@ -152,7 +153,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		final List<IBaseResource> allResources = myValueSetDao.search(SearchParameterMap.newSynchronous(), REQUEST_DETAILS).getAllResources();
 
 		assertThat(allResources).isNotEmpty();
-		assertThat(allResources.get(0) instanceof ValueSet).isTrue();
+		assertTrue(allResources.get(0) instanceof ValueSet);
 
 		return allResources.stream()
 			.map(ValueSet.class::cast)
@@ -166,7 +167,7 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		assertThat(allResources).hasSize(1);
 
 		final IBaseResource resource1 = allResources.get(0);
-		assertThat(resource1 instanceof ValueSet).isTrue();
+		assertTrue(resource1 instanceof ValueSet);
 
 		return (ValueSet) resource1;
 	}

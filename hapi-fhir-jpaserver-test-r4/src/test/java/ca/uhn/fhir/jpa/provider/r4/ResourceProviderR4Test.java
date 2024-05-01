@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
@@ -282,7 +286,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		IIdType id = myClient.update().resource(searchParameter).execute().getId().toUnqualifiedVersionless();
 
-		assertThat(id).isNotNull();
+		assertNotNull(id);
 		assertThat(id.getIdPart()).isEqualTo("resource-security");
 	}
 
@@ -339,7 +343,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		searchParameterDao.create(searchParameter, (RequestDetails) null);
 
 		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Organization", "_profile");
-		assertThat(sp).isNotNull();
+		assertNotNull(sp);
 
 		IFhirResourceDao<Organization> organizationDao = myDaoRegistry.getResourceDao(Organization.class);
 		Organization organizationWithNoProfile = new Organization();
@@ -360,7 +364,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.collect(Collectors.toList());
 
 			assertThat(matched).hasSize(2);
-			assertThat(matched.get(0).getUri()).isNull();
+			assertNull(matched.get(0).getUri());
 			assertThat(matched.get(1).getUri()).isEqualTo("http://foo");
 		});
 
@@ -551,7 +555,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(output.getTotalElement().getValue()).isNull();
+		assertNull(output.getTotalElement().getValue());
 
 		output = myClient
 			.search()
@@ -561,7 +565,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(output.getTotalElement().getValue()).isNotNull();
+		assertNotNull(output.getTotalElement().getValue());
 
 		String linkNext = output.getLink("next").getUrl();
 		linkNext = linkNext.replaceAll("_getpagesoffset=[0-9]+", "_getpagesoffset=3300");
@@ -569,7 +573,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Bundle nextPageBundle = myClient.loadPage().byUrl(linkNext).andReturnBundle(Bundle.class).execute();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(nextPageBundle));
-		assertThat(nextPageBundle.getLink("next")).isNull();
+		assertNull(nextPageBundle.getLink("next"));
 	}
 
 	@Test
@@ -597,7 +601,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		List<String> ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
 		ourLog.info("Ids: {}", ids);
 		assertThat(output.getEntry()).hasSize(6);
-		assertThat(output.getLink("next")).isNotNull();
+		assertNotNull(output.getLink("next"));
 
 		// Page 2
 		output = myClient
@@ -608,7 +612,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ids = output.getEntry().stream().map(t -> t.getResource().getIdElement().toUnqualifiedVersionless().getValue()).collect(Collectors.toList());
 		ourLog.info("Ids: {}", ids);
 		assertThat(output.getEntry()).hasSize(4);
-		assertThat(output.getLink("next")).isNull();
+		assertNull(output.getLink("next"));
 
 	}
 
@@ -1126,7 +1130,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(outcome.getId().getIdPart()).isEqualTo(id.getIdPart());
 		assertThat(outcome.getId().getVersionIdPart()).isEqualTo("2");
 		p = (Patient) outcome.getResource();
-		assertThat(p.getBirthDate()).isNull();
+		assertNull(p.getBirthDate());
 	}
 
 	/**
@@ -1223,7 +1227,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	@Test
 	public void testCreateIncludesRequestValidatorInterceptorOutcome() {
 		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
-		assertThat(interceptor.isAddValidationResultsToResponseOperationOutcome()).isTrue();
+		assertTrue(interceptor.isAddValidationResultsToResponseOperationOutcome());
 		interceptor.setFailOnSeverity(null);
 
 
@@ -2368,7 +2372,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertThat(history.getEntry().get(1).getRequest().getMethodElement().getValue()).isEqualTo(HTTPVerb.DELETE);
 		assertThat(history.getEntry().get(1).getRequest().getUrl()).isEqualTo("Patient/" + id.getIdPart() + "/_history/2");
-		assertThat(history.getEntry().get(1).getResource()).isNull();
+		assertNull(history.getEntry().get(1).getResource());
 
 		assertThat(history.getEntry().get(2).getResource().getId()).isEqualTo(id.withVersion("1").getValue());
 		assertThat(((Patient) history.getEntry().get(2).getResource()).getName()).hasSize(1);
@@ -2431,7 +2435,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(toUnqualifiedIdValues(history)).as(toUnqualifiedIdValues(history).toString()).containsExactly("Patient/A/_history/2", "Patient/A/_history/1");
 
 		// we got them all
-		assertThat(history.getLink("next")).isNull();
+		assertNull(history.getLink("next"));
 
 		/*
 		 * Try with a date offset
@@ -3130,12 +3134,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		assertThat(aeId.getVersionIdPart()).isEqualTo("1");
 
 		patient = myClient.read().resource(Patient.class).withId(patientId).execute();
-		assertThat(patient.getManagingOrganization().getReferenceElement().hasIdPart()).isTrue();
-		assertThat(patient.getManagingOrganization().getReferenceElement().hasVersionIdPart()).isFalse();
+		assertTrue(patient.getManagingOrganization().getReferenceElement().hasIdPart());
+		assertFalse(patient.getManagingOrganization().getReferenceElement().hasVersionIdPart());
 
 		ae = myClient.read().resource(AuditEvent.class).withId(aeId).execute();
-		assertThat(ae.getEntityFirstRep().getWhat().getReferenceElement().hasIdPart()).isTrue();
-		assertThat(ae.getEntityFirstRep().getWhat().getReferenceElement().hasVersionIdPart()).isTrue();
+		assertTrue(ae.getEntityFirstRep().getWhat().getReferenceElement().hasIdPart());
+		assertTrue(ae.getEntityFirstRep().getWhat().getReferenceElement().hasVersionIdPart());
 
 	}
 
@@ -3367,7 +3371,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 //			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 //			ourLog.info(text);
 //			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
-//			assertThat(text, not(containsString("\"text\",\"type\"")));
+//			assertThat(text).doesNotContain("\"text\",\"type\"");
 //		}
 	}
 
@@ -3607,7 +3611,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p.setId(patientId);
 
 		MethodOutcome outcome = myClient.update().resource(p).execute();
-		assertThat(outcome.getCreated()).isTrue();
+		assertTrue(outcome.getCreated());
 
 		Patient createdPatient = (Patient) outcome.getResource();
 
@@ -3622,7 +3626,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		// Delete
 		outcome = myClient.delete().resource(createdPatient).execute();
-		assertThat(outcome.getResource()).isNull();
+		assertNull(outcome.getResource());
 
 		// Search
 		Bundle search2 = (Bundle) myClient.search()
@@ -3630,7 +3634,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.where(Patient.RES_ID.exactly().identifier(patientId))
 			.execute();
 
-		assertThat(CollectionUtils.isEmpty(search2.getEntry())).isTrue();
+		assertTrue(CollectionUtils.isEmpty(search2.getEntry()));
 		assertThat(search2.getTotal()).isEqualTo(0);
 	}
 
@@ -3639,7 +3643,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// Create with server assigned ID
 		Patient p = new Patient();
 		MethodOutcome outcome = myClient.create().resource(p).execute();
-		assertThat(outcome.getCreated()).isTrue();
+		assertTrue(outcome.getCreated());
 
 		Patient createdPatient = (Patient) outcome.getResource();
 		String patientId = createdPatient.getIdElement().getIdPart();
@@ -3655,7 +3659,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		// Delete
 		outcome = myClient.delete().resource(createdPatient).execute();
-		assertThat(outcome.getResource()).isNull();
+		assertNull(outcome.getResource());
 
 		// Search
 		Bundle search2 = (Bundle) myClient.search()
@@ -3663,7 +3667,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			.where(Patient.RES_ID.exactly().identifier(patientId))
 			.execute();
 
-		assertThat(CollectionUtils.isEmpty(search2.getEntry())).isTrue();
+		assertTrue(CollectionUtils.isEmpty(search2.getEntry()));
 		assertThat(search2.getTotal()).isEqualTo(0);
 	}
 
@@ -4079,7 +4083,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		List<String> linkNext = Lists.newArrayList();
 		for (int i = 0; i < 100; i++) {
 			Bundle bundle = myClient.search().forResource(Patient.class).where(Patient.NAME.matches().value("testSearchPagingKeepsOldSearches")).count(5).returnBundle(Bundle.class).execute();
-			assertThat(isNotBlank(bundle.getLink("next").getUrl())).isTrue();
+			assertTrue(isNotBlank(bundle.getLink("next").getUrl()));
 			assertThat(bundle.getEntry()).hasSize(5);
 			linkNext.add(bundle.getLink("next").getUrl());
 		}
@@ -4123,12 +4127,12 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Date after = new Date();
 
 		InstantType updated = found.getMeta().getLastUpdatedElement();
-		assertThat(updated).isNotNull();
+		assertNotNull(updated);
 		Date value = updated.getValue();
-		assertThat(value).isNotNull();
+		assertNotNull(value);
 		ourLog.info(value.getTime() + "");
 		ourLog.info(before.getTime() + "");
-		assertThat(value.after(before)).isTrue();
+		assertTrue(value.after(before));
 		assertThat(value.before(after)).as(new InstantDt(value) + " should be before " + new InstantDt(after)).isTrue();
 	}
 
@@ -4668,7 +4672,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// When we've only got one DB connection available, we are forced to wait for the
 		// search to finish before returning
 		if (TestR4Config.getMaxThreads() > 1) {
-			assertThat(found.getTotalElement().getValue()).isNull();
+			assertNull(found.getTotalElement().getValue());
 			assertThat(found.getEntry()).hasSize(1);
 			assertThat(sw.getMillis()).isLessThan(1000L);
 		} else {
@@ -4733,7 +4737,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// WHen we've only got one DB connection available, we are forced to wait for the
 		// search to finish before returning
 		if (TestR4Config.getMaxThreads() > 1) {
-			assertThat(found.getTotalElement().getValue()).isNull();
+			assertNull(found.getTotalElement().getValue());
 			assertThat(found.getEntry()).hasSize(1);
 			assertThat(sw.getMillis()).isLessThan(1500L);
 		} else {
@@ -5469,13 +5473,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue(identifierValue);
 		MethodOutcome outcome = myClient.create().resource(patient).execute();
-		assertThat(outcome.getCreated()).isTrue();
+		assertTrue(outcome.getCreated());
 
 		//create observation
 		Observation obs = new Observation();
 		obs.addIdentifier().setSystem("urn:system").setValue(identifierValue);
 		outcome = myClient.create().resource(obs).execute();
-		assertThat(outcome.getCreated()).isTrue();
+		assertTrue(outcome.getCreated());
 
 		// search
 		Bundle patientsWithMissingBirthdate = myClient.search().byUrl(searchPatientURIWithMissingBirthdate).returnBundle(Bundle.class).execute();
@@ -5765,7 +5769,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			assertThat(respPt.getIdElement().getVersionIdPart()).isEqualTo("2");
 
 			InstantType updateTime = respPt.getMeta().getLastUpdatedElement();
-			assertThat(updateTime.getValue().after(before)).isTrue();
+			assertTrue(updateTime.getValue().after(before));
 
 		} finally {
 			response.close();
@@ -5848,7 +5852,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateWithClientSuppliedIdWhichDoesntExistrpr4");
 
 		MethodOutcome outcome = myClient.update().resource(p1).withId("testUpdateWithClientSuppliedIdWhichDoesntExistrpr4").execute();
-		assertThat(outcome.getCreated().booleanValue()).isTrue();
+		assertTrue(outcome.getCreated().booleanValue());
 		IdType p1Id = (IdType) outcome.getId();
 
 		assertThat(p1Id.getValue()).contains("Patient/testUpdateWithClientSuppliedIdWhichDoesntExistrpr4/_history");
@@ -6563,7 +6567,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String returnedPatientMetaSource = returnedPatient.getMeta().getSource();
 
 		assertThat(returnedPatientMetaSource).startsWith(sourceURL);
-		assertThat(returnedPatientMetaSource.endsWith(requestId)).isFalse();
+		assertFalse(returnedPatientMetaSource.endsWith(requestId));
 	}
 
 	@Test
@@ -6650,7 +6654,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		Date dateV1 = patientV1.getMeta().getLastUpdated();
 		Date dateV2 = patientV2.getMeta().getLastUpdated();
-		assertThat(dateV1.before((dateV2))).isTrue();
+		assertTrue(dateV1.before((dateV2)));
 
 		// Issue 3138 test case, verify behavior of _at
 		verifyAtBehaviourWhenQueriedDateDuringTwoUpdatedDates(patientId, delayInMs, dateV1, dateV2);
@@ -6665,8 +6669,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	private void verifyAtBehaviourWhenQueriedDateDuringTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
 		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, delayInMs / 2);
-		assertThat(timeBetweenUpdates.after(dateV1)).isTrue();
-		assertThat(timeBetweenUpdates.before(dateV2)).isTrue();
+		assertTrue(timeBetweenUpdates.after(dateV1));
+		assertTrue(timeBetweenUpdates.before(dateV2));
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
 		assertThat(resultIds).hasSize(2);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/1");
@@ -6675,8 +6679,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	private void verifyAtBehaviourWhenQueriedDateAfterTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
 		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV2, delayInMs);
-		assertThat(timeBetweenUpdates.after(dateV1)).isTrue();
-		assertThat(timeBetweenUpdates.after(dateV2)).isTrue();
+		assertTrue(timeBetweenUpdates.after(dateV1));
+		assertTrue(timeBetweenUpdates.after(dateV2));
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
 		assertThat(resultIds).hasSize(1);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
@@ -6684,8 +6688,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	private void verifyAtBehaviourWhenQueriedDateBeforeTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
 		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, -delayInMs);
-		assertThat(timeBetweenUpdates.before(dateV1)).isTrue();
-		assertThat(timeBetweenUpdates.before(dateV2)).isTrue();
+		assertTrue(timeBetweenUpdates.before(dateV1));
+		assertTrue(timeBetweenUpdates.before(dateV2));
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_at=gt" + toStr(timeBetweenUpdates));
 		assertThat(resultIds).hasSize(2);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/1");
@@ -6694,8 +6698,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	private void verifySinceBehaviourWhenQueriedDateDuringTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
 		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, delayInMs / 2);
-		assertThat(timeBetweenUpdates.after(dateV1)).isTrue();
-		assertThat(timeBetweenUpdates.before(dateV2)).isTrue();
+		assertTrue(timeBetweenUpdates.after(dateV1));
+		assertTrue(timeBetweenUpdates.before(dateV2));
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates));
 		assertThat(resultIds).hasSize(1);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/2");
@@ -6703,16 +6707,16 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 	private void verifySinceBehaviourWhenQueriedDateAfterTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
 		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV2, delayInMs);
-		assertThat(timeBetweenUpdates.after(dateV1)).isTrue();
-		assertThat(timeBetweenUpdates.after(dateV2)).isTrue();
+		assertTrue(timeBetweenUpdates.after(dateV1));
+		assertTrue(timeBetweenUpdates.after(dateV2));
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates));
 		assertThat(resultIds).isEmpty();
 	}
 
 	private void verifySinceBehaviourWhenQueriedDateBeforeTwoUpdatedDates(Long patientId, int delayInMs, Date dateV1, Date dateV2) throws IOException {
 		Date timeBetweenUpdates = DateUtils.addMilliseconds(dateV1, -delayInMs);
-		assertThat(timeBetweenUpdates.before(dateV1)).isTrue();
-		assertThat(timeBetweenUpdates.before(dateV2)).isTrue();
+		assertTrue(timeBetweenUpdates.before(dateV1));
+		assertTrue(timeBetweenUpdates.before(dateV2));
 		List<String> resultIds = searchAndReturnUnqualifiedIdValues(myServerBase + "/Patient/" + patientId + "/_history?_since=" + toStr(timeBetweenUpdates));
 		assertThat(resultIds).hasSize(2);
 		assertThat(resultIds).contains("Patient/" + patientId + "/_history/1");
@@ -6848,7 +6852,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		assertThat(results.getEntry()).hasSize(1);
 		assertThat(returnedPatientMetaSource).startsWith(sourceUri);
-		assertThat(returnedPatientMetaSource.endsWith(requestId)).isFalse();
+		assertFalse(returnedPatientMetaSource.endsWith(requestId));
 	}
 
 	@Test

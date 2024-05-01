@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -225,7 +226,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Encounter", "location");
-		assertThat(param).isNotNull();
+		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(enc, false);
 		assertThat(links).hasSize(1);
 		assertThat(links.iterator().next().getSearchParamName()).isEqualTo("location");
@@ -240,7 +241,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Consent", Consent.SP_SOURCE_REFERENCE);
-		assertThat(param).isNotNull();
+		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(consent, false);
 		assertThat(links).hasSize(1);
 		assertThat(links.iterator().next().getPath()).isEqualTo("Consent.source");
@@ -255,7 +256,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 		SearchParamExtractorR4 extractor = new SearchParamExtractorR4(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		RuntimeSearchParam param = mySearchParamRegistry.getActiveSearchParam("Patient", Patient.SP_IDENTIFIER);
-		assertThat(param).isNotNull();
+		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> params = extractor.extractSearchParamTokens(p, param);
 		assertThat(params).hasSize(1);
 		ResourceIndexedSearchParamToken paramValue = (ResourceIndexedSearchParamToken) params.iterator().next();
@@ -509,7 +510,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			assertThat(spEntry.getComponents()).hasSize(2);
 
 			ResourceIndexedSearchParamComposite.Component indexComponent0 = spEntry.getComponents().get(0);
-			assertThat(indexComponent0.getSearchParamName()).isNotNull();
+			assertNotNull(indexComponent0.getSearchParamName());
 			assertThat(indexComponent0.getSearchParamName()).isEqualTo("component-code");
 			assertThat(indexComponent0.getSearchParameterType()).isEqualTo(RestSearchParameterTypeEnum.TOKEN);
 			assertThat(indexComponent0.getParamIndexValues()).hasSize(2);

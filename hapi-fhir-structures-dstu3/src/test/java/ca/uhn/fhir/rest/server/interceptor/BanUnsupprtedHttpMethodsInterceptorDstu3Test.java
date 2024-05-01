@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -60,7 +61,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 	public void testHeadJsonWithInvalidPatient() throws Exception {	
 		HttpHead httpGet = new HttpHead(ourServer.getBaseUrl() + "/Patient/123");	
 		HttpResponse status = ourClient.execute(httpGet);
-		assertThat(status.getEntity()).isNull();	
+		assertNull(status.getEntity());	
  		ourLog.info(status.toString());
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
@@ -71,7 +72,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 	public void testHeadJsonWithValidPatient() throws Exception {	
 		HttpHead httpGet = new HttpHead(ourServer.getBaseUrl() + "/Patient/1");	
 		HttpResponse status = ourClient.execute(httpGet);
-		assertThat(status.getEntity()).isNull();	
+		assertNull(status.getEntity());	
  		ourLog.info(status.toString());
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);

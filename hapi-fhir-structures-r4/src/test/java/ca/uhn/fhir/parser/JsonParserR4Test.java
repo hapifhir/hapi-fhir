@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.PerformanceOptionsEnum;
@@ -195,7 +196,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		String asString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
 		ourLog.info(asString);
-		assertThat(asString, not(containsString("{ }")));
+		assertThat(asString).doesNotContain("{ }");
 	}
 
 
@@ -433,10 +434,10 @@ public class JsonParserR4Test extends BaseTest {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSequence(
 			"\"fullUrl\": \"urn:uuid:0.0.0.0\"",
 			"\"id\": \"1.1.1.1\""
-		));
+		);
 
 		input = ourCtx.newJsonParser().parseResource(Bundle.class, encoded);
 		assertThat(input.getEntry().get(0).getFullUrl()).isEqualTo("urn:uuid:0.0.0.0");
@@ -669,10 +670,10 @@ public class JsonParserR4Test extends BaseTest {
 		String encoded = parser.encodeResourceToString(b);
 		ourLog.info(encoded);
 
-		assertThat(encoded, not(containsString("BUNDLEID")));
-		assertThat(encoded, not(containsString("http://FOO")));
-		assertThat(encoded, (containsString("PATIENTID")));
-		assertThat(encoded, (containsString("http://BAR")));
+		assertThat(encoded).doesNotContain("BUNDLEID");
+		assertThat(encoded).doesNotContain("http://FOO");
+		assertThat(encoded).contains("PATIENTID");
+		assertThat(encoded).contains("http://BAR");
 		assertThat(encoded).contains("GIVEN");
 
 		b = parser.parseResource(Bundle.class, encoded);
@@ -695,10 +696,10 @@ public class JsonParserR4Test extends BaseTest {
 		String encoded = parser.encodeResourceToString(b);
 		ourLog.info(encoded);
 
-		assertThat(encoded, not(containsString("BUNDLEID")));
-		assertThat(encoded, not(containsString("http://FOO")));
-		assertThat(encoded, not(containsString("PATIENTID")));
-		assertThat(encoded, not(containsString("http://BAR")));
+		assertThat(encoded).doesNotContain("BUNDLEID");
+		assertThat(encoded).doesNotContain("http://FOO");
+		assertThat(encoded).doesNotContain("PATIENTID");
+		assertThat(encoded).doesNotContain("http://BAR");
 		assertThat(encoded).contains("GIVEN");
 
 		b = parser.parseResource(Bundle.class, encoded);
@@ -812,7 +813,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		Appointment input = parser.parseResource(Appointment.class, output);
 
-		assertThat(input.getMeta().getExtensionByUrl("http://example-source-team.com")).isNotNull();
+		assertNotNull(input.getMeta().getExtensionByUrl("http://example-source-team.com"));
 	}
 
 	@Test
@@ -1196,15 +1197,15 @@ public class JsonParserR4Test extends BaseTest {
 		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle);
 		ourLog.info(output);
 
-		assertThat(output, not(containsString("\"contained\"")));
-		assertThat(output, not(containsString("\"id\"")));
-		assertThat(output, stringContainsInOrder(
+		assertThat(output).doesNotContain("\"contained\"");
+		assertThat(output).doesNotContain("\"id\"");
+		assertThat(output).containsSequence(
 			 "\"fullUrl\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\",",
 			 "\"resourceType\": \"Patient\"",
 			 "\"fullUrl\": \"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"",
 			 "\"resourceType\": \"Observation\"",
 			 "\"reference\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\""
-		));
+		);
 
 	}
 
@@ -1215,9 +1216,9 @@ public class JsonParserR4Test extends BaseTest {
 		String output = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(parameters);
 		ourLog.info(output);
 
-		assertThat(output, not(containsString("\"contained\"")));
-		assertThat(output, not(containsString("\"id\"")));
-		assertThat(output, stringContainsInOrder(
+		assertThat(output).doesNotContain("\"contained\"");
+		assertThat(output).doesNotContain("\"id\"");
+		assertThat(output).containsSequence(
 			 "\"resourceType\": \"Parameters\"",
 			 "\"name\": \"resource\"",
 			 "\"fullUrl\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\",",
@@ -1225,7 +1226,7 @@ public class JsonParserR4Test extends BaseTest {
 			 "\"fullUrl\": \"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"",
 			 "\"resourceType\": \"Observation\"",
 			 "\"reference\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\""
-		));
+		);
 
 	}
 
@@ -1291,7 +1292,7 @@ public class JsonParserR4Test extends BaseTest {
 		patient.getName().add(humanName2);
 
 		final String patientString = ourCtx.newJsonParser().encodeResourceToString(patient);
-		assertThat(patientString, not(containsString("fhir_comment")));
+		assertThat(patientString).doesNotContain("fhir_comment");
 	}
 
 	@DatatypeDef(

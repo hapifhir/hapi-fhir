@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.coordinator;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -123,7 +124,7 @@ class JobDataSinkTest {
 		assertThat(batchWorkChunk.jobDefinitionId).isEqualTo(JOB_DEF_ID);
 		assertThat(batchWorkChunk.instanceId).isEqualTo(JOB_INSTANCE_ID);
 		assertThat(batchWorkChunk.targetStepId).isEqualTo(LAST_STEP_ID);
-		assertThat(batchWorkChunk.serializedData).isNotNull();
+		assertNotNull(batchWorkChunk.serializedData);
 		Step1Output stepOutput = JsonUtil.deserialize(batchWorkChunk.serializedData, Step1Output.class);
 		assertThat(stepOutput.getPids()).hasSize(PID_COUNT);
 	}

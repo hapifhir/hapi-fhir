@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -1102,7 +1105,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		p.addName().setFamily("Hello");
 		results = myPatientDao.create(p, "Patient?identifier=urn%3Asystem%7C" + methodName, mySrd);
 		assertThat(results.getId().getIdPart()).isEqualTo(id.getIdPart());
-		assertThat(results.getCreated()).isFalse();
+		assertFalse(results.getCreated());
 
 		// Now create a second one
 
@@ -1111,7 +1114,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		p.addName().setFamily("Hello");
 		results = myPatientDao.create(p, mySrd);
 		assertThat(results.getId().getIdPart()).isNotEqualTo(id.getIdPart());
-		assertThat(results.getCreated().booleanValue()).isTrue();
+		assertTrue(results.getCreated().booleanValue());
 
 		// Now try to create one with the original match URL and it should fail
 
@@ -1143,7 +1146,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		results = myPatientDao.create(p, "Patient?_id=" + id.toVersionless().getValue(), mySrd);
 		assertThat(results.getId().getIdPart()).isEqualTo(id.getIdPart());
 		assertThat(results.getId().getVersionIdPart()).isEqualTo(id.getVersionIdPart());
-		assertThat(results.getCreated().booleanValue()).isFalse();
+		assertFalse(results.getCreated().booleanValue());
 
 	}
 
@@ -1387,7 +1390,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IBundleProvider history = myPatientDao.history(null, null, null, mySrd);
 		assertThat(history.size().intValue()).isEqualTo(4 + initialHistory);
 		List<IBaseResource> resources = history.getResources(0, 4);
-		assertThat(resources.get(0).isDeleted()).isTrue();
+		assertTrue(resources.get(0).isDeleted());
 
 		try {
 			myPatientDao.delete(id2, mySrd);
@@ -1465,7 +1468,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		patient.setActive(true);
 
 		IIdType id = myPatientDao.create(patient, mySrd).getId();
-		assertThat(id.getIdPartAsLong()).isNotNull();
+		assertNotNull(id.getIdPartAsLong());
 		assertThat(id.getVersionIdPart()).isEqualTo("1");
 
 		IIdType id2 = myPatientDao.delete(id.toUnqualifiedVersionless()).getId();
@@ -1488,7 +1491,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertThat(id5.getVersionIdPart()).isEqualTo("3");
 
 		patient = myPatientDao.read(id.withVersion("1"));
-		assertThat(patient.getActive()).isTrue();
+		assertTrue(patient.getActive());
 
 		try {
 			myPatientDao.read(id.withVersion("2"));
@@ -1498,7 +1501,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		}
 
 		patient = myPatientDao.read(id.withVersion("3"));
-		assertThat(patient.getActive()).isFalse();
+		assertFalse(patient.getActive());
 
 	}
 
@@ -1562,8 +1565,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
 		assertThat(history.size().intValue()).isEqualTo(2);
 
-		assertThat(history.getResources(0, 1).get(0).isDeleted()).isTrue();
-		assertThat(history.getResources(1, 2).get(0).isDeleted()).isFalse();
+		assertTrue(history.getResources(0, 1).get(0).isDeleted());
+		assertFalse(history.getResources(1, 2).get(0).isDeleted());
 	}
 
 	@Test
@@ -2040,13 +2043,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertThat(entries.get(1).getIdElement()).isEqualTo(id.withVersion("2"));
 		assertThat(entries.get(2).getIdElement()).isEqualTo(id.withVersion("1"));
 
-		assertThat(entries.get(0).isDeleted()).isFalse();
+		assertFalse(entries.get(0).isDeleted());
 		assertThat(ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(0))).isEqualTo(BundleEntryTransactionMethodEnum.PUT);
 
-		assertThat(entries.get(1).isDeleted()).isTrue();
+		assertTrue(entries.get(1).isDeleted());
 		assertThat(ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(1))).isEqualTo(BundleEntryTransactionMethodEnum.DELETE);
 
-		assertThat(entries.get(2).isDeleted()).isFalse();
+		assertFalse(entries.get(2).isDeleted());
 		assertThat(ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(2))).isEqualTo(BundleEntryTransactionMethodEnum.POST);
 	}
 
@@ -2143,15 +2146,15 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		patient.addName().setFamily("Tester").addGiven("Joe");
 
 		MethodOutcome outcome = myPatientDao.create(patient, mySrd);
-		assertThat(outcome.getId()).isNotNull();
-		assertThat(outcome.getId().isEmpty()).isFalse();
+		assertNotNull(outcome.getId());
+		assertFalse(outcome.getId().isEmpty());
 
 		Date now = new Date();
 
 		{
 			Patient retrieved = myPatientDao.read(outcome.getId(), mySrd);
 			Date published = retrieved.getMeta().getLastUpdated();
-			assertThat(published.before(now)).isTrue();
+			assertTrue(published.before(now));
 		}
 
 		/*
@@ -2250,7 +2253,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 			id = myPatientDao.create(patient, mySrd).getId();
 		}
 
-		assertThat(id.hasVersionIdPart()).isTrue();
+		assertTrue(id.hasVersionIdPart());
 
 		/*
 		 * Create a second version
@@ -2621,8 +2624,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		patient.addName().setFamily("Tester").addGiven("JoetestPersistSearchParams");
 
 		MethodOutcome outcome = myPatientDao.create(patient, mySrd);
-		assertThat(outcome.getId()).isNotNull();
-		assertThat(outcome.getId().isEmpty()).isFalse();
+		assertNotNull(outcome.getId());
+		assertFalse(outcome.getId().isEmpty());
 
 		long id = outcome.getId().getIdPartAsLong();
 
@@ -2693,7 +2696,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		/*
 		 * VREAD
 		 */
-		assertThat(id1.hasVersionIdPart()).isTrue(); // just to make sure..
+		assertTrue(id1.hasVersionIdPart()); // just to make sure..
 		obs = myObservationDao.read(id1, mySrd);
 		assertThat(obs.getCode().getCoding().get(0).getCode()).isEqualTo(o1.getCode().getCoding().get(0).getCode());
 
@@ -2838,7 +2841,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		meta = myPatientDao.metaGetOperation(Meta.class, mySrd);
 		List<Coding> published = meta.getTag();
 		assertThat(published).hasSize(2);
-		assertThat(published.get(0).getSystem()).isNull();
+		assertNull(published.get(0).getSystem());
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
 		assertThat(published.get(1).getSystem()).isEqualTo("http://foo");
@@ -2969,7 +2972,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		meta = myPatientDao.metaGetOperation(Meta.class, mySrd);
 		List<Coding> published = meta.getTag();
 		assertThat(published).hasSize(2);
-		assertThat(published.get(0).getSystem()).isNull();
+		assertNull(published.get(0).getSystem());
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
 		assertThat(published.get(1).getSystem()).isEqualTo("http://foo");
@@ -3070,7 +3073,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		meta = myPatientDao.metaGetOperation(Meta.class, mySrd);
 		List<Coding> published = meta.getTag();
 		assertThat(published).hasSize(2);
-		assertThat(published.get(0).getSystem()).isNull();
+		assertNull(published.get(0).getSystem());
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
 		assertThat(published.get(1).getSystem()).isEqualTo("http://foo");
@@ -3162,7 +3165,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(outputBundle));
 
 		for (BundleEntryComponent next : outputBundle.getEntry()) {
-			assertThat(next.getResource().getIdElement().hasIdPart()).isTrue();
+			assertTrue(next.getResource().getIdElement().hasIdPart());
 		}
 	}
 
@@ -3880,7 +3883,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		Organization o1 = new Organization();
 		o1.getNameElement().setValue("AAA");
 		IIdType o1id = myOrganizationDao.create(o1, mySrd).getId();
-		assertThat(o1id.hasVersionIdPart()).isTrue();
+		assertTrue(o1id.hasVersionIdPart());
 
 		Patient p1 = new Patient();
 		p1.addName().setFamily("AAAA");
@@ -3889,7 +3892,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		p1 = myPatientDao.read(p1id, mySrd);
 
-		assertThat(p1.getManagingOrganization().getReferenceElement().hasVersionIdPart()).isFalse();
+		assertFalse(p1.getManagingOrganization().getReferenceElement().hasVersionIdPart());
 		assertThat(p1.getManagingOrganization().getReferenceElement().toUnqualifiedVersionless()).isEqualTo(o1id.toUnqualifiedVersionless());
 	}
 
@@ -3963,8 +3966,8 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 
 		MethodOutcome outcome = myPatientDao.create(patient, mySrd);
 		IIdType patientId = outcome.getId();
-		assertThat(patientId).isNotNull();
-		assertThat(patientId.isEmpty()).isFalse();
+		assertNotNull(patientId);
+		assertFalse(patientId.isEmpty());
 
 		Patient retrieved = myPatientDao.read(patientId, mySrd);
 		ArrayList<Coding> published = (ArrayList<Coding>) retrieved.getMeta().getTag();
@@ -3972,7 +3975,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertThat(published).hasSize(2);
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
-		assertThat(published.get(0).getSystem()).isNull();
+		assertNull(published.get(0).getSystem());
 		assertThat(published.get(1).getCode()).isEqualTo("Cat");
 		assertThat(published.get(1).getDisplay()).isEqualTo("Kittens");
 		assertThat(published.get(1).getSystem()).isEqualTo("http://foo");
@@ -4000,7 +4003,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		sort(published);
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
-		assertThat(published.get(0).getSystem()).isNull();
+		assertNull(published.get(0).getSystem());
 		assertThat(published.get(1).getCode()).isEqualTo("Cat");
 		assertThat(published.get(1).getDisplay()).isEqualTo("Kittens");
 		assertThat(published.get(1).getSystem()).isEqualTo("http://foo");
@@ -4030,7 +4033,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		assertThat(published).hasSize(3);
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
-		assertThat(published.get(0).getSystem()).isNull();
+		assertNull(published.get(0).getSystem());
 		assertThat(published.get(1).getCode()).isEqualTo("Cat");
 		assertThat(published.get(1).getDisplay()).isEqualTo("Kittens");
 		assertThat(published.get(1).getSystem()).isEqualTo("http://foo");

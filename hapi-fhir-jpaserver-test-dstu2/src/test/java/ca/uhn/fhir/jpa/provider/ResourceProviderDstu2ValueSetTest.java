@@ -208,9 +208,9 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		expanded = myValueSetDao.expand(myExtensionalVsId, new ValueSetExpansionOptions().setFilter("systolic"), mySrd);
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
 		/*
 		 * Filter with code
@@ -225,9 +225,9 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 	}
 
 	@Test
@@ -243,9 +243,9 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
 		List<String> codes = toCodes(expanded);
 		assertThat(codes).containsExactly("11378-7", "8450-9");

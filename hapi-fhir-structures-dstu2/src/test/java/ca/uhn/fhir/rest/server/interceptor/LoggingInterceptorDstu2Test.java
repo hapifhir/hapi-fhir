@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
@@ -81,7 +82,7 @@ public class LoggingInterceptorDstu2Test {
 
 		LoggingInterceptor interceptor = new LoggingInterceptor();
 		interceptor.setLogExceptions(true);
-		assertThat(interceptor.isLogExceptions()).isTrue();
+		assertTrue(interceptor.isLogExceptions());
 		interceptor.setErrorMessageFormat("ERROR - ${requestVerb} ${requestUrl}");
 		assertThat(interceptor.getErrorMessageFormat()).isEqualTo("ERROR - ${requestVerb} ${requestUrl}");
 

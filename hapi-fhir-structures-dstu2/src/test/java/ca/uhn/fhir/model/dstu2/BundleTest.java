@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.dstu2;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Link;
 import ca.uhn.fhir.util.TestUtil;
@@ -22,13 +24,13 @@ public class BundleTest {
 		Bundle b = new Bundle();
 		Link link = b.getLink(IBaseBundle.LINK_NEXT);
 
-		assertThat(link).isNull();
+		assertNull(link);
 		
 		Link link2 = b.getLinkOrCreate(IBaseBundle.LINK_NEXT);
 		link = b.getLink(IBaseBundle.LINK_NEXT);
 
-		assertThat(link).isNotNull();
-		assertThat(link2).isNotNull();
+		assertNotNull(link);
+		assertNotNull(link2);
 		assertThat(link2).isSameAs(link);
 	}
 	

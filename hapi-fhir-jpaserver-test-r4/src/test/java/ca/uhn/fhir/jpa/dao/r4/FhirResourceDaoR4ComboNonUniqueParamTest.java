@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboTokenNonUnique;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -109,10 +110,10 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		createNamesAndGenderSp();
 
 		IIdType id1 = createPatient1();
-		assertThat(id1).isNotNull();
+		assertNotNull(id1);
 
 		IIdType id2 = createPatient2();
-		assertThat(id2).isNotNull();
+		assertNotNull(id2);
 
 		logAllNonUniqueIndexes();
 		runInTransaction(() -> {
@@ -151,7 +152,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		myPatientDao.delete(id1);
 
 		IIdType id3 = createPatient1();
-		assertThat(id3).isNotNull();
+		assertNotNull(id3);
 
 		params = SearchParameterMap.newSynchronous();
 		params.add("family", new StringParam("fAmIlY1|")); // weird casing to test normalization
@@ -171,7 +172,7 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		// Create a resource patching the unique SP
 		myCaptureQueriesListener.clear();
 		IIdType id1 = createPatient1();
-		assertThat(id1).isNotNull();
+		assertNotNull(id1);
 
 		assertThat(myCaptureQueriesListener.countSelectQueries()).as(String.join(",", "\n" + myCaptureQueriesListener.getSelectQueries().stream().map(q -> q.getThreadName()).collect(Collectors.toList()))).isEqualTo(0);
 		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(12);
@@ -222,10 +223,10 @@ public class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4T
 		createNamesAndGenderSp();
 
 		IIdType id1 = createPatient1();
-		assertThat(id1).isNotNull();
+		assertNotNull(id1);
 
 		IIdType id2 = createPatient2();
-		assertThat(id2).isNotNull();
+		assertNotNull(id2);
 
 		logAllNonUniqueIndexes();
 		runInTransaction(() -> {

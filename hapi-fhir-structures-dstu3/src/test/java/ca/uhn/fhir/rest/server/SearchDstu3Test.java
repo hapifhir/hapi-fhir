@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -274,7 +275,7 @@ public class SearchDstu3Test {
 			bundle = ct.newParser(ourCtx).parseResource(Bundle.class, responseContent);
 			assertThat(bundle.getEntry()).hasSize(10);
 			String linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-			assertThat(linkNext).isNotNull();
+			assertNotNull(linkNext);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}

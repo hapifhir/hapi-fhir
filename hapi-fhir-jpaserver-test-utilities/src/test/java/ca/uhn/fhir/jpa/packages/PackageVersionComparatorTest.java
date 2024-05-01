@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.packages;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.Test;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -25,11 +27,11 @@ public class PackageVersionComparatorTest {
 
 	@Test
 	public void testIsEquivalent() {
-		assertThat(PackageVersionComparator.isEquivalent("1.2.x", "1.2.3")).isTrue();
-		assertThat(PackageVersionComparator.isEquivalent("1.2", "1.2.3")).isTrue();
-		assertThat(PackageVersionComparator.isEquivalent("1.2.3", "1.2.3")).isTrue();
-		assertThat(PackageVersionComparator.isEquivalent("1.2.4", "1.2.3")).isFalse();
-		assertThat(PackageVersionComparator.isEquivalent("1.3", "1.2.3")).isFalse();
+		assertTrue(PackageVersionComparator.isEquivalent("1.2.x", "1.2.3"));
+		assertTrue(PackageVersionComparator.isEquivalent("1.2", "1.2.3"));
+		assertTrue(PackageVersionComparator.isEquivalent("1.2.3", "1.2.3"));
+		assertFalse(PackageVersionComparator.isEquivalent("1.2.4", "1.2.3"));
+		assertFalse(PackageVersionComparator.isEquivalent("1.3", "1.2.3"));
 
 	}
 

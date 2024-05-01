@@ -74,7 +74,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 
 		myTenantClientInterceptor.setTenantId(TENANT_A);
 		Patient p = myClient.read().resource(Patient.class).withId(idA).execute();
-		assertThat(p.getActive()).isTrue();
+		assertTrue(p.getActive());
 	}
 
 	@Test
@@ -105,7 +105,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 
 		myTenantClientInterceptor.setTenantId("DEFAULT");
 		Patient p = myClient.read().resource(Patient.class).withId(idA).execute();
-		assertThat(p.getActive()).isTrue();
+		assertTrue(p.getActive());
 	}
 
 	@Test
@@ -248,8 +248,8 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(patientBundle.hasLink()).isTrue();
-		assertThat(patientBundle.getLink().stream().anyMatch(link -> link.hasRelation() && link.getRelation().equals("next"))).isTrue();
+		assertTrue(patientBundle.hasLink());
+		assertTrue(patientBundle.getLink().stream().anyMatch(link -> link.hasRelation() && link.getRelation().equals("next")));
 		String nextLink = patientBundle.getLink().stream().filter(link -> link.hasRelation() && link.getRelation().equals("next")).findFirst().get().getUrl();
 		assertThat(nextLink, not(blankOrNullString()));
 

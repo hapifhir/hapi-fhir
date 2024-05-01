@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
@@ -69,7 +72,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		IIdType id = myPatientDao.create(patient, mySrd).getId();
 
 		patient = myPatientDao.read(id, mySrd);
-		assertThat(patient.getActive()).isTrue();
+		assertTrue(patient.getActive());
 		assertThat(patient.getMeta().getExtensionsByUrl("http://foo")).hasSize(1);
 		assertThat(patient.getMeta().getExtensionByUrl("http://foo").getValueAsPrimitive().getValueAsString()).isEqualTo("hello");
 	}
@@ -96,7 +99,7 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 		bundle = myBundleDao.read(id, mySrd);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 		patient = (Patient) bundle.getEntryFirstRep().getResource();
-		assertThat(patient.getActive()).isTrue();
+		assertTrue(patient.getActive());
 		assertThat(patient.getMeta().getExtensionsByUrl("http://foo")).hasSize(1);
 		assertThat(patient.getMeta().getVersionId()).isEqualTo("22");
 		assertThat(patient.getMeta().getProfile().get(0).getValue()).isEqualTo("http://foo");
@@ -171,8 +174,8 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 
 		// then
 		var tag = patientReadback.getMeta().getTag().get(0);
-		assertThat(tag).isNotNull();
-		assertThat(tag.getUserSelectedElement().asStringValue()).isNull();
+		assertNotNull(tag);
+		assertNull(tag.getUserSelectedElement().asStringValue());
 	}
 
 
@@ -227,8 +230,8 @@ public class FhirResourceDaoR4MetaTest extends BaseJpaR4Test {
 				.setSystem(expectedSystem1)
 				.setCode(expectedCode1)
 				.setDisplay(expectedDisplay1);
-			assertThat(newTag.getUserSelectedElement().asStringValue()).isNull();
-			assertThat(newTag.getUserSelected()).isFalse();
+			assertNull(newTag.getUserSelectedElement().asStringValue());
+			assertFalse(newTag.getUserSelected());
 			newTag.setVersion(expectedVersion1)
 				.setUserSelected(expectedUserSelected1);
 			savedPatient.setActive(true);

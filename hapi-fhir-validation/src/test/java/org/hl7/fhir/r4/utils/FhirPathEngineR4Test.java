@@ -1,5 +1,7 @@
 package org.hl7.fhir.r4.utils;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.parser.IParser;
@@ -110,7 +112,7 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 		patient.setDeceased(new BooleanType());
 		List<Base> eval = ourCtx.newFhirPath().evaluate(patient, "Patient.deceased.exists()", Base.class);
 		ourLog.info(eval.toString());
-		assertThat(((BooleanType) eval.get(0)).getValue()).isFalse();
+		assertFalse(((BooleanType) eval.get(0)).getValue());
 	}
 
 	@Test
@@ -141,7 +143,7 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 		patient.setDeceased(new BooleanType(false));
 		List<Base> eval = ourCtx.newFhirPath().evaluate(patient, "Patient.deceased.exists()", Base.class);
 		ourLog.info(eval.toString());
-		assertThat(((BooleanType) eval.get(0)).getValue()).isTrue();
+		assertTrue(((BooleanType) eval.get(0)).getValue());
 	}
 
 	@Test
@@ -168,7 +170,7 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 		p.addName().setFamily("TEST");
 		List<Base> result = ourEngine.evaluate(null, p, null, diff, exp);
 		ourLog.info(result.toString());
-		assertThat(((BooleanType) result.get(0)).booleanValue()).isTrue();
+		assertTrue(((BooleanType) result.get(0)).booleanValue());
 	}
 
 	@Test

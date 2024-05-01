@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.model;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -11,7 +12,7 @@ public class HumanNameR4Test {
 	@Test
 	public void hasGivenFindsParameter() {
 		HumanName humanName = new HumanName().addGiven("test");
-		assertThat(humanName.hasGiven("test")).isTrue();
+		assertTrue(humanName.hasGiven("test"));
 	}
 
 	/**
@@ -20,7 +21,7 @@ public class HumanNameR4Test {
 	@Test
 	public void hasPrefixFindsParameter() {
 		HumanName humanName = new HumanName().addPrefix("test");
-		assertThat(humanName.hasPrefix("test")).isTrue();
+		assertTrue(humanName.hasPrefix("test"));
 	}
 
 	/**
@@ -29,6 +30,6 @@ public class HumanNameR4Test {
 	@Test
 	public void hasSuffixFindsParameter() {
 		HumanName humanName = new HumanName().addSuffix("test");
-		assertThat(humanName.hasSuffix("test")).isTrue();
+		assertTrue(humanName.hasSuffix("test"));
 	}
 }

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.bulk.imprt2;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.jobs.imprt.ConsumeFilesStep;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -89,9 +91,9 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
 		patient = myPatientDao.read(new IdType("Patient/A"));
-		assertThat(patient.getActive()).isTrue();
+		assertTrue(patient.getActive());
 		patient = myPatientDao.read(new IdType("Patient/B"));
-		assertThat(patient.getActive()).isFalse();
+		assertFalse(patient.getActive());
 
 	}
 
@@ -153,9 +155,9 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
 
 		patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
-		assertThat(patient.getActive()).isTrue();
+		assertTrue(patient.getActive());
 		patient = myPatientDao.read(new IdType("Patient/B"), mySrd);
-		assertThat(patient.getActive()).isFalse();
+		assertFalse(patient.getActive());
 
 	}
 
@@ -195,9 +197,9 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 
 
 		patient = myPatientDao.read(new IdType("Patient/A"));
-		assertThat(patient.getActive()).isTrue();
+		assertTrue(patient.getActive());
 		patient = myPatientDao.read(new IdType("Patient/B"));
-		assertThat(patient.getActive()).isFalse();
+		assertFalse(patient.getActive());
 
 	}
 

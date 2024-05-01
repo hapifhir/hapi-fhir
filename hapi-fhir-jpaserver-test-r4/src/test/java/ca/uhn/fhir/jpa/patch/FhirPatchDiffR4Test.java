@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.patch;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -336,7 +337,7 @@ public class FhirPatchDiffR4Test {
 		assertThat(diff.getParameter()).hasSize(2);
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "type")).isEqualTo("insert");
 		assertThat(extractPartValuePrimitive(diff, 0, "operation", "path")).isEqualTo("Patient.contact");
-		assertThat(extractPartValue(diff, 0, "operation", "value", IBase.class)).isNull();
+		assertNull(extractPartValue(diff, 0, "operation", "value", IBase.class));
 		assertThat(extractPartValuePrimitive(diff, 1, "operation", "type")).isEqualTo("insert");
 		assertThat(extractPartValuePrimitive(diff, 1, "operation", "path")).isEqualTo("Patient.contact[0].name");
 		assertThat(extractPartValue(diff, 1, "operation", "value", HumanName.class).getFamily()).isEqualTo("My Family");

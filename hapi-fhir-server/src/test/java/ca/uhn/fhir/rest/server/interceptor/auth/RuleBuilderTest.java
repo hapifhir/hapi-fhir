@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.model.primitive.IdDt;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Test;
@@ -85,7 +86,7 @@ public class RuleBuilderTest {
 		builder.allow().bulkExport().patientExportOnPatient("Patient/pat2").withResourceTypes(resourceTypes);
 		List<IAuthRule> rules = builder.build();
 		assertThat(1).isEqualTo(rules.size());
-		assertThat(rules.get(0) instanceof RuleBulkExportImpl).isTrue();
+		assertTrue(rules.get(0) instanceof RuleBulkExportImpl);
 	}
 
 	@Test

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -93,7 +94,7 @@ public class SearchPostDstu3Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			assertThat(ourLastMethod).isEqualTo("search");
-			assertThat(ourLastSortSpec).isNull();
+			assertNull(ourLastSortSpec);
 			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
@@ -124,7 +125,7 @@ public class SearchPostDstu3Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			assertThat(ourLastMethod).isEqualTo("search");
-			assertThat(ourLastSortSpec).isNull();
+			assertNull(ourLastSortSpec);
 			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
@@ -157,7 +158,7 @@ public class SearchPostDstu3Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			assertThat(ourLastMethod).isEqualTo("search");
-			assertThat(ourLastSortSpec).isNull();
+			assertNull(ourLastSortSpec);
 			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
@@ -190,7 +191,7 @@ public class SearchPostDstu3Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			assertThat(ourLastMethod).isEqualTo("search");
-			assertThat(ourLastSortSpec).isNull();
+			assertNull(ourLastSortSpec);
 			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");

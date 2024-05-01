@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -209,7 +212,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			@Test
 			public void withPreventInvalidatingConditionalMatchCriteria_false_mustThrow() {
 				//Note this should always default to false to preserve existing behaviour
-				assertThat(myStorageSettings.isPreventInvalidatingConditionalMatchCriteria()).isFalse();
+				assertFalse(myStorageSettings.isPreventInvalidatingConditionalMatchCriteria());
 
 				Patient p2 = new Patient();
 				p2.addIdentifier().setSystem("http://kookaburra.text/id").setValue("kookaburra1");
@@ -230,7 +233,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 			@Test
 			public void withPreventInvalidatingConditionalMatchCriteria_false_mustWork() {
 				//Note this should always default to false to preserve existing behaviour
-				assertThat(myStorageSettings.isPreventInvalidatingConditionalMatchCriteria()).isFalse();
+				assertFalse(myStorageSettings.isPreventInvalidatingConditionalMatchCriteria());
 
 				Patient p2 = new Patient();
 				p2.addIdentifier().setSystem("http://kookaburra.text/id").setValue("kookaburra2");
@@ -590,8 +593,8 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		patient.addName().setFamily("Tester").addGiven("Joe");
 
 		MethodOutcome outcome = myPatientDao.create(patient, mySrd);
-		assertThat(outcome.getId()).isNotNull();
-		assertThat(outcome.getId().isEmpty()).isFalse();
+		assertNotNull(outcome.getId());
+		assertFalse(outcome.getId().isEmpty());
 
 		assertThat(outcome.getId().getVersionIdPart()).isEqualTo("1");
 
@@ -601,7 +604,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		Patient retrieved = myPatientDao.read(outcome.getId(), mySrd);
 		InstantType updated = TestUtil.getTimestamp(retrieved);
-		assertThat(updated.before(now)).isTrue();
+		assertTrue(updated.before(now));
 
 		TestUtil.sleepOneClick();
 
@@ -619,8 +622,8 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		assertThat(retrieved2.getIdElement().getVersionIdPart()).isEqualTo("2");
 		assertThat(retrieved2.getIdentifier().get(0).getValue()).isEqualTo("002");
 		InstantType updated2 = TestUtil.getTimestamp(retrieved2);
-		assertThat(updated2.after(now)).isTrue();
-		assertThat(updated2.before(now2)).isTrue();
+		assertTrue(updated2.after(now));
+		assertTrue(updated2.before(now2));
 
 		TestUtil.sleepOneClick();
 
@@ -630,7 +633,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 
 		IBundleProvider historyBundle = myPatientDao.history(outcome.getId(), null, null, null, mySrd);
 
-		assertThat(historyBundle).isNotNull();
+		assertNotNull(historyBundle);
 		assertThat(Objects.requireNonNull(historyBundle.size()).intValue()).isEqualTo(2);
 
 		List<IBaseResource> history = historyBundle.getResources(0, 2);
@@ -1279,7 +1282,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		assertThat(myPatientDao.update(p, mySrd).getId().getVersionIdPart()).isEqualTo("2");
 
 		p = myPatientDao.read(new IdType("Patient/A"), mySrd);
-		assertThat(p.getActive()).isTrue();
+		assertTrue(p.getActive());
 		assertThat(p.getIdentifierFirstRep().getValue()).isEqualTo("foo");
 	}
 
@@ -1308,7 +1311,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		assertThat(myPatientDao.update(p, mySrd).getId().getVersionIdPart()).isEqualTo("1");
 
 		p = myPatientDao.read(new IdType("Patient/A"), mySrd);
-		assertThat(p.getActive()).isTrue();
+		assertTrue(p.getActive());
 		assertThat(p.getIdentifier()).isEmpty();
 	}
 
@@ -1338,7 +1341,7 @@ public class FhirResourceDaoR4UpdateTest extends BaseJpaR4Test {
 		assertThat(mySystemDao.transaction(mySrd, bb.getBundleTyped()).getEntryFirstRep().getResponse().getLocation()).endsWith("/_history/2");
 
 		p = myPatientDao.read(new IdType("Patient/A"), mySrd);
-		assertThat(p.getActive()).isTrue();
+		assertTrue(p.getActive());
 		assertThat(p.getIdentifierFirstRep().getValue()).isEqualTo("foo");
 	}
 }

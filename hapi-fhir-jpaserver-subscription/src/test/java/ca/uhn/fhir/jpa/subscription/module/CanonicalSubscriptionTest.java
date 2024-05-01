@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
@@ -41,7 +43,7 @@ public class CanonicalSubscriptionTest {
 
 		assertThat(s.getChannelExtension("key1")).isEqualTo("VALUE1");
 		assertThat(s.getChannelExtension("key2")).isEqualTo("VALUE2a");
-		assertThat(s.getChannelExtension("key3")).isNull();
+		assertNull(s.getChannelExtension("key3"));
 	}
 
 	@Test
@@ -74,7 +76,7 @@ public class CanonicalSubscriptionTest {
 		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4());
 		CanonicalSubscription sub1 = canonicalizer.canonicalize(makeEmailSubscription());
 		CanonicalSubscription sub2 = canonicalizer.canonicalize(makeEmailSubscription());
-		assertThat(sub1.equals(sub2)).isTrue();
+		assertTrue(sub1.equals(sub2));
 	}
 
 	@Test

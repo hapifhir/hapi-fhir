@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.api;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.Test;
 
 import java.net.URI;
@@ -33,11 +35,11 @@ public class TagTest {
 
 	@Test
 	public void testConstructors() throws URISyntaxException {
-		assertThat(new Tag().isEmpty()).isTrue();
-		assertThat(new Tag("http://foo").isEmpty()).isFalse();
-		assertThat(new Tag("http://foo", "http://bar").isEmpty()).isFalse();
-		assertThat(new Tag(new URI("http://foo"), new URI("http://bar"), "Label").isEmpty()).isFalse();
-		assertThat(new Tag((URI) null, null, "Label").isEmpty()).isTrue();
+		assertTrue(new Tag().isEmpty());
+		assertFalse(new Tag("http://foo").isEmpty());
+		assertFalse(new Tag("http://foo", "http://bar").isEmpty());
+		assertFalse(new Tag(new URI("http://foo"), new URI("http://bar"), "Label").isEmpty());
+		assertTrue(new Tag((URI) null, null, "Label").isEmpty());
 
 		assertThat(new Tag(new URI("http://foo"), new URI("http://bar"), "Label").getSystem()).isEqualTo("http://foo");
 		assertThat(new Tag(new URI("http://foo"), new URI("http://bar"), "Label").getCode()).isEqualTo("http://bar");

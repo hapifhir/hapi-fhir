@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -46,7 +47,7 @@ public class TerminologyHSearchIndexingProviderTest {
 
 		IBaseParameters retVal = testedProvider.reindexTerminology(myRequestDetails);
 
-		assertThat(retVal).isNotNull();
+		assertNotNull(retVal);
 		Optional<String> successValueOpt = ParametersUtil.getNamedParameterValueAsString(myContext, retVal, RESP_PARAM_SUCCESS);
 		assertThat(successValueOpt).isPresent();
 		assertThat(successValueOpt).contains("false");
@@ -62,7 +63,7 @@ public class TerminologyHSearchIndexingProviderTest {
 
 		IBaseParameters retVal = testedProvider.reindexTerminology(myRequestDetails);
 
-		assertThat(retVal).isNotNull();
+		assertNotNull(retVal);
 		Optional<String> successValueOpt = ParametersUtil.getNamedParameterValueAsString(myContext, retVal, RESP_PARAM_SUCCESS);
 		assertThat(successValueOpt).isPresent();
 		assertThat(successValueOpt).contains("false");
@@ -78,7 +79,7 @@ public class TerminologyHSearchIndexingProviderTest {
 
 		IBaseParameters retVal = testedProvider.reindexTerminology(myRequestDetails);
 
-		assertThat(retVal).isNotNull();
+		assertNotNull(retVal);
 		Optional<String> successValueOpt = ParametersUtil.getNamedParameterValueAsString(myContext, retVal, RESP_PARAM_SUCCESS);
 		assertThat(successValueOpt).isPresent();
 		assertThat(successValueOpt).contains("true");

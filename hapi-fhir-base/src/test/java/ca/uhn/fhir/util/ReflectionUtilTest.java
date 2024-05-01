@@ -1,5 +1,8 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import org.junit.jupiter.api.Test;
@@ -27,7 +30,7 @@ public class ReflectionUtilTest {
 
 	@Test
 	public void testNewInstanceOrReturnNullWrong1() {
-		assertThat(ReflectionUtil.newInstanceOrReturnNull("foo.Foo", List.class)).isNull();
+		assertNull(ReflectionUtil.newInstanceOrReturnNull("foo.Foo", List.class));
 	}
 
 	@Test
@@ -52,8 +55,8 @@ public class ReflectionUtilTest {
 
 	@Test
 	public void testTypeExists() {
-		assertThat(ReflectionUtil.typeExists("ca.Foo")).isFalse();
-		assertThat(ReflectionUtil.typeExists(String.class.getName())).isTrue();
+		assertFalse(ReflectionUtil.typeExists("ca.Foo"));
+		assertTrue(ReflectionUtil.typeExists(String.class.getName()));
 	}
 
 	@Test

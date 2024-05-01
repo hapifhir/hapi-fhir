@@ -39,6 +39,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
  * Tests the various metrics returned by IMdmMetricSvc
@@ -66,7 +67,7 @@ public interface IMdmMetricSvcTest {
 		MdmMetrics results = getMetricsSvc().generateMdmMetrics(parameters);
 
 		// verify
-		assertThat(results).isNotNull();
+		assertNotNull(results);
 		assertThat(results.getResourceType()).isEqualTo("Patient");
 		assertThat(results.getGoldenResourcesCount()).isEqualTo(4);
 		assertThat(results.getSourceResourcesCount()).isEqualTo(4);
@@ -80,9 +81,9 @@ public interface IMdmMetricSvcTest {
 		}) {
 			assertThat(map).containsKey(matchResult);
 			Map<MdmLinkSourceEnum, Long> source2Count = map.get(matchResult);
-			assertThat(source2Count).isNotNull();
+			assertNotNull(source2Count);
 			for (MdmLinkSourceEnum ls : MdmLinkSourceEnum.values()) {
-				assertThat(source2Count.get(ls)).isNotNull();
+				assertNotNull(source2Count.get(ls));
 			}
 		}
 	}
@@ -108,7 +109,7 @@ public interface IMdmMetricSvcTest {
 		MdmMetrics metrics = getMetricsSvc().generateMdmMetrics(parameters);
 
 		// verify
-		assertThat(metrics).isNotNull();
+		assertNotNull(metrics);
 		assertThat("Patient").isEqualTo(metrics.getResourceType());
 
 		MdmMetrics expectedMetrics = theParameters.getExpectedMetrics();
@@ -145,7 +146,7 @@ public interface IMdmMetricSvcTest {
 		MdmResourceMetrics results = getMetricsSvc().generateMdmMetrics(parameters);
 
 		// verify
-		assertThat(results).isNotNull();
+		assertNotNull(results);
 		assertThat(results.getResourceType()).isEqualTo("Patient");
 		assertThat(results.getSourceResourcesCount() + results.getGoldenResourcesCount())
 				.isEqualTo(theParams.getExpectedResourceCount());
@@ -170,7 +171,7 @@ public interface IMdmMetricSvcTest {
 		MdmMetrics actualMetrics = getMetricsSvc().generateMdmMetrics(scoreMetricsParameters);
 
 		// verify
-		assertThat(actualMetrics).isNotNull();
+		assertNotNull(actualMetrics);
 		assertThat(actualMetrics.getResourceType()).isEqualTo("Patient");
 
 		MdmMetrics expectedMetrics = theParams.getExpectedMetrics();

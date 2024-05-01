@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -135,10 +137,10 @@ class MdmGoldenResourceFindingSvcIT extends BaseMdmR4Test {
 			createFindGoldenResourceCandidateParams(candidate));
 
 		// verify
-		assertThat(candidateList).isNotNull();
+		assertNotNull(candidateList);
 		Set<Long> ids = new HashSet<>();
 		for (MatchedGoldenResourceCandidate c : candidateList.getCandidates()) {
-			assertThat(ids.add((Long) c.getCandidateGoldenResourcePid().getId())).isTrue();
+			assertTrue(ids.add((Long) c.getCandidateGoldenResourcePid().getId()));
 		}
 	}
 

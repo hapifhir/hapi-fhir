@@ -1,5 +1,6 @@
 package ca.uhn.hapi.fhir.cdshooks.svc;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +22,7 @@ class CdsHooksContextBooterTest {
 		// execute
 		final String actual = myFixture.validateJson("");
 		// validate
-		assertThat(actual).isNull();
+		assertNull(actual);
 	}
 
 	@Test

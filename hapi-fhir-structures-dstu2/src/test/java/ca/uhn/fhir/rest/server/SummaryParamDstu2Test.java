@@ -67,10 +67,10 @@ public class SummaryParamDstu2Test {
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase());
 		assertThat(responseContent).doesNotContain("<Bundle");
-		assertThat(responseContent, (containsString("<Patien")));
+		assertThat(responseContent).contains("<Patien");
 		assertThat(responseContent).doesNotContain("<div>THE DIV</div>");
-		assertThat(responseContent, (containsString("family")));
-		assertThat(responseContent, (containsString("maritalStatus")));
+		assertThat(responseContent).contains("family");
+		assertThat(responseContent).contains("maritalStatus");
 		assertThat(ourLastSummary).isEqualTo(SummaryEnum.DATA);
 	}
 
@@ -120,9 +120,9 @@ public class SummaryParamDstu2Test {
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_FHIR_XML + Constants.CHARSET_UTF8_CTSUFFIX.replace(" ", "").toLowerCase());
 		assertThat(responseContent).doesNotContain("<Bundle");
-		assertThat(responseContent, (containsString("<Patien")));
+		assertThat(responseContent).contains("<Patien");
 		assertThat(responseContent).doesNotContain("<div>THE DIV</div>");
-		assertThat(responseContent, (containsString("family")));
+		assertThat(responseContent).contains("family");
 		assertThat(responseContent).doesNotContain("maritalStatus");
 		assertThat(ourLastSummary).isEqualTo(SummaryEnum.TRUE);
 	}
@@ -136,7 +136,7 @@ public class SummaryParamDstu2Test {
 		ourLog.info(responseContent);
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(responseContent, (containsString("<total value=\"1\"/>")));
+		assertThat(responseContent).contains("<total value=\"1\"/>");
 		assertThat(responseContent).doesNotContain("entry");
 		assertThat(responseContent).doesNotContain("THE DIV");
 		assertThat(responseContent).doesNotContain("family");
@@ -185,9 +185,9 @@ public class SummaryParamDstu2Test {
 		ourLog.info(responseContent);
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(responseContent, (containsString("<total value=\"1\"/>")));
-		assertThat(responseContent, (containsString("entry")));
-		assertThat(responseContent, (containsString("THE DIV")));
+		assertThat(responseContent).contains("<total value=\"1\"/>");
+		assertThat(responseContent).contains("entry");
+		assertThat(responseContent).contains("THE DIV");
 		assertThat(responseContent).doesNotContain("family");
 		assertThat(responseContent).doesNotContain("maritalStatus");
 		assertThat(ourLastSummary).isEqualTo(SummaryEnum.TEXT);
@@ -202,10 +202,10 @@ public class SummaryParamDstu2Test {
 		ourLog.info(responseContent);
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(responseContent, (containsString("<total value=\"1\"/>")));
-		assertThat(responseContent, (containsString("entry")));
-		assertThat(responseContent, (containsString(">TEXT<")));
-		assertThat(responseContent, (containsString("Medication/123")));
+		assertThat(responseContent).contains("<total value=\"1\"/>");
+		assertThat(responseContent).contains("entry");
+		assertThat(responseContent).contains(">TEXT<");
+		assertThat(responseContent).contains("Medication/123");
 		assertThat(responseContent).doesNotContainIgnoringCase("note");
 	}
 
@@ -218,9 +218,9 @@ public class SummaryParamDstu2Test {
 		ourLog.info(responseContent);
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(responseContent, (containsString("<total value=\"1\"/>")));
-		assertThat(responseContent, (containsString("entry")));
-		assertThat(responseContent, (containsString("THE DIV")));
+		assertThat(responseContent).contains("<total value=\"1\"/>");
+		assertThat(responseContent).contains("entry");
+		assertThat(responseContent).contains("THE DIV");
 		assertThat(responseContent).doesNotContain("family");
 		assertThat(responseContent).doesNotContain("maritalStatus");
 		assertThat(ourLastSummaryList).containsExactly(SummaryEnum.TEXT);

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -96,13 +97,13 @@ public class TransactionHookTest extends BaseJpaR4SystemTest {
 
 		IBaseResource firstCreatedResource = createPointcutInvocations.get(0).get(IBaseResource.class);
 		InterceptorInvocationTimingEnum timing = createPointcutInvocations.get(0).get(InterceptorInvocationTimingEnum.class);
-		assertThat(firstCreatedResource instanceof Observation).isTrue();
-		assertThat(timing.equals(InterceptorInvocationTimingEnum.DEFERRED)).isTrue();
+		assertTrue(firstCreatedResource instanceof Observation);
+		assertTrue(timing.equals(InterceptorInvocationTimingEnum.DEFERRED));
 
 		IBaseResource secondCreatedResource = createPointcutInvocations.get(1).get(IBaseResource.class);
 		timing = createPointcutInvocations.get(1).get(InterceptorInvocationTimingEnum.class);
-		assertThat(secondCreatedResource instanceof Patient).isTrue();
-		assertThat(timing.equals(InterceptorInvocationTimingEnum.DEFERRED)).isTrue();
+		assertTrue(secondCreatedResource instanceof Patient);
+		assertTrue(timing.equals(InterceptorInvocationTimingEnum.DEFERRED));
 
 		assertThat(deferredInterceptorBroadcasts.get(Pointcut.STORAGE_PRECOMMIT_RESOURCE_DELETED)).hasSize(1);
 	}

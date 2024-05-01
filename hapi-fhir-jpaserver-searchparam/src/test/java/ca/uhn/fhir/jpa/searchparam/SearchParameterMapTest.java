@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.api.Include;
@@ -123,7 +124,7 @@ class SearchParameterMapTest {
 		assertThat(orList).hasSize(2);
 
 		List<List<IQueryParameterType>> unqualifiedAnds = map.remove("code");
-		assertThat(unqualifiedAnds).isNull();
+		assertNull(unqualifiedAnds);
 	}
 
 	@Test

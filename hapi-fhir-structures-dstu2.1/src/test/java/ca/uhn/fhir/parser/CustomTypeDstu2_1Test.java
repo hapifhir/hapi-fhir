@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -64,12 +65,12 @@ public class CustomTypeDstu2_1Test {
 		ourLog.info(xml);
 
 		//@formatter:on
-		assertThat(xml, stringContainsInOrder(
+		assertThat(xml).containsSequence(
 			"<CustomResource xmlns=\"http://hl7.org/fhir\">",
 			"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
 			"<baseValueCustomDate><date value=\"2016-05-13\"/></baseValueCustomDate>",
 			"</CustomResource>"
-		));
+		);
 		//@formatter:on
 		
 		CustomResource364Dstu21 parsedResource = parser.parseResource(CustomResource364Dstu21.class, xml);
@@ -92,12 +93,12 @@ public class CustomTypeDstu2_1Test {
 		String xml = parser.encodeResourceToString(resource);
 
 		//@formatter:on
-		assertThat(xml, stringContainsInOrder(
+		assertThat(xml).containsSequence(
 			"<CustomResource xmlns=\"http://hl7.org/fhir\">",
 			"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
 			"<baseValueString value=\"2016-05-13\"/>",
 			"</CustomResource>"
-		));
+		);
 		//@formatter:on
 		
 		CustomResource364Dstu21 parsedResource = parser.parseResource(CustomResource364Dstu21.class, xml);
@@ -166,12 +167,12 @@ public class CustomTypeDstu2_1Test {
 		assertThat(p.getMeta().getProfile()).isEmpty();
 		assertThat(p.getMeta().getFormatCommentsPost()).isEmpty();
 		assertThat(p.getMeta().getFormatCommentsPre()).isEmpty();
-		assertThat(p.getMeta().getLastUpdated()).isNull();
+		assertNull(p.getMeta().getLastUpdated());
 		assertThat(p.getMeta().getSecurity()).isEmpty();
-		assertThat(p.getMeta().getSecurity("foo", "bar")).isNull();
+		assertNull(p.getMeta().getSecurity("foo", "bar"));
 		assertThat(p.getMeta().getTag()).isEmpty();
-		assertThat(p.getMeta().getTag("foo", "bar")).isNull();
-		assertThat(p.getMeta().getVersionId()).isNull();
+		assertNull(p.getMeta().getTag("foo", "bar"));
+		assertNull(p.getMeta().getVersionId());
 		
 	}
 
@@ -189,7 +190,7 @@ public class CustomTypeDstu2_1Test {
 		ourLog.info(out);
 		
 		//@formatter:off
-		assertThat(out, stringContainsInOrder(
+		assertThat(out).containsSequence(
 			"<meta>", 
 			"<profile value=\"http://foo/profile1\"/>", 
 			"<profile value=\"http://foo/profile2\"/>", 
@@ -211,7 +212,7 @@ public class CustomTypeDstu2_1Test {
 			"<system value=\"TAG_S2\"/>", 
 			"<display value=\"TAG_D2\"/>", 
 			"</tag>", 
-			"</meta>"));
+			"</meta>");
 		//@formatter:on
 		
 	}
@@ -240,10 +241,10 @@ public class CustomTypeDstu2_1Test {
 		ourLog.info(messageString);
 		
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSequence(
 			"<meta>", 
 			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>"));
+			"</meta>");
 		//@formatter:on
 
 		//@formatter:off
@@ -282,11 +283,11 @@ public class CustomTypeDstu2_1Test {
 		ourLog.info(messageString);
 		
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSequence(
 			"<meta>", 
 			"<profile value=\"http://example.com/foo\"/>", 
 			"<profile value=\"http://example.com/bar\"/>", 
-			"</meta>"));
+			"</meta>");
 		//@formatter:on
 
 		//@formatter:off

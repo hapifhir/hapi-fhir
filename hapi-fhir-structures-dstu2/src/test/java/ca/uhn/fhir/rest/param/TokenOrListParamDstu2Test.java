@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.util.TestUtil;
 import org.junit.jupiter.api.AfterAll;
@@ -21,7 +23,7 @@ public class TokenOrListParamDstu2Test {
 		codings.add(new CodingDt("http://baz.org", "53"));
 		codings.add(new CodingDt("http://bar.org", "52"));
 
-		assertThat(params.doesCodingListMatch(codings)).isTrue();
+		assertTrue(params.doesCodingListMatch(codings));
 	}
 
 	@Test
@@ -34,7 +36,7 @@ public class TokenOrListParamDstu2Test {
 		codings.add(new CodingDt("http://baz.org", "53"));
 		codings.add(new CodingDt("http://bar.org", "11"));
 
-		assertThat(params.doesCodingListMatch(codings)).isFalse();
+		assertFalse(params.doesCodingListMatch(codings));
 	}
 
 	@Test
@@ -47,7 +49,7 @@ public class TokenOrListParamDstu2Test {
 		codings.add(new CodingDt("http://baz.org", "53"));
 		codings.add(new CodingDt("http://bar.org", "11"));
 
-		assertThat(params.doesCodingListMatch(codings)).isFalse();
+		assertFalse(params.doesCodingListMatch(codings));
 	}
 
 	@AfterAll

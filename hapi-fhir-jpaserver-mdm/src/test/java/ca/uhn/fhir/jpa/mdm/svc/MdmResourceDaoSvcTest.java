@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.interceptor.PatientIdPartitionInterceptor;
@@ -123,14 +126,14 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			result = myPatientDao.search(map, new SystemRequestDetails());
 
 			// verify
-			assertThat(result).isNotNull();
-			assertThat(result.isEmpty()).isFalse();
+			assertNotNull(result);
+			assertFalse(result.isEmpty());
 			List<IBaseResource> resources = result.getAllResources();
 			assertThat(resources).hasSize(resourceCount);
 			int count = 0;
 			for (IBaseResource resource : resources) {
 				String id = idPrefaces[count++];
-				assertThat(resource instanceof Patient).isTrue();
+				assertTrue(resource instanceof Patient);
 				Patient patient = (Patient) resource;
 				assertThat(patient.getId()).contains(id);
 			}
@@ -142,10 +145,10 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 			result = myPatientDao.search(map, new SystemRequestDetails());
 
 			// verify 2
-			assertThat(result).isNotNull();
+			assertNotNull(result);
 			resources = result.getAllResources();
 			assertThat(resources).hasSize(1);
-			assertThat(result.getAllResources().get(0) instanceof Patient).isTrue();
+			assertTrue(result.getAllResources().get(0) instanceof Patient);
 			Patient patient = (Patient) result.getAllResources().get(0);
 			assertThat(patient.getId()).contains(firstId.getValue());
 		} finally {
@@ -167,6 +170,6 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myPatientDao.update(goodSourcePatient, systemRequestDetails);
 
 		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient", requestPartitionId2);
-		assertThat(foundSourcePatient.isPresent()).isFalse();
+		assertFalse(foundSourcePatient.isPresent());
 	}
 }

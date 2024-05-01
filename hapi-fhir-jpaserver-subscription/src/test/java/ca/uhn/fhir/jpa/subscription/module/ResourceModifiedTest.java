@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
@@ -49,7 +50,7 @@ public class ResourceModifiedTest {
 		ResourceModifiedMessage msg = new ResourceModifiedMessage(myFhirContext, org, ResourceModifiedMessage.OperationTypeEnum.DELETE);
 		assertThat(msg.getPayloadId(myFhirContext).getValue()).isEqualTo("Organization/testOrgId");
 		assertThat(msg.getOperationType()).isEqualTo(ResourceModifiedMessage.OperationTypeEnum.DELETE);
-		assertThat(msg.getNewPayload(myFhirContext)).isNotNull();
+		assertNotNull(msg.getNewPayload(myFhirContext));
 		assertThat(RequestPartitionId.defaultPartition().toJson()).isEqualTo(msg.getPartitionId().toJson());
 	}
 

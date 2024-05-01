@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -594,7 +595,7 @@ public class MdmMatchLinkSvcTest {
 			);
 
 			// golden record now contains HAPI-generated EID and HAPI tag
-			assertThat(MdmResourceUtil.isMdmManaged(janeGoldenResourcePatient)).isTrue();
+			assertTrue(MdmResourceUtil.isMdmManaged(janeGoldenResourcePatient));
 			assertThat(myEidHelper.getHapiEid(janeGoldenResourcePatient)).isNotEmpty();
 
 			// original checks - verifies that EIDs are assigned
@@ -857,9 +858,9 @@ public class MdmMatchLinkSvcTest {
 			Set<Long> ids = new HashSet<>();
 			for (MdmLink link : links) {
 				JpaPid pid = link.getSourcePersistenceId();
-				assertThat(ids.add(pid.getId())).isTrue();
+				assertTrue(ids.add(pid.getId()));
 				JpaPid gpid = link.getGoldenResourcePersistenceId();
-				assertThat(ids.add(gpid.getId())).isTrue();
+				assertTrue(ids.add(gpid.getId()));
 			}
 		}
 

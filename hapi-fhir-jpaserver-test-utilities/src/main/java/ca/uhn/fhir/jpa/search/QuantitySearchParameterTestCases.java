@@ -37,6 +37,7 @@ import java.util.Set;
 
 import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.UCUM_CODESYSTEM_URL;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasItem;
@@ -74,20 +75,18 @@ public abstract class QuantitySearchParameterTestCases implements ITestDataBuild
 			@Test
 			public void noQuantityThrows() {
 				String invalidQtyParam = "|http://another.org";
-				DataFormatException thrown = assertThatExceptionOfType(DataFormatException.class)
-						.isThrownBy(
-								() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=" + invalidQtyParam));
 
-				assertThat(thrown.getMessage()).startsWith("HAPI-1940: Invalid");
-				assertThat(thrown.getMessage()).contains(invalidQtyParam);
+				assertThatThrownBy(() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=" + invalidQtyParam))
+						.isInstanceOf(DataFormatException.class)
+						.hasMessageStartingWith("HAPI-1940: Invalid")
+						.hasMessageContaining(invalidQtyParam);
 			}
 
 			@Test
 			public void invalidPrefixThrows() {
-				DataFormatException thrown = assertThatExceptionOfType(DataFormatException.class)
-						.isThrownBy(() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=st5.35"));
-
-				assertThat(thrown.getMessage()).isEqualTo("HAPI-1941: Invalid prefix: \"st\"");
+				assertThatThrownBy(() -> myTestDaoSearch.searchForIds("/Observation?value-quantity=st5.35"))
+						.isInstanceOf(DataFormatException.class)
+						.hasMessage("HAPI-1941: Invalid prefix: \"st\"");
 			}
 
 			@Test

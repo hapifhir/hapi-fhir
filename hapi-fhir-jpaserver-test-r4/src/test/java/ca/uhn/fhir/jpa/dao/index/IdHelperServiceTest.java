@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.index;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -67,7 +68,7 @@ public class IdHelperServiceTest {
 			resourceType,
 			patientIdsToResolve);
 
-		assertThat(idToPid.isEmpty()).isFalse();
+		assertFalse(idToPid.isEmpty());
 		for (String pid : patientIdsToResolve) {
 			assertThat(idToPid).containsKey(pid);
 		}
@@ -108,7 +109,7 @@ public class IdHelperServiceTest {
 			resourceType,
 			patientIdsToResolve);
 
-		assertThat(map.isEmpty()).isFalse();
+		assertFalse(map.isEmpty());
 		for (String id : patientIdsToResolve) {
 			assertThat(map).containsKey(id);
 		}
@@ -139,7 +140,7 @@ public class IdHelperServiceTest {
 			patientIdsToResolve
 		);
 
-		assertThat(map.isEmpty()).isFalse();
+		assertFalse(map.isEmpty());
 		for (String id : patientIdsToResolve) {
 			assertThat(map).containsKey(id);
 		}

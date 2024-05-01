@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.jpa.api.model.TranslationRequest;
@@ -169,6 +170,6 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 
 		assertThat(theExpSecondOne).hasSize(1);
 		assertThat(theExpSecondOne.get(0).getUrl()).isEqualTo(theUrl);
-		assertThat(theExpSecondOne.get(0).getVersion()).isNull();
+		assertNull(theExpSecondOne.get(0).getVersion());
 	}
 }

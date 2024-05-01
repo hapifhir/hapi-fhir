@@ -1,5 +1,7 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -76,7 +78,7 @@ public class BundleBuilderR4Test {
 		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.TRANSACTION);
 		assertThat(bundle.getEntry()).hasSize(1);
 		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patch);
-		assertThat(bundle.getEntry().get(0).getFullUrl()).isNull();
+		assertNull(bundle.getEntry().get(0).getFullUrl());
 		assertThat(bundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Patient?identifier=http://foo|123");
 		assertThat(bundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.PATCH);
 
@@ -106,7 +108,7 @@ public class BundleBuilderR4Test {
 	public void testNewPrimitive() {
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		IPrimitiveType<Date> datePrimitive = builder.newPrimitive("instant", myCheckDate);
-		assertThat(datePrimitive).isNotNull();
+		assertNotNull(datePrimitive);
 		assertThat(datePrimitive.getValue()).isEqualTo(myCheckDate);
 	}
 
@@ -153,10 +155,10 @@ public class BundleBuilderR4Test {
 	public void testSearchHandling() {
 		BundleBuilder builder = new BundleBuilder(myFhirContext);
 		IBase entry = builder.addEntry();
-		assertThat(entry).isNotNull();
+		assertNotNull(entry);
 
 		IBase search = builder.addSearch(entry);
-		assertThat(entry).isNotNull();
+		assertNotNull(entry);
 
 		builder.setSearchField(search, "mode", "match");
 		builder.setSearchField(search, "score", builder.newPrimitive("decimal", BigDecimal.ONE));
@@ -165,7 +167,7 @@ public class BundleBuilderR4Test {
 		ourLog.debug("Bundle:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertThat(bundle.getEntry()).hasSize(1);
-		assertThat(bundle.getEntry().get(0).getSearch()).isNotNull();
+		assertNotNull(bundle.getEntry().get(0).getSearch());
 		assertThat(bundle.getEntry().get(0).getSearch().getMode()).isEqualTo(Bundle.SearchEntryMode.MATCH);
 		assertThat(bundle.getEntry().get(0).getSearch().getScore()).isEqualTo(BigDecimal.ONE);
 	}
@@ -200,7 +202,7 @@ public class BundleBuilderR4Test {
 		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.TRANSACTION);
 		assertThat(bundle.getEntry()).hasSize(1);
 		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patient);
-		assertThat(bundle.getEntry().get(0).getFullUrl()).isNull();
+		assertNull(bundle.getEntry().get(0).getFullUrl());
 		assertThat(bundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Patient");
 		assertThat(bundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.POST);
 	}
@@ -222,12 +224,12 @@ public class BundleBuilderR4Test {
 		assertThat(bundle.getEntry()).hasSize(2);
 
 		//Check the IBaseresource style entry
-		assertThat(bundle.getEntry().get(0).getResource()).isNull();
+		assertNull(bundle.getEntry().get(0).getResource());
 		assertThat(bundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Patient/123");
 		assertThat(bundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.DELETE);
 
 		//Check the resourcetype + id style entry.
-		assertThat(bundle.getEntry().get(1).getResource()).isNull();
+		assertNull(bundle.getEntry().get(1).getResource());
 		assertThat(bundle.getEntry().get(1).getRequest().getUrl()).isEqualTo("Patient/123");
 		assertThat(bundle.getEntry().get(1).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.DELETE);
 
@@ -249,7 +251,7 @@ public class BundleBuilderR4Test {
 		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.TRANSACTION);
 		assertThat(bundle.getEntry()).hasSize(1);
 		assertThat(bundle.getEntry().get(0).getResource()).isSameAs(patient);
-		assertThat(bundle.getEntry().get(0).getFullUrl()).isNull();
+		assertNull(bundle.getEntry().get(0).getFullUrl());
 		assertThat(bundle.getEntry().get(0).getRequest().getUrl()).isEqualTo("Patient");
 		assertThat(bundle.getEntry().get(0).getRequest().getIfNoneExist()).isEqualTo("Patient?active=true");
 		assertThat(bundle.getEntry().get(0).getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.POST);

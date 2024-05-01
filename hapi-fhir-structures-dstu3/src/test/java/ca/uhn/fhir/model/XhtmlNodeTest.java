@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.ExplanationOfBenefit;
@@ -55,8 +56,8 @@ public class XhtmlNodeTest {
 		ExplanationOfBenefit copy1 = ourCtx.newXmlParser().parseResource(ExplanationOfBenefit.class, input);
 		ExplanationOfBenefit copy2 = ourCtx.newXmlParser().parseResource(ExplanationOfBenefit.class, input);
 
-		assertThat(copy1.equalsDeep(copy2)).isTrue();
-		assertThat(copy1.equalsShallow(copy2)).isTrue();
+		assertTrue(copy1.equalsDeep(copy2));
+		assertTrue(copy1.equalsShallow(copy2));
 		
 	}
 	

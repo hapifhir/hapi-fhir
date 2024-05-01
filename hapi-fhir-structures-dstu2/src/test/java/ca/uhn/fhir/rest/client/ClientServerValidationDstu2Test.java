@@ -1,5 +1,8 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
@@ -103,10 +106,10 @@ public class ClientServerValidationDstu2Test {
 		assertThat(capt.getAllValues()).hasSize(2);
 
 		Header auth = capt.getAllValues().get(0).getFirstHeader("Authorization");
-		assertThat(auth).isNotNull();
+		assertNotNull(auth);
 		assertThat(auth.getValue()).isEqualTo("Basic VVNFUjpQQVNT");
 		auth = capt.getAllValues().get(1).getFirstHeader("Authorization");
-		assertThat(auth).isNotNull();
+		assertNotNull(auth);
 		assertThat(auth.getValue()).isEqualTo("Basic VVNFUjpQQVNT");
 	}
 
@@ -153,10 +156,10 @@ public class ClientServerValidationDstu2Test {
 		assertThat(capt.getAllValues()).hasSize(2);
 
 		Header auth = capt.getAllValues().get(0).getFirstHeader("Authorization");
-		assertThat(auth).isNotNull();
+		assertNotNull(auth);
 		assertThat(auth.getValue()).isEqualTo("Basic VVNFUjpQQVNT");
 		auth = capt.getAllValues().get(1).getFirstHeader("Authorization");
-		assertThat(auth).isNotNull();
+		assertNotNull(auth);
 		assertThat(auth.getValue()).isEqualTo("Basic VVNFUjpQQVNT");
 	}
 
@@ -211,9 +214,9 @@ public class ClientServerValidationDstu2Test {
 		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
 
 		// don't load the conformance until the first time the client is actually used
-		assertThat(myFirstResponse).isTrue();
+		assertTrue(myFirstResponse);
 		client.read(new UriDt("http://foo/Patient/123"));
-		assertThat(myFirstResponse).isFalse();
+		assertFalse(myFirstResponse);
 		myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/123"));
 		myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/123"));
 
@@ -251,9 +254,9 @@ public class ClientServerValidationDstu2Test {
 		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
 
 		// don't load the conformance until the first time the client is actually used
-		assertThat(myFirstResponse).isTrue();
+		assertTrue(myFirstResponse);
 		client.read(new UriDt("http://foo/Patient/123"));
-		assertThat(myFirstResponse).isFalse();
+		assertFalse(myFirstResponse);
 		myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/123"));
 		myCtx.newRestfulGenericClient("http://foo").read(new UriDt("http://foo/Patient/123"));
 

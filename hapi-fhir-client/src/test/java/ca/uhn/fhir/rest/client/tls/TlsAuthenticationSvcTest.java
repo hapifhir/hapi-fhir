@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client.tls;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tls.KeyStoreInfo;
 import ca.uhn.fhir.tls.TlsAuthentication;
@@ -71,14 +72,14 @@ public class TlsAuthenticationSvcTest {
 	@Test
 	public void testCreateKeyStoreP12() throws Exception {
 		KeyStore keyStore = TlsAuthenticationSvc.createKeyStore(myServerKeyStoreInfo);
-		assertThat(keyStore.getKey(myServerKeyStoreInfo.getAlias(), myServerKeyStoreInfo.getKeyPass())).isNotNull();
+		assertNotNull(keyStore.getKey(myServerKeyStoreInfo.getAlias(), myServerKeyStoreInfo.getKeyPass()));
 	}
 
 	@Test
 	public void testCreateKeyStoreJKS() throws Exception {
 		KeyStoreInfo keyStoreInfo = new KeyStoreInfo("classpath:/keystore.jks", "changeit", "changeit", "client");
 		KeyStore keyStore = TlsAuthenticationSvc.createKeyStore(keyStoreInfo);
-		assertThat(keyStore.getKey(keyStoreInfo.getAlias(), keyStoreInfo.getKeyPass())).isNotNull();
+		assertNotNull(keyStore.getKey(keyStoreInfo.getAlias(), keyStoreInfo.getKeyPass()));
 	}
 
 	@Test
@@ -96,13 +97,13 @@ public class TlsAuthenticationSvcTest {
 	public void testCreateTrustStoreJks() throws Exception {
 		TrustStoreInfo trustStoreInfo = new TrustStoreInfo("classpath:/truststore.jks", "changeit",  "client");
 		KeyStore keyStore = TlsAuthenticationSvc.createKeyStore(trustStoreInfo);
-		assertThat(keyStore.getCertificate(trustStoreInfo.getAlias())).isNotNull();
+		assertNotNull(keyStore.getCertificate(trustStoreInfo.getAlias()));
 	}
 
 	@Test
 	public void testCreateTrustStoreP12() throws Exception {
 		KeyStore keyStore = TlsAuthenticationSvc.createKeyStore(myServerTrustStoreInfo);
-		assertThat(keyStore.getCertificate(myServerTrustStoreInfo.getAlias())).isNotNull();
+		assertNotNull(keyStore.getCertificate(myServerTrustStoreInfo.getAlias()));
 	}
 
 	@Test

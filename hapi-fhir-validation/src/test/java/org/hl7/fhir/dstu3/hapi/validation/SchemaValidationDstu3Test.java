@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.util.TestUtil;
@@ -52,7 +53,7 @@ public class SchemaValidationDstu3Test extends BaseValidationTestWithInlineMocks
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(encoded);
 
-		assertThat(result.isSuccessful()).isFalse();
+		assertFalse(result.isSuccessful());
 		assertThat(encoded).contains("passwd");
 		assertThat(encoded).contains("accessExternalDTD");
 	}

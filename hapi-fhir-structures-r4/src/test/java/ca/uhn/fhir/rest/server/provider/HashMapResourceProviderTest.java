@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.provider;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -72,7 +74,7 @@ public class HashMapResourceProviderTest {
 
 		// Read
 		p = (Patient) ourRestServer.getFhirClient().read().resource("Patient").withId(id).execute();
-		assertThat(p.getActive()).isTrue();
+		assertTrue(p.getActive());
 
 		assertThat(myPatientResourceProvider.getCountRead()).isEqualTo(1);
 	}
@@ -89,7 +91,7 @@ public class HashMapResourceProviderTest {
 
 		// Read
 		p = (Patient) ourRestServer.getFhirClient().read().resource("Patient").withId(id).execute();
-		assertThat(p.getActive()).isTrue();
+		assertTrue(p.getActive());
 	}
 
 	@Test
@@ -241,8 +243,8 @@ public class HashMapResourceProviderTest {
 		ourLog.info("Search:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 		assertThat(resp.getTotal()).isEqualTo(100);
 		assertThat(resp.getEntry()).hasSize(100);
-		assertThat(resp.getEntry().get(0).hasRequest()).isFalse();
-		assertThat(resp.getEntry().get(1).hasRequest()).isFalse();
+		assertFalse(resp.getEntry().get(0).hasRequest());
+		assertFalse(resp.getEntry().get(1).hasRequest());
 
 		assertThat(myPatientResourceProvider.getCountSearch()).isEqualTo(1);
 
@@ -323,9 +325,9 @@ public class HashMapResourceProviderTest {
 
 		// Read
 		p = (Patient) ourRestServer.getFhirClient().read().resource("Patient").withId(id.withVersion("1")).execute();
-		assertThat(p.getActive()).isTrue();
+		assertTrue(p.getActive());
 		p = (Patient) ourRestServer.getFhirClient().read().resource("Patient").withId(id.withVersion("2")).execute();
-		assertThat(p.getActive()).isFalse();
+		assertFalse(p.getActive());
 		try {
 			ourRestServer.getFhirClient().read().resource("Patient").withId(id.withVersion("3")).execute();
 			fail("");		} catch (ResourceNotFoundException e) {
@@ -341,7 +343,7 @@ public class HashMapResourceProviderTest {
 
 		IIdType patientId = myPatientResourceProvider.create(patient, srd).getId().toVersionless();
 		Patient readPatient = myPatientResourceProvider.read(patientId, srd, true);
-		assertThat(readPatient.isDeleted()).isFalse();
+		assertFalse(readPatient.isDeleted());
 	}
 
 	@Test
@@ -353,7 +355,7 @@ public class HashMapResourceProviderTest {
 		IIdType patientId = myPatientResourceProvider.create(patient, srd).getId().toVersionless();
 		myPatientResourceProvider.delete(patientId, srd);
 		Patient readPatient = myPatientResourceProvider.read(patientId, srd, true);
-		assertThat(readPatient.isDeleted()).isTrue();
+		assertTrue(readPatient.isDeleted());
 	}
 
 	@AfterAll

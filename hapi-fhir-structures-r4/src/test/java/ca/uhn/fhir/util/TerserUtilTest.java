@@ -1,5 +1,9 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -152,7 +156,7 @@ class TerserUtilTest {
 		Patient p2 = new Patient();
 		TerserUtil.replaceFields(ourFhirContext, p1, p2, TerserUtil.EXCLUDE_IDS_AND_META);
 
-		assertThat(p2.hasDeceased()).isTrue();
+		assertTrue(p2.hasDeceased());
 		assertThat("true").isEqualTo(p2.getDeceased());
 		assertThat(p2.getExtension()).hasSize(2);
 	}
@@ -164,7 +168,7 @@ class TerserUtilTest {
 		Patient p2 = new Patient();
 		TerserUtil.mergeAllFields(ourFhirContext, p1, p2);
 
-		assertThat(p2.hasDeceased()).isTrue();
+		assertTrue(p2.hasDeceased());
 		assertThat(p2.getDeceased().primitiveValue()).isEqualTo("true");
 		assertThat(p2.getExtension()).hasSize(2);
 	}
@@ -202,10 +206,10 @@ class TerserUtilTest {
 
 		Identifier id1 = (Identifier) p1Helper.getFieldValues("identifier").get(0);
 		Identifier id2 = (Identifier) p2Helper.getFieldValue("identifier");
-		assertThat(id1.equalsDeep(id2)).isTrue();
-		assertThat(id1.equals(id2)).isFalse();
+		assertTrue(id1.equalsDeep(id2));
+		assertFalse(id1.equals(id2));
 
-		assertThat(p2Helper.getFieldValue("address")).isNull();
+		assertNull(p2Helper.getFieldValue("address"));
 	}
 
 	@Test
@@ -216,7 +220,7 @@ class TerserUtilTest {
 		p1Helper.setField("gender", "code", "male");
 
 		Patient p = p1Helper.getResource();
-		assertThat(p.getActive()).isTrue();
+		assertTrue(p.getActive());
 		assertThat(p.getGender()).isEqualTo(Enumerations.AdministrativeGender.MALE);
 
 		DateType check = TerserUtil.newElement(ourFhirContext, "date", "1999-01-01");
@@ -226,8 +230,8 @@ class TerserUtilTest {
 
 	@Test
 	void testFieldExists() {
-		assertThat(TerserUtil.fieldExists(ourFhirContext, "identifier", TerserUtil.newResource(ourFhirContext, "Patient"))).isTrue();
-		assertThat(TerserUtil.fieldExists(ourFhirContext, "randomFieldName", TerserUtil.newResource(ourFhirContext, "Patient"))).isFalse();
+		assertTrue(TerserUtil.fieldExists(ourFhirContext, "identifier", TerserUtil.newResource(ourFhirContext, "Patient")));
+		assertFalse(TerserUtil.fieldExists(ourFhirContext, "randomFieldName", TerserUtil.newResource(ourFhirContext, "Patient")));
 	}
 
 	@Test
@@ -241,7 +245,7 @@ class TerserUtilTest {
 
 		assertThat(p2.getIdentifier()).isEmpty();
 
-		assertThat(p2.getId()).isNull();
+		assertNull(p2.getId());
 		assertThat(p2.getName()).hasSize(1);
 		assertThat(p2.getName().get(0).getNameAsSingleString()).isEqualTo(p1.getName().get(0).getNameAsSingleString());
 	}
@@ -322,7 +326,7 @@ class TerserUtilTest {
 		assertThat(p2.getAddress()).hasSize(2);
 		assertThat(p2.getAddress().get(0).getLine().toString()).isEqualTo("[10 Lenin Street]");
 		assertThat(p2.getAddress().get(1).getLine().toString()).isEqualTo("[10 Main Street]");
-		assertThat(p2.getAddress().get(1).hasExtension()).isTrue();
+		assertTrue(p2.getAddress().get(1).hasExtension());
 
 		p1 = new Patient();
 		p1.addAddress().addLine("10 Main Street").addExtension(ext);
@@ -331,8 +335,8 @@ class TerserUtilTest {
 
 		TerserUtil.mergeField(ourFhirContext, "address", p1, p2);
 		assertThat(p2.getAddress()).hasSize(2);
-		assertThat(p2.getAddress().get(0).hasExtension()).isTrue();
-		assertThat(p2.getAddress().get(1).hasExtension()).isTrue();
+		assertTrue(p2.getAddress().get(0).hasExtension());
+		assertTrue(p2.getAddress().get(1).hasExtension());
 
 	}
 
@@ -358,7 +362,7 @@ class TerserUtilTest {
 
 		assertThat(p2.getAddress()).hasSize(1);
 		assertThat(p2.getAddress().get(0).getLine().toString()).isEqualTo("[10 Main Street]");
-		assertThat(p2.getAddress().get(0).hasExtension()).isTrue();
+		assertTrue(p2.getAddress().get(0).hasExtension());
 	}
 
 	@Test
@@ -390,7 +394,7 @@ class TerserUtilTest {
 		assertThat(p2.getAddress()).hasSize(2);
 		assertThat(p2.getAddress().get(0).getLine().toString()).isEqualTo("[10 Main Street]");
 		assertThat(p2.getAddress().get(1).getLine().toString()).isEqualTo("[10 Main Street]");
-		assertThat(p2.getAddress().get(1).hasExtension()).isTrue();
+		assertTrue(p2.getAddress().get(1).hasExtension());
 	}
 
 
@@ -426,7 +430,7 @@ class TerserUtilTest {
 		p1.addName(new HumanName().setFamily("family").addGiven("asd"));
 		p2.addName(new HumanName().setFamily("family").addGiven("asd"));
 
-		assertThat(TerserUtil.equals(p1, p2)).isTrue();
+		assertTrue(TerserUtil.equals(p1, p2));
 	}
 
 	@Test
@@ -437,7 +441,7 @@ class TerserUtilTest {
 		p1.addName(new HumanName().setFamily("family").addGiven("asd"));
 		p2.addName(new HumanName().setFamily("family").addGiven("asd1"));
 
-		assertThat(TerserUtil.equals(p1, p2)).isFalse();
+		assertFalse(TerserUtil.equals(p1, p2));
 	}
 
 	@Test
@@ -445,8 +449,8 @@ class TerserUtilTest {
 		Patient p1 = new Patient();
 		p1.addName().setFamily("Doe");
 
-		assertThat(TerserUtil.hasValues(ourFhirContext, p1, "name")).isTrue();
-		assertThat(TerserUtil.hasValues(ourFhirContext, p1, "address")).isFalse();
+		assertTrue(TerserUtil.hasValues(ourFhirContext, p1, "name"));
+		assertFalse(TerserUtil.hasValues(ourFhirContext, p1, "address"));
 	}
 
 	@Test
@@ -456,8 +460,8 @@ class TerserUtilTest {
 
 		assertThat(((HumanName) TerserUtil.getValueFirstRep(ourFhirContext, p1, "name")).getFamily()).isEqualTo("Doe");
 		assertThat(TerserUtil.getValues(ourFhirContext, p1, "name")).isNotEmpty();
-		assertThat(TerserUtil.getValues(ourFhirContext, p1, "whoaIsThatReal")).isNull();
-		assertThat(TerserUtil.getValueFirstRep(ourFhirContext, p1, "whoaIsThatReal")).isNull();
+		assertNull(TerserUtil.getValues(ourFhirContext, p1, "whoaIsThatReal"));
+		assertNull(TerserUtil.getValueFirstRep(ourFhirContext, p1, "whoaIsThatReal"));
 	}
 
 	@Test
@@ -495,7 +499,7 @@ class TerserUtilTest {
 		TerserUtil.replaceField(ourFhirContext, "active", p1, p2);
 
 		// expect p2 to have 'active removed'
-		assertThat(p2.hasActive()).isFalse();
+		assertFalse(p2.hasActive());
 	}
 
 	@Test
@@ -563,7 +567,7 @@ class TerserUtilTest {
 		p1.addAddress(a1);
 
 		assertThat(p1.getAddress().get(0).getPeriod().getStartElement().toHumanDisplay()).isEqualTo("2021-01-01");
-		assertThat(p1.getAddress().get(0).getPeriod().getStart()).isNotNull();
+		assertNotNull(p1.getAddress().get(0).getPeriod().getStart());
 
 		Address a2 = new Address();
 		a2.addLine("Line 1");
@@ -576,7 +580,7 @@ class TerserUtilTest {
 		TerserUtil.clearFieldByFhirPath(ourFhirContext, p1, "address.line");
 		TerserUtil.clearFieldByFhirPath(ourFhirContext, p1, "address.period.start");
 
-		assertThat(p1.getAddress().get(0).getPeriod().getStart()).isNull();
+		assertNull(p1.getAddress().get(0).getPeriod().getStart());
 
 		assertThat(p1.getAddress()).hasSize(2);
 		assertThat(p1.getAddress().get(0).getLine()).isEmpty();
@@ -591,11 +595,11 @@ class TerserUtilTest {
 		Claim claimWithReferences = createClaim();
 		claimWithReferences.setPatient(new Reference("Patient/123"));
 		String fhirPath = "patient";
-		assertThat(claimWithReferences.hasPatient()).isTrue();
+		assertTrue(claimWithReferences.hasPatient());
 		//act
 		TerserUtil.clearFieldByFhirPath(ourFhirContext, claimWithReferences, fhirPath);
 		//assert
-		assertThat(claimWithReferences.hasPatient()).isFalse();
+		assertFalse(claimWithReferences.hasPatient());
 	}
 
 	static Claim createClaim() {
@@ -648,33 +652,33 @@ class TerserUtilTest {
 		Patient p2 = TerserUtil.clone(ourFhirContext, p1);
 
 		assertThat(p2.getName().get(0).getNameAsSingleString()).isEqualTo(p1.getName().get(0).getNameAsSingleString());
-		assertThat(p1.equalsDeep(p2)).isTrue();
+		assertTrue(p1.equalsDeep(p2));
 	}
 
 	@Test
 	public void testNewElement() {
-		assertThat((IBase)TerserUtil.newElement(ourFhirContext, "string")).isNotNull();
+		assertNotNull((IBase)TerserUtil.newElement(ourFhirContext, "string"));
 		assertThat(((PrimitiveType) TerserUtil.newElement(ourFhirContext, "integer", "1")).getValue()).isEqualTo(1);
 
-		assertThat((IBase)TerserUtil.newElement(ourFhirContext, "string")).isNotNull();
-		assertThat(((PrimitiveType) TerserUtil.newElement(ourFhirContext, "integer")).getValue()).isNull();
+		assertNotNull((IBase)TerserUtil.newElement(ourFhirContext, "string"));
+		assertNull(((PrimitiveType) TerserUtil.newElement(ourFhirContext, "integer")).getValue());
 
-		assertThat((IBase)TerserUtil.newElement(ourFhirContext, "string", null)).isNotNull();
-		assertThat(((PrimitiveType) TerserUtil.newElement(ourFhirContext, "integer", null)).getValue()).isNull();
+		assertNotNull((IBase)TerserUtil.newElement(ourFhirContext, "string", null));
+		assertNull(((PrimitiveType) TerserUtil.newElement(ourFhirContext, "integer", null)).getValue());
 	}
 
 	@Test
 	public void testNewResource() {
-		assertThat((IBase)TerserUtil.newResource(ourFhirContext, "Patient")).isNotNull();
-		assertThat((IBase)TerserUtil.newResource(ourFhirContext, "Patient", null)).isNotNull();
+		assertNotNull((IBase)TerserUtil.newResource(ourFhirContext, "Patient"));
+		assertNotNull((IBase)TerserUtil.newResource(ourFhirContext, "Patient", null));
 	}
 
 	@Test
 	public void testInstantiateBackboneElement() {
 		IBaseBackboneElement patientContact = TerserUtil.instantiateBackboneElement(ourFhirContext, "Patient", "contact");
-		assertThat(patientContact).isNotNull();
+		assertNotNull(patientContact);
 		assertThat(patientContact.getClass()).isEqualTo(Patient.ContactComponent.class);
-		assertThat(patientContact.isEmpty()).isTrue();
+		assertTrue(patientContact.isEmpty());
 	}
 
 }

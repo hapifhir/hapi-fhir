@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings.ClientIdStrategyEnum;
@@ -787,7 +791,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		results = myPatientDao.create(p, "Patient?_id=" + id.toVersionless().getValue(), mySrd);
 		assertThat(results.getId().getIdPart()).isEqualTo(id.getIdPart());
 		assertThat(results.getId().getVersionIdPart()).isEqualTo(id.getVersionIdPart());
-		assertThat(results.getCreated().booleanValue()).isFalse();
+		assertFalse(results.getCreated().booleanValue());
 
 	}
 
@@ -1010,7 +1014,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IBundleProvider history = myPatientDao.history(null, null, null, mySrd);
 		assertThat(history.size().intValue()).isEqualTo(4 + initialHistory);
 		List<IBaseResource> resources = history.getResources(0, 4);
-		assertThat(resources.get(0).isDeleted()).isTrue();
+		assertTrue(resources.get(0).isDeleted());
 
 		try {
 			myPatientDao.delete(id2, mySrd);
@@ -1119,8 +1123,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
 		assertThat(history.size().intValue()).isEqualTo(2);
 
-		assertThat(history.getResources(0, 1).get(0).isDeleted()).isTrue();
-		assertThat(history.getResources(1, 2).get(0).isDeleted()).isFalse();
+		assertTrue(history.getResources(0, 1).get(0).isDeleted());
+		assertFalse(history.getResources(1, 2).get(0).isDeleted());
 	}
 
 	@Test
@@ -1575,13 +1579,13 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertThat(entries.get(1).getIdElement()).isEqualTo(id.withVersion("2"));
 		assertThat(entries.get(2).getIdElement()).isEqualTo(id.withVersion("1"));
 
-		assertThat(entries.get(0).isDeleted()).isFalse();
+		assertFalse(entries.get(0).isDeleted());
 		assertThat(ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(0))).isEqualTo(BundleEntryTransactionMethodEnum.PUT);
 
-		assertThat(entries.get(1).isDeleted()).isTrue();
+		assertTrue(entries.get(1).isDeleted());
 		assertThat(ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(1))).isEqualTo(BundleEntryTransactionMethodEnum.DELETE);
 
-		assertThat(entries.get(2).isDeleted()).isFalse();
+		assertFalse(entries.get(2).isDeleted());
 		assertThat(ResourceMetadataKeyEnum.ENTRY_TRANSACTION_METHOD.get(entries.get(2))).isEqualTo(BundleEntryTransactionMethodEnum.POST);
 	}
 
@@ -1679,15 +1683,15 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		patient.addName().setFamily("Tester").addGiven("Joe");
 
 		MethodOutcome outcome = myPatientDao.create(patient, mySrd);
-		assertThat(outcome.getId()).isNotNull();
-		assertThat(outcome.getId().isEmpty()).isFalse();
+		assertNotNull(outcome.getId());
+		assertFalse(outcome.getId().isEmpty());
 
 		Date now = new Date();
 
 		{
 			Patient retrieved = myPatientDao.read(outcome.getId(), mySrd);
 			Date published = retrieved.getMeta().getLastUpdated();
-			assertThat(published.before(now)).isTrue();
+			assertTrue(published.before(now));
 		}
 
 		/*
@@ -1786,7 +1790,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 			id = myPatientDao.create(patient, mySrd).getId();
 		}
 
-		assertThat(id.hasVersionIdPart()).isTrue();
+		assertTrue(id.hasVersionIdPart());
 
 		/*
 		 * Create a second version
@@ -2128,8 +2132,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		patient.addName().setFamily("Tester").addGiven("JoetestPersistSearchParams");
 
 		MethodOutcome outcome = myPatientDao.create(patient, mySrd);
-		assertThat(outcome.getId()).isNotNull();
-		assertThat(outcome.getId().isEmpty()).isFalse();
+		assertNotNull(outcome.getId());
+		assertFalse(outcome.getId().isEmpty());
 
 		long id = outcome.getId().getIdPartAsLong();
 
@@ -2324,7 +2328,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		meta = myPatientDao.metaGetOperation(Meta.class, mySrd);
 		List<Coding> published = meta.getTag();
 		assertThat(published).hasSize(2);
-		assertThat(published.get(0).getSystem()).isNull();
+		assertNull(published.get(0).getSystem());
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
 		assertThat(published.get(1).getSystem()).isEqualTo("http://foo");
@@ -2425,7 +2429,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		meta = myPatientDao.metaGetOperation(Meta.class, mySrd);
 		List<Coding> published = meta.getTag();
 		assertThat(published).hasSize(2);
-		assertThat(published.get(0).getSystem()).isNull();
+		assertNull(published.get(0).getSystem());
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
 		assertThat(published.get(1).getSystem()).isEqualTo("http://foo");
@@ -2526,7 +2530,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		meta = myPatientDao.metaGetOperation(Meta.class, mySrd);
 		List<Coding> published = meta.getTag();
 		assertThat(published).hasSize(2);
-		assertThat(published.get(0).getSystem()).isNull();
+		assertNull(published.get(0).getSystem());
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
 		assertThat(published.get(1).getSystem()).isEqualTo("http://foo");
@@ -3201,7 +3205,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		Organization o1 = new Organization();
 		o1.getNameElement().setValue("AAA");
 		IIdType o1id = myOrganizationDao.create(o1, mySrd).getId();
-		assertThat(o1id.hasVersionIdPart()).isTrue();
+		assertTrue(o1id.hasVersionIdPart());
 
 		Patient p1 = new Patient();
 		p1.addName().setFamily("AAAA");
@@ -3210,7 +3214,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		p1 = myPatientDao.read(p1id, mySrd);
 
-		assertThat(p1.getManagingOrganization().getReferenceElement().hasVersionIdPart()).isFalse();
+		assertFalse(p1.getManagingOrganization().getReferenceElement().hasVersionIdPart());
 		assertThat(p1.getManagingOrganization().getReferenceElement().toUnqualifiedVersionless()).isEqualTo(o1id.toUnqualifiedVersionless());
 	}
 
@@ -3284,8 +3288,8 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		MethodOutcome outcome = myPatientDao.create(patient, mySrd);
 		IIdType patientId = outcome.getId();
-		assertThat(patientId).isNotNull();
-		assertThat(patientId.isEmpty()).isFalse();
+		assertNotNull(patientId);
+		assertFalse(patientId.isEmpty());
 
 		Patient retrieved = myPatientDao.read(patientId, mySrd);
 		ArrayList<Coding> published = (ArrayList<Coding>) retrieved.getMeta().getTag();
@@ -3293,7 +3297,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertThat(published).hasSize(2);
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
-		assertThat(published.get(0).getSystem()).isNull();
+		assertNull(published.get(0).getSystem());
 		assertThat(published.get(1).getCode()).isEqualTo("Cat");
 		assertThat(published.get(1).getDisplay()).isEqualTo("Kittens");
 		assertThat(published.get(1).getSystem()).isEqualTo("http://foo");
@@ -3321,7 +3325,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		sort(published);
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
-		assertThat(published.get(0).getSystem()).isNull();
+		assertNull(published.get(0).getSystem());
 		assertThat(published.get(1).getCode()).isEqualTo("Cat");
 		assertThat(published.get(1).getDisplay()).isEqualTo("Kittens");
 		assertThat(published.get(1).getSystem()).isEqualTo("http://foo");
@@ -3351,7 +3355,7 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 		assertThat(published).hasSize(3);
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
-		assertThat(published.get(0).getSystem()).isNull();
+		assertNull(published.get(0).getSystem());
 		assertThat(published.get(1).getCode()).isEqualTo("Cat");
 		assertThat(published.get(1).getDisplay()).isEqualTo("Kittens");
 		assertThat(published.get(1).getSystem()).isEqualTo("http://foo");

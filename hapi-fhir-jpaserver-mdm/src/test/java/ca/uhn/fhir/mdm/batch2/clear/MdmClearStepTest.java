@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.batch2.clear;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -136,7 +137,7 @@ class MdmClearStepTest extends BaseMdmR4Test {
 	}
 
 	private void assertPatientExists(String theSourceId) {
-		assertThat(myPatientDao.read(new IdDt(theSourceId))).isNotNull();
+		assertNotNull(myPatientDao.read(new IdDt(theSourceId)));
 	}
 
 	private void assertPatientCount(int theExpectedCount) {

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.validation;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -20,7 +21,7 @@ class ValidationResultTest {
 		ValidationResult vr = new ValidationResult(myFhirContext, validationMessages);
 		String toStringValue = vr.toString();
 		assertThat(toStringValue).contains("Error message #" + 1);
-		assertThat(toStringValue.contains("Error message #" + 2)).isFalse();
+		assertFalse(toStringValue.contains("Error message #" + 2));
 	}
 
 	@Test
@@ -30,7 +31,7 @@ class ValidationResultTest {
 		ValidationResult vr = new ValidationResult(myFhirContext, validationMessages);
 		String toStringValue = vr.toString();
 		assertThat(toStringValue).contains("Error message #" + ValidationResult.ERROR_DISPLAY_LIMIT_DEFAULT);
-		assertThat(toStringValue.contains("Error message #" + (ValidationResult.ERROR_DISPLAY_LIMIT_DEFAULT + 1))).isFalse();
+		assertFalse(toStringValue.contains("Error message #" + (ValidationResult.ERROR_DISPLAY_LIMIT_DEFAULT + 1)));
 	}
 
 	@Test
@@ -40,7 +41,7 @@ class ValidationResultTest {
 		vr.setErrorDisplayLimit(8);
 		String toStringValue = vr.toString();
 		assertThat(toStringValue).contains("Error message #" + 8);
-		assertThat(toStringValue.contains("Error message #" + 9)).isFalse();
+		assertFalse(toStringValue.contains("Error message #" + 9));
 	}
 
 	private List<SingleValidationMessage> getTestValidationErrors(int theSize) {

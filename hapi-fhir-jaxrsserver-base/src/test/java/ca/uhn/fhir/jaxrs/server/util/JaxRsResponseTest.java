@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
@@ -57,8 +58,8 @@ public class JaxRsResponseTest {
 		boolean theAddContentLocationHeader = false;
 		Response result = (Response) RestfulServerUtils.streamResponseAsResource(request.getServer(), binary, theSummaryMode, 200, theAddContentLocationHeader, respondGzip, this.request);
 		assertThat(result.getStatus()).isEqualTo(200);
-		assertThat(result.getHeaderString(Constants.HEADER_CONTENT_TYPE)).isNull();
-		assertThat(result.getEntity()).isNull();
+		assertNull(result.getHeaderString(Constants.HEADER_CONTENT_TYPE));
+		assertNull(result.getEntity());
 	}
 
 	@Test

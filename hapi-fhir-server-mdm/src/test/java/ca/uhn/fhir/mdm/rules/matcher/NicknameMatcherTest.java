@@ -1,5 +1,7 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.nickname.INicknameSvc;
 import ca.uhn.fhir.jpa.nickname.NicknameSvc;
 import ca.uhn.fhir.mdm.rules.json.MdmMatcherJson;
@@ -23,23 +25,23 @@ class NicknameMatcherTest {
 
 	@Test
 	public void testMatches() {
-		assertThat(match("Ken", "ken")).isTrue();
-		assertThat(match("ken", "Ken")).isTrue();
-		assertThat(match("Ken", "Ken")).isTrue();
-		assertThat(match("Kenneth", "Ken")).isTrue();
-		assertThat(match("Kenneth", "Kenny")).isTrue();
-		assertThat(match("Ken", "Kenneth")).isTrue();
-		assertThat(match("Kenny", "Kenneth")).isTrue();
-		assertThat(match("Jim", "Jimmy")).isTrue();
-		assertThat(match("Jimmy", "Jim")).isTrue();
-		assertThat(match("Jim", "James")).isTrue();
-		assertThat(match("Jimmy", "James")).isTrue();
-		assertThat(match("James", "Jimmy")).isTrue();
-		assertThat(match("James", "Jim")).isTrue();
+		assertTrue(match("Ken", "ken"));
+		assertTrue(match("ken", "Ken"));
+		assertTrue(match("Ken", "Ken"));
+		assertTrue(match("Kenneth", "Ken"));
+		assertTrue(match("Kenneth", "Kenny"));
+		assertTrue(match("Ken", "Kenneth"));
+		assertTrue(match("Kenny", "Kenneth"));
+		assertTrue(match("Jim", "Jimmy"));
+		assertTrue(match("Jimmy", "Jim"));
+		assertTrue(match("Jim", "James"));
+		assertTrue(match("Jimmy", "James"));
+		assertTrue(match("James", "Jimmy"));
+		assertTrue(match("James", "Jim"));
 
-		assertThat(match("Ken", "Bob")).isFalse();
+		assertFalse(match("Ken", "Bob"));
 		// These aren't nickname matches.  If you want matches like these use a phonetic matcher
-		assertThat(match("Allen", "Allan")).isFalse();
+		assertFalse(match("Allen", "Allan"));
 	}
 
 	private boolean match(String theFirst, String theSecond) {

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseExtractProvider;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -22,7 +23,7 @@ public class QuestionnaireResponseOperationsProviderTest extends BaseCrR4TestSer
 		var questionnaireResponse = readResource(QuestionnaireResponse.class, "ca/uhn/fhir/cr/r4/QuestionnaireResponse-QRSharonDecision.json");
 		var result = (Bundle) myQuestionnaireResponseExtractProvider.extract(null, questionnaireResponse, requestDetails);
 
-		assertThat(result).isNotNull();
+		assertNotNull(result);
 		assertThat(result.getEntry()).hasSize(5);
 	}
 }

@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.embedded;
 
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
@@ -152,9 +154,9 @@ public class HapiSchemaMigrationTest {
 		schemaMigrator.setDriverType(DriverTypeEnum.H2_EMBEDDED);
 
 		// Test & Validate
-		assertThat(schemaMigrator.createMigrationTableIfRequired()).isTrue();
-		assertThat(schemaMigrator.createMigrationTableIfRequired()).isFalse();
-		assertThat(schemaMigrator.createMigrationTableIfRequired()).isFalse();
+		assertTrue(schemaMigrator.createMigrationTableIfRequired());
+		assertFalse(schemaMigrator.createMigrationTableIfRequired());
+		assertFalse(schemaMigrator.createMigrationTableIfRequired());
 
 	}
 

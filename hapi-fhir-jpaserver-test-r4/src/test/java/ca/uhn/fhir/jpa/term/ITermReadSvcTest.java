@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 /*-
  * #%L
  * HAPI FHIR JPA Server
@@ -122,19 +125,19 @@ class ITermReadSvcTest {
 		@Test
 		void doesntStartWithGenericVSReturnsEmpty() {
 			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://boing.org");
-			assertThat(vsIdOpt.isPresent()).isFalse();
+			assertFalse(vsIdOpt.isPresent());
 		}
 
 		@Test
 		void doesntStartWithGenericVSPlusSlashReturnsEmpty() {
 			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://loinc.org/vs-no-slash-after-vs");
-			assertThat(vsIdOpt.isPresent()).isFalse();
+			assertFalse(vsIdOpt.isPresent());
 		}
 
 		@Test
 		void blankVsIdReturnsEmpty() {
 			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://loinc.org");
-			assertThat(vsIdOpt.isPresent()).isFalse();
+			assertFalse(vsIdOpt.isPresent());
 		}
 
 		@Test
@@ -152,19 +155,19 @@ class ITermReadSvcTest {
 		@Test
 		void doesntContainLoincReturnsFalse() {
 			boolean ret = TermReadSvcUtil.isLoincUnversionedCodeSystem("http://boing.org");
-			assertThat(ret).isFalse();
+			assertFalse(ret);
 		}
 
 		@Test
 		void hasVersionReturnsFalse() {
 			boolean ret = TermReadSvcUtil.isLoincUnversionedCodeSystem("http://boing.org|v2.68");
-			assertThat(ret).isFalse();
+			assertFalse(ret);
 		}
 
 		@Test
 		void containsLoincAndNoVersionReturnsTrue() {
 			boolean ret = TermReadSvcUtil.isLoincUnversionedCodeSystem("http://anything-plus-loinc.org");
-			assertThat(ret).isTrue();
+			assertTrue(ret);
 		}
 	}
 
@@ -174,25 +177,25 @@ class ITermReadSvcTest {
 		@Test
 		void notLoincReturnsFalse() {
 			boolean ret = TermReadSvcUtil.isLoincUnversionedValueSet("http://anything-but-loin-c.org");
-			assertThat(ret).isFalse();
+			assertFalse(ret);
 		}
 
 		@Test
 		void isLoincAndHasVersionReturnsFalse() {
 			boolean ret = TermReadSvcUtil.isLoincUnversionedValueSet("http://loinc.org|v2.67");
-			assertThat(ret).isFalse();
+			assertFalse(ret);
 		}
 
 		@Test
 		void isLoincNoVersionButEqualsLoincAllReturnsTrue() {
 			boolean ret = TermReadSvcUtil.isLoincUnversionedValueSet("http://loinc.org/vs");
-			assertThat(ret).isTrue();
+			assertTrue(ret);
 		}
 
 		@Test
 		void isLoincNoVersionStartsWithGenericValueSetPlusSlashPlusIdReturnsTrue() {
 			boolean ret = TermReadSvcUtil.isLoincUnversionedValueSet("http://loinc.org/vs/vs-id");
-			assertThat(ret).isTrue();
+			assertTrue(ret);
 		}
 
 	}
@@ -225,7 +228,7 @@ class ITermReadSvcTest {
 				.thenReturn(Collections.emptyList());
 
 			Optional<IBaseResource> result = testedClass.readCodeSystemByForcedId("a-cs-id");
-			assertThat(result.isPresent()).isFalse();
+			assertFalse(result.isPresent());
 		}
 
 		@Test
@@ -286,12 +289,12 @@ class ITermReadSvcTest {
 			String msg = ReflectionTestUtils.invokeMethod(
 				testedClass, "getTermConceptsFetchExceptionMsg", termConcepts, values);
 
-			assertThat(msg).isNotNull();
+			assertNotNull(msg);
 			assertThat(msg).contains("No TermConcept(s) were found");
-			assertThat(msg.contains(CODE_1)).isFalse();
+			assertFalse(msg.contains(CODE_1));
 			assertThat(msg).contains(CODE_2);
-			assertThat(msg.contains(CODE_3)).isFalse();
-			assertThat(msg.contains(CODE_4)).isFalse();
+			assertFalse(msg.contains(CODE_3));
+			assertFalse(msg.contains(CODE_4));
 			assertThat(msg).contains(CODE_5);
 		}
 
@@ -307,9 +310,9 @@ class ITermReadSvcTest {
 			String msg = ReflectionTestUtils.invokeMethod(
 				testedClass, "getTermConceptsFetchExceptionMsg", termConcepts, values);
 
-			assertThat(msg).isNotNull();
+			assertNotNull(msg);
 			assertThat(msg).contains("More TermConcepts were found than indicated codes");
-			assertThat(msg.contains("Queried codes: [" + CODE_3 + "]")).isFalse();
+			assertFalse(msg.contains("Queried codes: [" + CODE_3 + "]"));
 			assertThat(msg).contains("Obtained TermConcept IDs, codes: [1, code-1; 3, code-3]");
 		}
 	}

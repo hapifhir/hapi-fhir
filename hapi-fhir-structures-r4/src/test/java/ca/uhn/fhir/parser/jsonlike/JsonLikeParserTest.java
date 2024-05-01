@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser.jsonlike;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.IJsonLikeParser;
@@ -78,7 +79,7 @@ public class JsonLikeParserTest {
 		jsonLikeStructure.load(stringReader);
 
 		// then
-		assertThat(jsonLikeStructure.getRootObject()).isNotNull();
+		assertNotNull(jsonLikeStructure.getRootObject());
 
 	}
 

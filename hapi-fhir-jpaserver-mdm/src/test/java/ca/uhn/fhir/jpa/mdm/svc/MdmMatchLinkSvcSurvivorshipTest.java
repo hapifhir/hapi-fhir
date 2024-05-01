@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -143,8 +145,8 @@ public class MdmMatchLinkSvcSurvivorshipTest extends BaseMdmR4Test {
 		golden = (Patient) myMdmLinkUpdaterSvc.updateLink(params);
 
 		// verify
-		assertThat(golden.getTelecom() == null || golden.getTelecom().isEmpty()).isTrue();
-		assertThat(golden.getBirthDate()).isNull();
+		assertTrue(golden.getTelecom() == null || golden.getTelecom().isEmpty());
+		assertNull(golden.getBirthDate());
 	}
 
 	private void verifySurvivorshipCalled(int theNumberOfTimes) {

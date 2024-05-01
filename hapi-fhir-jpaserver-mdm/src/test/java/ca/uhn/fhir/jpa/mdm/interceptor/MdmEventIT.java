@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperConfig;
@@ -60,7 +61,7 @@ public class MdmEventIT extends BaseMdmR4Test {
 		MdmHelperR4.OutcomeAndLogMessageWrapper outcome = myMdmHelper.updateWithLatch(patient2);
 
 		MdmLinkEvent linkChangeEvent = outcome.getMdmLinkEvent();
-		assertThat(linkChangeEvent).isNotNull();
+		assertNotNull(linkChangeEvent);
 
 		ourLog.info("Got event: {}", linkChangeEvent);
 
@@ -86,13 +87,13 @@ public class MdmEventIT extends BaseMdmR4Test {
 		MdmHelperR4.OutcomeAndLogMessageWrapper outcome = myMdmHelper.createWithLatch(pr);
 
 		ResourceOperationMessage resourceOperationMessage = outcome.getResourceOperationMessage();
-		assertThat(resourceOperationMessage).isNotNull();
+		assertNotNull(resourceOperationMessage);
 		assertThat(resourceOperationMessage.getId()).isEqualTo(pr.getIdElement().toUnqualifiedVersionless().getValue());
 
 		MdmLink link = getLinkByTargetId(pr);
 
 		MdmLinkEvent linkChangeEvent = outcome.getMdmLinkEvent();
-		assertThat(linkChangeEvent).isNotNull();
+		assertNotNull(linkChangeEvent);
 
 		assertThat(linkChangeEvent.getMdmLinks()).hasSize(1);
 		MdmLinkJson l = linkChangeEvent.getMdmLinks().get(0);
@@ -112,7 +113,7 @@ public class MdmEventIT extends BaseMdmR4Test {
 		MdmHelperR4.OutcomeAndLogMessageWrapper outcome = myMdmHelper.createWithLatch(patient1);
 
 		MdmLinkEvent linkChangeEvent = outcome.getMdmLinkEvent();
-		assertThat(linkChangeEvent).isNotNull();
+		assertNotNull(linkChangeEvent);
 		assertThat(linkChangeEvent.getMdmLinks()).hasSize(1);
 
 		MdmLinkJson link = linkChangeEvent.getMdmLinks().get(0);

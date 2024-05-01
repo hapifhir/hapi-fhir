@@ -1,5 +1,7 @@
 package ca.uhn.fhir.context;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -102,7 +104,7 @@ public class ContextScanningDstu3Test {
 
 
 		BaseRuntimeElementCompositeDefinition<?> compositeDef = (BaseRuntimeElementCompositeDefinition<?>) ctx.getElementDefinition("identifier");
-		assertThat(compositeDef.isSealed()).isFalse();
+		assertFalse(compositeDef.isSealed());
 		
 		IGenericClient client = ctx.newRestfulGenericClient(ourServer.getBaseUrl());
 		client.read().resource(Patient.class).withId("1").execute();
@@ -113,7 +115,7 @@ public class ContextScanningDstu3Test {
 		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);		
 		assertThat(resDefs).doesNotContain("Observation");
 		compositeDef = (BaseRuntimeElementCompositeDefinition<?>) ctx.getElementDefinition("identifier");
-		assertThat(compositeDef.isSealed()).isFalse();
+		assertFalse(compositeDef.isSealed());
 
 		client.read().resource(Observation.class).withId("1").execute();
 		resDefs = scannedResourceNames(ctx);
@@ -122,7 +124,7 @@ public class ContextScanningDstu3Test {
 		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);		
 		assertThat(resDefs).doesNotContain("Observation");
 		compositeDef = (BaseRuntimeElementCompositeDefinition<?>) ctx.getElementDefinition("identifier");
-		assertThat(compositeDef.isSealed()).isTrue();
+		assertTrue(compositeDef.isSealed());
 	}
 
 	private TreeSet<String> scannedResourceNames(FhirContext ctx) {

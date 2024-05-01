@@ -1,5 +1,8 @@
 package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.IAddressValidator;
@@ -205,11 +208,11 @@ class LoquateAddressValidatorTest {
 	public void testSuccessfulResponses() throws Exception {
 		AddressValidationResult res = myValidator.getValidationResult(new AddressValidationResult(),
 			new ObjectMapper().readTree(RESPONSE_INVALID_ADDRESS), ourCtx);
-		assertThat(res.isValid()).isFalse();
+		assertFalse(res.isValid());
 
 		res = myValidator.getValidationResult(new AddressValidationResult(),
 			new ObjectMapper().readTree(RESPONSE_VALID_ADDRESS), ourCtx);
-		assertThat(res.isValid()).isTrue();
+		assertTrue(res.isValid());
 		assertThat(res.getValidatedAddressString()).isEqualTo("My Valid Address");
 	}
 
@@ -218,25 +221,25 @@ class LoquateAddressValidatorTest {
 		myValidator.getProperties().setProperty(PROPERTY_GEOCODE, "true");
 		AddressValidationResult res = myValidator.getValidationResult(new AddressValidationResult(),
 			new ObjectMapper().readTree(RESPONSE_VALID_ADDRESS_W_GEO), ourCtx);
-		assertThat(res.isValid()).isTrue();
+		assertTrue(res.isValid());
 
 		IBase address = res.getValidatedAddress();
 		IBaseExtension geocode = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.FHIR_GEOCODE_EXTENSION_URL);
-		assertThat(geocode).isNotNull();
+		assertNotNull(geocode);
 		assertThat(geocode.getExtension()).hasSize(2);
 		assertThat(((IBaseExtension) geocode.getExtension().get(0)).getUrl()).isEqualTo("latitude");
 		assertThat(((IBaseExtension) geocode.getExtension().get(1)).getUrl()).isEqualTo("longitude");
 
 		IBaseExtension quality = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL);
-		assertThat(quality).isNotNull();
+		assertNotNull(quality);
 		assertThat(quality.getValue().toString()).isEqualTo("A");
 
 		IBaseExtension verificationCode = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.ADDRESS_VERIFICATION_CODE_EXTENSION_URL);
-		assertThat(verificationCode).isNotNull();
+		assertNotNull(verificationCode);
 		assertThat(verificationCode.getValue().toString()).isEqualTo("V44-I44-P6-100");
 
 		IBaseExtension geoAccuracy = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.ADDRESS_GEO_ACCURACY_EXTENSION_URL);
-		assertThat(geoAccuracy).isNotNull();
+		assertNotNull(geoAccuracy);
 		assertThat(geoAccuracy.getValue().toString()).isEqualTo("Z1");
 	}
 

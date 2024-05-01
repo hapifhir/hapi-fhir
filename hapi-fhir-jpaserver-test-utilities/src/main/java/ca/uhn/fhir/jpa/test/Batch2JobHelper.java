@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.jpa.test;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
@@ -166,11 +168,11 @@ public class Batch2JobHelper {
 	}
 
 	public void assertNotFastTracking(String theInstanceId) {
-		assertThat(myJobCoordinator.getInstance(theInstanceId).isFastTracking()).isFalse();
+		assertFalse(myJobCoordinator.getInstance(theInstanceId).isFastTracking());
 	}
 
 	public void assertFastTracking(String theInstanceId) {
-		assertThat(myJobCoordinator.getInstance(theInstanceId).isFastTracking()).isTrue();
+		assertTrue(myJobCoordinator.getInstance(theInstanceId).isFastTracking());
 	}
 
 	public void awaitGatedStepId(String theExpectedGatedStepId, String theInstanceId) {

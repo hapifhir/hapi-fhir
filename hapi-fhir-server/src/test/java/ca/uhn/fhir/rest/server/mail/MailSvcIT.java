@@ -45,7 +45,7 @@ public class MailSvcIT {
 		fixture.sendMail(email);
 		// validate
 		boolean condition = ourGreenMail.waitForIncomingEmail(5000, 1);
-		assertThat(condition).isTrue();
+		assertTrue(condition);
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
 		assertThat(receivedMessages.length).isEqualTo(1);
 		assertThat(receivedMessages[0].getSubject()).isEqualTo(SUBJECT);
@@ -59,7 +59,7 @@ public class MailSvcIT {
 		// execute
 		fixture.sendMail(emails);
 		// validate
-		assertThat(ourGreenMail.waitForIncomingEmail(15000, emails.size())).isTrue();
+		assertTrue(ourGreenMail.waitForIncomingEmail(15000, emails.size()));
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
 		assertThat(receivedMessages.length).isEqualTo(emails.size());
 		assertThat(receivedMessages[0].getSubject()).isEqualTo(SUBJECT);
@@ -79,7 +79,7 @@ public class MailSvcIT {
 		fixture.sendMail(email);
 
 		// validate
-		assertThat(ourGreenMail.waitForIncomingEmail(5000, 0)).isTrue();
+		assertTrue(ourGreenMail.waitForIncomingEmail(5000, 0));
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
 		assertThat(receivedMessages.length).isEqualTo(0);
 	}
@@ -96,7 +96,7 @@ public class MailSvcIT {
 				assertEquals("Invalid TO address: " + email, e.getMessage());
 			});
 		// validate
-		assertThat(ourGreenMail.waitForIncomingEmail(1000, 0)).isTrue();
+		assertTrue(ourGreenMail.waitForIncomingEmail(1000, 0));
 	}
 
 	private MailConfig withMailConfig() {

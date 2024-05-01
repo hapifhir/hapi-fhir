@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -66,7 +67,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		tableCapt = ArgumentCaptor.forClass(IBaseResource.class);
 		verify(interceptor, times(1)).resourceCreated(detailsCapt.capture(), tableCapt.capture());
-		assertThat(tableCapt.getValue().getIdElement().getIdPart()).isNotNull();
+		assertNotNull(tableCapt.getValue().getIdElement().getIdPart());
 		assertThat(tableCapt.getValue().getIdElement().getIdPartAsLong()).isEqualTo(id);
 
 		detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
@@ -118,7 +119,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		tableCapt = ArgumentCaptor.forClass(IBaseResource.class);
 		verify(interceptor, times(1)).resourceDeleted(detailsCapt.capture(), tableCapt.capture());
-		assertThat(tableCapt.getValue().getIdElement().getIdPart()).isNotNull();
+		assertNotNull(tableCapt.getValue().getIdElement().getIdPart());
 		assertThat(tableCapt.getValue().getIdElement().getIdPartAsLong()).isEqualTo(id);
 
 	}
@@ -143,7 +144,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		tableCapt = ArgumentCaptor.forClass(IBaseResource.class);
 		verify(interceptor, times(1)).resourceUpdated(detailsCapt.capture(), tableCapt.capture());
-		assertThat(tableCapt.getValue().getIdElement().getIdPart()).isNotNull();
+		assertNotNull(tableCapt.getValue().getIdElement().getIdPart());
 		assertThat(tableCapt.getValue().getIdElement().getIdPartAsLong()).isEqualTo(id);
 
 		/*

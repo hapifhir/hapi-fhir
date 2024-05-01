@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module.matcher;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
@@ -48,15 +50,15 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
     StorageSettings myStorageSettings;
 
 	private void assertUnsupported(IBaseResource resource, String criteria) {
-		assertThat(mySearchParamMatcher.match(criteria, resource, null).supported()).isFalse();
+		assertFalse(mySearchParamMatcher.match(criteria, resource, null).supported());
 		assertThat(mySubscriptionStrategyEvaluator.determineStrategy(criteria)).isEqualTo(SubscriptionMatchingStrategy.DATABASE);
 	}
 
 	private void assertMatched(IBaseResource resource, String criteria) {
 		InMemoryMatchResult result = mySearchParamMatcher.match(criteria, resource, null);
 
-		assertThat(result.supported()).isTrue();
-		assertThat(result.matched()).isTrue();
+		assertTrue(result.supported());
+		assertTrue(result.matched());
 		assertThat(mySubscriptionStrategyEvaluator.determineStrategy(criteria)).isEqualTo(SubscriptionMatchingStrategy.IN_MEMORY);
 	}
 
@@ -67,8 +69,8 @@ public class InMemorySubscriptionMatcherR3Test extends BaseSubscriptionDstu3Test
 	private void assertNotMatched(IBaseResource resource, String criteria, SubscriptionMatchingStrategy theSubscriptionMatchingStrategy) {
 		InMemoryMatchResult result = mySearchParamMatcher.match(criteria, resource, null);
 
-		assertThat(result.supported()).isTrue();
-		assertThat(result.matched()).isFalse();
+		assertTrue(result.supported());
+		assertFalse(result.matched());
 
 		assertThat(mySubscriptionStrategyEvaluator.determineStrategy(criteria)).isEqualTo(theSubscriptionMatchingStrategy);
 	}

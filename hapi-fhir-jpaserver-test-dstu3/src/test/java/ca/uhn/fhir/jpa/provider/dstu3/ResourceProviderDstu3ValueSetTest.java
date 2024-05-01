@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -502,7 +504,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	@Test
 	public void testExpandInlineVsAgainstBuiltInCs() {
 		createLocalVsPointingAtBuiltInCodeSystem();
-		assertThat(myLocalValueSetId).isNotNull();
+		assertNotNull(myLocalValueSetId);
 
 		Parameters respParam = myClient
 			.operation()
@@ -521,7 +523,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	@Test
 	public void testExpandInlineVsAgainstExternalCs() {
 		createExternalCsAndLocalVs();
-		assertThat(myLocalVs).isNotNull();
+		assertNotNull(myLocalVs);
 		myLocalVs.setId("");
 
 		Parameters respParam = myClient
@@ -613,7 +615,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	@Test
 	public void testExpandLocalVsAgainstBuiltInCs() {
 		createLocalVsPointingAtBuiltInCodeSystem();
-		assertThat(myLocalValueSetId).isNotNull();
+		assertNotNull(myLocalValueSetId);
 
 		Parameters respParam = myClient
 			.operation()
@@ -632,7 +634,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	@Test
 	public void testExpandLocalVsAgainstExternalCs() {
 		createExternalCsAndLocalVs();
-		assertThat(myLocalValueSetId).isNotNull();
+		assertNotNull(myLocalValueSetId);
 
 		Parameters respParam = myClient
 			.operation()
@@ -654,7 +656,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	@Test
 	public void testExpandLocalVsCanonicalAgainstExternalCs() {
 		createExternalCsAndLocalVs();
-		assertThat(myLocalValueSetId).isNotNull();
+		assertNotNull(myLocalValueSetId);
 
 		Parameters respParam = myClient
 			.operation()
@@ -734,7 +736,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 			ourLog.debug(respString);
 
 			Parameters respParam = myFhirContext.newJsonParser().parseResource(Parameters.class, respString);
-			assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 		}
 	}
 

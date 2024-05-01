@@ -136,7 +136,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -170,7 +170,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -214,7 +214,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -261,7 +261,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertThat(oids).hasSize(2L);
+		assertThat(oids).hasSize(2);
 		assertThat(oids).containsExactly(oid1.getIdPart(), oid2.getIdPart());
 	}
 
@@ -309,7 +309,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertThat(oids).hasSize(2L);
+		assertThat(oids).hasSize(2);
 		assertThat(oids).containsExactly(oid1.getIdPart(), oid2.getIdPart());
 	}
 
@@ -350,7 +350,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -382,7 +382,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(0L);
+		assertThat(oids).hasSize(0);
 	}
 
 	@Test
@@ -430,7 +430,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -472,7 +472,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -514,7 +514,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -554,7 +554,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -606,7 +606,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -660,7 +660,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -701,7 +701,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -746,7 +746,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -787,7 +787,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -831,7 +831,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -871,7 +871,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(0L);
+		assertThat(oids).hasSize(0);
 	}
 
 	@Test
@@ -914,7 +914,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -964,7 +964,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -1020,7 +1020,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -1074,7 +1074,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -1132,7 +1132,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -1194,7 +1194,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -1239,7 +1239,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -1284,7 +1284,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -1329,7 +1329,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -1380,7 +1380,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueries();
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -1426,7 +1426,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -1471,7 +1471,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		List<String> oids = searchAndReturnUnqualifiedVersionlessIdValues(url);
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
@@ -1520,7 +1520,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		// validate
-		assertThat(oids).hasSize(1L);
+		assertThat(oids).hasSize(1);
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 

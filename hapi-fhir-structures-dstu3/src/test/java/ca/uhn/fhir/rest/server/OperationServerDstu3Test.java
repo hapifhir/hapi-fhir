@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -304,7 +305,7 @@ public class OperationServerDstu3Test {
 
 		assertThat(ourLastParam1.getValue()).isEqualTo("PARAM1val");
 		assertThat(ourLastParam2.getActive()).isEqualTo(true);
-		assertThat(ourLastId).isNull();
+		assertNull(ourLastId);
 		assertThat(ourLastMethod).isEqualTo("$OP_INSTANCE_OR_TYPE");
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
@@ -403,7 +404,7 @@ public class OperationServerDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(ourLastParam1.getValue()).isEqualTo("PARAM1val");
-		assertThat(ourLastParam2).isNull();
+		assertNull(ourLastParam2);
 		assertThat(ourLastMethod).isEqualTo("$OP_TYPE");
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
@@ -442,7 +443,7 @@ public class OperationServerDstu3Test {
 
 		assertThat(ourLastMethod).isEqualTo("$OP_SERVER_LIST_PARAM");
 		assertThat(ourLastParam2.getActive()).isEqualTo(true);
-		assertThat(ourLastParam1).isNull();
+		assertNull(ourLastParam1);
 		assertThat(ourLastParam3).hasSize(2);
 		assertThat(ourLastParam3.get(0).getValue()).isEqualTo("PARAM3val1");
 		assertThat(ourLastParam3.get(1).getValue()).isEqualTo("PARAM3val2");

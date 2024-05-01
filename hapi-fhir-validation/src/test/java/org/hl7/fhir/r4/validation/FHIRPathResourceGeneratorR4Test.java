@@ -1,5 +1,7 @@
 package org.hl7.fhir.r4.validation;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,14 +47,14 @@ public class FHIRPathResourceGeneratorR4Test extends BaseValidationTestWithInlin
     @Test
     public void createFhirGenerator() {
         FHIRPathResourceGeneratorR4<Patient> test = new FHIRPathResourceGeneratorR4<>();
-			assertThat(test).isNotNull();
+			assertNotNull(test);
     }
 
     @Test
     public void createFhirGeneratorWithMapping() {
         Map<String, String> mapping = this.createFhirMapping();
         FHIRPathResourceGeneratorR4<Patient> test = new FHIRPathResourceGeneratorR4<>(mapping);
-			assertThat(test).isNotNull();
+			assertNotNull(test);
     }
 
     @Test
@@ -60,7 +62,7 @@ public class FHIRPathResourceGeneratorR4Test extends BaseValidationTestWithInlin
         Map<String, String> mapping = this.createFhirMapping();
         FHIRPathResourceGeneratorR4<Patient> resourceGenerator = new FHIRPathResourceGeneratorR4<>(mapping);
         Patient patient = resourceGenerator.generateResource(Patient.class);
-			assertThat(patient).isNotNull();
+			assertNotNull(patient);
 
 			assertThat(1).isEqualTo(patient.getName().size());
 			assertThat("Parciak").isEqualTo(patient.getNameFirstRep().getFamily());
@@ -80,7 +82,7 @@ public class FHIRPathResourceGeneratorR4Test extends BaseValidationTestWithInlin
 							assertThat("37099").isEqualTo(address.getPostalCode());
             } else {
 							// an address that has no use should not be created based on the test data
-							assertThat(false).isTrue();
+							assertTrue(false);
             }
         }
     }
@@ -90,7 +92,7 @@ public class FHIRPathResourceGeneratorR4Test extends BaseValidationTestWithInlin
         Map<String, String> mapping = this.createFhirMapping_2();
         FHIRPathResourceGeneratorR4<Patient> resourceGenerator = new FHIRPathResourceGeneratorR4<>(mapping);
         Patient patient = resourceGenerator.generateResource(Patient.class);
-			assertThat(patient).isNotNull();
+			assertNotNull(patient);
 
 			assertThat(2).isEqualTo(patient.getName().size());
         for(HumanName name: patient.getName()) {
@@ -101,7 +103,7 @@ public class FHIRPathResourceGeneratorR4Test extends BaseValidationTestWithInlin
             } else if (name.getUse() == HumanName.NameUse.MAIDEN) {
 							assertThat("ParciakMaiden").isEqualTo(name.getFamily());
             } else {
-							assertThat(false).isTrue();
+							assertTrue(false);
             }
         }
 
@@ -121,7 +123,7 @@ public class FHIRPathResourceGeneratorR4Test extends BaseValidationTestWithInlin
         mapping.put("Patient.address.where(use != 'billing').type", "physical");
         FHIRPathResourceGeneratorR4<Patient> resourceGenerator = new FHIRPathResourceGeneratorR4<>(mapping);
         Patient patient = resourceGenerator.generateResource(Patient.class);
-			assertThat(patient).isNotNull();
+			assertNotNull(patient);
 
 			assertThat(1).isEqualTo(patient.getName().size());
 			assertThat("Parciak").isEqualTo(patient.getNameFirstRep().getFamily());
@@ -143,7 +145,7 @@ public class FHIRPathResourceGeneratorR4Test extends BaseValidationTestWithInlin
 							assertThat(AddressType.POSTAL).isEqualTo(address.getType());
             } else {
 							// an address that has no use should not be created based on the test data
-							assertThat(false).isTrue();
+							assertTrue(false);
             }
         }
     }

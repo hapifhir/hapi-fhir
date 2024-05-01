@@ -1,5 +1,7 @@
 package ca.uhn.fhir.storage;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.SimplePartitionTestHelper;
@@ -75,7 +77,7 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(patient);
 
 		// verify
-		assertThat(oPreviousPatient.isPresent()).isFalse();
+		assertFalse(oPreviousPatient.isPresent());
 	}
 
 	@Test
@@ -103,7 +105,7 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 
 		// execute
 		Optional<Patient> oDeletedPatient = mySvc.readPreviousVersion(latestUndeletedVersion);
-		assertThat(oDeletedPatient.isPresent()).isFalse();
+		assertFalse(oDeletedPatient.isPresent());
 	}
 
 	@Test
@@ -117,7 +119,7 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		// verify
 		assertThat(oPreviousPatient).isPresent();
 		Patient previousPatient = oPreviousPatient.get();
-		assertThat(previousPatient.isDeleted()).isTrue();
+		assertTrue(previousPatient.isDeleted());
 	}
 
 	@NotNull
@@ -137,7 +139,7 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		Patient latestUndeletedVersion = myPatientDao.read(patientId, mySrd);
 		assertThat(latestUndeletedVersion.getIdElement().getVersionIdPartAsLong()).isEqualTo(3L);
 
-		assertThat(latestUndeletedVersion.isDeleted()).isFalse();
+		assertFalse(latestUndeletedVersion.isDeleted());
 		assertThat(latestUndeletedVersion.getGenderElement().getValue()).isEqualTo(Enumerations.AdministrativeGender.FEMALE);
 		return latestUndeletedVersion;
 	}

@@ -1,5 +1,8 @@
 package ca.uhn.fhir.model.api;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -36,14 +39,14 @@ public class PagingIteratorTest {
 	public void hasNext_returnsTrue_ifElementsAvailable() {
 		myPagingIterator = createPagingIterator(1);
 
-		assertThat(myPagingIterator.hasNext()).isTrue();
+		assertTrue(myPagingIterator.hasNext());
 	}
 
 	@Test
 	public void hasNext_returnsFalse_ifNoElementsAvialable() {
 		myPagingIterator = createPagingIterator(0);
 
-		assertThat(myPagingIterator.hasNext()).isFalse();
+		assertFalse(myPagingIterator.hasNext());
 	}
 
 	@Test
@@ -51,7 +54,7 @@ public class PagingIteratorTest {
 		myPagingIterator = createPagingIterator(10);
 
 		String next = myPagingIterator.next();
-		assertThat(next).isNotNull();
+		assertNotNull(next);
 		assertThat(next).isNotEmpty();
 	}
 

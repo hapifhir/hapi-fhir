@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
@@ -39,6 +40,6 @@ class MdmResourceFilteringSvcMockTest {
 	@Test
 	public void testEmptyCriteriaShouldBeProcessed() {
 		when(myMdmSettings.getMdmRules()).thenReturn(new MdmRulesJson());
-		assertThat(myMdmResourceFilteringSvc.shouldBeProcessed(new Patient())).isTrue();
+		assertTrue(myMdmResourceFilteringSvc.shouldBeProcessed(new Patient()));
 	}
 }

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -116,7 +118,7 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 		
 		Bundle bundle = fetchBundle(myServerBase + "/" + myPatientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
-		assertThat(bundle.getLink("next")).isNull();
+		assertNull(bundle.getLink("next"));
 		
 		Set<String> actual = new TreeSet<String>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
@@ -150,7 +152,7 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Bundle bundle = fetchBundle(myServerBase + "/" + myPatientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
-		assertThat(bundle.getLink("next")).isNull();
+		assertNull(bundle.getLink("next"));
 
 		Set<String> actual = new TreeSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
@@ -179,7 +181,7 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 		
 		Bundle bundle = fetchBundle(myServerBase + "/" + myPatientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
-		assertThat(bundle.getLink("next")).isNull();
+		assertNull(bundle.getLink("next"));
 		
 		Set<String> actual = new TreeSet<String>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
@@ -205,11 +207,11 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 		
 		Bundle bundle = fetchBundle(myServerBase + "/" + myPatientId + "/$everything?_format=json&_count=1", EncodingEnum.JSON);
 
-		assertThat(bundle.getLink("next").getUrl()).isNotNull();
+		assertNotNull(bundle.getLink("next").getUrl());
 		assertThat(bundle.getLink("next").getUrl()).contains("_format=json");
 		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.JSON);
 
-		assertThat(bundle.getLink("next").getUrl()).isNotNull();
+		assertNotNull(bundle.getLink("next").getUrl());
 		assertThat(bundle.getLink("next").getUrl()).contains("_format=json");
 		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.JSON);
 	}
@@ -222,12 +224,12 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 		
 		Bundle bundle = fetchBundle(myServerBase + "/" + myPatientId + "/$everything?_format=xml&_count=1", EncodingEnum.XML);
 
-		assertThat(bundle.getLink("next").getUrl()).isNotNull();
+		assertNotNull(bundle.getLink("next").getUrl());
 		ourLog.info("Next link: {}", bundle.getLink("next").getUrl());
 		assertThat(bundle.getLink("next").getUrl()).contains("_format=xml");
 		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.XML);
 
-		assertThat(bundle.getLink("next").getUrl()).isNotNull();
+		assertNotNull(bundle.getLink("next").getUrl());
 		ourLog.info("Next link: {}", bundle.getLink("next").getUrl());
 		assertThat(bundle.getLink("next").getUrl()).contains("_format=xml");
 		bundle = fetchBundle(bundle.getLink("next").getUrl(), EncodingEnum.XML);

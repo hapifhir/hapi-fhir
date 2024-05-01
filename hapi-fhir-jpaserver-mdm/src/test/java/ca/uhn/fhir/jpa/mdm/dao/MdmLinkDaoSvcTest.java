@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.mdm.dao;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -45,12 +48,12 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 	@Test
 	public void testCreate() {
 		MdmLink mdmLink = createResourcesAndBuildTestMDMLink();
-		assertThat(mdmLink.getCreated()).isNull();
-		assertThat(mdmLink.getUpdated()).isNull();
+		assertNull(mdmLink.getCreated());
+		assertNull(mdmLink.getUpdated());
 		myMdmLinkDaoSvc.save(mdmLink);
-		assertThat(mdmLink.getCreated()).isNotNull();
-		assertThat(mdmLink.getUpdated()).isNotNull();
-		assertThat(mdmLink.getUpdated().getTime() - mdmLink.getCreated().getTime() < 1000).isTrue();
+		assertNotNull(mdmLink.getCreated());
+		assertNotNull(mdmLink.getUpdated());
+		assertTrue(mdmLink.getUpdated().getTime() - mdmLink.getCreated().getTime() < 1000);
 	}
 
 	@Test
@@ -448,7 +451,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 	}
 
 	private void assertMdmRevisionsEqual(List<MdmLinkWithRevision<MdmLink>> expectedMdmLinkRevisions, List<MdmLinkWithRevision<MdmLink>> actualMdmLinkRevisions) {
-		assertThat(actualMdmLinkRevisions).isNotNull();
+		assertNotNull(actualMdmLinkRevisions);
 
 		assertThat(actualMdmLinkRevisions).hasSize(expectedMdmLinkRevisions.size());
 
@@ -468,7 +471,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 			assertThat(actualEnversRevision.getRevisionType()).isEqualTo(expectedEnversRevision.getRevisionType());
 			// TODO:  LD:  when running this unit test on a pipeline, it's impossible to assert a revision number because of all the other MdmLinks
 			// created by other tests.  So for now, simply assert the revision is greater than 0
-			assertThat(actualEnversRevision.getRevisionNumber() > 0).isTrue();
+			assertTrue(actualEnversRevision.getRevisionNumber() > 0);
 		}
 	}
 

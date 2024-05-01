@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.subscription.match.registry;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.ISubscriptionDeliveryChannelNamer;
@@ -58,9 +62,9 @@ public class SubscriptionRegistryTest {
 		boolean registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
 
 		// verify
-		assertThat(registered).isTrue();
+		assertTrue(registered);
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
-		assertThat(activeSubscription.getRetryConfigurationParameters()).isNotNull();
+		assertNotNull(activeSubscription.getRetryConfigurationParameters());
 		assertThat(activeSubscription.getChannelName()).isEqualTo(channelName);
 		assertThat(activeSubscription.getRetryConfigurationParameters().getRetryCount()).isEqualTo(retryCount);
 	}
@@ -76,9 +80,9 @@ public class SubscriptionRegistryTest {
 		boolean registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
 
 		// verify
-		assertThat(registered).isTrue();
+		assertTrue(registered);
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
-		assertThat(activeSubscription.getRetryConfigurationParameters()).isNull();
+		assertNull(activeSubscription.getRetryConfigurationParameters());
 	}
 
 	@Test
@@ -96,9 +100,9 @@ public class SubscriptionRegistryTest {
 		boolean registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(subscription);
 
 		// verify
-		assertThat(registered).isTrue();
+		assertTrue(registered);
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
-		assertThat(activeSubscription.getRetryConfigurationParameters()).isNull();
+		assertNull(activeSubscription.getRetryConfigurationParameters());
 		assertThat(activeSubscription.getChannelName()).isEqualTo(CHANNEL_NAME);
 	}
 
@@ -112,14 +116,14 @@ public class SubscriptionRegistryTest {
 		boolean registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(topicSubscription1);
 
 		// verify
-		assertThat(registered).isTrue();
+		assertTrue(registered);
 		List<ActiveSubscription> subscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(SubscriptionTestDataHelper.TEST_TOPIC);
 		assertThat(subscriptions).hasSize(1);
 
 		Subscription topicSubscription2 = SubscriptionTestDataHelper.buildR4TopicSubscription();
 		topicSubscription2.setId("topicSubscription2");
 		registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(topicSubscription2);
-		assertThat(registered).isTrue();
+		assertTrue(registered);
 		subscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(SubscriptionTestDataHelper.TEST_TOPIC);
 		assertThat(subscriptions).hasSize(2);
 
@@ -127,7 +131,7 @@ public class SubscriptionRegistryTest {
 		Subscription topicSubscription3 = SubscriptionTestDataHelper.buildR4TopicSubscription();
 		topicSubscription3.setId("topicSubscription2");
 		registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(topicSubscription3);
-		assertThat(registered).isFalse();
+		assertFalse(registered);
 		assertThat(subscriptions).hasSize(2);
 
 		// Now register a subscription with a different topic
@@ -137,7 +141,7 @@ public class SubscriptionRegistryTest {
 		String testTopic4 = "test-topic-4";
 		topicSubscription4.setCriteria(testTopic4);
 		registered = mySubscriptionRegistry.registerSubscriptionUnlessAlreadyRegistered(topicSubscription4);
-		assertThat(registered).isTrue();
+		assertTrue(registered);
 
 		// Still 2 subs with the first topic
 		subscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(SubscriptionTestDataHelper.TEST_TOPIC);

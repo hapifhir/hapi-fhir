@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.DatatypeDef;
@@ -39,64 +41,64 @@ public class ModelInheritanceTest {
    */
   @Test
   public void testAddress() {
-		assertThat(ICompositeType.class.isAssignableFrom(Address.class)).isTrue();
+		assertTrue(ICompositeType.class.isAssignableFrom(Address.class));
   }
 
   @Test
   public void testBackboneElement() {
-		assertThat(IBaseBackboneElement.class.isAssignableFrom(BackboneElement.class)).isTrue();
-		assertThat(IBaseHasExtensions.class.isAssignableFrom(BackboneElement.class)).isTrue();
-		assertThat(IBaseHasModifierExtensions.class.isAssignableFrom(BackboneElement.class)).isTrue();
+		assertTrue(IBaseBackboneElement.class.isAssignableFrom(BackboneElement.class));
+		assertTrue(IBaseHasExtensions.class.isAssignableFrom(BackboneElement.class));
+		assertTrue(IBaseHasModifierExtensions.class.isAssignableFrom(BackboneElement.class));
   }
 
   @Test
   public void testBase() {
-		assertThat(IBase.class.isAssignableFrom(Base.class)).isTrue();
+		assertTrue(IBase.class.isAssignableFrom(Base.class));
   }
 
   @Test
   public void testBinary() {
-		assertThat(IBaseBinary.class.isAssignableFrom(Binary.class)).isTrue();
+		assertTrue(IBaseBinary.class.isAssignableFrom(Binary.class));
   }
 
   @Test
   public void testBooleanType() {
-		assertThat(IBaseBooleanDatatype.class.isAssignableFrom(BooleanType.class)).isTrue();
+		assertTrue(IBaseBooleanDatatype.class.isAssignableFrom(BooleanType.class));
   }
 
   @Test
   public void testBundle() {
-		assertThat(IBaseBundle.class.isAssignableFrom(Bundle.class)).isTrue();
+		assertTrue(IBaseBundle.class.isAssignableFrom(Bundle.class));
   }
 
   @Test
   public void testCoding() {
-		assertThat(IBaseCoding.class.isAssignableFrom(Coding.class)).isTrue();
+		assertTrue(IBaseCoding.class.isAssignableFrom(Coding.class));
   }
 
   @Test
   public void testDecimalType() {
-		assertThat(IBaseDecimalDatatype.class.isAssignableFrom(DecimalType.class)).isTrue();
+		assertTrue(IBaseDecimalDatatype.class.isAssignableFrom(DecimalType.class));
   }
 
   @Test
   public void testDomainResource() {
-		assertThat(IBaseHasExtensions.class.isAssignableFrom(DomainResource.class)).isTrue();
-		assertThat(IBaseHasModifierExtensions.class.isAssignableFrom(DomainResource.class)).isTrue();
-		assertThat(IDomainResource.class.isAssignableFrom(DomainResource.class)).isTrue();
+		assertTrue(IBaseHasExtensions.class.isAssignableFrom(DomainResource.class));
+		assertTrue(IBaseHasModifierExtensions.class.isAssignableFrom(DomainResource.class));
+		assertTrue(IDomainResource.class.isAssignableFrom(DomainResource.class));
   }
 
   @Test
   public void testElement() {
-		assertThat(IBaseHasExtensions.class.isAssignableFrom(Element.class)).isTrue();
+		assertTrue(IBaseHasExtensions.class.isAssignableFrom(Element.class));
   }
 
   @Test
   public void testEnumeration() {
-		assertThat(IBaseEnumeration.class.isAssignableFrom(Enumeration.class)).isTrue();
+		assertTrue(IBaseEnumeration.class.isAssignableFrom(Enumeration.class));
 
     DatatypeDef def = Enumeration.class.getAnnotation(DatatypeDef.class);
-		assertThat(def.isSpecialization()).isTrue();
+		assertTrue(def.isSpecialization());
   }
 
   /**
@@ -104,18 +106,18 @@ public class ModelInheritanceTest {
    */
   @Test
   public void testExtension() {
-		assertThat(IBaseExtension.class.isAssignableFrom(Extension.class)).isTrue();
-		assertThat(IBaseHasExtensions.class.isAssignableFrom(Extension.class)).isTrue();
+		assertTrue(IBaseExtension.class.isAssignableFrom(Extension.class));
+		assertTrue(IBaseHasExtensions.class.isAssignableFrom(Extension.class));
   }
 
   @Test
   public void testIdType() {
-		assertThat(IIdType.class.isAssignableFrom(IdType.class)).isTrue();
+		assertTrue(IIdType.class.isAssignableFrom(IdType.class));
   }
 
   @Test
   public void testIntegerType() {
-		assertThat(IBaseIntegerDatatype.class.isAssignableFrom(IntegerType.class)).isTrue();
+		assertTrue(IBaseIntegerDatatype.class.isAssignableFrom(IntegerType.class));
   }
 
   @Test
@@ -125,23 +127,23 @@ public class ModelInheritanceTest {
 
   @Test
   public void testMeta() {
-		assertThat(IBaseMetaType.class.isAssignableFrom(Meta.class)).isTrue();
+		assertTrue(IBaseMetaType.class.isAssignableFrom(Meta.class));
   }
 
   @Test
   public void testNarrative() {
-		assertThat(INarrative.class.isAssignableFrom(Narrative.class)).isTrue();
+		assertTrue(INarrative.class.isAssignableFrom(Narrative.class));
   }
 
   @Test
   public void testParameters() {
-		assertThat(IBaseParameters.class.isAssignableFrom(Parameters.class)).isTrue();
+		assertTrue(IBaseParameters.class.isAssignableFrom(Parameters.class));
   }
 
   @Test
   public void testPrimitiveType() {
-		assertThat(IPrimitiveType.class.isAssignableFrom(PrimitiveType.class)).isTrue();
-		assertThat(IBaseHasExtensions.class.isAssignableFrom(PrimitiveType.class)).isTrue();
+		assertTrue(IPrimitiveType.class.isAssignableFrom(PrimitiveType.class));
+		assertTrue(IBaseHasExtensions.class.isAssignableFrom(PrimitiveType.class));
   }
 
   @Test
@@ -154,28 +156,28 @@ public class ModelInheritanceTest {
 
   @Test
   public void testReference() {
-		assertThat(IBaseReference.class.isAssignableFrom(Reference.class)).isTrue();
+		assertTrue(IBaseReference.class.isAssignableFrom(Reference.class));
   }
 
   @Test
   public void testResource() {
-		assertThat(IAnyResource.class.isAssignableFrom(Resource.class)).isTrue();
+		assertTrue(IAnyResource.class.isAssignableFrom(Resource.class));
   }
 
   @Test
   public void testTiming_TimingRepeatComponent() {
-		assertThat(IBaseDatatypeElement.class.isAssignableFrom(Timing.TimingRepeatComponent.class)).isTrue();
-		assertThat(Timing.TimingRepeatComponent.class.getAnnotation(Block.class)).isNotNull();
+		assertTrue(IBaseDatatypeElement.class.isAssignableFrom(Timing.TimingRepeatComponent.class));
+		assertNotNull(Timing.TimingRepeatComponent.class.getAnnotation(Block.class));
   }
 
   @Test
   public void testType() {
-		assertThat(IBaseDatatype.class.isAssignableFrom(Type.class)).isTrue();
+		assertTrue(IBaseDatatype.class.isAssignableFrom(Type.class));
   }
 
   @Test
   public void testXhtml() {
-		assertThat(IBaseXhtml.class.isAssignableFrom(XhtmlNode.class)).isTrue();
+		assertTrue(IBaseXhtml.class.isAssignableFrom(XhtmlNode.class));
   }
 
 }

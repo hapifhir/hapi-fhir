@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RawParam;
@@ -64,10 +65,10 @@ public class SearchDefaultMethodDstu3Test {
 			ourLog.info(responseContent);
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertThat(ourLastMethod, oneOf("search01", "search02", "search03"));
-			assertThat(ourLastParam1).isNull();
-			assertThat(ourLastParam2).isNull();
-			assertThat(ourLastAdditionalParams).isNull();
+			assertThat(ourLastMethod).isIn("search01", "search02", "search03");
+			assertNull(ourLastParam1);
+			assertNull(ourLastParam2);
+			assertNull(ourLastAdditionalParams);
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -87,8 +88,8 @@ public class SearchDefaultMethodDstu3Test {
 			assertThat(ourLastParam1.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastParam1.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val1");
-			assertThat(ourLastParam2).isNull();
-			assertThat(ourLastAdditionalParams).isNull();
+			assertNull(ourLastParam2);
+			assertNull(ourLastAdditionalParams);
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -113,7 +114,7 @@ public class SearchDefaultMethodDstu3Test {
 			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastParam2.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("val2");
 
-			assertThat(ourLastAdditionalParams).isNull();
+			assertNull(ourLastAdditionalParams);
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());

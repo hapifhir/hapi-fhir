@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.GraphQL;
 import ca.uhn.fhir.rest.annotation.GraphQLQueryBody;
@@ -176,8 +177,8 @@ public class GraphQLR4RawTest {
 
 			assertThat(responseContent).isEqualTo("{\"foo\"}");
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
-			assertThat(ourLastId).isNull();
-			assertThat(ourLastResourceType).isNull();
+			assertNull(ourLastId);
+			assertNull(ourLastResourceType);
 			assertThat(ourLastQuery).isEqualTo("{PatientList(date: \"2022\") {name{family,given}}}");
 
 		} finally {
@@ -201,7 +202,7 @@ public class GraphQLR4RawTest {
 
 			assertThat(responseContent).isEqualTo("{\"foo\"}");
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
-			assertThat(ourLastId).isNull();
+			assertNull(ourLastId);
 			assertThat(ourLastQuery).isEqualTo("{name{family,given}}");
 
 		} finally {

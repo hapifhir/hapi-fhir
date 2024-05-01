@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientInappropriateForServerException;
@@ -58,7 +59,7 @@ public class ExceptionPropertiesTest {
 			ourLog.info("Scanning {}", classInfo.getBeanClassName());
 
 			Class<?> next = Class.forName(classInfo.getBeanClassName());
-			assertThat(next).isNotNull();
+			assertNotNull(next);
 
 			if (next == getClass()) {
 				continue;
@@ -81,7 +82,7 @@ public class ExceptionPropertiesTest {
 			}
 
 			try {
-				assertThat(next.getConstructor(String.class, IBaseOperationOutcome.class)).isNotNull();
+				assertNotNull(next.getConstructor(String.class, IBaseOperationOutcome.class));
 			} catch (NoSuchMethodException e) {
 				fail(classInfo.getBeanClassName() + " has no constructor with params: (String, IBaseOperationOutcome)");
 			}

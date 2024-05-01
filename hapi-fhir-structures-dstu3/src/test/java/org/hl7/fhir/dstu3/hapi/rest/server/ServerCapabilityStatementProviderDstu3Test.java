@@ -1,5 +1,8 @@
 package org.hl7.fhir.dstu3.hapi.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -151,7 +154,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 				found = true;
 			}
 		}
-		assertThat(found).isTrue();
+		assertTrue(found);
 		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -187,9 +190,9 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		CapabilityStatementRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
 		assertThat(res.getType()).isEqualTo("Patient");
 
-		assertThat(res.getConditionalCreate()).isTrue();
+		assertTrue(res.getConditionalCreate());
 		assertThat(res.getConditionalDelete()).isEqualTo(ConditionalDeleteStatus.MULTIPLE);
-		assertThat(res.getConditionalUpdate()).isTrue();
+		assertTrue(res.getConditionalUpdate());
 	}
 
 	@Test
@@ -303,7 +306,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 			}
 		}
 
-		assertThat(found).isTrue();
+		assertTrue(found);
 		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -331,9 +334,9 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		CapabilityStatementRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
 		assertThat(res.getType()).isEqualTo("Patient");
 
-		assertThat(res.getConditionalCreateElement().getValue()).isNull();
-		assertThat(res.getConditionalDeleteElement().getValue()).isNull();
-		assertThat(res.getConditionalUpdateElement().getValue()).isNull();
+		assertNull(res.getConditionalCreateElement().getValue());
+		assertNull(res.getConditionalDeleteElement().getValue());
+		assertNull(res.getConditionalUpdateElement().getValue());
 	}
 
 	/**
@@ -523,7 +526,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 				found = true;
 			}
 		}
-		assertThat(found).isTrue();
+		assertTrue(found);
 		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -559,7 +562,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 				found = true;
 			}
 		}
-		assertThat(found).isTrue();
+		assertTrue(found);
 		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -592,7 +595,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 				found = true;
 			}
 		}
-		assertThat(found).isTrue();
+		assertTrue(found);
 		CapabilityStatement conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -722,7 +725,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		assertThat(operationComponent.getName()).isEqualTo(NamedQueryPlainProvider.QUERY_NAME);
 
 		String operationReference = operationComponent.getDefinition().getReference();
-		assertThat(operationReference).isNotNull();
+		assertNotNull(operationReference);
 
 		OperationDefinition operationDefinition = sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
@@ -764,7 +767,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		CapabilityStatementRestComponent restComponent = conformance.getRest().get(0);
 		CapabilityStatementRestOperationComponent operationComponent = restComponent.getOperation().get(0);
 		String operationReference = operationComponent.getDefinition().getReference();
-		assertThat(operationReference).isNotNull();
+		assertNotNull(operationReference);
 
 		OperationDefinition operationDefinition = sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));

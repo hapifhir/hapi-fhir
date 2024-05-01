@@ -1,5 +1,6 @@
 package ca.uhn.fhir.storage.interceptor.balp;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -211,7 +212,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertThat(outcome.getCreated()).isTrue();
+		assertTrue(outcome.getCreated());
 
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
@@ -241,7 +242,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertThat(outcome.getCreated()).isTrue();
+		assertTrue(outcome.getCreated());
 
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
@@ -271,7 +272,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertThat(outcome.getCreated()).isTrue();
+		assertTrue(outcome.getCreated());
 
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 

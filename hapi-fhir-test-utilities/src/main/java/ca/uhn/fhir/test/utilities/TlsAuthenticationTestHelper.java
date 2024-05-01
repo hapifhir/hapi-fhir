@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.test.utilities;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tls.KeyStoreInfo;
 import ca.uhn.fhir.tls.TlsAuthentication;
@@ -63,7 +64,7 @@ public class TlsAuthenticationTestHelper implements AfterEachCallback {
 	@Override
 	public void afterEach(ExtensionContext theExtensionContext) throws Exception {
 		if(myTempFile != null && myTempFile.exists()){
-			assertThat(myTempFile.delete()).isTrue();
+			assertTrue(myTempFile.delete());
 			myTempFile = null;
 		}
 	}

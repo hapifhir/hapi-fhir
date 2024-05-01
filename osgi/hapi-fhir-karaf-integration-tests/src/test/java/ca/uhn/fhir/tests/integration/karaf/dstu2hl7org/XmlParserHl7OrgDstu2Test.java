@@ -229,9 +229,9 @@ public class XmlParserHl7OrgDstu2Test {
 		// Encode the bundle
 		encoded = xmlParser.encodeResourceToString(b);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<id value=\"1\"/>", "</contained>")));
+		assertThat(encoded).containsSequence(Arrays.asList("<contained>", "<id value=\"1\"/>", "</contained>"));
 		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
-		assertThat(encoded, stringContainsInOrder(Arrays.asList("<entry>", "</entry>")));
+		assertThat(encoded).containsSequence(Arrays.asList("<entry>", "</entry>"));
 		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<entry>", "</entry>", "<entry>"))));
 
 		// Re-parse the bundle
@@ -246,7 +246,7 @@ public class XmlParserHl7OrgDstu2Test {
 		// And re-encode a second time
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>",
+		assertThat(encoded).containsSequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>",
 			"</Organization", "</contained>", "<reference value=\"#1\"/>")));
 		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
 		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
@@ -256,7 +256,7 @@ public class XmlParserHl7OrgDstu2Test {
 		patient.getManagingOrganization().setReference(null);
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>",
+		assertThat(encoded).containsSequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>",
 			"</Organization", "</contained>", "<reference value=\"#1\"/>")));
 		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
 		assertThat(encoded, containsString("<reference value=\"#1\"/>"));
@@ -268,7 +268,7 @@ public class XmlParserHl7OrgDstu2Test {
 		patient.getManagingOrganization().getResource().setId(("#333"));
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded, stringContainsInOrder(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>",
+		assertThat(encoded).containsSequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>",
 			"</Organization", "</contained>", "<reference value=\"#333\"/>")));
 		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("<contained>", "<Org", "<contained>"))));
 
@@ -433,7 +433,7 @@ public class XmlParserHl7OrgDstu2Test {
 			"<id value=\"1\"/>", "<Patient xmlns=\"http://hl7.org/fhir\">", "<id value=\"2\"/>" };
 		// @formatter:off
 
-		assertThat(bundleString, stringContainsInOrder(strings));
+		assertThat(bundleString).containsSequence(strings);
 	}
 
 	@Test
@@ -448,7 +448,7 @@ public class XmlParserHl7OrgDstu2Test {
 		ourLog.info(val);
 
 		// @formatter:off
-		assertThat(val, stringContainsInOrder("<tag>", "<system value=\"scheme\"/>", "<code value=\"term\"/>",
+		assertThat(val).containsSequence("<tag>", "<system value=\"scheme\"/>", "<code value=\"term\"/>",
 			"<display value=\"label\"/>", "</tag>"));
 		// @formatter:on
 
@@ -504,7 +504,7 @@ public class XmlParserHl7OrgDstu2Test {
 		int idx = str.indexOf("reference value=\"#") + "reference value=\"#".length();
 		int idx2 = str.indexOf('"', idx + 1);
 		String id = str.substring(idx, idx2);
-		assertThat(str, stringContainsInOrder("<Specimen xmlns=\"http://hl7.org/fhir\">", "<id value=\"" + id + "\"/>"));
+		assertThat(str).containsSequence("<Specimen xmlns=\"http://hl7.org/fhir\">", "<id value=\"" + id + "\"/>");
 		assertThat(str, IsNot.not(StringContains.containsString("<?xml version='1.0'?>")));
 
 	}
@@ -528,13 +528,13 @@ public class XmlParserHl7OrgDstu2Test {
 		String encoded = parser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 
-		assertThat(encoded, stringContainsInOrder("<Patient", "<text>",
+		assertThat(encoded).containsSequence("<Patient", "<text>",
 			"<div xmlns=\"http://www.w3.org/1999/xhtml\">BARFOO</div>", "<contained>", "<Organization", "</Organization"));
 		assertThat(encoded,
 			not(stringContainsInOrder("<Patient", "<text>", "<contained>", "<Organization", "<text", "</Organization")));
 
-		assertThat(encoded, not(containsString("FOOBAR")));
-		assertThat(encoded, (containsString("BARFOO")));
+		assertThat(encoded).doesNotContain("FOOBAR");
+		assertThat(encoded).contains("BARFOO");
 
 	}
 
@@ -588,7 +588,7 @@ public class XmlParserHl7OrgDstu2Test {
 		p.getMeta().addTag();
 
 		String encoded = ourCtx.newXmlParser().encodeResourceToString(p);
-		assertThat(encoded, not(containsString("tag")));
+		assertThat(encoded).doesNotContain("tag");
 
 		// With tag
 
@@ -596,7 +596,7 @@ public class XmlParserHl7OrgDstu2Test {
 		p.getMeta().addTag().setSystem("sys").setCode("code");
 
 		encoded = ourCtx.newXmlParser().encodeResourceToString(p);
-		assertThat(encoded, (containsString("tag")));
+		assertThat(encoded).contains("tag");
 	}
 
 	@Test
@@ -640,7 +640,7 @@ public class XmlParserHl7OrgDstu2Test {
 		ourLog.info(output);
 
 		// @formatter:off
-		assertThat(output, stringContainsInOrder("<id value=\"1\"/>", "<meta>", "<profile value=\"http://profile\"/>",
+		assertThat(output).containsSequence("<id value=\"1\"/>", "<meta>", "<profile value=\"http://profile\"/>",
 			"<extension url=\"http://exturl\">", "<valueString value=\"ext_url_value\"/>", "<text value=\"CODE\"/>"));
 		assertThat(output, not(stringContainsInOrder("<url value=\"http://exturl\"/>")));
 		// @formatter:on
@@ -704,7 +704,7 @@ public class XmlParserHl7OrgDstu2Test {
 		ourLog.info(encoded);
 
 		//@formatter:off
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSequence(
 			"<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<contained>",
 			"<Condition xmlns=\"http://hl7.org/fhir\">",
@@ -774,10 +774,10 @@ public class XmlParserHl7OrgDstu2Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded, containsString("<Patient"));
-		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
+		assertThat(encoded).containsSequence("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
 			"<code value=\"" + Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
-		assertThat(encoded, not(containsString("text")));
-		assertThat(encoded, not(containsString("THE DIV")));
+		assertThat(encoded).doesNotContain("text");
+		assertThat(encoded).doesNotContain("THE DIV");
 		assertThat(encoded, containsString("family"));
 		assertThat(encoded, containsString("maritalStatus"));
 	}
@@ -810,14 +810,14 @@ public class XmlParserHl7OrgDstu2Test {
 		// Encode the buntdle
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(encoded);
-		assertThat(encoded, not(containsString("<contained>")));
-		assertThat(encoded, stringContainsInOrder("<Organization", "<id value=\"65546\"/>", "</Organization>"));
+		assertThat(encoded).doesNotContain("<contained>");
+		assertThat(encoded).containsSequence("<Organization", "<id value=\"65546\"/>", "</Organization>");
 		assertThat(encoded, containsString("<reference value=\"Organization/65546\"/>"));
-		assertThat(encoded, stringContainsInOrder("<Patient", "<id value=\"1333\"/>", "</Patient>"));
+		assertThat(encoded).containsSequence("<Patient", "<id value=\"1333\"/>", "</Patient>");
 
 		encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded, not(containsString("<contained>")));
+		assertThat(encoded).doesNotContain("<contained>");
 		assertThat(encoded, containsString("<reference value=\"Organization/65546\"/>"));
 
 	}
@@ -893,11 +893,11 @@ public class XmlParserHl7OrgDstu2Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded, containsString("<Patient"));
-		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
+		assertThat(encoded).containsSequence("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
 			"<code value=\"" + Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
-		assertThat(encoded, not(containsString("THE DIV")));
+		assertThat(encoded).doesNotContain("THE DIV");
 		assertThat(encoded, containsString("family"));
-		assertThat(encoded, not(containsString("maritalStatus")));
+		assertThat(encoded).doesNotContain("maritalStatus");
 	}
 
 	@Test
@@ -914,12 +914,12 @@ public class XmlParserHl7OrgDstu2Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded, containsString("<Patient"));
-		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"foo\"/>", "<code value=\"bar\"/>", "</tag>"));
-		assertThat(encoded, stringContainsInOrder("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
+		assertThat(encoded).containsSequence("<tag>", "<system value=\"foo\"/>", "<code value=\"bar\"/>", "</tag>");
+		assertThat(encoded).containsSequence("<tag>", "<system value=\"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
 			"<code value=\"" + Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>"));
-		assertThat(encoded, not(containsString("THE DIV")));
+		assertThat(encoded).doesNotContain("THE DIV");
 		assertThat(encoded, containsString("family"));
-		assertThat(encoded, not(containsString("maritalStatus")));
+		assertThat(encoded).doesNotContain("maritalStatus");
 	}
 
 	@Test
@@ -1245,7 +1245,7 @@ public class XmlParserHl7OrgDstu2Test {
 
 		assertThat(str,
 			stringContainsInOrder(Arrays.asList("<text value=\"B\"/>", "<text value=\"C\"/>", "<text value=\"A\"/>")));
-		assertThat(str, stringContainsInOrder(Arrays.asList("<contained>", "</contained>", "<contained>", "</contained>")));
+		assertThat(str).containsSequence(Arrays.asList("<contained>", "</contained>", "<contained>", "</contained>"));
 
 		org.hl7.fhir.dstu2.model.Observation obs = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Observation.class, str);
 		assertEquals("A", obs.getCode().getText());

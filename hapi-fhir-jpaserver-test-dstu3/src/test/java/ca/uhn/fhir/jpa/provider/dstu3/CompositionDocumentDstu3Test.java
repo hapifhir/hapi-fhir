@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -119,7 +120,7 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 			});
 
 		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.DOCUMENT);
-		assertThat(bundle.getLinkOrCreate("next").getUrl()).isNull();
+		assertNull(bundle.getLinkOrCreate("next").getUrl());
 
 		Set<String> actual = new HashSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {

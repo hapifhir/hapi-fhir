@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR5Test;
@@ -349,7 +352,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		idElement = obs2.getIdElement();
 		assertThat(idElement.getIdPart()).isEqualTo(sentObservation2.getIdElement().getIdPart());
 		// Now VersionId is stripped
-		assertThat(idElement.getVersionIdPart()).isNull();
+		assertNull(idElement.getVersionIdPart());
 	}
 
 	@Test
@@ -366,7 +369,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		ourLog.info("** About to send observation");
 		Observation sentObservation = sendObservation(OBS_CODE, "SNOMED-CT", false);
 		assertThat(sentObservation.getIdElement().getVersionIdPart()).isEqualTo("1");
-		assertThat(sentObservation.getNoteFirstRep().getText()).isNull();
+		assertNull(sentObservation.getNoteFirstRep().getText());
 
 		sentObservation.getNoteFirstRep().setText("changed");
 
@@ -375,7 +378,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		assertThat(sentObservation.getNoteFirstRep().getText()).isEqualTo("changed");
 
 		// Wait for our two delivery channel threads to be paused
-		assertThat(countDownLatch.await(5L, TimeUnit.SECONDS)).isTrue();
+		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
 		mySubscriptionDeliveredLatch.setExpectedCount(2);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
@@ -393,7 +396,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 			.orElseThrow();
 
 		assertThat(observation1.getIdElement().getVersionIdPart()).isEqualTo("1");
-		assertThat(observation1.getNoteFirstRep().getText()).isNull();
+		assertNull(observation1.getNoteFirstRep().getText());
 		assertThat(observation2.getIdElement().getVersionIdPart()).isEqualTo("2");
 		assertThat(observation2.getNoteFirstRep().getText()).isEqualTo("changed");
 	}
@@ -415,7 +418,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		ourLog.info("** About to send observation");
 		Observation sentObservation = sendObservation(OBS_CODE, "SNOMED-CT", false);
 		assertThat(sentObservation.getIdElement().getVersionIdPart()).isEqualTo("1");
-		assertThat(sentObservation.getNoteFirstRep().getText()).isNull();
+		assertNull(sentObservation.getNoteFirstRep().getText());
 
 		sentObservation.getNoteFirstRep().setText("changed");
 		DaoMethodOutcome methodOutcome = updateResource(sentObservation, false);
@@ -423,14 +426,14 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 		assertThat(sentObservation.getNoteFirstRep().getText()).isEqualTo("changed");
 
 		// Wait for our two delivery channel threads to be paused
-		assertThat(countDownLatch.await(5L, TimeUnit.SECONDS)).isTrue();
+		assertTrue(countDownLatch.await(5L, TimeUnit.SECONDS));
 		// Open the floodgates!
 		mySubscriptionDeliveredLatch.setExpectedCount(2);
 		myStoppableSubscriptionDeliveringRestHookSubscriber.unPause();
 		mySubscriptionDeliveredLatch.awaitExpected();
 
-		assertThat(getReceivedObservations().stream().allMatch(t -> "2".equals(t.getIdElement().getVersionIdPart()))).isTrue();
-		assertThat(getReceivedObservations().stream().anyMatch(t -> "changed".equals(t.getNoteFirstRep().getText()))).isTrue();
+		assertTrue(getReceivedObservations().stream().allMatch(t -> "2".equals(t.getIdElement().getVersionIdPart())));
+		assertTrue(getReceivedObservations().stream().anyMatch(t -> "changed".equals(t.getNoteFirstRep().getText())));
 	}
 
 	@Test
@@ -457,7 +460,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		// Update the OBS_CODE2 subscription to subscribe to OBS_CODE
 		Subscription subscriptionTemp = myClient.read().resource(Subscription.class).withId(subscription2.getId()).execute();
-		assertThat(subscriptionTemp).isNotNull();
+		assertNotNull(subscriptionTemp);
 		subscriptionTemp.setTopic(subscription1.getTopic());
 		ourLog.info(">>>4 Update sub");
 		updateResource(subscriptionTemp, false);
@@ -605,7 +608,7 @@ public class RestHookTestR5IT extends BaseSubscriptionsR5Test {
 
 		ourLog.info("** About to update subscription topic");
 		SubscriptionTopic subscriptionTopicTemp = myClient.read(SubscriptionTopic.class, subscriptionTopic.getId());
-		assertThat(subscriptionTopicTemp).isNotNull();
+		assertNotNull(subscriptionTopicTemp);
 		setSubscriptionTopicCriteria(subscriptionTopicTemp, "Observation?code=SNOMED-CT|" + OBS_CODE);
 		updateResource(subscriptionTopicTemp, false);
 

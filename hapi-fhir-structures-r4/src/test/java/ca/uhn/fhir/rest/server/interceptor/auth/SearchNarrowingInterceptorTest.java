@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
@@ -120,11 +121,11 @@ public class SearchNarrowingInterceptorTest {
 			.execute();
 
 		assertThat(ourLastHitMethod).isEqualTo("Patient.search");
-		assertThat(ourLastCodeParam).isNull();
-		assertThat(ourLastSubjectParam).isNull();
-		assertThat(ourLastPerformerParam).isNull();
-		assertThat(ourLastPatientParam).isNull();
-		assertThat(ourLastIdParam).isNull();
+		assertNull(ourLastCodeParam);
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertNull(ourLastPatientParam);
+		assertNull(ourLastIdParam);
 	}
 
 	@Test
@@ -142,11 +143,11 @@ public class SearchNarrowingInterceptorTest {
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).size()).isEqualTo(1);
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getModifier()).isEqualTo(TokenParamModifier.NOT_IN);
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("http://myvs");
-		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isNull();
-		assertThat(ourLastSubjectParam).isNull();
-		assertThat(ourLastPerformerParam).isNull();
-		assertThat(ourLastPatientParam).isNull();
-		assertThat(ourLastIdParam).isNull();
+		assertNull(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertNull(ourLastPatientParam);
+		assertNull(ourLastIdParam);
 	}
 
 	@Test
@@ -164,11 +165,11 @@ public class SearchNarrowingInterceptorTest {
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).size()).isEqualTo(1);
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getModifier()).isEqualTo(TokenParamModifier.IN);
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("http://myvs");
-		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isNull();
-		assertThat(ourLastSubjectParam).isNull();
-		assertThat(ourLastPerformerParam).isNull();
-		assertThat(ourLastPatientParam).isNull();
-		assertThat(ourLastIdParam).isNull();
+		assertNull(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertNull(ourLastPatientParam);
+		assertNull(ourLastIdParam);
 	}
 
 	@Test
@@ -188,11 +189,11 @@ public class SearchNarrowingInterceptorTest {
 			.execute();
 
 		assertThat(ourLastHitMethod).isEqualTo("Observation.search");
-		assertThat(ourLastCodeParam).isNull();
-		assertThat(ourLastSubjectParam).isNull();
-		assertThat(ourLastPerformerParam).isNull();
-		assertThat(ourLastPatientParam).isNull();
-		assertThat(ourLastIdParam).isNull();
+		assertNull(ourLastCodeParam);
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertNull(ourLastPatientParam);
+		assertNull(ourLastIdParam);
 	}
 
 	@Test
@@ -238,15 +239,15 @@ public class SearchNarrowingInterceptorTest {
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).size()).isEqualTo(1);
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getModifier()).isEqualTo(TokenParamModifier.IN);
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("http://othervs");
-		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isNull();
+		assertNull(ourLastCodeParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(1).size()).isEqualTo(1);
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getModifier()).isEqualTo(TokenParamModifier.IN);
 		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("http://myvs");
-		assertThat(ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getSystem()).isNull();
-		assertThat(ourLastSubjectParam).isNull();
-		assertThat(ourLastPerformerParam).isNull();
-		assertThat(ourLastPatientParam).isNull();
-		assertThat(ourLastIdParam).isNull();
+		assertNull(ourLastCodeParam.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getSystem());
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertNull(ourLastPatientParam);
+		assertNull(ourLastIdParam);
 	}
 
 	@Test
@@ -260,7 +261,7 @@ public class SearchNarrowingInterceptorTest {
 			.execute();
 
 		assertThat(ourLastHitMethod).isEqualTo("Observation.search");
-		assertThat(ourLastCodeParam).isNull();
+		assertNull(ourLastCodeParam);
 	}
 
 	@Test
@@ -274,10 +275,10 @@ public class SearchNarrowingInterceptorTest {
 			.execute();
 
 		assertThat(ourLastHitMethod).isEqualTo("Observation.search");
-		assertThat(ourLastIdParam).isNull();
-		assertThat(ourLastCodeParam).isNull();
-		assertThat(ourLastSubjectParam).isNull();
-		assertThat(ourLastPerformerParam).isNull();
+		assertNull(ourLastIdParam);
+		assertNull(ourLastCodeParam);
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
 		assertThat(toStrings(ourLastPatientParam)).containsExactly("Patient/123,Patient/456");
 	}
 
@@ -336,7 +337,7 @@ public class SearchNarrowingInterceptorTest {
 			.execute();
 
 		assertThat(ourLastHitMethod).isEqualTo("Patient.search");
-		assertThat(ourLastNameParam).isNull();
+		assertNull(ourLastNameParam);
 		assertThat(toStrings(ourLastIdParam)).containsExactly("Patient/123,Patient/456");
 	}
 
@@ -352,7 +353,7 @@ public class SearchNarrowingInterceptorTest {
 			.execute();
 
 		assertThat(ourLastHitMethod).isEqualTo("Patient.search");
-		assertThat(ourLastNameParam).isNull();
+		assertNull(ourLastNameParam);
 		assertThat(toStrings(ourLastIdParam)).containsExactly("Patient/123");
 	}
 
@@ -369,10 +370,10 @@ public class SearchNarrowingInterceptorTest {
 			.execute();
 
 		assertThat(ourLastHitMethod).isEqualTo("Observation.search");
-		assertThat(ourLastIdParam).isNull();
-		assertThat(ourLastCodeParam).isNull();
-		assertThat(ourLastSubjectParam).isNull();
-		assertThat(ourLastPerformerParam).isNull();
+		assertNull(ourLastIdParam);
+		assertNull(ourLastCodeParam);
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
 		assertThat(toStrings(ourLastPatientParam)).containsExactly("Patient/456", "Patient/456");
 	}
 
@@ -389,10 +390,10 @@ public class SearchNarrowingInterceptorTest {
 			.execute();
 
 		assertThat(ourLastHitMethod).isEqualTo("Observation.search");
-		assertThat(ourLastIdParam).isNull();
-		assertThat(ourLastCodeParam).isNull();
-		assertThat(ourLastSubjectParam).isNull();
-		assertThat(ourLastPerformerParam).isNull();
+		assertNull(ourLastIdParam);
+		assertNull(ourLastCodeParam);
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
 		assertThat(toStrings(ourLastPatientParam)).containsExactly("456", "456");
 	}
 
@@ -409,11 +410,11 @@ public class SearchNarrowingInterceptorTest {
 			.execute();
 
 		assertThat(ourLastHitMethod).isEqualTo("Observation.search");
-		assertThat(ourLastIdParam).isNull();
-		assertThat(ourLastCodeParam).isNull();
+		assertNull(ourLastIdParam);
+		assertNull(ourLastCodeParam);
 		assertThat(toStrings(ourLastSubjectParam)).containsExactly("Patient/456", "Patient/456");
-		assertThat(ourLastPerformerParam).isNull();
-		assertThat(ourLastPatientParam).isNull();
+		assertNull(ourLastPerformerParam);
+		assertNull(ourLastPatientParam);
 	}
 
 	@Test
@@ -434,7 +435,7 @@ public class SearchNarrowingInterceptorTest {
 			assertThat(e.getStatusCode()).isEqualTo(Constants.STATUS_HTTP_403_FORBIDDEN);
 		}
 
-		assertThat(ourLastHitMethod).isNull();
+		assertNull(ourLastHitMethod);
 	}
 
 	@Test
@@ -455,7 +456,7 @@ public class SearchNarrowingInterceptorTest {
 			assertThat(e.getStatusCode()).isEqualTo(Constants.STATUS_HTTP_403_FORBIDDEN);
 		}
 
-		assertThat(ourLastHitMethod).isNull();
+		assertNull(ourLastHitMethod);
 	}
 
 	@Test
@@ -475,7 +476,7 @@ public class SearchNarrowingInterceptorTest {
 			assertThat(e.getStatusCode()).isEqualTo(Constants.STATUS_HTTP_403_FORBIDDEN);
 		}
 
-		assertThat(ourLastHitMethod).isNull();
+		assertNull(ourLastHitMethod);
 	}
 
 	@Test
@@ -495,7 +496,7 @@ public class SearchNarrowingInterceptorTest {
 			assertThat(e.getStatusCode()).isEqualTo(Constants.STATUS_HTTP_403_FORBIDDEN);
 		}
 
-		assertThat(ourLastHitMethod).isNull();
+		assertNull(ourLastHitMethod);
 	}
 
 	/**
@@ -512,11 +513,11 @@ public class SearchNarrowingInterceptorTest {
 			.execute();
 
 		assertThat(ourLastHitMethod).isEqualTo("Observation.search");
-		assertThat(ourLastIdParam).isNull();
-		assertThat(ourLastCodeParam).isNull();
-		assertThat(ourLastSubjectParam).isNull();
-		assertThat(ourLastPerformerParam).isNull();
-		assertThat(ourLastPatientParam).isNull();
+		assertNull(ourLastIdParam);
+		assertNull(ourLastCodeParam);
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertNull(ourLastPatientParam);
 	}
 
 	@Test
@@ -530,10 +531,10 @@ public class SearchNarrowingInterceptorTest {
 			.execute();
 
 		assertThat(ourLastHitMethod).isEqualTo("Patient.search");
-		assertThat(ourLastCodeParam).isNull();
-		assertThat(ourLastSubjectParam).isNull();
-		assertThat(ourLastPerformerParam).isNull();
-		assertThat(ourLastPatientParam).isNull();
+		assertNull(ourLastCodeParam);
+		assertNull(ourLastSubjectParam);
+		assertNull(ourLastPerformerParam);
+		assertNull(ourLastPatientParam);
 		assertThat(toStrings(ourLastIdParam)).containsExactly("Patient/123,Patient/456");
 	}
 

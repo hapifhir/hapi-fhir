@@ -1,5 +1,7 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -11,13 +13,13 @@ public class UrlPathTokenizerTest {
 	@Test
 	void urlPathTokenizer_withValidPath_tokenizesCorrectly() {
 		UrlPathTokenizer tokenizer = new UrlPathTokenizer("/root/subdir/subsubdir/file.html");
-		assertThat(tokenizer.hasMoreTokens()).isTrue();
+		assertTrue(tokenizer.hasMoreTokens());
 		assertThat(tokenizer.countTokens()).isEqualTo(4);
 		assertThat(tokenizer.nextTokenUnescapedAndSanitized()).isEqualTo("root");
 		assertThat(tokenizer.nextTokenUnescapedAndSanitized()).isEqualTo("subdir");
 		assertThat(tokenizer.nextTokenUnescapedAndSanitized()).isEqualTo("subsubdir");
 		assertThat(tokenizer.nextTokenUnescapedAndSanitized()).isEqualTo("file.html");
-		assertThat(tokenizer.hasMoreTokens()).isFalse();
+		assertFalse(tokenizer.hasMoreTokens());
 	}
 
 	@ParameterizedTest
@@ -40,18 +42,18 @@ public class UrlPathTokenizerTest {
 	@Test
 	void urlPathTokenizer_withSinglePathElement_returnsSingleToken() {
 		UrlPathTokenizer tokenizer = new UrlPathTokenizer("hello");
-		assertThat(tokenizer.hasMoreTokens()).isTrue();
+		assertTrue(tokenizer.hasMoreTokens());
 		assertThat(tokenizer.nextTokenUnescapedAndSanitized()).isEqualTo("hello");
 	}
 
 	@Test
 	void urlPathTokenizer_withEscapedPath_shouldUnescape() {
 		UrlPathTokenizer tokenizer = new UrlPathTokenizer("Homer%20Simpson");
-		assertThat(tokenizer.hasMoreTokens()).isTrue();
+		assertTrue(tokenizer.hasMoreTokens());
 		assertThat(tokenizer.nextTokenUnescapedAndSanitized()).isEqualTo("Homer Simpson");
 
 		tokenizer = new UrlPathTokenizer("hack%2Fslash");
-		assertThat(tokenizer.hasMoreTokens()).isTrue();
+		assertTrue(tokenizer.hasMoreTokens());
 		assertThat(tokenizer.nextTokenUnescapedAndSanitized()).isEqualTo("hack/slash");
 	}
 
@@ -66,11 +68,11 @@ public class UrlPathTokenizerTest {
 	@Test
 	void urlPathTokenizer_withSuspiciousCharacters_sanitizesCorrectly() {
 		UrlPathTokenizer tokenizer = new UrlPathTokenizer("<DROP TABLE USERS>");
-		assertThat(tokenizer.hasMoreTokens()).isTrue();
+		assertTrue(tokenizer.hasMoreTokens());
 		assertThat(tokenizer.nextTokenUnescapedAndSanitized()).isEqualTo("&lt;DROP TABLE USERS&gt;");
 
 		tokenizer = new UrlPathTokenizer("'\n\r\"");
-		assertThat(tokenizer.hasMoreTokens()).isTrue();
+		assertTrue(tokenizer.hasMoreTokens());
 		assertThat(tokenizer.nextTokenUnescapedAndSanitized()).isEqualTo("&apos;&#10;&#13;&quot;");
 	}
 }

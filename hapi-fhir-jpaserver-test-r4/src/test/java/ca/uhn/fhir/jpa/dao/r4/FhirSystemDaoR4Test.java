@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -329,7 +332,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		Map<String, Long> counts = mySystemDao.getResourceCounts();
 		assertThat(counts).containsEntry("Patient", Long.valueOf(1L));
 		assertThat(counts).containsEntry("Observation", Long.valueOf(1L));
-		assertThat(counts.get("Organization")).isNull();
+		assertNull(counts.get("Organization"));
 
 	}
 
@@ -780,7 +783,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		meta = mySystemDao.metaGetOperation(mySrd);
 		published = meta.getTag();
 		assertThat(published).hasSize(2);
-		assertThat(published.get(0).getSystem()).isNull();
+		assertNull(published.get(0).getSystem());
 		assertThat(published.get(0).getCode()).isEqualTo("Dog");
 		assertThat(published.get(0).getDisplay()).isEqualTo("Puppies");
 		assertThat(published.get(1).getSystem()).isEqualTo("http://foo");
@@ -2054,7 +2057,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		String patientId = respEntry.getResponse().getLocation();
 		assertThat(patientId).doesNotEndWith("Patient/" + methodName + "/_history/1");
 		assertThat(patientId, (endsWith("/_history/1")));
-		assertThat(patientId, (containsString("Patient/")));
+		assertThat(patientId).contains("Patient/");
 		assertThat(respEntry.getResponse().getEtag()).isEqualTo("1");
 
 		respEntry = resp.getEntry().get(1);
@@ -2517,8 +2520,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		IBundleProvider history = myPatientDao.history(id, null, null, null, mySrd);
 		assertThat(history.size().intValue()).isEqualTo(2);
 
-		assertThat(history.getResources(0, 1).get(0).isDeleted()).isTrue();
-		assertThat(history.getResources(1, 2).get(0).isDeleted()).isFalse();
+		assertTrue(history.getResources(0, 1).get(0).isDeleted());
+		assertFalse(history.getResources(1, 2).get(0).isDeleted());
 	}
 
 	@Test
@@ -2615,8 +2618,8 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		assertThat(list.getEntry()).hasSize(6);
 
 		Patient p = find(list, Patient.class, 0);
-		assertThat(p.getIdElement().isIdPartValidLong()).isTrue();
-		assertThat(p.getGeneralPractitionerFirstRep().getReferenceElement().isIdPartValidLong()).isTrue();
+		assertTrue(p.getIdElement().isIdPartValidLong());
+		assertTrue(p.getGeneralPractitionerFirstRep().getReferenceElement().isIdPartValidLong());
 	}
 
 	@Test
@@ -3114,20 +3117,20 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		BundleEntryComponent nextEntry;
 
 		nextEntry = resp.getEntry().get(0);
-		assertThat(nextEntry.getResource()).isNotNull();
+		assertNotNull(nextEntry.getResource());
 		assertThat(nextEntry.getResource().getClass()).isEqualTo(Patient.class);
 		assertThat(nextEntry.getResource().getIdElement().toUnqualified()).isEqualTo(idv2.toUnqualified());
 		assertThat(nextEntry.getResponse().getStatus()).isEqualTo("200 OK");
 
 		nextEntry = resp.getEntry().get(1);
-		assertThat(nextEntry.getResource()).isNotNull();
+		assertNotNull(nextEntry.getResource());
 		assertThat(nextEntry.getResource().getClass()).isEqualTo(Patient.class);
 		assertThat(nextEntry.getResource().getIdElement().toUnqualified()).isEqualTo(idv2.toUnqualified());
 		assertThat(nextEntry.getResponse().getStatus()).isEqualTo("200 OK");
 
 		nextEntry = resp.getEntry().get(2);
 		assertThat(nextEntry.getResponse().getStatus()).isEqualTo("304 Not Modified");
-		assertThat(nextEntry.getResource()).isNull();
+		assertNull(nextEntry.getResource());
 	}
 
 	@Test
@@ -4112,7 +4115,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		// If there are 100 or less, then TransactionProcessor.preFetchConditionalUrls() will work off the same Long instance for the Organization JpaId
 		// and the Long == Long equality comparison will work
 		final InputStream resourceAsStream = getClass().getResourceAsStream("/bundle-refers-to-same-organization.json");
-		assertThat(resourceAsStream).isNotNull();
+		assertNotNull(resourceAsStream);
 		final String input = IOUtils.toString(resourceAsStream, StandardCharsets.UTF_8);
 		final Bundle bundle = myFhirContext.newJsonParser().parseResource(Bundle.class, input);
 
@@ -4253,7 +4256,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		app2 = myAppointmentDao.read(id2, mySrd);
 		assertThat(app2.getParticipant().get(0).getActor().getDisplay()).isEqualTo("NO REF");
-		assertThat(app2.getParticipant().get(0).getActor().getReference()).isNull();
+		assertNull(app2.getParticipant().get(0).getActor().getReference());
 		assertThat(app2.getParticipant().get(1).getActor().getDisplay()).isEqualTo("YES REF");
 		assertThat(app2.getParticipant().get(1).getActor().getReference()).isEqualTo(id0.toUnqualifiedVersionless().getValue());
 	}
@@ -4435,7 +4438,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		final List<IBaseResource> allResources = organizationSearch.getAllResources();
 		assertThat(allResources).hasSize(1);
 		assertThat(allResources.get(0).getIdElement().getResourceType()).isEqualTo(ResourceType.Organization.name());
-		assertThat(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString()).startsWith(ResourceType.Organization);
+		assertThat(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString()).startsWith(ResourceType.Organization.name());
 	}
 
 	@Test
@@ -4465,7 +4468,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		final List<IBaseResource> allResources = organizationSearch.getAllResources();
 		assertThat(allResources).hasSize(1);
 		assertThat(allResources.get(0).getIdElement().getResourceType()).isEqualTo(ResourceType.Organization.name());
-		assertThat(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString()).startsWith(ResourceType.Organization);
+		assertThat(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString()).startsWith(ResourceType.Organization.name());
 	}
 
 	@Test
@@ -4495,7 +4498,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		final List<IBaseResource> allResources = organizationSearch.getAllResources();
 		assertThat(allResources).hasSize(1);
 		assertThat(allResources.get(0).getIdElement().getResourceType()).isEqualTo(ResourceType.Organization.name());
-		assertThat(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString()).startsWith(ResourceType.Organization);
+		assertThat(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString()).startsWith(ResourceType.Organization.name());
 	}
 
 	@Test
@@ -4526,7 +4529,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		final List<IBaseResource> allResources = organizationSearch.getAllResources();
 		assertThat(allResources).hasSize(1);
 		assertThat(allResources.get(0).getIdElement().getResourceType()).isEqualTo(ResourceType.Organization.name());
-		assertThat(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString()).startsWith(ResourceType.Organization);
+		assertThat(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString()).startsWith(ResourceType.Organization.name());
 	}
 
 	@Test
@@ -4561,7 +4564,7 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		final List<IBaseResource> allResources = patientSearch.getAllResources();
 		assertThat(allResources).hasSize(1);
 		assertThat(allResources.get(0).getIdElement().getResourceType()).isEqualTo(ResourceType.Patient.name());
-		assertThat(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString()).startsWith(ResourceType.Patient);
+		assertThat(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString()).startsWith(ResourceType.Patient.name());
 	}
 
 	/**
@@ -4671,10 +4674,10 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 		IdType medId2 = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
 		IdType medOrderId2 = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 
-		assertThat(medId1.isIdPartValidLong()).isTrue();
-		assertThat(medId2.isIdPartValidLong()).isTrue();
-		assertThat(medOrderId1.isIdPartValidLong()).isTrue();
-		assertThat(medOrderId2.isIdPartValidLong()).isTrue();
+		assertTrue(medId1.isIdPartValidLong());
+		assertTrue(medId2.isIdPartValidLong());
+		assertTrue(medOrderId1.isIdPartValidLong());
+		assertTrue(medOrderId2.isIdPartValidLong());
 
 		assertThat(medId2).isEqualTo(medId1);
 		assertThat(medOrderId2).isNotEqualTo(medOrderId1);

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -341,7 +342,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		Observation obs = new Observation();
 		obs.addIdentifier().setValue("20210427133226.444+0800");
 		DaoMethodOutcome outcome = myObservationDao.create(obs, "identifier=20210427133226.444%2B0800", new SystemRequestDetails());
-		assertThat(outcome.getCreated()).isTrue();
+		assertTrue(outcome.getCreated());
 
 		logAllTokenIndexes();
 		myCaptureQueriesListener.clear();
@@ -349,7 +350,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		obs.addIdentifier().setValue("20210427133226.444+0800");
 		outcome = myObservationDao.create(obs, "identifier=20210427133226.444%2B0800", new SystemRequestDetails());
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(outcome.getCreated()).isFalse();
+		assertFalse(outcome.getCreated());
 	}
 
 	/**
@@ -406,9 +407,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		Long expectedResId = outcome.getId().getIdPartAsLong();
 		String expectedNormalizedMatchUrl = obs.fhirType() + "?" + matchUrl;
 
-		assertThat(outcome.getCreated()).isTrue();
+		assertTrue(outcome.getCreated());
 		ResourceSearchUrlEntity searchUrlEntity = myResourceSearchUrlDao.findAll().get(0);
-		assertThat(searchUrlEntity).isNotNull();
+		assertNotNull(searchUrlEntity);
 		assertThat(searchUrlEntity.getResourcePid()).isEqualTo(expectedResId);
 		assertThat(searchUrlEntity.getCreatedTime(), DateMatchers.within(1, SECONDS, new Date()));
 		assertThat(searchUrlEntity.getSearchUrl()).isEqualTo(expectedNormalizedMatchUrl);
@@ -505,7 +506,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		SampledData sampledData = new SampledData();
 		sampledData.setData("2 3 4 5 6");
 		o.setValue(sampledData);
-		assertThat(myObservationDao.create(o).getCreated()).isTrue();
+		assertTrue(myObservationDao.create(o).getCreated());
 	}
 
 	@Test
@@ -537,7 +538,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		// Read it back
 		p = myPatientDao.read(new IdType("Patient/" + firstClientAssignedId));
-		assertThat(p.getActive()).isTrue();
+		assertTrue(p.getActive());
 
 		// Now create a client assigned numeric ID
 		p = new Patient();
@@ -590,7 +591,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		// Read it back
 		p = myPatientDao.read(id0.toUnqualifiedVersionless());
-		assertThat(p.getActive()).isTrue();
+		assertTrue(p.getActive());
 
 		// Pick an ID that was already used as an internal PID
 		Long newId = runInTransaction(() -> myResourceTableDao.findIdsOfResourcesWithinUpdatedRangeOrderedFromNewest(
@@ -643,7 +644,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		StructureDefinition sd = new StructureDefinition();
 		sd.setUrl("http://foo.com");
 		DaoMethodOutcome result = myStructureDefinitionDao.create(sd);
-		assertThat(result.getCreated()).isTrue();
+		assertTrue(result.getCreated());
 		StructureDefinition readSd = myStructureDefinitionDao.read(result.getId());
 		assertThat(readSd.getUrl()).isEqualTo("http://foo.com");
 
@@ -770,7 +771,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		ourLog.debug("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
-		assertThat(myObservationDao.create(obs).getCreated()).isTrue();
+		assertTrue(myObservationDao.create(obs).getCreated());
 
 		// Same value should be placed in both quantity tables
 		runInTransaction(() -> {
@@ -811,7 +812,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		ourLog.debug("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		myCaptureQueriesListener.clear();
-		assertThat(myObservationDao.create(obs).getCreated()).isTrue();
+		assertTrue(myObservationDao.create(obs).getCreated());
 		myCaptureQueriesListener.logInsertQueries();
 
 		// Original value should be in Quantity index, normalized should be in normalized table
@@ -887,7 +888,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		ourLog.debug("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
-		assertThat(myObservationDao.create(obs).getCreated()).isTrue();
+		assertTrue(myObservationDao.create(obs).getCreated());
 
 		// Original value should be in Quantity index, normalized should be in normalized table
 		runInTransaction(() -> {
@@ -939,7 +940,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		ourLog.debug("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
-		assertThat(myObservationDao.create(obs).getCreated()).isTrue();
+		assertTrue(myObservationDao.create(obs).getCreated());
 
 		// Original value should be in Quantity index, normalized should be in normalized table
 		runInTransaction(() -> {
@@ -979,7 +980,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 
 		ourLog.debug("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
-		assertThat(myObservationDao.create(obs).getCreated()).isTrue();
+		assertTrue(myObservationDao.create(obs).getCreated());
 
 		// The Quantity can't be normalized, it should be stored in the non normalized quantity table only
 		runInTransaction(() -> {
@@ -1027,7 +1028,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		ourLog.debug("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		myCaptureQueriesListener.clear();
-		assertThat(myObservationDao.create(obs).getCreated()).isTrue();
+		assertTrue(myObservationDao.create(obs).getCreated());
 		myCaptureQueriesListener.logInsertQueries();
 
 		// Original value should be in Quantity index, normalized should be in normalized table
@@ -1160,7 +1161,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		ourLog.debug("Observation1: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
 		myCaptureQueriesListener.clear();
-		assertThat(myObservationDao.create(obs).getCreated()).isTrue();
+		assertTrue(myObservationDao.create(obs).getCreated());
 		myCaptureQueriesListener.logInsertQueries();
 
 		// Original value should be in Quantity index, no normalized should be in normalized table

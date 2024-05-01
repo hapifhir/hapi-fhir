@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailDetails;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.rest.server.mail.IMailSvc;
@@ -45,7 +46,7 @@ public class EmailSenderImplTest {
 		details.setBodyTemplate("foo");
 		fixture.send(details);
 
-		assertThat(ourGreenMail.waitForIncomingEmail(10000, 1)).isTrue();
+		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		MimeMessage[] messages = ourGreenMail.getReceivedMessages();
 		assertThat(messages.length).isEqualTo(2);

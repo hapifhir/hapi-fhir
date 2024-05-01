@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -78,11 +80,11 @@ public class UpdateConditionalHl7OrgDstu2Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(status.getFirstHeader("location")).isNull();
+		assertNull(status.getFirstHeader("location"));
 		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
-		assertThat(ourLastId).isNull();
-		assertThat(ourLastIdParam).isNull();
+		assertNull(ourLastId);
+		assertNull(ourLastIdParam);
 		assertThat(ourLastConditionalUrl).isEqualTo("Patient?identifier=system%7C001");
 
 	}
@@ -105,12 +107,12 @@ public class UpdateConditionalHl7OrgDstu2Test {
 		ourLog.info("Response was:\n{}", responseContent);
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(status.getFirstHeader("location")).isNull();
+		assertNull(status.getFirstHeader("location"));
 		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 		assertThat(new IdType(ourLastId).toUnqualified().getValue()).isEqualTo("Patient/2");
 		assertThat(ourLastIdParam.toUnqualified().getValue()).isEqualTo("Patient/2");
-		assertThat(ourLastConditionalUrl).isNull();
+		assertNull(ourLastConditionalUrl);
 
 	}
 
@@ -129,10 +131,10 @@ public class UpdateConditionalHl7OrgDstu2Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(ourLastRequestWasSearch).isTrue();
-		assertThat(ourLastId).isNull();
-		assertThat(ourLastIdParam).isNull();
-		assertThat(ourLastConditionalUrl).isNull();
+		assertTrue(ourLastRequestWasSearch);
+		assertNull(ourLastId);
+		assertNull(ourLastIdParam);
+		assertNull(ourLastConditionalUrl);
 
 	}
 

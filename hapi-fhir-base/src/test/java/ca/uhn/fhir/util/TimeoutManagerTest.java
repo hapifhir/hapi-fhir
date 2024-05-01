@@ -1,5 +1,7 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -62,7 +64,7 @@ class TimeoutManagerTest {
 	@Test
 	public void checkTimeout_noThreadholdHit_noLogging() {
 		// execute
-		assertThat(mySvc.checkTimeout()).isFalse();
+		assertFalse(mySvc.checkTimeout());
 		// verify
 		verifyNoInteractions(myAppender);
 	}
@@ -72,7 +74,7 @@ class TimeoutManagerTest {
 		// setup
 		mySvc.addTimeForUnitTest(Duration.ofDays(2));
 		// execute
-		assertThat(mySvc.checkTimeout()).isTrue();
+		assertTrue(mySvc.checkTimeout());
 		// verify
 		verify(myAppender, times(1)).doAppend(myLoggingEvent.capture());
 		ILoggingEvent event = myLoggingEvent.getValue();

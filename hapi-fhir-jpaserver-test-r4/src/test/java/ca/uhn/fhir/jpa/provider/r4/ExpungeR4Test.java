@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -724,12 +725,12 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		// Make sure read works
 		p = myPatientDao.read(new IdType("Patient/TEST"));
-		assertThat(p.getActive()).isTrue();
+		assertTrue(p.getActive());
 
 		// Make sure search by ID works
 		IBundleProvider outcome = myPatientDao.search(SearchParameterMap.newSynchronous("_id", new TokenParam("Patient/TEST")));
 		p = (Patient) outcome.getResources(0, 1).get(0);
-		assertThat(p.getActive()).isTrue();
+		assertTrue(p.getActive());
 
 		// Make sure search by Reference works
 		outcome = myObservationDao.search(SearchParameterMap.newSynchronous(Observation.SP_SUBJECT, new ReferenceParam("Patient/TEST")));
@@ -763,12 +764,12 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		// Make sure read works
 		p = myPatientDao.read(new IdType("Patient/TEST"));
-		assertThat(p.getActive()).isTrue();
+		assertTrue(p.getActive());
 
 		// Make sure search works
 		outcome = myPatientDao.search(SearchParameterMap.newSynchronous("_id", new TokenParam("Patient/TEST")));
 		p = (Patient) outcome.getResources(0, 1).get(0);
-		assertThat(p.getActive()).isTrue();
+		assertTrue(p.getActive());
 
 		// Make sure search by Reference works
 		outcome = myObservationDao.search(SearchParameterMap.newSynchronous(Observation.SP_SUBJECT, new ReferenceParam("Patient/TEST")));
@@ -871,7 +872,7 @@ public class ExpungeR4Test extends BaseResourceProviderR4Test {
 
 		// Note that the limit used in ExpungeOptions is meant to be a rough throttle.
 		// We care that AT LEAST the specified number of resources are expunged and not if the limit is exceeded.
-		assertThat(actualRemainingPatientHistoryRecords <= maximumRemainingPatientHistoryRecords).isTrue();
+		assertTrue(actualRemainingPatientHistoryRecords <= maximumRemainingPatientHistoryRecords);
 	}
 
 	@Test

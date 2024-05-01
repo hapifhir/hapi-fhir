@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.fql.executor;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -54,10 +55,10 @@ public class HfqlExecutorFhirPathTranslationToSearchParamTest extends BaseHfqlEx
 		if (theShouldConvert) {
 			assertThat(map.get("_id")).hasSize(1);
 			assertThat(map.get("_id").get(0)).hasSize(1);
-			assertThat(((TokenParam) map.get("_id").get(0).get(0)).getSystem()).isNull();
+			assertNull(((TokenParam) map.get("_id").get(0).get(0)).getSystem());
 			assertThat(((TokenParam) map.get("_id").get(0).get(0)).getValue()).isEqualTo("ABC123");
 		} else {
-			assertThat(map.get("_id")).isNull();
+			assertNull(map.get("_id"));
 		}
 	}
 

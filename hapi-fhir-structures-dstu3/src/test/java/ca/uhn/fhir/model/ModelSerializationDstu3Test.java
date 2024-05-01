@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
@@ -27,7 +28,7 @@ public class ModelSerializationDstu3Test {
 	public void testBoundCodeableConceptSerialization() {
 		AdministrativeGender maritalStatus = AdministrativeGender.MALE;
 		byte[] bytes = SerializationUtils.serialize(maritalStatus);
-		assertThat(bytes.length > 0).isTrue();
+		assertTrue(bytes.length > 0);
 
 		AdministrativeGender deserialized = SerializationUtils.deserialize(bytes);
 		assertThat(deserialized).isEqualTo(AdministrativeGender.MALE);
@@ -58,10 +59,10 @@ public class ModelSerializationDstu3Test {
 	@SuppressWarnings("unchecked")
 	private <T extends IBaseResource> T testIsSerializable(T theObject) {
 		byte[] bytes = SerializationUtils.serialize(theObject);
-		assertThat(bytes.length > 0).isTrue();
+		assertTrue(bytes.length > 0);
 
 		IBaseResource obj = SerializationUtils.deserialize(bytes);
-		assertThat(obj != null).isTrue();
+		assertTrue(obj != null);
 
 		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
 		assertThat(p.encodeResourceToString(obj)).isEqualTo(p.encodeResourceToString(theObject));

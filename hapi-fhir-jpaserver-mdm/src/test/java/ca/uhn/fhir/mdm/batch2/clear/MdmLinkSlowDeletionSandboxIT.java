@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.batch2.clear;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -51,7 +52,7 @@ public class MdmLinkSlowDeletionSandboxIT  extends BaseJpaR4Test {
 
 		long totalLinks = myMdmLinkDao.count();
 		ourLog.info("Total links in DB: {}", totalLinks);
-		assertThat(totalLinks > 0).isTrue();
+		assertTrue(totalLinks > 0);
 	}
 	
 

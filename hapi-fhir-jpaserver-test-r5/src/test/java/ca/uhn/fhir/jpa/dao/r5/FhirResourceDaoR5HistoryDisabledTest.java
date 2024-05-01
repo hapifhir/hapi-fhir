@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -65,12 +66,12 @@ public class FhirResourceDaoR5HistoryDisabledTest extends BaseJpaR5Test {
 		assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> myPatientDao.read(id2.withVersion("1"), mySrd));
 
 		p = myPatientDao.read(id2.toUnqualifiedVersionless(), mySrd);
-		assertThat(p.getActive()).isFalse();
+		assertFalse(p.getActive());
 		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
 		assertThat(p.getMeta().getVersionId()).isEqualTo("2");
 
 		p = myPatientDao.read(id2.withVersion("2"), mySrd);
-		assertThat(p.getActive()).isFalse();
+		assertFalse(p.getActive());
 		assertThat(p.getIdElement().getVersionIdPart()).isEqualTo("2");
 		assertThat(p.getMeta().getVersionId()).isEqualTo("2");
 	}

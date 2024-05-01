@@ -1,5 +1,7 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
@@ -15,27 +17,27 @@ public class DefaultProfileValidationSupportR4Test extends BaseValidationTestWit
 	
 	@Test
 	public void testGetStructureDefinitionsWithRelativeUrls() {
-		assertThat(mySvc.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Extension")).isNotNull();
-		assertThat(mySvc.fetchStructureDefinition("StructureDefinition/Extension")).isNotNull();
-		assertThat(mySvc.fetchStructureDefinition("Extension")).isNotNull();
+		assertNotNull(mySvc.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Extension"));
+		assertNotNull(mySvc.fetchStructureDefinition("StructureDefinition/Extension"));
+		assertNotNull(mySvc.fetchStructureDefinition("Extension"));
 
-		assertThat(mySvc.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Extension2")).isNull();
-		assertThat(mySvc.fetchStructureDefinition("StructureDefinition/Extension2")).isNull();
-		assertThat(mySvc.fetchStructureDefinition("Extension2")).isNull();
+		assertNull(mySvc.fetchStructureDefinition("http://hl7.org/fhir/StructureDefinition/Extension2"));
+		assertNull(mySvc.fetchStructureDefinition("StructureDefinition/Extension2"));
+		assertNull(mySvc.fetchStructureDefinition("Extension2"));
 
 	}
 	
 	@Test
 	public void testLoadCodeSystemWithVersion() {
 		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem("http://terminology.hl7.org/CodeSystem/v2-0291");
-		assertThat(cs).isNotNull();
+		assertNotNull(cs);
 		String version = cs.getVersion();
 		assertThat(version).isEqualTo("2.9");
 
 		cs = (CodeSystem) mySvc.fetchCodeSystem("http://terminology.hl7.org/CodeSystem/v2-0291|" + version);
-		assertThat(cs).isNotNull();
+		assertNotNull(cs);
 
 		cs = (CodeSystem) mySvc.fetchCodeSystem("http://terminology.hl7.org/CodeSystem/v2-0291|999");
-		assertThat(cs).isNotNull();
+		assertNotNull(cs);
 	}
 }

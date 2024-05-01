@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.Include;
@@ -178,7 +179,7 @@ public class IncludeTest {
 		assertThat(new Include("Patient:careProvider", true).withType("Practitioner").isRecurse()).isEqualTo(true);
 		assertThat(new Include("Patient:careProvider:Organization", true).withType("Practitioner").isLocked()).isEqualTo(false);
 		assertThat(new Include("Patient:careProvider", true).withType("Practitioner").getParamTargetType()).isEqualTo("Practitioner");
-		assertThat(new Include("Patient:careProvider", true).getParamTargetType()).isNull();
+		assertNull(new Include("Patient:careProvider", true).getParamTargetType());
 
 		assertThat(new Include("Patient:careProvider:Organization", true).withType("Practitioner").getValue()).isEqualTo("Patient:careProvider:Practitioner");
 		assertThat(new Include("Patient:careProvider:Organization", true).toLocked().withType("Practitioner").isLocked()).isEqualTo(true);

@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.topic;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscription;
@@ -37,11 +40,11 @@ class SubscriptionTopicUtilTest {
 
 		List<Enumeration<SubscriptionTopic.InteractionTrigger>> supportedTypes = List.of(create, delete);
 
-		assertThat(SubscriptionTopicUtil.matches(BaseResourceMessage.OperationTypeEnum.CREATE, supportedTypes)).isTrue();
-		assertThat(SubscriptionTopicUtil.matches(BaseResourceMessage.OperationTypeEnum.UPDATE, supportedTypes)).isFalse();
-		assertThat(SubscriptionTopicUtil.matches(BaseResourceMessage.OperationTypeEnum.DELETE, supportedTypes)).isTrue();
-		assertThat(SubscriptionTopicUtil.matches(BaseResourceMessage.OperationTypeEnum.MANUALLY_TRIGGERED, supportedTypes)).isFalse();
-		assertThat(SubscriptionTopicUtil.matches(BaseResourceMessage.OperationTypeEnum.TRANSACTION, supportedTypes)).isFalse();
+		assertTrue(SubscriptionTopicUtil.matches(BaseResourceMessage.OperationTypeEnum.CREATE, supportedTypes));
+		assertFalse(SubscriptionTopicUtil.matches(BaseResourceMessage.OperationTypeEnum.UPDATE, supportedTypes));
+		assertTrue(SubscriptionTopicUtil.matches(BaseResourceMessage.OperationTypeEnum.DELETE, supportedTypes));
+		assertFalse(SubscriptionTopicUtil.matches(BaseResourceMessage.OperationTypeEnum.MANUALLY_TRIGGERED, supportedTypes));
+		assertFalse(SubscriptionTopicUtil.matches(BaseResourceMessage.OperationTypeEnum.TRANSACTION, supportedTypes));
 	}
 
 	@Test
@@ -59,7 +62,7 @@ class SubscriptionTopicUtilTest {
 		Bundle bundle = buildSubscriptionStatus(null);
 
 		IBaseResource extractionResult = SubscriptionTopicUtil.extractResourceFromBundle(myContext, bundle);
-		assertThat(extractionResult).isNull();
+		assertNull(extractionResult);
 	}
 
 	private Bundle buildSubscriptionStatus(Resource theResource) {
@@ -82,13 +85,13 @@ class SubscriptionTopicUtilTest {
 		bundle.addEntry().setResource(new SubscriptionStatus());
 
 		IBaseResource extractionResult = SubscriptionTopicUtil.extractResourceFromBundle(myContext, bundle);
-		assertThat(extractionResult).isNull();
+		assertNull(extractionResult);
 	}
 
 	@Test
 	public void testExtractResourceFromBundle_withEmptyBundle_returnsNull() {
 		IBaseResource extractionResult = SubscriptionTopicUtil.extractResourceFromBundle(myContext, new Bundle());
-		assertThat(extractionResult).isNull();
+		assertNull(extractionResult);
 	}
 
 	@Test
@@ -96,7 +99,7 @@ class SubscriptionTopicUtilTest {
 		CanonicalSubscription canonicalSubscription = new CanonicalSubscription();
 		boolean result = SubscriptionTopicUtil.isEmptyContentTopicSubscription(canonicalSubscription);
 
-		assertThat(result).isFalse();
+		assertFalse(result);
 	}
 
 	@ParameterizedTest

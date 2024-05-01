@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -145,7 +146,7 @@ public class ValidateDstu3Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(ourLastPatient).isNull();
+		assertNull(ourLastPatient);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 	}
 
@@ -163,7 +164,7 @@ public class ValidateDstu3Test {
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(resp).contains("<OperationOutcome", "FOOBAR");
-		assertThat(ourLastPatient).isNull();
+		assertNull(ourLastPatient);
 		assertThat(ourLastId.getResourceType()).isEqualTo("Patient");
 		assertThat(ourLastId.getIdPart()).isEqualTo("123");
 	}

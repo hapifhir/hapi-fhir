@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -208,10 +210,10 @@ public class FhirPathFilterInterceptorR4Test {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
 			IBaseResource resource = ourCtx.newJsonParser().parseResource(responseText);
-			assertThat(resource instanceof Parameters).isTrue();
+			assertTrue(resource instanceof Parameters);
 			Parameters parameters = (Parameters)resource;
 			Parameters.ParametersParameterComponent parameterComponent = parameters.getParameter("result");
-			assertThat(parameterComponent).isNotNull();
+			assertNotNull(parameterComponent);
 			assertThat(parameterComponent.getPart()).hasSize(2);
 			Parameters.ParametersParameterComponent resultComponent = parameterComponent.getPart().get(1);
 			assertThat(resultComponent.getName()).isEqualTo("result");

@@ -1,5 +1,9 @@
 package ca.uhn.fhir.batch2.maintenance;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
@@ -166,9 +170,9 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		assertThat(instance.getProgress()).isEqualTo(0.5);
 		assertThat(instance.getCombinedRecordsProcessed()).isEqualTo(50);
 		assertThat(instance.getCombinedRecordsProcessedPerSecond()).isEqualTo(0.08333333333333333);
-		assertThat(instance.getStartTime()).isNotNull();
+		assertNotNull(instance.getStartTime());
 		assertThat(instance.getStartTime()).isEqualTo(parseTime("2022-02-12T14:00:00-04:00"));
-		assertThat(instance.getEndTime()).isNull();
+		assertNull(instance.getEndTime());
 		assertThat(instance.getEstimatedTimeRemaining()).isEqualTo("00:10:00");
 
 		verifyNoMoreInteractions(myJobPersistence);
@@ -207,7 +211,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		// Verify
 		verify(myJobPersistence, times(1)).updateInstance(eq(INSTANCE_ID), any());
 
-		assertThat(instance.getErrorMessage()).isNull();
+		assertNull(instance.getErrorMessage());
 		assertThat(instance.getErrorCount()).isEqualTo(4);
 		assertThat(instance.getProgress()).isEqualTo(0.5);
 		assertThat(instance.getCombinedRecordsProcessed()).isEqualTo(50);
@@ -390,7 +394,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		await().until(() -> mySvc.getQueueLength() > 0);
 
 		// Now trigger a maintenance pass in the foreground.  It should abort right away since there is already one thread in queue
-		assertThat(mySvc.triggerMaintenancePass()).isFalse();
+		assertFalse(mySvc.triggerMaintenancePass());
 
 		// Now release the background task
 		simulatedMaintenancePasslatch.countDown();
@@ -400,8 +404,8 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		// Verify maintenance was only called once
 		verify(myJobPersistence, times(2)).fetchInstances(anyInt(), eq(0));
-		assertThat(result1.get()).isTrue();
-		assertThat(result2.get()).isTrue();
+		assertTrue(result1.get());
+		assertTrue(result2.get());
 	}
 
 

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
@@ -87,9 +89,9 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 		String nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
 
 		// 2nd/last page
-		assertThat(nextUrl).isNotNull();
+		assertNotNull(nextUrl);
 		Bundle page2 = fetchBundle(nextUrl);
-		assertThat(page2).isNotNull();
+		assertNotNull(page2);
 		List<Patient> patientsPage2 = BundleUtil.toListOfResourcesOfType(myFhirContext, page2, Patient.class);
 
 		assertThat(patientsPage2).hasSize(4);
@@ -131,18 +133,18 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 			assertThat(patientsPage).hasSize(defaultPageSize);
 
 			for (Patient p : patientsPage) {
-				assertThat(ids.add(p.getId())).isTrue();
+				assertTrue(ids.add(p.getId()));
 			}
 			nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
-			assertThat(nextUrl).isNotNull();
+			assertNotNull(nextUrl);
 
 			// all future pages
 			do {
 				bundle = fetchBundle(nextUrl);
-				assertThat(bundle).isNotNull();
+				assertNotNull(bundle);
 				patientsPage = BundleUtil.toListOfResourcesOfType(myFhirContext, bundle, Patient.class);
 				for (Patient p : patientsPage) {
-					assertThat(ids.add(p.getId())).isTrue();
+					assertTrue(ids.add(p.getId()));
 				}
 				nextUrl = BundleUtil.getLinkUrlOfType(myFhirContext, bundle, LINK_NEXT);
 				if (nextUrl != null) {

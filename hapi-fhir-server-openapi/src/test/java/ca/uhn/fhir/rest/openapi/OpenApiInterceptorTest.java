@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.openapi;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -219,18 +221,18 @@ public class OpenApiInterceptorTest {
 			OpenAPI parsed = Yaml.mapper().readValue(resp, OpenAPI.class);
 
 			PathItem fooOpPath = parsed.getPaths().get("/$foo-op");
-			assertThat(fooOpPath.getGet()).isNull();
-			assertThat(fooOpPath.getPost()).isNotNull();
+			assertNull(fooOpPath.getGet());
+			assertNotNull(fooOpPath.getPost());
 			assertThat(fooOpPath.getPost().getDescription()).isEqualTo("Foo Op Description");
 			assertThat(fooOpPath.getPost().getSummary()).isEqualTo("Foo Op Short");
 
 			PathItem lastNPath = parsed.getPaths().get("/Observation/$lastn");
-			assertThat(lastNPath.getPost()).isNotNull();
+			assertNotNull(lastNPath.getPost());
 			assertThat(lastNPath.getPost().getDescription()).isEqualTo("LastN Description");
 			assertThat(lastNPath.getPost().getSummary()).isEqualTo("LastN Short");
-			assertThat(lastNPath.getPost().getParameters()).isNull();
-			assertThat(lastNPath.getPost().getRequestBody()).isNotNull();
-			assertThat(lastNPath.getGet()).isNotNull();
+			assertNull(lastNPath.getPost().getParameters());
+			assertNotNull(lastNPath.getPost().getRequestBody());
+			assertNotNull(lastNPath.getGet());
 			assertThat(lastNPath.getGet().getDescription()).isEqualTo("LastN Description");
 			assertThat(lastNPath.getGet().getSummary()).isEqualTo("LastN Short");
 			assertThat(lastNPath.getGet().getParameters()).hasSize(4);
@@ -356,7 +358,7 @@ public class OpenApiInterceptorTest {
 		public void testRemoveTrailingSlashWithNullUrl() {
 			OpenApiInterceptor interceptor = new OpenApiInterceptor();
 			String url = interceptor.removeTrailingSlash(null);
-			assertThat(url).isNull();
+			assertNull(url);
 		}
 
 		@Test

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.config;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -77,7 +78,7 @@ class MdmSubscriptionLoaderR5Test {
 		verify(mySubscriptionTopicDao).update(subscriptionTopicCaptor.capture(), any(RequestDetails.class));
 
         SubscriptionTopic subscriptionTopic = subscriptionTopicCaptor.getValue();
-		assertThat(subscriptionTopic).isNotNull();
+		assertNotNull(subscriptionTopic);
 		assertThat(subscriptionTopic.getId()).isEqualTo("mdm-subscription-topic");
 		assertThat(subscriptionTopic.getResourceTrigger()).hasSize(1);
 		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent triggerComponent = subscriptionTopic.getResourceTrigger().get(0);
@@ -88,7 +89,7 @@ class MdmSubscriptionLoaderR5Test {
 		verify(mySubscriptionDao).update(subscriptionCaptor.capture(), any(RequestDetails.class));
 
         Subscription subscription = subscriptionCaptor.getValue();
-		assertThat(subscription).isNotNull();
+		assertNotNull(subscription);
 		assertThat(subscription.getId()).isEqualTo("mdm-subscription");
 	}
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.coordinator;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -50,7 +51,7 @@ class JobQuerySvcTest extends BaseBatch2Test {
 		ourLog.info("Parameters: {}", outcome.getParameters());
 		assertThat(outcome.getParameters(TestJobParameters.class).getParam1()).isEqualTo(PARAM_1_VALUE);
 		assertThat(outcome.getParameters(TestJobParameters.class).getParam2()).isEqualTo(PARAM_2_VALUE);
-		assertThat(outcome.getParameters(TestJobParameters.class).getPassword()).isNull();
+		assertNull(outcome.getParameters(TestJobParameters.class).getPassword());
 
 	}
 

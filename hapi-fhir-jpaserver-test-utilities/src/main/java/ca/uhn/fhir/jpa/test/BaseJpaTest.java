@@ -19,6 +19,9 @@
  */
 package ca.uhn.fhir.jpa.test;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -396,7 +399,7 @@ public abstract class BaseJpaTest extends BaseTest {
 			if (currentSession != null) {
 				currentSession.doWork(connection -> isReadOnly.set(connection.isReadOnly()));
 
-				assertThat(isReadOnly.get()).isFalse();
+				assertFalse(isReadOnly.get());
 			}
 		}
 	}
@@ -858,7 +861,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected void assertGone(IIdType theId) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
 		IBaseResource result = dao.read(theId, mySrd, true);
-		assertThat(result.isDeleted()).isTrue();
+		assertTrue(result.isDeleted());
 	}
 
 	/**
@@ -866,7 +869,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	 */
 	protected void assertNotGone(IIdType theId) {
 		IFhirResourceDao dao = myDaoRegistry.getResourceDao(theId.getResourceType());
-		assertThat(dao.read(theId, mySrd)).isNotNull();
+		assertNotNull(dao.read(theId, mySrd));
 	}
 
 	/**

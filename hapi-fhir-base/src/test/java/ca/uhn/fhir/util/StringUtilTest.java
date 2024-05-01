@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import com.google.common.base.Charsets;
 import org.junit.jupiter.api.Test;
 
@@ -15,7 +16,7 @@ public class StringUtilTest {
 
 	@Test
 	public void testLeft() {
-		assertThat(StringUtil.left(null, 1)).isNull();
+		assertNull(StringUtil.left(null, 1));
 		assertThat(StringUtil.left("", 10)).isEqualTo("");
 		assertThat(StringUtil.left("STR", 10)).isEqualTo("STR");
 		assertThat(StringUtil.left("...", 1)).isEqualTo(".");
@@ -29,7 +30,7 @@ public class StringUtilTest {
 		assertThat(StringUtil.normalizeStringForSearchIndexing("TEST teSt")).isEqualTo("TEST TEST");
 		assertThat(StringUtil.normalizeStringForSearchIndexing("åéîøü")).isEqualTo("AEIØU");
 		assertThat(StringUtil.normalizeStringForSearchIndexing("杨浩")).isEqualTo("杨浩");
-		assertThat(StringUtil.normalizeStringForSearchIndexing(null)).isNull();
+		assertNull(StringUtil.normalizeStringForSearchIndexing(null));
 	}
 
 	@Test
@@ -55,7 +56,7 @@ public class StringUtilTest {
 
 	@Test
 	public void testChompCharacter() {
-		assertThat(StringUtil.chompCharacter(null, '/')).isNull();
+		assertNull(StringUtil.chompCharacter(null, '/'));
 		assertThat(StringUtil.chompCharacter("", '/')).isEqualTo("");
 		assertThat(StringUtil.chompCharacter("/", '/')).isEqualTo("");
 		assertThat(StringUtil.chompCharacter("a/", '/')).isEqualTo("a");

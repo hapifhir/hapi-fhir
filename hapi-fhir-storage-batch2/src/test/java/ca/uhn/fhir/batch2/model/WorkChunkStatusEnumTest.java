@@ -1,5 +1,7 @@
 package ca.uhn.fhir.batch2.model;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -15,9 +17,9 @@ public class WorkChunkStatusEnumTest {
 	@EnumSource(WorkChunkStatusEnum.class)
 	void allStatesExceptCOMPLETEDareIncomplete(WorkChunkStatusEnum theEnum) {
 		if (theEnum == WorkChunkStatusEnum.COMPLETED) {
-			assertThat(theEnum.isIncomplete()).isFalse();
+			assertFalse(theEnum.isIncomplete());
 		} else {
-			assertThat(theEnum.isIncomplete()).isTrue();
+			assertTrue(theEnum.isIncomplete());
 		}
 	}
 

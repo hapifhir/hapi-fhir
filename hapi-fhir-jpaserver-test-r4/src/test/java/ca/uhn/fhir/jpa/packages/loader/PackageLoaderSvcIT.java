@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.packages.loader;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.packages.FakeNpmServlet;
 import ca.uhn.fhir.jpa.packages.util.PackageUtils;
@@ -58,8 +59,8 @@ public class PackageLoaderSvcIT {
 		NpmPackageData result = myPackageLoaderSvc.fetchPackageFromPackageSpec(id, versionId);
 
 		// verify fetched data
-		assertThat(result).isNotNull();
-		assertThat(result.getPackage()).isNotNull();
+		assertNotNull(result);
+		assertNotNull(result.getPackage());
 		NpmPackage npmPackage = result.getPackage();
 
 		// test parse resources

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
@@ -42,12 +44,12 @@ public class RuleImplOpTest {
 		noMatchTypes.add("ABC");
 		noMatchTypes.add("XYZ");
 
-		assertThat(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.TYPES, Collections.emptyList(), matchTypes, CLASSIFIER_TYPE, "Patient")).isTrue();
-		assertThat(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.TYPES, Collections.emptyList(), noMatchTypes, CLASSIFIER_TYPE, "Patient")).isFalse();
-		assertThat(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.TYPES, Collections.emptyList(), Collections.emptySet(), CLASSIFIER_TYPE, "Patient")).isFalse();
-		assertThat(aRuleOp.matches(RuleOpEnum.WRITE, AppliesTypeEnum.TYPES, Collections.emptyList(), matchTypes, CLASSIFIER_TYPE, "Patient")).isFalse();
-		assertThat(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.INSTANCES, Collections.emptyList(), matchTypes, CLASSIFIER_TYPE, "Patient")).isFalse();
-		assertThat(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.TYPES, Collections.emptyList(), matchTypes, CLASSIFIER_TYPE, "Observation")).isFalse();
+		assertTrue(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.TYPES, Collections.emptyList(), matchTypes, CLASSIFIER_TYPE, "Patient"));
+		assertFalse(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.TYPES, Collections.emptyList(), noMatchTypes, CLASSIFIER_TYPE, "Patient"));
+		assertFalse(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.TYPES, Collections.emptyList(), Collections.emptySet(), CLASSIFIER_TYPE, "Patient"));
+		assertFalse(aRuleOp.matches(RuleOpEnum.WRITE, AppliesTypeEnum.TYPES, Collections.emptyList(), matchTypes, CLASSIFIER_TYPE, "Patient"));
+		assertFalse(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.INSTANCES, Collections.emptyList(), matchTypes, CLASSIFIER_TYPE, "Patient"));
+		assertFalse(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.TYPES, Collections.emptyList(), matchTypes, CLASSIFIER_TYPE, "Observation"));
 	}
 
 	@Test
@@ -70,12 +72,12 @@ public class RuleImplOpTest {
 		noMatchInstances.add(new IdDt("ABC"));
 		noMatchInstances.add(new IdDt("XYZ"));
 
-		assertThat(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.INSTANCES, matchInstances, Collections.emptySet(), CLASSIFIER_TYPE, "Patient")).isTrue();
-		assertThat(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.INSTANCES, noMatchInstances, Collections.emptySet(), CLASSIFIER_TYPE, "Patient")).isFalse();
-		assertThat(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.INSTANCES, Collections.emptyList(), Collections.emptySet(), CLASSIFIER_TYPE, "Patient")).isFalse();
-		assertThat(aRuleOp.matches(RuleOpEnum.WRITE, AppliesTypeEnum.INSTANCES, matchInstances, Collections.emptySet(), CLASSIFIER_TYPE, "Patient")).isFalse();
-		assertThat(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.TYPES, matchInstances, Collections.emptySet(), CLASSIFIER_TYPE, "Patient")).isFalse();
-		assertThat(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.INSTANCES, matchInstances, Collections.emptySet(), CLASSIFIER_TYPE, "Observation")).isFalse();
+		assertTrue(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.INSTANCES, matchInstances, Collections.emptySet(), CLASSIFIER_TYPE, "Patient"));
+		assertFalse(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.INSTANCES, noMatchInstances, Collections.emptySet(), CLASSIFIER_TYPE, "Patient"));
+		assertFalse(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.INSTANCES, Collections.emptyList(), Collections.emptySet(), CLASSIFIER_TYPE, "Patient"));
+		assertFalse(aRuleOp.matches(RuleOpEnum.WRITE, AppliesTypeEnum.INSTANCES, matchInstances, Collections.emptySet(), CLASSIFIER_TYPE, "Patient"));
+		assertFalse(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.TYPES, matchInstances, Collections.emptySet(), CLASSIFIER_TYPE, "Patient"));
+		assertFalse(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.INSTANCES, matchInstances, Collections.emptySet(), CLASSIFIER_TYPE, "Observation"));
 	}
 
 	@Test
@@ -86,9 +88,9 @@ public class RuleImplOpTest {
 		aRuleOp.setClassifierType(CLASSIFIER_TYPE);
 		aRuleOp.setClassifierCompartmentName("Patient");
 
-		assertThat(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.ALL_RESOURCES, Collections.emptyList(), Collections.emptySet(), CLASSIFIER_TYPE, "Patient")).isTrue();
-		assertThat(aRuleOp.matches(RuleOpEnum.WRITE, AppliesTypeEnum.ALL_RESOURCES, Collections.emptyList(), Collections.emptySet(), CLASSIFIER_TYPE, "Patient")).isFalse();
-		assertThat(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.TYPES, Collections.emptyList(), Collections.emptySet(), CLASSIFIER_TYPE, "Patient")).isFalse();
-		assertThat(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.ALL_RESOURCES, Collections.emptyList(), Collections.emptySet(), CLASSIFIER_TYPE, "Observation")).isFalse();
+		assertTrue(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.ALL_RESOURCES, Collections.emptyList(), Collections.emptySet(), CLASSIFIER_TYPE, "Patient"));
+		assertFalse(aRuleOp.matches(RuleOpEnum.WRITE, AppliesTypeEnum.ALL_RESOURCES, Collections.emptyList(), Collections.emptySet(), CLASSIFIER_TYPE, "Patient"));
+		assertFalse(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.TYPES, Collections.emptyList(), Collections.emptySet(), CLASSIFIER_TYPE, "Patient"));
+		assertFalse(aRuleOp.matches(RuleOpEnum.READ, AppliesTypeEnum.ALL_RESOURCES, Collections.emptyList(), Collections.emptySet(), CLASSIFIER_TYPE, "Observation"));
 	}
 }

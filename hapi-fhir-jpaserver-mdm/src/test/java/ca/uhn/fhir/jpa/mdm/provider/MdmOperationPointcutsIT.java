@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -169,7 +171,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 					called.getAndSet(true);
 					assertThat(theEvent.getFromResource().getId()).isEqualTo("Patient/" + gp1.getIdPart());
 					assertThat(theEvent.getToResource().getId()).isEqualTo("Patient/" + gp2.getIdPart());
-					assertThat(theEvent.getFromResource().isGoldenResource() && theEvent.getToResource().isGoldenResource()).isTrue();
+					assertTrue(theEvent.getFromResource().isGoldenResource() && theEvent.getToResource().isGoldenResource());
 				}
 			};
 			myInterceptors.add(intereptor);
@@ -184,7 +186,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			);
 
 			// verify
-			assertThat(called.get()).isTrue();
+			assertTrue(called.get());
 		}
 
 		@Test
@@ -226,7 +228,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			);
 
 			// verify
-			assertThat(called.get()).isTrue();
+			assertTrue(called.get());
 		}
 
 		@Test
@@ -260,7 +262,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			);
 
 			// validation
-			assertThat(called.get()).isTrue();
+			assertTrue(called.get());
 		}
 
 		@Test
@@ -303,7 +305,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			);
 
 			// verify
-			assertThat(called.get()).isTrue();
+			assertTrue(called.get());
 		}
 
 		@ParameterizedTest
@@ -337,7 +339,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 				void call(RequestDetails theRequestDetails, MdmClearEvent theEvent) {
 					called.set(true);
 
-					assertThat(theEvent.getResourceTypes()).isNotNull();
+					assertNotNull(theEvent.getResourceTypes());
 					if (isNotBlank(theResourceTypes)) {
 						assertThat(theEvent.getResourceTypes()).hasSize(resourceTypes.size());
 
@@ -365,7 +367,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			);
 
 			// verify
-			assertThat(called.get()).isTrue();
+			assertTrue(called.get());
 		}
 
 		@ParameterizedTest
@@ -519,7 +521,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 
 					// verify
 					latch.awaitExpected();
-					assertThat(called.get()).isTrue();
+					assertTrue(called.get());
 				}
 			}
 		}
@@ -574,7 +576,7 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 					} else if (theParametersToSend == LinkHistoryParameters.GOLDEN_IDS) {
 						assertThat(sids).isEmpty();
 					} else {
-						assertThat(sids.isEmpty() && gids.isEmpty()).isFalse();
+						assertFalse(sids.isEmpty() && gids.isEmpty());
 					}
 
 					assertThat(history).isNotEmpty();
@@ -594,8 +596,8 @@ public class MdmOperationPointcutsIT extends BaseProviderR4Test {
 			);
 
 			// verify
-			assertThat(called.get()).isTrue();
-			assertThat(retval.isEmpty()).isFalse();
+			assertTrue(called.get());
+			assertFalse(retval.isEmpty());
 		}
 
 

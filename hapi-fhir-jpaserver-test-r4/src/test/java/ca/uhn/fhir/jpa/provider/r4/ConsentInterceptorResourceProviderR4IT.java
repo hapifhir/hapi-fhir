@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -306,7 +308,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		Bundle response = myClient.search().forResource(Patient.class).count(1).accept("application/fhir+json; fhirVersion=3.0").returnBundle(Bundle.class).execute();
 
 		assertThat(response.getEntry()).hasSize(1);
-		assertThat(response.getTotalElement().getValue()).isNull();
+		assertNull(response.getTotalElement().getValue());
 
 	}
 
@@ -330,7 +332,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		assertThat(returnedIdValues).isEqualTo(myObservationIdsEvenOnlyBackwards.subList(0, 5));
 
 		// Per #2012
-		assertThat(result.getTotalElement().getValue()).isNull();
+		assertNull(result.getTotalElement().getValue());
 	}
 
 	@Test
@@ -381,7 +383,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(responseString, blankOrNullString());
-			assertThat(status.getEntity().getContentType()).isNull();
+			assertNull(status.getEntity().getContentType());
 		}
 
 		// Accept output
@@ -393,7 +395,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			String id = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
 			assertThat(id).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
-			assertThat(status.getEntity()).isNotNull();
+			assertNotNull(status.getEntity());
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(responseString, not(blankOrNullString()));
 			assertThat(status.getEntity().getContentType().getValue().toLowerCase()).matches(".*json.*");
@@ -428,7 +430,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(responseString, blankOrNullString());
-			assertThat(status.getEntity().getContentType()).isNull();
+			assertNull(status.getEntity().getContentType());
 		}
 
 		// Accept output
@@ -444,7 +446,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			String idVal = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
 			assertThat(idVal).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(status.getEntity()).isNotNull();
+			assertNotNull(status.getEntity());
 			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(responseString, not(blankOrNullString()));
 			assertThat(status.getEntity().getContentType().getValue().toLowerCase()).matches(".*json.*");
@@ -595,7 +597,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		// 2 results returned, but no total since it's stripped
 		assertThat(response.getEntry()).hasSize(1);
-		assertThat(response.getTotalElement().getValue()).isNull();
+		assertNull(response.getTotalElement().getValue());
 
 		StopWatch sw = new StopWatch();
 		while (true) {
@@ -614,7 +616,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		// Load next page
 		response = myClient.loadPage().next(response).execute();
 		assertThat(response.getEntry()).hasSize(1);
-		assertThat(response.getTotalElement().getValue()).isNull();
+		assertNull(response.getTotalElement().getValue());
 
 		runInTransaction(() -> {
 			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(searchId).orElseThrow(() -> new IllegalStateException());
@@ -649,15 +651,15 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		String searchId = response.getIdElement().getIdPart();
 
 		assertThat(response.getEntry()).hasSize(1);
-		assertThat(response.getTotalElement().getValue()).isNull();
+		assertNull(response.getTotalElement().getValue());
 
 		// Load next page
 		response = myClient.loadPage().next(response).execute();
 		assertThat(response.getEntry()).hasSize(1);
-		assertThat(response.getTotalElement().getValue()).isNull();
+		assertNull(response.getTotalElement().getValue());
 
 		// The paging should have ended now - but the last redacted female result is an empty existing page which should never have been there.
-		assertThat(BundleUtil.getLinkUrlOfType(myFhirContext, response, "next")).isNotNull();
+		assertNotNull(BundleUtil.getLinkUrlOfType(myFhirContext, response, "next"));
 
 		await()
 			.until(

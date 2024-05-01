@@ -1,5 +1,7 @@
 package ca.uhn.fhir.mdm.rules.svc;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -49,11 +51,11 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 		MemoryAppender memoryAppender = createAndAssignMemoryAppender(logger);
 
 		MdmMatchOutcome result = myMdmResourceMatcherSvc.match(myJohn, myJohny);
-		assertThat(result).isNotNull();
+		assertNotNull(result);
 
 		//this test assumes, that the defined algorithm for calculating scores doesn't change
-		assertThat(memoryAppender.contains("No match: Matcher patient-last did not match (score: 0.4", Level.TRACE)).isTrue();
-		assertThat(memoryAppender.contains("Match: Successfully matched matcher patient-given with score 0.8", Level.TRACE)).isTrue();
+		assertTrue(memoryAppender.contains("No match: Matcher patient-last did not match (score: 0.4", Level.TRACE));
+		assertTrue(memoryAppender.contains("Match: Successfully matched matcher patient-given with score 0.8", Level.TRACE));
 	}
 
 	@Test
@@ -65,10 +67,10 @@ public class MdmResourceMatcherSvcLoggingTest extends BaseMdmRulesR4Test {
 		MemoryAppender memoryAppender = createAndAssignMemoryAppender(logger);
 
 		MdmMatchOutcome result = myMdmResourceMatcherSvc.match(myJohn, someoneElse);
-		assertThat(result).isNotNull();
+		assertNotNull(result);
 
-		assertThat(memoryAppender.contains("NO_MATCH Patient/", Level.DEBUG)).isTrue();
-		assertThat(memoryAppender.contains("Field matcher results:\npatient-given: NO\npatient-last: YES", Level.TRACE)).isTrue();
+		assertTrue(memoryAppender.contains("NO_MATCH Patient/", Level.DEBUG));
+		assertTrue(memoryAppender.contains("Field matcher results:\npatient-given: NO\npatient-last: YES", Level.TRACE));
 	}
 
 	protected Patient buildSomeoneElse() {

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
@@ -87,7 +88,7 @@ public class SearchClientTest {
 		assertThat(found).hasSize(1);
 
 		Encounter encounter = found.get(0);
-		assertThat(encounter.getSubject().getReference()).isNotNull();
+		assertNotNull(encounter.getSubject().getReference());
 		HttpUriRequest value = capt.getValue();
 
 		assertThat(value instanceof HttpPost).as("Expected request of type POST on long params list").isTrue();
@@ -106,7 +107,7 @@ public class SearchClientTest {
 		assertThat(found).hasSize(1);
 
 		encounter = found.get(0);
-		assertThat(encounter.getSubject().getReference()).isNotNull();
+		assertNotNull(encounter.getSubject().getReference());
 		value = capt.getAllValues().get(1);
 
 		assertThat(value instanceof HttpPost).as("Expected request of type POST on long params list").isTrue();
@@ -133,7 +134,7 @@ public class SearchClientTest {
 		assertThat(found).hasSize(1);
 
 		Encounter encounter = found.get(0);
-		assertThat(encounter.getSubject().getReference()).isNotNull();
+		assertNotNull(encounter.getSubject().getReference());
 	}
 
 	private String createBundle() {

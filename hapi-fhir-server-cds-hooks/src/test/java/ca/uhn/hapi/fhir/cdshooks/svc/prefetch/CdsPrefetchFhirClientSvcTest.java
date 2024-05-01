@@ -1,5 +1,6 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -47,7 +48,7 @@ class CdsPrefetchFhirClientSvcTest {
 		cdsServiceRequestJson.setFhirServer("http://localhost:8000");
 
 		IBaseResource srq = myCdsPrefetchFhirClientSvc.resourceFromUrl(cdsServiceRequestJson, "ServiceRequest?_id=1234");
-		assertThat(srq).isNotNull();
+		assertNotNull(srq);
 		verify(myMockClient.search(), times(1)).byUrl("ServiceRequest?_id=1234");
 	}
 
@@ -56,7 +57,7 @@ class CdsPrefetchFhirClientSvcTest {
 		CdsServiceRequestJson cdsServiceRequestJson = new CdsServiceRequestJson();
 		cdsServiceRequestJson.setFhirServer("http://localhost:8000");
 		IBaseResource srq = myCdsPrefetchFhirClientSvc.resourceFromUrl(cdsServiceRequestJson, "ServiceRequest?_id=1234&_include=ServiceRequest:performer&_include=ServiceRequest:requester");
-		assertThat(srq).isNotNull();
+		assertNotNull(srq);
 		verify(myMockClient.search(), times(1)).byUrl("ServiceRequest?_id=1234&_include=ServiceRequest:performer&_include=ServiceRequest:requester");
 	}
 
@@ -69,7 +70,7 @@ class CdsPrefetchFhirClientSvcTest {
 		cdsServiceRequestJson.setServiceRequestAuthorizationJson(cdsServiceRequestAuthorizationJson);
 
 		IBaseResource srq = myCdsPrefetchFhirClientSvc.resourceFromUrl(cdsServiceRequestJson, "ServiceRequest/1234");
-		assertThat(srq).isNotNull();
+		assertNotNull(srq);
 		verify(cdsServiceRequestAuthorizationJson, times(2)).getAccessToken();
 		verify(myMockClient.read().resource("ServiceRequest"), times(1)).withId("1234");
 	}
@@ -80,7 +81,7 @@ class CdsPrefetchFhirClientSvcTest {
 		cdsServiceRequestJson.setFhirServer("http://localhost:8000");
 
 		IBaseResource srq = myCdsPrefetchFhirClientSvc.resourceFromUrl(cdsServiceRequestJson, "ServiceRequest/1234");
-		assertThat(srq).isNotNull();
+		assertNotNull(srq);
 		verify(myMockClient.read().resource("ServiceRequest"), times(1)).withId("1234");
 	}
 

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -249,15 +251,15 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 		// Part Mappings
 		conceptMap = conceptMaps.get(LoincPartRelatedCodeMappingHandler.LOINC_SCT_PART_MAP_ID);
-		assertThat(conceptMap.getSource()).isNull();
-		assertThat(conceptMap.getTarget()).isNull();
+		assertNull(conceptMap.getSource());
+		assertNull(conceptMap.getTarget());
 		assertThat(conceptMap.getUrl()).isEqualTo(LoincPartRelatedCodeMappingHandler.LOINC_SCT_PART_MAP_URI);
 		assertThat(conceptMap.getCopyright()).isEqualTo(expectedLoincCopyright + " " + partMappingsExternalCopyright);
 		assertThat(conceptMap.getVersion()).isEqualTo("Beta.1");
 		assertThat(conceptMap.getGroup()).hasSize(1);
 		group = conceptMap.getGroup().get(0);
 		assertThat(group.getSource()).isEqualTo(ITermLoaderSvc.LOINC_URI);
-		assertThat(group.getSourceVersion()).isNull();
+		assertNull(group.getSourceVersion());
 		assertThat(group.getTarget()).isEqualTo(ITermLoaderSvc.SCT_URI);
 		assertThat(group.getTargetVersion()).isEqualTo("http://snomed.info/sct/900000000000207008/version/20170731");
 		assertThat(group.getElement().get(0).getCode()).isEqualTo("LP18172-4");
@@ -275,7 +277,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertThat(vs.getCompose().getInclude().get(0).getConcept()).hasSize(3);
 		assertThat(vs.getCompose().getInclude().get(0).getConcept().get(0).getCode()).isEqualTo("11488-4");
 		assertThat(vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay()).isEqualTo("Consult note");
-		assertThat(vs.getVersion()).isNull();
+		assertNull(vs.getVersion());
 
 		// Document ontology parts
 		code = concepts.get("11488-4");
@@ -293,7 +295,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertThat(vs.getCompose().getInclude().get(0).getSystem()).isEqualTo(ITermLoaderSvc.LOINC_URI);
 		assertThat(vs.getCompose().getInclude().get(0).getConcept().get(0).getCode()).isEqualTo("17787-3");
 		assertThat(vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay()).isEqualTo("NM Thyroid gland Study report");
-		assertThat(vs.getVersion()).isNull();
+		assertNull(vs.getVersion());
 
 		// RSNA Playbook Code Parts - Region Imaged
 		code = concepts.get("17787-3");
@@ -326,7 +328,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		group = conceptMap.getGroupFirstRep();
 		// all entries have the same source and target so these should be null
 		assertThat(group.getSource()).isEqualTo(ITermLoaderSvc.LOINC_URI);
-		assertThat(group.getSourceVersion()).isNull();
+		assertNull(group.getSourceVersion());
 		assertThat(group.getTarget()).isEqualTo(LoincRsnaPlaybookHandler.RID_CS_URI);
 		assertThat(group.getElement().get(0).getCode()).isEqualTo("LP199995-4");
 		assertThat(group.getElement().get(0).getDisplay()).isEqualTo("Neck");
@@ -344,7 +346,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		group = conceptMap.getGroupFirstRep();
 		// all entries have the same source and target so these should be null
 		assertThat(group.getSource()).isEqualTo(ITermLoaderSvc.LOINC_URI);
-		assertThat(group.getSourceVersion()).isNull();
+		assertNull(group.getSourceVersion());
 		assertThat(group.getTarget()).isEqualTo(LoincRsnaPlaybookHandler.RPID_CS_URI);
 		assertThat(group.getElement().get(0).getCode()).isEqualTo("24531-6");
 		assertThat(group.getElement().get(0).getDisplay()).isEqualTo("US Retroperitoneum");
@@ -365,7 +367,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			assertThat(vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay()).isEqualTo("Creatinine [Mass/volume] in Serum or Plasma");
 			assertThat(vs.getCompose().getInclude().get(0).getConcept().get(1).getCode()).isEqualTo("718-7");
 			assertThat(vs.getCompose().getInclude().get(0).getConcept().get(1).getDisplay()).isEqualTo("Hemoglobin [Mass/volume] in Blood");
-			assertThat(vs.getVersion()).isNull();
+			assertNull(vs.getVersion());
 
 			// TOP 2000 - SI
 			vs = valueSets.get(LoincTop2000LabResultsSiHandler.TOP_2000_SI_VS_ID);
@@ -378,7 +380,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			assertThat(vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay()).isEqualTo("Creatinine [Moles/volume] in Serum or Plasma");
 			assertThat(vs.getCompose().getInclude().get(0).getConcept().get(1).getCode()).isEqualTo("718-7");
 			assertThat(vs.getCompose().getInclude().get(0).getConcept().get(1).getDisplay()).isEqualTo("Hemoglobin [Mass/volume] in Blood");
-			assertThat(vs.getVersion()).isNull();
+			assertNull(vs.getVersion());
 		}
 
 		// Universal lab order VS
@@ -388,24 +390,24 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		assertThat(vs.getCompose().getInclude().get(0).getConcept()).hasSize(9);
 		assertThat(vs.getCompose().getInclude().get(0).getConcept().get(0).getCode()).isEqualTo("42176-8");
 		assertThat(vs.getCompose().getInclude().get(0).getConcept().get(0).getDisplay()).isEqualTo("1,3 beta glucan [Mass/volume] in Serum");
-		assertThat(vs.getVersion()).isNull();
+		assertNull(vs.getVersion());
 
 		// All LOINC codes
 		assertThat(valueSets).containsKey(LOINC_ALL_VALUESET_ID);
 		vs = valueSets.get(LOINC_ALL_VALUESET_ID);
 		assertThat(vs.getUrl()).isEqualTo("http://loinc.org/vs");
-		assertThat(vs.getVersion()).isNull();
+		assertNull(vs.getVersion());
 		assertThat(vs.getName()).isEqualTo("All LOINC codes");
 		assertThat(vs.getStatus()).isEqualTo(Enumerations.PublicationStatus.ACTIVE);
-		assertThat(vs.hasDate()).isTrue();
+		assertTrue(vs.hasDate());
 		assertThat(vs.getPublisher()).isEqualTo("Regenstrief Institute, Inc.");
 		assertThat(vs.getDescription()).isEqualTo("A value set that includes all LOINC codes");
 		assertThat(vs.getCopyright()).isEqualTo(expectedLoincCopyright);
-		assertThat(vs.hasCompose()).isTrue();
-		assertThat(vs.getCompose().hasInclude()).isTrue();
+		assertTrue(vs.hasCompose());
+		assertTrue(vs.getCompose().hasInclude());
 		assertThat(vs.getCompose().getInclude()).hasSize(1);
 		assertThat(vs.getCompose().getInclude().get(0).getSystem()).isEqualTo(ITermLoaderSvc.LOINC_URI);
-		assertThat(vs.getVersion()).isNull();
+		assertNull(vs.getVersion());
 
 		// IEEE Medical Device Codes
 		conceptMap = conceptMaps.get(LoincIeeeMedicalDeviceCodeHandler.LOINC_IEEE_CM_ID);
@@ -481,7 +483,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		List<CodeSystem> loincCSResources = mySystemCaptor_267_first.getAllValues();
 		assertThat(loincCSResources).hasSize(2);
 		assertThat(loincCSResources.get(0).getVersion()).isEqualTo("2.67");
-		assertThat(loincCSResources.get(1).getVersion()).isNull();
+		assertNull(loincCSResources.get(1).getVersion());
 
 		List<List<ValueSet>> loincVS_resourceLists = myValueSetsCaptor_267_first.getAllValues();
 		assertThat(loincVS_resourceLists).hasSize(2);
@@ -498,7 +500,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
 				assertThat(loincVS.getVersion()).isEqualTo("Beta.1");
 			} else {
-				assertThat(loincVS.getVersion()).isNull();
+				assertNull(loincVS.getVersion());
 			}
 		}
 
@@ -518,7 +520,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			assertThat(loincCM.getGroup()).hasSize(1);
 			ConceptMap.ConceptMapGroupComponent group = loincCM.getGroup().get(0);
 			assertThat(group.getSource()).isEqualTo(ITermLoaderSvc.LOINC_URI);
-			assertThat(group.getSourceVersion()).isNull();
+			assertNull(group.getSourceVersion());
 		}
 
 		reset(myTermCodeSystemStorageSvc);
@@ -532,7 +534,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		loincCSResources = mySystemCaptor_267_second.getAllValues();
 		assertThat(loincCSResources).hasSize(2);
 		assertThat(loincCSResources.get(0).getVersion()).isEqualTo("2.67");
-		assertThat(loincCSResources.get(1).getVersion()).isNull();
+		assertNull(loincCSResources.get(1).getVersion());
 
 		loincVS_resourceLists = myValueSetsCaptor_267_second.getAllValues();
 		assertThat(loincVS_resourceLists).hasSize(2);
@@ -549,7 +551,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
 				assertThat(loincVS.getVersion()).isEqualTo("Beta.1");
 			} else {
-				assertThat(loincVS.getVersion()).isNull();
+				assertNull(loincVS.getVersion());
 			}
 		}
 
@@ -569,7 +571,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			assertThat(loincCM.getGroup()).hasSize(1);
 			ConceptMap.ConceptMapGroupComponent group = loincCM.getGroup().get(0);
 			assertThat(group.getSource()).isEqualTo(ITermLoaderSvc.LOINC_URI);
-			assertThat(group.getSourceVersion()).isNull();
+			assertNull(group.getSourceVersion());
 		}
 
 		reset(myTermCodeSystemStorageSvc);
@@ -583,7 +585,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 		loincCSResources = mySystemCaptor_268.getAllValues();
 		assertThat(loincCSResources).hasSize(2);
 		assertThat(loincCSResources.get(0).getVersion()).isEqualTo("2.68");
-		assertThat(loincCSResources.get(1).getVersion()).isNull();
+		assertNull(loincCSResources.get(1).getVersion());
 
 		loincVS_resourceLists = myValueSetsCaptor_268.getAllValues();
 		assertThat(loincVS_resourceLists).hasSize(2);
@@ -600,7 +602,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			if (loincVS.getId().startsWith("LL1000-0") || loincVS.getId().startsWith("LL1001-8") || loincVS.getId().startsWith("LL1892-0")) {
 				assertThat(loincVS.getVersion()).isEqualTo("Beta.1");
 			} else {
-				assertThat(loincVS.getVersion()).isNull();
+				assertNull(loincVS.getVersion());
 			}
 		}
 
@@ -620,7 +622,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 			assertThat(loincCM.getGroup()).hasSize(1);
 			ConceptMap.ConceptMapGroupComponent group = loincCM.getGroup().get(0);
 			assertThat(group.getSource()).isEqualTo(ITermLoaderSvc.LOINC_URI);
-			assertThat(group.getSourceVersion()).isNull();
+			assertNull(group.getSourceVersion());
 		}
 
 	}
@@ -797,7 +799,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 			boolean isMakeCurrent = requestDetails.getUserData() == null ||
 				(boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
-			assertThat(isMakeCurrent).isTrue();
+			assertTrue(isMakeCurrent);
 		}
 
 
@@ -812,7 +814,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 			boolean isMakeCurrent = requestDetails.getUserData() == null ||
 				(boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
-			assertThat(isMakeCurrent).isTrue();
+			assertTrue(isMakeCurrent);
 		}
 
 
@@ -828,7 +830,7 @@ public class TerminologyLoaderSvcLoincTest extends BaseLoaderTest {
 
 			boolean isMakeCurrent = requestDetails.getUserData() == null ||
 				(boolean) requestDetails.getUserData().getOrDefault(MAKE_LOADING_VERSION_CURRENT, Boolean.TRUE);
-			assertThat(isMakeCurrent).isFalse();
+			assertFalse(isMakeCurrent);
 		}
 
 

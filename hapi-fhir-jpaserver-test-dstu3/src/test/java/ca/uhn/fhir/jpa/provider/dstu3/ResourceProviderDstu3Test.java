@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
@@ -786,7 +790,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testCreateIncludesRequestValidatorInterceptorOutcome() {
 		RequestValidatingInterceptor interceptor = new RequestValidatingInterceptor();
-		assertThat(interceptor.isAddValidationResultsToResponseOperationOutcome()).isTrue();
+		assertTrue(interceptor.isAddValidationResultsToResponseOperationOutcome());
 		interceptor.setFailOnSeverity(null);
 
 		myRestServer.registerInterceptor(interceptor);
@@ -2055,7 +2059,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			}
 		}
 
-		assertThat(responseBundle.getLink("next")).isNull();
+		assertNull(responseBundle.getLink("next"));
 
 		assertThat(idsSet).contains("List/A161444");
 		assertThat(idsSet).contains("List/A161468");
@@ -2329,7 +2333,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		assertThat(history.getEntry().get(1).getRequest().getMethodElement().getValue()).isEqualTo(HTTPVerb.DELETE);
 		assertThat(history.getEntry().get(1).getRequest().getUrl()).isEqualTo("Patient/" + id.getIdPart() + "/_history/2");
-		assertThat(history.getEntry().get(1).getResource()).isNull();
+		assertNull(history.getEntry().get(1).getResource());
 
 		assertThat(history.getEntry().get(2).getResource().getId()).isEqualTo(id.withVersion("1").getValue());
 		assertThat(((Patient) history.getEntry().get(2).getResource()).getName()).hasSize(1);
@@ -2616,7 +2620,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		assertThat(response.getEntry()).hasSize(1);
 		assertThat(response.getTotalElement().getValueAsString()).isEqualTo("21");
-		assertThat(response.getLink("next")).isNull();
+		assertNull(response.getLink("next"));
 
 	}
 
@@ -2649,8 +2653,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			.execute();
 
 		assertThat(response.getEntry()).hasSize(10);
-		assertThat(response.getTotalElement().getValue()).isNull();
-		assertThat(response.getLink("next")).isNull();
+		assertNull(response.getTotalElement().getValue());
+		assertNull(response.getLink("next"));
 	}
 
 	@Test
@@ -2672,12 +2676,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertThat(aeId.getVersionIdPart()).isEqualTo("1");
 
 		patient = myClient.read().resource(Patient.class).withId(patientId).execute();
-		assertThat(patient.getManagingOrganization().getReferenceElement().hasIdPart()).isTrue();
-		assertThat(patient.getManagingOrganization().getReferenceElement().hasVersionIdPart()).isFalse();
+		assertTrue(patient.getManagingOrganization().getReferenceElement().hasIdPart());
+		assertFalse(patient.getManagingOrganization().getReferenceElement().hasVersionIdPart());
 
 		ae = myClient.read().resource(AuditEvent.class).withId(aeId).execute();
-		assertThat(ae.getEntityFirstRep().getReference().getReferenceElement().hasIdPart()).isTrue();
-		assertThat(ae.getEntityFirstRep().getReference().getReferenceElement().hasVersionIdPart()).isTrue();
+		assertTrue(ae.getEntityFirstRep().getReference().getReferenceElement().hasIdPart());
+		assertTrue(ae.getEntityFirstRep().getReference().getReferenceElement().hasVersionIdPart());
 
 	}
 
@@ -3277,7 +3281,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		List<String> linkNext = Lists.newArrayList();
 		for (int i = 0; i < 100; i++) {
 			Bundle bundle = myClient.search().forResource(Patient.class).where(Patient.NAME.matches().value("testSearchPagingKeepsOldSearches")).count(5).returnBundle(Bundle.class).execute();
-			assertThat(isNotBlank(bundle.getLink("next").getUrl())).isTrue();
+			assertTrue(isNotBlank(bundle.getLink("next").getUrl()));
 			assertThat(bundle.getEntry()).hasSize(5);
 			linkNext.add(bundle.getLink("next").getUrl());
 		}
@@ -3321,12 +3325,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		Date after = new Date();
 
 		InstantType updated = found.getMeta().getLastUpdatedElement();
-		assertThat(updated).isNotNull();
+		assertNotNull(updated);
 		Date value = updated.getValue();
-		assertThat(value).isNotNull();
+		assertNotNull(value);
 		ourLog.info(value.getTime() + "");
 		ourLog.info(before.getTime() + "");
-		assertThat(value.after(before)).isTrue();
+		assertTrue(value.after(before));
 		assertThat(value.before(after)).as(new InstantDt(value) + " should be before " + new InstantDt(after)).isTrue();
 	}
 
@@ -4405,7 +4409,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			assertThat(respPt.getIdElement().getVersionIdPart()).isEqualTo("2");
 
 			InstantType updateTime = respPt.getMeta().getLastUpdatedElement();
-			assertThat(updateTime.getValue().after(before)).isTrue();
+			assertTrue(updateTime.getValue().after(before));
 
 		} finally {
 			response.close();

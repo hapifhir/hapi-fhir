@@ -1,5 +1,6 @@
 package ca.uhn.hapi.fhir.cdshooks.api.json;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -17,7 +18,7 @@ class CdsServiceResponseJsonTest {
         //execute
         final List<CdsServiceResponseCardJson> actual = fixture.getCards();
 		//validate
-		assertThat(actual).isNotNull();
+		assertNotNull(actual);
 			assertThat(actual).hasSize(1);
 		assertThat(actual.get(0)).isEqualTo(expected);
     }
@@ -27,6 +28,6 @@ class CdsServiceResponseJsonTest {
         //execute
         final List<CdsServiceResponseCardJson> actual = fixture.getCards();
 		//validate
-		assertThat(actual).isNotNull();
+		assertNotNull(actual);
     }
 }

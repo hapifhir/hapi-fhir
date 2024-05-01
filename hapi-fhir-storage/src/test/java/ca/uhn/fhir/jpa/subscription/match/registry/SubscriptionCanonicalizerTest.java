@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.match.registry;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
@@ -34,7 +37,7 @@ class SubscriptionCanonicalizerTest {
 
 		CanonicalSubscription canonicalSubscription = testedSC.canonicalize(subscription);
 
-		assertThat(canonicalSubscription.getSendDeleteMessages()).isFalse();
+		assertFalse(canonicalSubscription.getSendDeleteMessages());
 	}
 
 	@Test
@@ -61,7 +64,7 @@ class SubscriptionCanonicalizerTest {
 		CanonicalSubscription canonicalSubscription = testedSC.canonicalize(subscription);
 
 		// verify
-		assertThat(canonicalSubscription.getSendDeleteMessages()).isTrue();
+		assertTrue(canonicalSubscription.getSendDeleteMessages());
 	}
 
 	@Test
@@ -78,7 +81,7 @@ class SubscriptionCanonicalizerTest {
 		CanonicalSubscription canonicalize = dstu2Canonicalizer.canonicalize(dstu2Sub);
 
 		// verify
-		assertThat(canonicalize.getSendDeleteMessages()).isTrue();
+		assertTrue(canonicalize.getSendDeleteMessages());
 	}
 
 	private org.hl7.fhir.r5.model.Subscription buildR5Subscription(org.hl7.fhir.r5.model.Subscription.SubscriptionPayloadContent thePayloadContent) {
@@ -209,14 +212,14 @@ class SubscriptionCanonicalizerTest {
 		assertThat(filter1.getResourceType()).isEqualTo("Encounter");
 		assertThat(filter1.getFilterParameter()).isEqualTo("patient");
 		assertThat(filter1.getComparator()).isEqualTo(Enumerations.SearchComparator.EQ);
-		assertThat(filter1.getModifier()).isNull();
+		assertNull(filter1.getModifier());
 		assertThat(filter1.getValue()).isEqualTo("Patient/123");
 
 		CanonicalTopicSubscriptionFilter filter2 = canonical.getFilters().get(1);
 		assertThat(filter2.getResourceType()).isEqualTo("Encounter");
 		assertThat(filter2.getFilterParameter()).isEqualTo("status");
 		assertThat(filter2.getComparator()).isEqualTo(Enumerations.SearchComparator.EQ);
-		assertThat(filter2.getModifier()).isNull();
+		assertNull(filter2.getModifier());
 		assertThat(filter2.getValue()).isEqualTo("finished");
 
 		assertThat(canonical.getHeartbeatPeriod()).isEqualTo(86400);

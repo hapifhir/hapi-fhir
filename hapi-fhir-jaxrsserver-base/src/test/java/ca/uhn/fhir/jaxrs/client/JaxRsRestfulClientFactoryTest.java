@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jaxrs.client;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.test.BaseFhirVersionParameterizedTest;
@@ -42,19 +44,19 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 
 	@Test
 	public void emptyConstructorTest() {
-		assertThat(new JaxRsRestfulClientFactory()).isNotNull();
+		assertNotNull(new JaxRsRestfulClientFactory());
 	}
 
 	@Test
 	public void getDefaultNativeClientTest() {
-		assertThat(factory.getNativeClientClient()).isNotNull();
+		assertNotNull(factory.getNativeClientClient());
 	}
 
 	@Test
 	public void getNativeClientEmptyRegisteredComponentListTest() {
 		factory.register(new ArrayList<>());
 		final Client result = factory.getNativeClientClient();
-		assertThat(result).isNotNull();
+		assertNotNull(result);
 		ourLog.info("Classes: {}", result.getConfiguration().getClasses());
 		assertThat(result.getConfiguration().getClasses(), not(hasItem(ca.uhn.fhir.jaxrs.client.MyFilter.class)));
 	}
@@ -63,7 +65,7 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 	public void getNativeClientRegisteredComponentListTest() {
 		factory.register(Arrays.asList(MyFilter.class, String.class));
 		final Client result = factory.getNativeClientClient();
-		assertThat(result).isNotNull();
+		assertNotNull(result);
 		ourLog.info("Classes: {}", result.getConfiguration().getClasses());
 		assertThat(result.getConfiguration().getClasses()).contains(ca.uhn.fhir.jaxrs.client.MyFilter.class);
 	}
@@ -100,7 +102,7 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 				.get(Response.class);
 			fail("");
 		} catch (Exception e) {
-			assertThat(e.getCause() instanceof SSLException).isTrue();
+			assertTrue(e.getCause() instanceof SSLException);
 		}
 	}
 }

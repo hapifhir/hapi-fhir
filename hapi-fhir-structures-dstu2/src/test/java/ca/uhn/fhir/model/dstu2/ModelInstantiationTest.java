@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model.dstu2;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.model.api.IResource;
@@ -25,7 +26,7 @@ public class ModelInstantiationTest {
 
 	@Test
 	public void testBinaryIsBaseBinary() {
-		assertThat(IBaseBinary.class.isAssignableFrom(Binary.class)).isTrue();
+		assertTrue(IBaseBinary.class.isAssignableFrom(Binary.class));
 	}
 	
 	@SuppressWarnings("unchecked")

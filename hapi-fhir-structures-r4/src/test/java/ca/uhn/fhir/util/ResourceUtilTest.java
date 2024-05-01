@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
@@ -23,7 +24,7 @@ public class ResourceUtilTest {
 
 		ResourceUtil.removeNarrative(FhirContext.forR4(), bundle);
 
-		assertThat(((Patient) bundle.getEntry().get(0).getResource()).getText().getDiv().getValueAsString()).isNull();
+		assertNull(((Patient) bundle.getEntry().get(0).getResource()).getText().getDiv().getValueAsString());
 	}
 
 }

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.search;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -51,8 +53,8 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 			.loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
 		IBundleProvider result = mySynchronousSearchSvc.executeQuery( "Patient", params, RequestPartitionId.allPartitions());
-		assertThat(result.getUuid()).isNull();
-		assertThat(result.isEmpty()).isFalse();
+		assertNull(result.getUuid());
+		assertFalse(result.isEmpty());
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
 		assertThat(resources).hasSize(790);

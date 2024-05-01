@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.openapi;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.ResponseHighlighterInterceptor;
@@ -85,6 +86,6 @@ public class OpenApiInterceptorWithAuthorizationInterceptorTest {
 		}
 
 		OpenAPI parsed = Yaml.mapper().readValue(resp, OpenAPI.class);
-		assertThat(parsed.getPaths().get("/Patient").getPost()).isNotNull();
+		assertNotNull(parsed.getPaths().get("/Patient").getPost());
 	}
 }

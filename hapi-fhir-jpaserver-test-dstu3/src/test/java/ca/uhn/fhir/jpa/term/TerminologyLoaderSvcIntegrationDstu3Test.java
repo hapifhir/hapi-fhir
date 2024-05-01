@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
@@ -211,7 +213,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		assertThat(propertyValueCoding.get().getDisplay()).isEqualTo("Qn");
 
 		propertyValueCoding = findProperty(parameters, "COMPONENT");
-		assertThat(propertyValueCoding.isPresent()).isFalse();
+		assertFalse(propertyValueCoding.isPresent());
 
 	}
 
@@ -225,7 +227,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
-		assertThat(result.isOk()).isTrue();
+		assertTrue(result.isOk());
 		assertThat(result.getDisplay()).isEqualTo("R' wave amplitude in lead I");
 	}
 
@@ -238,7 +240,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		myTerminologyDeferredStorageSvc.saveDeferred();
 
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
-		assertThat(result.isOk()).isFalse();
+		assertFalse(result.isOk());
 		assertThat(result.getMessage()).isEqualTo("Unknown code 'http://loinc.org#10013-1-9999999999' for in-memory expansion of ValueSet 'http://loinc.org/vs'");
 	}
 

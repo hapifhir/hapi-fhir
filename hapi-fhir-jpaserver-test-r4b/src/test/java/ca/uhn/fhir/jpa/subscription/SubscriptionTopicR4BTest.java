@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -70,7 +71,7 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 
 	@Test
 	public void testSubscriptionTopicRegistryBean() {
-		assertThat(mySubscriptionTopicRegistry).isNotNull();
+		assertNotNull(mySubscriptionTopicRegistry);
 	}
 
 	@Test

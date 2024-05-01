@@ -1,5 +1,7 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.cr.resolution;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -46,8 +48,8 @@ public class CdsCrServiceR4Test extends BaseCrTest {
 		requestDetails.setId(planDefinitionId);
 		final Parameters params = new CdsCrServiceR4(requestDetails, repository, myCdsConfigService).encodeParams(cdsServiceRequestJson);
 
-		assertThat(params.getParameter().size() == 3).isTrue();
-		assertThat(params.getParameter("parameters").hasResource()).isTrue();
+		assertTrue(params.getParameter().size() == 3);
+		assertTrue(params.getParameter("parameters").hasResource());
 	}
 
 	@Test
@@ -60,9 +62,9 @@ public class CdsCrServiceR4Test extends BaseCrTest {
 		requestDetails.setId(planDefinitionId);
 		final CdsServiceResponseJson cdsServiceResponseJson = new CdsCrServiceR4(requestDetails, repository, myCdsConfigService).encodeResponse(responseBundle);
 
-		assertThat(cdsServiceResponseJson.getCards().size() == 1).isTrue();
-		assertThat(!cdsServiceResponseJson.getCards().get(0).getSummary().isEmpty()).isTrue();
-		assertThat(!cdsServiceResponseJson.getCards().get(0).getDetail().isEmpty()).isTrue();
+		assertTrue(cdsServiceResponseJson.getCards().size() == 1);
+		assertTrue(!cdsServiceResponseJson.getCards().get(0).getSummary().isEmpty());
+		assertTrue(!cdsServiceResponseJson.getCards().get(0).getDetail().isEmpty());
 	}
 
 	@Test
@@ -76,8 +78,8 @@ public class CdsCrServiceR4Test extends BaseCrTest {
 		requestDetails.setId(planDefinitionId);
 		final CdsServiceResponseJson cdsServiceResponseJson = new CdsCrServiceR4(requestDetails, repository, myCdsConfigService).encodeResponse(responseBundle);
 
-		assertThat(cdsServiceResponseJson.getServiceActions().size() == 1).isTrue();
+		assertTrue(cdsServiceResponseJson.getServiceActions().size() == 1);
 		assertThat(cdsServiceResponseJson.getServiceActions().get(0).getType()).isEqualTo(ActionType.CREATE);
-		assertThat(cdsServiceResponseJson.getServiceActions().get(0).getResource()).isNotNull();
+		assertNotNull(cdsServiceResponseJson.getServiceActions().get(0).getResource());
 	}
 }

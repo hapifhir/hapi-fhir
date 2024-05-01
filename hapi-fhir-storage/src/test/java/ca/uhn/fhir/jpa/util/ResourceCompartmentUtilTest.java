@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.util;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -73,7 +74,7 @@ class ResourceCompartmentUtilTest {
 
 			Optional<String> result = ResourceCompartmentUtil.getPatientCompartmentIdentity(myResource, myFhirContext, mySearchParamExtractor);
 
-			assertThat(result.isEmpty()).isTrue();
+			assertTrue(result.isEmpty());
 		}
 
 		@Test

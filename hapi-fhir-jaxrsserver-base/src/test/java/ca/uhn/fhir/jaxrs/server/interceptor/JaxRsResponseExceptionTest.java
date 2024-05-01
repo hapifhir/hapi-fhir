@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jaxrs.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import jakarta.ejb.ApplicationException;
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,7 @@ public class JaxRsResponseExceptionTest {
 		JaxRsResponseException response = new JaxRsResponseException(wrappedException);
 		assertThat(wrappedException.getMessage()).isEqualTo(response.getMessage());
 		assertThat(wrappedException.getStatusCode()).isEqualTo(response.getStatusCode());
-		assertThat(response.getClass().getAnnotation(ApplicationException.class)).isNotNull();
+		assertNotNull(response.getClass().getAnnotation(ApplicationException.class));
 	}
 
 }

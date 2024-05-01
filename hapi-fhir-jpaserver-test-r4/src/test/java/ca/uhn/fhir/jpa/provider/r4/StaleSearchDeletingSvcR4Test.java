@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.entity.Search;
@@ -83,7 +84,7 @@ public class StaleSearchDeletingSvcR4Test extends BaseResourceProviderR4Test {
 		}
 
 		BundleLinkComponent nextLink = resp1.getLink("next");
-		assertThat(nextLink).isNotNull();
+		assertNotNull(nextLink);
 		String nextLinkUrl = nextLink.getUrl();
 		assertThat(nextLinkUrl, not(blankOrNullString()));
 

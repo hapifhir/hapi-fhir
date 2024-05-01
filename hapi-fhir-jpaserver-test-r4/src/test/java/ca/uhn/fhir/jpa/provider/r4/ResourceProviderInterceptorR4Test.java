@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -125,7 +127,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		// Load the next (and final) page
 		reset(interceptor);
 		results = myClient.loadPage().next(results).execute();
-		assertThat(results).isNotNull();
+		assertNotNull(results);
 		verify(interceptor, timeout(10000).times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FIRST_RESULT_LOADED), myParamsCaptor.capture());
 		verify(interceptor, timeout(10000).times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_SELECT_COMPLETE), myParamsCaptor.capture());
 		verify(interceptor, timeout(10000).times(1)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_COMPLETE), myParamsCaptor.capture());
@@ -272,7 +274,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		Organization org = new Organization();
 		org.setName("orgName");
 		IIdType orgId = myClient.create().resource(org).execute().getId().toUnqualified();
-		assertThat(orgId.getVersionIdPartAsLong()).isNotNull();
+		assertNotNull(orgId.getVersionIdPartAsLong());
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
@@ -445,7 +447,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			.resource(searchParameter)
 			.execute();
 
-		assertThat(methodOutcome.getCreated()).isTrue();
+		assertTrue(methodOutcome.getCreated());
 
 		// attempting to create an overlapping SearchParameter should fail
 		try {
@@ -473,7 +475,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			.resource(searchParameter)
 			.execute();
 
-		assertThat(methodOutcome.getCreated()).isTrue();
+		assertTrue(methodOutcome.getCreated());
 		SearchParameter createdSearchParameter = (SearchParameter) methodOutcome.getResource();
 
 		createdSearchParameter.setUrl("newUrl");
@@ -482,7 +484,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			.resource(createdSearchParameter)
 			.execute();
 
-		assertThat(methodOutcome).isNotNull();
+		assertNotNull(methodOutcome);
 	}
 	@Test
 	public void testSearchParamValidationOnUpdateWithClientAssignedId() {
@@ -497,7 +499,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			.resource(searchParameter)
 			.execute();
 
-		assertThat(methodOutcome.getCreated()).isTrue();
+		assertTrue(methodOutcome.getCreated());
 		SearchParameter createdSearchParameter = (SearchParameter) methodOutcome.getResource();
 
 		createdSearchParameter.setUrl("newUrl");
@@ -506,7 +508,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 			.resource(createdSearchParameter)
 			.execute();
 
-		assertThat(methodOutcome).isNotNull();
+		assertNotNull(methodOutcome);
 	}
 
 	@Test
@@ -523,7 +525,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		MethodOutcome methodOutcome = myClient
 			.update(defaultSearchParamId, defaultSearchParameter);
 
-		assertThat(methodOutcome.getCreated()).isTrue();
+		assertTrue(methodOutcome.getCreated());
 
 		SearchParameter overlappingSearchParameter = createSearchParameter();
 		overlappingSearchParameter.setId(overlappingSearchParamId);

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.entity;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -11,7 +12,7 @@ public class TermCodeSystemTest {
 		TermCodeSystem cs1 = new TermCodeSystem().setCodeSystemUri("http://foo");
 		TermCodeSystem cs2 = new TermCodeSystem().setCodeSystemUri("http://foo");
 		TermCodeSystem cs3 = new TermCodeSystem().setCodeSystemUri("http://foo2");
-		assertThat(cs2).isEqualTo(cs1).isNotNull();
+		assertThat(cs2).isNotNull().isEqualTo(cs1);
 		assertThat(cs3).isNotEqualTo(cs1);
 		assertThat("").isNotEqualTo(cs1);
 	}

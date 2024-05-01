@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IDao;
@@ -99,7 +100,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 			pid.set(resourcePid);
 		});
 		myClient.create().resource(new Patient()).execute();
-		assertThat(pid.get() > 0).isTrue();
+		assertTrue(pid.get() > 0);
 	}
 
 
@@ -196,8 +197,8 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 		patient.setId(id);
 		patient.getNameFirstRep().setFamily("SOMECHANGE");
 		myClient.update().resource(patient).execute();
-		assertThat(oldPid.get() > 0).isTrue();
-		assertThat(newPid.get() > 0).isTrue();
+		assertTrue(oldPid.get() > 0);
+		assertTrue(newPid.get() > 0);
 	}
 
 	@Test

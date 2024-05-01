@@ -1,6 +1,7 @@
 package ca.uhn.fhir.cr.r4;
 
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.cr.repo.HapiFhirRepository;
 
 
@@ -53,7 +54,7 @@ public class SubmitDataServiceR4Test extends BaseCrR4TestServer {
 			}
 		}
 		//found submitted MeasureReport!
-		assertThat(report).isNotNull();
+		assertNotNull(report);
 
 		var resultOb = repository.search(Bundle.class, Observation.class, Searches.ALL);
 		var obSize = resultOb.getEntry().size();
@@ -68,7 +69,7 @@ public class SubmitDataServiceR4Test extends BaseCrR4TestServer {
 			}
 		}
 		//found submitted Observation!
-		assertThat(observation).isNotNull();
+		assertNotNull(observation);
 
 	}
 }

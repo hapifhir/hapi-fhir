@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryTableDao;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -53,7 +54,7 @@ public class FhirResourceDaoR4InlineResourceModeTest extends BaseJpaR4Test {
 
 
 	private void validatePatient(IBaseResource theRead) {
-		assertThat(((Patient) theRead).getActive()).isTrue();
+		assertTrue(((Patient) theRead).getActive());
 	}
 
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.matching;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -61,7 +62,7 @@ public class DaoSubscriptionMatcherTest {
 	 */
 	@Test
 	public void testSubmitterCanRunWithoutTransactionManager() {
-		assertThat(myTxManager).isNull();
+		assertNull(myTxManager);
 	}
 
 	@Configuration

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
@@ -91,13 +92,13 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 
 		JpaPid goldenPatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient1));
 		JpaPid goldenPatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient2));
-		assertThat(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient1Pid.getId(), goldenPatient2Pid.getId()).isPresent()).isFalse();
-		assertThat(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient2Pid.getId(), goldenPatient1Pid.getId()).isPresent()).isFalse();
+		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient1Pid.getId(), goldenPatient2Pid.getId()).isPresent());
+		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient2Pid.getId(), goldenPatient1Pid.getId()).isPresent());
 
 		saveNoMatchLink(goldenPatient1Pid, goldenPatient2Pid);
 
 		myMdmLinkSvc.updateLink(goldenPatient1, goldenPatient2, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
-		assertThat(myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(goldenPatient1Pid, goldenPatient2Pid, MdmMatchResultEnum.POSSIBLE_DUPLICATE).isPresent()).isFalse();
+		assertFalse(myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(goldenPatient1Pid, goldenPatient2Pid, MdmMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
 		assertLinkCount(1);
 	}
 
@@ -109,13 +110,13 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 
 		JpaPid goldenPatient1Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient1));
 		JpaPid goldenPatient2Pid = runInTransaction(()->myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), goldenPatient2));
-		assertThat(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient1Pid.getId(), goldenPatient2Pid.getId()).isPresent()).isFalse();
-		assertThat(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient2Pid.getId(), goldenPatient1Pid.getId()).isPresent()).isFalse();
+		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient1Pid.getId(), goldenPatient2Pid.getId()).isPresent());
+		assertFalse(myMdmLinkDaoSvc.getLinkByGoldenResourcePidAndSourceResourcePid(goldenPatient2Pid.getId(), goldenPatient1Pid.getId()).isPresent());
 
 		saveNoMatchLink(goldenPatient2Pid, goldenPatient1Pid);
 
 		myMdmLinkSvc.updateLink(goldenPatient1, goldenPatient2, MdmMatchOutcome.POSSIBLE_DUPLICATE, MdmLinkSourceEnum.AUTO, createContextForCreate("Patient"));
-		assertThat(myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(goldenPatient1Pid, goldenPatient2Pid, MdmMatchResultEnum.POSSIBLE_DUPLICATE).isPresent()).isFalse();
+		assertFalse(myMdmLinkDaoSvc.getMdmLinksByGoldenResourcePidSourcePidAndMatchResult(goldenPatient1Pid, goldenPatient2Pid, MdmMatchResultEnum.POSSIBLE_DUPLICATE).isPresent());
 		assertLinkCount(1);
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client.apache;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.IOException;
 import java.util.function.Consumer;
 
@@ -68,7 +69,7 @@ public class ApacheRestfulClientFactoryTest {
 				f -> f.setProxy("theHost", 0));
 
 		HttpHost proxyHost = httpRoute.getProxyHost();
-		assertThat(proxyHost.getHostName()).isNotNull();
+		assertNotNull(proxyHost.getHostName());
 		assertThat(proxyHost.getHostName()).isEqualTo("theHost");
 		assertThat(proxyHost.getPort()).isEqualTo(0);
 	}
@@ -81,7 +82,7 @@ public class ApacheRestfulClientFactoryTest {
 		});
 
 		HttpHost proxyHost = httpRoute.getProxyHost();
-		assertThat(proxyHost.getHostName()).isNotNull();
+		assertNotNull(proxyHost.getHostName());
 		assertThat(proxyHost.getHostName()).isEqualTo("hostFromSystemProperty");
 		assertThat(proxyHost.getPort()).isEqualTo(1234);
 	}
@@ -94,7 +95,7 @@ public class ApacheRestfulClientFactoryTest {
 				f -> f.setProxy("providedProxy", 0));
 
 		HttpHost proxyHost = httpRoute.getProxyHost();
-		assertThat(proxyHost.getHostName()).isNotNull();
+		assertNotNull(proxyHost.getHostName());
 		assertThat(proxyHost.getHostName()).isEqualTo("providedProxy");
 		assertThat(proxyHost.getPort()).isEqualTo(0);
 	}

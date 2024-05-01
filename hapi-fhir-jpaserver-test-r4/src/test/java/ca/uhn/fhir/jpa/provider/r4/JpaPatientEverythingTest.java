@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -1819,7 +1821,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         Bundle responseBundle = myClient.transaction()
                 .withBundle(inputBundle)
                 .execute();
-		assertThat(responseBundle).isNotNull();
+		assertNotNull(responseBundle);
 			assertThat(responseBundle.getEntry()).hasSize(resourceCount);
 
         IIdType patientId = null;
@@ -1829,8 +1831,8 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
                 patientId = new IdType(entry.getResponse().getLocation());
             }
         }
-		assertThat(patientId).isNotNull();
-		assertThat(patientId.getIdPart()).isNotNull();
+		assertNotNull(patientId);
+		assertNotNull(patientId.getIdPart());
 
         ourLog.debug("------ EVERYTHING");
         // test without types filter
@@ -1841,10 +1843,10 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
                     .withNoParameters(Parameters.class)
                     .returnResourceType(Bundle.class)
                     .execute();
-			assertThat(response).isNotNull();
+			assertNotNull(response);
 					assertThat(response.getEntry()).hasSize(resourceCount);
             for (Bundle.BundleEntryComponent entry : response.getEntry()) {
-							assertThat(resourceTypes).contains(entry.getResource().getResourceType());
+							assertThat(resourceTypes).contains(entry.getResource().getResourceType().name());
             }
         }
 
@@ -1859,10 +1861,10 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
                     .withParameters(parameters)
                     .returnResourceType(Bundle.class)
                     .execute();
-			assertThat(response).isNotNull();
+			assertNotNull(response);
 					assertThat(response.getEntry()).hasSize(resourceCount);
             for (Bundle.BundleEntryComponent entry : response.getEntry()) {
-							assertThat(resourceTypes).contains(entry.getResource().getResourceType());
+							assertThat(resourceTypes).contains(entry.getResource().getResourceType().name());
             }
         }
     }
@@ -1878,7 +1880,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
             IOUtils.closeQuietly(resp);
         }
 
-		assertThat(bundle.getLink("next")).isNull();
+		assertNull(bundle.getLink("next"));
 
         Set<String> actual = new TreeSet<>();
         for (Bundle.BundleEntryComponent nextEntry : bundle.getEntry()) {

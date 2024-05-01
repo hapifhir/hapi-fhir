@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.model;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.batch2.coordinator.BaseBatch2Test;
 import ca.uhn.fhir.batch2.coordinator.TestJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -68,7 +69,7 @@ class JobWorkCursorTest extends BaseBatch2Test {
 		assertThat(theCursor.isFinalStep()).isEqualTo(theExpectedIsFinalStep);
 		assertThat(theCursor.currentStep.getStepId()).isEqualTo(theExpectedCurrentStep);
 		if (theExpectedNextStep == null) {
-			assertThat(theCursor.nextStep).isNull();
+			assertNull(theCursor.nextStep);
 		} else {
 			assertThat(theCursor.nextStep.getStepId()).isEqualTo(theExpectedNextStep);
 		}

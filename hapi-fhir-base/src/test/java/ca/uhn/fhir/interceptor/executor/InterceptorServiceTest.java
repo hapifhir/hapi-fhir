@@ -1,5 +1,8 @@
 package ca.uhn.fhir.interceptor.executor;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -169,7 +172,7 @@ public class InterceptorServiceTest {
 		InterceptorService svc = new InterceptorService();
 		svc.setWarnOnInterceptorWithNoHooks(false);
 		boolean outcome = svc.registerInterceptor(new InterceptorWithNoHooks());
-		assertThat(outcome).isFalse();
+		assertFalse(outcome);
 	}
 
 	@Test
@@ -195,11 +198,11 @@ public class InterceptorServiceTest {
 		// Registered in opposite order to verify that the order on the annotation is used
 		MyTestInterceptorTwo interceptor1 = new MyTestInterceptorTwo();
 		MyTestInterceptorOne interceptor0 = new MyTestInterceptorOne();
-		assertThat(svc.hasHooks(Pointcut.TEST_RB)).isFalse();
+		assertFalse(svc.hasHooks(Pointcut.TEST_RB));
 		svc.registerInterceptor(interceptor1);
-		assertThat(svc.hasHooks(Pointcut.TEST_RB)).isTrue();
+		assertTrue(svc.hasHooks(Pointcut.TEST_RB));
 		svc.registerInterceptor(interceptor0);
-		assertThat(svc.hasHooks(Pointcut.TEST_RB)).isTrue();
+		assertTrue(svc.hasHooks(Pointcut.TEST_RB));
 
 		// Register the manual interceptor (has Order right in the middle)
 		MyTestInterceptorManual myInterceptorManual = new MyTestInterceptorManual();
@@ -232,11 +235,11 @@ public class InterceptorServiceTest {
         assertInstanceOf(MyTestInterceptorTwo.class, globalInterceptors.get(1), globalInterceptors.get(1).getClass().toString());
 
 		// Unregister the two others
-		assertThat(svc.hasHooks(Pointcut.TEST_RB)).isTrue();
+		assertTrue(svc.hasHooks(Pointcut.TEST_RB));
 		svc.unregisterInterceptor(interceptor1);
-		assertThat(svc.hasHooks(Pointcut.TEST_RB)).isTrue();
+		assertTrue(svc.hasHooks(Pointcut.TEST_RB));
 		svc.unregisterInterceptor(interceptor0);
-		assertThat(svc.hasHooks(Pointcut.TEST_RB)).isFalse();
+		assertFalse(svc.hasHooks(Pointcut.TEST_RB));
 	}
 
 	@Test
@@ -251,7 +254,7 @@ public class InterceptorServiceTest {
 
 		if (svc.hasHooks(Pointcut.TEST_RB)) {
 			boolean outcome = svc.callHooks(Pointcut.TEST_RB, new HookParams("A", "B"));
-			assertThat(outcome).isTrue();
+			assertTrue(outcome);
 		}
 
 		assertThat(myInvocations).containsExactly("MyTestInterceptorOne.testRb", "MyTestInterceptorTwo.testRb");
@@ -271,7 +274,7 @@ public class InterceptorServiceTest {
 
 		if (svc.hasHooks(Pointcut.TEST_RB)) {
 			boolean outcome = svc.callHooks(Pointcut.TEST_RB, new HookParams("A", "B"));
-			assertThat(outcome).isTrue();
+			assertTrue(outcome);
 		}
 
 		assertThat(myInvocations).containsExactly("MyTestAnonymousInterceptorOne.testRb", "MyTestAnonymousInterceptorTwo.testRb");
@@ -290,7 +293,7 @@ public class InterceptorServiceTest {
 		svc.registerInterceptor(interceptor1);
 
 		boolean outcome = svc.callHooks(Pointcut.TEST_RB, new HookParams("A", "B"));
-		assertThat(outcome).isTrue();
+		assertTrue(outcome);
 
 		assertThat(myInvocations).containsExactly("MyTestInterceptorOne.testRb", "MyTestInterceptorTwo.testRb");
 		assertThat(interceptor0.myLastString0).isSameAs("A");
@@ -310,7 +313,7 @@ public class InterceptorServiceTest {
 		interceptor0.myNextReturn = false;
 
 		boolean outcome = svc.callHooks(Pointcut.TEST_RB, new HookParams("A", "B"));
-		assertThat(outcome).isFalse();
+		assertFalse(outcome);
 
 		assertThat(myInvocations).containsExactly("MyTestInterceptorOne.testRb");
 		assertThat(interceptor0.myLastString0).isSameAs("A");
@@ -343,8 +346,8 @@ public class InterceptorServiceTest {
 			.add(String.class, null)
 			.add(String.class, null);
 		svc.callHooks(Pointcut.TEST_RB, params);
-		assertThat(interceptor.myValue0).isNull();
-		assertThat(interceptor.myValue1).isNull();
+		assertNull(interceptor.myValue0);
+		assertNull(interceptor.myValue1);
 		svc.unregisterAllInterceptors();
 
 		// First null
@@ -354,7 +357,7 @@ public class InterceptorServiceTest {
 			.add(String.class, null)
 			.add(String.class, "A");
 		svc.callHooks(Pointcut.TEST_RB, params);
-		assertThat(interceptor.myValue0).isNull();
+		assertNull(interceptor.myValue0);
 		assertThat(interceptor.myValue1).isEqualTo("A");
 		svc.unregisterAllInterceptors();
 
@@ -366,7 +369,7 @@ public class InterceptorServiceTest {
 			.add(String.class, null);
 		svc.callHooks(Pointcut.TEST_RB, params);
 		assertThat(interceptor.myValue0).isEqualTo("A");
-		assertThat(interceptor.myValue1).isNull();
+		assertNull(interceptor.myValue1);
 		svc.unregisterAllInterceptors();
 
 	}
@@ -422,9 +425,9 @@ public class InterceptorServiceTest {
 			assertThat(e.getMessage()).isEqualTo("AAA");
 		}
 
-		assertThat(interceptor0.myHit).isTrue();
-		assertThat(interceptor1.myHit).isTrue();
-		assertThat(interceptor2.myHit).isTrue();
+		assertTrue(interceptor0.myHit);
+		assertTrue(interceptor1.myHit);
+		assertTrue(interceptor2.myHit);
 	}
 
 
@@ -451,7 +454,7 @@ public class InterceptorServiceTest {
 		params.add(String.class, "A");
 		params.add(String.class, "B");
 		boolean validated = svc.haveAppropriateParams(Pointcut.TEST_RB, params);
-		assertThat(validated).isTrue();
+		assertTrue(validated);
 	}
 
 	@Test
@@ -519,8 +522,8 @@ public class InterceptorServiceTest {
 		void testBooleanWithNoHooks_returnsTrue() {
 			InterceptorService svc = new InterceptorService();
 
-			assertThat(svc.callHooks(Pointcut.TEST_RB, params)).isTrue();
-			assertThat(svc.ifHasCallHooks(Pointcut.TEST_RB, () -> params)).isTrue();
+			assertTrue(svc.callHooks(Pointcut.TEST_RB, params));
+			assertTrue(svc.ifHasCallHooks(Pointcut.TEST_RB, () -> params));
 		}
 
 		@Test
@@ -529,8 +532,8 @@ public class InterceptorServiceTest {
 			svc.registerInterceptor(new BooleanHook(true));
 			svc.registerInterceptor(new BooleanHook(true));
 
-			assertThat(svc.callHooks(Pointcut.TEST_RB, params)).isTrue();
-			assertThat(svc.ifHasCallHooks(Pointcut.TEST_RB, () -> params)).isTrue();
+			assertTrue(svc.callHooks(Pointcut.TEST_RB, params));
+			assertTrue(svc.ifHasCallHooks(Pointcut.TEST_RB, () -> params));
 		}
 
 		@Test
@@ -540,8 +543,8 @@ public class InterceptorServiceTest {
 			svc.registerInterceptor(new BooleanHook(false));
 			svc.registerInterceptor(new BooleanHook(true));
 
-			assertThat(svc.callHooks(Pointcut.TEST_RB, params)).isFalse();
-			assertThat(svc.ifHasCallHooks(Pointcut.TEST_RB, () -> params)).isFalse();
+			assertFalse(svc.callHooks(Pointcut.TEST_RB, params));
+			assertFalse(svc.ifHasCallHooks(Pointcut.TEST_RB, () -> params));
 		}
 
 
@@ -549,8 +552,8 @@ public class InterceptorServiceTest {
 		void testObjectWithNoHooks_returnsNull() {
 			InterceptorService svc = new InterceptorService();
 
-			assertThat(svc.callHooksAndReturnObject(Pointcut.TEST_RO, params)).isNull();
-			assertThat(svc.ifHasCallHooksAndReturnObject(Pointcut.TEST_RO, () -> params)).isNull();
+			assertNull(svc.callHooksAndReturnObject(Pointcut.TEST_RO, params));
+			assertNull(svc.ifHasCallHooksAndReturnObject(Pointcut.TEST_RO, () -> params));
 		}
 
 		@Test
@@ -559,8 +562,8 @@ public class InterceptorServiceTest {
 			svc.registerInterceptor(new ObjectHook<>(null));
 			svc.registerInterceptor(new ObjectHook<>(null));
 
-			assertThat(svc.callHooksAndReturnObject(Pointcut.TEST_RO, params)).isNull();
-			assertThat(svc.ifHasCallHooksAndReturnObject(Pointcut.TEST_RO, () -> params)).isNull();
+			assertNull(svc.callHooksAndReturnObject(Pointcut.TEST_RO, params));
+			assertNull(svc.ifHasCallHooksAndReturnObject(Pointcut.TEST_RO, () -> params));
 		}
 
 		@Test

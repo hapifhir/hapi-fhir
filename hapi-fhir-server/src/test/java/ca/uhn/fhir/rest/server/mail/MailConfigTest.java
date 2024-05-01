@@ -1,5 +1,8 @@
 package ca.uhn.fhir.rest.server.mail;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -66,7 +69,7 @@ public class MailConfigTest {
 		// execute
 		final boolean actual = fixture.isSmtpUseStartTLS();
 		// validate
-		assertThat(actual).isTrue();
+		assertTrue(actual);
 	}
 
 	@Test
@@ -74,7 +77,7 @@ public class MailConfigTest {
 		// setup
 		final MailConfig other = withMainConfig();
 		// execute & validate
-		assertThat(fixture).isEqualTo(fixture).isNotNull();
+		assertThat(fixture).isNotNull().isEqualTo(fixture);
 		assertThat(fixture).isSameAs(fixture);
 		assertThat(other).isEqualTo(fixture);
 		assertNotSame(fixture, other);
@@ -86,18 +89,18 @@ public class MailConfigTest {
 	public void testSetSmtpUsername() {
 		// execute & validate
 		assertThat(fixture.setSmtpUsername("xyz").getSmtpUsername()).isEqualTo("xyz");
-		assertThat(fixture.setSmtpUsername(null).getSmtpUsername()).isNull();
-		assertThat(fixture.setSmtpUsername("").getSmtpUsername()).isNull();
-		assertThat(fixture.setSmtpUsername("  ").getSmtpUsername()).isNull();
+		assertNull(fixture.setSmtpUsername(null).getSmtpUsername());
+		assertNull(fixture.setSmtpUsername("").getSmtpUsername());
+		assertNull(fixture.setSmtpUsername("  ").getSmtpUsername());
 	}
 
 	@Test
 	public void testSetSmtpPassword() {
 		// execute & validate
 		assertThat(fixture.setSmtpPassword("xyz").getSmtpPassword()).isEqualTo("xyz");
-		assertThat(fixture.setSmtpPassword(null).getSmtpPassword()).isNull();
-		assertThat(fixture.setSmtpPassword("").getSmtpPassword()).isNull();
-		assertThat(fixture.setSmtpPassword("  ").getSmtpPassword()).isNull();
+		assertNull(fixture.setSmtpPassword(null).getSmtpPassword());
+		assertNull(fixture.setSmtpPassword("").getSmtpPassword());
+		assertNull(fixture.setSmtpPassword("  ").getSmtpPassword());
 	}
 
 }

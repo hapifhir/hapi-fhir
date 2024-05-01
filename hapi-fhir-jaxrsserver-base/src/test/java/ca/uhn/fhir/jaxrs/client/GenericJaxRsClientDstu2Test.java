@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jaxrs.client;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.Include;
@@ -342,7 +343,7 @@ public class GenericJaxRsClientDstu2Test {
 		p.addName().addFamily("FOOFAMILY");
 
 		MethodOutcome output = client.create().resource(p).execute();
-		assertThat(output.getResource()).isNotNull();
+		assertNotNull(output.getResource());
 		assertThat(output.getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/123");
 	}
 
@@ -1346,7 +1347,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 		assertThat(CAPTURE_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/AAA?name=http%3A//foo%7Cbar&_format=json");
-		assertThat(response).isNotNull();
+		assertNotNull(response);
 
 
 		response = client.search()
@@ -1356,7 +1357,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 		assertThat(CAPTURE_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar&_format=json");
-		assertThat(response).isNotNull();
+		assertNotNull(response);
 
 
 		response = client.search()
@@ -1366,7 +1367,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 		assertThat(CAPTURE_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar&_format=json");
-		assertThat(response).isNotNull();
+		assertNotNull(response);
 
 
 		response = client.search()
@@ -1375,7 +1376,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 		assertThat(CAPTURE_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient");
-		assertThat(response).isNotNull();
+		assertNotNull(response);
 
 
 		response = client.search()
@@ -1384,7 +1385,7 @@ public class GenericJaxRsClientDstu2Test {
 			.execute();
 
 		assertThat(CAPTURE_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient");
-		assertThat(response).isNotNull();
+		assertNotNull(response);
 
 
 		try {
@@ -1886,7 +1887,7 @@ public class GenericJaxRsClientDstu2Test {
 		p.addName().addFamily("FOOFAMILY");
 
 		MethodOutcome output = client.update().resource(p).execute();
-		assertThat(output.getResource()).isNotNull();
+		assertNotNull(output.getResource());
 		assertThat(output.getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/123");
 	}
 
@@ -1913,7 +1914,7 @@ public class GenericJaxRsClientDstu2Test {
 		assertThat(CAPTURE_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/$validate");
 		assertThat(CAPTURE_SERVLET.ourRequestMethod).isEqualTo("POST");
 		assertThat(CAPTURE_SERVLET.ourRequestBodyString).isEqualTo("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>");
-		assertThat(response.getOperationOutcome()).isNotNull();
+		assertNotNull(response.getOperationOutcome());
 		assertThat(toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("FOOBAR");
 
 
@@ -1921,7 +1922,7 @@ public class GenericJaxRsClientDstu2Test {
 		assertThat(CAPTURE_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/$validate");
 		assertThat(CAPTURE_SERVLET.ourRequestMethod).isEqualTo("POST");
 		assertThat(CAPTURE_SERVLET.ourRequestBodyString).isEqualTo("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>");
-		assertThat(response.getOperationOutcome()).isNotNull();
+		assertNotNull(response.getOperationOutcome());
 		assertThat(toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("FOOBAR");
 
 
@@ -1929,7 +1930,7 @@ public class GenericJaxRsClientDstu2Test {
 		assertThat(CAPTURE_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/$validate");
 		assertThat(CAPTURE_SERVLET.ourRequestMethod).isEqualTo("POST");
 		assertThat(CAPTURE_SERVLET.ourRequestBodyString).isEqualTo("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"given\":[\"GIVEN\"]}]}}]}");
-		assertThat(response.getOperationOutcome()).isNotNull();
+		assertNotNull(response.getOperationOutcome());
 		assertThat(toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("FOOBAR");
 
 
@@ -1937,7 +1938,7 @@ public class GenericJaxRsClientDstu2Test {
 		assertThat(CAPTURE_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/$validate?_pretty=true");
 		assertThat(CAPTURE_SERVLET.ourRequestMethod).isEqualTo("POST");
 		assertThat(CAPTURE_SERVLET.ourRequestBodyString).contains("\"resourceType\": \"Parameters\",\n");
-		assertThat(response.getOperationOutcome()).isNotNull();
+		assertNotNull(response.getOperationOutcome());
 		assertThat(toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("FOOBAR");
 
 	}
@@ -1967,7 +1968,7 @@ public class GenericJaxRsClientDstu2Test {
 		assertThat(CAPTURE_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/$validate?_format=xml");
 		assertThat(CAPTURE_SERVLET.ourRequestMethod).isEqualTo("POST");
 		assertThat(CAPTURE_SERVLET.ourRequestBodyString).isEqualTo("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>");
-		assertThat(response.getOperationOutcome()).isNotNull();
+		assertNotNull(response.getOperationOutcome());
 		assertThat(toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("FOOBAR");
 
 	}

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
@@ -69,7 +70,7 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 			}
 		}
 
-		assertThat(supportsTransaction).isTrue();
+		assertTrue(supportsTransaction);
 	}
 	
 	@Test

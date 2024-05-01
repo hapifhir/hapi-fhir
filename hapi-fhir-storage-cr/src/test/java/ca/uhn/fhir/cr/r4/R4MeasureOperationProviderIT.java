@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.IdType;
@@ -35,7 +36,7 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 			.returnResourceType(MeasureReport.class)
 			.execute();
 
-		assertThat(report).isNotNull();
+		assertNotNull(report);
 
 		return report;
 	}
@@ -79,10 +80,10 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 			}
 		}
 
-		assertThat(enrolledDuringParticipationPeriodObs).isNotNull();
+		assertNotNull(enrolledDuringParticipationPeriodObs);
 		assertThat(enrolledDuringParticipationPeriodObs.getValueCodeableConcept().getCodingFirstRep().getCode()).isEqualTo(Boolean.toString(enrolledDuringParticipationPeriod).toLowerCase());
 
-		assertThat(participationPeriodObs).isNotNull();
+		assertNotNull(participationPeriodObs);
 		assertThat(participationPeriodObs.getValueCodeableConcept().getCodingFirstRep().getCode()).isEqualTo(participationPeriod);
 	}
 
@@ -109,7 +110,7 @@ class R4MeasureOperationProviderIT extends BaseCrR4TestServer {
 		this.loadBundle("ClientNonPatientBasedMeasureBundle.json");
 
 		var measure = read(new IdType("Measure", "InitialInpatientPopulation"));
-		assertThat(measure).isNotNull();
+		assertNotNull(measure);
 
 		var returnMeasureReport = runEvaluateMeasure("2019-01-01", "2020-01-01", "Patient/97f27374-8a5c-4aa1-a26f-5a1ab03caa47", "InitialInpatientPopulation", "Individual", null);
 

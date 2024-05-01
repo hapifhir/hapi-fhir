@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cli;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.system.HapiSystemProperties;
@@ -88,7 +89,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 			.where(ConceptMap.URL.matches().value(conceptMapUrl))
 			.execute();
 
-		assertThat(methodOutcome.getCreated()).isNull();
+		assertNull(methodOutcome.getCreated());
 	}
 
 	@Test
@@ -111,7 +112,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 			.withId(resultConceptMap.getIdElement())
 			.execute();
 
-		assertThat(methodOutcome.getCreated()).isNull();
+		assertNull(methodOutcome.getCreated());
 	}
 
 	@ParameterizedTest

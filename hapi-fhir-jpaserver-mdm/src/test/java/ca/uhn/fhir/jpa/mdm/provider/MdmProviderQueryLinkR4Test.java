@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
@@ -217,7 +219,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 			Optional<IBase> opt = ParametersUtil.getParameterPartValue(myFhirContext, theParamComponent, "score");
 			assertThat(opt).isPresent();
 			DecimalType scoreIntegerDt = (DecimalType) opt.get();
-			assertThat(scoreIntegerDt.getValue()).isNotNull();
+			assertNotNull(scoreIntegerDt.getValue());
 			return scoreIntegerDt.getValue().doubleValue();
 		}
 
@@ -452,7 +454,7 @@ public class MdmProviderQueryLinkR4Test extends BaseLinkR4Test {
 			Parameters result = (Parameters) myMdmProvider.notDuplicate(myGoldenResource1Id, myGoldenResource2Id, myRequestDetails);
 			ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(result));
 			assertThat(result.getParameterFirstRep().getName()).isEqualTo("success");
-			assertThat(((BooleanType) (result.getParameterFirstRep().getValue())).booleanValue()).isTrue();
+			assertTrue(((BooleanType) (result.getParameterFirstRep().getValue())).booleanValue());
 		}
 
 		Parameters result = (Parameters) myMdmProvider.getDuplicateGoldenResources(new UnsignedIntType(0), new UnsignedIntType(10), myRequestDetails, null);

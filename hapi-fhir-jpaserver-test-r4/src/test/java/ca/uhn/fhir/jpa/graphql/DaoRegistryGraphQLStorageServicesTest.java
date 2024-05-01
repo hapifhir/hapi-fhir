@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.graphql;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -81,7 +82,7 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 		mySvc.listResources(mySrd, "Appointment", Collections.singletonList(argument), result);
 
 		assertThat(result).isNotEmpty();
-		assertThat(result.stream().anyMatch((it) -> it.getIdElement().getIdPart().equals("hapi-1"))).isTrue();
+		assertTrue(result.stream().anyMatch((it) -> it.getIdElement().getIdPart().equals("hapi-1")));
 	}
 
 	@Test
@@ -94,7 +95,7 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 		mySvc.listResources(mySrd, "Appointment", Collections.singletonList(argument), result);
 
 		assertThat(result).isNotEmpty();
-		assertThat(result.stream().anyMatch((it) -> it.getIdElement().getIdPart().equals("hapi-1"))).isTrue();
+		assertTrue(result.stream().anyMatch((it) -> it.getIdElement().getIdPart().equals("hapi-1")));
 	}
 
 	@Test
@@ -108,7 +109,7 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 		mySvc.listResources(mySrd, "Appointment", Collections.singletonList(argument), result);
 
 		assertThat(result).isNotEmpty();
-		assertThat(result.stream().anyMatch((it) -> it.getIdElement().getIdPart().equals("hapi-1"))).isTrue();
+		assertTrue(result.stream().anyMatch((it) -> it.getIdElement().getIdPart().equals("hapi-1")));
 	}
 
 	@Test
@@ -146,7 +147,7 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 		assertThat(result).isNotEmpty();
 
 		List<String> expectedId = Arrays.asList("hapi-123", "hapi-124");
-		assertThat(result.stream().allMatch((it) -> expectedId.contains(it.getIdElement().getIdPart()))).isTrue();
+		assertTrue(result.stream().allMatch((it) -> expectedId.contains(it.getIdElement().getIdPart())));
 	}
 
 	@Test
@@ -170,7 +171,7 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 		assertThat(result).hasSize(5);
 
 		List<String> expectedId = Arrays.asList("hapi-1", "hapi-2", "hapi-0", "hapi-3", "hapi-4");
-		assertThat(result.stream().allMatch((it) -> expectedId.contains(it.getIdElement().getIdPart()))).isTrue();
+		assertTrue(result.stream().allMatch((it) -> expectedId.contains(it.getIdElement().getIdPart())));
 
 		//_offset=5
 		List<IBaseResource> result2 = new ArrayList<>();
@@ -183,7 +184,7 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 		assertThat(result2).hasSize(5);
 
 		List<String> expectedId2 = Arrays.asList("hapi-5", "hapi-6", "hapi-7", "hapi-8", "hapi-9");
-		assertThat(result2.stream().allMatch((it) -> expectedId2.contains(it.getIdElement().getIdPart()))).isTrue();
+		assertTrue(result2.stream().allMatch((it) -> expectedId2.contains(it.getIdElement().getIdPart())));
 	}
 
 	@Test

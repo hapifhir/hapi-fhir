@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.delete.job;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
@@ -126,7 +127,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 			}
 		});
 		Patient patient = myPatientDao.read(patientId, mySrd);
-		assertThat(patient.getActive()).isTrue();
+		assertTrue(patient.getActive());
 
 	}
 
@@ -179,7 +180,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 			}
 		});
 		Patient patient = myPatientDao.read(patientId, mySrd);
-		assertThat(patient.getActive()).isTrue();
+		assertTrue(patient.getActive());
 
 	}
 
@@ -394,7 +395,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		JobInstance myJob = myBatch2JobHelper.awaitJobCompletion(startResponse);
 
 		assertThat(myJob.getStatus()).isEqualTo(StatusEnum.COMPLETED);
-		assertThat(myJob.getWarningMessages()).isNotNull();
+		assertNotNull(myJob.getWarningMessages());
 		assertThat(myJob.getWarningMessages()).contains("Failed to reindex resource because unique search parameter " + searchParameter.getEntity().getIdDt().toVersionless().toString());
 	}
 
@@ -423,7 +424,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		// Verify
 
 		assertThat(outcome.getStatus()).isEqualTo(StatusEnum.COMPLETED);
-		assertThat(outcome.getErrorMessage()).isNull();
+		assertNull(outcome.getErrorMessage());
 	}
 
 	@Test

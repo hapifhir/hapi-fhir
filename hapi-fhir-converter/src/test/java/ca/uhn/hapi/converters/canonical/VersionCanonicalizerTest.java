@@ -1,5 +1,6 @@
 package ca.uhn.hapi.converters.canonical;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
@@ -110,7 +111,7 @@ class VersionCanonicalizerTest {
 			org.hl7.fhir.r4.model.Parameters inputR4 = new Parameters();
 			inputR4.setParameter("paramA", "1");
 			ca.uhn.fhir.model.dstu2.resource.Parameters parameters = (ca.uhn.fhir.model.dstu2.resource.Parameters) ourCanonicalizer.parametersFromCanonical(inputR4);
-			assertThat(parameters.getParameter()).isNotNull();
+			assertNotNull(parameters.getParameter());
 			assertThat(parameters.getParameter().get(0).getName()).isEqualTo("paramA");
 		}
 	}

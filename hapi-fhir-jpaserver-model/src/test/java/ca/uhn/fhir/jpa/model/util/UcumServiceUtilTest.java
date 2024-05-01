@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.model.util;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.CELSIUS_KELVIN_DIFF;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -40,16 +42,16 @@ public class UcumServiceUtilTest {
 	public void testInvalidCanonicalForm() {
 
 		//-- invalid url
-		assertThat(UcumServiceUtil.getCanonicalForm("url", new BigDecimal(2.5), "cm")).isNull();
+		assertNull(UcumServiceUtil.getCanonicalForm("url", new BigDecimal(2.5), "cm"));
 
 		//-- missing value
-		assertThat(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, null, "dm")).isNull();
+		assertNull(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, null, "dm"));
 
 		//-- missing code
-		assertThat(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), null)).isNull();
+		assertNull(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), null));
 
 		//-- invalid codes
-		assertThat(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), "xyz")).isNull();
+		assertNull(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), "xyz"));
 
 	}
 	
@@ -60,7 +62,7 @@ public class UcumServiceUtilTest {
 		Decimal expected = new Decimal("310.8278");
 //		System.out.println("expected: " + expected);
 //		System.out.println("converted: " + converted);
-		assertThat(converted.equals(expected)).isTrue();
+		assertTrue(converted.equals(expected));
 		assertThat(canonicalPair.getCode()).isEqualTo("K");
 
 	}
@@ -77,7 +79,7 @@ public class UcumServiceUtilTest {
 //		System.out.println("expected: " + expected);
 //		System.out.println("converted: " + converted);
 //		System.out.println("diff: " + converted.subtract(expectedApprox));
-		assertThat(converted.equals(expected)).isTrue();
+		assertTrue(converted.equals(expected));
 		assertThat(canonicalPair.getCode()).isEqualTo("K");
 
 	}

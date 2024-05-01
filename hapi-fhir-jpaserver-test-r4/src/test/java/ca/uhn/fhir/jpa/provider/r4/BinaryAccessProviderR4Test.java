@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -215,8 +218,8 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			RequestDetails requestDetails = PointcutLatch.getInvocationParameterOfType(hookParams, RequestDetails.class);
 			ResponseDetails responseDetails= PointcutLatch.getInvocationParameterOfType(hookParams, ResponseDetails.class);
 
-			assertThat(responseDetails).isNotNull();
-			assertThat(requestDetails).isNotNull();
+			assertNotNull(responseDetails);
+			assertNotNull(requestDetails);
 
 			assertThat(requestDetails.getId().toString()).isEqualTo(id.toString());
 		}
@@ -247,7 +250,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			Attachment attachment = ref.getContentFirstRep().getAttachment();
 			assertThat(attachment.getContentType()).isEqualTo(ContentType.IMAGE_JPEG.getMimeType());
 			assertThat(attachment.getSize()).isEqualTo(15);
-			assertThat(attachment.getData()).isNull();
+			assertNull(attachment.getData());
 			assertThat(ref.getMeta().getVersionId()).isEqualTo("2");
 			attachmentId = attachment.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 			assertThat(attachmentId).matches("[a-zA-Z0-9]{100}");
@@ -306,7 +309,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				Attachment attachment = ref.getContentFirstRep().getAttachment();
 				assertThat(attachment.getContentType()).isEqualTo(ContentType.IMAGE_JPEG.getMimeType());
 				assertThat(attachment.getSize()).isEqualTo(15);
-				assertThat(attachment.getData()).isNull();
+				assertNull(attachment.getData());
 				assertThat(ref.getMeta().getVersionId()).isEqualTo("2");
 				attachmentId = attachment.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 				assertThat(attachmentId).matches("[a-zA-Z0-9]{100}");
@@ -393,7 +396,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				assertThat(attachment.getData()).containsExactly(SOME_BYTES_2);
 				assertThat(ref.getMeta().getVersionId()).isEqualTo("2");
 				attachmentId = attachment.getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
-				assertThat(attachmentId).isNull();
+				assertNull(attachmentId);
 
 			}
 
@@ -442,7 +445,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				Binary target = myFhirContext.newJsonParser().parseResource(Binary.class, response);
 
 				assertThat(target.getContentType()).isEqualTo(ContentType.IMAGE_JPEG.getMimeType());
-				assertThat(target.getData()).isNull();
+				assertNull(target.getData());
 				assertThat(target.getMeta().getVersionId()).isEqualTo("2");
 				attachmentId = target.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 				assertThat(attachmentId).matches("[a-zA-Z0-9]{100}");
@@ -507,7 +510,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			Binary target = myFhirContext.newJsonParser().parseResource(Binary.class, response);
 
 			assertThat(target.getContentType()).isEqualTo(ContentType.IMAGE_JPEG.getMimeType());
-			assertThat(target.getData()).isNull();
+			assertNull(target.getData());
 			assertThat(target.getMeta().getVersionId()).isEqualTo("2");
 			attachmentId = target.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 			assertThat(attachmentId).matches("[a-zA-Z0-9]{100}");
@@ -579,7 +582,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 				DocumentReference target = myFhirContext.newJsonParser().parseResource(DocumentReference.class, response);
 
-				assertThat(target.getContentFirstRep().getAttachment().getData()).isNull();
+				assertNull(target.getContentFirstRep().getAttachment().getData());
 				assertThat(target.getMeta().getVersionId()).isEqualTo("2");
 				attachmentId = target.getContentFirstRep().getAttachment().getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 				assertThat(attachmentId).startsWith("test-blob-id-prefix");
@@ -632,7 +635,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 				DocumentReference target = myFhirContext.newJsonParser().parseResource(DocumentReference.class, response);
 
-				assertThat(target.getContentFirstRep().getAttachment().getData()).isNull();
+				assertNull(target.getContentFirstRep().getAttachment().getData());
 				assertThat(target.getMeta().getVersionId()).isEqualTo("2");
 				attachmentId = target.getContentFirstRep().getAttachment().getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 				assertThat(attachmentId).matches("[a-zA-Z0-9]{100}");
@@ -738,7 +741,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		capture = new ByteArrayOutputStream();
-		assertThat(myStorageSvc.writeBlob(id, attachmentId, capture)).isFalse();
+		assertFalse(myStorageSvc.writeBlob(id, attachmentId, capture));
 		assertThat(capture.size()).isEqualTo(0);
 
 	}

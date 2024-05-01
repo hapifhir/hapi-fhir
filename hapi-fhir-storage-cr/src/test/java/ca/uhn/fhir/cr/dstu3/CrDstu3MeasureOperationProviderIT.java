@@ -121,6 +121,6 @@ public class CrDstu3MeasureOperationProviderIT extends BaseCrDstu3TestServer {
 		var additionalData = readResource(Bundle.class, "Exm105FhirR3MeasureAdditionalData.json");
 		var actual = getActual("2019-01-01", "2019-12-01", "Patient/denom-EXM105-FHIR3", "Measure/measure-EXM105-FHIR3-8.0.000", "individual", additionalData);
 
-		assertThat(actual).isNotNull();
+		assertNotNull(actual);
 	}
 }

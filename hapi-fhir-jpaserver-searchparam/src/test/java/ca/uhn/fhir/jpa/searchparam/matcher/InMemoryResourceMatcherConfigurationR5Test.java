@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.matcher;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -89,7 +90,7 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 	 */
 	public void testUnsupportedIn() {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
-		assertThat(result.supported()).isFalse();
+		assertFalse(result.supported());
 		assertThat(result.getUnsupportedReason()).isEqualTo("Parameter: <code:in> Reason: Qualified parameter not supported");
 	}
 
@@ -97,7 +98,7 @@ public class InMemoryResourceMatcherConfigurationR5Test {
 	@Order(3)
 	public void testUnsupportedNotIn() {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("code" + TokenParamModifier.NOT_IN.getValue() + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
-		assertThat(result.supported()).isFalse();
+		assertFalse(result.supported());
 		assertThat(result.getUnsupportedReason()).isEqualTo("Parameter: <code:not-in> Reason: Qualified parameter not supported");
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
@@ -117,7 +118,7 @@ public class CreateBinaryDstu3Test {
 		post.setEntity(new ByteArrayEntity(new byte[] { 0, 1, 2, 3, 4 }));
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
-			assertThat(ourLastBinary.getContentType()).isNull();
+			assertNull(ourLastBinary.getContentType());
 			assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 		} finally {
 			IOUtils.closeQuietly(status);

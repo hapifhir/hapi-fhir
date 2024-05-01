@@ -1,5 +1,7 @@
 package ca.uhn.fhir.cr.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -93,7 +95,7 @@ class CareGapsProviderIT extends BaseCrR4TestServer
 	}
 
 	private void assertForGaps(Parameters theResult) {
-		assertThat(theResult).isNotNull();
+		assertNotNull(theResult);
 		var dataBundle = (Bundle) theResult.getParameter().get(0).getResource();
 		var detectedIssue = dataBundle.getEntry()
 			.stream()
@@ -104,7 +106,7 @@ class CareGapsProviderIT extends BaseCrR4TestServer
 		Optional<Coding> coding = codeableConcept.getCoding()
 			.stream()
 			.filter(code -> "open-gap".equalsIgnoreCase(code.getCode()) || "closed-gap".equalsIgnoreCase(code.getCode())).findFirst();
-		assertThat(!coding.isEmpty()).isTrue();
+		assertTrue(!coding.isEmpty());
 	}
 
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
@@ -646,7 +647,7 @@ public class ResourceProviderMeaningfulOutcomeMessageR4Test extends BaseResource
 		for (var next : theMessageKey) {
 			String qualifiedKey = BaseStorageDao.class.getName() + "." + next;
 			String pattern = myFhirContext.getLocalizer().getFormatString(qualifiedKey);
-			assertThat(isNotBlank(pattern)).isTrue();
+			assertTrue(isNotBlank(pattern));
 			pattern = pattern
 				.replace("\"", "\\\"")
 				.replace("(", "\\(")

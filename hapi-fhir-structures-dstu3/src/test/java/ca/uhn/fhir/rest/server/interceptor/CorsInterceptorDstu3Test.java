@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -109,7 +110,7 @@ public class CorsInterceptorDstu3Test {
 	@Test
 	public void testCorsConfigMethods() {
 		CorsInterceptor corsInterceptor = new CorsInterceptor();
-		assertThat(corsInterceptor.getConfig()).isNotNull();
+		assertNotNull(corsInterceptor.getConfig());
 		corsInterceptor.setConfig(new CorsConfiguration());
 	}
 

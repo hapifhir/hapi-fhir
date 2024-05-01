@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,7 +14,7 @@ class NoiseCharactersTest {
 	@Test
 	public void testInit() {
 		myFilter.initializeFromClasspath();
-		assertThat(myFilter.getSize() > 0).isTrue();
+		assertTrue(myFilter.getSize() > 0);
 
 		myFilter = new NoiseCharacters();
 	}
@@ -22,8 +24,8 @@ class NoiseCharactersTest {
 		myFilter.add("#x0487");
 
 		char check = (char) Integer.parseInt("487", 16);
-		assertThat(myFilter.isNoise(check)).isTrue();
-		assertThat(myFilter.isNoise('A')).isFalse();
+		assertTrue(myFilter.isNoise(check));
+		assertFalse(myFilter.isNoise('A'));
 	}
 
 	@Test
@@ -31,13 +33,13 @@ class NoiseCharactersTest {
 		myFilter.addRange("#x0487-#x0489");
 
 		char check = (char) Integer.parseInt("487", 16);
-		assertThat(myFilter.isNoise(check)).isTrue();
+		assertTrue(myFilter.isNoise(check));
 		check = (char) Integer.parseInt("488", 16);
-		assertThat(myFilter.isNoise(check)).isTrue();
+		assertTrue(myFilter.isNoise(check));
 		check = (char) Integer.parseInt("489", 16);
-		assertThat(myFilter.isNoise(check)).isTrue();
+		assertTrue(myFilter.isNoise(check));
 
-		assertThat(myFilter.isNoise('A')).isFalse();
+		assertFalse(myFilter.isNoise('A'));
 	}
 
 	@Test
@@ -45,13 +47,13 @@ class NoiseCharactersTest {
 		myFilter.addRange("#x0487-#xA489");
 
 		char check = (char) Integer.parseInt("487", 16);
-		assertThat(myFilter.isNoise(check)).isTrue();
+		assertTrue(myFilter.isNoise(check));
 		check = (char) Integer.parseInt("488", 16);
-		assertThat(myFilter.isNoise(check)).isTrue();
+		assertTrue(myFilter.isNoise(check));
 		check = (char) Integer.parseInt("489", 16);
-		assertThat(myFilter.isNoise(check)).isTrue();
+		assertTrue(myFilter.isNoise(check));
 
-		assertThat(myFilter.isNoise('A')).isFalse();
+		assertFalse(myFilter.isNoise('A'));
 	}
 
 	@Test

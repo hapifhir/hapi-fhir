@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
 import ca.uhn.fhir.model.dstu2.resource.OperationDefinition;
@@ -164,21 +165,21 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 		//@formatter:off
-		assertThat(conf, stringContainsInOrder(
+		assertThat(conf).containsSequence(
 			"<type value=\"Patient\"/>",
 			"<operation>", 
 			"<name value=\"andlist\"/>"
-		));
-		assertThat(conf, stringContainsInOrder(
+		);
+		assertThat(conf).containsSequence(
 				"<type value=\"Patient\"/>",
 				"<operation>", 
 				"<name value=\"nonrepeating\"/>"
-			));
-		assertThat(conf, stringContainsInOrder(
+			);
+		assertThat(conf).containsSequence(
 				"<type value=\"Patient\"/>",
 				"<operation>", 
 				"<name value=\"orlist\"/>"
-			));
+			);
 		//@formatter:on
 
 		/*
@@ -188,7 +189,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		String def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
-		assertThat(def, stringContainsInOrder(
+		assertThat(def).containsSequence(
 			"<parameter>", 
 			"<name value=\"valtok\"/>", 
 			"<use value=\"in\"/>", 
@@ -196,7 +197,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 			"<max value=\"10\"/>", 
 			"<type value=\"string\"/>", 
 			"</parameter>"
-		));
+		);
 		//@formatter:on
 
 	}
@@ -260,7 +261,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		assertThat(ourLastParamValStr).hasSize(1);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALSTR");
-		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).isExact()).isTrue();
+		assertTrue(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).isExact());
 		assertThat(ourLastParamValTok).hasSize(1);
 		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("VALTOKA");

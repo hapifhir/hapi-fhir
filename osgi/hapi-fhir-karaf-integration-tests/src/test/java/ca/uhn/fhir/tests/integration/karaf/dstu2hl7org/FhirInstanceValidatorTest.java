@@ -107,7 +107,7 @@ public class FhirInstanceValidatorTest {
 		ourLog.info(encoded);
 
 		assertTrue(result.isSuccessful());
-		assertThat(encoded, not(containsString("A parameter must have a value or a resource, but not both")));
+		assertThat(encoded).doesNotContain("A parameter must have a value or a resource, but not both");
 	}
 
 	@Test

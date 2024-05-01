@@ -1,5 +1,7 @@
 package ca.uhn.fhir.testmindeps;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.IdentifierDt;
@@ -53,10 +55,10 @@ public class ReadTest {
 			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class,responseContent).getIdentifierFirstRep();
 
 			assertThat(dt.getSystemElement().getValueAsString()).isEqualTo("1");
-			assertThat(dt.getValueElement().getValueAsString()).isNull();
+			assertNull(dt.getValueElement().getValueAsString());
 			
 			org.apache.http.Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
-			assertThat(cl).isNotNull();
+			assertNotNull(cl);
 			assertThat(cl.getValue()).isEqualTo("http://localhost:" + ourPort + "/Patient/1/_history/1");
 			
 		}
@@ -77,11 +79,11 @@ public class ReadTest {
 			assertThat(status.getEntity().getContentType().getValue()).isEqualTo("application/x-foo");
 			
 			org.apache.http.Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
-			assertThat(cl).isNotNull();
+			assertNotNull(cl);
 			assertThat(cl.getValue()).isEqualTo("http://localhost:" + ourPort + "/Binary/1/_history/1");
 			
 			org.apache.http.Header cd = status.getFirstHeader("content-disposition");
-			assertThat(cd).isNotNull();
+			assertNotNull(cd);
 			assertThat(cd.getValue()).isEqualTo("Attachment;");
 
 			assertThat(responseContent.length).isEqualTo(4);
@@ -107,7 +109,7 @@ public class ReadTest {
 			assertThat(dt.getValueElement().getValueAsString()).isEqualTo("2");
 
 			org.apache.http.Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
-			assertThat(cl).isNotNull();
+			assertNotNull(cl);
 			assertThat(cl.getValue()).isEqualTo("http://localhost:" + ourPort + "/Patient/1/_history/1");
 		}
 	}

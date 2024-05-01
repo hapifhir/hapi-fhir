@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -1054,8 +1056,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	private JobInstance verifyBulkExportResults(BulkExportJobParameters theOptions, List<String> theContainedList, List<String> theExcludedList) {
 		Batch2JobStartResponse startResponse = startNewJob(theOptions);
 
-		assertThat(startResponse).isNotNull();
-		assertThat(startResponse.isUsesCachedResult()).isFalse();
+		assertNotNull(startResponse);
+		assertFalse(startResponse.isUsesCachedResult());
 
 		// Run a scheduled pass to build the export
 		JobInstance jobInstance = myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId(), 120);

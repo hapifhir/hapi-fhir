@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -65,7 +68,7 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 	public void testValidateCodeInCodeSystem_BlankCode_ReturnsNull() {
 		IValidationSupport.CodeValidationResult outcome = mySvc
 			.validateCode(null, null, CODE_SYSTEM, null, DISPLAY, null);
-		assertThat(outcome).isNull();
+		assertNull(outcome);
 	}
 
 	@Test
@@ -74,10 +77,10 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 
 		IValidationSupport.CodeValidationResult outcome = mySvc
 			.validateCode(null, null, CODE_SYSTEM, CODE, null, null);
-		assertThat(outcome).isNotNull();
+		assertNotNull(outcome);
 		assertThat(outcome.getCode()).isEqualTo(CODE);
-		assertThat(outcome.getSeverity()).isNull();
-		assertThat(outcome.getMessage()).isNull();
+		assertNull(outcome.getSeverity());
+		assertNull(outcome.getMessage());
 
 		assertThat(ourCodeSystemProvider.myLastCode.getCode()).isEqualTo(CODE);
 		assertThat(ourCodeSystemProvider.myLastUrl.getValueAsString()).isEqualTo(CODE_SYSTEM);
@@ -89,11 +92,11 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 
 		IValidationSupport.CodeValidationResult outcome = mySvc
 			.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, null);
-		assertThat(outcome).isNotNull();
+		assertNotNull(outcome);
 		assertThat(outcome.getCode()).isEqualTo(CODE);
 		assertThat(outcome.getDisplay()).isEqualTo(DISPLAY);
-		assertThat(outcome.getSeverity()).isNull();
-		assertThat(outcome.getMessage()).isNull();
+		assertNull(outcome.getSeverity());
+		assertNull(outcome.getMessage());
 
 		assertThat(ourCodeSystemProvider.myLastCode.getCode()).isEqualTo(CODE);
 		assertThat(ourCodeSystemProvider.myLastDisplay.getValue()).isEqualTo(DISPLAY);
@@ -107,11 +110,11 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 
 		IValidationSupport.CodeValidationResult outcome = mySvc
 			.validateCode(null, null, CODE_SYSTEM, CODE, null, null);
-		assertThat(outcome).isNotNull();
+		assertNotNull(outcome);
 		assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.ERROR);
 		assertThat(outcome.getMessage()).isEqualTo(SAMPLE_MESSAGE);
 
-		assertThat(((BooleanType) ourCodeSystemProvider.myNextReturnParams.getParameterValue("result")).booleanValue()).isFalse();
+		assertFalse(((BooleanType) ourCodeSystemProvider.myNextReturnParams.getParameterValue("result")).booleanValue());
 	}
 
 	@Test
@@ -120,10 +123,10 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 
 		IValidationSupport.CodeValidationResult outcome = mySvc
 			.validateCode(null, null, CODE_SYSTEM, CODE, null, VALUE_SET_URL);
-		assertThat(outcome).isNotNull();
+		assertNotNull(outcome);
 		assertThat(outcome.getCode()).isEqualTo(CODE);
-		assertThat(outcome.getSeverity()).isNull();
-		assertThat(outcome.getMessage()).isNull();
+		assertNull(outcome.getSeverity());
+		assertNull(outcome.getMessage());
 
 		assertThat(ourValueSetProvider.myLastCode.getCode()).isEqualTo(CODE);
 		assertThat(ourValueSetProvider.myLastUrl.getValueAsString()).isEqualTo(VALUE_SET_URL);
@@ -137,11 +140,11 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 
 		IValidationSupport.CodeValidationResult outcome = mySvc
 			.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
-		assertThat(outcome).isNotNull();
+		assertNotNull(outcome);
 		assertThat(outcome.getCode()).isEqualTo(CODE);
 		assertThat(outcome.getDisplay()).isEqualTo(DISPLAY);
-		assertThat(outcome.getSeverity()).isNull();
-		assertThat(outcome.getMessage()).isNull();
+		assertNull(outcome.getSeverity());
+		assertNull(outcome.getMessage());
 
 		assertThat(ourValueSetProvider.myLastCode.getCode()).isEqualTo(CODE);
 		assertThat(ourValueSetProvider.myLastDisplay.getValue()).isEqualTo(DISPLAY);

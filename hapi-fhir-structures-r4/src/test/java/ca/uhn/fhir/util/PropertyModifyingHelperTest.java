@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.Address;
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ public class PropertyModifyingHelperTest {
 
 		assertThat(address.getLine()).hasSize(2);
 		assertThat(address.getCity()).isEqualTo("city");
-		assertThat(address.getCountry()).isNull();
+		assertNull(address.getCountry());
 
 		helper.setDelimiter(";");
 		assertThat(helper.getFields("line", "city")).isEqualTo("line1;line2;city");

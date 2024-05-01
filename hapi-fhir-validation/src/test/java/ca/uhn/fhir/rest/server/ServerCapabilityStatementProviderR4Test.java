@@ -1,5 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -192,9 +196,9 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		CapabilityStatementRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
 		assertThat(res.getType()).isEqualTo("Patient");
 
-		assertThat(res.getConditionalCreate()).isTrue();
+		assertTrue(res.getConditionalCreate());
 		assertThat(res.getConditionalDelete()).isEqualTo(ConditionalDeleteStatus.MULTIPLE);
-		assertThat(res.getConditionalUpdate()).isTrue();
+		assertTrue(res.getConditionalUpdate());
 	}
 
 	@Test
@@ -314,7 +318,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 			}
 		}
 
-		assertThat(found).isTrue();
+		assertTrue(found);
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = validate(conformance);
 
@@ -340,9 +344,9 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		CapabilityStatementRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
 		assertThat(res.getType()).isEqualTo("Patient");
 
-		assertThat(res.getConditionalCreateElement().getValue()).isNull();
-		assertThat(res.getConditionalDeleteElement().getValue()).isNull();
-		assertThat(res.getConditionalUpdateElement().getValue()).isNull();
+		assertNull(res.getConditionalCreateElement().getValue());
+		assertNull(res.getConditionalDeleteElement().getValue());
+		assertNull(res.getConditionalUpdateElement().getValue());
 	}
 
 	@Test
@@ -551,7 +555,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 				found = true;
 			}
 		}
-		assertThat(found).isTrue();
+		assertTrue(found);
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = validate(conformance);
@@ -605,7 +609,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 				found = true;
 			}
 		}
-		assertThat(found).isTrue();
+		assertTrue(found);
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = validate(conformance);
@@ -637,7 +641,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 				found = true;
 			}
 		}
-		assertThat(found).isTrue();
+		assertTrue(found);
 		CapabilityStatement conformance = (CapabilityStatement) sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = validate(conformance);
@@ -828,9 +832,9 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		assertThat(operationDefinition.getCode()).isEqualTo("graphql");
 		assertThat(operationDefinition.getUrl()).isEqualTo("http://localhost/baseR4/OperationDefinition/Global-is-graphql");
 		assertThat(operationDefinition.getDescription()).isEqualTo("This operation invokes a GraphQL expression for fetching an joining a graph of resources, returning them in a custom format.");
-		assertThat(operationDefinition.getSystem()).isTrue();
-		assertThat(operationDefinition.getType()).isFalse();
-		assertThat(operationDefinition.getInstance()).isTrue();
+		assertTrue(operationDefinition.getSystem());
+		assertFalse(operationDefinition.getType());
+		assertTrue(operationDefinition.getInstance());
 	}
 
 	@Test
@@ -913,9 +917,9 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		assertThat(operationDefinition.getCode()).isEqualTo("diff");
 		assertThat(operationDefinition.getUrl()).isEqualTo("http://localhost/baseR4/OperationDefinition/Global-is-diff");
 		assertThat(operationDefinition.getDescription()).isEqualTo("This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.");
-		assertThat(operationDefinition.getSystem()).isTrue();
-		assertThat(operationDefinition.getType()).isFalse();
-		assertThat(operationDefinition.getInstance()).isTrue();
+		assertTrue(operationDefinition.getSystem());
+		assertFalse(operationDefinition.getType());
+		assertTrue(operationDefinition.getInstance());
 	}
 
 	@Test
@@ -981,7 +985,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		// At Server Level
 		CapabilityStatementRestComponent rest = opDef.getRest().get(0);
 		operation = rest.getOperation().stream().filter(t -> t.getName().equals("expunge")).findAny().orElse(null);
-		assertThat(operation).isNull();
+		assertNull(operation);
 
 		// Fetch OperationDefinition
 		IdType id = new IdType("http://localhost/baseR4/OperationDefinition/Patient-it-expunge");
@@ -991,9 +995,9 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		assertThat(operationDefinition.getCode()).isEqualTo("expunge");
 		assertThat(operationDefinition.getUrl()).isEqualTo("http://localhost/baseR4/OperationDefinition/Patient-it-expunge");
 		assertThat(operationDefinition.getDescription()).isEqualTo("This is the expunge operation");
-		assertThat(operationDefinition.getSystem()).isFalse();
-		assertThat(operationDefinition.getType()).isTrue();
-		assertThat(operationDefinition.getInstance()).isTrue();
+		assertFalse(operationDefinition.getSystem());
+		assertTrue(operationDefinition.getType());
+		assertTrue(operationDefinition.getInstance());
 
 	}
 
@@ -1058,7 +1062,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		assertThat(operationComponent.getName()).isEqualTo(NamedQueryPlainProvider.QUERY_NAME);
 
 		String operationReference = operationComponent.getDefinition();
-		assertThat(operationReference).isNotNull();
+		assertNotNull(operationReference);
 
 		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
 		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
@@ -1101,7 +1105,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 		CapabilityStatementRestResourceComponent restComponent = conformance.getRestFirstRep().getResource().stream().filter(t -> t.getType().equals("Patient")).findFirst().orElseThrow(() -> new IllegalArgumentException());
 		CapabilityStatementRestResourceOperationComponent operationComponent = restComponent.getOperation().get(0);
 		String operationReference = operationComponent.getDefinition();
-		assertThat(operationReference).isNotNull();
+		assertNotNull(operationReference);
 
 		OperationDefinition operationDefinition = (OperationDefinition) sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
 		ourLog.debug(myCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));

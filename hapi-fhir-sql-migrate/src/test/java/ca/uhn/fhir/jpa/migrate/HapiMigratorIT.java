@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
@@ -40,7 +41,7 @@ class HapiMigratorIT {
 		HapiMigrator migrator = buildMigrator();
 		migrator.createMigrationTableIfRequired();
 		Integer count = myJdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + MIGRATION_TABLENAME, Integer.class);
-		assertThat(count > 0).isTrue();
+		assertTrue(count > 0);
 		HapiMigrationDao migrationDao = new HapiMigrationDao(myDataSource, DriverTypeEnum.H2_EMBEDDED, MIGRATION_TABLENAME);
 		myMigrationStorageSvc = new HapiMigrationStorageSvc(migrationDao);
 

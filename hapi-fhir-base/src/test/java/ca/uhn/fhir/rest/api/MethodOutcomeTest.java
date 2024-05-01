@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.api;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -24,7 +25,7 @@ class MethodOutcomeTest {
 
 		Optional<String> firstHeader = myMethodOutcome.getFirstResponseHeader("some-header");
 
-		assertThat(firstHeader.isEmpty()).isTrue();
+		assertTrue(firstHeader.isEmpty());
 	}
 
 	@Test

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.mdm.svc.testmodels.BlockRuleTestCase;
 import ca.uhn.fhir.mdm.blocklist.json.BlockListJson;
@@ -530,6 +531,6 @@ public class BlockRuleEvaluationSvcImplTest {
 			.addGiven("Jane");
 
 		// test
-		assertThat(myRuleEvaluationSvc.isMdmMatchingBlocked(patient)).isFalse();
+		assertFalse(myRuleEvaluationSvc.isMdmMatchingBlocked(patient));
 	}
 }

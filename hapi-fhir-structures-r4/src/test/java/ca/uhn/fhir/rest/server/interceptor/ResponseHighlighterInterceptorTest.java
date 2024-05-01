@@ -1,5 +1,8 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -199,7 +202,7 @@ public class ResponseHighlighterInterceptorTest {
 		status.close();
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase()).isEqualTo(Constants.CT_FHIR_JSON + ";charset=utf-8");
-		assertThat(status.getFirstHeader("Content-Disposition")).isNull();
+		assertNull(status.getFirstHeader("Content-Disposition"));
 		assertThat(responseContent).isEqualTo("{\"resourceType\":\"Binary\",\"id\":\"foo\",\"contentType\":\"foo\",\"data\":\"AQIDBA==\"}");
 
 	}
@@ -239,7 +242,7 @@ public class ResponseHighlighterInterceptorTest {
 		reqDetails.setServletRequest(req);
 
 		// true means it decided to not handle the request..
-		assertThat(ourInterceptor.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp)).isTrue();
+		assertTrue(ourInterceptor.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 
 	}
 
@@ -259,7 +262,7 @@ public class ResponseHighlighterInterceptorTest {
 		bundle.setType(Bundle.BundleType.TRANSACTION);
 
 		String outcome = ourInterceptor.extractNarrativeHtml(newRequest(), bundle);
-		assertThat(outcome).isNull();
+		assertNull(outcome);
 	}
 
 	@Test
@@ -289,7 +292,7 @@ public class ResponseHighlighterInterceptorTest {
 		parameters.addParameter("Foo", new StringType("<div>HELLO</div>"));
 
 		String outcome = ourInterceptor.extractNarrativeHtml(newRequest(), parameters);
-		assertThat(outcome).isNull();
+		assertNull(outcome);
 	}
 
 	@Test
@@ -298,7 +301,7 @@ public class ResponseHighlighterInterceptorTest {
 		parameters.addParameter("Narrative", new Quantity(123L));
 
 		String outcome = ourInterceptor.extractNarrativeHtml(newRequest(), parameters);
-		assertThat(outcome).isNull();
+		assertNull(outcome);
 	}
 
 	@Test
@@ -307,7 +310,7 @@ public class ResponseHighlighterInterceptorTest {
 		parameters.addParameter("Narrative", (Type)null);
 
 		String outcome = ourInterceptor.extractNarrativeHtml(newRequest(), parameters);
-		assertThat(outcome).isNull();
+		assertNull(outcome);
 	}
 
 	@Test
@@ -316,7 +319,7 @@ public class ResponseHighlighterInterceptorTest {
 		parameters.addParameter("Narrative", new StringType("hello"));
 
 		String outcome = ourInterceptor.extractNarrativeHtml(newRequest(), parameters);
-		assertThat(outcome).isNull();
+		assertNull(outcome);
 	}
 
 	@Test
@@ -503,7 +506,7 @@ public class ResponseHighlighterInterceptorTest {
 		ourLog.info("Resp: {}", responseContent);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
 
-		assertThat(responseContent, stringContainsInOrder("<span class='hlTagName'>OperationOutcome</span>", "Unknown resource type 'Foobar' - Server knows how to handle"));
+		assertThat(responseContent).containsSequence("<span class='hlTagName'>OperationOutcome</span>", "Unknown resource type 'Foobar' - Server knows how to handle");
 
 	}
 
@@ -534,7 +537,7 @@ public class ResponseHighlighterInterceptorTest {
 		ourLog.info("Resp: {}", responseContent);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
-		assertThat(responseContent, stringContainsInOrder("<span class='hlTagName'>OperationOutcome</span>", "This is the base URL of FHIR server. Unable to handle this request, as it does not contain a resource type or operation name."));
+		assertThat(responseContent).containsSequence("<span class='hlTagName'>OperationOutcome</span>", "This is the base URL of FHIR server. Unable to handle this request, as it does not contain a resource type or operation name.");
 
 	}
 
@@ -549,7 +552,7 @@ public class ResponseHighlighterInterceptorTest {
 		ourLog.info("Resp: {}", responseContent);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-		assertThat(responseContent, stringContainsInOrder("&quot;foo&quot;"));
+		assertThat(responseContent).containsSequence("&quot;foo&quot;");
 
 	}
 
@@ -564,7 +567,7 @@ public class ResponseHighlighterInterceptorTest {
 		ourLog.info("Resp: {}", responseContent);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-		assertThat(responseContent, stringContainsInOrder("{\"foo\":\"bar\"}"));
+		assertThat(responseContent).containsSequence("{\"foo\":\"bar\"}");
 
 	}
 
@@ -593,7 +596,7 @@ public class ResponseHighlighterInterceptorTest {
 		ResourceNotFoundException exception = new ResourceNotFoundException("Not found");
 		exception.setOperationOutcome(new OperationOutcome().addIssue(new OperationOutcome.OperationOutcomeIssueComponent().setDiagnostics("Hello")));
 
-		assertThat(ourInterceptor.handleException(reqDetails, exception, req, resp)).isFalse();
+		assertFalse(ourInterceptor.handleException(reqDetails, exception, req, resp));
 
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
@@ -617,7 +620,7 @@ public class ResponseHighlighterInterceptorTest {
 
 			ourLog.info("Resp: {}", responseContent);
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
-			assertThat(responseContent, stringContainsInOrder("HELP IM A BUG"));
+			assertThat(responseContent).containsSequence("HELP IM A BUG");
 
 		} finally {
 
@@ -651,7 +654,7 @@ public class ResponseHighlighterInterceptorTest {
 		reqDetails.setServletRequest(req);
 
 		// false means it decided to handle the request..
-		assertThat(ourInterceptor.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp)).isFalse();
+		assertFalse(ourInterceptor.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 	}
 
 	/**
@@ -679,7 +682,7 @@ public class ResponseHighlighterInterceptorTest {
 		reqDetails.setServletRequest(req);
 
 		// false means it decided to handle the request..
-		assertThat(ourInterceptor.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp)).isFalse();
+		assertFalse(ourInterceptor.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 	}
 
 	@Test
@@ -705,7 +708,7 @@ public class ResponseHighlighterInterceptorTest {
 		reqDetails.setServletRequest(req);
 
 		// true means it decided to not handle the request..
-		assertThat(ourInterceptor.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp)).isTrue();
+		assertTrue(ourInterceptor.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 
 	}
 
@@ -730,12 +733,12 @@ public class ResponseHighlighterInterceptorTest {
 		reqDetails.setServer(server);
 		reqDetails.setServletRequest(req);
 
-		assertThat(ourInterceptor.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp)).isFalse();
+		assertFalse(ourInterceptor.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
 		assertThat(output).contains("<span class='hlTagName'>Patient</span>");
-		assertThat(output, stringContainsInOrder("<body>", "<pre>", "<div", "</pre>"));
+		assertThat(output).containsSequence("<body>", "<pre>", "<div", "</pre>");
 		assertThat(output).contains("<a href=\"?_format=json\">");
 	}
 
@@ -761,12 +764,12 @@ public class ResponseHighlighterInterceptorTest {
 		reqDetails.setServer(server);
 		reqDetails.setServletRequest(req);
 
-		assertThat(ourInterceptor.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp)).isFalse();
+		assertFalse(ourInterceptor.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
 		assertThat(output).contains("<span class='hlTagName'>Patient</span>");
-		assertThat(output, stringContainsInOrder("<body>", "<pre>", "<div", "</pre>"));
+		assertThat(output).containsSequence("<body>", "<pre>", "<div", "</pre>");
 	}
 
 	/**
@@ -793,7 +796,7 @@ public class ResponseHighlighterInterceptorTest {
 		reqDetails.setServer(server);
 		reqDetails.setServletRequest(req);
 
-		assertThat(ourInterceptor.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp)).isFalse();
+		assertFalse(ourInterceptor.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
@@ -822,7 +825,7 @@ public class ResponseHighlighterInterceptorTest {
 		reqDetails.setServletRequest(req);
 
 		// True here means the interceptor didn't handle the request, because HTML wasn't the top ranked accept header
-		assertThat(ourInterceptor.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp)).isTrue();
+		assertTrue(ourInterceptor.outgoingResponse(reqDetails, new ResponseDetails(resource), req, resp));
 	}
 
 	/**
@@ -1033,7 +1036,7 @@ public class ResponseHighlighterInterceptorTest {
 
 		final HttpServletResponse servletResponse = mock(HttpServletResponse.class);
 
-		assertThat(ourInterceptor.outgoingResponse(requestDetails, responseObject, servletRequest, servletResponse)).isTrue();
+		assertTrue(ourInterceptor.outgoingResponse(requestDetails, responseObject, servletRequest, servletResponse));
 	}
 
 	class TestServletRequestDetails extends ServletRequestDetails {

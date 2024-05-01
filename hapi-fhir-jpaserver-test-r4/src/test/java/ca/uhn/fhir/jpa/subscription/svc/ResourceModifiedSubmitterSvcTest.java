@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.svc;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.entity.PersistedResourceModifiedMessageEntityPK;
 import ca.uhn.fhir.jpa.model.entity.ResourceModifiedEntity;
@@ -134,7 +136,7 @@ public class ResourceModifiedSubmitterSvcTest {
 		boolean processed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(resourceModified);
 
 		// verify
-		assertThat(processed).isTrue();
+		assertTrue(processed);
 
 		ArgumentCaptor<ILoggingEvent> logEvent = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myListAppender, atLeast(2))
@@ -151,8 +153,8 @@ public class ResourceModifiedSubmitterSvcTest {
 				hasInflationException = true;
 			}
 		}
-		assertThat(hasDeleteException).isTrue();
-		assertThat(hasInflationException).isTrue();
+		assertTrue(hasDeleteException);
+		assertTrue(hasInflationException);
 	}
 
 	@Test
@@ -182,7 +184,7 @@ public class ResourceModifiedSubmitterSvcTest {
 		boolean processed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(resourceModified);
 
 		// then
-		assertThat(processed).isTrue();
+		assertTrue(processed);
 
 		// verify
 		verify(myChannelProducer)
@@ -190,7 +192,7 @@ public class ResourceModifiedSubmitterSvcTest {
 		ArgumentCaptor<ILoggingEvent> loggingCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		verify(myListAppender).doAppend(loggingCaptor.capture());
 		ILoggingEvent event = loggingCaptor.getValue();
-		assertThat(event).isNotNull();
+		assertNotNull(event);
 		assertThat(event.getThrowableProxy().getMessage()).contains(exceptionString);
 	}
 

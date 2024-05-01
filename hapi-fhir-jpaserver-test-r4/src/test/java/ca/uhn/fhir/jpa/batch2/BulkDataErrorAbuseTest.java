@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -157,7 +159,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 			if (futures.size() > 1000) {
 				while (futures.size() > 500) {
 					// This should always return true, but it'll throw an exception if we failed
-					assertThat(futures.remove(0).get()).isTrue();
+					assertTrue(futures.remove(0).get());
 				}
 			}
 		}
@@ -172,7 +174,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		ourLog.info("All tasks complete.  Verify results.");
 		for (var next : futures) {
 			// This should always return true, but it'll throw an exception if we failed
-			assertThat(next.get()).isTrue();
+			assertTrue(next.get());
 		}
 
 		ourLog.info("Finished task execution");
@@ -240,7 +242,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		startRequest.setUseCache(false);
 		startRequest.setParameters(theOptions);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(mySrd, startRequest);
-		assertThat(startResponse).isNotNull();
+		assertNotNull(startResponse);
 		return startResponse.getInstanceId();
 	}
 

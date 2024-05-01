@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
@@ -155,7 +156,7 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		try {
 			String response = IOUtils.toString(http.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
-			assertThat(response, (containsString("_format=json")));
+			assertThat(response).contains("_format=json");
 			assertThat(http.getStatusLine().getStatusCode()).isEqualTo(200);
 		} finally {
 			http.close();
@@ -327,10 +328,10 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		Bundle bundleResp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
 		IdDt id = new IdDt(bundleResp.getEntry().get(0).getResponse().getLocation());
 		assertThat(id.getResourceType()).isEqualTo("Patient");
-		assertThat(id.hasIdPart()).isTrue();
-		assertThat(id.isIdPartValidLong()).isTrue();
-		assertThat(id.hasVersionIdPart()).isTrue();
-		assertThat(id.isVersionIdPartValidLong()).isTrue();
+		assertTrue(id.hasIdPart());
+		assertTrue(id.isIdPartValidLong());
+		assertTrue(id.hasVersionIdPart());
+		assertTrue(id.isVersionIdPartValidLong());
 	}
 
 	@Test

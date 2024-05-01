@@ -1,6 +1,8 @@
 package ca.uhn.fhir.cr.r4;
 
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePackageProvider;
 import ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePopulateProvider;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -30,9 +32,9 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 			null, null, null, null,
 			requestDetails);
 
-		assertThat(result).isNotNull();
+		assertNotNull(result);
 		assertThat(result.getSubject().getReference()).isEqualTo("Patient/" + theSubject);
-		assertThat(result.getItem().get(0).getItem().get(0).hasAnswer()).isTrue();
+		assertTrue(result.getItem().get(0).getItem().get(0).hasAnswer());
 	}
 
 	@Test
@@ -47,8 +49,8 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 			null, null, null, null,
 			requestDetails);
 
-		assertThat(result).isNotNull();
-		assertThat(result.getItem().get(0).getItem().get(0).hasInitial()).isTrue();
+		assertNotNull(result);
+		assertTrue(result.getItem().get(0).getItem().get(0).hasInitial());
 	}
 
 	@Test
@@ -59,7 +61,7 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 			"http://example.org/sdh/dtr/aslp/Questionnaire/ASLPA1", "true",
 			requestDetails);
 
-		assertThat(result).isNotNull();
+		assertNotNull(result);
 		assertThat(result.getEntry()).hasSize(11);
 		assertThat(result.getEntry().get(0).getResource().fhirType()).isEqualTo(Enumerations.FHIRAllTypes.QUESTIONNAIRE);
 	}

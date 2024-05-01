@@ -1,5 +1,8 @@
 package ca.uhn.fhir.rest.api;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -14,8 +17,8 @@ public class CacheControlDirectiveTest {
 		List<String> values = Arrays.asList(Constants.CACHE_CONTROL_NO_CACHE);
 		CacheControlDirective ccd = new CacheControlDirective();
 		ccd.parse(values);
-		assertThat(ccd.isNoCache()).isTrue();
-		assertThat(ccd.isNoStore()).isFalse();
+		assertTrue(ccd.isNoCache());
+		assertFalse(ccd.isNoStore());
 	}
 
 	@Test
@@ -23,9 +26,9 @@ public class CacheControlDirectiveTest {
 		List<String> values = Arrays.asList(Constants.CACHE_CONTROL_NO_CACHE + "  ,   " + Constants.CACHE_CONTROL_NO_STORE);
 		CacheControlDirective ccd = new CacheControlDirective();
 		ccd.parse(values);
-		assertThat(ccd.isNoCache()).isTrue();
-		assertThat(ccd.isNoStore()).isTrue();
-		assertThat(ccd.getMaxResults()).isNull();
+		assertTrue(ccd.isNoCache());
+		assertTrue(ccd.isNoStore());
+		assertNull(ccd.getMaxResults());
 	}
 
 	@Test
@@ -33,8 +36,8 @@ public class CacheControlDirectiveTest {
 		List<String> values = Arrays.asList(Constants.CACHE_CONTROL_NO_STORE + ", "+ Constants.CACHE_CONTROL_MAX_RESULTS + "=5");
 		CacheControlDirective ccd = new CacheControlDirective();
 		ccd.parse(values);
-		assertThat(ccd.isNoCache()).isFalse();
-		assertThat(ccd.isNoStore()).isTrue();
+		assertFalse(ccd.isNoCache());
+		assertTrue(ccd.isNoStore());
 		assertThat(ccd.getMaxResults().intValue()).isEqualTo(5);
 	}
 
@@ -43,16 +46,16 @@ public class CacheControlDirectiveTest {
 		List<String> values = Arrays.asList(Constants.CACHE_CONTROL_NO_STORE + ", "+ Constants.CACHE_CONTROL_MAX_RESULTS + "=A");
 		CacheControlDirective ccd = new CacheControlDirective();
 		ccd.parse(values);
-		assertThat(ccd.isNoCache()).isFalse();
-		assertThat(ccd.isNoStore()).isTrue();
-		assertThat(ccd.getMaxResults()).isNull();
+		assertFalse(ccd.isNoCache());
+		assertTrue(ccd.isNoStore());
+		assertNull(ccd.getMaxResults());
 	}
 
 	@Test
 	public void testParseNull() {
 		CacheControlDirective ccd = new CacheControlDirective();
 		ccd.parse(null);
-		assertThat(ccd.isNoCache()).isFalse();
-		assertThat(ccd.isNoStore()).isFalse();
+		assertFalse(ccd.isNoCache());
+		assertFalse(ccd.isNoStore());
 	}
 }

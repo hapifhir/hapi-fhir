@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,8 +32,8 @@ public class SubscriptionCriteriaParserTest {
 		String expression = "[*]";
 		SubscriptionCriteriaParser.SubscriptionCriteria criteria = SubscriptionCriteriaParser.parse(expression);
 		assertThat(criteria.getType()).isEqualTo(SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION);
-		assertThat(criteria.getCriteria()).isNull();
-		assertThat(criteria.getApplicableResourceTypes()).isNull();
+		assertNull(criteria.getCriteria());
+		assertNull(criteria.getApplicableResourceTypes());
 		assertThat(criteria.toString()).isEqualTo("SubscriptionCriteriaParser.SubscriptionCriteria[type=STARTYPE_EXPRESSION]");
 	}
 
@@ -41,18 +42,18 @@ public class SubscriptionCriteriaParserTest {
 		String expression = "[Patient   , Observation]";
 		SubscriptionCriteriaParser.SubscriptionCriteria criteria = SubscriptionCriteriaParser.parse(expression);
 		assertThat(criteria.getType()).isEqualTo(SubscriptionCriteriaParser.TypeEnum.MULTITYPE_EXPRESSION);
-		assertThat(criteria.getCriteria()).isNull();
+		assertNull(criteria.getCriteria());
 		assertThat(criteria.getApplicableResourceTypes()).containsExactlyInAnyOrder("Patient", "Observation");
 		assertThat(criteria.toString()).isEqualTo("SubscriptionCriteriaParser.SubscriptionCriteria[type=MULTITYPE_EXPRESSION,applicableResourceTypes=[Observation, Patient]]");
 	}
 
 	@Test
 	public void testInvalidExpression() {
-		assertThat(SubscriptionCriteriaParser.parse("[]")).isNull();
-		assertThat(SubscriptionCriteriaParser.parse("")).isNull();
-		assertThat(SubscriptionCriteriaParser.parse(null)).isNull();
-		assertThat(SubscriptionCriteriaParser.parse(" ")).isNull();
-		assertThat(SubscriptionCriteriaParser.parse("#123")).isNull();
+		assertNull(SubscriptionCriteriaParser.parse("[]"));
+		assertNull(SubscriptionCriteriaParser.parse(""));
+		assertNull(SubscriptionCriteriaParser.parse(null));
+		assertNull(SubscriptionCriteriaParser.parse(" "));
+		assertNull(SubscriptionCriteriaParser.parse("#123"));
 	}
 
 }

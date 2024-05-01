@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil;
@@ -66,11 +68,11 @@ public class ResourceProviderR4CodeSystemPropertiesTest extends BaseResourceProv
 
 		// verify
 		if (theExpectedReturnedProperties.isEmpty()) {
-			assertThat(parameters.hasParameter("property")).isFalse();
+			assertFalse(parameters.hasParameter("property"));
 			return;
 		}
 
-		assertThat(parameters.hasParameter("property")).isTrue();
+		assertTrue(parameters.hasParameter("property"));
 		Iterator<ParametersParameterComponent> parameterPropertyIterator = parameters.getParameters("property").iterator();
 
 		Iterator<ConceptPropertyComponent> propertyIterator = concept.getProperty().stream()
@@ -79,7 +81,7 @@ public class ResourceProviderR4CodeSystemPropertiesTest extends BaseResourceProv
 		while (propertyIterator.hasNext()) {
 			ConceptPropertyComponent property = propertyIterator.next();
 
-			assertThat(parameterPropertyIterator.hasNext()).isTrue();
+			assertTrue(parameterPropertyIterator.hasNext());
 			ParametersParameterComponent parameter = parameterPropertyIterator.next();
 			Iterator<ParametersParameterComponent> parameterPartIterator = parameter.getPart().iterator();
 
@@ -89,9 +91,9 @@ public class ResourceProviderR4CodeSystemPropertiesTest extends BaseResourceProv
 
 			parameter = parameterPartIterator.next();
 			assertThat(parameter.getName()).isEqualTo("value");
-			assertThat(property.getValue().equalsShallow(parameter.getValue())).isTrue();
+			assertTrue(property.getValue().equalsShallow(parameter.getValue()));
 
-			assertThat(parameterPartIterator.hasNext()).isFalse();
+			assertFalse(parameterPartIterator.hasNext());
 		}
 	}
 }

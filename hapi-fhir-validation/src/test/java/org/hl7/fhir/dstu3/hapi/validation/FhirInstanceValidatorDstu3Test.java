@@ -1,5 +1,7 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -335,7 +337,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 			Patient p = loadResource("/dstu3/nl/nl-core-patient-instance.json", Patient.class);
 			ValidationResult result = val.validateWithResult(p);
 			List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(result);
-			assertThat(result.isSuccessful()).isTrue();
+			assertTrue(result.isSuccessful());
 			assertThat(all).isEmpty();
 		}
 
@@ -343,7 +345,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		{
 			Patient p = loadResource("/dstu3/nl/nl-core-patient-instance-invalid-country.json", Patient.class);
 			ValidationResult result = val.validateWithResult(p);
-			assertThat(result.isSuccessful()).isFalse();
+			assertFalse(result.isSuccessful());
 			List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 			assertThat(all).hasSize(1);
 			assertThat(all.get(0).getSeverity()).isEqualTo(ResultSeverityEnum.ERROR);
@@ -377,7 +379,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(encoded);
 
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 	}
 
 	/**
@@ -541,9 +543,9 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 	@Test
 	public void testIsNoTerminologyChecks() {
-		assertThat(myInstanceVal.isNoTerminologyChecks()).isFalse();
+		assertFalse(myInstanceVal.isNoTerminologyChecks());
 		myInstanceVal.setNoTerminologyChecks(true);
-		assertThat(myInstanceVal.isNoTerminologyChecks()).isTrue();
+		assertTrue(myInstanceVal.isNoTerminologyChecks());
 	}
 
 	/**
@@ -723,7 +725,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		fpOutput = fp.evaluate(bundle.getEntry().get(0).getResource(), "component.where(code = %resource.code).empty()");
 		assertThat(fpOutput).hasSize(1);
 		bool = (BooleanType) fpOutput.get(0);
-		assertThat(bool.getValue()).isTrue();
+		assertTrue(bool.getValue());
 		//
 		// fpOutput = fp.evaluate(bundle, "component.where(code = %resource.code).empty()");
 		// assertEquals(1, fpOutput.size());
@@ -778,7 +780,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 		ValidationResult output = myVal.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
-		assertThat(output.isSuccessful()).isTrue();
+		assertTrue(output.isSuccessful());
 	}
 
 

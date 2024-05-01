@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
@@ -690,7 +692,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 		List<IBaseResource> patients = toList(myPatientDao.search(params));
-		assertThat(patients.size() >= 2).isTrue();
+		assertTrue(patients.size() >= 2);
 	}
 
 	@Test
@@ -1972,7 +1974,7 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.setLoadSynchronous(true);
 		IBundleProvider values = myPatientDao.search(map);
-		assertThat(values.size()).isNull();
+		assertNull(values.size());
 		assertThat(values.getResources(0, 1000)).hasSize(5);
 	}
 

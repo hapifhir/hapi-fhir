@@ -1,5 +1,8 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import org.junit.jupiter.api.Test;
@@ -14,7 +17,7 @@ public class TokenParamTest {
 		TokenParam tokenParam1 = new TokenParam("foo", "bar");
 		TokenParam tokenParam2 = new TokenParam("foo", "bar");
 		TokenParam tokenParam3 = new TokenParam("foo", "baz");
-		assertThat(tokenParam1).isEqualTo(tokenParam1).isNotNull();
+		assertThat(tokenParam1).isNotNull().isEqualTo(tokenParam1);
 		assertThat(tokenParam2).isEqualTo(tokenParam1);
 		assertThat(tokenParam3).isNotEqualTo(tokenParam1);
 		assertThat("").isNotEqualTo(tokenParam1);
@@ -29,9 +32,9 @@ public class TokenParamTest {
 
 	@Test
 	public void testIsEmpty() {
-		assertThat(new TokenParam("foo", "bar").isEmpty()).isFalse();
-		assertThat(new TokenParam("", "").isEmpty()).isTrue();
-		assertThat(new TokenParam().isEmpty()).isTrue();
+		assertFalse(new TokenParam("foo", "bar").isEmpty());
+		assertTrue(new TokenParam("", "").isEmpty());
+		assertTrue(new TokenParam().isEmpty());
 		assertThat(new TokenParam().getValueNotNull()).isEqualTo("");
 	}
 
@@ -47,17 +50,17 @@ public class TokenParamTest {
 	@Test
 	public void testNameNickname() {
 		StringParam param = new StringParam();
-		assertThat(param.isNicknameExpand()).isFalse();
+		assertFalse(param.isNicknameExpand());
 		param.setValueAsQueryToken(ourCtx, "name", Constants.PARAMQUALIFIER_NICKNAME, "kenny");
-		assertThat(param.isNicknameExpand()).isTrue();
+		assertTrue(param.isNicknameExpand());
 	}
 
 	@Test
 	public void testGivenNickname() {
 		StringParam param = new StringParam();
-		assertThat(param.isNicknameExpand()).isFalse();
+		assertFalse(param.isNicknameExpand());
 		param.setValueAsQueryToken(ourCtx, "given", Constants.PARAMQUALIFIER_NICKNAME, "kenny");
-		assertThat(param.isNicknameExpand()).isTrue();
+		assertTrue(param.isNicknameExpand());
 	}
 
 }

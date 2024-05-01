@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.searchparam.registry;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -239,14 +243,14 @@ public class SearchParamRegistryImplTest {
 	@Test
 	public void testGetActiveSearchParamByUrl_whenSPExists_returnsActiveSp() {
 		RuntimeSearchParam patientLanguageSp = mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/Patient-language");
-		assertThat(patientLanguageSp).isNotNull();
+		assertNotNull(patientLanguageSp);
 		assertThat("Patient-language").isEqualTo(patientLanguageSp.getId().getIdPart());
 	}
 
 	@Test
 	public void testGetActiveSearchParamByUrl_whenSPNotExist_returnsNull() {
 		RuntimeSearchParam nonExistingSp = mySearchParamRegistry.getActiveSearchParamByUrl("SearchParameter/nonExistingSp");
-		assertThat(nonExistingSp).isNull();
+		assertNull(nonExistingSp);
 	}
 
 	@Test
@@ -262,10 +266,10 @@ public class SearchParamRegistryImplTest {
 			return ourResourceVersionMap;
 		});
 
-		assertThat(retried.get()).isFalse();
+		assertFalse(retried.get());
 		mySearchParamRegistry.forceRefresh();
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient");
-		assertThat(retried.get()).isTrue();
+		assertTrue(retried.get());
 		assertThat(activeSearchParams.size()).isEqualTo(ourBuiltInSearchParams.getSearchParamMap("Patient").size());
 	}
 
@@ -280,7 +284,7 @@ public class SearchParamRegistryImplTest {
 		ResourceSearchParams activeSearchParams = mySearchParamRegistry.getActiveSearchParams("Patient");
 
 		RuntimeSearchParam converted = activeSearchParams.get("foo");
-		assertThat(converted).isNotNull();
+		assertNotNull(converted);
 
 		assertThat(converted.getExtensions("http://foo")).hasSize(1);
 		IPrimitiveType<?> value = (IPrimitiveType<?>) converted.getExtensions("http://foo").get(0).getValue();
@@ -314,8 +318,8 @@ public class SearchParamRegistryImplTest {
 
 		RuntimeSearchParam canonicalSp = mySearchParamRegistry.getRuntimeSearchParam("Encounter", "subject");
 		assertThat(canonicalSp.getDescription()).isEqualTo("Modified Subject");
-		assertThat(canonicalSp.hasUpliftRefchain("name1")).isTrue();
-		assertThat(canonicalSp.hasUpliftRefchain("name99")).isFalse();
+		assertTrue(canonicalSp.hasUpliftRefchain("name1"));
+		assertFalse(canonicalSp.hasUpliftRefchain("name99"));
 		assertThat(canonicalSp.getUpliftRefchainCodes()).isEqualTo(Sets.newHashSet("name1", "name2"));
 	}
 

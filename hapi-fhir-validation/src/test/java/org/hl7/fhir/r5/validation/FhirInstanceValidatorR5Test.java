@@ -1,5 +1,7 @@
 package org.hl7.fhir.r5.validation;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -249,7 +251,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult result = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
-		assertThat(result.isSuccessful()).isFalse();
+		assertFalse(result.isSuccessful());
 		assertThat(all.get(0).getMessage()).isEqualTo("The code 'AA  ' is not valid (whitespace rules)");
 
 	}
@@ -272,7 +274,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
-		assertThat(result.isSuccessful()).isFalse();
+		assertFalse(result.isSuccessful());
 		assertThat(all.get(0).getMessage()).contains("All FHIR elements must have a @value or children");
 	}
 
@@ -297,7 +299,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		val.registerValidatorModule(instanceModule);
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 		assertThat(all).isEmpty();
 
 		// With BPs enabled
@@ -308,7 +310,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		val.registerValidatorModule(instanceModule);
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
-		assertThat(result.isSuccessful()).isFalse();
+		assertFalse(result.isSuccessful());
 		assertThat(all.get(0).getMessage()).isEqualTo("All observations should have a subject");
 	}
 
@@ -407,7 +409,7 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(encoded);
 
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 	}
 
 	/**
@@ -460,9 +462,9 @@ public class FhirInstanceValidatorR5Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	public void testIsNoTerminologyChecks() {
-		assertThat(myInstanceVal.isNoTerminologyChecks()).isFalse();
+		assertFalse(myInstanceVal.isNoTerminologyChecks());
 		myInstanceVal.setNoTerminologyChecks(true);
-		assertThat(myInstanceVal.isNoTerminologyChecks()).isTrue();
+		assertTrue(myInstanceVal.isNoTerminologyChecks());
 	}
 
 

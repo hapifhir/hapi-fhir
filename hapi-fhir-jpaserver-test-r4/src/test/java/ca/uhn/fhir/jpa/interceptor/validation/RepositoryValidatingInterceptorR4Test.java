@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor.validation;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
@@ -360,8 +361,8 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		assertThat(id.getVersionIdPart()).isEqualTo("1");
 
 		obs = myObservationDao.read(id);
-		assertThat(obs.getMeta().hasTag()).isTrue();
-		assertThat(obs.getMeta().getTag("http://foo", "validation-error") != null).isTrue();
+		assertTrue(obs.getMeta().hasTag());
+		assertTrue(obs.getMeta().getTag("http://foo", "validation-error") != null);
 	}
 
 	@Test

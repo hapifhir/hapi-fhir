@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -197,7 +198,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		// Do all the stubbing before starting any work, since we want to avoid threading issues
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
-		assertThat(result.getUuid()).isNotNull();
+		assertNotNull(result.getUuid());
 		assertThat(result.size()).isEqualTo(790);
 
 		List<IBaseResource> resources = result.getResources(0, 100000);
@@ -276,7 +277,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
-		assertThat(result.getUuid()).isNotNull();
+		assertNotNull(result.getUuid());
 		assertThat(result.size()).isEqualTo(790);
 
 		List<IBaseResource> resources;
@@ -329,7 +330,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		CountDownLatch completionLatch = new CountDownLatch(1);
 		Runnable taskStarter = () -> {
 			try {
-				assertThat(searchId).isNotNull();
+				assertNotNull(searchId);
 				ourLog.info("About to pull the first resource");
 				List<JpaPid> resources = mySvc.getResources(searchId, 0, 1, null, null);
 				ourLog.info("Done pulling the first resource");
@@ -380,7 +381,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		mockSearchTask();
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
-		assertThat(result.getUuid()).isNotNull();
+		assertNotNull(result.getUuid());
 		assertThat(result.size()).isEqualTo(790);
 
 		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
@@ -417,7 +418,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
-		assertThat(result.getUuid()).isNotNull();
+		assertNotNull(result.getUuid());
 		assertThat(Objects.requireNonNull(result.size()).intValue()).isEqualTo(90);
 
 		List<IBaseResource> resources = result.getResources(0, 30);

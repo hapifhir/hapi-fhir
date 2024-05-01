@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.searchparam.matcher;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -48,10 +50,10 @@ class InMemoryMatchResultTest {
 	}
 
 	private void assertMatch(InMemoryMatchResult theMerged) {
-		assertThat(theMerged.matched()).isTrue();
+		assertTrue(theMerged.matched());
 	}
 	private void assertNoMatch(InMemoryMatchResult theMerged) {
-		assertThat(theMerged.matched()).isFalse();
+		assertFalse(theMerged.matched());
 	}
 }
 

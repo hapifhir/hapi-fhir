@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.CodeType;
@@ -79,7 +81,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		ourLog.debug("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
-		assertThat(((BooleanType) param.getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
 		assertThat(((StringType) param.getValue()).getValueAsString()).isEqualTo("Matches found");
@@ -93,7 +95,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		Coding coding = (Coding) part.getValue();
 		assertThat(coding.getCode()).isEqualTo("13333");
 		assertThat(coding.getDisplay()).isEqualTo("Target Code 13333");
-		assertThat(coding.getUserSelected()).isFalse();
+		assertFalse(coding.getUserSelected());
 		assertThat(coding.getSystem()).isEqualTo(CS_URL_2);
 		assertThat(coding.getVersion()).isEqualTo("Version 2");
 		
@@ -164,7 +166,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
-		assertThat(((BooleanType) param.getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
 		assertThat(((StringType) param.getValue()).getValueAsString()).isEqualTo("Matches found");
@@ -178,7 +180,7 @@ public class ResourceProviderR5ConceptMapTest extends BaseResourceProviderR5Test
 		Coding coding = (Coding) part.getValue();
 		assertThat(coding.getCode()).isEqualTo("13333");
 		assertThat(coding.getDisplay()).isEqualTo("Source Code 13333");
-		assertThat(coding.getUserSelected()).isFalse();
+		assertFalse(coding.getUserSelected());
 		assertThat(coding.getSystem()).isEqualTo(CS_URL);
 		assertThat(coding.getVersion()).isEqualTo("Version 1");
 		part = getPartByName(param, "source");

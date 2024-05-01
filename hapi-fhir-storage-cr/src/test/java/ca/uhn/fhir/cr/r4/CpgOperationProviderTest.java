@@ -1,6 +1,9 @@
 package ca.uhn.fhir.cr.r4;
 
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -39,7 +42,7 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		// execute cql expression on date interval
 		Parameters params = parameters(stringPart("expression", "Interval[Today() - 2 years, Today())"));
 		Parameters results = runCqlExecution(params);
-		assertThat(results.getParameter("return").getValue() instanceof Period).isTrue();
+		assertTrue(results.getParameter("return").getValue() instanceof Period);
 	}
 
 	@Test
@@ -47,7 +50,7 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		// execute simple cql expression
 		Parameters params = parameters(stringPart("expression", "5 * 5"));
 		Parameters results = runCqlExecution(params);
-		assertThat(results.getParameter("return").getValue() instanceof IntegerType).isTrue();
+		assertTrue(results.getParameter("return").getValue() instanceof IntegerType);
 		assertThat(((IntegerType) results.getParameter("return").getValue()).asStringValue()).isEqualTo("25");
 	}
 
@@ -59,13 +62,13 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 
 		Parameters report = runEvaluateLibrary(params, "SimpleR4Library");
 
-		assertThat(report).isNotNull();
-		assertThat(report.hasParameter("Initial Population")).isTrue();
-		assertThat(((BooleanType) report.getParameter("Initial Population").getValue()).booleanValue()).isTrue();
-		assertThat(report.hasParameter("Numerator")).isTrue();
-		assertThat(((BooleanType) report.getParameter("Numerator").getValue()).booleanValue()).isTrue();
-		assertThat(report.hasParameter("Denominator")).isTrue();
-		assertThat(((BooleanType) report.getParameter("Denominator").getValue()).booleanValue()).isTrue();
+		assertNotNull(report);
+		assertTrue(report.hasParameter("Initial Population"));
+		assertTrue(((BooleanType) report.getParameter("Initial Population").getValue()).booleanValue());
+		assertTrue(report.hasParameter("Numerator"));
+		assertTrue(((BooleanType) report.getParameter("Numerator").getValue()).booleanValue());
+		assertTrue(report.hasParameter("Denominator"));
+		assertTrue(((BooleanType) report.getParameter("Denominator").getValue()).booleanValue());
 	}
 
 	@Test
@@ -76,9 +79,9 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		params.addParameter("expression", "Numerator");
 
 		Parameters report = runEvaluateLibrary(params, "SimpleR4Library");
-		assertThat(report).isNotNull();
-		assertThat(report.hasParameter("Numerator")).isTrue();
-		assertThat(((BooleanType) report.getParameter("Numerator").getValue()).booleanValue()).isTrue();
+		assertNotNull(report);
+		assertTrue(report.hasParameter("Numerator"));
+		assertTrue(((BooleanType) report.getParameter("Numerator").getValue()).booleanValue());
 	}
 
 	@Test
@@ -93,8 +96,8 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 			stringPart("expression", "SimpleR4Library.simpleBooleanExpression"));
 
 		Parameters results = runCqlExecution(params);
-		assertThat(results.getParameter("return").getValue() instanceof BooleanType).isTrue();
-		assertThat(((BooleanType) results.getParameter("return").getValue()).booleanValue()).isTrue();
+		assertTrue(results.getParameter("return").getValue() instanceof BooleanType);
+		assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
 	}
 
 	@Test
@@ -112,7 +115,7 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 			booleanPart("useServerData", false));
 
 		Parameters results =  runCqlExecution(params);
-		assertThat(results.getParameter().get(0).getResource() instanceof Observation).isTrue();
+		assertTrue(results.getParameter().get(0).getResource() instanceof Observation);
 	}
 
 	@Test
@@ -129,7 +132,7 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 			part("data", data),
 			booleanPart("useServerData", false));
 		Parameters results = runCqlExecution(params);
-		assertThat(results.getParameter().get(0).getResource() instanceof Observation).isTrue();
+		assertTrue(results.getParameter().get(0).getResource() instanceof Observation);
 	}
 
 	@Test
@@ -141,8 +144,8 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 			stringPart("expression", "year from %inputDate before 2020"),
 			part("parameters", evaluationParams));
 		Parameters results = runCqlExecution(params);
-		assertThat(results.getParameter("return").getValue() instanceof BooleanType).isTrue();
-		assertThat(((BooleanType) results.getParameter("return").getValue()).booleanValue()).isTrue();
+		assertTrue(results.getParameter("return").getValue() instanceof BooleanType);
+		assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
 	}
 
 	@Test
@@ -159,10 +162,10 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 
 		Parameters results = runCqlExecution(params);
 
-		assertThat(results.isEmpty()).isFalse();
+		assertFalse(results.isEmpty());
 		assertThat(results.getParameter()).hasSize(1);
-		assertThat(results.getParameter("return").getValue() instanceof BooleanType).isTrue();
-		assertThat(((BooleanType) results.getParameter("return").getValue()).booleanValue()).isTrue();
+		assertTrue(results.getParameter("return").getValue() instanceof BooleanType);
+		assertTrue(((BooleanType) results.getParameter("return").getValue()).booleanValue());
 	}
 
 	@Test
@@ -172,11 +175,11 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 
 		Parameters results = runCqlExecution(params);
 
-		assertThat(results.hasParameter()).isTrue();
-		assertThat(results.getParameterFirstRep().hasName()).isTrue();
+		assertTrue(results.hasParameter());
+		assertTrue(results.getParameterFirstRep().hasName());
 		assertThat(results.getParameterFirstRep().getName()).isEqualTo("evaluation error");
-		assertThat(results.getParameterFirstRep().hasResource()).isTrue();
-		assertThat(results.getParameterFirstRep().getResource() instanceof OperationOutcome).isTrue();
+		assertTrue(results.getParameterFirstRep().hasResource());
+		assertTrue(results.getParameterFirstRep().getResource() instanceof OperationOutcome);
 		assertThat(((OperationOutcome) results.getParameterFirstRep().getResource()).getIssueFirstRep().getDetails()
 				.getText()).isEqualTo("Unsupported interval point type for FHIR conversion java.lang.Integer");
 	}

@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.CodeSystemLookupWithPropertiesUtil;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
@@ -75,7 +78,7 @@ public class ResourceProviderDstu3CodeSystemPropertiesTest extends BaseResourceP
 
 		// verify
 		if (theExpectedReturnedProperties.isEmpty()) {
-			assertThat(parameter).isNull();
+			assertNull(parameter);
 			return;
 		}
 
@@ -84,7 +87,7 @@ public class ResourceProviderDstu3CodeSystemPropertiesTest extends BaseResourceP
 
 		while (propertyIterator.hasNext()) {
 			ConceptPropertyComponent property = propertyIterator.next();
-			assertThat(parameter).isNotNull();
+			assertNotNull(parameter);
 
 			Iterator<ParametersParameterComponent> parameterPartIterator = parameter.getPart().iterator();
 
@@ -94,7 +97,7 @@ public class ResourceProviderDstu3CodeSystemPropertiesTest extends BaseResourceP
 
 			parameter = parameterPartIterator.next();
 			assertThat(parameter.getName()).isEqualTo("value");
-			assertThat(property.getValue().equalsShallow(parameter.getValue())).isTrue();
+			assertTrue(property.getValue().equalsShallow(parameter.getValue()));
 
 			if (paramIterator.hasNext()) {
 				parameter = paramIterator.next();

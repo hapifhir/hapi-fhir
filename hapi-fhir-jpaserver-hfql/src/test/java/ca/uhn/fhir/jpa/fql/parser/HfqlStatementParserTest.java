@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.fql.parser;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import org.junit.jupiter.api.MethodOrderer;
@@ -113,7 +115,7 @@ public class HfqlStatementParserTest {
 
 		assertThat(statement.getOrderByClauses()).hasSize(1);
 		assertThat(statement.getOrderByClauses().get(0).getClause()).isEqualTo("id");
-		assertThat(statement.getOrderByClauses().get(0).isAscending()).isFalse();
+		assertFalse(statement.getOrderByClauses().get(0).isAscending());
 	}
 
 	@Test
@@ -261,9 +263,9 @@ public class HfqlStatementParserTest {
 		assertThat(statement.getSelectClauses().stream().map(t -> t.getAlias()).collect(Collectors.toList())).containsExactly("id", "name.family");
 		assertThat(statement.getOrderByClauses()).hasSize(2);
 		assertThat(statement.getOrderByClauses().get(0).getClause()).isEqualTo("name.family");
-		assertThat(statement.getOrderByClauses().get(0).isAscending()).isTrue();
+		assertTrue(statement.getOrderByClauses().get(0).isAscending());
 		assertThat(statement.getOrderByClauses().get(1).getClause()).isEqualTo("count(*)");
-		assertThat(statement.getOrderByClauses().get(1).isAscending()).isTrue();
+		assertTrue(statement.getOrderByClauses().get(1).isAscending());
 	}
 
 	@Test
@@ -278,9 +280,9 @@ public class HfqlStatementParserTest {
 		assertThat(statement.getSelectClauses().stream().map(t -> t.getAlias()).collect(Collectors.toList())).containsExactly("id", "name.family");
 		assertThat(statement.getOrderByClauses()).hasSize(2);
 		assertThat(statement.getOrderByClauses().get(0).getClause()).isEqualTo("name.family");
-		assertThat(statement.getOrderByClauses().get(0).isAscending()).isFalse();
+		assertFalse(statement.getOrderByClauses().get(0).isAscending());
 		assertThat(statement.getOrderByClauses().get(1).getClause()).isEqualTo("id");
-		assertThat(statement.getOrderByClauses().get(1).isAscending()).isTrue();
+		assertTrue(statement.getOrderByClauses().get(1).isAscending());
 	}
 
 	private HfqlStatement parse(String theInput) {

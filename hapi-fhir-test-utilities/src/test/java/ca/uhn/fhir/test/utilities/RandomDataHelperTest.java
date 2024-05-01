@@ -1,5 +1,6 @@
 package ca.uhn.fhir.test.utilities;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import org.junit.jupiter.api.Test;
 
@@ -30,10 +31,10 @@ class RandomDataHelperTest {
 
 		assertThat(object.myString, not(blankOrNullString()));
 		assertThat(object.myInt).isNotEqualTo(0);
-		assertThat(object.myBoxedLong).isNotNull();
-		assertThat(object.myDate).isNotNull();
-		assertThat(object.myUUID).isNotNull();
-		assertThat(object.myEnum).isNotNull();
+		assertNotNull(object.myBoxedLong);
+		assertNotNull(object.myDate);
+		assertNotNull(object.myUUID);
+		assertNotNull(object.myEnum);
 	}
 
 }

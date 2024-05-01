@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.Logs;
@@ -23,7 +24,7 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 
 	@Test
 	public void testSubscriptionTopicRegistryBean() {
-		assertThat(mySubscriptionTopicRegistry).isNotNull();
+		assertNotNull(mySubscriptionTopicRegistry);
 	}
 
 	@Test

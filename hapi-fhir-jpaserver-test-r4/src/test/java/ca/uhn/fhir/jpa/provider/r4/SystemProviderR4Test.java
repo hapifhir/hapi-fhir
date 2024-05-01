@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeProvider;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -386,7 +388,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
 		resp = myClient.transaction().withBundle(req).execute();
-		assertThat(resp.getEntry().get(0).getResource()).isNull();
+		assertNull(resp.getEntry().get(0).getResource());
 		assertThat(resp.getEntry().get(0).getResponse().getStatus()).isEqualTo("201 Created");
 
 		// Prefer return=minimal
@@ -396,7 +398,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		req.setType(BundleType.TRANSACTION);
 		req.addEntry().setResource(p).getRequest().setMethod(HTTPVerb.POST).setUrl("Patient");
 		resp = myClient.transaction().withBundle(req).execute();
-		assertThat(resp.getEntry().get(0).getResource()).isNull();
+		assertNull(resp.getEntry().get(0).getResource());
 		assertThat(resp.getEntry().get(0).getResponse().getStatus()).isEqualTo("201 Created");
 
 		// Prefer return=representation
@@ -670,10 +672,10 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		Bundle bundleResp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
 		IdType id = new IdType(bundleResp.getEntry().get(0).getResponse().getLocation());
 		assertThat(id.getResourceType()).isEqualTo("Patient");
-		assertThat(id.hasIdPart()).isTrue();
-		assertThat(id.isIdPartValidLong()).isTrue();
-		assertThat(id.hasVersionIdPart()).isTrue();
-		assertThat(id.isVersionIdPartValidLong()).isTrue();
+		assertTrue(id.hasIdPart());
+		assertTrue(id.isIdPartValidLong());
+		assertTrue(id.hasVersionIdPart());
+		assertTrue(id.isVersionIdPartValidLong());
 	}
 
 	@Test
@@ -897,7 +899,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 			myClient.transaction().withBundle(b).execute();
 
-			assertThat(called.get()).isTrue();
+			assertTrue(called.get());
 
 		} finally {
 			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor);

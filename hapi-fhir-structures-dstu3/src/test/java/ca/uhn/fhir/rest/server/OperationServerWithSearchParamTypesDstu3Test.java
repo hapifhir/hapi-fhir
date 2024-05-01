@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -319,7 +320,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		assertThat(ourLastParamValStr).hasSize(1);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALSTR");
-		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).isExact()).isTrue();
+		assertTrue(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).isExact());
 		assertThat(ourLastParamValTok).hasSize(1);
 		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("VALTOKA");

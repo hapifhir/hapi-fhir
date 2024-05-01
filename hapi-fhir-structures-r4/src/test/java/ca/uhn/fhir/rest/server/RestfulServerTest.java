@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -65,13 +66,13 @@ public class RestfulServerTest {
 		myRestfulServer.registerProvider(new MyClassWithRestInterface());
 		assertThat(myRestfulServer.getResourceProviders()).hasSize(1);
 		Object plainProvider = myRestfulServer.getResourceProviders().get(0);
-		assertThat(plainProvider instanceof MyClassWithRestInterface).isTrue();
+		assertTrue(plainProvider instanceof MyClassWithRestInterface);
 
 		//test register Resource Provider
 		myRestfulServer.registerProvider(new MyResourceProvider());
 		assertThat(myRestfulServer.getResourceProviders()).hasSize(2);
 		IResourceProvider resourceProvider = myRestfulServer.getResourceProviders().get(1);
-		assertThat(resourceProvider instanceof MyResourceProvider).isTrue();
+		assertTrue(resourceProvider instanceof MyResourceProvider);
 
 		//test unregister providers
 		myRestfulServer.unregisterProvider(plainProvider);

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -61,7 +62,7 @@ public class SearchCountParamDstu2Test {
 			assertThat(ourLastMethod).isEqualTo("search");
 			assertThat(ourLastParam).isEqualTo(Integer.valueOf(2));
 			
-			assertThat(responseContent, stringContainsInOrder(
+			assertThat(responseContent).containsSequence(
 				"<link>", 
 				"<relation value=\"self\"/>", 
 				"<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2\"/>",
@@ -69,7 +70,7 @@ public class SearchCountParamDstu2Test {
 				"<link>",
 				"<relation value=\"next\"/>", 
 				"<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
-				"</link>"));
+				"</link>");
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -89,10 +90,10 @@ public class SearchCountParamDstu2Test {
 			ourLog.info(responseContent);
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			assertThat(ourLastMethod).isEqualTo("searchWithNoCountParam");
-			assertThat(ourLastParam).isNull();
+			assertNull(ourLastParam);
 			
 			//@formatter:off
-			assertThat(responseContent, stringContainsInOrder(
+			assertThat(responseContent).containsSequence(
 				"<link>", 
 				"<relation value=\"self\"/>", 
 				"<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2&amp;_query=searchWithNoCountParam\"/>",
@@ -100,7 +101,7 @@ public class SearchCountParamDstu2Test {
 				"<link>",
 				"<relation value=\"next\"/>", 
 				"<url value=\"" + ourServer.getBaseUrl() + "?_getpages=", "&amp;_getpagesoffset=2&amp;_count=2&amp;_bundletype=searchset\"/>",
-				"</link>"));
+				"</link>");
 			//@formatter:on
 			
 		} finally {

@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -187,7 +190,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 	@Test
 	public void testSubscriptionTopicRegistryBean() {
 		// This bean should not exist in DSTU3
-		assertThat(mySubscriptionTopicRegistry).isNull();
+		assertNull(mySubscriptionTopicRegistry);
 	}
 
 	@Test
@@ -290,7 +293,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		// Should see 2 subscription notifications with and without authorization header
 		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
 		assertThat(ourNotificationServlet.getReceivedNotificationCount()).isEqualTo(1);
-		assertThat(ourNotificationServlet.getReceivedAuthorizationHeaders().get(0)).isNull();
+		assertNull(ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
 		ourNotificationServlet.reset();
 	}
 
@@ -362,7 +365,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Modify subscription 2 to also match
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
-		assertThat(subscriptionTemp).isNotNull();
+		assertNotNull(subscriptionTemp);
 		subscriptionTemp.setCriteria(criteria1);
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();
@@ -412,7 +415,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(5, ourUpdatedObservations);
 
-		assertThat(subscription1.getId().equals(subscription2.getId())).isFalse();
+		assertFalse(subscription1.getId().equals(subscription2.getId()));
 		assertThat(observation1.getId()).isNotEmpty();
 		assertThat(observation2.getId()).isNotEmpty();
 	}
@@ -439,7 +442,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Modify subscription 2 to also match
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
-		assertThat(subscriptionTemp).isNotNull();
+		assertNotNull(subscriptionTemp);
 		subscriptionTemp.setCriteria(criteria1);
 		myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();
 		waitForQueueToDrain();

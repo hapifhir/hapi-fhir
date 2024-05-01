@@ -1,5 +1,9 @@
 package org.hl7.fhir.dstu3.model;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -52,16 +56,16 @@ public class BaseDateTimeTypeDstu3Test {
 
 	@Test
 	public void testAfter() {
-		assertThat(new DateTimeType("2011-01-01T12:12:12Z").after(new DateTimeType("2011-01-01T12:12:11Z"))).isTrue();
-		assertThat(new DateTimeType("2011-01-01T12:12:11Z").after(new DateTimeType("2011-01-01T12:12:12Z"))).isFalse();
-		assertThat(new DateTimeType("2011-01-01T12:12:12Z").after(new DateTimeType("2011-01-01T12:12:12Z"))).isFalse();
+		assertTrue(new DateTimeType("2011-01-01T12:12:12Z").after(new DateTimeType("2011-01-01T12:12:11Z")));
+		assertFalse(new DateTimeType("2011-01-01T12:12:11Z").after(new DateTimeType("2011-01-01T12:12:12Z")));
+		assertFalse(new DateTimeType("2011-01-01T12:12:12Z").after(new DateTimeType("2011-01-01T12:12:12Z")));
 	}
 
 	@Test
 	public void testBefore() {
-		assertThat(new DateTimeType("2011-01-01T12:12:12Z").before(new DateTimeType("2011-01-01T12:12:11Z"))).isFalse();
-		assertThat(new DateTimeType("2011-01-01T12:12:11Z").before(new DateTimeType("2011-01-01T12:12:12Z"))).isTrue();
-		assertThat(new DateTimeType("2011-01-01T12:12:12Z").before(new DateTimeType("2011-01-01T12:12:12Z"))).isFalse();
+		assertFalse(new DateTimeType("2011-01-01T12:12:12Z").before(new DateTimeType("2011-01-01T12:12:11Z")));
+		assertTrue(new DateTimeType("2011-01-01T12:12:11Z").before(new DateTimeType("2011-01-01T12:12:12Z")));
+		assertFalse(new DateTimeType("2011-01-01T12:12:12Z").before(new DateTimeType("2011-01-01T12:12:12Z")));
 	}
 
 	@Disabled
@@ -89,17 +93,17 @@ public class BaseDateTimeTypeDstu3Test {
 	@Test()
 	public void testAfterNull() {
 		try {
-			assertThat(new DateTimeType().after(new DateTimeType("2011-01-01T12:12:11Z"))).isTrue();
+			assertTrue(new DateTimeType().after(new DateTimeType("2011-01-01T12:12:11Z")));
 			fail("");		} catch (NullPointerException e) {
 			assertThat(e.getMessage()).isEqualTo("This BaseDateTimeType does not contain a value (getValue() returns null)");
 		}
 		try {
-			assertThat(new DateTimeType("2011-01-01T12:12:11Z").after(new DateTimeType())).isTrue();
+			assertTrue(new DateTimeType("2011-01-01T12:12:11Z").after(new DateTimeType()));
 			fail("");		} catch (NullPointerException e) {
 			assertThat(e.getMessage()).isEqualTo("The given BaseDateTimeType does not contain a value (theDateTimeType.getValue() returns null)");
 		}
 		try {
-			assertThat(new DateTimeType("2011-01-01T12:12:11Z").after(null)).isTrue();
+			assertTrue(new DateTimeType("2011-01-01T12:12:11Z").after(null));
 			fail("");		} catch (NullPointerException e) {
 			assertThat(e.getMessage()).isEqualTo("theDateTimeType must not be null");
 		}
@@ -108,17 +112,17 @@ public class BaseDateTimeTypeDstu3Test {
 	@Test()
 	public void testBeforeNull1() {
 		try {
-			assertThat(new DateTimeType().before(new DateTimeType("2011-01-01T12:12:11Z"))).isTrue();
+			assertTrue(new DateTimeType().before(new DateTimeType("2011-01-01T12:12:11Z")));
 			fail("");		} catch (NullPointerException e) {
 			assertThat(e.getMessage()).isEqualTo("This BaseDateTimeType does not contain a value (getValue() returns null)");
 		}
 		try {
-			assertThat(new DateTimeType("2011-01-01T12:12:11Z").before(new DateTimeType())).isTrue();
+			assertTrue(new DateTimeType("2011-01-01T12:12:11Z").before(new DateTimeType()));
 			fail("");		} catch (NullPointerException e) {
 			assertThat(e.getMessage()).isEqualTo("The given BaseDateTimeType does not contain a value (theDateTimeType.getValue() returns null)");
 		}
 		try {
-			assertThat(new DateTimeType("2011-01-01T12:12:11Z").before(null)).isTrue();
+			assertTrue(new DateTimeType("2011-01-01T12:12:11Z").before(null));
 			fail("");		} catch (NullPointerException e) {
 			assertThat(e.getMessage()).isEqualTo("theDateTimeType must not be null");
 		}
@@ -299,19 +303,19 @@ public class BaseDateTimeTypeDstu3Test {
 		assertThat(dt.getNanos().longValue()).isEqualTo(275647578L);
 
 		dt = new InstantType();
-		assertThat(dt.getYear()).isNull();
-		assertThat(dt.getMonth()).isNull();
-		assertThat(dt.getDay()).isNull();
-		assertThat(dt.getHour()).isNull();
-		assertThat(dt.getMinute()).isNull();
-		assertThat(dt.getSecond()).isNull();
-		assertThat(dt.getMillis()).isNull();
-		assertThat(dt.getNanos()).isNull();
+		assertNull(dt.getYear());
+		assertNull(dt.getMonth());
+		assertNull(dt.getDay());
+		assertNull(dt.getHour());
+		assertNull(dt.getMinute());
+		assertNull(dt.getSecond());
+		assertNull(dt.getMillis());
+		assertNull(dt.getNanos());
 	}
 
 	@Test
 	public void testGetValueAsCalendar() {
-		assertThat(new InstantType().getValueAsCalendar()).isNull();
+		assertNull(new InstantType().getValueAsCalendar());
 
 		InstantType dt = new InstantType("2011-01-03T07:11:22.002-08:00");
 		GregorianCalendar cal = dt.getValueAsCalendar();
@@ -360,7 +364,7 @@ public class BaseDateTimeTypeDstu3Test {
 		InstantType now = InstantType.withCurrentTime();
 		Thread.sleep(100);
 		InstantType then = InstantType.withCurrentTime();
-		assertThat(now.getValue().before(then.getValue())).isTrue();
+		assertTrue(now.getValue().before(then.getValue()));
 	}
 
 	/**
@@ -403,7 +407,7 @@ public class BaseDateTimeTypeDstu3Test {
 		assertThat(myDateInstantParser.format(dt.getValue()).substring(0, 10)).isEqualTo("2013-02-03");
 		assertThat(dt.getValueAsString()).isEqualTo("2013-02-03");
 		assertThat(dt.isTimeZoneZulu()).isEqualTo(false);
-		assertThat(dt.getTimeZone()).isNull();
+		assertNull(dt.getTimeZone());
 		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.DAY);
 	}
 
@@ -501,7 +505,7 @@ public class BaseDateTimeTypeDstu3Test {
 		assertThat(myDateInstantParser.format(dt.getValue()).substring(0, 23)).isEqualTo("2013-02-03 11:22:33.234");
 		assertThat(dt.getValueAsString()).isEqualTo("2013-02-03T11:22:33.234");
 		assertThat(dt.isTimeZoneZulu()).isEqualTo(false);
-		assertThat(dt.getTimeZone()).isNull();
+		assertNull(dt.getTimeZone());
 		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.MILLI);
 	}
 
@@ -537,7 +541,7 @@ public class BaseDateTimeTypeDstu3Test {
 		ourLog.info("Date: {}", dt.getValue());
 		assertThat(dt.getValueAsString()).isEqualTo("2013-02");
 		assertThat(dt.isTimeZoneZulu()).isEqualTo(false);
-		assertThat(dt.getTimeZone()).isNull();
+		assertNull(dt.getTimeZone());
 		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.MONTH);
 
 		assertThat(myDateInstantParser.format(dt.getValue()).substring(0, 7)).isEqualTo("2013-02");
@@ -581,7 +585,7 @@ public class BaseDateTimeTypeDstu3Test {
 		assertThat(myDateInstantParser.format(dt.getValue()).substring(0, 19)).isEqualTo("2013-02-03 11:22:33");
 		assertThat(dt.getValueAsString()).isEqualTo("2013-02-03T11:22:33");
 		assertThat(dt.isTimeZoneZulu()).isEqualTo(false);
-		assertThat(dt.getTimeZone()).isNull();
+		assertNull(dt.getTimeZone());
 		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.SECOND);
 	}
 
@@ -705,7 +709,7 @@ public class BaseDateTimeTypeDstu3Test {
 		assertThat(myDateInstantParser.format(dt.getValue()).substring(0, 4)).isEqualTo("2013");
 		assertThat(dt.getValueAsString()).isEqualTo("2013");
 		assertThat(dt.isTimeZoneZulu()).isEqualTo(false);
-		assertThat(dt.getTimeZone()).isNull();
+		assertNull(dt.getTimeZone());
 		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.YEAR);
 	}
 
@@ -855,8 +859,8 @@ public class BaseDateTimeTypeDstu3Test {
 		InstantType i = new InstantType();
 		i.setValueAsString("2014-06-20T20:22:09Z");
 
-		assertThat(i.getValue()).isNotNull();
-		assertThat(i.getValueAsString()).isNotNull();
+		assertNotNull(i.getValue());
+		assertNotNull(i.getValueAsString());
 
 		assertThat(i.getValue().getTime()).isEqualTo(1403295729000L);
 		assertThat(i.getValueAsString()).isEqualTo("2014-06-20T20:22:09Z");

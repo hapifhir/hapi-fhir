@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -45,7 +48,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 			.where(ConceptMap.URL.matches().value(conceptMap.getUrl()))
 			.execute();
 
-		assertThat(methodOutcome.getCreated()).isNull();
+		assertNull(methodOutcome.getCreated());
 		assertThat(methodOutcome.getId().getVersionIdPart()).isEqualTo("1");
 	}
 
@@ -61,7 +64,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 			.where(ConceptMap.URL.matches().value(conceptMap.getUrl()))
 			.execute();
 
-		assertThat(methodOutcome.getCreated()).isNull();
+		assertNull(methodOutcome.getCreated());
 		assertThat(methodOutcome.getId().getVersionIdPart()).isEqualTo("2");
 	}
 
@@ -88,7 +91,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
-		assertThat(((BooleanType) param.getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
 		assertThat(((StringType) param.getValue()).getValueAsString()).isEqualTo("Matches found");
@@ -102,7 +105,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		Coding coding = (Coding) part.getValue();
 		assertThat(coding.getCode()).isEqualTo("56789");
 		assertThat(coding.getDisplay()).isEqualTo("Target Code 56789");
-		assertThat(coding.getUserSelected()).isFalse();
+		assertFalse(coding.getUserSelected());
 		assertThat(coding.getSystem()).isEqualTo(CS_URL_3);
 		assertThat(coding.getVersion()).isEqualTo("Version 4");
 		part = getPartByName(param, "source");
@@ -116,7 +119,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		coding = (Coding) part.getValue();
 		assertThat(coding.getCode()).isEqualTo("67890");
 		assertThat(coding.getDisplay()).isEqualTo("Target Code 67890");
-		assertThat(coding.getUserSelected()).isFalse();
+		assertFalse(coding.getUserSelected());
 		assertThat(coding.getSystem()).isEqualTo(CS_URL_3);
 		assertThat(coding.getVersion()).isEqualTo("Version 4");
 		part = getPartByName(param, "source");
@@ -149,7 +152,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
-		assertThat(((BooleanType) param.getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
 		assertThat(((StringType) param.getValue()).getValueAsString()).isEqualTo("Matches found");
@@ -163,7 +166,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		Coding coding = (Coding) part.getValue();
 		assertThat(coding.getCode()).isEqualTo("13333");
 		assertThat(coding.getDisplay()).isEqualTo("Target Code 13333");
-		assertThat(coding.getUserSelected()).isFalse();
+		assertFalse(coding.getUserSelected());
 		assertThat(coding.getSystem()).isEqualTo(CS_URL_2);
 		assertThat(coding.getVersion()).isEqualTo("Version 2");
 		part = getPartByName(param, "source");
@@ -198,7 +201,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		// Should return v2 since v2 specified.
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
-		assertThat(((BooleanType) param.getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
 		assertThat(((StringType) param.getValue()).getValueAsString()).isEqualTo("Matches found");
@@ -212,7 +215,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		Coding coding = (Coding) part.getValue();
 		assertThat(coding.getCode()).isEqualTo("13333");
 		assertThat(coding.getDisplay()).isEqualTo("Target Code 13333");
-		assertThat(coding.getUserSelected()).isFalse();
+		assertFalse(coding.getUserSelected());
 		assertThat(coding.getSystem()).isEqualTo(CS_URL_2);
 		assertThat(coding.getVersion()).isEqualTo("Version 2");
 		part = getPartByName(param, "source");
@@ -248,7 +251,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		// Should return v1 since v1 specified.
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
-		assertThat(((BooleanType) param.getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
 		assertThat(((StringType) param.getValue()).getValueAsString()).isEqualTo("Matches found");
@@ -262,7 +265,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		Coding coding = (Coding) part.getValue();
 		assertThat(coding.getCode()).isEqualTo("12222");
 		assertThat(coding.getDisplay()).isEqualTo("Target Code 12222");
-		assertThat(coding.getUserSelected()).isFalse();
+		assertFalse(coding.getUserSelected());
 		assertThat(coding.getSystem()).isEqualTo(CS_URL_2);
 		assertThat(coding.getVersion()).isEqualTo("Version 2");
 		part = getPartByName(param, "source");
@@ -297,7 +300,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		// Should return v2 since v2 is the most recently updated version.
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
-		assertThat(((BooleanType) param.getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
 		assertThat(((StringType) param.getValue()).getValueAsString()).isEqualTo("Matches found");
@@ -311,7 +314,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		Coding coding = (Coding) part.getValue();
 		assertThat(coding.getCode()).isEqualTo("13333");
 		assertThat(coding.getDisplay()).isEqualTo("Target Code 13333");
-		assertThat(coding.getUserSelected()).isFalse();
+		assertFalse(coding.getUserSelected());
 		assertThat(coding.getSystem()).isEqualTo(CS_URL_2);
 		assertThat(coding.getVersion()).isEqualTo("Version 2");
 		part = getPartByName(param, "source");
@@ -345,7 +348,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		// Should return v2 since v2 is the most recently updated version.
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
-		assertThat(((BooleanType) param.getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
 		assertThat(((StringType) param.getValue()).getValueAsString()).isEqualTo("Matches found");
@@ -359,7 +362,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		Coding coding = (Coding) part.getValue();
 		assertThat(coding.getCode()).isEqualTo("13333");
 		assertThat(coding.getDisplay()).isEqualTo("Target Code 13333");
-		assertThat(coding.getUserSelected()).isFalse();
+		assertFalse(coding.getUserSelected());
 		assertThat(coding.getSystem()).isEqualTo(CS_URL_2);
 		assertThat(coding.getVersion()).isEqualTo("Version 2");
 		part = getPartByName(param, "source");
@@ -393,7 +396,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 
 		// Should return v2 since v2 is the most recently updated version.
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
-		assertThat(((BooleanType) param.getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
 		assertThat(((StringType) param.getValue()).getValueAsString()).isEqualTo("Matches found");
@@ -407,7 +410,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		Coding coding = (Coding) part.getValue();
 		assertThat(coding.getCode()).isEqualTo("13333");
 		assertThat(coding.getDisplay()).isEqualTo("Target Code 13333");
-		assertThat(coding.getUserSelected()).isFalse();
+		assertFalse(coding.getUserSelected());
 		assertThat(coding.getSystem()).isEqualTo(CS_URL_2);
 		assertThat(coding.getVersion()).isEqualTo("Version 2");
 		part = getPartByName(param, "source");
@@ -439,7 +442,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
-		assertThat(((BooleanType) param.getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
 		assertThat(((StringType) param.getValue()).getValueAsString()).isEqualTo("No Matches found");
@@ -473,7 +476,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
-		assertThat(((BooleanType) param.getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
 		assertThat(((StringType) param.getValue()).getValueAsString()).isEqualTo("Matches found");
@@ -485,7 +488,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		Coding coding = (Coding) part.getValue();
 		assertThat(coding.getCode()).isEqualTo("13333");
 		assertThat(coding.getDisplay()).isEqualTo("Source Code 13333");
-		assertThat(coding.getUserSelected()).isFalse();
+		assertFalse(coding.getUserSelected());
 		assertThat(coding.getSystem()).isEqualTo(CS_URL);
 		assertThat(coding.getVersion()).isEqualTo("Version 1");
 		part = getPartByName(param, "source");
@@ -518,7 +521,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
-		assertThat(((BooleanType) param.getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
 		assertThat(((StringType) param.getValue()).getValueAsString()).isEqualTo("Matches found");
@@ -530,7 +533,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		Coding coding = (Coding) part.getValue();
 		assertThat(coding.getCode()).isEqualTo("13333");
 		assertThat(coding.getDisplay()).isEqualTo("Source Code 13333");
-		assertThat(coding.getUserSelected()).isFalse();
+		assertFalse(coding.getUserSelected());
 		assertThat(coding.getSystem()).isEqualTo(CS_URL);
 		assertThat(coding.getVersion()).isEqualTo("Version 1");
 		part = getPartByName(param, "source");
@@ -563,7 +566,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
-		assertThat(((BooleanType) param.getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
 		assertThat(((StringType) param.getValue()).getValueAsString()).isEqualTo("Matches found");
@@ -575,7 +578,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		Coding coding = (Coding) part.getValue();
 		assertThat(coding.getCode()).isEqualTo("13333");
 		assertThat(coding.getDisplay()).isEqualTo("Source Code 13333");
-		assertThat(coding.getUserSelected()).isFalse();
+		assertFalse(coding.getUserSelected());
 		assertThat(coding.getSystem()).isEqualTo(CS_URL);
 		assertThat(coding.getVersion()).isEqualTo("Version 1");
 		part = getPartByName(param, "source");
@@ -608,7 +611,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		
 		
 		ParametersParameterComponent param = getParameterByName(respParams, "result");
-		assertThat(((BooleanType) param.getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) param.getValue()).booleanValue());
 
 		param = getParameterByName(respParams, "message");
 		assertThat(((StringType) param.getValue()).getValueAsString()).isEqualTo("Matches found");
@@ -620,7 +623,7 @@ public class ResourceProviderDstu3ConceptMapTest extends BaseResourceProviderDst
 		Coding coding = (Coding) part.getValue();
 		assertThat(coding.getCode()).isEqualTo("13333");
 		assertThat(coding.getDisplay()).isEqualTo("Source Code 13333");
-		assertThat(coding.getUserSelected()).isFalse();
+		assertFalse(coding.getUserSelected());
 		assertThat(coding.getSystem()).isEqualTo(CS_URL);
 		assertThat(coding.getVersion()).isEqualTo("Version 1");
 		part = getPartByName(param, "source");

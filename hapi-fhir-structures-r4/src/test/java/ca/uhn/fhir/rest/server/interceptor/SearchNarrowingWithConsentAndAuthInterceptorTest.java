@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.model.api.Include;
@@ -75,7 +76,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 	private final AuthorizationInterceptor myAuthorizationInterceptor = new AuthorizationInterceptor() {
 		@Override
 		public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-			assertThat(myAuthorizationInterceptorRuleList).isNotNull();
+			assertNotNull(myAuthorizationInterceptorRuleList);
 			return myAuthorizationInterceptorRuleList;
 		}
 	};
@@ -83,7 +84,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 	private final SearchNarrowingInterceptor mySearchNarrowingInterceptor = new SearchNarrowingInterceptor() {
 		@Override
 		protected AuthorizedList buildAuthorizedList(RequestDetails theRequestDetails) {
-			assertThat(mySearchNarrowingInterceptorAuthorizedList).isNotNull();
+			assertNotNull(mySearchNarrowingInterceptorAuthorizedList);
 			return mySearchNarrowingInterceptorAuthorizedList;
 		}
 	};
@@ -476,7 +477,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		@Search(allowUnknownParams = true)
 		public List<IBaseResource> searchAll(RequestDetails theRequestDetails, @IncludeParam(reverse = true) Set<Include> theRevIncludes) {
-			assertThat(myNextPatientResponse).isNotNull();
+			assertNotNull(myNextPatientResponse);
 			myNextPatientResponse = ServerInterceptorUtil.fireStoragePreshowResource(myNextPatientResponse, theRequestDetails, myServer.getRestfulServer().getInterceptorService());
 			return myNextPatientResponse;
 		}
@@ -489,7 +490,7 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		@Operation(name = "$everything")
 		public IBundleProvider everything(RequestDetails theRequestDetails, @IdParam IdType theId) {
-			assertThat(myNextPatientResponse).isNotNull();
+			assertNotNull(myNextPatientResponse);
 			myNextPatientResponse = ServerInterceptorUtil.fireStoragePreshowResource(myNextPatientResponse, theRequestDetails, myServer.getRestfulServer().getInterceptorService());
 			return new SimpleBundleProvider(myNextPatientResponse);
 		}

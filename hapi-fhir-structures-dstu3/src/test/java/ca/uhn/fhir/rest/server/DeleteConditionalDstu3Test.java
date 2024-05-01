@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
 import ca.uhn.fhir.rest.annotation.Delete;
@@ -61,8 +63,8 @@ public class DeleteConditionalDstu3Test {
 			.where(Patient.IDENTIFIER.exactly().systemAndIdentifier("SOMESYS","SOMEID"))
 			.execute();
 
-		assertThat(ourLastRequestWasDelete).isTrue();
-		assertThat(ourLastIdParam).isNull();
+		assertTrue(ourLastRequestWasDelete);
+		assertNull(ourLastIdParam);
 		assertThat(ourLastConditionalUrl).isEqualTo("Patient?identifier=SOMESYS%7CSOMEID");
 
 	}

@@ -1,5 +1,8 @@
 package ca.uhn.fhir.model.primitive;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -213,14 +216,14 @@ public class BaseDateTimeDtDstu2Test {
 		assertThat(dt.getNanos().longValue()).isEqualTo(275647578L);
 
 		dt = new InstantDt();
-		assertThat(dt.getYear()).isNull();
-		assertThat(dt.getMonth()).isNull();
-		assertThat(dt.getDay()).isNull();
-		assertThat(dt.getHour()).isNull();
-		assertThat(dt.getMinute()).isNull();
-		assertThat(dt.getSecond()).isNull();
-		assertThat(dt.getMillis()).isNull();
-		assertThat(dt.getNanos()).isNull();
+		assertNull(dt.getYear());
+		assertNull(dt.getMonth());
+		assertNull(dt.getDay());
+		assertNull(dt.getHour());
+		assertNull(dt.getMinute());
+		assertNull(dt.getSecond());
+		assertNull(dt.getMillis());
+		assertNull(dt.getNanos());
 	}
 
 	@BeforeEach
@@ -380,7 +383,7 @@ public class BaseDateTimeDtDstu2Test {
 
 	@Test
 	public void testGetValueAsCalendar() {
-		assertThat(new InstantDt().getValueAsCalendar()).isNull();
+		assertNull(new InstantDt().getValueAsCalendar());
 
 		InstantDt dt = new InstantDt("2011-01-03T07:11:22.002-08:00");
 		GregorianCalendar cal = dt.getValueAsCalendar();
@@ -429,7 +432,7 @@ public class BaseDateTimeDtDstu2Test {
 		InstantDt now = InstantDt.withCurrentTime();
 		Thread.sleep(100);
 		InstantDt then = InstantDt.withCurrentTime();
-		assertThat(now.getValue().before(then.getValue())).isTrue();
+		assertTrue(now.getValue().before(then.getValue()));
 	}
 
 	@Test
@@ -445,7 +448,7 @@ public class BaseDateTimeDtDstu2Test {
 		assertThat(myDateInstantParser.format(dt.getValue()).substring(0, 10)).isEqualTo("2013-02-03");
 		assertThat(dt.getValueAsString()).isEqualTo("2013-02-03");
 		assertThat(dt.isTimeZoneZulu()).isEqualTo(false);
-		assertThat(dt.getTimeZone()).isNull();
+		assertNull(dt.getTimeZone());
 		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.DAY);
 	}
 
@@ -525,7 +528,7 @@ public class BaseDateTimeDtDstu2Test {
 		assertThat(myDateInstantParser.format(dt.getValue()).substring(0, 23)).isEqualTo("2013-02-03 11:22:33.234");
 		assertThat(dt.getValueAsString()).isEqualTo("2013-02-03T11:22:33.234");
 		assertThat(dt.isTimeZoneZulu()).isEqualTo(false);
-		assertThat(dt.getTimeZone()).isNull();
+		assertNull(dt.getTimeZone());
 		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.MILLI);
 	}
 
@@ -561,7 +564,7 @@ public class BaseDateTimeDtDstu2Test {
 		ourLog.info("Date: {}", dt.getValue());
 		assertThat(dt.getValueAsString()).isEqualTo("2013-02");
 		assertThat(dt.isTimeZoneZulu()).isEqualTo(false);
-		assertThat(dt.getTimeZone()).isNull();
+		assertNull(dt.getTimeZone());
 		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.MONTH);
 
 		assertThat(myDateInstantParser.format(dt.getValue()).substring(0, 7)).isEqualTo("2013-02");
@@ -603,7 +606,7 @@ public class BaseDateTimeDtDstu2Test {
 		assertThat(myDateInstantParser.format(dt.getValue()).substring(0, 19)).isEqualTo("2013-02-03 11:22:33");
 		assertThat(dt.getValueAsString()).isEqualTo("2013-02-03T11:22:33");
 		assertThat(dt.isTimeZoneZulu()).isEqualTo(false);
-		assertThat(dt.getTimeZone()).isNull();
+		assertNull(dt.getTimeZone());
 		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.SECOND);
 	}
 
@@ -727,7 +730,7 @@ public class BaseDateTimeDtDstu2Test {
 		assertThat(myDateInstantParser.format(dt.getValue()).substring(0, 4)).isEqualTo("2013");
 		assertThat(dt.getValueAsString()).isEqualTo("2013");
 		assertThat(dt.isTimeZoneZulu()).isEqualTo(false);
-		assertThat(dt.getTimeZone()).isNull();
+		assertNull(dt.getTimeZone());
 		assertThat(dt.getPrecision()).isEqualTo(TemporalPrecisionEnum.YEAR);
 	}
 
@@ -783,8 +786,8 @@ public class BaseDateTimeDtDstu2Test {
 		InstantDt i = new InstantDt();
 		i.setValueAsString("2014-06-20T20:22:09Z");
 
-		assertThat(i.getValue()).isNotNull();
-		assertThat(i.getValueAsString()).isNotNull();
+		assertNotNull(i.getValue());
+		assertNotNull(i.getValueAsString());
 
 		assertThat(i.getValue().getTime()).isEqualTo(1403295729000L);
 		assertThat(i.getValueAsString()).isEqualTo("2014-06-20T20:22:09Z");

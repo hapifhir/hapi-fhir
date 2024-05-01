@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.validation;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -60,6 +61,6 @@ public class ValidatorResourceFetcherTest extends BaseTest {
     RequestDetails r = new SystemRequestDetails();
     // test
     Element returnedResource = fetcher.fetch(v, r,"http://www.test-url-for-questionnaire.com/Questionnaire/test-id|1.0.0");
-		assertThat(returnedResource).isNotNull();
+		assertNotNull(returnedResource);
   }
 }

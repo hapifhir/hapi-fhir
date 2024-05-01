@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.fql.jdbc;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
@@ -174,11 +176,11 @@ public class JdbcDriverTest {
 		// Test
 		Connection connection = myDs.getConnection();
 		Statement statement = connection.createStatement();
-		assertThat(statement.execute(input)).isTrue();
+		assertTrue(statement.execute(input));
 		ResultSet resultSet = statement.getResultSet();
 
 		// Verify
-		assertThat(resultSet.next()).isTrue();
+		assertTrue(resultSet.next());
 		assertThat(resultSet.getString("col.string")).isEqualTo("a-string");
 		assertThat(resultSet.getDate("col.date")).isEqualTo(new DateType("2023-02-02").getValue());
 		assertThat(resultSet.getBoolean("col.boolean")).isEqualTo(true);
@@ -230,21 +232,21 @@ public class JdbcDriverTest {
 		// Test
 		Connection connection = myDs.getConnection();
 		Statement statement = connection.createStatement();
-		assertThat(statement.execute(input)).isTrue();
+		assertTrue(statement.execute(input));
 		ResultSet resultSet = statement.getResultSet();
 
 		// Verify
-		assertThat(resultSet.next()).isTrue();
+		assertTrue(resultSet.next());
 		assertThat(resultSet.getTime("col.time").toString()).isEqualTo("12:23:00");
-		assertThat(resultSet.next()).isTrue();
+		assertTrue(resultSet.next());
 		assertThat(resultSet.getTime("col.time").toString()).isEqualTo("12:23:10");
-		assertThat(resultSet.next()).isTrue();
+		assertTrue(resultSet.next());
 		assertThat(resultSet.getTime("col.time").toString()).isEqualTo("12:23:11");
-		assertThat(resultSet.next()).isTrue();
+		assertTrue(resultSet.next());
 		assertThat(resultSet.getTime("col.time").toString()).isEqualTo("12:23:12");
-		assertThat(resultSet.next()).isTrue();
+		assertTrue(resultSet.next());
 		assertThat(resultSet.getTime("col.time").toString()).isEqualTo("12:23:13");
-		assertThat(resultSet.next()).isFalse();
+		assertFalse(resultSet.next());
 
 		verify(myFqlExecutor, times(1)).executeInitialSearch(any(), any(), any());
 		verify(myFqlExecutor, times(0)).executeContinuation(any(), any(), anyInt(), any(), any());
@@ -263,9 +265,9 @@ public class JdbcDriverTest {
 		Connection connection = myDs.getConnection();
 		DatabaseMetaData metadata = connection.getMetaData();
 		ResultSet tables = metadata.getTables(null, null, null, null);
-		assertThat(tables.isBeforeFirst()).isTrue();
-		assertThat(tables.next()).isTrue();
-		assertThat(tables.isBeforeFirst()).isFalse();
+		assertTrue(tables.isBeforeFirst());
+		assertTrue(tables.next());
+		assertFalse(tables.isBeforeFirst());
 		assertThat(tables.getString(1)).isEqualTo("Account");
 		assertThat(tables.getString("TABLE_NAME")).isEqualTo("Account");
 	}
@@ -289,22 +291,22 @@ public class JdbcDriverTest {
 		ResultSet tables = metadata.getColumns(null, null, null, null);
 
 		// Row 1
-		assertThat(tables.next()).isTrue();
+		assertTrue(tables.next());
 		assertThat(tables.getString(1)).isEqualTo("foo");
 		assertThat(tables.getString("COLUMN_NAME")).isEqualTo("foo");
-		assertThat(tables.wasNull()).isFalse();
+		assertFalse(tables.wasNull());
 		assertThat(tables.getInt(2)).isEqualTo(Types.VARCHAR);
 		assertThat(tables.getInt("DATA_TYPE")).isEqualTo(Types.VARCHAR);
-		assertThat(tables.wasNull()).isFalse();
+		assertFalse(tables.wasNull());
 		// Row 2
-		assertThat(tables.next()).isTrue();
+		assertTrue(tables.next());
 		assertThat(tables.getString(1)).isEqualTo("bar");
 		assertThat(tables.getString("COLUMN_NAME")).isEqualTo("bar");
 		assertThat(tables.getInt(2)).isEqualTo(0);
 		assertThat(tables.getInt("DATA_TYPE")).isEqualTo(0);
-		assertThat(tables.wasNull()).isTrue();
+		assertTrue(tables.wasNull());
 		// No more rows
-		assertThat(tables.next()).isFalse();
+		assertFalse(tables.next());
 		// Invalid columns
 		assertThatExceptionOfType(SQLException.class).isThrownBy(() -> tables.getString(0));
 		assertThatExceptionOfType(SQLException.class).isThrownBy(() -> tables.getString(999));
@@ -317,8 +319,8 @@ public class JdbcDriverTest {
 		Connection connection = myDs.getConnection();
 		DatabaseMetaData metadata = connection.getMetaData();
 
-		assertThat(metadata.getImportedKeys(null, null, null).next()).isFalse();
-		assertThat(metadata.getExportedKeys(null, null, null).next()).isFalse();
+		assertFalse(metadata.getImportedKeys(null, null, null).next());
+		assertFalse(metadata.getExportedKeys(null, null, null).next());
 	}
 
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
@@ -143,7 +144,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(outcome.getTotalElement().getValue()).isNull();
+		assertNull(outcome.getTotalElement().getValue());
 		assertThat(outcome.getEntry()).hasSize(10);
 	}
 
@@ -163,7 +164,7 @@ public class ResourceProviderSummaryModeR4Test extends BaseResourceProviderR4Tes
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(outcome.getTotalElement().getValue()).isNull();
+		assertNull(outcome.getTotalElement().getValue());
 		assertThat(outcome.getEntry()).hasSize(10);
 	}
 

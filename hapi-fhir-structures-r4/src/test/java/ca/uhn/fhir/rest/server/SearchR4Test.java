@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.Include;
@@ -86,7 +87,7 @@ public class SearchR4Test {
 	private Bundle executeSearchAndValidateHasLinkNext(HttpGet httpGet, EncodingEnum theExpectEncoding) throws IOException {
 		Bundle bundle = executeSearch(httpGet, theExpectEncoding);
 		String linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext).isNotNull();
+		assertNotNull(linkNext);
 
 		assertThat(bundle.getEntry()).hasSize(10);
 		return bundle;

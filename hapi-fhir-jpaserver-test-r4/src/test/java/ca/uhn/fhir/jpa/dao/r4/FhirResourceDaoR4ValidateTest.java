@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -582,7 +584,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		vs.getCompose().addInclude().setSystem("http://loinc.org");
 		myValueSetDao.create(vs);
 
-		assertThat(myTermReadSvc.isValueSetPreExpandedForCodeValidation(vs)).isFalse();
+		assertFalse(myTermReadSvc.isValueSetPreExpandedForCodeValidation(vs));
 
 		// Load the profile, which is just the Vital Signs profile modified to accept all loinc codes
 		// and not just certain ones
@@ -1011,13 +1013,13 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		ValidationSupportContext ctx = new ValidationSupportContext(myValidationSupport);
 
 		boolean outcome = myValidationSupport.isCodeSystemSupported(ctx, "http://terminology.hl7.org/CodeSystem/v2-0203-FOO");
-		assertThat(outcome).isFalse();
+		assertFalse(outcome);
 
 		outcome = myValidationSupport.isCodeSystemSupported(ctx, "http://terminology.hl7.org/CodeSystem/v2-0203");
-		assertThat(outcome).isTrue();
+		assertTrue(outcome);
 
 		outcome = myValidationSupport.isCodeSystemSupported(ctx, "http://terminology.hl7.org/CodeSystem/v2-0203-BLAH");
-		assertThat(outcome).isFalse();
+		assertFalse(outcome);
 	}
 
 	/**
@@ -2113,7 +2115,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://fooVs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
-		assertThat(result.isOk()).isFalse();
+		assertFalse(result.isOk());
 		assertThat(result.getMessage()).isEqualTo("Validator is unable to provide validation for 10013-1#http://loinc.org - Unknown or unusable ValueSet[http://fooVs]");
 	}
 

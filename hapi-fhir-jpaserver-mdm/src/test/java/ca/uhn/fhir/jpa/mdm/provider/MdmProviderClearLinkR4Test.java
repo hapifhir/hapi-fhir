@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -150,14 +153,14 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 						assertThat(deletedCount).as(msg).isEqualTo(deletedTotal);
 					} else {
 						// pointless, but...
-						assertThat(contains).isTrue();
+						assertTrue(contains);
 					}
 				}
 			}
 
 			// want to make sure we found the trace messages
 			// or what's the point
-			assertThat(hasMsgs).isTrue();
+			assertTrue(hasMsgs);
 		} finally {
 			clearStepLogger.detachAppender(appender);
 			clearStepLogger.setLevel(initialLevel);
@@ -231,7 +234,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	public void testClearPatientLinks() {
 		assertLinkCount(2);
 		Patient read = myPatientDao.read(new IdDt(mySourcePatientId.getValueAsString()).toVersionless());
-		assertThat(read).isNotNull();
+		assertNotNull(read);
 		clearMdmLinks("Patient");
 		assertNoPatientLinksExist();
 		try {
@@ -250,11 +253,11 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 		createPatientAndUpdateLinks(buildJanePatient());
 		Patient patientAndUpdateLinks = createPatientAndUpdateLinks(buildJanePatient());
 		IAnyResource goldenResource = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
-		assertThat(goldenResource).isNotNull();
+		assertNotNull(goldenResource);
 		clearMdmLinks();
 		assertNoPatientLinksExist();
 		goldenResource = getGoldenResourceFromTargetResource(patientAndUpdateLinks);
-		assertThat(goldenResource).isNull();
+		assertNull(goldenResource);
 	}
 
 	@Test
@@ -335,7 +338,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 	public void testClearPractitionerLinks() {
 		assertLinkCount(2);
 		Practitioner read = myPractitionerDao.read(new IdDt(myPractitionerGoldenResourceId.getValueAsString()).toVersionless());
-		assertThat(read).isNotNull();
+		assertNotNull(read);
 		clearMdmLinks("Practitioner");
 		assertNoPractitionerLinksExist();
 		try {

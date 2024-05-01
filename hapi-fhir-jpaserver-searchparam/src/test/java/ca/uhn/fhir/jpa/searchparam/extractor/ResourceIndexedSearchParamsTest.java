@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -37,7 +39,7 @@ public class ResourceIndexedSearchParamsTest {
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
 		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
-		assertThat(result).isFalse();
+		assertFalse(result);
 	}
 
 	@Test
@@ -47,7 +49,7 @@ public class ResourceIndexedSearchParamsTest {
 
 		ReferenceParam referenceParam = getReferenceParam(STRING_ID);
 		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
-		assertThat(result).isTrue();
+		assertTrue(result);
 	}
 
 	@Test
@@ -57,7 +59,7 @@ public class ResourceIndexedSearchParamsTest {
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
 		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
-		assertThat(result).isFalse();
+		assertFalse(result);
 	}
 
 	@Test
@@ -67,7 +69,7 @@ public class ResourceIndexedSearchParamsTest {
 
 		ReferenceParam referenceParam = getReferenceParam(LONG_ID);
 		boolean result = myParams.matchResourceLinks(myStorageSettings, "Patient", "organization", referenceParam, "organization");
-		assertThat(result).isTrue();
+		assertTrue(result);
 	}
 
 	private ReferenceParam getReferenceParam(String theId) {

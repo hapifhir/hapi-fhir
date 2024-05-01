@@ -48,7 +48,7 @@ public class SearchWithHl7OrgDstu2BundleTest {
 		ourLog.info(responseContent);
 
 		//@formatter:off
-		assertThat(responseContent, stringContainsInOrder("<Bundle xmlns=\"http://hl7.org/fhir\">", 
+		assertThat(responseContent).containsSequence("<Bundle xmlns=\"http://hl7.org/fhir\">",
 				"<type value=\"searchset\"/>", 
 				"<link>" ,
 				"<relation value=\"self\"/>", 
@@ -57,7 +57,7 @@ public class SearchWithHl7OrgDstu2BundleTest {
 				"<entry>" , 
 				//"<fullUrl value=\ourServer.getBaseUrl() + "/Patient/123\"/>" , 
 				"<resource>" , 
-				"<Patient xmlns=\"http://hl7.org/fhir\">"));
+				"<Patient xmlns=\"http://hl7.org/fhir\">");
 		// @formatter:off
 	}
 

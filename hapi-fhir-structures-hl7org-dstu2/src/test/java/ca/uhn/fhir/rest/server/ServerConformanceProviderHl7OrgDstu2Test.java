@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.api.annotation.Description;
@@ -97,9 +99,9 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		ConformanceRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
 		assertThat(res.getType()).isEqualTo("Patient");
 
-		assertThat(res.getConditionalCreate()).isTrue();
+		assertTrue(res.getConditionalCreate());
 		assertThat(res.getConditionalDelete()).isEqualTo(ConditionalDeleteStatus.SINGLE);
-		assertThat(res.getConditionalUpdate()).isTrue();
+		assertTrue(res.getConditionalUpdate());
 	}
 	
 	@Test
@@ -186,7 +188,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 			}
 		}
 
-		assertThat(found).isTrue();
+		assertTrue(found);
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -214,9 +216,9 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 		ConformanceRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
 		assertThat(res.getType()).isEqualTo("Patient");
 
-		assertThat(res.getConditionalCreateElement().getValue()).isNull();
-		assertThat(res.getConditionalDeleteElement().getValue()).isNull();
-		assertThat(res.getConditionalUpdateElement().getValue()).isNull();
+		assertNull(res.getConditionalCreateElement().getValue());
+		assertNull(res.getConditionalDeleteElement().getValue());
+		assertNull(res.getConditionalUpdateElement().getValue());
 	}
 
 	@Test
@@ -241,7 +243,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 				found = true;
 			}
 		}
-		assertThat(found).isTrue();
+		assertTrue(found);
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -344,7 +346,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 				found = true;
 			}
 		}
-		assertThat(found).isTrue();
+		assertTrue(found);
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -406,7 +408,7 @@ public class ServerConformanceProviderHl7OrgDstu2Test {
 
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
-		assertThat(ourCtx.newValidator().validateWithResult(conformance).isSuccessful()).isTrue();
+		assertTrue(ourCtx.newValidator().validateWithResult(conformance).isSuccessful());
 	}
 
 	public static class ConditionalProvider implements IResourceProvider {

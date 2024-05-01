@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -120,7 +121,7 @@ public class InterceptorThrowingExceptionR4Test {
 		response = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 		assertThat(response).contains("FAM");
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		await().until(() -> hit.size() == 3);
 

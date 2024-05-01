@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.method;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
@@ -522,7 +523,7 @@ class ResponseBundleBuilderTest {
 
 	private static void verifyBundle(Bundle theBundle, Integer theExpectedTotal, int theExpectedEntryCount, String theFirstId, String theLastId) {
 		ourLog.trace(ourFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theBundle));
-		assertThat(theBundle.isEmpty()).isFalse();
+		assertFalse(theBundle.isEmpty());
 		assertThat(theBundle.getType()).isEqualTo(SEARCHSET);
 		assertThat(theBundle.getTotalElement().getValue()).isEqualTo(theExpectedTotal);
 		List<Bundle.BundleEntryComponent> entries = theBundle.getEntry();

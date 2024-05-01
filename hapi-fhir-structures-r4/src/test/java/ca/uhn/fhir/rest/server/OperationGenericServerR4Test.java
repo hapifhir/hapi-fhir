@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -158,10 +159,10 @@ public class OperationGenericServerR4Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			status.getEntity().getContent().close();
 
-			assertThat(ourLastResourceParam).isNull();
+			assertNull(ourLastResourceParam);
 			assertThat(ourLastParam1.getValue()).isEqualTo("PARAM1val");
 
-			assertThat(ourLastParam2).isNull();
+			assertNull(ourLastParam2);
 			assertThat(ourLastMethod).isEqualTo("$OP_TYPE");
 
 			Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);

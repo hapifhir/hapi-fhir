@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.resource.Binary;
@@ -165,7 +166,7 @@ public class BinaryDstu2Test {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			assertThat(status.getFirstHeader("content-type").getValue().replace(" ", "").toLowerCase()).isEqualTo(Constants.CT_FHIR_JSON + ";charset=utf-8");
-			assertThat(status.getFirstHeader("Content-Disposition")).isNull();
+			assertNull(status.getFirstHeader("Content-Disposition"));
 			assertThat(responseContent).isEqualTo("{\"resourceType\":\"Binary\",\"id\":\"1\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}");
 		}
 	}

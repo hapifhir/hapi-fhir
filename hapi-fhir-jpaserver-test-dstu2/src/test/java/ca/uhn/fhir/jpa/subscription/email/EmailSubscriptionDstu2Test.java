@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
 import ca.uhn.fhir.jpa.test.util.SubscriptionTestUtil;
@@ -127,7 +128,7 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Observation observation1 = sendObservation(code, "SNOMED-CT");
 
-		assertThat(ourGreenMail.waitForIncomingEmail(10000, 1)).isTrue();
+		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		MimeMessage[] messages = ourGreenMail.getReceivedMessages();
 		assertThat(messages.length).isEqualTo(2);

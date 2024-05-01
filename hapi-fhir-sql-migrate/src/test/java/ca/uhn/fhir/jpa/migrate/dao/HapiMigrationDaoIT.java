@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.dao;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.migrate.BaseMigrationTest;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
 import org.flywaydb.core.api.MigrationVersion;
@@ -22,7 +23,7 @@ class HapiMigrationDaoIT extends BaseMigrationTest {
 		HapiMigrationEntity record1 = buildEntity("DESC1", "1.1");
 
 		boolean result1 = ourHapiMigrationDao.save(record1);
-		assertThat(result1).isTrue();
+		assertTrue(result1);
 		{
 			Set<MigrationVersion> all = ourHapiMigrationDao.fetchSuccessfulMigrationVersions();
 			assertThat(all).hasSize(1);
@@ -30,7 +31,7 @@ class HapiMigrationDaoIT extends BaseMigrationTest {
 		HapiMigrationEntity record2 = buildEntity("DESC2", "1.2");
 
 		boolean result2 = ourHapiMigrationDao.save(record2);
-		assertThat(result2).isTrue();
+		assertTrue(result2);
 		{
 			Set<MigrationVersion> all = ourHapiMigrationDao.fetchSuccessfulMigrationVersions();
 			assertThat(all).hasSize(2);

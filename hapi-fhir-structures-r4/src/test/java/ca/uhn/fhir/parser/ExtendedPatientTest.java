@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -48,7 +49,7 @@ public class ExtendedPatientTest {
 		ExtendedPatient parsedMarge = (ExtendedPatient) parsedBundle.getEntry().get(1).getResource();
 
 		IBaseResource referencedHomer = parsedMarge.getLinkFirstRep().getOther().getResource();
-		assertThat(referencedHomer).isNotNull();
+		assertNotNull(referencedHomer);
 		assertThat(referencedHomer).isSameAs(parsedHomer);
 	}
 

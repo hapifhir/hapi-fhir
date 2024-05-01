@@ -1,5 +1,9 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
@@ -64,7 +68,7 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	@Test
 	public void testLookupCode_withUnknownSystem_returnsNull() {
 		LookupCodeResult outcome = mySvc.lookupCode(newSupport(), new LookupCodeRequest("http://foo", "someCode"));
-		assertThat(outcome).isNull();
+		assertNull(outcome);
 	}
 
 	@ParameterizedTest
@@ -169,14 +173,14 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	public void testFetchCodeSystem_withCountriesForDSTU3_returnsOk() {
 		CommonCodeSystemsTerminologyService svc = new CommonCodeSystemsTerminologyService(FhirContext.forDstu3Cached());
 		org.hl7.fhir.dstu3.model.CodeSystem cs = (org.hl7.fhir.dstu3.model.CodeSystem) svc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
-		assertThat(cs).isNotNull();
+		assertNotNull(cs);
 		assertThat(cs.getConcept()).hasSize(498);
 	}
 
 	@Test
 	public void testFetchCodeSystem_withCountriesForR4_returnsOk() {
 		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
-		assertThat(cs).isNotNull();
+		assertNotNull(cs);
 		assertThat(cs.getConcept()).hasSize(498);
 	}
 
@@ -184,7 +188,7 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	public void testFetchCodeSystem_withCountriesForR5_returnsOk() {
 		CommonCodeSystemsTerminologyService svc = new CommonCodeSystemsTerminologyService(FhirContext.forR5Cached());
 		org.hl7.fhir.r5.model.CodeSystem cs = (org.hl7.fhir.r5.model.CodeSystem) svc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
-		assertThat(cs).isNotNull();
+		assertNotNull(cs);
 		assertThat(cs.getConcept()).hasSize(498);
 	}
 
@@ -192,7 +196,7 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	public void testFetchCodeSystem_withCountriesForDSTU2_returnsOk() {
 		CommonCodeSystemsTerminologyService svc = new CommonCodeSystemsTerminologyService(FhirContext.forDstu2Cached());
 		IBaseResource cs = svc.fetchCodeSystem(CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL);
-		assertThat(cs).isNull();
+		assertNull(cs);
 	}
 
 	@ParameterizedTest
@@ -274,14 +278,14 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	@Test
 	public void testFetchCodeSystem_withCurrencies_returnsOk() {
 		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem(CURRENCIES_CODESYSTEM_URL);
-		assertThat(cs).isNotNull();
+		assertNotNull(cs);
 		assertThat(cs.getConcept()).hasSize(182);
 	}
 
 	@Test
 	public void testFetchCodeSystem_withUnknownSystem_returnsNull() {
 		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem("http://foo");
-		assertThat(cs).isNull();
+		assertNull(cs);
 	}
 
 	@Test
@@ -296,7 +300,7 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	@Test
 	public void testFetchCodeSystem_withMimeType_returnsOk() {
 		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem(MIMETYPES_CODESYSTEM_URL);
-		assertThat(cs).isNull();
+		assertNull(cs);
 	}
 
 	@ParameterizedTest
@@ -363,35 +367,35 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	}
 
 	private void validateCodeResultOk(final CodeValidationResult theResult, final String theCode, final String theDisplay) {
-		assertThat(theResult).isNotNull();
-		assertThat(theResult.isOk()).isTrue();
+		assertNotNull(theResult);
+		assertTrue(theResult.isOk());
 		assertThat(theResult.getCode()).isEqualTo(theCode);
 		assertThat(theResult.getDisplay()).isEqualTo(theDisplay);
-		assertThat(theResult.getSeverity()).isNull();
-		assertThat(theResult.getMessage()).isNull();
+		assertNull(theResult.getSeverity());
+		assertNull(theResult.getMessage());
 	}
 
 	private void validateCodeResultError(final CodeValidationResult theResult, final String theError) {
-		assertThat(theResult).isNotNull();
-		assertThat(theResult.isOk()).isFalse();
+		assertNotNull(theResult);
+		assertFalse(theResult.isOk());
 		assertThat(theResult.getSeverity()).isEqualTo(IssueSeverity.ERROR);
 		assertThat(theResult.getMessage()).isEqualTo(theError);
 	}
 
 	private void lookupCodeResultOk(final LookupCodeResult theResult, final String theCode, final String theSystem, final String theDisplay) {
-		assertThat(theResult).isNotNull();
+		assertNotNull(theResult);
 		assertThat(theResult.getSearchedForSystem()).isEqualTo(theSystem);
 		assertThat(theResult.getSearchedForCode()).isEqualTo(theCode);
-		assertThat(theResult.isFound()).isTrue();
+		assertTrue(theResult.isFound());
 		assertThat(theResult.getCodeDisplay()).isEqualTo(theDisplay);
 	}
 
 	private void lookupCodeResultError(final LookupCodeResult theResult, final String theCode, final String theMessage) {
-		assertThat(theResult).isNotNull();
+		assertNotNull(theResult);
 		assertThat(theResult.getSearchedForCode()).isEqualTo(theCode);
-		assertThat(theResult.isFound()).isFalse();
+		assertFalse(theResult.isFound());
 		assertThat(theResult.getErrorMessage()).isEqualTo(theMessage);
-		assertThat(theResult.getCodeDisplay()).isNull();
+		assertNull(theResult.getCodeDisplay());
 	}
 
 

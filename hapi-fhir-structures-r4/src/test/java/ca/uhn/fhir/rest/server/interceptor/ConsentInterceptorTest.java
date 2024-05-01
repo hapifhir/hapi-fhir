@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -359,8 +360,8 @@ public class ConsentInterceptorTest {
 
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(204);
-			assertThat(status.getEntity()).isNull();
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE)).isNull();
+			assertNull(status.getEntity());
+			assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
 		}
 
 		verify(myConsentSvc, timeout(2000).times(1)).startOperation(any(), any());
@@ -562,7 +563,7 @@ public class ConsentInterceptorTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(response.getTotalElement().getValue()).isNull();
+		assertNull(response.getTotalElement().getValue());
 		assertThat(response.getEntry()).isEmpty();
 
 		verify(myConsentSvc, timeout(2000).times(1)).startOperation(any(), any());
@@ -646,7 +647,7 @@ public class ConsentInterceptorTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(response.getTotalElement().getValue()).isNull();
+		assertNull(response.getTotalElement().getValue());
 		assertThat(response.getEntry()).hasSize(1);
 
 		verify(myConsentSvc, timeout(2000).times(1)).startOperation(any(), any());
@@ -684,7 +685,7 @@ public class ConsentInterceptorTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(response.getTotalElement().getValue()).isNull();
+		assertNull(response.getTotalElement().getValue());
 		assertThat(response.getEntry()).isEmpty();
 
 		verify(myConsentSvc, timeout(2000).times(1)).startOperation(any(), any());
@@ -724,7 +725,7 @@ public class ConsentInterceptorTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(response.getTotalElement().getValue()).isNull();
+		assertNull(response.getTotalElement().getValue());
 		assertThat(response.getEntry()).hasSize(1);
 
 		Patient patient = (Patient) response.getEntry().get(0).getResource();

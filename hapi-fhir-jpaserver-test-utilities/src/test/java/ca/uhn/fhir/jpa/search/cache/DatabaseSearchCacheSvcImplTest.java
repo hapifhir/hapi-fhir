@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.cache;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
@@ -60,7 +61,7 @@ public class DatabaseSearchCacheSvcImplTest {
 
 		Search search = new Search();
 		Optional<Search> outcome = mySvc.tryToMarkSearchAsInProgress(search, RequestPartitionId.allPartitions());
-		assertThat(outcome.isPresent()).isFalse();
+		assertFalse(outcome.isPresent());
 		verify(mySearchDao, times(1)).save(any());
 	}
 
@@ -72,7 +73,7 @@ public class DatabaseSearchCacheSvcImplTest {
 
 		Search search = new Search();
 		Optional<Search> outcome = mySvc.tryToMarkSearchAsInProgress(search, RequestPartitionId.allPartitions());
-		assertThat(outcome.isPresent()).isFalse();
+		assertFalse(outcome.isPresent());
 		verify(mySearchDao, never()).save(any());
 	}
 

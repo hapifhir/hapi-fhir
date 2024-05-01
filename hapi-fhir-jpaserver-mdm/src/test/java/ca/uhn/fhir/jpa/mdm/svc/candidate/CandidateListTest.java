@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -95,11 +98,11 @@ public class CandidateListTest {
 		}
 
 		// tests
-		assertThat(candidate.isEmpty()).isFalse();
-		assertThat(candidate.exactlyOneMatch()).isTrue();
+		assertFalse(candidate.isEmpty());
+		assertTrue(candidate.exactlyOneMatch());
 		assertThat(candidate.size()).isEqualTo(1);
-		assertThat(candidate.getFirstMatch()).isNotNull();
-		assertThat(candidate.getOnlyMatch()).isNotNull();
+		assertNotNull(candidate.getFirstMatch());
+		assertNotNull(candidate.getOnlyMatch());
 	}
 
 	@ParameterizedTest

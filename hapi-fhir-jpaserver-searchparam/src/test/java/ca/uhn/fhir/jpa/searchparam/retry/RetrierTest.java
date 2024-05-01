@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.retry;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -14,7 +15,7 @@ public class RetrierTest {
 	public void happyPath() {
 		Supplier<Boolean> supplier = () -> true;
 		Retrier<Boolean> retrier = new Retrier<>(supplier, 5);
-		assertThat(retrier.runWithRetry()).isTrue();
+		assertTrue(retrier.runWithRetry());
 	}
 
 	@Test
@@ -25,7 +26,7 @@ public class RetrierTest {
 			return true;
 		};
 		Retrier<Boolean> retrier = new Retrier<>(supplier, 5);
-		assertThat(retrier.runWithRetry()).isTrue();
+		assertTrue(retrier.runWithRetry());
 		assertThat(counter.get()).isEqualTo(3);
 	}
 

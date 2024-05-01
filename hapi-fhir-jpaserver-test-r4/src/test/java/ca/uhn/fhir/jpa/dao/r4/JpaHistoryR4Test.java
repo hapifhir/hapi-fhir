@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -48,7 +49,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		IBundleProvider history = myPatientDao.history(null, null, null, new SystemRequestDetails());
 
 		// Simulate the server requesting the Bundle.total value
-		assertThat(history.size()).isNull();
+		assertNull(history.size());
 
 		// Simulate the server actually loading the resources
 		history.getResources(0, 10);
@@ -179,7 +180,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		IBundleProvider history = myPatientDao.history(null, new Date(), null, new SystemRequestDetails());
 
 		// No count since there is an offset
-		assertThat(history.size()).isNull();
+		assertNull(history.size());
 
 		// Simulate the server actually loading the resources
 		assertThat(history.getResources(0, 999)).hasSize(20);

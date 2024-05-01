@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.bulk.imprt.svc;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -131,7 +133,7 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 			mySvc.markJobAsReadyForActivation(jobId);
 
 			ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
-			assertThat(activateJobOutcome.isActivated).isTrue();
+			assertTrue(activateJobOutcome.isActivated);
 
 			JobInstance instance = myBatch2JobHelper.awaitJobHasStatus(activateJobOutcome.jobId,
 				60,
@@ -163,10 +165,10 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 		mySvc.markJobAsReadyForActivation(jobId);
 
 		ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
-		assertThat(activateJobOutcome.isActivated).isTrue();
+		assertTrue(activateJobOutcome.isActivated);
 
 		JobInstance instance = myBatch2JobHelper.awaitJobCompletion(activateJobOutcome.jobId, 60);
-		assertThat(instance).isNotNull();
+		assertNotNull(instance);
 		assertThat(instance.getStatus()).isEqualTo(StatusEnum.COMPLETED);
 
 		IBundleProvider searchResults = myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd);
@@ -193,10 +195,10 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 			mySvc.markJobAsReadyForActivation(jobId);
 
 			ActivateJobResult activateJobOutcome = mySvc.activateNextReadyJob();
-			assertThat(activateJobOutcome.isActivated).isTrue();
+			assertTrue(activateJobOutcome.isActivated);
 
 			JobInstance instance = myBatch2JobHelper.awaitJobCompletion(activateJobOutcome.jobId);
-			assertThat(instance).isNotNull();
+			assertNotNull(instance);
 
 			ArgumentCaptor<HookParams> paramsCaptor = ArgumentCaptor.forClass(HookParams.class);
 			verify(interceptor, times(50)).invoke(any(), paramsCaptor.capture());

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model.dstu2;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -27,8 +29,8 @@ public class CompartmentDstu2Test {
 		Observation o = new Observation();
 		o.getSubject().setReference("Patient/PID1");
 
-		assertThat(ourCtx.newTerser().isSourceInCompartmentForTarget("Patient", o, new IdDt("Patient/PID1"))).isTrue();
-		assertThat(ourCtx.newTerser().isSourceInCompartmentForTarget("Patient", o, new IdDt("Patient/PID2"))).isFalse();
+		assertTrue(ourCtx.newTerser().isSourceInCompartmentForTarget("Patient", o, new IdDt("Patient/PID1")));
+		assertFalse(ourCtx.newTerser().isSourceInCompartmentForTarget("Patient", o, new IdDt("Patient/PID2")));
 	}
 	
 	@Test

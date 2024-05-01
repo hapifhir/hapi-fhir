@@ -1,5 +1,6 @@
 package ca.uhn.fhir.validation;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Appointment;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
@@ -29,7 +30,7 @@ public class BundleValidationTest {
 		validator.setValidateAgainstStandardSchematron(true);
 
 		ValidationResult result = validator.validateWithResult(appointment);
-		assertThat(result.isSuccessful()).isFalse();
+		assertFalse(result.isSuccessful());
 		assertThat(result.getMessages()).hasSize(1);
 		for (SingleValidationMessage singleValidationMessage : result.getMessages()) {
 			System.out.println(singleValidationMessage.getMessage());

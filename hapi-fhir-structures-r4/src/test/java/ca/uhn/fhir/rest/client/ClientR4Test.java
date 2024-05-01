@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -577,7 +579,7 @@ public class ClientR4Test {
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(response));
 
 		List<Coding> tags = response.getMeta().getTag();
-		assertThat(tags).isNotNull();
+		assertNotNull(tags);
 		assertThat(tags).hasSize(1);
 		assertThat(tags.get(0).getCode()).isEqualTo("http://foo/tagdefinition.html");
 		assertThat(tags.get(0).getSystem()).isEqualTo("http://hl7.org/fhir/tag");
@@ -1252,8 +1254,8 @@ public class ClientR4Test {
 
 		ITestClient client = ourCtx.newRestfulClient(ITestClient.class, "http://foo");
 		MethodOutcome resp = client.updatePatient(new IdType("Patient/100/_history/200"), patient);
-		assertThat(resp.getResource()).isNull();
-		assertThat(resp.getOperationOutcome()).isNull();
+		assertNull(resp.getResource());
+		assertNull(resp.getOperationOutcome());
 
 		assertThat(capt.getValue().getClass()).isEqualTo(HttpPut.class);
 		HttpPut post = (HttpPut) capt.getValue();
@@ -1324,8 +1326,8 @@ public class ClientR4Test {
 		HttpPost post = (HttpPost) capt.getValue();
 		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/$validate"));
 		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
-		assertThat(response.getOperationOutcome()).isNull();
-		assertThat(response.getResource()).isNull();
+		assertNull(response.getOperationOutcome());
+		assertNull(response.getResource());
 	}
 
 	@Test
@@ -1373,9 +1375,9 @@ public class ClientR4Test {
 		HttpPost post = (HttpPost) capt.getValue();
 		assertThat(post.getURI().toASCIIString(), StringEndsWith.endsWith("/Patient/$validate"));
 		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8), StringContains.containsString("\"Patient"));
-		assertThat(response.getOperationOutcome()).isNotNull();
+		assertNotNull(response.getOperationOutcome());
 		assertThat(((OperationOutcome) response.getOperationOutcome()).getIssueFirstRep().getDiagnostics()).isEqualTo("ALL GOOD");
-		assertThat(response.getResource()).isNull();
+		assertNull(response.getResource());
 	}
 
 	@Test

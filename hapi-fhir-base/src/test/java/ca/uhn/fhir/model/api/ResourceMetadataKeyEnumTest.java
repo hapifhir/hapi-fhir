@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model.api;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,7 +14,7 @@ public class ResourceMetadataKeyEnumTest {
 
 	@Test
 	public void testEquals() {
-		assertThat(ResourceMetadataKeyEnum.PROFILES).isNotNull();
+		assertNotNull(ResourceMetadataKeyEnum.PROFILES);
 		assertThat("").isNotEqualTo(ResourceMetadataKeyEnum.PROFILES);
 		assertThat(ResourceMetadataKeyEnum.PUBLISHED).isNotEqualTo(ResourceMetadataKeyEnum.PROFILES);
 		assertThat(ResourceMetadataKeyEnum.PROFILES).isEqualTo(ResourceMetadataKeyEnum.PROFILES);
@@ -23,7 +24,7 @@ public class ResourceMetadataKeyEnumTest {
 	@Test
 	public void testExtensionResourceEquals() {
 		assertThat(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://bar")).isNotEqualTo(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo"));
-		assertThat(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo")).isNotNull();
+		assertNotNull(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo"));
 		assertThat("").isNotEqualTo(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo"));
 		assertThat(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo")).isEqualTo(new ResourceMetadataKeyEnum.ExtensionResourceMetadataKey("http://foo"));
 

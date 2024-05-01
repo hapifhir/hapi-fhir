@@ -1,5 +1,8 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import org.junit.jupiter.api.Test;
 
@@ -14,12 +17,12 @@ class ObjectUtilTest {
 	void testEquals() {
 		String a = "a";
 		String b = "b";
-		assertThat(ObjectUtil.equals(b, a)).isFalse();
-		assertThat(ObjectUtil.equals(a, b)).isFalse();
-		assertThat(ObjectUtil.equals(a, null)).isFalse();
-		assertThat(ObjectUtil.equals(null, a)).isFalse();
-		assertThat(ObjectUtil.equals(null, null)).isTrue();
-		assertThat(ObjectUtil.equals(a, a)).isTrue();
+		assertFalse(ObjectUtil.equals(b, a));
+		assertFalse(ObjectUtil.equals(a, b));
+		assertFalse(ObjectUtil.equals(a, null));
+		assertFalse(ObjectUtil.equals(null, a));
+		assertTrue(ObjectUtil.equals(null, null));
+		assertTrue(ObjectUtil.equals(a, a));
 	}
 	
 	@Test
@@ -31,7 +34,7 @@ class ObjectUtilTest {
 		} catch (NullPointerException e) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(1776) + message);
 		}
-		assertThat(ObjectUtil.requireNonNull("some string", message)).isNotNull();
+		assertNotNull(ObjectUtil.requireNonNull("some string", message));
 	}
 	
 	@Test
@@ -73,6 +76,6 @@ class ObjectUtilTest {
 
 		Optional<Integer> result = ObjectUtil.castIfInstanceof(value, Integer.class);
 
-		assertThat(result.isEmpty()).isTrue();
+		assertTrue(result.isEmpty());
 	}
 }

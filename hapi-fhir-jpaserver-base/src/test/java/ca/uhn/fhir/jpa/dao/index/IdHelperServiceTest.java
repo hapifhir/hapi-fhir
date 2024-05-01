@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.index;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -102,8 +104,8 @@ public class IdHelperServiceTest {
 		Map<String, JpaPid> actualIds = subject.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted);
 
 		//verifyResult
-		assertThat(actualIds.isEmpty()).isFalse();
-		assertThat(actualIds.get(ids.get(0))).isNull();
+		assertFalse(actualIds.isEmpty());
+		assertNull(actualIds.get(ids.get(0)));
     }
 
     private Root<ResourceTable> getMockedFrom() {

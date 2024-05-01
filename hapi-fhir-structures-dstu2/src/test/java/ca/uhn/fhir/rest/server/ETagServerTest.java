@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -91,7 +92,7 @@ public class ETagServerTest {
 			assertThat(dt.getValue()).isEqualTo("3");
 
 			Header cl = status.getFirstHeader(Constants.HEADER_ETAG_LC);
-			assertThat(cl).isNotNull();
+			assertNotNull(cl);
 			assertThat(cl.getValue()).isEqualTo("W/\"222\"");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -113,7 +114,7 @@ public class ETagServerTest {
 			assertThat(dt.getValue()).isEqualTo("3");
 
 			Header cl = status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
-			assertThat(cl).isNotNull();
+			assertNotNull(cl);
 			assertThat(cl.getValue()).isEqualTo("Sun, 25 Nov 2012 02:34:45 GMT");
 		} finally {
 			if (status.getEntity() != null) {

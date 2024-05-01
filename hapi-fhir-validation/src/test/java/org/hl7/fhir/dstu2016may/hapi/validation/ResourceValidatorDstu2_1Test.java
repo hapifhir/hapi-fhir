@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu2016may.hapi.validation;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.i18n.Msg;
@@ -96,14 +97,14 @@ public class ResourceValidatorDstu2_1Test extends BaseValidationTestWithInlineMo
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSequence(
 			"meta",
 			"Organization/2.25.79433498044103547197447759549862032393",
 			"furry-grey",
 			"furry-white",
 			"String Extension",
 			"FamilyName"
-		));
+		);
 		assertThat(messageString, not(stringContainsInOrder(
 			"extension",
 			"meta"
@@ -144,7 +145,7 @@ public class ResourceValidatorDstu2_1Test extends BaseValidationTestWithInlineMo
 		String ooencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 		ourLog.info(ooencoded);
 
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 	}
 
 	/**
@@ -165,14 +166,14 @@ public class ResourceValidatorDstu2_1Test extends BaseValidationTestWithInlineMo
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSequence(
 			"meta",
 			"String Extension",
 			"Organization/2.25.79433498044103547197447759549862032393",
 			"furry-grey",
 			"furry-white",
 			"FamilyName"
-		));
+		);
 		assertThat(messageString, not(stringContainsInOrder(
 			"extension",
 			"meta"

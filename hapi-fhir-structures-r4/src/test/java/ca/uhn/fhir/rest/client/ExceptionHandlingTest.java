@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -147,7 +148,7 @@ public class ExceptionHandlingTest {
 			fail("");		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
 			assertThat(e.getMessage(), StringContains.containsString("Help I'm a bug"));
-			assertThat(e.getOperationOutcome()).isNotNull();
+			assertNotNull(e.getOperationOutcome());
 			assertThat(((OperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("Help I'm a bug");
 		}
 
@@ -172,7 +173,7 @@ public class ExceptionHandlingTest {
 			fail("");		} catch (InternalErrorException e) {
 			assertThat(e.getMessage(), StringContains.containsString("HTTP 500 Internal Error"));
 			assertThat(e.getMessage(), StringContains.containsString("Help I'm a bug"));
-			assertThat(e.getOperationOutcome()).isNotNull();
+			assertNotNull(e.getOperationOutcome());
 			assertThat(((OperationOutcome) e.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("Help I'm a bug");
 		}
 

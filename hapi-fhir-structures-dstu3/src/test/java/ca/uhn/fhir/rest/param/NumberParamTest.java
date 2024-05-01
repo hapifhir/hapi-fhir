@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 import org.junit.jupiter.api.AfterAll;
@@ -43,7 +44,7 @@ public class NumberParamTest {
 	public void testNoQualifier() {
 		NumberParam p = new NumberParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "5.4");
-		assertThat(p.getPrefix()).isNull();
+		assertNull(p.getPrefix());
 		assertThat(p.getValue().toPlainString()).isEqualTo("5.4");
 		assertThat(p.getValueAsQueryToken(ourCtx)).isEqualTo("5.4");
 	}
@@ -56,7 +57,7 @@ public class NumberParamTest {
 	public void testNegativeNumber() {
 		NumberParam p = new NumberParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "-5.4");
-		assertThat(p.getPrefix()).isNull();
+		assertNull(p.getPrefix());
 		assertThat(p.getValue().toPlainString()).isEqualTo("-5.4");
 		assertThat(p.getValue()).isEqualTo(new BigDecimal("-5.4"));
 		assertThat(p.getValueAsQueryToken(ourCtx)).isEqualTo("-5.4");

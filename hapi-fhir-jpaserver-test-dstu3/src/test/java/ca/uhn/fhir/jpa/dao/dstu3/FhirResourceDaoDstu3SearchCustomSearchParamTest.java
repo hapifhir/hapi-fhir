@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -98,7 +99,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		DaoMethodOutcome daoMethodOutcome;
 
 		daoMethodOutcome = mySearchParameterDao.create(sp);
-		assertThat(daoMethodOutcome.getId()).isNotNull();
+		assertNotNull(daoMethodOutcome.getId());
 	}
 
 	@Test
@@ -115,7 +116,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		sp.setExpression("Patient.telecom.where(system='phone') or Patient.telecome.where(system='email')");
 		sp.setCode("telephone-unformatted-2");
 		daoMethodOutcome = mySearchParameterDao.create(sp);
-		assertThat(daoMethodOutcome.getId()).isNotNull();
+		assertNotNull(daoMethodOutcome.getId());
 	}
 
 	@Test
@@ -132,7 +133,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		sp.setExpression("Patient.telecom.where(system='phone' or system='email') | Patient.telecome.where(system='email')");
 		sp.setCode("telephone-unformatted-3");
 		daoMethodOutcome = mySearchParameterDao.create(sp);
-		assertThat(daoMethodOutcome.getId()).isNotNull();
+		assertNotNull(daoMethodOutcome.getId());
 	}
 
 	@Test
@@ -149,7 +150,7 @@ public class FhirResourceDaoDstu3SearchCustomSearchParamTest extends BaseJpaDstu
 		sp.setExpression("Patient.telecom.where(system='phone' or system='email') | Patient.telecom.where(system='email') or Patient.telecom.where(system='mail' | system='phone')");
 		sp.setCode("telephone-unformatted-3");
 		daoMethodOutcome = mySearchParameterDao.create(sp);
-		assertThat(daoMethodOutcome.getId()).isNotNull();
+		assertNotNull(daoMethodOutcome.getId());
 	}
 
 	@Test

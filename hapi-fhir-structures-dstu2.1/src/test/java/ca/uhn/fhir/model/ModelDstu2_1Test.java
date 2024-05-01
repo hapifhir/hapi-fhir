@@ -1,5 +1,7 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.TestUtil;
@@ -28,7 +30,7 @@ public class ModelDstu2_1Test {
 
 	@Test
 	public void testElementHasInterface() {
-		assertThat(IBaseElement.class.isAssignableFrom(Element.class)).isTrue();
+		assertTrue(IBaseElement.class.isAssignableFrom(Element.class));
 	}
 	
 	
@@ -91,32 +93,32 @@ public class ModelDstu2_1Test {
 		Patient patient2 = context.newJsonParser().parseResource(Patient.class,
 		        context.newJsonParser().encodeResourceToString(patient1));
 
-		assertThat(patient1.equalsDeep(patient2)).isTrue();
-		assertThat(patient1.equalsShallow(patient2)).isTrue();
+		assertTrue(patient1.equalsDeep(patient2));
+		assertTrue(patient1.equalsShallow(patient2));
 
 		Patient patient3 = new Patient();
 		patient3.setBirthDate(date)
 		        .setGender(Enumerations.AdministrativeGender.MALE)
 		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").addFamily("family");
 
-		assertThat(patient1.equalsDeep(patient3)).isTrue();
-		assertThat(patient1.equalsShallow(patient3)).isTrue();
+		assertTrue(patient1.equalsDeep(patient3));
+		assertTrue(patient1.equalsShallow(patient3));
 
 		Patient patient4 = new Patient();
 		patient4.setBirthDate(date)
 		        .setGender(Enumerations.AdministrativeGender.MALE)
 		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").addFamily("family2");
 
-		assertThat(patient1.equalsShallow(patient4)).isTrue();
-		assertThat(patient1.equalsDeep(patient4)).isFalse();
+		assertTrue(patient1.equalsShallow(patient4));
+		assertFalse(patient1.equalsDeep(patient4));
 
 		Patient patient5 = new Patient();
 		patient5.setBirthDate(date)
 		        .setGender(Enumerations.AdministrativeGender.FEMALE)
 		        .addName().setUse(HumanName.NameUse.OFFICIAL).addGiven("first").addGiven("second").addFamily("family2");
 
-		assertThat(patient1.equalsShallow(patient5)).isFalse();
-		assertThat(patient1.equalsDeep(patient5)).isFalse();
+		assertFalse(patient1.equalsShallow(patient5));
+		assertFalse(patient1.equalsDeep(patient5));
 
 	}
 

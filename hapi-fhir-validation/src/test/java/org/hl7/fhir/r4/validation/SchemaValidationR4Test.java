@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.validation;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.util.TestUtil;
@@ -74,7 +75,7 @@ public class SchemaValidationR4Test extends BaseValidationTestWithInlineMocks {
 		 * DocumentBuilderFactory implementation: com.sun.org.apache.xerces.internal.jaxp.DocumentBuilderFactoryImpl loaded from: Java Runtime
 		 */
 
-		assertThat(result.isSuccessful()).isFalse();
+		assertFalse(result.isSuccessful());
 		assertThat(encoded).contains("passwd");
 		assertThat(encoded).contains("accessExternalDTD");
 	}

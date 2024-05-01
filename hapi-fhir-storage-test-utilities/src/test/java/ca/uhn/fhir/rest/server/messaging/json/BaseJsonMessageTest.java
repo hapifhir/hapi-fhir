@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.messaging.json;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryJsonMessage;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
@@ -28,7 +29,7 @@ class BaseJsonMessageTest {
 		IBaseResource patient = buildPatient();
 		ResourceOperationMessage payload = new ResourceOperationMessage(ourFhirContext, patient, ResourceOperationMessage.OperationTypeEnum.CREATE);
 		message.setPayload(payload);
-		assertThat(message.getMessageKey()).isNull();
+		assertNull(message.getMessageKey());
 		assertThat(message.getMessageKeyOrDefault()).isEqualTo(RESOURCE_ID);
 	}
 
@@ -50,7 +51,7 @@ class BaseJsonMessageTest {
 		ResourceDeliveryMessage payload = new ResourceDeliveryMessage();
 		payload.setPayload(ourFhirContext, patient, EncodingEnum.JSON);
 		message.setPayload(payload);
-		assertThat(message.getMessageKey()).isNull();
+		assertNull(message.getMessageKey());
 		assertThat(message.getMessageKeyOrDefault()).isEqualTo(RESOURCE_ID);
 	}
 
@@ -72,7 +73,7 @@ class BaseJsonMessageTest {
 		IBaseResource patient = buildPatient();
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(ourFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
 		message.setPayload(payload);
-		assertThat(message.getMessageKey()).isNull();
+		assertNull(message.getMessageKey());
 		assertThat(message.getMessageKeyOrDefault()).isEqualTo(RESOURCE_ID);
 	}
 
@@ -105,7 +106,7 @@ class BaseJsonMessageTest {
 		// when
 		ResourceModifiedMessage payload = new ResourceModifiedMessage(ourFhirContext, patient, BaseResourceMessage.OperationTypeEnum.CREATE);
 		// then
-		assertThat(payload.getMessageKey()).isNull();
+		assertNull(payload.getMessageKey());
 	}
 
 	@Nonnull

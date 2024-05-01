@@ -1,5 +1,8 @@
 package ca.uhn.fhir.util.bundle;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -62,7 +65,7 @@ public class BundleUtilTest {
 		public void testGetNextDoesntExist() {
 			Bundle b = new Bundle();
 			b.getLinkOrCreate("prev").setUrl("http://bar");
-			assertThat(BundleUtil.getLinkUrlOfType(ourCtx, b, "next")).isNull();
+			assertNull(BundleUtil.getLinkUrlOfType(ourCtx, b, "next"));
 		}
 
 		@Nested
@@ -99,7 +102,7 @@ public class BundleUtilTest {
 			@Test
 			public void testGetPrevious_doesnt_exist_neither_prev() {
 				Bundle b = new Bundle();
-				assertThat(BundleUtil.getLinkUrlOfType(ourCtx, b, IBaseBundle.LINK_PREV)).isNull();
+				assertNull(BundleUtil.getLinkUrlOfType(ourCtx, b, IBaseBundle.LINK_PREV));
 			}
 
 			@Test
@@ -140,7 +143,7 @@ public class BundleUtilTest {
 			@Test
 			public void testGetPrev_doesnt_exist_neither_previous() {
 				Bundle b = new Bundle();
-				assertThat(BundleUtil.getLinkUrlOfType(ourCtx, b, "prev")).isNull();
+				assertNull(BundleUtil.getLinkUrlOfType(ourCtx, b, "prev"));
 			}
 
 			@Test
@@ -157,14 +160,14 @@ public class BundleUtilTest {
 		Bundle b = new Bundle();
 		b.setTotal(999);
 		Integer total = BundleUtil.getTotal(ourCtx, b);
-		assertThat(total).isNotNull();
+		assertNotNull(total);
 		assertThat(total.intValue()).isEqualTo(999);
 	}
 
 	@Test
 	public void testGetTotalNull() {
 		Bundle b = new Bundle();
-		assertThat(BundleUtil.getTotal(ourCtx, b)).isNull();
+		assertNull(BundleUtil.getTotal(ourCtx, b));
 	}
 
 	@Test
@@ -251,8 +254,8 @@ public class BundleUtilTest {
 		int patientIndex = getIndexOfEntryWithId("Patient/P1", b);
 		int organizationIndex = getIndexOfEntryWithId("Organization/Org1", b);
 
-		assertThat(organizationIndex < patientIndex).isTrue();
-		assertThat(patientIndex < observationIndex).isTrue();
+		assertTrue(organizationIndex < patientIndex);
+		assertTrue(patientIndex < observationIndex);
 	}
 
 	@Test
@@ -447,10 +450,10 @@ public class BundleUtilTest {
 		assertThat(searchBundleEntryParts).hasSize(2);
 		assertThat(searchBundleEntryParts.get(0).getSearchMode()).isEqualTo(BundleEntrySearchModeEnum.MATCH);
 		assertThat(searchBundleEntryParts.get(0).getFullUrl()).contains("Patient/pata");
-		assertThat(searchBundleEntryParts.get(0).getResource()).isNotNull();
+		assertNotNull(searchBundleEntryParts.get(0).getResource());
 		assertThat(searchBundleEntryParts.get(1).getSearchMode()).isEqualTo(BundleEntrySearchModeEnum.INCLUDE);
 		assertThat(searchBundleEntryParts.get(1).getFullUrl()).contains("Condition/");
-		assertThat(searchBundleEntryParts.get(1).getResource()).isNotNull();
+		assertNotNull(searchBundleEntryParts.get(1).getResource());
 	}
 
 	@Test
@@ -494,8 +497,8 @@ public class BundleUtilTest {
 		int patientIndex = getIndexOfEntryWithId("Patient/P1", b);
 		int organizationIndex = getIndexOfEntryWithId("Organization/Org1", b);
 
-		assertThat(patientIndex < organizationIndex).isTrue();
-		assertThat(observationIndex < patientIndex).isTrue();
+		assertTrue(patientIndex < organizationIndex);
+		assertTrue(observationIndex < patientIndex);
 	}
 
 	@Test
@@ -543,7 +546,7 @@ public class BundleUtilTest {
 		// execute
 		final IBaseResource actual = BundleUtil.getResourceByReferenceAndResourceType(ourCtx, bundle, reference);
 		// validate
-		assertThat(actual).isNull();
+		assertNull(actual);
 	}
 
 	@Nonnull

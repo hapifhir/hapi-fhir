@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -141,7 +142,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 		DaoMethodOutcome outcome = dao.update(subscription, dets);
 
 		// verify
-		assertThat(outcome).isNotNull();
+		assertNotNull(outcome);
 		assertThat(outcome.getResource().getIdElement().getIdPart()).isEqualTo(id);
 		assertThat(readIndex.get()).isEqualTo(0); // should be no read interactions
 		assertThat(writeIndex.get()).isEqualTo(1);
@@ -306,7 +307,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 		public RequestPartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
-			assertThat(theResource).isNotNull();
+			assertNotNull(theResource);
 			RequestPartitionId retVal = myCreateRequestPartitionIds.remove(0);
 			ourLog.info("Returning partition for create: {}", retVal);
 			return retVal;
@@ -347,7 +348,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 		@Hook(Pointcut.STORAGE_PARTITION_IDENTIFY_CREATE)
 		public RequestPartitionId PartitionIdentifyCreate(IBaseResource theResource, ServletRequestDetails theRequestDetails) {
-			assertThat(theResource).isNotNull();
+			assertNotNull(theResource);
 			if (myObjectConsumer != null) {
 				myObjectConsumer.accept(theResource);
 			}

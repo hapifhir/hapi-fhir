@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
@@ -150,7 +151,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
 
-		assertThat(ourGreenMail.waitForIncomingEmail(10000, 1)).isTrue();
+		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
 		assertThat(received.get(0).getFrom().length).isEqualTo(1);
@@ -195,7 +196,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		sendObservation(code, "SNOMED-CT");
 		waitForQueueToDrain();
 
-		assertThat(ourGreenMail.waitForIncomingEmail(10000, 1)).isTrue();
+		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
 		assertThat(received).hasSize(1);
@@ -243,7 +244,7 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForQueueToDrain();
 
 		ourLog.info("About to wait for email reception");
-		assertThat(ourGreenMail.waitForIncomingEmail(10000, 1)).isTrue();
+		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
 		assertThat(received).hasSize(1);

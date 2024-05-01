@@ -1,6 +1,7 @@
 package ca.uhn.fhir.cr.r4;
 
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionApplyProvider;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
@@ -39,8 +40,8 @@ public class ActivityDefinitionOperationsProviderTest extends BaseCrR4TestServer
 			null,
 			null,
 			requestDetails);
-		assertThat(result instanceof MedicationRequest).isTrue();
+		assertTrue(result instanceof MedicationRequest);
 		MedicationRequest request = (MedicationRequest) result;
-		assertThat(request.getDoNotPerform()).isTrue();
+		assertTrue(request.getDoNotPerform());
 	}
 }

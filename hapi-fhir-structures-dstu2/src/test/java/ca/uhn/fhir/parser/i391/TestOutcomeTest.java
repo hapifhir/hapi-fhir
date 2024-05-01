@@ -1,5 +1,7 @@
 package ca.uhn.fhir.parser.i391;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -56,8 +58,8 @@ public class TestOutcomeTest {
 		String xmlResource = jsonParser.encodeResourceToString(outcome);
 		TestOutcome operationOutcome = jsonParser.parseResource(TestOutcome.class, xmlResource);
 
-		assertThat(operationOutcome.getElement()).isNotNull();
-		assertThat(operationOutcome.getElement() instanceof BoundCodeDt).isTrue();
+		assertNotNull(operationOutcome.getElement());
+		assertTrue(operationOutcome.getElement() instanceof BoundCodeDt);
 		assertThat(operationOutcome.getElement()).isEqualTo(outcome.getElement());
 	}
 
@@ -71,8 +73,8 @@ public class TestOutcomeTest {
 		String xmlResource = xmlParser.encodeResourceToString(outcome);
 		TestOutcome operationOutcome = xmlParser.parseResource(TestOutcome.class, xmlResource);
 
-		assertThat(operationOutcome.getElement()).isNotNull();
-		assertThat(operationOutcome.getElement() instanceof BoundCodeDt).isTrue();
+		assertNotNull(operationOutcome.getElement());
+		assertTrue(operationOutcome.getElement() instanceof BoundCodeDt);
 		assertThat(operationOutcome.getElement()).isEqualTo(outcome.getElement());
 	}
 

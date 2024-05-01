@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -54,7 +56,7 @@ class JpaJobPersistenceImplTest {
 		JobOperationResultJson result = mySvc.cancelInstance(TEST_INSTANCE_ID);
 
 		// validate
-		assertThat(result.getSuccess()).isTrue();
+		assertTrue(result.getSuccess());
 		assertThat(result.getMessage()).isEqualTo("Job instance <test-instance-id> successfully cancelled.");
 	}
 
@@ -68,7 +70,7 @@ class JpaJobPersistenceImplTest {
 		JobOperationResultJson result = mySvc.cancelInstance(TEST_INSTANCE_ID);
 
 		// validate
-		assertThat(result.getSuccess()).isFalse();
+		assertFalse(result.getSuccess());
 		assertThat(result.getMessage()).isEqualTo("Job instance <test-instance-id> not found.");
 	}
 
@@ -82,7 +84,7 @@ class JpaJobPersistenceImplTest {
 		JobOperationResultJson result = mySvc.cancelInstance(TEST_INSTANCE_ID);
 
 		// validate
-		assertThat(result.getSuccess()).isFalse();
+		assertFalse(result.getSuccess());
 		assertThat(result.getMessage()).isEqualTo("Job instance <test-instance-id> was already cancelled.  Nothing to do.");
 	}
 

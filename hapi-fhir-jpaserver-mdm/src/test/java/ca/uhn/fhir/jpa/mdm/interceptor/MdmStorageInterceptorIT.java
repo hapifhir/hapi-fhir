@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -379,7 +381,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		List<IBaseResource> resources = search.getResources(0, search.size());
 
 		for (IBaseResource r : resources) {
-			assertThat(r.getMeta().getTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED)).isNotNull();
+			assertNotNull(r.getMeta().getTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED));
 		}
 	}
 
@@ -388,7 +390,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		// GoldenResource created manually.
 		Patient patient = new Patient();
 		DaoMethodOutcome daoMethodOutcome = myMdmHelper.doCreateResource(patient, true);
-		assertThat(daoMethodOutcome.getId()).isNotNull();
+		assertNotNull(daoMethodOutcome.getId());
 
 		//Updating that patient to set them as MDM managed is not allowed.
 		patient.getMeta().addTag(SYSTEM_MDM_MANAGED, CODE_HAPI_MDM_MANAGED, "User is managed by MDM");
@@ -428,7 +430,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		TransactionLogMessages mdmTransactionLogMessages = wrapper.getLogMessages();
 
 		//There is no TransactionGuid here as there is no TransactionLog in this context.
-		assertThat(mdmTransactionLogMessages.getTransactionGuid()).isNull();
+		assertNull(mdmTransactionLogMessages.getTransactionGuid());
 
 		List<String> messages = mdmTransactionLogMessages.getValues();
 		assertThat(messages.isEmpty()).isEqualTo(false);

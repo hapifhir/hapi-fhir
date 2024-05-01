@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -413,9 +415,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
 		// Check expansion of multi-versioned ValueSet with version set to null
 		respParam = myClient
@@ -429,9 +431,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2 as this was the last version loaded.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 		// Check expansion of version 2
 		respParam = myClient
@@ -445,9 +447,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 	}
 
@@ -468,9 +470,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
 		// Check expansion of multi-versioned ValueSet with version set to null
 		respParam = myClient
@@ -484,9 +486,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2 as this was the last version loaded.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 		// Check expansion of version 2
 		respParam = myClient
@@ -500,9 +502,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 	}
 
@@ -549,9 +551,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
 		// Check expansion of multi-versioned ValueSet with version set to null
 		respParam = myClient
@@ -565,9 +567,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2 as this was the last version loaded.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 		// Check expansion of version 2
 		respParam = myClient
@@ -581,9 +583,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 	}
 
@@ -626,9 +628,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2 as this was the last updated.
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 		// Test with version 1 specified.
 		toExpand.setVersion("1");
@@ -647,9 +649,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v1.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
 		// Test with version 2 specified.
 		toExpand.setVersion("2");
@@ -668,9 +670,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 	}
 
@@ -695,9 +697,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2 as this was the last updated.
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 		// Test with version 1 specified.
 		toExpand.setVersion("1");
@@ -716,9 +718,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v1.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
 		// Test with version 2 specified.
 		toExpand.setVersion("2");
@@ -737,9 +739,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp, stringContainsInOrder(
+		assertThat(resp).containsSequence(
 			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter v2\"/>"));
+			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
 
 	}
@@ -747,8 +749,8 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 	@Test
 	public void testExpandInlineVsAgainstExternalCs() {
 		createExternalCsAndLocalVs();
-		assertThat(myLocalVs_v1).isNotNull();
-		assertThat(myLocalVs_v2).isNotNull();
+		assertNotNull(myLocalVs_v1);
+		assertNotNull(myLocalVs_v2);
 
 		myLocalVs_v1.setId("");
 		Parameters respParam = myClient
@@ -787,8 +789,8 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 	@Test
 	public void testExpandLocalVsAgainstExternalCs() {
 		createExternalCsAndLocalVs();
-		assertThat(myLocalValueSetId_v1).isNotNull();
-		assertThat(myLocalValueSetId_v2).isNotNull();
+		assertNotNull(myLocalValueSetId_v1);
+		assertNotNull(myLocalValueSetId_v2);
 
 		// Validate ValueSet v1
 		Parameters respParam = myClient
@@ -827,8 +829,8 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 	@Test
 	public void testExpandLocalVsCanonicalAgainstExternalCs() {
 		createExternalCsAndLocalVs();
-		assertThat(myLocalValueSetId_v1).isNotNull();
-		assertThat(myLocalValueSetId_v2).isNotNull();
+		assertNotNull(myLocalValueSetId_v1);
+		assertNotNull(myLocalValueSetId_v2);
 
 		Parameters respParam = myClient
 			.operation()
@@ -1143,7 +1145,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1159,7 +1161,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no ValueSet version specified and latest code system version. Should pass.
 		respParam = myClient
@@ -1175,7 +1177,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no ValueSet version specified and no code system version. Should pass.
 		respParam = myClient
@@ -1190,7 +1192,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With incorrect version specified. Should fail.
 		respParam = myClient
@@ -1207,7 +1209,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1223,7 +1225,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no ValueSet version specified and older code system version. Should fail.
 		respParam = myClient
@@ -1239,7 +1241,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 	}
 
@@ -1270,7 +1272,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1284,9 +1286,9 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no CodeSystem version specified. Should pass as the code and system exist in both ValueSet versions.
 		respParam = myClient
@@ -1300,7 +1302,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1313,7 +1315,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With incorrect version specified. Should fail.
 		respParam = myClient
@@ -1328,7 +1330,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1342,7 +1344,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 	}
 
@@ -1381,7 +1383,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1395,7 +1397,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no ValueSet version, and newer CodeSystem version. Should pass.
 		respParam = myClient
@@ -1409,7 +1411,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With incorrect version specified. Should fail.
 		respParam = myClient
@@ -1424,7 +1426,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1438,7 +1440,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no ValueSet version and older CodeSystem version. Should fail.
 		respParam = myClient
@@ -1452,7 +1454,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no CodeSystem version. Should pass, regardless of ValueSet version.
 		respParam = myClient
@@ -1467,7 +1469,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1481,7 +1483,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1494,7 +1496,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 	}
 
 
@@ -1537,7 +1539,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1551,7 +1553,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no ValueSet version and latest CodeSystem version. Should pass.
 		respParam = myClient
@@ -1565,7 +1567,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With incorrect version specified. Should fail.
 		respParam = myClient
@@ -1580,7 +1582,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1594,7 +1596,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no ValueSet version and older CodeSystem version. Should fail.
 		respParam = myClient
@@ -1608,7 +1610,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With no CodeSystem version. Should pass for all ValueSet versions.
 		respParam = myClient
@@ -1623,7 +1625,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1637,7 +1639,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1650,7 +1652,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.dstu2.composite.MoneyDt;
@@ -85,7 +86,7 @@ public class OperationServerDstu2Test {
 		Conformance p = ourServer.getFhirClient().fetchConformance().ofType(Conformance.class).prettyPrint().execute();
 		List<RestOperation> ops = p.getRest().get(0).getOperation();
 		assertThat(ops.size()).isGreaterThan(1);
-		assertThat(ops.get(0).getDefinition().getReference().getBaseUrl()).isNull();
+		assertNull(ops.get(0).getDefinition().getReference().getBaseUrl());
 		assertThat(ops.get(0).getDefinition().getReference().getValue()).startsWith("OperationDefinition/");
 
 		OperationDefinition def = ourServer.getFhirClient().read().resource(OperationDefinition.class).withId(ops.get(0).getDefinition().getReference()).execute();
@@ -300,7 +301,7 @@ public class OperationServerDstu2Test {
 
 		assertThat(ourLastParam1.getValue()).isEqualTo("PARAM1val");
 		assertThat(ourLastParam2.getActive().booleanValue()).isEqualTo(true);
-		assertThat(ourLastId).isNull();
+		assertNull(ourLastId);
 		assertThat(ourLastMethod).isEqualTo("$OP_INSTANCE_OR_TYPE");
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
@@ -399,7 +400,7 @@ public class OperationServerDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(ourLastParam1.getValue()).isEqualTo("PARAM1val");
-		assertThat(ourLastParam2).isNull();
+		assertNull(ourLastParam2);
 		assertThat(ourLastMethod).isEqualTo("$OP_TYPE");
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
@@ -437,7 +438,7 @@ public class OperationServerDstu2Test {
 
 		assertThat(ourLastMethod).isEqualTo("$OP_SERVER_LIST_PARAM");
 		assertThat(ourLastParam2.getActive().booleanValue()).isEqualTo(true);
-		assertThat(ourLastParam1).isNull();
+		assertNull(ourLastParam1);
 		assertThat(ourLastParam3).hasSize(2);
 		assertThat(ourLastParam3.get(0).getValue()).isEqualTo("PARAM3val1");
 		assertThat(ourLastParam3.get(1).getValue()).isEqualTo("PARAM3val2");

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -181,7 +182,7 @@ public class PartitioningNonNullDefaultPartitionR4Test extends BasePartitioningR
 
 		addReadDefaultPartition();
 		patient = myPatientDao.read(new IdType("Patient/" + id), mySrd);
-		assertThat(patient.getActive()).isTrue();
+		assertTrue(patient.getActive());
 
 		// Wrong partition
 		addReadPartition(2);

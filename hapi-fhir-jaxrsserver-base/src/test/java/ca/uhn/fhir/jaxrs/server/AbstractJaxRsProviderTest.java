@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jaxrs.server;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsResponse;
@@ -52,7 +54,7 @@ public class AbstractJaxRsProviderTest {
 		when(uriInfo.getQueryParameters()).thenReturn(new MultivaluedHashMap<String, String>());
 		provider.setUriInfo(uriInfo);
 		final Response result = provider.handleException(theRequest, theException);
-		assertThat(result).isNotNull();
+		assertNotNull(result);
 		assertThat(result.getStatus()).isEqualTo(Constants.STATUS_HTTP_400_BAD_REQUEST);
 	}
 
@@ -61,13 +63,13 @@ public class AbstractJaxRsProviderTest {
 		final ResourceNotFoundException base = new ResourceNotFoundException(new IdDt(1L));
 		final JaxRsResponseException theException = new JaxRsResponseException(base);
 		final Response result = provider.handleException(theRequest, theException);
-		assertThat(result).isNotNull();
+		assertNotNull(result);
 		assertThat(result.getStatus()).isEqualTo(base.getStatusCode());
 	}
 
 	@Test
 	public void testHandleExceptionRuntimeException() throws IOException, URISyntaxException {
-		assertThat(provider.withStackTrace()).isFalse();
+		assertFalse(provider.withStackTrace());
 
 		final RuntimeException theException = new RuntimeException();
 		final UriInfo mockUriInfo = mock(UriInfo.class);
@@ -78,7 +80,7 @@ public class AbstractJaxRsProviderTest {
 
 		provider.setUriInfo(mockUriInfo);
 		final Response result = provider.handleException(theRequest, theException);
-		assertThat(result).isNotNull();
+		assertNotNull(result);
 		assertThat(result.getStatus()).isEqualTo(Constants.STATUS_HTTP_500_INTERNAL_ERROR);
 	}
 

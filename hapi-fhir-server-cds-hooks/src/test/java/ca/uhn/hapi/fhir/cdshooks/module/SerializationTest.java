@@ -1,5 +1,6 @@
 package ca.uhn.hapi.fhir.cdshooks.module;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestContextJson;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
@@ -120,7 +121,7 @@ class SerializationTest {
 		assertThat(daughter.getNameFirstRep().getFamily()).isEqualTo(DAUGHTER);
 
 		Patient parent = (Patient) cdsServiceRequestJson.getPrefetch(PARENT_KEY);
-		assertThat(parent).isNull();
+		assertNull(parent);
 
 		assertThat(cdsServiceRequestJson.getContext().getString(CONTEXT_PATIENT_KEY)).isEqualTo(CONTEXT_PATIENT_VALUE);
 		List<String> selections = cdsServiceRequestJson.getContext().getArray(CONTEXT_SELECTIONS_KEY);

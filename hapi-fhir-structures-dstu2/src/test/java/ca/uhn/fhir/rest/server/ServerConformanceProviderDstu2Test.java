@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.ExtensionDt;
 import ca.uhn.fhir.model.api.Include;
@@ -143,9 +145,9 @@ public class ServerConformanceProviderDstu2Test {
 		RestResource res = conformance.getRest().get(0).getResource().get(1);
 		assertThat(res.getType()).isEqualTo("Patient");
 
-		assertThat(res.getConditionalCreate()).isTrue();
+		assertTrue(res.getConditionalCreate());
 		assertThat(res.getConditionalDeleteElement().getValueAsEnum()).isEqualTo(ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED);
-		assertThat(res.getConditionalUpdate()).isTrue();
+		assertTrue(res.getConditionalUpdate());
 	}
 
 	@Test
@@ -231,7 +233,7 @@ public class ServerConformanceProviderDstu2Test {
 			}
 		}
 
-		assertThat(found).isTrue();
+		assertTrue(found);
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
@@ -259,9 +261,9 @@ public class ServerConformanceProviderDstu2Test {
 		RestResource res = conformance.getRest().get(0).getResource().get(1);
 		assertThat(res.getType()).isEqualTo("Patient");
 
-		assertThat(res.getConditionalCreate()).isNull();
-		assertThat(res.getConditionalDelete()).isNull();
-		assertThat(res.getConditionalUpdate()).isNull();
+		assertNull(res.getConditionalCreate());
+		assertNull(res.getConditionalDelete());
+		assertNull(res.getConditionalUpdate());
 	}
 
 	/**
@@ -464,7 +466,7 @@ public class ServerConformanceProviderDstu2Test {
 				found = true;
 			}
 		}
-		assertThat(found).isTrue();
+		assertTrue(found);
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -500,7 +502,7 @@ public class ServerConformanceProviderDstu2Test {
 				found = true;
 			}
 		}
-		assertThat(found).isTrue();
+		assertTrue(found);
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -534,7 +536,7 @@ public class ServerConformanceProviderDstu2Test {
 				found = true;
 			}
 		}
-		assertThat(found).isTrue();
+		assertTrue(found);
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
@@ -570,7 +572,7 @@ public class ServerConformanceProviderDstu2Test {
 				found = true;
 			}
 		}
-		assertThat(found).isTrue();
+		assertTrue(found);
 		Conformance conformance = sc.getServerConformance(createHttpServletRequest(), createRequestDetails(rs));
 
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);

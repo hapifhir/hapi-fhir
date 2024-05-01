@@ -248,9 +248,9 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));
 		assertThat(instance.getErrorCount()).isEqualTo(1);
 		assertThat(instance.getStatus()).isEqualTo(StatusEnum.FAILED);
-		assertThat(instance.getCreateTime()).isNotNull();
-		assertThat(instance.getStartTime()).isNotNull();
-		assertThat(instance.getEndTime()).isNotNull();
+		assertNotNull(instance.getCreateTime());
+		assertNotNull(instance.getStartTime());
+		assertNotNull(instance.getEndTime());
 		assertThat(instance.getErrorMessage()).contains("Unknown resource name \"Foo\"");
 	}
 

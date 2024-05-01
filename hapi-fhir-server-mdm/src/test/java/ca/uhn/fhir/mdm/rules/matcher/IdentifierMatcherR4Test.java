@@ -1,5 +1,7 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.IdentifierMatcher;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Identifier;
@@ -27,7 +29,7 @@ public class IdentifierMatcherR4Test extends BaseMatcherR4Test {
 		Identifier left = new Identifier().setSystem(MATCHING_SYSTEM).setValue(MATCHING_VALUE);
 		Identifier right = new Identifier().setSystem(MATCHING_SYSTEM).setValue(MATCHING_VALUE);
 
-		assertThat(match(left, right)).isTrue();
+		assertTrue(match(left, right));
 	}
 
 	@Test
@@ -39,14 +41,14 @@ public class IdentifierMatcherR4Test extends BaseMatcherR4Test {
 		Identifier rightNoValue = new Identifier().setSystem(MATCHING_SYSTEM);
 
 
-		assertThat(match(left, rightWrongSystem)).isFalse();
-		assertThat(match(left, rightWrongValue)).isFalse();
-		assertThat(match(left, rightNoSystem)).isFalse();
-		assertThat(match(left, rightNoValue)).isFalse();
-		assertThat(match(rightWrongSystem, left)).isFalse();
-		assertThat(match(rightWrongValue, left)).isFalse();
-		assertThat(match(rightNoSystem, left)).isFalse();
-		assertThat(match(rightNoValue, left)).isFalse();
+		assertFalse(match(left, rightWrongSystem));
+		assertFalse(match(left, rightWrongValue));
+		assertFalse(match(left, rightNoSystem));
+		assertFalse(match(left, rightNoValue));
+		assertFalse(match(rightWrongSystem, left));
+		assertFalse(match(rightWrongValue, left));
+		assertFalse(match(rightNoSystem, left));
+		assertFalse(match(rightNoValue, left));
 	}
 
 	@Test
@@ -56,7 +58,7 @@ public class IdentifierMatcherR4Test extends BaseMatcherR4Test {
 
 		myMdmMatcherJson.setIdentifierSystem(MATCHING_SYSTEM);
 
-		assertThat(match(left, right)).isFalse();
+		assertFalse(match(left, right));
 	}
 
 	@Test
@@ -66,7 +68,7 @@ public class IdentifierMatcherR4Test extends BaseMatcherR4Test {
 
 		myMdmMatcherJson.setIdentifierSystem(MATCHING_SYSTEM);
 
-		assertThat(match(left, right)).isTrue();
+		assertTrue(match(left, right));
 	}
 
 	@Test
@@ -76,7 +78,7 @@ public class IdentifierMatcherR4Test extends BaseMatcherR4Test {
 
 		myMdmMatcherJson.setIdentifierSystem(MATCHING_SYSTEM);
 
-		assertThat(match(left, right)).isFalse();
+		assertFalse(match(left, right));
 	}
 
 	private boolean match(IBase theFirst, IBase theSecond) {

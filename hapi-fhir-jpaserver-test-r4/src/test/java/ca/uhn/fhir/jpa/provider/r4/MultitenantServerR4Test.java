@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.export.BulkDataExportProvider;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -78,7 +81,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 	public void after() throws Exception {
 		super.after();
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
-		assertThat(myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()).isFalse();
+		assertFalse(myPartitionSettings.isAllowUnqualifiedCrossPartitionReference());
 	}
 
 	@Test
@@ -109,7 +112,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		myTenantClientInterceptor.setTenantId(TENANT_A);
 		Patient response = myClient.read().resource(Patient.class).withId(idA).execute();
-		assertThat(response.getActive()).isTrue();
+		assertTrue(response.getActive());
 
 		// Update resource (should remain in correct partition)
 
@@ -118,7 +121,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Now read back
 
 		response = myClient.read().resource(Patient.class).withId(idA.withVersion("2")).execute();
-		assertThat(response.getActive()).isFalse();
+		assertFalse(response.getActive());
 
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		try {
@@ -147,7 +150,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		myTenantClientInterceptor.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 		Patient response = myClient.read().resource(Patient.class).withId(idA).execute();
-		assertThat(response.getActive()).isTrue();
+		assertTrue(response.getActive());
 
 		// Update resource (should remain in correct partition)
 
@@ -156,7 +159,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// Now read back
 
 		response = myClient.read().resource(Patient.class).withId(idA.withVersion("2")).execute();
-		assertThat(response.getActive()).isFalse();
+		assertFalse(response.getActive());
 
 		// Try reading from wrong partition
 
@@ -467,7 +470,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		// verify
 		assertThat(result.getEntry()).hasSize(1);
 		Patient retrievedPatient = (Patient) result.getEntry().get(0).getResource();
-		assertThat(retrievedPatient).isNotNull();
+		assertNotNull(retrievedPatient);
 		assertThat(retrievedPatient.getName().get(0).getFamily()).isEqualTo("Family");
 	}
 
@@ -498,23 +501,23 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		myTenantClientInterceptor.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 		Patient response = myClient.read().resource(Patient.class).withId(idA).execute();
-		assertThat(response.getActive()).isTrue();
+		assertTrue(response.getActive());
 
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		response = myClient.read().resource(Patient.class).withId(idB).execute();
-		assertThat(response.getActive()).isFalse();
+		assertFalse(response.getActive());
 
 		// Read back using DAO
 
 		requestDetails = new SystemRequestDetails();
 		requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 		response = myPatientDao.read(idA, requestDetails);
-		assertThat(response.getActive()).isTrue();
+		assertTrue(response.getActive());
 
 		requestDetails = new SystemRequestDetails();
 		requestDetails.setTenantId(TENANT_B);
 		response = myPatientDao.read(idB, requestDetails);
-		assertThat(response.getActive()).isFalse();
+		assertFalse(response.getActive());
 
 	}
 
@@ -562,23 +565,23 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 		myTenantClientInterceptor.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 		Patient response = myClient.read().resource(Patient.class).withId(idA).execute();
-		assertThat(response.getActive()).isTrue();
+		assertTrue(response.getActive());
 
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		response = myClient.read().resource(Patient.class).withId(idB).execute();
-		assertThat(response.getActive()).isFalse();
+		assertFalse(response.getActive());
 
 		// Read back using DAO
 
 		requestDetails = new SystemRequestDetails();
 		requestDetails.setTenantId(JpaConstants.DEFAULT_PARTITION_NAME);
 		response = myPatientDao.read(idA, requestDetails);
-		assertThat(response.getActive()).isTrue();
+		assertTrue(response.getActive());
 
 		requestDetails = new SystemRequestDetails();
 		requestDetails.setTenantId(TENANT_B);
 		response = myPatientDao.read(idB, requestDetails);
-		assertThat(response.getActive()).isFalse();
+		assertFalse(response.getActive());
 
 	}
 

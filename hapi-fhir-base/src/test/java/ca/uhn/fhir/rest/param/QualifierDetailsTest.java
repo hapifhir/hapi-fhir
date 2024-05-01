@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import com.google.common.collect.Sets;
 import org.junit.jupiter.api.Test;
 
@@ -12,8 +14,8 @@ public class QualifierDetailsTest {
 
 		QualifierDetails details = new QualifierDetails();
 		details.setColonQualifier(":Patient");
-		assertThat(details.passes(null, Sets.newHashSet(":Patient"))).isFalse();
-		assertThat(details.passes(null, Sets.newHashSet(":Observation"))).isTrue();
+		assertFalse(details.passes(null, Sets.newHashSet(":Patient")));
+		assertTrue(details.passes(null, Sets.newHashSet(":Observation")));
 
 	}
 

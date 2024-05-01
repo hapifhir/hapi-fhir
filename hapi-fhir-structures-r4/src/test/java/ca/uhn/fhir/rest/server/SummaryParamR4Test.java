@@ -66,10 +66,10 @@ public class SummaryParamR4Test {
 			patient -> {
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
 				assertThat(responseContent).doesNotContain("<Bundle");
-				assertThat(responseContent, (containsString("<Patien")));
+				assertThat(responseContent).contains("<Patien");
 				assertThat(responseContent).doesNotContain("<div>THE DIV</div>");
-				assertThat(responseContent, (containsString("family")));
-				assertThat(responseContent, (containsString("maritalStatus")));
+				assertThat(responseContent).contains("family");
+				assertThat(responseContent).contains("maritalStatus");
 				assertEquals(SummaryEnum.DATA, ourLastSummary);
 			}
 		);
@@ -119,9 +119,9 @@ public class SummaryParamR4Test {
 			patient -> {
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(patient);
 				assertThat(responseContent).doesNotContain("<Bundle");
-				assertThat(responseContent, (containsString("<Patien")));
+				assertThat(responseContent).contains("<Patien");
 				assertThat(responseContent).doesNotContain("<div>THE DIV</div>");
-				assertThat(responseContent, (containsString("family")));
+				assertThat(responseContent).contains("family");
 				assertThat(responseContent).doesNotContain("maritalStatus");
 				assertEquals(SummaryEnum.TRUE, ourLastSummary);
 			}
@@ -136,7 +136,7 @@ public class SummaryParamR4Test {
 			url,
 			bundle -> {
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(bundle);
-				assertThat(responseContent, (containsString("<total value=\"1\"/>")));
+				assertThat(responseContent).contains("<total value=\"1\"/>");
 				assertThat(responseContent).doesNotContain("entry");
 				assertThat(responseContent).doesNotContain("THE DIV");
 				assertThat(responseContent).doesNotContain("family");
@@ -153,11 +153,11 @@ public class SummaryParamR4Test {
 			url,
 			bundle -> {
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(bundle);
-				assertThat(responseContent, (containsString("<total value=\"1\"/>")));
-				assertThat(responseContent, (containsString("entry")));
+				assertThat(responseContent).contains("<total value=\"1\"/>");
+				assertThat(responseContent).contains("entry");
 				assertThat(responseContent).doesNotContain("THE DIV");
-				assertThat(responseContent, (containsString("family")));
-				assertThat(responseContent, (containsString("maritalStatus")));
+				assertThat(responseContent).contains("family");
+				assertThat(responseContent).contains("maritalStatus");
 			}
 		);
 	}
@@ -202,9 +202,9 @@ public class SummaryParamR4Test {
 			url,
 			bundle -> {
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(bundle);
-				assertThat(responseContent, (containsString("<total value=\"1\"/>")));
-				assertThat(responseContent, (containsString("entry")));
-				assertThat(responseContent, (containsString("THE DIV")));
+				assertThat(responseContent).contains("<total value=\"1\"/>");
+				assertThat(responseContent).contains("entry");
+				assertThat(responseContent).contains("THE DIV");
 				assertThat(responseContent).doesNotContain("family");
 				assertThat(responseContent).doesNotContain("maritalStatus");
 				assertEquals(SummaryEnum.TEXT, ourLastSummary);
@@ -220,10 +220,10 @@ public class SummaryParamR4Test {
 			bundle -> {
 				assertEquals(0, bundle.getMeta().getTag().size());
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(bundle);
-				assertThat(responseContent, (containsString("<total value=\"1\"/>")));
-				assertThat(responseContent, (containsString("entry")));
-				assertThat(responseContent, (containsString(">TEXT<")));
-				assertThat(responseContent, (containsString("Medication/123")));
+				assertThat(responseContent).contains("<total value=\"1\"/>");
+				assertThat(responseContent).contains("entry");
+				assertThat(responseContent).contains(">TEXT<");
+				assertThat(responseContent).contains("Medication/123");
 				assertThat(responseContent).doesNotContainIgnoringCase("note");
 			}
 		);
@@ -237,9 +237,9 @@ public class SummaryParamR4Test {
 			url,
 			bundle -> {
 				String responseContent = ourCtx.newXmlParser().encodeResourceToString(bundle);
-				assertThat(responseContent, (containsString("<total value=\"1\"/>")));
-				assertThat(responseContent, (containsString("entry")));
-				assertThat(responseContent, (containsString("THE DIV")));
+				assertThat(responseContent).contains("<total value=\"1\"/>");
+				assertThat(responseContent).contains("entry");
+				assertThat(responseContent).contains("THE DIV");
 				assertThat(responseContent).doesNotContain("family");
 				assertThat(responseContent).doesNotContain("maritalStatus");
 				assertThat(ourLastSummaryList).containsExactly(SummaryEnum.TEXT);

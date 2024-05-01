@@ -1,5 +1,7 @@
 package org.hl7.fhir.common.hapi.validation;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
@@ -120,9 +122,9 @@ public interface ILookupCodeTest {
 			LookupCodeResult outcome = getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, List.of(propertyName)));
 
 			// verify
-			assertThat(outcome).isNotNull();
+			assertNotNull(outcome);
 			Optional<IValidationSupport.BaseConceptProperty> propertyOptional = outcome.getProperties().stream().findFirst().filter(a -> propertyName.equals(a.getPropertyName()));
-			assertThat(propertyOptional.isPresent()).isFalse();
+			assertFalse(propertyOptional.isPresent());
 		}
 
 		@Test
@@ -139,7 +141,7 @@ public interface ILookupCodeTest {
 			LookupCodeResult outcome = getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
 
 			// verify
-			assertThat(outcome).isNotNull();
+			assertNotNull(outcome);
 			assertThat(getCodeSystemProvider().getCode()).isEqualTo(CODE);
 			assertThat(getCodeSystemProvider().getSystem()).isEqualTo(CODE_SYSTEM);
 			assertThat(outcome.getCodeSystemDisplayName()).isEqualTo(result.getCodeSystemDisplayName());
@@ -167,7 +169,7 @@ public interface ILookupCodeTest {
 			LookupCodeResult outcome = getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, List.of(propertyName)));
 
 			// verify
-			assertThat(outcome).isNotNull();
+			assertNotNull(outcome);
 			assertThat(getCodeSystemProvider().getCode()).isEqualTo(CODE);
 			assertThat(getCodeSystemProvider().getSystem()).isEqualTo(CODE_SYSTEM);
 			assertThat(outcome.getCodeSystemDisplayName()).isEqualTo(result.getCodeSystemDisplayName());
@@ -194,7 +196,7 @@ public interface ILookupCodeTest {
 			LookupCodeResult outcome = getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
 
 			// verify
-			assertThat(outcome).isNotNull();
+			assertNotNull(outcome);
 
 			Collection<IValidationSupport.ConceptDesignation> designations = outcome.getDesignations();
 			assertThat(designations).hasSize(1);
@@ -224,7 +226,7 @@ public interface ILookupCodeTest {
 			LookupCodeResult outcome = getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null));
 
 			// verify
-			assertThat(outcome).isNotNull();
+			assertNotNull(outcome);
 
 			Collection<IValidationSupport.ConceptDesignation> designations = outcome.getDesignations();
 			assertThat(designations).hasSize(2);

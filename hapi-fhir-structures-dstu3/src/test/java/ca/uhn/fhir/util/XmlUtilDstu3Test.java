@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -91,10 +92,10 @@ public class XmlUtilDstu3Test {
 
 	@Test
 	public void testApplyUnsupportedFeature() throws IOException, SAXException {
-		assertThat(XmlUtil.parseDocument("<document></document>")).isNotNull();
+		assertNotNull(XmlUtil.parseDocument("<document></document>"));
 
 		XmlUtil.setThrowExceptionForUnitTest(new ParserConfigurationException("AA"));
-		assertThat(XmlUtil.parseDocument("<document></document>")).isNotNull();
+		assertNotNull(XmlUtil.parseDocument("<document></document>"));
 	}
 
 	@AfterAll

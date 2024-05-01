@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -47,7 +48,7 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 
 		Bundle bundle = fetchBundle(myServerBase + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
-		assertThat(bundle.getLink("next")).isNull();
+		assertNull(bundle.getLink("next"));
 
 		Set<String> actual = new TreeSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
@@ -73,7 +74,7 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 
 		Bundle bundle = fetchBundle(myClient.getServerBase() + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
-		assertThat(bundle.getLink("next")).isNull();
+		assertNull(bundle.getLink("next"));
 
 		Set<String> actual = new TreeSet<>();
 		for (Bundle.BundleEntryComponent nextEntry : bundle.getEntry()) {
@@ -98,7 +99,7 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 
 		Bundle bundle = fetchBundle(myClient.getServerBase() + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
-		assertThat(bundle.getLink("next")).isNull();
+		assertNull(bundle.getLink("next"));
 
 		Set<String> actual = new TreeSet<>();
 		for (Bundle.BundleEntryComponent nextEntry : bundle.getEntry()) {
@@ -123,7 +124,7 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 
 		Bundle bundle = fetchBundle(myClient.getServerBase() + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
-		assertThat(bundle.getLink("next")).isNull();
+		assertNull(bundle.getLink("next"));
 
 		Set<String> actual = new TreeSet<>();
 		for (Bundle.BundleEntryComponent nextEntry : bundle.getEntry()) {
@@ -149,7 +150,7 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 
 		Bundle bundle = fetchBundle(myClient.getServerBase() + "/" + patientId + "/$everything?_format=json&_count=100", EncodingEnum.JSON);
 
-		assertThat(bundle.getLink("next")).isNull();
+		assertNull(bundle.getLink("next"));
 
 		Set<String> actual = new TreeSet<>();
 		for (Bundle.BundleEntryComponent nextEntry : bundle.getEntry()) {

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.ips.generator;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -98,7 +99,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		assertThat(patientId).matches("urn:uuid:.*");
 		MedicationStatement medicationStatement = findFirstEntryResource(output, MedicationStatement.class, 2);
 		assertThat(medicationStatement.getSubject().getReference()).isEqualTo(patientId);
-		assertThat(medicationStatement.getInformationSource().getReference()).isNull();
+		assertNull(medicationStatement.getInformationSource().getReference());
 
 		List<String> sectionTitles = extractSectionTitles(output);
 		assertThat(sectionTitles).as(sectionTitles.toString()).containsExactly("Allergies and Intolerances", "Medication List", "Problem List", "History of Immunizations", "Diagnostic Results");

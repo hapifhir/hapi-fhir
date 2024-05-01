@@ -1,5 +1,8 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.r4.model.Patient;
@@ -18,18 +21,18 @@ class ExtensionUtilTest {
 	@Test
 	void testExtensionsWork() {
 		Patient p1 = new Patient();
-		assertThat(ExtensionUtil.hasExtension(p1, EXT_URL)).isFalse();
+		assertFalse(ExtensionUtil.hasExtension(p1, EXT_URL));
 		ExtensionUtil.setExtensionAsString(ourFhirContext, p1, EXT_URL, "value");
-		assertThat(ExtensionUtil.hasExtension(p1, EXT_URL)).isTrue();
+		assertTrue(ExtensionUtil.hasExtension(p1, EXT_URL));
 	}
 
 	@Test
 	void testExtensionTypesWork() {
 		Patient p1 = new Patient();
-		assertThat(ExtensionUtil.hasExtension(p1, EXT_URL)).isFalse();
+		assertFalse(ExtensionUtil.hasExtension(p1, EXT_URL));
 		ExtensionUtil.setExtension(ourFhirContext, p1, EXT_URL, "integer", "1");
 
-		assertThat(ExtensionUtil.hasExtension(p1, EXT_URL)).isTrue();
+		assertTrue(ExtensionUtil.hasExtension(p1, EXT_URL));
 		assertThat(ExtensionUtil.getExtensionsByUrl(p1, EXT_URL)).hasSize(1);
 
 		IBaseDatatype ext = ExtensionUtil.getExtensionByUrl(p1, EXT_URL).getValue();
@@ -40,8 +43,8 @@ class ExtensionUtilTest {
 	@Test
 	void testAddExtension() {
 		Patient p = new Patient();
-		assertThat(ExtensionUtil.addExtension(p)).isNotNull();
-		assertThat(ExtensionUtil.addExtension(p, "myUrl")).isNotNull();
+		assertNotNull(ExtensionUtil.addExtension(p));
+		assertNotNull(ExtensionUtil.addExtension(p, "myUrl"));
 
 		assertThat(p.getExtension()).hasSize(2);
 		assertThat(p.getExtension().get(1).getUrl()).isEqualTo("myUrl");
@@ -52,8 +55,8 @@ class ExtensionUtilTest {
 		Patient p = new Patient();
 		p.addExtension("URL", new StringType("VALUE"));
 
-		assertThat(ExtensionUtil.hasExtension(p, "URL")).isTrue();
-		assertThat(ExtensionUtil.hasExtension(p, "URL", "VALUE")).isTrue();
+		assertTrue(ExtensionUtil.hasExtension(p, "URL"));
+		assertTrue(ExtensionUtil.hasExtension(p, "URL", "VALUE"));
 	}
 
 	@Test
@@ -65,8 +68,8 @@ class ExtensionUtilTest {
 		ExtensionUtil.clearExtensionsByUrl(p, "URL");
 
 		assertThat(p.getExtension()).hasSize(1);
-		assertThat(ExtensionUtil.hasExtension(p, "URL")).isFalse();
-		assertThat(ExtensionUtil.hasExtension(p, "URL2")).isTrue();
+		assertFalse(ExtensionUtil.hasExtension(p, "URL"));
+		assertTrue(ExtensionUtil.hasExtension(p, "URL2"));
 
 		ExtensionUtil.clearAllExtensions(p);
 

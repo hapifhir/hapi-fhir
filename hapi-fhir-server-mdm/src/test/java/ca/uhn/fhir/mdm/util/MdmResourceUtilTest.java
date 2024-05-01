@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Organization;
@@ -38,7 +39,7 @@ class MdmResourceUtilTest {
 		);
 
 		// verify
-		assertThat(changed).isNotNull();
+		assertNotNull(changed);
 		List<Coding> tags = changed.getMeta().getTag();
 		Set<String> codes = new HashSet<>();
 		codes.add(MdmConstants.CODE_BLOCKED);

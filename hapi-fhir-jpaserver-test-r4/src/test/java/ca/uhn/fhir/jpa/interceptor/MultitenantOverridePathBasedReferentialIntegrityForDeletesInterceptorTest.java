@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.provider.r4.BaseMultitenantResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -47,7 +48,7 @@ public class MultitenantOverridePathBasedReferentialIntegrityForDeletesIntercept
 	@AfterEach
 	public void after() throws Exception {
 		myPartitionSettings.setAllowReferencesAcrossPartitions(PartitionSettings.CrossPartitionReferenceMode.NOT_ALLOWED);
-		assertThat(myPartitionSettings.isAllowUnqualifiedCrossPartitionReference()).isFalse();
+		assertFalse(myPartitionSettings.isAllowUnqualifiedCrossPartitionReference());
 
 		myInterceptorRegistry.unregisterInterceptor(mySvc);
 		mySvc.clearPaths();

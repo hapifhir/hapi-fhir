@@ -1,5 +1,7 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -15,13 +17,13 @@ public class OperationOutcomeUtilTest {
 	public void testHasIssueTrue() {
 		OperationOutcome oo =new OperationOutcome();
 		oo.addIssue().setDiagnostics("foo");
-		assertThat(OperationOutcomeUtil.hasIssues(myCtx, oo)).isTrue();
+		assertTrue(OperationOutcomeUtil.hasIssues(myCtx, oo));
 	}
 
 	@Test
 	public void testHasIssueFalse() {
 		OperationOutcome oo =new OperationOutcome();
-		assertThat(OperationOutcomeUtil.hasIssues(myCtx, oo)).isFalse();
+		assertFalse(OperationOutcomeUtil.hasIssues(myCtx, oo));
 	}
 
 	@Test
@@ -48,7 +50,7 @@ public class OperationOutcomeUtilTest {
 		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.ERROR);
 		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
 
-		assertThat(OperationOutcomeUtil.hasIssuesOfSeverity(myCtx, oo, OperationOutcome.IssueSeverity.FATAL.toCode())).isFalse();
+		assertFalse(OperationOutcomeUtil.hasIssuesOfSeverity(myCtx, oo, OperationOutcome.IssueSeverity.FATAL.toCode()));
 	}
 
 	@Test
@@ -59,6 +61,6 @@ public class OperationOutcomeUtilTest {
 		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.FATAL);
 		oo.addIssue().setSeverity(OperationOutcome.IssueSeverity.INFORMATION);
 
-		assertThat(OperationOutcomeUtil.hasIssuesOfSeverity(myCtx, oo, OperationOutcome.IssueSeverity.FATAL.toCode())).isTrue();
+		assertTrue(OperationOutcomeUtil.hasIssuesOfSeverity(myCtx, oo, OperationOutcome.IssueSeverity.FATAL.toCode()));
 	}
 }

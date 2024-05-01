@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.util;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -40,7 +41,7 @@ public class ResourceCountCacheTest {
 		// Cache is initialized on startup
 		ResourceCountCache cache = new ResourceCountCache(myFetcher);
 		cache.setCacheMillis(500);
-		assertThat(cache.get()).isNull();
+		assertNull(cache.get());
 
 		// Not time to update yet
 		cache.update();
@@ -71,18 +72,18 @@ public class ResourceCountCacheTest {
 		 * No matter how long we wait it should never load...
 		 */
 
-		assertThat(cache.get()).isNull();
+		assertNull(cache.get());
 
 		cache.update();
-		assertThat(cache.get()).isNull();
+		assertNull(cache.get());
 
 		ResourceCountCache.setNowForUnitTest(start + 400);
 		cache.update();
-		assertThat(cache.get()).isNull();
+		assertNull(cache.get());
 
 		ResourceCountCache.setNowForUnitTest(start + 80000);
 		cache.update();
-		assertThat(cache.get()).isNull();
+		assertNull(cache.get());
 
 	}
 

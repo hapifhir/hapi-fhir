@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.topic;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
@@ -61,8 +65,8 @@ class SubscriptionTopicPayloadBuilderR4BTest {
 
 		// verify Encounter entry
 		Bundle.BundleEntryComponent encounterEntry = payload.getEntry().get(1);
-		assertThat(encounterEntry.getResource()).isNull();
-		assertThat(encounterEntry.getFullUrl()).isNull();
+		assertNull(encounterEntry.getResource());
+		assertNull(encounterEntry.getFullUrl());
 		verifyRequestParameters(encounterEntry, org.hl7.fhir.r5.model.Bundle.HTTPVerb.DELETE.name(), "Encounter/1");
 	}
 
@@ -130,7 +134,7 @@ class SubscriptionTopicPayloadBuilderR4BTest {
 
 		// verify Encounter entry
 		Bundle.BundleEntryComponent encounterEntry = payload.getEntry().get(1);
-		assertThat(encounterEntry.getResource()).isNull();
+		assertNull(encounterEntry.getResource());
 		assertThat(encounterEntry.getFullUrl()).isEqualTo(theFullUrl);
 		verifyRequestParameters(encounterEntry, theHttpMethod, theRequestUrl);
 	}
@@ -159,12 +163,12 @@ class SubscriptionTopicPayloadBuilderR4BTest {
 		assertThat(((SubscriptionStatus) resources.get(0)).getNotificationEvent()).hasSize(1);
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent =
 				((SubscriptionStatus) resources.get(0)).getNotificationEventFirstRep();
-		assertThat(notificationEvent.hasFocus()).isFalse();
+		assertFalse(notificationEvent.hasFocus());
 	}
 
 	private void verifyRequestParameters(Bundle.BundleEntryComponent theEncounterEntry,
 										 String theHttpMethod, String theRequestUrl) {
-		assertThat(theEncounterEntry.getRequest()).isNotNull();
+		assertNotNull(theEncounterEntry.getRequest());
 		assertThat(theEncounterEntry.getRequest().getMethod().name()).isEqualTo(theHttpMethod);
 		assertThat(theEncounterEntry.getRequest().getUrl()).isEqualTo(theRequestUrl);
 	}
@@ -174,7 +178,7 @@ class SubscriptionTopicPayloadBuilderR4BTest {
 		assertThat(((SubscriptionStatus) theResource).getNotificationEvent()).hasSize(1);
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent =
 				((SubscriptionStatus) theResource).getNotificationEventFirstRep();
-		assertThat(notificationEvent.hasFocus()).isTrue();
+		assertTrue(notificationEvent.hasFocus());
 		assertThat(notificationEvent.getFocus().getReference()).isEqualTo(myEncounter.getId());
 	}
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
@@ -89,7 +90,7 @@ public class TransactionClientTest {
 		assertThat(bundle.getEntry()).hasSize(2);
 		assertThat(bundle.getEntry().get(0).getResource().getIdElement().getValue()).isEqualTo("Patient/testPersistWithSimpleLinkP01");
 
-		assertThat(bundle.getEntry().get(1).getResource().getIdElement().isEmpty()).isTrue();
+		assertTrue(bundle.getEntry().get(1).getResource().getIdElement().isEmpty());
 
   }
 
@@ -128,7 +129,7 @@ public class TransactionClientTest {
 		assertThat(bundle.getEntry()).hasSize(2);
 		assertThat(bundle.getEntry().get(0).getResource().getIdElement().getValue()).isEqualTo("http://foo/Patient/testPersistWithSimpleLinkP01");
 
-		assertThat(bundle.getEntry().get(1).getResource().getIdElement().isEmpty()).isTrue();
+		assertTrue(bundle.getEntry().get(1).getResource().getIdElement().isEmpty());
 
   }
 

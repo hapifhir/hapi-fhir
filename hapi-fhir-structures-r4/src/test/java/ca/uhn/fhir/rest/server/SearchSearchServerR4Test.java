@@ -1,5 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.Include;
@@ -131,7 +134,7 @@ public class SearchSearchServerR4Test {
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertThat(p.getNameFirstRep().getFamily()).isNull();
+		assertNull(p.getNameFirstRep().getFamily());
   }
 
   @Test
@@ -155,11 +158,11 @@ public class SearchSearchServerR4Test {
 
 		assertThat(ourLastAndList.getValuesAsQueryTokens()).hasSize(4);
 		assertThat(ourLastAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(2);
-		assertThat(ourLastAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).isExact()).isFalse();
+		assertFalse(ourLastAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).isExact());
 		assertThat(ourLastAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("NE,NE");
 		assertThat(ourLastAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValue()).isEqualTo("NE,NE");
 		assertThat(ourLastAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("NE\\NE");
-		assertThat(ourLastAndList.getValuesAsQueryTokens().get(2).getValuesAsQueryTokens().get(0).isExact()).isTrue();
+		assertTrue(ourLastAndList.getValuesAsQueryTokens().get(2).getValuesAsQueryTokens().get(0).isExact());
 		assertThat(ourLastAndList.getValuesAsQueryTokens().get(2).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("E$E");
 		assertThat(ourLastAndList.getValuesAsQueryTokens().get(3).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("E|E");
   }

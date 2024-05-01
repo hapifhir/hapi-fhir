@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -482,7 +483,7 @@ public class GenericClientDstu2Test {
 		p.addName().addFamily("FOOFAMILY");
 
 		MethodOutcome output = client.create().resource(p).execute();
-		assertThat(output.getResource()).isNotNull();
+		assertNotNull(output.getResource());
 		assertThat(output.getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/123");
 	}
 
@@ -1988,7 +1989,7 @@ public class GenericClientDstu2Test {
 			.execute();
 		//@formatter:on
 		assertThat(capt.getAllValues().get(idx).getURI().toString()).isEqualTo("http://foo?name=http%3A//foo%7Cbar&_format=json");
-		assertThat(response).isNotNull();
+		assertNotNull(response);
 		idx++;
 
 		//@formatter:off
@@ -1999,7 +2000,7 @@ public class GenericClientDstu2Test {
 			.execute();
 		//@formatter:on
 		assertThat(capt.getAllValues().get(idx).getURI().toString()).isEqualTo("http://example.com/fhir/Patient?name=http%3A//foo%7Cbar&_format=json");
-		assertThat(response).isNotNull();
+		assertNotNull(response);
 		idx++;
 
 		//@formatter:off
@@ -2010,7 +2011,7 @@ public class GenericClientDstu2Test {
 			.execute();
 		//@formatter:on
 		assertThat(capt.getAllValues().get(idx).getURI().toString()).isEqualTo("http://example.com/fhir/Patient?name=http%3A//foo%7Cbar&_format=json");
-		assertThat(response).isNotNull();
+		assertNotNull(response);
 		idx++;
 
 		//@formatter:off
@@ -2020,7 +2021,7 @@ public class GenericClientDstu2Test {
 			.execute();
 		//@formatter:on
 		assertThat(capt.getAllValues().get(idx).getURI().toString()).isEqualTo("http://example.com/fhir/Patient");
-		assertThat(response).isNotNull();
+		assertNotNull(response);
 		idx++;
 
 		//@formatter:off
@@ -2030,7 +2031,7 @@ public class GenericClientDstu2Test {
 			.execute();
 		//@formatter:on
 		assertThat(capt.getAllValues().get(idx).getURI().toString()).isEqualTo("http://example.com/fhir/Patient?");
-		assertThat(response).isNotNull();
+		assertNotNull(response);
 		idx++;
 
 		try {
@@ -2528,7 +2529,7 @@ public class GenericClientDstu2Test {
 		p.addName().addFamily("FOOFAMILY");
 
 		MethodOutcome output = client.update().resource(p).execute();
-		assertThat(output.getResource()).isNotNull();
+		assertNotNull(output.getResource());
 		assertThat(output.getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/123");
 	}
 
@@ -2563,7 +2564,7 @@ public class GenericClientDstu2Test {
 		assertThat(capt.getAllValues().get(idx).getRequestLine().getMethod()).isEqualTo("POST");
 		assertThat(capt.getAllValues().get(idx).getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo("application/xml+fhir");
 		assertThat(extractBody(capt, idx)).isEqualTo("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>");
-		assertThat(response.getOperationOutcome()).isNotNull();
+		assertNotNull(response.getOperationOutcome());
 		assertThat(toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("FOOBAR");
 		idx++;
 
@@ -2572,7 +2573,7 @@ public class GenericClientDstu2Test {
 		assertThat(capt.getAllValues().get(idx).getRequestLine().getMethod()).isEqualTo("POST");
 		assertThat(capt.getAllValues().get(idx).getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo("application/xml+fhir");
 		assertThat(extractBody(capt, idx)).isEqualTo("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>");
-		assertThat(response.getOperationOutcome()).isNotNull();
+		assertNotNull(response.getOperationOutcome());
 		assertThat(toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("FOOBAR");
 		idx++;
 
@@ -2581,7 +2582,7 @@ public class GenericClientDstu2Test {
 		assertThat(capt.getAllValues().get(idx).getRequestLine().getMethod()).isEqualTo("POST");
 		assertThat(capt.getAllValues().get(idx).getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo("application/json+fhir");
 		assertThat(extractBody(capt, idx)).isEqualTo("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"given\":[\"GIVEN\"]}]}}]}");
-		assertThat(response.getOperationOutcome()).isNotNull();
+		assertNotNull(response.getOperationOutcome());
 		assertThat(toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("FOOBAR");
 		idx++;
 
@@ -2590,7 +2591,7 @@ public class GenericClientDstu2Test {
 		assertThat(capt.getAllValues().get(idx).getRequestLine().getMethod()).isEqualTo("POST");
 		assertThat(capt.getAllValues().get(idx).getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo("application/json+fhir");
 		assertThat(extractBody(capt, idx)).contains("\"resourceType\": \"Parameters\",\n");
-		assertThat(response.getOperationOutcome()).isNotNull();
+		assertNotNull(response.getOperationOutcome());
 		assertThat(toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("FOOBAR");
 		idx++;
 	}
@@ -2626,7 +2627,7 @@ public class GenericClientDstu2Test {
 		assertThat(capt.getAllValues().get(idx).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/$validate");
 		assertThat(capt.getAllValues().get(idx).getRequestLine().getMethod()).isEqualTo("POST");
 		assertThat(extractBody(capt, idx)).isEqualTo("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"given\":[\"GIVEN\"]}]}}]}");
-		assertThat(response.getOperationOutcome()).isNotNull();
+		assertNotNull(response.getOperationOutcome());
 		assertThat(toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("FOOBAR");
 		idx++;
 	}

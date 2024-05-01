@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoObservation;
@@ -269,12 +270,12 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 		while (theObservationCode.equals(observationCodeMap.get(theObservationIds.get(theNextObservationIdx)))
 			&& thePatientId.equals(observationPatientMap.get(theObservationIds.get(theNextObservationIdx)))) {
 			// Check that effective date is before that of the previous observation.
-			assertThat(lastEffectiveDt.compareTo(observationEffectiveMap.get(theObservationIds.get(theNextObservationIdx))) > 0).isTrue();
+			assertTrue(lastEffectiveDt.compareTo(observationEffectiveMap.get(theObservationIds.get(theNextObservationIdx))) > 0);
 			lastEffectiveDt = observationEffectiveMap.get(theObservationIds.get(theNextObservationIdx));
 
 			// Check that observation is in one of the specified categories (if applicable)
 			if (theCategories != null && !theCategories.isEmpty()) {
-				assertThat(theCategories).contains(observationCategoryMap);
+				assertThat(theCategories).contains(observationCategoryMap.get(theObservationIds.get(theNextObservationIdx)));
 			}
 			theNextObservationIdx++;
 			if (theNextObservationIdx >= theObservationIds.size()) {

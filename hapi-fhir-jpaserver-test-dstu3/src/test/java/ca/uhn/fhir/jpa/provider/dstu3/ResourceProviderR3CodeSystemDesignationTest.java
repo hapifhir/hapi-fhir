@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeType;
@@ -67,7 +68,7 @@ public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourcePro
 		// 2. Systolic blood pressure 12 hour minimum (no language)
 		designation = designationList.get(1);
 		assertThat(designation.getPart().get(0).getName()).isEqualTo("language");
-		assertThat(designation.getPart().get(0).getValue()).isNull();
+		assertNull(designation.getPart().get(0).getValue());
 		assertThat(designation.getPart().get(2).getName()).isEqualTo("value");
 		assertThat(designation.getPart().get(2).getValue().toString()).isEqualTo("Systolic blood pressure 12 hour minimum");
 
@@ -104,7 +105,7 @@ public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourcePro
 		// 1. Systolic blood pressure 12 hour minimum (no language)
 		ParametersParameterComponent designation = designationList.get(0);
 		assertThat(designation.getPart().get(0).getName()).isEqualTo("language");
-		assertThat(designation.getPart().get(0).getValue()).isNull();
+		assertNull(designation.getPart().get(0).getValue());
 		assertThat(designation.getPart().get(2).getName()).isEqualTo("value");
 		assertThat(designation.getPart().get(2).getValue().toString()).isEqualTo("Systolic blood pressure 12 hour minimum");
 
@@ -153,7 +154,7 @@ public class ResourceProviderR3CodeSystemDesignationTest extends BaseResourcePro
 		// 3. Systolic blood pressure 12 hour minimum (no language)
 		designation = designationList.get(2);
 		assertThat(designation.getPart().get(0).getName()).isEqualTo("language");
-		assertThat(designation.getPart().get(0).getValue()).isNull();
+		assertNull(designation.getPart().get(0).getValue());
 		assertThat(designation.getPart().get(2).getName()).isEqualTo("value");
 		assertThat(designation.getPart().get(2).getValue().toString()).isEqualTo("Systolic blood pressure 12 hour minimum");
 

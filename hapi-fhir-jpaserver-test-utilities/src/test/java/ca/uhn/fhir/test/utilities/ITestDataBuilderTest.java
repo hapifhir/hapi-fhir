@@ -1,5 +1,7 @@
 package ca.uhn.fhir.test.utilities;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -66,7 +68,7 @@ public class ITestDataBuilderTest {
 			Observation o = (Observation) myCreatedList.get(0);
 
 			CodeableConcept codeable = o.getCode();
-			assertThat(codeable).isNotNull();
+			assertNotNull(codeable);
 			assertThat(codeable.getCoding().size()).as("has one coding").isEqualTo(1);
 			Coding coding = codeable.getCoding().get(0);
 
@@ -85,7 +87,7 @@ public class ITestDataBuilderTest {
 			Observation o = (Observation) myCreatedList.get(0);
 
 			Quantity valueQuantity = o.getValueQuantity();
-			assertThat(valueQuantity).isNotNull();
+			assertNotNull(valueQuantity);
 
 			assertThat(valueQuantity.getValue().doubleValue()).isEqualTo(200);
 			assertThat(valueQuantity.getSystem()).isEqualTo("hulla");
@@ -130,7 +132,7 @@ public class ITestDataBuilderTest {
 		assertThat(myCreatedList).hasSize(1);
 		Group g = (Group) myCreatedList.get(0);
 		assertThat(g.getMember()).hasSize(1);
-		assertThat(g.getMember().get(0).hasEntity()).isTrue();
+		assertTrue(g.getMember().get(0).hasEntity());
 		assertThat(g.getMember().get(0).getEntity().getReference()).isEqualTo("Patient/123");
 	}
 

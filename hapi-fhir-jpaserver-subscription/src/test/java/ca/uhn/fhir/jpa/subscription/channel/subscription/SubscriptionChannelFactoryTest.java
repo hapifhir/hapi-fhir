@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelReceiver;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannelFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -60,12 +61,12 @@ public class SubscriptionChannelFactoryTest {
 			channel.send(input);
 			fail("");
 		} catch (MessageDeliveryException e) {
-			assertThat(e.getCause() instanceof NullPointerException).isTrue();
+			assertTrue(e.getCause() instanceof NullPointerException);
 		}
 
 		verify(myInterceptor, times(1)).afterSendCompletion(any(), any(), anyBoolean(), myExceptionCaptor.capture());
 
-		assertThat(myExceptionCaptor.getValue() instanceof NullPointerException).isTrue();
+		assertTrue(myExceptionCaptor.getValue() instanceof NullPointerException);
 	}
 
 

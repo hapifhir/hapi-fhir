@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import ca.uhn.fhir.rest.server.interceptor.validation.address.AddressValidationResult;
@@ -23,7 +24,7 @@ class BaseRestfulValidatorTest {
 		when(responseEntity.getBody()).thenReturn("{}");
 
 		TestRestfulValidator val = spy(new TestRestfulValidator(responseEntity));
-		assertThat(val.isValid(new Address(), FhirContext.forR4())).isNotNull();
+		assertNotNull(val.isValid(new Address(), FhirContext.forR4()));
 
 		verify(val, times(1)).getResponseEntity(any(IBase.class), any(FhirContext.class));
 		verify(val, times(1)).getValidationResult(any(), any(), any());
@@ -36,7 +37,7 @@ class BaseRestfulValidatorTest {
 
 		TestRestfulValidator val = new TestRestfulValidator(responseEntity);
 		try {
-			assertThat(val.isValid(new Address(), FhirContext.forR4())).isNotNull();
+			assertNotNull(val.isValid(new Address(), FhirContext.forR4()));
 			fail("");		} catch (Exception e) {
 		}
 	}

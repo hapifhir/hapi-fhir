@@ -1,5 +1,7 @@
 package ca.uhn.fhir.android.client;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.parser.IParser;
@@ -263,8 +265,8 @@ public class GenericClientDstu3IT {
 
 		MethodOutcome outcome = client.create().resource(pt).prefer(PreferReturnEnum.REPRESENTATION).execute();
 
-		assertThat(outcome.getOperationOutcome()).isNull();
-		assertThat(outcome.getResource()).isNotNull();
+		assertNull(outcome.getOperationOutcome());
+		assertNotNull(outcome.getResource());
 
 		assertThat(capt.getAllValues()).hasSize(1);
 		assertThat(((Patient) outcome.getResource()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>");

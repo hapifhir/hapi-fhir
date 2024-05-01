@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.topic;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -51,7 +53,7 @@ class SubscriptionTriggerMatcherTest {
 		InMemoryMatchResult result = svc.match();
 
 		// verify
-		assertThat(result.matched()).isFalse();
+		assertFalse(result.matched());
 	}
 
 	@Test
@@ -68,7 +70,7 @@ class SubscriptionTriggerMatcherTest {
 		InMemoryMatchResult result = svc.match();
 
 		// verify
-		assertThat(result.matched()).isTrue();
+		assertTrue(result.matched());
 	}
 
 	@Test
@@ -85,7 +87,7 @@ class SubscriptionTriggerMatcherTest {
 		InMemoryMatchResult result = svc.match();
 
 		// verify
-		assertThat(result.matched()).isFalse();
+		assertFalse(result.matched());
 	}
 
 	@Test
@@ -102,7 +104,7 @@ class SubscriptionTriggerMatcherTest {
 		InMemoryMatchResult result = svc.match();
 
 		// verify
-		assertThat(result.matched()).isTrue();
+		assertTrue(result.matched());
 	}
 
 	@Test
@@ -127,7 +129,7 @@ class SubscriptionTriggerMatcherTest {
 		InMemoryMatchResult result = svc.match();
 
 		// verify
-		assertThat(result.matched()).isTrue();
+		assertTrue(result.matched());
 	}
 
 }

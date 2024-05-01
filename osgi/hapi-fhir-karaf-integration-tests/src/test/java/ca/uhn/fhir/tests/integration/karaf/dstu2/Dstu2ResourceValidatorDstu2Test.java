@@ -206,7 +206,7 @@ public class Dstu2ResourceValidatorDstu2Test {
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSequence(
 			"meta",
 			"String Extension",
 			"Organization/2.25.79433498044103547197447759549862032393",
@@ -233,7 +233,7 @@ public class Dstu2ResourceValidatorDstu2Test {
 		assertTrue(result.isSuccessful());
 
 		assertThat(messageString, containsString("valueReference"));
-		assertThat(messageString, not(containsString("valueResource")));
+		assertThat(messageString).doesNotContain("valueResource");
 	}
 
 	private Matcher<? super String> stringContainsInOrder(java.lang.String... substrings) {
@@ -259,7 +259,7 @@ public class Dstu2ResourceValidatorDstu2Test {
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString, stringContainsInOrder(
+		assertThat(messageString).containsSequence(
 			"meta",
 			"Organization/2.25.79433498044103547197447759549862032393",
 			"furry-grey",
@@ -288,7 +288,7 @@ public class Dstu2ResourceValidatorDstu2Test {
 		assertTrue(result.isSuccessful());
 
 		assertThat(messageString, containsString("valueReference"));
-		assertThat(messageString, not(containsString("valueResource")));
+		assertThat(messageString).doesNotContain("valueResource");
 	}
 
 	@ResourceDef(name = "Patient")

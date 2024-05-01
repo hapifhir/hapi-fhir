@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.config.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import net.ttddyy.dsproxy.support.ProxyDataSource;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,19 +71,19 @@ class ConnectionPoolInfoProviderTest {
 		@Test
 		void testGetMaxWaitMillis() {
 			Optional<Long> resOpt = tested.getMaxWaitMillis();
-			assertThat(resOpt.isPresent()).isFalse();
+			assertFalse(resOpt.isPresent());
 		}
 
 		@Test
 		void testGetMaxConnectionSize() {
 			Optional<Integer> resOpt = tested.getTotalConnectionSize();
-			assertThat(resOpt.isPresent()).isFalse();
+			assertFalse(resOpt.isPresent());
 		}
 
 		@Test
 		void testGetActiveConnections() {
 			Optional<Integer> resOpt = tested.getActiveConnections();
-			assertThat(resOpt.isPresent()).isFalse();
+			assertFalse(resOpt.isPresent());
 		}
 
 	}
@@ -98,8 +102,8 @@ class ConnectionPoolInfoProviderTest {
 			IConnectionPoolInfoProvider instantiatedProvider =
 				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "myProvider");
 
-			assertThat(instantiatedProvider).isNotNull();
-			assertThat(instantiatedProvider.getClass().isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class)).isTrue();
+			assertNotNull(instantiatedProvider);
+			assertTrue(instantiatedProvider.getClass().isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class));
 		}
 
 		@Test
@@ -111,8 +115,8 @@ class ConnectionPoolInfoProviderTest {
 
 			IConnectionPoolInfoProvider instantiatedProvider =
 				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "myProvider");
-			assertThat(instantiatedProvider).isNotNull();
-			assertThat(instantiatedProvider.getClass().isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class)).isTrue();
+			assertNotNull(instantiatedProvider);
+			assertTrue(instantiatedProvider.getClass().isAssignableFrom(BasicDataSourceConnectionPoolInfoProvider.class));
 		}
 
 		@Test
@@ -122,7 +126,7 @@ class ConnectionPoolInfoProviderTest {
 			IConnectionPoolInfoProvider provider = new ConnectionPoolInfoProvider(proxyDs);
 			IConnectionPoolInfoProvider instantiatedProvider =
 				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "myProvider");
-			assertThat(instantiatedProvider).isNull();
+			assertNull(instantiatedProvider);
 		}
 
 		@Test
@@ -131,7 +135,7 @@ class ConnectionPoolInfoProviderTest {
 
 			IConnectionPoolInfoProvider instantiatedProvider =
 				(IConnectionPoolInfoProvider) ReflectionTestUtils.getField(provider, "myProvider");
-			assertThat(instantiatedProvider).isNull();
+			assertNull(instantiatedProvider);
 		}
 
 	}

@@ -1,5 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -58,7 +59,7 @@ public class ValidationSupportChainTest extends BaseValidationTestWithInlineMock
 
 		assertThat(actualBinaryContent1).containsExactly(EXPECTED_BINARY_CONTENT_1);
 		assertThat(actualBinaryContent2).containsExactly(EXPECTED_BINARY_CONTENT_2);
-		assertThat(validationSupportChain.fetchBinary("nonExistentKey")).isNull();
+		assertNull(validationSupportChain.fetchBinary("nonExistentKey"));
 	}
 
 

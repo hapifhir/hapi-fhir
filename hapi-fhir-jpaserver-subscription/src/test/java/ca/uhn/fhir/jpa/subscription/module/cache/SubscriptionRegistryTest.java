@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module.cache;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import org.hl7.fhir.dstu3.model.Subscription;
 import org.junit.jupiter.api.Test;
@@ -24,7 +26,7 @@ public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 		ActiveSubscription newActiveSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
 		assertThat(newActiveSubscription.getCriteria().getCriteria()).isEqualTo(NEW_CRITERIA);
 		// The same object
-		assertThat(newActiveSubscription == origActiveSubscription).isTrue();
+		assertTrue(newActiveSubscription == origActiveSubscription);
 	}
 
 	@Test
@@ -45,7 +47,7 @@ public class SubscriptionRegistryTest extends BaseSubscriptionRegistryTest {
 
 		ActiveSubscription newActiveSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
 		// A new object
-		assertThat(newActiveSubscription == origActiveSubscription).isFalse();
+		assertFalse(newActiveSubscription == origActiveSubscription);
 	}
 
 	@Test

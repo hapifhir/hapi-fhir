@@ -1,5 +1,8 @@
 package ca.uhn.fhir.batch2.coordinator;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -146,10 +149,10 @@ public class WorkChunkProcessorTest {
 		);
 
 		// verify
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 		verify(myJobPersistence)
 			.onWorkChunkCompletion(any(WorkChunkCompletionEvent.class));
-		assertThat(myDataSink.myActualDataSink instanceof JobDataSink).isTrue();
+		assertTrue(myDataSink.myActualDataSink instanceof JobDataSink);
 
 		if (theRecoveredErrorsForDataSink > 0) {
 			verify(myJobPersistence)
@@ -190,8 +193,8 @@ public class WorkChunkProcessorTest {
 		);
 
 		// verify
-		assertThat(result.isSuccessful()).isTrue();
-		assertThat(myDataSink.myActualDataSink instanceof FinalStepDataSink).isTrue();
+		assertTrue(result.isSuccessful());
+		assertTrue(myDataSink.myActualDataSink instanceof FinalStepDataSink);
 
 		// nevers
 		verifyNoErrors(0);
@@ -275,10 +278,10 @@ public class WorkChunkProcessorTest {
 		} while (processedOutcomeSuccessfully == null && counter <= WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT + 2);
 
 		// verify
-		assertThat(processedOutcomeSuccessfully).isNotNull();
+		assertNotNull(processedOutcomeSuccessfully);
 		// +1 because of the > MAX_CHUNK_ERROR_COUNT check
 		assertThat(counter).isEqualTo(WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT + 1);
-		assertThat(processedOutcomeSuccessfully).isFalse();
+		assertFalse(processedOutcomeSuccessfully);
 	}
 
 	private void runExceptionThrowingTest(Exception theExceptionToThrow) {
@@ -304,7 +307,7 @@ public class WorkChunkProcessorTest {
 		);
 
 		// verify
-		assertThat(output.isSuccessful()).isFalse();
+		assertFalse(output.isSuccessful());
 	}
 
 	/**********************/

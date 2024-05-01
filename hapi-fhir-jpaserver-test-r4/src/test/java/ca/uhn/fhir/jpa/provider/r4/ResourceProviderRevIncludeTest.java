@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -133,10 +135,10 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 			}
 		}
 
-		assertThat(patientFound).isTrue();
-		assertThat(groupFound).isTrue();
-		assertThat(careTeamFound).isTrue();
-		assertThat(patient).isNotNull();
+		assertTrue(patientFound);
+		assertTrue(groupFound);
+		assertTrue(careTeamFound);
+		assertNotNull(patient);
 		assertThat(patient.getIdElement().getIdPart()).isEqualTo(pid.getIdPart());
 		assertThat(patient.getName().get(0).getFamily()).isEqualTo(methodName);
 

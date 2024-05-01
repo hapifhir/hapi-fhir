@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.ConditionalUrlParam;
@@ -75,7 +76,7 @@ public class UpdateDstu3Test {
 		assertThat(actualPatient.getIdentifier().get(0).getValue()).isEqualTo(patient.getIdentifier().get(0).getValue());
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(status.getFirstHeader("location")).isNull();
+		assertNull(status.getFirstHeader("location"));
 		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/123/_history/002");
 		assertThat(status.getFirstHeader(Constants.HEADER_ETAG_LC).getValue()).isEqualTo("W/\"002\"");
 		assertThat(status.getFirstHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE).getValue()).isEqualTo("Mon, 22 Apr 2002 11:22:33 GMT");
@@ -99,7 +100,7 @@ public class UpdateDstu3Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 			assertThat(ourConditionalUrl).isEqualTo("Patient?_id=001");
-			assertThat(ourId).isNull();
+			assertNull(ourId);
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -144,7 +145,7 @@ public class UpdateDstu3Test {
 			ourLog.info("Response was:\n{}", responseContent);
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-			assertThat(ourConditionalUrl).isNull();
+			assertNull(ourConditionalUrl);
 			assertThat(ourId.getValue()).isEqualTo("Patient/001");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -208,7 +209,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 
 		IBundleProvider outcome = myPatientDao.search(map);
 
-		assertThat(outcome).isNotNull();
+		assertNotNull(outcome);
 		// we know 4 cause that's how many patients are created
 		// plus one golden resource
 		assertThat(outcome.size()).isEqualTo(resourceCount + 1);
@@ -245,7 +246,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 
 		// verify return results
 		// we expect all the linked ids to be returned too
-		assertThat(outcome).isNotNull();
+		assertNotNull(outcome);
 		// plus 1 for the golden resource
 		assertThat(outcome.size()).isEqualTo(expectedIds.size() + 1);
 		List<String> returnedIds = outcome.getAllResourceIds();

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -39,7 +40,7 @@ class CodingSpyTest {
 
 		Boolean result = new CodingSpy().getBooleanObject(value);
 
-		assertThat(result).isNull();
+		assertNull(result);
 	}
 
 	static List<Arguments> getCases() {

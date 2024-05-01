@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -58,7 +60,7 @@ class FhirQueryRuleTesterTest  {
 
 		boolean matches = myTester.matchesOutput(myTestRequest);
 
-		assertThat(matches).isTrue();
+		assertTrue(matches);
 	}
 
 
@@ -71,7 +73,7 @@ class FhirQueryRuleTesterTest  {
 
 		boolean matches = myTester.matchesOutput(myTestRequest);
 
-		assertThat(matches).isFalse();
+		assertFalse(matches);
 	}
 
 	@Test
@@ -84,7 +86,7 @@ class FhirQueryRuleTesterTest  {
 
 		boolean matches = myTester.matchesOutput(myTestRequest);
 
-		assertThat(matches).isFalse();
+		assertFalse(matches);
 	}
 
 	@Test
@@ -97,7 +99,7 @@ class FhirQueryRuleTesterTest  {
 
 		boolean matches = myTester.matchesOutput(myTestRequest);
 
-		assertThat(matches).isTrue();
+		assertTrue(matches);
 	}
 
 	@Test
@@ -109,7 +111,7 @@ class FhirQueryRuleTesterTest  {
 
 		boolean matches = myTester.matchesOutput(myTestRequest);
 
-		assertThat(matches).isTrue();
+		assertTrue(matches);
 	}
 
 

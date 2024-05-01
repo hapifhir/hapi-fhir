@@ -1,5 +1,7 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
 import ch.qos.logback.classic.Level;
@@ -35,7 +37,7 @@ public class PhoneticEncoderUtilTests {
 		// test
 		IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(enumString);
 
-		assertThat(encoder).isNotNull();
+		assertNotNull(encoder);
 		assertThat(encoder.name()).isEqualTo(enumVal.name());
 	}
 
@@ -45,7 +47,7 @@ public class PhoneticEncoderUtilTests {
 		for (PhoneticEncoderEnum enumVal : PhoneticEncoderEnum.values()) {
 			IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(enumVal.name());
 
-			assertThat(encoder).isNotNull();
+			assertNotNull(encoder);
 			assertThat(encoder.name()).isEqualTo(enumVal.name());
 		}
 	}
@@ -62,7 +64,7 @@ public class PhoneticEncoderUtilTests {
 		);
 
 		// verify
-		assertThat(encoder).isNull();
+		assertNull(encoder);
 		ArgumentCaptor<ILoggingEvent> loggingCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		Mockito.verify(myListAppender).doAppend(loggingCaptor.capture());
 		assertThat(loggingCaptor.getAllValues()).hasSize(1);
@@ -79,7 +81,7 @@ public class PhoneticEncoderUtilTests {
 		IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(theString);
 
 		// verify
-		assertThat(encoder).isNull();
+		assertNull(encoder);
 		ArgumentCaptor<ILoggingEvent> captor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		Mockito.verify(myListAppender)
 			.doAppend(captor.capture());
@@ -127,7 +129,7 @@ public class PhoneticEncoderUtilTests {
 			PhoneticEncoderEnum.METAPHONE.name() + "(" + Integer.MAX_VALUE + ")"
 		);
 
-		assertThat(encoder).isNotNull();
+		assertNotNull(encoder);
 		assertThat(encoder.name()).isEqualTo(PhoneticEncoderEnum.METAPHONE.name());
 	}
 
@@ -135,7 +137,7 @@ public class PhoneticEncoderUtilTests {
 	 * Verifies the outcome encoder when an invalid string was passed in.
 	 */
 	private void verifyOutcome_getEncoder_NumberParseFailure(IPhoneticEncoder theEncoder, String theNumberParam) {
-		assertThat(theEncoder).isNull();
+		assertNull(theEncoder);
 		ArgumentCaptor<ILoggingEvent> loggingCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		Mockito.verify(myListAppender).doAppend(loggingCaptor.capture());
 		assertThat(loggingCaptor.getAllValues()).hasSize(1);

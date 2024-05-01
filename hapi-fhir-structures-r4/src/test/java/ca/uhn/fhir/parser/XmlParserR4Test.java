@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds;
 import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,7 +78,7 @@ public class XmlParserR4Test extends BaseTest {
 
 		Appointment input = parser.parseResource(Appointment.class, output);
 
-		assertThat(input.getMeta().getExtensionByUrl("http://example-source-team.com")).isNotNull();
+		assertNotNull(input.getMeta().getExtensionByUrl("http://example-source-team.com"));
 	}
 
 
@@ -161,10 +162,10 @@ public class XmlParserR4Test extends BaseTest {
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input);
 
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded, stringContainsInOrder(
+		assertThat(encoded).containsSequence(
 			"<fullUrl value=\"urn:uuid:0.0.0.0\"/>",
 			"<id value=\"1.1.1.1\"/>"
-		));
+		);
 
 		input = ourCtx.newXmlParser().parseResource(Bundle.class, encoded);
 		assertThat(input.getEntry().get(0).getFullUrl()).isEqualTo("urn:uuid:0.0.0.0");
@@ -312,15 +313,15 @@ public class XmlParserR4Test extends BaseTest {
 		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle);
 		ourLog.info(output);
 
-		assertThat(output, not(containsString("<contained")));
-		assertThat(output, not(containsString("<id")));
-		assertThat(output, stringContainsInOrder(
+		assertThat(output).doesNotContain("<contained");
+		assertThat(output).doesNotContain("<id");
+		assertThat(output).containsSequence(
 			 "<fullUrl value=\"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\"/>",
 			 "<Patient xmlns=\"http://hl7.org/fhir\">",
 			 "<fullUrl value=\"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"/>",
 			 "<Observation xmlns=\"http://hl7.org/fhir\">",
 			 "<reference value=\"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\"/>"
-		));
+		);
 
 	}
 
@@ -331,16 +332,16 @@ public class XmlParserR4Test extends BaseTest {
 		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parameters);
 		ourLog.info(output);
 
-		assertThat(output, not(containsString("\"contained\"")));
-		assertThat(output, not(containsString("\"id\"")));
-		assertThat(output, stringContainsInOrder(
+		assertThat(output).doesNotContain("\"contained\"");
+		assertThat(output).doesNotContain("\"id\"");
+		assertThat(output).containsSequence(
 			 "<Parameters xmlns=\"http://hl7.org/fhir\">",
 			 "<fullUrl value=\"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\"/>",
 			 "<Patient xmlns=\"http://hl7.org/fhir\">",
 			 "<fullUrl value=\"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"/>",
 			 "<Observation xmlns=\"http://hl7.org/fhir\">",
 			 "<reference value=\"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\"/>"
-		));
+		);
 
 	}
 

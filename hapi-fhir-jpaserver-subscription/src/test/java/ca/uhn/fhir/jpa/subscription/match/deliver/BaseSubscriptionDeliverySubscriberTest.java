@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.match.deliver;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -386,7 +388,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 
 		ourLog.info(jsonMessage.getPayload().getRequestPartitionId().asJson());
 
-		assertThat(jsonMessage.getPayload().getRequestPartitionId()).isNotNull();
+		assertNotNull(jsonMessage.getPayload().getRequestPartitionId());
 		assertThat(RequestPartitionId.defaultPartition().toJson()).isEqualTo(jsonMessage.getPayload().getRequestPartitionId().toJson());
 	}
 
@@ -412,7 +414,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 			fail("");
 		} catch (MessagingException e) {
 			String messageExceptionAsString = e.toString();
-			assertThat(messageExceptionAsString.contains(familyName)).isFalse();
+			assertFalse(messageExceptionAsString.contains(familyName));
 		}
 	}
 

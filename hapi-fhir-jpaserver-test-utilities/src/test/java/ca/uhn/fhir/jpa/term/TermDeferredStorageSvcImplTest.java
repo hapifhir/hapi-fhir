@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -68,9 +70,9 @@ public class TermDeferredStorageSvcImplTest {
 
 		when(myJobCoordinator.getInstance(eq(jobId)))
 			.thenReturn(instance);
-		assertThat(mySvc.isStorageQueueEmpty(true)).isFalse();
+		assertFalse(mySvc.isStorageQueueEmpty(true));
 		instance.setStatus(StatusEnum.COMPLETED);
-		assertThat(mySvc.isStorageQueueEmpty(true)).isTrue();
+		assertTrue(mySvc.isStorageQueueEmpty(true));
 	}
 
 

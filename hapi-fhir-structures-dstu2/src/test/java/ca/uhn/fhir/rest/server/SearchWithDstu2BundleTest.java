@@ -49,7 +49,7 @@ public class SearchWithDstu2BundleTest {
 		ourLog.info(responseContent);
 
 		//@formatter:off
-		assertThat(responseContent, stringContainsInOrder("<Bundle xmlns=\"http://hl7.org/fhir\">", 
+		assertThat(responseContent).containsSequence("<Bundle xmlns=\"http://hl7.org/fhir\">",
 				"<type value=\"searchset\"/>", 
 				"<link>" ,
 				"<relation value=\"self\"/>", 
@@ -57,7 +57,7 @@ public class SearchWithDstu2BundleTest {
 				"</link>" ,
 				"<entry>" , 
 				"<resource>" , 
-				"<Patient xmlns=\"http://hl7.org/fhir\">"));
+				"<Patient xmlns=\"http://hl7.org/fhir\">");
 		// @formatter:off
 		
 	}

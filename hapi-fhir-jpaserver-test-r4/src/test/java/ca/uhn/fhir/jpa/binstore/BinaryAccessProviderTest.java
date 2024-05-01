@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.binstore;
 
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -232,7 +233,7 @@ public class BinaryAccessProviderTest {
 
 		try {
 			IBaseResource outcome = myBinaryAccessProvider.binaryAccessWrite(docRef.getIdElement(), new StringType("DocumentReference.content.attachment"), myRequestDetails, theServletRequest, theServletResponse);
-			assertThat(outcome).isNotNull();
+			assertNotNull(outcome);
 			assertThat(outcome.getIdElement().getValue()).isEqualTo(docRef.getId());
 		} catch (IOException e) {
 		}
@@ -260,7 +261,7 @@ public class BinaryAccessProviderTest {
 
 		try {
 			IBaseResource outcome = myBinaryAccessProvider.binaryAccessWrite(docRef.getIdElement(), new StringType("DocumentReference.content.attachment"), myRequestDetails, theServletRequest, theServletResponse);
-			assertThat(outcome).isNotNull();
+			assertNotNull(outcome);
 			assertThat(outcome.getIdElement().getValue()).isEqualTo(docRef.getId());
 		} catch (IOException e) {
 		}

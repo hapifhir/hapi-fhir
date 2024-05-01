@@ -1,5 +1,7 @@
 package ca.uhn.fhir.okhttp;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.okhttp.client.OkHttpRestfulClientFactory;
@@ -35,14 +37,14 @@ public class OkHttpRestfulClientFactoryTest extends BaseFhirVersionParameterized
 	public void testGetNativeClient_noClientSet_returnsADefault() throws Exception {
 		Call.Factory actualNativeClient = clientFactory.getNativeClient();
 
-		assertThat(actualNativeClient).isNotNull();
+		assertNotNull(actualNativeClient);
 	}
 
 	@Test
 	public void testGetNativeClient_noProxySet_defaultHasNoProxySet() throws Exception {
 		OkHttpClient actualNativeClient = (OkHttpClient) clientFactory.getNativeClient();
 
-		assertThat(actualNativeClient.proxy()).isNull();
+		assertNull(actualNativeClient.proxy());
 	}
 
 	@Test

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
 
@@ -48,7 +49,7 @@ public class NDJsonParserTest {
 		IBaseResource myBundle = myBuilder.getBundle();
 		IBaseResource responseBundle = fromNDJson(toNDJson(myBundle));
 
-		assertThat(fhirResourcesEqual(myBundle, responseBundle)).isTrue();
+		assertTrue(fhirResourcesEqual(myBundle, responseBundle));
 	}
 
 	@Test
@@ -59,7 +60,7 @@ public class NDJsonParserTest {
 		IBaseResource myBundle = myBuilder.getBundle();
 		IBaseResource responseBundle = fromNDJson(toNDJson(myBundle));
 
-		assertThat(fhirResourcesEqual(myBundle, responseBundle)).isTrue();
+		assertTrue(fhirResourcesEqual(myBundle, responseBundle));
 	}
 
 	@Test
@@ -79,7 +80,7 @@ public class NDJsonParserTest {
 		IBaseResource myBundle = myBuilder.getBundle();
 		IBaseResource responseBundle = fromNDJson(toNDJson(myBundle));
 
-		assertThat(fhirResourcesEqual(myBundle, responseBundle)).isTrue();
+		assertTrue(fhirResourcesEqual(myBundle, responseBundle));
 	}
 
 	@Test
@@ -93,7 +94,7 @@ public class NDJsonParserTest {
 		IBaseResource myBundle = myBuilder.getBundle();
 		IBaseResource responseBundle = fromNDJson(toNDJson(myBundle));
 
-		assertThat(fhirResourcesEqual(myBundle, responseBundle)).isTrue();
+		assertTrue(fhirResourcesEqual(myBundle, responseBundle));
 	}
 
 	@Test

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client.tls;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tls.KeyStoreInfo;
 import ca.uhn.fhir.tls.KeyStoreType;
@@ -60,13 +61,13 @@ public class StoreInfoTest {
 	@Test
 	public void testStorePass(){
 		KeyStoreInfo keyStoreInfo = new KeyStoreInfo("file:///my-file.p12", "storePassword" , "keyPassword", "alias");
-		assertThat(StringUtils.equals("storePassword", new String(keyStoreInfo.getStorePass()))).isTrue();
+		assertTrue(StringUtils.equals("storePassword", new String(keyStoreInfo.getStorePass())));
 	}
 
 	@Test
 	public void testKeyPass(){
 		KeyStoreInfo keyStoreInfo = new KeyStoreInfo("file:///my-file.p12", "storePassword" , "keyPassword", "alias");
-		assertThat(StringUtils.equals("keyPassword", new String(keyStoreInfo.getKeyPass()))).isTrue();
+		assertTrue(StringUtils.equals("keyPassword", new String(keyStoreInfo.getKeyPass())));
 	}
 
 	@Test

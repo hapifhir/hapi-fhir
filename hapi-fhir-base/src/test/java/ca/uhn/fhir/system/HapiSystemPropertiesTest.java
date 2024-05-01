@@ -1,5 +1,6 @@
 package ca.uhn.fhir.system;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
@@ -21,7 +22,7 @@ class HapiSystemPropertiesTest {
 		// execute
 		final boolean actual = HapiSystemProperties.isHapiClientKeepResponsesEnabled();
 		// validate
-		assertThat(actual).isTrue();
+		assertTrue(actual);
 	}
 
 	@Test
@@ -31,7 +32,7 @@ class HapiSystemPropertiesTest {
 		// execute
 		final boolean actual = HapiSystemProperties.isTestModeEnabled();
 		// validate
-		assertThat(actual).isTrue();
+		assertTrue(actual);
 	}
 
 	@Test
@@ -41,7 +42,7 @@ class HapiSystemPropertiesTest {
 		// execute
 		final boolean actual = HapiSystemProperties.isUnitTestModeEnabled();
 		// validate
-		assertThat(actual).isTrue();
+		assertTrue(actual);
 	}
 
 	@Test
@@ -51,7 +52,7 @@ class HapiSystemPropertiesTest {
 		// execute
 		final boolean actual = HapiSystemProperties.isUnitTestCaptureStackEnabled();
 		// validate
-		assertThat(actual).isTrue();
+		assertTrue(actual);
 	}
 
 	@Test
@@ -61,7 +62,7 @@ class HapiSystemPropertiesTest {
 		// execute
 		final boolean actual = HapiSystemProperties.isDisableStatusBasedReindex();
 		// validate
-		assertThat(actual).isTrue();
+		assertTrue(actual);
 	}
 
 	@Test
@@ -71,6 +72,6 @@ class HapiSystemPropertiesTest {
 		// execute
 		final boolean actual = HapiSystemProperties.isSuppressHapiFhirVersionLogEnabled();
 		// validate
-		assertThat(actual).isTrue();
+		assertTrue(actual);
 	}
 }

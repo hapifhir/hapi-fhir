@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
@@ -21,14 +24,14 @@ class MdmSurvivorshipSvcImplIT extends BaseMdmR4Test {
 
 		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(p1, p2, new MdmTransactionContext(MdmTransactionContext.OperationType.CREATE_RESOURCE));
 
-		assertThat(p2.hasIdElement()).isFalse();
+		assertFalse(p2.hasIdElement());
 		assertThat(p2.getIdentifier()).isEmpty();
-		assertThat(p2.getMeta().isEmpty()).isTrue();
+		assertTrue(p2.getMeta().isEmpty());
 
-		assertThat(p1.getNameFirstRep().equalsDeep(p2.getNameFirstRep())).isTrue();
-		assertThat(p2.getBirthDate()).isNull();
+		assertTrue(p1.getNameFirstRep().equalsDeep(p2.getNameFirstRep()));
+		assertNull(p2.getBirthDate());
 		assertThat(p2.getTelecom()).hasSize(p1.getTelecom().size());
-		assertThat(p2.getTelecomFirstRep().equalsDeep(p1.getTelecomFirstRep())).isTrue();
+		assertTrue(p2.getTelecomFirstRep().equalsDeep(p1.getTelecomFirstRep()));
 	}
 
 	@Test
@@ -40,16 +43,16 @@ class MdmSurvivorshipSvcImplIT extends BaseMdmR4Test {
 
 		myMdmSurvivorshipService.applySurvivorshipRulesToGoldenResource(p1, p2, new MdmTransactionContext(MdmTransactionContext.OperationType.MERGE_GOLDEN_RESOURCES));
 
-		assertThat(p2.hasIdElement()).isFalse();
+		assertFalse(p2.hasIdElement());
 		assertThat(p2.getIdentifier()).isNotEmpty();
-		assertThat(p2.getMeta().isEmpty()).isTrue();
+		assertTrue(p2.getMeta().isEmpty());
 
 		assertThat(p2.getName()).hasSize(2);
 		assertThat(p2.getName().get(0).getNameAsSingleString()).isEqualTo(p2Name);
 		assertThat(p2.getName().get(1).getNameAsSingleString()).isEqualTo(p1Name);
-		assertThat(p2.getBirthDate()).isNull();
+		assertNull(p2.getBirthDate());
 
 		assertThat(p1.getTelecom()).hasSize(p1.getTelecom().size());
-		assertThat(p2.getTelecomFirstRep().equalsDeep(p1.getTelecomFirstRep())).isTrue();
+		assertTrue(p2.getTelecomFirstRep().equalsDeep(p1.getTelecomFirstRep()));
 	}
 }

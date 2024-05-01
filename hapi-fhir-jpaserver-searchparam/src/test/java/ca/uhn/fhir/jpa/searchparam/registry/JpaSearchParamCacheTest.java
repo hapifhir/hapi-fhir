@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.registry;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -88,7 +89,7 @@ public class JpaSearchParamCacheTest {
 		setActiveComboSearchParams(RESOURCE_TYPE, List.of(sp1));
 
 		Optional<RuntimeSearchParam> found = myJpaSearchParamCache.getActiveComboSearchParamById(RESOURCE_TYPE, id2);
-		assertThat(found.isEmpty()).isTrue();
+		assertTrue(found.isEmpty());
 	}
 
 	private RuntimeSearchParam createSearchParam(ComboSearchParamType theType){

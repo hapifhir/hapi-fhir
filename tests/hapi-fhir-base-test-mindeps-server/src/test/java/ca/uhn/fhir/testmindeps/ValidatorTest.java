@@ -1,5 +1,7 @@
 package ca.uhn.fhir.testmindeps;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -26,8 +28,8 @@ public class ValidatorTest {
 		}
 
 		// Ph-Schematron is not onthe classpath
-		assertThat(val.isValidateAgainstStandardSchema()).isTrue();
-		assertThat(val.isValidateAgainstStandardSchematron()).isFalse();
+		assertTrue(val.isValidateAgainstStandardSchema());
+		assertFalse(val.isValidateAgainstStandardSchematron());
 
 		try {
 			val.setValidateAgainstStandardSchematron(true);

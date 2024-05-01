@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.progress;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobInstance;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
@@ -99,7 +100,7 @@ class JobInstanceStatusUpdaterTest {
 		// execute
 		mySvc.updateInstanceStatus(myInstance, StatusEnum.ERRORED);
 
-		assertThat(myDetails.get()).isNull();
+		assertNull(myDetails.get());
 	}
 
 	@Test

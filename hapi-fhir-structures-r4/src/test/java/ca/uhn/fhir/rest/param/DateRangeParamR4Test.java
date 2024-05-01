@@ -1,5 +1,8 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
@@ -138,12 +141,12 @@ public class DateRangeParamR4Test {
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(ourLastDateRange.getLowerBound().getValueAsString()).isEqualTo("2012-01-01");
-		assertThat(ourLastDateRange.getUpperBound()).isNull();
+		assertNull(ourLastDateRange.getUpperBound());
 
 		assertThat(ourLastDateRange.getLowerBoundAsInstant()).isEqualTo(parseLowerForDatePrecision("2012-01-02 00:00:00.0000"));
-		assertThat(ourLastDateRange.getUpperBoundAsInstant()).isNull();
+		assertNull(ourLastDateRange.getUpperBoundAsInstant());
 		assertThat(ourLastDateRange.getLowerBound().getPrefix()).isEqualTo(ParamPrefixEnum.GREATERTHAN);
-		assertThat(ourLastDateRange.getUpperBound()).isNull();
+		assertNull(ourLastDateRange.getUpperBound());
 	}
 
 	@Test
@@ -153,12 +156,12 @@ public class DateRangeParamR4Test {
 		consumeResponse(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-		assertThat(ourLastDateRange.getLowerBound()).isNull();
+		assertNull(ourLastDateRange.getLowerBound());
 		assertThat(ourLastDateRange.getUpperBound().getValueAsString()).isEqualTo("2012-01-01");
 
-		assertThat(ourLastDateRange.getLowerBoundAsInstant()).isNull();
+		assertNull(ourLastDateRange.getLowerBoundAsInstant());
 		assertThat(ourLastDateRange.getUpperBoundAsInstant()).isEqualTo(parseUpperForDatePrecision("2012-01-02 00:00:00.0000"));
-		assertThat(ourLastDateRange.getLowerBound()).isNull();
+		assertNull(ourLastDateRange.getLowerBound());
 		assertThat(ourLastDateRange.getUpperBound().getPrefix()).isEqualTo(ParamPrefixEnum.LESSTHAN);
 	}
 
@@ -170,12 +173,12 @@ public class DateRangeParamR4Test {
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(ourLastDateRange.getLowerBound().getValueAsString()).isEqualTo("2012-01-01");
-		assertThat(ourLastDateRange.getUpperBound()).isNull();
+		assertNull(ourLastDateRange.getUpperBound());
 
 		assertThat(ourLastDateRange.getLowerBoundAsInstant()).isEqualTo(parseLowerForDatePrecision("2012-01-01 00:00:00.0000"));
-		assertThat(ourLastDateRange.getUpperBoundAsInstant()).isNull();
+		assertNull(ourLastDateRange.getUpperBoundAsInstant());
 		assertThat(ourLastDateRange.getLowerBound().getPrefix()).isEqualTo(ParamPrefixEnum.GREATERTHAN_OR_EQUALS);
-		assertThat(ourLastDateRange.getUpperBound()).isNull();
+		assertNull(ourLastDateRange.getUpperBound());
 	}
 
 	@Test
@@ -185,12 +188,12 @@ public class DateRangeParamR4Test {
 		consumeResponse(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-		assertThat(ourLastDateRange.getLowerBound()).isNull();
+		assertNull(ourLastDateRange.getLowerBound());
 		assertThat(ourLastDateRange.getUpperBound().getValueAsString()).isEqualTo("2012-01-01");
 
-		assertThat(ourLastDateRange.getLowerBoundAsInstant()).isNull();
+		assertNull(ourLastDateRange.getLowerBoundAsInstant());
 		assertThat(ourLastDateRange.getUpperBoundAsInstant()).isEqualTo(parseUpperForDatePrecision("2012-01-03 00:00:00.0000"));
-		assertThat(ourLastDateRange.getLowerBound()).isNull();
+		assertNull(ourLastDateRange.getLowerBound());
 		assertThat(ourLastDateRange.getUpperBound().getPrefix()).isEqualTo(ParamPrefixEnum.LESSTHAN_OR_EQUALS);
 	}
 
@@ -218,12 +221,12 @@ public class DateRangeParamR4Test {
 		assertThat(ourLastDateRange.getLowerBound().getValueAsString()).isEqualTo("2012-01-01");
 		Date lowerBoundInstant = ourLastDateRange.getLowerBoundAsInstant();
 		Date midnightLower = new InstantDt("2012-01-01T00:00:00Z").getValue();
-		assertThat(lowerBoundInstant.after(midnightLower)).isTrue();
+		assertTrue(lowerBoundInstant.after(midnightLower));
 
 		assertThat(ourLastDateRange.getUpperBound().getValueAsString()).isEqualTo("2012-01-03");
 		Date upperBoundInstant = ourLastDateRange.getUpperBoundAsInstant();
 		Date midnightUpper = new InstantDt("2012-01-03T00:00:00Z").getValue();
-		assertThat(upperBoundInstant.after(midnightUpper)).isTrue();
+		assertTrue(upperBoundInstant.after(midnightUpper));
 
 	}
 
@@ -239,12 +242,12 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testAndList() {
-		assertThat(new DateAndListParam().newInstance()).isNotNull();
-		assertThat(new NumberAndListParam().newInstance()).isNotNull();
-		assertThat(new ReferenceAndListParam().newInstance()).isNotNull();
-		assertThat(new QuantityAndListParam().newInstance()).isNotNull();
-		assertThat(new UriAndListParam().newInstance()).isNotNull();
-		assertThat(new StringAndListParam().newInstance()).isNotNull();
+		assertNotNull(new DateAndListParam().newInstance());
+		assertNotNull(new NumberAndListParam().newInstance());
+		assertNotNull(new ReferenceAndListParam().newInstance());
+		assertNotNull(new QuantityAndListParam().newInstance());
+		assertNotNull(new UriAndListParam().newInstance());
+		assertNotNull(new StringAndListParam().newInstance());
 	}
 
 	@Test
@@ -276,9 +279,9 @@ public class DateRangeParamR4Test {
 		assertThat(create("2011-01-01").getUpperBoundAsInstant()).isEqualTo(parseUpperForDatePrecision("2011-01-03 00:00:00.0000"));
 
 		assertThat(create("ge2011-01-01").getLowerBoundAsInstant()).isEqualTo(parseLowerForDatePrecision("2011-01-01 00:00:00.0000"));
-		assertThat(create("ge2011-01-01").getUpperBoundAsInstant()).isNull();
+		assertNull(create("ge2011-01-01").getUpperBoundAsInstant());
 
-		assertThat(create("le2011-01-01").getLowerBoundAsInstant()).isNull();
+		assertNull(create("le2011-01-01").getLowerBoundAsInstant());
 		assertThat(create("le2011-01-01").getUpperBoundAsInstant()).isEqualTo(parseUpperForDatePrecision("2011-01-03 00:00:00.0000"));
 	}
 
@@ -323,12 +326,12 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testOrList() {
-		assertThat(new DateOrListParam().newInstance()).isNotNull();
-		assertThat(new NumberOrListParam().newInstance()).isNotNull();
-		assertThat(new ReferenceOrListParam().newInstance()).isNotNull();
-		assertThat(new QuantityOrListParam().newInstance()).isNotNull();
-		assertThat(new UriOrListParam().newInstance()).isNotNull();
-		assertThat(new StringOrListParam().newInstance()).isNotNull();
+		assertNotNull(new DateOrListParam().newInstance());
+		assertNotNull(new NumberOrListParam().newInstance());
+		assertNotNull(new ReferenceOrListParam().newInstance());
+		assertNotNull(new QuantityOrListParam().newInstance());
+		assertNotNull(new UriOrListParam().newInstance());
+		assertNotNull(new StringOrListParam().newInstance());
 	}
 
 	@Test

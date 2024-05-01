@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
 import ca.uhn.fhir.test.utilities.RandomDataHelper;
@@ -22,7 +23,7 @@ class JobInstanceUtilTest {
 		JobInstanceUtil.fromInstanceToEntity(instance, entity);
 		JobInstance instanceCopyBack = JobInstanceUtil.fromEntityToInstance(entity);
 
-		assertThat(EqualsBuilder.reflectionEquals(instance, instanceCopyBack)).isTrue();
+		assertTrue(EqualsBuilder.reflectionEquals(instance, instanceCopyBack));
 
 	}
 

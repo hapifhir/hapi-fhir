@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -113,8 +115,8 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		ourObservationProvider.waitForUpdateCount(1);
 		assertThat(ourRestfulServer.getRequestContentTypes().get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
 		assertThat(ourObservationProvider.getStoredResources().get(0).getId()).isEqualTo("Observation/A/_history/1");
-		assertThat(ourHitBeforeRestHookDelivery).isTrue();
-		assertThat(ourHitAfterRestHookDelivery).isTrue();
+		assertTrue(ourHitBeforeRestHookDelivery);
+		assertTrue(ourHitAfterRestHookDelivery);
 	}
 
 	@Test
@@ -134,8 +136,8 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 		ourObservationProvider.waitForCreateCount(0);
 		ourObservationProvider.waitForUpdateCount(1);
 		assertThat(ourRestfulServer.getRequestContentTypes().get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
-		assertThat(ourHitBeforeRestHookDelivery).isTrue();
-		assertThat(ourHitAfterRestHookDelivery).isTrue();
+		assertTrue(ourHitBeforeRestHookDelivery);
+		assertTrue(ourHitAfterRestHookDelivery);
 		assertThat(ourRestfulServer.getRequestHeaders().get(0)).contains("X-Foo: Bar");
 	}
 
@@ -258,7 +260,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 			assertThat(ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart()).isEqualTo("1");
 
 			Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
-			assertThat(subscriptionTemp).isNotNull();
+			assertNotNull(subscriptionTemp);
 
 			subscriptionTemp.setCriteria(criteria1);
 			myClient.update().resource(subscriptionTemp).withId(subscriptionTemp.getIdElement()).execute();

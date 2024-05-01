@@ -176,9 +176,9 @@ public class R4JsonParserTest {
 		assertThat(output, containsString("FAMILY"));
 		assertThat(output, containsString("SYS"));
 		assertThat(output, containsString("CODE"));
-		assertThat(output, not(containsString("AAA")));
-		assertThat(output, not(containsString("BBB")));
-		assertThat(output, not(containsString("2011")));
+		assertThat(output).doesNotContain("AAA");
+		assertThat(output).doesNotContain("BBB");
+		assertThat(output).doesNotContain("2011");
 	}
 
 	@Test

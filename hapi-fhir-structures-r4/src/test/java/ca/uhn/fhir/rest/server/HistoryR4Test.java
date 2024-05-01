@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.At;
 import ca.uhn.fhir.rest.annotation.History;
@@ -131,14 +133,14 @@ public class HistoryR4Test {
 				assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			}
 
-			assertThat(ourLastAt).isNull();
+			assertNull(ourLastAt);
 			assertThat(ourLastSince.getValueAsString()).isEqualTo("2005");
 			assertThat(ourLastSince2.getValueAsString()).isEqualTo("2005");
-			assertThat(DateTimeType.class.equals(ourLastSince2.getClass())).isTrue();
+			assertTrue(DateTimeType.class.equals(ourLastSince2.getClass()));
 			assertThat(ourLastSince3.getValueAsString()).isEqualTo("2005");
-			assertThat(StringType.class.equals(ourLastSince3.getClass())).isTrue();
+			assertTrue(StringType.class.equals(ourLastSince3.getClass()));
 			assertThat(ourLastSince4.getValueAsString()).isEqualTo("2005");
-			assertThat(StringType.class.equals(ourLastSince4.getClass())).isTrue();
+			assertTrue(StringType.class.equals(ourLastSince4.getClass()));
 		}
 	}
 
@@ -153,7 +155,7 @@ public class HistoryR4Test {
 				assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 			}
 
-			assertThat(ourLastAt).isNull();
+			assertNull(ourLastAt);
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertThat(bundle.getEntry()).hasSize(2);

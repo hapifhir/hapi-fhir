@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -117,7 +118,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 			.findFirst()
 			.orElseThrow(() -> new InternalErrorException("No patient"))
 			.getExtensionByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
-		assertThat(patientCountExt).isNull();
+		assertNull(patientCountExt);
 
 		/*
 		 * Now run a background pass (the update

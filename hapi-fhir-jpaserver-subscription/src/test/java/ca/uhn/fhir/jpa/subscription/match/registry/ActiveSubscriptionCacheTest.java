@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.subscription.match.registry;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.jetbrains.annotations.NotNull;
@@ -22,12 +25,12 @@ public class ActiveSubscriptionCacheTest {
 		ActiveSubscriptionCache activeSubscriptionCache = new ActiveSubscriptionCache();
 		ActiveSubscription activeSub1 = buildActiveSubscription(ID1);
 		activeSubscriptionCache.put(ID1, activeSub1);
-		assertThat(activeSub1.isFlagForDeletion()).isFalse();
+		assertFalse(activeSub1.isFlagForDeletion());
 		List<String> saveIds = new ArrayList<>();
 
 		List<String> idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
-		assertThat(activeSub1.isFlagForDeletion()).isTrue();
-		assertThat(activeSubscriptionCache.get(ID1)).isNotNull();
+		assertTrue(activeSub1.isFlagForDeletion());
+		assertNotNull(activeSubscriptionCache.get(ID1));
 		assertThat(idsToDelete).isEmpty();
 
 		idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
@@ -47,16 +50,16 @@ public class ActiveSubscriptionCacheTest {
 		List<String> saveIds = new ArrayList<>();
 		activeSubscriptionCache.put(ID1, activeSub1);
 
-		assertThat(activeSub1.isFlagForDeletion()).isFalse();
+		assertFalse(activeSub1.isFlagForDeletion());
 
 		List<String> idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
-		assertThat(activeSub1.isFlagForDeletion()).isTrue();
-		assertThat(activeSubscriptionCache.get(ID1)).isNotNull();
+		assertTrue(activeSub1.isFlagForDeletion());
+		assertNotNull(activeSubscriptionCache.get(ID1));
 		assertThat(idsToDelete).isEmpty();
 
 		saveIds.add(ID1);
 		idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
-		assertThat(activeSub1.isFlagForDeletion()).isFalse();
+		assertFalse(activeSub1.isFlagForDeletion());
 		assertThat(idsToDelete).isEmpty();
 	}
 
@@ -75,8 +78,8 @@ public class ActiveSubscriptionCacheTest {
 		List<String> idsToDelete = activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
 
 		assertThat(idsToDelete).containsExactlyInAnyOrder(ID1);
-		assertThat(activeSubscriptionCache.get(ID2)).isNotNull();
-		assertThat(activeSub2.isFlagForDeletion()).isTrue();
+		assertNotNull(activeSubscriptionCache.get(ID2));
+		assertTrue(activeSub2.isFlagForDeletion());
 	}
 
 	@Test
@@ -96,10 +99,10 @@ public class ActiveSubscriptionCacheTest {
 
 		activeSubscriptionCache.markAllSubscriptionsNotInCollectionForDeletionAndReturnIdsToDelete(saveIds);
 
-		assertThat(activeSubscriptionCache.get(ID1)).isNotNull();
-		assertThat(activeSub1.isFlagForDeletion()).isFalse();
-		assertThat(activeSubscriptionCache.get(ID2)).isNotNull();
-		assertThat(activeSub2.isFlagForDeletion()).isFalse();
+		assertNotNull(activeSubscriptionCache.get(ID1));
+		assertFalse(activeSub1.isFlagForDeletion());
+		assertNotNull(activeSubscriptionCache.get(ID2));
+		assertFalse(activeSub2.isFlagForDeletion());
 	}
 
 	@Test

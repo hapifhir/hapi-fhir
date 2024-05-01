@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.search;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
@@ -75,7 +76,7 @@ class HSearchSortHelperImplTest {
 
 		verify(mockSearchParamRegistry, times(1)).getActiveSearchParams("Observation");
 		verify(mockResourceSearchParams, times(1)).get("the-param-name");
-		assertThat(paramType.isEmpty()).isFalse();
+		assertFalse(paramType.isEmpty());
 	}
 
 	@Test
@@ -92,7 +93,7 @@ class HSearchSortHelperImplTest {
 
 		Optional<SortFinalStep> sortFieldStepOpt = tested.getSortClause(mockSearchSortFactory, sortSpec, "Observation");
 
-		assertThat(sortFieldStepOpt.isEmpty()).isFalse();
+		assertFalse(sortFieldStepOpt.isEmpty());
 		verify(mockSearchSortFactory, times(1)).composite();
 		verify(mockSearchSortFactory, times(1)).field("aaa._tag.bbb.ccc");
 		verify(mockSearchSortFactory, times(1)).field("ddd._tag.eee.fff");

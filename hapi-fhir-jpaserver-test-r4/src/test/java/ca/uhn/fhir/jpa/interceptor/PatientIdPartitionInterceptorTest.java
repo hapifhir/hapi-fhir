@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.r4.BaseJpaR4SystemTest;
@@ -175,7 +176,7 @@ public class PatientIdPartitionInterceptorTest extends BaseJpaR4SystemTest {
 
 		myCaptureQueriesListener.clear();
 		Patient patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
-		assertThat(patient.getActive()).isTrue();
+		assertTrue(patient.getActive());
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(myCaptureQueriesListener.getSelectQueries()).hasSize(3);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false)).contains("rt1_0.PARTITION_ID in (?)");

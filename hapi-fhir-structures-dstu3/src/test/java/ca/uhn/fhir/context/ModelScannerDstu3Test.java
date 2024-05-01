@@ -1,5 +1,6 @@
 package ca.uhn.fhir.context;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Block;
 import ca.uhn.fhir.model.api.annotation.Child;
@@ -43,8 +44,8 @@ public class ModelScannerDstu3Test {
 		FhirContext ctx = FhirContext.forDstu3();
 		RuntimeResourceDefinition def = ctx.getResourceDefinition("Bundle");
 
-		assertThat(def.getSearchParam("composition")).isNotNull();
-		assertThat(def.getSearchParam("_id")).isNotNull();
+		assertNotNull(def.getSearchParam("composition"));
+		assertNotNull(def.getSearchParam("_id"));
 	}
 
 	@Test
@@ -105,27 +106,27 @@ public class ModelScannerDstu3Test {
 		assertThat(def.getChildByNameOrThrowDataFormatException("identifier").getClass()).isEqualTo(RuntimeChildCompositeDatatypeDefinition.class);
 
 		RuntimeChildDeclaredExtensionDefinition ext = def.getDeclaredExtension("http://foo/#f1", "");
-		assertThat(ext).isNotNull();
+		assertNotNull(ext);
 		BaseRuntimeElementDefinition<?> valueString = ext.getChildByName("valueString");
-		assertThat(valueString).isNotNull();
+		assertNotNull(valueString);
 
 		ext = def.getDeclaredExtension("http://foo/#f2", "");
-		assertThat(ext).isNotNull();
+		assertNotNull(ext);
 		valueString = ext.getChildByName("valueString");
-		assertThat(valueString).isNotNull();
+		assertNotNull(valueString);
 
 		ext = def.getDeclaredExtension("http://bar/#b1", "");
-		assertThat(ext).isNotNull();
+		assertNotNull(ext);
 		RuntimeChildDeclaredExtensionDefinition childExt = ext.getChildExtensionForUrl("http://bar/#b1/1");
-		assertThat(childExt).isNotNull();
+		assertNotNull(childExt);
 		BaseRuntimeElementDefinition<?> valueDate = childExt.getChildByName("valueDate");
-		assertThat(valueDate).isNotNull();
+		assertNotNull(valueDate);
 		childExt = ext.getChildExtensionForUrl("http://bar/#b1/2");
-		assertThat(childExt).isNotNull();
+		assertNotNull(childExt);
 		childExt = childExt.getChildExtensionForUrl("http://bar/#b1/2/1");
-		assertThat(childExt).isNotNull();
+		assertNotNull(childExt);
 		valueDate = childExt.getChildByName("valueDate");
-		assertThat(valueDate).isNotNull();
+		assertNotNull(valueDate);
 
 	}
 

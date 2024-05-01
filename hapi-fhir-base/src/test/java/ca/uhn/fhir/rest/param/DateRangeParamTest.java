@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
@@ -35,7 +36,7 @@ public class DateRangeParamTest {
 		DateRangeParam dateRangeParam = new DateRangeParam();
 		dateRangeParam.setValuesAsQueryTokens(fhirContext, "_lastUpdated", params);
 
-		assertThat(dateRangeParam.isEmpty()).isTrue();
+		assertTrue(dateRangeParam.isEmpty());
 	}
 
 	/**

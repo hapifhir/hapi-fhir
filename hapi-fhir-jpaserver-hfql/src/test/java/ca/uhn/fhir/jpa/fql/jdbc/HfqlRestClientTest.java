@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.fql.jdbc;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -119,23 +121,23 @@ public class HfqlRestClientTest {
 
 		IHfqlExecutionResult result = myClient.execute(input, true, 2);
 		IHfqlExecutionResult.Row nextRow;
-		assertThat(result.hasNext()).isTrue();
+		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
 		assertThat(nextRow.getRowOffset()).isEqualTo(0);
 		assertThat(nextRow.getRowValues()).containsExactly("Simpson", "Homer");
-		assertThat(result.hasNext()).isTrue();
+		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
 		assertThat(nextRow.getRowOffset()).isEqualTo(3);
 		assertThat(nextRow.getRowValues()).containsExactly("Simpson", "Marge");
-		assertThat(result.hasNext()).isTrue();
+		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
 		assertThat(nextRow.getRowOffset()).isEqualTo(5);
 		assertThat(nextRow.getRowValues()).containsExactly("Simpson", "Maggie");
-		assertThat(result.hasNext()).isTrue();
+		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
 		assertThat(nextRow.getRowOffset()).isEqualTo(7);
 		assertThat(nextRow.getRowValues()).containsExactly("Simpson", "Lisa");
-		assertThat(result.hasNext()).isFalse();
+		assertFalse(result.hasNext());
 
 		verify(myFqlExecutor, times(1)).executeInitialSearch(myStatementCaptor.capture(), myLimitCaptor.capture(), myRequestDetailsCaptor.capture());
 		assertThat(myStatementCaptor.getValue()).isEqualTo(sql);

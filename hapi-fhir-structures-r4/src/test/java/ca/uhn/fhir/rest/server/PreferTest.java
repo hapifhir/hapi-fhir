@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -74,7 +75,7 @@ public class PreferTest {
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_201_CREATED);
 		assertThat(responseContent).isNullOrEmpty();
 		// assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue(), not(containsString("fhir")));
-		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE)).isNull();
+		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
 		assertThat(status.getFirstHeader("location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
 

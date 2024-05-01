@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.delete;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -85,7 +86,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		myDeleteInterceptor.deleteConflictFunction = this::deleteConflicts;
 		myOrganizationDao.delete(organizationId);
 
-		assertThat(myDeleteInterceptor.myDeleteConflictList).isNotNull();
+		assertNotNull(myDeleteInterceptor.myDeleteConflictList);
 		assertThat(myDeleteInterceptor.myCallCount).isEqualTo(1);
 		assertThat(myInterceptorDeleteCount).isEqualTo(1);
 	}
@@ -107,7 +108,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		myDeleteInterceptor.deleteConflictFunction = this::deleteConflicts;
 		myOrganizationDao.delete(organizationId);
 
-		assertThat(myDeleteInterceptor.myDeleteConflictList).isNotNull();
+		assertNotNull(myDeleteInterceptor.myDeleteConflictList);
 		assertThat(myDeleteInterceptor.myCallCount).isEqualTo(2);
 		assertThat(myInterceptorDeleteCount).isEqualTo(2);
 	}
@@ -133,7 +134,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		myDeleteInterceptor.deleteConflictFunction = this::deleteConflicts;
 		myOrganizationDao.delete(organizationId);
 
-		assertThat(myDeleteInterceptor.myDeleteConflictList).isNotNull();
+		assertNotNull(myDeleteInterceptor.myDeleteConflictList);
 		assertThat(myDeleteInterceptor.myCallCount).isEqualTo(2);
 		assertThat(myInterceptorDeleteCount).isEqualTo(3);
 	}
@@ -174,7 +175,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 			fail("");
 		}
 
-		assertThat(myDeleteInterceptor.myDeleteConflictList).isNotNull();
+		assertNotNull(myDeleteInterceptor.myDeleteConflictList);
 		assertThat(myDeleteInterceptor.myCallCount).isEqualTo(3);
 		assertThat(myInterceptorDeleteCount).isEqualTo(12);
 

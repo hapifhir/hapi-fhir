@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
@@ -61,7 +62,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 
 		QuantityParam nearDistanceParam = map.getNearDistanceParam();
 		assertThat(map.size()).isEqualTo(1);
-		assertThat(nearDistanceParam).isNotNull();
+		assertNotNull(nearDistanceParam);
 		assertThat(nearDistanceParam.getValue().doubleValue()).isCloseTo(kmDistance, within(0.0));
 	}
 

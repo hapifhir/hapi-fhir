@@ -1,5 +1,7 @@
 package ca.uhn.fhir.sl.cache.caffeine;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
 import ca.uhn.fhir.sl.cache.LoadingCache;
@@ -40,7 +42,7 @@ public class CacheLoaderTest {
 			for (var next : futures) {
 				Cache<?, ?> actual = next.get(1, TimeUnit.MINUTES);
 				ourLog.info("Got cache: {}", actual);
-				assertThat(actual).isNotNull();
+				assertNotNull(actual);
 			}
 		} finally {
 			executor.shutdown();
@@ -53,6 +55,6 @@ public class CacheLoaderTest {
 		LoadingCache<String, String> cache = CacheFactory.build(1000, key -> {
 			return null;
 		});
-		assertThat(cache.get("1")).isNull();
+		assertNull(cache.get("1"));
 	}
 }

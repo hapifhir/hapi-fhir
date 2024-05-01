@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -144,7 +146,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		assertThat(encoded).contains(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 
 		// Then: Make sure the prefix was applied
-		assertThat(encoded, (containsString("prefix-bar-bar2-")));
+		assertThat(encoded).contains("prefix-bar-bar2-");
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
 
 	}
@@ -243,8 +245,8 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		// Now read it back and make sure it was not  de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
 		assertThat(output.getContentType()).isEqualTo("application/octet-stream");
-		assertThat(output.getData()).isNull();;
-		assertThat(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID)).isNotNull();
+		assertNull(output.getData());;
+		assertNotNull(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID));
 	}
 
 	@Test
@@ -309,10 +311,10 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		Binary execute = myClient.read().resource(Binary.class).withId(id).execute();
 		myClient.unregisterInterceptor(interceptor);
 
-		assertThat(execute.getContent()).isNull();
-		assertThat(execute.getDataElement().getValue()).isNull();
+		assertNull(execute.getContent());
+		assertNull(execute.getDataElement().getValue());
 
-		assertThat(execute.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue()).isNull();
+		assertNull(execute.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue());
 	}
 	@Test
 	public void testCreateAndRetrieveBinary_ClientAssignedId_ExternalizedBinary() {
@@ -335,7 +337,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		Binary output = myBinaryDao.read(id, mySrd);
 		assertThat(output.getContentType()).isEqualTo("application/octet-stream");
 		assertThat(SOME_BYTES).containsExactly(output.getData());
-		assertThat(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue()).isNotNull();
+		assertNotNull(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue());
 	}
 
 
@@ -544,8 +546,8 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		// Now read it back and make sure it was de-externalized
 		Binary output = myBinaryDao.read(id, mySrd);
 		assertThat(output.getContentType()).isEqualTo("application/octet-stream");
-		assertThat(output.getData()).isNull();
-		assertThat(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue()).isNotNull();
+		assertNull(output.getData());
+		assertNotNull(output.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue());
 
 	}
 

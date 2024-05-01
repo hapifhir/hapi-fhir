@@ -1,6 +1,8 @@
 package ca.uhn.fhir.model.api;
 
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -64,7 +66,7 @@ public class BaseBatchJobParametersTest {
 		// test
 		if (theParams.isExpectedToWork()) {
 			parameters.setUserData(key, testValue);
-			assertThat(parameters.getUserData().isEmpty()).isFalse();
+			assertFalse(parameters.getUserData().isEmpty());
 			assertThat(parameters.getUserData()).containsEntry(key, testValue);
 		} else {
 			try {
@@ -73,7 +75,7 @@ public class BaseBatchJobParametersTest {
 			} catch (IllegalArgumentException ex) {
 				String dataType = testValue.getClass().getName();
 				assertThat(ex.getMessage().contains("Invalid data type provided " + dataType)).as(ex.getMessage()).isTrue();
-				assertThat(parameters.getUserData().isEmpty()).isTrue();
+				assertTrue(parameters.getUserData().isEmpty());
 			}
 		}
 	}
@@ -105,6 +107,6 @@ public class BaseBatchJobParametersTest {
 		assertThat(parameters.getUserData()).containsKey(key);
 
 		parameters.setUserData(key, null);
-		assertThat(parameters.getUserData().containsKey(key)).isFalse();
+		assertFalse(parameters.getUserData().containsKey(key));
 	}
 }

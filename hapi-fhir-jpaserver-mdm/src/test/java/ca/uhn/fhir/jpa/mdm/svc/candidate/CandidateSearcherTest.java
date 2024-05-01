@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.mdm.svc.MdmSearchParamSvc;
@@ -60,9 +61,9 @@ class CandidateSearcherTest {
 		Optional<IBundleProvider> result = myCandidateSearcher.search(resourceType, criteria);
 
 		// validate
-		assertThat(map.isLoadSynchronous()).isTrue();
+		assertTrue(map.isLoadSynchronous());
 		assertThat(map.getLoadSynchronousUpTo()).isEqualTo(candidateSearchLimit);
 		boolean shouldNotFailBecauseOfTooManyMatches = offset < 0;
-		assertThat(result.isPresent() == shouldNotFailBecauseOfTooManyMatches).isTrue();
+		assertTrue(result.isPresent() == shouldNotFailBecauseOfTooManyMatches);
 	}
 }

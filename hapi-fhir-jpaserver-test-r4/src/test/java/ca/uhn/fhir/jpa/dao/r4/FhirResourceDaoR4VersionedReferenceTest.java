@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -272,7 +275,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			p.setActive(true);
 			IIdType patientId = myPatientDao.create(p).getId().toUnqualified();
 			assertThat(patientId.getVersionIdPart()).isEqualTo("1");
-			assertThat(patientId.getBaseUrl()).isNull();
+			assertNull(patientId.getBaseUrl());
 			String patientIdString = patientId.getValue();
 
 			// Create - put an unversioned reference in the subject
@@ -329,9 +332,9 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
 			IdType encounterId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 			IdType observationId = new IdType(outcome.getEntry().get(2).getResponse().getLocation());
-			assertThat(patientId.hasVersionIdPart()).isTrue();
-			assertThat(encounterId.hasVersionIdPart()).isTrue();
-			assertThat(observationId.hasVersionIdPart()).isTrue();
+			assertTrue(patientId.hasVersionIdPart());
+			assertTrue(encounterId.hasVersionIdPart());
+			assertTrue(observationId.hasVersionIdPart());
 
 			// Read back and verify that reference is now versioned
 			observation = myObservationDao.read(observationId);
@@ -493,7 +496,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			assertThat(outcome.getResource().getIdElement().getValue()).isEqualTo(patientId + "/_history/1");
 
 			Patient returned = myPatientDao.read(idType);
-			assertThat(returned).isNotNull();
+			assertNotNull(returned);
 			assertThat(returned.getId()).isEqualTo(patientId + "/_history/1");
 
 			// update to change version
@@ -512,11 +515,11 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 			Bundle returnedTr = mySystemDao.transaction(new SystemRequestDetails(), submitted);
 
-			assertThat(returnedTr).isNotNull();
+			assertNotNull(returnedTr);
 
 			// some verification
 			Observation obRet = myObservationDao.read(obs.getIdElement());
-			assertThat(obRet).isNotNull();
+			assertNotNull(obRet);
 		}
 
 		@Test
@@ -536,13 +539,13 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 			Bundle returnedTr = mySystemDao.transaction(new SystemRequestDetails(), submitted);
 
-			assertThat(returnedTr).isNotNull();
+			assertNotNull(returnedTr);
 
 			// some verification
 			Observation obRet = myObservationDao.read(obs.getIdElement());
-			assertThat(obRet).isNotNull();
+			assertNotNull(obRet);
 			Patient returned = myPatientDao.read(patientRef.getReferenceElement());
-			assertThat(returned).isNotNull();
+			assertNotNull(returned);
 		}
 
 		@Test
@@ -593,7 +596,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		p.setActive(true);
 		IIdType patientId = myPatientDao.create(p).getId().toUnqualified();
 		assertThat(patientId.getVersionIdPart()).isEqualTo("1");
-		assertThat(patientId.getBaseUrl()).isNull();
+		assertNull(patientId.getBaseUrl());
 		String patientIdString = patientId.getValue();
 
 		Observation observation = new Observation();
@@ -618,7 +621,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		IIdType patientId = myPatientDao.update(p).getId().toUnqualified();
 
 		assertThat(patientId.getVersionIdPart()).isEqualTo("2");
-		assertThat(patientId.getBaseUrl()).isNull();
+		assertNull(patientId.getBaseUrl());
 
 		Observation observation = new Observation();
 		observation.getSubject().setReference(patientId.withVersion("1").getValue());
@@ -934,7 +937,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		Bundle transaction = mySystemDao.transaction(new SystemRequestDetails(), bundle);
 
-		assertThat(transaction).isNotNull();
+		assertNotNull(transaction);
 	}
 
 	@Test
@@ -950,7 +953,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		assertThat(versionedPatientReference).isEqualTo("Patient/ABC");
 
 		Patient p = myPatientDao.read(new IdDt("Patient/ABC"));
-		assertThat(p).isNotNull();
+		assertNotNull(p);
 
 		myStorageSettings.setAutoVersionReferenceAtPaths("Observation.subject");
 
@@ -992,6 +995,6 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 				.getResource().getId());
 		// the bundle above contains an observation, so we'll verify it was created here
 		Observation obs = myObservationDao.read(idType);
-		assertThat(obs).isNotNull();
+		assertNotNull(obs);
 	}
 }

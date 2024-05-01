@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.index;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.util.CanonicalIdentifier;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ class DaoResourceLinkResolverTest {
 		assertThat(canonicalIdentifier.getValueElement().getValueAsString()).isEqualTo("123456");
 
 		canonicalIdentifier = resolver.extractIdentifierFromUrl("Patient?_tag:not=http://hapifhir.io/fhir/namingsystem/mdm-record-status|GOLDEn_rEcorD");
-		assertThat(canonicalIdentifier).isNull();
+		assertNull(canonicalIdentifier);
 
 	}
 

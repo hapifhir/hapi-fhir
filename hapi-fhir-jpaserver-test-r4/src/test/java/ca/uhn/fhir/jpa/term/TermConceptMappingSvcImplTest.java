@@ -1644,7 +1644,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 	}
 
 	private static void assertSameTranslationRequest(TranslationRequest expected, TranslationRequest actual) {
-		assertThat(expected.getCodeableConcept().equalsDeep(actual.getCodeableConcept())).isTrue();
+		assertTrue(expected.getCodeableConcept().equalsDeep(actual.getCodeableConcept()));
 		assertThat(actual.getConceptMapVersion()).isEqualTo(expected.getConceptMapVersion());
 		assertThat(actual.getUrl()).isEqualTo(expected.getUrl());
 		assertThat(actual.getSource()).isEqualTo(expected.getSource());

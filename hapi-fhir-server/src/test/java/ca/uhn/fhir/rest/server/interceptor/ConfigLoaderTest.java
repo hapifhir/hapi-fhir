@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -14,16 +16,16 @@ class ConfigLoaderTest {
 	@Test
 	public void testConfigLoading() {
 		Map config = ConfigLoader.loadJson("classpath:field-s13n-rules.json", Map.class);
-		assertThat(config).isNotNull();
-		assertThat(config.size() > 0).isTrue();
+		assertNotNull(config);
+		assertTrue(config.size() > 0);
 
 		Properties props = ConfigLoader.loadProperties("classpath:address-validation.properties");
-		assertThat(props).isNotNull();
-		assertThat(props.size() > 0).isTrue();
+		assertNotNull(props);
+		assertTrue(props.size() > 0);
 
 		String text = ConfigLoader.loadResourceContent("classpath:noise-chars.txt");
-		assertThat(text).isNotNull();
-		assertThat(text.length() > 0).isTrue();
+		assertNotNull(text);
+		assertTrue(text.length() > 0);
 
 		try {
 			ConfigLoader.loadResourceContent("blah");

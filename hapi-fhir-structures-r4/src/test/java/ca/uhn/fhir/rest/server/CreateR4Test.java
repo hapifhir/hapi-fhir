@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -304,7 +305,7 @@ public class CreateR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE)).isNull();
+			assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
 
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseContent).isNullOrEmpty();
@@ -326,7 +327,7 @@ public class CreateR4Test {
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		//@formatter:off
-		assertThat(responseContent, stringContainsInOrder(
+		assertThat(responseContent).containsSequence(
 			"<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<id value=\"0\"/>",
 			"<meta>",
@@ -335,7 +336,7 @@ public class CreateR4Test {
 			"<modifierExtension url=\"http://example.com/ext/date\">",
 			"<valueDate value=\"2011-01-01\"/>",
 			"</modifierExtension>",
-			"</Patient>"));
+			"</Patient>");
 		//@formatter:on
 
 		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");
@@ -365,7 +366,7 @@ public class CreateR4Test {
 
 		@Create()
 		public MethodOutcome create(@ResourceParam Patient thePatient) {
-			assertThat(thePatient.getIdElement().getIdPart()).isNull();
+			assertNull(thePatient.getIdElement().getIdPart());
 			thePatient.setId("1");
 			thePatient.getMeta().setVersionId("1");
 			return new MethodOutcome(new IdType("Patient", "1"), true).setOperationOutcome(ourReturnOo).setResource(thePatient);

@@ -1,5 +1,9 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
@@ -124,7 +128,7 @@ public class FhirTerserR4Test {
 		IBase family = myCtx.newTerser().addElement(patient, "Patient.name.family");
 
 		assertThat(patient.getName()).hasSize(3);
-		assertThat(existingFamily == patient.getName().get(0).getFamilyElement()).isTrue();
+		assertTrue(existingFamily == patient.getName().get(0).getFamilyElement());
 		assertThat(patient.getName().get(0).getFamilyElement()).isSameAs(family);
 	}
 
@@ -228,8 +232,8 @@ public class FhirTerserR4Test {
 		myCtx.newTerser().containResources(bundle, FhirTerser.OptionsEnum.MODIFY_RESOURCE);
 
 		assertThat(mr.getContained()).isEmpty();
-		assertThat(mr.getRequester().getReference()).isNull();
-		assertThat(mr.getMedicationReference().getReference()).isNull();
+		assertNull(mr.getRequester().getReference());
+		assertNull(mr.getMedicationReference().getReference());
 
 	}
 
@@ -239,7 +243,7 @@ public class FhirTerserR4Test {
 		Patient patient = new Patient();
 
 		Enumeration<?> enumeration = (Enumeration<?>) myCtx.newTerser().getValues(patient, "Patient.gender", Enumeration.class, true).get(0);
-		assertThat(enumeration.getEnumFactory()).isNotNull();
+		assertNotNull(enumeration.getEnumFactory());
 	}
 
 	@Test
@@ -271,7 +275,7 @@ public class FhirTerserR4Test {
 
 		String output = myCtx.newJsonParser().encodeResourceToString(input);
 		ourLog.info(output);
-		assertThat(input.isEmpty()).isTrue();
+		assertTrue(input.isEmpty());
 		assertThat(output).isEqualTo("{\"resourceType\":\"Bundle\"}");
 	}
 
@@ -410,7 +414,7 @@ public class FhirTerserR4Test {
 		Money target = new Money();
 
 		myCtx.newTerser().cloneInto(source, target, true);
-		assertThat(target.isEmpty()).isTrue();
+		assertTrue(target.isEmpty());
 
 		try {
 			myCtx.newTerser().cloneInto(source, target, false);
@@ -586,28 +590,28 @@ public class FhirTerserR4Test {
 
 		List<IBase> values = myCtx.newTerser().getValues(p, "Patient.active");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof PrimitiveType).isTrue();
-		assertThat(values.get(0) instanceof BooleanType).isTrue();
-		assertThat(((BooleanType) values.get(0)).booleanValue()).isTrue();
+		assertTrue(values.get(0) instanceof PrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanType);
+		assertTrue(((BooleanType) values.get(0)).booleanValue());
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/extension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("value");
 
 		values = myCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/modifierExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("modifierValue");
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/childExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("nestedValue");
 	}
@@ -705,9 +709,9 @@ public class FhirTerserR4Test {
 
 		List<IBase> values = myCtx.newTerser().getValues(p, "Patient.active");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof PrimitiveType).isTrue();
-		assertThat(values.get(0) instanceof BooleanType).isTrue();
-		assertThat(((BooleanType) values.get(0)).booleanValue()).isTrue();
+		assertTrue(values.get(0) instanceof PrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanType);
+		assertTrue(((BooleanType) values.get(0)).booleanValue());
 
 		((BooleanType) values.get(0)).setValue(Boolean.FALSE);
 
@@ -715,14 +719,14 @@ public class FhirTerserR4Test {
 
 		values = myCtx.newTerser().getValues(p, "Patient.active");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof PrimitiveType).isTrue();
-		assertThat(values.get(0) instanceof BooleanType).isTrue();
-		assertThat(((BooleanType) values.get(0)).booleanValue()).isFalse();
+		assertTrue(values.get(0) instanceof PrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanType);
+		assertFalse(((BooleanType) values.get(0)).booleanValue());
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/extension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("value");
 
@@ -732,15 +736,15 @@ public class FhirTerserR4Test {
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/extension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("modifiedValue");
 
 		values = myCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/modifierExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("modifierValue");
 
@@ -750,15 +754,15 @@ public class FhirTerserR4Test {
 
 		values = myCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/modifierExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("modifiedModifierValue");
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/childExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("nestedValue");
 
@@ -768,8 +772,8 @@ public class FhirTerserR4Test {
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/childExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("modifiedNestedValue");
 	}
@@ -807,34 +811,34 @@ public class FhirTerserR4Test {
 
 		List<IBase> values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')");
 		assertThat(values).hasSize(2);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/extension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("value1");
-		assertThat(values.get(1) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(1) instanceof Extension).isTrue();
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof Extension);
 		assertThat(((Extension) values.get(1)).getUrl()).isEqualTo("http://acme.org/extension");
 		assertThat(((StringType) ((Extension) values.get(1)).getValue()).getValueAsString()).isEqualTo("value2");
 
 		values = myCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')");
 		assertThat(values).hasSize(2);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/modifierExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("modifierValue1");
-		assertThat(values.get(1) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(1) instanceof Extension).isTrue();
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof Extension);
 		assertThat(((Extension) values.get(1)).getUrl()).isEqualTo("http://acme.org/modifierExtension");
 		assertThat(((StringType) ((Extension) values.get(1)).getValue()).getValueAsString()).isEqualTo("modifierValue2");
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
 		assertThat(values).hasSize(2);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/childExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("nestedValue1");
-		assertThat(values.get(1) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(1) instanceof Extension).isTrue();
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof Extension);
 		assertThat(((Extension) values.get(1)).getUrl()).isEqualTo("http://acme.org/childExtension");
 		assertThat(((StringType) ((Extension) values.get(1)).getValue()).getValueAsString()).isEqualTo("nestedValue2");
 	}
@@ -862,24 +866,24 @@ public class FhirTerserR4Test {
 
 		List<PrimitiveType> values = myCtx.newTerser().getValues(p, "Patient.active", PrimitiveType.class);
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof BooleanType).isTrue();
-		assertThat(((BooleanType) values.get(0)).booleanValue()).isTrue();
+		assertTrue(values.get(0) instanceof BooleanType);
+		assertTrue(((BooleanType) values.get(0)).booleanValue());
 
 		List<Extension> extValues = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')", Extension.class);
 		assertThat(extValues).hasSize(1);
-		assertThat(extValues.get(0).getValue() instanceof StringType).isTrue();
+		assertTrue(extValues.get(0).getValue() instanceof StringType);
 		assertThat(extValues.get(0).getUrl()).isEqualTo("http://acme.org/extension");
 		assertThat(((StringType) (extValues.get(0).getValue())).getValueAsString()).isEqualTo("value");
 
 		extValues = myCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')", Extension.class);
 		assertThat(extValues).hasSize(1);
-		assertThat(extValues.get(0).getValue() instanceof StringType).isTrue();
+		assertTrue(extValues.get(0).getValue() instanceof StringType);
 		assertThat(extValues.get(0).getUrl()).isEqualTo("http://acme.org/modifierExtension");
 		assertThat(((StringType) (extValues.get(0).getValue())).getValueAsString()).isEqualTo("modifierValue");
 
 		extValues = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", Extension.class);
 		assertThat(extValues).hasSize(1);
-		assertThat(extValues.get(0).getValue() instanceof StringType).isTrue();
+		assertTrue(extValues.get(0).getValue() instanceof StringType);
 		assertThat(extValues.get(0).getUrl()).isEqualTo("http://acme.org/childExtension");
 		assertThat(((StringType) extValues.get(0).getValue()).getValueAsString()).isEqualTo("nestedValue");
 	}
@@ -907,8 +911,8 @@ public class FhirTerserR4Test {
 
 		List<PrimitiveType> values = myCtx.newTerser().getValues(p, "Patient.active", PrimitiveType.class);
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof BooleanType).isTrue();
-		assertThat(((BooleanType) values.get(0)).booleanValue()).isTrue();
+		assertTrue(values.get(0) instanceof BooleanType);
+		assertTrue(((BooleanType) values.get(0)).booleanValue());
 
 		((BooleanType) values.get(0)).setValue(Boolean.FALSE);
 
@@ -916,12 +920,12 @@ public class FhirTerserR4Test {
 
 		values = myCtx.newTerser().getValues(p, "Patient.active", PrimitiveType.class);
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof BooleanType).isTrue();
-		assertThat(((BooleanType) values.get(0)).booleanValue()).isFalse();
+		assertTrue(values.get(0) instanceof BooleanType);
+		assertFalse(((BooleanType) values.get(0)).booleanValue());
 
 		List<Extension> extValues = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')", Extension.class);
 		assertThat(extValues).hasSize(1);
-		assertThat(extValues.get(0).getValue() instanceof StringType).isTrue();
+		assertTrue(extValues.get(0).getValue() instanceof StringType);
 		assertThat(extValues.get(0).getUrl()).isEqualTo("http://acme.org/extension");
 		assertThat(((StringType) (extValues.get(0).getValue())).getValueAsString()).isEqualTo("value");
 
@@ -931,13 +935,13 @@ public class FhirTerserR4Test {
 
 		extValues = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')", Extension.class);
 		assertThat(extValues).hasSize(1);
-		assertThat(extValues.get(0).getValue() instanceof StringType).isTrue();
+		assertTrue(extValues.get(0).getValue() instanceof StringType);
 		assertThat(extValues.get(0).getUrl()).isEqualTo("http://acme.org/extension");
 		assertThat(((StringType) (extValues.get(0).getValue())).getValueAsString()).isEqualTo("modifiedValue");
 
 		extValues = myCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')", Extension.class);
 		assertThat(extValues).hasSize(1);
-		assertThat(extValues.get(0).getValue() instanceof StringType).isTrue();
+		assertTrue(extValues.get(0).getValue() instanceof StringType);
 		assertThat(extValues.get(0).getUrl()).isEqualTo("http://acme.org/modifierExtension");
 		assertThat(((StringType) (extValues.get(0).getValue())).getValueAsString()).isEqualTo("modifierValue");
 
@@ -947,13 +951,13 @@ public class FhirTerserR4Test {
 
 		extValues = myCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')", Extension.class);
 		assertThat(extValues).hasSize(1);
-		assertThat(extValues.get(0).getValue() instanceof StringType).isTrue();
+		assertTrue(extValues.get(0).getValue() instanceof StringType);
 		assertThat(extValues.get(0).getUrl()).isEqualTo("http://acme.org/modifierExtension");
 		assertThat(((StringType) (extValues.get(0).getValue())).getValueAsString()).isEqualTo("modifiedModifierValue");
 
 		extValues = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", Extension.class);
 		assertThat(extValues).hasSize(1);
-		assertThat(extValues.get(0).getValue() instanceof StringType).isTrue();
+		assertTrue(extValues.get(0).getValue() instanceof StringType);
 		assertThat(extValues.get(0).getUrl()).isEqualTo("http://acme.org/childExtension");
 		assertThat(((StringType) extValues.get(0).getValue()).getValueAsString()).isEqualTo("nestedValue");
 
@@ -963,7 +967,7 @@ public class FhirTerserR4Test {
 
 		extValues = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", Extension.class);
 		assertThat(extValues).hasSize(1);
-		assertThat(extValues.get(0).getValue() instanceof StringType).isTrue();
+		assertTrue(extValues.get(0).getValue() instanceof StringType);
 		assertThat(extValues.get(0).getUrl()).isEqualTo("http://acme.org/childExtension");
 		assertThat(((StringType) extValues.get(0).getValue()).getValueAsString()).isEqualTo("modifiedNestedValue");
 	}
@@ -976,23 +980,23 @@ public class FhirTerserR4Test {
 
 		List<PrimitiveType> values = myCtx.newTerser().getValues(p, "Patient.active", PrimitiveType.class, true);
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof BooleanType).isTrue();
-		assertThat(((BooleanType) values.get(0)).getValue()).isNull();
+		assertTrue(values.get(0) instanceof BooleanType);
+		assertNull(((BooleanType) values.get(0)).getValue());
 
 		List<Extension> extValues = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')", Extension.class, true);
 		assertThat(extValues).hasSize(1);
 		assertThat(extValues.get(0).getUrl()).isEqualTo("http://acme.org/extension");
-		assertThat(extValues.get(0).getValue()).isNull();
+		assertNull(extValues.get(0).getValue());
 
 		extValues = myCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')", Extension.class, true);
 		assertThat(extValues).hasSize(1);
 		assertThat(extValues.get(0).getUrl()).isEqualTo("http://acme.org/modifierExtension");
-		assertThat(extValues.get(0).getValue()).isNull();
+		assertNull(extValues.get(0).getValue());
 
 		extValues = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", Extension.class, true);
 		assertThat(extValues).hasSize(1);
 		assertThat(extValues.get(0).getUrl()).isEqualTo("http://acme.org/childExtension");
-		assertThat(extValues.get(0).getValue()).isNull();
+		assertNull(extValues.get(0).getValue());
 	}
 
 	@Test
@@ -1018,68 +1022,68 @@ public class FhirTerserR4Test {
 
 		List<IBase> values = myCtx.newTerser().getValues(p, "Patient.active");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof PrimitiveType).isTrue();
-		assertThat(values.get(0) instanceof BooleanType).isTrue();
-		assertThat(((BooleanType) values.get(0)).booleanValue()).isTrue();
+		assertTrue(values.get(0) instanceof PrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanType);
+		assertTrue(((BooleanType) values.get(0)).booleanValue());
 
 		// No change.
 		values = myCtx.newTerser().getValues(p, "Patient.active", false, true);
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof PrimitiveType).isTrue();
-		assertThat(values.get(0) instanceof BooleanType).isTrue();
-		assertThat(((BooleanType) values.get(0)).booleanValue()).isTrue();
+		assertTrue(values.get(0) instanceof PrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanType);
+		assertTrue(((BooleanType) values.get(0)).booleanValue());
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/extension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("value");
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')", false, true);
 		assertThat(values).hasSize(2);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/extension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("value");
-		assertThat(values.get(1) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(1) instanceof Extension).isTrue();
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof Extension);
 		assertThat(((Extension) values.get(1)).getUrl()).isEqualTo("http://acme.org/extension");
-		assertThat(((Extension) values.get(1)).getValue()).isNull();
+		assertNull(((Extension) values.get(1)).getValue());
 
 		((Extension) values.get(1)).setValue(new StringType("addedValue"));
 
 		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
-		assertThat(values.get(1) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(1) instanceof Extension).isTrue();
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof Extension);
 		assertThat(((Extension) values.get(1)).getUrl()).isEqualTo("http://acme.org/extension");
 		assertThat(((StringType) ((Extension) values.get(1)).getValue()).getValueAsString()).isEqualTo("addedValue");
 
 		values = myCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/modifierExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("modifierValue");
 
 		values = myCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')", false, true);
 		assertThat(values).hasSize(2);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/modifierExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("modifierValue");
-		assertThat(values.get(1) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(1) instanceof Extension).isTrue();
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof Extension);
 		assertThat(((Extension) values.get(1)).getUrl()).isEqualTo("http://acme.org/modifierExtension");
-		assertThat(((Extension) values.get(1)).getValue()).isNull();
+		assertNull(((Extension) values.get(1)).getValue());
 
 		((Extension) values.get(1)).setValue(new StringType("addedModifierValue"));
 
 		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
-		assertThat(values.get(1) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(1) instanceof Extension).isTrue();
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof Extension);
 		assertThat(((Extension) values.get(1)).getUrl()).isEqualTo("http://acme.org/modifierExtension");
 		assertThat(((StringType) ((Extension) values.get(1)).getValue()).getValueAsString()).isEqualTo("addedModifierValue");
 
@@ -1087,28 +1091,28 @@ public class FhirTerserR4Test {
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/childExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("nestedValue");
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", false, true);
 		assertThat(values).hasSize(2);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/childExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("nestedValue");
-		assertThat(values.get(1) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(1) instanceof Extension).isTrue();
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof Extension);
 		assertThat(((Extension) values.get(1)).getUrl()).isEqualTo("http://acme.org/childExtension");
-		assertThat(((Extension) values.get(1)).getValue()).isNull();
+		assertNull(((Extension) values.get(1)).getValue());
 
 		((Extension) values.get(1)).setValue(new StringType("addedNestedValue"));
 
 		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
-		assertThat(values.get(1) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(1) instanceof Extension).isTrue();
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof Extension);
 		assertThat(((Extension) values.get(1)).getUrl()).isEqualTo("http://acme.org/childExtension");
 		assertThat(((StringType) ((Extension) values.get(1)).getValue()).getValueAsString()).isEqualTo("addedNestedValue");
 	}
@@ -1119,30 +1123,30 @@ public class FhirTerserR4Test {
 
 		List<IBase> values = myCtx.newTerser().getValues(p, "Patient.active", true);
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof PrimitiveType).isTrue();
-		assertThat(values.get(0) instanceof BooleanType).isTrue();
-		assertThat(((BooleanType) values.get(0)).getValue()).isNull();
+		assertTrue(values.get(0) instanceof PrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanType);
+		assertNull(((BooleanType) values.get(0)).getValue());
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')", true);
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/extension");
-		assertThat(((Extension) values.get(0)).getValue()).isNull();
+		assertNull(((Extension) values.get(0)).getValue());
 
 		values = myCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')", true);
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/modifierExtension");
-		assertThat(((Extension) values.get(0)).getValue()).isNull();
+		assertNull(((Extension) values.get(0)).getValue());
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", true);
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/childExtension");
-		assertThat(((Extension) values.get(0)).getValue()).isNull();
+		assertNull(((Extension) values.get(0)).getValue());
 	}
 
 	@Test
@@ -1168,95 +1172,95 @@ public class FhirTerserR4Test {
 
 		List<IBase> values = myCtx.newTerser().getValues(p, "Patient.active");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof PrimitiveType).isTrue();
-		assertThat(values.get(0) instanceof BooleanType).isTrue();
-		assertThat(((BooleanType) values.get(0)).booleanValue()).isTrue();
+		assertTrue(values.get(0) instanceof PrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanType);
+		assertTrue(((BooleanType) values.get(0)).booleanValue());
 
 		// No change.
 		values = myCtx.newTerser().getValues(p, "Patient.active", true, true);
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof PrimitiveType).isTrue();
-		assertThat(values.get(0) instanceof BooleanType).isTrue();
-		assertThat(((BooleanType) values.get(0)).booleanValue()).isTrue();
+		assertTrue(values.get(0) instanceof PrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanType);
+		assertTrue(((BooleanType) values.get(0)).booleanValue());
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/extension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("value");
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')", true, true);
 		assertThat(values).hasSize(2);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/extension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("value");
-		assertThat(values.get(1) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(1) instanceof Extension).isTrue();
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof Extension);
 		assertThat(((Extension) values.get(1)).getUrl()).isEqualTo("http://acme.org/extension");
-		assertThat(((Extension) values.get(1)).getValue()).isNull();
+		assertNull(((Extension) values.get(1)).getValue());
 
 		((Extension) values.get(1)).setValue(new StringType("addedValue"));
 
 		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
-		assertThat(values.get(1) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(1) instanceof Extension).isTrue();
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof Extension);
 		assertThat(((Extension) values.get(1)).getUrl()).isEqualTo("http://acme.org/extension");
 		assertThat(((StringType) ((Extension) values.get(1)).getValue()).getValueAsString()).isEqualTo("addedValue");
 
 		values = myCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/modifierExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("modifierValue");
 
 		values = myCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')", true, true);
 		assertThat(values).hasSize(2);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/modifierExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("modifierValue");
-		assertThat(values.get(1) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(1) instanceof Extension).isTrue();
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof Extension);
 		assertThat(((Extension) values.get(1)).getUrl()).isEqualTo("http://acme.org/modifierExtension");
-		assertThat(((Extension) values.get(1)).getValue()).isNull();
+		assertNull(((Extension) values.get(1)).getValue());
 
 		((Extension) values.get(1)).setValue(new StringType("addedModifierValue"));
 
 		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
-		assertThat(values.get(1) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(1) instanceof Extension).isTrue();
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof Extension);
 		assertThat(((Extension) values.get(1)).getUrl()).isEqualTo("http://acme.org/modifierExtension");
 		assertThat(((StringType) ((Extension) values.get(1)).getValue()).getValueAsString()).isEqualTo("addedModifierValue");
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')");
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/childExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("nestedValue");
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", true, true);
 		assertThat(values).hasSize(2);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/childExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("nestedValue");
-		assertThat(values.get(1) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(1) instanceof Extension).isTrue();
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof Extension);
 		assertThat(((Extension) values.get(1)).getUrl()).isEqualTo("http://acme.org/childExtension");
-		assertThat(((Extension) values.get(1)).getValue()).isNull();
+		assertNull(((Extension) values.get(1)).getValue());
 
 		((Extension) values.get(1)).setValue(new StringType("addedNestedValue"));
 
 		System.out.println(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p));
 
-		assertThat(values.get(1) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(1) instanceof Extension).isTrue();
+		assertTrue(values.get(1) instanceof IBaseExtension);
+		assertTrue(values.get(1) instanceof Extension);
 		assertThat(((Extension) values.get(1)).getUrl()).isEqualTo("http://acme.org/childExtension");
 		assertThat(((StringType) ((Extension) values.get(1)).getValue()).getValueAsString()).isEqualTo("addedNestedValue");
 	}
@@ -1284,28 +1288,28 @@ public class FhirTerserR4Test {
 
 		List<IBase> values = myCtx.newTerser().getValues(p, "Patient.active", true);
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof PrimitiveType).isTrue();
-		assertThat(values.get(0) instanceof BooleanType).isTrue();
-		assertThat(((BooleanType) values.get(0)).booleanValue()).isTrue();
+		assertTrue(values.get(0) instanceof PrimitiveType);
+		assertTrue(values.get(0) instanceof BooleanType);
+		assertTrue(((BooleanType) values.get(0)).booleanValue());
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/extension')", true);
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/extension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("value");
 
 		values = myCtx.newTerser().getValues(p, "Patient.modifierExtension('http://acme.org/modifierExtension')", true);
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/modifierExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("modifierValue");
 
 		values = myCtx.newTerser().getValues(p, "Patient.extension('http://acme.org/parentExtension').extension('http://acme.org/childExtension')", true);
 		assertThat(values).hasSize(1);
-		assertThat(values.get(0) instanceof IBaseExtension).isTrue();
-		assertThat(values.get(0) instanceof Extension).isTrue();
+		assertTrue(values.get(0) instanceof IBaseExtension);
+		assertTrue(values.get(0) instanceof Extension);
 		assertThat(((Extension) values.get(0)).getUrl()).isEqualTo("http://acme.org/childExtension");
 		assertThat(((StringType) ((Extension) values.get(0)).getValue()).getValueAsString()).isEqualTo("nestedValue");
 	}
@@ -1481,7 +1485,7 @@ public class FhirTerserR4Test {
 					HashSet<String> additionalCompartmentParamNames = new HashSet<>();
 					additionalCompartmentParamNames.add("test");
 					boolean outcome = ctx.newTerser().isSourceInCompartmentForTarget("Patient", observation, new IdType("Patient/123"), additionalCompartmentParamNames);
-					assertThat(outcome).isTrue();
+					assertTrue(outcome);
 
 				};
 				Future<?> future = executor.submit(runnable);

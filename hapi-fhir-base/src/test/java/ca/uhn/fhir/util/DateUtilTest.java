@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -11,8 +12,8 @@ public class DateUtilTest {
 	public void testCompletedDate() {
 		
 		Pair<String, String> result = DateUtils.getCompletedDate(null);
-		assertThat(result.getLeft()).isNull();
-		assertThat(result.getRight()).isNull();	
+		assertNull(result.getLeft());
+		assertNull(result.getRight());	
 		
 		result = DateUtils.getCompletedDate("2020");
 		assertThat(result.getLeft()).isEqualTo("2020-01-01");

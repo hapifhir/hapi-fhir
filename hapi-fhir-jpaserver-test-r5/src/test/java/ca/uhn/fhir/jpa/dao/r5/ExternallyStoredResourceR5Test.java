@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddress;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceAddressMetadataKey;
 import ca.uhn.fhir.jpa.esr.ExternallyStoredResourceServiceRegistry;
@@ -70,7 +71,7 @@ public class ExternallyStoredResourceR5Test extends BaseJpaR5Test {
 
 		// Test
 		Patient fetchedPatient = myPatientDao.read(id, mySrd);
-		assertThat(fetchedPatient.getActive()).isTrue();
+		assertTrue(fetchedPatient.getActive());
 
 	}
 

@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -1640,7 +1643,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		assertThat(response.getEntry()).hasSize(1);
 		assertThat(response.getTotal().intValue()).isEqualTo(21);
-		assertThat(response.getLink("next")).isNull();
+		assertNull(response.getLink("next"));
 	}
 
 	@Test
@@ -1674,8 +1677,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.execute();
 
 			assertThat(response.getEntry()).hasSize(10);
-			assertThat(response.getTotalElement().getValue()).isNull();
-			assertThat(response.getLink("next")).isNull();
+			assertNull(response.getTotalElement().getValue());
+			assertNull(response.getLink("next"));
 
 		} finally {
 			myServer.getRestfulServer().setPagingProvider(previousPagingProvider);
@@ -2043,8 +2046,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.execute();
 
 			List<IIdType> patients = toIdListUnqualifiedVersionless(found);
-			assertThat(patients.toString(), patients, not(hasItem(id2)));
-			assertThat(patients.toString(), patients, (hasItems(id1a, id1b)));
+			assertThat(patients).doesNotContain(id2);
+			assertThat(patients).contains(id1a, id1b);
 		}
 		{
 			Bundle found = myClient.search()
@@ -2055,8 +2058,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.execute();
 
 			List<IIdType> patients = toIdListUnqualifiedVersionless(found);
-			assertThat(patients, (hasItems(id1a, id1b)));
-			assertThat(patients, not(hasItem(id2)));
+			assertThat(patients).doesNotContain(id2);
+			assertThat(patients).contains(id1a, id1b);
 		}
 	}
 
@@ -2116,13 +2119,13 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		Date after = new Date();
 
 		InstantDt updated = ResourceMetadataKeyEnum.UPDATED.get(found);
-		assertThat(updated).isNotNull();
+		assertNotNull(updated);
 		Date value = updated.getValue();
-		assertThat(value).isNotNull();
+		assertNotNull(value);
 		ourLog.info(value.getTime() + "");
 		ourLog.info(before.getTime() + "");
-		assertThat(value.after(before)).isTrue();
-		assertThat(value.before(after)).isTrue();
+		assertTrue(value.after(before));
+		assertTrue(value.before(after));
 	}
 
 	@Test
@@ -2309,9 +2312,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			List<IIdType> list = toIdListUnqualifiedVersionless(found);
 			ourLog.info(methodName + ": " + list.toString());
 			ourLog.info("Wanted " + orgNotMissing + " and not " + deletedIdMissingFalse + " but got " + list.size() + ": " + list);
-			assertThat("Wanted " + orgNotMissing + " but got " + list.size() + ": " + list, list, containsInRelativeOrder(orgNotMissing));
-			assertThat(list, not(containsInRelativeOrder(deletedIdMissingFalse)));
-			assertThat(list, not(containsInRelativeOrder(orgMissing)));
+			assertThat(list).as("Wanted " + orgNotMissing + " but got " + list.size() + ": " + list).contains(orgNotMissing);
+			assertThat(list).doesNotContain(deletedIdMissingFalse);
+			assertThat(list).doesNotContain(orgMissing);
 		}
 
 		Bundle found = myClient
@@ -2325,10 +2328,10 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		List<IIdType> list = toIdListUnqualifiedVersionless(found);
 		ourLog.info(methodName + " found: " + list.toString() + " - Wanted " + orgMissing + " but not " + orgNotMissing);
-		assertThat(list, not(containsInRelativeOrder(orgNotMissing)));
-		assertThat(list, not(containsInRelativeOrder(deletedIdMissingTrue)));
-		assertThat("Wanted " + orgMissing + " but found: " + list, list, containsInRelativeOrder(orgMissing));
-	}
+		assertThat(list).doesNotContain(deletedIdMissingFalse);
+		assertThat(list).doesNotContain(orgMissing);
+		assertThat(list).as("Wanted " + orgMissing + " but found: " + list).contains(orgMissing);
+		}
 
 	@Test
 	public void testSearchWithMissing2() throws Exception {
@@ -2714,7 +2717,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			assertThat(respPt.getId().getVersionIdPart()).isEqualTo("2");
 
 			InstantDt updateTime = ResourceMetadataKeyEnum.UPDATED.get(respPt);
-			assertThat(updateTime.getValue().after(before)).isTrue();
+			assertTrue(updateTime.getValue().after(before));
 
 		} finally {
 			response.close();
@@ -2948,8 +2951,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			ourLog.info(resp);
 			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 			// @formatter:off
-			assertThat(resp,
-				stringContainsInOrder("<ValueSet xmlns=\"http://hl7.org/fhir\">",
+			assertThat(resp).containsSequence(
+				"<ValueSet xmlns=\"http://hl7.org/fhir\">",
 					"<expansion>",
 					"<contains>",
 					"<system value=\"http://acme.org\"/>",
@@ -2962,7 +2965,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 					"<display value=\"Systolic blood pressure--expiration\"/>",
 					"</contains>",
 					"</expansion>"
-				));
+				);
 			//@formatter:on
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
@@ -2980,9 +2983,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			ourLog.info(resp);
 			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 			//@formatter:off
-			assertThat(resp, stringContainsInOrder(
+			assertThat(resp).containsSequence(
 				"<code value=\"11378-7\"/>",
-				"<display value=\"Systolic blood pressure at First encounter\"/>"));
+				"<display value=\"Systolic blood pressure at First encounter\"/>");
 			//@formatter:on
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
@@ -3000,10 +3003,10 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			ourLog.info(resp);
 			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 			//@formatter:off
-			assertThat(resp, stringContainsInOrder(
+			assertThat(resp).containsSequence(
 				"<code value=\"11378-7\"/>",
 				"<display value=\"Systolic blood pressure at First encounter\"/>"
-			));
+			);
 			//@formatter:on
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());

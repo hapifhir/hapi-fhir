@@ -1,5 +1,8 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ch.qos.logback.classic.Level;
@@ -48,10 +51,10 @@ public class StringParamTest {
 	public void testEquals() {
 		StringParam input = new StringParam("foo", true);
 
-		assertThat(input.equals(input)).isTrue();
-		assertThat(input.equals(null)).isFalse();
-		assertThat(input.equals("")).isFalse();
-		assertThat(input.equals(new StringParam("foo", false))).isFalse();
+		assertTrue(input.equals(input));
+		assertFalse(input.equals(null));
+		assertFalse(input.equals(""));
+		assertFalse(input.equals(new StringParam("foo", false)));
 	}
 
 	@Nested
@@ -62,36 +65,36 @@ public class StringParamTest {
 			// exact
 			StringParam sp = new StringParam("the-value", true);
 			sp.setText(false);
-			assertThat(sp.isExact()).isTrue();
+			assertTrue(sp.isExact());
 			sp.setText(true);
-			assertThat(sp.isExact()).isFalse();
+			assertFalse(sp.isExact());
 
 			// contains
 			sp = new StringParam("the-value");
 			sp.setContains(true);
 
 			sp.setText(false);
-			assertThat(sp.isContains()).isTrue();
+			assertTrue(sp.isContains());
 			sp.setText(true);
-			assertThat(sp.isContains()).isFalse();
+			assertFalse(sp.isContains());
 
 			// exact
 			sp = new StringParam("the-value");
 			sp.setExact(true);
 
 			sp.setText(false);
-			assertThat(sp.isExact()).isTrue();
+			assertTrue(sp.isExact());
 			sp.setText(true);
-			assertThat(sp.isExact()).isFalse();
+			assertFalse(sp.isExact());
 
 			// missing
 			sp = new StringParam("the-value");
 			sp.setMissing(true);
 
 			sp.setText(false);
-			assertThat(sp.getMissing()).isTrue();
+			assertTrue(sp.getMissing());
 			sp.setText(true);
-			assertThat(sp.getMissing()).isNull();
+			assertNull(sp.getMissing());
 		}
 
 		@Test
@@ -130,18 +133,18 @@ public class StringParamTest {
 	}
 
 	private void assertNicknameQualifierSearchParameterIsValid(StringParam theStringParam, String theExpectedValue){
-		assertThat(theStringParam.isNicknameExpand()).isTrue();
-		assertThat(theStringParam.isExact()).isFalse();
-		assertThat(theStringParam.isContains()).isFalse();
-		assertThat(theStringParam.isText()).isFalse();
+		assertTrue(theStringParam.isNicknameExpand());
+		assertFalse(theStringParam.isExact());
+		assertFalse(theStringParam.isContains());
+		assertFalse(theStringParam.isText());
 		assertThat(theStringParam.getValue()).isEqualTo(theExpectedValue);
 	}
 
 	private void assertTextQualifierSearchParameterIsValid(StringParam theStringParam, String theExpectedValue){
-		assertThat(theStringParam.isNicknameExpand()).isFalse();
-		assertThat(theStringParam.isExact()).isFalse();
-		assertThat(theStringParam.isContains()).isFalse();
-		assertThat(theStringParam.isText()).isTrue();
+		assertFalse(theStringParam.isNicknameExpand());
+		assertFalse(theStringParam.isExact());
+		assertFalse(theStringParam.isContains());
+		assertTrue(theStringParam.isText());
 		assertThat(theStringParam.getValue()).isEqualTo(theExpectedValue);
 	}
 

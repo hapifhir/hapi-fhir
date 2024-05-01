@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.entity;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +22,7 @@ class PartitionEntityTest {
 		RequestPartitionId requestPartitionId = PartitionEntity.buildRequestPartitionId(entities);
 
 		// then
-			assertThat(requestPartitionId).isNotNull();
+			assertNotNull(requestPartitionId);
 		assertThat(requestPartitionId.getPartitionIds()).isEqualTo(List.of(1, 2));
 		assertThat(requestPartitionId.getPartitionNames()).isEqualTo(List.of("p1", "p2"));
 	}

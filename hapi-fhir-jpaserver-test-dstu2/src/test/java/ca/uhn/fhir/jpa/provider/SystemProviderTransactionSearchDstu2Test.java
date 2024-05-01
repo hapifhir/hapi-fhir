@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.dstu2.BaseJpaDstu2Test;
@@ -131,7 +133,7 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 		assertThat(output.getEntry()).hasSize(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
 		assertThat(respBundle.getEntry()).hasSize(5);
-		assertThat(respBundle.getLink("next")).isNull();
+		assertNull(respBundle.getLink("next"));
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 	}
@@ -190,7 +192,7 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 		for (int i = 0; i < 30; i++) {
 			Bundle respBundle = (Bundle) output.getEntry().get(i).getResource();
 			assertThat(respBundle.getEntry()).hasSize(5);
-			assertThat(respBundle.getLink("next").getUrl()).isNotNull();
+			assertNotNull(respBundle.getLink("next").getUrl());
 			List<String> actualIds = toIds(respBundle);
 			assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 		}
@@ -216,7 +218,7 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 		assertThat(output.getEntry()).hasSize(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
 		assertThat(respBundle.getEntry()).hasSize(5);
-		assertThat(respBundle.getLink("next")).isNull();
+		assertNull(respBundle.getLink("next"));
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 	}
@@ -275,7 +277,7 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 		for (int i = 0; i < 30; i++) {
 			Bundle respBundle = (Bundle) output.getEntry().get(i).getResource();
 			assertThat(respBundle.getEntry()).hasSize(5);
-			assertThat(respBundle.getLink("next").getUrl()).isNotNull();
+			assertNotNull(respBundle.getLink("next").getUrl());
 			List<String> actualIds = toIds(respBundle);
 			assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 		}

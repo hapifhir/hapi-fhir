@@ -1,5 +1,7 @@
 package org.hl7.fhir.r4.validation;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -387,7 +389,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult result = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
-		assertThat(result.isSuccessful()).isFalse();
+		assertFalse(result.isSuccessful());
 		assertThat(all.get(0).getMessage()).isEqualTo("The code 'AA  ' is not valid (whitespace rules)");
 
 	}
@@ -410,7 +412,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
-		assertThat(result.isSuccessful()).isFalse();
+		assertFalse(result.isSuccessful());
 		assertThat(all.get(0).getMessage()).contains("All FHIR elements must have a @value or children");
 	}
 
@@ -436,7 +438,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult result = val.validateWithResult(operationDefinition);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
-		assertThat(result.isSuccessful()).isFalse();
+		assertFalse(result.isSuccessful());
 		assertThat(all.get(0).getMessage()).isEqualTo("The property resource  must be a JSON Array, not a Primitive property (at OperationDefinition)");
 	}
 
@@ -463,7 +465,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult result = val.validateWithResult(input);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 	}
 
 	/**
@@ -480,7 +482,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		val.registerValidatorModule(new FhirInstanceValidator(myValidationSupport));
 		ValidationResult result = val.validateWithResult(obs);
 		logResultsAndReturnAll(result);
-		assertThat(result.isSuccessful()).isFalse();
+		assertFalse(result.isSuccessful());
 	}
 
 
@@ -502,7 +504,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult result = val.validateWithResult(input);
 		logResultsAndReturnAll(result);
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 	}
 
 	/**
@@ -526,7 +528,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		val.registerValidatorModule(instanceModule);
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 		assertThat(all).isEmpty();
 
 		// With BPs enabled
@@ -537,7 +539,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		val.registerValidatorModule(instanceModule);
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
-		assertThat(result.isSuccessful()).isFalse();
+		assertFalse(result.isSuccessful());
 		assertThat(all.get(0).getMessage()).isEqualTo("All observations should have a subject");
 	}
 
@@ -652,7 +654,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(encoded);
 
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 	}
 
 	/**
@@ -685,9 +687,9 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 	@Test
 	public void testIsNoTerminologyChecks() {
-		assertThat(myInstanceVal.isNoTerminologyChecks()).isFalse();
+		assertFalse(myInstanceVal.isNoTerminologyChecks());
 		myInstanceVal.setNoTerminologyChecks(true);
-		assertThat(myInstanceVal.isNoTerminologyChecks()).isTrue();
+		assertTrue(myInstanceVal.isNoTerminologyChecks());
 	}
 
 	@Test
@@ -813,7 +815,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		fpOutput = fp.evaluate(bundle.getEntry().get(0).getResource(), "component.where(code = %resource.code).empty()");
 		assertThat(fpOutput).hasSize(1);
 		bool = (BooleanType) fpOutput.get(0);
-		assertThat(bool.getValue()).isTrue();
+		assertTrue(bool.getValue());
 		//
 		// fpOutput = fp.evaluate(bundle, "component.where(code = %resource.code).empty()");
 		// assertEquals(1, fpOutput.size());
@@ -833,7 +835,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 
 		ValidationResult output = myFhirValidator.validateWithResult(vsContents);
 		logResultsAndReturnNonInformationalOnes(output);
-		assertThat(output.isSuccessful()).isTrue();
+		assertTrue(output.isSuccessful());
 	}
 
 	@Test
@@ -1625,8 +1627,8 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 			ValidationResult output = myFhirValidator.validateWithResult(bundle);
 			ourLog.info("Validation time: {}", stopwatch);
 			// assert that validation messages include the bundle entry path
-			assertThat(output.getMessages().stream().anyMatch(message -> message.getLocationString().contains("Bundle.entry[0].resource.ofType(Patient)"))).isTrue();
-			assertThat(output.getMessages().stream().anyMatch(message -> message.getLocationString().contains("Bundle.entry[1].resource.ofType(Patient)"))).isTrue();
+			assertTrue(output.getMessages().stream().anyMatch(message -> message.getLocationString().contains("Bundle.entry[0].resource.ofType(Patient)")));
+			assertTrue(output.getMessages().stream().anyMatch(message -> message.getLocationString().contains("Bundle.entry[1].resource.ofType(Patient)")));
 			// validate
 			List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(output);
 			assertThat(output.getMessages()).hasSize(entriesCount * 2);
@@ -1832,8 +1834,8 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		 *   org.hl7.fhir.r5.formats.XmlParser
 		 * and then re-run the test.
 		 */
-		assertThat(ClassesLoadedFlags.ourJsonParserBaseLoaded).isFalse();
-		assertThat(ClassesLoadedFlags.ourXmlParserBaseLoaded).isFalse();
+		assertFalse(ClassesLoadedFlags.ourJsonParserBaseLoaded);
+		assertFalse(ClassesLoadedFlags.ourXmlParserBaseLoaded);
 	}
 
 	@AfterAll

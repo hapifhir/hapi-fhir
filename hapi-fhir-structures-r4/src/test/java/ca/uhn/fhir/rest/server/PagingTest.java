@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
@@ -91,7 +92,7 @@ public class PagingTest {
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
 			assertThat(bundle.getEntry()).hasSize(10);
 
-			assertThat(bundle.getLink(IBaseBundle.LINK_PREV)).isNull();
+			assertNull(bundle.getLink(IBaseBundle.LINK_PREV));
 
 			String linkSelf = bundle.getLink(IBaseBundle.LINK_SELF).getUrl();
 			assertThat(linkSelf).as("'self' link is not present").isNotNull();
@@ -140,7 +141,7 @@ public class PagingTest {
 			checkParam(linkSelf, Constants.PARAM_PAGINGOFFSET, "20");
 			//			assertTrue(linkSelf.contains(Constants.PARAM_COUNT + "=1"));
 
-			assertThat(bundle.getLink(IBaseBundle.LINK_NEXT)).isNull();
+			assertNull(bundle.getLink(IBaseBundle.LINK_NEXT));
 		}
 	}
 
@@ -161,7 +162,7 @@ public class PagingTest {
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
 			assertThat(bundle.getEntry()).hasSize(10);
 
-			assertThat(bundle.getLink(IBaseBundle.LINK_PREV)).isNull();
+			assertNull(bundle.getLink(IBaseBundle.LINK_PREV));
 
 			String linkSelf = bundle.getLink(IBaseBundle.LINK_SELF).getUrl();
 			assertThat(linkSelf).as("'self' link is not present").isNotNull();
@@ -210,7 +211,7 @@ public class PagingTest {
 			checkParam(linkSelf, Constants.PARAM_OFFSET, "20");
 			checkParam(linkSelf, Constants.PARAM_COUNT, "10");
 
-			assertThat(bundle.getLink(IBaseBundle.LINK_NEXT)).isNull();
+			assertNull(bundle.getLink(IBaseBundle.LINK_NEXT));
 		}
 	}
 

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -71,7 +73,7 @@ public class ClientHeadersR4Test {
 			.execute();
 
 		assertThat(ourHeaders.get(Constants.HEADER_ACCEPT).get(0)).isEqualTo("application/fhir+xml;q=1.0, application/xml+fhir;q=0.9");
-		assertThat(ourParams.get(Constants.PARAM_FORMAT)).isNull();
+		assertNull(ourParams.get(Constants.PARAM_FORMAT));
 	}
 
 	@Test
@@ -98,7 +100,7 @@ public class ClientHeadersR4Test {
 			.execute();
 
 		assertThat(ourHeaders.get(Constants.HEADER_ACCEPT).get(0)).isEqualTo("application/fhir+json;q=1.0, application/json+fhir;q=0.9");
-		assertThat(ourParams.get(Constants.PARAM_FORMAT)).isNull();
+		assertNull(ourParams.get(Constants.PARAM_FORMAT));
 	}
 
 	@Test
@@ -122,7 +124,7 @@ public class ClientHeadersR4Test {
 
 		MethodOutcome resp = myClient.create().resource(resp1).execute();
 
-		assertThat(resp).isNotNull();
+		assertNotNull(resp);
 		assertThat(ourHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(ourHeaders.get(Constants.HEADER_CONTENT_TYPE).get(0)).isEqualTo("application/fhir+json; charset=UTF-8");
 	}

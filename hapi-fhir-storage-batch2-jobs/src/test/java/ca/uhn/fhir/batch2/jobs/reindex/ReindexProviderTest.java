@@ -1,5 +1,7 @@
 package ca.uhn.fhir.batch2.jobs.reindex;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
 import ca.uhn.fhir.batch2.jobs.parameters.UrlPartitioner;
@@ -121,7 +123,7 @@ public class ReindexProviderTest {
 		assertThat(params.getPartitionedUrls().get(0).getUrl()).isEqualTo(url);
 		// Default values
 		assertThat(params.getReindexSearchParameters()).isEqualTo(ReindexParameters.ReindexSearchParametersEnum.ALL);
-		assertThat(params.getOptimisticLock()).isTrue();
+		assertTrue(params.getOptimisticLock());
 		assertThat(params.getOptimizeStorage()).isEqualTo(ReindexParameters.OptimizeStorageModeEnum.NONE);
 	}
 
@@ -156,7 +158,7 @@ public class ReindexProviderTest {
 		assertThat(params.getPartitionedUrls()).isEmpty();
 		// Non-default values
 		assertThat(params.getReindexSearchParameters()).isEqualTo(ReindexParameters.ReindexSearchParametersEnum.NONE);
-		assertThat(params.getOptimisticLock()).isFalse();
+		assertFalse(params.getOptimisticLock());
 		assertThat(params.getOptimizeStorage()).isEqualTo(ReindexParameters.OptimizeStorageModeEnum.CURRENT_VERSION);
 
 	}

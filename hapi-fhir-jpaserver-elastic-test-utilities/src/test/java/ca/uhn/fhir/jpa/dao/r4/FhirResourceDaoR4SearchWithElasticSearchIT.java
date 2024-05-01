@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -973,7 +975,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		SearchParameterMap map = new SearchParameterMap();
 		map.add("code", new TokenParam().setSystem("http://example.com"));
 		List<IResourcePersistentId> bp = myObservationDao.searchForIds(map, new ServletRequestDetails());
-		assertThat(bp).isNotNull();
+		assertNotNull(bp);
 		assertThat(bp).hasSize(600);
 
 	}
@@ -1243,7 +1245,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			IIdType id = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless();
 
 			// no error.
-			assertThat(id).isNotNull();
+			assertNotNull(id);
 		}
 	}
 
@@ -2086,7 +2088,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				DateTimeType effectiveFirst = (DateTimeType) ((Observation) result.getAllResources().get(0)).getEffective();
 				DateTimeType effectiveSecond = (DateTimeType) ((Observation) result.getAllResources().get(1)).getEffective();
 				// requested date descending so first result should be the one with the latest effective date: id2
-				assertThat(effectiveFirst.after(effectiveSecond)).isTrue();
+				assertTrue(effectiveFirst.after(effectiveSecond));
 			}
 
 			@Test
@@ -2112,7 +2114,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 				DateTimeType effectiveFirst = (DateTimeType) ((Observation) result.getAllResources().get(0)).getEffective();
 				DateTimeType effectiveSecond = (DateTimeType) ((Observation) result.getAllResources().get(1)).getEffective();
 				// requested date descending so first result should be the one with the latest effective date: id2
-				assertThat(effectiveFirst.after(effectiveSecond)).isTrue();
+				assertTrue(effectiveFirst.after(effectiveSecond));
 			}
 
 			@Test

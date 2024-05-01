@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser.json;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import org.junit.jupiter.api.Test;
 
@@ -44,7 +45,7 @@ public class JsonLikeStructureTest {
 		
 		BaseJsonLikeObject rootObject = jsonStructure.getRootObject();
 
-		assertThat(rootObject).isNotNull();
+		assertNotNull(rootObject);
 		assertThat(rootObject.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.OBJECT);
 	}
 
@@ -75,10 +76,10 @@ public class JsonLikeStructureTest {
 		
 		BaseJsonLikeObject rootObject = jsonStructure.getRootObject();
 
-		assertThat(rootObject).isNotNull();
+		assertNotNull(rootObject);
 		
 		BaseJsonLikeValue value = rootObject.get("object-value");
-		assertThat(value).isNotNull();
+		assertNotNull(value);
 		assertThat(value.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.OBJECT);
 		assertThat(value.isObject()).isEqualTo(true);
 		assertThat(value.isArray()).isEqualTo(false);
@@ -86,7 +87,7 @@ public class JsonLikeStructureTest {
 		assertThat(value.isNull()).isEqualTo(false);
 
 		BaseJsonLikeObject obj = value.getAsObject();
-		assertThat(obj).isNotNull();
+		assertNotNull(obj);
 		assertThat(obj.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.OBJECT);
 		assertThat(obj.isObject()).isEqualTo(true);
 		assertThat(obj.isArray()).isEqualTo(false);
@@ -94,7 +95,7 @@ public class JsonLikeStructureTest {
 		assertThat(obj.isNull()).isEqualTo(false);
 		
 		value = rootObject.get("array-value");
-		assertThat(value).isNotNull();
+		assertNotNull(value);
 		assertThat(value.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.ARRAY);
 		assertThat(value.isObject()).isEqualTo(false);
 		assertThat(value.isArray()).isEqualTo(true);
@@ -102,7 +103,7 @@ public class JsonLikeStructureTest {
 		assertThat(value.isNull()).isEqualTo(false);
 
 		BaseJsonLikeArray array = value.getAsArray();
-		assertThat(array).isNotNull();
+		assertNotNull(array);
 		assertThat(array.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.ARRAY);
 		assertThat(array.isObject()).isEqualTo(false);
 		assertThat(array.isArray()).isEqualTo(true);
@@ -110,7 +111,7 @@ public class JsonLikeStructureTest {
 		assertThat(array.isNull()).isEqualTo(false);
 
 		value = rootObject.get("null-value");
-		assertThat(value).isNotNull();
+		assertNotNull(value);
 		assertThat(value.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.NULL);
 		assertThat(value.isObject()).isEqualTo(false);
 		assertThat(value.isArray()).isEqualTo(false);
@@ -118,7 +119,7 @@ public class JsonLikeStructureTest {
 		assertThat(value.isNull()).isEqualTo(true);
 
 		value = rootObject.get("scalar-string");
-		assertThat(value).isNotNull();
+		assertNotNull(value);
 		assertThat(value.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.SCALAR);
 		assertThat(value.isObject()).isEqualTo(false);
 		assertThat(value.isArray()).isEqualTo(false);
@@ -128,13 +129,13 @@ public class JsonLikeStructureTest {
 		assertThat("A scalar string").isEqualTo(value.getAsString());
 
 		value = rootObject.get("scalar-number");
-		assertThat(value).isNotNull();
+		assertNotNull(value);
 		assertThat(value.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.SCALAR);
 		assertThat(value.getDataType()).isEqualTo(BaseJsonLikeValue.ScalarType.NUMBER);
 		assertThat("11111").isEqualTo(value.getAsString());
 
 		value = rootObject.get("scalar-boolean");
-		assertThat(value).isNotNull();
+		assertNotNull(value);
 		assertThat(value.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.SCALAR);
 		assertThat(value.getDataType()).isEqualTo(BaseJsonLikeValue.ScalarType.BOOLEAN);
 		assertThat("true").isEqualTo(value.getAsString());

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jaxrs.server;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.client.JaxRsRestfulClientFactory;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
@@ -339,7 +341,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		resource = nextPage.getEntry().get(0).getResource();
 		compareResultId(9, resource);
 		compareResultUrl("/Patient/9", resource);
-		assertThat(nextPage.getLink(org.hl7.fhir.dstu3.model.Bundle.LINK_NEXT)).isNull();
+		assertNull(nextPage.getLink(org.hl7.fhir.dstu3.model.Bundle.LINK_NEXT));
 	}
 
 	/**
@@ -382,8 +384,8 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
 		client.update().resource(createPatient(1)).conditional().where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
 
-		assertThat(patientCaptor.getValue().getIdElement().getIdPart()).isNull();
-		assertThat(patientCaptor.getValue().getIdElement().getVersionIdPart()).isNull();
+		assertNull(patientCaptor.getValue().getIdElement().getIdPart());
+		assertNull(patientCaptor.getValue().getIdElement().getVersionIdPart());
 		assertThat(conditionalCaptor.getValue()).isEqualTo("Patient?identifier=2&_format=json");
 	}
 
@@ -435,7 +437,7 @@ public class AbstractJaxRsResourceProviderDstu3Test {
 
 		final MethodOutcome mO = client.validate().resource(patient).execute();
 		//verify
-		assertThat(mO.getOperationOutcome()).isNotNull();
+		assertNotNull(mO.getOperationOutcome());
 	}
 
 	class StringTypeMatcher implements ArgumentMatcher<StringType> {

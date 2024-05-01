@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -788,8 +791,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 	@Test
 	public void testExpandInlineVsAgainstExternalCs() {
 		createExternalCsAndLocalVs();
-		assertThat(myLocalVs_v1).isNotNull();
-		assertThat(myLocalVs_v2).isNotNull();
+		assertNotNull(myLocalVs_v1);
+		assertNotNull(myLocalVs_v2);
 
 		myLocalVs_v1.setId("");
 		Parameters respParam = myClient
@@ -828,8 +831,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 	@Test
 	public void testExpandLocalVsAgainstExternalCs() {
 		createExternalCsAndLocalVs();
-		assertThat(myLocalValueSetId_v1).isNotNull();
-		assertThat(myLocalValueSetId_v2).isNotNull();
+		assertNotNull(myLocalValueSetId_v1);
+		assertNotNull(myLocalValueSetId_v2);
 
 		// Validate ValueSet v1
 		Parameters respParam = myClient
@@ -868,8 +871,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 	@Test
 	public void testExpandLocalVsCanonicalAgainstExternalCs() {
 		createExternalCsAndLocalVs();
-		assertThat(myLocalValueSetId_v1).isNotNull();
-		assertThat(myLocalValueSetId_v2).isNotNull();
+		assertNotNull(myLocalValueSetId_v1);
+		assertNotNull(myLocalValueSetId_v2);
 
 		Parameters respParam = myClient
 			.operation()
@@ -1070,10 +1073,10 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 	private void validateTermValueSetNotExpanded(String theValueSetName, String theVersion, Long theId) {
 		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(theId);
-			assertThat(optionalValueSetByResourcePid.isPresent()).isTrue();
+			assertTrue(optionalValueSetByResourcePid.isPresent());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", theVersion);
-			assertThat(optionalValueSetByUrl.isPresent()).isTrue();
+			assertTrue(optionalValueSetByUrl.isPresent());
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertThat(termValueSet).isSameAs(optionalValueSetByResourcePid.get());
@@ -1088,10 +1091,10 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 	private void validateTermValueSetExpandedAndChildrenV1(String theValueSetName, CodeSystem theCodeSystem) {
 		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable_v1);
-			assertThat(optionalValueSetByResourcePid.isPresent()).isTrue();
+			assertTrue(optionalValueSetByResourcePid.isPresent());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", "1");
-			assertThat(optionalValueSetByUrl.isPresent()).isTrue();
+			assertTrue(optionalValueSetByUrl.isPresent());
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertThat(termValueSet).isSameAs(optionalValueSetByResourcePid.get());
@@ -1121,10 +1124,10 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 
 		runInTransaction(() -> {
 			Optional<TermValueSet> optionalValueSetByResourcePid = myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable_v2);
-			assertThat(optionalValueSetByResourcePid.isPresent()).isTrue();
+			assertTrue(optionalValueSetByResourcePid.isPresent());
 
 			Optional<TermValueSet> optionalValueSetByUrl = myTermValueSetDao.findTermValueSetByUrlAndVersion("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", "2");
-			assertThat(optionalValueSetByUrl.isPresent()).isTrue();
+			assertTrue(optionalValueSetByUrl.isPresent());
 
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertThat(termValueSet).isSameAs(optionalValueSetByResourcePid.get());
@@ -1184,7 +1187,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1200,7 +1203,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With incorrect version specified. Should fail.
 		respParam = myClient
@@ -1217,7 +1220,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1233,7 +1236,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 	}
 
@@ -1254,7 +1257,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1268,7 +1271,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With incorrect version specified. Should fail.
 		respParam = myClient
@@ -1283,7 +1286,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1297,7 +1300,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 	}
 
@@ -1324,7 +1327,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1338,7 +1341,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With incorrect version specified. Should fail.
 		respParam = myClient
@@ -1353,7 +1356,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1367,7 +1370,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 	}
 
@@ -1396,7 +1399,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1410,7 +1413,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
+		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		// With incorrect version specified. Should fail.
 		respParam = myClient
@@ -1425,7 +1428,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 		respParam = myClient
 			.operation()
@@ -1439,7 +1442,7 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isFalse();
+		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
 	}
 	

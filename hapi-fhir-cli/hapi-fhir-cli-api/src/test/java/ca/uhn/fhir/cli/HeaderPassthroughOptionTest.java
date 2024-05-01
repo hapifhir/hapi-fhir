@@ -1,5 +1,7 @@
 package ca.uhn.fhir.cli;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
@@ -83,9 +85,9 @@ public class HeaderPassthroughOptionTest {
 		final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
 		testedCommand.run(commandLine);
 
-		assertThat(myCapturingInterceptor.getLastRequest()).isNotNull();
+		assertNotNull(myCapturingInterceptor.getLastRequest());
 		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
-		assertThat(allHeaders.isEmpty()).isFalse();
+		assertFalse(allHeaders.isEmpty());
 
 		assertThat(allHeaders).containsKey(headerKey1);
 		assertThat(allHeaders.get(headerKey1)).hasSize(1);
@@ -114,9 +116,9 @@ public class HeaderPassthroughOptionTest {
 		final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
 		testedCommand.run(commandLine);
 
-		assertThat(myCapturingInterceptor.getLastRequest()).isNotNull();
+		assertNotNull(myCapturingInterceptor.getLastRequest());
 		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
-		assertThat(allHeaders.isEmpty()).isFalse();
+		assertFalse(allHeaders.isEmpty());
 		assertThat(allHeaders.get(headerKey1)).hasSize(2);
 
 		assertThat(allHeaders).containsKey(headerKey1);
@@ -148,9 +150,9 @@ public class HeaderPassthroughOptionTest {
 		final CommandLine commandLine = new DefaultParser().parse(testedCommand.getOptions(), args, true);
 		testedCommand.run(commandLine);
 
-		assertThat(myCapturingInterceptor.getLastRequest()).isNotNull();
+		assertNotNull(myCapturingInterceptor.getLastRequest());
 		Map<String, List<String>> allHeaders = myCapturingInterceptor.getLastRequest().getAllHeaders();
-		assertThat(allHeaders.isEmpty()).isFalse();
+		assertFalse(allHeaders.isEmpty());
 
 		assertThat(allHeaders).containsKey(headerKey1);
 		assertThat(allHeaders.get(headerKey1)).hasSize(1);

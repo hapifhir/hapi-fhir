@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -1629,7 +1631,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		List<IBaseResource> patients = toList(myPatientDao.search(params));
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
-		assertThat(patients.size() >= 2).isTrue();
+		assertTrue(patients.size() >= 2);
 	}
 
 	@Test
@@ -2629,8 +2631,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 			assertThat(dates).contains("1980-01-01", "1980-01-09");
 
-			assertThat(map.isLoadSynchronous()).isFalse();
-			assertThat(map.getLoadSynchronousUpTo()).isNull();
+			assertFalse(map.isLoadSynchronous());
+			assertNull(map.getLoadSynchronousUpTo());
 		}
 	}
 
@@ -4579,7 +4581,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		myCaptureQueriesListener.clear();
 		IBundleProvider values = myPatientDao.search(map);
-		assertThat(values.size()).isNull();
+		assertNull(values.size());
 		assertThat(values.getResources(0, 1000)).hasSize(5);
 
 		String sql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);

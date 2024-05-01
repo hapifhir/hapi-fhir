@@ -1,5 +1,7 @@
 package org.hl7.fhir.dstu3.utils;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
@@ -61,7 +63,7 @@ public class FhirPathEngineTest extends BaseValidationTestWithInlineMocks {
 		patient.setDeceased(new BooleanType());
 		List<Base> eval = ourEngine.evaluate(patient, "Patient.deceased.exists()");
 		ourLog.info(eval.toString());
-		assertThat(((BooleanType) eval.get(0)).getValue()).isFalse();
+		assertFalse(((BooleanType) eval.get(0)).getValue());
 	}
 
 	@Test
@@ -70,7 +72,7 @@ public class FhirPathEngineTest extends BaseValidationTestWithInlineMocks {
 		patient.setDeceased(new BooleanType(false));
 		List<Base> eval = ourEngine.evaluate(patient, "Patient.deceased.exists()");
 		ourLog.info(eval.toString());
-		assertThat(((BooleanType) eval.get(0)).getValue()).isTrue();
+		assertTrue(((BooleanType) eval.get(0)).getValue());
 	}
 
 	@AfterAll

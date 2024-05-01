@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jaxrs.server;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.client.JaxRsRestfulClientFactory;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
@@ -318,7 +320,7 @@ public class AbstractJaxRsResourceProviderTest {
 		resource = nextPage.getEntry().get(0).getResource();
 		compareResultId(9, resource);
 		compareResultUrl("/Patient/9", resource);
-		assertThat(nextPage.getLink(Bundle.LINK_NEXT)).isNull();
+		assertNull(nextPage.getLink(Bundle.LINK_NEXT));
 	}
 
 	/** Search - Subsetting (_summary and _elements) */
@@ -342,7 +344,7 @@ public class AbstractJaxRsResourceProviderTest {
 		when(mock.update(idCaptor.capture(), patientCaptor.capture(), conditionalCaptor.capture())).thenReturn(new MethodOutcome());
 		client.update().resource(createPatient(1)).conditional().where(Patient.IDENTIFIER.exactly().identifier("2")).execute();
 
-		assertThat(patientCaptor.getValue().getId().getIdPart()).isNull();
+		assertNull(patientCaptor.getValue().getId().getIdPart());
 		assertThat(conditionalCaptor.getValue()).isEqualTo("Patient?identifier=2&_format=json");
 	}
 
@@ -377,7 +379,7 @@ public class AbstractJaxRsResourceProviderTest {
 		compareResultId(1, patient);
 		compareResultUrl("/Patient/1/_history/1", patient);
 		assertThat(idCaptor.getValue().getIdPart()).isEqualTo("1");
-		assertThat(idCaptor.getValue().getVersionIdPart()).isNull();
+		assertNull(idCaptor.getValue().getVersionIdPart());
 	}
 
 	@Test
@@ -414,7 +416,7 @@ public class AbstractJaxRsResourceProviderTest {
 
 		final MethodOutcome mO = client.validate().resource(patient).execute();
 		// verify
-		assertThat(mO.getOperationOutcome()).isNotNull();
+		assertNotNull(mO.getOperationOutcome());
 	}
 
 	private <T> T withId(final T id) {

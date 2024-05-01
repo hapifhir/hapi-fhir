@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IResource;
@@ -118,7 +119,7 @@ public class SearchDstu2Test {
 		Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
 		String ref = patient.getManagingOrganization().getReference().getValue();
 		assertThat(ref).isEqualTo("Organization/555");
-		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION)).isNull();
+		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
 	}
 
 	@Test
@@ -135,7 +136,7 @@ public class SearchDstu2Test {
 		Patient patient = (Patient) ourCtx.newJsonParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
 		String ref = patient.getManagingOrganization().getReference().getValue();
 		assertThat(ref).isEqualTo("Organization/555");
-		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION)).isNull();
+		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
 	}
 
 	@Test
@@ -148,7 +149,7 @@ public class SearchDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertThat(responseContent, stringContainsInOrder("<lastUpdated value=\"2011-02-03T11:22:33Z\"/>"));
+		assertThat(responseContent).containsSequence("<lastUpdated value=\"2011-02-03T11:22:33Z\"/>");
 	}
 
 	@Test
@@ -372,7 +373,7 @@ public class SearchDstu2Test {
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		assertThat(ourLastRef.getIdPart()).isEqualTo("123");
-		assertThat(ourLastRef.getResourceType()).isNull();
+		assertNull(ourLastRef.getResourceType());
 	}
 
 	@Test

@@ -1,5 +1,9 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
@@ -315,7 +319,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
@@ -325,21 +329,21 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by rule: Rule 1");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$validate");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$validate");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 	}
 
 
@@ -388,7 +392,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
@@ -398,14 +402,14 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by rule: Rule 1");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/TENANTA/Patient/1/$validate");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -446,7 +450,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		extractResponseAndClose(status);
 
 		//Then
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 	}
 
@@ -486,7 +490,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		extractResponseAndClose(status);
 
 		//then
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
 	}
 
@@ -527,7 +531,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		extractResponseAndClose(status);
 
 		//then
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
 	}
 
@@ -590,7 +594,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Qualified
 		patient = new Patient();
@@ -605,7 +609,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Wrong one
 		patient = new Patient();
@@ -620,7 +624,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 
 		patient = new Patient();
@@ -654,7 +658,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createCarePlan(10, "FOO"));
@@ -662,7 +666,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -688,7 +692,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createCarePlan(10, "FOO"));
@@ -696,7 +700,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -722,7 +726,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createCarePlan(10, "FOO"));
@@ -730,7 +734,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 	}
 
 	@Test
@@ -831,7 +835,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by rule: Rule 1");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Acceptable code present
 		ourHitMethod = false;
@@ -847,7 +851,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Both Unacceptable and Acceptable code present
 		ourHitMethod = false;
@@ -869,7 +873,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by rule: Rule 1");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -904,7 +908,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// No acceptable code present - Read
 		ourHitMethod = false;
@@ -921,7 +925,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Both Unacceptable and Acceptable code present
 		ourHitMethod = false;
@@ -942,7 +946,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Allowed code present - Search
 		ourHitMethod = false;
@@ -958,7 +962,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// No acceptable code present - Search
 		ourHitMethod = false;
@@ -975,7 +979,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -1011,7 +1015,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// No acceptable code present - Read
 		ourHitMethod = false;
@@ -1027,7 +1031,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Both Unacceptable and Acceptable code present - Should not pass since one of the codes is in the VS
 		ourHitMethod = false;
@@ -1048,7 +1052,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -1083,7 +1087,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// No acceptable code present - Read
 		ourHitMethod = false;
@@ -1100,7 +1104,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by rule: Rule 1");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Both Unacceptable and Acceptable code present - Should not pass since one of the codes is in the VS
 		ourHitMethod = false;
@@ -1121,7 +1125,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// No acceptable codesystem present - Read
 		ourHitMethod = false;
@@ -1138,7 +1142,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by rule: Rule 1");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -1176,7 +1180,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 	}
 
 
@@ -1274,7 +1278,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(500);
 		assertThat(response).contains("HAPI-2025: Unknown SearchParameter for resource Observation: blah");
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 	}
 
 
@@ -1333,7 +1337,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpDelete);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(1));
@@ -1341,7 +1345,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpDelete);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(204);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 	}
 
 	@Test
@@ -1376,7 +1380,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpPost);
 		responseString = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).as(responseString).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		bundle.getEntry().clear();
@@ -1388,7 +1392,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpPost);
 		responseString = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).as(responseString).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		bundle.getEntry().clear();
@@ -1400,7 +1404,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpPost);
 		responseString = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).as(responseString).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		bundle.getEntry().clear();
@@ -1412,7 +1416,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpPost);
 		responseString = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).as(responseString).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 	}
 
 	@Test
@@ -1436,7 +1440,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpDelete);
 		responseString = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).as(responseString).isEqualTo(204);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
@@ -1444,7 +1448,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpDelete);
 		responseString = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).as(responseString).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 
 	}
@@ -1472,7 +1476,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
 		ourHitMethod = false;
@@ -1482,7 +1486,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by rule: (unnamed rule)");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 	}
 
@@ -1515,7 +1519,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
@@ -1525,7 +1529,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by rule: Default Rule");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$validate");
@@ -1534,7 +1538,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by rule: Default Rule");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$opName");
@@ -1543,7 +1547,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by rule: Default Rule");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 	}
 
 	@Test
@@ -1574,7 +1578,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
@@ -1584,7 +1588,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$validate");
@@ -1593,7 +1597,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$opName");
@@ -1602,7 +1606,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 	}
 
 	/**
@@ -1626,7 +1630,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createCarePlan(10, "FOO"));
@@ -1634,7 +1638,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -1660,7 +1664,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createCarePlan(10, "FOO"));
@@ -1668,7 +1672,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 	}
 
 	@Test
@@ -1692,21 +1696,21 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/_history");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/_history");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 	}
 
 	@Test
@@ -1809,7 +1813,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		String response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -1835,7 +1839,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		response = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Type
 		ourHitMethod = false;
@@ -1845,7 +1849,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Instance
 		ourHitMethod = false;
@@ -1855,7 +1859,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Instance Version
 		ourHitMethod = false;
@@ -1865,7 +1869,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -1891,7 +1895,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		response = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Type
 		ourHitMethod = false;
@@ -1901,7 +1905,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Instance
 		ourHitMethod = false;
@@ -1911,7 +1915,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Instance Version
 		ourHitMethod = false;
@@ -1921,7 +1925,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 	}
 
@@ -2055,7 +2059,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Type
 		ourHitMethod = false;
@@ -2066,7 +2070,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Instance
 		ourHitMethod = false;
@@ -2076,7 +2080,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Wrong instance
 		ourHitMethod = false;
@@ -2087,7 +2091,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 	}
 
@@ -2114,7 +2118,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Type
 		ourHitMethod = false;
@@ -2125,7 +2129,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Instance
 		ourHitMethod = false;
@@ -2135,7 +2139,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Another Instance
 		ourHitMethod = false;
@@ -2145,7 +2149,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Wrong name
 		ourHitMethod = false;
@@ -2156,7 +2160,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 	}
 
@@ -2183,7 +2187,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// System
 		ourHitMethod = false;
@@ -2193,7 +2197,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Type
 		ourHitMethod = false;
@@ -2203,7 +2207,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Instance
 		ourHitMethod = false;
@@ -2213,7 +2217,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 	}
 
 	@Test
@@ -2238,7 +2242,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Type
 		ourHitMethod = false;
@@ -2249,7 +2253,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Instance
 		ourHitMethod = false;
@@ -2260,7 +2264,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 	}
 
 	@Test
@@ -2286,7 +2290,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Type
 		ourHitMethod = false;
@@ -2296,7 +2300,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Wrong type
 		ourHitMethod = false;
@@ -2307,7 +2311,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Wrong name
 		ourHitMethod = false;
@@ -2318,7 +2322,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Instance
 		ourHitMethod = false;
@@ -2329,7 +2333,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 	}
 
 	@Test
@@ -2355,7 +2359,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Type
 		ourHitMethod = false;
@@ -2365,7 +2369,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Another type
 		ourHitMethod = false;
@@ -2375,7 +2379,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Wrong name
 		ourHitMethod = false;
@@ -2386,7 +2390,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Instance
 		ourHitMethod = false;
@@ -2397,7 +2401,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 	}
 
 	@Test
@@ -2423,7 +2427,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Type
 		ourHitMethod = false;
@@ -2433,7 +2437,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Wrong type
 		ourHitMethod = false;
@@ -2444,7 +2448,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Instance
 		ourHitMethod = false;
@@ -2455,7 +2459,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 	}
 
 	@Test
@@ -2482,7 +2486,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Wrong Tenant
 		ourHitMethod = false;
@@ -2492,7 +2496,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(response).contains("Access denied by default policy");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 	}
 
 
@@ -2523,7 +2527,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// With body
 		ourHitMethod = false;
@@ -2532,7 +2536,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 	}
 
 	@Test
@@ -2596,7 +2600,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		CloseableHttpResponse status = ourClient.execute(patch);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 	}
 
 	@Test
@@ -2621,7 +2625,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		CloseableHttpResponse status = ourClient.execute(patch);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 	}
 
 	@Test
@@ -2644,7 +2648,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -2667,7 +2671,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 	}
 
@@ -2692,7 +2696,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
@@ -2700,7 +2704,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
 		ourHitMethod = false;
@@ -2710,7 +2714,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy (no applicable rules)");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourReturn = Arrays.asList(createPatient(1), createObservation(10, "Patient/2"));
 		ourHitMethod = false;
@@ -2720,7 +2724,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy (no applicable rules)");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Arrays.asList(createPatient(2), createObservation(10, "Patient/1"));
 		ourHitMethod = false;
@@ -2730,7 +2734,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy (no applicable rules)");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -2756,7 +2760,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
@@ -2765,7 +2769,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(response).contains("Access denied by default policy (no applicable rules)");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
@@ -2773,7 +2777,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
 		ourHitMethod = false;
@@ -2783,7 +2787,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy (no applicable rules)");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourReturn = Arrays.asList(createPatient(1), createObservation(10, "Patient/2"));
 		ourHitMethod = false;
@@ -2793,7 +2797,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy (no applicable rules)");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Arrays.asList(createPatient(2), createObservation(10, "Patient/1"));
 		ourHitMethod = false;
@@ -2803,7 +2807,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy (no applicable rules)");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -2833,7 +2837,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
@@ -2841,7 +2845,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
 		ourHitMethod = false;
@@ -2851,7 +2855,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy (no applicable rules)");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourReturn = Arrays.asList(createPatient(1), createObservation(10, "Patient/2"));
 		ourHitMethod = false;
@@ -2861,7 +2865,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy (no applicable rules)");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 	}
 
@@ -2886,14 +2890,14 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourReturn = Collections.singletonList(new ServiceRequest().setAuthoredOn(new Date()).setId("ServiceRequest/123"));
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/ServiceRequest");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 	}
@@ -2919,7 +2923,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createPatient(1));
 		ourHitMethod = false;
@@ -2927,14 +2931,14 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=Patient/2");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 	}
 
 	@Test
@@ -2957,7 +2961,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createDiagnosticReport(1, "Patient/1"));
 		ourHitMethod = false;
@@ -2965,7 +2969,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createDiagnosticReport(1, "Patient/1"));
 		ourHitMethod = false;
@@ -2973,7 +2977,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createDiagnosticReport(1, "Patient/1"));
 		ourHitMethod = false;
@@ -2981,7 +2985,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createDiagnosticReport(1, "Patient/1"));
 		ourHitMethod = false;
@@ -2989,7 +2993,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createDiagnosticReport(1, "Patient/1"));
 		ourHitMethod = false;
@@ -2997,7 +3001,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 	}
 
@@ -3022,7 +3026,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/1"));
 		ourHitMethod = false;
@@ -3030,7 +3034,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Arrays.asList(createPatient(1), createObservation(10, "Patient/1"));
 		ourHitMethod = false;
@@ -3038,7 +3042,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 	}
 
@@ -3064,7 +3068,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
@@ -3072,7 +3076,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/CarePlan/10");
@@ -3080,7 +3084,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
@@ -3088,7 +3092,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/_history");
@@ -3096,7 +3100,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/_history");
@@ -3104,7 +3108,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/999/_history");
@@ -3112,7 +3116,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 	}
 
 	@Test
@@ -3139,7 +3143,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy (no applicable rules)");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
 		ourHitMethod = false;
@@ -3149,7 +3153,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy (no applicable rules)");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createCarePlan(10, "Patient/2"));
 		ourHitMethod = false;
@@ -3159,7 +3163,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy (no applicable rules)");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourReturn = Arrays.asList(createPatient(1), createObservation(10, "Patient/2"));
 		ourHitMethod = false;
@@ -3169,7 +3173,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy (no applicable rules)");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Arrays.asList(createPatient(2), createObservation(10, "Patient/1"));
 		ourHitMethod = false;
@@ -3179,7 +3183,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourLog.info(response);
 		assertThat(response).contains("Access denied by default policy (no applicable rules)");
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -3206,7 +3210,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
@@ -3214,7 +3218,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/CarePlan/10");
@@ -3222,7 +3226,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
@@ -3230,7 +3234,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -3257,7 +3261,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
@@ -3265,7 +3269,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// CarePlan could potentially be in the Patient/1 compartment but we don't
 		// have any rules explicitly allowing CarePlan so it's blocked
@@ -3275,7 +3279,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
@@ -3283,7 +3287,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/_history");
@@ -3291,7 +3295,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/_history");
@@ -3299,7 +3303,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/999/_history");
@@ -3307,7 +3311,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 	}
 
 	@Test
@@ -3333,7 +3337,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Read with contained
 		ourReturn = Lists.newArrayList(createObservation(10, "#1"));
@@ -3343,7 +3347,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Read with contained
 		Observation obs = (Observation) createObservation(10, null);
@@ -3355,7 +3359,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -3383,7 +3387,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createPatient(901));
 		ourHitMethod = false;
@@ -3391,7 +3395,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourReturn = Collections.singletonList(createPatient(1));
 		ourHitMethod = false;
@@ -3400,7 +3404,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
 		assertThat(response).isEqualTo(ERR403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 	}
 
@@ -3428,14 +3432,14 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=Patient/900");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=901");
@@ -3443,7 +3447,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
 		assertThat(response).isEqualTo(ERR403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=Patient/901");
@@ -3451,7 +3455,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
 		assertThat(response).isEqualTo(ERR403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		// technically this is invalid, but just in case..
@@ -3460,7 +3464,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
 		assertThat(response).isEqualTo(ERR403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation?_id=901");
@@ -3468,21 +3472,21 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
 		assertThat(response).isEqualTo(ERR403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=Patient/900,Patient/700");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=900,777");
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 	}
 
 	@Test
@@ -3511,12 +3515,12 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		respString = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
 		assertThat(respBundle.getEntry()).hasSize(5);
 		assertThat(respBundle.getTotal()).isEqualTo(10);
 		assertThat(respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Observation/0");
-		assertThat(respBundle.getLink("next")).isNotNull();
+		assertNotNull(respBundle.getLink("next"));
 
 		// Load next page
 
@@ -3525,12 +3529,12 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		respString = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
 		assertThat(respBundle.getEntry()).hasSize(5);
 		assertThat(respBundle.getTotal()).isEqualTo(10);
 		assertThat(respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Observation/5");
-		assertThat(respBundle.getLink("next")).isNull();
+		assertNull(respBundle.getLink("next"));
 
 	}
 
@@ -3563,12 +3567,12 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		respString = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
 		assertThat(respBundle.getEntry()).hasSize(5);
 		assertThat(respBundle.getTotal()).isEqualTo(10);
 		assertThat(respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Observation/0");
-		assertThat(respBundle.getLink("next")).isNotNull();
+		assertNotNull(respBundle.getLink("next"));
 
 		// Load next page
 
@@ -3578,7 +3582,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpGet);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 	}
 
@@ -3785,7 +3789,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
 		assertThat(response).isEqualTo(ERR403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		// Conditional
 		ourHitMethod = false;
@@ -3796,7 +3800,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
 		assertThat(response).isEqualTo(ERR403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpPost = new HttpPost(ourServer.getBaseUrl() + "/Observation");
@@ -3805,7 +3809,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
 		assertThat(response).isEqualTo(ERR403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpPost = new HttpPost(ourServer.getBaseUrl() + "/Observation");
@@ -3813,7 +3817,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpPost);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 	}
 
 	@Test
@@ -3841,7 +3845,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		String response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -3870,7 +3874,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		String response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(204);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -3900,7 +3904,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Right resource
 		ourReturn = Collections.singletonList(createPatient(2));
@@ -3910,7 +3914,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		ourLog.info(response);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(204);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -3935,7 +3939,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpDelete);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(1));
@@ -3943,7 +3947,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpDelete);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 	}
 
 	@Test
@@ -3969,7 +3973,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(response).isEqualTo(ERR403);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient/1");
@@ -3977,7 +3981,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpPost);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		// Conditional
 		ourHitMethod = false;
@@ -3987,7 +3991,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(response).isEqualTo(ERR403);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient?foo=bar");
@@ -3996,7 +4000,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(response).isEqualTo(ERR403);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Observation/10");
@@ -4004,7 +4008,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpPost);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Observation/10");
@@ -4013,7 +4017,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(response).isEqualTo(ERR403);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 	}
 
 	@Test
@@ -4042,7 +4046,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
 		assertThat(response).isEqualTo(ERR403);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 	}
 
@@ -4071,7 +4075,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpPost);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Observation?foo=bar");
@@ -4080,7 +4084,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
 		assertThat(response).isEqualTo(ERR403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 	}
 
@@ -4109,14 +4113,14 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpPost);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Observation?foo=bar");
 		httpPost.setEntity(createFhirResourceEntity(createObservation(null, "Patient/12")));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
 		assertThat(response).isEqualTo(ERR403);
 
@@ -4146,7 +4150,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpPost);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Observation/901");
@@ -4154,7 +4158,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpPost);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpPost = new HttpPost(ourServer.getBaseUrl() + "/Observation");
@@ -4163,7 +4167,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
 		assertThat(response).isEqualTo(ERR403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 		ourHitMethod = false;
 		httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
@@ -4172,7 +4176,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		response = extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(403);
 		assertThat(response).isEqualTo(ERR403);
-		assertThat(ourHitMethod).isFalse();
+		assertFalse(ourHitMethod);
 
 	}
 
@@ -4201,7 +4205,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		status = ourClient.execute(httpPost);
 		extractResponseAndClose(status);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourHitMethod).isTrue();
+		assertTrue(ourHitMethod);
 	}
 
 	@AfterAll

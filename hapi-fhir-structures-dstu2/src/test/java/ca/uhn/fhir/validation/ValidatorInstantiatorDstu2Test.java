@@ -1,5 +1,6 @@
 package ca.uhn.fhir.validation;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.util.TestUtil;
@@ -24,8 +25,8 @@ public class ValidatorInstantiatorDstu2Test {
       FhirValidator val = ourCtx.newValidator();
       val.validateWithResult(new Patient());
 			// We have a full classpath, so take advantage
-		 assertThat(val.isValidateAgainstStandardSchema()).isTrue();
-		 assertThat(val.isValidateAgainstStandardSchematron()).isTrue();
+		 assertTrue(val.isValidateAgainstStandardSchema());
+		 assertTrue(val.isValidateAgainstStandardSchematron());
       
    }
    

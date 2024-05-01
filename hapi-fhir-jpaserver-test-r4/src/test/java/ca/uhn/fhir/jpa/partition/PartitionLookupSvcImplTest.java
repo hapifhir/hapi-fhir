@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.partition;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.dao.data.IPartitionDao;
@@ -50,7 +51,7 @@ class PartitionLookupSvcImplTest {
 		when(myPartitionDao.findById(any())).thenReturn(Optional.empty());
 		for (int i = 0; i<10000; i++) {
 			int randomUnusedPartitionId = myPartitionLookupSvc.generateRandomUnusedPartitionId();
-			assertThat(randomUnusedPartitionId >= 1).isTrue();
+			assertTrue(randomUnusedPartitionId >= 1);
 		}
 	}
 }

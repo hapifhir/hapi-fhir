@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.cr.r4.plandefinition.PlanDefinitionApplyProvider;
 import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,7 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
 			null, null, null,
 			requestDetails);
 
-		assertThat(result).isNotNull();
+		assertNotNull(result);
 		assertThat(((Questionnaire) result.getContained().get(1))
 				.getItem().get(0)
 				.getItem().get(0)
@@ -39,7 +40,7 @@ public class PlanDefinitionOperationsProviderTest extends BaseCrR4TestServer {
 			null, null, null,
 			requestDetails);
 
-		assertThat(resultR5).isNotNull();
+		assertNotNull(resultR5);
 		assertThat(((Questionnaire) resultR5.getEntry().get(1)
 				.getResource()).getItem().get(0)
 				.getItem().get(0)

@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module.matcher;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -117,7 +119,7 @@ public class InMemorySubscriptionMatcherR4Test {
 	private void assertMatched(Resource resource, SearchParameterMap params) {
 		InMemoryMatchResult result = match(resource, params);
 		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
-		assertThat(result.matched()).isTrue();
+		assertTrue(result.matched());
 		assertThat(mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, params))).isEqualTo(SubscriptionMatchingStrategy.IN_MEMORY);
 	}
 
@@ -143,7 +145,7 @@ public class InMemorySubscriptionMatcherR4Test {
 
 	private void assertUnsupported(Resource resource, SearchParameterMap theParams) {
 		InMemoryMatchResult result = match(resource, theParams);
-		assertThat(result.supported()).isFalse();
+		assertFalse(result.supported());
 		assertThat(mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, theParams))).isEqualTo(SubscriptionMatchingStrategy.DATABASE);
 	}
 

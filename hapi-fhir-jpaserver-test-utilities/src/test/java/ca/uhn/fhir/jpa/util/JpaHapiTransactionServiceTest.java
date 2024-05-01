@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.util;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -110,6 +111,6 @@ public class JpaHapiTransactionServiceTest extends BaseJpaTest {
 	}
 
 	void assertFound(IFhirResourceDao<?> theDao, IIdType theId) {
-		assertThat(theDao.read(theId, myRequestDetails)).isNotNull();
+		assertNotNull(theDao.read(theId, myRequestDetails));
 	}
 }

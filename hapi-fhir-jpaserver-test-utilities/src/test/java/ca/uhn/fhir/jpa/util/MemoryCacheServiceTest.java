@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.util;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
@@ -50,7 +52,7 @@ class MemoryCacheServiceTest {
 			type, system, code, version, userSelected);
 
 		TagDefinition retVal = mySvc.getIfPresent(MemoryCacheService.CacheEnum.TAG_DEFINITION, cacheKey);
-		assertThat(retVal).isNull();
+		assertNull(retVal);
 
 		TagDefinition tagDef = new TagDefinition(type, system, code, "theLabel");
 		tagDef.setVersion(version);
@@ -225,7 +227,7 @@ class MemoryCacheServiceTest {
 			}
 
 			void assertDone() {
-				assertThat(future.isDone()).isTrue();
+				assertTrue(future.isDone());
 			}
 
 			void assertNotDone() {

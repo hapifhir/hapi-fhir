@@ -1,5 +1,7 @@
 package ca.uhn.fhir.mdm.util;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.FhirTerser;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -69,28 +71,28 @@ class PrimitiveTypeEqualsPredicateTest {
 
 	@Test
 	public void testNegativeMatchOnTheSameType() {
-		assertThat(cut.test(myPositiveTest1, myNegativeTest)).isFalse();
-		assertThat(cut.test(myNegativeTest, myPositiveTest1)).isFalse();
+		assertFalse(cut.test(myPositiveTest1, myNegativeTest));
+		assertFalse(cut.test(myNegativeTest, myPositiveTest1));
 	}
 
 	@Test
 	public void testNegativeMatchOnDifferentTypes() {
 		Person person = new Person();
 		person.addName().addGiven("John");
-		assertThat(cut.test(myNegativeTest, person)).isFalse();
+		assertFalse(cut.test(myNegativeTest, person));
 	}
 
 	@Test
 	public void testNulls() {
-		assertThat(cut.test(null, null)).isTrue();
-		assertThat(cut.test(myPositiveTest1, null)).isFalse();
-		assertThat(cut.test(null, myPositiveTest1)).isFalse();
+		assertTrue(cut.test(null, null));
+		assertFalse(cut.test(myPositiveTest1, null));
+		assertFalse(cut.test(null, myPositiveTest1));
 	}
 
 	@Test
 	public void testPositiveMatchOnTheSameType() {
-		assertThat(cut.test(myPositiveTest1, myPositiveTest2)).isTrue();
-		assertThat(cut.test(myPositiveTest1, myPositiveTest1)).isTrue();
+		assertTrue(cut.test(myPositiveTest1, myPositiveTest2));
+		assertTrue(cut.test(myPositiveTest1, myPositiveTest1));
 	}
 
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerCacheRefresherImpl;
 import ca.uhn.fhir.jpa.cache.ResourceChangeListenerRegistryImpl;
 import org.hl7.fhir.r4.model.DateType;
@@ -39,7 +40,7 @@ public class CrResourceListenerTests extends BaseCrR4TestServer {
 			.returnResourceType(MeasureReport.class)
 			.execute();
 
-		assertThat(report).isNotNull();
+		assertNotNull(report);
 
 		return report;
 	}

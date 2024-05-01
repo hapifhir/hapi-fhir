@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -126,12 +128,12 @@ public class FindCandidateByExampleSvcTest {
 		List<MatchedGoldenResourceCandidate> goldenResourceCanddiates = myFindCandidateByExampleSvc.findMatchGoldenResourceCandidates(patient);
 
 		// verify
-		assertThat(goldenResourceCanddiates).isNotNull();
+		assertNotNull(goldenResourceCanddiates);
 		assertThat(goldenResourceCanddiates).hasSize(2);
 		Set<String> ids = new HashSet<>();
 		for (MatchedGoldenResourceCandidate r : goldenResourceCanddiates) {
 			// we know these are strings
-			assertThat(ids.add((String) r.getCandidateGoldenResourcePid().getId())).isTrue();
+			assertTrue(ids.add((String) r.getCandidateGoldenResourcePid().getId()));
 		}
 	}
 }

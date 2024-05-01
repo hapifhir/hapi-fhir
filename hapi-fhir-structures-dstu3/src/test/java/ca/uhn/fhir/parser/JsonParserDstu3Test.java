@@ -1,5 +1,9 @@
 package ca.uhn.fhir.parser;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
@@ -207,7 +211,7 @@ public class JsonParserDstu3Test {
 		assertThat(dm.getSubject().getReference()).isEqualTo("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3");
 
 		Patient subject = (Patient) dm.getSubject().getResource();
-		assertThat(subject).isNotNull();
+		assertNotNull(subject);
 		assertThat(subject.getNameFirstRep().getFamily()).isEqualTo("FAMILY");
 	}
 
@@ -238,7 +242,7 @@ public class JsonParserDstu3Test {
 
 		// Check no NPE if base server not configure
 		newPatient = ourCtx.newJsonParser().parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
-		assertThat(newPatient.getPetName().getValue()).isNull();
+		assertNull(newPatient.getPetName().getValue());
 		assertThat(((StringType) newPatient.getExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue()).isEqualTo("myName");
 	}
 
@@ -263,14 +267,14 @@ public class JsonParserDstu3Test {
 
 		// Parse with string
 		Bundle newBundle = jsonParser.parseResource(Bundle.class, parsedBundle);
-		assertThat(newBundle).isNotNull();
+		assertNotNull(newBundle);
 		assertThat(newBundle.getEntry()).hasSize(1);
 		Patient newPatient = (Patient) newBundle.getEntry().get(0).getResource();
 		assertThat(((StringType) newPatient.getExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue()).isEqualTo("myName");
 
 		// Parse with stream
 		newBundle = jsonParser.parseResource(Bundle.class, new StringReader(parsedBundle));
-		assertThat(newBundle).isNotNull();
+		assertNotNull(newBundle);
 		assertThat(newBundle.getEntry()).hasSize(1);
 		newPatient = (Patient) newBundle.getEntry().get(0).getResource();
 		assertThat(((StringType) newPatient.getExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue()).isEqualTo("myName");
@@ -361,7 +365,7 @@ public class JsonParserDstu3Test {
 
 		parent = patient.getExtension().get(1);
 		assertThat(parent.getUrl()).isEqualTo("http://example.com#parent");
-		assertThat(parent.getValue()).isNull();
+		assertNull(parent.getValue());
 		child1 = parent.getExtension().get(0);
 		assertThat(child1.getUrl()).isEqualTo("http://example.com#child");
 		assertThat(((StringType) child1.getValue()).getValueAsString()).isEqualTo("value1");
@@ -381,7 +385,7 @@ public class JsonParserDstu3Test {
 
 		given2ext = name.getGiven().get(1).getExtension().get(0);
 		assertThat(given2ext.getUrl()).isEqualTo("http://examples.com#givenext_parent");
-		assertThat(given2ext.getValue()).isNull();
+		assertNull(given2ext.getValue());
 		Extension given2ext2 = given2ext.getExtension().get(0);
 		assertThat(given2ext2.getUrl()).isEqualTo("http://examples.com#givenext_child");
 		assertThat(((StringType) given2ext2.getValue()).getValue()).isEqualTo("CHILD");
@@ -519,18 +523,18 @@ public class JsonParserDstu3Test {
 		assertThat(name.getId()).isEqualTo("nameid");
 		assertThat(name.getGiven()).hasSize(3);
 
-		assertThat(name.getGiven().get(0).getValue()).isNull();
+		assertNull(name.getGiven().get(0).getValue());
 		assertThat(name.getGiven().get(1).getValue()).isEqualTo("V1");
-		assertThat(name.getGiven().get(2).getValue()).isNull();
+		assertNull(name.getGiven().get(2).getValue());
 
 		assertThat(name.getGiven().get(0).getId()).isEqualTo("f0");
 		assertThat(name.getGiven().get(1).getId()).isEqualTo("f1");
-		assertThat(name.getGiven().get(2).getId()).isNull();
+		assertNull(name.getGiven().get(2).getId());
 
 		assertThat(name.getGiven().get(0).getExtension()).hasSize(1);
 		assertThat(name.getGiven().get(0).getExtension().get(0).getUrl()).isEqualTo("http://foo");
 		assertThat(((StringType) name.getGiven().get(0).getExtension().get(0).getValue()).getValue()).isEqualTo("FOOEXT0");
-		assertThat(name.getGiven().get(0).getExtension().get(0).getId()).isNull();
+		assertNull(name.getGiven().get(0).getExtension().get(0).getId());
 
 		assertThat(name.getGiven().get(1).getExtension()).hasSize(1);
 		assertThat(name.getGiven().get(1).getExtension().get(0).getUrl()).isEqualTo("http://foo");
@@ -540,7 +544,7 @@ public class JsonParserDstu3Test {
 		assertThat(name.getGiven().get(2).getExtension()).hasSize(1);
 		assertThat(name.getGiven().get(2).getExtension().get(0).getUrl()).isEqualTo("http://foo");
 		assertThat(((StringType) name.getGiven().get(2).getExtension().get(0).getValue()).getValue()).isEqualTo("FOOEXT3");
-		assertThat(name.getGiven().get(2).getExtension().get(0).getId()).isNull();
+		assertNull(name.getGiven().get(2).getExtension().get(0).getId());
 
 	}
 
@@ -731,7 +735,7 @@ public class JsonParserDstu3Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded).contains("123");
-		assertThat(encoded).doesNotContain("\"\"").isNotNull();
+		assertThat(encoded).isNotNull().doesNotContain("\"\"");
 	}
 
 	@Test
@@ -943,7 +947,7 @@ public class JsonParserDstu3Test {
 	public void testEncodeHistoryEncodeVersionsAtPath1() {
 		ourCtx = FhirContext.forDstu3();
 
-		assertThat(ourCtx.newJsonParser().getStripVersionsFromReferences()).isNull();
+		assertNull(ourCtx.newJsonParser().getStripVersionsFromReferences());
 
 		Patient p = new Patient();
 		p.setManagingOrganization(new Reference("http://foo.com/Organization/2/_history/1"));
@@ -960,8 +964,8 @@ public class JsonParserDstu3Test {
 	public void testEncodeHistoryEncodeVersionsAtPath2() {
 		ourCtx = FhirContext.forDstu3();
 
-		assertThat(ourCtx.newJsonParser().getStripVersionsFromReferences()).isNull();
-		assertThat(ourCtx.getParserOptions().isStripVersionsFromReferences()).isTrue();
+		assertNull(ourCtx.newJsonParser().getStripVersionsFromReferences());
+		assertTrue(ourCtx.getParserOptions().isStripVersionsFromReferences());
 
 		Patient p = new Patient();
 		p.setManagingOrganization(new Reference("http://foo.com/Organization/2/_history/1"));
@@ -978,7 +982,7 @@ public class JsonParserDstu3Test {
 	public void testEncodeHistoryEncodeVersionsAtPath3() {
 		ourCtx = FhirContext.forDstu3();
 
-		assertThat(ourCtx.newJsonParser().getStripVersionsFromReferences()).isNull();
+		assertNull(ourCtx.newJsonParser().getStripVersionsFromReferences());
 
 		AuditEvent auditEvent = new AuditEvent();
 		auditEvent.addEntity().setReference(new Reference("http://foo.com/Organization/2/_history/1"));
@@ -1010,8 +1014,8 @@ public class JsonParserDstu3Test {
 	public void testEncodeHistoryEncodeVersionsAtPathUsingOptions() {
 		ourCtx = FhirContext.forDstu3();
 
-		assertThat(ourCtx.newJsonParser().getStripVersionsFromReferences()).isNull();
-		assertThat(ourCtx.getParserOptions().isStripVersionsFromReferences()).isTrue();
+		assertNull(ourCtx.newJsonParser().getStripVersionsFromReferences());
+		assertTrue(ourCtx.getParserOptions().isStripVersionsFromReferences());
 		assertThat(ourCtx.getParserOptions().getDontStripVersionsFromReferencesAtPaths()).isEmpty();
 
 		Patient p = new Patient();
@@ -1039,7 +1043,7 @@ public class JsonParserDstu3Test {
 	public void testEncodeHistoryStripVersionsFromReferences() {
 		ourCtx = FhirContext.forDstu3();
 
-		assertThat(ourCtx.newJsonParser().getStripVersionsFromReferences()).isNull();
+		assertNull(ourCtx.newJsonParser().getStripVersionsFromReferences());
 
 		Patient p = new Patient();
 		p.setManagingOrganization(new Reference("http://foo.com/Organization/2/_history/1"));
@@ -1061,7 +1065,7 @@ public class JsonParserDstu3Test {
 	public void testEncodeHistoryStripVersionsFromReferencesFromContext() {
 		ourCtx = FhirContext.forDstu3();
 
-		assertThat(ourCtx.getParserOptions().isStripVersionsFromReferences()).isTrue();
+		assertTrue(ourCtx.getParserOptions().isStripVersionsFromReferences());
 
 		Patient p = new Patient();
 		p.setManagingOrganization(new Reference("http://foo.com/Organization/2/_history/1"));
@@ -1266,7 +1270,7 @@ public class JsonParserDstu3Test {
 		assertThat(bundle.getEntry().get(0).getId()).isEqualTo("123");
 
 		condition = (Condition) bundle.getEntry().get(0).getResource();
-		assertThat(condition.getId()).isNull();
+		assertNull(condition.getId());
 	}
 
 	@Test
@@ -1516,8 +1520,8 @@ public class JsonParserDstu3Test {
 
 		assertThat(found.getAllValues().get(1)).isEqualTo(ValueType.OBJECT);
 		assertThat(expected.getAllValues().get(1)).isEqualTo(ValueType.ARRAY);
-		assertThat(foundScalarType.getAllValues().get(1)).isNull();
-		assertThat(expectedScalarType.getAllValues().get(1)).isNull();
+		assertNull(foundScalarType.getAllValues().get(1));
+		assertNull(expectedScalarType.getAllValues().get(1));
 
 		assertThat(patient.getIdElement().getIdPart()).isEqualTo("123");
 		assertThat(patient.getCommunicationFirstRep().getLanguage().getText()).isEqualTo("Hindi");
@@ -1563,7 +1567,7 @@ public class JsonParserDstu3Test {
 		parser.setParserErrorHandler(errorHandler);
 		Observation parsed = parser.parseResource(Observation.class, res);
 
-		assertThat(parsed.getValueDateTimeType().getValue()).isNull();
+		assertNull(parsed.getValueDateTimeType().getValue());
 		assertThat(parsed.getValueDateTimeType().getValueAsString()).isEqualTo("foo");
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
@@ -1599,8 +1603,8 @@ public class JsonParserDstu3Test {
 		parser.setParserErrorHandler(errorHandler);
 		Patient parsed = parser.parseResource(Patient.class, res);
 
-		assertThat(parsed.getGenderElement().getValue()).isNull();
-		assertThat(parsed.getGenderElement().getValueAsString()).isNull();
+		assertNull(parsed.getGenderElement().getValue());
+		assertNull(parsed.getGenderElement().getValueAsString());
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
 		verify(errorHandler, times(1)).invalidValue(any(), eq(""), msgCaptor.capture());
@@ -1619,7 +1623,7 @@ public class JsonParserDstu3Test {
 		parser.setParserErrorHandler(errorHandler);
 		Patient parsed = parser.parseResource(Patient.class, res);
 
-		assertThat(parsed.getGenderElement().getValue()).isNull();
+		assertNull(parsed.getGenderElement().getValue());
 		assertThat(parsed.getGenderElement().getValueAsString()).isEqualTo("foo");
 
 		ArgumentCaptor<String> msgCaptor = ArgumentCaptor.forClass(String.class);
@@ -1676,10 +1680,10 @@ public class JsonParserDstu3Test {
 			{
 				Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
 				IIdType o1Id = o1.getIdElement();
-				assertThat(o1Id.hasBaseUrl()).isFalse();
+				assertFalse(o1Id.hasBaseUrl());
 				assertThat(o1Id.getResourceType()).isEqualTo("Patient");
 				assertThat(o1Id.getIdPart()).isEqualTo("patxuzos");
-				assertThat(o1Id.hasVersionIdPart()).isFalse();
+				assertFalse(o1Id.hasVersionIdPart());
 			}
 		} finally {
 			// ensure we cleanup ourCtx so other tests continue to work
@@ -1696,10 +1700,10 @@ public class JsonParserDstu3Test {
 			{
 				Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
 				IIdType o1Id = o1.getIdElement();
-				assertThat(o1Id.hasBaseUrl()).isFalse();
+				assertFalse(o1Id.hasBaseUrl());
 				assertThat(o1Id.getResourceType()).isEqualTo("Patient");
 				assertThat(o1Id.getIdPart()).isEqualTo("patxuzos");
-				assertThat(o1Id.hasVersionIdPart()).isFalse();
+				assertFalse(o1Id.hasVersionIdPart());
 			}
 		} finally {
 			// ensure we cleanup ourCtx so other tests continue to work
@@ -1767,7 +1771,7 @@ public class JsonParserDstu3Test {
 		assertThat(((Reference) p.getMedication()).getReference()).isEqualTo("#med");
 
 		Medication m = (Medication) ((Reference) p.getMedication()).getResource();
-		assertThat(m).isNotNull();
+		assertNotNull(m);
 		assertThat(m.getIdElement().getValue()).isEqualTo("#med");
 		assertThat(p.getContained()).hasSize(1);
 		assertThat(p.getContained().get(0)).isSameAs(m);
@@ -1858,7 +1862,7 @@ public class JsonParserDstu3Test {
 		ourLog.info(encoded);
 
 		assertThat(parsed.getEntry().get(0).getResource().getIdElement().getValue()).isEqualTo("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57");
-		assertThat(parsed.getEntry().get(0).getResource().getIdElement().getBaseUrl()).isNull();
+		assertNull(parsed.getEntry().get(0).getResource().getIdElement().getBaseUrl());
 		assertThat(parsed.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo("urn:uuid:180f219f-97a8-486d-99d9-ed631fe4fc57");
 		assertThat(encoded).doesNotContain("\"id\":\"180f219f-97a8-486d-99d9-ed631fe4fc57\"");
 	}
@@ -1976,7 +1980,7 @@ public class JsonParserDstu3Test {
 		o = parser.parseResource(Observation.class, enc);
 		assertThat(o.getCode().getText()).isEqualTo("obs text");
 
-		assertThat(o.getSubject().getResource()).isNotNull();
+		assertNotNull(o.getSubject().getResource());
 		p = (Patient) o.getSubject().getResource();
 		assertThat(p.getName().get(0).getFamilyElement().getValue()).isEqualTo("patient family");
 	}
@@ -2008,11 +2012,11 @@ public class JsonParserDstu3Test {
 		QuestionnaireResponse qr = parser.parseResource(QuestionnaireResponse.class, input);
 
 		assertThat(qr.getIdElement().getValue()).isEqualTo("QuestionnaireResponse/123");
-		assertThat(qr.getAuthored()).isNull();
-		assertThat(qr.getAuthoredElement().getValue()).isNull();
-		assertThat(qr.getAuthoredElement().getValueAsString()).isNull();
-		assertThat(qr.getItemFirstRep().getLinkId()).isNull();
-		assertThat(qr.getItemFirstRep().getLinkIdElement().getValue()).isNull();
+		assertNull(qr.getAuthored());
+		assertNull(qr.getAuthoredElement().getValue());
+		assertNull(qr.getAuthoredElement().getValueAsString());
+		assertNull(qr.getItemFirstRep().getLinkId());
+		assertNull(qr.getItemFirstRep().getLinkIdElement().getValue());
 	}
 
 	/**
@@ -2064,7 +2068,7 @@ public class JsonParserDstu3Test {
 		parser.setParserErrorHandler(new LenientErrorHandler());
 		Patient parsed = (Patient) parser.parseResource(input);
 		assertThat(parsed.getExtension()).hasSize(1);
-		assertThat(parsed.getExtension().get(0).getUrl()).isNull();
+		assertNull(parsed.getExtension().get(0).getUrl());
 		assertThat(parsed.getExtension().get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("2011-01-02T11:13:15");
 
 		try {
@@ -2093,7 +2097,7 @@ public class JsonParserDstu3Test {
 		parser.setParserErrorHandler(new LenientErrorHandler());
 		Patient parsed = (Patient) parser.parseResource(input);
 		assertThat(parsed.getModifierExtension()).hasSize(1);
-		assertThat(parsed.getModifierExtension().get(0).getUrl()).isNull();
+		assertNull(parsed.getModifierExtension().get(0).getUrl());
 		assertThat(parsed.getModifierExtension().get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("2011-01-02T11:13:15");
 
 		try {
@@ -2189,11 +2193,11 @@ public class JsonParserDstu3Test {
 	public void testParseNarrativeWithEmptyDiv() {
 		String input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div/>\"}}";
 		Basic basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
-		assertThat(basic.getText().getDivAsString()).isNull();
+		assertNull(basic.getText().getDivAsString());
 
 		input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div></div>\"}}";
 		basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
-		assertThat(basic.getText().getDivAsString()).isNull();
+		assertNull(basic.getText().getDivAsString());
 
 		input = "{\"resourceType\":\"Basic\",\"id\":\"1\",\"text\":{\"status\":\"generated\",\"div\":\"<div> </div>\"}}";
 		basic = ourCtx.newJsonParser().parseResource(Basic.class, input);
@@ -2428,8 +2432,8 @@ public class JsonParserDstu3Test {
 		assertThat(elementName.getAllValues().get(0)).isEqualTo("_id");
 		assertThat(expected.getAllValues().get(0)).isEqualTo(ValueType.OBJECT);
 		assertThat(actual.getAllValues().get(0)).isEqualTo(ValueType.SCALAR);
-		assertThat(expectedScalar.getAllValues().get(0)).isNull();
-		assertThat(actualScalar.getAllValues().get(0)).isNull();
+		assertNull(expectedScalar.getAllValues().get(0));
+		assertNull(actualScalar.getAllValues().get(0));
 	}
 
 	@Test
@@ -2452,7 +2456,7 @@ public class JsonParserDstu3Test {
 		ValidationResult result = val.validateWithResult(header);
 
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
-		assertThat(result.isSuccessful()).isTrue();
+		assertTrue(result.isSuccessful());
 	}
 
 	@Test
@@ -2482,13 +2486,13 @@ public class JsonParserDstu3Test {
 
 		// Assert
 		Patient parsedPatient = (Patient) parser.parseResource(encodedPatient);
-		assertThat(parsedPatient.getId()).isNull();
-		assertThat(parsedPatient.getMeta().isEmpty()).isTrue();
+		assertNull(parsedPatient.getId());
+		assertTrue(parsedPatient.getMeta().isEmpty());
 
 		Resource containedResource = parsedPatient.getContained().get(0);
-		assertThat(containedResource.getMeta()).isNotNull();
-		assertThat(containedResource.getMeta().getVersionId()).isNull();
-		assertThat(containedResource.getMeta().getLastUpdated()).isNull();
+		assertNotNull(containedResource.getMeta());
+		assertNull(containedResource.getMeta().getVersionId());
+		assertNull(containedResource.getMeta().getLastUpdated());
 		assertThat(containedResource.getMeta().getSecurity()).isEmpty();
 		assertThat(containedResource.getMeta().getProfile()).hasSize(1);
 		assertThat(containedResource.getMeta().getTag()).hasSize(1);

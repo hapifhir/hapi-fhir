@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
@@ -90,7 +91,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
 		assertThat(links.get(0).getLinkSource()).isEqualTo(MdmLinkSourceEnum.MANUAL);
 		assertThat(links.get(0).getMatchResult()).isEqualTo(MdmMatchResultEnum.MATCH);
-		assertThat(links.get(0).getPartitionId()).isNotNull();
+		assertNotNull(links.get(0).getPartitionId());
 		assertThat(links.get(0).getPartitionId().getPartitionId()).isEqualTo(1);
 	}
 
@@ -139,7 +140,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 	public void testUpdateLinkTwiceDoesNotThrowValidationErrorWhenNoVersionIsProvided() {
 		myMdmProvider.updateLink(mySourcePatientId, myPatientId, MATCH_RESULT, myRequestDetails);
 		Patient patient = (Patient) myMdmProvider.updateLink(myVersionlessGodlenResourceId, myPatientId, NO_MATCH_RESULT, myRequestDetails);
-		assertThat(patient).isNotNull(); // if this wasn't allowed - a validation exception would be thrown
+		assertNotNull(patient); // if this wasn't allowed - a validation exception would be thrown
 	}
 
 	@Test

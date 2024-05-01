@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.searchparam.registry;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import org.junit.jupiter.api.Test;
 
 import static ca.uhn.fhir.jpa.searchparam.registry.ReadOnlySearchParamCache.searchParamMatchesAtLeastOnePattern;
@@ -11,12 +13,12 @@ public class ReadOnlySearchParamCacheTest {
 
 	@Test
 	void testSearchParamMatchesAtLeastOnePattern() {
-		assertThat(searchParamMatchesAtLeastOnePattern(newHashSet("*"), "Patient", "name")).isTrue();
-		assertThat(searchParamMatchesAtLeastOnePattern(newHashSet("Patient:name"), "Patient", "name")).isTrue();
-		assertThat(searchParamMatchesAtLeastOnePattern(newHashSet("Patient:*"), "Patient", "name")).isTrue();
-		assertThat(searchParamMatchesAtLeastOnePattern(newHashSet("*:name"), "Patient", "name")).isTrue();
-		assertThat(searchParamMatchesAtLeastOnePattern(newHashSet("Patient:foo"), "Patient", "name")).isFalse();
-		assertThat(searchParamMatchesAtLeastOnePattern(newHashSet("Foo:name"), "Patient", "name")).isFalse();
+		assertTrue(searchParamMatchesAtLeastOnePattern(newHashSet("*"), "Patient", "name"));
+		assertTrue(searchParamMatchesAtLeastOnePattern(newHashSet("Patient:name"), "Patient", "name"));
+		assertTrue(searchParamMatchesAtLeastOnePattern(newHashSet("Patient:*"), "Patient", "name"));
+		assertTrue(searchParamMatchesAtLeastOnePattern(newHashSet("*:name"), "Patient", "name"));
+		assertFalse(searchParamMatchesAtLeastOnePattern(newHashSet("Patient:foo"), "Patient", "name"));
+		assertFalse(searchParamMatchesAtLeastOnePattern(newHashSet("Foo:name"), "Patient", "name"));
 	}
 
 

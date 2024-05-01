@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
@@ -141,7 +142,7 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		assertThat(set.getRootConcepts().get(0).getChildren()).hasSize(2);
 		assertThat(set.getRootConcepts().get(0).getChildren().get(0).getChild().getCode()).isEqualTo("HB");
 		assertThat(set.getRootConcepts().get(0).getChildren().get(0).getChild().getDisplay()).isEqualTo("Hemoglobin");
-		assertThat(set.getRootConcepts().get(0).getChildren().get(0).getChild().getSequence()).isNull();
+		assertNull(set.getRootConcepts().get(0).getChildren().get(0).getChild().getSequence());
 		assertThat(set.getRootConcepts().get(0).getChildren().get(1).getChild().getCode()).isEqualTo("NEUT");
 		assertThat(set.getRootConcepts().get(0).getChildren().get(1).getChild().getDisplay()).isEqualTo("Neutrophils");
 
