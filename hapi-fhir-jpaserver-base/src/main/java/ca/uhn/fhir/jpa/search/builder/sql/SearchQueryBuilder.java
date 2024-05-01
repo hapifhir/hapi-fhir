@@ -361,6 +361,12 @@ public class SearchQueryBuilder {
 	public ComboCondition createOnCondition(DbColumn theSourceColumn, DbColumn theTargetColumn) {
 		ComboCondition onCondition = ComboCondition.and();
 		onCondition.addCondition(BinaryCondition.equalTo(theSourceColumn, theTargetColumn));
+		// fixme cosmos hack
+		if (true) {
+			DbColumn sourcePartId = theSourceColumn.getTable().findColumn("PARTITION_ID");
+			DbColumn targetPartId = theTargetColumn.getTable().findColumn("PARTITION_ID");
+			onCondition.addCondition(BinaryCondition.equalTo(sourcePartId, targetPartId));
+		}
 
 		return onCondition;
 	}
@@ -459,18 +465,18 @@ public class SearchQueryBuilder {
 			DbColumn theToColumn,
 			SelectQuery.JoinType theJoinType) {
 		DbColumn[] fromColumns;
-        DbColumn[] toColumns;
+		DbColumn[] toColumns;
 
 		if (true) {
 			// fixme cosmos hack
-			fromColumns = new DbColumn[]{theFromColumn, theFromTable.findColumn("PARTITION_ID")};
-			toColumns = new DbColumn[]{theToColumn, theToTable.findColumn("PARTITION_ID")};
+			fromColumns = new DbColumn[] {theFromColumn, theFromTable.findColumn("PARTITION_ID")};
+			toColumns = new DbColumn[] {theToColumn, theToTable.findColumn("PARTITION_ID")};
 		} else {
-			fromColumns = new DbColumn[]{theFromColumn};
-			toColumns = new DbColumn[]{theToColumn};
+			fromColumns = new DbColumn[] {theFromColumn};
+			toColumns = new DbColumn[] {theToColumn};
 		}
 
-        Join join = new DbJoin(mySpec, theFromTable, theToTable, fromColumns, toColumns);
+		Join join = new DbJoin(mySpec, theFromTable, theToTable, fromColumns, toColumns);
 		mySelect.addJoins(theJoinType, join);
 	}
 

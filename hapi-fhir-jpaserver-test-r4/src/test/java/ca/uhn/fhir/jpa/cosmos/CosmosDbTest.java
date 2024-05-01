@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
+import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
@@ -18,9 +19,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.BundleBuilder;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IAnyResource;
-import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
@@ -32,6 +31,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -72,6 +73,8 @@ public class CosmosDbTest extends BaseJpaTest {
 	private ISearchParamRegistry mySearchParamRegistry;
 	@Autowired
 	private IBulkDataExportJobSchedulingHelper myBulkDataScheduleHelper;
+	@Autowired
+	private TestDaoSearch myDaoSearch;
 
 	@Override
 	protected FhirContext getFhirContext() {
@@ -141,6 +144,26 @@ public class CosmosDbTest extends BaseJpaTest {
 		IBundleProvider outcome = myObservationDao.search(map, mySrd);
 		assertThat(toUnqualifiedVersionlessIdValues(outcome), contains(OBSERVATION_O0));
 	}
+
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+			string, Patient?_sort=name
+			date, Observation?_sort=date
+			_id, Patient?_sort=_id
+			_lastUpdated, Patient?_sort=_lastUpdated
+			_pid, Patient?_sort=_pid
+			""")
+	void testSort(String theComment, String theQuery) {
+		// Create resource
+		createPatientAndObservation();
+
+		// when
+		addReadPartition(1);
+		List<String> ids = myDaoSearch.searchForIds(theQuery);
+
+		assertEquals(1, ids.size(), theComment);
+	}
+
 
 	@Test
 	public void testIncludes() {
@@ -222,6 +245,7 @@ public class CosmosDbTest extends BaseJpaTest {
 		patient.setId(PATIENT_P0);
 		patient.addIdentifier().setSystem("http://foo").setValue("123");
 		patient.setGender(Enumerations.AdministrativeGender.MALE);
+		patient.addName().setFamily("Smith");
 		myPatientDao.update(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		addCreatePartition1();
