@@ -327,7 +327,7 @@ public class DatabaseBinaryContentStorageSvcImplTest extends BaseJpaR4Test {
 		IdType resourceId = new IdType("Binary/123");
 
 		// when
-		StoredDetails outcome = svc.storeBinaryContent(resourceId, null, contentType, inputStream, new ServletRequestDetails());
+		svc.storeBinaryContent(resourceId, null, contentType, inputStream, new ServletRequestDetails());
 
 		// then
 		verify(mockedEntityManager, times(1)).persist(captor.capture());
