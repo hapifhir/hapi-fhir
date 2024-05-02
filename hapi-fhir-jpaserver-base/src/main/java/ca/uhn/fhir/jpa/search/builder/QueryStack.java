@@ -419,7 +419,7 @@ public class QueryStack {
 		}
 
 		addSortCustomJoin(resourceLinkPredicateBuilder.getColumnTargetResourceId(), chainedPredicateBuilder, null);
-		Condition predicate = chainedPredicateBuilder.createHashIdentityPredicate(targetType, theChain);
+		Condition predicate = chainedPredicateBuilder.createHashIdentityOrNullPredicate(targetType, theChain);
 		mySqlBuilder.addPredicate(predicate);
 
 		for (DbColumn next : sortColumn) {

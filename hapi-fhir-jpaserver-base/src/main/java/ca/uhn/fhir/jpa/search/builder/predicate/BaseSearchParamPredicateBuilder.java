@@ -27,6 +27,7 @@ import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.Conditions;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.SelectQuery;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
@@ -94,6 +95,15 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 				getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName);
 		String hashIdentityVal = generatePlaceholder(hashIdentity);
 		return BinaryCondition.equalTo(myColumnHashIdentity, hashIdentityVal);
+	}
+
+	@Nonnull
+	public Condition createHashIdentityOrNullPredicate(String theResourceType, String theParamName) {
+		final long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
+			getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName);
+		final String hashIdentityVal = generatePlaceholder(hashIdentity);
+		return Conditions.or(BinaryCondition.equalTo(myColumnHashIdentity, hashIdentityVal),
+							 Conditions.isNull(myColumnHashIdentity));
 	}
 
 	public Condition createPredicateParamMissingForNonReference(
