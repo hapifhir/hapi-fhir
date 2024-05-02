@@ -419,7 +419,8 @@ public class QueryStack {
 		}
 
 		addSortCustomJoin(resourceLinkPredicateBuilder.getColumnTargetResourceId(), chainedPredicateBuilder, null);
-		Condition predicate = chainedPredicateBuilder.createHashIdentityOrNullPredicate(targetType, theChain);
+// Support chained sort - when there is no data to sort, the outer join will produce null columns.  We need to include those too.
+				Condition predicate = chainedPredicateBuilder.createHashIdentityOrNullPredicate(targetType, theChain);
 		mySqlBuilder.addPredicate(predicate);
 
 		for (DbColumn next : sortColumn) {
