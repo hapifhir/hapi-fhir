@@ -130,6 +130,15 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 				.addIndex("20240422.1", "IDX_IDXCMBTOKNU_HASHC")
 				.unique(false)
 				.withColumns("HASH_COMPLETE", "RES_ID", "PARTITION_ID");
+
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
+				.addColumn("20240422.2", "HASH_IDENTITY")
+				.nullable()
+				.type(ColumnTypeEnum.LONG);
+		version.onTable("HFJ_IDX_CMP_STRING_UNIQ")
+				.addColumn("20240422.3", "HASH_COMPLETE")
+				.nullable()
+				.type(ColumnTypeEnum.LONG);
 	}
 
 	protected void init720() {
