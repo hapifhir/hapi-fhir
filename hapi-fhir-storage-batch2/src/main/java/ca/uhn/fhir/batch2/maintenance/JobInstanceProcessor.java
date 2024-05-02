@@ -258,8 +258,7 @@ public class JobInstanceProcessor {
 		if (workChunkStatuses.isEmpty()) {
 			// no work chunks = no output
 			// trivial to advance to next step
-			ourLog.info("No workchunks for {} in step id {}", theInstance.getInstanceId(),
-				currentGatedStepId);
+			ourLog.info("No workchunks for {} in step id {}", theInstance.getInstanceId(), currentGatedStepId);
 			return true;
 		}
 
@@ -356,23 +355,24 @@ public class JobInstanceProcessor {
 		myBatchJobSender.sendWorkChannelMessage(workNotification);
 	}
 
-	private void processChunksForNextGatedSteps(JobInstance theInstance, JobDefinition<?> theJobDefinition, String nextStepId) {
+	private void processChunksForNextGatedSteps(
+			JobInstance theInstance, JobDefinition<?> theJobDefinition, String nextStepId) {
 		String instanceId = theInstance.getInstanceId();
 
 		List<String> gateWaitingChunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(
-			instanceId, nextStepId, WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED);
+				instanceId, nextStepId, WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED);
 		int totalChunksForNextStep = myProgressAccumulator.getTotalChunkCountForInstanceAndStep(instanceId, nextStepId);
 		if (totalChunksForNextStep != gateWaitingChunksForNextStep.size()) {
 			ourLog.debug(
-				"Total ProgressAccumulator GATE_WAITING chunk count does not match GATE_WAITING chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]",
-				instanceId,
-				nextStepId,
-				totalChunksForNextStep,
-				gateWaitingChunksForNextStep.size());
+					"Total ProgressAccumulator GATE_WAITING chunk count does not match GATE_WAITING chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]",
+					instanceId,
+					nextStepId,
+					totalChunksForNextStep,
+					gateWaitingChunksForNextStep.size());
 		}
 
-		JobWorkCursor<?, ?, ?> jobWorkCursor = JobWorkCursor.fromJobDefinitionAndRequestedStepId(
-			theJobDefinition, nextStepId);
+		JobWorkCursor<?, ?, ?> jobWorkCursor =
+				JobWorkCursor.fromJobDefinitionAndRequestedStepId(theJobDefinition, nextStepId);
 
 		// update the job step so the workers will process them.
 		// Sets all chunks from QUEUED/GATE_WAITING -> READY (REDUCTION_READY for reduction jobs)
