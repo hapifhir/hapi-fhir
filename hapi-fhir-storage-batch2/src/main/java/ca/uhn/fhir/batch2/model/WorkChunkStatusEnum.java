@@ -101,6 +101,7 @@ public enum WorkChunkStatusEnum {
 			case READY:
 				return EnumSet.of(QUEUED);
 			case REDUCTION_READY:
+				// currently no support for POLL_WAITING reduction steps
 				return EnumSet.of(COMPLETED, FAILED);
 			case QUEUED:
 				return EnumSet.of(IN_PROGRESS);

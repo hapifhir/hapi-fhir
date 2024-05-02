@@ -48,6 +48,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -108,6 +109,10 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 		getTestManager().verifyWorkChunkMessageHandlerCalled(sendLatch, 1);
 	}
 
+	/**
+	 * Tests transitions to a known ready state for gated jobs.
+	 * for most jobs, this is READY. For reduction step jobs, this is REDUCTION_READY
+	 */
 	@ParameterizedTest
 	@ValueSource(booleans = { true, false })
 	default void advanceJobStepAndUpdateChunkStatus_forGatedJob_updatesBothGATE_WAITINGAndQUEUEDChunksToAnExpectedREADYState(boolean theIsReductionStep) {
@@ -131,6 +136,65 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 
 		// execute
 		getTestManager().runInTransaction(() -> getTestManager().getSvc().advanceJobStepAndUpdateChunkStatus(jobInstanceId, LAST_STEP_ID, theIsReductionStep));
+
+		// verify
+		assertEquals(LAST_STEP_ID, getTestManager().freshFetchJobInstance(jobInstanceId).getCurrentGatedStepId());
+		info.verifyFinalStates(getTestManager().getSvc());
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {
+		"""
+			1|COMPLETED
+			2|COMPLETED
+			3|READY
+		""",
+		"""
+			1|COMPLETED
+			2|COMPLETED
+			3|REDUCTION_READY
+		""",
+		"""
+			1|COMPLETED
+			2|COMPLETED
+			3|IN_PROGRESS
+		""",
+		"""
+			1|COMPLETED
+			2|COMPLETED
+			3|POLL_WAITING
+		""",
+		"""
+			1|COMPLETED
+			2|COMPLETED
+			3|ERRORED
+		""",
+		"""
+			1|COMPLETED
+			2|COMPLETED
+			3|FAILED
+		""",
+		"""
+			1|COMPLETED
+			2|COMPLETED
+			3|COMPLETED
+		"""
+	})
+	default void advanceJobStepAndUpdateChunkStatus_reductionJobWithInvalidStates_doNotTransition(String theState) {
+		// setup
+		getTestManager().disableWorkChunkMessageHandler();
+
+		JobDefinition<TestJobParameters> jobDef = getTestManager().withJobDefinitionWithReductionStep();
+		String jobInstanceId = getTestManager().createAndStoreJobInstance(jobDef);
+
+		JobMaintenanceStateInformation info = new JobMaintenanceStateInformation(jobInstanceId, jobDef, theState);
+		getTestManager().createChunksInStates(info);
+		assertEquals(SECOND_STEP_ID, getTestManager().freshFetchJobInstance(jobInstanceId).getCurrentGatedStepId());
+
+		// execute
+		getTestManager().runInTransaction(() -> {
+			getTestManager().getSvc().advanceJobStepAndUpdateChunkStatus(jobInstanceId, LAST_STEP_ID, true);
+		});
 
 		// verify
 		assertEquals(LAST_STEP_ID, getTestManager().freshFetchJobInstance(jobInstanceId).getCurrentGatedStepId());

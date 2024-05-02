@@ -485,16 +485,6 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 	}
 
 	@Override
-	public List<String> fetchAllChunkIdsForStepWithStatus(
-			String theInstanceId, String theStepId, WorkChunkStatusEnum theStatusEnum) {
-		return myTransactionService
-				.withSystemRequest()
-				.withPropagation(Propagation.REQUIRES_NEW)
-				.execute(() -> myWorkChunkRepository.fetchAllChunkIdsForStepWithStatus(
-						theInstanceId, theStepId, theStatusEnum));
-	}
-
-	@Override
 	public void updateInstanceUpdateTime(String theInstanceId) {
 		myJobInstanceRepository.updateInstanceUpdateTime(theInstanceId, new Date());
 	}
@@ -632,9 +622,9 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 		if (changed) {
 			ourLog.debug(
-					"Updating chunk status from GATE_WAITING to READY for gated instance {} in step {}.",
-					theJobInstanceId,
-					theNextStepId);
+				"Updating chunk status from GATE_WAITING to READY for gated instance {} in step {}.",
+				theJobInstanceId,
+				theNextStepId);
 			WorkChunkStatusEnum nextStep = theIsReductionStep ? WorkChunkStatusEnum.REDUCTION_READY : WorkChunkStatusEnum.READY;
 			// when we reach here, the current step id is equal to theNextStepId
 			// Up to 7.1, gated jobs' work chunks are created in status QUEUED but not actually queued for the
@@ -642,15 +632,15 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			// In order to keep them compatible, turn QUEUED chunks into READY, too.
 			// TODO: 'QUEUED' from the IN clause will be removed after 7.6.0.
 			int numChanged = myWorkChunkRepository.updateAllChunksForStepWithStatus(
-					theJobInstanceId,
-					theNextStepId,
-					List.of(WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED),
+				theJobInstanceId,
+				theNextStepId,
+				List.of(WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED),
 				nextStep);
 			ourLog.debug(
-					"Updated {} chunks of gated instance {} for step {} from fake QUEUED to READY.",
-					numChanged,
-					theJobInstanceId,
-					theNextStepId);
+				"Updated {} chunks of gated instance {} for step {} from fake QUEUED to READY.",
+				numChanged,
+				theJobInstanceId,
+				theNextStepId);
 		}
 
 		return changed;

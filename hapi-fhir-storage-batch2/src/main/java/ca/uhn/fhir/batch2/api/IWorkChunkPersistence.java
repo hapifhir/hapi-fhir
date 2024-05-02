@@ -143,14 +143,4 @@ public interface IWorkChunkPersistence {
 	 */
 	@Transactional(propagation = Propagation.MANDATORY, readOnly = true)
 	Stream<WorkChunk> fetchAllWorkChunksForStepStream(String theInstanceId, String theStepId);
-
-	/**
-	 * Fetch chunk ids for starting a gated step.
-	 *
-	 * @param theInstanceId the job
-	 * @param theStepId     the step that is starting
-	 * @return the WorkChunk ids
-	 */
-	List<String> fetchAllChunkIdsForStepWithStatus(
-			String theInstanceId, String theStepId, WorkChunkStatusEnum theStatusEnum);
 }
