@@ -89,11 +89,6 @@ public class RenameTableTask extends BaseTableTask {
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		boolean hasTableWithNewTableName = tableNames.contains(getNewTableName());
 
-		if (!tableNames.contains(getOldTableName())) {
-			throw new SQLException(Msg.code(2516) + "Can not rename " + getOldTableName() + " to " + getNewTableName()
-					+ " because the original table does not exists");
-		}
-
 		if (hasTableWithNewTableName) {
 			handleTableWithNewTableName();
 		}
