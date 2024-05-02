@@ -179,20 +179,20 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 			Builder.BuilderWithTableName binaryStorageTableFix = version.onTable("HFJ_BINARY_STORAGE");
 
 			binaryStorageTableFix
-					.renameColumn("20240430.10", "CONTENT_ID", "BLOB_ID")
+					.renameColumn("20240404.10", "CONTENT_ID", "BLOB_ID")
 					.getLastAddedTask()
 					.ifPresent(BaseTask::failureAllowed);
 			binaryStorageTableFix
-					.renameColumn("20240430.20", "CONTENT_SIZE", "BLOB_SIZE")
+					.renameColumn("20240404.20", "CONTENT_SIZE", "BLOB_SIZE")
 					.getLastAddedTask()
 					.ifPresent(BaseTask::failureAllowed);
 			binaryStorageTableFix
-					.renameColumn("20240430.30", "CONTENT_HASH", "BLOB_HASH")
+					.renameColumn("20240404.30", "CONTENT_HASH", "BLOB_HASH")
 					.getLastAddedTask()
 					.ifPresent(BaseTask::failureAllowed);
 
 			binaryStorageTableFix
-					.renameTable("20240430.40", "HFJ_BINARY_STORAGE_BLOB")
+					.renameTable("20240404.40", "HFJ_BINARY_STORAGE_BLOB")
 					.failureAllowed();
 		}
 
