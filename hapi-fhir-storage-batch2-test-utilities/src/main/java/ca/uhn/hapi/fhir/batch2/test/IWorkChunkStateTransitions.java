@@ -108,19 +108,21 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 		getTestManager().verifyWorkChunkMessageHandlerCalled(sendLatch, 1);
 	}
 
-	@Test
-	default void advanceJobStepAndUpdateChunkStatus_forGatedJob_updatesBothREADYAndQUEUEDChunks() {
+	@ParameterizedTest
+	@ValueSource(booleans = { true, false })
+	default void advanceJobStepAndUpdateChunkStatus_forGatedJob_updatesBothGATE_WAITINGAndQUEUEDChunksToAnExpectedREADYState(boolean theIsReductionStep) {
 		// setup
 		getTestManager().disableWorkChunkMessageHandler();
 
-		String state = """
+		WorkChunkStatusEnum nextState = theIsReductionStep ? WorkChunkStatusEnum.REDUCTION_READY : WorkChunkStatusEnum.READY;
+		String state = String.format("""
 						1|COMPLETED
 						2|COMPLETED
-						3|GATE_WAITING,3|READY
-						3|QUEUED,3|READY
-		""";
+						3|GATE_WAITING,3|%s
+						3|QUEUED,3|%s
+		""", nextState.name(), nextState.name());
 
-		JobDefinition<TestJobParameters> jobDef = getTestManager().withJobDefinition(true);
+		JobDefinition<TestJobParameters> jobDef = theIsReductionStep ? getTestManager().withJobDefinitionWithReductionStep() : getTestManager().withJobDefinition(true);
 		String jobInstanceId = getTestManager().createAndStoreJobInstance(jobDef);
 
 		JobMaintenanceStateInformation info = new JobMaintenanceStateInformation(jobInstanceId, jobDef, state);
@@ -128,7 +130,7 @@ public interface IWorkChunkStateTransitions extends IWorkChunkCommon, WorkChunkT
 		assertEquals(SECOND_STEP_ID, getTestManager().freshFetchJobInstance(jobInstanceId).getCurrentGatedStepId());
 
 		// execute
-		getTestManager().runInTransaction(() -> getTestManager().getSvc().advanceJobStepAndUpdateChunkStatus(jobInstanceId, LAST_STEP_ID));
+		getTestManager().runInTransaction(() -> getTestManager().getSvc().advanceJobStepAndUpdateChunkStatus(jobInstanceId, LAST_STEP_ID, theIsReductionStep));
 
 		// verify
 		assertEquals(LAST_STEP_ID, getTestManager().freshFetchJobInstance(jobInstanceId).getCurrentGatedStepId());

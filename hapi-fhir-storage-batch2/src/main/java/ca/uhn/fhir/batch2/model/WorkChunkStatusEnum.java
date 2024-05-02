@@ -35,13 +35,17 @@ public enum WorkChunkStatusEnum {
 	 * The initial state all workchunks start in
 	 */
 	READY,
+	REDUCTION_READY,
+	/**
+	 *
+	 */
 	GATE_WAITING,
-	QUEUED,
 	/**
 	 * The state of workchunks that have been sent to the queue;
 	 * or of workchunks that are about to be processed in a final
 	 * reduction step (these workchunks are never queued)
 	 */
+	QUEUED,
 	/**
 	 * The state of workchunks that are doing work.
 	 */
@@ -80,6 +84,10 @@ public enum WorkChunkStatusEnum {
 
 	public boolean isIncomplete() {
 		return (this != WorkChunkStatusEnum.COMPLETED);
+	}
+
+	public boolean isAReadyState() {
+		return this == WorkChunkStatusEnum.READY || this == WorkChunkStatusEnum.REDUCTION_READY;
 	}
 
 	public Set<WorkChunkStatusEnum> getNextStates() {

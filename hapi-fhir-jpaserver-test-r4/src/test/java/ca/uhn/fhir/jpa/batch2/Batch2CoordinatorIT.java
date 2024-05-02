@@ -27,19 +27,25 @@ import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelFactory;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.jpa.test.config.Batch2FastSchedulerConfig;
+import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.test.concurrency.PointcutLatch;
+import ca.uhn.test.util.LogbackCaptureTestExtension;
+import ch.qos.logback.classic.Level;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
@@ -61,12 +67,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static ca.uhn.fhir.batch2.config.BaseBatch2Config.CHANNEL_NAME;
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -102,6 +112,9 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	@Autowired
 	IJobPersistence myJobPersistence;
 
+	@RegisterExtension
+	LogbackCaptureTestExtension myLogbackCaptureTestExtension = new LogbackCaptureTestExtension();
+
 	private final PointcutLatch myFirstStepLatch = new PointcutLatch("First Step");
 	private final PointcutLatch myLastStepLatch = new PointcutLatch("Last Step");
 	private IJobCompletionHandler<TestJobParameters> myCompletionHandler;
@@ -110,6 +123,10 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	private static RunOutcome callLatch(PointcutLatch theLatch, StepExecutionDetails<?, ?> theStep) {
 		theLatch.call(theStep);
 		return RunOutcome.SUCCESS;
+	}
+
+	static {
+		TestR4Config.ourMaxThreads = 100;
 	}
 
 	@Override
@@ -259,9 +276,11 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	 * This test verifies that if we have a workchunks being processed by the queue,
 	 * and the maintenance job kicks in, it won't necessarily advance the steps.
 	 */
-	@Test
+	@RepeatedTest(50)
 	public void gatedJob_whenMaintenanceRunHappensDuringMsgProcessing_doesNotAdvance() throws InterruptedException {
 		// setup
+		myLogbackCaptureTestExtension.setUp(Level.DEBUG);
+		// TODO shut off scheduler?
 		String jobId = getMethodNameForJobId();
 		int chunksToMake = 5;
 		AtomicInteger secondGateCounter = new AtomicInteger();
@@ -927,6 +946,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			)
 			.completionHandler(myCompletionHandler)
 			.build();
+		myJobDefinitionRegistry.removeJobDefinition(theJobId, 1);
 		myJobDefinitionRegistry.addJobDefinition(jd);
 	}
 

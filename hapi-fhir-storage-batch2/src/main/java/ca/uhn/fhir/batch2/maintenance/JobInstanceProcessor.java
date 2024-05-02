@@ -97,8 +97,14 @@ public class JobInstanceProcessor {
 		JobDefinition<? extends IModelJson> jobDefinition =
 				myJobDefinitionegistry.getJobDefinitionOrThrowException(theInstance);
 
+		// move POLL_WAITING -> READY
 		processPollingChunks(theInstance.getInstanceId());
+		// determine job progress; delete CANCELED/COMPLETE/FAILED jobs that are no longer needed
 		cleanupInstance(theInstance);
+		// move gated jobs to the next step, if needed
+		// moves GATE_WAITING / QUEUED (legacy) chunks to:
+		// READY (for regular gated jobs)
+		// REDUCTION_READY (if it's the final reduction step)
 		triggerGatedExecutions(theInstance, jobDefinition);
 
 		if (theInstance.hasGatedStep() && theInstance.isRunning()) {
@@ -117,7 +123,7 @@ public class JobInstanceProcessor {
 			}
 		}
 
-		// enqueue the chunks as normal
+		// enqueue all READY chunks
 		enqueueReadyChunks(theInstance, jobDefinition);
 
 		ourLog.debug("Finished job processing: {} - {}", myInstanceId, stopWatch);
@@ -219,7 +225,7 @@ public class JobInstanceProcessor {
 						currentStepId,
 						nextStepId);
 
-				processChunksForNextGatedSteps(theInstance, nextStepId);
+				processChunksForNextGatedSteps(theInstance, jobWorkCursor, nextStepId);
 			} else {
 				ourLog.info(
 						"Ready to advance gated execution of instance {} but already at the final step {}. Not proceeding to advance steps.",
@@ -348,22 +354,24 @@ public class JobInstanceProcessor {
 		myBatchJobSender.sendWorkChannelMessage(workNotification);
 	}
 
-	private void processChunksForNextGatedSteps(JobInstance theInstance, String nextStepId) {
+	private void processChunksForNextGatedSteps(JobInstance theInstance, JobWorkCursor<?, ?, ?> theWorkCursor, String nextStepId) {
 		String instanceId = theInstance.getInstanceId();
+
 		List<String> gateWaitingChunksForNextStep = myProgressAccumulator.getChunkIdsWithStatus(
-				instanceId, nextStepId, WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED);
+			instanceId, nextStepId, WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED);
 		int totalChunksForNextStep = myProgressAccumulator.getTotalChunkCountForInstanceAndStep(instanceId, nextStepId);
 		if (totalChunksForNextStep != gateWaitingChunksForNextStep.size()) {
 			ourLog.debug(
-					"Total ProgressAccumulator GATE_WAITING chunk count does not match GATE_WAITING chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]",
-					instanceId,
-					nextStepId,
-					totalChunksForNextStep,
-					gateWaitingChunksForNextStep.size());
+				"Total ProgressAccumulator GATE_WAITING chunk count does not match GATE_WAITING chunk size! [instanceId={}, stepId={}, totalChunks={}, queuedChunks={}]",
+				instanceId,
+				nextStepId,
+				totalChunksForNextStep,
+				gateWaitingChunksForNextStep.size());
 		}
 
 		// update the job step so the workers will process them.
-		myJobPersistence.advanceJobStepAndUpdateChunkStatus(instanceId, nextStepId);
+		// Sets all chunks from QUEUED/GATE_WAITING -> READY (REDUCTION_READY for reduction jobs)
+		myJobPersistence.advanceJobStepAndUpdateChunkStatus(instanceId, nextStepId, theWorkCursor.isReductionStep());
 	}
 
 	/**

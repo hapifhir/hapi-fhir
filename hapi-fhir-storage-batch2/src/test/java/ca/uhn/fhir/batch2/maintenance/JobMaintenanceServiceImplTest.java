@@ -282,7 +282,7 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		// Verify
 		verify(myWorkChannelProducer, times(2)).send(myMessageCaptor.capture());
 		verify(myJobPersistence, times(1)).updateInstance(eq(INSTANCE_ID), any());
-		verify(myJobPersistence, times(1)).advanceJobStepAndUpdateChunkStatus(eq(INSTANCE_ID), eq(STEP_2));
+		verify(myJobPersistence, times(1)).advanceJobStepAndUpdateChunkStatus(eq(INSTANCE_ID), eq(STEP_2), eq(false));
 		verify(myJobPersistence).updatePollWaitingChunksForJobIfReady(eq(INSTANCE_ID));
 		verifyNoMoreInteractions(myJobPersistence);
 		JobWorkNotification payload0 = myMessageCaptor.getAllValues().get(0).getPayload();

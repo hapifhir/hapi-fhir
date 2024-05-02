@@ -413,7 +413,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void advanceJobStepAndUpdateChunkStatus_forGatedJob_updatesCurrentStepAndChunkStatus() {
+	public void advanceJobStepAndUpdateChunkStatus_forGatedJobWithoutReduction_updatesCurrentStepAndChunkStatus() {
 		// setup
 		boolean isGatedExecution = true;
 		JobInstance instance = createInstance(true, isGatedExecution);
@@ -425,7 +425,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		// execute
 		runInTransaction(() -> {
-			boolean changed = mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID);
+			boolean changed = mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, LAST_STEP_ID, false);
 			assertTrue(changed);
 		});
 
@@ -450,7 +450,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		// execute
 		runInTransaction(() -> {
-			boolean changed = mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, FIRST_STEP_ID);
+			boolean changed = mySvc.advanceJobStepAndUpdateChunkStatus(instanceId, FIRST_STEP_ID, false);
 			assertFalse(changed);
 		});
 

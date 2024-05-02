@@ -43,6 +43,8 @@ public interface ITestFixture {
 
 	void sleepUntilTimeChanges();
 
+	JobDefinition<TestJobParameters> withJobDefinitionWithReductionStep();
+
 	JobDefinition<TestJobParameters> withJobDefinition(boolean theIsGatedJob);
 
 	TransactionTemplate newTxTemplate();

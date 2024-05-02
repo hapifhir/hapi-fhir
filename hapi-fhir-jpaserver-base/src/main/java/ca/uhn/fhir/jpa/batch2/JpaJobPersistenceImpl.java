@@ -619,7 +619,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	public boolean advanceJobStepAndUpdateChunkStatus(String theJobInstanceId, String theNextStepId) {
+	public boolean advanceJobStepAndUpdateChunkStatus(String theJobInstanceId, String theNextStepId, boolean theIsReductionStep) {
 		boolean changed = updateInstance(theJobInstanceId, instance -> {
 			if (instance.getCurrentGatedStepId().equals(theNextStepId)) {
 				// someone else beat us here.  No changes
@@ -635,6 +635,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 					"Updating chunk status from GATE_WAITING to READY for gated instance {} in step {}.",
 					theJobInstanceId,
 					theNextStepId);
+			WorkChunkStatusEnum nextStep = theIsReductionStep ? WorkChunkStatusEnum.REDUCTION_READY : WorkChunkStatusEnum.READY;
 			// when we reach here, the current step id is equal to theNextStepId
 			// Up to 7.1, gated jobs' work chunks are created in status QUEUED but not actually queued for the
 			// workers.
@@ -644,7 +645,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 					theJobInstanceId,
 					theNextStepId,
 					List.of(WorkChunkStatusEnum.GATE_WAITING, WorkChunkStatusEnum.QUEUED),
-					WorkChunkStatusEnum.READY);
+				nextStep);
 			ourLog.debug(
 					"Updated {} chunks of gated instance {} for step {} from fake QUEUED to READY.",
 					numChanged,

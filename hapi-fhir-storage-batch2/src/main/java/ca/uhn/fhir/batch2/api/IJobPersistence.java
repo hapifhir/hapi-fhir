@@ -28,6 +28,7 @@ import ca.uhn.fhir.batch2.model.WorkChunkCreateEvent;
 import ca.uhn.fhir.batch2.model.WorkChunkMetadata;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import com.fasterxml.jackson.databind.annotation.JsonAppend;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -298,5 +299,5 @@ public interface IJobPersistence extends IWorkChunkPersistence {
 	 * @return whether any changes were made
 	 */
 	@Transactional(propagation = Propagation.REQUIRES_NEW)
-	boolean advanceJobStepAndUpdateChunkStatus(String theJobInstanceId, String theNextStepId);
+	boolean advanceJobStepAndUpdateChunkStatus(String theJobInstanceId, String theNextStepId, boolean theIsReductionStepBoolean);
 }
