@@ -49,6 +49,7 @@ title: Batch2 Job Work Chunk state transitions
 stateDiagram-v2
     state GATE_WAITING
     state READY
+    state REDUCTION_READY
     state QUEUED
     state on_receive <<choice>>
     state IN_PROGRESS
@@ -58,12 +59,13 @@ stateDiagram-v2
     state FAILED
     state COMPLETED
    direction LR
-   [*]             --> READY         : on create - normal or gated first chunk
-   [*]             --> GATE_WAITING  : on create - gated jobs for all but the first chunks of the first step
-   GATE_WAITING    --> READY         : on gate release - gated
-   QUEUED          --> READY         : on gate release - gated (for compatibility with legacy QUEUED state up to Hapi-fhir version 7.1)
-   READY           --> QUEUED        : placed on kafka (maint.)
-   POLL_WAITING --> READY        : after a poll delay on a POLL_WAITING work chunk has elapsed
+   [*]             --> READY            : on create - normal or gated jobs first chunks
+   [*]             --> GATE_WAITING     : on create - gated jobs for all but the first chunks of the first step
+   GATE_WAITING    --> READY            : on gate release - gated
+   GATE_WAITING    --> REDUCTION_READY  : on gate release for the final reduction step (all reduction jobs are gated)
+   QUEUED          --> READY            : on gate release - gated (for compatibility with legacy QUEUED state up to Hapi-fhir version 7.1)
+   READY           --> QUEUED           : placed on kafka (maint.)
+   POLL_WAITING    --> READY            : after a poll delay on a POLL_WAITING work chunk has elapsed
   
   %% worker processing states
   QUEUED     --> on_receive : on deque by worker

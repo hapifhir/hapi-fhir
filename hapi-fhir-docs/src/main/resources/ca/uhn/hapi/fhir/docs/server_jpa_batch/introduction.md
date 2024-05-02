@@ -30,8 +30,8 @@ A Scheduled Job runs periodically (once a minute).  For each Job Instance in the
 1. Moves all `POLL_WAITING` work chunks to `READY` if their `nextPollTime` has expired.
 1. Calculates job progress (% of work chunks in `COMPLETE` status). If the job is finished, purges any leftover work chunks still in the database.
 1. Cleans up any complete, failed, or cancelled jobs that need to be removed.
-1. When the current step is complete, moves any gated jobs onto their next step and updates all chunks in `GATE_WAITING` to `READY`.
-1. If the final step of a gated job is a reduction step, a reduction step execution will be triggered.
+1. When the current step is complete, moves any gated jobs onto their next step and updates all chunks in `GATE_WAITING` to `READY`. If the the job is being moved to its final reduction step, chunks are moved from `GATE_WAITING` to `REDUCTION_READY`.
+1. If the final step of a gated job is a reduction step, a reduction step execution will be triggered. All workchunks for the job in `REDUCTION_READY` will be consumed at this point.
 1. Moves all `READY` work chunks into the `QUEUED` state and publishes a message to the Batch Notification Message Channel to inform worker threads that a work chunk is now ready for processing. \*
 
 \* An exception is for the final reduction step, where work chunks are not published to the Batch Notification Message Channel,
@@ -65,8 +65,8 @@ The final step operates the same way as the middle steps, except it does not pro
 
 ### Gated Execution
 
-If a Job Definition is set to having Gated Execution, then all work chunks for one step must be COMPLETED before any work chunks for the next step may begin.
+If a Job Definition is set to having Gated Execution, then all work chunks for a step must be `COMPLETED` before any work chunks for the next step may begin.
 
 ### Job Instance Completion
 
-A Batch Job Maintenance Service runs every minute to monitor the status of all Job Instances and the Job Instance is transitioned to either COMPLETED, ERRORED or FAILED according to the status of all outstanding work chunks for that job instance.  If the job instance is still IN_PROGRESS this maintenance service also estimates the time remaining to complete the job.
+A Batch Job Maintenance Service runs every minute to monitor the status of all Job Instances and the Job Instance is transitioned to either `COMPLETED`, `ERRORED` or `FAILED` according to the status of all outstanding work chunks for that job instance. If the job instance is still `IN_PROGRESS` this maintenance service also estimates the time remaining to complete the job.

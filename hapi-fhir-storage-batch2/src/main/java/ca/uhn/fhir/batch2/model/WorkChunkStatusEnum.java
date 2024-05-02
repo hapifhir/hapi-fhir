@@ -32,14 +32,18 @@ import java.util.Set;
  */
 public enum WorkChunkStatusEnum {
 	/**
-	 * The initial state all workchunks start in
+	 * The initial state all workchunks start in for non-gated jobs.
 	 */
 	READY,
-	REDUCTION_READY,
 	/**
-	 *
+	 * The initial state all workchunks start in for gated jobs.
 	 */
 	GATE_WAITING,
+	/**
+	 * Workchunk is ready for reduction pass.
+	 * It will not be QUEUED, but consumed inline by reduction pass.
+	 */
+	REDUCTION_READY,
 	/**
 	 * The state of workchunks that have been sent to the queue;
 	 * or of workchunks that are about to be processed in a final
@@ -96,6 +100,8 @@ public enum WorkChunkStatusEnum {
 				return EnumSet.of(READY);
 			case READY:
 				return EnumSet.of(QUEUED);
+			case REDUCTION_READY:
+				return EnumSet.of(COMPLETED, FAILED);
 			case QUEUED:
 				return EnumSet.of(IN_PROGRESS);
 			case IN_PROGRESS:

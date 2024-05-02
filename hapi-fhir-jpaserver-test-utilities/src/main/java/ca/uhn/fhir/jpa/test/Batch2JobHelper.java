@@ -335,6 +335,10 @@ public class Batch2JobHelper {
 		myJobMaintenanceService.runMaintenancePass();
 	}
 
+	public void enableMaintenanceRunner(boolean theEnabled) {
+		myJobMaintenanceService.enableMaintenancePass(theEnabled);
+	}
+
 	/**
 	 * Forces a run of the maintenance pass without waiting for
 	 * the semaphore to release

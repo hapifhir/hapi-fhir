@@ -217,7 +217,7 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		try {
 			processChunksAndCompleteJob(theJobWorkCursor, step, instance, parameters, reductionStepWorker, response);
 		} catch (Exception ex) {
-			ourLog.error("Job completion failed for Job {}", instance.getInstanceId());
+			ourLog.error("Job completion failed for Job {}", instance.getInstanceId(), ex);
 
 			executeInTransactionWithSynchronization(() -> {
 				myJobPersistence.updateInstance(instance.getInstanceId(), theInstance -> {
@@ -340,10 +340,10 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		/*
 		 * Reduction steps are done inline and only on gated jobs.
 		 * As such, all workchunks once they get here should either be:
-		 * 1) READY (7.2 new status)
+		 * 1) REDUCTION_READY (7.2 new status)
 		 * 2) COMPLETED (7.0 legacy)
 		 */
-		if (theChunk.getStatus() != WorkChunkStatusEnum.READY
+		if (theChunk.getStatus() != WorkChunkStatusEnum.REDUCTION_READY
 				|| theChunk.getStatus() == WorkChunkStatusEnum.COMPLETED) {
 			// This should never happen since jobs with reduction are required to be gated
 			ourLog.error(
