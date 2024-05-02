@@ -523,7 +523,7 @@ public class TermConcept implements Serializable {
 		return getChildren().stream().map(TermConceptParentChildLink::getChild).collect(Collectors.toList());
 	}
 
-	public void setSupportLegacyLob(boolean theSupportLegacyLob) {
+	public void performLegacyLobSupport(boolean theSupportLegacyLob) {
 		mySupportLegacyLob = theSupportLegacyLob;
 	}
 
