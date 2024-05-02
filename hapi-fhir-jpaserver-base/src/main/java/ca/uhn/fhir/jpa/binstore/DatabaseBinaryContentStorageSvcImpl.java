@@ -99,7 +99,7 @@ public class DatabaseBinaryContentStorageSvcImpl extends BaseBinaryStorageSvcImp
 		entity.setContentId(id);
 		entity.setStorageContentBin(loadedStream);
 
-		if(mySupportLegacyLobServer) {
+		if (mySupportLegacyLobServer) {
 			Blob dataBlob = lobHelper.createBlob(loadedStream);
 			entity.setBlob(dataBlob);
 		}
