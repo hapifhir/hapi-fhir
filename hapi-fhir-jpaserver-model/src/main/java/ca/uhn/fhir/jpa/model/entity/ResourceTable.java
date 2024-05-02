@@ -38,7 +38,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.NamedEntityGraph;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostPersist;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
@@ -419,15 +418,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 	@Transient
 	private transient boolean myVersionUpdatedInCurrentTransaction;
-
-	@OneToOne(
-			optional = true,
-			fetch = FetchType.EAGER,
-			cascade = {},
-			orphanRemoval = false,
-			mappedBy = "myResource")
-	@OptimisticLock(excluded = true)
-	private ForcedId myForcedId;
 
 	@Transient
 	private volatile String myCreatedByMatchUrl;
@@ -889,10 +879,9 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 
 		retVal.setResourceId(myId);
 		retVal.setResourceType(myResourceType);
-		retVal.setTransientForcedId(getTransientForcedId());
+		retVal.setTransientForcedId(getFhirId());
 		retVal.setFhirVersion(getFhirVersion());
 		retVal.setResourceTable(this);
-		retVal.setForcedId(getForcedId());
 		retVal.setPartitionId(getPartitionId());
 
 		retVal.setHasTags(isHasTags());
@@ -923,6 +912,7 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	public String toString() {
 		ToStringBuilder b = new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE);
 		b.append("pid", myId);
+		b.append("fhirId", myFhirId);
 		b.append("resourceType", myResourceType);
 		b.append("version", myVersion);
 		if (getPartitionId() != null) {
@@ -971,16 +961,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 	}
 
 	@Override
-	public ForcedId getForcedId() {
-		return myForcedId;
-	}
-
-	@Override
-	public void setForcedId(ForcedId theForcedId) {
-		myForcedId = theForcedId;
-	}
-
-	@Override
 	public IdDt getIdDt() {
 		IdDt retVal = new IdDt();
 		populateId(retVal);
@@ -997,10 +977,6 @@ public class ResourceTable extends BaseHasResource implements Serializable, IBas
 		String resourceId;
 		if (myFhirId != null && !myFhirId.isEmpty()) {
 			resourceId = myFhirId;
-		} else if (getTransientForcedId() != null) {
-			resourceId = getTransientForcedId();
-		} else if (myForcedId != null) {
-			resourceId = myForcedId.getForcedId();
 		} else {
 			Long id = this.getResourceId();
 			resourceId = Long.toString(id);

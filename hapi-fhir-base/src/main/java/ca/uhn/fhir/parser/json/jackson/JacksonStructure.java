@@ -30,6 +30,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.StreamReadConstraints;
+import com.fasterxml.jackson.core.json.JsonReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -406,7 +407,9 @@ public class JacksonStructure implements JsonLikeStructure {
 	}
 
 	private static ObjectMapper createObjectMapper() {
-		ObjectMapper retVal = JsonMapper.builder().build();
+		ObjectMapper retVal = JsonMapper.builder()
+				.enable(JsonReadFeature.ALLOW_LEADING_PLUS_SIGN_FOR_NUMBERS)
+				.build();
 		retVal = retVal.setNodeFactory(new JsonNodeFactory(true));
 		retVal = retVal.enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
 		retVal = retVal.enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);

@@ -7,6 +7,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -105,6 +106,7 @@ public class BulkImportCommandTest {
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json");
 
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
 		when(myJobCoordinator.startInstance(any(), any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread
@@ -148,6 +150,7 @@ public class BulkImportCommandTest {
 
 		when(myJobCoordinator.startInstance(any(), any()))
 			.thenReturn(createJobStartResponse("THE-JOB-ID"));
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
 
 		// Start the command in a separate thread
 		new Thread(() -> App.main(new String[]{
@@ -188,6 +191,7 @@ public class BulkImportCommandTest {
 		writeNdJsonFileToTempDirectory(fileContents1, "file1.json");
 		writeNdJsonFileToTempDirectory(fileContents2, "file2.json");
 
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForServerOperation(any(), any())).thenReturn(RequestPartitionId.allPartitions());
 		when(myJobCoordinator.startInstance(any(), any())).thenReturn(createJobStartResponse("THE-JOB-ID"));
 
 		// Start the command in a separate thread

@@ -40,6 +40,7 @@ import ca.uhn.fhir.jpa.binary.provider.BinaryAccessProvider;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkDataExportJobSchedulingHelper;
 import ca.uhn.fhir.jpa.dao.GZipUtil;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
+import ca.uhn.fhir.jpa.dao.TestDaoSearch;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
@@ -112,6 +113,7 @@ import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
+import jakarta.persistence.EntityManager;
 import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -204,7 +206,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import jakarta.persistence.EntityManager;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -547,6 +548,8 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 	private IInterceptorService myInterceptorService;
 	@Autowired(required = false)
 	private MdmStorageInterceptor myMdmStorageInterceptor;
+	@Autowired
+	protected TestDaoSearch myTestDaoSearch;
 
 	@RegisterExtension
 	private final PreventDanglingInterceptorsExtension myPreventDanglingInterceptorsExtension = new PreventDanglingInterceptorsExtension(()-> myInterceptorRegistry);
@@ -926,6 +929,28 @@ public abstract class BaseJpaR4Test extends BaseJpaTest implements ITestDataBuil
 		target.setCode("34567");
 		target.setDisplay("Target Code 34567");
 		target.setEquivalence(ConceptMapEquivalence.NARROWER);
+
+		group = conceptMap.addGroup();
+		group.setSource(CS_URL_4);
+		group.setSourceVersion("Version 1");
+		group.setTarget(CS_URL_3);
+		group.setTargetVersion("Version 1");
+
+		// This one should not show up in the results because it doesn't have a code
+		element = group.addElement();
+		element.setCode("89012");
+		element.setDisplay("Source Code 89012");
+
+		target = element.addTarget();
+		target.setEquivalence(ConceptMapEquivalence.DISJOINT);
+
+		// This one should show up in the results because unmatched targets are allowed to be codeless
+		element = group.addElement();
+		element.setCode("89123");
+		element.setDisplay("Source Code 89123");
+
+		target = element.addTarget();
+		target.setEquivalence(ConceptMapEquivalence.UNMATCHED);
 
 		return conceptMap;
 	}

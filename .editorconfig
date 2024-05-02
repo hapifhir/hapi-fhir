@@ -8,6 +8,11 @@ tab_width = 4
 indent_size = 4
 charset = utf-8
 
+[*.html]
+indent_style = tab
+tab_width = 3
+indent_size = 3
+
 [*.xml]
 indent_style = tab
 tab_width = 3

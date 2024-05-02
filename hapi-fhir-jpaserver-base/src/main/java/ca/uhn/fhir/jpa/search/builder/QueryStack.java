@@ -119,6 +119,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
@@ -139,6 +140,7 @@ public class QueryStack {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(QueryStack.class);
 	public static final String LOCATION_POSITION = "Location.position";
+	private static final Pattern PATTERN_DOT_AND_ALL_AFTER = Pattern.compile("\\..*");
 
 	private final FhirContext myFhirContext;
 	private final SearchQueryBuilder mySqlBuilder;
@@ -296,7 +298,8 @@ public class QueryStack {
 			String theReferenceTargetType,
 			String theParamName,
 			String theChain,
-			boolean theAscending) {
+			boolean theAscending,
+			SearchParameterMap theParams) {
 		BaseJoiningPredicateBuilder firstPredicateBuilder = mySqlBuilder.getOrCreateFirstPredicateBuilder();
 		ResourceLinkPredicateBuilder resourceLinkPredicateBuilder = mySqlBuilder.createReferencePredicateBuilder(this);
 
@@ -378,13 +381,37 @@ public class QueryStack {
 				 * sort on a target that was a reference or a quantity, but if someone needed
 				 * that we could implement it here.
 				 */
+			case SPECIAL: {
+				if (LOCATION_POSITION.equals(targetSearchParameter.getPath())) {
+					List<List<IQueryParameterType>> params = theParams.get(theParamName);
+					if (params != null && !params.isEmpty() && !params.get(0).isEmpty()) {
+						IQueryParameterType locationParam = params.get(0).get(0);
+						final SpecialParam specialParam =
+								new SpecialParam().setValue(locationParam.getValueAsQueryToken(myFhirContext));
+						ParsedLocationParam location = ParsedLocationParam.from(theParams, specialParam);
+						double latitudeValue = location.getLatitudeValue();
+						double longitudeValue = location.getLongitudeValue();
+						final CoordsPredicateBuilder coordsPredicateBuilder = mySqlBuilder.addCoordsPredicateBuilder(
+								resourceLinkPredicateBuilder.getColumnTargetResourceId());
+						mySqlBuilder.addSortCoordsNear(
+								coordsPredicateBuilder, latitudeValue, longitudeValue, theAscending);
+					} else {
+						String msg = myFhirContext
+								.getLocalizer()
+								.getMessageSanitized(
+										QueryStack.class, "cantSortOnCoordParamWithoutValues", theParamName);
+						throw new InvalidRequestException(Msg.code(2497) + msg);
+					}
+					return;
+				}
+			}
 			case NUMBER:
 			case REFERENCE:
 			case COMPOSITE:
 			case QUANTITY:
 			case URI:
 			case HAS:
-			case SPECIAL:
+
 			default:
 				throw new InvalidRequestException(Msg.code(2290) + "Unable to sort on a chained parameter "
 						+ theParamName + "." + theChain + " as this parameter. Can not sort on chains of target type: "
@@ -1093,7 +1120,7 @@ public class QueryStack {
 				targetResourceType = next.getTargetResourceType();
 				paramReference = next.getReferenceFieldName();
 				parameterName = next.getParameterName();
-				paramName = parameterName.replaceAll("\\..*", "");
+				paramName = PATTERN_DOT_AND_ALL_AFTER.matcher(parameterName).replaceAll("");
 				parameters.add(QualifiedParamList.singleton(null, next.getValueAsQueryToken(myFhirContext)));
 			}
 
@@ -1150,11 +1177,23 @@ public class QueryStack {
 
 			// Handle internal chain inside the has.
 			if (parameterName.contains(".")) {
-				String chainedPartOfParameter = getChainedPart(parameterName);
+				// Previously, for some unknown reason, we were calling getChainedPart() twice.  This broke the _has
+				// then chain, then _has use case by effectively cutting off the second part of the chain and
+				// missing one iteration of the recursive call to build the query.
+				// So, for example, for
+				// Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:List:item:_id=list1
+				// instead of passing " payor._has:List:item:_id=list1" to the next recursion, the second call to
+				// getChainedPart() was wrongly removing "payor." and passing down "_has:List:item:_id=list1" instead.
+				// This resulted in running incorrect SQL with nonsensical join that resulted in 0 results.
+				// However, after running the pipeline,  I've concluded there's no use case at all for the
+				// double call to "getChainedPart()", which is why there's no conditional logic at all to make a double
+				// call to getChainedPart().
+				final String chainedPart = getChainedPart(parameterName);
+
 				orValues.stream()
 						.filter(qp -> qp instanceof ReferenceParam)
 						.map(qp -> (ReferenceParam) qp)
-						.forEach(rp -> rp.setChain(getChainedPart(chainedPartOfParameter)));
+						.forEach(rp -> rp.setChain(chainedPart));
 
 				parameterName = parameterName.substring(0, parameterName.indexOf('.'));
 			}
@@ -2466,7 +2505,7 @@ public class QueryStack {
 								theRequestPartitionId,
 								andPredicates,
 								nextAnd)) {
-							break;
+							continue;
 						}
 
 						EmbeddedChainedSearchModeEnum embeddedChainedSearchModeEnum =

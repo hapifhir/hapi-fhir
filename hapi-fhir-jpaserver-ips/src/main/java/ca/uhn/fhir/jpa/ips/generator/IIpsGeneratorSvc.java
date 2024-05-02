@@ -30,11 +30,11 @@ public interface IIpsGeneratorSvc {
 	 * Generates an IPS document and returns the complete document bundle
 	 * for the given patient by ID
 	 */
-	IBaseBundle generateIps(RequestDetails theRequestDetails, IIdType thePatientId);
+	IBaseBundle generateIps(RequestDetails theRequestDetails, IIdType thePatientId, String theProfile);
 
 	/**
 	 * Generates an IPS document and returns the complete document bundle
 	 * for the given patient by identifier
 	 */
-	IBaseBundle generateIps(RequestDetails theRequestDetails, TokenParam thePatientIdentifier);
+	IBaseBundle generateIps(RequestDetails theRequestDetails, TokenParam thePatientIdentifier, String theProfile);
 }

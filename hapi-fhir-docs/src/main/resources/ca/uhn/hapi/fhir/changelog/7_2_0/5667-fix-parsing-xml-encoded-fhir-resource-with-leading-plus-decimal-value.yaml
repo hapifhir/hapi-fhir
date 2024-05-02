@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 5667
+title: "Previously, creating an XML encoded FHIR resource with a decimal element that has a leading plus sign value 
+would result in `JsonParseException` during the read operation from the database. Thus, making it impossible to 
+retrieve or modify such resources. This has been fixed."

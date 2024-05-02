@@ -126,6 +126,30 @@ public class PartitionRunnerTest {
 		assertThat(partitionCall2.threadName).isNotEqualTo(partitionCall1.threadName);
 	}
 
+
+
+	/**
+	 * See #5636 $expunge operation ignoring ExpungeThreadCount setting in certain cases
+	 */
+	@Test
+	public void testExpunge_withTasksSizeBiggerThanExecutorQueue_usesConfiguredNumberOfThreads() throws InterruptedException {
+		// setup
+		List<IResourcePersistentId> resourceIds = buildPidList(2500);
+		Consumer<List<IResourcePersistentId>> partitionConsumer = buildPartitionConsumer(myLatch);
+		// with batch size = 2 we expect 2500/2 runnableTasks to be created
+		myLatch.setExpectedCount(1250);
+
+		// execute
+		getPartitionRunner(2, 2).runInPartitionedThreads(resourceIds, partitionConsumer);
+		List<HookParams> calls = myLatch.awaitExpected();
+
+		// validate - only two threads should be used for execution
+		for (int i = 0; i < 1250; i++) {
+			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, i);
+			assertThat(partitionCall.threadName, is(oneOf(TEST_THREADNAME_1, TEST_THREADNAME_2)));
+		}
+	}
+
 	@Test
 	public void tenItemsOneThread() throws InterruptedException {
 		List<IResourcePersistentId> resourceIds = buildPidList(10);

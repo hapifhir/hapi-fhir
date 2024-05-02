@@ -8,7 +8,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
-import ca.uhn.fhir.jpa.model.entity.ForcedId;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
@@ -60,13 +59,6 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof MyReadWriteInterceptor);
 
-		if (myHaveDroppedForcedIdUniqueConstraint) {
-			runInTransaction(() -> {
-				myEntityManager.createNativeQuery("delete from HFJ_FORCED_ID").executeUpdate();
-				myEntityManager.createNativeQuery("alter table HFJ_FORCED_ID add constraint IDX_FORCEDID_TYPE_FID unique (RESOURCE_TYPE, FORCED_ID)");
-			});
-		}
-
 		myStorageSettings.setIndexMissingFields(new JpaStorageSettings().getIndexMissingFields());
 		myStorageSettings.setAutoCreatePlaceholderReferenceTargets(new JpaStorageSettings().isAutoCreatePlaceholderReferenceTargets());
 		myStorageSettings.setMassIngestionMode(new JpaStorageSettings().isMassIngestionMode());
@@ -105,6 +97,18 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 	}
 
+	@Override
+	public void afterPurgeDatabase() {
+		super.afterPurgeDatabase();
+
+		if (myHaveDroppedForcedIdUniqueConstraint) {
+			runInTransaction(() -> {
+				myEntityManager.createNativeQuery("delete from HFJ_RESOURCE").executeUpdate();
+				myEntityManager.createNativeQuery("alter table " + ResourceTable.HFJ_RESOURCE +
+					" add constraint " + IDX_RES_TYPE_FHIR_ID + " unique (RES_TYPE, FHIR_ID)").executeUpdate();
+			});
+		}
+	}
 	protected void createUniqueCompositeSp() {
 		addCreateDefaultPartition();
 		addReadDefaultPartition(); // one for search param validation
@@ -136,8 +140,7 @@ public abstract class BasePartitioningR4Test extends BaseJpaR4SystemTest {
 
 	protected void dropForcedIdUniqueConstraint() {
 		runInTransaction(() -> {
-			myEntityManager.createNativeQuery("alter table " + ForcedId.HFJ_FORCED_ID + " drop constraint " + ForcedId.IDX_FORCEDID_TYPE_FID).executeUpdate();
-			myEntityManager.createNativeQuery("alter table " + ResourceTable.HFJ_RESOURCE + " drop constraint " + ResourceTable.IDX_RES_TYPE_FHIR_ID).executeUpdate();
+			myEntityManager.createNativeQuery("alter table " + ResourceTable.HFJ_RESOURCE + " drop constraint " + IDX_RES_TYPE_FHIR_ID).executeUpdate();
 		});
 		myHaveDroppedForcedIdUniqueConstraint = true;
 	}

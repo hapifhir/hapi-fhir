@@ -130,6 +130,7 @@ public class FetchResourceIdsStepTest {
 			.thenReturn(observationIds.iterator());
 		int maxFileCapacity = 1000;
 		when(myStorageSettings.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
+		when(myStorageSettings.getBulkExportFileMaximumSize()).thenReturn(10000L);
 
 		// test
 		RunOutcome outcome = myFirstStep.run(input, sink);
@@ -190,6 +191,7 @@ public class FetchResourceIdsStepTest {
 		// when
 		int maxFileCapacity = 5;
 		when(myStorageSettings.getBulkExportFileMaximumCapacity()).thenReturn(maxFileCapacity);
+		when(myStorageSettings.getBulkExportFileMaximumSize()).thenReturn(10000L);
 
 		for (int i = 0; i <= maxFileCapacity; i++) {
 			JpaPid id = JpaPid.fromId((long) i);

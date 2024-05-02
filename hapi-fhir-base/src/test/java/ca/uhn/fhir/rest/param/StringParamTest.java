@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.Constants;
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -132,6 +133,23 @@ public class StringParamTest {
 		assertNicknameWarningLogged(false);
 	}
 
+	@Test
+	public void testNameNickname() {
+		StringParam param = new StringParam();
+		assertFalse(param.isNicknameExpand());
+		param.setValueAsQueryToken(myContext, "name", Constants.PARAMQUALIFIER_NICKNAME, "kenny");
+		assertTrue(param.isNicknameExpand());
+	}
+
+	@Test
+	public void testGivenNickname() {
+		StringParam param = new StringParam();
+		assertFalse(param.isNicknameExpand());
+		param.setValueAsQueryToken(myContext, "given", Constants.PARAMQUALIFIER_NICKNAME, "kenny");
+		assertTrue(param.isNicknameExpand());
+	}
+
+
 	private void assertNicknameQualifierSearchParameterIsValid(StringParam theStringParam, String theExpectedValue){
 		assertTrue(theStringParam.isNicknameExpand());
 		assertFalse(theStringParam.isExact());
@@ -164,5 +182,5 @@ public class StringParamTest {
 			assertThat(warningLogs).isEmpty();
 		}
 	}
-	
+
 }

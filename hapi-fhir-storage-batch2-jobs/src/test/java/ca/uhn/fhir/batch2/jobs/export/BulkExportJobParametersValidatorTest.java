@@ -65,7 +65,7 @@ public class BulkExportJobParametersValidatorTest {
 		// when
 		when(myDaoRegistry.isResourceTypeSupported(anyString()))
 			.thenReturn(true);
-		when(myIBinaryStorageSvc.isValidBlobId(any())).thenReturn(false);
+		when(myIBinaryStorageSvc.isValidBinaryContentId(any())).thenReturn(false);
 		List<String> errors = myValidator.validate(null, parameters);
 
 		// verify
@@ -82,7 +82,7 @@ public class BulkExportJobParametersValidatorTest {
 		when(myDaoRegistry.isResourceTypeSupported(anyString()))
 			.thenReturn(true);
 
-		when(myIBinaryStorageSvc.isValidBlobId(any())).thenReturn(true);
+		when(myIBinaryStorageSvc.isValidBinaryContentId(any())).thenReturn(true);
 		List<String> errors = myValidator.validate(null, parameters);
 
 		// verify

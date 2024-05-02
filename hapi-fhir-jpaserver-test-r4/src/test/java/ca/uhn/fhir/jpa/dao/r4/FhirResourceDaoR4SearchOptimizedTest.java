@@ -1230,13 +1230,12 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		p.getPhotoFirstRep().setCreationElement(new DateTimeType("2011")); // non-indexed field
 		myPatientDao.update(p).getId().toUnqualifiedVersionless();
 
-		assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread()).isEqualTo(1);
-		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(4);
-		assertThat(myCaptureQueriesListener.countDeleteQueriesForCurrentThread()).isEqualTo(0);
+		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 		runInTransaction(() -> {
 			assertEquals(1, myResourceTableDao.count());
 			assertEquals(1, myResourceHistoryTableDao.count());
-			assertEquals(1, myForcedIdDao.count());
 			assertEquals(1, myResourceIndexedSearchParamTokenDao.count());
 		});
 
@@ -1257,7 +1256,6 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		runInTransaction(() -> {
 			assertEquals(1, myResourceTableDao.count());
 			assertEquals(2, myResourceHistoryTableDao.count());
-			assertEquals(1, myForcedIdDao.count());
 			assertEquals(1, myResourceIndexedSearchParamTokenDao.count());
 		});
 

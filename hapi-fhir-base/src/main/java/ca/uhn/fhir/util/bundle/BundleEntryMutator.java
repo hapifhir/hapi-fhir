@@ -69,4 +69,12 @@ public class BundleEntryMutator {
 		BaseRuntimeChildDefinition resourceChild = myEntryDefinition.getChildByName("resource");
 		resourceChild.getMutator().setValue(myEntry, theUpdatedResource);
 	}
+
+	public void setRequestIfNoneExist(FhirContext theFhirContext, String theIfNoneExist) {
+		BaseRuntimeChildDefinition requestUrlChildDef = myRequestChildContentsDef.getChildByName("ifNoneExist");
+		IPrimitiveType<?> url = ParametersUtil.createString(theFhirContext, theIfNoneExist);
+		for (IBase nextRequest : myRequestChildDef.getAccessor().getValues(myEntry)) {
+			requestUrlChildDef.getMutator().addValue(nextRequest, url);
+		}
+	}
 }

@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 5644
+title: "Previously, searching for `Bundle` resources with read all `Bundle` resources permissions, returned an 
+HTTP 403 Forbidden error. This was because the `AuthorizationInterceptor` applied permissions to the resources inside 
+the `Bundle`, instead of the `Bundle` itself. This has been fixed and permissions are no longer applied to the resources 
+inside a `Bundle` of type `document`, `message`, or `collection` for `Bundle` requests."
+

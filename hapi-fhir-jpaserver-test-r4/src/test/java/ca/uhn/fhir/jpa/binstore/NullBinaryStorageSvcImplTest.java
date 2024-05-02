@@ -13,37 +13,37 @@ public class NullBinaryStorageSvcImplTest {
 	private final NullBinaryStorageSvcImpl mySvc = new NullBinaryStorageSvcImpl();
 
 	@Test
-	public void shouldStoreBlob() {
-		assertFalse(mySvc.shouldStoreBlob(1, new IdType("Patient/2"), "application/json"));
+	public void shouldStoreBinaryContent() {
+		assertFalse(mySvc.shouldStoreBinaryContent(1, new IdType("Patient/2"), "application/json"));
 	}
 
 	@Test
 	public void storeBlob() {
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.storeBlob(null, null, null, null, null));
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.storeBinaryContent(null, null, null, null, null));
 	}
 
 	@Test
 	public void fetchBlobDetails() {
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.fetchBlobDetails(null, null));
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.fetchBinaryContentDetails(null, null));
 	}
 
 	@Test
 	public void writeBlob() {
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.writeBlob(null, null, null));
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.writeBinaryContent(null, null, null));
 	}
 
 	@Test
 	public void expungeBlob() {
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.expungeBlob(null, null));
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.expungeBinaryContent(null, null));
 	}
 
 	@Test
 	public void fetchBlob() {
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.fetchBlob(null, null));
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.fetchBinaryContent(null, null));
 	}
 
 	@Test
 	public void newBlobId() {
-		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.newBlobId());
+		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.newBinaryContentId());
 	}
 }

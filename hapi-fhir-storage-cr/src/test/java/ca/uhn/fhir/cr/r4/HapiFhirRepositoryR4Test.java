@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import ca.uhn.fhir.rest.param.InternalCodingDt;
 import ca.uhn.fhir.rest.param.NumberParam;
@@ -17,6 +16,7 @@ import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Immunization;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import ca.uhn.fhir.cr.repo.HapiFhirRepository;
@@ -30,13 +30,28 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 	private static final String MY_TEST_DATA =
 		"ca/uhn/fhir/cr/r4/immunization/Patients_Encounters_Immunizations_Practitioners.json";
 
+	@BeforeEach
+	void setup() {
+		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
+		loadBundle(MY_TEST_DATA);
+	}
 	@Test
-	void crudTest() {
-		var requestDetails = setupRequestDetails();
-		//register repo
-		//regster providers
-		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, myRestfulServer);
-		var result = repository
+	void repositoryTests(){
+		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
+		//run repository tests
+		transactionReadsImmunizationResources(repository);
+		repositorySearchForEncounterWithMatchingCode(repository);
+		canSearchMoreThan50Patients(repository);
+		canSearchWithPagination(repository);
+		transactionReadsPatientResources(repository);
+		transactionReadsEncounterResources(repository);
+		assertTrue(crudTest(repository));
+	}
+
+
+	Boolean crudTest(HapiFhirRepository theRepository) {
+
+		var result = theRepository
 			.create(new Patient().addName(new HumanName().setFamily("Test").addGiven("Name1")));
 		assertThat(result.getCreated()).isEqualTo(true);
 		var patient = (Patient) result.getResource();
@@ -44,60 +59,22 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 		assertThat(patient.getName().get(0).getFamily()).isEqualTo("Test");
 		assertThat(patient.getName().get(0).getGiven()).hasSize(1);
 		patient.getName().get(0).addGiven("Name2");
-		repository.update(patient);
-		var updatedPatient = repository.read(Patient.class, patient.getIdElement());
-		assertThat(updatedPatient.getName().get(0).getGiven()).hasSize(2);
-		repository.delete(Patient.class, patient.getIdElement());
+		theRepository.update(patient);
+		var updatedPatient = theRepository.read(Patient.class, patient.getIdElement());
+		assertEquals(2, updatedPatient.getName().get(0).getGiven().size());
+		theRepository.delete(Patient.class, patient.getIdElement());
 		var ex = assertThrows(Exception.class,
-			() -> repository.read(Patient.class, new IdType(patient.getIdElement().getIdPart())));
-		assertThat(ex.getMessage()).contains("Resource was deleted");
+			() -> theRepository.read(Patient.class, new IdType(patient.getIdElement().getIdPart())));
+		return ex.getMessage().contains("Resource was deleted");
 	}
 
-	@Test
-	void canSearchMoreThan50Patients() {
-		loadBundle(MY_TEST_DATA);
-		var expectedPatientCount = 63;
+	void canSearchMoreThan50Patients(HapiFhirRepository theRepository) {
+		var expectedPatientCount = 65;
 
 		ourPagingProvider.setMaximumPageSize(100);
-		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
 		// get all patient resources posted
-		var result = repository.search(Bundle.class, Patient.class, withCountParam(100));
-		assertThat(result.getTotal()).isEqualTo(expectedPatientCount);
-		// count all resources in result
-		int counter = 0;
-		for (var e : result.getEntry()) {
-			counter++;
-		}
-		// verify all patient resources captured
-		assertThat(counter).as("Patient search results don't match available resources").isEqualTo(expectedPatientCount);
-	}
-
-	@Test
-	void canSearchWithPagination() {
-		loadBundle(MY_TEST_DATA);
-
-		var requestDetails = setupRequestDetails();
-		var repository = new HapiFhirRepository(myDaoRegistry, requestDetails, myRestfulServer);
-		var result = repository.search(Bundle.class, Patient.class, withCountParam(20));
-		assertThat(result.getEntry()).hasSize(20);
-		var next = result.getLink().get(1);
-		assertThat(next.getRelation()).isEqualTo("next");
-		var nextUrl = next.getUrl();
-		var nextResult = repository.link(Bundle.class, nextUrl);
-		assertThat(nextResult.getEntry()).hasSize(20);
-		assertThat(result.getEntry().stream().map(e -> e.getResource().getIdPart()).anyMatch(
-				i -> nextResult.getEntry().stream().map(e -> e.getResource().getIdPart())
-						.collect(Collectors.toList()).contains(i))).isEqualTo(false);
-	}
-
-	@Test
-	void transactionReadsPatientResources() {
-		var expectedPatientCount = 63;
-		var theBundle = readResource(Bundle.class, MY_TEST_DATA);
-		ourPagingProvider.setMaximumPageSize(100);
-		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
-		repository.transaction(theBundle);
-		var result = repository.search(Bundle.class, Patient.class, withCountParam(100));
+		var result = theRepository.search(Bundle.class, Patient.class, withCountParam(100));
+		assertEquals(expectedPatientCount, result.getTotal());
 		// count all resources in result
 		int counter = 0;
 		for (Object i : result.getEntry()) {
@@ -107,14 +84,40 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 		assertThat(counter).as("Patient search results don't match available resources").isEqualTo(expectedPatientCount);
 	}
 
-	@Test
-	void transactionReadsEncounterResources() {
-		var expectedEncounterCount = 652;
-		var theBundle = readResource(Bundle.class, MY_TEST_DATA);
+
+	void canSearchWithPagination(HapiFhirRepository theRepository) {
+
+		var result = theRepository.search(Bundle.class, Patient.class, withCountParam(20));
+		assertEquals(20, result.getEntry().size());
+		var next = result.getLink().get(1);
+		assertThat(next.getRelation()).isEqualTo("next");
+		var nextUrl = next.getUrl();
+		var nextResult = theRepository.link(Bundle.class, nextUrl);
+		assertEquals(20, nextResult.getEntry().size());
+		assertEquals(false,
+			result.getEntry().stream().map(e -> e.getResource().getIdPart()).anyMatch(
+				i -> nextResult.getEntry().stream().map(e -> e.getResource().getIdPart())
+					.toList().contains(i)));
+	}
+
+
+	void transactionReadsPatientResources(HapiFhirRepository theRepository) {
+		var expectedPatientCount = 65;
+		ourPagingProvider.setMaximumPageSize(100);
+		var result = theRepository.search(Bundle.class, Patient.class, withCountParam(100));
+		// count all resources in result
+		int counter = 0;
+		for (Object i : result.getEntry()) {
+			counter++;
+		}
+		// verify all patient resources captured
+		assertThat(counter).as("Patient search results don't match available resources").isEqualTo(expectedPatientCount);
+	}
+
+	void transactionReadsEncounterResources(HapiFhirRepository theRepository) {
+		var expectedEncounterCount = 654;
 		ourPagingProvider.setMaximumPageSize(1000);
-		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
-		repository.transaction(theBundle);
-		var result = repository.search(Bundle.class, Encounter.class, withCountParam(1000));
+		var result = theRepository.search(Bundle.class, Encounter.class, withCountParam(1000));
 		// count all resources in result
 		int counter = 0;
 		for (Object i : result.getEntry()) {
@@ -124,9 +127,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 		assertThat(counter).as("Encounter search results don't match available resources").isEqualTo(expectedEncounterCount);
 	}
 
-	@Test
-	void repositorySearchForEncounterWithMatchingCode() {
-		loadBundle("ColorectalCancerScreeningsFHIR-bundle.json");
+	void repositorySearchForEncounterWithMatchingCode(HapiFhirRepository theRepository) {
 
 		//SearchConverter validation test for repository
 		List<IQueryParameterType> codeList = new ArrayList<>();
@@ -150,10 +151,8 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 		// replicate repository searchParam list
 		Map<String, List<IQueryParameterType>> searchParams = Map.of("type", codeList, "subject", Collections.singletonList(new ReferenceParam("Patient/numer-EXM130")));
 
-		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
-
 		// replicate search for valueset codes
-		var result = repository.search(Bundle.class, Encounter.class, searchParams);
+		var result = theRepository.search(Bundle.class, Encounter.class, searchParams);
 
 		// count all resources in result
 		int counter = 0;
@@ -164,14 +163,11 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 		assertThat(counter).as("Encounter search results don't match available resources").isEqualTo(1);
 	}
 
-	@Test
-	void transactionReadsImmunizationResources() {
+	void transactionReadsImmunizationResources(HapiFhirRepository theRepository) {
 		var expectedEncounterCount = 638;
-		var theBundle = readResource(Bundle.class, MY_TEST_DATA);
 		ourPagingProvider.setMaximumPageSize(1000);
-		var repository = new HapiFhirRepository(myDaoRegistry, setupRequestDetails(), myRestfulServer);
-		repository.transaction(theBundle);
-		var result = repository.search(Bundle.class, Immunization.class, withCountParam(1000));
+
+		var result = theRepository.search(Bundle.class, Immunization.class, withCountParam(1000));
 		// count all resources in result
 		int counter = 0;
 		for (Object i : result.getEntry()) {

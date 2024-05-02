@@ -48,7 +48,12 @@ import java.util.TreeSet;
 
 @SuppressWarnings("JavadocLinkAsPlainText")
 public class JpaStorageSettings extends StorageSettings {
+	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageSettings.class);
 
+	/**
+	 * Default value for {@link #getBulkExportFileMaximumSize()}: 100 MB
+	 */
+	public static final long DEFAULT_BULK_EXPORT_MAXIMUM_WORK_CHUNK_SIZE = 100 * FileUtils.ONE_MB;
 	/**
 	 * Default value for {@link #setReuseCachedSearchResultsForMillis(Long)}: 60000ms (one minute)
 	 */
@@ -101,7 +106,6 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	private static final Integer DEFAULT_MAXIMUM_SEARCH_RESULT_COUNT_IN_TRANSACTION = null;
 
-	private static final Logger ourLog = LoggerFactory.getLogger(JpaStorageSettings.class);
 	private static final int DEFAULT_REINDEX_BATCH_SIZE = 800;
 	private static final int DEFAULT_MAXIMUM_DELETE_CONFLICT_COUNT = 60;
 	/**
@@ -110,6 +114,7 @@ public class JpaStorageSettings extends StorageSettings {
 	private static final Integer DEFAULT_INTERNAL_SYNCHRONOUS_SEARCH_SIZE = 10000;
 
 	private static final boolean DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA = false;
+	private static final long DEFAULT_REST_DELETE_BY_URL_RESOURCE_ID_THRESHOLD = 10000;
 
 	/**
 	 * Do not change default of {@code 0}!
@@ -313,6 +318,10 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	private int myBulkExportFileMaximumCapacity = DEFAULT_BULK_EXPORT_FILE_MAXIMUM_CAPACITY;
 	/**
+	 * Since 7.2.0
+	 */
+	private long myBulkExportFileMaximumSize = DEFAULT_BULK_EXPORT_MAXIMUM_WORK_CHUNK_SIZE;
+	/**
 	 * Since 6.4.0
 	 */
 	private boolean myJobFastTrackingEnabled = false;
@@ -343,6 +352,13 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	private boolean myPreventInvalidatingConditionalMatchCriteria =
 			DEFAULT_PREVENT_INVALIDATING_CONDITIONAL_MATCH_CRITERIA;
+
+	/**
+	 * This setting helps to enforce a threshold in number of resolved resources for DELETE by URL REST calls
+	 *
+	 * @since 7.2.0
+	 */
+	private long myRestDeleteByUrlResourceIdThreshold = DEFAULT_REST_DELETE_BY_URL_RESOURCE_ID_THRESHOLD;
 
 	/**
 	 * Constructor
@@ -2293,9 +2309,40 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Default is 1000 resources per file.
 	 *
 	 * @since 6.2.0
+	 * @see #setBulkExportFileMaximumCapacity(int)
 	 */
 	public void setBulkExportFileMaximumCapacity(int theBulkExportFileMaximumCapacity) {
 		myBulkExportFileMaximumCapacity = theBulkExportFileMaximumCapacity;
+	}
+
+	/**
+	 * Defines the maximum size for a single work chunk or report file to be held in
+	 * memory or stored in the database for bulk export jobs.
+	 * Note that the framework will attempt to not exceed this limit, but will only
+	 * estimate the actual chunk size as it works, so this value should be set
+	 * below any hard limits that may be present.
+	 *
+	 * @since 7.2.0
+	 * @see #DEFAULT_BULK_EXPORT_MAXIMUM_WORK_CHUNK_SIZE The default value for this setting
+	 */
+	public long getBulkExportFileMaximumSize() {
+		return myBulkExportFileMaximumSize;
+	}
+
+	/**
+	 * Defines the maximum size for a single work chunk or report file to be held in
+	 * memory or stored in the database for bulk export jobs. Default is 100 MB.
+	 * Note that the framework will attempt to not exceed this limit, but will only
+	 * estimate the actual chunk size as it works, so this value should be set
+	 * below any hard limits that may be present.
+	 *
+	 * @since 7.2.0
+	 * @see #setBulkExportFileMaximumCapacity(int)
+	 * @see #DEFAULT_BULK_EXPORT_MAXIMUM_WORK_CHUNK_SIZE The default value for this setting
+	 */
+	public void setBulkExportFileMaximumSize(long theBulkExportFileMaximumSize) {
+		Validate.isTrue(theBulkExportFileMaximumSize > 0, "theBulkExportFileMaximumSize must be positive");
+		myBulkExportFileMaximumSize = theBulkExportFileMaximumSize;
 	}
 
 	/**
@@ -2425,6 +2472,14 @@ public class JpaStorageSettings extends StorageSettings {
 
 	public boolean isPreventInvalidatingConditionalMatchCriteria() {
 		return myPreventInvalidatingConditionalMatchCriteria;
+	}
+
+	public long getRestDeleteByUrlResourceIdThreshold() {
+		return myRestDeleteByUrlResourceIdThreshold;
+	}
+
+	public void setRestDeleteByUrlResourceIdThreshold(long theRestDeleteByUrlResourceIdThreshold) {
+		myRestDeleteByUrlResourceIdThreshold = theRestDeleteByUrlResourceIdThreshold;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

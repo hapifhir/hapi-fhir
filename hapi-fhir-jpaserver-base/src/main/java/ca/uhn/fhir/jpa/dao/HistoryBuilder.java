@@ -124,7 +124,20 @@ public class HistoryBuilder {
 
 		from.fetch("myProvenance", JoinType.LEFT);
 
-		criteriaQuery.orderBy(cb.desc(from.get("myUpdated")));
+		/*
+		 * The sort on myUpdated is the important one for _history operations, but there are
+		 * cases where multiple pages of results all have the exact same myUpdated value (e.g.
+		 * if they were all ingested in a single FHIR transaction). So we put a secondary sort
+		 * on the resource PID just to ensure that the sort is stable across queries.
+		 *
+		 * There are indexes supporting the myUpdated sort at each level (system/type/instance)
+		 * but those indexes don't include myResourceId. I don't think that should be an issue
+		 * since myUpdated should generally be unique anyhow. If this ever becomes an issue,
+		 * we might consider adding the resource PID to indexes IDX_RESVER_DATE and
+		 * IDX_RESVER_TYPE_DATE in the future.
+		 * -JA 2024-04-21
+		 */
+		criteriaQuery.orderBy(cb.desc(from.get("myUpdated")), cb.desc(from.get("myResourceId")));
 
 		TypedQuery<ResourceHistoryTable> query = myEntityManager.createQuery(criteriaQuery);
 
@@ -154,6 +167,14 @@ public class HistoryBuilder {
 				Optional<String> forcedId = pidToForcedId.get(JpaPid.fromId(nextResourceId));
 				if (forcedId.isPresent()) {
 					resourceId = forcedId.get();
+					// IdHelperService returns a forcedId with the '<resourceType>/' prefix
+					// but the transientForcedId is expected to be just the idPart (without the <resourceType>/ prefix).
+					// For that reason, strip the prefix before setting the transientForcedId below.
+					// If not stripped this messes up the id of the resource as the resourceType would be repeated
+					// twice like Patient/Patient/1234 in the resource constructed
+					if (resourceId.startsWith(myResourceType + "/")) {
+						resourceId = resourceId.substring(myResourceType.length() + 1);
+					}
 				} else {
 					resourceId = nextResourceId.toString();
 				}

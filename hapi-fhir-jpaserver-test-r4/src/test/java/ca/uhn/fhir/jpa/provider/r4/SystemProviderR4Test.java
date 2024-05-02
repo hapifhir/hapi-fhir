@@ -563,12 +563,13 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		MyAnonymousInterceptor1 interceptor1 = new MyAnonymousInterceptor1();
 		ourRestServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED, interceptor1);
 		MySearchNarrowingInterceptor interceptor2 = new MySearchNarrowingInterceptor();
+		interceptor2.setNarrowConditionalUrls(true);
 		ourRestServer.getInterceptorService().registerInterceptor(interceptor2);
 		try {
 			myClient.transaction().withBundle(input).execute();
-			assertThat(counter0.get()).isEqualTo(1);
-			assertThat(counter1.get()).isEqualTo(1);
-			assertThat(counter2.get()).isEqualTo(5);
+			assertEquals(1, counter0.get());
+			assertEquals(1, counter1.get());
+			assertEquals(1, counter2.get());
 
 		} finally {
 			ourRestServer.getInterceptorService().unregisterInterceptor(interceptor1);

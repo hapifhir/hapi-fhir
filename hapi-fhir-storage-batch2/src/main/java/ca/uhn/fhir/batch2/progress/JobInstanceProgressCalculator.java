@@ -22,19 +22,26 @@ package ca.uhn.fhir.batch2.progress;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
+import ca.uhn.fhir.batch2.model.JobDefinition;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.StopWatch;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 public class JobInstanceProgressCalculator {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	private final IJobPersistence myJobPersistence;
 	private final JobChunkProgressAccumulator myProgressAccumulator;
 	private final JobInstanceStatusUpdater myJobInstanceStatusUpdater;
+	private final JobDefinitionRegistry myJobDefinitionRegistry;
 
 	public JobInstanceProgressCalculator(
 			IJobPersistence theJobPersistence,
@@ -42,6 +49,7 @@ public class JobInstanceProgressCalculator {
 			JobDefinitionRegistry theJobDefinitionRegistry) {
 		myJobPersistence = theJobPersistence;
 		myProgressAccumulator = theProgressAccumulator;
+		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry);
 	}
 
@@ -96,8 +104,20 @@ public class JobInstanceProgressCalculator {
 		}
 
 		// wipmb separate status update from stats collection in 6.8
-		instanceProgress.calculateNewStatus();
+		instanceProgress.calculateNewStatus(lastStepIsReduction(instanceId));
 
 		return instanceProgress;
+	}
+
+	private boolean lastStepIsReduction(String theInstanceId) {
+		JobInstance jobInstance = getJobInstance(theInstanceId);
+		JobDefinition<IModelJson> jobDefinition = myJobDefinitionRegistry.getJobDefinitionOrThrowException(jobInstance);
+		return jobDefinition.isLastStepReduction();
+	}
+
+	private JobInstance getJobInstance(String theInstanceId) {
+		Optional<JobInstance> oInstance = myJobPersistence.fetchInstance(theInstanceId);
+		return oInstance.orElseThrow(() ->
+				new InternalErrorException(Msg.code(2486) + "Failed to fetch JobInstance with id: " + theInstanceId));
 	}
 }

@@ -8,14 +8,17 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.ips.api.IIpsGenerationStrategy;
+import ca.uhn.fhir.jpa.ips.jpa.DefaultJpaIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.ips.provider.IpsOperationProvider;
-import ca.uhn.fhir.jpa.ips.strategy.DefaultIpsGenerationStrategy;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.util.ClasspathUtil;
-import ca.uhn.fhir.util.ResourceReferenceInfo;
 import ca.uhn.fhir.validation.FhirValidator;
+import ca.uhn.fhir.validation.ResultSeverityEnum;
+import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -39,9 +42,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -94,9 +96,9 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 
 		// Verify
 		validateDocument(output);
-		assertThat(output.getEntry()).hasSize(117);
-		String patientId = findFirstEntryResource(output, Patient.class, 1).getId();
-		assertThat(patientId).matches("urn:uuid:.*");
+		assertEquals(117, output.getEntry().size());
+		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toUnqualifiedVersionless().getValue();
+		assertEquals("Patient/f15d2419-fbff-464a-826d-0afe8f095771", patientId);
 		MedicationStatement medicationStatement = findFirstEntryResource(output, MedicationStatement.class, 2);
 		assertThat(medicationStatement.getSubject().getReference()).isEqualTo(patientId);
 		assertNull(medicationStatement.getInformationSource().getReference());
@@ -181,11 +183,11 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 
 		// Verify
 		validateDocument(output);
-		assertThat(output.getEntry()).hasSize(7);
-		String patientId = findFirstEntryResource(output, Patient.class, 1).getId();
-		assertThat(patientId).matches("urn:uuid:.*");
-		assertThat(findEntryResource(output, Condition.class, 0, 2).getSubject().getReference()).isEqualTo(patientId);
-		assertThat(findEntryResource(output, Condition.class, 1, 2).getSubject().getReference()).isEqualTo(patientId);
+		assertEquals(7, output.getEntry().size());
+		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toUnqualifiedVersionless().getValue();
+		assertEquals("Patient/5342998", patientId);
+		assertEquals(patientId, findEntryResource(output, Condition.class, 0, 2).getSubject().getReference());
+		assertEquals(patientId, findEntryResource(output, Condition.class, 1, 2).getSubject().getReference());
 
 		List<String> sectionTitles = extractSectionTitles(output);
 		assertThat(sectionTitles).as(sectionTitles.toString()).containsExactly("Allergies and Intolerances", "Medication List", "Problem List");
@@ -276,18 +278,9 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		instanceValidator.setValidationSupport(new ValidationSupportChain(new IpsTerminologySvc(), myFhirContext.getValidationSupport()));
 		validator.registerValidatorModule(instanceValidator);
 		ValidationResult validation = validator.validateWithResult(theOutcome);
-		assertThat(validation.isSuccessful()).as(() -> myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(validation.toOperationOutcome())).isTrue();
 
-		// Make sure that all refs have been replaced with UUIDs
-		List<ResourceReferenceInfo> references = myFhirContext.newTerser().getAllResourceReferences(theOutcome);
-		for (IBaseResource next : myFhirContext.newTerser().getAllEmbeddedResources(theOutcome, true)) {
-			references.addAll(myFhirContext.newTerser().getAllResourceReferences(next));
-		}
-		for (ResourceReferenceInfo next : references) {
-			if (!next.getResourceReference().getReferenceElement().getValue().startsWith("urn:uuid:")) {
-				fail("", next.getName());
-			}
-		}
+		Optional<SingleValidationMessage> failure = validation.getMessages().stream().filter(t -> t.getSeverity().ordinal() >= ResultSeverityEnum.ERROR.ordinal()).findFirst();
+		assertFalse(failure.isPresent(), () -> failure.get().toString());
 	}
 
 	@Configuration
@@ -295,12 +288,12 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 
 		@Bean
 		public IIpsGenerationStrategy ipsGenerationStrategy() {
-			return new DefaultIpsGenerationStrategy();
+			return new DefaultJpaIpsGenerationStrategy();
 		}
 
 		@Bean
 		public IIpsGeneratorSvc ipsGeneratorSvc(FhirContext theFhirContext, IIpsGenerationStrategy theGenerationStrategy, DaoRegistry theDaoRegistry) {
-			return new IpsGeneratorSvcImpl(theFhirContext, theGenerationStrategy, theDaoRegistry);
+			return new IpsGeneratorSvcImpl(theFhirContext, theGenerationStrategy);
 		}
 
 		@Bean
@@ -311,7 +304,6 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 
 	}
 
-	@SuppressWarnings("unchecked")
 	private static <T extends IBaseResource> T findFirstEntryResource(Bundle theBundle, Class<T> theType, int theExpectedCount) {
 		return findEntryResource(theBundle, theType, 0, theExpectedCount);
 	}

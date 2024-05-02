@@ -83,6 +83,7 @@ import org.hl7.fhir.r4.model.CompartmentDefinition;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.Consent;
+import org.hl7.fhir.r4.model.ContactPoint;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Device;
@@ -233,6 +234,42 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 		return retVal;
 	}
 
+	@Test
+	public void testUpdateResource_whenTokenPropertyAssignedTooLargeValue_willTruncateLargeValueOnUpdate(){
+		// given
+		final String modifiedEmailPrefix = "modified";
+		final String originalEmail = RandomStringUtils.randomAlphanumeric(ResourceIndexedSearchParamToken.MAX_LENGTH) + "@acme.corp";
+		final String modifiedEmail = modifiedEmailPrefix + originalEmail;
+
+		// when
+		Patient pt1 = new Patient();
+		pt1.setActive(true);
+		pt1.addName().setFamily("FAM");
+		pt1.addTelecom().setSystem(ContactPoint.ContactPointSystem.EMAIL).setValue(originalEmail);
+
+		myPatientDao.create(pt1).getId().toUnqualifiedVersionless();
+
+		pt1.getTelecomFirstRep().setValue(modifiedEmail);
+
+		IIdType id1 = myPatientDao.update(pt1).getId().toUnqualifiedVersionless();
+
+		// then
+		runInTransaction(() -> {
+			List<String> paramValues = myResourceIndexedSearchParamTokenDao
+				.findAll()
+				.stream()
+				.filter(t -> defaultString(t.getSystem()).equals("email"))
+				.map(t -> t.getValue())
+				.collect(Collectors.toList());
+
+			assertThat(paramValues, hasSize(2));
+
+			for (String tokenValue : paramValues) {
+				assertThat(tokenValue, startsWith(modifiedEmailPrefix));
+				assertThat(tokenValue, hasLength(ResourceIndexedSearchParamToken.MAX_LENGTH));
+			}
+		});
+	}
 
 	@Test
 	public void testDeletedResourcesAreReindexed() {

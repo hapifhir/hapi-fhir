@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.dao.r4;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
@@ -10,13 +11,18 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.DateTimeType;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.AdministrativeGender;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +31,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@SuppressWarnings({"unchecked", "deprecation"})
+@SuppressWarnings({"deprecation"})
 public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4SortTest.class);
@@ -48,7 +54,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSortOnId() throws Exception {
+	public void testSortOnId() {
 		// Numeric ID
 		Patient p01 = new Patient();
 		p01.setActive(true);
@@ -144,7 +150,7 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testSortOnSearchParameterWhereAllResourcesHaveAValue() throws Exception {
+	public void testSortOnSearchParameterWhereAllResourcesHaveAValue() {
 		Patient pBA = new Patient();
 		pBA.setId("BA");
 		pBA.setActive(true);
@@ -345,20 +351,63 @@ public class FhirResourceDaoR4SortTest extends BaseJpaR4Test {
 		SearchParameterMap map;
 		List<String> ids;
 
-		runInTransaction(() -> {
-			ourLog.info("Dates:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
-		});
+		runInTransaction(() -> ourLog.info("Dates:\n * {}", myResourceIndexedSearchParamDateDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * "))));
 
-		map = new SearchParameterMap();
-		map.setLoadSynchronous(true);
-		map.add(Observation.SP_SUBJECT, new ReferenceParam("Patient", "identifier", "PCA|PCA"));
-		map.setSort(new SortSpec("date").setOrder(SortOrderEnum.DESC));
-		myCaptureQueriesListener.clear();
-		ids = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
-		ourLog.info("IDS: {}", ids);
-		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(ids).as(ids.toString()).containsExactly("Observation/OBS2", "Observation/OBS1");
-
+		myTestDaoSearch.assertSearchFinds(
+			"chained search",
+		"Observation?subject.identifier=PCA|PCA&_sort=-date",
+			"OBS2", "OBS1"
+			);
 	}
+
+	/**
+	 * Define a composition SP for document Bundles, and sort by it.
+	 * The chain is referencing the Bundle contents.
+	 * @see https://smilecdr.com/docs/fhir_storage_relational/chained_searches_and_sorts.html#document-and-message-search-parameters
+	 */
+	@Test
+	void testSortByCompositionSP() {
+	    // given
+		SearchParameter searchParameter = new SearchParameter();
+		searchParameter.setId("bundle-composition-patient-birthdate");
+		searchParameter.setCode("composition.patient.birthdate");
+		searchParameter.setName("composition.patient.birthdate");
+		searchParameter.setUrl("http://example.org/SearchParameter/bundle-composition-patient-birthdate");
+		searchParameter.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		searchParameter.addBase("Bundle");
+		searchParameter.setType(Enumerations.SearchParamType.DATE);
+		searchParameter.setExpression("Bundle.entry.resource.ofType(Patient).birthDate");
+		doUpdateResource(searchParameter);
+
+		mySearchParamRegistry.forceRefresh();
+
+		Patient pat1 = buildResource("Patient", withId("pat1"), withBirthdate("2001-03-17"));
+		doUpdateResource(pat1);
+		Bundle pat1Bundle = buildCompositionBundle(pat1);
+		String pat1BundleId = doCreateResource(pat1Bundle).getIdPart();
+
+		Patient pat2 = buildResource("Patient", withId("pat2"), withBirthdate("2000-01-01"));
+		doUpdateResource(pat2);
+		Bundle pat2Bundle = buildCompositionBundle(pat2);
+		String pat2BundleId = doCreateResource(pat2Bundle).getIdPart();
+
+		// then
+		myTestDaoSearch.assertSearchFinds("sort by contained date",
+			"Bundle?_sort=composition.patient.birthdate", List.of(pat2BundleId, pat1BundleId));
+		myTestDaoSearch.assertSearchFinds("reverse sort by contained date",
+			"Bundle?_sort=-composition.patient.birthdate", List.of(pat1BundleId, pat2BundleId));
+	}
+
+	private static Bundle buildCompositionBundle(Patient pat11) {
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.DOCUMENT);
+		Composition composition = new Composition();
+		composition.setType(new CodeableConcept().addCoding(new Coding().setCode("code").setSystem("http://example.org")));
+		bundle.addEntry().setResource(composition);
+		composition.getSubject().setReference(pat11.getIdElement().getValue());
+		bundle.addEntry().setResource(pat11);
+		return bundle;
+	}
+
 
 }

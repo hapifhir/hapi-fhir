@@ -11,6 +11,7 @@ import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -522,6 +523,59 @@ public class FhirPatchApplyR4Test {
 		assertThat(patient.getExtension()).hasSize(1);
 		assertThat(patient.getExtension().get(0).getUrl()).isEqualTo("http://foo/fhir/extension/foo");
 		assertThat(patient.getExtension().get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("foo");
+	}
+
+	@Test
+	public void testAddExtensionWithExtension() {
+		final String extensionUrl  = "http://foo/fhir/extension/foo";
+		final String innerExtensionUrl  = "http://foo/fhir/extension/innerExtension";
+		final String innerExtensionValue = "2021-07-24T13:23:30-04:00";
+
+		FhirPatch svc = new FhirPatch(ourCtx);
+		Patient patient = new Patient();
+
+		Parameters patch = new Parameters();
+		Parameters.ParametersParameterComponent addOperation = createPatchAddOperation("Patient", "extension", null);
+		addOperation
+			.addPart()
+			.setName("value")
+			.addPart(
+				new Parameters.ParametersParameterComponent()
+					.setName("url")
+					.setValue(new UriType(extensionUrl))
+			)
+			.addPart(
+				new Parameters.ParametersParameterComponent()
+					.setName("extension")
+					.addPart(
+						new Parameters.ParametersParameterComponent()
+							.setName("url")
+							.setValue(new UriType(innerExtensionUrl))
+					)
+					.addPart(
+						new Parameters.ParametersParameterComponent()
+							.setName("value")
+							.setValue(new DateTimeType(innerExtensionValue))
+					)
+			);
+
+		patch.addParameter(addOperation);
+
+		ourLog.info("Patch:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patch));
+
+		svc.apply(patient, patch);
+		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
+
+		//Then: it adds the new extension correctly.
+		assertThat(patient.getExtension(), hasSize(1));
+		Extension extension = patient.getExtension().get(0);
+		assertThat(extension.getUrl(), is(equalTo(extensionUrl)));
+		Extension innerExtension = extension.getExtensionFirstRep();
+
+		assertThat(innerExtension, notNullValue());
+		assertThat(innerExtension.getUrl(), is(equalTo(innerExtensionUrl)));
+		assertThat(innerExtension.getValue().primitiveValue(), is(equalTo(innerExtensionValue)));
+
 	}
 
 	private Parameters.ParametersParameterComponent createPatchAddOperation(String thePath, String theName, Type theValue) {

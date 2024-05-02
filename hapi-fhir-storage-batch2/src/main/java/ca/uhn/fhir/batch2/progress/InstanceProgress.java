@@ -192,12 +192,12 @@ public class InstanceProgress {
 	/**
 	 * Transitions from IN_PROGRESS/ERRORED based on chunk statuses.
 	 */
-	public void calculateNewStatus() {
+	public void calculateNewStatus(boolean theLastStepIsReduction) {
 		if (myFailedChunkCount > 0) {
 			myNewStatus = StatusEnum.FAILED;
 		} else if (myErroredChunkCount > 0) {
 			myNewStatus = StatusEnum.ERRORED;
-		} else if (myIncompleteChunkCount == 0 && myCompleteChunkCount > 0) {
+		} else if (myIncompleteChunkCount == 0 && myCompleteChunkCount > 0 && !theLastStepIsReduction) {
 			myNewStatus = StatusEnum.COMPLETED;
 		}
 	}

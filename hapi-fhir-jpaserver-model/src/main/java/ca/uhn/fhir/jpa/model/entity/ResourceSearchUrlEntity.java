@@ -29,6 +29,15 @@ import jakarta.persistence.TemporalType;
 
 import java.util.Date;
 
+/**
+ * This entity is used to enforce uniqueness on a given search URL being
+ * used as a conditional operation URL, e.g. a conditional create or a
+ * conditional update. When we perform a conditional operation that is
+ * creating a new resource, we store an entity with the conditional URL
+ * in this table. The URL is the PK of the table, so the database
+ * ensures that two concurrent threads don't accidentally create two
+ * resources with the same conditional URL.
+ */
 @Entity
 @Table(
 		name = "HFJ_RES_SEARCH_URL",

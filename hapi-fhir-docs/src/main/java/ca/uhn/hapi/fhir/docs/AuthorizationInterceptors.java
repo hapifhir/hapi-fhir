@@ -55,13 +55,13 @@ import java.util.List;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
-@SuppressWarnings("unused")
 /**
  * Examples integrated into our documentation.
  */
+@SuppressWarnings({"unused", "WriteOnlyObject", "UnnecessaryLocalVariable"})
 public class AuthorizationInterceptors {
 
-	public class PatientResourceProvider implements IResourceProvider {
+	public static class PatientResourceProvider implements IResourceProvider {
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
@@ -74,8 +74,8 @@ public class AuthorizationInterceptors {
 		}
 	}
 
+	@SuppressWarnings({"ConstantConditions", "InnerClassMayBeStatic"})
 	// START SNIPPET: patientAndAdmin
-	@SuppressWarnings("ConstantConditions")
 	public class PatientAndAdminAuthorizationInterceptor extends AuthorizationInterceptor {
 
 		@Override
@@ -265,6 +265,7 @@ public class AuthorizationInterceptors {
 
 	}
 
+	@SuppressWarnings("InnerClassMayBeStatic")
 	// START SNIPPET: narrowing
 	public class MyPatientSearchNarrowingInterceptor extends SearchNarrowingInterceptor {
 
@@ -300,6 +301,13 @@ public class AuthorizationInterceptors {
 	}
 	// END SNIPPET: narrowing
 
+	public void narrowingConditional() {
+		// START SNIPPET: narrowingConditional
+		SearchNarrowingInterceptor interceptor = new SearchNarrowingInterceptor();
+		interceptor.setNarrowConditionalUrls(true);
+		// END SNIPPET: narrowingConditional
+	}
+
 	@SuppressWarnings("SpellCheckingInspection")
 	public void rsNarrowing() {
 		RestfulServer restfulServer = new RestfulServer();
@@ -330,6 +338,7 @@ public class AuthorizationInterceptors {
 		// END SNIPPET: rsnarrowing
 	}
 
+	@SuppressWarnings("InnerClassMayBeStatic")
 	// START SNIPPET: narrowingByCode
 	public class MyCodeSearchNarrowingInterceptor extends SearchNarrowingInterceptor {
 

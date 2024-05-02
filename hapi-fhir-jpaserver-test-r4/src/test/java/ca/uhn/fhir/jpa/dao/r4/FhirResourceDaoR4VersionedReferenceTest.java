@@ -378,17 +378,11 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			observation.getEncounter().setReference(encounter.getId()); // not versioned
 			builder.addTransactionCreateEntry(observation);
 
-			Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
-			ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-			assertThat(outcome.getEntry().get(0).getResponse().getStatus()).isEqualTo("200 OK");
-			assertThat(outcome.getEntry().get(1).getResponse().getStatus()).isEqualTo("200 OK");
-			assertThat(outcome.getEntry().get(2).getResponse().getStatus()).isEqualTo("201 Created");
+			Bundle outcome = createAndValidateBundle((Bundle) builder.getBundle(),
+				List.of("200 OK", "200 OK", "201 Created"), List.of("2", "1", "1"));
 			IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
 			IdType encounterId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
 			IdType observationId = new IdType(outcome.getEntry().get(2).getResponse().getLocation());
-			assertThat(patientId.getVersionIdPart()).isEqualTo("2");
-			assertThat(encounterId.getVersionIdPart()).isEqualTo("1");
-			assertThat(observationId.getVersionIdPart()).isEqualTo("1");
 
 			// Read back and verify that reference is now versioned
 			observation = myObservationDao.read(observationId);
@@ -427,14 +421,10 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			builder.addTransactionCreateEntry(observation);
 
 			myCaptureQueriesListener.clear();
-			Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
-			ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-			assertThat(outcome.getEntry().get(0).getResponse().getStatus()).isEqualTo("200 OK");
-			assertThat(outcome.getEntry().get(1).getResponse().getStatus()).isEqualTo("201 Created");
+			Bundle outcome = createAndValidateBundle((Bundle) builder.getBundle(),
+				List.of("200 OK", "201 Created"), List.of("3", "1"));
 			IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
 			IdType observationId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
-			assertThat(patientId.getVersionIdPart()).isEqualTo("3");
-			assertThat(observationId.getVersionIdPart()).isEqualTo("1");
 
 			// Make sure we're not introducing any extra DB operations
 			assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(3);
@@ -466,14 +456,10 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 			myCaptureQueriesListener.clear();
 
-			Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
-			ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-			assertThat(outcome.getEntry().get(0).getResponse().getStatus()).isEqualTo("200 OK");
-			assertThat(outcome.getEntry().get(1).getResponse().getStatus()).isEqualTo("201 Created");
+			Bundle outcome = createAndValidateBundle((Bundle) builder.getBundle(),
+				List.of("200 OK", "201 Created"), List.of("3", "1"));
 			IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
 			IdType observationId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
-			assertThat(patientId.getVersionIdPart()).isEqualTo("3");
-			assertThat(observationId.getVersionIdPart()).isEqualTo("1");
 
 			// Make sure we're not introducing any extra DB operations
 			assertThat(myCaptureQueriesListener.logSelectQueries()).hasSize(4);
@@ -561,18 +547,89 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			BundleBuilder builder = new BundleBuilder(myFhirContext);
 			builder.addTransactionCreateEntry(messageHeader);
 
-			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(builder.getBundle()));
-			Bundle outcome = mySystemDao.transaction(mySrd, (Bundle) builder.getBundle());
-			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-			assertThat(outcome.getEntry().get(0).getResponse().getStatus()).isEqualTo("201 Created");
-
+			Bundle outcome = createAndValidateBundle((Bundle) builder.getBundle(),
+				List.of("201 Created"), List.of("1"));
 			IdType messageHeaderId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
-			assertThat(patient.getIdElement().getVersionIdPart()).isEqualTo("2");
-			assertThat(messageHeaderId.getVersionIdPart()).isEqualTo("1");
+			assertEquals("2", patient.getIdElement().getVersionIdPart());
 
 			// read back and verify that reference is versioned
 			messageHeader = myMessageHeaderDao.read(messageHeaderId);
 			assertThat(messageHeader.getFocus().get(0).getReference()).isEqualTo(patient.getIdElement().getValue());
+		}
+
+		@Test
+		@DisplayName("#5619 Incorrect version of auto versioned reference for conditional update with urn id placeholder")
+		public void testInsertVersionedReferencesByPath_conditionalUpdateNoOpInTransaction_addsCorrectVersionToReference() {
+			Supplier<Bundle> supplier = () -> {
+				//  create patient
+				Patient patient = new Patient();
+				patient.setActive(true);
+				patient.addIdentifier().setSystem("http://example.com").setValue("test");
+
+				// add patient to the Bundle - conditional update with placeholder url
+				Bundle bundle = new Bundle();
+				bundle.setType(Bundle.BundleType.TRANSACTION);
+				bundle.addEntry()
+					.setResource(patient)
+					.setFullUrl("urn:uuid:00001")
+					.getRequest()
+					.setMethod(Bundle.HTTPVerb.PUT)
+					.setUrl("Patient?identifier=http://example.com|test");
+
+				// create MessageHeader
+				MessageHeader messageHeader = new MessageHeader();
+				messageHeader.getMeta().setExtension(messageHeaderAutoVersionExtension);
+				// add reference
+				messageHeader.addFocus().setReference("urn:uuid:00001");
+
+				bundle.addEntry()
+					.setResource(messageHeader)
+					.getRequest()
+					.setMethod(Bundle.HTTPVerb.POST)
+					.setUrl("/MessageHeader");
+
+				return bundle;
+			};
+
+			// create bundle first time
+			Bundle outcome = createAndValidateBundle(supplier.get(),
+				List.of("201 Created", "201 Created"), List.of("1", "1"));
+			IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
+			IdType messageHeaderId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
+
+			// read back and verify that reference is versioned and correct
+			Patient patient = myPatientDao.read(patientId);
+			MessageHeader messageHeader = myMessageHeaderDao.read(messageHeaderId);
+			assertEquals(patient.getIdElement().getValue(), messageHeader.getFocus().get(0).getReference());
+
+			// create bundle second time
+			outcome = createAndValidateBundle(supplier.get(), List.of("200 OK", "201 Created"), List.of("1", "1"));
+			patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation());
+			messageHeaderId = new IdType(outcome.getEntry().get(1).getResponse().getLocation());
+
+			// read back and verify that reference is versioned and correct
+			patient = myPatientDao.read(patientId);
+			messageHeader = myMessageHeaderDao.read(messageHeaderId);
+			assertEquals(patient.getIdElement().getValue(), messageHeader.getFocus().get(0).getReference());
+		}
+
+		private Bundle createAndValidateBundle(Bundle theBundle, List<String> theOutcomeStatuses,
+											   List<String> theOutcomeVersions) {
+			assertEquals(theBundle.getEntry().size(), theOutcomeStatuses.size(),
+				"Size of OutcomeStatuses list is incorrect");
+			assertEquals(theBundle.getEntry().size(), theOutcomeVersions.size(),
+				"Size of OutcomeVersions list is incorrect");
+
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theBundle));
+			Bundle result = mySystemDao.transaction(mySrd, theBundle);
+			ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theBundle));
+
+			for (int i = 0; i < result.getEntry().size(); i++) {
+				assertEquals(theOutcomeStatuses.get(i), result.getEntry().get(i).getResponse().getStatus());
+				IIdType resultId = new IdType(result.getEntry().get(i).getResponse().getLocation());
+				assertEquals(theOutcomeVersions.get(i), resultId.getVersionIdPart());
+			}
+			return result;
 		}
 
 		private Patient createAndUpdatePatient(String thePatientId) {

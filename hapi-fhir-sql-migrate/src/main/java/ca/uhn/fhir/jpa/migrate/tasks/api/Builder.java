@@ -39,11 +39,14 @@ import ca.uhn.fhir.jpa.migrate.taskdef.DropTableTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteRawSqlTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ExecuteTaskPrecondition;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.MigrateColumBlobTypeToBinaryTypeTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.MigrateColumnClobTypeToTextTypeTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.MigratePostgresTextClobToBinaryClobTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ModifyColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.NopTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameColumnTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.RenameIndexTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.RenameTableTask;
 import org.apache.commons.lang3.Validate;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
@@ -320,11 +323,30 @@ public class Builder {
 			addTask(task);
 		}
 
+		public void renameTable(String theVersion, String theNewTableName) {
+			RenameTableTask task = new RenameTableTask(myRelease, theVersion, getTableName(), theNewTableName);
+			addTask(task);
+		}
+
 		public void migratePostgresTextClobToBinaryClob(String theVersion, String theColumnName) {
 			MigratePostgresTextClobToBinaryClobTask task =
 					new MigratePostgresTextClobToBinaryClobTask(myRelease, theVersion);
 			task.setTableName(getTableName());
 			task.setColumnName(theColumnName);
+			addTask(task);
+		}
+
+		public void migrateBlobToBinary(String theVersion, String theFromColumName, String theToColumName) {
+			MigrateColumBlobTypeToBinaryTypeTask task = new MigrateColumBlobTypeToBinaryTypeTask(
+					myRelease, theVersion, getTableName(), theFromColumName, theToColumName);
+
+			addTask(task);
+		}
+
+		public void migrateClobToText(String theVersion, String theFromColumName, String theToColumName) {
+			MigrateColumnClobTypeToTextTypeTask task = new MigrateColumnClobTypeToTextTypeTask(
+					myRelease, theVersion, getTableName(), theFromColumName, theToColumName);
+
 			addTask(task);
 		}
 
@@ -597,11 +619,11 @@ public class Builder {
 								"Only SELECT statements (including CTEs) are allowed here.  Please check your SQL: [%s]",
 								theSql));
 			}
-			ourLog.info("SQL to evaluate: {}", theSql);
+			ourLog.debug("SQL to evaluate: {}", theSql);
 
 			myTask.addPrecondition(new ExecuteTaskPrecondition(
 					() -> {
-						ourLog.info("Checking precondition for SQL: {}", theSql);
+						ourLog.debug("Checking precondition for SQL: {}", theSql);
 						return MigrationJdbcUtils.queryForSingleBooleanResultMultipleThrowsException(
 								theSql, myTask.newJdbcTemplate());
 					},
@@ -612,6 +634,11 @@ public class Builder {
 
 		public BuilderCompleteTask runEvenDuringSchemaInitialization() {
 			myTask.setRunDuringSchemaInitialization(true);
+			return this;
+		}
+
+		public BuilderCompleteTask setTransactional(boolean theFlag) {
+			myTask.setTransactional(theFlag);
 			return this;
 		}
 	}

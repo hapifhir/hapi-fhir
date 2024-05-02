@@ -38,8 +38,7 @@ public class CdsCrServiceMethod extends BaseCdsCrMethod implements ICdsServiceMe
 
 	@Override
 	public boolean isAllowAutoFhirClientPrefetch() {
-		// The $apply operation will make FHIR requests for any data it needs
-		// directly against the fhirServer of the ServiceRequest.
-		return false;
+		// The $apply operation will NOT make FHIR requests for any data it needs.
+		return true;
 	}
 }

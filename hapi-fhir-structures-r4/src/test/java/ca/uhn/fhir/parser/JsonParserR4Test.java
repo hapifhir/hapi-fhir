@@ -1159,6 +1159,18 @@ public class JsonParserR4Test extends BaseTest {
 	}
 
 	@Test
+	public void testEncodeToString_CompoundTypeWithReference() {
+		Identifier identifier = new Identifier();
+		identifier.setSystem("http://system.org");
+		identifier.setValue("123");
+		Reference reference = new Reference("Organization/1");
+		identifier.setAssigner(reference);
+		String expected = "{\"system\":\"http://system.org\",\"value\":\"123\",\"assigner\":{\"reference\":\"Organization/1\"}}";
+		String actual = ourCtx.newJsonParser().encodeToString(identifier);
+		assertEquals(expected, actual);
+	}
+
+	@Test
 	public void testEncodeToString_Resource() {
 		Patient p = new Patient();
 		p.setId("Patient/123");

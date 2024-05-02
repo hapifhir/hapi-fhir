@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 5725
+jira: SMILE-8343
+title: "The recommended constructor was not present on hibernate dialects
+  provided by HAPI FHIR, leading to warnings during startup, and failures
+  in some cases. This has been corrected. Thanks to GitHub user
+  @pano-smals for the contribution!"

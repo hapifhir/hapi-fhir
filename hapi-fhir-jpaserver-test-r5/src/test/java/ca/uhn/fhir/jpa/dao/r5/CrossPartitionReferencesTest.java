@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Enumerations;
@@ -192,8 +193,7 @@ public class CrossPartitionReferencesTest extends BaseJpaR5Test {
 		when(myCrossPartitionReferencesDetectedInterceptor.handle(any(),any())).thenAnswer(t->{
 			CrossPartitionReferenceDetails theDetails = t.getArgument(1, CrossPartitionReferenceDetails.class);
 			IIdType targetId = theDetails.getPathAndRef().getRef().getReferenceElement();
-			ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forRead(targetId);
-			RequestPartitionId referenceTargetPartition = myPartitionHelperSvc.determineReadPartitionForRequest(theDetails.getRequestDetails(), details);
+			RequestPartitionId referenceTargetPartition = myPartitionHelperSvc.determineReadPartitionForRequestForRead(theDetails.getRequestDetails(), targetId.getResourceType(), targetId);
 
 			IResourceLookup targetResource = myTransactionService
 				.withRequest(theDetails.getRequestDetails())

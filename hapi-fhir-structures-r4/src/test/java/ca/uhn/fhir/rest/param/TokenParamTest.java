@@ -48,19 +48,16 @@ public class TokenParamTest {
 	}
 
 	@Test
-	public void testNameNickname() {
-		StringParam param = new StringParam();
-		assertFalse(param.isNicknameExpand());
-		param.setValueAsQueryToken(ourCtx, "name", Constants.PARAMQUALIFIER_NICKNAME, "kenny");
-		assertTrue(param.isNicknameExpand());
+	public void testMdmQualifier() {
+		final String value = "Patient/PJANE1";
+
+		TokenParam param = new TokenParam();
+		param.setValueAsQueryToken(ourCtx, "_id", Constants.PARAMQUALIFIER_MDM, value);
+		assertNull(param.getModifier());
+		assertNull(param.getSystem());
+		assertTrue(param.isMdmExpand());
+		assertEquals(value, param.getValue());
 	}
 
-	@Test
-	public void testGivenNickname() {
-		StringParam param = new StringParam();
-		assertFalse(param.isNicknameExpand());
-		param.setValueAsQueryToken(ourCtx, "given", Constants.PARAMQUALIFIER_NICKNAME, "kenny");
-		assertTrue(param.isNicknameExpand());
-	}
 
 }

@@ -10,7 +10,6 @@ import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.BaseStorageDao;
 import ca.uhn.fhir.jpa.dao.DaoTestUtils;
-import ca.uhn.fhir.jpa.dao.data.IForcedIdDao;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
@@ -86,7 +85,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -109,8 +107,6 @@ import static org.assertj.core.api.Assertions.fail;
 public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoDstu2Test.class);
-	@Autowired
-	private IForcedIdDao myForcedIdDao;
 
 	@AfterEach
 	public final void after() {
@@ -992,9 +988,7 @@ public class FhirResourceDaoDstu2Test extends BaseJpaDstu2Test {
 			idv2 = myPatientDao.update(patient, mySrd).getId();
 		}
 
-		runInTransaction(() -> {
-			ourLog.info("Forced IDs:\n{}", myForcedIdDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n")));
-		});
+		logAllResources();
 
 		List<Patient> patients = toList(myPatientDao.history(idv1.toVersionless(), null, null, null, mySrd));
 		assertTrue(patients.size() == 2);
