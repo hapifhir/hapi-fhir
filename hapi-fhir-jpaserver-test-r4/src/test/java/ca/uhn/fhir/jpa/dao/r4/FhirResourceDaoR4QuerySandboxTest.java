@@ -9,8 +9,11 @@ import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.jpa.util.SqlQueryList;
+import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.storage.test.DaoTestDataBuilder;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,6 +36,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
  * Sandbox for implementing queries.
@@ -49,10 +53,10 @@ import static org.hamcrest.Matchers.not;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 @TestExecutionListeners(listeners = {
 	DependencyInjectionTestExecutionListener.class
-	, FhirResourceDaoR4QuerySandbox.TestDirtiesContextTestExecutionListener.class
+	, FhirResourceDaoR4QuerySandboxTest.TestDirtiesContextTestExecutionListener.class
 })
-public class FhirResourceDaoR4QuerySandbox extends BaseJpaTest {
-	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4QuerySandbox.class);
+public class FhirResourceDaoR4QuerySandboxTest extends BaseJpaTest {
+	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4QuerySandboxTest.class);
 
 	@Autowired
 	PlatformTransactionManager myTxManager;
@@ -135,6 +139,25 @@ public class FhirResourceDaoR4QuerySandbox extends BaseJpaTest {
 
 		myTestDaoSearch.assertSearchFindsInOrder("sort by server assigned id", "Patient?family=smith&_sort=_pid", id1,id2,id3);
 		myTestDaoSearch.assertSearchFindsInOrder("reverse sort by server assigned id", "Patient?family=smith&_sort=-_pid", id3,id2,id1);
+	}
+
+	@Test
+	void testChainedSort() {
+
+		IIdType practitionerId = myDataBuilder.createPractitioner(myDataBuilder.withFamily("Jones"));
+
+		String id1 = myDataBuilder.createPatient(myDataBuilder.withFamily("Smithy")).getIdPart();
+		String id2 = myDataBuilder.createPatient(myDataBuilder.withFamily("Smithwick")).getIdPart();
+		String id3 = myDataBuilder.createPatient(
+			myDataBuilder.withFamily("Smith"),
+			myDataBuilder.withReference("generalPractitioner", practitionerId)).getIdPart();
+
+
+		IBundleProvider iBundleProvider = myTestDaoSearch.searchForBundleProvider("Patient?_total=ACCURATE&_sort=Practitioner:general-practitioner.family");
+		assertEquals(3, iBundleProvider.size());
+		List<IBaseResource> allResources = iBundleProvider.getAllResources();
+		assertEquals(3, iBundleProvider.size());
+		assertEquals(3, allResources.size());
 	}
 
 	public static final class TestDirtiesContextTestExecutionListener extends DirtiesContextTestExecutionListener {
