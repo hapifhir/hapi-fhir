@@ -60,7 +60,7 @@ public class TermConceptPropertyTest {
 		String value = termConceptProperty.getValue();
 
 		// then
-		assertThat(value, startsWith("a"));
+		assertThat(value).startsWith("a"));
 
 	}
 
@@ -75,7 +75,7 @@ public class TermConceptPropertyTest {
 		String value = termConceptProperty.getValue();
 
 		// then
-		assertThat(value, startsWith("a"));
+		assertThat(value).startsWith("a"));
 	}
 
 }

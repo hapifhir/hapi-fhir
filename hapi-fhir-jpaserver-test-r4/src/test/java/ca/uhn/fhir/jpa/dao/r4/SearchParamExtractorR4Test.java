@@ -452,7 +452,7 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			Collection<ResourceIndexedSearchParamComposite> c = myExtractor.extractSearchParamComposites(resource);
 
 			assertThat(c, not(empty()));
-			assertThat("Extracts standard R4 composite sp", c, hasItem(hasProperty("searchParamName", equalTo("component-code-value-concept"))));
+			assertThat("Extracts standard R4 composite sp", c, hasItem(hasProperty("searchParamName").isEqualTo("component-code-value-concept"))));
 
 			List<ResourceIndexedSearchParamComposite> components = c.stream()
 				.filter(idx -> idx.getSearchParamName().equals("component-code-value-concept"))

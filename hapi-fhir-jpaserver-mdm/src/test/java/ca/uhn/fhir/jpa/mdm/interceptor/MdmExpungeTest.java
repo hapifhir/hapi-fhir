@@ -63,8 +63,8 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 			myPatientDao.expunge(myTargetId.toVersionless(), expungeOptions, null);
 			fail("");
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage(), containsString("ViolationException"));
-			assertThat(e.getMessage(), containsString("FK_EMPI_LINK_TARGET"));
+			assertThat(e.getMessage()).contains("ViolationException"));
+			assertThat(e.getMessage()).contains("FK_EMPI_LINK_TARGET"));
 		}
 		myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
 		myPatientDao.expunge(myTargetId.toVersionless(), expungeOptions, null);

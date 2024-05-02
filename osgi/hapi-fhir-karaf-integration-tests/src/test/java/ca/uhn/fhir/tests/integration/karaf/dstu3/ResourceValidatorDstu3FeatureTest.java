@@ -118,7 +118,7 @@ public class ResourceValidatorDstu3FeatureTest {
 		String resultString = parser.setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome());
 		ourLog.info(resultString);
 
-		assertThat(resultString, containsString("No issues detected during validation"));
+		assertThat(resultString).contains("No issues detected during validation"));
 
 	}
 
@@ -190,7 +190,7 @@ public class ResourceValidatorDstu3FeatureTest {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(operationOutcome);
 //		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("Error parsing JSON: the primitive value must be a string"));
+		assertThat(encoded).contains("Error parsing JSON: the primitive value must be a string"));
 
 	}
 
@@ -276,7 +276,7 @@ public class ResourceValidatorDstu3FeatureTest {
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(ooencoded, containsString("Unknown extension http://foo"));
+		assertThat(ooencoded).contains("Unknown extension http://foo"));
 	}
 
 	/**
@@ -326,7 +326,7 @@ public class ResourceValidatorDstu3FeatureTest {
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(messageString, containsString("valueReference"));
+		assertThat(messageString).contains("valueReference"));
 		assertThat(messageString).doesNotContain("valueResource");
 	}
 
@@ -362,8 +362,8 @@ public class ResourceValidatorDstu3FeatureTest {
 		assertThat(messageString, not(stringContainsInOrder(
 			Arrays.asList(strings1)
 		)));
-		assertThat(messageString, containsString("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\""));
-		assertThat(messageString, containsString("url=\"http://foo.com/example\""));
+		assertThat(messageString).contains("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\""));
+		assertThat(messageString).contains("url=\"http://foo.com/example\""));
 		//@formatter:on
 
 		FhirValidator val = ourCtx.newValidator();
@@ -381,7 +381,7 @@ public class ResourceValidatorDstu3FeatureTest {
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(messageString, containsString("valueReference"));
+		assertThat(messageString).contains("valueReference"));
 		assertThat(messageString).doesNotContain("valueResource");
 	}
 

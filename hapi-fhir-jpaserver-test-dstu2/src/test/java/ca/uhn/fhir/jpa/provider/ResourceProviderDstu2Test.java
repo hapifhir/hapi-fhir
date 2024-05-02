@@ -492,7 +492,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			ourLog.debug(respString);
 			assertThat(respString).startsWith("<Patient xmlns=\"http://hl7.org/fhir\">");
 			assertThat(respString).endsWith("</Patient>");
-			//assertThat(respString, containsString("<OperationOutcome xmlns=\"http://hl7.org/fhir\">"));
+			//assertThat(respString).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\">"));
 		} finally {
 			response.getEntity().getContent().close();
 			response.close();

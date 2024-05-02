@@ -68,7 +68,7 @@ public class MigrateColumnClobTypeToTextTypeTaskTest {
 
 		String storedContent = (String) stringObjectMap.get("storage_content_text");
 
-		assertThat(storedContent, equalTo(expectedString));
+		assertThat(storedContent).isEqualTo(expectedString));
 
 	}
 

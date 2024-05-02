@@ -1,6 +1,8 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -30,6 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -89,7 +92,8 @@ public class RestfulServerTest {
 	public void testFailRegisterInterfaceProviderWithoutRestfulMethod() {
 		try {
 			myRestfulServer.registerProvider(new MyClassWithoutRestInterface());
-			fail("");		} catch (ConfigurationException e) {
+			fail("");
+		} catch (ConfigurationException e) {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(289) + "Did not find any annotated RESTful methods on provider class ca.uhn.fhir.rest.server.RestfulServerTest$MyClassWithoutRestInterface");
 		}
 	}
@@ -100,13 +104,12 @@ public class RestfulServerTest {
 		requestDetails.setRequestType(RequestTypeEnum.GET);
 		requestDetails.setResourceName("InvalidResourceName");
 		myRestfulServer.registerProvider(new MyListResourceProvider());
-		ResourceNotFoundException thrown = assertThrows(
-			 ResourceNotFoundException.class,
-			 () -> myRestfulServer.determineResourceMethod(requestDetails, "1234"),
-		 "Expected request to fail, but it succeeded.");
-
-		assertTrue(thrown.getMessage().contains("List"));
-		assertFalse(thrown.getMessage().contains("ListResource"));
+		assertThatThrownBy(
+			 () -> myRestfulServer.determineResourceMethod(requestDetails, "1234"))
+			 .as("Expected request to fail, but it succeeded.")
+			 .isInstanceOf(ResourceNotFoundException.class)
+			 .hasMessageContaining("List")
+			 .hasMessageContaining("ListResource");
 	}
 
 	//--------- Scaffolding ---------//
@@ -197,7 +200,7 @@ public class RestfulServerTest {
 		}
 	}
 
-	@ResourceDef(name="MyResource")
+	@ResourceDef(name = "MyResource")
 	public static class MyResource implements IBaseResource {
 
 		@Override
@@ -256,7 +259,7 @@ public class RestfulServerTest {
 		}
 	}
 
-	@ResourceDef(name="MyResource2")
+	@ResourceDef(name = "MyResource2")
 	public static class MyResource2 extends MyResource {
 	}
 

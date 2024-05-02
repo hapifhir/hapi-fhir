@@ -226,8 +226,8 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 
 		List<SqlQuery> selectQueriesForCurrentThread = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 		assertEquals(4, selectQueriesForCurrentThread.size());
-		assertThat(selectQueriesForCurrentThread.get(0).getSql(false, false), containsString("PARTITION_ID in (?)"));
-		assertThat(selectQueriesForCurrentThread.get(1).getSql(false, false), containsString("PARTITION_ID="));
+		assertThat(selectQueriesForCurrentThread.get(0).getSql(false, false)).contains("PARTITION_ID in (?)"));
+		assertThat(selectQueriesForCurrentThread.get(1).getSql(false, false)).contains("PARTITION_ID="));
 	}
 
 

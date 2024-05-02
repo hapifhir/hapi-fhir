@@ -67,7 +67,7 @@ public class CachingValidationSupportTest {
 		assertThat(fetched.get(0)).isSameAs(sd0);
 		assertThat(responses).hasSize(2);
 
-		await().until(() -> responses.size(), equalTo(1));
+		await().until(() -> responses.size()).isEqualTo(1));
 		assertThat(responses).hasSize(1);
 		fetched = support.fetchAllNonBaseStructureDefinitions();
 		assert fetched != null;

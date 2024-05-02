@@ -2015,7 +2015,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test {
 			myBatch2JobHelper.runMaintenancePass();
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
-		}, equalTo(true));
+		}).isEqualTo(true));
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 

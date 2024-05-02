@@ -197,12 +197,12 @@ public class JsonParserHl7OrgDstu2Test {
     String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSuppressNarratives(true).encodeResourceToString(patient);
     ourLog.info(encoded);
 
-    assertThat(encoded, containsString("Patient"));
+    assertThat(encoded).contains("Patient"));
     assertThat(encoded).containsSequence(Constants.TAG_SUBSETTED_SYSTEM_DSTU3, Constants.TAG_SUBSETTED_CODE);
     assertThat(encoded).doesNotContain("text");
     assertThat(encoded).doesNotContain("THE DIV");
-    assertThat(encoded, containsString("family"));
-    assertThat(encoded, containsString("maritalStatus"));
+    assertThat(encoded).contains("family"));
+    assertThat(encoded).contains("maritalStatus"));
   }
 
   @Test
@@ -249,7 +249,7 @@ public class JsonParserHl7OrgDstu2Test {
         stringContainsInOrder("{\"resourceType\":\"Patient\",", "\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}",
             "{\"url\":\"http://example.com#parent\",\"extension\":[{\"url\":\"http://example.com#child\",\"valueString\":\"value1\"},{\"url\":\"http://example.com#child\",\"valueString\":\"value2\"}]}"));
     assertThat(enc).containsSequence("\"modifierExtension\":[" + "{" + "\"url\":\"http://example.com/extensions#modext\"," + "\"valueDate\":\"1995-01-02\"" + "}" + "],");
-    assertThat(enc, containsString("\"_given\":[" + "{" + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext\"," + "\"valueString\":\"given\"" + "}" + "]" + "}," + "{"
+    assertThat(enc).contains("\"_given\":[" + "{" + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext\"," + "\"valueString\":\"given\"" + "}" + "]" + "}," + "{"
         + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext_parent\"," + "\"extension\":[" + "{"
         + "\"url\":\"http://examples.com#givenext_child\"," + "\"valueString\":\"CHILD\"" + "}" + "]" + "}" + "]" + "}"));
 
@@ -499,12 +499,12 @@ public class JsonParserHl7OrgDstu2Test {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(encoded);
 		assertThat(encoded).containsSequence(Arrays.asList("\"contained\"", "resourceType\": \"Organization", "id\": \"1\""));
-		assertThat(encoded, containsString("reference\": \"#1\""));
+		assertThat(encoded).contains("reference\": \"#1\""));
 
 		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded).containsSequence(Arrays.asList("\"contained\"", "resourceType\": \"Organization", "id\": \"1\""));
-		assertThat(encoded, containsString("reference\": \"#1\""));
+		assertThat(encoded).contains("reference\": \"#1\""));
 	}
 
 	@Test
@@ -686,7 +686,7 @@ public class JsonParserHl7OrgDstu2Test {
 		valueSet.addUseContext().addExtension().setUrl("http://foo").setValue( new StringType("AAA"));
 
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(valueSet);
-		assertThat(encoded, containsString("\"useContext\":[{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}"));
+		assertThat(encoded).contains("\"useContext\":[{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}"));
 
 	}
 
@@ -724,7 +724,7 @@ public class JsonParserHl7OrgDstu2Test {
 		String enc = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(list);
 		ourLog.info(enc);
 
-		assertThat(enc, containsString("\"id\": \"1\""));
+		assertThat(enc).contains("\"id\": \"1\""));
 
 		List_ parsed = ourCtx.newJsonParser().parseResource(List_.class,enc);
 		assertEquals(Patient.class, parsed.getEntry().get(0).getItem().getResource().getClass());
@@ -763,7 +763,7 @@ public class JsonParserHl7OrgDstu2Test {
 		str = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(str);
 		// Backslashes need to be escaped because they are in a JSON value
-		assertThat(str, containsString(">hello<"));
+		assertThat(str).contains(">hello<"));
 
 	}
 
@@ -784,12 +784,12 @@ public class JsonParserHl7OrgDstu2Test {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(encoded);
 		assertThat(encoded).doesNotContain("contained");
-		assertThat(encoded, containsString("\"reference\": \"Organization/65546\""));
+		assertThat(encoded).contains("\"reference\": \"Organization/65546\""));
 
 		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
 		assertThat(encoded).doesNotContain("contained");
-		assertThat(encoded, containsString("\"reference\": \"Organization/65546\""));
+		assertThat(encoded).contains("\"reference\": \"Organization/65546\""));
 	}
 
 
@@ -828,11 +828,11 @@ public class JsonParserHl7OrgDstu2Test {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("Patient"));
+		assertThat(encoded).contains("Patient"));
 		assertThat(encoded).containsSequence("\"tag\"",
 				"\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE+"\","));
 		assertThat(encoded).doesNotContain("THE DIV");
-		assertThat(encoded, containsString("family"));
+		assertThat(encoded).contains("family"));
 		assertThat(encoded).doesNotContain("maritalStatus");
 	}
 
@@ -849,12 +849,12 @@ public class JsonParserHl7OrgDstu2Test {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).setSummaryMode(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("Patient"));
+		assertThat(encoded).contains("Patient"));
 		assertThat(encoded).containsSequence("\"tag\"",
 				"\"system\": \"foo\",", "\"code\": \"bar\"",
 				"\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE+"\","));
 		assertThat(encoded).doesNotContain("THE DIV");
-		assertThat(encoded, containsString("family"));
+		assertThat(encoded).contains("family"));
 		assertThat(encoded).doesNotContain("maritalStatus");
 	}
 
@@ -937,7 +937,7 @@ public class JsonParserHl7OrgDstu2Test {
 		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
 		ourLog.info(enc);
 		//@formatter:off
-		assertThat(enc, containsString(("{\n" +
+		assertThat(enc).contains(("{\n" +
 				"    \"resourceType\":\"Patient\",\n" +
 				"    \"name\":[\n" +
 				"        {\n" +
@@ -1011,7 +1011,7 @@ public class JsonParserHl7OrgDstu2Test {
 
     String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
     //@formatter:off
-		assertThat(enc, containsString(("{" +
+		assertThat(enc).contains(("{" +
 				"\"resourceType\":\"Patient\"," +
 				"    \"extension\":[" +
 				"        {" +
@@ -1035,7 +1035,7 @@ public class JsonParserHl7OrgDstu2Test {
 		//@formatter:on
 
     //@formatter:off
-		assertThat(enc, containsString((
+		assertThat(enc).contains((
 				"            \"given\":[" +
 				"                \"Joe\"," +
 				"                \"Shmoe\"" +

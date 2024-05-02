@@ -93,11 +93,11 @@ public class R4XmlParserTest {
 		String encoded = parser.encodeResourceToString(b);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("BUNDLEID"));
-		assertThat(encoded, containsString("http://FOO"));
-		assertThat(encoded, containsString("PATIENTID"));
-		assertThat(encoded, containsString("http://BAR"));
-		assertThat(encoded, containsString("GIVEN"));
+		assertThat(encoded).contains("BUNDLEID"));
+		assertThat(encoded).contains("http://FOO"));
+		assertThat(encoded).contains("PATIENTID"));
+		assertThat(encoded).contains("http://BAR"));
+		assertThat(encoded).contains("GIVEN"));
 
 		b = parser.parseResource(Bundle.class, encoded);
 
@@ -123,7 +123,7 @@ public class R4XmlParserTest {
 		assertThat(encoded, IsNot.not(containsString("http://FOO")));
 		assertThat(encoded, IsNot.not(containsString("PATIENTID")));
 		assertThat(encoded, IsNot.not(containsString("http://BAR")));
-		assertThat(encoded, containsString("GIVEN"));
+		assertThat(encoded).contains("GIVEN"));
 
 		b = parser.parseResource(Bundle.class, encoded);
 
@@ -161,8 +161,8 @@ public class R4XmlParserTest {
 		Patient parsed = xmlParser.parseResource(Patient.class, input);
 
 		ourLog.info(jsonParser.setPrettyPrint(true).encodeResourceToString(parsed));
-		assertThat(xmlParser.encodeResourceToString(parsed), containsString("Underweight"));
-		assertThat(jsonParser.encodeResourceToString(parsed), containsString("Underweight"));
+		assertThat(xmlParser.encodeResourceToString(parsed)).contains("Underweight"));
+		assertThat(jsonParser.encodeResourceToString(parsed)).contains("Underweight"));
 
 	}
 

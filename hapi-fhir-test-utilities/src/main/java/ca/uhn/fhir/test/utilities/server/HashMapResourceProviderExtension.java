@@ -96,17 +96,17 @@ public class HashMapResourceProviderExtension<T extends IBaseResource> extends H
 
 	public void waitForUpdateCount(long theCount) {
 		assertThat(theCount).isGreaterThanOrEqualTo(getCountUpdate());
-		await().until(this::getCountUpdate, equalTo(theCount));
+		await().until(this::getCountUpdate).isEqualTo(theCount));
 	}
 
 	public void waitForCreateCount(long theCount) {
 		assertThat(theCount).isGreaterThanOrEqualTo(getCountCreate());
-		await().until(this::getCountCreate, equalTo(theCount));
+		await().until(this::getCountCreate).isEqualTo(theCount));
 	}
 
 	public void waitForDeleteCount(long theCount) {
 		assertThat(theCount).isGreaterThanOrEqualTo(getCountDelete());
-		await().until(this::getCountDelete, equalTo(theCount));
+		await().until(this::getCountDelete).isEqualTo(theCount));
 	}
 
 	public List<T> getResourceUpdates() {

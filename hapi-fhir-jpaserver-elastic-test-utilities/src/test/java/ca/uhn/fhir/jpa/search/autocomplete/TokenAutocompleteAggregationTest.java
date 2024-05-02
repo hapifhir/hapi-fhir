@@ -30,9 +30,9 @@ class TokenAutocompleteAggregationTest {
 
 			buildAggregation();
 
-			assertThat("nested clause includes sp", myAggJson, isJson(withJsonPath("nested.path", equalTo("nsp.combo-code"))));
-			assertThat("terms field is sp", myAggJson, isJson(withJsonPath("aggs.search.aggs.group_by_token.terms.field", equalTo("nsp.combo-code.token.code-system"))));
-			assertThat("fetched piece is sp", myAggJson, isJson(withJsonPath("aggs.search.aggs.group_by_token.aggs.top_tags_hits.top_hits._source.includes[0]", equalTo("nsp.combo-code"))));
+			assertThat("nested clause includes sp", myAggJson, isJson(withJsonPath("nested.path").isEqualTo("nsp.combo-code"))));
+			assertThat("terms field is sp", myAggJson, isJson(withJsonPath("aggs.search.aggs.group_by_token.terms.field").isEqualTo("nsp.combo-code.token.code-system"))));
+			assertThat("fetched piece is sp", myAggJson, isJson(withJsonPath("aggs.search.aggs.group_by_token.aggs.top_tags_hits.top_hits._source.includes[0]").isEqualTo("nsp.combo-code"))));
 		}
 
 		@Test
@@ -42,7 +42,7 @@ class TokenAutocompleteAggregationTest {
 
 			buildAggregation();
 
-			assertThat("count for top n", myAggJson, isJson(withJsonPath("aggs.search.aggs.group_by_token.terms.size", equalTo(77))));
+			assertThat("count for top n", myAggJson, isJson(withJsonPath("aggs.search.aggs.group_by_token.terms.size").isEqualTo(77))));
 		}
 
 		private void buildAggregation() {

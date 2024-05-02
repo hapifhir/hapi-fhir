@@ -68,7 +68,7 @@ public class MigrateColumBlobTypeToBinaryTypeTaskTest {
 
 		String storedContent = convertToString(stringObjectMap, "storage_content_bin");
 
-		assertThat(storedContent, equalTo(expectedString));
+		assertThat(storedContent).isEqualTo(expectedString));
 
 	}
 

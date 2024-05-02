@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util.bundle;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -496,10 +497,10 @@ public class BundleUtilTest {
 		List<SearchBundleEntryParts> searchBundleEntryParts = BundleUtil.getSearchBundleEntryParts(ourCtx, bundle);
 
 		//Then
-		assertThat(searchBundleEntryParts, hasSize(1));
-		assertThat(searchBundleEntryParts.get(0).getSearchMode(), is(nullValue()));
-		assertThat(searchBundleEntryParts.get(0).getFullUrl(), is(containsString("Condition/1626")));
-		assertThat(searchBundleEntryParts.get(0).getResource(), is(notNullValue()));
+		assertThat(searchBundleEntryParts).hasSize(1);
+		assertThat(searchBundleEntryParts.get(0).getSearchMode()).isNull();
+		assertThat(searchBundleEntryParts.get(0).getFullUrl()).contains("Condition/1626");
+		assertThat(searchBundleEntryParts.get(0).getResource()).isNull();
 	}
 
 	@Test
@@ -543,10 +544,10 @@ public class BundleUtilTest {
 		List<SearchBundleEntryParts> searchBundleEntryParts = BundleUtil.getSearchBundleEntryParts(ourCtx, bundle);
 
 		//Then
-		assertThat(searchBundleEntryParts, hasSize(1));
-		assertThat(searchBundleEntryParts.get(0).getSearchMode(), is(equalTo(BundleEntrySearchModeEnum.OUTCOME)));
-		assertThat(searchBundleEntryParts.get(0).getFullUrl(), is(containsString("Condition/1626")));
-		assertThat(searchBundleEntryParts.get(0).getResource(), is(notNullValue()));
+		assertThat(searchBundleEntryParts).hasSize(1);
+		assertEquals(BundleEntrySearchModeEnum.OUTCOME, searchBundleEntryParts.get(0).getSearchMode());
+		assertThat(searchBundleEntryParts.get(0).getFullUrl()).contains("Condition/1626");
+		assertThat(searchBundleEntryParts.get(0).getResource()).isNull();
 	}
 
 	@Test

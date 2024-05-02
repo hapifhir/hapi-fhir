@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -571,9 +572,9 @@ public class SearchNarrowingInterceptorTest {
 			 .execute();
 
 		assertEquals("Patient.create", ourLastHitMethod);
-		assertThat(ourLastConditionalUrl, startsWith("/Patient?"));
-		assertThat(ourLastConditionalUrl, containsString("active=true"));
-		assertThat(ourLastConditionalUrl, containsString("_id=" + escapeUrlParam("Patient/123,Patient/456")));
+		assertThat(ourLastConditionalUrl).startsWith("/Patient?");
+		assertThat(ourLastConditionalUrl).contains("active=true");
+		assertThat(ourLastConditionalUrl).contains("_id=" + escapeUrlParam("Patient/123,Patient/456"));
 	}
 
 	@Test
@@ -603,7 +604,7 @@ public class SearchNarrowingInterceptorTest {
 			 .execute();
 
 		assertEquals("Patient.create", ourLastHitMethod);
-		assertThat(ourLastConditionalUrl, equalTo("/Patient?active=true"));
+		assertThat(ourLastConditionalUrl).isEqualTo("/Patient?active=true");
 	}
 
 	@Test
@@ -618,9 +619,9 @@ public class SearchNarrowingInterceptorTest {
 			 .execute();
 
 		assertEquals("Observation.create", ourLastHitMethod);
-		assertThat(ourLastConditionalUrl, startsWith("/Observation?"));
-		assertThat(ourLastConditionalUrl, containsString("status=final"));
-		assertThat(ourLastConditionalUrl, containsString("patient=" + escapeUrlParam("Patient/123,Patient/456")));
+		assertThat(ourLastConditionalUrl).startsWith("/Observation?");
+		assertThat(ourLastConditionalUrl).contains("status=final");
+		assertThat(ourLastConditionalUrl).contains("patient=" + escapeUrlParam("Patient/123,Patient/456"));
 	}
 
 	@Test
@@ -638,9 +639,9 @@ public class SearchNarrowingInterceptorTest {
 
 		assertEquals("transaction", ourLastHitMethod);
 		assertEquals("Observation", ourLastBundleRequest.getUrl());
-		assertThat(ourLastBundleRequest.getIfNoneExist(), startsWith("Observation?"));
-		assertThat(ourLastBundleRequest.getIfNoneExist(), containsString("status=final"));
-		assertThat(ourLastBundleRequest.getIfNoneExist(), containsString("patient=" + escapeUrlParam("Patient/123,Patient/456")));
+		assertThat(ourLastBundleRequest.getIfNoneExist()).startsWith("Observation?");
+		assertThat(ourLastBundleRequest.getIfNoneExist()).contains("status=final");
+		assertThat(ourLastBundleRequest.getIfNoneExist()).contains("patient=" + escapeUrlParam("Patient/123,Patient/456"));
 	}
 
 	@Test
@@ -674,9 +675,9 @@ public class SearchNarrowingInterceptorTest {
 			 .execute();
 
 		assertEquals("Patient.update", ourLastHitMethod);
-		assertThat(ourLastConditionalUrl, startsWith("Patient?"));
-		assertThat(ourLastConditionalUrl, containsString("active=true"));
-		assertThat(ourLastConditionalUrl, containsString("_id=" + escapeUrlParam("Patient/123,Patient/456")));
+		assertThat(ourLastConditionalUrl).startsWith("Patient?");
+		assertThat(ourLastConditionalUrl).contains("active=true");
+		assertThat(ourLastConditionalUrl).contains("_id=" + escapeUrlParam("Patient/123,Patient/456"));
 	}
 
 	@Test
@@ -707,9 +708,9 @@ public class SearchNarrowingInterceptorTest {
 			 .execute();
 
 		assertEquals("Observation.update", ourLastHitMethod);
-		assertThat(ourLastConditionalUrl, startsWith("Observation?"));
-		assertThat(ourLastConditionalUrl, containsString("status=final"));
-		assertThat(ourLastConditionalUrl, containsString("patient=" + escapeUrlParam("Patient/123,Patient/456")));
+		assertThat(ourLastConditionalUrl).startsWith("Observation?");
+		assertThat(ourLastConditionalUrl).contains("status=final");
+		assertThat(ourLastConditionalUrl).contains("patient=" + escapeUrlParam("Patient/123,Patient/456"));
 	}
 
 	@Test
@@ -726,9 +727,9 @@ public class SearchNarrowingInterceptorTest {
 			 .execute();
 
 		assertEquals("transaction", ourLastHitMethod);
-		assertThat(ourLastBundleRequest.getUrl(), startsWith("Observation?"));
-		assertThat(ourLastBundleRequest.getUrl(), containsString("status=final"));
-		assertThat(ourLastBundleRequest.getUrl(), containsString("patient=" + escapeUrlParam("Patient/123,Patient/456")));
+		assertThat(ourLastBundleRequest.getUrl()).startsWith("Observation?");
+		assertThat(ourLastBundleRequest.getUrl()).contains("status=final");
+		assertThat(ourLastBundleRequest.getUrl()).contains("patient=" + escapeUrlParam("Patient/123,Patient/456"));
 	}
 
 	@Test
@@ -759,9 +760,9 @@ public class SearchNarrowingInterceptorTest {
 			 .execute();
 
 		assertEquals("Patient.delete", ourLastHitMethod);
-		assertThat(ourLastConditionalUrl, startsWith("Patient?"));
-		assertThat(ourLastConditionalUrl, containsString("active=true"));
-		assertThat(ourLastConditionalUrl, containsString("_id=" + escapeUrlParam("Patient/123,Patient/456")));
+		assertThat(ourLastConditionalUrl).startsWith("Patient?");
+		assertThat(ourLastConditionalUrl).contains("active=true");
+		assertThat(ourLastConditionalUrl).contains("_id=" + escapeUrlParam("Patient/123,Patient/456"));
 	}
 
 	@Test
@@ -775,9 +776,9 @@ public class SearchNarrowingInterceptorTest {
 			 .execute();
 
 		assertEquals("Observation.delete", ourLastHitMethod);
-		assertThat(ourLastConditionalUrl, startsWith("Observation?"));
-		assertThat(ourLastConditionalUrl, containsString("status=final"));
-		assertThat(ourLastConditionalUrl, containsString("patient=" + escapeUrlParam("Patient/123,Patient/456")));
+		assertThat(ourLastConditionalUrl).startsWith("Observation?");
+		assertThat(ourLastConditionalUrl).contains("status=final");
+		assertThat(ourLastConditionalUrl).contains("patient=" + escapeUrlParam("Patient/123,Patient/456"));
 	}
 
 	@Test
@@ -794,9 +795,9 @@ public class SearchNarrowingInterceptorTest {
 			 .execute();
 
 		assertEquals("transaction", ourLastHitMethod);
-		assertThat(ourLastBundleRequest.getUrl(), startsWith("Observation?"));
-		assertThat(ourLastBundleRequest.getUrl(), containsString("status=final"));
-		assertThat(ourLastBundleRequest.getUrl(), containsString("patient=" + escapeUrlParam("Patient/123,Patient/456")));
+		assertThat(ourLastBundleRequest.getUrl()).startsWith("Observation?");
+		assertThat(ourLastBundleRequest.getUrl()).contains("status=final");
+		assertThat(ourLastBundleRequest.getUrl()).contains("patient=" + escapeUrlParam("Patient/123,Patient/456"));
 	}
 
 	@Test
@@ -812,9 +813,9 @@ public class SearchNarrowingInterceptorTest {
 			 .execute();
 
 		assertEquals("Patient.patch", ourLastHitMethod);
-		assertThat(ourLastConditionalUrl, startsWith("Patient?"));
-		assertThat(ourLastConditionalUrl, containsString("active=true"));
-		assertThat(ourLastConditionalUrl, containsString("_id=" + escapeUrlParam("Patient/123,Patient/456")));
+		assertThat(ourLastConditionalUrl).startsWith("Patient?");
+		assertThat(ourLastConditionalUrl).contains("active=true");
+		assertThat(ourLastConditionalUrl).contains("_id=" + escapeUrlParam("Patient/123,Patient/456"));
 	}
 
 	@Test
@@ -830,9 +831,9 @@ public class SearchNarrowingInterceptorTest {
 			 .execute();
 
 		assertEquals("Observation.patch", ourLastHitMethod);
-		assertThat(ourLastConditionalUrl, startsWith("Observation?"));
-		assertThat(ourLastConditionalUrl, containsString("status=final"));
-		assertThat(ourLastConditionalUrl, containsString("patient=" + escapeUrlParam("Patient/123,Patient/456")));
+		assertThat(ourLastConditionalUrl).startsWith("Observation?");
+		assertThat(ourLastConditionalUrl).contains("status=final");
+		assertThat(ourLastConditionalUrl).contains("patient=" + escapeUrlParam("Patient/123,Patient/456"));
 	}
 
 	@Test
@@ -849,9 +850,9 @@ public class SearchNarrowingInterceptorTest {
 			 .execute();
 
 		assertEquals("transaction", ourLastHitMethod);
-		assertThat(ourLastBundleRequest.getUrl(), startsWith("Observation?"));
-		assertThat(ourLastBundleRequest.getUrl(), containsString("status=final"));
-		assertThat(ourLastBundleRequest.getUrl(), containsString("patient=" + escapeUrlParam("Patient/123,Patient/456")));
+		assertThat(ourLastBundleRequest.getUrl()).startsWith("Observation?");
+		assertThat(ourLastBundleRequest.getUrl()).contains("status=final");
+		assertThat(ourLastBundleRequest.getUrl()).contains("patient=" + escapeUrlParam("Patient/123,Patient/456"));
 	}
 
 	@Test

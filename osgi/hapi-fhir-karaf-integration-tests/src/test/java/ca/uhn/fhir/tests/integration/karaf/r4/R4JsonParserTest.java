@@ -131,11 +131,11 @@ public class R4JsonParserTest {
 		String encoded = parser.encodeResourceToString(b);
 		ourLog.info(encoded);
 
-		assertThat(encoded, containsString("BUNDLEID"));
-		assertThat(encoded, containsString("http://FOO"));
-		assertThat(encoded, containsString("PATIENTID"));
-		assertThat(encoded, containsString("http://BAR"));
-		assertThat(encoded, containsString("GIVEN"));
+		assertThat(encoded).contains("BUNDLEID"));
+		assertThat(encoded).contains("http://FOO"));
+		assertThat(encoded).contains("PATIENTID"));
+		assertThat(encoded).contains("http://BAR"));
+		assertThat(encoded).contains("GIVEN"));
 
 		b = parser.parseResource(Bundle.class, encoded);
 
@@ -156,7 +156,7 @@ public class R4JsonParserTest {
 		p.addName().setFamily(longString);
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(p);
 
-		assertThat(encoded, containsString(longString));
+		assertThat(encoded).contains(longString));
 	}
 
 
@@ -173,9 +173,9 @@ public class R4JsonParserTest {
 		parser.setDontEncodeElements(Sets.newHashSet("id", "*.meta.versionId", "*.meta.lastUpdated"));
 		String output = parser.encodeResourceToString(p);
 
-		assertThat(output, containsString("FAMILY"));
-		assertThat(output, containsString("SYS"));
-		assertThat(output, containsString("CODE"));
+		assertThat(output).contains("FAMILY"));
+		assertThat(output).contains("SYS"));
+		assertThat(output).contains("CODE"));
 		assertThat(output).doesNotContain("AAA");
 		assertThat(output).doesNotContain("BBB");
 		assertThat(output).doesNotContain("2011");
@@ -219,8 +219,8 @@ public class R4JsonParserTest {
 		Patient parsed = jsonParser.parseResource(Patient.class, input);
 
 		ourLog.info(jsonParser.setPrettyPrint(true).encodeResourceToString(parsed));
-		assertThat(xmlParser.encodeResourceToString(parsed), containsString("Underweight"));
-		assertThat(jsonParser.encodeResourceToString(parsed), containsString("Underweight"));
+		assertThat(xmlParser.encodeResourceToString(parsed)).contains("Underweight"));
+		assertThat(jsonParser.encodeResourceToString(parsed)).contains("Underweight"));
 
 	}
 

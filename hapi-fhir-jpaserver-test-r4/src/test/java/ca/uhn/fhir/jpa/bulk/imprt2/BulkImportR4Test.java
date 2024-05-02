@@ -104,7 +104,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			myJobCleanerService.runMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
 			return instance.getStatus();
-		}, equalTo(StatusEnum.FAILED));
+		}).isEqualTo(StatusEnum.FAILED));
 
 		//No resources stored
 		runInTransaction(() -> {
@@ -153,7 +153,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			myJobCleanerService.runMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
 			return instance.getStatus();
-		}, equalTo(StatusEnum.COMPLETED));
+		}).isEqualTo(StatusEnum.COMPLETED));
 
 		runInTransaction(() -> {
 			assertEquals(200, myResourceTableDao.count());
@@ -216,7 +216,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				});
 
 				return status;
-			}, equalTo(StatusEnum.ERRORED));
+			}).isEqualTo(StatusEnum.ERRORED));
 
 			String storageDescription = runInTransaction(() -> {
 				assertEquals(0, myResourceTableDao.count());
@@ -289,7 +289,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			myJobCleanerService.runMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
 			return instance.getStatus();
-		}, equalTo(StatusEnum.FAILED));
+		}).isEqualTo(StatusEnum.FAILED));
 
 		JobInstance instance = myJobCoordinator.getInstance(instanceId);
 		ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));
@@ -333,7 +333,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 				myJobCleanerService.runMaintenancePass();
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
 				return instance.getStatus();
-			}, equalTo(StatusEnum.FAILED));
+			}).isEqualTo(StatusEnum.FAILED));
 
 			runInTransaction(() -> {
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);

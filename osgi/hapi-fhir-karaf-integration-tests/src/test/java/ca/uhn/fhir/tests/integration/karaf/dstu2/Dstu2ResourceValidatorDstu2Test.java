@@ -183,7 +183,7 @@ public class Dstu2ResourceValidatorDstu2Test {
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(messageString, containsString("No issues"));
+		assertThat(messageString).contains("No issues"));
 
 	}
 
@@ -232,7 +232,7 @@ public class Dstu2ResourceValidatorDstu2Test {
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(messageString, containsString("valueReference"));
+		assertThat(messageString).contains("valueReference"));
 		assertThat(messageString).doesNotContain("valueResource");
 	}
 
@@ -271,8 +271,8 @@ public class Dstu2ResourceValidatorDstu2Test {
 			"extension",
 			"meta"
 		)));
-		assertThat(messageString, containsString("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\""));
-		assertThat(messageString, containsString("url=\"http://foo.com/example\""));
+		assertThat(messageString).contains("url=\"http://ahr.copa.inso.tuwien.ac.at/StructureDefinition/Patient#animal-colorSecondary\""));
+		assertThat(messageString).contains("url=\"http://foo.com/example\""));
 		//@formatter:on
 
 		FhirValidator val = ourCtx.newValidator();
@@ -287,7 +287,7 @@ public class Dstu2ResourceValidatorDstu2Test {
 
 		assertTrue(result.isSuccessful());
 
-		assertThat(messageString, containsString("valueReference"));
+		assertThat(messageString).contains("valueReference"));
 		assertThat(messageString).doesNotContain("valueResource");
 	}
 

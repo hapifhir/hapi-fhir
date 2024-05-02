@@ -97,7 +97,7 @@ public class BulkImportWithPatientIdPartitioningTest extends BaseJpaR4Test {
 			myJobCleanerService.runMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
 			return instance.getStatus();
-		}, equalTo(StatusEnum.COMPLETED));
+		}).isEqualTo(StatusEnum.COMPLETED));
 
 		runInTransaction(() -> {
 			assertEquals(1, myResourceTableDao.count());

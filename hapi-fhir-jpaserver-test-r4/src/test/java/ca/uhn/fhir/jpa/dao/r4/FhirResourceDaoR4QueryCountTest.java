@@ -3170,7 +3170,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		assertThat(svc.getActiveJobCount()).isEqualTo(0);
 
 		assertThat(ourPatientProvider.getCountCreate()).isEqualTo(0);
-		await().until(ourPatientProvider::getCountUpdate, equalTo(200L));
+		await().until(ourPatientProvider::getCountUpdate).isEqualTo(200L));
 
 	}
 

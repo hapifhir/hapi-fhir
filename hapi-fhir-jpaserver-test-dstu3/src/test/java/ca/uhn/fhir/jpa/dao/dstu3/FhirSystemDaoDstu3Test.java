@@ -1373,7 +1373,7 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 		assertThat(resp.getEntry().get(0).getResponse().getStatus()).isEqualTo("204 No Content");
 
 		// fail("");		// } catch (ResourceNotFoundException e) {
-		// assertThat(e.getMessage(), containsString("resource matching URL \"Patient?"));
+		// assertThat(e.getMessage()).contains("resource matching URL \"Patient?"));
 		// }
 	}
 

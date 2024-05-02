@@ -579,8 +579,8 @@ public class QuestionnaireResponseValidatorR4Test {
 //		errors = myVal.validateWithResult(qa);
 //		errors = stripBindingHasNoSourceMessage(errors);
 //		ourLog.info(errors.toString());
-//		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system::code1) is not in the options value set in the questionnaire"));
-//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+//		assertThat(errors.toString()).contains("The value provided (http://codesystems.com/system::code1) is not in the options value set in the questionnaire"));
+//		assertThat(errors.toString()).contains("QuestionnaireResponse.item[0].answer[0]"));
 //
 //		// Partial code
 //
@@ -592,8 +592,8 @@ public class QuestionnaireResponseValidatorR4Test {
 //		errors = myVal.validateWithResult(qa);
 //		errors = stripBindingHasNoSourceMessage(errors);
 //		ourLog.info(errors.toString());
-//		assertThat(errors.toString(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
-//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+//		assertThat(errors.toString()).contains("The value provided (null::code1) is not in the options value set in the questionnaire"));
+//		assertThat(errors.toString()).contains("QuestionnaireResponse.item[0].answer[0]"));
 //
 //		qa = new QuestionnaireResponse();
 //		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -603,8 +603,8 @@ public class QuestionnaireResponseValidatorR4Test {
 //		errors = myVal.validateWithResult(qa);
 //		errors = stripBindingHasNoSourceMessage(errors);
 //		ourLog.info(errors.toString());
-//		assertThat(errors.toString(), containsString("The value provided (null::code1) is not in the options value set in the questionnaire"));
-//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+//		assertThat(errors.toString()).contains("The value provided (null::code1) is not in the options value set in the questionnaire"));
+//		assertThat(errors.toString()).contains("QuestionnaireResponse.item[0].answer[0]"));
 //
 //		// System only in known codesystem
 //		qa = new QuestionnaireResponse();
@@ -614,8 +614,8 @@ public class QuestionnaireResponseValidatorR4Test {
 //		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://codesystems.com/system").setCode(null));
 //		errors = myVal.validateWithResult(qa);
 //		ourLog.info(errors.toString());
-//		assertThat(errors.toString(), containsString("The value provided (http://codesystems.com/system::null) is not in the options value set in the questionnaire"));
-//		assertThat(errors.toString(), containsString("QuestionnaireResponse.item[0].answer[0]"));
+//		assertThat(errors.toString()).contains("The value provided (http://codesystems.com/system::null) is not in the options value set in the questionnaire"));
+//		assertThat(errors.toString()).contains("QuestionnaireResponse.item[0].answer[0]"));
 
 		qa = new QuestionnaireResponse();
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
