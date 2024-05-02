@@ -819,6 +819,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 						result.addCodeValidationIssue(codeValidationIssue);
 					}
 				}
+			} else {
+				result = myValidationSupportContext
+					.getRootValidationSupport()
+					.validateCode(
+						myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, null);
 			}
 		} else {
 			result = myValidationSupportContext
