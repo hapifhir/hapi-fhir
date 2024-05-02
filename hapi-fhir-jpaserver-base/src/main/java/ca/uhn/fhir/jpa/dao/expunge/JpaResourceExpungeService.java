@@ -299,7 +299,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 	}
 
 	protected void expungeCurrentVersionOfResource(
-		RequestDetails theRequestDetails, Long theResourceId, AtomicInteger theRemainingCount) {
+			RequestDetails theRequestDetails, Long theResourceId, AtomicInteger theRemainingCount) {
 		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElseThrow(IllegalStateException::new);
 
 		ResourceHistoryTable currentVersion = myResourceHistoryTableDao.findForIdAndVersionAndFetchProvenance(
