@@ -100,10 +100,11 @@ public abstract class BaseSearchParamPredicateBuilder extends BaseJoiningPredica
 	@Nonnull
 	public Condition createHashIdentityOrNullPredicate(String theResourceType, String theParamName) {
 		final long hashIdentity = BaseResourceIndexedSearchParam.calculateHashIdentity(
-			getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName);
+				getPartitionSettings(), getRequestPartitionId(), theResourceType, theParamName);
 		final String hashIdentityVal = generatePlaceholder(hashIdentity);
-		return Conditions.or(BinaryCondition.equalTo(myColumnHashIdentity, hashIdentityVal),
-							 Conditions.isNull(myColumnHashIdentity));
+		return Conditions.or(
+				BinaryCondition.equalTo(myColumnHashIdentity, hashIdentityVal),
+				Conditions.isNull(myColumnHashIdentity));
 	}
 
 	public Condition createPredicateParamMissingForNonReference(
