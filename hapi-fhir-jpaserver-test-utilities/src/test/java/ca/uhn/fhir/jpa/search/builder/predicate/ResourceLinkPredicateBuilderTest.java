@@ -37,12 +37,12 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 public class ResourceLinkPredicateBuilderTest {
 
-    private static final String PLACEHOLDER_BASE = UUID.randomUUID().toString();
+	private static final String PLACEHOLDER_BASE = UUID.randomUUID().toString();
 
 	private ResourceLinkPredicateBuilder myResourceLinkPredicateBuilder;
 
-    @Mock
-    private SearchQueryBuilder mySearchQueryBuilder;
+	@Mock
+	private SearchQueryBuilder mySearchQueryBuilder;
 
 	@Mock
 	private ISearchParamRegistry mySearchParamRegistry;
@@ -56,28 +56,28 @@ public class ResourceLinkPredicateBuilderTest {
 		DbSchema schema = new DbSchema(spec, "schema");
 		DbTable table = new DbTable(schema, "table");
 		when(mySearchQueryBuilder.addTable(Mockito.anyString())).thenReturn(table);
-        myResourceLinkPredicateBuilder = new ResourceLinkPredicateBuilder(null, mySearchQueryBuilder, false);
+		myResourceLinkPredicateBuilder = new ResourceLinkPredicateBuilder(null, mySearchQueryBuilder, false);
 		myResourceLinkPredicateBuilder.setSearchParamRegistryForUnitTest(mySearchParamRegistry);
 		myResourceLinkPredicateBuilder.setIdHelperServiceForUnitTest(myIdHelperService);
 	}
 
 	@Test
 	public void createEverythingPredicate_withListOfPids_returnsInPredicate() {
-        when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE+"1", PLACEHOLDER_BASE+"2"));
+		when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE + "1", PLACEHOLDER_BASE + "2"));
 		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), 1l, 2l);
 		assertThat(condition.getClass()).isEqualTo(InCondition.class);
 	}
 
 	@Test
 	public void createEverythingPredicate_withSinglePid_returnsInCondition() {
-        when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE+"1"));
+		when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE + "1"));
 		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), 1l);
 		assertThat(condition.getClass()).isEqualTo(BinaryCondition.class);
 	}
 
 	@Test
 	public void createEverythingPredicate_withNoPids_returnsBinaryCondition() {
-        Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), new Long[0]);
+		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), new Long[0]);
 		assertThat(condition.getClass()).isEqualTo(BinaryCondition.class);
 	}
 
@@ -97,7 +97,7 @@ public class ResourceLinkPredicateBuilderTest {
 		assertThatThrownBy(() ->
 			myResourceLinkPredicateBuilder.createPredicate(requestDetails, "Observation", "", Collections.emptyList(), referenceOrParamList, null, RequestPartitionId.allPartitions()))
 			.isInstanceOf(Exception.class)
-				.hasMessage("HAPI-2498: Unsupported search modifier(s): \"[:identifier, :x, :y]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]");
-		}
+			.hasMessage("HAPI-2498: Unsupported search modifier(s): \"[:identifier, :x, :y]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]");
+
 	}
 }

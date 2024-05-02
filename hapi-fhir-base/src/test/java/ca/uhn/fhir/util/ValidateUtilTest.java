@@ -1,6 +1,7 @@
 package ca.uhn.fhir.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
 
 import ca.uhn.fhir.i18n.Msg;
@@ -15,7 +16,7 @@ public class ValidateUtilTest {
 	@Test
 	public void testIsTrueOrThrowInvalidRequest() {
 		ValidateUtil.isTrueOrThrowInvalidRequest(true, "");
-		
+
 		try {
 			ValidateUtil.isTrueOrThrowInvalidRequest(false, "The message");
 			fail("");
@@ -23,17 +24,15 @@ public class ValidateUtilTest {
 			assertThat(e.getMessage()).isEqualTo(Msg.code(1769) + "The message");
 		}
 	}
-	
+
 	@Test
 	public void testIsTrueOrThrowResourceNotFound() {
 		ValidateUtil.isTrueOrThrowResourceNotFound(true, "");
 
-		try {
-			ValidateUtil.isTrueOrThrowResourceNotFound(false, "The message");
-			fail();
-		} catch (ResourceNotFoundException e) {
-			assertEquals(Msg.code(2494) + "The message", e.getMessage());
-		}
+		assertThatThrownBy(() ->
+			ValidateUtil.isTrueOrThrowResourceNotFound(false, "The message"))
+			.isInstanceOf(ResourceNotFoundException.class)
+			.hasMessage(Msg.code(2494) + "The message");
 	}
 
 	@Test
@@ -61,7 +60,7 @@ public class ValidateUtilTest {
 	@Test
 	public void testIsNotBlank() {
 		ValidateUtil.isNotBlankOrThrowInvalidRequest("aa", "");
-		
+
 		try {
 			ValidateUtil.isNotBlankOrThrowInvalidRequest("", "The message");
 			fail("");
