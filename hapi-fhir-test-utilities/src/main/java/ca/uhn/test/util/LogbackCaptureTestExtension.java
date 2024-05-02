@@ -145,4 +145,51 @@ public class LogbackCaptureTestExtension implements BeforeEachCallback, AfterEac
 			myLogger.setLevel(mySavedLevel);
 		}
 	}
+
+
+	public List<ILoggingEvent> filterLoggingEventsWithMessageEqualTo(String theMessageText){
+		return filterLoggingEventsWithPredicate(loggingEvent -> loggingEvent.getFormattedMessage().equals(theMessageText));
+	}
+
+	public List<ILoggingEvent> filterLoggingEventsWithMessageContaining(String theMessageText){
+		return filterLoggingEventsWithPredicate(loggingEvent -> loggingEvent.getFormattedMessage().contains(theMessageText));
+	}
+
+	public List<ILoggingEvent> filterLoggingEventsWithPredicate(Predicate<ILoggingEvent> theLoggingEventPredicate){
+		return getLogEvents()
+			.stream()
+			.filter(theLoggingEventPredicate)
+			.collect(Collectors.toList());
+	}
+
+	/**
+	 * Extract the log messages from the logging events.
+	 * @return a copy of the List of log messages
+	 *
+	 */
+	@Nonnull
+	public List<String> getLogMessages() {
+		return getLogEvents().stream().map(ILoggingEvent::getMessage).collect(Collectors.toList());
+	}
+
+	//  Hamcrest matcher support
+	public static Matcher<ILoggingEvent> eventWithLevelAndMessageContains(@Nonnull Level theLevel, @Nonnull String thePartialMessage) {
+		return new LogbackEventMatcher(theLevel, thePartialMessage);
+	}
+
+	public static Matcher<ILoggingEvent> eventWithLevel(@Nonnull Level theLevel) {
+		return new LogbackEventMatcher(theLevel, null);
+	}
+
+	public static Matcher<ILoggingEvent> eventWithMessageContains(@Nonnull String thePartialMessage) {
+		return new LogbackEventMatcher(null, thePartialMessage);
+	}
+
+	public static Matcher<ILoggingEvent> eventWithLevelAndMessageAndThrew(@Nonnull Level theLevel,
+																								 @Nonnull String thePartialMessage,
+																								 @Nonnull String theThrown)
+	{
+		return new LogbackEventMatcher(theLevel, thePartialMessage, theThrown);
+	}
+
 }

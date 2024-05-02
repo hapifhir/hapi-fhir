@@ -97,10 +97,10 @@ public class PartitionRunnerTest {
 		getPartitionRunner(5).runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
 		PartitionCall partitionCall1 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
-		assertThat(partitionCall1.threadName, isOneOf(TEST_THREADNAME_1, TEST_THREADNAME_2));
+		assertThat(partitionCall1.threadName).isIn(TEST_THREADNAME_1, TEST_THREADNAME_2);
 		assertThat(partitionCall1.size).isEqualTo(5);
 		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
-		assertThat(partitionCall2.threadName, isOneOf(TEST_THREADNAME_1, TEST_THREADNAME_2));
+		assertThat(partitionCall2.threadName).isIn(TEST_THREADNAME_1, TEST_THREADNAME_2);
 		assertThat(partitionCall2.size).isEqualTo(5);
 		assertThat(partitionCall2.threadName).isNotEqualTo(partitionCall1.threadName);
 	}
@@ -118,10 +118,10 @@ public class PartitionRunnerTest {
 		getPartitionRunner(5).runInPartitionedThreads(resourceIds, partitionConsumer);
 		List<HookParams> calls = myLatch.awaitExpected();
 		PartitionCall partitionCall1 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 0);
-		assertThat(partitionCall1.threadName, isOneOf(TEST_THREADNAME_1, TEST_THREADNAME_2));
+		assertThat(partitionCall1.threadName).isIn(TEST_THREADNAME_1, TEST_THREADNAME_2);
 		assertThat(nums.remove(partitionCall1.size)).isEqualTo(true);
 		PartitionCall partitionCall2 = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, 1);
-		assertThat(partitionCall2.threadName, isOneOf(TEST_THREADNAME_1, TEST_THREADNAME_2));
+		assertThat(partitionCall2.threadName).isIn(TEST_THREADNAME_1, TEST_THREADNAME_2);
 		assertThat(nums.remove(partitionCall2.size)).isEqualTo(true);
 		assertThat(partitionCall2.threadName).isNotEqualTo(partitionCall1.threadName);
 	}
@@ -146,7 +146,7 @@ public class PartitionRunnerTest {
 		// validate - only two threads should be used for execution
 		for (int i = 0; i < 1250; i++) {
 			PartitionCall partitionCall = (PartitionCall) PointcutLatch.getLatchInvocationParameter(calls, i);
-			assertThat(partitionCall.threadName, is(oneOf(TEST_THREADNAME_1, TEST_THREADNAME_2)));
+			assertThat(partitionCall.threadName).isIn(TEST_THREADNAME_1, TEST_THREADNAME_2);
 		}
 	}
 

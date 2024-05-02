@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.Mockito.when;
 
@@ -93,11 +94,10 @@ public class ResourceLinkPredicateBuilderTest {
 		params.put("patient", new String[]{"4"});
 		requestDetails.setParameters(params);
 
-		try {
-			myResourceLinkPredicateBuilder.createPredicate(requestDetails, "Observation", "", Collections.emptyList(), referenceOrParamList, null, RequestPartitionId.allPartitions());
-			fail();
-		} catch (Exception exception) {
-			assertEquals("HAPI-2498: Unsupported search modifier(s): \"[:identifier, :x, :y]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]", exception.getMessage());
+		assertThatThrownBy(() ->
+			myResourceLinkPredicateBuilder.createPredicate(requestDetails, "Observation", "", Collections.emptyList(), referenceOrParamList, null, RequestPartitionId.allPartitions()))
+			.isInstanceOf(Exception.class)
+				.hasMessage("HAPI-2498: Unsupported search modifier(s): \"[:identifier, :x, :y]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]");
 		}
 	}
 }
