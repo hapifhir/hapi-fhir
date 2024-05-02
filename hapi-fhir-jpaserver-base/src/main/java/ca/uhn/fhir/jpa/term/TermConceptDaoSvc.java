@@ -46,6 +46,8 @@ public class TermConceptDaoSvc {
 	@Autowired
 	protected ITermConceptDesignationDao myConceptDesignationDao;
 
+	private boolean mySupportLegacyLob = false;
+
 	public int saveConcept(TermConcept theConcept) {
 		int retVal = 0;
 
@@ -70,6 +72,7 @@ public class TermConceptDaoSvc {
 			retVal++;
 			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
 			theConcept.setUpdated(new Date());
+			theConcept.setSupportLegacyLob(mySupportLegacyLob);
 			myConceptDao.save(theConcept);
 
 			for (TermConceptProperty next : theConcept.getProperties()) {
@@ -85,6 +88,11 @@ public class TermConceptDaoSvc {
 		return retVal;
 	}
 
+	public TermConceptDaoSvc setSupportLegacyLob(boolean theSupportLegacyLob) {
+		mySupportLegacyLob = theSupportLegacyLob;
+		return this;
+	}
+
 	private int ensureParentsSaved(Collection<TermConceptParentChildLink> theParents) {
 		ourLog.trace("Checking {} parents", theParents.size());
 		int retVal = 0;
@@ -95,6 +103,7 @@ public class TermConceptDaoSvc {
 				retVal += ensureParentsSaved(nextParent.getParents());
 				if (nextParent.getId() == null) {
 					nextParent.setUpdated(new Date());
+					nextParent.setSupportLegacyLob(mySupportLegacyLob);
 					myConceptDao.saveAndFlush(nextParent);
 					retVal++;
 					ourLog.debug("Saved parent code {} and got id {}", nextParent.getCode(), nextParent.getId());
