@@ -269,7 +269,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	 * This test verifies that if we have a workchunks being processed by the queue,
 	 * and the maintenance job kicks in, it won't necessarily advance the steps.
 	 */
-//	@RepeatedTest(50)
 	@Test
 	public void gatedJob_whenMaintenanceRunHappensDuringMsgProcessing_doesNotAdvance() throws InterruptedException {
 		// setup
