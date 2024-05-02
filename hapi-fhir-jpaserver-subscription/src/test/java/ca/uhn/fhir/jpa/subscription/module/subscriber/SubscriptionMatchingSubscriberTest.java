@@ -40,6 +40,7 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -572,8 +573,8 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 			mySubscriptionResourceMatched.awaitExpected();
 			ourObservationListener.awaitExpected();
 		} catch (InterruptedException exception) {
-			fail();
 			Thread.currentThread().interrupt();
+			fail();
 		}
 	}
 }
