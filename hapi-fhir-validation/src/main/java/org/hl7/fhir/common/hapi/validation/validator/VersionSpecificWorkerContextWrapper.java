@@ -807,7 +807,7 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 							theCode,
 							theDisplay,
 							theValueSet);
-			if (result != null && !result.isOk()) {
+			if (result != null) {
 				// So the code isn't in the ValueSet, but it might also be invalid in the code system.
 				IValidationSupport.CodeValidationResult codeSystemResult = myValidationSupportContext
 						.getRootValidationSupport()
