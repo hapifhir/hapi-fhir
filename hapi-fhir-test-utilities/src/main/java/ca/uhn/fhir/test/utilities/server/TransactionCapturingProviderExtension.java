@@ -62,7 +62,7 @@ public class TransactionCapturingProviderExtension<T extends IBaseBundle> implem
 
 	public void waitForTransactionCount(int theCount) {
 		assertThat(theCount).isGreaterThanOrEqualTo(myProvider.size());
-		await().until(()->myProvider.size()).isEqualTo(theCount));
+		await().until(()->myProvider.size() == theCount);
 	}
 
 	public List<T> getTransactions() {
