@@ -4,4 +4,3 @@ issue: 5904
 title: "Under certain conditions, when running a GET query with a chained sort and linked resources will return less 
         resources than expected, including a smaller total.
         This has been fixed."
-u
