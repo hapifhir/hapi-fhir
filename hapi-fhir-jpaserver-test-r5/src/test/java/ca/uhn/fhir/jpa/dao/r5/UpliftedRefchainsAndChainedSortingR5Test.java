@@ -724,7 +724,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertEquals(1, countMatches(querySql, "HFJ_SPIDX_STRING"), querySql);
 		assertEquals(0, countMatches(querySql, "HASH_NORM_PREFIX"), querySql);
-		assertEquals(1, countMatches(querySql, "HASH_IDENTITY"), querySql);
+		assertEquals(2, countMatches(querySql, "HASH_IDENTITY"), querySql);
 		assertEquals(1, countMatches(querySql, "HFJ_RES_LINK"), querySql);
 	}
 
@@ -760,7 +760,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertEquals(2, countMatches(querySql, "HFJ_SPIDX_STRING"), querySql);
 		assertEquals(1, countMatches(querySql, "HASH_NORM_PREFIX"), querySql);
-		assertEquals(1, countMatches(querySql, "HASH_IDENTITY"), querySql);
+		assertEquals(2, countMatches(querySql, "HASH_IDENTITY"), querySql);
 		assertEquals(2, countMatches(querySql, "HFJ_RES_LINK"), querySql);
 	}
 
@@ -794,7 +794,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertEquals(1, countMatches(querySql, "HFJ_SPIDX_TOKEN"), querySql);
-		assertEquals(1, countMatches(querySql, "HASH_IDENTITY"), querySql);
+		assertEquals(2, countMatches(querySql, "HASH_IDENTITY"), querySql);
 		assertEquals(1, countMatches(querySql, "HFJ_RES_LINK"), querySql);
 	}
 
@@ -828,7 +828,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		assertEquals(2, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertEquals(1, countMatches(querySql, "HFJ_SPIDX_DATE"), querySql);
-		assertEquals(1, countMatches(querySql, "HASH_IDENTITY"), querySql);
+		assertEquals(2, countMatches(querySql, "HASH_IDENTITY"), querySql);
 		assertEquals(1, countMatches(querySql, "HFJ_RES_LINK"), querySql);
 	}
 
@@ -863,7 +863,7 @@ public class UpliftedRefchainsAndChainedSortingR5Test extends BaseJpaR5Test {
 		String querySql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
 		assertEquals(1, countMatches(querySql, "HFJ_SPIDX_STRING"), querySql);
 		assertEquals(0, countMatches(querySql, "HASH_NORM_PREFIX"), querySql);
-		assertEquals(1, countMatches(querySql, "HASH_IDENTITY"), querySql);
+		assertEquals(2, countMatches(querySql, "HASH_IDENTITY"), querySql);
 		assertEquals(1, countMatches(querySql, "HFJ_RES_LINK"), querySql);
 	}
 

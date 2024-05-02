@@ -37,6 +37,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Sandbox for implementing queries.
@@ -143,21 +144,24 @@ public class FhirResourceDaoR4QuerySandboxTest extends BaseJpaTest {
 
 	@Test
 	void testChainedSort() {
+		final IIdType practitionerId = myDataBuilder.createPractitioner(myDataBuilder.withFamily("Jones"));
 
-		IIdType practitionerId = myDataBuilder.createPractitioner(myDataBuilder.withFamily("Jones"));
-
-		String id1 = myDataBuilder.createPatient(myDataBuilder.withFamily("Smithy")).getIdPart();
-		String id2 = myDataBuilder.createPatient(myDataBuilder.withFamily("Smithwick")).getIdPart();
-		String id3 = myDataBuilder.createPatient(
+		final String id1 = myDataBuilder.createPatient(myDataBuilder.withFamily("Smithy")).getIdPart();
+		final String id2 = myDataBuilder.createPatient(myDataBuilder.withFamily("Smithwick")).getIdPart();
+		final String id3 = myDataBuilder.createPatient(
 			myDataBuilder.withFamily("Smith"),
 			myDataBuilder.withReference("generalPractitioner", practitionerId)).getIdPart();
 
 
-		IBundleProvider iBundleProvider = myTestDaoSearch.searchForBundleProvider("Patient?_total=ACCURATE&_sort=Practitioner:general-practitioner.family");
+		final IBundleProvider iBundleProvider = myTestDaoSearch.searchForBundleProvider("Patient?_total=ACCURATE&_sort=Practitioner:general-practitioner.family");
 		assertEquals(3, iBundleProvider.size());
-		List<IBaseResource> allResources = iBundleProvider.getAllResources();
+
+		final List<IBaseResource> allResources = iBundleProvider.getAllResources();
 		assertEquals(3, iBundleProvider.size());
 		assertEquals(3, allResources.size());
+
+		final List<String> actualIds = allResources.stream().map(IBaseResource::getIdElement).map(IIdType::getIdPart).toList();
+		assertTrue(actualIds.containsAll(List.of(id1, id2, id3)));
 	}
 
 	public static final class TestDirtiesContextTestExecutionListener extends DirtiesContextTestExecutionListener {
