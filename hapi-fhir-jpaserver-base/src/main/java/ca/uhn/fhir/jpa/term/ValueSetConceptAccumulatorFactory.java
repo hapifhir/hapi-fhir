@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
@@ -17,8 +18,15 @@ public class ValueSetConceptAccumulatorFactory {
 	@Autowired
 	private ITermValueSetConceptDesignationDao myValueSetConceptDesignationDao;
 
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
+
 	public ValueSetConceptAccumulator create(TermValueSet theTermValueSet) {
-		return new ValueSetConceptAccumulator(
+		ValueSetConceptAccumulator valueSetConceptAccumulator = new ValueSetConceptAccumulator(
 				theTermValueSet, myValueSetDao, myValueSetConceptDao, myValueSetConceptDesignationDao);
+
+		valueSetConceptAccumulator.setSupportLegacyLob(myStorageSettings.isWriteToLegacyLobColumns());
+
+		return valueSetConceptAccumulator;
 	}
 }

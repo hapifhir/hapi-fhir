@@ -293,6 +293,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 	@Autowired
 	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
 
+	@Autowired
+	private ValueSetConceptAccumulatorFactory myValueSetConceptAccumulatorFactory;
+
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		TermCodeSystemVersionDetails cs = getCurrentCodeSystemVersion(theSystem);
@@ -2393,14 +2396,11 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				});
 				assert valueSet != null;
 
-
-				ValueSetConceptAccumulatorFactory bean = myApplicationContext.getBean(ValueSetConceptAccumulatorFactory.class);
-				ValueSetConceptAccumulator valueSetConceptAccumulator = bean.create(valueSetToExpand);
-				ValueSetConceptAccumulator accumulator =
-						myApplicationContext.getBean(ValueSetConceptAccumulator.class, valueSetToExpand);
+				ValueSetConceptAccumulator valueSetConceptAccumulator =
+						myValueSetConceptAccumulatorFactory.create(valueSetToExpand);
 				ValueSetExpansionOptions options = new ValueSetExpansionOptions();
 				options.setIncludeHierarchy(true);
-				expandValueSet(options, valueSet, accumulator);
+				expandValueSet(options, valueSet, valueSetConceptAccumulator);
 
 				// We are done with this ValueSet.
 				txTemplate.executeWithoutResult(t -> {
@@ -2415,7 +2415,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 						"Pre-expanded ValueSet[{}] with URL[{}] - Saved {} concepts in {}",
 						valueSet.getId(),
 						valueSet.getUrl(),
-						accumulator.getConceptsSaved(),
+						valueSetConceptAccumulator.getConceptsSaved(),
 						sw);
 
 			} catch (Exception e) {
