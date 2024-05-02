@@ -2393,6 +2393,9 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 				});
 				assert valueSet != null;
 
+
+				ValueSetConceptAccumulatorFactory bean = myApplicationContext.getBean(ValueSetConceptAccumulatorFactory.class);
+				ValueSetConceptAccumulator valueSetConceptAccumulator = bean.create(valueSetToExpand);
 				ValueSetConceptAccumulator accumulator =
 						myApplicationContext.getBean(ValueSetConceptAccumulator.class, valueSetToExpand);
 				ValueSetExpansionOptions options = new ValueSetExpansionOptions();

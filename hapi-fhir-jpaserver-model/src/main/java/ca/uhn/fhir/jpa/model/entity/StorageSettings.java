@@ -270,6 +270,10 @@ public class StorageSettings {
 		this.myBundleBatchMaxPoolSize = theBundleBatchMaxPoolSize;
 	}
 
+	public void setWriteToLegacyLobColumns(boolean theWriteToLegacyLobColumns) {
+		this.myWriteToLegacyLobColumns =
+	}
+
 	/**
 	 * If set to <code>false</code> (default is true) the server will not use
 	 * in-memory subscription searching and instead use the database matcher for all subscription

@@ -72,7 +72,7 @@ public class TermConceptDaoSvc {
 			retVal++;
 			theConcept.setIndexStatus(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
 			theConcept.setUpdated(new Date());
-			theConcept.performLegacyLobSupport(mySupportLegacyLob);
+			theConcept.flagForLegacyLobSupport(mySupportLegacyLob);
 			myConceptDao.save(theConcept);
 
 			for (TermConceptProperty next : theConcept.getProperties()) {
@@ -104,7 +104,7 @@ public class TermConceptDaoSvc {
 				retVal += ensureParentsSaved(nextParent.getParents());
 				if (nextParent.getId() == null) {
 					nextParent.setUpdated(new Date());
-					nextParent.performLegacyLobSupport(mySupportLegacyLob);
+					nextParent.flagForLegacyLobSupport(mySupportLegacyLob);
 					myConceptDao.saveAndFlush(nextParent);
 					retVal++;
 					ourLog.debug("Saved parent code {} and got id {}", nextParent.getCode(), nextParent.getId());
