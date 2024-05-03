@@ -597,24 +597,25 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			fail(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(14, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		System.out.println(myCaptureQueriesListener.getSelectQueriesForCurrentThread().stream().map(q -> "QUERY: " + q.getSql(true, false)).collect(Collectors.joining("\n")));
+		assertEquals(8, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
-		assertEquals(12, myCaptureQueriesListener.getCommitCount());
+		assertEquals(6, myCaptureQueriesListener.getCommitCount());
 
 		// Validate again (should rely only on caches)
 		myCaptureQueriesListener.clear();
 		myObservationDao.validate(obs, null, null, null, null, null, null);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(6, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(0, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logUpdateQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logInsertQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
-		assertEquals(6, myCaptureQueriesListener.getCommitCount());
+		assertEquals(0, myCaptureQueriesListener.getCommitCount());
 	}
 
 	/**
