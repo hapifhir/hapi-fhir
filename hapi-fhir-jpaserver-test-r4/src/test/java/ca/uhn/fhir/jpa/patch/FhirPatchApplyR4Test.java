@@ -571,7 +571,7 @@ public class FhirPatchApplyR4Test {
 		//Then: it adds the new extension correctly.
 		assertThat(patient.getExtension()).hasSize(1);
 		Extension extension = patient.getExtension().get(0);
-		assertEquals(extensionUrl, extension.getUrl())
+		assertEquals(extensionUrl, extension.getUrl());
 		Extension innerExtension = extension.getExtensionFirstRep();
 
 		assertNotNull(innerExtension);
