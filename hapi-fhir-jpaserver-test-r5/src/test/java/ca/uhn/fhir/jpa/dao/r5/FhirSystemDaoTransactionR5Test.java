@@ -1,7 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -30,8 +28,8 @@ import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.assertj.core.api.Assertions.fail;
-
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
@@ -691,7 +689,7 @@ public class FhirSystemDaoTransactionR5Test extends BaseJpaR5Test {
 
 		Bundle outputBundle = mySystemDao.transaction(mySrd, inputBundle);
 
-		assertThat(outputBundle.getEntry().get(0).getResponse().getLocation(), matchesPattern("Patient/[0-9]+/_history/1"));
+		assertThat(outputBundle.getEntry().get(0).getResponse().getLocation()).matches("Patient/[0-9]+/_history/1");
 	}
 
 
