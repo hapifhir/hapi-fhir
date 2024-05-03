@@ -22,11 +22,8 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.ColumnMapRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.SQLException;
 import java.util.Set;
@@ -51,47 +48,11 @@ public class RenameTableTask extends BaseTableTask {
 		setDescription("Rename table " + getOldTableName());
 	}
 
-	private void handleTableWithNewTableName() throws SQLException {
-
-		if (!myDeleteTargetColumnFirstIfExist) {
-			throw new SQLException(Msg.code(2517) + "Can not rename " + getOldTableName() + " to " + getNewTableName()
-					+ " because a table with name " + getNewTableName() + " already exists");
-		}
-
-		// a table with the new tableName already exists and we can delete it.  we will only do so if it is empty.
-		Integer rowsWithData = getConnectionProperties().getTxTemplate().execute(t -> {
-			String sql = "SELECT * FROM " + getNewTableName();
-			JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
-			jdbcTemplate.setMaxRows(1);
-			return jdbcTemplate.query(sql, new ColumnMapRowMapper()).size();
-		});
-
-		if (rowsWithData != null && rowsWithData > 0) {
-			throw new SQLException(Msg.code(2518) + "Can not rename " + getOldTableName() + " to " + getNewTableName()
-					+ " because a table with name " + getNewTableName() + " already exists and is populated.");
-		}
-
-		logInfo(
-				ourLog,
-				"Table {} already exists - Going to drop it before renaming table {} to {}",
-				getNewTableName(),
-				getOldTableName(),
-				getNewTableName());
-
-		@Language("SQL")
-		String sql = "DROP TABLE " + getNewTableName();
-		executeSql(getNewTableName(), sql);
-	}
-
 	@Override
 	public void doExecute() throws SQLException {
 
 		Set<String> tableNames = JdbcUtils.getTableNames(getConnectionProperties());
 		boolean hasTableWithNewTableName = tableNames.contains(getNewTableName());
-
-		if (hasTableWithNewTableName) {
-			handleTableWithNewTableName();
-		}
 
 		String sql = buildRenameTableSqlStatement();
 		logInfo(ourLog, "Renaming table: {}", getOldTableName());
