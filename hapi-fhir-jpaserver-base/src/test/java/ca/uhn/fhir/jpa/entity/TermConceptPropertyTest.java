@@ -3,10 +3,9 @@ package ca.uhn.fhir.jpa.entity;
 import com.google.common.base.Strings;
 import org.junit.jupiter.api.Test;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.startsWith;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 
 public class TermConceptPropertyTest {
 
@@ -21,8 +20,8 @@ public class TermConceptPropertyTest {
 		termConceptProperty.setValue(ourVeryLongString);
 
 		// then
-		assertThat(termConceptProperty.getValueBlobForTesting(), notNullValue());
-		assertThat(termConceptProperty.getValueBinForTesting(), notNullValue());
+		assertThat(termConceptProperty.getValueBlobForTesting()).isNotNull();
+		assertThat(termConceptProperty.getValueBinForTesting()).isNotNull();
 	}
 
 	@Test
@@ -33,7 +32,7 @@ public class TermConceptPropertyTest {
 		termConceptProperty.setValueBlobForTesting(null);
 
 		// when/then
-		assertThat(termConceptProperty.hasValueBin(), is(true));
+		assertTrue(termConceptProperty.hasValueBin());
 
 	}
 
@@ -45,7 +44,7 @@ public class TermConceptPropertyTest {
 		termConceptProperty.setValueBlobForTesting(ourVeryLongString.getBytes());
 
 		// when/then
-		assertThat(termConceptProperty.hasValueBin(), is(true));
+		assertTrue(termConceptProperty.hasValueBin());
 
 	}
 
@@ -60,7 +59,7 @@ public class TermConceptPropertyTest {
 		String value = termConceptProperty.getValue();
 
 		// then
-		assertThat(value).startsWith("a"));
+		assertThat(value).startsWith("a");
 
 	}
 
@@ -75,7 +74,7 @@ public class TermConceptPropertyTest {
 		String value = termConceptProperty.getValue();
 
 		// then
-		assertThat(value).startsWith("a"));
+		assertThat(value).startsWith("a");
 	}
 
 }
