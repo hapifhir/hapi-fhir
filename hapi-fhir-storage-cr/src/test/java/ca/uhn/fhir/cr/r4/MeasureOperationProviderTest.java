@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.model.DateType;

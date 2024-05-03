@@ -2297,6 +2297,26 @@
 				<artifactId>assertj-core</artifactId>
 				<version>3.22.0</version>
 			</dependency>
+			<dependency>
+				<groupId>org.assertj</groupId>
+				<artifactId>assertj-json</artifactId>
+				<version>3.22.0</version>
+			</dependency>
+			<dependency>
+				<groupId>net.javacrumbs.json-unit</groupId>
+				<artifactId>json-unit-assertj</artifactId>
+				<version>3.2.7</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.hamcrest</groupId>
+						<artifactId>hamcrest-core</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.hamcrest</groupId>
+						<artifactId>hamcrest</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
