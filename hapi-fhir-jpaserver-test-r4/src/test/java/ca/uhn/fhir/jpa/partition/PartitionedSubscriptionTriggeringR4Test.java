@@ -44,8 +44,9 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4Test  {
+public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(RestHookTestR4Test.class);
 
 	@Autowired
@@ -111,7 +112,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		mySrdInterceptorService.unregisterInterceptorsIf(t -> t instanceof BasePartitioningR4Test.MyReadWriteInterceptor);
 		await().until(() -> {
 			mySubscriptionTriggeringSvc.runDeliveryPass();
-			return ((SubscriptionTriggeringSvcImpl)mySubscriptionTriggeringSvc).getActiveJobCount() == 0;
+			return ((SubscriptionTriggeringSvcImpl) mySubscriptionTriggeringSvc).getActiveJobCount() == 0;
 		});
 
 		super.afterUnregisterRestHookListener();
@@ -171,13 +172,13 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 			if (!theIsCrossPartitionEnabled) {
 				fail("Expecting a timeout and 0 matching subscriptions and thus a timeout if cross partition is DISabled");
 			}
-			Assertions.assertEquals(1, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().size());
+			assertEquals(1, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().size());
 		} catch (ConditionTimeoutException e) {
 			if (theIsCrossPartitionEnabled) {
 				fail("Expecting no timeout and 1 matching subscriptions and thus a timeout if cross partition is enabled");
 			} else {
 				// Should have 0 matching subscription, if we get 1 update count then the test fails
-				Assertions.assertEquals(0, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().size());
+				assertEquals(0, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().size());
 			}
 		}
 	}
@@ -212,12 +213,12 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		waitForQueueToDrain();
 		List<Observation> resourceUpdates = BaseSubscriptionsR4Test.ourObservationProvider.getResourceUpdates();
 		if (theIsCrossPartitionEnabled) {
-			assertThat(resourceUpdates.size(), is(equalTo(2)));
-			assertThat(resourceUpdates.stream().map(Resource::getId).sorted().toList(),
-				is(equalTo(Stream.of(observationIdPartitionOne, observationIdPartitionTwo).map(Object::toString).sorted().toList())));
+			assertEquals(2, resourceUpdates.size());
+			assertEquals(Stream.of(observationIdPartitionOne, observationIdPartitionTwo).map(Object::toString).sorted().toList(),
+				resourceUpdates.stream().map(Resource::getId).sorted().toList());
 		} else {
-			assertThat(resourceUpdates.size(), is(equalTo(1)));
-			assertThat(resourceUpdates.get(0).getId(), is(equalTo(observationIdPartitionOne.toString())));
+			assertEquals(1, resourceUpdates.size());
+			assertEquals(observationIdPartitionOne.toString(), resourceUpdates.get(0).getId());
 		}
 
 		String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
@@ -242,7 +243,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		Subscription theResource = newSubscription(criteria1, payload);
 		theResource.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType(Boolean.TRUE));
 		myPartitionInterceptor.setRequestPartitionId(RequestPartitionId.defaultPartition());
-		IIdType subscriptionId= myDaoRegistry.getResourceDao("Subscription").create(theResource, mySrd).getId();
+		IIdType subscriptionId = myDaoRegistry.getResourceDao("Subscription").create(theResource, mySrd).getId();
 		waitForActivatedSubscriptionCount(1);
 
 		ArrayList<IPrimitiveType<String>> searchUrlList = new ArrayList<>();
@@ -256,6 +257,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		List<Observation> resourceUpdates = BaseSubscriptionsR4Test.ourObservationProvider.getResourceUpdates();
 		assertThat(resourceUpdates).hasSize(2);
 	}
+
 	@Test
 	public void testManualTriggeredSubscriptionInPartition() throws Exception {
 		String payload = "application/fhir+json";

@@ -1,9 +1,5 @@
 package ca.uhn.fhir.jpa.binstore;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.jpa.binary.api.StoredDetails;
 import ca.uhn.fhir.jpa.dao.data.IBinaryStorageEntityDao;
@@ -28,9 +24,12 @@ import java.sql.SQLException;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
-
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -68,7 +67,7 @@ public class DatabaseBinaryContentStorageSvcImplTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 
-		assertThat(outcome.getBlobId()).matches("^[a-zA-Z0-9]{100}$");
+		assertThat(outcome.getBinaryContentId()).matches("^[a-zA-Z0-9]{100}$");
 		assertThat(outcome.getBytes()).isEqualTo(16);
 
 		/*
@@ -148,12 +147,10 @@ public class DatabaseBinaryContentStorageSvcImplTest extends BaseJpaR4Test {
 
 	@Test
 	public void testFetchBinaryContentUnknown() throws IOException {
-		try {
-			mySvc.fetchBinaryContent(new IdType("Patient/123"), "1111111");
-			fail();
-		} catch (ResourceNotFoundException e) {
-			assertEquals("Unknown BinaryContent ID: 1111111 for resource ID Patient/123", e.getMessage());
-		}
+		assertThatThrownBy(() ->
+			mySvc.fetchBinaryContent(new IdType("Patient/123"), "1111111"))
+			.isInstanceOf(ResourceNotFoundException.class)
+			.hasMessage("Unknown BinaryContent ID: 1111111 for resource ID Patient/123");
 
 		StoredDetails details = mySvc.fetchBinaryContentDetails(new IdType("Patient/123"), "1111111");
 		assertNull(details);
@@ -212,12 +209,10 @@ public class DatabaseBinaryContentStorageSvcImplTest extends BaseJpaR4Test {
 		when(blob.getBinaryStream()).thenThrow(new SQLException("FOO"));
 		mockInput.setBlob(blob);
 
-		try {
-			svc.copyBinaryContentToOutputStream(new ByteArrayOutputStream(), (mockInput));
-			fail();
-		} catch (IOException e) {
-			assertThat(e.getMessage()).contains("FOO");
-		}
+		assertThatThrownBy(() ->
+			svc.copyBinaryContentToOutputStream(new ByteArrayOutputStream(), (mockInput)))
+			.isInstanceOf(IOException.class)
+				.hasMessageContaining("FOO");
 	}
 
 	@Test
@@ -229,12 +224,10 @@ public class DatabaseBinaryContentStorageSvcImplTest extends BaseJpaR4Test {
 		when(blob.getBinaryStream()).thenThrow(new SQLException("FOO"));
 		mockInput.setBlob(blob);
 
-		try {
-			svc.copyBinaryContentToByteArray(mockInput);
-			fail();
-		} catch (IOException e) {
-			assertThat(e.getMessage()).contains("FOO");
-		}
+			assertThatThrownBy(() ->
+			svc.copyBinaryContentToByteArray(mockInput))
+				.isInstanceOf(IOException.class)
+					.hasMessageContaining("FOO");
 	}
 
 	@Test
@@ -263,11 +256,11 @@ public class DatabaseBinaryContentStorageSvcImplTest extends BaseJpaR4Test {
 		BinaryStorageEntity mockInput = mock(BinaryStorageEntity.class);
 		when(mockInput.hasStorageContent()).thenReturn(false);
 		when(mockInput.hasBlob()).thenReturn(true);
-		when(mockInput.getBlob()).thenAnswer(t ->{
+		when(mockInput.getBlob()).thenAnswer(t -> {
 			Blob blob = mock(Blob.class);
 			when(blob.getBinaryStream()).thenReturn(new ByteArrayInputStream(SOME_BYTES));
 			return blob;
-		} );
+		});
 
 		// when
 		svc.copyBinaryContentToByteArray(mockInput);
@@ -288,12 +281,12 @@ public class DatabaseBinaryContentStorageSvcImplTest extends BaseJpaR4Test {
 		StoredDetails outcome = mySvc.storeBinaryContent(resourceId, null, contentType, inputStream, new ServletRequestDetails());
 
 		runInTransaction(() -> {
-				Optional<BinaryStorageEntity> binaryStorageEntityOptional = myBinaryStorageEntityDao.findByIdAndResourceId(outcome.getBinaryContentId(), resourceId.toUnqualifiedVersionless().getValue());
-				BinaryStorageEntity binaryStorageEntity = binaryStorageEntityOptional.get();
+			Optional<BinaryStorageEntity> binaryStorageEntityOptional = myBinaryStorageEntityDao.findByIdAndResourceId(outcome.getBinaryContentId(), resourceId.toUnqualifiedVersionless().getValue());
+			BinaryStorageEntity binaryStorageEntity = binaryStorageEntityOptional.get();
 
-				// then
-				assertThat(binaryStorageEntity.hasStorageContent(), is(true));
-				assertThat(binaryStorageEntity.hasBlob(), is(true));
+			// then
+			assertTrue(binaryStorageEntity.hasStorageContent());
+			assertTrue(binaryStorageEntity.hasBlob());
 		});
 
 	}

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.binstore;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -88,7 +89,7 @@ public class FilesystemBinaryStorageSvcImplTest {
 		mySvc.writeBinaryContent(id, outcome.getBinaryContentId(), capture);
 
 		assertThat(capture.toByteArray()).containsExactly(SOME_BYTES);
-		assertThat(mySvc.getBinaryContentId(id, outcome.fetchBinaryContent())).containsExactly(SOME_BYTES);
+		assertThat(mySvc.fetchBinaryContent(id, outcome.getBinaryContentId())).containsExactly(SOME_BYTES);
 	}
 
 

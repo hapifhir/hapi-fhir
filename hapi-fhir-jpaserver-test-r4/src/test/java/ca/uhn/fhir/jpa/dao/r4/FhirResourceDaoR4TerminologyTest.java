@@ -634,7 +634,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertEquals(2, codes.size());
-		assertThat(codes, containsInAnyOrder("childAAA", "childAAB"));
+		assertThat(codes).containsExactlyInAnyOrder("childAAA", "childAAB");
 
 	}
 
