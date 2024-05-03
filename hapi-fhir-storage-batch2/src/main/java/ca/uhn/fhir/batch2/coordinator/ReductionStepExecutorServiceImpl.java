@@ -339,12 +339,8 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 
 		/*
 		 * Reduction steps are done inline and only on gated jobs.
-		 * As such, all workchunks once they get here should either be:
-		 * 1) REDUCTION_READY (7.2 new status)
-		 * 2) COMPLETED (7.0 legacy)
 		 */
-		if (theChunk.getStatus() != WorkChunkStatusEnum.REDUCTION_READY
-				|| theChunk.getStatus() == WorkChunkStatusEnum.COMPLETED) {
+		if (theChunk.getStatus() == WorkChunkStatusEnum.COMPLETED) {
 			// This should never happen since jobs with reduction are required to be gated
 			ourLog.error(
 					"Unexpected chunk {} with status {} found while reducing {}.  No chunks feeding into a reduction step should be in a state other than READY.",
