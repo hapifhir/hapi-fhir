@@ -14,9 +14,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasSize;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 public class MigrateColumnClobTypeToTextTypeTaskTest {
 
@@ -62,13 +60,13 @@ public class MigrateColumnClobTypeToTextTypeTaskTest {
 		// then
 		List<Map<String, Object>> rows = ourPostgresEmbeddedDatabase.query("select * from HFJ_STORAGE_WITH_OID");
 
-		assertThat(rows, hasSize(1));
+		assertThat(rows).hasSize(1);
 
 		Map<String, Object> stringObjectMap = rows.get(0);
 
 		String storedContent = (String) stringObjectMap.get("storage_content_text");
 
-		assertThat(storedContent).isEqualTo(expectedString));
+		assertThat(storedContent).isEqualTo(expectedString);
 
 	}
 
