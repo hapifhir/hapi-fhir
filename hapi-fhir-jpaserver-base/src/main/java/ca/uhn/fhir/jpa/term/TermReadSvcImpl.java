@@ -2104,6 +2104,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 					theCode,
 					theDisplay,
 					expectedDisplay,
+					theSystem,
 					systemVersion,
 					myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
 		}
@@ -2753,6 +2754,7 @@ public class TermReadSvcImpl implements ITermReadSvc, IHasScheduledJobs {
 						theCode,
 						theDisplay,
 						code.getDisplay(),
+						code.getSystem(),
 						code.getSystemVersion(),
 						myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
 			}

@@ -805,29 +805,34 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		return convertValidationResult(theSystem, result);
 	}
 
-	private IValidationSupport.CodeValidationResult validateCodeInValueSet(IBaseResource theValueSet, ConceptValidationOptions theValidationOptions, String theSystem, String theCode, String theDisplay) {
+	private IValidationSupport.CodeValidationResult validateCodeInValueSet(
+			IBaseResource theValueSet,
+			ConceptValidationOptions theValidationOptions,
+			String theSystem,
+			String theCode,
+			String theDisplay) {
 		IValidationSupport.CodeValidationResult result = myValidationSupportContext
-			.getRootValidationSupport()
-			.validateCodeInValueSet(
-				myValidationSupportContext,
-				theValidationOptions,
-				theSystem,
-				theCode,
-				theDisplay,
-				theValueSet);
+				.getRootValidationSupport()
+				.validateCodeInValueSet(
+						myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, theValueSet);
 		if (result != null) {
-				/* We got a value set result, which could be successful, or could contain errors/warnings. The code
-				 might also be invalid in the code system, so we will check that as well and add those issues
-				 to our result.
-				*/
-			IValidationSupport.CodeValidationResult codeSystemResult = validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
+			/* We got a value set result, which could be successful, or could contain errors/warnings. The code
+			might also be invalid in the code system, so we will check that as well and add those issues
+			to our result.
+			*/
+			IValidationSupport.CodeValidationResult codeSystemResult =
+					validateCodeInCodeSystem(theValidationOptions, theSystem, theCode, theDisplay);
+			final boolean valueSetResultContainsInvalidDisplay = result.getCodeValidationIssues().stream()
+					.anyMatch(codeValidationIssue -> codeValidationIssue.getCoding()
+							== IValidationSupport.CodeValidationIssueCoding.INVALID_DISPLAY);
 			if (codeSystemResult != null) {
 				for (IValidationSupport.CodeValidationIssue codeValidationIssue :
-					codeSystemResult.getCodeValidationIssues()) {
-						/* Value set validation should already have checked the display name. If we get INVALID_DISPLAY
-						   issues from code system validation, they will only repeat what was already caught.
-						 */
-					if (codeValidationIssue.getCoding() != IValidationSupport.CodeValidationIssueCoding.INVALID_DISPLAY) {
+						codeSystemResult.getCodeValidationIssues()) {
+					/* Value set validation should already have checked the display name. If we get INVALID_DISPLAY
+					issues from code system validation, they will only repeat what was already caught.
+					*/
+					if (codeValidationIssue.getCoding() != IValidationSupport.CodeValidationIssueCoding.INVALID_DISPLAY
+							|| !valueSetResultContainsInvalidDisplay) {
 						result.addCodeValidationIssue(codeValidationIssue);
 					}
 				}
@@ -836,11 +841,11 @@ public class VersionSpecificWorkerContextWrapper extends I18nBase implements IWo
 		return result;
 	}
 
-	private IValidationSupport.CodeValidationResult validateCodeInCodeSystem(ConceptValidationOptions theValidationOptions, String theSystem, String theCode, String theDisplay) {
+	private IValidationSupport.CodeValidationResult validateCodeInCodeSystem(
+			ConceptValidationOptions theValidationOptions, String theSystem, String theCode, String theDisplay) {
 		return myValidationSupportContext
-			.getRootValidationSupport()
-			.validateCode(
-				myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, null);
+				.getRootValidationSupport()
+				.validateCode(myValidationSupportContext, theValidationOptions, theSystem, theCode, theDisplay, null);
 	}
 
 	@Override

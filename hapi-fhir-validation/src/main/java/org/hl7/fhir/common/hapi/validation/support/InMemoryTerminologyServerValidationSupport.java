@@ -28,7 +28,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.Enumerations;
-import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 
 import java.util.ArrayList;
@@ -579,15 +578,15 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			codeValidationResult = new CodeValidationResult()
 					.setSeverityCode(severity.toCode())
 					.setMessage(message)
-					.addCodeValidationIssue(
-							new CodeValidationIssue(message, getIssueSeverityFromCodeValidationIssue(severity), issueCode, issueCoding));
+					.addCodeValidationIssue(new CodeValidationIssue(
+							message, getIssueSeverityFromCodeValidationIssue(severity), issueCode, issueCoding));
 		}
 
 		return codeValidationResult;
 	}
 
 	private IValidationSupport.IssueSeverity getIssueSeverityFromCodeValidationIssue(
-		ValidationMessage.IssueSeverity theSeverity) {
+			ValidationMessage.IssueSeverity theSeverity) {
 		switch (theSeverity) {
 			case ERROR:
 				return IValidationSupport.IssueSeverity.ERROR;
@@ -650,6 +649,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 								theCodeToValidate,
 								theDisplayToValidate,
 								nextExpansionCode.getDisplay(),
+								codeSystemUrlToValidate,
 								csVersion,
 								messageAppend,
 								getIssueSeverityForCodeDisplayMismatch());
@@ -1324,6 +1324,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			String theCode,
 			String theDisplay,
 			String theExpectedDisplay,
+			String theCodeSystem,
 			String theCodeSystemVersion,
 			IssueSeverity theIssueSeverityForCodeDisplayMismatch) {
 		return createResultForDisplayMismatch(
@@ -1331,6 +1332,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 				theCode,
 				theDisplay,
 				theExpectedDisplay,
+				theCodeSystem,
 				theCodeSystemVersion,
 				"",
 				theIssueSeverityForCodeDisplayMismatch);
@@ -1341,6 +1343,7 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			String theCode,
 			String theDisplay,
 			String theExpectedDisplay,
+			String theCodeSystem,
 			String theCodeSystemVersion,
 			String theMessageAppend,
 			IssueSeverity theIssueSeverityForCodeDisplayMismatch) {
@@ -1357,7 +1360,9 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 									InMemoryTerminologyServerValidationSupport.class,
 									"displayMismatch",
 									theDisplay,
-									theExpectedDisplay)
+									theExpectedDisplay,
+									theCodeSystem,
+									theCode)
 					+ theMessageAppend;
 		}
 		CodeValidationResult codeValidationResult = new CodeValidationResult()

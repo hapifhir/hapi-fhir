@@ -657,7 +657,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		// Code that exists but isn't in the valueset
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
-		obs.getCode().getCodingFirstRep().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs").setDisplay("Display 3");
+		obs.getCode().getCodingFirstRep().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs").setDisplay("Vital Signs");
 		oo = validateAndReturnOutcome(obs);
 		assertEquals("None of the codings provided are in the value set 'ValueSet[http://example.com/fhir/ValueSet/observation-vitalsignresult]' (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a coding from this value set is required) (codes = http://terminology.hl7.org/CodeSystem/observation-category#vital-signs)", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
@@ -1112,7 +1112,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		// Code that exists but isn't in the valueset
 		obs.getText().setStatus(Narrative.NarrativeStatus.GENERATED);
-		obs.getCode().getCodingFirstRep().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs").setDisplay("Display 3");
+		obs.getCode().getCodingFirstRep().setSystem("http://terminology.hl7.org/CodeSystem/observation-category").setCode("vital-signs").setDisplay("Vital Signs");
 		oo = validateAndReturnOutcome(obs);
 		assertEquals("None of the codings provided are in the value set 'ValueSet[http://example.com/fhir/ValueSet/observation-vitalsignresult]' (http://example.com/fhir/ValueSet/observation-vitalsignresult), and a coding from this value set is required) (codes = http://terminology.hl7.org/CodeSystem/observation-category#vital-signs)", oo.getIssueFirstRep().getDiagnostics(), encode(oo));
 
@@ -1387,7 +1387,9 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		TermCodeSystemVersion csv = new TermCodeSystemVersion();
 		csv.addConcept().setCode("bar").setDisplay("Bar Code");
-		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, csv, mySrd, Collections.emptyList(), Collections.emptyList());
+		IIdType updatedCsId = myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, csv, mySrd, Collections.emptyList(), Collections.emptyList());
+
+
 
 		// Validate a resource containing this codesystem in a field with an extendable binding
 		Patient patient = new Patient();
@@ -1407,11 +1409,12 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		// It would be ok for this to produce 0 issues, or just an information message too
 		assertEquals(2, OperationOutcomeUtil.getIssueCount(myFhirContext, oo));
-		assertThat(oo.getIssue().get(1).getDiagnostics(),
+		OperationOutcome.OperationOutcomeIssueComponent notInValueSetIssue = oo.getIssue().get(1);
+		assertThat(notInValueSetIssue.getDiagnostics(),
 			containsString("None of the codings provided are in the value set 'IdentifierType'"));
-		assertThat(oo.getIssue().get(1).getDiagnostics(),
+		assertThat(notInValueSetIssue.getDiagnostics(),
 			containsString("a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = http://foo#bar)"));
-		assertEquals(OperationOutcome.IssueSeverity.WARNING, oo.getIssue().get(0).getSeverity());
+		assertEquals(OperationOutcome.IssueSeverity.WARNING, notInValueSetIssue.getSeverity());
 		assertEquals("Concept Display \"not bar code\" does not match expected \"Bar Code\" for 'http://foo#bar'", oo.getIssue().get(0).getDiagnostics());
 	}
 
