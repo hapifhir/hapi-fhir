@@ -45,7 +45,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.fail;
-
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 public class ChainingR4SearchTest extends BaseJpaR4Test {
@@ -1608,7 +1608,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		createDocumentBundleWithPatientDetails("1980-01-01", "system", "value-1");
 
 		List<String> ids = myTestDaoSearch.searchForIds(theSearchUrl);
-		assertThat(theMessage, ids, hasSize(theExpectedCount));
+		assertThat(ids).as(theMessage).hasSize(theExpectedCount);
 	}
 
 	private void createSearchParameter(String theId, String theCode, String theBase, String theExpression, Enumerations.SearchParamType theType) {

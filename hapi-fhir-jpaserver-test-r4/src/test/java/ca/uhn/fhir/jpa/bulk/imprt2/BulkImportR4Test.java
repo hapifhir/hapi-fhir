@@ -103,8 +103,8 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		await().atMost(120, TimeUnit.SECONDS).until(() -> {
 			myJobCleanerService.runMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
-			return instance.getStatus();
-		}).isEqualTo(StatusEnum.FAILED));
+			return instance.getStatus() == StatusEnum.FAILED;
+		});
 
 		//No resources stored
 		runInTransaction(() -> {
@@ -117,7 +117,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
 			ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));
 			assertEquals(1, instance.getErrorCount());
-			assertThat(instance.getErrorMessage(), is(containsString("Received HTTP 403")));
+			assertThat(instance.getErrorMessage()).contains("Received HTTP 403");
 		});
 
 	}
@@ -152,8 +152,8 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		await().atMost(120, TimeUnit.SECONDS).until(() -> {
 			myJobCleanerService.runMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
-			return instance.getStatus();
-		}).isEqualTo(StatusEnum.COMPLETED));
+			return instance.getStatus() == StatusEnum.COMPLETED;
+		});
 
 		runInTransaction(() -> {
 			assertEquals(200, myResourceTableDao.count());
@@ -215,8 +215,8 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 					ourLog.info("Chunks:\n * " + allChunks.stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
 				});
 
-				return status;
-			}).isEqualTo(StatusEnum.ERRORED));
+				return status == StatusEnum.ERRORED;
+			});
 
 			String storageDescription = runInTransaction(() -> {
 				assertEquals(0, myResourceTableDao.count());
@@ -288,8 +288,8 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		await().until(() -> {
 			myJobCleanerService.runMaintenancePass();
 			JobInstance instance = myJobCoordinator.getInstance(instanceId);
-			return instance.getStatus();
-		}).isEqualTo(StatusEnum.FAILED));
+			return instance.getStatus() == StatusEnum.FAILED;
+		});
 
 		JobInstance instance = myJobCoordinator.getInstance(instanceId);
 		ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));
@@ -332,8 +332,8 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			await().until(() -> {
 				myJobCleanerService.runMaintenancePass();
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);
-				return instance.getStatus();
-			}).isEqualTo(StatusEnum.FAILED));
+				return instance.getStatus() == StatusEnum.FAILED;
+			});
 
 			runInTransaction(() -> {
 				JobInstance instance = myJobCoordinator.getInstance(instanceId);

@@ -1,16 +1,15 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndexedSearchParam;
-import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.entity.NormalizedQuantitySearchLevel;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantity;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamQuantityNormalized;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamString;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
@@ -54,10 +53,8 @@ import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.empty;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
@@ -452,7 +449,9 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			Collection<ResourceIndexedSearchParamComposite> c = myExtractor.extractSearchParamComposites(resource);
 
 			assertThat(c, not(empty()));
-			assertThat("Extracts standard R4 composite sp", c, hasItem(hasProperty("searchParamName").isEqualTo("component-code-value-concept"))));
+			assertThat(c).as("Extracts standard R4 composite sp")
+				.extracting("searchParamName")
+				.contains("component-code-value-concept");
 
 			List<ResourceIndexedSearchParamComposite> components = c.stream()
 				.filter(idx -> idx.getSearchParamName().equals("component-code-value-concept"))

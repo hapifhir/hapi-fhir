@@ -9,6 +9,8 @@ import org.hl7.fhir.r4.model.Attachment;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class AttachmentUtilTest {
 

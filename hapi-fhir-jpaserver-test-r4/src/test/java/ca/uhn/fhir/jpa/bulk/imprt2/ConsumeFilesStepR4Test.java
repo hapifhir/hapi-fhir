@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.bulk.imprt2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;

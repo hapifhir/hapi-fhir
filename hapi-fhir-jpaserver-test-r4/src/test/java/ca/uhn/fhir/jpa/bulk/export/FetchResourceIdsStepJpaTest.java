@@ -108,7 +108,7 @@ public class FetchResourceIdsStepJpaTest  extends BaseJpaR4Test {
 			// Note that the 600 is a bit higher than the configured maximum of 500 above,
 			// because our chunk size estimate is not totally accurate, but it's not
 			// going to be way off, less than 100 regardless of how big the maximum is
-			assertThat(serialized, serialized.length(), lessThanOrEqualTo(600));
+			assertThat(serialized.length()).as(serialized).isLessThanOrEqualTo(600);
 		}
 
 	}

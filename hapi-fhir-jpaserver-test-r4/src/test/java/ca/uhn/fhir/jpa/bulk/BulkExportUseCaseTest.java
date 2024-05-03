@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
@@ -514,8 +515,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			final Optional<JobInstance> optJobInstance = myJobPersistence.fetchInstance(jobId);
 			assertNotNull(optJobInstance);
 			assertTrue(optJobInstance.isPresent());
-			assertThat(optJobInstance.get().getReport(),
-				containsString("Export complete, but no data to generate report for job instance:"));
+			assertThat(optJobInstance.get().getReport()).
+				contains("Export complete, but no data to generate report for job instance:");
 		}
 
 		private void logContentTypeAndResponse(Header[] headers, String response) {
@@ -656,8 +657,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				});
 
 			String report = myJobCoordinator.getInstance(job.getInstanceId()).getReport();
-			assertThat(report,
-				containsString("Export complete, but no data to generate report for job instance:"));
+			assertThat(report).
+				contains("Export complete, but no data to generate report for job instance:");
 		}
 	}
 
@@ -1283,8 +1284,8 @@ public class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			BulkExportJobResults bulkExportJobResults = startGroupBulkExportJobAndAwaitCompletion(
 				resourceTypes, new HashSet<>(), "G-empty");
 
-			assertThat(bulkExportJobResults.getReportMsg(),
-				startsWith("Export complete, but no data to generate report for job instance:"));
+			assertThat(bulkExportJobResults.getReportMsg()).
+				startsWith("Export complete, but no data to generate report for job instance:");
 		}
 
 		@Test

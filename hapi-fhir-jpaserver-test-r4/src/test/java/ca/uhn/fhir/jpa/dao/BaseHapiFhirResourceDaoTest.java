@@ -1,5 +1,7 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.parameters.PartitionedUrl;
@@ -381,12 +383,10 @@ class BaseHapiFhirResourceDaoTest {
 
 			final Set<JpaPid> expectedResourceIds = handleExpectedResourceIds(theResourceIds);
 
-			try {
-				mySpiedSvc.deleteByUrl(URL, REQUEST);
-				fail();
-			} catch (PreconditionFailedException exception) {
-				 assertEquals(String.format("HAPI-2496: Failed to DELETE resources with match URL \"Patient?_lastUpdated=gt2024-01-01\" because the resolved number of resources: %s exceeds the threshold of %s", expectedResourceIds.size(), theThreshold), exception.getMessage());
-			}
+				assertThatThrownBy(() ->
+				mySpiedSvc.deleteByUrl(URL, REQUEST))
+					.isInstanceOf(PreconditionFailedException.class)
+						.hasMessage(String.format("HAPI-2496: Failed to DELETE resources with match URL \"Patient?_lastUpdated=gt2024-01-01\" because the resolved number of resources: %s exceeds the threshold of %s", expectedResourceIds.size(), theThreshold));
 		}
 
 		private Set<JpaPid> handleExpectedResourceIds(Set<Long> theResourceIds) {

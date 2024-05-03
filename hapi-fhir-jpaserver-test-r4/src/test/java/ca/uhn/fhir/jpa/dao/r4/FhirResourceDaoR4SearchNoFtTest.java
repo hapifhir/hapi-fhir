@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -1524,7 +1526,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		bundleResponse = mySystemDao.transaction(new SystemRequestDetails(), duplicateBundle);
 		bundleResponse.getEntry()
 			.forEach(entry -> {
-			assertThat(entry.getResponse().getStatus()).isEqualTo("200 OK");
+				assertThat(entry.getResponse().getStatus()).isEqualTo("200 OK");
 			});
 
 		search = myOrganizationDao.search(new SearchParameterMap().setLoadSynchronous(true), new SystemRequestDetails());
@@ -3549,8 +3551,8 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		IIdType encounterId = createEncounter(withIdentifier("http://example", "someValue"));
 
 		MedicationAdministration ma = new MedicationAdministration()
-				.setContext(new Reference(encounterId))
-				.setEffective(new DateTimeType());
+			.setContext(new Reference(encounterId))
+			.setEffective(new DateTimeType());
 		IIdType medicationAdministrationId = myMedicationAdministrationDao.create(ma, mySrd).getId();
 
 		// execute
@@ -3560,22 +3562,20 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		// verify
 		List<IIdType> ids = toUnqualifiedVersionlessIds(myMedicationAdministrationDao.search(map, mySrd));
 		assertEquals(1, ids.size());
-		assertThat(ids, contains(medicationAdministrationId.toUnqualifiedVersionless()));
+		assertThat(ids).contains(medicationAdministrationId.toUnqualifiedVersionless());
 	}
 
 	@Test
 	public void testSearchWithInvalidTypedResourceReference_throwsUnsupportedResourceType() {
 		// execute
-		try {
-			ReferenceParam referenceParam = new ReferenceParam("abc", null, "123");
-			SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(MedicationAdministration.SP_CONTEXT, referenceParam);
+		ReferenceParam referenceParam = new ReferenceParam("abc", null, "123");
+		SearchParameterMap map = new SearchParameterMap().setLoadSynchronous(true).add(MedicationAdministration.SP_CONTEXT, referenceParam);
 
-			// verify
-			myMedicationAdministrationDao.search(map, mySrd);
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1250) + "Invalid/unsupported resource type: \"abc\"", e.getMessage());
-		}
+		// verify
+		assertThatThrownBy(() ->
+			myMedicationAdministrationDao.search(map, mySrd))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessage(Msg.code(1250) + "Invalid/unsupported resource type: \"abc\"");
 	}
 
 	@Test
@@ -5739,7 +5739,7 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 	/**
 	 * Index for
-	 *   [base]/Bundle?composition.patient.identifier=foo
+	 * [base]/Bundle?composition.patient.identifier=foo
 	 */
 	@ParameterizedTest
 	@CsvSource({

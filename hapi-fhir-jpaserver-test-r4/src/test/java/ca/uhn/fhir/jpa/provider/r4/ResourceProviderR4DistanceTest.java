@@ -34,7 +34,9 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 
@@ -342,8 +344,6 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 	}
 
 
-
-
 	@Test
 	void shouldSortPractitionerRolesByLocationNear() {
 
@@ -395,7 +395,8 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			"PractitionerRole-Barrie",
 			"PractitionerRole-Kitchener");
 
-		assertArrayEquals(referenceList.toArray(), list.toArray());
+		assertThat(list.toArray())
+			.containsExactly(referenceList.toArray());
 
 		Bundle sortedPractitionerRolesDesc = (Bundle) myClient.search()
 			.forResource(PractitionerRole.class)
@@ -411,7 +412,8 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			.map(Identifier::getValue).toList();
 
 		Collections.reverse(referenceList);
-		assertArrayEquals(referenceList.toArray(), list.toArray());
+		assertThat(list.toArray())
+			.containsExactly(referenceList.toArray());
 
 	}
 
@@ -465,7 +467,8 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			"PractitionerRole-city3",
 			"PractitionerRole-city4");
 
-		assertArrayEquals(referenceList.toArray(), sortedValues.toArray());
+		assertThat(sortedValues.toArray())
+			.containsExactly(referenceList.toArray());
 
 		Bundle sortedPractitionerRolesDesc = (Bundle) myClient.search()
 			.forResource(PractitionerRole.class)
@@ -493,7 +496,8 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			"PractitionerRole-city2",
 			"PractitionerRole-city1"
 		);
-		assertArrayEquals(referenceList.toArray(), sortedValuesDesc.toArray());
+		assertThat(sortedValuesDesc.toArray())
+			.containsExactly(referenceList.toArray());
 	}
 
 	@Test
@@ -569,12 +573,13 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 
 	@Test
 	void shouldThrowExceptionWhenSortingByChainedNearWithoutProvidingNearValue() {
-		assertThrows(InvalidRequestException.class, () -> {
+		assertThatThrownBy(() ->
 			myClient.search()
 				.forResource(PractitionerRole.class)
 				.sort(new SortSpec("location.near", SortOrderEnum.ASC))
-				.execute();
-		}, "HTTP 400 : HAPI-2307: Can not sort on coordinate parameter \"location\" unless this parameter is also specified as a search parameter with a latitude/longitude value");
+				.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessage("HTTP 400 : HAPI-2307: Can not sort on coordinate parameter \"location\" unless this parameter is also specified as a search parameter with a latitude/longitude value");
 	}
 
 	private void createLocation(String id, double latitude, double longitude) {

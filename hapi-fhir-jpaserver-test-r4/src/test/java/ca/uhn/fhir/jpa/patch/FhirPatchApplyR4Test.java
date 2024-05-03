@@ -33,6 +33,8 @@ import jakarta.annotation.Nullable;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class FhirPatchApplyR4Test {
 
@@ -567,14 +569,14 @@ public class FhirPatchApplyR4Test {
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 
 		//Then: it adds the new extension correctly.
-		assertThat(patient.getExtension(), hasSize(1));
+		assertThat(patient.getExtension()).hasSize(1);
 		Extension extension = patient.getExtension().get(0);
-		assertThat(extension.getUrl(), is(equalTo(extensionUrl)));
+		assertEquals(extensionUrl, extension.getUrl())
 		Extension innerExtension = extension.getExtensionFirstRep();
 
-		assertThat(innerExtension, notNullValue());
-		assertThat(innerExtension.getUrl(), is(equalTo(innerExtensionUrl)));
-		assertThat(innerExtension.getValue().primitiveValue(), is(equalTo(innerExtensionValue)));
+		assertNotNull(innerExtension);
+		assertEquals(innerExtensionUrl, innerExtension.getUrl());
+		assertEquals(innerExtensionValue, innerExtension.getValue().primitiveValue());
 
 	}
 

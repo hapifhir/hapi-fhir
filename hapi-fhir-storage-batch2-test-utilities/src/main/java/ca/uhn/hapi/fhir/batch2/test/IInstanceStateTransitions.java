@@ -55,7 +55,7 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 
 		// then
 		JobInstance jobInstance = getTestManager().freshFetchJobInstance(createResult.jobInstanceId);
-		assertThat(jobInstance.getStatus()).isEqualTo(StatusEnum.IN_PROGRESS));
+		assertEquals(StatusEnum.IN_PROGRESS, jobInstance.getStatus());
 	}
 
 	@ParameterizedTest

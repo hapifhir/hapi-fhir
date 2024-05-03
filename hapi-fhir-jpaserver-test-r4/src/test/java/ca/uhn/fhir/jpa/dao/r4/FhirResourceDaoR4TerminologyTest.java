@@ -51,6 +51,7 @@ import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SuppressWarnings("Duplicates")
@@ -606,7 +607,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		ArrayList<String> codes = toCodesContains(result.getExpansion().getContains());
 		assertEquals(3, codes.size());
-		assertThat(codes, containsInAnyOrder("childAA", "childAAA", "childAAB"));
+		assertThat(codes).contains("childAA", "childAAA", "childAAB");
 
 	}
 

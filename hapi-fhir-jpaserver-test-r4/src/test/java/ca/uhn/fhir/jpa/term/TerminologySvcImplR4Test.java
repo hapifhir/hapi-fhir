@@ -484,7 +484,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 			myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 			return myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true);
-			}).isEqualTo(true));
+			});
 
 		IValidationSupport.CodeValidationResult outcome;
 

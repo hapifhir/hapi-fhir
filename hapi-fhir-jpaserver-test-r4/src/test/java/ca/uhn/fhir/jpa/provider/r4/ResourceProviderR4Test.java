@@ -1,9 +1,11 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
@@ -330,7 +332,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testSearchResourcesOnProfile_whenProfileIsMissing_returnsResourcesWithMissingProfile(){
+	public void testSearchResourcesOnProfile_whenProfileIsMissing_returnsResourcesWithMissingProfile() {
 		// given
 		myStorageSettings.setIndexMissingFields(StorageSettings.IndexEnabledEnum.ENABLED);
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
@@ -381,7 +383,8 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			// then
 			assertThat(matched).hasSize(1);
-			assertThat(matched).extracting(ResourceIndexedSearchParamUri::getUri).isNull();;
+			assertThat(matched).extracting(ResourceIndexedSearchParamUri::getUri).isNull();
+			;
 		});
 	}
 
@@ -2369,7 +2372,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		IIdType id = myClient.create().resource(patient).execute().getId().toVersionless();
 		ourLog.info("Res ID: {}", id);
 
-		final String expectedFullUrl = myServerBase +  "/Patient/" + id.getIdPart();
+		final String expectedFullUrl = myServerBase + "/Patient/" + id.getIdPart();
 
 		if (theInvalidateCacheBeforeHistory) {
 			// the reason for this test parameterization to invalidate the cache is that
@@ -2418,7 +2421,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Res ID: {}", id);
 		assertEquals(patientForcedId, id.getIdPart());
 
-		final String expectedFullUrl = myServerBase +  "/Patient/" + id.getIdPart();
+		final String expectedFullUrl = myServerBase + "/Patient/" + id.getIdPart();
 
 		if (theInvalidateCacheBeforeHistory) {
 			// the reason for this test parameterization to invalidate the cache is that
@@ -7425,6 +7428,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			);
 		}
 	}
+
 	@Nested
 	class SearchWithIdentifiers {
 		private static final String SYSTEM = "http://acme.org/fhir/identifier/mrn";
@@ -7459,15 +7463,13 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		private void testAndAssertFailureFor(String theUrl) {
-			try {
+			assertThatThrownBy(() ->
 				myClient.search()
 					.byUrl(theUrl)
 					.returnBundle(Bundle.class)
-					.execute();
-				fail();
-			} catch (InvalidRequestException exception) {
-				assertEquals("HTTP 400 Bad Request: HAPI-2498: Unsupported search modifier(s): \"[:identifier]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]", exception.getMessage());
-			}
+					.execute())
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage("HTTP 400 Bad Request: HAPI-2498: Unsupported search modifier(s): \"[:identifier]\" for resource type \"Observation\". Valid search modifiers are: [:contains, :exact, :in, :iterate, :missing, :not-in, :of-type, :recurse, :text]");
 		}
 	}
 }

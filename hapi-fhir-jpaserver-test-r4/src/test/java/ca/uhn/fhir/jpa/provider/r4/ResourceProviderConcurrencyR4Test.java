@@ -108,7 +108,7 @@ public class ResourceProviderConcurrencyR4Test extends BaseResourceProviderR4Tes
 			});
 		}
 
-		await().until(() -> searchBlockingInterceptorFamily1.getHits()).isEqualTo(1));
+		await().until(() -> searchBlockingInterceptorFamily1.getHits() == 1);
 
 		// Submit search 2 (should also block because it will reuse the first search - same name being searched)
 		{

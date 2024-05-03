@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails;
@@ -226,8 +227,8 @@ public class PatientIdPartitionInterceptorTest extends BaseResourceProviderR4Tes
 
 		List<SqlQuery> selectQueriesForCurrentThread = myCaptureQueriesListener.getSelectQueriesForCurrentThread();
 		assertEquals(4, selectQueriesForCurrentThread.size());
-		assertThat(selectQueriesForCurrentThread.get(0).getSql(false, false)).contains("PARTITION_ID in (?)"));
-		assertThat(selectQueriesForCurrentThread.get(1).getSql(false, false)).contains("PARTITION_ID="));
+		assertThat(selectQueriesForCurrentThread.get(0).getSql(false, false)).contains("PARTITION_ID in (?)");
+		assertThat(selectQueriesForCurrentThread.get(1).getSql(false, false)).contains("PARTITION_ID=");
 	}
 
 

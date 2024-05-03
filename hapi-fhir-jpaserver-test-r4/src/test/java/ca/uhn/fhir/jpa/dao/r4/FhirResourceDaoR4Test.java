@@ -262,11 +262,11 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test {
 				.map(t -> t.getValue())
 				.collect(Collectors.toList());
 
-			assertThat(paramValues, hasSize(2));
+			assertThat(paramValues).hasSize(2);
 
 			for (String tokenValue : paramValues) {
-				assertThat(tokenValue).startsWith(modifiedEmailPrefix));
-				assertThat(tokenValue, hasLength(ResourceIndexedSearchParamToken.MAX_LENGTH));
+				assertThat(tokenValue).startsWith(modifiedEmailPrefix);
+				assertThat(tokenValue).hasSize(ResourceIndexedSearchParamToken.MAX_LENGTH);
 			}
 		});
 	}

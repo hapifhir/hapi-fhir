@@ -2015,7 +2015,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		private static void assertExpectedOutcome(String outcomeJson) {
 			assertThat(outcomeJson).doesNotContain(I18nConstants.VALIDATION_VAL_PROFILE_UNKNOWN_NOT_POLICY);
-			assertThat(encoded).contains("No issues detected");
+			assertThat(outcomeJson).contains("No issues detected");
 		}
 
 		private String validate(Patient thePatient) {

@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -238,7 +240,7 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		for (var next : myWorkChunkCaptor.getAllValues()) {
 			int nextSize = String.join("\n", next.getStringifiedResources()).length();
 			ourLog.info("Next size: {}", nextSize);
-			assertThat(nextSize, lessThanOrEqualTo(maxFileSize));
+			assertThat(nextSize).isLessThanOrEqualTo(maxFileSize);
 			next.getStringifiedResources().stream()
 				.filter(StringUtils::isNotBlank)
 				.map(t->myFhirContext.newJsonParser().parseResource(t))
