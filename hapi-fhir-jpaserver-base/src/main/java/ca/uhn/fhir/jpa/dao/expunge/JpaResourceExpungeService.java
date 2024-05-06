@@ -298,7 +298,7 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 		}
 	}
 
-	private void expungeCurrentVersionOfResource(
+	protected void expungeCurrentVersionOfResource(
 			RequestDetails theRequestDetails, Long theResourceId, AtomicInteger theRemainingCount) {
 		ResourceTable resource = myResourceTableDao.findById(theResourceId).orElseThrow(IllegalStateException::new);
 
@@ -310,8 +310,6 @@ public class JpaResourceExpungeService implements IResourceExpungeService<JpaPid
 
 		ourLog.info(
 				"Expunging current version of resource {}", resource.getIdDt().getValue());
-
-		deleteAllSearchParams(JpaPid.fromId(resource.getResourceId()));
 
 		try {
 			if (resource.isHasTags()) {
