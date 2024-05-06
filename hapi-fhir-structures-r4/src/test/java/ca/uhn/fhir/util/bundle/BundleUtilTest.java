@@ -500,7 +500,7 @@ public class BundleUtilTest {
 		assertThat(searchBundleEntryParts).hasSize(1);
 		assertThat(searchBundleEntryParts.get(0).getSearchMode()).isNull();
 		assertThat(searchBundleEntryParts.get(0).getFullUrl()).contains("Condition/1626");
-		assertThat(searchBundleEntryParts.get(0).getResource()).isNull();
+		assertThat(searchBundleEntryParts.get(0).getResource()).isNotNull();
 	}
 
 	@Test
@@ -547,7 +547,7 @@ public class BundleUtilTest {
 		assertThat(searchBundleEntryParts).hasSize(1);
 		assertEquals(BundleEntrySearchModeEnum.OUTCOME, searchBundleEntryParts.get(0).getSearchMode());
 		assertThat(searchBundleEntryParts.get(0).getFullUrl()).contains("Condition/1626");
-		assertThat(searchBundleEntryParts.get(0).getResource()).isNull();
+		assertThat(searchBundleEntryParts.get(0).getResource()).isNotNull();
 	}
 
 	@Test

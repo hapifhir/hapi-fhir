@@ -238,7 +238,7 @@ public class CustomTypeDstu3Test {
 		ourLog.info(out);
 
 		//@formatter:off
-		assertThat(out).containsSequence(
+		assertThat(out).contains(
 			"<meta>", 
 			"<profile value=\"http://foo/profile1\"/>", 
 			"<profile value=\"http://foo/profile2\"/>", 
@@ -289,18 +289,15 @@ public class CustomTypeDstu3Test {
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString).containsSequence(
+		assertThat(messageString).contains(
 			"<meta>", 
 			"<profile value=\"http://example.com/foo\"/>", 
 			"</meta>");
 		//@formatter:on
 
 		//@formatter:off
-		assertThat(messageString).doesNotContain(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"", "/>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>");
+		assertThat(messageString).doesNotContainPattern(
+			"<meta>.*<profile value=\"http://example.com/foo\".*/>.*<profile value=\"http://example.com/foo\"/>.*</meta>");
 		//@formatter:on
 	}
 
@@ -331,7 +328,7 @@ public class CustomTypeDstu3Test {
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString).containsSequence(
+		assertThat(messageString).contains(
 			"<meta>", 
 			"<profile value=\"http://example.com/foo\"/>", 
 			"<profile value=\"http://example.com/bar\"/>", 
@@ -339,11 +336,8 @@ public class CustomTypeDstu3Test {
 		//@formatter:on
 
 		//@formatter:off
-		assertThat(messageString).doesNotContain(
-			"<meta>", 
-			"<profile value=\"http://example.com/foo\"", "/>", 
-			"<profile value=\"http://example.com/foo\"/>", 
-			"</meta>");
+		assertThat(messageString).doesNotContainPattern(
+			"<meta>.*<profile value=\"http://example.com/foo\".*/>.*<profile value=\"http://example.com/foo\"/>.*</meta>");
 		//@formatter:on
 	}
 

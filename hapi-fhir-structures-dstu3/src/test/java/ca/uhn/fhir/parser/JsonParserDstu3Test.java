@@ -847,11 +847,7 @@ public class JsonParserDstu3Test {
 			"\"valueString\": \"ext_url_value\"",
 			"\"code\":"
 		);
-		assertThat(output).doesNotContain(
-			"\"url\": \"http://exturl\"",
-			",",
-			"\"url\": \"http://exturl\""
-		);
+		assertThat(output).doesNotContainPattern("\"url\": \"http://exturl\".*,.*\"url\": \"http://exturl\"");
 		//@formatter:on
 
 		obs = parser.parseResource(Observation.class, output);
@@ -892,11 +888,7 @@ public class JsonParserDstu3Test {
 			"\"valueString\": \"sub_ext_value\"",
 			"\"code\":"
 		);
-		assertThat(output).doesNotContain(
-			"\"url\": \"http://exturl\"",
-			",",
-			"\"url\": \"http://exturl\""
-		);
+		assertThat(output).doesNotContainPattern("\"url\": \"http://exturl\".*,.*\"url\": \"http://exturl\"");
 		//@formatter:on
 
 		obs = parser.parseResource(Observation.class, output);

@@ -157,7 +157,7 @@ class TerserUtilTest {
 		TerserUtil.replaceFields(ourFhirContext, p1, p2, TerserUtil.EXCLUDE_IDS_AND_META);
 
 		assertTrue(p2.hasDeceased());
-		assertThat("true").isEqualTo(p2.getDeceased());
+		assertTrue(((BooleanType)p2.getDeceased()).booleanValue());
 		assertThat(p2.getExtension()).hasSize(2);
 	}
 
