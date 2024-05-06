@@ -3158,8 +3158,8 @@ public class FhirResourceDaoDstu3SearchNoFtTest extends BaseJpaDstu3Test {
 			param.setMissing(true);
 			params.add(Observation.SP_CODE, param);
 			List<IIdType> patients = toUnqualifiedVersionlessIds(myObservationDao.search(params));
-			assertThat(patients).doesNotContain(missing);
-			assertThat(patients).contains(notMissing);
+			assertThat(patients).contains(missing);
+			assertThat(patients).doesNotContain(notMissing);
 		}
 	}
 
