@@ -572,7 +572,7 @@ public class XmlParserDstu3Test {
 		assertThat(encoded).contains(Arrays.asList("<contained>", "<id value=\"1\"/>", "</contained>"));
 		assertThat(encoded).contains("<reference value=\"#1\"/>");
 		assertThat(encoded).contains(Arrays.asList("<entry>", "</entry>"));
-		assertThat(encoded).doesNotContain(Arrays.asList("<entry>", "</entry>", "<entry>"));
+		assertThat(encoded).doesNotContainPattern("<entry>.*</entry>.*<entry>");
 
 		// Re-parse the bundle
 		patient = (Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
@@ -586,8 +586,8 @@ public class XmlParserDstu3Test {
 		// And re-encode a second time
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>"));
-		assertThat(encoded).doesNotContain(Arrays.asList("<contained>", "<Org", "<contained>"));
+		assertThat(encoded).contains(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>"));
+		assertThat(encoded).doesNotContainPattern("<contained>.*<Org.*<contained>");
 		assertThat(encoded).contains("<reference value=\"#1\"/>");
 
 		// And re-encode once more, with the references cleared
@@ -595,8 +595,8 @@ public class XmlParserDstu3Test {
 		patient.getManagingOrganization().setReference(null);
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>"));
-		assertThat(encoded).doesNotContain(Arrays.asList("<contained>", "<Org", "<contained>"));
+		assertThat(encoded).contains(Arrays.asList("<contained>", "<Organization ", "<id value=\"1\"/>", "</Organization", "</contained>", "<reference value=\"#1\"/>"));
+		assertThat(encoded).doesNotContainPattern("<contained>.*<Org.*<contained>");
 		assertThat(encoded).contains("<reference value=\"#1\"/>");
 
 		// And re-encode once more, with the references cleared and a manually set local ID
@@ -605,8 +605,8 @@ public class XmlParserDstu3Test {
 		patient.getManagingOrganization().getResource().setId(("#333"));
 		encoded = xmlParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSequence(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>", "</Organization", "</contained>", "<reference value=\"#333\"/>"));
-		assertThat(encoded).doesNotContain(Arrays.asList("<contained>", "<Org", "<contained>"));
+		assertThat(encoded).contains(Arrays.asList("<contained>", "<Organization ", "<id value=\"333\"/>", "</Organization", "</contained>", "<reference value=\"#333\"/>"));
+		assertThat(encoded).doesNotContainPattern("<contained>.*<Org.*<contained>");
 
 	}
 
@@ -629,7 +629,7 @@ public class XmlParserDstu3Test {
 		String output = parser.encodeResourceToString(dr);
 		ourLog.info(output);
 
-		assertThat(output).containsSequence(
+		assertThat(output).contains(
 			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">",
 			"<meta>",
 			"<profile value=\"http://custom_DiagnosticReport\"/>",
@@ -680,7 +680,7 @@ public class XmlParserDstu3Test {
 		String output = parser.encodeResourceToString(dr);
 		ourLog.info(output);
 
-		assertThat(output).containsSequence(
+		assertThat(output).contains(
 			"<DiagnosticReport xmlns=\"http://hl7.org/fhir\">",
 			"<contained>",
 			"<Observation xmlns=\"http://hl7.org/fhir\">",
@@ -849,7 +849,7 @@ public class XmlParserDstu3Test {
 		String out = xmlParser.encodeResourceToString(patient);
 		ourLog.info(out);
 
-		assertThat(out).containsSequence("<identifier>",
+		assertThat(out).contains("<identifier>",
 			"<type>",
 			"<coding>",
 			"<system value=\"http://hl7.org/fhir/v2/0203\"/>",
@@ -897,7 +897,7 @@ public class XmlParserDstu3Test {
 		String enc = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
 
-		assertThat(enc).containsSequence("<Patient xmlns=\"http://hl7.org/fhir\">",
+		assertThat(enc).contains("<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<meta>",
 			"<profile value=\"http://foo/Profile1\"/>",
 			"<profile value=\"http://foo/Profile2\"/>",
@@ -955,7 +955,7 @@ public class XmlParserDstu3Test {
 		String enc = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
 
-		assertThat(enc).containsSequence("<Patient xmlns=\"http://hl7.org/fhir\">",
+		assertThat(enc).contains("<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<meta>",
 			"<tag>",
 			"<system value=\"scheme1\"/>",
@@ -1084,7 +1084,7 @@ public class XmlParserDstu3Test {
 		String enc = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(enc);
 
-		assertThat(enc).containsSequence("<Patient xmlns=\"http://hl7.org/fhir\">",
+		assertThat(enc).contains("<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<meta>",
 			"<security>",
 			"<system value=\"SYSTEM1\"/>",
@@ -1213,8 +1213,8 @@ public class XmlParserDstu3Test {
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(encoded);
 
-		assertThat(encoded).containsSequence("<DiagnosticReport", "<contained", "<Observation", "<text value=\"Sharp1\"", "</DiagnosticReport");
-		assertThat(encoded).doesNotContain("<DiagnosticReport", "<contained", "<Observation", "<contained", "<Observation", "</DiagnosticReport");
+		assertThat(encoded).contains("<DiagnosticReport", "<contained", "<Observation", "<text value=\"Sharp1\"", "</DiagnosticReport");
+		assertThat(encoded).doesNotContainPattern("<DiagnosticReport.*<contained.*<Observation.*<contained.*<Observation.*</DiagnosticReport");
 	}
 
 	@Test
@@ -1282,7 +1282,7 @@ public class XmlParserDstu3Test {
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
 
-		assertThat(encoded).containsSequence(
+		assertThat(encoded).contains(
 			"<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<contained>",
 			"<Condition xmlns=\"http://hl7.org/fhir\">",
@@ -1327,7 +1327,7 @@ public class XmlParserDstu3Test {
 
 		// @formatter:on
 		assertThat(encoded).
-			containsSequence("<MedicationRequest xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
+			contains("<MedicationRequest xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
 				"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#123\"/>",
 				"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationRequest>");
 
@@ -1359,7 +1359,7 @@ public class XmlParserDstu3Test {
 		String encoded = p.encodeResourceToString(medicationPrescript);
 		ourLog.info(encoded);
 
-		assertThat(encoded).containsSequence
+		assertThat(encoded).contains
 			("<MedicationRequest xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"1\"/>", "<code>", "<coding>",
 				"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#1\"/>",
 				"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationRequest>");
@@ -1392,7 +1392,7 @@ public class XmlParserDstu3Test {
 		String encoded = p.encodeResourceToString(medicationPrescript);
 		ourLog.info(encoded);
 
-		assertThat(encoded).containsSequence
+		assertThat(encoded).contains
 			("<MedicationRequest xmlns=\"http://hl7.org/fhir\">", "<contained>", "<Medication xmlns=\"http://hl7.org/fhir\">", "<id value=\"123\"/>", "<code>", "<coding>",
 				"<system value=\"urn:sys\"/>", "<code value=\"code1\"/>", "</coding>", "</code>", "</Medication>", "</contained>", "<medicationReference>", "<reference value=\"#123\"/>",
 				"<display value=\"MedRef\"/>", "</medicationReference>", "</MedicationRequest>");
@@ -1418,8 +1418,8 @@ public class XmlParserDstu3Test {
 		String encoded = parser.encodeResourceToString(patient);
 		ourLog.info(encoded);
 
-		assertThat(encoded).containsSequence("<Patient", "<text>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">BARFOO</div>", "<contained>", "<Organization", "</Organization");
-		assertThat(encoded).containsSequence("<Patient", "<text>", "<contained>", "<Organization", "<text", "</Organization");
+		assertThat(encoded).contains("<Patient", "<text>", "<div xmlns=\"http://www.w3.org/1999/xhtml\">BARFOO</div>", "<contained>", "<Organization", "</Organization");
+		assertThat(encoded).contains("<Patient", "<text>", "<contained>", "<Organization", "<text", "</Organization");
 
 		assertThat(encoded).contains("FOOBAR");
 		assertThat(encoded).contains("BARFOO");
@@ -1480,7 +1480,7 @@ public class XmlParserDstu3Test {
 		ourLog.info(encode);
 
 		assertThat(encode).contains("<value value=\"APPID\"/>");
-		assertThat(encode).containsSequence("<dest", "<source");
+		assertThat(encode).contains("<dest", "<source");
 	}
 
 	/**
@@ -1495,7 +1495,7 @@ public class XmlParserDstu3Test {
 		String output = ourCtx.newXmlParser().setPrettyPrint(false).encodeResourceToString(p);
 		ourLog.info(output);
 
-		assertThat(output).containsSequence(
+		assertThat(output).contains(
 			"<text><div",
 			"<p>A P TAG</p><p>",
 			"<pre>line1\nline2\nline3  <b>BOLD</b></pre>");
@@ -1511,7 +1511,7 @@ public class XmlParserDstu3Test {
 		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(output);
 
-		assertThat(output).containsSequence(
+		assertThat(output).contains(
 			"   <text>",
 			"      <div",
 			"         <pre>line1\nline2\nline3  <b>BOLD</b></pre>");
@@ -1655,7 +1655,7 @@ public class XmlParserDstu3Test {
 		String output = parser.setPrettyPrint(true).encodeResourceToString(obs);
 		ourLog.info(output);
 
-		assertThat(output).containsSequence(
+		assertThat(output).contains(
 			"<id value=\"1\"/>",
 			"<meta>",
 			"<profile value=\"http://profile\"/>",
@@ -1689,7 +1689,7 @@ public class XmlParserDstu3Test {
 		String output = parser.setPrettyPrint(true).encodeResourceToString(obs);
 		ourLog.info(output);
 
-		assertThat(output).containsSequence(
+		assertThat(output).contains(
 			"<id value=\"1\"/>",
 			"<meta>",
 			"<profile value=\"http://profile\"/>",
@@ -1726,7 +1726,7 @@ public class XmlParserDstu3Test {
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
 
-		assertThat(encoded).containsSequence(
+		assertThat(encoded).contains(
 			"<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<contained>",
 			"<Condition xmlns=\"http://hl7.org/fhir\">",
@@ -1813,7 +1813,7 @@ public class XmlParserDstu3Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded).contains("<Patient");
-		assertThat(encoded).containsSequence("<tag>", "<system value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
+		assertThat(encoded).contains("<tag>", "<system value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
 			"<code value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>");
 		assertThat(encoded).doesNotContain("text");
 		assertThat(encoded).doesNotContain("THE DIV");
@@ -1849,9 +1849,9 @@ public class XmlParserDstu3Test {
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(encoded);
 		assertThat(encoded).doesNotContain("<contained>");
-		assertThat(encoded).containsSequence("<Organization", "<id value=\"65546\"/>", "</Organization>");
+		assertThat(encoded).contains("<Organization", "<id value=\"65546\"/>", "</Organization>");
 		assertThat(encoded).contains("<reference value=\"Organization/65546\"/>");
-		assertThat(encoded).containsSequence("<Patient", "<id value=\"1333\"/>", "</Patient>");
+		assertThat(encoded).contains("<Patient", "<id value=\"1333\"/>", "</Patient>");
 
 		encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
@@ -1960,7 +1960,7 @@ public class XmlParserDstu3Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded).contains("<Patient");
-		assertThat(encoded).containsSequence("<tag>", "<system value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
+		assertThat(encoded).contains("<tag>", "<system value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
 			"<code value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>");
 		assertThat(encoded).doesNotContain("THE DIV");
 		assertThat(encoded).contains("family");
@@ -1981,8 +1981,8 @@ public class XmlParserDstu3Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded).contains("<Patient");
-		assertThat(encoded).containsSequence("<tag>", "<system value=\"foo\"/>", "<code value=\"bar\"/>", "</tag>");
-		assertThat(encoded).containsSequence("<tag>", "<system value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
+		assertThat(encoded).contains("<tag>", "<system value=\"foo\"/>", "<code value=\"bar\"/>", "</tag>");
+		assertThat(encoded).contains("<tag>", "<system value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"/>",
 			"<code value=\"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\"/>", "</tag>");
 		assertThat(encoded).doesNotContain("THE DIV");
 		assertThat(encoded).contains("family");
@@ -2010,7 +2010,7 @@ public class XmlParserDstu3Test {
 		ourLog.info(encode);
 
 		assertThat(encode).contains("<value value=\"APPID\"/>");
-		assertThat(encode).containsSequence("<dest", "<source");
+		assertThat(encode).contains("<dest", "<source");
 	}
 
 	@Test
@@ -2063,7 +2063,7 @@ public class XmlParserDstu3Test {
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(appointment);
 		ourLog.info(encoded);
 
-		assertThat(encoded).containsSequence(
+		assertThat(encoded).contains(
 			"<Appointment xmlns=\"http://hl7.org/fhir\">",
 			"<id value=\"1234\"/>",
 			"<contained>",
@@ -2320,7 +2320,7 @@ public class XmlParserDstu3Test {
 		p.setId("123");
 		p.addName().setFamily("ABC");
 
-		assertThat(ourCtx.newXmlParser().encodeResourceToString(p)).containsSequence("123", "ABC");
+		assertThat(ourCtx.newXmlParser().encodeResourceToString(p)).contains("123", "ABC");
 		assertThat(ourCtx.newXmlParser().setOmitResourceId(true).encodeResourceToString(p)).contains("ABC");
 		assertThat(ourCtx.newXmlParser().setOmitResourceId(true).encodeResourceToString(p)).doesNotContain("123");
 	}
@@ -2492,7 +2492,7 @@ public class XmlParserDstu3Test {
 		encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(res);
 		ourLog.info(encoded);
 
-		assertThat(encoded).containsSequence(
+		assertThat(encoded).contains(
 			"<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<id value=\"pat1\"/>",
 			"<text>",
@@ -2545,7 +2545,7 @@ public class XmlParserDstu3Test {
 		String output = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(pat);
 		ourLog.info(output);
 
-		assertThat(output).containsSequence(
+		assertThat(output).contains(
 			"<Patient xmlns=\"http://hl7.org/fhir\">",
 			"  <!-- comment 1 -->",
 			"  <id value=\"someid\"/>",
@@ -2836,7 +2836,7 @@ public class XmlParserDstu3Test {
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(encoded);
 
-		assertThat(encoded).containsSequence(
+		assertThat(encoded).contains(
 			"<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<birthDate value=\"2005-03-04\">",
 			"<extension url=\"http://my.fancy.extension.url\">",
@@ -3034,7 +3034,7 @@ public class XmlParserDstu3Test {
 		String enc = parser.encodeResourceToString(o);
 		ourLog.info(enc);
 
-		assertThat(enc).containsSequence(
+		assertThat(enc).contains(
 			"<Observation xmlns=\"http://hl7.org/fhir\">",
 			"<contained>",
 			"<Patient xmlns=\"http://hl7.org/fhir\">",
@@ -3508,7 +3508,7 @@ public class XmlParserDstu3Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded).containsSubsequence(Arrays.asList("<contained>", "<Observation", "</Observation>", "</contained>"));
-		assertThat(encoded).doesNotContain(Arrays.asList("<contained>", "<Observation", "</Observation>", "<Observation", "</contained>"));
+		assertThat(encoded).doesNotContainPattern("<contained>.*<Observation.*</Observation>.*<Observation.*</contained>");
 	}
 	/**
 	 * See #551
