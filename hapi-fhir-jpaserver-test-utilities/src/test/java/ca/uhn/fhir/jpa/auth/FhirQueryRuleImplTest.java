@@ -306,7 +306,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 			// then
 			assertNull(verdict);
-			LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasEventWithLevelAndMessageContains(Level.WARN, "no matcher provided");
+			LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasEventWithLevelAndMessageContains(Level.WARN, "No matcher provided");
 		}
 
 	}
