@@ -62,7 +62,7 @@ public class ContextScanningDstu3Test {
 		elementDefs = scannedElementNames(ctx);
 		ourLog.info("Have {} resource definitions: {}", ctx.getAllResourceDefinitions().size(), resDefs);
 		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);		
-		assertThat(resDefs).doesNotContain("Observation");
+		assertThat(resDefs).contains("Observation");
 	}
 
 	public static void main(String[] args) {
@@ -122,7 +122,7 @@ public class ContextScanningDstu3Test {
 		elementDefs = scannedElementNames(ctx);
 		ourLog.info("Have {} resource definitions: {}", ctx.getAllResourceDefinitions().size(), resDefs);
 		ourLog.info("Have {} element definitions: {}", ctx.getElementDefinitions().size(), elementDefs);		
-		assertThat(resDefs).doesNotContain("Observation");
+		assertThat(resDefs).contains("Observation");
 		compositeDef = (BaseRuntimeElementCompositeDefinition<?>) ctx.getElementDefinition("identifier");
 		assertTrue(compositeDef.isSealed());
 	}
