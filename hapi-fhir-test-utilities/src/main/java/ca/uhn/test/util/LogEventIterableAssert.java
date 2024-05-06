@@ -29,8 +29,10 @@ public class LogEventIterableAssert extends AbstractIterableAssert<LogEventItera
 
 	public LogEventIterableAssert hasEventWithLevelAndMessageContains(@Nonnull Level theLevel, @Nonnull String thePartialMessage) {
 		isNotNull();
-		matches(logEvents -> logEvents.stream().anyMatch(event-> event.getMessage().contains(thePartialMessage) && event.getLevel().isGreaterOrEqual(theLevel)),
-			"Log Events should have at least one message with `FAILURE` in it.");
+		matches(logEvents -> logEvents.stream()
+				.anyMatch(event-> event.getFormattedMessage().contains(thePartialMessage) &&
+					event.getLevel().isGreaterOrEqual(theLevel)),
+			"Log Events should have at least one message with `"+theLevel.levelStr+"` in it.");
 		return this;
 	}
 	public LogEventIterableAssert hasAtLeastOneFailureMessage() {
@@ -47,7 +49,7 @@ public class LogEventIterableAssert extends AbstractIterableAssert<LogEventItera
 		isNotNull();
 
 		matches(logEvents -> logEvents.stream()
-				.map(ILoggingEvent::getMessage)
+				.map(ILoggingEvent::getFormattedMessage)
 				.anyMatch(message -> message.contains(thePartial)),
 			"Log Events should have at least one message with "+ thePartial + " in it.");
 		return this;
