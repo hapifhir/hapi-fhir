@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.entity.BulkImportJobEntity;
 import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.taskdef.ArbitrarySqlTask;
+import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateHashesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.CalculateOrdinalDatesTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
@@ -146,8 +147,16 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 
 			binaryStorageBlobTable
 					.renameColumn("20240404.1", "BLOB_ID", "CONTENT_ID")
+					.getLastAddedTask()
+					.ifPresent(BaseTask::doNothing);
+			binaryStorageBlobTable
 					.renameColumn("20240404.2", "BLOB_SIZE", "CONTENT_SIZE")
-					.renameColumn("20240404.3", "BLOB_HASH", "CONTENT_HASH");
+					.getLastAddedTask()
+					.ifPresent(BaseTask::doNothing);
+			binaryStorageBlobTable
+					.renameColumn("20240404.3", "BLOB_HASH", "CONTENT_HASH")
+					.getLastAddedTask()
+					.ifPresent(BaseTask::doNothing);
 
 			binaryStorageBlobTable
 					.modifyColumn("20240404.4", "BLOB_DATA")
@@ -159,9 +168,23 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.nullable()
 					.type(ColumnTypeEnum.BINARY);
 
-			binaryStorageBlobTable.migrateBlobToBinary("20240404.6", "BLOB_DATA", "STORAGE_CONTENT_BIN");
+			binaryStorageBlobTable
+					.migrateBlobToBinary("20240404.6", "BLOB_DATA", "STORAGE_CONTENT_BIN")
+					.doNothing();
 
-			binaryStorageBlobTable.renameTable("20240404.7", "HFJ_BINARY_STORAGE");
+			binaryStorageBlobTable
+					.renameTable("20240404.7", "HFJ_BINARY_STORAGE")
+					.doNothing();
+
+			Builder.BuilderWithTableName binaryStorageTableFix = version.onTable("HFJ_BINARY_STORAGE");
+
+			binaryStorageTableFix.renameColumn("20240404.10", "CONTENT_ID", "BLOB_ID", true, true);
+			binaryStorageTableFix.renameColumn("20240404.20", "CONTENT_SIZE", "BLOB_SIZE", true, true);
+			binaryStorageTableFix.renameColumn("20240404.30", "CONTENT_HASH", "BLOB_HASH", true, true);
+
+			binaryStorageTableFix
+					.renameTable("20240404.40", "HFJ_BINARY_STORAGE_BLOB")
+					.failureAllowed();
 		}
 
 		{
@@ -172,7 +195,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.nullable()
 					.type(ColumnTypeEnum.BINARY);
 
-			termConceptPropertyTable.migrateBlobToBinary("20240409.2", "PROP_VAL_LOB", "PROP_VAL_BIN");
+			termConceptPropertyTable
+					.migrateBlobToBinary("20240409.2", "PROP_VAL_LOB", "PROP_VAL_BIN")
+					.doNothing();
 		}
 
 		{
@@ -182,8 +207,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.nullable()
 					.type(ColumnTypeEnum.TEXT);
 
-			termValueSetConceptTable.migrateClobToText(
-					"20240409.4", "SOURCE_DIRECT_PARENT_PIDS", "SOURCE_DIRECT_PARENT_PIDS_VC");
+			termValueSetConceptTable
+					.migrateClobToText("20240409.4", "SOURCE_DIRECT_PARENT_PIDS", "SOURCE_DIRECT_PARENT_PIDS_VC")
+					.doNothing();
 		}
 
 		{
@@ -193,7 +219,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 					.nullable()
 					.type(ColumnTypeEnum.TEXT);
 
-			termConceptTable.migrateClobToText("20240410.2", "PARENT_PIDS", "PARENT_PIDS_VC");
+			termConceptTable
+					.migrateClobToText("20240410.2", "PARENT_PIDS", "PARENT_PIDS_VC")
+					.doNothing();
 		}
 	}
 
