@@ -20,6 +20,8 @@ import ca.uhn.fhir.jpa.dao.tx.NonTransactionalHapiTransactionService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -70,8 +72,11 @@ public class ReductionStepExecutorServiceImplTest {
 		mySvc = new ReductionStepExecutorServiceImpl(myJobPersistence, myTransactionService, myJobDefinitionRegistry);
 	}
 
+	// QUEUED, IN_PROGRESS are supported because of backwards compatibility
+	// these statuses will stop being supported after 7.6
 	@SuppressWarnings({"unchecked", "rawtypes"})
-	@Test
+	@ParameterizedTest
+	@EnumSource(value = WorkChunkStatusEnum.class, names = { "REDUCTION_READY", "QUEUED", "IN_PROGRESS" })
 	public void doExecution_reductionWithChunkFailed_marksAllFutureChunksAsFailedButPreviousAsSuccess() {
 		// setup
 		List<String> chunkIds = Arrays.asList("chunk1", "chunk2");
