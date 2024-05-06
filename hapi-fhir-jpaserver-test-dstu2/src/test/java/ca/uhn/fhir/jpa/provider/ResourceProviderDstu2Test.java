@@ -2329,7 +2329,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		List<IIdType> list = toIdListUnqualifiedVersionless(found);
 		ourLog.info(methodName + " found: " + list.toString() + " - Wanted " + orgMissing + " but not " + orgNotMissing);
 		assertThat(list).doesNotContain(deletedIdMissingFalse);
-		assertThat(list).doesNotContain(orgMissing);
+		assertThat(list).doesNotContain(orgNotMissing);
 		assertThat(list).as("Wanted " + orgMissing + " but found: " + list).contains(orgMissing);
 		}
 
