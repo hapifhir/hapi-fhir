@@ -255,7 +255,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSequence(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 5",
 			"\"name\": \"target\"",
@@ -296,7 +296,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSequence(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 5",
 			"\"name\": \"target\"",
@@ -343,7 +343,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSequence(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 5",
 			"\"name\": \"target\"",
@@ -383,7 +383,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSequence(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 5",
 			"\"name\": \"target\"",
@@ -453,7 +453,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSequence(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 2",
 			"\"name\": \"target\"",
@@ -523,7 +523,7 @@ public class TerminologyUploaderProviderR4Test extends BaseResourceProviderR4Tes
 
 		String encoded = myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSequence(
+		assertThat(encoded).containsSubsequence(
 			"\"name\": \"conceptCount\"",
 			"\"valueInteger\": 2",
 			"\"name\": \"target\"",

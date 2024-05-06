@@ -408,7 +408,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		IBundleProvider outcome = myPatientDao.search(sp);
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(unformattedSql).containsSequence(
+		assertThat(unformattedSql).containsSubsequence(
 			"IDX_STRING = 'Patient?identifier=urn%7C111'",
 			"HASH_SYS_AND_VALUE = '-3122824860083758210'"
 		);
@@ -545,7 +545,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(srId);
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(unformattedSql).containsSequence(
+		assertThat(unformattedSql).containsSubsequence(
 			"IDX_STRING = 'ServiceRequest?identifier=sys%7C111&patient=Patient%2F" + ptId.getIdPart() + "&performer=Practitioner%2F" + practId.getIdPart() + "'",
 			"HASH_SYS_AND_VALUE = '6795110643554413877'"
 		);
@@ -567,7 +567,7 @@ public class FhirResourceDaoR4ComboUniqueParamIT extends BaseComboParamsR4Test {
 		myCaptureQueriesListener.logFirstSelectQueryForCurrentThread();
 		assertThat(toUnqualifiedVersionlessIdValues(outcome)).containsExactlyInAnyOrder(srId);
 		unformattedSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		assertThat(unformattedSql).containsSequence(
+		assertThat(unformattedSql).containsSubsequence(
 			"SRC_PATH = 'ServiceRequest.subject.where(resolve() is Patient)'",
 			"SRC_PATH = 'ServiceRequest.performer'"
 		);

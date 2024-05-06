@@ -435,7 +435,7 @@ public class JsonParserR4Test extends BaseTest {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input);
 
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded).containsSequence(
+		assertThat(encoded).containsSubsequence(
 			"\"fullUrl\": \"urn:uuid:0.0.0.0\"",
 			"\"id\": \"1.1.1.1\""
 		);
@@ -1212,7 +1212,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		assertThat(output).doesNotContain("\"contained\"");
 		assertThat(output).doesNotContain("\"id\"");
-		assertThat(output).containsSequence(
+		assertThat(output).containsSubsequence(
 			 "\"fullUrl\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\",",
 			 "\"resourceType\": \"Patient\"",
 			 "\"fullUrl\": \"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"",
@@ -1231,7 +1231,7 @@ public class JsonParserR4Test extends BaseTest {
 
 		assertThat(output).doesNotContain("\"contained\"");
 		assertThat(output).doesNotContain("\"id\"");
-		assertThat(output).containsSequence(
+		assertThat(output).containsSubsequence(
 			 "\"resourceType\": \"Parameters\"",
 			 "\"name\": \"resource\"",
 			 "\"fullUrl\": \"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\",",

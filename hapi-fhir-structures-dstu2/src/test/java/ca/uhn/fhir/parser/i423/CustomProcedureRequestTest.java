@@ -26,7 +26,7 @@ public class CustomProcedureRequestTest {
 		ourLog.info(encoded);
 		
 		//@formatter:off
-		assertThat(encoded).containsSequence(
+		assertThat(encoded).containsSubsequence(
 			"<ProcedureRequest xmlns=\"http://hl7.org/fhir\">",
 				"<meta>",
 					"<profile value=\"http://test/\"/>",

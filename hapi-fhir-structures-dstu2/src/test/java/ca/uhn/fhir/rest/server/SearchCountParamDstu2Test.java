@@ -62,7 +62,7 @@ public class SearchCountParamDstu2Test {
 			assertThat(ourLastMethod).isEqualTo("search");
 			assertThat(ourLastParam).isEqualTo(Integer.valueOf(2));
 			
-			assertThat(responseContent).containsSequence(
+			assertThat(responseContent).containsSubsequence(
 				"<link>", 
 				"<relation value=\"self\"/>", 
 				"<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2\"/>",
@@ -93,7 +93,7 @@ public class SearchCountParamDstu2Test {
 			assertNull(ourLastParam);
 			
 			//@formatter:off
-			assertThat(responseContent).containsSequence(
+			assertThat(responseContent).containsSubsequence(
 				"<link>", 
 				"<relation value=\"self\"/>", 
 				"<url value=\"" + ourServer.getBaseUrl() + "/Patient?_count=2&amp;_query=searchWithNoCountParam\"/>",

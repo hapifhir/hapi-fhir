@@ -106,10 +106,9 @@ public class RestfulServerTest {
 		myRestfulServer.registerProvider(new MyListResourceProvider());
 		assertThatThrownBy(
 			 () -> myRestfulServer.determineResourceMethod(requestDetails, "1234"))
-			 .as("Expected request to fail, but it succeeded.")
 			 .isInstanceOf(ResourceNotFoundException.class)
 			 .hasMessageContaining("List")
-			 .hasMessageContaining("ListResource");
+			 .hasMessageNotContaining("ListResource");
 	}
 
 	//--------- Scaffolding ---------//

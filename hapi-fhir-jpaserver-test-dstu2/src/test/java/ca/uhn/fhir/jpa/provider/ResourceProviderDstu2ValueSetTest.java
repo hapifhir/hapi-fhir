@@ -208,7 +208,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		expanded = myValueSetDao.expand(myExtensionalVsId, new ValueSetExpansionOptions().setFilter("systolic"), mySrd);
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
@@ -225,7 +225,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>");
 	}
@@ -243,7 +243,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>");
 

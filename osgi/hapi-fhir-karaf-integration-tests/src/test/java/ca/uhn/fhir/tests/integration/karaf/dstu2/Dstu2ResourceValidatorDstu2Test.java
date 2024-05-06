@@ -206,7 +206,7 @@ public class Dstu2ResourceValidatorDstu2Test {
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString).containsSequence(
+		assertThat(messageString).containsSubsequence(
 			"meta",
 			"String Extension",
 			"Organization/2.25.79433498044103547197447759549862032393",
@@ -259,7 +259,7 @@ public class Dstu2ResourceValidatorDstu2Test {
 		ourLog.info(messageString);
 
 		//@formatter:off
-		assertThat(messageString).containsSequence(
+		assertThat(messageString).containsSubsequence(
 			"meta",
 			"Organization/2.25.79433498044103547197447759549862032393",
 			"furry-grey",

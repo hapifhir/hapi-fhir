@@ -117,7 +117,7 @@ public class CustomTypeDstu3Test {
 		ourLog.info(xml);
 
 		//@formatter:on
-		assertThat(xml).containsSequence(
+		assertThat(xml).containsSubsequence(
 				"<CustomResource xmlns=\"http://hl7.org/fhir\">",
 				"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
 				"<baseValueCustomDate><date value=\"2016-05-13\"/></baseValueCustomDate>",
@@ -144,7 +144,7 @@ public class CustomTypeDstu3Test {
 		String xml = parser.encodeResourceToString(resource);
 
 		//@formatter:on
-		assertThat(xml).containsSequence(
+		assertThat(xml).containsSubsequence(
 				"<CustomResource xmlns=\"http://hl7.org/fhir\">",
 				"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
 				"<baseValueString value=\"2016-05-13\"/>",

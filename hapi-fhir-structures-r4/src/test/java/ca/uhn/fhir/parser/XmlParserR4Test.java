@@ -1,19 +1,10 @@
 package ca.uhn.fhir.parser;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds;
-import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.stringContainsInOrder;
-import static org.hamcrest.core.IsNot.not;
-
-import java.io.IOException;
-import java.net.URL;
-
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.ClasspathUtil;
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.AuditEvent;
 import org.hl7.fhir.r4.model.Bundle;
@@ -35,11 +26,14 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Resources;
+import java.io.IOException;
+import java.net.URL;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.test.BaseTest;
+import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds;
+import static ca.uhn.fhir.parser.JsonParserR4Test.createBundleWithCrossReferenceFullUrlsAndNoIds_NestedInParameters;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class XmlParserR4Test extends BaseTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(XmlParserR4Test.class);
@@ -164,7 +158,7 @@ public class XmlParserR4Test extends BaseTest {
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input);
 
 		ourLog.info("Encoded: {}", encoded);
-		assertThat(encoded).containsSequence(
+		assertThat(encoded).contains(
 			"<fullUrl value=\"urn:uuid:0.0.0.0\"/>",
 			"<id value=\"1.1.1.1\"/>"
 		);
@@ -330,7 +324,7 @@ public class XmlParserR4Test extends BaseTest {
 
 		assertThat(output).doesNotContain("<contained");
 		assertThat(output).doesNotContain("<id");
-		assertThat(output).containsSequence(
+		assertThat(output).containsSubsequence(
 			 "<fullUrl value=\"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\"/>",
 			 "<Patient xmlns=\"http://hl7.org/fhir\">",
 			 "<fullUrl value=\"urn:uuid:71d7ab79-a001-41dc-9a8e-b3e478ce1cbb\"/>",
@@ -349,7 +343,7 @@ public class XmlParserR4Test extends BaseTest {
 
 		assertThat(output).doesNotContain("\"contained\"");
 		assertThat(output).doesNotContain("\"id\"");
-		assertThat(output).containsSequence(
+		assertThat(output).containsSubsequence(
 			 "<Parameters xmlns=\"http://hl7.org/fhir\">",
 			 "<fullUrl value=\"urn:uuid:9e9187c1-db6d-4b6f-adc6-976153c65ed7\"/>",
 			 "<Patient xmlns=\"http://hl7.org/fhir\">",

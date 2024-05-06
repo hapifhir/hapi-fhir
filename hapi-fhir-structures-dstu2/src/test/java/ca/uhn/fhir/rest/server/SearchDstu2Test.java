@@ -149,7 +149,7 @@ public class SearchDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertThat(responseContent).containsSequence("<lastUpdated value=\"2011-02-03T11:22:33Z\"/>");
+		assertThat(responseContent).containsSubsequence("<lastUpdated value=\"2011-02-03T11:22:33Z\"/>");
 	}
 
 	@Test

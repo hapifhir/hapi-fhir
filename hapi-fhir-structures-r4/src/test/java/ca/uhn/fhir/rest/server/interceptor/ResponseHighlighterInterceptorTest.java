@@ -506,7 +506,7 @@ public class ResponseHighlighterInterceptorTest {
 		ourLog.info("Resp: {}", responseContent);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
 
-		assertThat(responseContent).containsSequence("<span class='hlTagName'>OperationOutcome</span>", "Unknown resource type 'Foobar' - Server knows how to handle");
+		assertThat(responseContent).containsSubsequence("<span class='hlTagName'>OperationOutcome</span>", "Unknown resource type 'Foobar' - Server knows how to handle");
 
 	}
 
@@ -537,7 +537,7 @@ public class ResponseHighlighterInterceptorTest {
 		ourLog.info("Resp: {}", responseContent);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
-		assertThat(responseContent).containsSequence("<span class='hlTagName'>OperationOutcome</span>", "This is the base URL of FHIR server. Unable to handle this request, as it does not contain a resource type or operation name.");
+		assertThat(responseContent).containsSubsequence("<span class='hlTagName'>OperationOutcome</span>", "This is the base URL of FHIR server. Unable to handle this request, as it does not contain a resource type or operation name.");
 
 	}
 
@@ -552,7 +552,7 @@ public class ResponseHighlighterInterceptorTest {
 		ourLog.info("Resp: {}", responseContent);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-		assertThat(responseContent).containsSequence("&quot;foo&quot;");
+		assertThat(responseContent).containsSubsequence("&quot;foo&quot;");
 
 	}
 
@@ -567,7 +567,7 @@ public class ResponseHighlighterInterceptorTest {
 		ourLog.info("Resp: {}", responseContent);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-		assertThat(responseContent).containsSequence("{\"foo\":\"bar\"}");
+		assertThat(responseContent).containsSubsequence("{\"foo\":\"bar\"}");
 
 	}
 
@@ -620,7 +620,7 @@ public class ResponseHighlighterInterceptorTest {
 
 			ourLog.info("Resp: {}", responseContent);
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
-			assertThat(responseContent).containsSequence("HELP IM A BUG");
+			assertThat(responseContent).containsSubsequence("HELP IM A BUG");
 
 		} finally {
 
@@ -738,7 +738,7 @@ public class ResponseHighlighterInterceptorTest {
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
 		assertThat(output).contains("<span class='hlTagName'>Patient</span>");
-		assertThat(output).containsSequence("<body>", "<pre>", "<div", "</pre>");
+		assertThat(output).containsSubsequence("<body>", "<pre>", "<div", "</pre>");
 		assertThat(output).contains("<a href=\"?_format=json\">");
 	}
 
@@ -769,7 +769,7 @@ public class ResponseHighlighterInterceptorTest {
 		String output = sw.getBuffer().toString();
 		ourLog.info(output);
 		assertThat(output).contains("<span class='hlTagName'>Patient</span>");
-		assertThat(output).containsSequence("<body>", "<pre>", "<div", "</pre>");
+		assertThat(output).containsSubsequence("<body>", "<pre>", "<div", "</pre>");
 	}
 
 	/**

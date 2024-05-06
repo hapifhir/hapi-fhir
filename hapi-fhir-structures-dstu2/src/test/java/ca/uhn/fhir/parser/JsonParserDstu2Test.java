@@ -443,7 +443,7 @@ public class JsonParserDstu2Test {
 		ourLog.info(enc);
 
 		//@formatter:off
-		assertThat(enc).containsSequence("\"meta\": {",
+		assertThat(enc).containsSubsequence("\"meta\": {",
 			"\"profile\": [",
 			"\"http://foo/Profile1\",",
 			"\"http://foo/Profile2\"",
@@ -554,7 +554,7 @@ public class JsonParserDstu2Test {
 		String actual = enc.trim();
 		ourLog.info("Actual:\n{}", actual);
 
-		assertThat(actual).containsSequence("{",
+		assertThat(actual).containsSubsequence("{",
 			"  \"resourceType\": \"Patient\",", 
 			"  \"meta\": {", 
 			"    \"security\": [ {", 
@@ -688,7 +688,7 @@ public class JsonParserDstu2Test {
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(qr);
 		ourLog.info(encoded);
 
-		assertThat(encoded).containsSequence("123");
+		assertThat(encoded).containsSubsequence("123");
 		assertThat(encoded, not(stringContainsInOrder("\"\"")));
 		assertThat(encoded, not(stringContainsInOrder("null")));
 	}
@@ -738,7 +738,7 @@ public class JsonParserDstu2Test {
 		ourLog.info(output);
 
 		//@formatter:off
-		assertThat(output).containsSequence(
+		assertThat(output).containsSubsequence(
 			"\"id\": \"1\"",
 			"\"meta\"",
 			"\"extension\"",
@@ -778,7 +778,7 @@ public class JsonParserDstu2Test {
 		ourLog.info(output);
 
 		//@formatter:off
-		assertThat(output).containsSequence(
+		assertThat(output).containsSubsequence(
 			"\"id\": \"1\"",
 			"\"meta\"",
 			"\"extension\"",
@@ -875,7 +875,7 @@ public class JsonParserDstu2Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded).contains("Patient");
-		assertThat(encoded).containsSequence(Constants.TAG_SUBSETTED_SYSTEM_DSTU3, Constants.TAG_SUBSETTED_CODE);
+		assertThat(encoded).containsSubsequence(Constants.TAG_SUBSETTED_SYSTEM_DSTU3, Constants.TAG_SUBSETTED_CODE);
 		assertThat(encoded).doesNotContain("text");
 		assertThat(encoded).doesNotContain("THE DIV");
 		assertThat(encoded).contains("family");
@@ -907,7 +907,7 @@ public class JsonParserDstu2Test {
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(org01);
 		ourLog.info(encoded);
 
-		assertThat(encoded).containsSequence("LEVEL02", "LEVEL03", "LEVEL04", "LEVEL01");
+		assertThat(encoded).containsSubsequence("LEVEL02", "LEVEL03", "LEVEL04", "LEVEL01");
 	}
 
 	@Test
@@ -926,7 +926,7 @@ public class JsonParserDstu2Test {
 		String json = ourCtx.newJsonParser().encodeResourceToString(procedureRequest);
 
 		// @formatter:off
-		assertThat(json).containsSequence(
+		assertThat(json).containsSubsequence(
 			"\"meta\":{" +
 				"\"extension\":[" +
 				"{" +
@@ -985,7 +985,7 @@ public class JsonParserDstu2Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded).contains("Patient");
-		assertThat(encoded).containsSequence("\"tag\"", "\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE + "\",");
+		assertThat(encoded).containsSubsequence("\"tag\"", "\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE + "\",");
 		assertThat(encoded).doesNotContain("THE DIV");
 		assertThat(encoded).contains("family");
 		assertThat(encoded).doesNotContain("maritalStatus");
@@ -1007,7 +1007,7 @@ public class JsonParserDstu2Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded).contains("Patient");
-		assertThat(encoded).containsSequence("\"tag\"", "\"system\": \"foo\",", "\"code\": \"bar\"", "\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",",
+		assertThat(encoded).containsSubsequence("\"tag\"", "\"system\": \"foo\",", "\"code\": \"bar\"", "\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",",
 			"\"code\": \"" + Constants.TAG_SUBSETTED_CODE + "\",");
 		assertThat(encoded).doesNotContain("THE DIV");
 		assertThat(encoded).contains("family");
@@ -1643,7 +1643,7 @@ public class JsonParserDstu2Test {
 		ourLog.info(encoded);
 
 		//@formatter:off
-		assertThat(encoded).containsSequence(
+		assertThat(encoded).containsSubsequence(
 			"\"identifier\": [",
 			"{",
 			"\"fhir_comments\":",
@@ -1713,7 +1713,7 @@ public class JsonParserDstu2Test {
 		ourLog.info(enc);
 
 		//@formatter:off
-		assertThat(enc).containsSequence(
+		assertThat(enc).containsSubsequence(
 			"\"resourceType\": \"Observation\"",
 			"\"contained\": [",
 			"\"resourceType\": \"Patient\",",

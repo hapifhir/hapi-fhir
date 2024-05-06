@@ -165,17 +165,17 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformance);
 		ourLog.info(conf);
 		//@formatter:off
-		assertThat(conf).containsSequence(
+		assertThat(conf).containsSubsequence(
 			"<type value=\"Patient\"/>",
 			"<operation>", 
 			"<name value=\"andlist\"/>"
 		);
-		assertThat(conf).containsSequence(
+		assertThat(conf).containsSubsequence(
 				"<type value=\"Patient\"/>",
 				"<operation>", 
 				"<name value=\"nonrepeating\"/>"
 			);
-		assertThat(conf).containsSequence(
+		assertThat(conf).containsSubsequence(
 				"<type value=\"Patient\"/>",
 				"<operation>", 
 				"<name value=\"orlist\"/>"
@@ -189,7 +189,7 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		String def = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(andListDef);
 		ourLog.info(def);
 		//@formatter:off
-		assertThat(def).containsSequence(
+		assertThat(def).containsSubsequence(
 			"<parameter>", 
 			"<name value=\"valtok\"/>", 
 			"<use value=\"in\"/>", 

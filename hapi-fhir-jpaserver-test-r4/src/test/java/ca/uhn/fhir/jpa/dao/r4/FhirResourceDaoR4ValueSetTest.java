@@ -485,7 +485,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>");
 		//@formatter:on

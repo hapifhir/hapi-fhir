@@ -285,9 +285,9 @@ public class Dstu3JsonParserTest {
 		ourLog.info(output);
 
 		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
-		assertThat(enc).containsSequence("{\"resourceType\":\"Patient\",", "\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}",
+		assertThat(enc).containsSubsequence("{\"resourceType\":\"Patient\",", "\"extension\":[{\"url\":\"http://example.com/extensions#someext\",\"valueDateTime\":\"2011-01-02T11:13:15\"}",
 			"{\"url\":\"http://example.com#parent\",\"extension\":[{\"url\":\"http://example.com#child\",\"valueString\":\"value1\"},{\"url\":\"http://example.com#child\",\"valueString\":\"value2\"}]}"));
-		assertThat(enc).containsSequence("\"modifierExtension\":[" + "{" + "\"url\":\"http://example.com/extensions#modext\"," + "\"valueDate\":\"1995-01-02\"" + "}" + "],");
+		assertThat(enc).containsSubsequence("\"modifierExtension\":[" + "{" + "\"url\":\"http://example.com/extensions#modext\"," + "\"valueDate\":\"1995-01-02\"" + "}" + "],");
 		assertThat(enc,
 			containsString("\"_given\":[" + "{" + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext\"," + "\"valueString\":\"given\"" + "}" + "]" + "}," + "{" + "\"extension\":[" + "{"
 				+ "\"url\":\"http://examples.com#givenext_parent\"," + "\"extension\":[" + "{" + "\"url\":\"http://examples.com#givenext_child\"," + "\"valueString\":\"CHILD\"" + "}" + "]" + "}"
@@ -353,7 +353,7 @@ public class Dstu3JsonParserTest {
 		ourLog.info(enc);
 
 		//@formatter:off
-		assertThat(enc).containsSequence("\"meta\": {",
+		assertThat(enc).containsSubsequence("\"meta\": {",
 			"\"profile\": [",
 			"\"http://foo/Profile1\",",
 			"\"http://foo/Profile2\"",
@@ -572,7 +572,7 @@ public class Dstu3JsonParserTest {
 		ourLog.info(encoded);
 
 		//@formatter:off
-		assertThat(encoded).containsSequence(
+		assertThat(encoded).containsSubsequence(
 			"{",
 			"\"resourceType\": \"Patient\",",
 			"\"contained\": [",
@@ -660,7 +660,7 @@ public class Dstu3JsonParserTest {
 		String encoded = ourCtx.newJsonParser().encodeResourceToString(qr);
 		ourLog.info(encoded);
 
-		assertThat(encoded).containsSequence("123");
+		assertThat(encoded).containsSubsequence("123");
 		assertThat(encoded, not(stringContainsInOrder("\"\"")));
 		assertThat(encoded, not(stringContainsInOrder("null")));
 	}
@@ -730,7 +730,7 @@ public class Dstu3JsonParserTest {
 		ourLog.info(output);
 
 		//@formatter:off
-		assertThat(output).containsSequence(
+		assertThat(output).containsSubsequence(
 			"\"id\": \"1\"",
 			"\"meta\"",
 			"\"extension\"",
@@ -773,7 +773,7 @@ public class Dstu3JsonParserTest {
 		ourLog.info(output);
 
 		//@formatter:off
-		assertThat(output).containsSequence(
+		assertThat(output).containsSubsequence(
 			"\"id\": \"1\"",
 			"\"meta\"",
 			"\"extension\"",
@@ -978,7 +978,7 @@ public class Dstu3JsonParserTest {
 		ourLog.info(encoded);
 
 		assertThat(encoded).contains("Patient"));
-		assertThat(encoded).containsSequence(ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3, ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE);
+		assertThat(encoded).containsSubsequence(ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3, ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE);
 		assertThat(encoded).doesNotContain("text");
 		assertThat(encoded).doesNotContain("THE DIV");
 		assertThat(encoded).contains("family"));
@@ -1012,7 +1012,7 @@ public class Dstu3JsonParserTest {
 		ourLog.info(encoded);
 
 		assertThat(encoded).contains("Patient"));
-		assertThat(encoded).containsSequence("\"tag\"", "\"system\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\"");
+		assertThat(encoded).containsSubsequence("\"tag\"", "\"system\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\"");
 		assertThat(encoded).doesNotContain("THE DIV");
 		assertThat(encoded).contains("family"));
 		assertThat(encoded).doesNotContain("maritalStatus");
@@ -1032,7 +1032,7 @@ public class Dstu3JsonParserTest {
 		ourLog.info(encoded);
 
 		assertThat(encoded).contains("Patient"));
-		assertThat(encoded).containsSequence("\"tag\"", "\"system\": \"foo\",", "\"code\": \"bar\"", "\"system\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"",
+		assertThat(encoded).containsSubsequence("\"tag\"", "\"system\": \"foo\",", "\"code\": \"bar\"", "\"system\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\"",
 			"\"code\": \"" + ca.uhn.fhir.rest.api.Constants.TAG_SUBSETTED_CODE + "\""));
 		assertThat(encoded).doesNotContain("THE DIV");
 		assertThat(encoded).contains("family"));
@@ -1438,7 +1438,7 @@ public class Dstu3JsonParserTest {
 		ourLog.info(encoded);
 
 		//@formatter:off
-		assertThat(encoded).containsSequence(
+		assertThat(encoded).containsSubsequence(
 			"\"identifier\": [",
 			"{",
 			"\"fhir_comments\":",

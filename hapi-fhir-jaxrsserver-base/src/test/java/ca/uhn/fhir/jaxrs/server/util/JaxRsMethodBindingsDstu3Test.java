@@ -66,7 +66,7 @@ public class JaxRsMethodBindingsDstu3Test {
 			}
 		}
 		assertThat(new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass()).isEqualTo(TestFindPatientProvider.class);
-		assertThat(new TestUpdatePatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getDeclaringClass()).isEqualTo(TestFindPatientProvider.class);
+		assertThat(new TestUpdatePatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getDeclaringClass()).isEqualTo(TestUpdatePatientProvider.class);
 	}
 
 	@Test

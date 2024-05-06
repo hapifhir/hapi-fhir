@@ -327,7 +327,7 @@ public class CreateR4Test {
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
 		//@formatter:off
-		assertThat(responseContent).containsSequence(
+		assertThat(responseContent).containsSubsequence(
 			"<Patient xmlns=\"http://hl7.org/fhir\">",
 			"<id value=\"0\"/>",
 			"<meta>",

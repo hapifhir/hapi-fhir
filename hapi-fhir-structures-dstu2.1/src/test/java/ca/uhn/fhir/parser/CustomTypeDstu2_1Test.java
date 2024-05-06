@@ -65,7 +65,7 @@ public class CustomTypeDstu2_1Test {
 		ourLog.info(xml);
 
 		//@formatter:on
-		assertThat(xml).containsSequence(
+		assertThat(xml).containsSubsequence(
 			"<CustomResource xmlns=\"http://hl7.org/fhir\">",
 			"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
 			"<baseValueCustomDate><date value=\"2016-05-13\"/></baseValueCustomDate>",
@@ -93,7 +93,7 @@ public class CustomTypeDstu2_1Test {
 		String xml = parser.encodeResourceToString(resource);
 
 		//@formatter:on
-		assertThat(xml).containsSequence(
+		assertThat(xml).containsSubsequence(
 			"<CustomResource xmlns=\"http://hl7.org/fhir\">",
 			"<meta><profile value=\"http://hl7.org/fhir/profiles/custom-resource\"/></meta>",
 			"<baseValueString value=\"2016-05-13\"/>",
@@ -190,7 +190,7 @@ public class CustomTypeDstu2_1Test {
 		ourLog.info(out);
 		
 		//@formatter:off
-		assertThat(out).containsSequence(
+		assertThat(out).containsSubsequence(
 			"<meta>", 
 			"<profile value=\"http://foo/profile1\"/>", 
 			"<profile value=\"http://foo/profile2\"/>", 
@@ -241,7 +241,7 @@ public class CustomTypeDstu2_1Test {
 		ourLog.info(messageString);
 		
 		//@formatter:off
-		assertThat(messageString).containsSequence(
+		assertThat(messageString).containsSubsequence(
 			"<meta>", 
 			"<profile value=\"http://example.com/foo\"/>", 
 			"</meta>");
@@ -283,7 +283,7 @@ public class CustomTypeDstu2_1Test {
 		ourLog.info(messageString);
 		
 		//@formatter:off
-		assertThat(messageString).containsSequence(
+		assertThat(messageString).containsSubsequence(
 			"<meta>", 
 			"<profile value=\"http://example.com/foo\"/>", 
 			"<profile value=\"http://example.com/bar\"/>", 

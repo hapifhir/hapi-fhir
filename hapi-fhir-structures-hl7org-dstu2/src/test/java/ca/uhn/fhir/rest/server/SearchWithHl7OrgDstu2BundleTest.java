@@ -48,7 +48,7 @@ public class SearchWithHl7OrgDstu2BundleTest {
 		ourLog.info(responseContent);
 
 		//@formatter:off
-		assertThat(responseContent).containsSequence("<Bundle xmlns=\"http://hl7.org/fhir\">",
+		assertThat(responseContent).containsSubsequence("<Bundle xmlns=\"http://hl7.org/fhir\">",
 				"<type value=\"searchset\"/>", 
 				"<link>" ,
 				"<relation value=\"self\"/>", 

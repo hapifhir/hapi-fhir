@@ -64,7 +64,7 @@ public class ReadR4Test {
 			assertNull(status.getFirstHeader(Constants.HEADER_LOCATION));
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo("http://localhost:" + myPort + "/Patient/2/_history/2");
 
-			assertThat(responseContent).containsSequence(
+			assertThat(responseContent).containsSubsequence(
 				"<Patient xmlns=\"http://hl7.org/fhir\">",
 				" <id value=\"2\"/>",
 				" <meta>",
@@ -91,7 +91,7 @@ public class ReadR4Test {
 			assertNull(status.getFirstHeader(Constants.HEADER_LOCATION));
 			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo("http://localhost:" + myPort + "/Patient/2/_history/2");
 
-			assertThat(responseContent).containsSequence(
+			assertThat(responseContent).containsSubsequence(
 				"<Patient xmlns=\"http://hl7.org/fhir\">",
 				" <id value=\"2\"/>",
 				" <meta>",
@@ -117,7 +117,7 @@ public class ReadR4Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent).containsSequence(
+			assertThat(responseContent).containsSubsequence(
 				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
 				" <issue>",
 				"  <severity value=\"error\"/>",
@@ -134,7 +134,7 @@ public class ReadR4Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent).containsSequence(
+			assertThat(responseContent).containsSubsequence(
 				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
 				" <issue>",
 				"  <severity value=\"error\"/>",
@@ -151,7 +151,7 @@ public class ReadR4Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent).containsSequence(
+			assertThat(responseContent).containsSubsequence(
 				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
 				" <issue>",
 				"  <severity value=\"error\"/>",
@@ -168,7 +168,7 @@ public class ReadR4Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent).containsSequence(
+			assertThat(responseContent).containsSubsequence(
 				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
 				" <issue>",
 				"  <severity value=\"error\"/>",
@@ -185,7 +185,7 @@ public class ReadR4Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent).containsSequence(
+			assertThat(responseContent).containsSubsequence(
 				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
 				" <issue>",
 				"  <severity value=\"error\"/>",
@@ -202,7 +202,7 @@ public class ReadR4Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent).containsSequence(
+			assertThat(responseContent).containsSubsequence(
 				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
 				" <issue>",
 				"  <severity value=\"error\"/>",
@@ -219,7 +219,7 @@ public class ReadR4Test {
 			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
 
 			String responseContent = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
-			assertThat(responseContent).containsSequence(
+			assertThat(responseContent).containsSubsequence(
 				"<OperationOutcome xmlns=\"http://hl7.org/fhir\">",
 				" <issue>",
 				"  <severity value=\"error\"/>",

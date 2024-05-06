@@ -157,7 +157,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>");
 		//@formatter:on
@@ -171,7 +171,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>");
 		//@formatter:on
@@ -190,7 +190,7 @@ public class FhirResourceDaoDstu3ValueSetTest extends BaseJpaDstu3Test {
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		//@formatter:off
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>");
 		//@formatter:on

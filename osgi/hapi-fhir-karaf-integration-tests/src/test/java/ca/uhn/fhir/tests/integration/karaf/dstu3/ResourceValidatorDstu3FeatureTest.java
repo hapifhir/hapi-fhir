@@ -302,7 +302,7 @@ public class ResourceValidatorDstu3FeatureTest {
 			"furry-grey",
 			"furry-white",
 			"FamilyName"};
-		assertThat(messageString).containsSequence(
+		assertThat(messageString).containsSubsequence(
 			Arrays.asList(strings)
 		));
 		String[] strings1 = {"extension",
@@ -354,7 +354,7 @@ public class ResourceValidatorDstu3FeatureTest {
 			"furry-white",
 			"String Extension",
 			"FamilyName"};
-		assertThat(messageString).containsSequence(
+		assertThat(messageString).containsSubsequence(
 			Arrays.asList(strings)
 		));
 		String[] strings1 = {"extension",

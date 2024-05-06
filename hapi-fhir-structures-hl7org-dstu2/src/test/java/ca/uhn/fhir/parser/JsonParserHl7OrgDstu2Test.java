@@ -179,7 +179,7 @@ public class JsonParserHl7OrgDstu2Test {
     ourLog.info(encoded);
 
 		assertThat(encoded).contains("Patient");
-    assertThat(encoded).containsSequence(Constants.TAG_SUBSETTED_SYSTEM_DSTU3, Constants.TAG_SUBSETTED_CODE);
+    assertThat(encoded).containsSubsequence(Constants.TAG_SUBSETTED_SYSTEM_DSTU3, Constants.TAG_SUBSETTED_CODE);
 		assertThat(encoded).doesNotContain("text");
 		assertThat(encoded).doesNotContain("THE DIV");
 		assertThat(encoded).contains("family");
@@ -415,7 +415,7 @@ public class JsonParserHl7OrgDstu2Test {
 		
 		String encoded = jsonParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSequence(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\""));
+		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\""));
 		
 		// Create a bundle with just the patient resource
 		Bundle b = new Bundle();
@@ -424,7 +424,7 @@ public class JsonParserHl7OrgDstu2Test {
 		// Encode the bundle
 		encoded = jsonParser.encodeResourceToString(b);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSequence(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\""));
+		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\""));
 		
 		// Re-parse the bundle
 		patient = (Patient) jsonParser.parseResource(jsonParser.encodeResourceToString(patient));
@@ -438,7 +438,7 @@ public class JsonParserHl7OrgDstu2Test {
 		// And re-encode a second time
 		encoded = jsonParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSequence(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\""));
+		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\""));
 		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("\"contained\":", "[", "\"contained\":"))));
 
 		// And re-encode once more, with the references cleared
@@ -446,7 +446,7 @@ public class JsonParserHl7OrgDstu2Test {
 		patient.getManagingOrganization().setReference(null);
 		encoded = jsonParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSequence(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\""));
+		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"1\"", "\"identifier\"", "\"reference\": \"#1\""));
 		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("\"contained\":", "[", "\"contained\":"))));
 
 		// And re-encode once more, with the references cleared and a manually set local ID
@@ -455,7 +455,7 @@ public class JsonParserHl7OrgDstu2Test {
 		patient.getManagingOrganization().getResource().setId(("#333"));
 		encoded = jsonParser.encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSequence(Arrays.asList("\"contained\": [", "\"id\": \"333\"", "\"identifier\"", "\"reference\": \"#333\""));
+		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\": [", "\"id\": \"333\"", "\"identifier\"", "\"reference\": \"#333\""));
 		assertThat(encoded, not(stringContainsInOrder(Arrays.asList("\"contained\":", "[", "\"contained\":"))));
 		
 	}
@@ -479,12 +479,12 @@ public class JsonParserHl7OrgDstu2Test {
 		// Encode the buntdle
 		String encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSequence(Arrays.asList("\"contained\"", "resourceType\": \"Organization", "id\": \"1\""));
+		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\"", "resourceType\": \"Organization", "id\": \"1\""));
 		assertThat(encoded).contains("reference\": \"#1\"");
 		
 		encoded = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient);
 		ourLog.info(encoded);
-		assertThat(encoded).containsSequence(Arrays.asList("\"contained\"", "resourceType\": \"Organization", "id\": \"1\""));
+		assertThat(encoded).containsSubsequence(Arrays.asList("\"contained\"", "resourceType\": \"Organization", "id\": \"1\""));
 		assertThat(encoded).contains("reference\": \"#1\"");
 	}
 
@@ -808,7 +808,7 @@ public class JsonParserHl7OrgDstu2Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded).contains("Patient");
-		assertThat(encoded).containsSequence("\"tag\"",
+		assertThat(encoded).containsSubsequence("\"tag\"",
 				"\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE+"\",");
 		assertThat(encoded).doesNotContain("THE DIV");
 		assertThat(encoded).contains("family");
@@ -829,7 +829,7 @@ public class JsonParserHl7OrgDstu2Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded).contains("Patient");
-		assertThat(encoded).containsSequence("\"tag\"",
+		assertThat(encoded).containsSubsequence("\"tag\"",
 				"\"system\": \"foo\",", "\"code\": \"bar\"",
 				"\"system\": \"" + Constants.TAG_SUBSETTED_SYSTEM_DSTU3 + "\",", "\"code\": \"" + Constants.TAG_SUBSETTED_CODE+"\",");
 		assertThat(encoded).doesNotContain("THE DIV");
@@ -1062,7 +1062,7 @@ public class JsonParserHl7OrgDstu2Test {
     String str = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(A);
     ourLog.info(str);
 
-    assertThat(str).containsSequence(Arrays.asList("\"text\": \"B\"", "\"text\": \"C\"", "\"text\": \"A\""));
+    assertThat(str).containsSubsequence(Arrays.asList("\"text\": \"B\"", "\"text\": \"C\"", "\"text\": \"A\""));
 
     // Only one (outer) contained block
     int idx0 = str.indexOf("\"contained\"");

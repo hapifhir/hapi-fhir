@@ -31,6 +31,7 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(DefaultThymeleafNarrativeGeneratorDstu2Test.class);
@@ -77,7 +78,7 @@ public class DefaultThymeleafNarrativeGeneratorDstu2Test {
 		myGen.populateResourceNarrative(myCtx, value);
 		String output = value.getText().getDiv().getValueAsString();
 		ourLog.info(output);
-		assertThat(output).doesNotContain("narrative");
+		assertNull(output);
 
 	}
 

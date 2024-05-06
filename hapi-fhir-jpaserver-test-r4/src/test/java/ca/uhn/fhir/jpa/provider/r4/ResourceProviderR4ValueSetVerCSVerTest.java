@@ -415,7 +415,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
@@ -431,7 +431,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2 as this was the last version loaded.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
@@ -447,7 +447,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
@@ -470,7 +470,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
@@ -486,7 +486,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2 as this was the last version loaded.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
@@ -502,7 +502,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
@@ -551,7 +551,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
@@ -567,7 +567,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2 as this was the last version loaded.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
@@ -583,7 +583,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
@@ -628,7 +628,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2 as this was the last updated.
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
@@ -649,7 +649,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v1.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
@@ -670,7 +670,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
@@ -697,7 +697,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2 as this was the last updated.
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 
@@ -718,7 +718,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v1.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter\"/>");
 
@@ -739,7 +739,7 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		// Should return v2.
 		resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
-		assertThat(resp).containsSequence(
+		assertThat(resp).containsSubsequence(
 			"<code value=\"11378-7\"/>",
 			"<display value=\"Systolic blood pressure at First encounter v2\"/>");
 

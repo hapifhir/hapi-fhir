@@ -2951,7 +2951,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			ourLog.info(resp);
 			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 			// @formatter:off
-			assertThat(resp).containsSequence(
+			assertThat(resp).containsSubsequence(
 				"<ValueSet xmlns=\"http://hl7.org/fhir\">",
 					"<expansion>",
 					"<contains>",
@@ -2983,7 +2983,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			ourLog.info(resp);
 			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 			//@formatter:off
-			assertThat(resp).containsSequence(
+			assertThat(resp).containsSubsequence(
 				"<code value=\"11378-7\"/>",
 				"<display value=\"Systolic blood pressure at First encounter\"/>");
 			//@formatter:on
@@ -3003,7 +3003,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			ourLog.info(resp);
 			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
 			//@formatter:off
-			assertThat(resp).containsSequence(
+			assertThat(resp).containsSubsequence(
 				"<code value=\"11378-7\"/>",
 				"<display value=\"Systolic blood pressure at First encounter\"/>"
 			);

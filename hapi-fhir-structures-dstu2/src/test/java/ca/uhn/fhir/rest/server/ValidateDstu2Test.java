@@ -80,7 +80,7 @@ public class ValidateDstu2Test {
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-		assertThat(resp).containsSequence("<OperationOutcome");
+		assertThat(resp).containsSubsequence("<OperationOutcome");
 	}
 
 	@Test
@@ -99,7 +99,7 @@ public class ValidateDstu2Test {
 		HttpResponse status = ourClient.execute(httpPost);
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-		assertThat(ourLastResourceBody).containsSequence("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001");
+		assertThat(ourLastResourceBody).containsSubsequence("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001");
 		assertThat(ourLastEncoding).isEqualTo(EncodingEnum.JSON);
 
 	}
@@ -125,7 +125,7 @@ public class ValidateDstu2Test {
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-		assertThat(resp).containsSequence("<OperationOutcome");
+		assertThat(resp).containsSubsequence("<OperationOutcome");
 		assertThat(ourLastProfile).isEqualTo("http://foo");
 		assertThat(ourLastMode).isEqualTo(ValidationModeEnum.CREATE);
 	}
@@ -152,7 +152,7 @@ public class ValidateDstu2Test {
 
 		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
 
-		assertThat(resp).containsSequence("<OperationOutcome", "FOOBAR");
+		assertThat(resp).containsSubsequence("<OperationOutcome", "FOOBAR");
 	}
 
 	@AfterAll
