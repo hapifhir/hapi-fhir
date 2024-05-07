@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
@@ -215,22 +216,22 @@ public class ExpandResourceAndWriteBinaryStepTest {
 		RunOutcome outcome = myFinalStep.run(input, sink);
 
 		// verify
-		assertThat(outcome.getRecordsProcessed()).isEqualTo(new RunOutcome(resources.size()).getRecordsProcessed());
+		assertEquals(new RunOutcome(resources.size()).getRecordsProcessed(), outcome.getRecordsProcessed());
 
 		ArgumentCaptor<IBaseBinary> binaryCaptor = ArgumentCaptor.forClass(IBaseBinary.class);
 		ArgumentCaptor<SystemRequestDetails> binaryDaoCreateRequestDetailsCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
 		verify(binaryDao)
 			.update(binaryCaptor.capture(), binaryDaoCreateRequestDetailsCaptor.capture());
 		String outputString = new String(binaryCaptor.getValue().getContent());
-		assertThat(StringUtils.countOccurrencesOf(outputString, "\n")).isEqualTo(resources.size());
+		assertEquals(resources.size(), StringUtils.countOccurrencesOf(outputString, "\n"));
 		if (thePartitioned) {
-			assertThat(binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId()).isEqualTo(getPartitionId(thePartitioned));
+			assertEquals(getPartitionId(thePartitioned), binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId());
 		}
 
 		ArgumentCaptor<BulkExportBinaryFileId> fileIdArgumentCaptor = ArgumentCaptor.forClass(BulkExportBinaryFileId.class);
 		verify(sink)
 			.accept(fileIdArgumentCaptor.capture());
-		assertThat(fileIdArgumentCaptor.getValue().getBinaryId()).isEqualTo(binaryId.getValueAsString());
+		assertEquals(binaryId.getValueAsString(), fileIdArgumentCaptor.getValue().getBinaryId());
 	}
 
 	@NotNull

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.provider.dstu2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.BundleInclusionRule;
 import ca.uhn.fhir.model.api.IResource;
@@ -96,14 +97,14 @@ public class Dstu2BundleFactoryTest {
 		Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes(new String("*")));
 
 		assertThat(bundle.getEntry()).hasSize(6);
-		assertThat(numberOfEntriesOfType(bundle, Specimen.class)).isEqualTo(2);
+		assertEquals(2, numberOfEntriesOfType(bundle, Specimen.class));
 	}
 
 	@Test
 	public void whenIncludeIsNull_bundle_shouldOnlyContainPrimaryResource() throws Exception {
 		Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, null);
 		assertThat(bundle.getEntry()).hasSize(1);
-		assertThat(numberOfEntriesOfType(bundle, DiagnosticReport.class)).isEqualTo(1);
+		assertEquals(1, numberOfEntriesOfType(bundle, DiagnosticReport.class));
 	}
 
 	@Test
@@ -112,8 +113,8 @@ public class Dstu2BundleFactoryTest {
 		Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes);
 
 		assertThat(bundle.getEntry()).hasSize(2);
-		assertThat(numberOfEntriesOfType(bundle, DiagnosticReport.class)).isEqualTo(1);
-		assertThat(numberOfEntriesOfType(bundle, Patient.class)).isEqualTo(1);
+		assertEquals(1, numberOfEntriesOfType(bundle, DiagnosticReport.class));
+		assertEquals(1, numberOfEntriesOfType(bundle, Patient.class));
 	}
 	
 	@Test
@@ -123,12 +124,12 @@ public class Dstu2BundleFactoryTest {
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertThat(bundle.getEntry()).hasSize(3);
-		assertThat(numberOfEntriesOfType(bundle, DiagnosticReport.class)).isEqualTo(1);
-		assertThat(numberOfEntriesOfType(bundle, Observation.class)).isEqualTo(1);
-		assertThat(numberOfEntriesOfType(bundle, Specimen.class)).isEqualTo(1);
+		assertEquals(1, numberOfEntriesOfType(bundle, DiagnosticReport.class));
+		assertEquals(1, numberOfEntriesOfType(bundle, Observation.class));
+		assertEquals(1, numberOfEntriesOfType(bundle, Specimen.class));
 		List<Specimen> specimens = getResourcesOfType(bundle, Specimen.class);
 		assertThat(specimens).hasSize(1);
-		assertThat(specimens.get(0).getId().getIdPart()).isEqualTo("1");
+		assertEquals("1", specimens.get(0).getId().getIdPart());
 	}
 
 	@Test
@@ -136,7 +137,7 @@ public class Dstu2BundleFactoryTest {
 		Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_INCLUDES, includes(Observation.INCLUDE_SPECIMEN.getValue()));
 
 		assertThat(bundle.getEntry()).hasSize(1);
-		assertThat(numberOfEntriesOfType(bundle, DiagnosticReport.class)).isEqualTo(1);
+		assertEquals(1, numberOfEntriesOfType(bundle, DiagnosticReport.class));
 	}
 
 	@Test
@@ -144,7 +145,7 @@ public class Dstu2BundleFactoryTest {
 		Bundle bundle = makeBundle(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE, null);
 
 		assertThat(bundle.getEntry()).hasSize(6);
-		assertThat(numberOfEntriesOfType(bundle, Specimen.class)).isEqualTo(2);
+		assertEquals(2, numberOfEntriesOfType(bundle, Specimen.class));
 	}
 
 	Bundle makeBundle(BundleInclusionRule theBundleInclusionRule, Set<Include> theIncludes) {

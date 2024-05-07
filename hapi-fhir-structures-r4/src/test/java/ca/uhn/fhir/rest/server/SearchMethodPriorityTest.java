@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -52,7 +53,7 @@ public class SearchMethodPriorityTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(myLastMethod).isEqualTo("findDateRangeParam");
+		assertEquals("findDateRangeParam", myLastMethod);
 	}
 
 	@Test
@@ -66,7 +67,7 @@ public class SearchMethodPriorityTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(myLastMethod).isEqualTo("findDateParam");
+		assertEquals("findDateParam", myLastMethod);
 	}
 
 	@Test
@@ -79,7 +80,7 @@ public class SearchMethodPriorityTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(myLastMethod).isEqualTo("find");
+		assertEquals("find", myLastMethod);
 	}
 
 	@Test
@@ -94,7 +95,7 @@ public class SearchMethodPriorityTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(myLastMethod).isEqualTo("findStringAndListParam");
+		assertEquals("findStringAndListParam", myLastMethod);
 	}
 
 	@Test
@@ -108,7 +109,7 @@ public class SearchMethodPriorityTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(myLastMethod).isEqualTo("findString");
+		assertEquals("findString", myLastMethod);
 	}
 
 	@Test
@@ -121,7 +122,7 @@ public class SearchMethodPriorityTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(myLastMethod).isEqualTo("find");
+		assertEquals("find", myLastMethod);
 	}
 
 	@Test
@@ -134,7 +135,7 @@ public class SearchMethodPriorityTest {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(myLastMethod).isEqualTo("find");
+		assertEquals("find", myLastMethod);
 	}
 
 	public class DateStrengthsWithRequiredResourceProvider implements IResourceProvider {

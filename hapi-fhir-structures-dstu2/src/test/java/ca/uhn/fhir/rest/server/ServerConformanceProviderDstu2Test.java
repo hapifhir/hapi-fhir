@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -143,10 +144,10 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		RestResource res = conformance.getRest().get(0).getResource().get(1);
-		assertThat(res.getType()).isEqualTo("Patient");
+		assertEquals("Patient", res.getType());
 
 		assertTrue(res.getConditionalCreate());
-		assertThat(res.getConditionalDeleteElement().getValueAsEnum()).isEqualTo(ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED);
+		assertEquals(ConditionalDeleteStatusEnum.MULTIPLE_DELETES_SUPPORTED, res.getConditionalDeleteElement().getValueAsEnum());
 		assertTrue(res.getConditionalUpdate());
 	}
 
@@ -167,8 +168,8 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		assertThat(conformance.getRest().get(0).getOperation()).hasSize(1);
-		assertThat(conformance.getRest().get(0).getOperation().get(0).getName()).isEqualTo("everything");
-		assertThat(conformance.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue()).isEqualTo("OperationDefinition/Patient-i-everything");
+		assertEquals("everything", conformance.getRest().get(0).getOperation().get(0).getName());
+		assertEquals("OperationDefinition/Patient-i-everything", conformance.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
 	}
 
 	@Test
@@ -186,8 +187,8 @@ public class ServerConformanceProviderDstu2Test {
 		OperationDefinition opDef = sc.readOperationDefinition(new IdDt("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
 		validate(opDef);
 
-		assertThat(opDef.getCode()).isEqualTo("everything");
-		assertThat(opDef.getIdempotent().booleanValue()).isEqualTo(true);
+		assertEquals("everything", opDef.getCode());
+		assertEquals(true, opDef.getIdempotent().booleanValue());
 	}
 
 	@Test
@@ -228,7 +229,7 @@ public class ServerConformanceProviderDstu2Test {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
-				assertThat(param.getDescription()).isEqualTo("The patient's identifier");
+				assertEquals("The patient's identifier", param.getDescription());
 				found = true;
 			}
 		}
@@ -259,7 +260,7 @@ public class ServerConformanceProviderDstu2Test {
 		ourLog.info(conf);
 
 		RestResource res = conformance.getRest().get(0).getResource().get(1);
-		assertThat(res.getType()).isEqualTo("Patient");
+		assertEquals("Patient", res.getType());
 
 		assertNull(res.getConditionalCreate());
 		assertNull(res.getConditionalDelete());
@@ -296,14 +297,14 @@ public class ServerConformanceProviderDstu2Test {
 			validate(opDef);
 
 			Set<String> types = toStrings(opDef.getType());
-			assertThat(opDef.getCode()).isEqualTo("someOp");
-			assertThat(opDef.getInstance()).isEqualTo(true);
-			assertThat(opDef.getSystem()).isEqualTo(false);
+			assertEquals("someOp", opDef.getCode());
+			assertEquals(true, opDef.getInstance());
+			assertEquals(false, opDef.getSystem());
 			assertThat(types).containsExactlyInAnyOrder("Patient", "Encounter");
 			assertThat(opDef.getParameter()).hasSize(2);
-			assertThat(opDef.getParameter().get(0).getName()).isEqualTo("someOpParam1");
-			assertThat(opDef.getParameter().get(0).getType()).isEqualTo("date");
-			assertThat(opDef.getParameter().get(1).getName()).isEqualTo("someOpParam2");
+			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
+			assertEquals("date", opDef.getParameter().get(0).getType());
+			assertEquals("someOpParam2", opDef.getParameter().get(1).getName());
 		}
 	}
 
@@ -387,17 +388,17 @@ public class ServerConformanceProviderDstu2Test {
 
 		Rest rest = conformance.getRestFirstRep();
 		RestResource res = rest.getResourceFirstRep();
-		assertThat(res.getType()).isEqualTo("DiagnosticReport");
+		assertEquals("DiagnosticReport", res.getType());
 
-		assertThat(res.getSearchParam().get(0).getName()).isEqualTo(DiagnosticReport.SP_SUBJECT);
-		assertThat(res.getSearchParam().get(0).getChain().get(0).getValue()).isEqualTo("identifier");
+		assertEquals(DiagnosticReport.SP_SUBJECT, res.getSearchParam().get(0).getName());
+		assertEquals("identifier", res.getSearchParam().get(0).getChain().get(0).getValue());
 
-		assertThat(res.getSearchParam().get(1).getName()).isEqualTo(DiagnosticReport.SP_CODE);
+		assertEquals(DiagnosticReport.SP_CODE, res.getSearchParam().get(1).getName());
 
-		assertThat(res.getSearchParam().get(2).getName()).isEqualTo(DiagnosticReport.SP_DATE);
+		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(2).getName());
 
 		assertThat(res.getSearchInclude()).hasSize(1);
-		assertThat(res.getSearchIncludeFirstRep().getValue()).isEqualTo("DiagnosticReport.result");
+		assertEquals("DiagnosticReport.result", res.getSearchIncludeFirstRep().getValue());
 	}
 
 	@Test
@@ -498,7 +499,7 @@ public class ServerConformanceProviderDstu2Test {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(24);
-				assertThat(param.getDescription()).isEqualTo("The organization at which this person is a patient");
+				assertEquals("The organization at which this person is a patient", param.getDescription());
 				found = true;
 			}
 		}
@@ -532,7 +533,7 @@ public class ServerConformanceProviderDstu2Test {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
-				assertThat(param.getDescription()).isEqualTo("The organization at which this person is a patient");
+				assertEquals("The organization at which this person is a patient", param.getDescription());
 				found = true;
 			}
 		}
@@ -545,8 +546,8 @@ public class ServerConformanceProviderDstu2Test {
 		RestResource resource = findRestResource(conformance, "Patient");
 
 		RestResourceSearchParam param = resource.getSearchParam().get(0);
-		assertThat(param.getChain().get(0).getValue()).isEqualTo("bar");
-		assertThat(param.getChain().get(1).getValue()).isEqualTo("foo");
+		assertEquals("bar", param.getChain().get(0).getValue());
+		assertEquals("foo", param.getChain().get(1).getValue());
 		assertThat(param.getChain()).hasSize(2);
 	}
 
@@ -568,7 +569,7 @@ public class ServerConformanceProviderDstu2Test {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
-				assertThat(param.getDescription()).isEqualTo("The organization at which this person is a patient");
+				assertEquals("The organization at which this person is a patient", param.getDescription());
 				found = true;
 			}
 		}
@@ -582,10 +583,10 @@ public class ServerConformanceProviderDstu2Test {
 
 		assertThat(resource.getSearchParam()).hasSize(1);
 		RestResourceSearchParam param = resource.getSearchParam().get(0);
-		assertThat(param.getName()).isEqualTo("organization");
-		assertThat(param.getChain().get(0).getValue()).isEqualTo("bar");
-		assertThat(param.getChain().get(1).getValue()).isEqualTo("baz.bob");
-		assertThat(param.getChain().get(2).getValue()).isEqualTo("foo");
+		assertEquals("organization", param.getName());
+		assertEquals("bar", param.getChain().get(0).getValue());
+		assertEquals("baz.bob", param.getChain().get(1).getValue());
+		assertEquals("foo", param.getChain().get(2).getValue());
 		assertThat(param.getChain()).hasSize(3);
 	}
 

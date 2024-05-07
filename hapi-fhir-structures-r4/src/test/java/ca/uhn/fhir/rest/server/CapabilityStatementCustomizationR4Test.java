@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
@@ -58,7 +59,7 @@ public class CapabilityStatementCustomizationR4Test {
 		myServerExtension.getRestfulServer().registerInterceptor(new CapabilityStatementCustomizer());
 
 		CapabilityStatement received = myServerExtension.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
-		assertThat(received.getSoftware().getName()).isEqualTo("Acme FHIR Server");
+		assertEquals("Acme FHIR Server", received.getSoftware().getName());
 
 	}
 
@@ -88,7 +89,7 @@ public class CapabilityStatementCustomizationR4Test {
 		myServerExtension.getRestfulServer().registerInterceptor(new CapabilityStatementCustomizer());
 
 		CapabilityStatement received = myServerExtension.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
-		assertThat(received.getSoftware().getName()).isEqualTo("Acme FHIR Server");
+		assertEquals("Acme FHIR Server", received.getSoftware().getName());
 
 	}
 

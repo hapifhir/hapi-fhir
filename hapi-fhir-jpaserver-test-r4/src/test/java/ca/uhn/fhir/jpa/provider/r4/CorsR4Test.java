@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -23,7 +24,7 @@ public class CorsR4Test extends BaseResourceProviderR4Test {
 		ourLog.info(resp.toString());
 		
 		IOUtils.closeQuietly(resp.getEntity().getContent());
-		assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, resp.getStatusLine().getStatusCode());
 	}
 
 

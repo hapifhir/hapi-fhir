@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -52,7 +53,7 @@ class MdmGoldenResourceFindingSvcIT extends BaseMdmR4Test {
 		// the NO_MATCH golden resource should not be a candidate
 		CandidateList candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(
 			createFindGoldenResourceCandidateParams(jane));
-		assertThat(candidateList.size()).isEqualTo(0);
+		assertEquals(0, candidateList.size());
 	}
 
 	@Test

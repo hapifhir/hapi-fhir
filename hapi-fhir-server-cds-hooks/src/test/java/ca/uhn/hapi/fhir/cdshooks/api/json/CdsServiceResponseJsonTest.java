@@ -1,5 +1,6 @@
 package ca.uhn.hapi.fhir.cdshooks.api.json;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +21,7 @@ class CdsServiceResponseJsonTest {
 		//validate
 		assertNotNull(actual);
 			assertThat(actual).hasSize(1);
-		assertThat(actual.get(0)).isEqualTo(expected);
+		assertEquals(expected, actual.get(0));
     }
 
     @Test

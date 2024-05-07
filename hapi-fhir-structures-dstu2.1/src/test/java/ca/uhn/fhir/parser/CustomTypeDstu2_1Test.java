@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
@@ -74,7 +75,7 @@ public class CustomTypeDstu2_1Test {
 		//@formatter:on
 		
 		CustomResource364Dstu21 parsedResource = parser.parseResource(CustomResource364Dstu21.class, xml);
-		assertThat(((CustomResource364CustomDate) parsedResource.getBaseValues()).getDate().getValueAsString()).isEqualTo("2016-05-13");
+		assertEquals("2016-05-13", ((CustomResource364CustomDate) parsedResource.getBaseValues()).getDate().getValueAsString());
 	}
 
 	/**
@@ -102,7 +103,7 @@ public class CustomTypeDstu2_1Test {
 		//@formatter:on
 		
 		CustomResource364Dstu21 parsedResource = parser.parseResource(CustomResource364Dstu21.class, xml);
-		assertThat(((StringType) parsedResource.getBaseValues()).getValueAsString()).isEqualTo("2016-05-13");
+		assertEquals("2016-05-13", ((StringType) parsedResource.getBaseValues()).getValueAsString());
 	}
 
 	
@@ -119,14 +120,14 @@ public class CustomTypeDstu2_1Test {
 		assertThat(res0.getMeta().getProfile()).isEmpty();
 		List<Extension> exts = res0.getExtensionsByUrl("http://example.com/Weight");
 		assertThat(exts).hasSize(1);
-		assertThat(((StringType) exts.get(0).getValue()).getValue()).isEqualTo("185 cm");
+		assertEquals("185 cm", ((StringType) exts.get(0).getValue()).getValue());
 
 		MyCustomPatient res1 = (MyCustomPatient) bundle.getEntry().get(1).getResource();
 		assertThat(res1.getMeta().getProfile()).hasSize(1);
-		assertThat(res1.getMeta().getProfile().get(0).getValue()).isEqualTo("http://example.com/foo");
+		assertEquals("http://example.com/foo", res1.getMeta().getProfile().get(0).getValue());
 		exts = res1.getExtensionsByUrl("http://example.com/Weight");
 		assertThat(exts).isEmpty();
-		assertThat(res1.getWeight().getValue()).isEqualTo("185 cm");
+		assertEquals("185 cm", res1.getWeight().getValue());
 	}
 	
 	@Test
@@ -138,12 +139,12 @@ public class CustomTypeDstu2_1Test {
 		
 		MyCustomPatient parsed = (MyCustomPatient) ctx.newXmlParser().parseResource(input);
 		assertThat(parsed.getMeta().getProfile()).hasSize(1);
-		assertThat(parsed.getMeta().getProfile().get(0).getValue()).isEqualTo("http://example.com/foo");
+		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
 		
 		List<Extension> exts = parsed.getExtensionsByUrl("http://example.com/Weight");
 		assertThat(exts).isEmpty();
 
-		assertThat(parsed.getWeight().getValue()).isEqualTo("185 cm");
+		assertEquals("185 cm", parsed.getWeight().getValue());
 	}
 
 	
@@ -154,11 +155,11 @@ public class CustomTypeDstu2_1Test {
 		FhirContext ctx = FhirContext.forDstu2_1();
 		Patient parsed = (Patient) ctx.newXmlParser().parseResource(input);
 		assertThat(parsed.getMeta().getProfile()).hasSize(1);
-		assertThat(parsed.getMeta().getProfile().get(0).getValue()).isEqualTo("http://example.com/foo");
+		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
 		
 		List<Extension> exts = parsed.getExtensionsByUrl("http://example.com/Weight");
 		assertThat(exts).hasSize(1);
-		assertThat(((StringType) exts.get(0).getValue()).getValue()).isEqualTo("185 cm");
+		assertEquals("185 cm", ((StringType) exts.get(0).getValue()).getValue());
 	}
 	
 	@Test
@@ -331,7 +332,7 @@ public class CustomTypeDstu2_1Test {
 		ctx.setDefaultTypeForProfile("http://fhir.something.com/StructureDefinition/our-medication", MyMedication.class);
 		
 		MedicationOrder mo = ctx.newXmlParser().parseResource(MedicationOrder.class, input);
-		assertThat(mo.getContained().get(0).getClass()).isEqualTo(MyMedication.class);
+		assertEquals(MyMedication.class, mo.getContained().get(0).getClass());
 	}
 
 	public static String createBundle(String... theResources) {

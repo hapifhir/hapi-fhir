@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -72,7 +73,7 @@ public class SyntheaPerfTest extends BaseJpaTest {
 	@Disabled("Stress test")
 	@Test
 	public void testLoadSynthea() throws Exception {
-		assertThat(TestR4Config.getMaxThreads()).isEqualTo(100);
+		assertEquals(100, TestR4Config.getMaxThreads());
 
 		myStorageSettings.setResourceEncoding(ResourceEncodingEnum.JSON);
 		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);

@@ -120,7 +120,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 			myCodeSystemDao.create(theDuplicate, mySrd);
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo(theDuplicateErrorBaseMsg + originalResId);
+			assertEquals(theDuplicateErrorBaseMsg + originalResId, e.getMessage());
 		}
 
 		// Try updating code system when content mode is NOT PRESENT
@@ -136,7 +136,7 @@ public class TermCodeSystemStorageSvcTest extends BaseJpaR4Test {
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myTerminologyDeferredStorageSvc.setProcessDeferred(false);
 		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
-		assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(theExpectedConceptCount);
+		assertEquals(theExpectedConceptCount, runInTransaction(() -> myTermConceptDao.count()));
 
 	}
 

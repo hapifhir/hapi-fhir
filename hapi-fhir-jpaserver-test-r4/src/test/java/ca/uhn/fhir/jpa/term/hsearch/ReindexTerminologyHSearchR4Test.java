@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term.hsearch;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -152,31 +153,31 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 	private void validateFreetextCounts() {
 		int dbTermConceptCountForVersion = runInTransaction(() ->
 			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithVersionId));
-		assertThat(dbTermConceptCountForVersion).isEqualTo(CS_CONCEPTS_NUMBER);
+		assertEquals(CS_CONCEPTS_NUMBER, dbTermConceptCountForVersion);
 
 		long termConceptCountForVersion = searchAllIndexedTermConceptCount(termCodeSystemVersionWithVersionId);
 		ourLog.info("=================> Number of freetext found concepts after re-indexing for version {}: {}",
 			CS_VERSION, termConceptCountForVersion);
-		assertThat(termConceptCountForVersion).isEqualTo(CS_CONCEPTS_NUMBER);
+		assertEquals(CS_CONCEPTS_NUMBER, termConceptCountForVersion);
 
 
 		int dbTermConceptCountForNullVersion = runInTransaction(() ->
 			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithNoVersionId));
-		assertThat(dbTermConceptCountForNullVersion).isEqualTo(CS_CONCEPTS_NUMBER);
+		assertEquals(CS_CONCEPTS_NUMBER, dbTermConceptCountForNullVersion);
 
 		long termConceptCountNullVersion = searchAllIndexedTermConceptCount(termCodeSystemVersionWithNoVersionId);
 		ourLog.info("=================> Number of freetext found concepts after re-indexing for version {}: {}",
 			NULL, termConceptCountNullVersion);
-		assertThat(termConceptCountNullVersion).isEqualTo(CS_CONCEPTS_NUMBER);
+		assertEquals(CS_CONCEPTS_NUMBER, termConceptCountNullVersion);
 	}
 
 
 	private void validateFreetextIndexesEmpty() {
 		long termConceptCountVersioned = searchAllIndexedTermConceptCount(termCodeSystemVersionWithVersionId);
-		assertThat(termConceptCountVersioned).isEqualTo(0);
+		assertEquals(0, termConceptCountVersioned);
 
 		long termConceptCountNotVersioned = searchAllIndexedTermConceptCount(termCodeSystemVersionWithNoVersionId);
-		assertThat(termConceptCountNotVersioned).isEqualTo(0);
+		assertEquals(0, termConceptCountNotVersioned);
 	}
 
 	/**
@@ -187,9 +188,9 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 		for (TermValueSet termValueSet : termValueSets) {
 			ourLog.debug("=================> testing ValueSet: {}", termValueSet.getUrl());
 			long conceptCount = conceptCounts.get(termValueSet.getUrl());
-			assertThat(termValueSet.getTotalConcepts()).isEqualTo(conceptCount);
+			assertEquals(conceptCount, termValueSet.getTotalConcepts());
 			long conceptDesignationCount = conceptDesignationCounts.get(termValueSet.getUrl());
-			assertThat(termValueSet.getTotalConceptDesignations()).isEqualTo(conceptDesignationCount);
+			assertEquals(conceptDesignationCount, termValueSet.getTotalConceptDesignations());
 		}
 	}
 
@@ -199,13 +200,13 @@ public class ReindexTerminologyHSearchR4Test extends BaseJpaR4Test {
 		int dbVersionedTermConceptCount = runInTransaction(() ->
 			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithVersionId));
 		ourLog.info("=================> Number of stored concepts for version {}: {}", CS_VERSION, dbVersionedTermConceptCount);
-		assertThat(dbVersionedTermConceptCount).isEqualTo(CS_CONCEPTS_NUMBER);
+		assertEquals(CS_CONCEPTS_NUMBER, dbVersionedTermConceptCount);
 
 		termCodeSystemVersionWithNoVersionId = getTermCodeSystemVersionNullId();
 		int dbNotVersionedTermConceptCount = runInTransaction(() ->
 			myTermConceptDao.countByCodeSystemVersion(termCodeSystemVersionWithNoVersionId));
 		ourLog.info("=================> Number of stored concepts for version {}: {}", NULL, dbNotVersionedTermConceptCount);
-		assertThat(dbNotVersionedTermConceptCount).isEqualTo(CS_CONCEPTS_NUMBER);
+		assertEquals(CS_CONCEPTS_NUMBER, dbNotVersionedTermConceptCount);
 	}
 
 

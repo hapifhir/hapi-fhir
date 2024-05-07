@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
@@ -63,7 +64,7 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		addTableByColumnTask.addAddColumnTask(buildAddColumnTask(driverType, columnType, tableName, columnName1, true, 20, Collections.emptySet()));
 
 		final String actualCreateTableSql = addTableByColumnTask.generateSQLCreateScript();
-		assertThat("CREATE TABLE table_3_columns ( z_column varchar(10), id varchar(25)  not null, a_column varchar(20),  PRIMARY KEY (id) )").isEqualTo(actualCreateTableSql);;
+		assertEquals(actualCreateTableSql, "CREATE TABLE table_3_columns ( z_column varchar(10), id varchar(25)  not null, a_column varchar(20),  PRIMARY KEY (id) )");;
 	}
 
 	@Test
@@ -86,7 +87,7 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		addTableByColumnTask.addAddColumnTask(buildAddColumnTask(driverType, columnType, tableName, columnName1, true, 20, Collections.singleton(override)));
 
 		final String actualCreateTableSql = addTableByColumnTask.generateSQLCreateScript();
-		assertThat("CREATE TABLE table_3_columns ( z_column nvarchar(10), id nvarchar(25)  not null, a_column nvarchar(20),  PRIMARY KEY (id) )").isEqualTo(actualCreateTableSql);;
+		assertEquals(actualCreateTableSql, "CREATE TABLE table_3_columns ( z_column nvarchar(10), id nvarchar(25)  not null, a_column nvarchar(20),  PRIMARY KEY (id) )");;
 	}
 
 	@Test
@@ -118,7 +119,7 @@ public class AddTableByColumnTaskTest extends BaseTest {
 		addTableByColumnTask.addAddColumnTask(buildAddColumnTask(driverType, columnType, tableName, columnNameId, false, 25, Collections.singleton(override)));
 
 		final String actualCreateTableSql = addTableByColumnTask.generateSQLCreateScript();
-		assertThat("CREATE TABLE table_4_columns ( id nvarchar(25)  not null, a_column nvarchar(20), b_column nvarchar(15)  not null, z_column nvarchar(10),  PRIMARY KEY (id) )").isEqualTo(actualCreateTableSql);;
+		assertEquals(actualCreateTableSql, "CREATE TABLE table_4_columns ( id nvarchar(25)  not null, a_column nvarchar(20), b_column nvarchar(15)  not null, z_column nvarchar(10),  PRIMARY KEY (id) )");;
 	}
 
 	private static AddColumnTask buildAddColumnTask(DriverTypeEnum theDriverTypeEnum, ColumnTypeEnum theColumnTypeEnum, String theTableName, String theColumnName, boolean theNullable, int theColumnLength, Set<ColumnDriverMappingOverride> theColumnDriverMappingOverrides) {

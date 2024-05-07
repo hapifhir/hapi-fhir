@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
@@ -58,9 +59,9 @@ public class SearchCountParamDstu2Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(ourLastMethod).isEqualTo("search");
-			assertThat(ourLastParam).isEqualTo(Integer.valueOf(2));
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("search", ourLastMethod);
+			assertEquals(Integer.valueOf(2), ourLastParam);
 			
 			assertThat(responseContent).containsSubsequence(
 				"<link>", 
@@ -88,8 +89,8 @@ public class SearchCountParamDstu2Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(ourLastMethod).isEqualTo("searchWithNoCountParam");
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("searchWithNoCountParam", ourLastMethod);
 			assertNull(ourLastParam);
 			
 			//@formatter:off

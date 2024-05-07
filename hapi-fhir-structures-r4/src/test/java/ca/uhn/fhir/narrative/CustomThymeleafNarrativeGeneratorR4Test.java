@@ -1,5 +1,6 @@
 package ca.uhn.fhir.narrative;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Quantity;
@@ -79,7 +80,7 @@ public class CustomThymeleafNarrativeGeneratorR4Test {
 			"  } ],\n" +
 			"  \"active\": true\n" +
 			"}";
-		assertThat(output).isEqualTo(expectedEncoding);
+		assertEquals(expectedEncoding, output);
 
 		CustomThymeleafNarrativeGenerator gen = new CustomThymeleafNarrativeGenerator("classpath:narrative/customtypes_r4.properties");
 		myCtx.setNarrativeGenerator(gen);
@@ -89,7 +90,7 @@ public class CustomThymeleafNarrativeGeneratorR4Test {
 		ourLog.info(actual);
 
 		String expected = "<div xmlns=\"http://www.w3.org/1999/xhtml\"><h1>CustomPatient</h1><div><div><h1>Favourite Pizza</h1> Toppings: <span>Mushrooms, Onions</span> Size: <span>14</span></div></div></div>";
-		assertThat(actual).isEqualTo(expected);
+		assertEquals(expected, actual);
 
 	}
 

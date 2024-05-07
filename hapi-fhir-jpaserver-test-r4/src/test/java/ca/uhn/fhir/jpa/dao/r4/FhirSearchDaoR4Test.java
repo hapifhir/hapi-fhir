@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -65,7 +66,7 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 
 		// verify results
 		assertThat(ids).hasSize(1);
-		assertThat(ids.get(0).getId()).isEqualTo(id1);
+		assertEquals(id1, ids.get(0).getId());
 	}
 
 	@Test
@@ -88,9 +89,9 @@ public class FhirSearchDaoR4Test extends BaseJpaR4Test {
 		IBundleProvider ret = myPatientDao.search(map);
 
 		// only one should be returned
-		assertThat(ret.size()).isEqualTo(1);
+		assertEquals(1, ret.size());
 		Patient retPatient = (Patient) ret.getAllResources().get(0);
-		assertThat(retPatient.getName().get(0).getFamily()).isEqualTo(patient.getName().get(0).getFamily());
+		assertEquals(patient.getName().get(0).getFamily(), retPatient.getName().get(0).getFamily());
 	}
 
 	@Test

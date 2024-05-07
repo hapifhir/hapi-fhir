@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -58,22 +59,22 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		Map<String, TermConcept> concepts = extractConcepts();
 
 		// Verify codesystem
-		assertThat(mySystemCaptor.getValue().getUrl()).isEqualTo("http://example.com/labCodes");
-		assertThat(mySystemCaptor.getValue().getContent()).isEqualTo(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-		assertThat(mySystemCaptor.getValue().getName()).isEqualTo("Example Lab Codes");
+		assertEquals("http://example.com/labCodes", mySystemCaptor.getValue().getUrl());
+		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, mySystemCaptor.getValue().getContent());
+		assertEquals("Example Lab Codes", mySystemCaptor.getValue().getName());
 
 		// Root code
 		TermConcept code;
 		assertThat(concepts).hasSize(2);
 		code = concepts.get("CHEM");
-		assertThat(code.getCode()).isEqualTo("CHEM");
-		assertThat(code.getDisplay()).isEqualTo("Chemistry");
+		assertEquals("CHEM", code.getCode());
+		assertEquals("Chemistry", code.getDisplay());
 
 		assertThat(code.getChildren()).hasSize(2);
-		assertThat(code.getChildren().get(0).getChild().getCode()).isEqualTo("HB");
-		assertThat(code.getChildren().get(0).getChild().getDisplay()).isEqualTo("Hemoglobin");
-		assertThat(code.getChildren().get(1).getChild().getCode()).isEqualTo("NEUT");
-		assertThat(code.getChildren().get(1).getChild().getDisplay()).isEqualTo("Neutrophils");
+		assertEquals("HB", code.getChildren().get(0).getChild().getCode());
+		assertEquals("Hemoglobin", code.getChildren().get(0).getChild().getDisplay());
+		assertEquals("NEUT", code.getChildren().get(1).getChild().getCode());
+		assertEquals("Neutrophils", code.getChildren().get(1).getChild().getDisplay());
 
 	}
 
@@ -88,8 +89,8 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		Map<String, TermConcept> concepts = extractConcepts();
 
 		// Verify codesystem
-		assertThat(mySystemCaptor.getValue().getUrl()).isEqualTo("http://example.com/labCodes");
-		assertThat(mySystemCaptor.getValue().getContent()).isEqualTo(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		assertEquals("http://example.com/labCodes", mySystemCaptor.getValue().getUrl());
+		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, mySystemCaptor.getValue().getContent());
 
 	}
 
@@ -111,8 +112,8 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 		// Root code
 		assertThat(concepts).hasSize(5);
 		code = concepts.get("CHEM");
-		assertThat(code.getCode()).isEqualTo("CHEM");
-		assertThat(code.getDisplay()).isEqualTo("Chemistry");
+		assertEquals("CHEM", code.getCode());
+		assertEquals("Chemistry", code.getDisplay());
 
 	}
 
@@ -133,18 +134,18 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 
 		// Root concepts
 		assertThat(set.getRootConcepts()).hasSize(2);
-		assertThat(set.getRootConcepts().get(0).getCode()).isEqualTo("CHEM");
-		assertThat(set.getRootConcepts().get(0).getDisplay()).isEqualTo("Chemistry");
-		assertThat(set.getRootConcepts().get(1).getCode()).isEqualTo("MICRO");
-		assertThat(set.getRootConcepts().get(1).getDisplay()).isEqualTo("Microbiology");
+		assertEquals("CHEM", set.getRootConcepts().get(0).getCode());
+		assertEquals("Chemistry", set.getRootConcepts().get(0).getDisplay());
+		assertEquals("MICRO", set.getRootConcepts().get(1).getCode());
+		assertEquals("Microbiology", set.getRootConcepts().get(1).getDisplay());
 
 		// Child concepts
 		assertThat(set.getRootConcepts().get(0).getChildren()).hasSize(2);
-		assertThat(set.getRootConcepts().get(0).getChildren().get(0).getChild().getCode()).isEqualTo("HB");
-		assertThat(set.getRootConcepts().get(0).getChildren().get(0).getChild().getDisplay()).isEqualTo("Hemoglobin");
+		assertEquals("HB", set.getRootConcepts().get(0).getChildren().get(0).getChild().getCode());
+		assertEquals("Hemoglobin", set.getRootConcepts().get(0).getChildren().get(0).getChild().getDisplay());
 		assertNull(set.getRootConcepts().get(0).getChildren().get(0).getChild().getSequence());
-		assertThat(set.getRootConcepts().get(0).getChildren().get(1).getChild().getCode()).isEqualTo("NEUT");
-		assertThat(set.getRootConcepts().get(0).getChildren().get(1).getChild().getDisplay()).isEqualTo("Neutrophils");
+		assertEquals("NEUT", set.getRootConcepts().get(0).getChildren().get(1).getChild().getCode());
+		assertEquals("Neutrophils", set.getRootConcepts().get(0).getChildren().get(1).getChild().getDisplay());
 
 	}
 
@@ -168,12 +169,12 @@ public class TerminologyLoaderSvcCustomTest extends BaseLoaderTest {
 
 		// Root concepts
 		assertThat(set.getRootConcepts()).hasSize(5);
-		assertThat(set.getRootConcepts().get(0).getCode()).isEqualTo("CHEM");
-		assertThat(set.getRootConcepts().get(0).getDisplay()).isEqualTo("Chemistry");
-		assertThat(set.getRootConcepts().get(1).getCode()).isEqualTo("HB");
-		assertThat(set.getRootConcepts().get(1).getDisplay()).isEqualTo("Hemoglobin");
-		assertThat(set.getRootConcepts().get(2).getCode()).isEqualTo("NEUT");
-		assertThat(set.getRootConcepts().get(2).getDisplay()).isEqualTo("Neutrophils");
+		assertEquals("CHEM", set.getRootConcepts().get(0).getCode());
+		assertEquals("Chemistry", set.getRootConcepts().get(0).getDisplay());
+		assertEquals("HB", set.getRootConcepts().get(1).getCode());
+		assertEquals("Hemoglobin", set.getRootConcepts().get(1).getDisplay());
+		assertEquals("NEUT", set.getRootConcepts().get(2).getCode());
+		assertEquals("Neutrophils", set.getRootConcepts().get(2).getDisplay());
 
 	}
 

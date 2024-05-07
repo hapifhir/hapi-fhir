@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -234,7 +235,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 		assertThat(outcome.getCompose().getInclude()).hasSize(1);
 		assertThat(outcome.getCompose().getExclude()).hasSize(1);
-		assertThat(outcome.getExpansion().getTotal()).isEqualTo(1);
+		assertEquals(1, outcome.getExpansion().getTotal());
 
 	}
 
@@ -431,8 +432,8 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 				.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/bogus"))
 				.execute();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getStatusCode()).isEqualTo(404);
-			assertThat(e.getMessage()).isEqualTo("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus");
+			assertEquals(404, e.getStatusCode());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
 		}
 	}
 
@@ -474,8 +475,8 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 				.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/bogus"))
 				.execute();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getStatusCode()).isEqualTo(404);
-			assertThat(e.getMessage()).isEqualTo("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus");
+			assertEquals(404, e.getStatusCode());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fbogus", e.getMessage());
 		}
 	}
 
@@ -556,7 +557,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 				.execute();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1133) + "$expand operation at the type level (no ID specified) requires a url or a valueSet as a part of the request.");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1133) + "$expand operation at the type level (no ID specified) requires a url or a valueSet as a part of the request.", e.getMessage());
 		}
 
 		try {
@@ -570,7 +571,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 				.execute();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1134) + "$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1134) + "$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
 		}
 
 		try {
@@ -584,7 +585,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 				.execute();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1134) + "$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1134) + "$expand must EITHER be invoked at the instance level, or have a url specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
 		}
 
 		try {
@@ -596,7 +597,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 				.execute();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1135) + "offset parameter for $expand operation must be >= 0 when specified. offset: -1");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1135) + "offset parameter for $expand operation must be >= 0 when specified. offset: -1", e.getMessage());
 		}
 
 		try {
@@ -608,7 +609,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 				.execute();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1136) + "count parameter for $expand operation must be >= 0 when specified. count: -1");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1136) + "count parameter for $expand operation must be >= 0 when specified. count: -1", e.getMessage());
 		}
 	}
 
@@ -691,7 +692,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 
 			ourLog.info(resp.toString());
 
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, resp.getStatusLine().getStatusCode());
 			assertThat(respString).contains("Unknown FilterOperator code 'n'");
 
 		}
@@ -712,7 +713,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isEqualTo(true);
+		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 	}
 
 	@Test
@@ -756,7 +757,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isEqualTo(true);
+		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 	}
 
 	/**
@@ -779,14 +780,14 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().get(0).getName()).isEqualTo(IValidationSupport.CodeValidationResult.RESULT);
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(true);
+		assertEquals(IValidationSupport.CodeValidationResult.RESULT, respParam.getParameter().get(0).getName());
+		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
-		assertThat(respParam.getParameter().get(1).getName()).isEqualTo(IValidationSupport.CodeValidationResult.DISPLAY);
-		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo("Male");
+		assertEquals(IValidationSupport.CodeValidationResult.DISPLAY, respParam.getParameter().get(1).getName());
+		assertEquals("Male", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 
-		assertThat(respParam.getParameter().get(2).getName()).isEqualTo(IValidationSupport.CodeValidationResult.SOURCE_DETAILS);
-		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/administrative-gender");
+		assertEquals(IValidationSupport.CodeValidationResult.SOURCE_DETAILS, respParam.getParameter().get(2).getName());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/administrative-gender", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 
 	/**
@@ -809,14 +810,14 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().get(0).getName()).isEqualTo(IValidationSupport.CodeValidationResult.RESULT);
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(true);
+		assertEquals(IValidationSupport.CodeValidationResult.RESULT, respParam.getParameter().get(0).getName());
+		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).getValue());
 
-		assertThat(respParam.getParameter().get(1).getName()).isEqualTo(IValidationSupport.CodeValidationResult.DISPLAY);
-		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo("Male");
+		assertEquals(IValidationSupport.CodeValidationResult.DISPLAY, respParam.getParameter().get(1).getName());
+		assertEquals("Male", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
 
-		assertThat(respParam.getParameter().get(2).getName()).isEqualTo(IValidationSupport.CodeValidationResult.SOURCE_DETAILS);
-		assertThat(((StringType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/administrative-gender");
+		assertEquals(IValidationSupport.CodeValidationResult.SOURCE_DETAILS, respParam.getParameter().get(2).getName());
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://hl7.org/fhir/ValueSet/administrative-gender", ((StringType) respParam.getParameter().get(2).getValue()).getValue());
 
 	}
 

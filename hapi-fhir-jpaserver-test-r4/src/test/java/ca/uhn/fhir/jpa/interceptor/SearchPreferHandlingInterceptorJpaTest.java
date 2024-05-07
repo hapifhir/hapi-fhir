@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
@@ -104,9 +105,9 @@ public class SearchPreferHandlingInterceptorJpaTest extends BaseResourceProvider
 			.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_LENIENT)
 			.encodedJson()
 			.execute();
-		assertThat(outcome.getTotal()).isEqualTo(0);
+		assertEquals(0, outcome.getTotal());
 
-		assertThat(outcome.getLink(Constants.LINK_SELF).getUrl()).isEqualTo(myServerBase + "/Patient?_format=json&_pretty=true&identifier=BLAH");
+		assertEquals(myServerBase + "/Patient?_format=json&_pretty=true&identifier=BLAH", outcome.getLink(Constants.LINK_SELF).getUrl());
 	}
 
 	@Test
@@ -139,7 +140,7 @@ public class SearchPreferHandlingInterceptorJpaTest extends BaseResourceProvider
 			.returnBundle(Bundle.class)
 			.encodedJson()
 			.execute();
-		assertThat(outcome.getTotal()).isEqualTo(0);
+		assertEquals(0, outcome.getTotal());
 	}
 
 
@@ -154,7 +155,7 @@ public class SearchPreferHandlingInterceptorJpaTest extends BaseResourceProvider
 			.returnBundle(Bundle.class)
 			.encodedJson()
 			.execute();
-		assertThat(outcome.getTotal()).isEqualTo(0);
+		assertEquals(0, outcome.getTotal());
 	}
 
 }

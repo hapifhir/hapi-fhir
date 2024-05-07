@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.registry;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -76,7 +77,7 @@ public class JpaSearchParamCacheTest {
 
 		Optional<RuntimeSearchParam> found = myJpaSearchParamCache.getActiveComboSearchParamById(RESOURCE_TYPE, id1);
 		assertThat(found).isPresent();
-		assertThat(found.get().getId()).isEqualTo(id1);
+		assertEquals(id1, found.get().getId());
 	}
 
 	@Test

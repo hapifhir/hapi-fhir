@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 
@@ -13,7 +14,7 @@ public class ApacheProxyAddressStrategyTest {
 				true);
 		MockHttpServletRequest request = prepareRequest();
 		String serverBase = addressStrategy.determineServerBase(null, request);
-		assertThat(serverBase).isEqualTo("https://localhost/imagingstudy/fhir");
+		assertEquals("https://localhost/imagingstudy/fhir", serverBase);
 	}
 
 	@Test
@@ -23,7 +24,7 @@ public class ApacheProxyAddressStrategyTest {
 		MockHttpServletRequest request = prepareRequest();
 		request.addHeader("X-Forwarded-Host", "my.example.host");
 		String serverBase = addressStrategy.determineServerBase(null, request);
-		assertThat(serverBase).isEqualTo("https://my.example.host/imagingstudy/fhir");
+		assertEquals("https://my.example.host/imagingstudy/fhir", serverBase);
 	}
 
 	@Test
@@ -33,7 +34,7 @@ public class ApacheProxyAddressStrategyTest {
 		MockHttpServletRequest request = prepareRequest();
 		request.addHeader("X-Forwarded-Host", "my.example.host");
 		String serverBase = addressStrategy.determineServerBase(null, request);
-		assertThat(serverBase).isEqualTo("http://my.example.host/imagingstudy/fhir");
+		assertEquals("http://my.example.host/imagingstudy/fhir", serverBase);
 	}
 
 	@Test
@@ -45,7 +46,7 @@ public class ApacheProxyAddressStrategyTest {
 		request.addHeader("X-Forwarded-Proto", "https");
 		request.addHeader("X-Forwarded-Prefix", "server-prefix/fhir");
 		String serverBase = addressStrategy.determineServerBase(null, request);
-		assertThat(serverBase).isEqualTo("https://my.example.host/server-prefix/fhir");
+		assertEquals("https://my.example.host/server-prefix/fhir", serverBase);
 	}
 
 	@Test
@@ -59,7 +60,7 @@ public class ApacheProxyAddressStrategyTest {
 		request.addHeader("X-Forwarded-Proto", "https");
 		request.addHeader("X-Forwarded-Prefix", "/server-prefix/fhir");
 		String serverBase = addressStrategy.determineServerBase(null, request);
-		assertThat(serverBase).isEqualTo("https://my.example.host/server-prefix/fhir");
+		assertEquals("https://my.example.host/server-prefix/fhir", serverBase);
 	}
 
 	@Test
@@ -71,7 +72,7 @@ public class ApacheProxyAddressStrategyTest {
 		request.addHeader("X-Forwarded-Host", "my.example.host");
 		request.addHeader("X-Forwarded-Proto", "https");
 		String serverBase = addressStrategy.determineServerBase(null, request);
-		assertThat(serverBase).isEqualTo("https://my.example.host/imagingstudy/fhir");
+		assertEquals("https://my.example.host/imagingstudy/fhir", serverBase);
 	}
 
 	@Test
@@ -83,7 +84,7 @@ public class ApacheProxyAddressStrategyTest {
 		request.addHeader("X-Forwarded-Host", "my.example.host");
 		request.addHeader("X-Forwarded-Port", "345");
 		String serverBase = addressStrategy.determineServerBase(null, request);
-		assertThat(serverBase).isEqualTo("https://my.example.host:345/imagingstudy/fhir");
+		assertEquals("https://my.example.host:345/imagingstudy/fhir", serverBase);
 	}
 	
 	@Test
@@ -95,7 +96,7 @@ public class ApacheProxyAddressStrategyTest {
 		request.addHeader("X-Forwarded-Host", "my.example.host");
 		request.addHeader("X-Forwarded-Port", "-1");
 		String serverBase = addressStrategy.determineServerBase(null, request);
-		assertThat(serverBase).isEqualTo("https://my.example.host/imagingstudy/fhir");
+		assertEquals("https://my.example.host/imagingstudy/fhir", serverBase);
 	}
 	
 	@Test
@@ -107,7 +108,7 @@ public class ApacheProxyAddressStrategyTest {
 		request.addHeader("Forwarded", "Forwarded: for=192.0.2.43,"
 				+ " for=198.51.100.17;by=203.0.113.60;proto=http;host=example.com");
 		String serverBase = addressStrategy.determineServerBase(null, request);
-		assertThat(serverBase).isEqualTo("http://example.com/imagingstudy/fhir");
+		assertEquals("http://example.com/imagingstudy/fhir", serverBase);
 	}
 
 	private MockHttpServletRequest prepareRequest() {

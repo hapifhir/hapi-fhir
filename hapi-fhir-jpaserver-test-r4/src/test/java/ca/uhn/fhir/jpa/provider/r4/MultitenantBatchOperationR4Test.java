@@ -80,9 +80,9 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		IIdType idBF = createPatient(withTenant(TENANT_B), withActiveFalse());
 
 		// validate setup
-		assertThat(getAllPatientsInTenant(TENANT_A).getTotal()).isEqualTo(2);
-		assertThat(getAllPatientsInTenant(TENANT_B).getTotal()).isEqualTo(2);
-		assertThat(getAllPatientsInTenant(DEFAULT_PARTITION_NAME).getTotal()).isEqualTo(0);
+		assertEquals(2, getAllPatientsInTenant(TENANT_A).getTotal());
+		assertEquals(2, getAllPatientsInTenant(TENANT_B).getTotal());
+		assertEquals(0, getAllPatientsInTenant(DEFAULT_PARTITION_NAME).getTotal());
 
 		Parameters input = new Parameters();
 		input.addParameter(ProviderConstants.OPERATION_DELETE_EXPUNGE_URL, "Patient?active=false");
@@ -105,18 +105,18 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 
 		assertThat(interceptor.requestPartitionIds).hasSize(4);
 		RequestPartitionId partitionId = interceptor.requestPartitionIds.get(0);
-		assertThat(partitionId.getFirstPartitionIdOrNull()).isEqualTo(TENANT_B_ID);
-		assertThat(partitionId.getFirstPartitionNameOrNull()).isEqualTo(TENANT_B);
+		assertEquals(TENANT_B_ID, partitionId.getFirstPartitionIdOrNull());
+		assertEquals(TENANT_B, partitionId.getFirstPartitionNameOrNull());
 		assertThat(interceptor.requestDetails.get(0)).isInstanceOf(ServletRequestDetails.class);
-		assertThat(interceptor.resourceDefs.get(0).getName()).isEqualTo("Patient");
+		assertEquals("Patient", interceptor.resourceDefs.get(0).getName());
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
 
-		assertThat(myBatch2JobHelper.getCombinedRecordsProcessed(jobId)).isEqualTo(1);
+		assertEquals(1, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
 
 		// validate only the false patient in TENANT_B is removed
-		assertThat(getAllPatientsInTenant(TENANT_A).getTotal()).isEqualTo(2);
-		assertThat(getAllPatientsInTenant(TENANT_B).getTotal()).isEqualTo(1);
-		assertThat(getAllPatientsInTenant(DEFAULT_PARTITION_NAME).getTotal()).isEqualTo(0);
+		assertEquals(2, getAllPatientsInTenant(TENANT_A).getTotal());
+		assertEquals(1, getAllPatientsInTenant(TENANT_B).getTotal());
+		assertEquals(0, getAllPatientsInTenant(DEFAULT_PARTITION_NAME).getTotal());
 
 	}
 
@@ -176,7 +176,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		// Only the one in the first tenant should be indexed
 		myTenantClientInterceptor.setTenantId(TENANT_A);
 		assertThat(reindexTestHelper.getAlleleObservationIds(myClient)).hasSize(1);
-		assertThat(alleleObservationIds.get(0)).isEqualTo(obsFinalA.getIdPart());
+		assertEquals(obsFinalA.getIdPart(), alleleObservationIds.get(0));
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		assertThat(reindexTestHelper.getAlleleObservationIds(myClient)).hasSize(0);
 		myTenantClientInterceptor.setTenantId(DEFAULT_PARTITION_NAME);
@@ -257,7 +257,7 @@ public class MultitenantBatchOperationR4Test extends BaseMultitenantResourceProv
 		// Only the one in the first tenant should be indexed
 		myTenantClientInterceptor.setTenantId(TENANT_A);
 		assertThat(reindexTestHelper.getAlleleObservationIds(myClient)).hasSize(1);
-		assertThat(alleleObservationIds.get(0)).isEqualTo(obsFinalA.getIdPart());
+		assertEquals(obsFinalA.getIdPart(), alleleObservationIds.get(0));
 		myTenantClientInterceptor.setTenantId(TENANT_B);
 		assertThat(reindexTestHelper.getAlleleObservationIds(myClient)).hasSize(0);
 	}

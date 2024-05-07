@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
@@ -25,8 +26,8 @@ public class XhtmlNodeTest {
 	public void testParseRsquo() {
 		XhtmlNode dt = new XhtmlNode();
 		dt.setValueAsString("It&rsquo;s January again");
-		assertThat(dt.getValueAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">It’s January again</div>");
-		assertThat(new XhtmlNode().setValue(dt.getValue()).getValueAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">It’s January again</div>");
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">It’s January again</div>", dt.getValueAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">It’s January again</div>", new XhtmlNode().setValue(dt.getValue()).getValueAsString());
 	}
 
 	/**
@@ -36,8 +37,8 @@ public class XhtmlNodeTest {
 	public void testLangAttributePreserved() {
 		XhtmlNode dt = new XhtmlNode();
 		dt.setValueAsString("<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en-US\">help i'm a bug</div>");
-		assertThat(dt.getValueAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en-US\">help i'm a bug</div>");
-		assertThat(new XhtmlNode().setValue(dt.getValue()).getValueAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en-US\">help i'm a bug</div>");
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en-US\">help i'm a bug</div>", dt.getValueAsString());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\" lang=\"en-US\">help i'm a bug</div>", new XhtmlNode().setValue(dt.getValue()).getValueAsString());
 	}
 
 	/**

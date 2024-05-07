@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -272,7 +273,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		assertThat(b.getEntry()).hasSize(1);
-		assertThat(b.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("MedicationRequest/MR635079");
+		assertEquals("MedicationRequest/MR635079", b.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 
 		b = new Bundle();
 		b.setType(BundleType.BATCH);
@@ -286,7 +287,7 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 		b = (Bundle) resp.getEntry().get(0).getResource();
 		assertThat(b.getEntry()).hasSize(1);
-		assertThat(b.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("MedicationRequest/MR635079");
+		assertEquals("MedicationRequest/MR635079", b.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.entity;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import com.google.common.base.Strings;
 import org.junit.jupiter.api.Test;
 
@@ -20,8 +21,8 @@ public class TermConceptPropertyTest {
 		termConceptProperty.setValue(ourVeryLongString);
 
 		// then
-		assertThat(termConceptProperty.getValueBlobForTesting()).isNotNull();
-		assertThat(termConceptProperty.getValueBinForTesting()).isNotNull();
+		assertNotNull(termConceptProperty.getValueBlobForTesting());
+		assertNotNull(termConceptProperty.getValueBinForTesting());
 	}
 
 	@Test

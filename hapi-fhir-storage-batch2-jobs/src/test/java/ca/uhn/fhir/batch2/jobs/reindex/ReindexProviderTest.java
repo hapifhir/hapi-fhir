@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.reindex;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
@@ -115,16 +116,16 @@ public class ReindexProviderTest {
 
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
-		assertThat(jobId.getValue()).isEqualTo(TEST_JOB_ID);
+		assertEquals(TEST_JOB_ID, jobId.getValue());
 
 		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
 		assertThat(params.getPartitionedUrls()).hasSize(1);
-		assertThat(params.getPartitionedUrls().get(0).getUrl()).isEqualTo(url);
+		assertEquals(url, params.getPartitionedUrls().get(0).getUrl());
 		// Default values
-		assertThat(params.getReindexSearchParameters()).isEqualTo(ReindexParameters.ReindexSearchParametersEnum.ALL);
+		assertEquals(ReindexParameters.ReindexSearchParametersEnum.ALL, params.getReindexSearchParameters());
 		assertTrue(params.getOptimisticLock());
-		assertThat(params.getOptimizeStorage()).isEqualTo(ReindexParameters.OptimizeStorageModeEnum.NONE);
+		assertEquals(ReindexParameters.OptimizeStorageModeEnum.NONE, params.getOptimizeStorage());
 	}
 
 	@Test
@@ -151,15 +152,15 @@ public class ReindexProviderTest {
 
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		StringType jobId = (StringType) response.getParameterValue(ProviderConstants.OPERATION_REINDEX_RESPONSE_JOB_ID);
-		assertThat(jobId.getValue()).isEqualTo(TEST_JOB_ID);
+		assertEquals(TEST_JOB_ID, jobId.getValue());
 
 		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
 		ReindexJobParameters params = myStartRequestCaptor.getValue().getParameters(ReindexJobParameters.class);
 		assertThat(params.getPartitionedUrls()).isEmpty();
 		// Non-default values
-		assertThat(params.getReindexSearchParameters()).isEqualTo(ReindexParameters.ReindexSearchParametersEnum.NONE);
+		assertEquals(ReindexParameters.ReindexSearchParametersEnum.NONE, params.getReindexSearchParameters());
 		assertFalse(params.getOptimisticLock());
-		assertThat(params.getOptimizeStorage()).isEqualTo(ReindexParameters.OptimizeStorageModeEnum.CURRENT_VERSION);
+		assertEquals(ReindexParameters.OptimizeStorageModeEnum.CURRENT_VERSION, params.getOptimizeStorage());
 
 	}
 }

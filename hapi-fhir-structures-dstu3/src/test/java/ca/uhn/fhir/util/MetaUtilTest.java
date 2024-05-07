@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.dstu3.model.Observation;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,6 @@ public class MetaUtilTest {
 		String source = "testSource";
 		Observation observation = new Observation();
 		MetaUtil.setSource(ourFhirContext, observation, source);
-		assertThat(MetaUtil.getSource(ourFhirContext, observation.getMeta())).isEqualTo(source);
+		assertEquals(source, MetaUtil.getSource(ourFhirContext, observation.getMeta()));
 	}
 }

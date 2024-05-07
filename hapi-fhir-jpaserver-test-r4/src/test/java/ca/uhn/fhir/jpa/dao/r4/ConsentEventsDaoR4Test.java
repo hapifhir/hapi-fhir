@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.IPointcut;
@@ -94,17 +95,17 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		// Fetch the first 10 (don't cross a fetch boundary)
 		List<IBaseResource> resources = outcome.getResources(0, 10);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertThat(returnedIdValues).isEqualTo(myObservationIds.subList(0, 10));
-		assertThat(hitCount.get()).isEqualTo(1);
-		assertThat(interceptedResourceIds).isEqualTo(myObservationIds.subList(0, 21));
+		assertEquals(myObservationIds.subList(0, 10), returnedIdValues);
+		assertEquals(1, hitCount.get());
+		assertEquals(myObservationIds.subList(0, 21), interceptedResourceIds);
 
 		// Fetch the next 30 (do cross a fetch boundary)
 		outcome = myPagingProvider.retrieveResultList(mySrd, outcome.getUuid());
 		resources = outcome.getResources(10, 40);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertThat(returnedIdValues).isEqualTo(myObservationIds.subList(10, 40));
-		assertThat(hitCount.get()).isEqualTo(2);
-		assertThat(interceptedResourceIds).isEqualTo(myObservationIds.subList(0, 50));
+		assertEquals(myObservationIds.subList(10, 40), returnedIdValues);
+		assertEquals(2, hitCount.get());
+		assertEquals(myObservationIds.subList(0, 50), interceptedResourceIds);
 	}
 
 
@@ -126,8 +127,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		// Fetch the first 10 (don't cross a fetch boundary)
 		List<IBaseResource> resources = outcome.getResources(0, 10);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertThat(returnedIdValues).isEqualTo(myObservationIdsEvenOnly.subList(0, 10));
-		assertThat(hitCount.get()).isEqualTo(1);
+		assertEquals(myObservationIdsEvenOnly.subList(0, 10), returnedIdValues);
+		assertEquals(1, hitCount.get());
 		assertThat(interceptedResourceIds).as("Wrong response from " + outcome.getClass()).isEqualTo(myObservationIds.subList(0, 21));
 
 		// Fetch the next 30 (do cross a fetch boundary)
@@ -144,7 +145,7 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 			}
 		}
 		assertThat(returnedIdValues).as("Wrong response from " + outcome.getClass()).isEqualTo(myObservationIdsEvenOnly.subList(10, 25));
-		assertThat(hitCount.get()).isEqualTo(3);
+		assertEquals(3, hitCount.get());
 	}
 
 
@@ -168,15 +169,15 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		// Fetch the first 10 (don't cross a fetch boundary)
 		List<IBaseResource> resources = outcome.getResources(0, 10);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertThat(returnedIdValues).isEqualTo(myObservationIdsEvenOnly.subList(0, 10));
-		assertThat(hitCount.get()).isEqualTo(1);
-		assertThat(interceptedResourceIds).isEqualTo(myObservationIds);
+		assertEquals(myObservationIdsEvenOnly.subList(0, 10), returnedIdValues);
+		assertEquals(1, hitCount.get());
+		assertEquals(myObservationIds, interceptedResourceIds);
 
 		// Fetch the next 30 (do cross a fetch boundary)
 		resources = outcome.getResources(10, 40);
 		returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertThat(returnedIdValues).isEqualTo(myObservationIdsEvenOnly.subList(10, 25));
-		assertThat(hitCount.get()).isEqualTo(1);
+		assertEquals(myObservationIdsEvenOnly.subList(10, 25), returnedIdValues);
+		assertEquals(1, hitCount.get());
 	}
 
 
@@ -201,8 +202,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		// Fetch the first 10 (don't cross a fetch boundary)
 		List<IBaseResource> resources = outcome.getResources(0, 100);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertThat(sort(returnedIdValues)).isEqualTo(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly));
-		assertThat(hitCount.get()).isEqualTo(2);
+		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
+		assertEquals(2, hitCount.get());
 
 	}
 
@@ -230,8 +231,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		List<IBaseResource> resources = outcome.getResources(0, 100);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertThat(sort(returnedIdValues)).isEqualTo(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly));
-		assertThat(hitCount.get()).isEqualTo(2);
+		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
+		assertEquals(2, hitCount.get());
 
 	}
 
@@ -253,10 +254,10 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		// Fetch the first 10 (don't cross a fetch boundary)
 		List<IBaseResource> resources = outcome.getResources(0, 100);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertThat(sort(returnedIdValues)).isEqualTo(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly));
+		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
 
 		// This should probably be 4
-		assertThat(hitCount.get()).isEqualTo(5);
+		assertEquals(5, hitCount.get());
 
 	}
 
@@ -278,8 +279,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		// Fetch the first 10 (don't cross a fetch boundary)
 		List<IBaseResource> resources = outcome.getResources(0, 100);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertThat(sort(returnedIdValues)).isEqualTo(sort(myPatientIds, myObservationIds));
-		assertThat(hitCount.get()).isEqualTo(4);
+		assertEquals(sort(myPatientIds, myObservationIds), sort(returnedIdValues));
+		assertEquals(4, hitCount.get());
 
 	}
 
@@ -303,8 +304,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		// Fetch the first 10 (don't cross a fetch boundary)
 		List<IBaseResource> resources = outcome.getResources(0, 100);
 		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-		assertThat(sort(returnedIdValues)).isEqualTo(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly));
-		assertThat(hitCount.get()).isEqualTo(2);
+		assertEquals(sort(myPatientIdsEvenOnly, myObservationIdsEvenOnly), sort(returnedIdValues));
+		assertEquals(2, hitCount.get());
 
 	}
 
@@ -332,8 +333,8 @@ public class ConsentEventsDaoR4Test extends BaseJpaR4SystemTest {
 		 * Note: Each observation in the observation list will appear twice in the actual
 		 * returned results because we create it then update it in create50Observations()
 		 */
-		assertThat(hitCount.get()).isEqualTo(1);
-		assertThat(sort(interceptedResourceIds)).isEqualTo(sort(myObservationIdsWithoutVersions.subList(90, myObservationIdsWithoutVersions.size())));
+		assertEquals(1, hitCount.get());
+		assertEquals(sort(myObservationIdsWithoutVersions.subList(90, myObservationIdsWithoutVersions.size())), sort(interceptedResourceIds));
 		returnedIdValues.forEach(t -> assertTrue(new IdType(t).getIdPartAsLong() % 2 == 0));
 	}
 

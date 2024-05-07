@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.JobOperationResultJson;
@@ -57,7 +58,7 @@ class JpaJobPersistenceImplTest {
 
 		// validate
 		assertTrue(result.getSuccess());
-		assertThat(result.getMessage()).isEqualTo("Job instance <test-instance-id> successfully cancelled.");
+		assertEquals("Job instance <test-instance-id> successfully cancelled.", result.getMessage());
 	}
 
 	@Test
@@ -71,7 +72,7 @@ class JpaJobPersistenceImplTest {
 
 		// validate
 		assertFalse(result.getSuccess());
-		assertThat(result.getMessage()).isEqualTo("Job instance <test-instance-id> not found.");
+		assertEquals("Job instance <test-instance-id> not found.", result.getMessage());
 	}
 
 	@Test
@@ -85,7 +86,7 @@ class JpaJobPersistenceImplTest {
 
 		// validate
 		assertFalse(result.getSuccess());
-		assertThat(result.getMessage()).isEqualTo("Job instance <test-instance-id> was already cancelled.  Nothing to do.");
+		assertEquals("Job instance <test-instance-id> was already cancelled.  Nothing to do.", result.getMessage());
 	}
 
 	@Test
@@ -139,8 +140,8 @@ class JpaJobPersistenceImplTest {
 
 		// verify
 		assertThat(retInstances).hasSize(instances.size());
-		assertThat(retInstances.get(0).getInstanceId()).isEqualTo(instances.get(0).getId());
-		assertThat(retInstances.get(1).getInstanceId()).isEqualTo(instances.get(1).getId());
+		assertEquals(instances.get(0).getId(), retInstances.get(0).getInstanceId());
+		assertEquals(instances.get(1).getId(), retInstances.get(1).getInstanceId());
 
 		ArgumentCaptor<Pageable> pageableCaptor = ArgumentCaptor.forClass(Pageable.class);
 		verify(myJobInstanceRepository)
@@ -151,8 +152,8 @@ class JpaJobPersistenceImplTest {
 			);
 
 		Pageable pageable = pageableCaptor.getValue();
-		assertThat(pageable.getPageNumber()).isEqualTo(pageStart);
-		assertThat(pageable.getPageSize()).isEqualTo(pageSize);
+		assertEquals(pageStart, pageable.getPageNumber());
+		assertEquals(pageSize, pageable.getPageSize());
 	}
 
 	@Test
@@ -170,7 +171,7 @@ class JpaJobPersistenceImplTest {
 
 		// verify
 		assertThat(retInstance).isPresent();
-		assertThat(retInstance.get().getInstanceId()).isEqualTo(instance.getInstanceId());
+		assertEquals(instance.getInstanceId(), retInstance.get().getInstanceId());
 	}
 
 	private JobInstance createJobInstanceFromEntity(Batch2JobInstanceEntity theEntity) {

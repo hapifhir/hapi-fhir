@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.coordinator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +18,7 @@ class JobDefinitionTest {
 			JobDefinition.newBuilder().build();
 			fail("");
 		} catch (NullPointerException e) {
-			assertThat(e.getMessage()).isEqualTo("No job parameters type was supplied");
+			assertEquals("No job parameters type was supplied", e.getMessage());
 		}
 	}
 
@@ -32,7 +33,7 @@ class JobDefinitionTest {
 				.build();
 			fail("");
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo("At least 2 steps must be supplied");
+			assertEquals("At least 2 steps must be supplied", e.getMessage());
 		}
 	}
 }

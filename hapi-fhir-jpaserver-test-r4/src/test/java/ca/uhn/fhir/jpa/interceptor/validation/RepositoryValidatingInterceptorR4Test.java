@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -62,7 +63,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		Patient patient = new Patient();
 		patient.getMeta().addProfile("http://foo/Profile1");
 		IIdType id = myPatientDao.create(patient).getId();
-		assertThat(id.getVersionIdPart()).isEqualTo("1");
+		assertEquals("1", id.getVersionIdPart());
 	}
 
 	@Test
@@ -85,7 +86,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		patient.getMeta().addProfile("http://foo/Profile2");
 		patient.setActive(true);
 		id = myPatientDao.update(patient).getId();
-		assertThat(id.getVersionIdPart()).isEqualTo("2");
+		assertEquals("2", id.getVersionIdPart());
 
 		// Create with other resource type allowed
 		Observation obs = new Observation();
@@ -115,7 +116,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myPatientDao.create(patient);
 			fail("");
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(575) + "Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]");
+			assertEquals(Msg.code(575) + "Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]", e.getMessage());
 		}
 
 		// No profile blocked
@@ -125,7 +126,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myPatientDao.create(patient);
 			fail("");
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(575) + "Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]");
+			assertEquals(Msg.code(575) + "Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]", e.getMessage());
 		}
 
 	}
@@ -151,7 +152,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myPatientDao.metaDeleteOperation(id, metaDel, mySrd);
 			fail("");
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(575) + "Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]");
+			assertEquals(Msg.code(575) + "Resource of type \"Patient\" does not declare conformance to profile from: [http://foo/Profile1, http://foo/Profile2]", e.getMessage());
 		}
 
 		patient = myPatientDao.read(id);
@@ -175,7 +176,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myPatientDao.create(patient);
 			fail("");
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(575) + "Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad");
+			assertEquals(Msg.code(575) + "Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad", e.getMessage());
 		}
 
 	}
@@ -201,7 +202,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myPatientDao.metaAddOperation(id, metaDel, mySrd);
 			fail("");
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(575) + "Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad");
+			assertEquals(Msg.code(575) + "Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad", e.getMessage());
 		}
 
 		// Explicitly adding the profile is blocked using patch
@@ -229,7 +230,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 			myPatientDao.patch(id, null, PatchTypeEnum.FHIR_PATCH_JSON, null, patch, mySrd);
 			fail("");
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(575) + "Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad2");
+			assertEquals(Msg.code(575) + "Resource of type \"Patient\" must not declare conformance to profile: http://profile-bad2", e.getMessage());
 		} catch (Exception e) {
 			myCaptureQueriesListener.logAllQueriesForCurrentThread();
 			fail("", e.toString());
@@ -258,7 +259,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		//Then
 		try {
 			IIdType id = myPractitionerRoleDao.create(pr).getId();
-			assertThat(id.getVersionIdPart()).isEqualTo("1");
+			assertEquals("1", id.getVersionIdPart());
 		} catch (PreconditionFailedException e) {
 			// should not happen
 			fail("", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
@@ -282,7 +283,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		//Then
 		try {
 			IIdType id = myPractitionerRoleDao.create(pr).getId();
-			assertThat(id.getVersionIdPart()).isEqualTo("1");
+			assertEquals("1", id.getVersionIdPart());
 		} catch (PreconditionFailedException e) {
 			// should not happen
 			fail("", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
@@ -310,7 +311,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		obs.setStatus(Observation.ObservationStatus.AMENDED);
 		try {
 			IIdType id = myObservationDao.create(obs).getId();
-			assertThat(id.getVersionIdPart()).isEqualTo("1");
+			assertEquals("1", id.getVersionIdPart());
 		} catch (PreconditionFailedException e) {
 			// should not happen
 			fail("", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
@@ -337,7 +338,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		obs.setStatus(Observation.ObservationStatus.AMENDED);
 		try {
 			IIdType id = myObservationDao.create(obs).getId();
-			assertThat(id.getVersionIdPart()).isEqualTo("1");
+			assertEquals("1", id.getVersionIdPart());
 		} catch (PreconditionFailedException e) {
 			// should not happen
 			fail("", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
@@ -358,7 +359,7 @@ public class RepositoryValidatingInterceptorR4Test extends BaseJpaR4Test {
 		Observation obs = new Observation();
 		obs.getCode().addCoding().setSystem("http://foo").setCode("123").setDisplay("help im a bug");
 		IIdType id = myObservationDao.create(obs).getId();
-		assertThat(id.getVersionIdPart()).isEqualTo("1");
+		assertEquals("1", id.getVersionIdPart());
 
 		obs = myObservationDao.read(id);
 		assertTrue(obs.getMeta().hasTag());

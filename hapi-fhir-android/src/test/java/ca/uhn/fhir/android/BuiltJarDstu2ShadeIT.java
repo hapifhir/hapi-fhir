@@ -1,5 +1,6 @@
 package ca.uhn.fhir.android;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
@@ -37,7 +38,7 @@ public class BuiltJarDstu2ShadeIT {
 		String str = ctx.newXmlParser().encodeResourceToString(p);
 		Patient p2 = ctx.newXmlParser().parseResource(Patient.class, str);
 
-		assertThat(p2.getIdentifierFirstRep().getSystemElement().getValueAsString()).isEqualTo("system");
+		assertEquals("system", p2.getIdentifierFirstRep().getSystemElement().getValueAsString());
 	}
 
 	@Test
@@ -53,7 +54,7 @@ public class BuiltJarDstu2ShadeIT {
 		String str = ctx.newJsonParser().encodeResourceToString(o);
 		Observation p2 = ctx.newJsonParser().parseResource(Observation.class, str);
 
-		assertThat(p2.getCode().getText()).isEqualTo("TEXT");
+		assertEquals("TEXT", p2.getCode().getText());
 
 		QuantityDt dt = (QuantityDt) p2.getValue();
 		dt.getComparatorElement().getValueAsEnum();

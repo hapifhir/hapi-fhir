@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import org.hl7.fhir.dstu3.model.Bundle;
@@ -69,8 +70,8 @@ public class FhirSystemDaoTransactionDstu3Test extends BaseJpaDstu3SystemTest {
 		Bundle response = mySystemDao.transaction(null, bundle);
 
 		assertThat(response.getEntry()).hasSize(theSize);
-		assertThat(response.getEntry().get(0).getResponse().getStatus()).isEqualTo("201 Created");
-		assertThat(response.getEntry().get(theSize - 1).getResponse().getStatus()).isEqualTo("201 Created");
+		assertEquals("201 Created", response.getEntry().get(0).getResponse().getStatus());
+		assertEquals("201 Created", response.getEntry().get(theSize - 1).getResponse().getStatus());
 	}
 
 }

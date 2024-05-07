@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
@@ -263,7 +264,7 @@ public class AuthorizationInterceptorMultitenantJpaR4Test extends BaseMultitenan
 			Bundle resp2 = myClient.search().byUrl(nextLink).returnBundle(Bundle.class).execute();
 			fail("");
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 403 Forbidden: HAPI-0334: Access denied by default policy (no applicable rules)");
+			assertEquals("HTTP 403 Forbidden: HAPI-0334: Access denied by default policy (no applicable rules)", e.getMessage());
 		}
 	}
 }

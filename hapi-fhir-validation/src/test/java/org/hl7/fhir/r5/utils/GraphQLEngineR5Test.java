@@ -1,5 +1,6 @@
 package org.hl7.fhir.r5.utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.util.TestUtil;
@@ -86,7 +87,7 @@ public class GraphQLEngineR5Test extends BaseValidationTestWithInlineMocks {
 			"    \"unit\":\"cm\"\n" +
 			"  }\n" +
 			"}";
-		assertThat(TestUtil.stripReturns(outputBuilder.toString())).isEqualTo(TestUtil.stripReturns(expected));
+		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
 
 	}
 
@@ -110,7 +111,7 @@ public class GraphQLEngineR5Test extends BaseValidationTestWithInlineMocks {
 		String expected = "{\n" +
 			"  \"id\":\"PATA\"\n" +
 			"}";
-		assertThat(TestUtil.stripReturns(outputBuilder.toString())).isEqualTo(TestUtil.stripReturns(expected));
+		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
 	}
 
 	@Test
@@ -133,7 +134,7 @@ public class GraphQLEngineR5Test extends BaseValidationTestWithInlineMocks {
 			"  \"id\":\"PATA\",\n" +
 			"  \"effectiveDateTime\":\"2022-01-01T12:12:12Z\"\n" +
 			"}";
-		assertThat(TestUtil.stripReturns(outputBuilder.toString())).isEqualTo(TestUtil.stripReturns(expected));
+		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
 	}
 
 
@@ -171,7 +172,7 @@ public class GraphQLEngineR5Test extends BaseValidationTestWithInlineMocks {
 			"    }\n" +
 			"  }\n" +
 			"}";
-		assertThat(TestUtil.stripReturns(outputBuilder.toString())).isEqualTo(TestUtil.stripReturns(expected));
+		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
 
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailDetails;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
@@ -49,19 +50,19 @@ public class EmailSenderImplTest {
 		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		MimeMessage[] messages = ourGreenMail.getReceivedMessages();
-		assertThat(messages.length).isEqualTo(2);
+		assertEquals(2, messages.length);
 		final MimeMessage message = messages[0];
 		ourLog.info("Received: " + GreenMailUtil.getWholeMessage(message));
-		assertThat(message.getSubject()).isEqualTo("test subject");
-		assertThat(message.getFrom().length).isEqualTo(1);
-		assertThat(((InternetAddress) message.getFrom()[0]).getAddress()).isEqualTo("foo@example.com");
-		assertThat(message.getAllRecipients().length).isEqualTo(2);
-		assertThat(((InternetAddress) message.getAllRecipients()[0]).getAddress()).isEqualTo("to1@example.com");
-		assertThat(((InternetAddress) message.getAllRecipients()[1]).getAddress()).isEqualTo("to2@example.com");
-		assertThat(message.getHeader("Content-Type").length).isEqualTo(1);
-		assertThat(message.getHeader("Content-Type")[0]).isEqualTo("text/plain; charset=UTF-8");
+		assertEquals("test subject", message.getSubject());
+		assertEquals(1, message.getFrom().length);
+		assertEquals("foo@example.com", ((InternetAddress) message.getFrom()[0]).getAddress());
+		assertEquals(2, message.getAllRecipients().length);
+		assertEquals("to1@example.com", ((InternetAddress) message.getAllRecipients()[0]).getAddress());
+		assertEquals("to2@example.com", ((InternetAddress) message.getAllRecipients()[1]).getAddress());
+		assertEquals(1, message.getHeader("Content-Type").length);
+		assertEquals("text/plain; charset=UTF-8", message.getHeader("Content-Type")[0]);
 		String foundBody = GreenMailUtil.getBody(message);
-		assertThat(foundBody).isEqualTo("foo");
+		assertEquals("foo", foundBody);
 	}
 
 	private IMailSvc withMailService() {

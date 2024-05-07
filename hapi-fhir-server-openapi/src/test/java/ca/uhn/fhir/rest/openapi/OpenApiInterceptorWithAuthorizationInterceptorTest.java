@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.openapi;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -82,7 +83,7 @@ public class OpenApiInterceptorWithAuthorizationInterceptorTest {
 			resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", response.getStatusLine());
 			ourLog.debug("Response: {}", resp);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 		}
 
 		OpenAPI parsed = Yaml.mapper().readValue(resp, OpenAPI.class);

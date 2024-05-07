@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.rest.api.Constants;
 import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -23,7 +24,7 @@ public class ServletRequestTracingTest {
 
 		// verify
 		assertThat(myRequestIdResult).as("id generated").isNotBlank();
-		assertThat(myRequestIdResult).isEqualTo(myRequest.getAttribute(ServletRequestTracing.ATTRIBUTE_REQUEST_ID));
+		assertEquals(myRequest.getAttribute(ServletRequestTracing.ATTRIBUTE_REQUEST_ID), myRequestIdResult);
 	}
 
 	@Test
@@ -34,7 +35,7 @@ public class ServletRequestTracingTest {
 		run();
 
 		// verify
-		assertThat(myRequestIdResult).isEqualTo("a_request_id");
+		assertEquals("a_request_id", myRequestIdResult);
 	}
 
 	@Test
@@ -47,7 +48,7 @@ public class ServletRequestTracingTest {
 
 		// verify
 		assertThat(secondResult).as("id generated").isNotBlank();
-		assertThat(secondResult).isEqualTo(myRequestIdResult);
+		assertEquals(myRequestIdResult, secondResult);
 	}
 
 }

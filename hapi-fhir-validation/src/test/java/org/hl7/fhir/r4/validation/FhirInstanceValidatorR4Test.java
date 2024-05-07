@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
@@ -390,7 +391,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult result = val.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnErrorOnes(result);
 		assertFalse(result.isSuccessful());
-		assertThat(all.get(0).getMessage()).isEqualTo("The code 'AA  ' is not valid (whitespace rules)");
+		assertEquals("The code 'AA  ' is not valid (whitespace rules)", all.get(0).getMessage());
 
 	}
 
@@ -439,7 +440,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult result = val.validateWithResult(operationDefinition);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertThat(all.get(0).getMessage()).isEqualTo("The property resource  must be a JSON Array, not a Primitive property (at OperationDefinition)");
+		assertEquals("The property resource  must be a JSON Array, not a Primitive property (at OperationDefinition)", all.get(0).getMessage());
 	}
 
 	@Test
@@ -540,7 +541,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		result = val.validateWithResult(input);
 		all = logResultsAndReturnAll(result);
 		assertFalse(result.isSuccessful());
-		assertThat(all.get(0).getMessage()).isEqualTo("All observations should have a subject");
+		assertEquals("All observations should have a subject", all.get(0).getMessage());
 	}
 
 
@@ -594,7 +595,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(errors).hasSize(1);
-		assertThat(errors.get(0).getMessage()).isEqualTo("The value '%%%2@()()' is not a valid Base64 value");
+		assertEquals("The value '%%%2@()()' is not a valid Base64 value", errors.get(0).getMessage());
 
 	}
 
@@ -699,7 +700,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertThat(errors).hasSize(2);
 		assertThat(errors.get(0).getMessage()).contains("None of the codings provided are in the value set 'LOINC Diagnostic Report Codes'");
-		assertThat(errors.get(1).getMessage()).isEqualTo("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway");
+		assertEquals("Base64 encoded values SHOULD not contain any whitespace (per RFC 4648). Note that non-validating readers are encouraged to accept whitespace anyway", errors.get(1).getMessage());
 	}
 
 	@Test
@@ -757,7 +758,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 			// https://gforge.hl7.org/gf/project/fhir/tracker/?action=TrackerItemEdit&tracker_item_id=17207
 			if (next.getId().equalsIgnoreCase("http://hl7.org/fhir/OperationDefinition/StructureDefinition-snapshot")) {
 				assertThat(results).hasSize(1);
-				assertThat(results.get(0).getMessage()).isEqualTo("A search type can only be specified for parameters of type string [searchType.exists() implies type = 'string']");
+				assertEquals("A search type can only be specified for parameters of type string [searchType.exists() implies type = 'string']", results.get(0).getMessage());
 				continue;
 			}
 
@@ -923,14 +924,14 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(1);
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
-		assertThat(output.getMessages().get(0).getLocationString()).isEqualTo("Patient");
-		assertThat(output.getMessages().get(0).getMessage()).isEqualTo("Unrecognized property 'foo'");
+		assertEquals("Patient", output.getMessages().get(0).getLocationString());
+		assertEquals("Unrecognized property 'foo'", output.getMessages().get(0).getMessage());
 
 		OperationOutcome operationOutcome = (OperationOutcome) output.toOperationOutcome();
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(operationOutcome));
-		assertThat(operationOutcome.getIssue().get(0).getDiagnostics()).isEqualTo("Unrecognized property 'foo'");
-		assertThat(operationOutcome.getIssue().get(0).getLocation().get(0).getValue()).isEqualTo("Patient");
-		assertThat(operationOutcome.getIssue().get(0).getLocation().get(1).getValue()).isEqualTo("Line[5] Col[23]");
+		assertEquals("Unrecognized property 'foo'", operationOutcome.getIssue().get(0).getDiagnostics());
+		assertEquals("Patient", operationOutcome.getIssue().get(0).getLocation().get(0).getValue());
+		assertEquals("Line[5] Col[23]", operationOutcome.getIssue().get(0).getLocation().get(1).getValue());
 	}
 
 	@Test
@@ -977,8 +978,8 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(1);
 
-		assertThat(output.getMessages().get(0).getMessage()).isEqualTo("Unknown extension http://hl7.org/fhir/v3/ethnicity");
-		assertThat(output.getMessages().get(0).getSeverity()).isEqualTo(ResultSeverityEnum.INFORMATION);
+		assertEquals("Unknown extension http://hl7.org/fhir/v3/ethnicity", output.getMessages().get(0).getMessage());
+		assertEquals(ResultSeverityEnum.INFORMATION, output.getMessages().get(0).getSeverity());
 	}
 
 	@Test
@@ -1012,8 +1013,8 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myFhirValidator.validateWithResult(encoded);
 		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(1);
 
-		assertThat(output.getMessages().get(0).getMessage()).isEqualTo("The extension http://hl7.org/fhir/v3/ethnicity is unknown, and not allowed here");
-		assertThat(output.getMessages().get(0).getSeverity()).isEqualTo(ResultSeverityEnum.ERROR);
+		assertEquals("The extension http://hl7.org/fhir/v3/ethnicity is unknown, and not allowed here", output.getMessages().get(0).getMessage());
+		assertEquals(ResultSeverityEnum.ERROR, output.getMessages().get(0).getSeverity());
 	}
 
 	@Test
@@ -1046,10 +1047,10 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(1);
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
-		assertThat(output.getMessages().get(0).getLocationString()).isEqualTo("/f:Patient");
-		assertThat(output.getMessages().get(0).getMessage()).isEqualTo("Undefined element 'foo' at /f:Patient");
-		assertThat(output.getMessages().get(0).getLocationCol().intValue()).isEqualTo(28);
-		assertThat(output.getMessages().get(0).getLocationLine().intValue()).isEqualTo(4);
+		assertEquals("/f:Patient", output.getMessages().get(0).getLocationString());
+		assertEquals("Undefined element 'foo' at /f:Patient", output.getMessages().get(0).getMessage());
+		assertEquals(28, output.getMessages().get(0).getLocationCol().intValue());
+		assertEquals(4, output.getMessages().get(0).getLocationLine().intValue());
 	}
 
 	@Test
@@ -1100,7 +1101,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(res.size()).as(output.toString()).isEqualTo(1);
-		assertThat(output.getMessages().get(0).getMessage()).isEqualTo("A code with no system has no defined meaning. A system should be provided");
+		assertEquals("A code with no system has no defined meaning. A system should be provided", output.getMessages().get(0).getMessage());
 	}
 
 	/**
@@ -1180,8 +1181,8 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 
-		assertThat(errors.get(0).getSeverity()).isEqualTo(ResultSeverityEnum.ERROR);
-		assertThat(errors.get(0).getMessage()).isEqualTo("Unknown code for 'http://loinc.org#12345'");
+		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
+		assertEquals("Unknown code for 'http://loinc.org#12345'", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -1222,8 +1223,8 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 
 		assertThat(errors).hasSize(1);
-		assertThat(errors.get(0).getMessage()).isEqualTo("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it is unknown");
-		assertThat(errors.get(0).getSeverity()).isEqualTo(ResultSeverityEnum.ERROR);
+		assertEquals("Profile reference 'http://foo/structuredefinition/myprofile' has not been checked because it is unknown", errors.get(0).getMessage());
+		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
 	}
 
 	@Test
@@ -1252,7 +1253,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		ValidationResult output = myFhirValidator.validateWithResult(input);
-		assertThat(0).isEqualTo(output.getMessages().size());
+		assertEquals(output.getMessages().size(), 0);
 	}
 
 	@Test
@@ -1270,7 +1271,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 				"</Observation>";
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		logResultsAndReturnAll(output);
-		assertThat(output.getMessages().get(0).getMessage()).isEqualTo("The value provided ('notvalidcode') is not in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.0.1), and a code is required from this value set  (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')");
+		assertEquals("The value provided ('notvalidcode') is not in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.0.1), and a code is required from this value set  (error message = Unknown code 'notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')", output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -1298,7 +1299,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info(input);
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		logResultsAndReturnAll(output);
-		assertThat(output.getMessages().get(0).getMessage()).isEqualTo("");
+		assertEquals("", output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -1347,9 +1348,9 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		OperationOutcome oo = (OperationOutcome) output.toOperationOutcome();
 		ourLog.info("Outcome: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 		assertThat(oo.getIssue()).hasSize(1);
-		assertThat(oo.getIssue().get(0).getCode()).isEqualTo(OperationOutcome.IssueType.PROCESSING);
-		assertThat(oo.getIssue().get(0).getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.INFORMATION);
-		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo("Details for Patient/A matching against profile http://hl7.org/fhir/StructureDefinition/Patient|4.0.1 - Observation.subject->Patient.text: Narrative.div: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Narrative|4.0.1)");
+		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
+		assertEquals(OperationOutcome.IssueSeverity.INFORMATION, oo.getIssue().get(0).getSeverity());
+		assertEquals("Details for Patient/A matching against profile http://hl7.org/fhir/StructureDefinition/Patient|4.0.1 - Observation.subject->Patient.text: Narrative.div: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Narrative|4.0.1)", oo.getIssue().get(0).getDiagnostics());
 		assertThat(oo.getIssue().get(0).getLocation().stream().map(PrimitiveType::getValue).collect(Collectors.toList())).containsExactly("Observation.subject", "Line[1] Col[238]");
 	}
 
@@ -1367,7 +1368,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertThat(errors.size()).as(errors.toString()).isGreaterThan(0);
-		assertThat(errors.get(0).getMessage()).isEqualTo("Unknown code for 'http://acme.org#9988877'");
+		assertEquals("Unknown code for 'http://acme.org#9988877'", errors.get(0).getMessage());
 
 	}
 
@@ -1405,7 +1406,7 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(errors).hasSize(1);
-		assertThat(errors.get(0).getMessage()).isEqualTo("Unknown code for 'http://loinc.org#1234'");
+		assertEquals("Unknown code for 'http://loinc.org#1234'", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -1434,9 +1435,9 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		ValidationResult output = myFhirValidator.validateWithResult(p);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertThat(all).hasSize(1);
-		assertThat(all.get(0).getLocationString()).isEqualTo("Patient.identifier[0].type");
+		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertThat(all.get(0).getMessage()).contains("None of the codings provided are in the value set 'IdentifierType'");
-		assertThat(all.get(0).getSeverity()).isEqualTo(ResultSeverityEnum.WARNING);
+		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}
 
@@ -1666,22 +1667,22 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		OperationOutcome oo = (OperationOutcome) result.toOperationOutcome();
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
-		assertThat(result.getMessages().get(0).getMessage()).isEqualTo("Error processing unit 'MG/DL': The unit 'DL' is unknown' at position 3 for 'http://unitsofmeasure.org#MG/DL'");
-		assertThat(result.getMessages().get(0).getSeverity()).isEqualTo(ResultSeverityEnum.ERROR);
-		assertThat(result.getMessages().get(0).getLocationLine()).isEqualTo(15);
-		assertThat(result.getMessages().get(0).getLocationCol()).isEqualTo(4);
-		assertThat(result.getMessages().get(0).getLocationString()).isEqualTo("Observation.value.ofType(Quantity)");
-		assertThat(result.getMessages().get(0).getMessageId()).isEqualTo("Terminology_PassThrough_TX_Message");
+		assertEquals("Error processing unit 'MG/DL': The unit 'DL' is unknown' at position 3 for 'http://unitsofmeasure.org#MG/DL'", result.getMessages().get(0).getMessage());
+		assertEquals(ResultSeverityEnum.ERROR, result.getMessages().get(0).getSeverity());
+		assertEquals(15, result.getMessages().get(0).getLocationLine());
+		assertEquals(4, result.getMessages().get(0).getLocationCol());
+		assertEquals("Observation.value.ofType(Quantity)", result.getMessages().get(0).getLocationString());
+		assertEquals("Terminology_PassThrough_TX_Message", result.getMessages().get(0).getMessageId());
 
-		assertThat(((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue()).isEqualTo(15);
-		assertThat(((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue()).isEqualTo(4);
-		assertThat(((StringType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").getValue()).getValue()).isEqualTo("Terminology_PassThrough_TX_Message");
-		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo("Error processing unit 'MG/DL': The unit 'DL' is unknown' at position 3 for 'http://unitsofmeasure.org#MG/DL'");
-		assertThat(oo.getIssue().get(0).getCode()).isEqualTo(OperationOutcome.IssueType.PROCESSING);
-		assertThat(oo.getIssue().get(0).getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertEquals(15, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
+		assertEquals(4, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
+		assertEquals("Terminology_PassThrough_TX_Message", ((StringType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").getValue()).getValue());
+		assertEquals("Error processing unit 'MG/DL': The unit 'DL' is unknown' at position 3 for 'http://unitsofmeasure.org#MG/DL'", oo.getIssue().get(0).getDiagnostics());
+		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
+		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertThat(oo.getIssue().get(0).getLocation()).hasSize(2);
-		assertThat(oo.getIssue().get(0).getLocation().get(0).getValue()).isEqualTo("Observation.value.ofType(Quantity)");
-		assertThat(oo.getIssue().get(0).getLocation().get(1).getValue()).isEqualTo("Line[15] Col[4]");
+		assertEquals("Observation.value.ofType(Quantity)", oo.getIssue().get(0).getLocation().get(0).getValue());
+		assertEquals("Line[15] Col[4]", oo.getIssue().get(0).getLocation().get(1).getValue());
 	}
 
 	@Test
@@ -1707,22 +1708,22 @@ public class FhirInstanceValidatorR4Test extends BaseValidationTestWithInlineMoc
 		OperationOutcome oo = (OperationOutcome) result.toOperationOutcome();
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
-		assertThat(result.getMessages().get(0).getMessage()).isEqualTo("Unknown code 'urn:iso:std:iso:4217#blah' for 'urn:iso:std:iso:4217#blah'");
-		assertThat(result.getMessages().get(0).getSeverity()).isEqualTo(ResultSeverityEnum.ERROR);
-		assertThat(result.getMessages().get(0).getLocationLine()).isEqualTo(15);
-		assertThat(result.getMessages().get(0).getLocationCol()).isEqualTo(4);
-		assertThat(result.getMessages().get(0).getLocationString()).isEqualTo("Observation.value.ofType(Quantity)");
-		assertThat(result.getMessages().get(0).getMessageId()).isEqualTo("Terminology_PassThrough_TX_Message");
+		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah' for 'urn:iso:std:iso:4217#blah'", result.getMessages().get(0).getMessage());
+		assertEquals(ResultSeverityEnum.ERROR, result.getMessages().get(0).getSeverity());
+		assertEquals(15, result.getMessages().get(0).getLocationLine());
+		assertEquals(4, result.getMessages().get(0).getLocationCol());
+		assertEquals("Observation.value.ofType(Quantity)", result.getMessages().get(0).getLocationString());
+		assertEquals("Terminology_PassThrough_TX_Message", result.getMessages().get(0).getMessageId());
 
-		assertThat(((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue()).isEqualTo(15);
-		assertThat(((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue()).isEqualTo(4);
-		assertThat(((StringType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").getValue()).getValue()).isEqualTo("Terminology_PassThrough_TX_Message");
-		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo("Unknown code 'urn:iso:std:iso:4217#blah' for 'urn:iso:std:iso:4217#blah'");
-		assertThat(oo.getIssue().get(0).getCode()).isEqualTo(OperationOutcome.IssueType.PROCESSING);
-		assertThat(oo.getIssue().get(0).getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertEquals(15, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
+		assertEquals(4, ((IntegerType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
+		assertEquals("Terminology_PassThrough_TX_Message", ((StringType) oo.getIssue().get(0).getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id").getValue()).getValue());
+		assertEquals("Unknown code 'urn:iso:std:iso:4217#blah' for 'urn:iso:std:iso:4217#blah'", oo.getIssue().get(0).getDiagnostics());
+		assertEquals(OperationOutcome.IssueType.PROCESSING, oo.getIssue().get(0).getCode());
+		assertEquals(OperationOutcome.IssueSeverity.ERROR, oo.getIssue().get(0).getSeverity());
 		assertThat(oo.getIssue().get(0).getLocation()).hasSize(2);
-		assertThat(oo.getIssue().get(0).getLocation().get(0).getValue()).isEqualTo("Observation.value.ofType(Quantity)");
-		assertThat(oo.getIssue().get(0).getLocation().get(1).getValue()).isEqualTo("Line[15] Col[4]");
+		assertEquals("Observation.value.ofType(Quantity)", oo.getIssue().get(0).getLocation().get(0).getValue());
+		assertEquals("Line[15] Col[4]", oo.getIssue().get(0).getLocation().get(1).getValue());
 	}
 
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -247,7 +248,7 @@ abstract public class BaseR4SearchLastN extends BaseJpaTest {
 			assertThat(observationPatientMap).containsEntry(theObservationIds.get(theNextObservationIdx), patientId);
 			theNextObservationIdx = validateSortingWithinPatient(theObservationIds, theNextObservationIdx, theCodes, theCategores, patientId);
 		}
-		assertThat(theNextObservationIdx).isEqualTo(theObservationIds.size());
+		assertEquals(theObservationIds.size(), theNextObservationIdx);
 	}
 
 	private int validateSortingWithinPatient(List<String> theObservationIds, int theFirstObservationIdxForPatient, List<String> theCodes,

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
@@ -67,7 +68,7 @@ public class SearchReturningProfiledResourceDstu2Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/");
 		Bundle bundle = client.search().forResource(PatientProfileDstu2.class).returnBundle(Bundle.class).execute();
 
-		assertThat(bundle.getEntry().get(0).getResource().getClass()).isEqualTo(PatientProfileDstu2.class);
+		assertEquals(PatientProfileDstu2.class, bundle.getEntry().get(0).getResource().getClass());
 	}
 
 	@Test
@@ -76,7 +77,7 @@ public class SearchReturningProfiledResourceDstu2Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/");
 		Bundle bundle = client.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
 
-		assertThat(bundle.getEntry().get(0).getResource().getClass()).isEqualTo(PatientProfileDstu2.class);
+		assertEquals(PatientProfileDstu2.class, bundle.getEntry().get(0).getResource().getClass());
 	}
 
 	@Test
@@ -84,7 +85,7 @@ public class SearchReturningProfiledResourceDstu2Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/");
 		Bundle bundle = client.search().forResource(Patient.class).returnBundle(Bundle.class).execute();
 
-		assertThat(bundle.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
+		assertEquals(Patient.class, bundle.getEntry().get(0).getResource().getClass());
 	}
 
 	@Test

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.coordinator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -51,13 +52,13 @@ class JobDefinitionRegistryTest {
 
 	@Test
 	void testGetLatestJobDefinition() {
-		assertThat(mySvc.getLatestJobDefinition("A").orElseThrow(IllegalArgumentException::new).getJobDefinitionVersion()).isEqualTo(2);
+		assertEquals(2, mySvc.getLatestJobDefinition("A").orElseThrow(IllegalArgumentException::new).getJobDefinitionVersion());
 	}
 
 	@Test
 	void testGetJobDefinition() {
-		assertThat(mySvc.getJobDefinition("A", 1).orElseThrow(IllegalArgumentException::new).getJobDefinitionVersion()).isEqualTo(1);
-		assertThat(mySvc.getJobDefinition("A", 2).orElseThrow(IllegalArgumentException::new).getJobDefinitionVersion()).isEqualTo(2);
+		assertEquals(1, mySvc.getJobDefinition("A", 1).orElseThrow(IllegalArgumentException::new).getJobDefinitionVersion());
+		assertEquals(2, mySvc.getJobDefinition("A", 2).orElseThrow(IllegalArgumentException::new).getJobDefinitionVersion());
 	}
 
 
@@ -76,7 +77,7 @@ class JobDefinitionRegistryTest {
 				.build());
 			fail("");
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-2047: Multiple definitions for job[A] version: 2");
+			assertEquals("HAPI-2047: Multiple definitions for job[A] version: 2", e.getMessage());
 		}
 
 		try {
@@ -91,7 +92,7 @@ class JobDefinitionRegistryTest {
 				.build());
 			fail("");
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-2046: Duplicate step[S1] in definition[A] version: 3");
+			assertEquals("HAPI-2046: Duplicate step[S1] in definition[A] version: 3", e.getMessage());
 		}
 
 		try {
@@ -105,7 +106,7 @@ class JobDefinitionRegistryTest {
 				.build());
 			fail("");
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo("No step ID specified");
+			assertEquals("No step ID specified", e.getMessage());
 		}
 
 	}
@@ -118,7 +119,7 @@ class JobDefinitionRegistryTest {
 			mySvc.getJobDefinitionOrThrowException(jobDefinitionId, jobDefinitionVersion);
 			fail("");
 		} catch (JobExecutionFailedException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-2043: Unknown job definition ID[" + jobDefinitionId + "] version[" + jobDefinitionVersion + "]");
+			assertEquals("HAPI-2043: Unknown job definition ID[" + jobDefinitionId + "] version[" + jobDefinitionVersion + "]", e.getMessage());
 		}
 	}
 

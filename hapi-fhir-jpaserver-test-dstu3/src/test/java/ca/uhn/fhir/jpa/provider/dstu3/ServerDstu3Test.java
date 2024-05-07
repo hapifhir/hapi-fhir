@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -39,7 +40,7 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		try {
 			ourLog.info(resp.toString());
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.debug(respString);
@@ -74,7 +75,7 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 			String string = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(string);
 
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 		}
 	}
 

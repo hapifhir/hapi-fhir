@@ -100,9 +100,9 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		task = myTaskDao.read(id);
 		assertThat(task.getPartOf()).hasSize(3);
-		assertThat(task.getPartOf().get(0).getReference()).isEqualTo("Task/AAA");
-		assertThat(task.getPartOf().get(1).getReference()).isEqualTo("Task/AAA");
-		assertThat(task.getPartOf().get(2).getReference()).isEqualTo("Task/AAA");
+		assertEquals("Task/AAA", task.getPartOf().get(0).getReference());
+		assertEquals("Task/AAA", task.getPartOf().get(1).getReference());
+		assertEquals("Task/AAA", task.getPartOf().get(2).getReference());
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add(Task.SP_PART_OF, new ReferenceParam("Task/AAA"));
@@ -196,8 +196,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		map.setLoadSynchronous(true);
 		map.add("_id", new TokenParam("999999999999999"));
 		IBundleProvider outcome = myPatientDao.search(map);
-		assertThat(outcome.size().intValue()).isEqualTo(1);
-		assertThat(outcome.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/999999999999999");
+		assertEquals(1, outcome.size().intValue());
+		assertEquals("Patient/999999999999999", outcome.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
@@ -295,7 +295,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		//Ensure the Obs has the right placeholder ID.
 		IIdType placeholderPatId = placeholderPat.getIdElement();
-		assertThat(placeholderPatId.toUnqualifiedVersionless().getValueAsString()).isEqualTo(createdObs.getSubject().getReference());
+		assertEquals(createdObs.getSubject().getReference(), placeholderPatId.toUnqualifiedVersionless().getValueAsString());
 
 		/*
 		 * Should have a single identifier populated.
@@ -304,8 +304,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertThat(placeholderPat.getIdentifier()).hasSize(1);
 		List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
-		assertThat(identifier.getSystem()).isEqualTo("http://foo");
-		assertThat(identifier.getValue()).isEqualTo("123");
+		assertEquals("http://foo", identifier.getSystem());
+		assertEquals("123", identifier.getValue());
 	}
 
 
@@ -340,7 +340,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		//Ensure the Obs has the right placeholder ID.
 		IIdType placeholderPatId = placeholderPat.getIdElement();
-		assertThat(placeholderPatId.toUnqualifiedVersionless().getValueAsString()).isEqualTo(createdObs.getSubject().getReference());
+		assertEquals(createdObs.getSubject().getReference(), placeholderPatId.toUnqualifiedVersionless().getValueAsString());
 
 		/*
 		 * Should have a single identifier populated.
@@ -349,8 +349,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertThat(placeholderPat.getIdentifier()).hasSize(1);
 		List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
-		assertThat(identifier.getSystem()).isEqualTo("http://foo");
-		assertThat(identifier.getValue()).isEqualTo("123");
+		assertEquals("http://foo", identifier.getSystem());
+		assertEquals("123", identifier.getValue());
 	}
 
 
@@ -386,7 +386,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		//Ensure the Obs has the right placeholder ID.
 		IIdType placeholderPatId = placeholderPat.getIdElement();
-		assertThat(placeholderPatId.toUnqualifiedVersionless().getValueAsString()).isEqualTo(createdObs.getSubject().getReference());
+		assertEquals(createdObs.getSubject().getReference(), placeholderPatId.toUnqualifiedVersionless().getValueAsString());
 
 		/*
 		 * Should have a single identifier populated.
@@ -395,8 +395,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertThat(placeholderPat.getIdentifier()).hasSize(1);
 		List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
-		assertThat(identifier.getSystem()).isEqualTo("http://bar");
-		assertThat(identifier.getValue()).isEqualTo("321");
+		assertEquals("http://bar", identifier.getSystem());
+		assertEquals("321", identifier.getValue());
 
 
 	}
@@ -428,7 +428,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		//Ensure the Obs has the right placeholder ID.
 		final IIdType placeholderPatId = placeholderPat.getIdElement();
-		assertThat(placeholderPatId.toUnqualifiedVersionless().getValueAsString()).isEqualTo(createdObs.getSubject().getReference());
+		assertEquals(createdObs.getSubject().getReference(), placeholderPatId.toUnqualifiedVersionless().getValueAsString());
 		assertTrue(placeholderPatId.isIdPartValidLong());
 		assertTrue(placeholderPatId.isVersionIdPartValidLong());
 
@@ -439,8 +439,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		assertThat(placeholderPat.getIdentifier()).hasSize(1);
 		final List<Identifier> identifiers = placeholderPat.getIdentifier();
 		Identifier identifier = identifiers.get(0);
-		assertThat(identifier.getSystem()).isEqualTo(system);
-		assertThat(identifier.getValue()).isEqualTo(value);
+		assertEquals(system, identifier.getSystem());
+		assertEquals(value, identifier.getValue());
 	}
 
 	@Test
@@ -465,7 +465,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		final IBundleProvider organizationSearch = myOrganizationDao.search(new SearchParameterMap(Organization.SP_IDENTIFIER, new TokenParam(TEST_IDENTIFIER_SYSTEM, identifierValue)), new SystemRequestDetails());
 		final List<IBaseResource> allResources = organizationSearch.getAllResources();
 		assertThat(allResources).hasSize(1);
-		assertThat(allResources.get(0).getIdElement().getResourceType()).isEqualTo(ResourceType.Organization.name());
+		assertEquals(ResourceType.Organization.name(), allResources.get(0).getIdElement().getResourceType());
 		assertThat(allResources.get(0).getIdElement().toUnqualifiedVersionless().toString()).startsWith(ResourceType.Organization.name());
 		assertThat(organizationSearch.getAllResourceIds()).hasSize(1);
 	}
@@ -505,7 +505,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		//Ensure the Obs has the right placeholder ID.
 		IIdType placeholderPatId = placeholderPat.getIdElement();
-		assertThat(placeholderPatId.toUnqualifiedVersionless().getValueAsString()).isEqualTo(createdObs.getSubject().getReference());
+		assertEquals(createdObs.getSubject().getReference(), placeholderPatId.toUnqualifiedVersionless().getValueAsString());
 
 		/*
 		 * Placeholder Identifiers should both be populated since they were both provided, and did not match
@@ -515,12 +515,12 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		List<Identifier> identifiers = placeholderPat.getIdentifier();
 
 		//inline match-url identifier
-		assertThat(identifiers.get(1).getSystem()).isEqualTo("http://foo");
-		assertThat(identifiers.get(1).getValue()).isEqualTo("123");
+		assertEquals("http://foo", identifiers.get(1).getSystem());
+		assertEquals("123", identifiers.get(1).getValue());
 
 		//subject identifier
-		assertThat(identifiers.get(0).getSystem()).isEqualTo(system);
-		assertThat(identifiers.get(0).getValue()).isEqualTo(value);
+		assertEquals(system, identifiers.get(0).getSystem());
+		assertEquals(value, identifiers.get(0).getValue());
 
 
 		// Conditionally update a Patient with the same identifier
@@ -540,8 +540,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		 */
 		createdObs = myObservationDao.read(obsId);
 		ourLog.debug("\nObservation read after Patient update:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
-		assertThat(conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString()).isEqualTo(createdObs.getSubject().getReference());
-		assertThat(conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString()).isEqualTo(placeholderPatId.toUnqualifiedVersionless().getValueAsString());
+		assertEquals(createdObs.getSubject().getReference(), conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString());
+		assertEquals(placeholderPatId.toUnqualifiedVersionless().getValueAsString(), conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString());
 	}
 
 	@Test
@@ -571,7 +571,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		IIdType placeholderPatId = placeholderPat.getIdElement();
 		ourLog.debug("\nPlaceholder Patient created:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(placeholderPat));
 		assertThat(placeholderPat.getIdentifier()).hasSize(1);
-		assertThat(placeholderPatId.toUnqualifiedVersionless().getValueAsString()).isEqualTo(createdObs.getSubject().getReference());
+		assertEquals(createdObs.getSubject().getReference(), placeholderPatId.toUnqualifiedVersionless().getValueAsString());
 
 		// Conditionally update a Patient with the same identifier
 		Patient patToConditionalUpdate = new Patient();
@@ -590,8 +590,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		 */
 		createdObs = myObservationDao.read(obsId);
 		ourLog.debug("\nObservation read after Patient update:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(createdObs));
-		assertThat(conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString()).isEqualTo(createdObs.getSubject().getReference());
-		assertThat(conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString()).isEqualTo(placeholderPatId.toUnqualifiedVersionless().getValueAsString());
+		assertEquals(createdObs.getSubject().getReference(), conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString());
+		assertEquals(placeholderPatId.toUnqualifiedVersionless().getValueAsString(), conditionalUpdatePatId.toUnqualifiedVersionless().getValueAsString());
 	}
 
 	@Test
@@ -611,8 +611,8 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		Patient patient = myPatientDao.read(new IdType(createdObs.getSubject().getReference()));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
 		assertThat(patient.getIdentifier()).hasSize(1);
-		assertThat(patient.getIdentifier().get(0).getSystem()).isEqualTo("http://foo");
-		assertThat(patient.getIdentifier().get(0).getValue()).isEqualTo("123");
+		assertEquals("http://foo", patient.getIdentifier().get(0).getSystem());
+		assertEquals("123", patient.getIdentifier().get(0).getValue());
 	}
 
 	@Test
@@ -649,7 +649,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		IIdType id = myObservationDao.create(obsToCreate, mySrd).getId();
 
 		Observation createdObs = myObservationDao.read(id);
-		assertThat(createdObs.getSubject().getReference()).isEqualTo("Patient/ABC");
+		assertEquals("Patient/ABC", createdObs.getSubject().getReference());
 	}
 
 	@Test
@@ -700,7 +700,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
 		assertNotNull(returned);
 		assertTrue(returned.getActive());
-		assertThat(returned.getIdElement().getVersionIdPartAsLong()).isEqualTo(2);
+		assertEquals(2, returned.getIdElement().getVersionIdPartAsLong());
 
 		Observation retObservation = myObservationDao.read(obs.getIdElement());
 		assertNotNull(retObservation);
@@ -735,7 +735,7 @@ public class FhirResourceDaoCreatePlaceholdersR4Test extends BaseJpaR4Test {
 
 		Patient returned = myPatientDao.read(patientRef.getReferenceElement());
 		assertNotNull(returned);
-		assertThat(returned.getIdElement().getVersionIdPartAsLong()).isEqualTo(2);
+		assertEquals(2, returned.getIdElement().getVersionIdPartAsLong());
 
 		Observation retObservation = myObservationDao.read(obs.getIdElement());
 		assertNotNull(retObservation);

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -372,14 +373,14 @@ chunk3, LAST, QUEUED
 	private void assertError(String theExpectedErrorMessage) {
 		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(TEST_INSTANCE_ID);
 		assertThat(instance).isPresent();
-		assertThat(instance.get().getErrorMessage()).isEqualTo(theExpectedErrorMessage);
+		assertEquals(theExpectedErrorMessage, instance.get().getErrorMessage());
 	}
 
 
 	private void assertCurrentGatedStep(String theNextStepId) {
 		Optional<JobInstance> instance = myJobPersistence.fetchInstance(TEST_INSTANCE_ID);
 		assertThat(instance).isPresent();
-		assertThat(instance.get().getCurrentGatedStepId()).isEqualTo(theNextStepId);
+		assertEquals(theNextStepId, instance.get().getCurrentGatedStepId());
 	}
 
 	@Nonnull
@@ -440,7 +441,7 @@ chunk3, LAST, QUEUED
 	private void assertInstanceStatus(StatusEnum theInProgress) {
 		Optional<Batch2JobInstanceEntity> instance = myJobInstanceRepository.findById(TEST_INSTANCE_ID);
 		assertThat(instance).isPresent();
-		assertThat(instance.get().getStatus()).isEqualTo(theInProgress);
+		assertEquals(theInProgress, instance.get().getStatus());
 	}
 	@Nonnull
 	private static JobDefinition<? extends IModelJson> buildGatedJobDefinition(IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> theFirstStep, IJobStepWorker<TestJobParameters, FirstStepOutput, SecondStepOutput> theSecondStep, IJobStepWorker<TestJobParameters, SecondStepOutput, VoidModel> theLastStep) {

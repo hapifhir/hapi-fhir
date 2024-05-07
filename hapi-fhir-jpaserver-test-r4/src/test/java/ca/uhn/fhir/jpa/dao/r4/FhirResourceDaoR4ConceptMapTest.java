@@ -1209,7 +1209,7 @@ public class FhirResourceDaoR4ConceptMapTest extends BaseJpaR4Test {
 		request.setTargetSystem("http://hl7.org/fhir/sid/icd-10-us");
 		TranslateConceptResults outcome = myConceptMapDao.translate(request, mySrd);
 
-		assertThat(outcome.getResults().get(0).getCode()).isEqualTo("S52.209A");
+		assertEquals("S52.209A", outcome.getResults().get(0).getCode());
 	}
 
 	@Test

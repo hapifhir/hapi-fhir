@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -60,9 +61,9 @@ public class ClientIntegrationTest {
 
 		List<Patient> actualPatients = client.searchForPatients(new StringDt("AAAABBBB"));
 		assertThat(actualPatients).hasSize(1);
-		assertThat(actualPatients.get(0).getNameFirstRep().getFamily()).isEqualTo("AAAABBBB");
+		assertEquals("AAAABBBB", actualPatients.get(0).getNameFirstRep().getFamily());
 
-		assertThat(myPatientProvider.getAuthorizationHeader()).isEqualTo("Basic Zm9vYmFyOmJvb2JlYXI=");
+		assertEquals("Basic Zm9vYmFyOmJvb2JlYXI=", myPatientProvider.getAuthorizationHeader());
 	}
 
 	@AfterEach

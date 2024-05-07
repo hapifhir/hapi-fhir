@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.mail;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -37,7 +38,7 @@ public class MailConfigTest {
 		// execute
 		final String actual = fixture.getSmtpHostname();
 		// validate
-		assertThat(actual).isEqualTo(SMTP_HOST_NAME);
+		assertEquals(SMTP_HOST_NAME, actual);
 	}
 
 	@Test
@@ -45,7 +46,7 @@ public class MailConfigTest {
 		// execute
 		final int actual = fixture.getSmtpPort();
 		// validate
-		assertThat(actual).isEqualTo(SMTP_PORT);
+		assertEquals(SMTP_PORT, actual);
 	}
 
 	@Test
@@ -53,7 +54,7 @@ public class MailConfigTest {
 		// execute
 		final String actual = fixture.getSmtpUsername();
 		// validate
-		assertThat(actual).isEqualTo(SMTP_USERNAME);
+		assertEquals(SMTP_USERNAME, actual);
 	}
 
 	@Test
@@ -61,7 +62,7 @@ public class MailConfigTest {
 		// execute
 		final String actual = fixture.getSmtpPassword();
 		// validate
-		assertThat(actual).isEqualTo(SMTP_PASSWORD);
+		assertEquals(SMTP_PASSWORD, actual);
 	}
 
 	@Test
@@ -77,18 +78,18 @@ public class MailConfigTest {
 		// setup
 		final MailConfig other = withMainConfig();
 		// execute & validate
-		assertThat(fixture).isNotNull().isEqualTo(fixture);
+		assertNotNull(fixture).isEqualTo(fixture);
 		assertThat(fixture).isSameAs(fixture);
-		assertThat(other).isEqualTo(fixture);
+		assertEquals(fixture, other);
 		assertNotSame(fixture, other);
-		assertThat(other.hashCode()).isEqualTo(fixture.hashCode());
+		assertEquals(fixture.hashCode(), other.hashCode());
 		assertThat(other.toString()).isNotEqualTo(fixture.toString());
 	}
 
 	@Test
 	public void testSetSmtpUsername() {
 		// execute & validate
-		assertThat(fixture.setSmtpUsername("xyz").getSmtpUsername()).isEqualTo("xyz");
+		assertEquals("xyz", fixture.setSmtpUsername("xyz").getSmtpUsername());
 		assertNull(fixture.setSmtpUsername(null).getSmtpUsername());
 		assertNull(fixture.setSmtpUsername("").getSmtpUsername());
 		assertNull(fixture.setSmtpUsername("  ").getSmtpUsername());
@@ -97,7 +98,7 @@ public class MailConfigTest {
 	@Test
 	public void testSetSmtpPassword() {
 		// execute & validate
-		assertThat(fixture.setSmtpPassword("xyz").getSmtpPassword()).isEqualTo("xyz");
+		assertEquals("xyz", fixture.setSmtpPassword("xyz").getSmtpPassword());
 		assertNull(fixture.setSmtpPassword(null).getSmtpPassword());
 		assertNull(fixture.setSmtpPassword("").getSmtpPassword());
 		assertNull(fixture.setSmtpPassword("  ").getSmtpPassword());

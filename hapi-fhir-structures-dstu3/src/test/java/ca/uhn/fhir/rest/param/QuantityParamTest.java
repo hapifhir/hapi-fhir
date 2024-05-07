@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
@@ -17,33 +18,33 @@ public class QuantityParamTest {
 	public void testFull() {
 		QuantityParam p = new QuantityParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "<5.4|http://unitsofmeasure.org|mg");
-		assertThat(p.getPrefix()).isEqualTo(ParamPrefixEnum.LESSTHAN);
-		assertThat(p.getValue().toPlainString()).isEqualTo("5.4");
-		assertThat(p.getSystem()).isEqualTo("http://unitsofmeasure.org");
-		assertThat(p.getUnits()).isEqualTo("mg");
-		assertThat(p.getValueAsQueryToken(ourCtx)).isEqualTo("lt5.4|http://unitsofmeasure.org|mg");
+		assertEquals(ParamPrefixEnum.LESSTHAN, p.getPrefix());
+		assertEquals("5.4", p.getValue().toPlainString());
+		assertEquals("http://unitsofmeasure.org", p.getSystem());
+		assertEquals("mg", p.getUnits());
+		assertEquals("lt5.4|http://unitsofmeasure.org|mg", p.getValueAsQueryToken(ourCtx));
 	}
 
 	@Test
 	public void testApproximateLegacy() {
 		QuantityParam p = new QuantityParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "~5.4|http://unitsofmeasure.org|mg");
-		assertThat(p.getPrefix()).isEqualTo(ParamPrefixEnum.APPROXIMATE);
-		assertThat(p.getValue().toPlainString()).isEqualTo("5.4");
-		assertThat(p.getSystem()).isEqualTo("http://unitsofmeasure.org");
-		assertThat(p.getUnits()).isEqualTo("mg");
-		assertThat(p.getValueAsQueryToken(ourCtx)).isEqualTo("ap5.4|http://unitsofmeasure.org|mg");
+		assertEquals(ParamPrefixEnum.APPROXIMATE, p.getPrefix());
+		assertEquals("5.4", p.getValue().toPlainString());
+		assertEquals("http://unitsofmeasure.org", p.getSystem());
+		assertEquals("mg", p.getUnits());
+		assertEquals("ap5.4|http://unitsofmeasure.org|mg", p.getValueAsQueryToken(ourCtx));
 	}
 
 	@Test
 	public void testApproximate() {
 		QuantityParam p = new QuantityParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "ap5.4|http://unitsofmeasure.org|mg");
-		assertThat(p.getPrefix()).isEqualTo(ParamPrefixEnum.APPROXIMATE);
-		assertThat(p.getValue().toPlainString()).isEqualTo("5.4");
-		assertThat(p.getSystem()).isEqualTo("http://unitsofmeasure.org");
-		assertThat(p.getUnits()).isEqualTo("mg");
-		assertThat(p.getValueAsQueryToken(ourCtx)).isEqualTo("ap5.4|http://unitsofmeasure.org|mg");
+		assertEquals(ParamPrefixEnum.APPROXIMATE, p.getPrefix());
+		assertEquals("5.4", p.getValue().toPlainString());
+		assertEquals("http://unitsofmeasure.org", p.getSystem());
+		assertEquals("mg", p.getUnits());
+		assertEquals("ap5.4|http://unitsofmeasure.org|mg", p.getValueAsQueryToken(ourCtx));
 	}
 	
 	@Test
@@ -51,10 +52,10 @@ public class QuantityParamTest {
 		QuantityParam p = new QuantityParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "5.4|http://unitsofmeasure.org|mg");
 		assertNull(p.getPrefix());
-		assertThat(p.getValue().toPlainString()).isEqualTo("5.4");
-		assertThat(p.getSystem()).isEqualTo("http://unitsofmeasure.org");
-		assertThat(p.getUnits()).isEqualTo("mg");
-		assertThat(p.getValueAsQueryToken(ourCtx)).isEqualTo("5.4|http://unitsofmeasure.org|mg");
+		assertEquals("5.4", p.getValue().toPlainString());
+		assertEquals("http://unitsofmeasure.org", p.getSystem());
+		assertEquals("mg", p.getUnits());
+		assertEquals("5.4|http://unitsofmeasure.org|mg", p.getValueAsQueryToken(ourCtx));
 	}
 
 	
@@ -63,10 +64,10 @@ public class QuantityParamTest {
 		QuantityParam p = new QuantityParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "5.4");
 		assertNull(p.getPrefix());
-		assertThat(p.getValue().toPlainString()).isEqualTo("5.4");
+		assertEquals("5.4", p.getValue().toPlainString());
 		assertNull(p.getSystem());
 		assertNull(p.getUnits());
-		assertThat(p.getValueAsQueryToken(ourCtx)).isEqualTo("5.4||");
+		assertEquals("5.4||", p.getValueAsQueryToken(ourCtx));
 	}
  
 	@Test
@@ -79,9 +80,9 @@ public class QuantityParamTest {
 		// Check parts. The 'mg' part should be put in the units not the system
 		// System.out.println(param);
 		assertNull(param.getPrefix());
-		assertThat(param.getValue().toPlainString()).isEqualTo("5.5");
+		assertEquals("5.5", param.getValue().toPlainString());
 		assertNull(param.getSystem());
-		assertThat(param.getUnits()).isEqualTo("mg");
+		assertEquals("mg", param.getUnits());
 		
 		// Make sure we don't break on this one...
 		query = "5.5| |mg";
@@ -89,9 +90,9 @@ public class QuantityParamTest {
 		param.setValueAsQueryToken(null, "value-quantity", null, query);
 		// System.out.println(param);
 		assertNull(param.getPrefix());
-		assertThat(param.getValue().toPlainString()).isEqualTo("5.5");
+		assertEquals("5.5", param.getValue().toPlainString());
 		assertNull(param.getSystem());
-		assertThat(param.getUnits()).isEqualTo("mg");
+		assertEquals("mg", param.getUnits());
 	}
 
 	/**
@@ -102,11 +103,11 @@ public class QuantityParamTest {
 		QuantityParam p = new QuantityParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "-5.4|http://unitsofmeasure.org|mg");
 		assertNull(p.getPrefix());
-		assertThat(p.getValue().toPlainString()).isEqualTo("-5.4");
-		assertThat(p.getValue()).isEqualTo(new BigDecimal("-5.4"));
-		assertThat(p.getSystem()).isEqualTo("http://unitsofmeasure.org");
-		assertThat(p.getUnits()).isEqualTo("mg");
-		assertThat(p.getValueAsQueryToken(ourCtx)).isEqualTo("-5.4|http://unitsofmeasure.org|mg");
+		assertEquals("-5.4", p.getValue().toPlainString());
+		assertEquals(new BigDecimal("-5.4"), p.getValue());
+		assertEquals("http://unitsofmeasure.org", p.getSystem());
+		assertEquals("mg", p.getUnits());
+		assertEquals("-5.4|http://unitsofmeasure.org|mg", p.getValueAsQueryToken(ourCtx));
 	}
 
 	/**
@@ -117,11 +118,11 @@ public class QuantityParamTest {
 		QuantityParam p = new QuantityParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "-5.4");
 		assertNull(p.getPrefix());
-		assertThat(p.getValue().toPlainString()).isEqualTo("-5.4");
-		assertThat(p.getValue()).isEqualTo(new BigDecimal("-5.4"));
+		assertEquals("-5.4", p.getValue().toPlainString());
+		assertEquals(new BigDecimal("-5.4"), p.getValue());
 		assertNull(p.getSystem());
 		assertNull(p.getUnits());
-		assertThat(p.getValueAsQueryToken(ourCtx)).isEqualTo("-5.4||");
+		assertEquals("-5.4||", p.getValueAsQueryToken(ourCtx));
 	}
 
 	/**
@@ -131,12 +132,12 @@ public class QuantityParamTest {
 	public void testNegativeQuantityWithoutUnitsWithComparator() {
 		QuantityParam p = new QuantityParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "gt-5.4");
-		assertThat(p.getPrefix()).isEqualTo(ParamPrefixEnum.GREATERTHAN);
-		assertThat(p.getValue().toPlainString()).isEqualTo("-5.4");
-		assertThat(p.getValue()).isEqualTo(new BigDecimal("-5.4"));
+		assertEquals(ParamPrefixEnum.GREATERTHAN, p.getPrefix());
+		assertEquals("-5.4", p.getValue().toPlainString());
+		assertEquals(new BigDecimal("-5.4"), p.getValue());
 		assertNull(p.getSystem());
 		assertNull(p.getUnits());
-		assertThat(p.getValueAsQueryToken(ourCtx)).isEqualTo("gt-5.4||");
+		assertEquals("gt-5.4||", p.getValueAsQueryToken(ourCtx));
 	}
 
 	@AfterAll

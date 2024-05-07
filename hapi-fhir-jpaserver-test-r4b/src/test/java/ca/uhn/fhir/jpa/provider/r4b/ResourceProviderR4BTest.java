@@ -131,7 +131,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 			.returnBundle(Bundle.class)
 			.execute();
 		assertThat(response1.getEntry()).hasSize(1);
-		assertThat(response1.getId()).isEqualTo(response0.getId());
+		assertEquals(response0.getId(), response1.getId());
 
 		// Pretend the search was errored out
 		markSearchErrored();
@@ -195,7 +195,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		try {
 			myClient.loadPage().next(response0).execute();
 		} catch (NotImplementedOperationException e) {
-			assertThat(e.getStatusCode()).isEqualTo(501);
+			assertEquals(501, e.getStatusCode());
 			assertThat(e.getMessage()).contains("Some Failure Message");
 		}
 
@@ -236,7 +236,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		ourLog.debug("Output: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 		myCaptureQueriesListener.logSelectQueries();
 
-		assertThat(output.getTotal()).isEqualTo(2);
+		assertEquals(2, output.getTotal());
 		assertThat(output.getEntry()).isEmpty();
 	}
 
@@ -330,10 +330,10 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		assertThat(found.getEntry()).hasSize(4);
-		assertThat(list.get(0)).isEqualTo(oid3);
-		assertThat(list.get(1)).isEqualTo(oid1);
-		assertThat(list.get(2)).isEqualTo(oid4);
-		assertThat(list.get(3)).isEqualTo(oid2);
+		assertEquals(oid3, list.get(0));
+		assertEquals(oid1, list.get(1));
+		assertEquals(oid4, list.get(2));
+		assertEquals(oid2, list.get(3));
 	}
 
 	@Test
@@ -359,7 +359,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 
 		myCaptureQueriesListener.logSelectQueries();
 
-		assertThat(b.getType()).isEqualTo(Bundle.BundleType.SEARCHSET);
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
@@ -390,7 +390,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 
 		myCaptureQueriesListener.logSelectQueries();
 
-		assertThat(b.getType()).isEqualTo(Bundle.BundleType.SEARCHSET);
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
@@ -408,7 +408,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
 			String output = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Fetch output: {}", output);
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 		}
 	}
 
@@ -444,7 +444,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 
 		myCaptureQueriesListener.logSelectQueries();
 
-		assertThat(b.getType()).isEqualTo(Bundle.BundleType.SEARCHSET);
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);

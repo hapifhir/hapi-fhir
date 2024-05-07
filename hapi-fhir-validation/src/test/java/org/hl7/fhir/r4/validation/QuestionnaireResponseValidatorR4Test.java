@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -515,14 +516,14 @@ public class QuestionnaireResponseValidatorR4Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
 		assertThat(errors.getMessages()).hasSize(1);
-		assertThat(errors.getMessages().get(0).getSeverity()).isEqualTo(ResultSeverityEnum.WARNING);
+		assertEquals(ResultSeverityEnum.WARNING, errors.getMessages().get(0).getSeverity());
 
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
 		assertThat(errors.getMessages()).hasSize(1);
-		assertThat(errors.getMessages().get(0).getSeverity()).isEqualTo(ResultSeverityEnum.ERROR);
+		assertEquals(ResultSeverityEnum.ERROR, errors.getMessages().get(0).getSeverity());
 	}
 
 	@Test
@@ -697,7 +698,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		qa.addItem().setLinkId("link0").addAnswer().setValue(new Coding().setSystem("http://foo").setCode("foo"));
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
-		assertThat(errors.isSuccessful()).isEqualTo(true);
+		assertEquals(true, errors.isSuccessful());
 
 		qa = new QuestionnaireResponse();
 		qa.getText().setDiv(new XhtmlNode().setValue("<div>AA</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
@@ -721,7 +722,7 @@ public class QuestionnaireResponseValidatorR4Test {
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
 		// This is set in InstanceValidator#validateAnswerCode
-		assertThat(errors.isSuccessful()).isEqualTo(false);
+		assertEquals(false, errors.isSuccessful());
 
 	}
 

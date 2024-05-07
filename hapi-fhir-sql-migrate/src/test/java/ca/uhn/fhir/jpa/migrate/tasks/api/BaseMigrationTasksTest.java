@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.tasks.api;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropTableTask;
@@ -31,7 +32,7 @@ public class BaseMigrationTasksTest {
 			migrationTasks.validate(tasks);
 			fail("");
 		} catch (IllegalStateException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(51) + "Migration version 1.20191029.1 found after migration version 1.20191029.2.  Migrations need to be in order by version number.");
+			assertEquals(Msg.code(51) + "Migration version 1.20191029.1 found after migration version 1.20191029.2.  Migrations need to be in order by version number.", e.getMessage());
 		}
 	}
 
@@ -45,7 +46,7 @@ public class BaseMigrationTasksTest {
 			migrationTasks.validate(tasks);
 			fail("");
 		} catch (IllegalStateException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(51) + "Migration version 1.20191029.1 found after migration version 1.20191029.1.  Migrations need to be in order by version number.");
+			assertEquals(Msg.code(51) + "Migration version 1.20191029.1 found after migration version 1.20191029.1.  Migrations need to be in order by version number.", e.getMessage());
 		}
 	}
 
@@ -59,7 +60,7 @@ public class BaseMigrationTasksTest {
 			migrationTasks.validate(tasks);
 			fail("");
 		} catch (IllegalStateException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(51) + "Migration version 1.20191028.1 found after migration version 1.20191029.1.  Migrations need to be in order by version number.");
+			assertEquals(Msg.code(51) + "Migration version 1.20191028.1 found after migration version 1.20191029.1.  Migrations need to be in order by version number.", e.getMessage());
 		}
 	}
 

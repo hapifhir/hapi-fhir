@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.topic;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4b.model.Enumerations;
 import org.hl7.fhir.r4b.model.SubscriptionTopic;
@@ -14,7 +15,7 @@ class SubscriptionTopicCanonicalizerTest {
 		topic.setId("123");
 		topic.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		org.hl7.fhir.r5.model.SubscriptionTopic canonicalized = SubscriptionTopicCanonicalizer.canonicalizeTopic(FhirContext.forR4BCached(), topic);
-		assertThat(canonicalized.getId()).isEqualTo("123");
-		assertThat(canonicalized.getStatus()).isEqualTo(org.hl7.fhir.r5.model.Enumerations.PublicationStatus.ACTIVE);
+		assertEquals("123", canonicalized.getId());
+		assertEquals(org.hl7.fhir.r5.model.Enumerations.PublicationStatus.ACTIVE, canonicalized.getStatus());
 	}
 }

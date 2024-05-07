@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.packages;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -61,13 +62,13 @@ public class NpmDstu3Test extends BaseJpaDstu3Test {
 		myServer.stopServer();
 
 		StructureDefinition sd = (StructureDefinition) myNpmJpaValidationSupport.fetchStructureDefinition("http://fhir.de/StructureDefinition/condition-de-basis/0.2");
-		assertThat(sd.getUrl()).isEqualTo("http://fhir.de/StructureDefinition/condition-de-basis/0.2");
+		assertEquals("http://fhir.de/StructureDefinition/condition-de-basis/0.2", sd.getUrl());
 
 		ValueSet vs = (ValueSet) myNpmJpaValidationSupport.fetchValueSet("http://fhir.de/ValueSet/ifa/pzn");
-		assertThat(vs.getUrl()).isEqualTo("http://fhir.de/ValueSet/ifa/pzn");
+		assertEquals("http://fhir.de/ValueSet/ifa/pzn", vs.getUrl());
 
 		CodeSystem cs = (CodeSystem) myNpmJpaValidationSupport.fetchCodeSystem("http://fhir.de/CodeSystem/deuev/anlage-8-laenderkennzeichen");
-		assertThat(cs.getUrl()).isEqualTo("http://fhir.de/CodeSystem/deuev/anlage-8-laenderkennzeichen");
+		assertEquals("http://fhir.de/CodeSystem/deuev/anlage-8-laenderkennzeichen", cs.getUrl());
 
 		// Try and validate using a profile from the IG
 		Condition condition = new Condition();

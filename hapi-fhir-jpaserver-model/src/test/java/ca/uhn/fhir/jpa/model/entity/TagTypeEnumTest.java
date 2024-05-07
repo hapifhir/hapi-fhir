@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.model.entity;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.util.TestUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -18,9 +19,9 @@ public class TagTypeEnumTest {
 	public void testOrder() {
 		// Ordinals are used in DB columns so the order
 		// shouldn't change
-		assertThat(TagTypeEnum.TAG.ordinal()).isEqualTo(0);
-		assertThat(TagTypeEnum.PROFILE.ordinal()).isEqualTo(1);
-		assertThat(TagTypeEnum.SECURITY_LABEL.ordinal()).isEqualTo(2);
+		assertEquals(0, TagTypeEnum.TAG.ordinal());
+		assertEquals(1, TagTypeEnum.PROFILE.ordinal());
+		assertEquals(2, TagTypeEnum.SECURITY_LABEL.ordinal());
 	}
 	
 }

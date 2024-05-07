@@ -1,5 +1,6 @@
 package ca.uhn.fhir.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Patient;
@@ -25,11 +26,11 @@ public class FhirValidatorTest {
 		Patient patientWithoutContained = (Patient)validator.withoutContainedResources(patient);
 
 		// check
-		assertThat(patientWithoutContained.getNameFirstRep().getGivenAsSingleString()).isEqualTo("bob");
+		assertEquals("bob", patientWithoutContained.getNameFirstRep().getGivenAsSingleString());
 		assertThat(patientWithoutContained.getContained()).hasSize(0);
 
-		assertThat(patient.getNameFirstRep().getGivenAsSingleString()).isEqualTo("bob");
+		assertEquals("bob", patient.getNameFirstRep().getGivenAsSingleString());
 		assertThat(patient.getContained()).hasSize(1);
-		assertThat(((Observation) patient.getContained().get(0)).getValue().toString()).isEqualTo("heavy");
+		assertEquals("heavy", ((Observation) patient.getContained().get(0)).getValue().toString());
 	}
 }

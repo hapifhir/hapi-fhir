@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -181,7 +182,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
-		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 
 		Parameters response = myClient
 			.operation()
@@ -296,7 +297,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 
 		SubscriptionTriggeringSvcImpl svc = ProxyUtil.getSingletonTarget(mySubscriptionTriggeringSvc, SubscriptionTriggeringSvcImpl.class);
-		assertThat(svc.getActiveJobCount()).isEqualTo(0);
+		assertEquals(0, svc.getActiveJobCount());
 
 		assertThat(ourCreatedPatients).isEmpty();
 		await().until(() -> ourUpdatedPatients.size() == 3);
@@ -401,7 +402,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 				.execute();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(24) + "Search URL is not valid (must be in the form \"[resource type]?[optional params]\")");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(24) + "Search URL is not valid (must be in the form \"[resource type]?[optional params]\")", e.getMessage());
 		}
 	}
 
@@ -463,7 +464,7 @@ public class SubscriptionTriggeringDstu3Test extends BaseResourceProviderDstu3Te
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
-		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 
 		Parameters response = myClient
 			.operation()

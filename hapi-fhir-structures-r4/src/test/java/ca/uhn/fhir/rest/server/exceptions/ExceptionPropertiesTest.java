@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.exceptions;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
@@ -34,9 +35,9 @@ public class ExceptionPropertiesTest {
 		test(new FhirClientInappropriateForServerException(new Exception()));
 		test(new FhirClientInappropriateForServerException("", new Exception()));
 
-		assertThat(new ResourceGoneException(new IdDt("Patient/123")).getMessage()).isEqualTo("Resource Patient/123 is gone/deleted");
-		assertThat(new ResourceGoneException("FOO", new OperationOutcome()).getMessage()).isEqualTo("FOO");
-		assertThat(new ResourceGoneException(Practitioner.class, new IdType("Patient/123")).getMessage()).isEqualTo("Resource of type Practitioner with ID Patient/123 is gone/deleted");
+		assertEquals("Resource Patient/123 is gone/deleted", new ResourceGoneException(new IdDt("Patient/123")).getMessage());
+		assertEquals("FOO", new ResourceGoneException("FOO", new OperationOutcome()).getMessage());
+		assertEquals("Resource of type Practitioner with ID Patient/123 is gone/deleted", new ResourceGoneException(Practitioner.class, new IdType("Patient/123")).getMessage());
 	}
 
 	private void test(Exception theE) {

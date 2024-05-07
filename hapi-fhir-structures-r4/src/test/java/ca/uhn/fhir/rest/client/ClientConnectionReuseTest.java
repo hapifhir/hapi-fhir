@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.apache.GZipContentInterceptor;
@@ -53,7 +54,7 @@ public class ClientConnectionReuseTest {
 		}
 		ourLog.info("Invoked {} counts in {}", reps, sw);
 
-		assertThat(ourServer.getConnectionsOpenedCount()).isEqualTo(1);
+		assertEquals(1, ourServer.getConnectionsOpenedCount());
 	}
 
 	@ParameterizedTest()
@@ -71,7 +72,7 @@ public class ClientConnectionReuseTest {
 		}
 		ourLog.info("Invoked {} counts in {}", reps, sw);
 
-		assertThat(ourServer.getConnectionsOpenedCount()).isEqualTo(1);
+		assertEquals(1, ourServer.getConnectionsOpenedCount());
 	}
 
 	@ParameterizedTest()
@@ -88,7 +89,7 @@ public class ClientConnectionReuseTest {
 		}
 		ourLog.info("Invoked {} counts in {}", reps, sw);
 
-		assertThat(ourServer.getConnectionsOpenedCount()).isEqualTo(1);
+		assertEquals(1, ourServer.getConnectionsOpenedCount());
 	}
 
 

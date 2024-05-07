@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cli;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.system.HapiSystemProperties;
@@ -111,11 +112,11 @@ public class CreatePackageCommandTest extends BaseTest {
 			  }
 			}
 			""";
-		assertThat(packageJsonContents.trim()).isEqualTo(expectedPackageJson.trim());
+		assertEquals(expectedPackageJson.trim(), packageJsonContents.trim());
 
 		// Try parsing the module again to make sure we can
 		NpmPackage loadedPackage = NpmPackage.fromPackage(new FileInputStream(igArchive));
-		assertThat(loadedPackage.name()).isEqualTo("com.example.ig");
+		assertEquals("com.example.ig", loadedPackage.name());
 	}
 
 	@Test
@@ -162,11 +163,11 @@ public class CreatePackageCommandTest extends BaseTest {
 			  "fhirVersions" : ["4.0.1"]
 			}
 			""";
-		assertThat(packageJsonContents.trim()).isEqualTo(expectedPackageJson.trim());
+		assertEquals(expectedPackageJson.trim(), packageJsonContents.trim());
 
 		// Try parsing the module again to make sure we can
 		NpmPackage loadedPackage = NpmPackage.fromPackage(new FileInputStream(igArchive));
-		assertThat(loadedPackage.name()).isEqualTo("com.example.ig");
+		assertEquals("com.example.ig", loadedPackage.name());
 
 	}
 

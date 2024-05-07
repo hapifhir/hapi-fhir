@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jaxrs.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jaxrs.server.AbstractJaxRsProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
 import ca.uhn.fhir.jaxrs.server.util.JaxRsRequest;
@@ -58,7 +59,7 @@ public class JaxRsExceptionInterceptorTest {
 			interceptor.intercept(context);
 			fail("");
 		} catch (BaseServerResponseException e) {
-			assertThat(thrownException.getMessage()).isEqualTo(e.getMessage());
+			assertEquals(e.getMessage(), thrownException.getMessage());
 		}
 	}
 
@@ -98,7 +99,7 @@ public class JaxRsExceptionInterceptorTest {
 		JaxRsResponseException thrownException = new JaxRsResponseException(new NotImplementedOperationException("not implemented"));
 		doThrow(new jakarta.servlet.ServletException("someMessage")).when(exceptionHandler).handleException(request, thrownException);
 		Response result = interceptor.convertExceptionIntoResponse(request, thrownException);
-		assertThat(result.getStatus()).isEqualTo(InternalErrorException.STATUS_CODE);
+		assertEquals(InternalErrorException.STATUS_CODE, result.getStatus());
 	}
 
 }

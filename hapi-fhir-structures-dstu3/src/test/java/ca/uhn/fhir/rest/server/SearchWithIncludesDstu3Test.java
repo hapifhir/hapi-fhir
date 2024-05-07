@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
@@ -47,7 +48,7 @@ public class SearchWithIncludesDstu3Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		// Response should include both the patient, and the organization that was referred to
 		// by a linked resource

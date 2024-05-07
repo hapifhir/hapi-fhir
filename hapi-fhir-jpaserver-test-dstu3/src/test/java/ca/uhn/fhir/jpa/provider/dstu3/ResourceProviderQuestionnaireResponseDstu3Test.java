@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.interceptor.RequestValidatingInterceptor;
 import ca.uhn.fhir.validation.IValidatorModule;
@@ -134,7 +135,7 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/QuestionnaireResponse/");
 			id2 = new IdType(newIdString);
@@ -164,7 +165,7 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
 			assertThat(responseString).contains("No resource supplied for $validate operation");
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -185,7 +186,7 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -206,7 +207,7 @@ public class ResourceProviderQuestionnaireResponseDstu3Test extends BaseResource
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
 			assertThat(responseString).contains("Resource has no ID");
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(422);
+			assertEquals(422, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response);
 		}

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -74,11 +75,11 @@ public class PatchClientR4Test {
 
 		MethodOutcome outcome = client.patch(new IdType("Patient/123"), "{}", PatchTypeEnum.JSON_PATCH);
 
-		assertThat(capt.getAllValues().get(0).getMethod()).isEqualTo("PATCH");
-		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/123");
-		assertThat(capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_JSON_PATCH);
-		assertThat(extractBodyAsString(capt)).isEqualTo("{}");
-		assertThat(((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div>");
+		assertEquals("PATCH", capt.getAllValues().get(0).getMethod());
+		assertEquals("http://example.com/fhir/Patient/123", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals(Constants.CT_JSON_PATCH, capt.getAllValues().get(0).getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals("{}", extractBodyAsString(capt));
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">OK</div>", ((OperationOutcome) outcome.getOperationOutcome()).getText().getDivAsString());
 	}
 
 	@Test

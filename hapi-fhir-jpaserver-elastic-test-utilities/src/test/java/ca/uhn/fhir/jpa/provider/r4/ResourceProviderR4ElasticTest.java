@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -84,7 +85,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(expandQuery)) {
 
 			// then
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_200_OK);
+			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
 			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ValueSet valueSet = myFhirContext.newXmlParser().parseResource(ValueSet.class, text);
 			ourLog.info("testAutocompleteDirectionExisting {}", text);
@@ -147,7 +148,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		Bundle bundle = (Bundle) respParam.getParameter().get(0).getResource();
 		Observation observation = (Observation) bundle.getEntryFirstRep().getResource();
 
-		assertThat(observation.getSubject().getReference()).isEqualTo("Patient/p-123");
+		assertEquals("Patient/p-123", observation.getSubject().getReference());
 		assertThat(observation.getCode().getCodingFirstRep().getDisplay()).contains("Erythrocytes");
 
 	}
@@ -163,7 +164,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(countQuery)) {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 			// then
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_200_OK);
+			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
 			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);
 			assertThat(bundle.getTotal()).as("Expected total 10 observations matching query").isEqualTo(10);
@@ -183,7 +184,7 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		myCaptureQueriesListener.clear();
 		try (CloseableHttpResponse response = BaseResourceProviderR4Test.ourHttpClient.execute(countQuery)) {
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_200_OK);
+			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
 			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);
 			assertThat(bundle.getTotal()).as("Expected total 10 observations matching query").isEqualTo(10);

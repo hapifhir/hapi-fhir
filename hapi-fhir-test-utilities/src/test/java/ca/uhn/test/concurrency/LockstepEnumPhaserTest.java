@@ -1,5 +1,6 @@
 package ca.uhn.test.concurrency;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.github.seregamorph.hamcrest.OrderMatchers;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hamcrest.Matchers;
@@ -93,8 +94,8 @@ class LockstepEnumPhaserTest {
 		Future<Integer> result1 = myExecutorService.submit(schedule);
 		Future<Integer> result2 = myExecutorService.submit(schedule);
 
-		assertThat(result1.get()).isEqualTo(1);
-		assertThat(result2.get()).isEqualTo(1);
+		assertEquals(1, result1.get());
+		assertEquals(1, result2.get());
 		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
 		assertThat(myProgressEvents).as("all progress logged").hasSize(6);
 	}
@@ -158,8 +159,8 @@ class LockstepEnumPhaserTest {
 		Future<Integer> result1 = myExecutorService.submit(schedule1);
 		Future<Integer> result3 = myExecutorService.submit(schedule3);
 
-		assertThat(result1.get()).isEqualTo(1);
-		assertThat(result3.get()).isEqualTo(3);
+		assertEquals(1, result1.get());
+		assertEquals(3, result3.get());
 
 		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
 		assertThat(myProgressEvents).as("all progress logged").hasSize(8);
@@ -215,7 +216,7 @@ class LockstepEnumPhaserTest {
 			ourLog.info("Leaving schedule - {}", threadId);
 
 			Stages deregisterPhase = myPhaser.arriveAndDeregister();
-			assertThat(deregisterPhase).isEqualTo(TWO);
+			assertEquals(TWO, deregisterPhase);
 
 			return threadId;
 		};
@@ -223,9 +224,9 @@ class LockstepEnumPhaserTest {
 		Future<Integer> result2 = myExecutorService.submit(schedule2);
 		Future<Integer> result3 = myExecutorService.submit(schedule3);
 
-		assertThat(result1.get()).isEqualTo(1);
-		assertThat(result2.get()).isEqualTo(2);
-		assertThat(result3.get()).isEqualTo(3);
+		assertEquals(1, result1.get());
+		assertEquals(2, result2.get());
+		assertEquals(3, result3.get());
 
 		assertThat("progress is ordered", myProgressEvents, OrderMatchers.softOrdered(myProgressStageComparator));
 		assertThat(myProgressEvents).as("all progress logged").hasSize(2 * 3 + 2);

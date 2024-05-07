@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.auth;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -88,7 +89,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 			// then
 			assertNotNull(verdict);
-			assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.ALLOW);
+			assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
 		}
 
 		@Test
@@ -110,7 +111,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 			// then
 			assertNotNull(verdict);
-			assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.ALLOW);
+			assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
 		}
 
 		@Test
@@ -200,7 +201,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 			// then
 			assertNotNull(verdict);
-			assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
+			assertEquals(PolicyEnum.DENY, verdict.getDecision());
 		}
 
 
@@ -222,7 +223,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 
 			// then
 			assertNotNull(verdict);
-			assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.ALLOW);
+			assertEquals(PolicyEnum.ALLOW, verdict.getDecision());
 		}
 
 
@@ -286,7 +287,7 @@ class FhirQueryRuleImplTest implements ITestDataBuilder {
 			AuthorizationInterceptor.Verdict verdict = applyRuleToResource(myPatient);
 
 			// then
-			assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
+			assertEquals(PolicyEnum.DENY, verdict.getDecision());
 			LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasEventWithLevelAndMessageContains(Level.WARN, "unsupported chain XXX");
 		}
 

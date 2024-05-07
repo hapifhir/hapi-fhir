@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFuzzUtil;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import org.junit.jupiter.api.Test;
@@ -19,7 +20,7 @@ public class SearchFuzzUtilTest {
 		BigDecimal in = new BigDecimal("200");
 		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
-		assertThat(out.toPlainString()).isEqualTo("0.5");
+		assertEquals("0.5", out.toPlainString());
 	}
 
 	@Test
@@ -27,7 +28,7 @@ public class SearchFuzzUtilTest {
 		BigDecimal in = new BigDecimal("200.");
 		BigDecimal out = SearchFuzzUtil.calculateFuzzAmount(ParamPrefixEnum.EQUAL, in);
 		ourLog.info(out.toPlainString());
-		assertThat(out.toPlainString()).isEqualTo("0.5");
+		assertEquals("0.5", out.toPlainString());
 	}
 
 	@Test

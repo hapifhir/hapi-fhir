@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.Test;
 
@@ -11,40 +12,40 @@ public class SubscriptionCriteriaParserTest {
 	public void testSearchExpression() {
 		String expression = "Patient?foo=bar";
 		SubscriptionCriteriaParser.SubscriptionCriteria criteria = SubscriptionCriteriaParser.parse(expression);
-		assertThat(criteria.getType()).isEqualTo(SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION);
-		assertThat(criteria.getCriteria()).isEqualTo(expression);
+		assertEquals(SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION, criteria.getType());
+		assertEquals(expression, criteria.getCriteria());
 		assertThat(criteria.getApplicableResourceTypes()).containsExactlyInAnyOrder("Patient");
-		assertThat(criteria.toString()).isEqualTo("SubscriptionCriteriaParser.SubscriptionCriteria[type=SEARCH_EXPRESSION,criteria=Patient?foo=bar,applicableResourceTypes=[Patient]]");
+		assertEquals("SubscriptionCriteriaParser.SubscriptionCriteria[type=SEARCH_EXPRESSION,criteria=Patient?foo=bar,applicableResourceTypes=[Patient]]", criteria.toString());
 	}
 
 	@Test
 	public void testTypeExpression() {
 		String expression = "Patient";
 		SubscriptionCriteriaParser.SubscriptionCriteria criteria = SubscriptionCriteriaParser.parse(expression);
-		assertThat(criteria.getType()).isEqualTo(SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION);
-		assertThat(criteria.getCriteria()).isEqualTo(expression);
+		assertEquals(SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION, criteria.getType());
+		assertEquals(expression, criteria.getCriteria());
 		assertThat(criteria.getApplicableResourceTypes()).containsExactlyInAnyOrder("Patient");
-		assertThat(criteria.toString()).isEqualTo("SubscriptionCriteriaParser.SubscriptionCriteria[type=SEARCH_EXPRESSION,criteria=Patient,applicableResourceTypes=[Patient]]");
+		assertEquals("SubscriptionCriteriaParser.SubscriptionCriteria[type=SEARCH_EXPRESSION,criteria=Patient,applicableResourceTypes=[Patient]]", criteria.toString());
 	}
 
 	@Test
 	public void testStarExpression() {
 		String expression = "[*]";
 		SubscriptionCriteriaParser.SubscriptionCriteria criteria = SubscriptionCriteriaParser.parse(expression);
-		assertThat(criteria.getType()).isEqualTo(SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION);
+		assertEquals(SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION, criteria.getType());
 		assertNull(criteria.getCriteria());
 		assertNull(criteria.getApplicableResourceTypes());
-		assertThat(criteria.toString()).isEqualTo("SubscriptionCriteriaParser.SubscriptionCriteria[type=STARTYPE_EXPRESSION]");
+		assertEquals("SubscriptionCriteriaParser.SubscriptionCriteria[type=STARTYPE_EXPRESSION]", criteria.toString());
 	}
 
 	@Test
 	public void testMultitypeExpression() {
 		String expression = "[Patient   , Observation]";
 		SubscriptionCriteriaParser.SubscriptionCriteria criteria = SubscriptionCriteriaParser.parse(expression);
-		assertThat(criteria.getType()).isEqualTo(SubscriptionCriteriaParser.TypeEnum.MULTITYPE_EXPRESSION);
+		assertEquals(SubscriptionCriteriaParser.TypeEnum.MULTITYPE_EXPRESSION, criteria.getType());
 		assertNull(criteria.getCriteria());
 		assertThat(criteria.getApplicableResourceTypes()).containsExactlyInAnyOrder("Patient", "Observation");
-		assertThat(criteria.toString()).isEqualTo("SubscriptionCriteriaParser.SubscriptionCriteria[type=MULTITYPE_EXPRESSION,applicableResourceTypes=[Observation, Patient]]");
+		assertEquals("SubscriptionCriteriaParser.SubscriptionCriteria[type=MULTITYPE_EXPRESSION,applicableResourceTypes=[Observation, Patient]]", criteria.toString());
 	}
 
 	@Test

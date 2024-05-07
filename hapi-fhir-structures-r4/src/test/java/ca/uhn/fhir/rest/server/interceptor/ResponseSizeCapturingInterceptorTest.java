@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
@@ -81,10 +82,10 @@ public class ResponseSizeCapturingInterceptorTest {
 		}).when(myConsumer).accept(any());
 
 		resource = ourServerRule.getFhirClient().read().resource(Patient.class).withId(id).execute();
-		assertThat(resource.getActive()).isEqualTo(true);
+		assertEquals(true, resource.getActive());
 
 		verify(myConsumer, timeout(10000).times(1)).accept(myResultCaptor.capture());
-		assertThat(myResultCaptor.getValue().getWrittenChars()).isEqualTo(100);
+		assertEquals(100, myResultCaptor.getValue().getWrittenChars());
 	}
 
 

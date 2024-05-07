@@ -83,13 +83,13 @@ public class SummaryParamR4Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase());
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
 			assertThat(responseContent).doesNotContain("<Bundle");
 			assertThat(responseContent).doesNotContain("<Medic");
-			assertThat(responseContent).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">THE DIV</div>");
+			assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">THE DIV</div>", responseContent);
 			assertThat(responseContent).doesNotContain("efer");
-			assertThat(ourLastSummary).isEqualTo(SummaryEnum.TEXT);
+			assertEquals(SummaryEnum.TEXT, ourLastSummary);
 		}
 	}
 
@@ -100,11 +100,11 @@ public class SummaryParamR4Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase());
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(Constants.CT_HTML_WITH_UTF8.replace(" ", "").toLowerCase(), status.getEntity().getContentType().getValue().replace(" ", "").replace("UTF", "utf"));
 			assertThat(responseContent).doesNotContain("<Bundle");
 			assertThat(responseContent).doesNotContain("<Patien");
-			assertThat(responseContent).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT</div>");
+			assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">TEXT</div>", responseContent);
 			assertThat(responseContent).doesNotContain("family");
 			assertThat(responseContent).doesNotContain("maritalStatus");
 		}
@@ -271,7 +271,7 @@ public class SummaryParamR4Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, status.getStatusLine().getStatusCode());
 			assertThat(responseContent).contains("Can not combine _summary=text with other values for _summary");
 		}
 	}

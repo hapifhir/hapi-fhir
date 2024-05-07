@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -50,7 +51,7 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest extends BaseVal
 
 		p = myClient.read().resource(Patient.class).withId(id).execute();
 		assertThat(p.getMaritalStatus().getCoding()).hasSize(1);
-		assertThat(p.getMaritalStatus().getCoding().get(0).getDisplay()).isEqualTo("Annulled");
+		assertEquals("Annulled", p.getMaritalStatus().getCoding().get(0).getDisplay());
 	}
 
 	@Test
@@ -78,7 +79,7 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest extends BaseVal
 		assertThat(bundle.getEntry()).hasSize(1);
 		p = (Patient) bundle.getEntry().get(0).getResource();
 		assertThat(p.getMaritalStatus().getCoding()).hasSize(1);
-		assertThat(p.getMaritalStatus().getCoding().get(0).getDisplay()).isEqualTo("Annulled");
+		assertEquals("Annulled", p.getMaritalStatus().getCoding().get(0).getDisplay());
 	}
 
 	@Test
@@ -106,7 +107,7 @@ public class ResponseTerminologyDisplayPopulationInterceptorTest extends BaseVal
 
 		p = myClient.read().resource(Patient.class).withId(id).execute();
 		assertThat(p.getMaritalStatus().getCoding()).hasSize(1);
-		assertThat(p.getMaritalStatus().getCoding().get(0).getDisplay()).isEqualTo("FOO");
+		assertEquals("FOO", p.getMaritalStatus().getCoding().get(0).getDisplay());
 	}
 
 	@Test

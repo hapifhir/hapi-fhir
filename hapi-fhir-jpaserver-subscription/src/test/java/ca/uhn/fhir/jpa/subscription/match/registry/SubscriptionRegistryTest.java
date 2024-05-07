@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.match.registry;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -66,8 +67,8 @@ public class SubscriptionRegistryTest {
 		assertTrue(registered);
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
 		assertNotNull(activeSubscription.getRetryConfigurationParameters());
-		assertThat(activeSubscription.getChannelName()).isEqualTo(channelName);
-		assertThat(activeSubscription.getRetryConfigurationParameters().getRetryCount()).isEqualTo(retryCount);
+		assertEquals(channelName, activeSubscription.getChannelName());
+		assertEquals(retryCount, activeSubscription.getRetryConfigurationParameters().getRetryCount());
 	}
 
 	@Test
@@ -104,7 +105,7 @@ public class SubscriptionRegistryTest {
 		assertTrue(registered);
 		ActiveSubscription activeSubscription = mySubscriptionRegistry.get(SUBSCRIPTION_ID);
 		assertNull(activeSubscription.getRetryConfigurationParameters());
-		assertThat(activeSubscription.getChannelName()).isEqualTo(CHANNEL_NAME);
+		assertEquals(CHANNEL_NAME, activeSubscription.getChannelName());
 	}
 
 	@Test
@@ -151,7 +152,7 @@ public class SubscriptionRegistryTest {
 		// Now also 1 sub with a different topic
 		subscriptions = mySubscriptionRegistry.getTopicSubscriptionsByTopic(testTopic4);
 		assertThat(subscriptions).hasSize(1);
-		assertThat(subscriptions.get(0).getId()).isEqualTo(topicSubscription4Id);
+		assertEquals(topicSubscription4Id, subscriptions.get(0).getId());
 	}
 
 

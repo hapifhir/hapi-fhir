@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -46,7 +47,7 @@ public class FhirResourceDaoR5ReindexTest extends BaseJpaR5Test {
 		Parameters outcome = (Parameters) myInstanceReindexService.reindex(mySrd, id);
 		ourLog.info("Outcome: {}", myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertThat(outcome.getParameter("Narrative").getValueStringType().getValue()).contains("Reindex completed in");
-		assertThat(outcome.getParameter("UriIndexes").getPartFirstRep().getPartFirstRep().getValueCodeType().getValue()).isEqualTo("REMOVE");
+		assertEquals("REMOVE", outcome.getParameter("UriIndexes").getPartFirstRep().getPartFirstRep().getValueCodeType().getValue());
 
 		runInTransaction(() -> {
 			ResourceTable table = myResourceTableDao.findById(id.getIdPartAsLong()).orElseThrow();

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cli;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.RestServerDstu3Helper;
@@ -97,7 +98,7 @@ public class ExportConceptMapToCsvCommandDstu3Test {
 
 		ourLog.info("Going to read file: {}", FILE);
 		String result = IOUtils.toString(new FileInputStream(FILE), Charsets.UTF_8);
-		assertThat(result).isEqualTo(expected);
+		assertEquals(expected, result);
 
 		FileUtils.deleteQuietly(new File(FILE));
 	}

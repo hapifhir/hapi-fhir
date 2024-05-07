@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.junit.jupiter.api.AfterAll;
@@ -21,9 +22,9 @@ public class DateTypeTest {
 	@Test
 	public void testDateType() {
 		DateType birthDate = new DateType(1974, 11, 25);
-		assertThat(birthDate.getYear()).isEqualTo(1974);
-		assertThat(birthDate.getMonth()).isEqualTo(11);
-		assertThat(birthDate.getDay()).isEqualTo(25);
+		assertEquals(1974, birthDate.getYear());
+		assertEquals(11, birthDate.getMonth());
+		assertEquals(25, birthDate.getDay());
 	}
 
 	@SuppressWarnings("unused")
@@ -32,22 +33,22 @@ public class DateTypeTest {
 		try {
 			new DateType(1974, 12, 25);
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo("theMonth must be between 0 and 11");
+			assertEquals("theMonth must be between 0 and 11", e.getMessage());
 		}
 		try {
 			new DateType(1974, -1, 25);
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo("theMonth must be between 0 and 11");
+			assertEquals("theMonth must be between 0 and 11", e.getMessage());
 		}
 		try {
 			new DateType(1974, 2, 0);
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo("theDay must be between 1 and 31");
+			assertEquals("theDay must be between 1 and 31", e.getMessage());
 		}
 		try {
 			new DateType(1974, 2, 32);
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo("theDay must be between 1 and 31");
+			assertEquals("theDay must be between 1 and 31", e.getMessage());
 		}
 		new DateType(1974, 1, 31);
 	}
@@ -84,10 +85,10 @@ public class DateTypeTest {
 		cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 		cal.set(1990, Calendar.JANUARY, 5, 0, 0, 0);
 		DateType dateDt = new DateType(cal);
-		assertThat(dateDt.getValueAsString()).isEqualTo("1990-01-05");
+		assertEquals("1990-01-05", dateDt.getValueAsString());
 
 		dateDt = new DateType(1990, 0, 5);
-		assertThat(dateDt.getValueAsString()).isEqualTo("1990-01-05");
+		assertEquals("1990-01-05", dateDt.getValueAsString());
 	}
 
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -100,7 +101,7 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(446) + "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>");
 
 	}
@@ -115,10 +116,10 @@ public class SearchDstu2Test {
 
 		assertThat(responseContent).doesNotContain("text");
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
 		String ref = patient.getManagingOrganization().getReference().getValue();
-		assertThat(ref).isEqualTo("Organization/555");
+		assertEquals("Organization/555", ref);
 		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
 	}
 
@@ -132,10 +133,10 @@ public class SearchDstu2Test {
 
 		assertThat(responseContent).doesNotContain("text");
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		Patient patient = (Patient) ourCtx.newJsonParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
 		String ref = patient.getManagingOrganization().getReference().getValue();
-		assertThat(ref).isEqualTo("Organization/555");
+		assertEquals("Organization/555", ref);
 		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
 	}
 
@@ -160,7 +161,7 @@ public class SearchDstu2Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).matches(".*id value..[0-9a-f-]+\\\".*");
 	}
 
@@ -171,7 +172,7 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
@@ -181,8 +182,8 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourLastMethod).isEqualTo("searchBlacklist01");
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("searchBlacklist01", ourLastMethod);
 	}
 
 	@Test
@@ -195,12 +196,12 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(ourLastMethod).isEqualTo("searchDateAndList");
+		assertEquals("searchDateAndList", ourLastMethod);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(2);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens()).hasSize(2);
-		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValueAsString()).isEqualTo("2001");
-		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString()).isEqualTo("2002");
+		assertEquals("2001", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValueAsString());
+		assertEquals("2002", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString());
 		assertThat(responseContent).contains("SYSTEM");
 	}
 
@@ -212,7 +213,7 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(ourLastMethod).isEqualTo("searchReturnNull");
+		assertEquals("searchReturnNull", ourLastMethod);
 		assertThat(responseContent).contains("<total value=\"0\"/>");
 	}
 
@@ -226,12 +227,12 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(ourLastMethod).isEqualTo("searchDateAndList");
+		assertEquals("searchDateAndList", ourLastMethod);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(2);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens()).hasSize(2);
-		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValueAsString()).isEqualTo("2001");
-		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString()).isEqualTo("2002");
+		assertEquals("2001", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValueAsString());
+		assertEquals("2002", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString());
 		assertThat(responseContent).contains(":\"SYSTEM\"");
 
 	}
@@ -248,12 +249,12 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(ourLastMethod).isEqualTo("searchDateAndList");
+		assertEquals("searchDateAndList", ourLastMethod);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(2);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens()).hasSize(2);
-		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValueAsString()).isEqualTo("2001");
-		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString()).isEqualTo("2002");
+		assertEquals("2001", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValueAsString());
+		assertEquals("2002", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString());
 		assertThat(responseContent).contains(":\"SYSTEM\"");
 
 	}
@@ -268,7 +269,7 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
@@ -278,12 +279,12 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(ourLastMethod).isEqualTo("searchDateAndList");
+		assertEquals("searchDateAndList", ourLastMethod);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(2);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens()).hasSize(2);
-		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValueAsString()).isEqualTo("2001");
-		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString()).isEqualTo("2002");
+		assertEquals("2001", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValueAsString());
+		assertEquals("2002", ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValueAsString());
 	}
 
 	/**
@@ -299,8 +300,8 @@ public class SearchDstu2Test {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info(responseContent);
 			resp = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-			assertThat(resp.getType()).isEqualTo("searchset");
-			assertThat(resp.getTotal().intValue()).isEqualTo(100);
+			assertEquals("searchset", resp.getType());
+			assertEquals(100, resp.getTotal().intValue());
 		}
 		Link nextLink = resp.getLink("next");
 		assertThat(nextLink.getUrl()).startsWith("http://");
@@ -313,8 +314,8 @@ public class SearchDstu2Test {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info(responseContent);
 			resp = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-			assertThat(resp.getType()).isEqualTo("searchset");
-			assertThat(resp.getTotal().intValue()).isEqualTo(100);
+			assertEquals("searchset", resp.getType());
+			assertEquals(100, resp.getTotal().intValue());
 		}
 
 		nextLink = resp.getLink("next");
@@ -328,8 +329,8 @@ public class SearchDstu2Test {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info(responseContent);
 			resp = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-			assertThat(resp.getType()).isEqualTo("searchset");
-			assertThat(resp.getTotal().intValue()).isEqualTo(100);
+			assertEquals("searchset", resp.getType());
+			assertEquals(100, resp.getTotal().intValue());
 		}
 	}
 
@@ -343,8 +344,8 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourLastQuantity.getMissing()).isEqualTo(Boolean.TRUE);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals(Boolean.TRUE, ourLastQuantity.getMissing());
 	}
 
 	/**
@@ -357,10 +358,10 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		assertThat(ourLastQuantity.getPrefix()).isEqualTo(ParamPrefixEnum.GREATERTHAN);
-		assertThat(ourLastQuantity.getValue().intValue()).isEqualTo(100);
+		assertEquals(ParamPrefixEnum.GREATERTHAN, ourLastQuantity.getPrefix());
+		assertEquals(100, ourLastQuantity.getValue().intValue());
 	}
 
 	@Test
@@ -370,9 +371,9 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		assertThat(ourLastRef.getIdPart()).isEqualTo("123");
+		assertEquals("123", ourLastRef.getIdPart());
 		assertNull(ourLastRef.getResourceType());
 	}
 
@@ -383,10 +384,10 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		assertThat(ourLastRef.getIdPart()).isEqualTo("123");
-		assertThat(ourLastRef.getResourceType()).isEqualTo("Patient");
+		assertEquals("123", ourLastRef.getIdPart());
+		assertEquals("Patient", ourLastRef.getResourceType());
 	}
 
 	@Test
@@ -396,10 +397,10 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		assertThat(ourLastRef.getIdPart()).isEqualTo("123");
-		assertThat(ourLastRef.getResourceType()).isEqualTo("Patient");
+		assertEquals("123", ourLastRef.getIdPart());
+		assertEquals("Patient", ourLastRef.getResourceType());
 	}
 
 	@Test
@@ -409,10 +410,10 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		assertThat(ourLastRef.getIdPart()).isEqualTo("123");
-		assertThat(ourLastRef.getResourceType()).isEqualTo("Patient");
+		assertEquals("123", ourLastRef.getIdPart());
+		assertEquals("Patient", ourLastRef.getResourceType());
 	}
 
 	/**
@@ -425,9 +426,9 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		assertThat(ourLastMethod).isEqualTo("idProvider");
+		assertEquals("idProvider", ourLastMethod);
 	}
 
 	@Test
@@ -437,9 +438,9 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		assertThat(ourLastMethod).isEqualTo("stringParam:true:true");
+		assertEquals("stringParam:true:true", ourLastMethod);
 	}
 
 	@Test
@@ -449,9 +450,9 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		assertThat(ourLastMethod).isEqualTo("stringParam:false:true");
+		assertEquals("stringParam:false:true", ourLastMethod);
 	}
 
 	@Test
@@ -461,9 +462,9 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		assertThat(ourLastMethod).isEqualTo("stringParam:true:false");
+		assertEquals("stringParam:true:false", ourLastMethod);
 	}
 
 	@Test
@@ -473,9 +474,9 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
-		assertThat(ourLastMethod).isEqualTo("stringParam:false:false");
+		assertEquals("stringParam:false:false", ourLastMethod);
 	}
 
 
@@ -486,7 +487,7 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
@@ -496,8 +497,8 @@ public class SearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourLastMethod).isEqualTo("searchWhitelist01");
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("searchWhitelist01", ourLastMethod);
 	}
 
 	@AfterAll

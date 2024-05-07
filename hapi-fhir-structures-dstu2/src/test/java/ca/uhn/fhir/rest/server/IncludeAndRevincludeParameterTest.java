@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.api.Include;
@@ -57,7 +58,7 @@ public class IncludeAndRevincludeParameterTest {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertThat(ourIncludes).hasSize(0);
 		assertThat(ourReverseIncludes).hasSize(0);
@@ -69,7 +70,7 @@ public class IncludeAndRevincludeParameterTest {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertThat(ourIncludes).hasSize(2);
 		assertThat(ourReverseIncludes).hasSize(2);

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -87,13 +88,13 @@ public class ClientWithCustomTypeR4Test {
 
     HttpUriRequest request = capt.getAllValues().get(0);
 
-		assertThat(request.getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/123");
-		assertThat(request.getMethod()).isEqualTo("GET");
+		assertEquals("http://example.com/fhir/Patient/123", request.getURI().toASCIIString());
+		assertEquals("GET", request.getMethod());
 
 		assertThat(value.getName()).hasSize(1);
-		assertThat(value.getName().get(0).getFamily()).isEqualTo("FAMILY");
-		assertThat(value.getStringExt().getValue()).isEqualTo("STRINGVAL");
-		assertThat(value.getDateExt().getValueAsString()).isEqualTo("2011-01-02");
+		assertEquals("FAMILY", value.getName().get(0).getFamily());
+		assertEquals("STRINGVAL", value.getStringExt().getValue());
+		assertEquals("2011-01-02", value.getDateExt().getValueAsString());
 
   }
 
@@ -129,9 +130,9 @@ public class ClientWithCustomTypeR4Test {
     ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
     List<IBaseResource> response = client.getPatientByDobWithGenericResourceReturnType(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 
-		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://foo/Patient?birthdate=ge2011-01-02");
+		assertEquals("http://foo/Patient?birthdate=ge2011-01-02", capt.getValue().getURI().toString());
     ExtendedPatient patientResp = (ExtendedPatient) response.get(0);
-		assertThat(patientResp.getIdentifier().get(0).getValue()).isEqualTo("PRP1660");
+		assertEquals("PRP1660", patientResp.getIdentifier().get(0).getValue());
 
   }
 
@@ -167,9 +168,9 @@ public class ClientWithCustomTypeR4Test {
     ITestClient client = ctx.newRestfulClient(ITestClient.class, "http://foo");
     List<IAnyResource> response = client.getPatientByDobWithGenericResourceReturnType2(new DateParam(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, "2011-01-02"));
 
-		assertThat(capt.getValue().getURI().toString()).isEqualTo("http://foo/Patient?birthdate=ge2011-01-02");
+		assertEquals("http://foo/Patient?birthdate=ge2011-01-02", capt.getValue().getURI().toString());
     ExtendedPatient patientResp = (ExtendedPatient) response.get(0);
-		assertThat(patientResp.getIdentifier().get(0).getValue()).isEqualTo("PRP1660");
+		assertEquals("PRP1660", patientResp.getIdentifier().get(0).getValue());
 
   }
 

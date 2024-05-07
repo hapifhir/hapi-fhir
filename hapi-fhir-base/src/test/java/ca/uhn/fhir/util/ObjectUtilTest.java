@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -32,7 +33,7 @@ class ObjectUtilTest {
 			ObjectUtil.requireNonNull(null, message);
 			fail("should not get here.");
 		} catch (NullPointerException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1776) + message);
+			assertEquals(Msg.code(1776) + message, e.getMessage());
 		}
 		assertNotNull(ObjectUtil.requireNonNull("some string", message));
 	}
@@ -57,7 +58,7 @@ class ObjectUtilTest {
 			ObjectUtil.requireNotEmpty(string, message);
 			fail("should not get here.");
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1777) + message);
+			assertEquals(Msg.code(1777) + message, e.getMessage());
 		}
 	}
 

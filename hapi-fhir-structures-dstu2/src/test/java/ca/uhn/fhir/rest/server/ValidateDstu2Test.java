@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.base.resource.BaseOperationOutcome;
@@ -78,7 +79,7 @@ public class ValidateDstu2Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertThat(resp).containsSubsequence("<OperationOutcome");
 	}
@@ -97,10 +98,10 @@ public class ValidateDstu2Test {
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertThat(ourLastResourceBody).containsSubsequence("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001");
-		assertThat(ourLastEncoding).isEqualTo(EncodingEnum.JSON);
+		assertEquals(EncodingEnum.JSON, ourLastEncoding);
 
 	}
 
@@ -123,11 +124,11 @@ public class ValidateDstu2Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertThat(resp).containsSubsequence("<OperationOutcome");
-		assertThat(ourLastProfile).isEqualTo("http://foo");
-		assertThat(ourLastMode).isEqualTo(ValidationModeEnum.CREATE);
+		assertEquals("http://foo", ourLastProfile);
+		assertEquals(ValidationModeEnum.CREATE, ourLastMode);
 	}
 
 	@Test
@@ -150,7 +151,7 @@ public class ValidateDstu2Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertThat(resp).containsSubsequence("<OperationOutcome", "FOOBAR");
 	}

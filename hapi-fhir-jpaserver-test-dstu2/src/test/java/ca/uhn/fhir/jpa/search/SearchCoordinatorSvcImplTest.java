@@ -199,19 +199,19 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		assertNotNull(result.getUuid());
-		assertThat(result.size()).isEqualTo(790);
+		assertEquals(790, result.size());
 
 		List<IBaseResource> resources = result.getResources(0, 100000);
 		assertThat(resources).hasSize(790);
-		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
-		assertThat(resources.get(789).getIdElement().getValueAsString()).isEqualTo("799");
+		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
+		assertEquals("799", resources.get(789).getIdElement().getValueAsString());
 
 		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
 		verify(mySearchCacheSvc, atLeastOnce()).save(searchCaptor.capture(), any());
 
 		assertThat(allResults).hasSize(790);
-		assertThat(allResults.get(0).getId()).isEqualTo(10);
-		assertThat(allResults.get(789).getId()).isEqualTo(799);
+		assertEquals(10, allResults.get(0).getId());
+		assertEquals(799, allResults.get(789).getId());
 
 		myExpectedNumberOfSearchBuildersCreated = 4;
 	}
@@ -235,7 +235,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 			mySvc.getResources("1234-5678", 0, 100, null, null);
 			fail("");
 		} catch (ResourceGoneException e) {
-			assertThat(e.getMessage()).isEqualTo("Search ID \"1234-5678\" does not exist and may have expired");
+			assertEquals("Search ID \"1234-5678\" does not exist and may have expired", e.getMessage());
 		}
 	}
 
@@ -278,14 +278,14 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		assertNotNull(result.getUuid());
-		assertThat(result.size()).isEqualTo(790);
+		assertEquals(790, result.size());
 
 		List<IBaseResource> resources;
 
 		resources = result.getResources(0, 30);
 		assertThat(resources).hasSize(30);
-		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
-		assertThat(resources.get(29).getIdElement().getValueAsString()).isEqualTo("39");
+		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
+		assertEquals("39", resources.get(29).getIdElement().getValueAsString());
 
 	}
 
@@ -382,21 +382,21 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		assertNotNull(result.getUuid());
-		assertThat(result.size()).isEqualTo(790);
+		assertEquals(790, result.size());
 
 		ArgumentCaptor<Search> searchCaptor = ArgumentCaptor.forClass(Search.class);
 		verify(mySearchCacheSvc, atLeast(1)).save(searchCaptor.capture(), any());
 		Search search = searchCaptor.getValue();
-		assertThat(search.getSearchType()).isEqualTo(SearchTypeEnum.SEARCH);
+		assertEquals(SearchTypeEnum.SEARCH, search.getSearchType());
 
 		List<IBaseResource> resources;
 		PersistedJpaBundleProvider provider;
 
 		resources = result.getResources(0, 10);
-		assertThat(result.size()).isEqualTo(790);
+		assertEquals(790, result.size());
 		assertThat(resources).hasSize(10);
-		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
-		assertThat(resources.get(9).getIdElement().getValueAsString()).isEqualTo("19");
+		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
+		assertEquals("19", resources.get(9).getIdElement().getValueAsString());
 
 		myExpectedNumberOfSearchBuildersCreated = 4;
 	}
@@ -419,12 +419,12 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		IBundleProvider result = mySvc.registerSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null, RequestPartitionId.allPartitions());
 		assertNotNull(result.getUuid());
-		assertThat(Objects.requireNonNull(result.size()).intValue()).isEqualTo(90);
+		assertEquals(90, Objects.requireNonNull(result.size()).intValue());
 
 		List<IBaseResource> resources = result.getResources(0, 30);
 		assertThat(resources).hasSize(30);
-		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
-		assertThat(resources.get(29).getIdElement().getValueAsString()).isEqualTo("39");
+		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
+		assertEquals("39", resources.get(29).getIdElement().getValueAsString());
 
 	}
 
@@ -432,8 +432,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	public void testGetPage() {
 		Pageable page = SearchCoordinatorSvcImpl.toPage(50, 73);
 		assert page != null;
-		assertThat(page.getOffset()).isEqualTo(50);
-		assertThat(page.getPageSize()).isEqualTo(23);
+		assertEquals(50, page.getOffset());
+		assertEquals(23, page.getPageSize());
 	}
 
 	@Test
@@ -481,8 +481,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		provider = newPersistedJpaBundleProvider(uuid);
 		resources = provider.getResources(10, 20);
 		assertThat(resources).hasSize(10);
-		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("20");
-		assertThat(resources.get(9).getIdElement().getValueAsString()).isEqualTo("29");
+		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
+		assertEquals("29", resources.get(9).getIdElement().getValueAsString());
 
 		provider = new PersistedJpaBundleProvider(null, uuid);
 		provider.setTxServiceForUnitTest(myTransactionService);
@@ -495,8 +495,8 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		provider.setRequestPartitionId(RequestPartitionId.defaultPartition());
 		resources = provider.getResources(20, 40);
 		assertThat(resources).hasSize(20);
-		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("30");
-		assertThat(resources.get(19).getIdElement().getValueAsString()).isEqualTo("49");
+		assertEquals("30", resources.get(0).getIdElement().getValueAsString());
+		assertEquals("49", resources.get(19).getIdElement().getValueAsString());
 
 		myExpectedNumberOfSearchBuildersCreated = 3;
 	}
@@ -574,7 +574,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 			mySvc.getResources("0000-1111", 0, 10, null, null);
 			fail("");
 		} catch (ResourceGoneException e) {
-			assertThat(e.getMessage()).isEqualTo("Search ID \"0000-1111\" does not exist and may have expired");
+			assertEquals("Search ID \"0000-1111\" does not exist and may have expired", e.getMessage());
 		}
 
 	}
@@ -607,7 +607,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 			mySvc.getResources("0000-1111", 0, 10, null, null);
 			fail("");
 		} catch (ResourceGoneException e) {
-			assertThat(e.getMessage()).isEqualTo("Search ID \"0000-1111\" does not exist and may have expired");
+			assertEquals("Search ID \"0000-1111\" does not exist and may have expired", e.getMessage());
 		}
 
 	}

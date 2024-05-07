@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cli;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkDataImportProvider;
 import ca.uhn.fhir.batch2.jobs.imprt.BulkImportJobParameters;
@@ -129,8 +130,8 @@ public class BulkImportCommandTest {
 
 		// Reverse order because Patient should be first
 		assertThat(jobParameters.getNdJsonUrls()).hasSize(2);
-		assertThat(fetchFile(jobParameters.getNdJsonUrls().get(0))).isEqualTo(fileContents2);
-		assertThat(fetchFile(jobParameters.getNdJsonUrls().get(1))).isEqualTo(fileContents1);
+		assertEquals(fileContents2, fetchFile(jobParameters.getNdJsonUrls().get(0)));
+		assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
 	}
 
 	@Test
@@ -172,8 +173,8 @@ public class BulkImportCommandTest {
 
 		// Reverse order because Patient should be first
 		assertThat(jobParameters.getNdJsonUrls()).hasSize(2);
-		assertThat(fetchFile(jobParameters.getNdJsonUrls().get(0))).isEqualTo(fileContents2);
-		assertThat(fetchFile(jobParameters.getNdJsonUrls().get(1))).isEqualTo(fileContents1);
+		assertEquals(fileContents2, fetchFile(jobParameters.getNdJsonUrls().get(0)));
+		assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
 	}
 
 	@Test
@@ -215,8 +216,8 @@ public class BulkImportCommandTest {
 
 			// Reverse order because Patient should be first
 			assertThat(jobParameters.getNdJsonUrls()).hasSize(2);
-			assertThat(fetchFile(jobParameters.getNdJsonUrls().get(0))).isEqualTo(fileContents2);
-			assertThat(fetchFile(jobParameters.getNdJsonUrls().get(1))).isEqualTo(fileContents1);
+			assertEquals(fileContents2, fetchFile(jobParameters.getNdJsonUrls().get(0)));
+			assertEquals(fileContents1, fetchFile(jobParameters.getNdJsonUrls().get(1)));
 		}
 		catch(InternalErrorException e) {
 			ourLog.error(e.getMessage());
@@ -226,7 +227,7 @@ public class BulkImportCommandTest {
 	private String fetchFile(String url) throws IOException {
 		String outcome;
 		try (CloseableHttpResponse response = myHttpClientExtension.getClient().execute(new HttpGet(url))) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 		}
 		return outcome;

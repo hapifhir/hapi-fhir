@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.client.apache.ApacheHttpResponse;
@@ -44,8 +45,8 @@ public class CapturingInterceptorTest {
 		interceptor.interceptResponse(expectedResponse);
 		interceptor.interceptRequest(expectedRequest);
 
-		assertThat(interceptor.getLastRequest()).isEqualTo(expectedRequest);
-		assertThat(interceptor.getLastResponse()).isEqualTo(expectedResponse);
+		assertEquals(expectedRequest, interceptor.getLastRequest());
+		assertEquals(expectedResponse, interceptor.getLastResponse());
 
 		interceptor.clear();
 
@@ -60,7 +61,7 @@ public class CapturingInterceptorTest {
 		CapturingInterceptor interceptor = new CapturingInterceptor();
 		interceptor.interceptRequest(expectedRequest);
 
-		assertThat(interceptor.getLastRequest()).isEqualTo(expectedRequest);
+		assertEquals(expectedRequest, interceptor.getLastRequest());
 	}
 
 	@Test
@@ -71,7 +72,7 @@ public class CapturingInterceptorTest {
 		CapturingInterceptor interceptor = new CapturingInterceptor();
 		interceptor.interceptResponse(expectedResponse);
 
-		assertThat(interceptor.getLastResponse()).isEqualTo(expectedResponse);
+		assertEquals(expectedResponse, interceptor.getLastResponse());
 		verify(expectedResponse).bufferEntity();
 	}
 
@@ -86,8 +87,8 @@ public class CapturingInterceptorTest {
 		interceptor.interceptResponse(expectedResponse);
 		IHttpResponse actualResponse = interceptor.getLastResponse();
 
-		assertThat(actualResponse).isEqualTo(expectedResponse);
-		assertThat("Some content").isEqualTo(IOUtils.toString(actualResponse.createReader()));
+		assertEquals(expectedResponse, actualResponse);
+		assertEquals(IOUtils.toString(actualResponse.createReader()), "Some content");
 		verify(expectedResponse).bufferEntity();
 
 		//A second call should not throw an exception (InpuStreamEntity is not repeatable)
@@ -105,7 +106,7 @@ public class CapturingInterceptorTest {
 		interceptor.interceptResponse(expectedResponse);
 		IHttpResponse actualResponse = interceptor.getLastResponse();
 
-		assertThat(actualResponse).isEqualTo(expectedResponse);
+		assertEquals(expectedResponse, actualResponse);
 		verify(expectedResponse).bufferEntity();
 	}
 
@@ -120,8 +121,8 @@ public class CapturingInterceptorTest {
 			interceptor.interceptResponse(response);
 		});
 
-		assertThat(exception.getMessage()).isEqualTo(Msg.code(1404) + "Unable to buffer the entity for capturing");
-		assertThat(exception.getCause()).isEqualTo(expectedCause);
+		assertEquals(Msg.code(1404) + "Unable to buffer the entity for capturing", exception.getMessage());
+		assertEquals(expectedCause, exception.getCause());
 
 	}
 
@@ -136,8 +137,8 @@ public class CapturingInterceptorTest {
 		interceptor.interceptResponse(expectedResponse);
 		IHttpResponse actualResponse = interceptor.getLastResponse();
 
-		assertThat(actualResponse).isEqualTo(expectedResponse);
-		assertThat("Some content").isEqualTo(IOUtils.toString(actualResponse.createReader()));
+		assertEquals(expectedResponse, actualResponse);
+		assertEquals(IOUtils.toString(actualResponse.createReader()), "Some content");
 		verify(expectedResponse, times(0)).bufferEntity();
 
 		//A second call should not throw an exception (StringEntity is repeatable)

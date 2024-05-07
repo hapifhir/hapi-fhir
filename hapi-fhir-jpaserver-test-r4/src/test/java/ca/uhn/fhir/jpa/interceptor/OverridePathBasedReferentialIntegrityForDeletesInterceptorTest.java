@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -79,7 +80,7 @@ public class OverridePathBasedReferentialIntegrityForDeletesInterceptorTest exte
 
 		// Search should still work
 		IBundleProvider searchOutcome = myAuditEventDao.search(SearchParameterMap.newSynchronous(AuditEvent.SP_AGENT, new ReferenceParam("Patient/P")));
-		assertThat(searchOutcome.size()).isEqualTo(1);
+		assertEquals(1, searchOutcome.size());
 
 
 	}

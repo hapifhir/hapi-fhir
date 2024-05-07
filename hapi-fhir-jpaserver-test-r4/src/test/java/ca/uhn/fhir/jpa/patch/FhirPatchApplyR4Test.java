@@ -58,7 +58,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1267) + "Unknown patch operation type: foo");
+			assertEquals(Msg.code(1267) + "Unknown patch operation type: foo", e.getMessage());
 		}
 	}
 
@@ -87,7 +87,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1270) + "Invalid insert index 2 for path Patient.identifier - Only have 0 existing entries");
+			assertEquals(Msg.code(1270) + "Invalid insert index 2 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
 		}
 	}
 
@@ -116,7 +116,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1270) + "Invalid insert index -1 for path Patient.identifier - Only have 0 existing entries");
+			assertEquals(Msg.code(1270) + "Invalid insert index -1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
 		}
 	}
 
@@ -149,7 +149,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1268) + "Invalid move source index 2 for path Patient.identifier - Only have 0 existing entries");
+			assertEquals(Msg.code(1268) + "Invalid move source index 2 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
 		}
 	}
 
@@ -182,7 +182,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1268) + "Invalid move source index -1 for path Patient.identifier - Only have 0 existing entries");
+			assertEquals(Msg.code(1268) + "Invalid move source index -1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
 		}
 	}
 
@@ -216,7 +216,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1269) + "Invalid move destination index 1 for path Patient.identifier - Only have 0 existing entries");
+			assertEquals(Msg.code(1269) + "Invalid move destination index 1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
 		}
 	}
 
@@ -250,7 +250,7 @@ public class FhirPatchApplyR4Test {
 		try {
 			svc.apply(patient, patch);
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1269) + "Invalid move destination index -1 for path Patient.identifier - Only have 0 existing entries");
+			assertEquals(Msg.code(1269) + "Invalid move destination index -1 for path Patient.identifier - Only have 0 existing entries", e.getMessage());
 		}
 	}
 
@@ -279,7 +279,7 @@ public class FhirPatchApplyR4Test {
 
 		assertThat(patient.getIdentifier()).hasSize(1);
 
-		assertThat(ourCtx.newJsonParser().encodeResourceToString(patient)).isEqualTo("{\"resourceType\":\"Patient\",\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}],\"active\":true}");
+		assertEquals("{\"resourceType\":\"Patient\",\"identifier\":[{\"system\":\"sys\",\"value\":\"val\"}],\"active\":true}", ourCtx.newJsonParser().encodeResourceToString(patient));
 
 	}
 
@@ -316,7 +316,7 @@ public class FhirPatchApplyR4Test {
 
 		assertThat(patient.getExtension()).hasSize(2);
 
-		assertThat(ourCtx.newJsonParser().encodeResourceToString(patient)).isEqualTo("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"url1\",\"extension\":[{\"url\":\"text\",\"valueString\":\"first text\"},{\"url\":\"code\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"sys\",\"code\":\"123\",\"display\":\"Abc\"}]}}]},{\"url\":\"url3\",\"extension\":[{\"url\":\"text\",\"valueString\":\"third text\"},{\"url\":\"code\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"sys\",\"code\":\"345\",\"display\":\"Ghi\"}]}},{\"url\":\"detail\",\"valueInteger\":12}]}],\"active\":true}");
+		assertEquals("{\"resourceType\":\"Patient\",\"extension\":[{\"url\":\"url1\",\"extension\":[{\"url\":\"text\",\"valueString\":\"first text\"},{\"url\":\"code\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"sys\",\"code\":\"123\",\"display\":\"Abc\"}]}}]},{\"url\":\"url3\",\"extension\":[{\"url\":\"text\",\"valueString\":\"third text\"},{\"url\":\"code\",\"valueCodeableConcept\":{\"coding\":[{\"system\":\"sys\",\"code\":\"345\",\"display\":\"Ghi\"}]}},{\"url\":\"detail\",\"valueInteger\":12}]}],\"active\":true}", ourCtx.newJsonParser().encodeResourceToString(patient));
 
 	}
 
@@ -409,7 +409,7 @@ public class FhirPatchApplyR4Test {
 		svc.apply(patient, patch);
 
 		ourLog.debug("Outcome:\n{}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertThat(ourCtx.newJsonParser().encodeResourceToString(patient)).isEqualTo("{\"resourceType\":\"Questionnaire\",\"item\":[{\"linkId\":\"1\",\"code\":[{\"system\":\"https://smilecdr.com/fhir/document-type\",\"code\":\"CLINICAL\"}],\"text\":\"Test item\"},{\"linkId\":\"2\",\"code\":[{\"system\":\"http://smilecdr.com/fhir/document-type\",\"code\":\"ADMIN\"}],\"text\":\"Test Item 2\"}]}");
+		assertEquals("{\"resourceType\":\"Questionnaire\",\"item\":[{\"linkId\":\"1\",\"code\":[{\"system\":\"https://smilecdr.com/fhir/document-type\",\"code\":\"CLINICAL\"}],\"text\":\"Test item\"},{\"linkId\":\"2\",\"code\":[{\"system\":\"http://smilecdr.com/fhir/document-type\",\"code\":\"ADMIN\"}],\"text\":\"Test Item 2\"}]}", ourCtx.newJsonParser().encodeResourceToString(patient));
 	}
 
 	@Test
@@ -431,10 +431,10 @@ public class FhirPatchApplyR4Test {
 
 		//Then: New identifier is added, and does not overwrite.
 		assertThat(patient.getIdentifier()).hasSize(2);
-		assertThat(patient.getIdentifier().get(0).getSystem()).isEqualTo("first-system");
-		assertThat(patient.getIdentifier().get(0).getValue()).isEqualTo("first-value");
-		assertThat(patient.getIdentifier().get(1).getSystem()).isEqualTo("second-system");
-		assertThat(patient.getIdentifier().get(1).getValue()).isEqualTo("second-value");
+		assertEquals("first-system", patient.getIdentifier().get(0).getSystem());
+		assertEquals("first-value", patient.getIdentifier().get(0).getValue());
+		assertEquals("second-system", patient.getIdentifier().get(1).getSystem());
+		assertEquals("second-value", patient.getIdentifier().get(1).getValue());
 	}
 
 	@Test
@@ -453,8 +453,8 @@ public class FhirPatchApplyR4Test {
 
 		//Then: it applies the new identifier correctly.
 		assertThat(patient.getIdentifier()).hasSize(1);
-		assertThat(patient.getIdentifier().get(0).getSystem()).isEqualTo("third-system");
-		assertThat(patient.getIdentifier().get(0).getValue()).isEqualTo("third-value");
+		assertEquals("third-system", patient.getIdentifier().get(0).getSystem());
+		assertEquals("third-value", patient.getIdentifier().get(0).getValue());
 	}
 	@Test
 	public void testReplaceToHighCardinalityFieldRemovesAllAndSetsValue() {
@@ -474,8 +474,8 @@ public class FhirPatchApplyR4Test {
 
 		//Then: it applies the new identifier correctly.
 		assertThat(patient.getIdentifier()).hasSize(1);
-		assertThat(patient.getIdentifier().get(0).getSystem()).isEqualTo("third-system");
-		assertThat(patient.getIdentifier().get(0).getValue()).isEqualTo("third-value");
+		assertEquals("third-system", patient.getIdentifier().get(0).getSystem());
+		assertEquals("third-value", patient.getIdentifier().get(0).getValue());
 	}
 
 	//TODO: https://github.com/hapifhir/hapi-fhir/issues/3796
@@ -523,8 +523,8 @@ public class FhirPatchApplyR4Test {
 
 		//Then: it adds the new extension correctly.
 		assertThat(patient.getExtension()).hasSize(1);
-		assertThat(patient.getExtension().get(0).getUrl()).isEqualTo("http://foo/fhir/extension/foo");
-		assertThat(patient.getExtension().get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("foo");
+		assertEquals("http://foo/fhir/extension/foo", patient.getExtension().get(0).getUrl());
+		assertEquals("foo", patient.getExtension().get(0).getValueAsPrimitive().getValueAsString());
 	}
 
 	@Test

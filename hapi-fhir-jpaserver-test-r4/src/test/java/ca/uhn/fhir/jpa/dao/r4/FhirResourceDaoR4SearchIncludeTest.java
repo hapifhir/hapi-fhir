@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -162,7 +163,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		map.addRevInclude(new Include("Procedure:part-of"));
 		map.addInclude(new Include("Procedure:focalAccess").asRecursive());
 		IBundleProvider outcome = myProcedureDao.search(map, mySrd);
-		assertThat(outcome.getClass()).isEqualTo(PersistedJpaSearchFirstPageBundleProvider.class);
+		assertEquals(PersistedJpaSearchFirstPageBundleProvider.class, outcome.getClass());
 		List<String> ids = toUnqualifiedVersionlessIdValues(outcome);
 		assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder("Procedure/PRA8780542726", "Procedure/PRA8780542785", "BodyStructure/B51936689");
 
@@ -172,7 +173,7 @@ public class FhirResourceDaoR4SearchIncludeTest extends BaseJpaR4Test {
 		map.addRevInclude(new Include("Procedure:part-of"));
 		map.addInclude(new Include("Procedure:focalAccess").asRecursive());
 		outcome = myProcedureDao.search(map, mySrd);
-		assertThat(outcome.getClass()).isEqualTo(SimpleBundleProvider.class);
+		assertEquals(SimpleBundleProvider.class, outcome.getClass());
 		ids = toUnqualifiedVersionlessIdValues(outcome);
 		assertThat(ids).as(ids.toString()).containsExactlyInAnyOrder("Procedure/PRA8780542726", "Procedure/PRA8780542785", "BodyStructure/B51936689");
 	}

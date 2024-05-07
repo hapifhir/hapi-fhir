@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
@@ -163,7 +164,7 @@ public class ExpandResourcesStepTest {
 		RunOutcome outcome = mySecondStep.run(input, sink);
 
 		// verify
-		assertThat(outcome).isEqualTo(RunOutcome.SUCCESS);
+		assertEquals(RunOutcome.SUCCESS, outcome);
 
 
 		// data sink
@@ -182,7 +183,7 @@ public class ExpandResourcesStepTest {
 		// Patient Search
 		ArgumentCaptor<SystemRequestDetails> patientSearchCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
 		verify(patientDao).search(any(), patientSearchCaptor.capture());
-		assertThat(patientSearchCaptor.getValue().getRequestPartitionId()).isEqualTo(input.getParameters().getPartitionId());
+		assertEquals(input.getParameters().getPartitionId(), patientSearchCaptor.getValue().getRequestPartitionId());
 
 	}
 }

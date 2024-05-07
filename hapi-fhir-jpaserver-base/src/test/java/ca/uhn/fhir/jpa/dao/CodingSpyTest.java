@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -31,7 +32,7 @@ class CodingSpyTest {
 
 		Boolean result = new CodingSpy().getBooleanObject(theObject);
 
-		assertThat(result).isEqualTo(theValue);
+		assertEquals(theValue, result);
 	}
 
 	@Test

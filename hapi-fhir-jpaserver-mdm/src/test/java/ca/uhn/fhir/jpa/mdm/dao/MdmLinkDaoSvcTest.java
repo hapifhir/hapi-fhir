@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.dao;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -59,7 +60,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 	@Test
 	public void testUpdate() {
 		MdmLink createdLink = myMdmLinkDaoSvc.save(createResourcesAndBuildTestMDMLink());
-		assertThat(createdLink.getLinkSource()).isEqualTo(MdmLinkSourceEnum.MANUAL);
+		assertEquals(MdmLinkSourceEnum.MANUAL, createdLink.getLinkSource());
 		TestUtil.sleepOneClick();
 		createdLink.setLinkSource(MdmLinkSourceEnum.AUTO);
 		MdmLink updatedLink = myMdmLinkDaoSvc.save(createdLink);
@@ -70,8 +71,8 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 	public void testNew() {
 		IMdmLink newLink = myMdmLinkDaoSvc.newMdmLink();
 		MdmRulesJson rules = myMdmSettings.getMdmRules();
-		assertThat(rules.getVersion()).isEqualTo("1");
-		assertThat(newLink.getVersion()).isEqualTo(rules.getVersion());
+		assertEquals("1", rules.getVersion());
+		assertEquals(rules.getVersion(), newLink.getVersion());
 	}
 
 	@Test
@@ -99,7 +100,7 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 
 		lists.stream()
 			.forEach(tuple -> {
-			assertThat(tuple.getGoldenPid().getId()).isEqualTo(myIdHelperService.getPidOrThrowException(golden).getId());
+			assertEquals(myIdHelperService.getPidOrThrowException(golden).getId(), tuple.getGoldenPid().getId());
 			assertThat(tuple.getSourcePid().getId()).isIn(expectedExpandedPids);
 				});
 	}
@@ -235,8 +236,8 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 		// verify
 		assertThat(actualMdmLinkRevisions).hasSize(1);
 		MdmLink actualMdmLink = actualMdmLinkRevisions.get(0).getMdmLink();
-		assertThat(actualMdmLink.getGoldenResourcePersistenceId().getId().toString()).isEqualTo(goldenPatientId);
-		assertThat(actualMdmLink.getSourcePersistenceId().getId().toString()).isEqualTo(sourcePatientId);
+		assertEquals(goldenPatientId, actualMdmLink.getGoldenResourcePersistenceId().getId().toString());
+		assertEquals(sourcePatientId, actualMdmLink.getSourcePersistenceId().getId().toString());
 	}
 
 	@Test
@@ -464,11 +465,11 @@ public class MdmLinkDaoSvcTest extends BaseMdmR4Test {
 			final MdmLink expectedMdmLink = expectedMdmLinkRevision.getMdmLink();
 			final MdmLink actualMdmLink = actualMdmLinkRevision.getMdmLink();
 
-			assertThat(actualMdmLink.getMatchResult()).isEqualTo(expectedMdmLink.getMatchResult());
-			assertThat(actualMdmLinkRevision.getMdmLink().getGoldenResourcePersistenceId()).isEqualTo(expectedMdmLink.getGoldenResourcePersistenceId());
-			assertThat(actualMdmLinkRevision.getMdmLink().getSourcePersistenceId()).isEqualTo(expectedMdmLink.getSourcePersistenceId());
+			assertEquals(expectedMdmLink.getMatchResult(), actualMdmLink.getMatchResult());
+			assertEquals(expectedMdmLink.getGoldenResourcePersistenceId(), actualMdmLinkRevision.getMdmLink().getGoldenResourcePersistenceId());
+			assertEquals(expectedMdmLink.getSourcePersistenceId(), actualMdmLinkRevision.getMdmLink().getSourcePersistenceId());
 
-			assertThat(actualEnversRevision.getRevisionType()).isEqualTo(expectedEnversRevision.getRevisionType());
+			assertEquals(expectedEnversRevision.getRevisionType(), actualEnversRevision.getRevisionType());
 			// TODO:  LD:  when running this unit test on a pipeline, it's impossible to assert a revision number because of all the other MdmLinks
 			// created by other tests.  So for now, simply assert the revision is greater than 0
 			assertTrue(actualEnversRevision.getRevisionNumber() > 0);

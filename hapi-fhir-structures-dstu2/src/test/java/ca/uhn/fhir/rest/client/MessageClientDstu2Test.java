@@ -1,6 +1,7 @@
 package ca.uhn.fhir.rest.client;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.MessageHeader;
@@ -106,11 +107,11 @@ public class MessageClientDstu2Test {
                 .execute();
 
 			//System.out.println(response);
-			assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://192.168.4.93:83/fhirServer/$process-message?async=true&response-url=http%3A%2F%2Fmyserver%2Ffhir&_format=json");
-			assertThat(capt.getAllValues().get(0).getRequestLine().getMethod()).isEqualTo("POST");
+			assertEquals("http://192.168.4.93:83/fhirServer/$process-message?async=true&response-url=http%3A%2F%2Fmyserver%2Ffhir&_format=json", capt.getAllValues().get(0).getURI().toASCIIString());
+			assertEquals("POST", capt.getAllValues().get(0).getRequestLine().getMethod());
 			//assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", extractBody(capt, 0));
 			//assertNotNull(response.getOperationOutcome());
-			assertThat(((OperationOutcome) response).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("FOOBAR");
+			assertEquals("FOOBAR", ((OperationOutcome) response).getIssueFirstRep().getDiagnosticsElement().getValue());
 
     }
 
@@ -151,11 +152,11 @@ public class MessageClientDstu2Test {
                 .execute();
 
 			//System.out.println(response);
-			assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://192.168.4.93:83/fhirServer/$process-message?async=false&_format=json");
-			assertThat(capt.getAllValues().get(0).getRequestLine().getMethod()).isEqualTo("POST");
+			assertEquals("http://192.168.4.93:83/fhirServer/$process-message?async=false&_format=json", capt.getAllValues().get(0).getURI().toASCIIString());
+			assertEquals("POST", capt.getAllValues().get(0).getRequestLine().getMethod());
 			//assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", extractBody(capt, 0));
 			//assertNotNull(response.getOperationOutcome());
-			assertThat(((Bundle) response).getEntryFirstRep().getResource().getResourceName()).isEqualTo("MessageHeader");
+			assertEquals("MessageHeader", ((Bundle) response).getEntryFirstRep().getResource().getResourceName());
 
     }
 

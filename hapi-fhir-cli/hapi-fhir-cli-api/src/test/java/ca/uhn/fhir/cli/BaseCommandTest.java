@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cli;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
@@ -20,7 +21,7 @@ public class BaseCommandTest {
 			System.setIn(new ByteArrayInputStream("A VALUE\n".getBytes()));
 
 			String value = new MyBaseCommand().read();
-			assertThat(value).isEqualTo("A VALUE");
+			assertEquals("A VALUE", value);
 
 		} finally {
 			System.setIn(stdin);

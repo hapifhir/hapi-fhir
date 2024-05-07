@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,35 +17,35 @@ public class DateUtilTest {
 		assertNull(result.getRight());	
 		
 		result = DateUtils.getCompletedDate("2020");
-		assertThat(result.getLeft()).isEqualTo("2020-01-01");
-		assertThat(result.getRight()).isEqualTo("2020-12-31");
+		assertEquals("2020-01-01", result.getLeft());
+		assertEquals("2020-12-31", result.getRight());
 		
 		result = DateUtils.getCompletedDate("202001a");
-		assertThat(result.getLeft()).isEqualTo("202001a");
-		assertThat(result.getRight()).isEqualTo("202001a");
+		assertEquals("202001a", result.getLeft());
+		assertEquals("202001a", result.getRight());
 		
 		result = DateUtils.getCompletedDate("202001");
-		assertThat(result.getLeft()).isEqualTo("202001");
-		assertThat(result.getRight()).isEqualTo("202001");
+		assertEquals("202001", result.getLeft());
+		assertEquals("202001", result.getRight());
 		
 		result = DateUtils.getCompletedDate("2020-01");
-		assertThat(result.getLeft()).isEqualTo("2020-01-01");
-		assertThat(result.getRight()).isEqualTo("2020-01-31");
+		assertEquals("2020-01-01", result.getLeft());
+		assertEquals("2020-01-31", result.getRight());
 		
 		result = DateUtils.getCompletedDate("2020-02");
-		assertThat(result.getLeft()).isEqualTo("2020-02-01");
-		assertThat(result.getRight()).isEqualTo("2020-02-29");
+		assertEquals("2020-02-01", result.getLeft());
+		assertEquals("2020-02-29", result.getRight());
 		
 		result = DateUtils.getCompletedDate("2021-02");
-		assertThat(result.getLeft()).isEqualTo("2021-02-01");
-		assertThat(result.getRight()).isEqualTo("2021-02-28");
+		assertEquals("2021-02-01", result.getLeft());
+		assertEquals("2021-02-28", result.getRight());
 		
 		result = DateUtils.getCompletedDate("2020-04");
-		assertThat(result.getLeft()).isEqualTo("2020-04-01");
-		assertThat(result.getRight()).isEqualTo("2020-04-30");
+		assertEquals("2020-04-01", result.getLeft());
+		assertEquals("2020-04-30", result.getRight());
 		
 		result = DateUtils.getCompletedDate("2020-05-16");
-		assertThat(result.getLeft()).isEqualTo("2020-05-16");
-		assertThat(result.getRight()).isEqualTo("2020-05-16");
+		assertEquals("2020-05-16", result.getLeft());
+		assertEquals("2020-05-16", result.getRight());
 	}
 }

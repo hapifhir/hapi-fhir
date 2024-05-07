@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import org.hamcrest.Matchers;
 import org.hl7.fhir.instance.model.api.IBase;
@@ -27,7 +28,7 @@ public class ParametersUtilR4Test {
 		ParametersUtil.addParameterToParameters(ourFhirContext, parameters, "someDate", "date", "2019");
 
 		String encoded = ourFhirContext.newJsonParser().encodeResourceToString(parameters);
-		assertThat(encoded).isEqualTo("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"someString\",\"valueString\":\"someStringValue\"},{\"name\":\"someDate\",\"valueDate\":\"2019\"}]}");
+		assertEquals("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"someString\",\"valueString\":\"someStringValue\"},{\"name\":\"someDate\",\"valueDate\":\"2019\"}]}", encoded);
 	}
 
 	@Test
@@ -60,7 +61,7 @@ public class ParametersUtilR4Test {
 
 		Optional<Integer> value = ParametersUtil.getNamedParameterValueAsInteger(FhirContext.forR4(), p, "foo");
 		assertThat(value).isPresent();
-		assertThat(value.get().intValue()).isEqualTo(123);
+		assertEquals(123, value.get().intValue());
 	}
 
 	@Test
@@ -72,9 +73,9 @@ public class ParametersUtilR4Test {
 		}
 		List<String> values = ParametersUtil.getNamedParameterPartAsString(ourFhirContext, parameters, "link", "personId");
 		assertThat(values).hasSize(3);
-		assertThat(values.get(0)).isEqualTo(TEST_PERSON_ID);
-		assertThat(values.get(1)).isEqualTo(TEST_PERSON_ID);
-		assertThat(values.get(2)).isEqualTo(TEST_PERSON_ID);
+		assertEquals(TEST_PERSON_ID, values.get(0));
+		assertEquals(TEST_PERSON_ID, values.get(1));
+		assertEquals(TEST_PERSON_ID, values.get(2));
 	}
 
 	@Test
@@ -90,6 +91,6 @@ public class ParametersUtilR4Test {
 		// verify
 		String expected = BigDecimal.valueOf(decimalValue).toPlainString();
 		List<String> results = ParametersUtil.getNamedParameterPartAsString(ourFhirContext, parameters, "link", "linkCreated");
-		assertThat(results.get(0)).isEqualTo(expected);
+		assertEquals(expected, results.get(0));
 	}
 }

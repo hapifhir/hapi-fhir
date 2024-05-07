@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.DropIndexTask;
 import org.junit.jupiter.api.BeforeEach;
@@ -104,7 +105,7 @@ public class MigrationTaskSkipperTest {
 	private void assertSkipped(List<BaseTask> theTasks, Integer... theVersions) {
 		Set<String> expectedVersions = integersToVersions(theVersions).collect(Collectors.toSet());
 		Set<String> taskVersions = theTasks.stream().filter(BaseTask::isDoNothing).map(BaseTask::getMigrationVersion).collect(Collectors.toSet());
-		assertThat(taskVersions).isEqualTo(expectedVersions);
+		assertEquals(expectedVersions, taskVersions);
 	}
 
 	@Nonnull

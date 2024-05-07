@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -53,10 +54,10 @@ public class SearchHl7OrgDstu2Test {
 
 		assertThat(responseContent).doesNotContain("text");
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
     String ref = patient.getManagingOrganization().getReference();
-		assertThat(ref).isEqualTo("Organization/555");
+		assertEquals("Organization/555", ref);
 		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
   }
 
@@ -70,10 +71,10 @@ public class SearchHl7OrgDstu2Test {
 
 		assertThat(responseContent).doesNotContain("text");
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Patient patient = (Patient) ourCtx.newJsonParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
     String ref = patient.getManagingOrganization().getReference();
-		assertThat(ref).isEqualTo("Organization/555");
+		assertEquals("Organization/555", ref);
 		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION));
   }
 
@@ -85,14 +86,14 @@ public class SearchHl7OrgDstu2Test {
     IOUtils.closeQuietly(status.getEntity().getContent());
     ourLog.info(responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).matches(".*id value..[0-9a-f-]+\\\".*");
   }
 
   @Test
   public void testResultBundleHasUpdateTime() throws Exception {
     ourReturnPublished = new InstantDt("2011-02-03T11:22:33Z");
-		assertThat("2011-02-03T11:22:33Z").isEqualTo(ourReturnPublished.getValueAsString());
+		assertEquals(ourReturnPublished.getValueAsString(), "2011-02-03T11:22:33Z");
 
     HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=searchWithBundleProvider&_pretty=true");
     HttpResponse status = ourClient.execute(httpGet);

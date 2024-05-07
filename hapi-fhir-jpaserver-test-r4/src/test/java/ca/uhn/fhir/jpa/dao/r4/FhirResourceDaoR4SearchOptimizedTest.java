@@ -134,10 +134,10 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		IBundleProvider results = myPatientDao.search(params);
 		String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
-		assertThat(results.size().intValue()).isEqualTo(200);
+		assertEquals(200, results.size().intValue());
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids).isEmpty();
-		assertThat(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue()).isEqualTo(200);
+		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 	}
 
 	@Test
@@ -172,7 +172,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertThat(sql).contains("COUNT(DISTINCT ");
 		uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
-		assertThat(results.size().intValue()).isEqualTo(201);
+		assertEquals(201, results.size().intValue());
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids).isEmpty();
 
@@ -183,10 +183,10 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		results = myPatientDao.search(params);
 		uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
-		assertThat(results.size().intValue()).isEqualTo(201);
+		assertEquals(201, results.size().intValue());
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids).isEmpty();
-		assertThat(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue()).isEqualTo(201);
+		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
 		// Search with total explicitly requested
 		params = new SearchParameterMap();
@@ -195,13 +195,13 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		results = myPatientDao.search(params);
 		uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
-		assertThat(results.size().intValue()).isEqualTo(201);
+		assertEquals(201, results.size().intValue());
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids).hasSize(10);
 		PersistedJpaBundleProvider bundleProvider = (PersistedJpaBundleProvider) myDatabaseBackedPagingProvider.retrieveResultList(null, uuid);
 		Integer bundleSize = bundleProvider.size();
 		assertThat(bundleSize).as("Null size from provider of type " + bundleProvider.getClass() + " - Cache hit: " + bundleProvider.getCacheStatus()).isNotNull();
-		assertThat(bundleSize.intValue()).isEqualTo(201);
+		assertEquals(201, bundleSize.intValue());
 
 		// Search with count only
 		params = new SearchParameterMap();
@@ -210,10 +210,10 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		results = myPatientDao.search(params);
 		uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
-		assertThat(results.size().intValue()).isEqualTo(201);
+		assertEquals(201, results.size().intValue());
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
 		assertThat(ids).isEmpty();
-		assertThat(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue()).isEqualTo(201);
+		assertEquals(201, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
 	}
 
@@ -242,11 +242,11 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		Search bundleProviderSearch = results.getSearchEntityForTesting();
 		Search backingSearch = valueArgumentCaptor.getValue().getSearch();
 
-		assertThat(bundleProviderSearch.getUuid()).isEqualTo(keyArgumentCaptor.getValue());
-		assertThat(bundleProviderSearch.getUuid()).isEqualTo(backingSearch.getUuid());
+		assertEquals(keyArgumentCaptor.getValue(), bundleProviderSearch.getUuid());
+		assertEquals(backingSearch.getUuid(), bundleProviderSearch.getUuid());
 
-		assertThat(bundleProviderSearch.getStatus()).isEqualTo(backingSearch.getStatus());
-		assertThat(bundleProviderSearch.getId()).isEqualTo(backingSearch.getId());
+		assertEquals(backingSearch.getStatus(), bundleProviderSearch.getStatus());
+		assertEquals(backingSearch.getId(), bundleProviderSearch.getId());
 
 	}
 
@@ -268,11 +268,11 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		ourLog.info("** Search returned UUID: {}", uuid);
 
 //		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(mySrd, uuid).size().intValue());
-		assertThat(results.size().intValue()).isEqualTo(200);
+		assertEquals(200, results.size().intValue());
 		ourLog.info("** Asking for results");
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 5, true);
-		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
-		assertThat(ids.get(4)).isEqualTo("Patient/PT00004");
+		assertEquals("Patient/PT00000", ids.get(0));
+		assertEquals("Patient/PT00004", ids.get(4));
 
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 5000, false);
 		assertThat(ids).hasSize(200);
@@ -280,7 +280,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		ourLog.info("** About to make new query for search with UUID: {}", uuid);
 		IBundleProvider search2 = myDatabaseBackedPagingProvider.retrieveResultList(null, uuid);
 		Integer search2Size = search2.size();
-		assertThat(search2Size.intValue()).isEqualTo(200);
+		assertEquals(200, search2Size.intValue());
 	}
 
 	@Test
@@ -296,14 +296,14 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		IBundleProvider results = myPatientDao.search(params);
 		final String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
-		assertThat(results.size().intValue()).isEqualTo(200);
+		assertEquals(200, results.size().intValue());
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
-		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
-		assertThat(ids.get(9)).isEqualTo("Patient/PT00009");
+		assertEquals("Patient/PT00000", ids.get(0));
+		assertEquals("Patient/PT00009", ids.get(9));
 
 		results = myDatabaseBackedPagingProvider.retrieveResultList(null, uuid);
 		Integer resultsSize = results.size();
-		assertThat(resultsSize.intValue()).isEqualTo(200);
+		assertEquals(200, resultsSize.intValue());
 
 		// Try the same query again. This time the same thing should come back, but
 		// from the cache...
@@ -314,13 +314,13 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSummaryMode(SummaryEnum.DATA);
 		results = myPatientDao.search(params);
 		String uuid2 = results.getUuid();
-		assertThat(uuid2).isEqualTo(uuid);
+		assertEquals(uuid, uuid2);
 		ourLog.info("** Search returned UUID: {}", uuid2);
-		assertThat(results.size().intValue()).isEqualTo(200);
+		assertEquals(200, results.size().intValue());
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
-		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
-		assertThat(ids.get(9)).isEqualTo("Patient/PT00009");
-		assertThat(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid2).size().intValue()).isEqualTo(200);
+		assertEquals("Patient/PT00000", ids.get(0));
+		assertEquals("Patient/PT00009", ids.get(9));
+		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid2).size().intValue());
 
 	}
 
@@ -337,8 +337,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		ourLog.info("** Search returned UUID: {}", uuid);
 		assertNull(results.size());
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
-		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
-		assertThat(ids.get(9)).isEqualTo("Patient/PT00009");
+		assertEquals("Patient/PT00000", ids.get(0));
+		assertEquals("Patient/PT00009", ids.get(9));
 		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		// Try the same query again. This time we'll request _total=accurate as well
@@ -350,14 +350,14 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		results = myPatientDao.search(params);
 		String uuid2 = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid2);
-		assertThat(results.size().intValue()).isEqualTo(200);
+		assertEquals(200, results.size().intValue());
 		ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
-		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
-		assertThat(ids.get(9)).isEqualTo("Patient/PT00009");
+		assertEquals("Patient/PT00000", ids.get(0));
+		assertEquals("Patient/PT00009", ids.get(9));
 		await().until(() -> myDatabaseBackedPagingProvider.retrieveResultList(null, uuid2).size() != null);
 		IBundleProvider results2 = myDatabaseBackedPagingProvider.retrieveResultList(null, uuid2);
 		Integer results2Size = results2.size();
-		assertThat(results2Size.intValue()).isEqualTo(200);
+		assertEquals(200, results2Size.intValue());
 		assertThat(uuid2).isNotEqualTo(uuid);
 
 	}
@@ -378,8 +378,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 200, true);
-		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
-		assertThat(ids.get(199)).isEqualTo("Patient/PT00199");
+		assertEquals("Patient/PT00000", ids.get(0));
+		assertEquals("Patient/PT00199", ids.get(199));
 		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
@@ -438,8 +438,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
-		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
-		assertThat(ids.get(9)).isEqualTo("Patient/PT00009");
+		assertEquals("Patient/PT00000", ids.get(0));
+		assertEquals("Patient/PT00009", ids.get(9));
 		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
@@ -472,8 +472,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSort(new SortSpec(Patient.SP_NAME));
 		results = myPatientDao.search(params);
 		ids = toUnqualifiedVersionlessIdValues(results, 10, 15, false);
-		assertThat(ids.get(0)).isEqualTo("Patient/PT00010");
-		assertThat(ids.get(4)).isEqualTo("Patient/PT00014");
+		assertEquals("Patient/PT00010", ids.get(0));
+		assertEquals("Patient/PT00014", ids.get(4));
 		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
@@ -489,8 +489,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 */
 
 		ids = toUnqualifiedVersionlessIdValues(results, 15, 25, false);
-		assertThat(ids.get(0)).isEqualTo("Patient/PT00015");
-		assertThat(ids.get(9)).isEqualTo("Patient/PT00024");
+		assertEquals("Patient/PT00015", ids.get(0));
+		assertEquals("Patient/PT00024", ids.get(9));
 
 		/*
 		 * Search gets incremented twice as a part of loading the next batch
@@ -512,8 +512,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSort(new SortSpec(Patient.SP_NAME));
 		results = myPatientDao.search(params);
 		ids = toUnqualifiedVersionlessIdValues(results, 25, 30, false);
-		assertThat(ids.get(0)).isEqualTo("Patient/PT00025");
-		assertThat(ids.get(4)).isEqualTo("Patient/PT00029");
+		assertEquals("Patient/PT00025", ids.get(0));
+		assertEquals("Patient/PT00029", ids.get(4));
 		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
@@ -529,8 +529,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 */
 
 		ids = toUnqualifiedVersionlessIdValues(results, 50, 60, false);
-		assertThat(ids.get(0)).isEqualTo("Patient/PT00050");
-		assertThat(ids.get(9)).isEqualTo("Patient/PT00059");
+		assertEquals("Patient/PT00050", ids.get(0));
+		assertEquals("Patient/PT00059", ids.get(9));
 
 		/*
 		 * Search gets incremented twice as a part of loading the next batch
@@ -550,9 +550,9 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		ids = toUnqualifiedVersionlessIdValues(results, 180, 200, false);
 		assertThat(ids).hasSize(11);
-		assertThat(ids.get(0)).isEqualTo("Patient/PT00180");
-		assertThat(ids.get(9)).isEqualTo("Patient/PT00189");
-		assertThat(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue()).isEqualTo(191);
+		assertEquals("Patient/PT00180", ids.get(0));
+		assertEquals("Patient/PT00189", ids.get(9));
+		assertEquals(191, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
 
 	}
@@ -574,8 +574,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 50, true);
-		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
-		assertThat(ids.get(49)).isEqualTo("Patient/PT00049");
+		assertEquals("Patient/PT00000", ids.get(0));
+		assertEquals("Patient/PT00049", ids.get(49));
 		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
@@ -615,8 +615,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
-		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
-		assertThat(ids.get(9)).isEqualTo("Patient/PT00009");
+		assertEquals("Patient/PT00000", ids.get(0));
+		assertEquals("Patient/PT00009", ids.get(9));
 		assertNull(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size());
 
 		/*
@@ -643,9 +643,9 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		params.setSort(new SortSpec(Patient.SP_NAME));
 		results = myPatientDao.search(params);
 		ids = toUnqualifiedVersionlessIdValues(results, 15, 25, false);
-		assertThat(ids.get(0)).isEqualTo("Patient/PT00015");
-		assertThat(ids.get(9)).isEqualTo("Patient/PT00024");
-		assertThat(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue()).isEqualTo(200);
+		assertEquals("Patient/PT00015", ids.get(0));
+		assertEquals("Patient/PT00024", ids.get(9));
+		assertEquals(200, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
 		/*
 		 * Search should be untouched
@@ -676,8 +676,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
-		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
-		assertThat(ids.get(9)).isEqualTo("Patient/PT00009");
+		assertEquals("Patient/PT00000", ids.get(0));
+		assertEquals("Patient/PT00009", ids.get(9));
 		assertNull(results.size());
 
 		/*
@@ -749,7 +749,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		String uuid = results.getUuid();
 		ourLog.info("** Search returned UUID: {}", uuid);
 		List<String> ids = toUnqualifiedVersionlessIdValues(results, 0, 10, true);
-		assertThat(ids.get(0)).isEqualTo("Patient/PT00000");
+		assertEquals("Patient/PT00000", ids.get(0));
 		assertThat(ids).hasSize(1);
 
 		await().until(() -> runInTransaction(() -> mySearchEntityDao
@@ -765,7 +765,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			assertEquals(1, search.getVersion().intValue());
 		});
 
-		assertThat(myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue()).isEqualTo(1);
+		assertEquals(1, myDatabaseBackedPagingProvider.retrieveResultList(null, uuid).size().intValue());
 
 	}
 
@@ -832,7 +832,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertThat(resultingQueryNotFormatted).contains("TARGET_RESOURCE_ID IN ('" + ids.get(0) + "','" + ids.get(1) + "','" + ids.get(2) + "','" + ids.get(3) + "','" + ids.get(4) + "')");
 
 		// Ensure that the search actually worked
-		assertThat(search.size().intValue()).isEqualTo(5);
+		assertEquals(5, search.size().intValue());
 
 	}
 
@@ -848,8 +848,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		String selectQuery = myCaptureQueriesListener.getSelectQueries().get(0).getSql(true, true);
 		ourLog.info(selectQuery);
-		assertThat(StringUtils.countMatches(selectQuery, "JOIN")).isEqualTo(1);
-		assertThat(StringUtils.countMatches(selectQuery, "SELECT")).isEqualTo(1);
+		assertEquals(1, StringUtils.countMatches(selectQuery, "JOIN"));
+		assertEquals(1, StringUtils.countMatches(selectQuery, "SELECT"));
 	}
 
 	/**
@@ -904,7 +904,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			map.add("_id", new TokenOrListParam(null, "A", obs2id));
 			myCaptureQueriesListener.clear();
 			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
-			assertThat(outcome.size()).isEqualTo(2);
+			assertEquals(2, outcome.size());
 			assertThat(outcome.getResources(0, 999)).hasSize(2);
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
@@ -925,7 +925,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			map.add("_id", new TokenParam("A"));
 			myCaptureQueriesListener.clear();
 			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
-			assertThat(outcome.size()).isEqualTo(0);
+			assertEquals(0, outcome.size());
 			assertThat(outcome.getResources(0, 999)).isEmpty();
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
@@ -941,7 +941,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 			map.add("_id", new TokenOrListParam(null, "A", obs2id));
 			myCaptureQueriesListener.clear();
 			IBundleProvider outcome = myObservationDao.search(map, new SystemRequestDetails());
-			assertThat(outcome.size()).isEqualTo(0);
+			assertEquals(0, outcome.size());
 			assertThat(outcome.getResources(0, 999)).isEmpty();
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 			String selectQuery = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, false);
@@ -1161,8 +1161,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		ourLog.info("** Done performing write");
 
-		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(26);
-		assertThat(myCaptureQueriesListener.countUpdateQueriesForCurrentThread()).isEqualTo(0);
+		assertEquals(26, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 
 		/*
 		 * Not update the value
@@ -1180,9 +1180,9 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		ourLog.info("** Done performing write 2");
 
-		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(1);
-		assertThat(myCaptureQueriesListener.countUpdateQueriesForCurrentThread()).isEqualTo(3);
-		assertThat(myCaptureQueriesListener.countDeleteQueriesForCurrentThread()).isEqualTo(0);
+		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(3, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 	}
 
 	@Test
@@ -1206,16 +1206,16 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		await().until(() -> myCaptureQueriesListener.countSelectQueries() == 4);
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(myCaptureQueriesListener.countSelectQueries()).isEqualTo(4);
+		assertEquals(4, myCaptureQueriesListener.countSelectQueries());
 		// first prefetch is 50+1
-		assertThat(myCaptureQueriesListener.logInsertQueries()).isEqualTo(52);
-		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(1);
-		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
+		assertEquals(52, myCaptureQueriesListener.logInsertQueries());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 
-		assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread()).isEqualTo(4);
-		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(52);
-		assertThat(myCaptureQueriesListener.countUpdateQueriesForCurrentThread()).isEqualTo(1);
-		assertThat(myCaptureQueriesListener.countDeleteQueriesForCurrentThread()).isEqualTo(0);
+		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(52, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
 
 	}
 
@@ -1249,10 +1249,10 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		myPatientDao.update(p).getId().toUnqualifiedVersionless();
 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread()).isEqualTo(4);
-		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(1);
-		assertThat(myCaptureQueriesListener.countDeleteQueriesForCurrentThread()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countUpdateQueriesForCurrentThread()).isEqualTo(1);
+		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 		runInTransaction(() -> {
 			assertEquals(1, myResourceTableDao.count());
 			assertEquals(2, myResourceHistoryTableDao.count());
@@ -1271,7 +1271,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		p.getPhotoFirstRep().setCreationElement(new DateTimeType("2011")); // non-indexed field
 		IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
-		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(3);
+		assertEquals(3, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		runInTransaction(() -> {
 			assertEquals(1, myResourceTableDao.count());
 			assertEquals(1, myResourceHistoryTableDao.count());
@@ -1284,7 +1284,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		p.getPhotoFirstRep().setCreationElement(new DateTimeType("2012")); // non-indexed field
 		myPatientDao.update(p).getId().toUnqualifiedVersionless();
 
-		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(1);
+		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		runInTransaction(() -> {
 			assertEquals(1, myResourceTableDao.count());
 			assertEquals(2, myResourceHistoryTableDao.count());
@@ -1312,8 +1312,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		pt.getNameFirstRep().addGiven("GIVEN1C");
 		myPatientDao.update(pt);
 
-		assertThat(myCaptureQueriesListener.countDeleteQueriesForCurrentThread()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(4);
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 	}
 
 
@@ -1331,8 +1331,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 
-		assertThat(myPatientDao.search(m1).size().intValue()).isEqualTo(1);
-		assertThat(myPatientDao.search(m2).size().intValue()).isEqualTo(0);
+		assertEquals(1, myPatientDao.search(m1).size().intValue());
+		assertEquals(0, myPatientDao.search(m2).size().intValue());
 
 		ourLog.info("** About to update");
 
@@ -1341,12 +1341,12 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		pt.addName().setFamily("FAMILY2");
 		myPatientDao.update(pt);
 
-		assertThat(myCaptureQueriesListener.countDeleteQueriesForCurrentThread()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(1); // Add an entry to HFJ_RES_VER
-		assertThat(myCaptureQueriesListener.countUpdateQueriesForCurrentThread()).isEqualTo(4); // Update SPIDX_STRING and HFJ_RESOURCE
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread()); // Add an entry to HFJ_RES_VER
+		assertEquals(4, myCaptureQueriesListener.countUpdateQueriesForCurrentThread()); // Update SPIDX_STRING and HFJ_RESOURCE
 
-		assertThat(myPatientDao.search(m1).size().intValue()).isEqualTo(0);
-		assertThat(myPatientDao.search(m2).size().intValue()).isEqualTo(1);
+		assertEquals(0, myPatientDao.search(m1).size().intValue());
+		assertEquals(1, myPatientDao.search(m2).size().intValue());
 	}
 
 
@@ -1362,12 +1362,12 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		pt.setGender(Enumerations.AdministrativeGender.MALE);
 		IIdType id = myPatientDao.create(pt).getId().toUnqualifiedVersionless();
 
-		assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countDeleteQueriesForCurrentThread()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(4);
-		assertThat(myCaptureQueriesListener.countUpdateQueriesForCurrentThread()).isEqualTo(0);
-		assertThat(myPatientDao.search(m1).size().intValue()).isEqualTo(1);
-		assertThat(myPatientDao.search(m2).size().intValue()).isEqualTo(0);
+		assertEquals(0, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(1, myPatientDao.search(m1).size().intValue());
+		assertEquals(0, myPatientDao.search(m2).size().intValue());
 
 		/*
 		 * Change a value
@@ -1388,13 +1388,13 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		 *   Select the current token indexes
 		 */
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread()).isEqualTo(3);
-		assertThat(myCaptureQueriesListener.countDeleteQueriesForCurrentThread()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(1); // Add an entry to HFJ_RES_VER
-		assertThat(myCaptureQueriesListener.countUpdateQueriesForCurrentThread()).isEqualTo(2); // Update SPIDX_STRING and HFJ_RESOURCE
+		assertEquals(3, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread()); // Add an entry to HFJ_RES_VER
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread()); // Update SPIDX_STRING and HFJ_RESOURCE
 
-		assertThat(myPatientDao.search(m1).size().intValue()).isEqualTo(0);
-		assertThat(myPatientDao.search(m2).size().intValue()).isEqualTo(1);
+		assertEquals(0, myPatientDao.search(m1).size().intValue());
+		assertEquals(1, myPatientDao.search(m2).size().intValue());
 		myCaptureQueriesListener.clear();
 
 		/*
@@ -1407,12 +1407,12 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		pt.setId(id);
 		myPatientDao.update(pt);
 
-		assertThat(myCaptureQueriesListener.countDeleteQueriesForCurrentThread()).isEqualTo(1);
-		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(1);
-		assertThat(myCaptureQueriesListener.countUpdateQueriesForCurrentThread()).isEqualTo(1);
+		assertEquals(1, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
 
-		assertThat(myPatientDao.search(m1).size().intValue()).isEqualTo(0);
-		assertThat(myPatientDao.search(m2).size().intValue()).isEqualTo(0);
+		assertEquals(0, myPatientDao.search(m1).size().intValue());
+		assertEquals(0, myPatientDao.search(m2).size().intValue());
 
 	}
 
@@ -1437,8 +1437,8 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 
-		assertThat(myPatientDao.search(m1).size().intValue()).isEqualTo(1);
-		assertThat(myPatientDao.search(m2).size().intValue()).isEqualTo(0);
+		assertEquals(1, myPatientDao.search(m1).size().intValue());
+		assertEquals(0, myPatientDao.search(m2).size().intValue());
 
 		ourLog.info("** About to update");
 
@@ -1447,12 +1447,12 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		pt.getManagingOrganization().setReference(orgId2.getValue());
 		myPatientDao.update(pt);
 
-		assertThat(myCaptureQueriesListener.countDeleteQueriesForCurrentThread()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(1); // Add an entry to HFJ_RES_VER
-		assertThat(myCaptureQueriesListener.countUpdateQueriesForCurrentThread()).isEqualTo(2); // Update SPIDX_STRING and HFJ_RESOURCE
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueriesForCurrentThread());
+		assertEquals(1, myCaptureQueriesListener.countInsertQueriesForCurrentThread()); // Add an entry to HFJ_RES_VER
+		assertEquals(2, myCaptureQueriesListener.countUpdateQueriesForCurrentThread()); // Update SPIDX_STRING and HFJ_RESOURCE
 
-		assertThat(myPatientDao.search(m1).size().intValue()).isEqualTo(0);
-		assertThat(myPatientDao.search(m2).size().intValue()).isEqualTo(1);
+		assertEquals(0, myPatientDao.search(m1).size().intValue());
+		assertEquals(1, myPatientDao.search(m2).size().intValue());
 	}
 
 	@Test
@@ -1516,7 +1516,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertThat(resultingQueryNotFormatted).matches(".*TARGET_RESOURCE_ID IN \\('[0-9]+','[0-9]+','[0-9]+','[0-9]+','[0-9]+'\\).*");
 
 		// Ensure that the search actually worked
-		assertThat(search.size().intValue()).isEqualTo(5);
+		assertEquals(5, search.size().intValue());
 
 		/*
 		 * Now clear the caches and make sure the lookup works as expected
@@ -1547,7 +1547,7 @@ public class FhirResourceDaoR4SearchOptimizedTest extends BaseJpaR4Test {
 		assertThat(resultingQueryNotFormatted.toUpperCase(Locale.US)).matches(".*TARGET_RESOURCE_ID IN \\('[0-9]+','[0-9]+','[0-9]+','[0-9]+','[0-9]+'\\).*");
 
 		// Ensure that the search actually worked
-		assertThat(search.size().intValue()).isEqualTo(5);
+		assertEquals(5, search.size().intValue());
 	}
 
 

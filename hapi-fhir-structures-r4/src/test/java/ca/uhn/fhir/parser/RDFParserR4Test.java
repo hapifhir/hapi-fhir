@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.r4.model.DecimalType;
@@ -21,7 +22,7 @@ public class RDFParserR4Test {
 		DecimalType object = new DecimalType("123.456000");
 		String expected = "123.456000";
 		String actual = ourCtx.newRDFParser().encodeToString(object);
-		assertThat(actual).isEqualTo(expected);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -44,7 +45,7 @@ public class RDFParserR4Test {
 			""";
 
 		String actual = ourCtx.newRDFParser().encodeToString(p);
-		assertThat(actual).isEqualTo(expected);
+		assertEquals(expected, actual);
 	}
 
 	@Test
@@ -53,7 +54,7 @@ public class RDFParserR4Test {
 		name.setFamily("Simpson").addGiven("Homer").addGiven("Jay");
 		name.addExtension("http://foo", new StringType("bar"));
 
-		assertThat(assertThrows(InternalErrorException.class, () -> ourCtx.newRDFParser().encodeToString(name)).getMessage()).isEqualTo("HAPI-2363: This parser does not support encoding non-resource values");
+		assertEquals("HAPI-2363: This parser does not support encoding non-resource values", assertThrows(InternalErrorException.class, () -> ourCtx.newRDFParser().encodeToString(name)).getMessage());
 	}
 
 	@Test
@@ -62,7 +63,7 @@ public class RDFParserR4Test {
 		communication.setPreferred(true);
 		communication.getLanguage().setText("English");
 
-		assertThat(assertThrows(InternalErrorException.class, () -> ourCtx.newRDFParser().encodeToString(communication)).getMessage()).isEqualTo("HAPI-2363: This parser does not support encoding non-resource values");
+		assertEquals("HAPI-2363: This parser does not support encoding non-resource values", assertThrows(InternalErrorException.class, () -> ourCtx.newRDFParser().encodeToString(communication)).getMessage());
 	}
 
 }

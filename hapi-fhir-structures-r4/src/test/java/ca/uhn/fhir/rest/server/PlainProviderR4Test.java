@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Count;
@@ -70,7 +71,7 @@ public class PlainProviderR4Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
 		
@@ -80,7 +81,7 @@ public class PlainProviderR4Test {
 		status = ourClient.execute(new HttpGet(baseUri + "/_history?&_count=12"));
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertNull(provider.myLastSince);
@@ -89,7 +90,7 @@ public class PlainProviderR4Test {
 		status =ourClient.execute(new HttpGet(baseUri + "/_history?_since=2012-01-02T00%3A01%3A02"));
 		responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertThat(provider.myLastSince.getValueAsString(), StringStartsWith.startsWith("2012-01-02T00:01:02"));
@@ -105,7 +106,7 @@ public class PlainProviderR4Test {
 		CloseableHttpResponse status = ourClient.execute(new HttpGet(baseUri + "/_history"));
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertNull(provider.myLastSince);
@@ -126,15 +127,15 @@ public class PlainProviderR4Test {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 			ourLog.info("Response was:\n{}", responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
 			assertThat(bundle.getEntry()).hasSize(1);
 
 			Patient patient = (Patient) bundle.getEntry().get(0).getResource();
-			assertThat(patient.getName().get(0).getGiven().get(0).getValue()).isEqualTo("PatientOne");
+			assertEquals("PatientOne", patient.getName().get(0).getGiven().get(0).getValue());
 
-			assertThat(bundle.getLink("self").getUrl()).isEqualTo(uri.replace(":hapitest:", "%3Ahapitest%3A"));
+			assertEquals(uri.replace(":hapitest:", "%3Ahapitest%3A"), bundle.getLink("self").getUrl());
 		}
 
 	}

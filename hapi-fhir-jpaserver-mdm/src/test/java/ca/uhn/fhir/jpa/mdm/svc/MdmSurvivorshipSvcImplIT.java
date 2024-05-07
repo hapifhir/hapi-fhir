@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -48,8 +49,8 @@ class MdmSurvivorshipSvcImplIT extends BaseMdmR4Test {
 		assertTrue(p2.getMeta().isEmpty());
 
 		assertThat(p2.getName()).hasSize(2);
-		assertThat(p2.getName().get(0).getNameAsSingleString()).isEqualTo(p2Name);
-		assertThat(p2.getName().get(1).getNameAsSingleString()).isEqualTo(p1Name);
+		assertEquals(p2Name, p2.getName().get(0).getNameAsSingleString());
+		assertEquals(p1Name, p2.getName().get(1).getNameAsSingleString());
 		assertNull(p2.getBirthDate());
 
 		assertThat(p1.getTelecom()).hasSize(p1.getTelecom().size());

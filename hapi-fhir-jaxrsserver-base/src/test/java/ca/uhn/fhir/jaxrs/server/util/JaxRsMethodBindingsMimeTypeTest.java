@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jaxrs.server.test.AbstractDummyPatientProvider;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProviderR4;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProviderR4MimeType;
@@ -18,8 +19,8 @@ public class JaxRsMethodBindingsMimeTypeTest {
 
 	@Test
 	public void testFindMethodsFor2ProvidersWithMethods() {
-		assertThat(new TestJaxRsDummyPatientProviderR4().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass()).isEqualTo(AbstractDummyPatientProvider.class);
-		assertThat(new TestJaxRsDummyPatientProviderR4MimeType().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass()).isEqualTo(AbstractDummyPatientProvider.class);
+		assertEquals(AbstractDummyPatientProvider.class, new TestJaxRsDummyPatientProviderR4().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass());
+		assertEquals(AbstractDummyPatientProvider.class, new TestJaxRsDummyPatientProviderR4MimeType().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass());
 	}
 
 }

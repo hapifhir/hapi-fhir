@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.model.api.IResource;
@@ -68,7 +69,7 @@ public class ReadDstu2Test {
 		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T13:00:00Z").getValue()));
 		status = ourClient.execute(httpGet);
 		try {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(304);
+			assertEquals(304, status.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -80,7 +81,7 @@ public class ReadDstu2Test {
 		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T12:12:12Z").getValue()));
 		status = ourClient.execute(httpGet);
 		try {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(304);
+			assertEquals(304, status.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -92,7 +93,7 @@ public class ReadDstu2Test {
 		httpGet.addHeader(Constants.HEADER_IF_MODIFIED_SINCE, DateUtils.formatDate(new InstantDt("2012-01-01T10:00:00Z").getValue()));
 		status = ourClient.execute(httpGet);
 		try {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -111,14 +112,14 @@ public class ReadDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("p1ReadValue");
 		assertThat(responseContent).contains("p1ReadId");
-		assertThat(responseContent).isEqualTo("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>");
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
 
 		ourLog.info(responseContent);
 
-		assertThat(ourLastId.getValue()).isEqualTo("Patient/123");
+		assertEquals("Patient/123", ourLastId.getValue());
 	}
 
 	/**
@@ -136,10 +137,10 @@ public class ReadDstu2Test {
 
 		ourLog.info(responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("p1ReadValue");
 		assertThat(responseContent).contains("p1ReadId");
-		assertThat(responseContent).isEqualTo("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>");
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
 	}
 
 	/**
@@ -155,7 +156,7 @@ public class ReadDstu2Test {
 		ourLog.info(responseContent);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("p1ReadValue");
 		assertThat(responseContent).contains("p1ReadId");
 		assertThat(responseContent).contains("\"meta\":{\"lastUpdated\":\"2012-01-01T12:12:12Z\",\"profile\":[\"http://foo_profile\"]}");
@@ -171,7 +172,7 @@ public class ReadDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("p1ReadValue");
 		assertThat(responseContent).contains("p1ReadId");
 
@@ -187,16 +188,16 @@ public class ReadDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("p1ReadValue");
 		assertThat(responseContent).contains("p1ReadId");
-		assertThat(responseContent).isEqualTo("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>");
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"p1ReadId\"/><meta><lastUpdated value=\"2012-01-01T12:12:12Z\"/><profile value=\"http://foo_profile\"/></meta><identifier><value value=\"p1ReadValue\"/></identifier></Patient>", responseContent);
 
 		ourLog.info(responseContent);
 
-		assertThat(ourLastId.getValue()).isEqualTo("Patient/123/_history/1");
-		assertThat(ourLastId.getIdPart()).isEqualTo("123");
-		assertThat(ourLastId.getVersionIdPart()).isEqualTo("1");
+		assertEquals("Patient/123/_history/1", ourLastId.getValue());
+		assertEquals("123", ourLastId.getIdPart());
+		assertEquals("1", ourLastId.getVersionIdPart());
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {

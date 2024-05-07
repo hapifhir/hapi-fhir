@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchCriteriaBuilderSvc;
@@ -66,7 +67,7 @@ public class MdmCandidateSearchCriteriaBuilderSvcTest extends BaseMdmR4Test {
 		searchParamJson.addSearchParam("identifier");
 		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), searchParamJson);
 		assertThat(result).isPresent();
-		assertThat("Patient?identifier=urn%3Aoid%3A1.2.36.146.595.217.0.1%7C12345").isEqualTo(result.get());
+		assertEquals(result.get(), "Patient?identifier=urn%3Aoid%3A1.2.36.146.595.217.0.1%7C12345");
 	}
 
 	@Test
@@ -84,7 +85,7 @@ public class MdmCandidateSearchCriteriaBuilderSvcTest extends BaseMdmR4Test {
 	public void testOmittingCandidateSearchParamsIsAllowed() {
 		Patient patient = new Patient();
 		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, Collections.emptyList(), null);
-		assertThat(result.isPresent()).isEqualTo(true);
+		assertEquals(true, result.isPresent());
 		assertThat(result).contains("Patient?");
 	}
 
@@ -93,7 +94,7 @@ public class MdmCandidateSearchCriteriaBuilderSvcTest extends BaseMdmR4Test {
 		Patient patient = new Patient();
 		List<String> filterParams = Collections.singletonList("active=true");
 		Optional<String> result = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString("Patient", patient, filterParams, null);
-		assertThat(result.isPresent()).isEqualTo(true);
+		assertEquals(true, result.isPresent());
 		assertThat(result).contains("Patient?active=true");
 	}
 }

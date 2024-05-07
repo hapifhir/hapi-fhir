@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -44,9 +45,9 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 		ISearchParamRegistry searchParamRegistry = mock(ISearchParamRegistry.class);
 		when(searchParamRegistry.getActiveSearchParam(any(), eq("patient"))).thenReturn(resourceDef.getSearchParam("patient"));
 		SearchParameterMap match = myMatchUrlService.translateMatchUrl("Condition?patient=304&_lastUpdated=>2011-01-01T11:12:21.0000Z", resourceDef);
-		assertThat(match.getLastUpdated().getLowerBound().getValueAsString()).isEqualTo("2011-01-01T11:12:21.0000Z");
-		assertThat(match.get("patient").get(0).get(0).getClass()).isEqualTo(ReferenceParam.class);
-		assertThat(((ReferenceParam) match.get("patient").get(0).get(0)).getIdPart()).isEqualTo("304");
+		assertEquals("2011-01-01T11:12:21.0000Z", match.getLastUpdated().getLowerBound().getValueAsString());
+		assertEquals(ReferenceParam.class, match.get("patient").get(0).get(0).getClass());
+		assertEquals("304", ((ReferenceParam) match.get("patient").get(0).get(0)).getIdPart());
 	}
 
 	@Test
@@ -61,7 +62,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 		Dstu3DistanceHelper.setNearDistance(Location.class, map);
 
 		QuantityParam nearDistanceParam = map.getNearDistanceParam();
-		assertThat(map.size()).isEqualTo(1);
+		assertEquals(1, map.size());
 		assertNotNull(nearDistanceParam);
 		assertThat(nearDistanceParam.getValue().doubleValue()).isCloseTo(kmDistance, within(0.0));
 	}
@@ -79,7 +80,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 
 			fail("");
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
+			assertEquals(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present", e.getMessage());
 		}
 	}
 
@@ -96,7 +97,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 
 			fail("");
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present");
+			assertEquals(Msg.code(495) + "Only one " + Location.SP_NEAR_DISTANCE + " parameter may be present", e.getMessage());
 		}
 	}
 

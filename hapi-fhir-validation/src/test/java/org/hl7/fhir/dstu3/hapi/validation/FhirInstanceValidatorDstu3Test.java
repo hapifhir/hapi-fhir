@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
@@ -348,8 +349,8 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 			assertFalse(result.isSuccessful());
 			List<SingleValidationMessage> all = logResultsAndReturnAll(result);
 			assertThat(all).hasSize(1);
-			assertThat(all.get(0).getSeverity()).isEqualTo(ResultSeverityEnum.ERROR);
-			assertThat(all.get(0).getMessage()).isEqualTo("Unknown code 'urn:iso:std:iso:3166#QQ' for 'urn:iso:std:iso:3166#QQ'");
+			assertEquals(ResultSeverityEnum.ERROR, all.get(0).getSeverity());
+			assertEquals("Unknown code 'urn:iso:std:iso:3166#QQ' for 'urn:iso:std:iso:3166#QQ'", all.get(0).getMessage());
 		}
 	}
 
@@ -754,7 +755,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult results = myVal.validateWithResult(is);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
 		assertThat(outcome).hasSize(1);
-		assertThat(outcome.get(0).getMessage()).isEqualTo("Unknown code 'http://dicom.nema.org/resources/ontology/DCM#BAR' for 'http://dicom.nema.org/resources/ontology/DCM#BAR'");
+		assertEquals("Unknown code 'http://dicom.nema.org/resources/ontology/DCM#BAR' for 'http://dicom.nema.org/resources/ontology/DCM#BAR'", outcome.get(0).getMessage());
 //		assertEquals("The Coding provided is not in the value set http://hl7.org/fhir/ValueSet/dicom-cid29, and a code should come from this value set unless it has no suitable code.  (error message = Unknown code[BAR] in system[http://dicom.nema.org/resources/ontology/DCM])", outcome.get(1).getMessage());
 
 	}
@@ -874,8 +875,8 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(1);
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
-		assertThat(output.getMessages().get(0).getLocationString()).isEqualTo("Patient");
-		assertThat(output.getMessages().get(0).getMessage()).isEqualTo("Unrecognized property 'foo'");
+		assertEquals("Patient", output.getMessages().get(0).getLocationString());
+		assertEquals("Unrecognized property 'foo'", output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -922,8 +923,8 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult output = myVal.validateWithResult(encoded);
 		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(1);
 
-		assertThat(output.getMessages().get(0).getMessage()).isEqualTo("Unknown extension http://hl7.org/fhir/v3/ethnicity");
-		assertThat(output.getMessages().get(0).getSeverity()).isEqualTo(ResultSeverityEnum.INFORMATION);
+		assertEquals("Unknown extension http://hl7.org/fhir/v3/ethnicity", output.getMessages().get(0).getMessage());
+		assertEquals(ResultSeverityEnum.INFORMATION, output.getMessages().get(0).getSeverity());
 	}
 
 	@Test
@@ -956,8 +957,8 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult output = myVal.validateWithResult(encoded);
 		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(1);
 
-		assertThat(output.getMessages().get(0).getMessage()).isEqualTo("The extension http://hl7.org/fhir/v3/ethnicity is unknown, and not allowed here");
-		assertThat(output.getMessages().get(0).getSeverity()).isEqualTo(ResultSeverityEnum.ERROR);
+		assertEquals("The extension http://hl7.org/fhir/v3/ethnicity is unknown, and not allowed here", output.getMessages().get(0).getMessage());
+		assertEquals(ResultSeverityEnum.ERROR, output.getMessages().get(0).getSeverity());
 	}
 
 	@Test
@@ -981,8 +982,8 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(1);
 		ourLog.info(output.getMessages().get(0).getLocationString());
 		ourLog.info(output.getMessages().get(0).getMessage());
-		assertThat(output.getMessages().get(0).getLocationString()).isEqualTo("/f:Patient");
-		assertThat(output.getMessages().get(0).getMessage()).isEqualTo("Undefined element 'foo' at /f:Patient");
+		assertEquals("/f:Patient", output.getMessages().get(0).getLocationString());
+		assertEquals("Undefined element 'foo' at /f:Patient", output.getMessages().get(0).getMessage());
 	}
 
 	@Test
@@ -1024,7 +1025,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> res = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(res.size()).as(output.toString()).isEqualTo(1);
-		assertThat(output.getMessages().get(0).getMessage()).isEqualTo("A code with no system has no defined meaning. A system should be provided");
+		assertEquals("A code with no system has no defined meaning. A system should be provided", output.getMessages().get(0).getMessage());
 	}
 
 	/**
@@ -1112,8 +1113,8 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 
-		assertThat(errors.get(0).getSeverity()).isEqualTo(ResultSeverityEnum.ERROR);
-		assertThat(errors.get(0).getMessage()).isEqualTo("Unknown code for 'http://loinc.org#12345'");
+		assertEquals(ResultSeverityEnum.ERROR, errors.get(0).getSeverity());
+		assertEquals("Unknown code for 'http://loinc.org#12345'", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -1163,7 +1164,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 
 		ValidationResult output = myVal.validateWithResult(input);
 		assertThat(output.getMessages().size()).isGreaterThan(0);
-		assertThat(output.getMessages().get(0).getMessage()).isEqualTo("Observation.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Observation)");
+		assertEquals("Observation.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/Observation)", output.getMessages().get(0).getMessage());
 
 	}
 
@@ -1177,7 +1178,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		ValidationResult output = myVal.validateWithResult(input);
-		assertThat(0).isEqualTo(output.getMessages().size());
+		assertEquals(output.getMessages().size(), 0);
 	}
 
 	@Test
@@ -1224,7 +1225,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnAll(output);
 		assertThat(errors.size()).as(errors.toString()).isGreaterThan(0);
-		assertThat(errors.get(0).getMessage()).isEqualTo("Unknown code for 'http://acme.org#9988877'");
+		assertEquals("Unknown code for 'http://acme.org#9988877'", errors.get(0).getMessage());
 
 	}
 
@@ -1260,7 +1261,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult output = myVal.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
 		assertThat(errors).hasSize(1);
-		assertThat(errors.get(0).getMessage()).isEqualTo("Unknown code for 'http://loinc.org#1234'");
+		assertEquals("Unknown code for 'http://loinc.org#1234'", errors.get(0).getMessage());
 	}
 
 	@Test
@@ -1287,9 +1288,9 @@ public class FhirInstanceValidatorDstu3Test extends BaseValidationTestWithInline
 		ValidationResult output = myVal.validateWithResult(patient);
 		List<SingleValidationMessage> all = logResultsAndReturnAll(output);
 		assertThat(all).hasSize(1);
-		assertThat(all.get(0).getLocationString()).isEqualTo("Patient.identifier[0].type");
+		assertEquals("Patient.identifier[0].type", all.get(0).getLocationString());
 		assertThat(all.get(0).getMessage()).contains("None of the codings provided are in the value set 'Identifier Type Codes'");
-		assertThat(all.get(0).getSeverity()).isEqualTo(ResultSeverityEnum.WARNING);
+		assertEquals(ResultSeverityEnum.WARNING, all.get(0).getSeverity());
 
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.maintenance;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -167,13 +168,13 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		verify(myJobPersistence, times(1)).updateInstance(eq(INSTANCE_ID), any());
 
-		assertThat(instance.getProgress()).isEqualTo(0.5);
-		assertThat(instance.getCombinedRecordsProcessed()).isEqualTo(50);
-		assertThat(instance.getCombinedRecordsProcessedPerSecond()).isEqualTo(0.08333333333333333);
+		assertEquals(0.5, instance.getProgress());
+		assertEquals(50, instance.getCombinedRecordsProcessed());
+		assertEquals(0.08333333333333333, instance.getCombinedRecordsProcessedPerSecond());
 		assertNotNull(instance.getStartTime());
-		assertThat(instance.getStartTime()).isEqualTo(parseTime("2022-02-12T14:00:00-04:00"));
+		assertEquals(parseTime("2022-02-12T14:00:00-04:00"), instance.getStartTime());
 		assertNull(instance.getEndTime());
-		assertThat(instance.getEstimatedTimeRemaining()).isEqualTo("00:10:00");
+		assertEquals("00:10:00", instance.getEstimatedTimeRemaining());
 
 		verifyNoMoreInteractions(myJobPersistence);
 	}
@@ -212,10 +213,10 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		verify(myJobPersistence, times(1)).updateInstance(eq(INSTANCE_ID), any());
 
 		assertNull(instance.getErrorMessage());
-		assertThat(instance.getErrorCount()).isEqualTo(4);
-		assertThat(instance.getProgress()).isEqualTo(0.5);
-		assertThat(instance.getCombinedRecordsProcessed()).isEqualTo(50);
-		assertThat(instance.getCombinedRecordsProcessedPerSecond()).isEqualTo(0.08333333333333333);
+		assertEquals(4, instance.getErrorCount());
+		assertEquals(0.5, instance.getProgress());
+		assertEquals(50, instance.getCombinedRecordsProcessed());
+		assertEquals(0.08333333333333333, instance.getCombinedRecordsProcessedPerSecond());
 
 		verifyNoMoreInteractions(myJobPersistence);
 	}
@@ -251,11 +252,11 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		verify(myJobPersistence, times(2)).updateInstance(eq(INSTANCE_ID), any());
 		verifyNoMoreInteractions(myJobPersistence);
 		JobWorkNotification payload0 = myMessageCaptor.getAllValues().get(0).getPayload();
-		assertThat(payload0.getTargetStepId()).isEqualTo(STEP_2);
-		assertThat(payload0.getChunkId()).isEqualTo(CHUNK_ID);
+		assertEquals(STEP_2, payload0.getTargetStepId());
+		assertEquals(CHUNK_ID, payload0.getChunkId());
 		JobWorkNotification payload1 = myMessageCaptor.getAllValues().get(1).getPayload();
-		assertThat(payload1.getTargetStepId()).isEqualTo(STEP_2);
-		assertThat(payload1.getChunkId()).isEqualTo(CHUNK_ID_2);
+		assertEquals(STEP_2, payload1.getTargetStepId());
+		assertEquals(CHUNK_ID_2, payload1.getChunkId());
 	}
 
 	@Test
@@ -299,19 +300,19 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 
 		verify(myJobPersistence, times(1)).updateInstance(eq(INSTANCE_ID), any());
 
-		assertThat(instance.getProgress()).isEqualTo(1.0);
-		assertThat(instance.getStatus()).isEqualTo(StatusEnum.COMPLETED);
-		assertThat(instance.getCombinedRecordsProcessed()).isEqualTo(150);
-		assertThat(instance.getCombinedRecordsProcessedPerSecond()).isEqualTo(0.25);
-		assertThat(instance.getEndTime()).isEqualTo(parseTime("2022-02-12T14:10:00-04:00"));
+		assertEquals(1.0, instance.getProgress());
+		assertEquals(StatusEnum.COMPLETED, instance.getStatus());
+		assertEquals(150, instance.getCombinedRecordsProcessed());
+		assertEquals(0.25, instance.getCombinedRecordsProcessedPerSecond());
+		assertEquals(parseTime("2022-02-12T14:10:00-04:00"), instance.getEndTime());
 
 		verify(myJobPersistence, times(1)).deleteChunksAndMarkInstanceAsChunksPurged(eq(INSTANCE_ID));
 		verify(myCompletionHandler, times(1)).jobComplete(myJobCompletionCaptor.capture());
 
 		verifyNoMoreInteractions(myJobPersistence);
 
-		assertThat(myJobCompletionCaptor.getValue().getInstance().getInstanceId()).isEqualTo(INSTANCE_ID);
-		assertThat(myJobCompletionCaptor.getValue().getParameters().getParam1()).isEqualTo(PARAM_1_VALUE);
+		assertEquals(INSTANCE_ID, myJobCompletionCaptor.getValue().getInstance().getInstanceId());
+		assertEquals(PARAM_1_VALUE, myJobCompletionCaptor.getValue().getParameters().getParam1());
 	}
 
 	@Test
@@ -336,12 +337,12 @@ public class JobMaintenanceServiceImplTest extends BaseBatch2Test {
 		mySvc.runMaintenancePass();
 
 
-		assertThat(instance.getProgress()).isEqualTo(0.8333333333333334);
-		assertThat(instance.getStatus()).isEqualTo(StatusEnum.FAILED);
-		assertThat(instance.getErrorMessage()).isEqualTo("This is an error message");
-		assertThat(instance.getCombinedRecordsProcessed()).isEqualTo(150);
-		assertThat(instance.getCombinedRecordsProcessedPerSecond()).isEqualTo(0.25);
-		assertThat(instance.getEndTime()).isEqualTo(parseTime("2022-02-12T14:10:00-04:00"));
+		assertEquals(0.8333333333333334, instance.getProgress());
+		assertEquals(StatusEnum.FAILED, instance.getStatus());
+		assertEquals("This is an error message", instance.getErrorMessage());
+		assertEquals(150, instance.getCombinedRecordsProcessed());
+		assertEquals(0.25, instance.getCombinedRecordsProcessedPerSecond());
+		assertEquals(parseTime("2022-02-12T14:10:00-04:00"), instance.getEndTime());
 
 		// twice - once to move to FAILED, and once to purge the chunks
 		verify(myJobPersistence, times(1)).updateInstance(eq(INSTANCE_ID), any());

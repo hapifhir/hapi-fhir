@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import java.util.ArrayList;
@@ -89,7 +90,7 @@ class SearchConverterTest {
 		myFixture.setParameterTypeValue(theKey, theValue);
 		String result = myFixture.searchParameterMap.toNormalizedQueryString(withFhirContext());
 		String expected = "?theOrKey=theSecondValue,theValue";
-		assertThat(result).isEqualTo(expected);
+		assertEquals(expected, result);
 	}
 
 	@Test
@@ -100,7 +101,7 @@ class SearchConverterTest {
 		String result = myFixture.searchParameterMap.toNormalizedQueryString(withFhirContext());
 		String expected =
 				"?theAndKey=theSecondValue,theValue&theAndKey=theSecondValueAgain,theValueAgain";
-		assertThat(result).isEqualTo(expected);
+		assertEquals(expected, result);
 	}
 
 	@Test
@@ -110,7 +111,7 @@ class SearchConverterTest {
 		String theKey = "theKey";
 		myFixture.setParameterTypeValue(theKey, theValue);
 		String result = myFixture.searchParameterMap.toNormalizedQueryString(withFhirContext());
-		assertThat(result).isEqualTo(expected);
+		assertEquals(expected, result);
 	}
 
 	@Test
@@ -125,7 +126,7 @@ class SearchConverterTest {
 		Map<String, String[]> expected = withParamListAsStrings();
 		myFixture.convertToStringMap(withParamList(), withFhirContext());
 		Map<String, String[]> result = myFixture.resultParameters;
-		assertThat(expected.keySet()).isEqualTo(result.keySet());
+		assertEquals(result.keySet(), expected.keySet());
 		assertThat(result.entrySet().stream()
 				.allMatch(e -> Arrays.equals(e.getValue(),expected.get(e.getKey())))).isTrue();
 	}

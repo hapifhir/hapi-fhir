@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -89,7 +90,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		CodeableConceptDt codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@Test
@@ -103,9 +104,9 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		CodeableConceptDt codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
-		assertThat(result.getMessage()).isEqualTo("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for in-memory expansion of ValueSet: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
-		assertThat(result.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
+		assertEquals("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for in-memory expansion of ValueSet: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", result.getMessage());
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertEquals(IValidationSupport.IssueSeverity.WARNING, result.getSeverity());
 	}
 
 	@Test
@@ -119,7 +120,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		CodeableConceptDt codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertThat(result.isOk()).as(result.getMessage()).isTrue();
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@Test
@@ -133,7 +134,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		CodeableConceptDt codeableConcept = new CodeableConceptDt("http://acme.org", "11378-7");
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@Test
@@ -147,7 +148,7 @@ public class FhirResourceDaoValueSetDstu2Test extends BaseJpaDstu2Test {
 		CodeableConceptDt codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@Test

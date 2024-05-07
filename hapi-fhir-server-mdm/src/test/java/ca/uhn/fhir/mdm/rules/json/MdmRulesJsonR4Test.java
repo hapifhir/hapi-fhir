@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.rules.json;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -45,31 +46,31 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 		String json = JsonUtil.serialize(myRules);
 		ourLog.info(json);
 		MdmRulesJson rulesDeser = JsonUtil.deserialize(json, MdmRulesJson.class);
-		assertThat(rulesDeser.size()).isEqualTo(2);
-		assertThat(rulesDeser.getMatchResult(myBothNameFields)).isEqualTo(MdmMatchResultEnum.MATCH);
+		assertEquals(2, rulesDeser.size());
+		assertEquals(MdmMatchResultEnum.MATCH, rulesDeser.getMatchResult(myBothNameFields));
 		MdmFieldMatchJson second = rulesDeser.get(1);
-		assertThat(second.getResourcePath()).isEqualTo("name.family");
-		assertThat(second.getSimilarity().getAlgorithm()).isEqualTo(MdmSimilarityEnum.JARO_WINKLER);
+		assertEquals("name.family", second.getResourcePath());
+		assertEquals(MdmSimilarityEnum.JARO_WINKLER, second.getSimilarity().getAlgorithm());
 	}
 
 	@Test
 	public void testMatchResultMap() {
-		assertThat(myRules.getMatchResult(3L)).isEqualTo(MdmMatchResultEnum.MATCH);
+		assertEquals(MdmMatchResultEnum.MATCH, myRules.getMatchResult(3L));
 	}
 
 	@Test
 	public void getVector() {
 		VectorMatchResultMap vectorMatchResultMap = myRules.getVectorMatchResultMapForUnitTest();
-		assertThat(vectorMatchResultMap.getVector(PATIENT_GIVEN)).isEqualTo(1);
-		assertThat(vectorMatchResultMap.getVector(PATIENT_FAMILY)).isEqualTo(2);
-		assertThat(vectorMatchResultMap.getVector(String.join(",", PATIENT_GIVEN, PATIENT_FAMILY))).isEqualTo(3);
-		assertThat(vectorMatchResultMap.getVector(String.join(", ", PATIENT_GIVEN, PATIENT_FAMILY))).isEqualTo(3);
-		assertThat(vectorMatchResultMap.getVector(String.join(",  ", PATIENT_GIVEN, PATIENT_FAMILY))).isEqualTo(3);
-		assertThat(vectorMatchResultMap.getVector(String.join(", \n ", PATIENT_GIVEN, PATIENT_FAMILY))).isEqualTo(3);
+		assertEquals(1, vectorMatchResultMap.getVector(PATIENT_GIVEN));
+		assertEquals(2, vectorMatchResultMap.getVector(PATIENT_FAMILY));
+		assertEquals(3, vectorMatchResultMap.getVector(String.join(",", PATIENT_GIVEN, PATIENT_FAMILY)));
+		assertEquals(3, vectorMatchResultMap.getVector(String.join(", ", PATIENT_GIVEN, PATIENT_FAMILY)));
+		assertEquals(3, vectorMatchResultMap.getVector(String.join(",  ", PATIENT_GIVEN, PATIENT_FAMILY)));
+		assertEquals(3, vectorMatchResultMap.getVector(String.join(", \n ", PATIENT_GIVEN, PATIENT_FAMILY)));
 		try {
 			vectorMatchResultMap.getVector("bad");
 			fail("");		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1523) + "There is no matchField with name bad");
+			assertEquals(Msg.code(1523) + "There is no matchField with name bad", e.getMessage());
 		}
 	}
 
@@ -78,13 +79,13 @@ public class MdmRulesJsonR4Test extends BaseMdmRulesR4Test {
 		myRules = buildOldStyleEidRules();
 
 		String eidSystem = myRules.getEnterpriseEIDSystemForResourceType("Patient");
-		assertThat(eidSystem).isEqualTo(PATIENT_EID_FOR_TEST);
+		assertEquals(PATIENT_EID_FOR_TEST, eidSystem);
 
 		eidSystem = myRules.getEnterpriseEIDSystemForResourceType("Practitioner");
-		assertThat(eidSystem).isEqualTo(PATIENT_EID_FOR_TEST);
+		assertEquals(PATIENT_EID_FOR_TEST, eidSystem);
 
 		eidSystem = myRules.getEnterpriseEIDSystemForResourceType("Medication");
-		assertThat(eidSystem).isEqualTo(PATIENT_EID_FOR_TEST);
+		assertEquals(PATIENT_EID_FOR_TEST, eidSystem);
 	}
 
 	@Override

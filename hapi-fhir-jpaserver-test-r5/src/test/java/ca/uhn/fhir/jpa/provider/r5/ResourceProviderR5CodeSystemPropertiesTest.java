@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -83,11 +84,11 @@ public class ResourceProviderR5CodeSystemPropertiesTest extends BaseResourceProv
 			Iterator<ParametersParameterComponent> parameterPartIterator = parameter.getPart().iterator();
 
 			parameter = parameterPartIterator.next();
-			assertThat(parameter.getName()).isEqualTo("code");
-			assertThat(((CodeType) parameter.getValue()).getValue()).isEqualTo(property.getCode());
+			assertEquals("code", parameter.getName());
+			assertEquals(property.getCode(), ((CodeType) parameter.getValue()).getValue());
 
 			parameter = parameterPartIterator.next();
-			assertThat(parameter.getName()).isEqualTo("value");
+			assertEquals("value", parameter.getName());
 			assertTrue(property.getValue().equalsShallow(parameter.getValue()));
 
 			assertFalse(parameterPartIterator.hasNext());

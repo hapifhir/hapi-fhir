@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -69,13 +70,13 @@ public class MdmEventIT extends BaseMdmR4Test {
 			.stream()
 			.filter(l -> l.getSourceId().equals(patient2.getIdElement().toVersionless().getValueAsString()) && l.getMatchResult() == MdmMatchResultEnum.POSSIBLE_MATCH)
 			.count();
-		assertThat(expectTwoPossibleMatchesForPatientTwo).isEqualTo(2);
+		assertEquals(2, expectTwoPossibleMatchesForPatientTwo);
 
 		long expectOnePossibleDuplicate = linkChangeEvent.getMdmLinks()
 			.stream()
 			.filter(l -> l.getMatchResult() == MdmMatchResultEnum.POSSIBLE_DUPLICATE)
 			.count();
-		assertThat(expectOnePossibleDuplicate).isEqualTo(1);
+		assertEquals(1, expectOnePossibleDuplicate);
 
 		List<MdmLinkJson> mdmLinkEvent = linkChangeEvent.getMdmLinks();
 		assertThat(mdmLinkEvent).hasSize(3);
@@ -88,7 +89,7 @@ public class MdmEventIT extends BaseMdmR4Test {
 
 		ResourceOperationMessage resourceOperationMessage = outcome.getResourceOperationMessage();
 		assertNotNull(resourceOperationMessage);
-		assertThat(resourceOperationMessage.getId()).isEqualTo(pr.getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(pr.getIdElement().toUnqualifiedVersionless().getValue(), resourceOperationMessage.getId());
 
 		MdmLink link = getLinkByTargetId(pr);
 
@@ -97,8 +98,8 @@ public class MdmEventIT extends BaseMdmR4Test {
 
 		assertThat(linkChangeEvent.getMdmLinks()).hasSize(1);
 		MdmLinkJson l = linkChangeEvent.getMdmLinks().get(0);
-		assertThat(new IdDt(l.getGoldenResourceId()).getIdPartAsLong()).isEqualTo(link.getGoldenResourcePid());
-		assertThat(new IdDt(l.getSourceId()).getIdPartAsLong()).isEqualTo(link.getSourcePid());
+		assertEquals(link.getGoldenResourcePid(), new IdDt(l.getGoldenResourceId()).getIdPartAsLong());
+		assertEquals(link.getSourcePid(), new IdDt(l.getSourceId()).getIdPartAsLong());
 	}
 
 	private MdmLink getLinkByTargetId(IBaseResource theResource) {
@@ -117,9 +118,9 @@ public class MdmEventIT extends BaseMdmR4Test {
 		assertThat(linkChangeEvent.getMdmLinks()).hasSize(1);
 
 		MdmLinkJson link = linkChangeEvent.getMdmLinks().get(0);
-		assertThat(link.getSourceId()).isEqualTo(patient1.getIdElement().toVersionless().getValueAsString());
-		assertThat(new IdDt(link.getGoldenResourceId()).getIdPartAsLong()).isEqualTo(getLinkByTargetId(patient1).getGoldenResourcePid());
-		assertThat(link.getMatchResult()).isEqualTo(MdmMatchResultEnum.MATCH);
+		assertEquals(patient1.getIdElement().toVersionless().getValueAsString(), link.getSourceId());
+		assertEquals(getLinkByTargetId(patient1).getGoldenResourcePid(), new IdDt(link.getGoldenResourceId()).getIdPartAsLong());
+		assertEquals(MdmMatchResultEnum.MATCH, link.getMatchResult());
 	}
 
 }

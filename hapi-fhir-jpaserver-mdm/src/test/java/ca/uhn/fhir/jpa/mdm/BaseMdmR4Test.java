@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -152,7 +153,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	@AfterEach
 	public void after() throws IOException {
 		myMdmLinkDao.deleteAll();
-		assertThat(myMdmLinkDao.count()).isEqualTo(0);
+		assertEquals(0, myMdmLinkDao.count());
 	}
 
 	protected void saveLink(MdmLink theMdmLink) {
@@ -399,7 +400,7 @@ abstract public class BaseMdmR4Test extends BaseJpaR4Test {
 	}
 
 	protected void assertLinkCount(long theExpectedCount) {
-		assertThat(myMdmLinkDao.count()).isEqualTo(theExpectedCount);
+		assertEquals(theExpectedCount, myMdmLinkDao.count());
 	}
 
 	protected <T extends IAnyResource> T getGoldenResourceFromTargetResource(T theBaseResource) {

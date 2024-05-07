@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -66,7 +67,7 @@ public class ServeMediaResourceRawInterceptorTest {
 
 		HttpGet get = new HttpGet(myReadUrl);
 		try (CloseableHttpResponse response = ourClient.execute(get)) {
-			assertThat(response.getEntity().getContentType().getValue()).isEqualTo("application/fhir+json;charset=utf-8");
+			assertEquals("application/fhir+json;charset=utf-8", response.getEntity().getContentType().getValue());
 			String contents = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			assertThat(contents).contains("\"resourceType\"");
 		}
@@ -81,7 +82,7 @@ public class ServeMediaResourceRawInterceptorTest {
 		HttpGet get = new HttpGet(myReadUrl);
 		get.addHeader(Constants.HEADER_ACCEPT, "image/png");
 		try (CloseableHttpResponse response = ourClient.execute(get)) {
-			assertThat(response.getEntity().getContentType().getValue()).isEqualTo("image/png");
+			assertEquals("image/png", response.getEntity().getContentType().getValue());
 			byte[] contents = IOUtils.toByteArray(response.getEntity().getContent());
 			assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
 		}
@@ -95,7 +96,7 @@ public class ServeMediaResourceRawInterceptorTest {
 		HttpGet get = new HttpGet(myReadUrl);
 		get.addHeader(Constants.HEADER_ACCEPT, "image/png");
 		try (CloseableHttpResponse response = ourClient.execute(get)) {
-			assertThat(response.getEntity().getContentType().getValue()).isEqualTo("application/fhir+json;charset=utf-8");
+			assertEquals("application/fhir+json;charset=utf-8", response.getEntity().getContentType().getValue());
 		}
 	}
 
@@ -107,7 +108,7 @@ public class ServeMediaResourceRawInterceptorTest {
 
 		HttpGet get = new HttpGet(myReadUrl + "?_output=data");
 		try (CloseableHttpResponse response = ourClient.execute(get)) {
-			assertThat(response.getEntity().getContentType().getValue()).isEqualTo("image/png");
+			assertEquals("image/png", response.getEntity().getContentType().getValue());
 			byte[] contents = IOUtils.toByteArray(response.getEntity().getContent());
 			assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
 		}

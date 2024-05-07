@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.cache;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -128,7 +129,7 @@ public class ResourceVersionSvcTest {
 			Collections.singletonList(type));
 
 		assertTrue(retMap.containsKey(type));
-		assertThat(map.get(type).getVersion()).isEqualTo(jpaPid.getVersion());
+		assertEquals(jpaPid.getVersion(), map.get(type).getVersion());
 	}
 
 	@Test
@@ -167,7 +168,7 @@ public class ResourceVersionSvcTest {
 		);
 
 		// verify
-		assertThat(retMap.size()).isEqualTo(1);
+		assertEquals(1, retMap.size());
 		assertTrue(retMap.containsKey(type));
 		assertFalse(retMap.containsKey(type2));
 	}
@@ -193,7 +194,7 @@ public class ResourceVersionSvcTest {
 		svc.setPartitionSettingsForUnitTest(partitionSettings);
 
 		RequestPartitionId outcome = svc.replaceDefault(RequestPartitionId.defaultPartition());
-		assertThat(outcome.getPartitionIds().get(0)).isEqualTo(1);
+		assertEquals(1, outcome.getPartitionIds().get(0));
 	}
 
 	// helper class to package up data for helper methods

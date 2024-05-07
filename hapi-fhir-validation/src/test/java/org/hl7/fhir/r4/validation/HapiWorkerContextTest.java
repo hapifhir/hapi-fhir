@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
@@ -63,7 +64,7 @@ public class HapiWorkerContextTest extends BaseValidationTestWithInlineMocks {
 
 		outcome = workerCtx.validateCode(options, "active2", vs);
 		assertThat(outcome.isOk()).as(outcome.getMessage()).isEqualTo(false);
-		assertThat(outcome.getMessage()).isEqualTo("Unknown code[active2] in system[(none)]");
+		assertEquals("Unknown code[active2] in system[(none)]", outcome.getMessage());
 
 		// PrePopulated codes
 
@@ -73,7 +74,7 @@ public class HapiWorkerContextTest extends BaseValidationTestWithInlineMocks {
 
 		outcome = workerCtx.validateCode(options, "F2", vs);
 		assertThat(outcome.isOk()).as(outcome.getMessage()).isEqualTo(false);
-		assertThat(outcome.getMessage()).isEqualTo("Unknown code[F2] in system[(none)]");
+		assertEquals("Unknown code[F2] in system[(none)]", outcome.getMessage());
 
 	}
 

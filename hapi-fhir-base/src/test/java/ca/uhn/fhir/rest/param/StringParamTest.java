@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -110,7 +111,7 @@ public class StringParamTest {
 			StringParam sp = new StringParam("the-value");
 			sp.doSetValueAsQueryToken(myContext, "value-string", PARAMQUALIFIER_STRING_TEXT, "yellow");
 
-			assertThat(((IQueryParameterType) sp).getQueryParameterQualifier()).isEqualTo(PARAMQUALIFIER_STRING_TEXT);
+			assertEquals(PARAMQUALIFIER_STRING_TEXT, ((IQueryParameterType) sp).getQueryParameterQualifier());
 		}
 	}
 
@@ -155,7 +156,7 @@ public class StringParamTest {
 		assertFalse(theStringParam.isExact());
 		assertFalse(theStringParam.isContains());
 		assertFalse(theStringParam.isText());
-		assertThat(theStringParam.getValue()).isEqualTo(theExpectedValue);
+		assertEquals(theExpectedValue, theStringParam.getValue());
 	}
 
 	private void assertTextQualifierSearchParameterIsValid(StringParam theStringParam, String theExpectedValue){
@@ -163,7 +164,7 @@ public class StringParamTest {
 		assertFalse(theStringParam.isExact());
 		assertFalse(theStringParam.isContains());
 		assertTrue(theStringParam.isText());
-		assertThat(theStringParam.getValue()).isEqualTo(theExpectedValue);
+		assertEquals(theExpectedValue, theStringParam.getValue());
 	}
 
 	private void assertNicknameWarningLogged(boolean theWasLogged){

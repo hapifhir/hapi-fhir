@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.cache;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.cache.config.RegisteredResourceListenerFactoryConfig;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
@@ -55,7 +56,7 @@ class ResourceChangeListenerCacheTest {
 		// Reset timer if it does match searchparams
 		mockInMemorySupported(cache, InMemoryMatchResult.successfulMatch());
 		cache.requestRefreshIfWatching(ourPatient);
-		assertThat(cache.getNextRefreshTimeForUnitTest()).isEqualTo(Instant.MIN);
+		assertEquals(Instant.MIN, cache.getNextRefreshTimeForUnitTest());
 	}
 
 	private void mockInMemorySupported(ResourceChangeListenerCache thecache, InMemoryMatchResult theTheInMemoryMatchResult) {

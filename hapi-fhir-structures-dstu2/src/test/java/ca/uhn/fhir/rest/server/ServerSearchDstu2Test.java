@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -58,8 +59,8 @@ public class ServerSearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(ourLastMethod).isEqualTo("searchParam3");
-		assertThat(ourLastRef2.getMissing()).isEqualTo(Boolean.FALSE);
+		assertEquals("searchParam3", ourLastMethod);
+		assertEquals(Boolean.FALSE, ourLastRef2.getMissing());
 	}
 
 	@Test
@@ -69,8 +70,8 @@ public class ServerSearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(ourLastMethod).isEqualTo("searchParam3");
-		assertThat(ourLastRef2.getMissing()).isEqualTo(Boolean.TRUE);
+		assertEquals("searchParam3", ourLastMethod);
+		assertEquals(Boolean.TRUE, ourLastRef2.getMissing());
 	}
 
 	@Test
@@ -80,8 +81,8 @@ public class ServerSearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(ourLastMethod).isEqualTo("searchParam1");
-		assertThat(ourLastRef.getValue()).isEqualTo("param1value");
+		assertEquals("searchParam1", ourLastMethod);
+		assertEquals("param1value", ourLastRef.getValue());
 	}
 
 	@Test
@@ -91,8 +92,8 @@ public class ServerSearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(ourLastMethod).isEqualTo("searchParam2");
-		assertThat(ourLastRef.getValue()).isEqualTo("param2value");
+		assertEquals("searchParam2", ourLastMethod);
+		assertEquals("param2value", ourLastRef.getValue());
 	}
 
 	@Test
@@ -102,8 +103,8 @@ public class ServerSearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(ourLastMethod).isEqualTo("searchParam2");
-		assertThat(ourLastRef.getValue()).isEqualTo("param value");
+		assertEquals("searchParam2", ourLastMethod);
+		assertEquals("param value", ourLastRef.getValue());
 	}
 
 	@Test
@@ -113,8 +114,8 @@ public class ServerSearchDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(ourLastMethod).isEqualTo("searchParam1");
-		assertThat(ourLastRef.getValue()).isEqualTo("Jernelöv");
+		assertEquals("searchParam1", ourLastMethod);
+		assertEquals("Jernelöv", ourLastRef.getValue());
 	}
 
 	@Test

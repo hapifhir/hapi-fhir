@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Parameters;
@@ -24,7 +25,7 @@ public class BulkExportProviderR4Test extends BaseResourceProviderR4Test {
 				.execute(),
 			"$export of missing Group throws 404");
 
-		assertThat(e.getStatusCode()).isEqualTo(404);
+		assertEquals(404, e.getStatusCode());
 	}
 
 	@Test
@@ -40,7 +41,7 @@ public class BulkExportProviderR4Test extends BaseResourceProviderR4Test {
 				.execute(),
 			"$export of missing Patient throws 404");
 
-		assertThat(e.getStatusCode()).isEqualTo(404);
+		assertEquals(404, e.getStatusCode());
 	}
 	@Test
 	void testBulkExport_typePatientIdNotExists_throws404() {
@@ -55,6 +56,6 @@ public class BulkExportProviderR4Test extends BaseResourceProviderR4Test {
 				.execute(),
 			"Patient/$export with missing patient throws 404");
 
-		assertThat(e.getStatusCode()).isEqualTo(404);
+		assertEquals(404, e.getStatusCode());
 	}
 }

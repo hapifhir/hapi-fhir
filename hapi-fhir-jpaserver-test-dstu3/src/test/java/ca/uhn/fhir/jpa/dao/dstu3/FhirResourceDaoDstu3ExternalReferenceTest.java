@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -42,7 +43,7 @@ public class FhirResourceDaoDstu3ExternalReferenceTest extends BaseJpaDstu3Test 
 			myPatientDao.create(p, mySrd);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1094) + "Resource Organization/FOO not found, specified in path: Patient.managingOrganization");
+			assertEquals(Msg.code(1094) + "Resource Organization/FOO not found, specified in path: Patient.managingOrganization", e.getMessage());
 		}
 	}
 
@@ -59,7 +60,7 @@ public class FhirResourceDaoDstu3ExternalReferenceTest extends BaseJpaDstu3Test 
 			myPatientDao.create(p, mySrd);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(507) + "Resource contains external reference to URL \"http://example.com/base/Organization/FOO\" but this server is not configured to allow external references");
+			assertEquals(Msg.code(507) + "Resource contains external reference to URL \"http://example.com/base/Organization/FOO\" but this server is not configured to allow external references", e.getMessage());
 		}
 	}
 
@@ -102,7 +103,7 @@ public class FhirResourceDaoDstu3ExternalReferenceTest extends BaseJpaDstu3Test 
 		IIdType pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = myPatientDao.read(pid, mySrd);
-		assertThat(p.getManagingOrganization().getReference()).isEqualTo("Organization/FOO");
+		assertEquals("Organization/FOO", p.getManagingOrganization().getReference());
 
 		SearchParameterMap map;
 
@@ -141,7 +142,7 @@ public class FhirResourceDaoDstu3ExternalReferenceTest extends BaseJpaDstu3Test 
 		IIdType pid = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = myPatientDao.read(pid, mySrd);
-		assertThat(p.getManagingOrganization().getReference()).isEqualTo("Organization/FOO");
+		assertEquals("Organization/FOO", p.getManagingOrganization().getReference());
 
 		SearchParameterMap map;
 

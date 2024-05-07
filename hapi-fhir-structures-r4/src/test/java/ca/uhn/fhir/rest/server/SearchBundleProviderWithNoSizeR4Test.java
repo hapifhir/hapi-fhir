@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -90,12 +91,12 @@ public class SearchBundleProviderWithNoSizeR4Test {
 			status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(ourLastMethod).isEqualTo("searchAll");
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("searchAll", ourLastMethod);
 			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
 			assertThat(respBundle.getEntry()).hasSize(10);
-			assertThat(respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/0");
+			assertEquals("Patient/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			linkNext = respBundle.getLink("next");
 			assertNotNull(linkNext);
 
@@ -111,12 +112,12 @@ public class SearchBundleProviderWithNoSizeR4Test {
 			status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(ourLastMethod).isEqualTo("searchAll");
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("searchAll", ourLastMethod);
 			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
 			assertThat(respBundle.getEntry()).hasSize(10);
-			assertThat(respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/10");
+			assertEquals("Patient/10", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			linkNext = respBundle.getLink("next");
 			assertNotNull(linkNext);
 
@@ -129,12 +130,12 @@ public class SearchBundleProviderWithNoSizeR4Test {
 			status = ourClient.execute(httpGet);
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(ourLastMethod).isEqualTo("searchAll");
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("searchAll", ourLastMethod);
 			respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
 			assertThat(respBundle.getEntry()).hasSize(5);
-			assertThat(respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/20");
+			assertEquals("Patient/20", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 			linkNext = respBundle.getLink("next");
 			assertNull(linkNext);
 

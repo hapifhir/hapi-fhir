@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.mdm.api.MdmConstants;
@@ -46,15 +47,15 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		assertThat(result.getEntry()).hasSize(1);
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
-		assertThat(entry0.getResource().getId()).isEqualTo(createdJane.getId());
+		assertEquals(createdJane.getId(), entry0.getResource().getId());
 
 		Bundle.BundleEntrySearchComponent searchComponent = entry0.getSearch();
-		assertThat(searchComponent.getMode()).isEqualTo(Bundle.SearchEntryMode.MATCH);
+		assertEquals(Bundle.SearchEntryMode.MATCH, searchComponent.getMode());
 
 		assertThat(searchComponent.getScore().doubleValue()).isCloseTo(2.0 / 3.0, within(0.01));
 		Extension matchGradeExtension = searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
 		assertNotNull(matchGradeExtension);
-		assertThat(matchGradeExtension.getValue().toString()).isEqualTo(MatchGrade.CERTAIN.toCode());
+		assertEquals(MatchGrade.CERTAIN.toCode(), matchGradeExtension.getValue().toString());
 	}
 
 	@Test
@@ -70,16 +71,16 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		assertThat(result.getEntry()).hasSize(1);
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
-		assertThat(entry0.getResource().getId()).isEqualTo(createdMedication.getId());
+		assertEquals(createdMedication.getId(), entry0.getResource().getId());
 
 		Bundle.BundleEntrySearchComponent searchComponent = entry0.getSearch();
-		assertThat(searchComponent.getMode()).isEqualTo(Bundle.SearchEntryMode.MATCH);
+		assertEquals(Bundle.SearchEntryMode.MATCH, searchComponent.getMode());
 
 		//Since there is only
 		assertThat(searchComponent.getScore().doubleValue()).isCloseTo(1.0 / 1.0, within(0.01));
 		Extension matchGradeExtension = searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
 		assertNotNull(matchGradeExtension);
-		assertThat(matchGradeExtension.getValue().toString()).isEqualTo(MatchGrade.CERTAIN.toCode());
+		assertEquals(MatchGrade.CERTAIN.toCode(), matchGradeExtension.getValue().toString());
 
 	}
 
@@ -95,15 +96,15 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 		assertThat(result.getEntry()).hasSize(1);
 
 		Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
-		assertThat(entry0.getResource().getId()).isEqualTo(createdJane.getId());
+		assertEquals(createdJane.getId(), entry0.getResource().getId());
 
 		Bundle.BundleEntrySearchComponent searchComponent = entry0.getSearch();
-		assertThat(searchComponent.getMode()).isEqualTo(Bundle.SearchEntryMode.MATCH);
+		assertEquals(Bundle.SearchEntryMode.MATCH, searchComponent.getMode());
 
 		assertThat(searchComponent.getScore().doubleValue()).isCloseTo(2.0 / 3.0, within(0.01));
 		Extension matchGradeExtension = searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
 		assertNotNull(matchGradeExtension);
-		assertThat(matchGradeExtension.getValue().toString()).isEqualTo(MatchGrade.CERTAIN.toCode());
+		assertEquals(MatchGrade.CERTAIN.toCode(), matchGradeExtension.getValue().toString());
 	}
 
 	@Test
@@ -155,7 +156,7 @@ public class MdmProviderMatchR4Test extends BaseProviderR4Test {
 
 		Bundle result = (Bundle) myMdmProvider.match(newJane, new SystemRequestDetails());
 		assertThat(result.getEntry()).hasSize(1);
-		assertThat(result.getEntryFirstRep().getResource().getId()).isEqualTo(createdJane.getId());
+		assertEquals(createdJane.getId(), result.getEntryFirstRep().getResource().getId());
 	}
 
 	@Test

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
@@ -69,9 +70,9 @@ public class IncludedResourceStitchingClientTest {
 		    .returnBundle(Bundle.class)
 		    .execute();
 
-		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
+		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
-		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient");
+		assertEquals("http://foo/Patient", get.getURI().toString());
 
 		assertThat(bundle.getEntry()).hasSize(3);
 		
@@ -80,7 +81,7 @@ public class IncludedResourceStitchingClientTest {
 		assertThat(exts).hasSize(1);
 		Extension ext = exts.get(0);
 		Reference ref = (Reference) ext.getValue();
-		assertThat(ref.getReferenceElement().getValue()).isEqualTo("Organization/o1");
+		assertEquals("Organization/o1", ref.getReferenceElement().getValue());
 		assertNotNull(ref.getResource());
 		
 	}
@@ -97,19 +98,19 @@ public class IncludedResourceStitchingClientTest {
 		IGenericClient client = ctx.newRestfulGenericClient( "http://foo");
 		Bundle bundle = client.search().forResource(IncludeTest.ExtPatient.class).returnBundle(Bundle.class).execute();
 
-		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
+		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
-		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient");
+		assertEquals("http://foo/Patient", get.getURI().toString());
 
 		assertThat(bundle.getEntry()).hasSize(4);
 		
 		ExtPatient p = (ExtPatient) bundle.getEntry().get(0).getResource();
 		Reference ref = p.getSecondOrg();
-		assertThat(ref.getReferenceElement().getValue()).isEqualTo("Organization/o1");
+		assertEquals("Organization/o1", ref.getReferenceElement().getValue());
 		assertNotNull(ref.getResource());
 		
 		Organization o1 = (Organization) ref.getResource();
-		assertThat(o1.getPartOf().getReferenceElement().toUnqualifiedVersionless().getIdPart()).isEqualTo("o2");
+		assertEquals("o2", o1.getPartOf().getReferenceElement().toUnqualifiedVersionless().getIdPart());
 		assertNotNull(o1.getPartOf().getResource());
 		
 	}

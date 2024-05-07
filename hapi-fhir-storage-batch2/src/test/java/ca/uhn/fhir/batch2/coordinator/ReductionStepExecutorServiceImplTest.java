@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.coordinator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.ChunkExecutionDetails;
@@ -121,8 +122,8 @@ public class ReductionStepExecutorServiceImplTest {
 		// successes, then failures
 		assertThat(statusCaptor.getAllValues()).hasSize(2);
 		List<WorkChunkStatusEnum> statuses = statusCaptor.getAllValues();
-		assertThat(statuses.get(0)).isEqualTo(WorkChunkStatusEnum.COMPLETED);
-		assertThat(statuses.get(1)).isEqualTo(WorkChunkStatusEnum.FAILED);
+		assertEquals(WorkChunkStatusEnum.COMPLETED, statuses.get(0));
+		assertEquals(WorkChunkStatusEnum.FAILED, statuses.get(1));
 	}
 
 

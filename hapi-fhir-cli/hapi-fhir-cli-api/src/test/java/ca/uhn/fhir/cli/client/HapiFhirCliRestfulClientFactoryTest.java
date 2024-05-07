@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cli.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
@@ -30,11 +31,11 @@ public class HapiFhirCliRestfulClientFactoryTest extends BaseFhirVersionParamete
 
 		HttpUriRequest request = new HttpGet(fhirVersionParams.getPatientEndpoint());
 		HttpResponse response = client.execute(request);
-		assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, response.getStatusLine().getStatusCode());
 
 		String json = EntityUtils.toString(response.getEntity());
 		IBaseResource bundle = fhirVersionParams.parseResource(json);
-		assertThat(bundle.getStructureFhirVersionEnum()).isEqualTo(fhirVersionParams.getFhirVersion());
+		assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
 	}
 
 	@ParameterizedTest
@@ -46,11 +47,11 @@ public class HapiFhirCliRestfulClientFactoryTest extends BaseFhirVersionParamete
 
 		HttpUriRequest request = new HttpGet(fhirVersionParams.getSecuredPatientEndpoint());
 		HttpResponse response = authenticatedClient.execute(request);
-		assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, response.getStatusLine().getStatusCode());
 
 		String json = EntityUtils.toString(response.getEntity());
 		IBaseResource bundle = fhirVersionParams.parseResource(json);
-		assertThat(bundle.getStructureFhirVersionEnum()).isEqualTo(fhirVersionParams.getFhirVersion());
+		assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
 	}
 
 	@ParameterizedTest
@@ -65,7 +66,7 @@ public class HapiFhirCliRestfulClientFactoryTest extends BaseFhirVersionParamete
 			unauthenticatedClient.execute(request);
 			fail("");		}
 		catch(Exception e){
-			assertThat(e.getClass()).isEqualTo(SSLHandshakeException.class);
+			assertEquals(SSLHandshakeException.class, e.getClass());
 		}
 	}
 
@@ -77,7 +78,7 @@ public class HapiFhirCliRestfulClientFactoryTest extends BaseFhirVersionParamete
 		FhirContext context = fhirVersionParams.getFhirContext();
 		context.setRestfulClientFactory(new HapiFhirCliRestfulClientFactory(context));
 		IBaseResource bundle = context.newRestfulGenericClient(base).search().forResource("Patient").execute();
-		assertThat(bundle.getStructureFhirVersionEnum()).isEqualTo(theFhirVersion);
+		assertEquals(theFhirVersion, bundle.getStructureFhirVersionEnum());
 	}
 
 	@ParameterizedTest
@@ -88,7 +89,7 @@ public class HapiFhirCliRestfulClientFactoryTest extends BaseFhirVersionParamete
 		FhirContext context = fhirVersionParams.getFhirContext();
 		context.setRestfulClientFactory(new HapiFhirCliRestfulClientFactory(context, getTlsAuthentication()));
 		IBaseResource bundle = context.newRestfulGenericClient(secureBase).search().forResource("Patient").execute();
-		assertThat(bundle.getStructureFhirVersionEnum()).isEqualTo(theFhirVersion);
+		assertEquals(theFhirVersion, bundle.getStructureFhirVersionEnum());
 	}
 
 	@ParameterizedTest
@@ -102,7 +103,7 @@ public class HapiFhirCliRestfulClientFactoryTest extends BaseFhirVersionParamete
 			context.newRestfulGenericClient(secureBase).search().forResource("Patient").execute();
 			fail("");		} catch (Exception e) {
 			assertThat(e.getMessage()).contains("HAPI-1357: Failed to retrieve the server metadata statement during client initialization");
-			assertThat(e.getCause().getCause().getClass()).isEqualTo(SSLHandshakeException.class);
+			assertEquals(SSLHandshakeException.class, e.getCause().getCause().getClass());
 		}
 	}
 
@@ -118,17 +119,17 @@ public class HapiFhirCliRestfulClientFactoryTest extends BaseFhirVersionParamete
 		HapiFhirCliRestfulClientFactory restfulClientFactory = new HapiFhirCliRestfulClientFactory(context, getTlsAuthentication());
 		context.setRestfulClientFactory(restfulClientFactory);
 		IBaseResource bundle = context.newRestfulGenericClient(secureBase).search().forResource("Patient").execute();
-		assertThat(bundle.getStructureFhirVersionEnum()).isEqualTo(theFhirVersion);
+		assertEquals(theFhirVersion, bundle.getStructureFhirVersionEnum());
 
 		// http
 		restfulClientFactory.useHttp();
 		bundle = context.newRestfulGenericClient(base).search().forResource("Patient").execute();
-		assertThat(bundle.getStructureFhirVersionEnum()).isEqualTo(theFhirVersion);
+		assertEquals(theFhirVersion, bundle.getStructureFhirVersionEnum());
 
 		// https
 		restfulClientFactory.useHttps(getTlsAuthentication());
 		bundle = context.newRestfulGenericClient(secureBase).search().forResource("Patient").execute();
-		assertThat(bundle.getStructureFhirVersionEnum()).isEqualTo(theFhirVersion);
+		assertEquals(theFhirVersion, bundle.getStructureFhirVersionEnum());
 	}
 
 
@@ -141,7 +142,7 @@ public class HapiFhirCliRestfulClientFactoryTest extends BaseFhirVersionParamete
 			HapiFhirCliRestfulClientFactory hapiFhirCliRestfulClientFactory = new HapiFhirCliRestfulClientFactory(fhirContext);
 			hapiFhirCliRestfulClientFactory.setHttpClient(new Object());
 		} catch (UnsupportedOperationException e){
-			assertThat(e.getMessage()).isEqualTo(Msg.code(2119));
+			assertEquals(Msg.code(2119), e.getMessage());
 		}
 	}
 
@@ -154,7 +155,7 @@ public class HapiFhirCliRestfulClientFactoryTest extends BaseFhirVersionParamete
 			HapiFhirCliRestfulClientFactory hapiFhirCliRestfulClientFactory = new HapiFhirCliRestfulClientFactory(fhirContext);
 			hapiFhirCliRestfulClientFactory.setProxy("proxy", 1);
 		} catch (UnsupportedOperationException e){
-			assertThat(e.getMessage()).isEqualTo(Msg.code(2120));
+			assertEquals(Msg.code(2120), e.getMessage());
 		}
 	}
 

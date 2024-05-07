@@ -1,5 +1,6 @@
 package ca.uhn.hapi.fhir.cdshooks.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.hapi.fhir.cdshooks.api.ICdsMethod;
@@ -41,11 +42,11 @@ class CdsServiceCacheTest {
 		// validate
 		assertThat(myFixture.myServiceMap).hasSize(1);
 		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.myServiceMap.get(TEST_KEY);
-		assertThat(cdsMethod.getFunction()).isEqualTo(serviceFunction);
-		assertThat(cdsMethod.getCdsServiceJson()).isEqualTo(cdsServiceJson);
+		assertEquals(serviceFunction, cdsMethod.getFunction());
+		assertEquals(cdsServiceJson, cdsMethod.getCdsServiceJson());
 		assertTrue(cdsMethod.isAllowAutoFhirClientPrefetch());
 		assertThat(myFixture.myCdsServiceJson.getServices()).hasSize(1);
-		assertThat(myFixture.myCdsServiceJson.getServices().get(0)).isEqualTo(cdsServiceJson);
+		assertEquals(cdsServiceJson, myFixture.myCdsServiceJson.getServices().get(0));
 	}
 
 	@Test
@@ -62,11 +63,11 @@ class CdsServiceCacheTest {
 		// validate
 		assertThat(myFixture.myServiceMap).hasSize(1);
 		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.myServiceMap.get(TEST_KEY);
-		assertThat(cdsMethod.getFunction()).isEqualTo(serviceFunction);
-		assertThat(cdsMethod.getCdsServiceJson()).isEqualTo(cdsServiceJson);
+		assertEquals(serviceFunction, cdsMethod.getFunction());
+		assertEquals(cdsServiceJson, cdsMethod.getCdsServiceJson());
 		assertTrue(cdsMethod.isAllowAutoFhirClientPrefetch());
 		assertThat(myFixture.myCdsServiceJson.getServices()).hasSize(1);
-		assertThat(myFixture.myCdsServiceJson.getServices().get(0)).isEqualTo(cdsServiceJson);
+		assertEquals(cdsServiceJson, myFixture.myCdsServiceJson.getServices().get(0));
 		LogEventIterableAssert.assertThat(myLogCapture.getLogEvents()).hasEventWithLevelAndMessageContains(Level.ERROR, expectedLogMessage);
 
 	}
@@ -81,8 +82,8 @@ class CdsServiceCacheTest {
 		final CdsDynamicPrefetchableServiceMethod cdsMethod = (CdsDynamicPrefetchableServiceMethod) myFixture.unregisterServiceMethod(TEST_KEY, MODULE_ID);
 		// validate
 		assertTrue(myFixture.myServiceMap.isEmpty());
-		assertThat(cdsMethod.getFunction()).isEqualTo(serviceFunction);
-		assertThat(cdsMethod.getCdsServiceJson()).isEqualTo(cdsServiceJson);
+		assertEquals(serviceFunction, cdsMethod.getFunction());
+		assertEquals(cdsServiceJson, cdsMethod.getCdsServiceJson());
 		assertTrue(cdsMethod.isAllowAutoFhirClientPrefetch());
 		assertThat(myFixture.myCdsServiceJson.getServices()).isEmpty();
 	}

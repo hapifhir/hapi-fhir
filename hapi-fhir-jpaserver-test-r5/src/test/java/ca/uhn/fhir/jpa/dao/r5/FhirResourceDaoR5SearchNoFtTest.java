@@ -156,7 +156,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
         Long id = myPatientDao.create(p).getId().getIdPartAsLong();
 
         IBundleProvider outcome = myPatientDao.search(new SearchParameterMap());
-		assertThat(outcome.size().intValue()).isEqualTo(3);
+		assertEquals(3, outcome.size().intValue());
 
         runInTransaction(() -> {
             ResourceTable table = myResourceTableDao.findById(id).orElseThrow(() -> new IllegalArgumentException());
@@ -307,12 +307,12 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
         SearchParameterMap map = SearchParameterMap
                 .newSynchronous("composition.patient.identifier", new TokenParam("http://foo", "bar"));
         outcome = myBundleDao.search(map, mySrd);
-		assertThat(outcome.size()).isEqualTo(1);
+		assertEquals(1, outcome.size());
 
         map = SearchParameterMap
                 .newSynchronous("composition", new ReferenceParam("patient.identifier", "http://foo|bar"));
         outcome = myBundleDao.search(map, mySrd);
-		assertThat(outcome.size()).isEqualTo(1);
+		assertEquals(1, outcome.size());
     }
 
     @Test
@@ -331,7 +331,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
             myObservationDao.search(params, new SystemRequestDetails());
 			fail("");
         } catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-2305: Reference field does not exist: " + referenceFieldName);
+			assertEquals("HAPI-2305: Reference field does not exist: " + referenceFieldName, e.getMessage());
         }
     }
 

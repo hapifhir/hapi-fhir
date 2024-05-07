@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -52,7 +53,7 @@ public class UnclassifiedServerExceptionDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(477);
+			assertEquals(477, status.getStatusLine().getStatusCode());
 			//assertEquals("SOME MESSAGE", status.getStatusLine().getReasonPhrase());
 			assertThat(responseContent).contains("business-rule");
 		} finally {

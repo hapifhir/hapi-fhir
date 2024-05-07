@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -795,7 +796,7 @@ public abstract class BaseJpaTest extends BaseTest {
 			return null;
 		} else {
 			TermValueSetConcept termValueSetConcept = first.get();
-			assertThat(theValueSet.getConcepts().indexOf(termValueSetConcept)).isEqualTo(termValueSetConcept.getOrder());
+			assertEquals(termValueSetConcept.getOrder(), theValueSet.getConcepts().indexOf(termValueSetConcept));
 			return termValueSetConcept;
 		}
 	}

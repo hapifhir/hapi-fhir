@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.mdm;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.mdm.models.GenerateMetricsTestParameters;
 import ca.uhn.fhir.jpa.mdm.models.LinkMetricTestParameters;
 import ca.uhn.fhir.jpa.mdm.models.LinkScoreMetricTestParams;
@@ -68,10 +69,10 @@ public interface IMdmMetricSvcTest {
 
 		// verify
 		assertNotNull(results);
-		assertThat(results.getResourceType()).isEqualTo("Patient");
-		assertThat(results.getGoldenResourcesCount()).isEqualTo(4);
-		assertThat(results.getSourceResourcesCount()).isEqualTo(4);
-		assertThat(results.getExcludedResources()).isEqualTo(0);
+		assertEquals("Patient", results.getResourceType());
+		assertEquals(4, results.getGoldenResourcesCount());
+		assertEquals(4, results.getSourceResourcesCount());
+		assertEquals(0, results.getExcludedResources());
 
 		Map<MdmMatchResultEnum, Map<MdmLinkSourceEnum, Long>> map = results.getMatchTypeToLinkToCountMap();
 		// See OUR_BASIC_STATE
@@ -110,7 +111,7 @@ public interface IMdmMetricSvcTest {
 
 		// verify
 		assertNotNull(metrics);
-		assertThat("Patient").isEqualTo(metrics.getResourceType());
+		assertEquals(metrics.getResourceType(), "Patient");
 
 		MdmMetrics expectedMetrics = theParameters.getExpectedMetrics();
 
@@ -147,11 +148,11 @@ public interface IMdmMetricSvcTest {
 
 		// verify
 		assertNotNull(results);
-		assertThat(results.getResourceType()).isEqualTo("Patient");
+		assertEquals("Patient", results.getResourceType());
 		assertThat(results.getSourceResourcesCount() + results.getGoldenResourcesCount())
 				.isEqualTo(theParams.getExpectedResourceCount());
-		assertThat(results.getExcludedResources()).isEqualTo(theParams.getExpectedBlockedResourceCount());
-		assertThat(results.getGoldenResourcesCount()).isEqualTo(theParams.getExpectedGoldenResourceCount());
+		assertEquals(theParams.getExpectedBlockedResourceCount(), results.getExcludedResources());
+		assertEquals(theParams.getExpectedGoldenResourceCount(), results.getGoldenResourcesCount());
 	}
 
 	void generateLinkScoreMetricsSetup(LinkScoreMetricTestParams theParams);
@@ -172,7 +173,7 @@ public interface IMdmMetricSvcTest {
 
 		// verify
 		assertNotNull(actualMetrics);
-		assertThat(actualMetrics.getResourceType()).isEqualTo("Patient");
+		assertEquals("Patient", actualMetrics.getResourceType());
 
 		MdmMetrics expectedMetrics = theParams.getExpectedMetrics();
 

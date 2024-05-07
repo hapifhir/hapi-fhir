@@ -143,9 +143,9 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 		// verify
 		assertNotNull(outcome);
-		assertThat(outcome.getResource().getIdElement().getIdPart()).isEqualTo(id);
-		assertThat(readIndex.get()).isEqualTo(0); // should be no read interactions
-		assertThat(writeIndex.get()).isEqualTo(1);
+		assertEquals(id, outcome.getResource().getIdElement().getIdPart());
+		assertEquals(0, readIndex.get()); // should be no read interactions
+		assertEquals(1, writeIndex.get());
 	}
 
 	@Test
@@ -190,7 +190,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			myStructureDefinitionDao.create(sd, new ServletRequestDetails());
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1318) + "Resource type StructureDefinition can not be partitioned");
+			assertEquals(Msg.code(1318) + "Resource type StructureDefinition can not be partitioned", e.getMessage());
 		}
 	}
 
@@ -205,7 +205,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 			myPatientDao.search(map);
 			fail("");
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1319) + "No interceptor provided a value for pointcut: STORAGE_PARTITION_IDENTIFY_READ");
+			assertEquals(Msg.code(1319) + "No interceptor provided a value for pointcut: STORAGE_PARTITION_IDENTIFY_READ", e.getMessage());
 		}
 	}
 
@@ -228,7 +228,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);
-			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).isEqualTo(0);
+			assertEquals(0, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
@@ -263,7 +263,7 @@ public class PartitioningInterceptorR4Test extends BaseJpaR4SystemTest {
 
 			String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 			ourLog.info("Search SQL:\n{}", searchSql);
-			assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).isEqualTo(1);
+			assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);

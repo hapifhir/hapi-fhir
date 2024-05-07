@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -80,7 +81,7 @@ public class CustomTypeServerDstu3 {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
+		assertEquals(201, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
@@ -100,9 +101,9 @@ public class CustomTypeServerDstu3 {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo("HAPI-0365: Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)");
+		assertEquals("HAPI-0365: Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
 	}
 
 	@Test
@@ -122,9 +123,9 @@ public class CustomTypeServerDstu3 {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
-		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo("HAPI-0365: Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)");
+		assertEquals("HAPI-0365: Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
 	}
 
 

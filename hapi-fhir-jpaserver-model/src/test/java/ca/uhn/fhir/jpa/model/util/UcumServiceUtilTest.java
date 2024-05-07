@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.model.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.CELSIUS_KELVIN_DIFF;
@@ -19,23 +20,23 @@ public class UcumServiceUtilTest {
 	@Test
 	public void testCanonicalForm() {
 
-		assertThat(Double.parseDouble(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(0.012), "mm").getValue().asDecimal())).isEqualTo(Double.parseDouble("0.000012"));
+		assertEquals(Double.parseDouble("0.000012"), Double.parseDouble(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(0.012), "mm").getValue().asDecimal()));
 
 
-		assertThat(Double.parseDouble(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(149597.870691), "mm").getValue().asDecimal())).isEqualTo(Double.parseDouble("149.597870691"));
+		assertEquals(Double.parseDouble("149.597870691"), Double.parseDouble(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(149597.870691), "mm").getValue().asDecimal()));
 
-		assertThat(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), "mm").toString()).isEqualTo("0.0025 m");
-		assertThat(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), "cm").toString()).isEqualTo("0.025 m");
-		assertThat(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), "dm").toString()).isEqualTo("0.25 m");
-		assertThat(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), "m").toString()).isEqualTo("2.5 m");
-		assertThat(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), "km").toString()).isEqualTo("2500 m");
+		assertEquals("0.0025 m", UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), "mm").toString());
+		assertEquals("0.025 m", UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), "cm").toString());
+		assertEquals("0.25 m", UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), "dm").toString());
+		assertEquals("2.5 m", UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), "m").toString());
+		assertEquals("2500 m", UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(2.5), "km").toString());
 
-		assertThat(Double.parseDouble(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(95.74), "mg/dL").getValue().asDecimal())).isEqualTo(Double.parseDouble("957.4"));
+		assertEquals(Double.parseDouble("957.4"), Double.parseDouble(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(95.74), "mg/dL").getValue().asDecimal()));
 
-		assertThat(Double.parseDouble(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(95.74), "g/dL").getValue().asDecimal())).isEqualTo(Double.parseDouble("957400.0"));
+		assertEquals(Double.parseDouble("957400.0"), Double.parseDouble(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(95.74), "g/dL").getValue().asDecimal()));
 
 		//-- code g.m-3
-		assertThat(Double.parseDouble(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(95.74), "kg/dL").getValue().asDecimal())).isEqualTo(Double.parseDouble("957400000"));	
+		assertEquals(Double.parseDouble("957400000"), Double.parseDouble(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(95.74), "kg/dL").getValue().asDecimal()));
 	}
 
 	@Test
@@ -63,7 +64,7 @@ public class UcumServiceUtilTest {
 //		System.out.println("expected: " + expected);
 //		System.out.println("converted: " + converted);
 		assertTrue(converted.equals(expected));
-		assertThat(canonicalPair.getCode()).isEqualTo("K");
+		assertEquals("K", canonicalPair.getCode());
 
 	}
 
@@ -80,7 +81,7 @@ public class UcumServiceUtilTest {
 //		System.out.println("converted: " + converted);
 //		System.out.println("diff: " + converted.subtract(expectedApprox));
 		assertTrue(converted.equals(expected));
-		assertThat(canonicalPair.getCode()).isEqualTo("K");
+		assertEquals("K", canonicalPair.getCode());
 
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -52,7 +53,7 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 			cacheWarmingSvc.initCacheMap();
 			fail("");
 		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1684) + "Unknown resource name \"BadResource\" (this name is not known in FHIR version \"R4\")");
+			assertEquals(Msg.code(1684) + "Unknown resource name \"BadResource\" (this name is not known in FHIR version \"R4\")", e.getMessage());
 		}
 
 		myStorageSettings.setWarmCacheEntries(new ArrayList<>());
@@ -65,7 +66,7 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 			cacheWarmingSvc.initCacheMap();
 			fail("");
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1172) + "Invalid warm cache URL (must have ? character)");
+			assertEquals(Msg.code(1172) + "Invalid warm cache URL (must have ? character)", e.getMessage());
 		}
 
 
@@ -101,10 +102,10 @@ public class FhirResourceDaoR4CacheWarmingTest extends BaseJpaR4Test {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("smith"));
 		IBundleProvider result = myPatientDao.search(params);
-		assertThat(result.getClass()).isEqualTo(PersistedJpaBundleProvider.class);
+		assertEquals(PersistedJpaBundleProvider.class, result.getClass());
 
 		PersistedJpaBundleProvider resultCasted = (PersistedJpaBundleProvider) result;
-		assertThat(resultCasted.getCacheStatus()).isEqualTo(SearchCacheStatusEnum.HIT);
+		assertEquals(SearchCacheStatusEnum.HIT, resultCasted.getCacheStatus());
 	}
 
 }

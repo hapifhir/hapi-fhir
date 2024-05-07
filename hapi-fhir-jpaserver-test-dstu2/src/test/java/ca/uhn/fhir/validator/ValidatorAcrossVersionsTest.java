@@ -1,5 +1,6 @@
 package ca.uhn.fhir.validator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -26,7 +27,7 @@ public class ValidatorAcrossVersionsTest {
 			ctxDstu2.getResourceDefinition(org.hl7.fhir.dstu3.model.Patient.class);
 			fail("");
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1731) + "This context is for FHIR version \"DSTU2\" but the class \"org.hl7.fhir.dstu3.model.Patient\" is for version \"DSTU3\"");
+			assertEquals(Msg.code(1731) + "This context is for FHIR version \"DSTU2\" but the class \"org.hl7.fhir.dstu3.model.Patient\" is for version \"DSTU3\"", e.getMessage());
 		}
 		
 	}
@@ -48,8 +49,8 @@ public class ValidatorAcrossVersionsTest {
 		ourLog.debug(ctxDstu2.newJsonParser().setPrettyPrint(true).encodeResourceToString(result.toOperationOutcome()));
 
 		assertThat(result.getMessages()).hasSize(2);
-		assertThat(result.getMessages().get(0).getMessage()).isEqualTo("QuestionnaireResponse.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse)");
-		assertThat(result.getMessages().get(1).getMessage()).isEqualTo("No questionnaire is identified, so no validation can be performed against the base questionnaire");
+		assertEquals("QuestionnaireResponse.status: minimum required = 1, but only found 0 (from http://hl7.org/fhir/StructureDefinition/QuestionnaireResponse)", result.getMessages().get(0).getMessage());
+		assertEquals("No questionnaire is identified, so no validation can be performed against the base questionnaire", result.getMessages().get(1).getMessage());
 	}
 
 }

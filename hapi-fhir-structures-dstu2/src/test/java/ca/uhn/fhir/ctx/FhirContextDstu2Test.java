@@ -1,5 +1,6 @@
 package ca.uhn.fhir.ctx;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.BaseRuntimeChildDatatypeDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -40,7 +41,7 @@ public class FhirContextDstu2Test {
 			FhirContext ctx = FhirContext.forDstu2();
 			ctx.getResourceDefinition("InvalidResource");
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1684) + "Unknown resource name \"InvalidResource\" (this name is not known in FHIR version \"DSTU2\")");
+			assertEquals(Msg.code(1684) + "Unknown resource name \"InvalidResource\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 	}
 
@@ -48,7 +49,7 @@ public class FhirContextDstu2Test {
 	@Test
 	public void testAutoDetectVersion() {
 		FhirContext ctx = new FhirContext();
-		assertThat(ctx.getVersion().getVersion()).isEqualTo(FhirVersionEnum.DSTU2);
+		assertEquals(FhirVersionEnum.DSTU2, ctx.getVersion().getVersion());
 	}
 
 	@Test
@@ -58,7 +59,7 @@ public class FhirContextDstu2Test {
 		BaseRuntimeChildDatatypeDefinition genderChild = (BaseRuntimeChildDatatypeDefinition) patientType.getChildByName(childName);
 		ourLog.trace(genderChild.getClass().getName());
 
-		assertThat(genderChild.getBoundEnumType()).isEqualTo(AdministrativeGenderEnum.class);
+		assertEquals(AdministrativeGenderEnum.class, genderChild.getBoundEnumType());
 	}
 
 	@Test
@@ -68,7 +69,7 @@ public class FhirContextDstu2Test {
 		BaseRuntimeChildDatatypeDefinition genderChild = (BaseRuntimeChildDatatypeDefinition) patientType.getChildByName(childName);
 		ourLog.trace(genderChild.getClass().getName());
 
-		assertThat(genderChild.getBoundEnumType()).isEqualTo(MaritalStatusCodesEnum.class);
+		assertEquals(MaritalStatusCodesEnum.class, genderChild.getBoundEnumType());
 	}
 
 	@Test

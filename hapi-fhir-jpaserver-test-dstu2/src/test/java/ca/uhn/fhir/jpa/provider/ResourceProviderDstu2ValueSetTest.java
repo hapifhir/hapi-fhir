@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
@@ -54,7 +55,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().get(0).getValue()).isEqualTo(new BooleanDt(true));
+		assertEquals(new BooleanDt(true), respParam.getParameter().get(0).getValue());
 	}
 
 	@Test
@@ -70,10 +71,10 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("display");
-		assertThat(respParam.getParameter().get(0).getValue()).isEqualTo(new StringDt("Systolic blood pressure--expiration"));
-		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("abstract");
-		assertThat(respParam.getParameter().get(1).getValue()).isEqualTo(new BooleanDt(false));
+		assertEquals("display", respParam.getParameter().get(0).getName());
+		assertEquals(new StringDt("Systolic blood pressure--expiration"), respParam.getParameter().get(0).getValue());
+		assertEquals("abstract", respParam.getParameter().get(1).getName());
+		assertEquals(new BooleanDt(false), respParam.getParameter().get(1).getValue());
 	}
 
 	@Test
@@ -90,12 +91,12 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
-		assertThat(respParam.getParameter().get(0).getValue()).isEqualTo(new StringDt("Unknown"));
-		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("display");
-		assertThat(respParam.getParameter().get(1).getValue()).isEqualTo(new StringDt("Married"));
-		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("abstract");
-		assertThat(respParam.getParameter().get(2).getValue()).isEqualTo(new BooleanDt(false));
+		assertEquals("name", respParam.getParameter().get(0).getName());
+		assertEquals(new StringDt("Unknown"), respParam.getParameter().get(0).getValue());
+		assertEquals("display", respParam.getParameter().get(1).getName());
+		assertEquals(new StringDt("Married"), respParam.getParameter().get(1).getValue());
+		assertEquals("abstract", respParam.getParameter().get(2).getName());
+		assertEquals(new BooleanDt(false), respParam.getParameter().get(2).getValue());
 	}
 
 	@Test
@@ -110,10 +111,10 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("display");
-		assertThat(respParam.getParameter().get(0).getValue()).isEqualTo(new StringDt("Systolic blood pressure--expiration"));
-		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("abstract");
-		assertThat(respParam.getParameter().get(1).getValue()).isEqualTo(new BooleanDt(false));
+		assertEquals("display", respParam.getParameter().get(0).getName());
+		assertEquals(new StringDt("Systolic blood pressure--expiration"), respParam.getParameter().get(0).getValue());
+		assertEquals("abstract", respParam.getParameter().get(1).getName());
+		assertEquals(new BooleanDt(false), respParam.getParameter().get(1).getValue());
 	}
 
 	@Test
@@ -129,7 +130,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.execute();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 	}
 
@@ -145,7 +146,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.execute();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1127) + "$lookup can only validate (system AND code) OR (coding.system AND coding.code)", e.getMessage());
 		}
 	}
 
@@ -160,7 +161,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.execute();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1126) + "No code, coding, or codeableConcept provided to validate");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1126) + "No code, coding, or codeableConcept provided to validate", e.getMessage());
 		}
 	}
 
@@ -294,7 +295,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.execute();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1130) + "$expand operation at the type level (no ID specified) requires an identifier or a valueSet as a part of the request");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1130) + "$expand operation at the type level (no ID specified) requires an identifier or a valueSet as a part of the request", e.getMessage());
 		}
 
 		try {
@@ -308,7 +309,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.execute();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1131) + "$expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1131) + "$expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
 		}
 
 		try {
@@ -322,7 +323,7 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 				.execute();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1131) + "$expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1131) + "$expand must EITHER be invoked at the type level, or have an identifier specified, or have a ValueSet specified. Can not combine these options.", e.getMessage());
 		}
 
 	}

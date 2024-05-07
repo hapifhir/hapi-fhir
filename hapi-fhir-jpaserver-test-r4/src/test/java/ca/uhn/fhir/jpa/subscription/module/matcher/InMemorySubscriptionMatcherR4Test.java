@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module.matcher;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
@@ -120,14 +121,14 @@ public class InMemorySubscriptionMatcherR4Test {
 		InMemoryMatchResult result = match(resource, params);
 		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
 		assertTrue(result.matched());
-		assertThat(mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, params))).isEqualTo(SubscriptionMatchingStrategy.IN_MEMORY);
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, params)));
 	}
 
 	private void assertNotMatched(Resource theResource, SearchParameterMap theParams) {
 		InMemoryMatchResult result = match(theResource, theParams);
 		assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
 		assertThat(result.matched()).as("Failed on ID: " + theResource.getId()).isFalse();
-		assertThat(mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(theResource, theParams))).isEqualTo(SubscriptionMatchingStrategy.IN_MEMORY);
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(theResource, theParams)));
 	}
 
 	private InMemoryMatchResult match(Resource theResource, SearchParameterMap theParams) {
@@ -146,7 +147,7 @@ public class InMemorySubscriptionMatcherR4Test {
 	private void assertUnsupported(Resource resource, SearchParameterMap theParams) {
 		InMemoryMatchResult result = match(resource, theParams);
 		assertFalse(result.supported());
-		assertThat(mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, theParams))).isEqualTo(SubscriptionMatchingStrategy.DATABASE);
+		assertEquals(SubscriptionMatchingStrategy.DATABASE, mySubscriptionStrategyEvaluator.determineStrategy(getCriteria(resource, theParams)));
 	}
 
 	/*
@@ -658,7 +659,7 @@ public class InMemorySubscriptionMatcherR4Test {
 			InMemoryMatchResult result = myInMemorySubscriptionMatcher.match(subscription, msg);
 			fail("");
 		} catch (AssertionError e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(320) + "Reference at managingOrganization is invalid: urn:uuid:13720262-b392-465f-913e-54fb198ff954");
+			assertEquals(Msg.code(320) + "Reference at managingOrganization is invalid: urn:uuid:13720262-b392-465f-913e-54fb198ff954", e.getMessage());
 		}
 	}
 

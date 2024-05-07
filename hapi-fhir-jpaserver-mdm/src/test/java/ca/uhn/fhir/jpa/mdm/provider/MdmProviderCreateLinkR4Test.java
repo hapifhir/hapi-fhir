@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -40,8 +41,8 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(2);
 
 		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
-		assertThat(links.get(0).getLinkSource()).isEqualTo(MdmLinkSourceEnum.MANUAL);
-		assertThat(links.get(0).getMatchResult()).isEqualTo(MdmMatchResultEnum.MATCH);
+		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
+		assertEquals(MdmMatchResultEnum.MATCH, links.get(0).getMatchResult());
 	}
 
 	@Test
@@ -61,11 +62,11 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(2);
 
 		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
-		assertThat(1).isEqualTo(links.size());
-		assertThat(links.get(0).getLinkSource()).isEqualTo(MdmLinkSourceEnum.MANUAL);
-		assertThat(links.get(0).getMatchResult()).isEqualTo(MdmMatchResultEnum.MATCH);
+		assertEquals(links.size(), 1);
+		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
+		assertEquals(MdmMatchResultEnum.MATCH, links.get(0).getMatchResult());
 		assertNotNull(links.get(0).getPartitionId());
-		assertThat(links.get(0).getPartitionId().getPartitionId()).isEqualTo(1);
+		assertEquals(1, links.get(0).getPartitionId().getPartitionId());
 	}
 
 	@Test
@@ -106,8 +107,8 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(2);
 
 		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
-		assertThat(links.get(0).getLinkSource()).isEqualTo(MdmLinkSourceEnum.MANUAL);
-		assertThat(links.get(0).getMatchResult()).isEqualTo(MdmMatchResultEnum.MATCH);
+		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
+		assertEquals(MdmMatchResultEnum.MATCH, links.get(0).getMatchResult());
 	}
 
 	@Test
@@ -152,8 +153,8 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 
 		assertLinkCount(3);
 		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
-		assertThat(links.get(1).getLinkSource()).isEqualTo(MdmLinkSourceEnum.MANUAL);
-		assertThat(links.get(1).getMatchResult()).isEqualTo(MdmMatchResultEnum.NO_MATCH);
+		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(1).getLinkSource());
+		assertEquals(MdmMatchResultEnum.NO_MATCH, links.get(1).getMatchResult());
 	}
 
 	@Test
@@ -174,7 +175,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.createLink(mySourcePatientId, myPatientId, POSSIBLE_DUPLICATE_RESULT, myRequestDetails);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1496) + "$mdm-create-link illegal matchResult value 'POSSIBLE_DUPLICATE'.  Must be NO_MATCH, MATCH or POSSIBLE_MATCH");
+			assertEquals(Msg.code(1496) + "$mdm-create-link illegal matchResult value 'POSSIBLE_DUPLICATE'.  Must be NO_MATCH, MATCH or POSSIBLE_MATCH", e.getMessage());
 		}
 	}
 
@@ -206,7 +207,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 			fail("");
 		} catch (InvalidRequestException e) {
 			String expectedMessage = myMessageHelper.getMessageForFailedGoldenResourceLoad("goldenResourceId", patient.getId());
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1502) + expectedMessage);
+			assertEquals(Msg.code(1502) + expectedMessage, e.getMessage());
 		}
 	}
 
@@ -219,7 +220,7 @@ public class MdmProviderCreateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.createLink(mySourcePatientId, new StringType(patient.getIdElement().getValue()), MATCH_RESULT, myRequestDetails);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(759) + myMessageHelper.getMessageForUnsupportedSourceResource());
+			assertEquals(Msg.code(759) + myMessageHelper.getMessageForUnsupportedSourceResource(), e.getMessage());
 		}
 	}
 }

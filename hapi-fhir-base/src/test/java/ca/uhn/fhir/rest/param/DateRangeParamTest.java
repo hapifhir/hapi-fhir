@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
@@ -87,10 +88,10 @@ public class DateRangeParamTest {
 		DateRangeParam dateRangeParam = new DateRangeParam();
 
 		dateRangeParam.setValuesAsQueryTokens(fhirContext, "_lastUpdated", params);
-		assertThat(dateRangeParam.getLowerBound().getValueAsString()).isEqualTo("1965");
-		assertThat(dateRangeParam.getUpperBound().getValueAsString()).isEqualTo("1965");
-		assertThat(dateRangeParam.getLowerBound().getPrefix()).isEqualTo(ParamPrefixEnum.NOT_EQUAL);
-		assertThat(dateRangeParam.getUpperBound().getPrefix()).isEqualTo(ParamPrefixEnum.NOT_EQUAL);
+		assertEquals("1965", dateRangeParam.getLowerBound().getValueAsString());
+		assertEquals("1965", dateRangeParam.getUpperBound().getValueAsString());
+		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getLowerBound().getPrefix());
+		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getUpperBound().getPrefix());
 	}
 
 	@Test
@@ -103,10 +104,10 @@ public class DateRangeParamTest {
 		DateRangeParam dateRangeParam = new DateRangeParam();
 
 		dateRangeParam.setValuesAsQueryTokens(fhirContext, "_lastUpdated", params);
-		assertThat(dateRangeParam.getLowerBound().getValueAsString()).isEqualTo("1965-11");
-		assertThat(dateRangeParam.getUpperBound().getValueAsString()).isEqualTo("1965-11");
-		assertThat(dateRangeParam.getLowerBound().getPrefix()).isEqualTo(ParamPrefixEnum.NOT_EQUAL);
-		assertThat(dateRangeParam.getUpperBound().getPrefix()).isEqualTo(ParamPrefixEnum.NOT_EQUAL);
+		assertEquals("1965-11", dateRangeParam.getLowerBound().getValueAsString());
+		assertEquals("1965-11", dateRangeParam.getUpperBound().getValueAsString());
+		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getLowerBound().getPrefix());
+		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getUpperBound().getPrefix());
 	}
 
 	@Test
@@ -119,10 +120,10 @@ public class DateRangeParamTest {
 		DateRangeParam dateRangeParam = new DateRangeParam();
 
 		dateRangeParam.setValuesAsQueryTokens(fhirContext, "_lastUpdated", params);
-		assertThat(dateRangeParam.getLowerBound().getValueAsString()).isEqualTo("1965-11-23");
-		assertThat(dateRangeParam.getUpperBound().getValueAsString()).isEqualTo("1965-11-23");
-		assertThat(dateRangeParam.getLowerBound().getPrefix()).isEqualTo(ParamPrefixEnum.NOT_EQUAL);
-		assertThat(dateRangeParam.getUpperBound().getPrefix()).isEqualTo(ParamPrefixEnum.NOT_EQUAL);
+		assertEquals("1965-11-23", dateRangeParam.getLowerBound().getValueAsString());
+		assertEquals("1965-11-23", dateRangeParam.getUpperBound().getValueAsString());
+		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getLowerBound().getPrefix());
+		assertEquals(ParamPrefixEnum.NOT_EQUAL, dateRangeParam.getUpperBound().getPrefix());
 	}
 
 	@Test
@@ -133,8 +134,8 @@ public class DateRangeParamTest {
 
 		DateRangeParam copy = new DateRangeParam(input);
 
-		assertThat(copy.getLowerBound()).isEqualTo(dateStart);
-		assertThat(copy.getUpperBound()).isEqualTo(dateEnd);
+		assertEquals(dateStart, copy.getLowerBound());
+		assertEquals(dateEnd, copy.getUpperBound());
 
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term.icd10cm;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -30,15 +31,15 @@ public class Icd10CmLoaderTest {
 
 	@Test
 	public void testLoadIcd10CmCheckVersion() {
-		assertThat(codeSystemVersion.getCodeSystemVersionId()).isEqualTo("2021");
+		assertEquals("2021", codeSystemVersion.getCodeSystemVersionId());
 	}
 
 	@Test
 	public void testLoadIcd10CmCheckRootConcepts() {
 		List<TermConcept> rootConcepts = new ArrayList<>(codeSystemVersion.getConcepts());
 		assertThat(rootConcepts).hasSize(4);
-		assertThat(rootConcepts.get(0).getCode()).isEqualTo("A00");
-		assertThat(rootConcepts.get(0).getDisplay()).isEqualTo("Cholera");
+		assertEquals("A00", rootConcepts.get(0).getCode());
+		assertEquals("Cholera", rootConcepts.get(0).getDisplay());
 		List<String> conceptNames = rootConcepts.stream().map(t -> t.getCode()).collect(Collectors.toList());
 		assertThat(conceptNames).as(conceptNames.toString()).containsExactly("A00", "A01", "H40", "R40");
 	}
@@ -48,8 +49,8 @@ public class Icd10CmLoaderTest {
 		List<TermConcept> rootConcepts = new ArrayList<>(codeSystemVersion.getConcepts());
 		assertThat(rootConcepts.get(0).getChildCodes()).hasSize(3);
 		TermConcept firstChildCode = rootConcepts.get(0).getChildCodes().get(0);
-		assertThat(firstChildCode.getCode()).isEqualTo("A00.0");
-		assertThat(firstChildCode.getDisplay()).isEqualTo("Cholera due to Vibrio cholerae 01, biovar cholerae");
+		assertEquals("A00.0", firstChildCode.getCode());
+		assertEquals("Cholera due to Vibrio cholerae 01, biovar cholerae", firstChildCode.getDisplay());
 		List<String> conceptNames = rootConcepts.get(0).getChildCodes().stream().map(t -> t.getCode()).collect(Collectors.toList());
 		assertThat(conceptNames).as(conceptNames.toString()).containsExactly("A00.0", "A00.1", "A00.9");
 	}
@@ -62,12 +63,12 @@ public class Icd10CmLoaderTest {
 		assertThat(conceptNames).as(conceptNames.toString()).containsExactly("H40.40", "H40.40X0", "H40.40X1", "H40.40X2", "H40.40X3", "H40.40X4", "H40.41", "H40.41X0", "H40.41X1", "H40.41X2", "H40.41X3", "H40.41X4");
 
 		TermConcept ExtendedChildCode = rootConcepts.get(2).getChildCodes().get(0).getChildCodes().get(1);
-		assertThat(ExtendedChildCode.getCode()).isEqualTo("H40.40X0");
-		assertThat(ExtendedChildCode.getDisplay()).isEqualTo("Glaucoma secondary to eye inflammation, unspecified eye, stage unspecified");
+		assertEquals("H40.40X0", ExtendedChildCode.getCode());
+		assertEquals("Glaucoma secondary to eye inflammation, unspecified eye, stage unspecified", ExtendedChildCode.getDisplay());
 
 
 		ExtendedChildCode = rootConcepts.get(3).getChildCodes().get(0).getChildCodes().get(0).getChildCodes().get(0).getChildCodes().get(0).getChildCodes().get(0).getChildCodes().get(3);
-		assertThat(ExtendedChildCode.getCode()).isEqualTo("R40.2112");
-		assertThat(ExtendedChildCode.getDisplay()).isEqualTo("Coma scale, eyes open, never, at arrival to emergency department");
+		assertEquals("R40.2112", ExtendedChildCode.getCode());
+		assertEquals("Coma scale, eyes open, never, at arrival to emergency department", ExtendedChildCode.getDisplay());
 	}
 }

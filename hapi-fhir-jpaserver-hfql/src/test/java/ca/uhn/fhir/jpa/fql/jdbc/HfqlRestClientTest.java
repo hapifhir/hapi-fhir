@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.fql.jdbc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
@@ -123,30 +124,30 @@ public class HfqlRestClientTest {
 		IHfqlExecutionResult.Row nextRow;
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
-		assertThat(nextRow.getRowOffset()).isEqualTo(0);
+		assertEquals(0, nextRow.getRowOffset());
 		assertThat(nextRow.getRowValues()).containsExactly("Simpson", "Homer");
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
-		assertThat(nextRow.getRowOffset()).isEqualTo(3);
+		assertEquals(3, nextRow.getRowOffset());
 		assertThat(nextRow.getRowValues()).containsExactly("Simpson", "Marge");
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
-		assertThat(nextRow.getRowOffset()).isEqualTo(5);
+		assertEquals(5, nextRow.getRowOffset());
 		assertThat(nextRow.getRowValues()).containsExactly("Simpson", "Maggie");
 		assertTrue(result.hasNext());
 		nextRow = result.getNextRow();
-		assertThat(nextRow.getRowOffset()).isEqualTo(7);
+		assertEquals(7, nextRow.getRowOffset());
 		assertThat(nextRow.getRowValues()).containsExactly("Simpson", "Lisa");
 		assertFalse(result.hasNext());
 
 		verify(myFqlExecutor, times(1)).executeInitialSearch(myStatementCaptor.capture(), myLimitCaptor.capture(), myRequestDetailsCaptor.capture());
-		assertThat(myStatementCaptor.getValue()).isEqualTo(sql);
+		assertEquals(sql, myStatementCaptor.getValue());
 		String expectedAuthHeader = Constants.HEADER_AUTHORIZATION_VALPREFIX_BASIC + Base64Utils.encodeToString((USERNAME + ":" + PASSWORD).getBytes(StandardCharsets.UTF_8));
 
 
 		String actual = ourHeaderCaptureInterceptor.getCapturedHeaders().get(0).get(Constants.HEADER_AUTHORIZATION).get(0);
-		assertThat(actual).isEqualTo(expectedAuthHeader);
-		assertThat(myLimitCaptor.getValue().intValue()).isEqualTo(123);
+		assertEquals(expectedAuthHeader, actual);
+		assertEquals(123, myLimitCaptor.getValue().intValue());
 	}
 
 	@Nonnull

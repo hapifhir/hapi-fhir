@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model.primitive;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -12,7 +13,7 @@ public class UriDtTest {
 	@Test
 	public void testFromOid() {
 		UriDt uri = UriDt.fromOid("0.1.2.3.4");
-		assertThat(uri.getValue()).isEqualTo("urn:oid:0.1.2.3.4");
+		assertEquals("urn:oid:0.1.2.3.4", uri.getValue());
 	}
 	
 	@Test
@@ -24,11 +25,11 @@ public class UriDtTest {
 	@Test
 	public void testEqualsObject() {
 		UriDt dt = new UriDt("http://example.com/foo");
-		assertThat(dt).isEqualTo(dt);
+		assertEquals(dt, dt);
 		assertFalse(dt.equals(null));
 		assertThat(new UriDt()).isNotEqualTo(dt);
-		assertThat(new UriDt("http://example.com/foo")).isEqualTo(dt);
-		assertThat(new UriDt("http://example.com/foo/")).isEqualTo(dt);
+		assertEquals(dt, new UriDt("http://example.com/foo"));
+		assertEquals(dt, new UriDt("http://example.com/foo/"));
 		assertThat(new UriDt("http://blah.com/foo/")).isNotEqualTo(dt);
 		assertThat(new StringDt("http://example.com/foo")).isNotEqualTo(dt);
 	}
@@ -42,10 +43,10 @@ public class UriDtTest {
 	@Test
 	public void testHashCode() {
 		UriDt dt = new UriDt("http://example.com/foo");
-		assertThat(dt.hashCode()).isEqualTo(-1671329151);
+		assertEquals(-1671329151, dt.hashCode());
 		
 		dt = new UriDt();
-		assertThat(dt.hashCode()).isEqualTo(31);
+		assertEquals(31, dt.hashCode());
 
 	}
 
@@ -53,7 +54,7 @@ public class UriDtTest {
 	public void testSetInvalid() {
 		UriDt dt = new UriDt();
 		dt.setValue("blah : // AA");
-		assertThat(dt.hashCode()).isEqualTo(-1078724630);
+		assertEquals(-1078724630, dt.hashCode());
 	}
 
 }

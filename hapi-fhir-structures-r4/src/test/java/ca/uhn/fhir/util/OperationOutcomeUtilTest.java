@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
@@ -33,7 +34,7 @@ public class OperationOutcomeUtilTest {
 		OperationOutcomeUtil.addLocationToIssue(myCtx, issue, null);
 		OperationOutcomeUtil.addLocationToIssue(myCtx, issue, "");
 		OperationOutcomeUtil.addLocationToIssue(myCtx, issue, "line 3");
-		assertThat(myCtx.newJsonParser().encodeResourceToString(oo)).isEqualTo("{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"throttled\",\"diagnostics\":\"Help i'm a bug\",\"location\":[\"/Patient\",\"line 3\"]}]}");
+		assertEquals("{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"throttled\",\"diagnostics\":\"Help i'm a bug\",\"location\":[\"/Patient\",\"line 3\"]}]}", myCtx.newJsonParser().encodeResourceToString(oo));
 	}
 
 	@Test

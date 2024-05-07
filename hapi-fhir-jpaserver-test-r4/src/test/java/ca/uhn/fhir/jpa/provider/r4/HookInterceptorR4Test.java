@@ -65,9 +65,9 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Response reflects change, stored resource also does
 		Patient responsePatient = (Patient) outcome.getResource();
-		assertThat(responsePatient.getNameFirstRep().getFamily()).isEqualTo("NEWFAMILY");
+		assertEquals("NEWFAMILY", responsePatient.getNameFirstRep().getFamily());
 		responsePatient = myClient.read().resource(Patient.class).withId(outcome.getId()).execute();
-		assertThat(responsePatient.getNameFirstRep().getFamily()).isEqualTo("NEWFAMILY");
+		assertEquals("NEWFAMILY", responsePatient.getNameFirstRep().getFamily());
 
 	}
 
@@ -84,9 +84,9 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Response reflects change, stored resource does not
 		Patient responsePatient = (Patient) outcome.getResource();
-		assertThat(responsePatient.getNameFirstRep().getFamily()).isEqualTo("NEWFAMILY");
+		assertEquals("NEWFAMILY", responsePatient.getNameFirstRep().getFamily());
 		responsePatient = myClient.read().resource(Patient.class).withId(outcome.getId()).execute();
-		assertThat(responsePatient.getNameFirstRep().getFamily()).isEqualTo("OLDFAMILY");
+		assertEquals("OLDFAMILY", responsePatient.getNameFirstRep().getFamily());
 
 	}
 
@@ -146,7 +146,7 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 			.withParameters(parameters)
 			.execute();
 
-		assertThat(pid.get()).isEqualTo(savedPatientPid.longValue());
+		assertEquals(savedPatientPid.longValue(), pid.get());
 	}
 
 
@@ -219,9 +219,9 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Response reflects change, stored resource also does
 		Patient responsePatient = (Patient) outcome.getResource();
-		assertThat(responsePatient.getNameFirstRep().getFamily()).isEqualTo("NEWFAMILY");
+		assertEquals("NEWFAMILY", responsePatient.getNameFirstRep().getFamily());
 		responsePatient = myClient.read().resource(Patient.class).withId(outcome.getId()).execute();
-		assertThat(responsePatient.getNameFirstRep().getFamily()).isEqualTo("NEWFAMILY");
+		assertEquals("NEWFAMILY", responsePatient.getNameFirstRep().getFamily());
 
 	}
 
@@ -243,9 +243,9 @@ public class HookInterceptorR4Test extends BaseResourceProviderR4Test {
 
 		// Response reflects change, stored resource does not
 		Patient responsePatient = (Patient) outcome.getResource();
-		assertThat(responsePatient.getNameFirstRep().getFamily()).isEqualTo("NEWFAMILY");
+		assertEquals("NEWFAMILY", responsePatient.getNameFirstRep().getFamily());
 		responsePatient = myClient.read().resource(Patient.class).withId(outcome.getId()).execute();
-		assertThat(responsePatient.getNameFirstRep().getFamily()).isEqualTo("OLDFAMILY");
+		assertEquals("OLDFAMILY", responsePatient.getNameFirstRep().getFamily());
 
 	}
 

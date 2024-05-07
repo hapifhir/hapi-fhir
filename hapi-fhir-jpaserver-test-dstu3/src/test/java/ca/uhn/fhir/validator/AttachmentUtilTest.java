@@ -1,5 +1,6 @@
 package ca.uhn.fhir.validator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.util.AttachmentUtil;
@@ -26,7 +27,7 @@ public class AttachmentUtilTest {
 		org.hl7.fhir.dstu3.model.Observation obs = new org.hl7.fhir.dstu3.model.Observation();
 		obs.setValue((org.hl7.fhir.dstu3.model.Type) attachment);
 		String encoded = ctx.newJsonParser().encodeResourceToString(obs);
-		assertThat(encoded).isEqualTo("{\"resourceType\":\"Observation\",\"valueAttachment\":{\"contentType\":\"text/plain\",\"data\":\"AAECAw==\",\"url\":\"http://foo\",\"size\":123}}");
+		assertEquals("{\"resourceType\":\"Observation\",\"valueAttachment\":{\"contentType\":\"text/plain\",\"data\":\"AAECAw==\",\"url\":\"http://foo\",\"size\":123}}", encoded);
 	}
 
 	@Test
@@ -41,7 +42,7 @@ public class AttachmentUtilTest {
 		org.hl7.fhir.r4.model.Communication communication = new org.hl7.fhir.r4.model.Communication();
 		communication.addPayload().setContent((org.hl7.fhir.r4.model.Type) attachment);
 		String encoded = ctx.newJsonParser().encodeResourceToString(communication);
-		assertThat(encoded).isEqualTo("{\"resourceType\":\"Communication\",\"payload\":[{\"contentAttachment\":{\"contentType\":\"text/plain\",\"data\":\"AAECAw==\",\"url\":\"http://foo\",\"size\":123}}]}");
+		assertEquals("{\"resourceType\":\"Communication\",\"payload\":[{\"contentAttachment\":{\"contentType\":\"text/plain\",\"data\":\"AAECAw==\",\"url\":\"http://foo\",\"size\":123}}]}", encoded);
 	}
 
 	@Test
@@ -56,7 +57,7 @@ public class AttachmentUtilTest {
 		org.hl7.fhir.r5.model.Communication communication = new org.hl7.fhir.r5.model.Communication();
 		communication.addPayload().setContent((org.hl7.fhir.r5.model.DataType) attachment);
 		String encoded = ctx.newJsonParser().encodeResourceToString(communication);
-		assertThat(encoded).isEqualTo("{\"resourceType\":\"Communication\",\"payload\":[{\"contentAttachment\":{\"contentType\":\"text/plain\",\"data\":\"AAECAw==\",\"url\":\"http://foo\",\"size\":123}}]}");
+		assertEquals("{\"resourceType\":\"Communication\",\"payload\":[{\"contentAttachment\":{\"contentType\":\"text/plain\",\"data\":\"AAECAw==\",\"url\":\"http://foo\",\"size\":123}}]}", encoded);
 	}
 
 	@Test

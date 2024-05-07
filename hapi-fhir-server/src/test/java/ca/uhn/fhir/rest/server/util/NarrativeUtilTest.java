@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -23,7 +24,7 @@ public class NarrativeUtilTest {
 	})
 	public void testValidateIsCaseInsensitive(String theHtml, String theExpected) {
 		String output = NarrativeUtil.sanitizeHtmlFragment(fixNull(theHtml));
-		assertThat(fixNull(output)).isEqualTo(fixNull(theExpected));
+		assertEquals(fixNull(theExpected), fixNull(output));
 	}
 
 	private String fixNull(String theExpected) {

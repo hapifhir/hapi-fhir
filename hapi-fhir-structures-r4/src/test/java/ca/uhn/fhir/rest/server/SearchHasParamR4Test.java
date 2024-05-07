@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -56,14 +57,14 @@ public class SearchHasParamR4Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourLastMethod).isEqualTo("search");
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("search", ourLastMethod);
 		
 		HasParam param = ourLastParam.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0);
-		assertThat(param.getTargetResourceType()).isEqualTo("Encounter");
-		assertThat(param.getReferenceFieldName()).isEqualTo("patient");
-		assertThat(param.getParameterName()).isEqualTo("type");
-		assertThat(param.getParameterValue()).isEqualTo("SURG");
+		assertEquals("Encounter", param.getTargetResourceType());
+		assertEquals("patient", param.getReferenceFieldName());
+		assertEquals("type", param.getParameterName());
+		assertEquals("SURG", param.getParameterValue());
 	}
 
 	@AfterAll

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.parser.LenientErrorHandler;
@@ -25,7 +26,7 @@ public class TolerantJsonParserR4Test {
 		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		Observation obs = parser.parseResource(Observation.class, input);
 
-		assertThat(obs.getValueQuantity().getValueElement().getValueAsString()).isEqualTo("0.5");
+		assertEquals("0.5", obs.getValueQuantity().getValueElement().getValueAsString());
 	}
 
 	@Test
@@ -41,7 +42,7 @@ public class TolerantJsonParserR4Test {
 		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		Observation obs = parser.parseResource(Observation.class, input);
 
-		assertThat(obs.getValueQuantity().getValueElement().getValueAsString()).isEqualTo("0.5");
+		assertEquals("0.5", obs.getValueQuantity().getValueElement().getValueAsString());
 	}
 
 	@Test
@@ -57,7 +58,7 @@ public class TolerantJsonParserR4Test {
 		TolerantJsonParser parser = new TolerantJsonParser(myFhirContext, new LenientErrorHandler(), 123L);
 		Observation obs = parser.parseResource(Observation.class, input);
 
-		assertThat(obs.getValueQuantity().getValueElement().getValueAsString()).isEqualTo("0");
+		assertEquals("0", obs.getValueQuantity().getValueElement().getValueAsString());
 	}
 
 	@Test

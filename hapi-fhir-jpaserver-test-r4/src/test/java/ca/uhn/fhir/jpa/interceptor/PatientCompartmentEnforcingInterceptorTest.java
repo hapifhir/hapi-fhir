@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
@@ -67,7 +68,7 @@ public class PatientCompartmentEnforcingInterceptorTest extends BaseResourceProv
 		obs.getSubject().setReference("Patient/B");
 
 		InternalErrorException thrown = assertThrows(InternalErrorException.class, () -> myObservationDao.update(obs, new SystemRequestDetails()));
-		assertThat(thrown.getMessage()).isEqualTo("HAPI-2476: Resource compartment changed. Was a referenced Patient changed?");
+		assertEquals("HAPI-2476: Resource compartment changed. Was a referenced Patient changed?", thrown.getMessage());
 	}
 
 	@Test

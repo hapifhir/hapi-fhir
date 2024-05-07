@@ -521,8 +521,8 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 				.andParameter("valueSetVersion", new StringType("3"))
 				.execute();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getStatusCode()).isEqualTo(404);
-			assertThat(e.getMessage()).isEqualTo("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3");
+			assertEquals(404, e.getStatusCode());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3", e.getMessage());
 		}
 	}
 
@@ -605,8 +605,8 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 				.andParameter("valueSetVersion", new StringType("3"))
 				.execute();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getStatusCode()).isEqualTo(404);
-			assertThat(e.getMessage()).isEqualTo("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3");
+			assertEquals(404, e.getStatusCode());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3", e.getMessage());
 		}
 	}
 
@@ -1097,21 +1097,21 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
 			TermValueSetConcept concept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration v2", 2);
-			assertThat(concept.getSystemVersion()).isEqualTo("2");
+			assertEquals("2", concept.getSystemVersion());
 			assertTermConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
 			assertTermConceptContainsDesignation(concept, "sv", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systoliskt blodtryck - utgång");
 
 			TermValueSetConcept termValueSetConcept1 = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter v2", 0);
-			assertThat(termValueSetConcept1.getSystemVersion()).isEqualTo("2");
+			assertEquals("2", termValueSetConcept1.getSystemVersion());
 
 			// ...
 
 			TermValueSetConcept otherConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum v2", 1);
-			assertThat(otherConcept.getSystemVersion()).isEqualTo("2");
+			assertEquals("2", otherConcept.getSystemVersion());
 			assertTermConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
 
 			TermValueSetConcept termValueSetConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum v2", 0);
-			assertThat(termValueSetConcept.getSystemVersion()).isEqualTo("2");
+			assertEquals("2", termValueSetConcept.getSystemVersion());
 		});
 	}
 

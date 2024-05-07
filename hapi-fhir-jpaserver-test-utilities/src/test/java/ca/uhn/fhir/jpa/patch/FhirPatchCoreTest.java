@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.patch;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -40,7 +41,7 @@ public class FhirPatchCoreTest extends BaseTest {
 
 			String expected = theContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(myOutput);
 			String actual = theContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(myInput);
-			assertThat(actual).isEqualTo(expected);
+			assertEquals(expected, actual);
 
 		} else {
 			fail("", "Unknown mode: " + myMode);

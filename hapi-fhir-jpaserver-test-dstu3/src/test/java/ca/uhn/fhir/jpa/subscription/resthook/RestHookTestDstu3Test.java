@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -198,8 +199,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		String databaseCriteria = "Observation?code=17861-6&context.type=IHD";
 		Subscription subscription = createSubscription(databaseCriteria, null, ourNotificationListenerServer);
 		List<Coding> tag = subscription.getMeta().getTag();
-		assertThat(tag.get(0).getSystem()).isEqualTo(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY);
-		assertThat(tag.get(0).getCode()).isEqualTo(SubscriptionMatchingStrategy.DATABASE.toString());
+		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
+		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.get(0).getCode());
 	}
 
 	@Test
@@ -208,8 +209,8 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		Subscription subscription = createSubscription(inMemoryCriteria, null, ourNotificationListenerServer);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(subscription));
 		List<Coding> tag = subscription.getMeta().getTag();
-		assertThat(tag.get(0).getSystem()).isEqualTo(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY);
-		assertThat(tag.get(0).getCode()).isEqualTo(SubscriptionMatchingStrategy.IN_MEMORY.toString());
+		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.get(0).getSystem());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.get(0).getCode());
 	}
 	@Test
 	public void testForcedInMemoryPreventsDatabaseSubscriptions() throws InterruptedException {
@@ -262,24 +263,24 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Should see 1 subscription notification with authorization header
 		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
-		assertThat(ourNotificationServlet.getReceivedNotificationCount()).isEqualTo(1);
-		assertThat(ourNotificationServlet.getReceivedAuthorizationHeaders().get(0)).isEqualTo("abc-def");
+		assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
 		ourNotificationServlet.reset();
 
 		sendObservation(code, "SNOMED-CT");
 
 		// Should see 1 subscription notification with authorization header
 		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
-		assertThat(ourNotificationServlet.getReceivedNotificationCount()).isEqualTo(1);
-		assertThat(ourNotificationServlet.getReceivedAuthorizationHeaders().get(0)).isEqualTo("abc-def");
+		assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
 		ourNotificationServlet.reset();
 
 		Observation observationTemp3 = sendObservation(code, "SNOMED-CT");
 
 		/// Should see 1 subscription notification with authorization header
 		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
-		assertThat(ourNotificationServlet.getReceivedNotificationCount()).isEqualTo(1);
-		assertThat(ourNotificationServlet.getReceivedAuthorizationHeaders().get(0)).isEqualTo("abc-def");
+		assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
+		assertEquals("abc-def", ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
 		ourNotificationServlet.reset();
 
 		Observation observation3 = myClient.read(Observation.class, observationTemp3.getId());
@@ -292,7 +293,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// Should see 2 subscription notifications with and without authorization header
 		waitForSize(1, ourNotificationServlet.getReceivedAuthorizationHeaders());
-		assertThat(ourNotificationServlet.getReceivedNotificationCount()).isEqualTo(1);
+		assertEquals(1, ourNotificationServlet.getReceivedNotificationCount());
 		assertNull(ourNotificationServlet.getReceivedAuthorizationHeaders().get(0));
 		ourNotificationServlet.reset();
 	}
@@ -314,7 +315,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
-		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
 
 
@@ -341,7 +342,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
-		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
 
 	@Test
@@ -361,7 +362,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
-		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 
 		// Modify subscription 2 to also match
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
@@ -438,7 +439,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
-		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_XML_NEW);
+		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 
 		// Modify subscription 2 to also match
 		Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
@@ -517,7 +518,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		waitForQueueToDrain();
 		waitForSize(0, ourCreatedObservations);
 		waitForSize(1, ourUpdatedObservations);
-		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_XML_NEW);
+		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
 	@Test
@@ -549,7 +550,7 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 			createSubscription(criteria1, payload, ourListenerServerBase);
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 422 Unprocessable Entity: " + Msg.code(9) + "Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT " + Msg.code(488) + "Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee");
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(9) + "Invalid subscription criteria submitted: Observation?codeeeee=SNOMED-CT " + Msg.code(488) + "Failed to parse match URL[Observation?codeeeee=SNOMED-CT] - Resource type Observation does not have a parameter with name: codeeeee", e.getMessage());
 		}
 	}
 
@@ -567,19 +568,19 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		Subscription subscriptionOrig = createSubscription(criteria1, payload, ourListenerServerBase);
 		IdType subscriptionId = subscriptionOrig.getIdElement();
 
-		assertThat(subscriptionOrig.getStatus()).isEqualTo(Subscription.SubscriptionStatus.REQUESTED);
+		assertEquals(Subscription.SubscriptionStatus.REQUESTED, subscriptionOrig.getStatus());
 		List<Coding> tags = subscriptionOrig.getMeta().getTag();
 		assertThat(tags).hasSize(1);
 		Coding tag = tags.get(0);
-		assertThat(tag.getSystem()).isEqualTo(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY);
-		assertThat(tag.getCode()).isEqualTo(SubscriptionMatchingStrategy.IN_MEMORY.toString());
-		assertThat(tag.getDisplay()).isEqualTo("In-memory");
+		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.getCode());
+		assertEquals("In-memory", tag.getDisplay());
 
 		// Wait for subscription to be moved to active
 		await().until(() -> Subscription.SubscriptionStatus.ACTIVE.equals(myClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute().getStatus()));
 
 		Subscription subscriptionActivated = myClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
-		assertThat(subscriptionActivated.getStatus()).isEqualTo(Subscription.SubscriptionStatus.ACTIVE);
+		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscriptionActivated.getStatus());
 		assertInMemoryTag(subscriptionActivated);
 	}
 
@@ -589,9 +590,9 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		tags = theSubscription.getMeta().getTag();
 		assertThat(tags).hasSize(1);
 		tag = tags.get(0);
-		assertThat(tag.getSystem()).isEqualTo(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY);
-		assertThat(tag.getCode()).isEqualTo(SubscriptionMatchingStrategy.IN_MEMORY.toString());
-		assertThat(tag.getDisplay()).isEqualTo("In-memory");
+		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY.toString(), tag.getCode());
+		assertEquals("In-memory", tag.getDisplay());
 	}
 
 	@Test
@@ -604,21 +605,21 @@ public class RestHookTestDstu3Test extends BaseResourceProviderDstu3Test {
 		List<Coding> tags = subscriptionOrig.getMeta().getTag();
 		assertThat(tags).hasSize(1);
 		Coding tag = tags.get(0);
-		assertThat(tag.getSystem()).isEqualTo(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY);
-		assertThat(tag.getCode()).isEqualTo(SubscriptionMatchingStrategy.DATABASE.toString());
-		assertThat(tag.getDisplay()).isEqualTo("Database");
+		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
+		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.getCode());
+		assertEquals("Database", tag.getDisplay());
 
 		// Wait for subscription to be moved to active
 		await().until(() -> Subscription.SubscriptionStatus.ACTIVE.equals(myClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute().getStatus()));
 
 		Subscription subscription = myClient.read().resource(Subscription.class).withId(subscriptionId.toUnqualifiedVersionless()).execute();
-		assertThat(subscription.getStatus()).isEqualTo(Subscription.SubscriptionStatus.ACTIVE);
+		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscription.getStatus());
 		tags = subscription.getMeta().getTag();
 		assertThat(tags).hasSize(1);
 		tag = tags.get(0);
-		assertThat(tag.getSystem()).isEqualTo(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY);
-		assertThat(tag.getCode()).isEqualTo(SubscriptionMatchingStrategy.DATABASE.toString());
-		assertThat(tag.getDisplay()).isEqualTo("Database");
+		assertEquals(HapiExtensions.EXT_SUBSCRIPTION_MATCHING_STRATEGY, tag.getSystem());
+		assertEquals(SubscriptionMatchingStrategy.DATABASE.toString(), tag.getCode());
+		assertEquals("Database", tag.getDisplay());
 	}
 
 	@Test

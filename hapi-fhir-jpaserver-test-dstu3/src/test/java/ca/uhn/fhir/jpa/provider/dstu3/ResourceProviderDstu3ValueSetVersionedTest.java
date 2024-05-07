@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -566,8 +567,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 				.andParameter("valueSetVersion", new StringType("3"))
 				.execute();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getStatusCode()).isEqualTo(404);
-			assertThat(e.getMessage()).isEqualTo("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3");
+			assertEquals(404, e.getStatusCode());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3", e.getMessage());
 		}
 	}
 
@@ -647,8 +648,8 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 				.andParameter("valueSetVersion", new StringType("3"))
 				.execute();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getStatusCode()).isEqualTo(404);
-			assertThat(e.getMessage()).isEqualTo("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3");
+			assertEquals(404, e.getStatusCode());
+			assertEquals("HTTP 404 Not Found: HAPI-2024: Unknown ValueSet: http%3A%2F%2Fwww.healthintersections.com.au%2Ffhir%2FValueSet%2Fextensional-case-2%7C3", e.getMessage());
 		}
 	}
 
@@ -1081,10 +1082,10 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertThat(termValueSet).isSameAs(optionalValueSetByResourcePid.get());
 			ourLog.info("ValueSet:\n" + termValueSet.toString());
-			assertThat(termValueSet.getUrl()).isEqualTo("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
-			assertThat(termValueSet.getName()).isEqualTo(theValueSetName);
-			assertThat(termValueSet.getConcepts().size()).isEqualTo(0);
-			assertThat(termValueSet.getExpansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
+			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
+			assertEquals(theValueSetName, termValueSet.getName());
+			assertEquals(0, termValueSet.getConcepts().size());
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
 		});
 	}
 
@@ -1099,10 +1100,10 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertThat(termValueSet).isSameAs(optionalValueSetByResourcePid.get());
 			ourLog.info("ValueSet:\n" + termValueSet.toString());
-			assertThat(termValueSet.getUrl()).isEqualTo("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
-			assertThat(termValueSet.getName()).isEqualTo(theValueSetName);
-			assertThat(termValueSet.getConcepts().size()).isEqualTo(theCodeSystem.getConcept().size());
-			assertThat(termValueSet.getExpansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
+			assertEquals(theValueSetName, termValueSet.getName());
+			assertEquals(theCodeSystem.getConcept().size(), termValueSet.getConcepts().size());
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
 			TermValueSetConcept concept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration", 2);
 			assertTermConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
@@ -1132,27 +1133,27 @@ public class ResourceProviderDstu3ValueSetVersionedTest extends BaseResourceProv
 			TermValueSet termValueSet = optionalValueSetByUrl.get();
 			assertThat(termValueSet).isSameAs(optionalValueSetByResourcePid.get());
 			ourLog.info("ValueSet:\n" + termValueSet.toString());
-			assertThat(termValueSet.getUrl()).isEqualTo("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
-			assertThat(termValueSet.getName()).isEqualTo(theValueSetName);
-			assertThat(termValueSet.getConcepts().size()).isEqualTo(theCodeSystem.getConcept().size());
-			assertThat(termValueSet.getExpansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertEquals("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", termValueSet.getUrl());
+			assertEquals(theValueSetName, termValueSet.getName());
+			assertEquals(theCodeSystem.getConcept().size(), termValueSet.getConcepts().size());
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 
 			TermValueSetConcept concept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8450-9", "Systolic blood pressure--expiration v2", 2);
-			assertThat(concept.getSystemVersion()).isEqualTo("2");
+			assertEquals("2", concept.getSystemVersion());
 			assertTermConceptContainsDesignation(concept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk - expiratie");
 			assertTermConceptContainsDesignation(concept, "sv", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systoliskt blodtryck - utgång");
 
 			TermValueSetConcept termValueSetConcept1 = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "11378-7", "Systolic blood pressure at First encounter v2", 0);
-			assertThat(termValueSetConcept1.getSystemVersion()).isEqualTo("2");
+			assertEquals("2", termValueSetConcept1.getSystemVersion());
 
 			// ...
 
 			TermValueSetConcept otherConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8491-3", "Systolic blood pressure 1 hour minimum v2", 1);
-			assertThat(otherConcept.getSystemVersion()).isEqualTo("2");
+			assertEquals("2", otherConcept.getSystemVersion());
 			assertTermConceptContainsDesignation(otherConcept, "nl", "http://snomed.info/sct", "900000000000013009", "Synonym", "Systolische bloeddruk minimaal 1 uur");
 
 			TermValueSetConcept termValueSetConcept = assertTermValueSetContainsConceptAndIsInDeclaredOrder(termValueSet, "http://acme.org", "8492-1", "Systolic blood pressure 8 hour minimum v2", 0);
-			assertThat(termValueSetConcept.getSystemVersion()).isEqualTo("2");
+			assertEquals("2", termValueSetConcept.getSystemVersion());
 		});
 	}
 

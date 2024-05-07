@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
@@ -153,7 +154,7 @@ public class WriteBinaryStepTest {
 		RunOutcome outcome = myFinalStep.run(input, sink);
 
 		// verify
-		assertThat(outcome.getRecordsProcessed()).isEqualTo(new RunOutcome(stringified.size()).getRecordsProcessed());
+		assertEquals(new RunOutcome(stringified.size()).getRecordsProcessed(), outcome.getRecordsProcessed());
 
 		ArgumentCaptor<IBaseBinary> binaryCaptor = ArgumentCaptor.forClass(IBaseBinary.class);
 		ArgumentCaptor<SystemRequestDetails> binaryDaoCreateRequestDetailsCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
@@ -164,13 +165,13 @@ public class WriteBinaryStepTest {
 		String expected = String.join("\n", stringified) + "\n";
 		assertThat(outputString).as(outputString + " != " + expected).isEqualTo(expected);
 		if (thePartitioned) {
-			assertThat(binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId()).isEqualTo(getPartitionId(thePartitioned));
+			assertEquals(getPartitionId(thePartitioned), binaryDaoCreateRequestDetailsCaptor.getValue().getRequestPartitionId());
 		}
 
 		ArgumentCaptor<BulkExportBinaryFileId> fileIdArgumentCaptor = ArgumentCaptor.forClass(BulkExportBinaryFileId.class);
 		verify(sink)
 			.accept(fileIdArgumentCaptor.capture());
-		assertThat(fileIdArgumentCaptor.getValue().getBinaryId()).isEqualTo(binaryId.getValueAsString());
+		assertEquals(binaryId.getValueAsString(), fileIdArgumentCaptor.getValue().getBinaryId());
 	}
 
 	@Test

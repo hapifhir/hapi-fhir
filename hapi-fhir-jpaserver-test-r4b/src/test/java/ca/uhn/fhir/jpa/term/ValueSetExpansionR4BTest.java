@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.jpa.dao.r4b.BaseJpaR4BTest;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -32,9 +33,9 @@ public class ValueSetExpansionR4BTest extends BaseJpaR4BTest {
 
 		// check valueSet and codeSystem versions
 		String expectedCodeSystemVersion = "4.3.0";
-		assertThat(taskCodeCs.getVersion()).isEqualTo(expectedCodeSystemVersion);
-		assertThat(taskCodeVs.getVersion()).isEqualTo(expectedCodeSystemVersion);
-		assertThat(taskCodeVs.getCompose().getInclude().get(0).getVersion()).isEqualTo(expectedCodeSystemVersion);
+		assertEquals(expectedCodeSystemVersion, taskCodeCs.getVersion());
+		assertEquals(expectedCodeSystemVersion, taskCodeVs.getVersion());
+		assertEquals(expectedCodeSystemVersion, taskCodeVs.getCompose().getInclude().get(0).getVersion());
 
 		myCodeSystemDao.create(taskCodeCs);
 		IIdType id = myValueSetDao.create(taskCodeVs).getId();
@@ -44,7 +45,7 @@ public class ValueSetExpansionR4BTest extends BaseJpaR4BTest {
 		// check expansion size and include CodeSystem version
 		assertThat(expandedValueSet.getExpansion().getContains()).hasSize(7);
 		assertThat(expandedValueSet.getCompose().getInclude()).hasSize(1);
-		assertThat(expandedValueSet.getCompose().getInclude().get(0).getVersion()).isEqualTo(expectedCodeSystemVersion);
+		assertEquals(expectedCodeSystemVersion, expandedValueSet.getCompose().getInclude().get(0).getVersion());
 	}
 
 	private IBaseResource findResourceByFullUrlInBundle(Bundle thebundle, String theFullUrl) {

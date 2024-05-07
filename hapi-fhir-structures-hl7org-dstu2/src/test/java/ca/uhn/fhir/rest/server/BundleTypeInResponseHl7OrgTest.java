@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -41,13 +42,13 @@ public class BundleTypeInResponseHl7OrgTest {
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent());
     IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
     ourLog.info(responseContent);
 
 		org.hl7.fhir.dstu2.model.Bundle bundle = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
-		assertThat(bundle.getType()).isEqualTo(BundleType.SEARCHSET);
+		assertEquals(BundleType.SEARCHSET, bundle.getType());
   }
 
   public static class DummyPatientResourceProvider implements IResourceProvider {

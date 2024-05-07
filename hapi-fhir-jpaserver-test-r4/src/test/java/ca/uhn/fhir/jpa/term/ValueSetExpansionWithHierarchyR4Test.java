@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -102,7 +103,7 @@ public class ValueSetExpansionWithHierarchyR4Test extends BaseTermR4Test {
       Optional<TermValueSet> optionalTermValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(theValueSet.getUrl()));
 		 assertThat(optionalTermValueSet).isPresent();
       TermValueSet expandedTermValueSet = optionalTermValueSet.get();
-	   assertThat(expandedTermValueSet.getExpansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED);
-	   assertThat(expandedTermValueSet.getTotalConcepts()).isEqualTo(theExpectedConceptExpansionCount);
+	   assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, expandedTermValueSet.getExpansionStatus());
+	   assertEquals(theExpectedConceptExpansionCount, expandedTermValueSet.getTotalConcepts());
    }
 }

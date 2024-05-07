@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.coordinator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -106,7 +107,7 @@ public class ReductionStepDataSinkTest {
 		myDataSink.accept(chunkData);
 
 		// verify
-		assertThat(instance.getReport()).isEqualTo(JsonUtil.serialize(stepData, false));
+		assertEquals(JsonUtil.serialize(stepData, false), instance.getReport());
 	}
 
 	@Test

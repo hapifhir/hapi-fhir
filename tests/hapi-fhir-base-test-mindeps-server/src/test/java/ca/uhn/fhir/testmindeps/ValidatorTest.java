@@ -1,5 +1,6 @@
 package ca.uhn.fhir.testmindeps;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,7 +25,7 @@ public class ValidatorTest {
 		try {
 			val.validateWithResult(new Patient());
 			fail("");		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1829) + "This parser is for FHIR version DSTU2 - Can not encode a structure for version DSTU3");
+			assertEquals(Msg.code(1829) + "This parser is for FHIR version DSTU2 - Can not encode a structure for version DSTU3", e.getMessage());
 		}
 
 		// Ph-Schematron is not onthe classpath
@@ -34,7 +35,7 @@ public class ValidatorTest {
 		try {
 			val.setValidateAgainstStandardSchematron(true);
 			fail("");		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1970) + "Ph-schematron library not found on classpath, can not enable perform schematron validation");
+			assertEquals(Msg.code(1970) + "Ph-schematron library not found on classpath, can not enable perform schematron validation", e.getMessage());
 		}
 
 	}

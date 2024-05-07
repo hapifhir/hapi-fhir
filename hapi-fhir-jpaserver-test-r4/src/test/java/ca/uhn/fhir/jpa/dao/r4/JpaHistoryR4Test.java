@@ -54,11 +54,11 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		// Simulate the server actually loading the resources
 		history.getResources(0, 10);
 
-		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		// Resource query happens but not count query
-		assertThat(myCaptureQueriesListener.countSelectQueries()).isEqualTo(1);
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT)).doesNotStartWith("select count");
 
 	}
@@ -84,15 +84,15 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		IBundleProvider history = myPatientDao.history(null, null, null, new SystemRequestDetails());
 
 		// Simulate the server requesting the Bundle.total value
-		assertThat(history.sizeOrThrowNpe()).isEqualTo(20);
+		assertEquals(20, history.sizeOrThrowNpe());
 
 		// Simulate the server actually loading the resources
 		history.getResources(0, 10);
 
-		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countSelectQueries()).isEqualTo(2);
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT)).startsWith("select count");
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false).toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
 
@@ -104,15 +104,15 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		history = myPatientDao.history(null, null, null, new SystemRequestDetails());
 
 		// Simulate the server requesting the Bundle.total value
-		assertThat(history.sizeOrThrowNpe()).isEqualTo(20);
+		assertEquals(20, history.sizeOrThrowNpe());
 
 		// Simulate the server actually loading the resources
 		history.getResources(0, 10);
 
-		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countSelectQueries()).isEqualTo(2);
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT)).startsWith("select count");
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false).toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
 
@@ -130,15 +130,15 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		IBundleProvider history = myPatientDao.history(null, null, null, new SystemRequestDetails());
 
 		// Simulate the server requesting the Bundle.total value
-		assertThat(history.sizeOrThrowNpe()).isEqualTo(20);
+		assertEquals(20, history.sizeOrThrowNpe());
 
 		// Simulate the server actually loading the resources
 		history.getResources(0, 10);
 
-		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countSelectQueries()).isEqualTo(2);
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logSelectQueries(false, false);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT)).startsWith("select count");
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false).toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
@@ -152,15 +152,15 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		history = myPatientDao.history(null, null, null, new SystemRequestDetails());
 
 		// Simulate the server requesting the Bundle.total value
-		assertThat(history.sizeOrThrowNpe()).isEqualTo(20);
+		assertEquals(20, history.sizeOrThrowNpe());
 
 		// Simulate the server actually loading the resources
 		history.getResources(0, 10);
 
-		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countSelectQueries()).isEqualTo(1);
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logSelectQueries(false, false);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
 		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
@@ -185,10 +185,10 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		// Simulate the server actually loading the resources
 		assertThat(history.getResources(0, 999)).hasSize(20);
 
-		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countSelectQueries()).isEqualTo(1);
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT)).doesNotStartWith("select count");
 
 	}
@@ -205,16 +205,16 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		IBundleProvider history = mySystemDao.history(null, null, null, new SystemRequestDetails());
 
 		// Simulate the server requesting the Bundle.total value
-		assertThat(history.sizeOrThrowNpe()).isEqualTo(20);
+		assertEquals(20, history.sizeOrThrowNpe());
 
 		// Simulate the server actually loading the resources
 		history.getResources(0, 10);
 
-		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 		myCaptureQueriesListener.logSelectQueries(false, false);
-		assertThat(myCaptureQueriesListener.countSelectQueries()).isEqualTo(2);
+		assertEquals(2, myCaptureQueriesListener.countSelectQueries());
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT)).startsWith("select count");
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(1).getSql(false, false).toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
 		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
@@ -227,15 +227,15 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		history = mySystemDao.history(null, null, null, new SystemRequestDetails());
 
 		// Simulate the server requesting the Bundle.total value
-		assertThat(history.sizeOrThrowNpe()).isEqualTo(20);
+		assertEquals(20, history.sizeOrThrowNpe());
 
 		// Simulate the server actually loading the resources
 		history.getResources(0, 10);
 
-		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countSelectQueries()).isEqualTo(1);
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(1, myCaptureQueriesListener.countSelectQueries());
 		myCaptureQueriesListener.logSelectQueries(false, false);
 		assertThat(myCaptureQueriesListener.getSelectQueries().get(0).getSql(false, false).toLowerCase(Locale.ROOT)).contains(" from hfj_res_ver ");
 		runInTransaction(() -> assertEquals(0, mySearchEntityDao.count()));
@@ -251,7 +251,7 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 		try {
 			Runnable task = () -> {
 				IBundleProvider history = mySystemDao.history(null, null, null, new SystemRequestDetails());
-				assertThat(history.sizeOrThrowNpe()).isEqualTo(20);
+				assertEquals(20, history.sizeOrThrowNpe());
 				assertThat(history.getResources(0, 999)).hasSize(20);
 			};
 			List<Future<?>> futures = new ArrayList<>();
@@ -267,13 +267,13 @@ public class JpaHistoryR4Test extends BaseJpaR4SystemTest {
 			threadPool.shutdown();
 		}
 
-		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
 
 		// We fetch the history resources 20 times, but should only fetch the
 		// count(*) once, for a total of 21
-		assertThat(myCaptureQueriesListener.countSelectQueries()).isEqualTo(20 + 1);
+		assertEquals(20 + 1, myCaptureQueriesListener.countSelectQueries());
 
 	}
 

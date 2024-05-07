@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.dao.data.IBatch2JobInstanceRepository;
 import ca.uhn.fhir.jpa.entity.Batch2JobInstanceEntity;
@@ -50,10 +51,10 @@ public class Batch2JobInstanceRepositoryTest extends BaseJpaR4Test {
 			myBatch2JobInstanceRepository.findById(jobId).orElseThrow());
 		if (theExpectedSuccessFlag) {
 			assertThat(changeCount).as("The change happened").isEqualTo(1);
-			assertThat(readBack.getStatus()).isEqualTo(theTargetState);
+			assertEquals(theTargetState, readBack.getStatus());
 		} else {
 			assertThat(changeCount).as("The change did not happened").isEqualTo(0);
-			assertThat(readBack.getStatus()).isEqualTo(theCurrentState);
+			assertEquals(theCurrentState, readBack.getStatus());
 		}
 
 	}

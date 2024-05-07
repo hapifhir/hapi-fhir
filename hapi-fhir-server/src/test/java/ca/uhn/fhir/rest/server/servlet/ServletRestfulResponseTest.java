@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.servlet;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,9 +57,9 @@ public class ServletRestfulResponseTest {
 
 	@Test
 	public void testSanitizeHeaderField() {
-		assertThat(ServletRestfulResponse.sanitizeHeaderField("A\nB")).isEqualTo("AB");
-		assertThat(ServletRestfulResponse.sanitizeHeaderField("A\r\r\rB")).isEqualTo("AB");
-		assertThat(ServletRestfulResponse.sanitizeHeaderField("AB")).isEqualTo("AB");
+		assertEquals("AB", ServletRestfulResponse.sanitizeHeaderField("A\nB"));
+		assertEquals("AB", ServletRestfulResponse.sanitizeHeaderField("A\r\r\rB"));
+		assertEquals("AB", ServletRestfulResponse.sanitizeHeaderField("AB"));
 	}
 
 }

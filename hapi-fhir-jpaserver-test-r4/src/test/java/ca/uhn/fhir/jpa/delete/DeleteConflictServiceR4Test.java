@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.delete;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -64,11 +65,11 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 			myOrganizationDao.delete(organizationId);
 			fail("");
 		} catch (ResourceVersionConflictException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(550) + Msg.code(515) + "Unable to delete Organization/" + organizationId.getIdPart() + " because at least one resource has a reference to this resource. First reference found was resource Patient/" + patientId.getIdPart() + " in path Patient.managingOrganization");
+			assertEquals(Msg.code(550) + Msg.code(515) + "Unable to delete Organization/" + organizationId.getIdPart() + " because at least one resource has a reference to this resource. First reference found was resource Patient/" + patientId.getIdPart() + " in path Patient.managingOrganization", e.getMessage());
 		}
-		assertThat(myDeleteInterceptor.myDeleteConflictList.size()).isEqualTo(1);
-		assertThat(myDeleteInterceptor.myCallCount).isEqualTo(1);
-		assertThat(myInterceptorDeleteCount).isEqualTo(0);
+		assertEquals(1, myDeleteInterceptor.myDeleteConflictList.size());
+		assertEquals(1, myDeleteInterceptor.myCallCount);
+		assertEquals(0, myInterceptorDeleteCount);
 		myPatientDao.delete(patientId);
 		myOrganizationDao.delete(organizationId);
 	}
@@ -87,8 +88,8 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		myOrganizationDao.delete(organizationId);
 
 		assertNotNull(myDeleteInterceptor.myDeleteConflictList);
-		assertThat(myDeleteInterceptor.myCallCount).isEqualTo(1);
-		assertThat(myInterceptorDeleteCount).isEqualTo(1);
+		assertEquals(1, myDeleteInterceptor.myCallCount);
+		assertEquals(1, myInterceptorDeleteCount);
 	}
 
 	@Test
@@ -109,8 +110,8 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		myOrganizationDao.delete(organizationId);
 
 		assertNotNull(myDeleteInterceptor.myDeleteConflictList);
-		assertThat(myDeleteInterceptor.myCallCount).isEqualTo(2);
-		assertThat(myInterceptorDeleteCount).isEqualTo(2);
+		assertEquals(2, myDeleteInterceptor.myCallCount);
+		assertEquals(2, myInterceptorDeleteCount);
 	}
 
 	@Test
@@ -135,8 +136,8 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		myOrganizationDao.delete(organizationId);
 
 		assertNotNull(myDeleteInterceptor.myDeleteConflictList);
-		assertThat(myDeleteInterceptor.myCallCount).isEqualTo(2);
-		assertThat(myInterceptorDeleteCount).isEqualTo(3);
+		assertEquals(2, myDeleteInterceptor.myCallCount);
+		assertEquals(3, myInterceptorDeleteCount);
 	}
 
 	@Test
@@ -161,7 +162,7 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 			// Needs a fourth and final pass to ensure that all conflicts are now gone.
 			fail("");
 		} catch (ResourceVersionConflictException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(550) + Msg.code(821) + DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG);
+			assertEquals(Msg.code(550) + Msg.code(821) + DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, e.getMessage());
 		}
 
 		// Try again with Maximum conflict count set to 6.
@@ -176,8 +177,8 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 		}
 
 		assertNotNull(myDeleteInterceptor.myDeleteConflictList);
-		assertThat(myDeleteInterceptor.myCallCount).isEqualTo(3);
-		assertThat(myInterceptorDeleteCount).isEqualTo(12);
+		assertEquals(3, myDeleteInterceptor.myCallCount);
+		assertEquals(12, myInterceptorDeleteCount);
 
 	}
 
@@ -198,9 +199,9 @@ public class DeleteConflictServiceR4Test extends BaseJpaR4Test {
 			myOrganizationDao.delete(organizationId);
 			fail("");
 		} catch (ResourceVersionConflictException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(550) + Msg.code(821) + DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG);
+			assertEquals(Msg.code(550) + Msg.code(821) + DeleteConflictService.MAX_RETRY_ATTEMPTS_EXCEEDED_MSG, e.getMessage());
 		}
-		assertThat(myDeleteInterceptor.myCallCount).isEqualTo(1 + DeleteConflictService.MAX_RETRY_ATTEMPTS);
+		assertEquals(1 + DeleteConflictService.MAX_RETRY_ATTEMPTS, myDeleteInterceptor.myCallCount);
 	}
 
 	@Test

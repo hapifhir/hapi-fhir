@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.model.primitive.IdDt;
 import com.google.common.collect.Lists;
@@ -30,11 +31,11 @@ public class RuleBuilderTest {
 
 		assertThat(list).hasSize(2);
 
-		assertThat(list.get(0).getClass()).isEqualTo(RuleImplOp.class);
+		assertEquals(RuleImplOp.class, list.get(0).getClass());
 		RuleImplOp allowRead = (RuleImplOp) list.get(0);
 		assertThat(allowRead.getAppliesToInstances()).containsExactly(new IdDt("Patient/READ-1"), new IdDt("Patient/READ-2"), new IdDt("Patient/READ-3"), new IdDt("Patient/READ-4"));
 
-		assertThat(list.get(1).getClass()).isEqualTo(RuleImplOp.class);
+		assertEquals(RuleImplOp.class, list.get(1).getClass());
 		RuleImplOp allowWrite = (RuleImplOp) list.get(1);
 		assertThat(allowWrite.getAppliesToInstances()).containsExactly(new IdDt("Patient/WRITE-1"), new IdDt("Patient/WRITE-2"), new IdDt("Patient/WRITE-3"), new IdDt("Patient/WRITE-4"));
 	}
@@ -48,7 +49,7 @@ public class RuleBuilderTest {
 
 		assertThat(list).hasSize(1);
 
-		assertThat(list.get(0).getClass()).isEqualTo(RuleImplOp.class);
+		assertEquals(RuleImplOp.class, list.get(0).getClass());
 	}
 
 	@Test
@@ -60,7 +61,7 @@ public class RuleBuilderTest {
 
 		assertThat(list).hasSize(2);
 
-		assertThat(list.get(0).getClass()).isEqualTo(RuleImplOp.class);
+		assertEquals(RuleImplOp.class, list.get(0).getClass());
 	}
 
 	@Test
@@ -85,7 +86,7 @@ public class RuleBuilderTest {
 		builder.allow().bulkExport().patientExportOnPatient("Patient/pat1").withResourceTypes(resourceTypes);
 		builder.allow().bulkExport().patientExportOnPatient("Patient/pat2").withResourceTypes(resourceTypes);
 		List<IAuthRule> rules = builder.build();
-		assertThat(1).isEqualTo(rules.size());
+		assertEquals(rules.size(), 1);
 		assertTrue(rules.get(0) instanceof RuleBulkExportImpl);
 	}
 

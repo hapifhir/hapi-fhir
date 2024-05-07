@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.packages.PackageInstallationSpec;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -80,7 +81,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 				.sorted()
 				.collect(Collectors.toList());
 			ourLog.info("System ops: {}", opNames);
-			assertThat(opNames).isEqualTo(opNames.stream().distinct().sorted().collect(Collectors.toList()));
+			assertEquals(opNames.stream().distinct().sorted().collect(Collectors.toList()), opNames);
 		}
 	}
 
@@ -96,7 +97,7 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 			.sorted()
 			.collect(Collectors.toList());
 		ourLog.info("System ops: {}", systemOpNames);
-		assertThat(systemOpNames).isEqualTo(systemOpNames.stream().distinct().sorted().collect(Collectors.toList()));
+		assertEquals(systemOpNames.stream().distinct().sorted().collect(Collectors.toList()), systemOpNames);
 	}
 
 	@Test
@@ -118,10 +119,10 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 
 		List<CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent> fooSearchParams = findSearchParams(cs, "Patient", "foo");
 		assertThat(fooSearchParams).hasSize(1);
-		assertThat(fooSearchParams.get(0).getName()).isEqualTo("foo");
-		assertThat(fooSearchParams.get(0).getDefinition()).isEqualTo("http://acme.com/foo");
-		assertThat(fooSearchParams.get(0).getDocumentation()).isEqualTo("This is a search param!");
-		assertThat(fooSearchParams.get(0).getType()).isEqualTo(Enumerations.SearchParamType.TOKEN);
+		assertEquals("foo", fooSearchParams.get(0).getName());
+		assertEquals("http://acme.com/foo", fooSearchParams.get(0).getDefinition());
+		assertEquals("This is a search param!", fooSearchParams.get(0).getDocumentation());
+		assertEquals(Enumerations.SearchParamType.TOKEN, fooSearchParams.get(0).getType());
 
 	}
 
@@ -131,10 +132,10 @@ public class ServerCapabilityStatementProviderJpaR4Test extends BaseResourceProv
 
 		List<CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent> fooSearchParams = findSearchParams(cs, "Patient", "_lastUpdated");
 		assertThat(fooSearchParams).hasSize(1);
-		assertThat(fooSearchParams.get(0).getName()).isEqualTo("_lastUpdated");
-		assertThat(fooSearchParams.get(0).getDefinition()).isEqualTo("http://hl7.org/fhir/SearchParameter/Resource-lastUpdated");
-		assertThat(fooSearchParams.get(0).getDocumentation()).isEqualTo("When the resource version last changed");
-		assertThat(fooSearchParams.get(0).getType()).isEqualTo(Enumerations.SearchParamType.DATE);
+		assertEquals("_lastUpdated", fooSearchParams.get(0).getName());
+		assertEquals("http://hl7.org/fhir/SearchParameter/Resource-lastUpdated", fooSearchParams.get(0).getDefinition());
+		assertEquals("When the resource version last changed", fooSearchParams.get(0).getDocumentation());
+		assertEquals(Enumerations.SearchParamType.DATE, fooSearchParams.get(0).getType());
 
 	}
 

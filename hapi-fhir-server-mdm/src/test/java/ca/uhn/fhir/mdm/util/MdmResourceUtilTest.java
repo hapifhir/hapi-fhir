@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import org.hl7.fhir.r4.model.Coding;
@@ -24,7 +25,7 @@ class MdmResourceUtilTest {
 
 		boolean hasGoldenRecordTag = MdmResourceUtil.hasGoldenRecordSystemTag(organization);
 
-		assertThat(hasGoldenRecordTag).isEqualTo(false);
+		assertEquals(false, hasGoldenRecordTag);
 	}
 
 	@Test
@@ -46,7 +47,7 @@ class MdmResourceUtilTest {
 		codes.add(MdmConstants.CODE_GOLDEN_RECORD);
 		assertThat(tags).hasSize(2);
 		for (Coding code : tags) {
-			assertThat(code.getSystem()).isEqualTo(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS);
+			assertEquals(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, code.getSystem());
 			assertThat(codes).contains(code.getCode());
 		}
 	}

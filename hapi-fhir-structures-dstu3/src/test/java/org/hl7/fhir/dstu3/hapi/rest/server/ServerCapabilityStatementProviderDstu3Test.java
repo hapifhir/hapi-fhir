@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.hapi.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -150,7 +151,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
-				assertThat(param.getDescription()).isEqualTo("The organization at which this person is a patient");
+				assertEquals("The organization at which this person is a patient", param.getDescription());
 				found = true;
 			}
 		}
@@ -164,7 +165,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		assertThat(resource.getSearchParam()).hasSize(1);
 		CapabilityStatementRestResourceSearchParamComponent param = resource.getSearchParam().get(0);
-		assertThat(param.getName()).isEqualTo("organization");
+		assertEquals("organization", param.getName());
 
 //		assertEquals("bar", param.getChain().get(0).getValue());
 //		assertEquals("baz.bob", param.getChain().get(1).getValue());
@@ -188,10 +189,10 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		ourLog.info(conf);
 
 		CapabilityStatementRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
-		assertThat(res.getType()).isEqualTo("Patient");
+		assertEquals("Patient", res.getType());
 
 		assertTrue(res.getConditionalCreate());
-		assertThat(res.getConditionalDelete()).isEqualTo(ConditionalDeleteStatus.MULTIPLE);
+		assertEquals(ConditionalDeleteStatus.MULTIPLE, res.getConditionalDelete());
 		assertTrue(res.getConditionalUpdate());
 	}
 
@@ -232,14 +233,14 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		ourLog.info(conf);
 
 		assertThat(conformance.getRest().get(0).getOperation()).hasSize(1);
-		assertThat(conformance.getRest().get(0).getOperation().get(0).getName()).isEqualTo("everything");
+		assertEquals("everything", conformance.getRest().get(0).getOperation().get(0).getName());
 
 		OperationDefinition opDef = sc.readOperationDefinition(new IdType("OperationDefinition/Patient-i-everything"), createRequestDetails(rs));
 		validate(opDef);
-		assertThat(opDef.getCode()).isEqualTo("everything");
-		assertThat(opDef.getSystem()).isEqualTo(false);
-		assertThat(opDef.getType()).isEqualTo(false);
-		assertThat(opDef.getInstance()).isEqualTo(true);
+		assertEquals("everything", opDef.getCode());
+		assertEquals(false, opDef.getSystem());
+		assertEquals(false, opDef.getType());
+		assertEquals(true, opDef.getInstance());
 	}
 
 	@Test
@@ -260,8 +261,8 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		String conf = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef);
 		ourLog.info(conf);
 
-		assertThat(opDef.getCode()).isEqualTo("everything");
-		assertThat(opDef.getIdempotent()).isEqualTo(true);
+		assertEquals("everything", opDef.getCode());
+		assertEquals(true, opDef.getIdempotent());
 	}
 
 	@Test
@@ -301,7 +302,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().iterator().next();
-				assertThat(param.getDescription()).isEqualTo("The patient's identifier");
+				assertEquals("The patient's identifier", param.getDescription());
 				found = true;
 			}
 		}
@@ -332,7 +333,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		ourLog.info(conf);
 
 		CapabilityStatementRestResourceComponent res = conformance.getRest().get(0).getResource().get(1);
-		assertThat(res.getType()).isEqualTo("Patient");
+		assertEquals("Patient", res.getType());
 
 		assertNull(res.getConditionalCreateElement().getValue());
 		assertNull(res.getConditionalDeleteElement().getValue());
@@ -369,14 +370,14 @@ public class ServerCapabilityStatementProviderDstu3Test {
 			validate(opDef);
 			ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(opDef));
 			Set<String> types = toStrings(opDef.getResource());
-			assertThat(opDef.getCode()).isEqualTo("someOp");
-			assertThat(opDef.getInstance()).isEqualTo(true);
-			assertThat(opDef.getSystem()).isEqualTo(false);
+			assertEquals("someOp", opDef.getCode());
+			assertEquals(true, opDef.getInstance());
+			assertEquals(false, opDef.getSystem());
 			assertThat(types).containsExactlyInAnyOrder("Patient", "Encounter");
 			assertThat(opDef.getParameter()).hasSize(2);
-			assertThat(opDef.getParameter().get(0).getName()).isEqualTo("someOpParam1");
-			assertThat(opDef.getParameter().get(0).getType()).isEqualTo("date");
-			assertThat(opDef.getParameter().get(1).getName()).isEqualTo("someOpParam2");
+			assertEquals("someOpParam1", opDef.getParameter().get(0).getName());
+			assertEquals("date", opDef.getParameter().get(0).getType());
+			assertEquals("someOpParam2", opDef.getParameter().get(1).getName());
 		}
 	}
 	
@@ -417,17 +418,17 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		CapabilityStatementRestComponent rest = conformance.getRest().get(0);
 		CapabilityStatementRestResourceComponent res = rest.getResource().get(0);
-		assertThat(res.getType()).isEqualTo("DiagnosticReport");
+		assertEquals("DiagnosticReport", res.getType());
 
-		assertThat(res.getSearchParam().get(0).getName()).isEqualTo(DiagnosticReport.SP_SUBJECT);
+		assertEquals(DiagnosticReport.SP_SUBJECT, res.getSearchParam().get(0).getName());
 //		assertEquals("identifier", res.getSearchParam().get(0).getChain().get(0).getValue());
 
-		assertThat(res.getSearchParam().get(1).getName()).isEqualTo(DiagnosticReport.SP_CODE);
+		assertEquals(DiagnosticReport.SP_CODE, res.getSearchParam().get(1).getName());
 
-		assertThat(res.getSearchParam().get(2).getName()).isEqualTo(DiagnosticReport.SP_DATE);
+		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(2).getName());
 
 		assertThat(res.getSearchInclude()).hasSize(1);
-		assertThat(res.getSearchInclude().get(0).getValue()).isEqualTo("DiagnosticReport.result");
+		assertEquals("DiagnosticReport.result", res.getSearchInclude().get(0).getValue());
 	}
 
 	@Test
@@ -447,17 +448,17 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		CapabilityStatementRestComponent rest = conformance.getRest().get(0);
 		CapabilityStatementRestResourceComponent res = rest.getResource().get(0);
-		assertThat(res.getType()).isEqualTo("DiagnosticReport");
+		assertEquals("DiagnosticReport", res.getType());
 
-		assertThat(res.getSearchParam().get(0).getName()).isEqualTo(DiagnosticReport.SP_SUBJECT);
+		assertEquals(DiagnosticReport.SP_SUBJECT, res.getSearchParam().get(0).getName());
 //		assertEquals("identifier", res.getSearchParam().get(0).getChain().get(0).getValue());
 
-		assertThat(res.getSearchParam().get(1).getName()).isEqualTo(DiagnosticReport.SP_CODE);
+		assertEquals(DiagnosticReport.SP_CODE, res.getSearchParam().get(1).getName());
 
-		assertThat(res.getSearchParam().get(2).getName()).isEqualTo(DiagnosticReport.SP_DATE);
+		assertEquals(DiagnosticReport.SP_DATE, res.getSearchParam().get(2).getName());
 
 		assertThat(res.getSearchInclude()).hasSize(1);
-		assertThat(res.getSearchInclude().get(0).getValue()).isEqualTo("DiagnosticReport.result");
+		assertEquals("DiagnosticReport.result", res.getSearchInclude().get(0).getValue());
 	}
 
 	@Test
@@ -558,7 +559,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(25);
-				assertThat(param.getDescription()).isEqualTo("The organization at which this person is a patient");
+				assertEquals("The organization at which this person is a patient", param.getDescription());
 				found = true;
 			}
 		}
@@ -591,7 +592,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 				List<BaseMethodBinding> methodBindings = resourceBinding.getMethodBindings();
 				SearchMethodBinding binding = (SearchMethodBinding) methodBindings.get(0);
 				SearchParameter param = (SearchParameter) binding.getParameters().get(0);
-				assertThat(param.getDescription()).isEqualTo("The organization at which this person is a patient");
+				assertEquals("The organization at which this person is a patient", param.getDescription());
 				found = true;
 			}
 		}
@@ -646,7 +647,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		String confWithType = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(conformanceWithType);
 		ourLog.info(confWithType);
 
-		assertThat(confWithType).isEqualTo(confNoType);
+		assertEquals(confNoType, confWithType);
 		assertThat(confNoType).contains("<date value=\"2011-02-22T11:22:33Z\"/>");
 	}
 
@@ -722,7 +723,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		CapabilityStatementRestComponent restComponent = conformance.getRest().get(0);
 		CapabilityStatementRestOperationComponent operationComponent = restComponent.getOperation().get(0);
-		assertThat(operationComponent.getName()).isEqualTo(NamedQueryPlainProvider.QUERY_NAME);
+		assertEquals(NamedQueryPlainProvider.QUERY_NAME, operationComponent.getName());
 
 		String operationReference = operationComponent.getDefinition().getReference();
 		assertNotNull(operationReference);
@@ -730,25 +731,25 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		OperationDefinition operationDefinition = sc.readOperationDefinition(new IdType(operationReference), createRequestDetails(rs));
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(operationDefinition));
 		validate(operationDefinition);
-		assertThat(operationDefinition.getCode()).isEqualTo(NamedQueryPlainProvider.QUERY_NAME);
+		assertEquals(NamedQueryPlainProvider.QUERY_NAME, operationDefinition.getCode());
 		assertThat(operationDefinition.getName()).as("The operation name should be the description, if a description is set").isEqualTo(NamedQueryPlainProvider.DESCRIPTION);
-		assertThat(operationDefinition.getStatus()).isEqualTo(PublicationStatus.ACTIVE);
-		assertThat(operationDefinition.getKind()).isEqualTo(OperationKind.QUERY);
-		assertThat(operationDefinition.getDescription()).isEqualTo(NamedQueryPlainProvider.DESCRIPTION);
-		assertThat(operationDefinition.getIdempotent()).isEqualTo(true);
+		assertEquals(PublicationStatus.ACTIVE, operationDefinition.getStatus());
+		assertEquals(OperationKind.QUERY, operationDefinition.getKind());
+		assertEquals(NamedQueryPlainProvider.DESCRIPTION, operationDefinition.getDescription());
+		assertEquals(true, operationDefinition.getIdempotent());
 		assertThat(operationDefinition.getResource()).as("A system level search has no target resources").isEmpty();
-		assertThat(operationDefinition.getSystem()).isEqualTo(true);
-		assertThat(operationDefinition.getType()).isEqualTo(false);
-		assertThat(operationDefinition.getInstance()).isEqualTo(false);
+		assertEquals(true, operationDefinition.getSystem());
+		assertEquals(false, operationDefinition.getType());
+		assertEquals(false, operationDefinition.getInstance());
 		List<OperationDefinitionParameterComponent> parameters = operationDefinition.getParameter();
 		assertThat(parameters).hasSize(1);
 		OperationDefinitionParameterComponent param = parameters.get(0);
-		assertThat(param.getName()).isEqualTo(NamedQueryPlainProvider.SP_QUANTITY);
-		assertThat(param.getType()).isEqualTo("string");
-		assertThat(param.getSearchTypeElement().asStringValue()).isEqualTo(RestSearchParameterTypeEnum.QUANTITY.getCode());
-		assertThat(param.getMin()).isEqualTo(1);
-		assertThat(param.getMax()).isEqualTo("1");
-		assertThat(param.getUse()).isEqualTo(OperationParameterUse.IN);
+		assertEquals(NamedQueryPlainProvider.SP_QUANTITY, param.getName());
+		assertEquals("string", param.getType());
+		assertEquals(RestSearchParameterTypeEnum.QUANTITY.getCode(), param.getSearchTypeElement().asStringValue());
+		assertEquals(1, param.getMin());
+		assertEquals("1", param.getMax());
+		assertEquals(OperationParameterUse.IN, param.getUse());
 	}
 
 	@Test
@@ -775,18 +776,18 @@ public class ServerCapabilityStatementProviderDstu3Test {
 		assertThat(operationDefinition.getName()).as("The operation name should be the code if no description is set").isEqualTo(NamedQueryResourceProvider.QUERY_NAME);
 		String patientResourceName = "Patient";
 		assertThat(operationDefinition.getResource().get(0).getValue()).as("A resource level search targets the resource of the provider it's defined in").isEqualTo(patientResourceName);
-		assertThat(operationDefinition.getSystem()).isEqualTo(false);
-		assertThat(operationDefinition.getType()).isEqualTo(true);
-		assertThat(operationDefinition.getInstance()).isEqualTo(false);
+		assertEquals(false, operationDefinition.getSystem());
+		assertEquals(true, operationDefinition.getType());
+		assertEquals(false, operationDefinition.getInstance());
 		List<OperationDefinitionParameterComponent> parameters = operationDefinition.getParameter();
 		assertThat(parameters).hasSize(1);
 		OperationDefinitionParameterComponent param = parameters.get(0);
-		assertThat(param.getName()).isEqualTo(NamedQueryResourceProvider.SP_PARAM);
-		assertThat(param.getType()).isEqualTo("string");
-		assertThat(param.getSearchTypeElement().asStringValue()).isEqualTo(RestSearchParameterTypeEnum.STRING.getCode());
-		assertThat(param.getMin()).isEqualTo(0);
-		assertThat(param.getMax()).isEqualTo("1");
-		assertThat(param.getUse()).isEqualTo(OperationParameterUse.IN);
+		assertEquals(NamedQueryResourceProvider.SP_PARAM, param.getName());
+		assertEquals("string", param.getType());
+		assertEquals(RestSearchParameterTypeEnum.STRING.getCode(), param.getSearchTypeElement().asStringValue());
+		assertEquals(0, param.getMin());
+		assertEquals("1", param.getMax());
+		assertEquals(OperationParameterUse.IN, param.getUse());
 
 		CapabilityStatementRestResourceComponent patientResource = restComponent.getResource().stream()
 				.filter(r -> patientResourceName.equals(r.getType()))
@@ -811,14 +812,14 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		List<CapabilityStatementRestOperationComponent> operations = conformance.getRest().get(0).getOperation();
 		assertThat(operations).hasSize(1);
-		assertThat(operations.get(0).getName()).isEqualTo(TypeLevelOperationProvider.OPERATION_NAME);
+		assertEquals(TypeLevelOperationProvider.OPERATION_NAME, operations.get(0).getName());
 
 		OperationDefinition opDef = sc.readOperationDefinition(new IdType(operations.get(0).getDefinition().getReference()), createRequestDetails(rs));
 		validate(opDef);
-		assertThat(opDef.getCode()).isEqualTo(TypeLevelOperationProvider.OPERATION_NAME);
-		assertThat(opDef.getSystem()).isEqualTo(false);
-		assertThat(opDef.getType()).isEqualTo(true);
-		assertThat(opDef.getInstance()).isEqualTo(false);
+		assertEquals(TypeLevelOperationProvider.OPERATION_NAME, opDef.getCode());
+		assertEquals(false, opDef.getSystem());
+		assertEquals(true, opDef.getType());
+		assertEquals(false, opDef.getInstance());
 	}
 
     @Test
@@ -856,7 +857,7 @@ public class ServerCapabilityStatementProviderDstu3Test {
 
 		// then
 		String instantiatesFirstRepValue = conformance.getInstantiates().get(0).getValue();
-		assertThat(instantiatesFirstRepValue).isEqualTo(Constants.BULK_DATA_ACCESS_IG_URL);
+		assertEquals(Constants.BULK_DATA_ACCESS_IG_URL, instantiatesFirstRepValue);
 	}
 
 	private List<String> toOperationIdParts(List<CapabilityStatementRestOperationComponent> theOperation) {

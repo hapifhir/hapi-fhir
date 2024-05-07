@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.validation.fields;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -59,7 +60,7 @@ class FieldValidatingInterceptorTest {
 		person.addTelecom().setSystem(ContactPoint.ContactPointSystem.EMAIL).setValue("EMAIL");
 
 		myInterceptor.handleRequest(request, person);
-		assertThat(person.getTelecom().get(0).getValue()).isEqualTo("EMAIL");
+		assertEquals("EMAIL", person.getTelecom().get(0).getValue());
 	}
 
 	@Test
@@ -88,11 +89,11 @@ class FieldValidatingInterceptorTest {
 
 		ContactPoint invalidEmail = person.getTelecomFirstRep();
 		assertTrue(invalidEmail.hasExtension());
-		assertThat(invalidEmail.getExtensionString(IValidator.VALIDATION_EXTENSION_URL)).isEqualTo("true");
+		assertEquals("true", invalidEmail.getExtensionString(IValidator.VALIDATION_EXTENSION_URL));
 
 		ContactPoint validEmail = person.getTelecom().get(1);
 		assertTrue(validEmail.hasExtension());
-		assertThat(validEmail.getExtensionString(IValidator.VALIDATION_EXTENSION_URL)).isEqualTo("false");
+		assertEquals("false", validEmail.getExtensionString(IValidator.VALIDATION_EXTENSION_URL));
 	}
 
 	@Test

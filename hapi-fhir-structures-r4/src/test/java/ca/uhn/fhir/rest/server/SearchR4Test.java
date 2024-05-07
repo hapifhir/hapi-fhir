@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -98,9 +99,9 @@ public class SearchR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
-			assertThat(ct).isEqualTo(theExpectEncoding);
+			assertEquals(theExpectEncoding, ct);
 			bundle = ct.newParser(myCtx).parseResource(Bundle.class, responseContent);
 			validate(bundle);
 		}
@@ -116,7 +117,7 @@ public class SearchR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, status.getStatusLine().getStatusCode());
 			assertThat(responseContent).contains("not know how to handle GET operation[Patient] with parameters [[_getpages]]");
 		}
 	}
@@ -130,8 +131,8 @@ public class SearchR4Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&" + Constants.PARAM_SUMMARY + "=" + SummaryEnum.COUNT.getCode());
 		Bundle bundle = executeSearch(httpGet, EncodingEnum.JSON);
 		ourLog.info(toJson(bundle));
-		assertThat(bundle.getTotal()).isEqualTo(200);
-		assertThat(bundle.getType().toCode()).isEqualTo("searchset");
+		assertEquals(200, bundle.getTotal());
+		assertEquals("searchset", bundle.getType().toCode());
 		assertThat(bundle.getEntry()).isEmpty();
 	}
 
@@ -227,7 +228,7 @@ public class SearchR4Test {
 		Bundle bundle;
 		try (CloseableHttpResponse status = ourClient.execute(theHttpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			bundle = myCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 		}
 		return bundle;
@@ -405,12 +406,12 @@ public class SearchR4Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			validate(myCtx.newJsonParser().parseResource(responseContent));
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 
-			assertThat(ourLastMethod).isEqualTo("search");
+			assertEquals("search", ourLastMethod);
 
-			assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("foo");
-			assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("bar");
+			assertEquals("foo", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
+			assertEquals("bar", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 		}
 
 	}
@@ -419,7 +420,7 @@ public class SearchR4Test {
 	public void testRequestIdGeneratedAndReturned() throws Exception {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
 			assertThat(requestId).matches("[a-zA-Z0-9]{16}");
 		}
@@ -430,7 +431,7 @@ public class SearchR4Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
 		httpGet.addHeader(Constants.HEADER_REQUEST_ID, "help im a bug");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
 			assertThat(requestId).matches("help im a bug");
 		}
@@ -441,7 +442,7 @@ public class SearchR4Test {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
 		httpGet.addHeader(Constants.HEADER_REQUEST_ID, "help i'm a bug");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
 			assertThat(requestId).matches("[a-zA-Z0-9]{16}");
 		}
@@ -453,10 +454,10 @@ public class SearchR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, status.getStatusLine().getStatusCode());
 
 			OperationOutcome oo = (OperationOutcome) myCtx.newJsonParser().parseResource(responseContent);
-			assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)");
+			assertEquals(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)", oo.getIssueFirstRep().getDiagnostics());
 		}
 
 	}

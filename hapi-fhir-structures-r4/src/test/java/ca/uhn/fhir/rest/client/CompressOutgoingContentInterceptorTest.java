@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -48,9 +49,9 @@ public class CompressOutgoingContentInterceptorTest {
 
 		client.create().resource(p).execute();
 
-		assertThat(p.getName().get(0).getFamily()).isEqualTo("FAMILY");
-		assertThat(ourLastReq).isEqualTo("gzip");
-		assertThat(ourLastResponseEncoding).isEqualTo("gzip");
+		assertEquals("FAMILY", p.getName().get(0).getFamily());
+		assertEquals("gzip", ourLastReq);
+		assertEquals("gzip", ourLastResponseEncoding);
 	}
 
 

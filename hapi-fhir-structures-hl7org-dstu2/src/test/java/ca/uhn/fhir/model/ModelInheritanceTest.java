@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -122,7 +123,7 @@ public class ModelInheritanceTest {
 
   @Test
   public void testList() {
-		assertThat(ourCtx.getResourceDefinition(List_.class).getName()).isEqualTo("List");
+		assertEquals("List", ourCtx.getResourceDefinition(List_.class).getName());
   }
 
   @Test
@@ -148,10 +149,10 @@ public class ModelInheritanceTest {
 
   @Test
   public void testProfiledDatatype() {
-		assertThat(CodeType.class.getSuperclass()).isEqualTo(StringType.class);
-		assertThat(CodeType.class.getAnnotation(DatatypeDef.class).profileOf()).isEqualTo(StringType.class);
-		assertThat(Money.class.getSuperclass()).isEqualTo(Quantity.class);
-		assertThat(Money.class.getAnnotation(DatatypeDef.class).profileOf()).isEqualTo(Quantity.class);
+		assertEquals(StringType.class, CodeType.class.getSuperclass());
+		assertEquals(StringType.class, CodeType.class.getAnnotation(DatatypeDef.class).profileOf());
+		assertEquals(Quantity.class, Money.class.getSuperclass());
+		assertEquals(Quantity.class, Money.class.getAnnotation(DatatypeDef.class).profileOf());
   }
 
   @Test

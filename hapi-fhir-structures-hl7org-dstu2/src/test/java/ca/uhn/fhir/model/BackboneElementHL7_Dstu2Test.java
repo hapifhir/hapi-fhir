@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.hl7.fhir.dstu2.model.BackboneElement;
 import org.hl7.fhir.dstu2.model.Patient.PatientCommunicationComponent;
@@ -21,6 +22,6 @@ public class BackboneElementHL7_Dstu2Test {
         String copiedPccID = copiedPcc.getIdElement().getIdPart();
 
 			assertTrue(copiedPcc instanceof BackboneElement); // Just making sure this assumption still holds up, otherwise this test isn't very useful
-			assertThat(copiedPccID).isEqualTo("1001");
+			assertEquals("1001", copiedPccID);
     }
 }

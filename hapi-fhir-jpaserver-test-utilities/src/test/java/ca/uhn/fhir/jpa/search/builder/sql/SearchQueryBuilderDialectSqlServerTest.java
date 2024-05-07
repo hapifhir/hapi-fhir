@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirSQLServerDialect;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
 import org.apache.commons.lang3.StringUtils;
@@ -26,7 +27,7 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		sql = massageSql(sql);
 		assertThat(sql.endsWith("ORDER BY -t1.SP_VALUE_LOW DESC offset 0 rows fetch first ? rows only")).as(sql).isTrue();
 
-		assertThat(StringUtils.countMatches(sql, "?")).isEqualTo(3);
+		assertEquals(3, StringUtils.countMatches(sql, "?"));
 		assertThat(generatedSql.getBindVariables()).hasSize(3);
 	}
 
@@ -48,7 +49,7 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		sql = massageSql(sql);
 		assertThat(sql.endsWith("order by @@version offset ? rows fetch next ? rows only")).as(sql).isTrue();
 
-		assertThat(StringUtils.countMatches(sql, "?")).isEqualTo(3);
+		assertEquals(3, StringUtils.countMatches(sql, "?"));
 		assertThat(generatedSql.getBindVariables()).hasSize(3);
 	}
 
@@ -64,7 +65,7 @@ public class SearchQueryBuilderDialectSqlServerTest extends BaseSearchQueryBuild
 		sql = massageSql(sql);
 		assertThat(sql.endsWith("order by @@version offset 0 rows fetch first ? rows only")).as(sql).isTrue();
 
-		assertThat(StringUtils.countMatches(sql, "?")).isEqualTo(2);
+		assertEquals(2, StringUtils.countMatches(sql, "?"));
 		assertThat(generatedSql.getBindVariables()).hasSize(2);
 	}
 

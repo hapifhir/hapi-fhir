@@ -125,7 +125,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 				.execute();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1165) + "Cache-Control header max-results value must not exceed 123");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1165) + "Cache-Control header max-results value must not exceed 123", e.getMessage());
 		}
 	}
 
@@ -188,9 +188,9 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 		Bundle results2 = myClient.search().forResource("Patient").where(Patient.FAMILY.matches().value("FAM")).returnBundle(Bundle.class).execute();
 		assertThat(results2.getEntry()).hasSize(1);
 		runInTransaction(() -> assertEquals(1, mySearchEntityDao.count()));
-		assertThat(myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE).get(0)).isEqualTo("HIT from " + myServerBase);
-		assertThat(results2.getMeta().getLastUpdated()).isEqualTo(results1.getMeta().getLastUpdated());
-		assertThat(results2.getId()).isEqualTo(results1.getId());
+		assertEquals("HIT from " + myServerBase, myCapturingInterceptor.getLastResponse().getHeaders(Constants.HEADER_X_CACHE).get(0));
+		assertEquals(results1.getMeta().getLastUpdated(), results2.getMeta().getLastUpdated());
+		assertEquals(results1.getId(), results2.getId());
 	}
 
 	@Test
@@ -220,7 +220,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(resp2.getId()).isEqualTo(resp1.getId());
+		assertEquals(resp1.getId(), resp2.getId());
 
 		ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp2));
 		assertThat(resp2.getEntry()).hasSize(1);
@@ -256,7 +256,7 @@ public class ResourceProviderR4CacheTest extends BaseResourceProviderR4Test {
 			.execute();});
 
 		// Then: We get a HTTP 400 Bad Request
-		assertThat(exception.getStatusCode()).isEqualTo(Constants.STATUS_HTTP_400_BAD_REQUEST);
+		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, exception.getStatusCode());
 	}
 
 }

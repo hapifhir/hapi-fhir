@@ -223,8 +223,8 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 			.setTargetSystem(CS_URL_2);
 
 		TranslateConceptResults resp = myConceptMappingSvc.translate(translationRequest);
-		assertThat(resp.size()).isEqualTo(1);
-		assertThat(resp.getResults().get(0).getCode()).isEqualTo("34567");
+		assertEquals(1, resp.size());
+		assertEquals("34567", resp.getResults().get(0).getCode());
 	}
 
 	@Test
@@ -1138,7 +1138,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 			createAndPersistConceptMap();
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(840) + "Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart());
+			assertEquals(Msg.code(840) + "Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart(), e.getMessage());
 		}
 
 	}
@@ -1151,7 +1151,7 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 			createAndPersistConceptMap("v1");
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(841) + "Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\" and ConceptMap.version \"v1\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart());
+			assertEquals(Msg.code(841) + "Can not create multiple ConceptMap resources with ConceptMap.url \"http://example.com/my_concept_map\" and ConceptMap.version \"v1\", already have one with resource ID: ConceptMap/" + myConceptMapId.getIdPart(), e.getMessage());
 		}
 
 	}
@@ -1559,13 +1559,13 @@ public class TermConceptMappingSvcImplTest extends BaseTermR4Test {
 
 	private static void assertSameTranslationRequest(TranslationRequest expected, TranslationRequest actual) {
 		assertTrue(expected.getCodeableConcept().equalsDeep(actual.getCodeableConcept()));
-		assertThat(actual.getConceptMapVersion()).isEqualTo(expected.getConceptMapVersion());
-		assertThat(actual.getUrl()).isEqualTo(expected.getUrl());
-		assertThat(actual.getSource()).isEqualTo(expected.getSource());
-		assertThat(actual.getTarget()).isEqualTo(expected.getTarget());
-		assertThat(actual.getTargetSystem()).isEqualTo(expected.getTargetSystem());
-		assertThat(actual.getResourceId()).isEqualTo(expected.getResourceId());
-		assertThat(actual.getReverseAsBoolean()).isEqualTo(expected.getReverseAsBoolean());
+		assertEquals(expected.getConceptMapVersion(), actual.getConceptMapVersion());
+		assertEquals(expected.getUrl(), actual.getUrl());
+		assertEquals(expected.getSource(), actual.getSource());
+		assertEquals(expected.getTarget(), actual.getTarget());
+		assertEquals(expected.getTargetSystem(), actual.getTargetSystem());
+		assertEquals(expected.getResourceId(), actual.getResourceId());
+		assertEquals(expected.getReverseAsBoolean(), actual.getReverseAsBoolean());
 	}
 
 	private void createAndPersistConceptMap() {

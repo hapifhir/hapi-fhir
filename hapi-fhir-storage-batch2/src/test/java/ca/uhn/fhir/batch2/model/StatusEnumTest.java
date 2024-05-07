@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -70,7 +71,7 @@ class StatusEnumTest {
 		"FINALIZE, ERRORED, true",
 	})
 	public void testStateTransition(StatusEnum origStatus, StatusEnum newStatus, boolean expected) {
-		assertThat(StatusEnum.isLegalStateTransition(origStatus, newStatus)).isEqualTo(expected);
+		assertEquals(expected, StatusEnum.isLegalStateTransition(origStatus, newStatus));
 		if (expected) {
 			assertThat(StatusEnum.ourFromStates.get(newStatus)).contains(origStatus);
 			assertThat(StatusEnum.ourToStates.get(origStatus)).contains(newStatus);
@@ -83,7 +84,7 @@ class StatusEnumTest {
 	@ParameterizedTest
 	@EnumSource(StatusEnum.class)
 	public void testCancellableStates(StatusEnum theState) {
-		assertThat(theState.isCancellable()).isEqualTo(StatusEnum.ourFromStates.get(StatusEnum.CANCELLED).contains(theState));
+		assertEquals(StatusEnum.ourFromStates.get(StatusEnum.CANCELLED).contains(theState), theState.isCancellable());
 	}
 
 	@Test

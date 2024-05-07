@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
@@ -62,7 +63,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		ourLog.debug("Patient history 2: {}", history2);
 		myPatientDao.update(p, mySrd);
 		String versionAfterUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
-		assertThat(versionAfterUpdate).isEqualTo(versionBeforeUpdate);
+		assertEquals(versionBeforeUpdate, versionAfterUpdate);
 
 		p = new Patient();
 		p.addIdentifier().setSystem("urn:system").setValue(systemNameModified);
@@ -73,15 +74,15 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		versionBeforeUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
 		myPatientDao.update(p, mySrd);
 		versionAfterUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
-		assertThat(versionAfterUpdate).isEqualTo(versionBeforeUpdate);
+		assertEquals(versionBeforeUpdate, versionAfterUpdate);
 
 		Patient h2 = myPatientDao.read(id.withVersion("2"), mySrd);
-		assertThat(h2.getName().get(0).getFamily()).isEqualTo(testFamilyNameModified);
+		assertEquals(testFamilyNameModified, h2.getName().get(0).getFamily());
 		assertThat(h2.getIdElement().toString()).endsWith("/_history/2");
 		assertTrue(Math.abs(h2.getMeta().getLastUpdated().getTime() - new Date().getTime()) < 1000L);
 
 		Patient h1 = myPatientDao.read(id.withVersion("1"), mySrd);
-		assertThat(h1.getIdentifier().get(0).getValue()).isEqualTo(systemNameModified);
+		assertEquals(systemNameModified, h1.getIdentifier().get(0).getValue());
 		assertThat(h1.getIdElement().toString()).endsWith("/_history/1");
 		assertTrue(Math.abs(h1.getMeta().getLastUpdated().getTime() - new Date().getTime()) < 1000L);
 	}
@@ -106,14 +107,14 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		String versionBeforeUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
 		myPatientDao.update(p, mySrd);
 		String versionAfterUpdate = myPatientDao.read(id.toUnqualifiedVersionless()).getIdElement().getVersionIdPart();
-		assertThat(versionAfterUpdate).isEqualTo(versionBeforeUpdate);
+		assertEquals(versionBeforeUpdate, versionAfterUpdate);
 
 		int resourceVersionsSizeAfterUpdate = myResourceHistoryTableDao.findAll().size();
 
 		Patient lPatient = myPatientDao.read(id.toVersionless(), mySrd);
-		assertThat(lPatient.getName().get(0).getFamily()).isEqualTo(testFamilyNameModified);
-		assertThat(lPatient.getName().get(0).getGiven().get(0).getValue()).isEqualTo(testGivenNameModified);
-		assertThat(resourceVersionsSizeAfterUpdate).isEqualTo(resourceVersionsSizeInit);
+		assertEquals(testFamilyNameModified, lPatient.getName().get(0).getFamily());
+		assertEquals(testGivenNameModified, lPatient.getName().get(0).getGiven().get(0).getValue());
+		assertEquals(resourceVersionsSizeInit, resourceVersionsSizeAfterUpdate);
 		assertThat(lPatient.getIdElement().toString()).endsWith("/_history/3");
 		assertTrue(Math.abs(lPatient.getMeta().getLastUpdated().getTime() - new Date().getTime()) < 1000L);
 	}
@@ -236,7 +237,7 @@ public class FhirResourceDaoR4HistoryRewriteTest extends BaseJpaR4Test {
 		assertThat(versionAfterUpdate).isNotEqualTo(versionBeforeUpdate);
 
 		p = myPatientDao.read(id.toVersionless(), mySrd);
-		assertThat(p.getName().get(0).getFamily()).isEqualTo(TEST_FAMILY_NAME);
+		assertEquals(TEST_FAMILY_NAME, p.getName().get(0).getFamily());
 		assertThat(p.getIdElement().toString()).endsWith("/_history/3");
 		return id;
 	}

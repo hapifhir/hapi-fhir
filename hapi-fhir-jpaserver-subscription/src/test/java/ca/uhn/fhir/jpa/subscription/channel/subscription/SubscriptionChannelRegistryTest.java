@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.channel.subscription;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.subscription.channel.api.BaseChannelSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
@@ -81,8 +82,8 @@ public class SubscriptionChannelRegistryTest {
 		SubscriptionChannelWithHandlers receiverChannel = mySubscriptionChannelRegistry.getDeliveryReceiverChannel(channelName);
 		MessageChannel senderChannel = mySubscriptionChannelRegistry.getDeliverySenderChannel(channelName);
 
-		assertThat(senderChannel).isEqualTo(producer);
-		assertThat(receiverChannel.getChannel()).isEqualTo(receiver);
+		assertEquals(producer, senderChannel);
+		assertEquals(receiver, receiverChannel.getChannel());
 
 		// verify the creation of the sender/receiver
 		// both have retry values provided
@@ -108,6 +109,6 @@ public class SubscriptionChannelRegistryTest {
 	private void verifySettingsHaveRetryConfig(BaseChannelSettings theSettings, int theRetryCount) {
 		assertNotNull(theSettings);
 		assertNotNull(theSettings.getRetryConfigurationParameters());
-		assertThat(theSettings.getRetryConfigurationParameters().getRetryCount()).isEqualTo(theRetryCount);
+		assertEquals(theRetryCount, theSettings.getRetryConfigurationParameters().getRetryCount());
 	}
 }

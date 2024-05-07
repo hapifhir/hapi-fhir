@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.tx;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -116,7 +117,7 @@ class HapiTransactionServiceTest {
 			myHapiTransactionService.doExecute((HapiTransactionService.ExecutionBuilder) executionBuilder, transactionCallback);
 		});
 
-		assertThat(numberOfCalls.get()).isEqualTo(theExpectedNumberOfCallsToTransactionCallback);
+		assertEquals(theExpectedNumberOfCallsToTransactionCallback, numberOfCalls.get());
 		verify(mySleepUtilMock, times(theExpectedNumberOfCallsToTransactionCallback - 1))
 			.sleepAtLeast(anyLong(), anyBoolean());
 		return theExceptionThrownByDoExecute;
@@ -160,7 +161,7 @@ class HapiTransactionServiceTest {
 	void testDoExecute_WhenRetryEnabled_DoesNotRetryOnNonRetriableException() {
 		RuntimeException nonRetriableException = new RuntimeException("should not be retried");
 		Exception exceptionThrown = testRetriesOnException(nonRetriableException, true, 10, 1);
-		assertThat(exceptionThrown).isEqualTo(nonRetriableException);
+		assertEquals(nonRetriableException, exceptionThrown);
 		verifyNoInteractions(myInterceptorBroadcasterMock);
 	}
 
@@ -187,7 +188,7 @@ class HapiTransactionServiceTest {
 
 		myHapiTransactionService.doExecute((HapiTransactionService.ExecutionBuilder) executionBuilder, transactionCallback);
 
-		assertThat(numberOfCalls.get()).isEqualTo(3);
+		assertEquals(3, numberOfCalls.get());
 		verify(mySleepUtilMock, times(2))
 			.sleepAtLeast(anyLong(), anyBoolean());
 	}

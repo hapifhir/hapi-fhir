@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.reindex;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -123,8 +124,8 @@ public class ResourceReindexingSvcImplTest {
 		verify(myResourceTableDao, never()).findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(), any(), any(), any());
 		verify(myReindexJobDao, never()).markAsDeletedById(any());
 		verify(myResourceTableDao, times(1)).findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(myPageRequestCaptor.capture(), myLowCaptor.capture(), myHighCaptor.capture());
-		assertThat(myLowCaptor.getAllValues().get(0)).isEqualTo(new Date(40 * DateUtils.MILLIS_PER_DAY));
-		assertThat(myHighCaptor.getAllValues().get(0)).isEqualTo(highThreshold);
+		assertEquals(new Date(40 * DateUtils.MILLIS_PER_DAY), myLowCaptor.getAllValues().get(0));
+		assertEquals(highThreshold, myHighCaptor.getAllValues().get(0));
 
 		// Should mark the low threshold as 1 milli higher than the ne returned item
 		verify(myReindexJobDao, times(1)).setThresholdLow(eq(123L), eq(new Date((40 * DateUtils.MILLIS_PER_DAY) + 1L)));
@@ -146,8 +147,8 @@ public class ResourceReindexingSvcImplTest {
 		mySvc.forceReindexingPass();
 		verify(myResourceTableDao, never()).findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(any(), any(), any(), any());
 		verify(myResourceTableDao, times(1)).findIdsOfResourcesWithinUpdatedRangeOrderedFromOldest(myPageRequestCaptor.capture(), myLowCaptor.capture(), myHighCaptor.capture());
-		assertThat(myLowCaptor.getAllValues().get(0)).isEqualTo(new Date(40 * DateUtils.MILLIS_PER_DAY));
-		assertThat(myHighCaptor.getAllValues().get(0)).isEqualTo(highThreshold);
+		assertEquals(new Date(40 * DateUtils.MILLIS_PER_DAY), myLowCaptor.getAllValues().get(0));
+		assertEquals(highThreshold, myHighCaptor.getAllValues().get(0));
 
 		// This time we shouldn't update the threshold
 		verify(myReindexJobDao, never()).setThresholdLow(any(), any());
@@ -177,15 +178,15 @@ public class ResourceReindexingSvcImplTest {
 		when(myDaoRegistry.getResourceDao(eq(Patient.class))).thenReturn(myResourceDao);
 
 		int count = mySvc.forceReindexingPass();
-		assertThat(count).isEqualTo(4);
+		assertEquals(4, count);
 
 		// Make sure we reindexed all 4 resources
 		verify(myResourceDao, times(4)).reindex(any(), any());
 
 		// Make sure we updated the low threshold
 		verify(myReindexJobDao, times(1)).setThresholdLow(myIdCaptor.capture(), myLowCaptor.capture());
-		assertThat(myIdCaptor.getValue().longValue()).isEqualTo(123L);
-		assertThat(myLowCaptor.getValue().getTime()).isEqualTo(40 * DateUtils.MILLIS_PER_DAY);
+		assertEquals(123L, myIdCaptor.getValue().longValue());
+		assertEquals(40 * DateUtils.MILLIS_PER_DAY, myLowCaptor.getValue().getTime());
 
 		// Make sure we didn't do anything unexpected
 		verify(myReindexJobDao, times(1)).findAll(any(), eq(false));
@@ -233,15 +234,15 @@ public class ResourceReindexingSvcImplTest {
 
 
 		int count = mySvc.forceReindexingPass();
-		assertThat(count).isEqualTo(4);
+		assertEquals(4, count);
 
 		// Make sure we reindexed all 4 resources
 		verify(myResourceDao, times(4)).reindex(any(), any());
 
 		// Make sure we updated the low threshold
 		verify(myReindexJobDao, times(1)).setThresholdLow(myIdCaptor.capture(), myLowCaptor.capture());
-		assertThat(myIdCaptor.getValue().longValue()).isEqualTo(123L);
-		assertThat(myLowCaptor.getValue().getTime()).isEqualTo(40 * DateUtils.MILLIS_PER_DAY);
+		assertEquals(123L, myIdCaptor.getValue().longValue());
+		assertEquals(40 * DateUtils.MILLIS_PER_DAY, myLowCaptor.getValue().getTime());
 
 		// Make sure we didn't do anything unexpected
 		verify(myReindexJobDao, times(1)).findAll(any(), eq(false));
@@ -278,7 +279,7 @@ public class ResourceReindexingSvcImplTest {
 		int count = mySvc.forceReindexingPass();
 
 		// verify
-		assertThat(count).isEqualTo(0);
+		assertEquals(0, count);
 		verify(myResourceTableDao, times(1)).updateIndexStatus(eq(0L), eq(BaseHapiFhirDao.INDEX_STATUS_INDEXING_FAILED));
 	}
 
@@ -291,7 +292,7 @@ public class ResourceReindexingSvcImplTest {
 		when(myResourceTableDao.findById(anyLong())).thenThrow(new NullPointerException("A MESSAGE"));
 
 		int count = mySvc.forceReindexingPass();
-		assertThat(count).isEqualTo(0);
+		assertEquals(0, count);
 
 		// Make sure we didn't do anything unexpected
 		verify(myReindexJobDao, times(1)).findAll(any(), eq(false));

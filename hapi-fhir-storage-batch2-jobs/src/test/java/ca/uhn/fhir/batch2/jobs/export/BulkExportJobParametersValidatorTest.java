@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -71,7 +72,7 @@ public class BulkExportJobParametersValidatorTest {
 		// verify
 		assertNotNull(errors);
 		assertThat(errors).hasSize(1);
-		assertThat("Export ID does not conform to the current blob storage implementation's limitations.").isEqualTo(errors.get(0));
+		assertEquals(errors.get(0), "Export ID does not conform to the current blob storage implementation's limitations.");
 	}
 
 	@Test

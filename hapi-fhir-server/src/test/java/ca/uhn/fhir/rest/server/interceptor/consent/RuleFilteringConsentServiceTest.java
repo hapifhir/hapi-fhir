@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.consent;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IRuleApplier;
@@ -39,7 +40,7 @@ class RuleFilteringConsentServiceTest {
 
 		ConsentOutcome consentDecision = myRuleFilteringConsentService.canSeeResource(myRequestDetails, null, null);
 
-		assertThat(consentDecision.getStatus()).isEqualTo(ConsentOperationStatusEnum.PROCEED);
+		assertEquals(ConsentOperationStatusEnum.PROCEED, consentDecision.getStatus());
 
 	}
 
@@ -50,6 +51,6 @@ class RuleFilteringConsentServiceTest {
 
 		ConsentOutcome consentDecision = myRuleFilteringConsentService.canSeeResource(myRequestDetails, null, null);
 
-		assertThat(consentDecision.getStatus()).isEqualTo(ConsentOperationStatusEnum.REJECT);
+		assertEquals(ConsentOperationStatusEnum.REJECT, consentDecision.getStatus());
 	}
 }

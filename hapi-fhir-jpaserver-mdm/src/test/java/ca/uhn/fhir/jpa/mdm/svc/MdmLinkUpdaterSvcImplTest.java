@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.mdm.api.IMdmLinkUpdaterSvc;
@@ -73,7 +74,7 @@ class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
 		assertThat(targets).hasSize(1);
 		final MdmLink mdmLink = targets.get(0);
 
-		assertThat(mdmLink.getScore()).isEqualTo(matchOutcome.getNormalizedScore());
+		assertEquals(matchOutcome.getNormalizedScore(), mdmLink.getScore());
 	}
 
 	@Test
@@ -103,6 +104,6 @@ class MdmLinkUpdaterSvcImplTest extends BaseMdmR4Test {
 
 		final MdmLink mdmLink = targets.get(0);
 
-		assertThat(mdmLink.getSourcePersistenceId().getId().toString()).isEqualTo(patient1.getIdElement().toVersionless().getIdPart());
+		assertEquals(patient1.getIdElement().toVersionless().getIdPart(), mdmLink.getSourcePersistenceId().getId().toString());
 	}
 }

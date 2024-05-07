@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.tx;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeOperation;
@@ -77,7 +78,7 @@ public class ExpungeOperationTest {
 			.map(RequestDetails::getTenantId)
 			.allMatch(theExpectedTenantId::equals);
 
-		assertThat(allMatching).isEqualTo(true);
+		assertEquals(true, allMatching);
 	}
 
 	private RequestDetails getRequestDetails() {

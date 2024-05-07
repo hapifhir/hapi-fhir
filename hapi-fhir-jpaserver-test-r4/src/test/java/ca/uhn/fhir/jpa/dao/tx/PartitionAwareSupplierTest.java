@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.tx;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.dao.expunge.PartitionAwareSupplier;
 import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -53,7 +54,7 @@ public class PartitionAwareSupplierTest {
 
 		String requestDetailsTenantId = methodArgumentExecutionBuilder.getRequestDetailsForTesting().getTenantId();
 
-		assertThat(requestDetailsTenantId).isEqualTo(theExpectedTenantId);
+		assertEquals(theExpectedTenantId, requestDetailsTenantId);
 	}
 
 	private RequestDetails getRequestDetails() {

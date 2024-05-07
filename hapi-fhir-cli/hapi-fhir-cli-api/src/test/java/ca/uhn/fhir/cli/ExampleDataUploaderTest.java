@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cli;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -75,8 +76,8 @@ class ExampleDataUploaderTest {
 		assertThat(myRestServerR4Helper.getTransactions()).hasSize(1);
 		Bundle bundle = myRestServerR4Helper.getTransactions().get(0);
 		Resource resource = bundle.getEntry().get(0).getResource();
-		assertThat(resource.getClass()).isEqualTo(Patient.class);
-		assertThat(resource.getIdElement().getIdPart()).isEqualTo("EX3152");
+		assertEquals(Patient.class, resource.getClass());
+		assertEquals("EX3152", resource.getIdElement().getIdPart());
 	}
 
 	private void runCommand(CommandLine commandLine) {

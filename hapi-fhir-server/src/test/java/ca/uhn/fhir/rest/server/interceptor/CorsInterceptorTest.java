@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,7 +37,7 @@ public class CorsInterceptorTest {
 		assertNotNull(corsConfiguration.getAllowedMethods());
 		assertNotNull(corsConfiguration.getAllowedOrigins());
 		assertNotNull(corsConfiguration.getExposedHeaders());
-		assertThat(corsConfiguration.getMaxAge()).isEqualTo(Long.valueOf(1800L));
+		assertEquals(Long.valueOf(1800L), corsConfiguration.getMaxAge());
 		assertNotNull(corsConfiguration.checkHeaders(Collections.singletonList("Content-Type")));
 		assertNotNull(corsConfiguration.checkHeaders(Collections.singletonList("Authorization")));
 		assertNotNull(corsConfiguration.checkHeaders(Arrays.asList("Authorization", "Content-Type")));

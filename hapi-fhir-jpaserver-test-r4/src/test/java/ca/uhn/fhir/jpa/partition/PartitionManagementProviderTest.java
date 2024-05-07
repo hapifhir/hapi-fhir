@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.partition;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -87,9 +88,9 @@ public class PartitionManagementProviderTest {
 		verify(myPartitionConfigSvc, times(1)).createPartition(any(), any());
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
-		assertThat(((IntegerType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue()).isEqualTo(123);
-		assertThat(((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue()).isEqualTo("PARTITION-123");
-		assertThat(((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue()).isEqualTo("a description");
+		assertEquals(123, ((IntegerType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue());
+		assertEquals("PARTITION-123", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue());
+		assertEquals("a description", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
 	}
 
 	@Test
@@ -115,9 +116,9 @@ public class PartitionManagementProviderTest {
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 		PartitionEntity value = entityCaptor.getValue();
 
-		assertThat(value.getName()).isEqualTo("PARTITION-123");
+		assertEquals("PARTITION-123", value.getName());
 		assertThat(value.getId()).isInstanceOf(Integer.class);
-		assertThat(value.getDescription()).isEqualTo("a description");
+		assertEquals("a description", value.getDescription());
 	}
 
 	@Nonnull
@@ -149,7 +150,7 @@ public class PartitionManagementProviderTest {
 				.execute();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}
 		verify(myPartitionConfigSvc, times(0)).createPartition(any(), any());
 	}
@@ -175,9 +176,9 @@ public class PartitionManagementProviderTest {
 		verify(myPartitionConfigSvc, times(1)).getPartitionById(any());
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
-		assertThat(((IntegerType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue()).isEqualTo(123);
-		assertThat(((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue()).isEqualTo("PARTITION-123");
-		assertThat(((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue()).isEqualTo("a description");
+		assertEquals(123, ((IntegerType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue());
+		assertEquals("PARTITION-123", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue());
+		assertEquals("a description", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
 	}
 
 	@Test
@@ -192,7 +193,7 @@ public class PartitionManagementProviderTest {
 				.execute();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}
 		verify(myPartitionConfigSvc, times(0)).getPartitionById(any());
 	}
@@ -216,9 +217,9 @@ public class PartitionManagementProviderTest {
 		verify(myPartitionConfigSvc, times(1)).updatePartition(any());
 		verifyNoMoreInteractions(myPartitionConfigSvc);
 
-		assertThat(((IntegerType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue()).isEqualTo(123);
-		assertThat(((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue()).isEqualTo("PARTITION-123");
-		assertThat(((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue()).isEqualTo("a description");
+		assertEquals(123, ((IntegerType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID)).getValue().intValue());
+		assertEquals("PARTITION-123", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME)).getValue());
+		assertEquals("a description", ((StringType) response.getParameterValue(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC)).getValue());
 	}
 
 	@Test
@@ -233,7 +234,7 @@ public class PartitionManagementProviderTest {
 				.execute();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}
 		verify(myPartitionConfigSvc, times(0)).createPartition(any(), any());
 	}
@@ -269,7 +270,7 @@ public class PartitionManagementProviderTest {
 				.execute();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1314) + "No Partition ID supplied", e.getMessage());
 		}
 		verify(myPartitionConfigSvc, times(0)).createPartition(any(), any());
 	}
@@ -307,20 +308,20 @@ public class PartitionManagementProviderTest {
 		List<Parameters.ParametersParameterComponent> list = getParametersByName(response, "partition");
 		assertThat(list).hasSize(2);
 		List<Parameters.ParametersParameterComponent> part = list.get(0).getPart();
-		assertThat(part.get(0).getName()).isEqualTo(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID);
-		assertThat(((IntegerType) part.get(0).getValue()).getValue().intValue()).isEqualTo(1);
-		assertThat(part.get(1).getName()).isEqualTo(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME);
-		assertThat(part.get(1).getValue().toString()).isEqualTo("PARTITION-1");
-		assertThat(part.get(2).getName()).isEqualTo(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC);
-		assertThat(part.get(2).getValue().toString()).isEqualTo("a description1");
+		assertEquals(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, part.get(0).getName());
+		assertEquals(1, ((IntegerType) part.get(0).getValue()).getValue().intValue());
+		assertEquals(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, part.get(1).getName());
+		assertEquals("PARTITION-1", part.get(1).getValue().toString());
+		assertEquals(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, part.get(2).getName());
+		assertEquals("a description1", part.get(2).getValue().toString());
 
 		part = list.get(1).getPart();
-		assertThat(part.get(0).getName()).isEqualTo(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID);
-		assertThat(((IntegerType) part.get(0).getValue()).getValue().intValue()).isEqualTo(2);
-		assertThat(part.get(1).getName()).isEqualTo(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME);
-		assertThat(part.get(1).getValue().toString()).isEqualTo("PARTITION-2");
-		assertThat(part.get(2).getName()).isEqualTo(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC);
-		assertThat(part.get(2).getValue().toString()).isEqualTo("a description2");
+		assertEquals(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_ID, part.get(0).getName());
+		assertEquals(2, ((IntegerType) part.get(0).getValue()).getValue().intValue());
+		assertEquals(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_NAME, part.get(1).getName());
+		assertEquals("PARTITION-2", part.get(1).getValue().toString());
+		assertEquals(ProviderConstants.PARTITION_MANAGEMENT_PARTITION_DESC, part.get(2).getName());
+		assertEquals("a description2", part.get(2).getValue().toString());
 	}
 
 	@Configuration

@@ -35,7 +35,7 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 			requestDetails);
 
 		assertNotNull(result);
-		assertThat(result.getSubject().getReference()).isEqualTo("Patient/" + theSubject);
+		assertEquals("Patient/" + theSubject, result.getSubject().getReference());
 		assertTrue(result.getItem().get(0).getItem().get(0).hasAnswer());
 	}
 

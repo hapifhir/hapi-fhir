@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.topic;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -102,9 +103,9 @@ class SubscriptionTopicPayloadBuilderR5Test {
 
         // verify Encounter entry
         Bundle.BundleEntryComponent encounterEntry = payload.getEntry().get(1);
-		assertThat(resources.get(1).getResourceType().name()).isEqualTo("Encounter");
-		assertThat(resources.get(1)).isEqualTo(myEncounter);
-		assertThat(encounterEntry.getFullUrl()).isEqualTo(theFullUrl);
+		assertEquals("Encounter", resources.get(1).getResourceType().name());
+		assertEquals(myEncounter, resources.get(1));
+		assertEquals(theFullUrl, encounterEntry.getFullUrl());
         verifyRequestParameters(encounterEntry, theHttpMethod, theRequestUrl);
     }
 
@@ -135,7 +136,7 @@ class SubscriptionTopicPayloadBuilderR5Test {
         // verify Encounter entry
         Bundle.BundleEntryComponent encounterEntry = payload.getEntry().get(1);
 		assertNull(encounterEntry.getResource());
-		assertThat(encounterEntry.getFullUrl()).isEqualTo(theFullUrl);
+		assertEquals(theFullUrl, encounterEntry.getFullUrl());
         verifyRequestParameters(encounterEntry, theHttpMethod, theRequestUrl);
     }
 
@@ -159,7 +160,7 @@ class SubscriptionTopicPayloadBuilderR5Test {
 			assertThat(resources).hasSize(1);
 
 		// verify SubscriptionStatus.notificationEvent.focus
-		assertThat(resources.get(0).getResourceType().name()).isEqualTo("SubscriptionStatus");
+		assertEquals("SubscriptionStatus", resources.get(0).getResourceType().name());
 			assertThat(((SubscriptionStatus) resources.get(0)).getNotificationEvent()).hasSize(1);
         SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent =
                 ((SubscriptionStatus) resources.get(0)).getNotificationEventFirstRep();
@@ -169,16 +170,16 @@ class SubscriptionTopicPayloadBuilderR5Test {
     private void verifyRequestParameters(Bundle.BundleEntryComponent theEncounterEntry,
                                          String theHttpMethod, String theRequestUrl) {
 		assertNotNull(theEncounterEntry.getRequest());
-		assertThat(theEncounterEntry.getRequest().getMethod().name()).isEqualTo(theHttpMethod);
-		assertThat(theEncounterEntry.getRequest().getUrl()).isEqualTo(theRequestUrl);
+		assertEquals(theHttpMethod, theEncounterEntry.getRequest().getMethod().name());
+		assertEquals(theRequestUrl, theEncounterEntry.getRequest().getUrl());
     }
 
     private void verifySubscriptionStatusNotificationEvent(Resource theResource) {
-		assertThat(theResource.getResourceType().name()).isEqualTo("SubscriptionStatus");
+		assertEquals("SubscriptionStatus", theResource.getResourceType().name());
 			assertThat(((SubscriptionStatus) theResource).getNotificationEvent()).hasSize(1);
         SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent =
                 ((SubscriptionStatus) theResource).getNotificationEventFirstRep();
 		assertTrue(notificationEvent.hasFocus());
-		assertThat(notificationEvent.getFocus().getReference()).isEqualTo(myEncounter.getId());
+		assertEquals(myEncounter.getId(), notificationEvent.getFocus().getReference());
     }
 }

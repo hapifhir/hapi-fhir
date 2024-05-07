@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.method.BaseMethodBinding;
 import ca.uhn.fhir.rest.server.method.PageMethodBinding;
@@ -34,7 +35,7 @@ class ResourceBindingTest {
 		// verify
 		List<BaseMethodBinding> list = myResourceBinding.getMethodBindings();
 		assertThat(second).isNotEqualTo(first);
-		assertThat(list.get(0)).isEqualTo(second);
-		assertThat(list.get(1)).isEqualTo(first);
+		assertEquals(second, list.get(0));
+		assertEquals(first, list.get(1));
 	}
 }

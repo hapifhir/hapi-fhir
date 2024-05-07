@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term.loinc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 import ch.qos.logback.classic.Level;
@@ -130,7 +131,7 @@ class LoincCodingPropertiesHandlerTest {
 			// JUnit assertions
 			List<ILoggingEvent> logsList = testListAppender.list;
 			assertThat(logsList).hasSize(1);
-			assertThat(logsList.get(0).getLevel()).isEqualTo(Level.ERROR);
+			assertEquals(Level.ERROR, logsList.get(0).getLevel());
 			assertThat(logsList.get(0).getFormattedMessage()).startsWith("Couldn't find TermConcept for code: 'ref-code-02'");
 			assertThat(logsList.get(0).getFormattedMessage()).contains(thePropName);
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import org.junit.jupiter.api.Test;
 
@@ -21,7 +22,7 @@ public class BaseTaskTest {
 			task.validateVersion();
 			fail("");
 		} catch (IllegalStateException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(62) + "The version 123.4 does not match the expected pattern " + BaseTask.MIGRATION_VERSION_PATTERN);
+			assertEquals(Msg.code(62) + "The version 123.4 does not match the expected pattern " + BaseTask.MIGRATION_VERSION_PATTERN, e.getMessage());
 		}
 	}
 
@@ -32,7 +33,7 @@ public class BaseTaskTest {
 			task.validateVersion();
 			fail("");
 		} catch (IllegalStateException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(62) + "The version 123456789 does not match the expected pattern " + BaseTask.MIGRATION_VERSION_PATTERN);
+			assertEquals(Msg.code(62) + "The version 123456789 does not match the expected pattern " + BaseTask.MIGRATION_VERSION_PATTERN, e.getMessage());
 		}
 	}
 
@@ -43,7 +44,7 @@ public class BaseTaskTest {
 			task.validateVersion();
 			fail("");
 		} catch (IllegalStateException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(62) + "The version 12345678.9.1 does not match the expected pattern " + BaseTask.MIGRATION_VERSION_PATTERN);
+			assertEquals(Msg.code(62) + "The version 12345678.9.1 does not match the expected pattern " + BaseTask.MIGRATION_VERSION_PATTERN, e.getMessage());
 		}
 	}
 

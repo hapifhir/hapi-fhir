@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Transaction;
@@ -80,15 +81,15 @@ public class TransactionClientTest {
 
     client.transaction(resources);
 
-		assertThat(capt.getValue().getClass()).isEqualTo(HttpPost.class);
+		assertEquals(HttpPost.class, capt.getValue().getClass());
     HttpPost post = (HttpPost) capt.getValue();
-		assertThat(post.getURI().toString()).isEqualTo("http://foo");
+		assertEquals("http://foo", post.getURI().toString());
 
     Bundle bundle = ctx.newJsonParser().parseResource(Bundle.class, new InputStreamReader(post.getEntity().getContent()));
     ourLog.debug(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertThat(bundle.getEntry()).hasSize(2);
-		assertThat(bundle.getEntry().get(0).getResource().getIdElement().getValue()).isEqualTo("Patient/testPersistWithSimpleLinkP01");
+		assertEquals("Patient/testPersistWithSimpleLinkP01", bundle.getEntry().get(0).getResource().getIdElement().getValue());
 
 		assertTrue(bundle.getEntry().get(1).getResource().getIdElement().isEmpty());
 
@@ -119,15 +120,15 @@ public class TransactionClientTest {
 
     client.transaction(transactionBundle);
 
-		assertThat(capt.getValue().getClass()).isEqualTo(HttpPost.class);
+		assertEquals(HttpPost.class, capt.getValue().getClass());
     HttpPost post = (HttpPost) capt.getValue();
-		assertThat(post.getURI().toString()).isEqualTo("http://foo");
+		assertEquals("http://foo", post.getURI().toString());
 
     Bundle bundle = ctx.newJsonParser().parseResource(Bundle.class, new InputStreamReader(post.getEntity().getContent()));
     ourLog.debug(ctx.newXmlParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		assertThat(bundle.getEntry()).hasSize(2);
-		assertThat(bundle.getEntry().get(0).getResource().getIdElement().getValue()).isEqualTo("http://foo/Patient/testPersistWithSimpleLinkP01");
+		assertEquals("http://foo/Patient/testPersistWithSimpleLinkP01", bundle.getEntry().get(0).getResource().getIdElement().getValue());
 
 		assertTrue(bundle.getEntry().get(1).getResource().getIdElement().isEmpty());
 

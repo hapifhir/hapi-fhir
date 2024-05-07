@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.expunge;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
@@ -61,7 +62,7 @@ public class DeleteExpungeProviderTest {
 		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_DELETE_EXPUNGE);
 		try(CloseableHttpResponse execute = myClient.execute(post)) {
 			String body = IOUtils.toString(execute.getEntity().getContent(), Charset.defaultCharset());
-			assertThat(execute.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, execute.getStatusLine().getStatusCode());
 			assertThat(body).contains("At least one `url` parameter to $delete-expunge must be provided.");
 		}
 	}
@@ -92,7 +93,7 @@ public class DeleteExpungeProviderTest {
 
 		// Verify
 		ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
-		assertThat(BatchHelperR4.jobIdFromBatch2Parameters(response)).isEqualTo(TEST_JOB_ID);
+		assertEquals(TEST_JOB_ID, BatchHelperR4.jobIdFromBatch2Parameters(response));
 
 		verify(myDeleteExpungeJobSubmitter, times(1)).submitJob(
 			eq(2401),

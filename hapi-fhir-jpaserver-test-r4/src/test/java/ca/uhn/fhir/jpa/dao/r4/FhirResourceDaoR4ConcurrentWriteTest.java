@@ -143,14 +143,14 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		List<Future<Bundle>> futures = myExecutor.invokeAll(callables);
 
 		// validate
-		assertThat(calls).isEqualTo(futures.size());
+		assertEquals(futures.size(), calls);
 		for (Future<Bundle> future : futures) {
 			// make sure no exceptions
 			Bundle b = future.get();
 			assertNotNull(b);
 		}
 		latch.awaitExpected();
-		assertThat(calls).isEqualTo(counter.get());
+		assertEquals(counter.get(), calls);
 	}
 
 	@Test
@@ -278,7 +278,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			assertEquals(14, myResourceHistoryTableDao.count());
 		});
 
-		assertThat(myConcurrencySemaphoreInterceptor.countSemaphores()).isEqualTo(6);
+		assertEquals(6, myConcurrencySemaphoreInterceptor.countSemaphores());
 	}
 
 	@Test
@@ -316,9 +316,9 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 			}
 
 			if (set == 0) {
-				assertThat(myConcurrencySemaphoreInterceptor.countSemaphores()).isEqualTo(2);
+				assertEquals(2, myConcurrencySemaphoreInterceptor.countSemaphores());
 			} else {
-				assertThat(myConcurrencySemaphoreInterceptor.countSemaphores()).isEqualTo(0);
+				assertEquals(0, myConcurrencySemaphoreInterceptor.countSemaphores());
 			}
 		}
 
@@ -431,7 +431,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertThat(patient.getActive()).isEqualTo(true);
+		assertEquals(true, patient.getActive());
 
 	}
 
@@ -457,14 +457,14 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 				ourLog.info("Future produced success");
 			} catch (ExecutionException e) {
 				ourLog.info("Future produced exception: {}", e.toString());
-				assertThat(e.getCause().getClass()).isEqualTo(ResourceVersionConflictException.class);
+				assertEquals(ResourceVersionConflictException.class, e.getCause().getClass());
 			}
 		}
 
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertThat(patient.getActive()).isEqualTo(true);
+		assertEquals(true, patient.getActive());
 
 	}
 
@@ -497,7 +497,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertThat(patient.getActive()).isEqualTo(true);
+		assertEquals(true, patient.getActive());
 
 	}
 
@@ -566,7 +566,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		IBundleProvider search = myPatientDao.search(SearchParameterMap.newSynchronous("gender", new TokenParam("http://hl7.org/fhir/administrative-gender", "male")));
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(search.sizeOrThrowNpe()).isEqualTo(1);
+		assertEquals(1, search.sizeOrThrowNpe());
 
 	}
 
@@ -650,7 +650,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertThat(patient.getActive()).isEqualTo(true);
+		assertEquals(true, patient.getActive());
 
 	}
 
@@ -686,7 +686,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertThat(patient.getActive()).isEqualTo(true);
+		assertEquals(true, patient.getActive());
 
 	}
 
@@ -726,7 +726,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertThat(patient.getActive()).isEqualTo(true);
+		assertEquals(true, patient.getActive());
 
 	}
 
@@ -778,7 +778,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(pId);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertThat(patient.getMeta().getVersionId()).isEqualTo("6");
+		assertEquals("6", patient.getMeta().getVersionId());
 
 	}
 
@@ -829,7 +829,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		// Make sure we saved the object
 		Patient patient = myPatientDao.read(new IdType("Patient/ABC"));
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(patient));
-		assertThat(patient.getActive()).isEqualTo(true);
+		assertEquals(true, patient.getActive());
 
 	}
 
@@ -886,7 +886,7 @@ public class FhirResourceDaoR4ConcurrentWriteTest extends BaseJpaR4Test {
 		// Make sure we saved the object
 		for (int i = 0; i < repetitionCount; i++) {
 			Patient patient = myPatientDao.read(new IdType("Patient/PATIENT0"));
-			assertThat(patient.getActive()).isEqualTo(true);
+			assertEquals(true, patient.getActive());
 		}
 
 	}

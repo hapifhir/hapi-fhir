@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -589,7 +590,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		IBundleProvider bundle = myQuestionnaireResponseDao.search(map);
 		List<IBaseResource> result = bundle.getResources(0, bundle.sizeOrThrowNpe());
 		assertThat(result).hasSize(1);
-		assertThat(result.get(0).getIdElement()).isEqualTo(questionnaireResponseId);
+		assertEquals(questionnaireResponseId, result.get(0).getIdElement());
 	}
 
 	@Test
@@ -752,7 +753,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		assertThat(result).hasSize(1);
-		assertThat(id1.getIdPart()).isEqualTo(((Observation) result.get(0)).getIdElement().getIdPart());
+		assertEquals(((Observation) result.get(0)).getIdElement().getIdPart(), id1.getIdPart());
 		assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("JPA search for IDs and for resources").isEqualTo(2);
 
 		// restore changed property
@@ -1287,7 +1288,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 			assertThat(result).hasSize(1);
-			assertThat(id.getIdPart()).isEqualTo(((Observation) result.get(0)).getId());
+			assertEquals(((Observation) result.get(0)).getId(), id.getIdPart());
 			assertThat(myCaptureQueriesListener.getSelectQueriesForCurrentThread().size()).as("we build the bundle with no sql").isEqualTo(0);
 
 			// only one hibernate search took place
@@ -1330,7 +1331,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			IIdType id = myTestDataBuilder.createObservation(List.of(
 				myTestDataBuilder.withObservationCode("http://example.com/", "theCode"),
 				myTestDataBuilder.withId("forcedid")));
-			assertThat(id.getIdPart()).isEqualTo("forcedid");
+			assertEquals("forcedid", id.getIdPart());
 			myCaptureQueriesListener.clear();
 
 			List<String> ids = myTestDaoSearch.searchForIds("Observation?code=theCode");
@@ -1360,8 +1361,8 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			assertThat(observations).hasSize(1);
 			List<? extends IBaseCoding> tags = observations.get(0).getMeta().getTag();
 			assertThat(tags).hasSize(1);
-			assertThat(tags.get(0).getSystem()).isEqualTo("http://example.com");
-			assertThat(tags.get(0).getCode()).isEqualTo("aTag");
+			assertEquals("http://example.com", tags.get(0).getSystem());
+			assertEquals("aTag", tags.get(0).getCode());
 
 			// TODO
 			// we assume tags, etc. are inline,
@@ -1670,7 +1671,7 @@ public class FhirResourceDaoR4SearchWithElasticSearchIT extends BaseJpaTest impl
 			myTestDataBuilder.createObservation(asArray(myTestDataBuilder.withObservationCode("http://example.com/", "code-3")));
 
 			IBundleProvider resultBundle = myTestDaoSearch.searchForBundleProvider("Observation?_total=" + SearchTotalModeEnum.ACCURATE);
-			assertThat(resultBundle.size()).isEqualTo(3);
+			assertEquals(3, resultBundle.size());
 		}
 
 	}

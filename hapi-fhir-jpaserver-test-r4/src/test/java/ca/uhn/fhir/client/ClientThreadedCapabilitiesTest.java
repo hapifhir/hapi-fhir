@@ -1,5 +1,6 @@
 package ca.uhn.fhir.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -85,7 +86,7 @@ public class ClientThreadedCapabilitiesTest {
 		ourLog.info("Total elapsed time: {}", sw);
 
 		int metaClientRequestCount = ((CountingMetaClientInterceptor) myCountingMetaClientInterceptor).getCount();
-		assertThat(metaClientRequestCount).isEqualTo(1);
+		assertEquals(1, metaClientRequestCount);
 	}
 
 

@@ -19,6 +19,7 @@
  */
 package ca.uhn.test.concurrency;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +76,7 @@ public class LockstepEnumPhaser<E extends Enum<E>> {
 	public E arriveAndAwaitSharedEndOf(E thePhase) {
 		checkAwait(thePhase);
 		E current = arrive();
-		assertThat(thePhase).isEqualTo(current);
+		assertEquals(current, thePhase);
 		return doAwait(thePhase);
 	}
 

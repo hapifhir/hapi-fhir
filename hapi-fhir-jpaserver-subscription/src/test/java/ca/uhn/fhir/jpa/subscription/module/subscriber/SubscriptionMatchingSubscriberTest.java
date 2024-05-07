@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -78,7 +79,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		Subscription subscription2 = makeActiveSubscription(criteria2, payload, ourListenerServerBase);
 		sendSubscription(subscription2, null, false);
 
-		assertThat(mySubscriptionRegistry.size()).isEqualTo(2);
+		assertEquals(2, mySubscriptionRegistry.size());
 
 		ourObservationListener.setExpectedCount(1);
 		mySubscriptionResourceMatched.setExpectedCount(1);
@@ -87,7 +88,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		ourObservationListener.awaitExpected();
 
 		assertThat(ourContentTypes).hasSize(1);
-		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
 
 	@Test
@@ -103,7 +104,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		Subscription subscription2 = makeActiveSubscription(criteria2, payload, ourListenerServerBase);
 		sendSubscription(subscription2, null, false);
 
-		assertThat(mySubscriptionRegistry.size()).isEqualTo(2);
+		assertEquals(2, mySubscriptionRegistry.size());
 
 		ourObservationListener.setExpectedCount(1);
 		mySubscriptionResourceMatched.setExpectedCount(1);
@@ -112,7 +113,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		ourObservationListener.awaitExpected();
 
 		assertThat(ourContentTypes).hasSize(1);
-		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_XML_NEW);
+		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
 	@Test
@@ -124,7 +125,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		Subscription subscription = makeActiveSubscription("Observation?", "application/fhir+xml", ourListenerServerBase);
 		sendSubscription(subscription, null, false);
 
-		assertThat(mySubscriptionRegistry.size()).isEqualTo(1);
+		assertEquals(1, mySubscriptionRegistry.size());
 		ourObservationListener.setExpectedCount(1);
 		mySubscriptionResourceMatched.setExpectedCount(1);
 		sendResource(observation);
@@ -132,7 +133,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		ourObservationListener.awaitExpected();
 
 		assertThat(ourContentTypes).hasSize(1);
-		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_XML_NEW);
+		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
 	@Test
@@ -148,7 +149,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		Subscription subscription2 = makeActiveSubscription(criteria2, payload, ourListenerServerBase);
 		sendSubscription(subscription2, null, false);
 
-		assertThat(mySubscriptionRegistry.size()).isEqualTo(2);
+		assertEquals(2, mySubscriptionRegistry.size());
 
 		mySubscriptionAfterDelivery.setExpectedCount(1);
 		ourObservationListener.setExpectedCount(0);
@@ -178,7 +179,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		Subscription subscription3 = makeActiveSubscription(criteria3, payload, ourListenerServerBase);
 		sendSubscription(subscription3, null, false);
 
-		assertThat(mySubscriptionRegistry.size()).isEqualTo(3);
+		assertEquals(3, mySubscriptionRegistry.size());
 
 		ourObservationListener.setExpectedCount(2);
 		mySubscriptionResourceMatched.setExpectedCount(2);
@@ -187,7 +188,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 		ourObservationListener.awaitExpected();
 
 		assertThat(ourContentTypes).hasSize(2);
-		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_XML_NEW);
+		assertEquals(Constants.CT_FHIR_XML_NEW, ourContentTypes.get(0));
 	}
 
 	@Test

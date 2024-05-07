@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.elementmodel;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
@@ -45,7 +46,7 @@ public class PropertyDstu3Test extends BaseValidationTestWithInlineMocks {
         final List<Property> result = property.getChildProperties("id", null);
 			assertThat(result).isNotEmpty();
 			assertThat(result).hasSize(3);
-			assertThat(result.get(0).getDefinition().getPath()).isEqualTo("id.id");
+			assertEquals("id.id", result.get(0).getDefinition().getPath());
     }
 
     @Test
@@ -55,7 +56,7 @@ public class PropertyDstu3Test extends BaseValidationTestWithInlineMocks {
         final List<Property> result = property.getChildProperties("birthdate", null);
 			assertThat(result).isNotEmpty();
 			assertThat(result).hasSize(3);
-			assertThat(result.get(0).getDefinition().getPath()).isEqualTo("date.id");
+			assertEquals("date.id", result.get(0).getDefinition().getPath());
     }
 
     @Test
@@ -65,7 +66,7 @@ public class PropertyDstu3Test extends BaseValidationTestWithInlineMocks {
 			property = new Property(workerContext, ed, sd);
 			property.getChildProperties("birthdate", null);
 			fail("");		} catch (Error e) {
-				assertThat(e.getMessage()).isEqualTo("types == 0, and no children found");
+				assertEquals("types == 0, and no children found", e.getMessage());
 		}
     }
 }

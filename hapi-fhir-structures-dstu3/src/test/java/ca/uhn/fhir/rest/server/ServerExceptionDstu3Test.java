@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -78,8 +79,8 @@ public class ServerExceptionDstu3Test {
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
-			assertThat(status.getFirstHeader("X-Foo").getValue()).isEqualTo("BAR BAR");
+			assertEquals(404, status.getStatusLine().getStatusCode());
+			assertEquals("BAR BAR", status.getFirstHeader("X-Foo").getValue());
 			assertThat(status.getFirstHeader("X-Powered-By").getValue()).contains("HAPI FHIR");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
@@ -117,7 +118,7 @@ public class ServerExceptionDstu3Test {
 
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=json");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(500);
+			assertEquals(500, status.getStatusLine().getStatusCode());
 			byte[] responseContentBytes = IOUtils.toByteArray(status.getEntity().getContent());
 			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
@@ -134,7 +135,7 @@ public class ServerExceptionDstu3Test {
 
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=json");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(500);
+			assertEquals(500, status.getStatusLine().getStatusCode());
 			byte[] responseContentBytes = IOUtils.toByteArray(status.getEntity().getContent());
 			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
@@ -156,7 +157,7 @@ public class ServerExceptionDstu3Test {
 
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=json");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(500);
+			assertEquals(500, status.getStatusLine().getStatusCode());
 			byte[] responseContentBytes = IOUtils.toByteArray(status.getEntity().getContent());
 			String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 			ourLog.info(status.getStatusLine().toString());
@@ -178,7 +179,7 @@ public class ServerExceptionDstu3Test {
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertEquals(201, status.getStatusLine().getStatusCode());
 			assertThat(status.getFirstHeader("Location").getValue()).contains("Patient/123");
 		}
 
@@ -199,8 +200,8 @@ public class ServerExceptionDstu3Test {
 			ourLog.info(status.getStatusLine().toString());
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(401);
-			assertThat(status.getFirstHeader("WWW-Authenticate").getValue()).isEqualTo("Basic realm=\"REALM\"");
+			assertEquals(401, status.getStatusLine().getStatusCode());
+			assertEquals("Basic realm=\"REALM\"", status.getFirstHeader("WWW-Authenticate").getValue());
 		}
 
 	}

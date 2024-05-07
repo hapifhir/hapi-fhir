@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.bulk;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
@@ -803,14 +804,14 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		try(CloseableHttpResponse postResponse = mySender.execute(post)){
 			ourLog.info("Response: {}",postResponse);
-			assertThat(postResponse.getStatusLine().getStatusCode()).isEqualTo(202);
-			assertThat(postResponse.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+			assertEquals(202, postResponse.getStatusLine().getStatusCode());
+			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
 
 			try(CloseableHttpResponse getResponse = mySender.execute(get)){
 				ourLog.info("Get Response: {}", getResponse);
-				assertThat(getResponse.getStatusLine().getStatusCode()).isEqualTo(202);
-				assertThat(getResponse.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
-				assertThat(getResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(postResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+				assertEquals(202, getResponse.getStatusLine().getStatusCode());
+				assertEquals("Accepted", getResponse.getStatusLine().getReasonPhrase());
+				assertEquals(postResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue(), getResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 			}
 		}
 		myInterceptorRegistry.unregisterInterceptor(newInterceptor);
@@ -977,7 +978,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		JobInstance finalJobInstance = verifyBulkExportResults(options, expectedIds, List.of());
-		assertThat(finalJobInstance.getCombinedRecordsProcessed()).isEqualTo(40);
+		assertEquals(40, finalJobInstance.getCombinedRecordsProcessed());
 	}
 
 	@Test
@@ -997,7 +998,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 		JobInstance finalJobInstance = verifyBulkExportResults(options, expectedIds, List.of());
-		assertThat(finalJobInstance.getCombinedRecordsProcessed()).isEqualTo(40);
+		assertEquals(40, finalJobInstance.getCombinedRecordsProcessed());
 	}
 
 
@@ -1034,7 +1035,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
 			JobInstance finalJobInstance = verifyBulkExportResults(options, expectedIds, List.of());
-			assertThat(finalJobInstance.getCombinedRecordsProcessed()).isEqualTo(10);
+			assertEquals(10, finalJobInstance.getCombinedRecordsProcessed());
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof BoysOnlyInterceptor);
@@ -1063,8 +1064,8 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		assertThat(binaryIds).hasSize(2);
 		for (String next : binaryIds) {
 			Binary binary = myBinaryDao.read(new IdType(next), new SystemRequestDetails());
-			assertThat(binary.getSecurityContext().getIdentifier().getSystem()).isEqualTo("http://foo");
-			assertThat(binary.getSecurityContext().getIdentifier().getValue()).isEqualTo("bar");
+			assertEquals("http://foo", binary.getSecurityContext().getIdentifier().getSystem());
+			assertEquals("bar", binary.getSecurityContext().getIdentifier().getValue());
 		}
 	}
 
@@ -1100,7 +1101,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 				assertThat(nextBinaryIdPart).matches("[a-zA-Z0-9]{32}");
 
 				Binary binary = myBinaryDao.read(new IdType(nextBinaryId));
-				assertThat(binary.getContentType()).isEqualTo(Constants.CT_FHIR_NDJSON);
+				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
 
 				String nextNdJsonFileContent = new String(binary.getContent(), Constants.CHARSET_UTF8);
 				try (var iter = new LineIterator(new StringReader(nextNdJsonFileContent))) {

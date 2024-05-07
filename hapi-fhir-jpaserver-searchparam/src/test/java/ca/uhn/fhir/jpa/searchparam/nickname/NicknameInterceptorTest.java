@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.nickname;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.nickname.NicknameSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -28,7 +29,7 @@ class NicknameInterceptorTest {
 
 		// verify
 		String newSearch = sp.toNormalizedQueryString(null);
-		assertThat(newSearch).isEqualTo("?name=ken,kendrick,kenneth,kenny");
+		assertEquals("?name=ken,kendrick,kenneth,kenny", newSearch);
 	}
 
 	@Test
@@ -44,7 +45,7 @@ class NicknameInterceptorTest {
 
 		// verify
 		String newSearch = sp.toNormalizedQueryString(null);
-		assertThat(newSearch).isEqualTo("?name=ken,kendall,kendrick,kendrik,kenna,kenneth,kenny,kent,mckenna,meaka");
+		assertEquals("?name=ken,kendall,kendrick,kendrik,kenna,kenneth,kenny,kent,mckenna,meaka", newSearch);
 	}
 
 	@Test
@@ -60,6 +61,6 @@ class NicknameInterceptorTest {
 
 		// verify
 		String newSearch = sp.toNormalizedQueryString(null);
-		assertThat(newSearch).isEqualTo("?name=x%20%C3%A6%20a-12");
+		assertEquals("?name=x%20%C3%A6%20a-12", newSearch);
 	}
 }

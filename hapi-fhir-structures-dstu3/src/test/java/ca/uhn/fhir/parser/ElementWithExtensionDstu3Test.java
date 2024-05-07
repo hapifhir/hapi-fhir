@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.Extension;
@@ -194,10 +195,10 @@ public class ElementWithExtensionDstu3Test {
 		assertThat(encoded).contains("FOO");
 
 		p = (Patient) parser.parseResource(encoded);
-		assertThat(p.getId()).isEqualTo("Patient/123");
+		assertEquals("Patient/123", p.getId());
 		Extension ex = p.getIdElement().getExtension().get(0);
-		assertThat(ex.getUrl()).isEqualTo("http://foo");
-		assertThat(ex.getValueAsPrimitive().getValueAsString()).isEqualTo("FOO");
+		assertEquals("http://foo", ex.getUrl());
+		assertEquals("FOO", ex.getValueAsPrimitive().getValueAsString());
 
 
 	 }
@@ -215,10 +216,10 @@ public class ElementWithExtensionDstu3Test {
 		assertThat(encoded).contains("FOO");
 
 		p = (Patient) parser.parseResource(encoded);
-		assertThat(p.getId()).isEqualTo("Patient/123");
+		assertEquals("Patient/123", p.getId());
 		Extension ex = p.getIdElement().getExtension().get(0);
-		assertThat(ex.getUrl()).isEqualTo("http://foo");
-		assertThat(ex.getValueAsPrimitive().getValueAsString()).isEqualTo("FOO");
+		assertEquals("http://foo", ex.getUrl());
+		assertEquals("FOO", ex.getValueAsPrimitive().getValueAsString());
 
 
 	}

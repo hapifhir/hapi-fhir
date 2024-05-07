@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.delete;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -59,7 +60,7 @@ public class DeleteConflictServiceTest {
 		list.add(link);
 		when(myDeleteConflictFinderService.findConflicts(any(), anyInt())).thenReturn(list);
 		int retryCount = myDeleteConflictService.validateOkToDelete(deleteConflicts, entity, false, null, new TransactionDetails());
-		assertThat(retryCount).isEqualTo(0);
+		assertEquals(0, retryCount);
 	}
 
 	static class SpringConfig {

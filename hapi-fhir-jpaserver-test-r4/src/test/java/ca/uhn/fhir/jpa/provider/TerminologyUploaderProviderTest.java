@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -20,7 +21,7 @@ public class TerminologyUploaderProviderTest extends BaseTest {
 
 		CodeSystem canonical = provider.canonicalizeCodeSystem(input);
 
-		assertThat(canonical.getConcept().get(0).getCode()).isEqualTo("FOO");
+		assertEquals("FOO", canonical.getConcept().get(0).getCode());
 	}
 
 	@Test
@@ -33,7 +34,7 @@ public class TerminologyUploaderProviderTest extends BaseTest {
 
 		CodeSystem canonical = provider.canonicalizeCodeSystem(input);
 
-		assertThat(canonical.getConcept().get(0).getCode()).isEqualTo("FOO");
+		assertEquals("FOO", canonical.getConcept().get(0).getCode());
 	}
 
 	@Test
@@ -46,7 +47,7 @@ public class TerminologyUploaderProviderTest extends BaseTest {
 
 		CodeSystem canonical = provider.canonicalizeCodeSystem(input);
 
-		assertThat(canonical.getConcept().get(0).getCode()).isEqualTo("FOO");
+		assertEquals("FOO", canonical.getConcept().get(0).getCode());
 	}
 
 	@Test
@@ -59,7 +60,7 @@ public class TerminologyUploaderProviderTest extends BaseTest {
 		try {
 			provider.canonicalizeCodeSystem(input);
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1769) + "Resource 'Patient' is not a CodeSystem");
+			assertEquals(Msg.code(1769) + "Resource 'Patient' is not a CodeSystem", e.getMessage());
 		}
 
 	}

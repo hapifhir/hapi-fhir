@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.model.entity.TagDefinition;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
@@ -312,7 +313,7 @@ public class BaseHapiFhirDaoTest {
 
 		// verify
 		assertThat(outcomes).hasSize(1);
-		assertThat(counter.get()).isEqualTo(threads);
+		assertEquals(threads, counter.get());
 		assertThat(errors.size()).as(errors.values().stream().map(Throwable::getMessage)
 			.collect(Collectors.joining(", "))).isEqualTo(0);
 
@@ -386,10 +387,10 @@ public class BaseHapiFhirDaoTest {
 
 	@Test
 	public void cleanProvenanceSourceUri() {
-		assertThat(MetaUtil.cleanProvenanceSourceUriOrEmpty(null)).isEqualTo("");
-		assertThat(MetaUtil.cleanProvenanceSourceUriOrEmpty("abc")).isEqualTo("abc");
-		assertThat(MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#")).isEqualTo("abc");
-		assertThat(MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def")).isEqualTo("abc");
-		assertThat(MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def#ghi")).isEqualTo("abc");
+		assertEquals("", MetaUtil.cleanProvenanceSourceUriOrEmpty(null));
+		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc"));
+		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#"));
+		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def"));
+		assertEquals("abc", MetaUtil.cleanProvenanceSourceUriOrEmpty("abc#def#ghi"));
 	}
 }

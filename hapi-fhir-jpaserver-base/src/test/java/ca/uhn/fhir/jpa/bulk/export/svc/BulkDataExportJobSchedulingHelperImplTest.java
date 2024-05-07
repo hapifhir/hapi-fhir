@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.bulk.export.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
@@ -95,7 +96,7 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		verify(myJpaJobPersistence, never()).deleteInstanceAndChunks(anyString());
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
-		assertThat(DateUtils.truncate(cutoffDate, Calendar.SECOND)).isEqualTo(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.SECOND));
+		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.SECOND), DateUtils.truncate(cutoffDate, Calendar.SECOND));
 	}
 
 	@Test

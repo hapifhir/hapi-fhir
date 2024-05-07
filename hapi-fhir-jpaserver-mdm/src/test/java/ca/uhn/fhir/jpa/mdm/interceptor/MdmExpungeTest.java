@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
@@ -54,9 +55,9 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 
 	@Test
 	public void testUninterceptedDeleteRemovesMdmReference() {
-		assertThat(myMdmLinkDao.count()).isEqualTo(1);
+		assertEquals(1, myMdmLinkDao.count());
 		myPatientDao.delete(myTargetEntity.getIdDt());
-		assertThat(myMdmLinkDao.count()).isEqualTo(1);
+		assertEquals(1, myMdmLinkDao.count());
 		ExpungeOptions expungeOptions = new ExpungeOptions();
 		expungeOptions.setExpungeDeletedResources(true);
 		try {
@@ -68,7 +69,7 @@ public class MdmExpungeTest extends BaseMdmR4Test {
 		}
 		myInterceptorService.registerInterceptor(myMdmStorageInterceptor);
 		myPatientDao.expunge(myTargetId.toVersionless(), expungeOptions, null);
-		assertThat(myMdmLinkDao.count()).isEqualTo(0);
+		assertEquals(0, myMdmLinkDao.count());
 	}
 
 	@AfterEach

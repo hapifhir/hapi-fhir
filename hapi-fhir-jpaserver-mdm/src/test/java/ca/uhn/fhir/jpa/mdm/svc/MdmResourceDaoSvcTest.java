@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -58,7 +59,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 
 		Optional<IAnyResource> foundGoldenResource = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");
 		assertThat(foundGoldenResource).isPresent();
-		assertThat(foundGoldenResource.get().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue(), foundGoldenResource.get().getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
@@ -71,7 +72,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 
 		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient");
 		assertThat(foundSourcePatient).isPresent();
-		assertThat(foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue(), foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
@@ -87,7 +88,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 
 		Optional<IAnyResource> foundSourcePatient = myResourceDaoSvc.searchGoldenResourceByEID(TEST_EID, "Patient", requestPartitionId);
 		assertThat(foundSourcePatient).isPresent();
-		assertThat(foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(goodSourcePatient.getIdElement().toUnqualifiedVersionless().getValue(), foundSourcePatient.get().getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test

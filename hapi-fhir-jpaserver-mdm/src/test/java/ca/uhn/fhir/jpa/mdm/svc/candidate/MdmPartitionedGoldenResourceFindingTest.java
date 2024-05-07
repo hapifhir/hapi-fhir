@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -66,6 +67,6 @@ public class MdmPartitionedGoldenResourceFindingTest extends BaseMdmR4Test {
 		assertThat(links2).hasSize(1);
 		Long jane2GoldenResourceId = links2.get(0).getGoldenResourcePersistenceId().getId();
 
-		assertThat(jane2GoldenResourceId).isEqualTo(janeOriginalGoldenResourceId);
+		assertEquals(janeOriginalGoldenResourceId, jane2GoldenResourceId);
 	}
 }

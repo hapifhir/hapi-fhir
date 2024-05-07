@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.migrate.taskdef.ColumnTypeEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -68,7 +69,7 @@ public class JdbcUtilsTest {
 		JdbcUtils.ColumnType testColumnType = JdbcUtils.getColumnType(myConnectionProperties, "TEST_TABLE", "TEST_COLUMN");
 		ourLog.info("Column type: {}", testColumnType);
 
-		assertThat(testColumnType.getColumnTypeEnum()).isEqualTo(theExpectedColumnType);
+		assertEquals(theExpectedColumnType, testColumnType.getColumnTypeEnum());
 	}
 
 	@Test

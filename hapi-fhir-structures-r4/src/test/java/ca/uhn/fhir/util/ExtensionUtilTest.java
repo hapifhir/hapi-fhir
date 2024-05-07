@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -36,8 +37,8 @@ class ExtensionUtilTest {
 		assertThat(ExtensionUtil.getExtensionsByUrl(p1, EXT_URL)).hasSize(1);
 
 		IBaseDatatype ext = ExtensionUtil.getExtensionByUrl(p1, EXT_URL).getValue();
-		assertThat(ext.fhirType()).isEqualTo("integer");
-		assertThat(((PrimitiveType) ext).asStringValue()).isEqualTo("1");
+		assertEquals("integer", ext.fhirType());
+		assertEquals("1", ((PrimitiveType) ext).asStringValue());
 	}
 
 	@Test
@@ -47,7 +48,7 @@ class ExtensionUtilTest {
 		assertNotNull(ExtensionUtil.addExtension(p, "myUrl"));
 
 		assertThat(p.getExtension()).hasSize(2);
-		assertThat(p.getExtension().get(1).getUrl()).isEqualTo("myUrl");
+		assertEquals("myUrl", p.getExtension().get(1).getUrl());
 	}
 
 	@Test

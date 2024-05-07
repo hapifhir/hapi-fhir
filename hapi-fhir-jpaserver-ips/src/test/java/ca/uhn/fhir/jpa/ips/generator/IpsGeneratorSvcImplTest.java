@@ -160,12 +160,12 @@ public class IpsGeneratorSvcImplTest {
 
 		// Allergy and Intolerances has no content
 		section = composition.getSection().get(0);
-		assertThat(section.getTitle()).isEqualTo("Allergies and Intolerances");
+		assertEquals("Allergies and Intolerances", section.getTitle());
 		assertThat(section.getText().getDivAsString()).contains("No information about allergies");
 
 		// Medication Summary has a resource
 		section = composition.getSection().get(1);
-		assertThat(section.getTitle()).isEqualTo("Medication List");
+		assertEquals("Medication List", section.getTitle());
 		assertThat(section.getText().getDivAsString()).contains("Oral use");
 
 		// Composition itself should also have a narrative
@@ -219,10 +219,10 @@ public class IpsGeneratorSvcImplTest {
 		assertThat(tables).hasSize(1);
 		HtmlTable table = (HtmlTable) tables.get(0);
 		int onsetIndex = 6;
-		assertThat(table.getHeader().getRows().get(0).getCell(onsetIndex).asNormalizedText()).isEqualTo("Onset");
-		assertThat(table.getBodies().get(0).getRows().get(0).getCell(onsetIndex).asNormalizedText()).isEqualTo(new DateTimeType("2020-02-03T11:22:33Z").getValue().toString());
-		assertThat(table.getBodies().get(0).getRows().get(1).getCell(onsetIndex).asNormalizedText()).isEqualTo("Some Onset");
-		assertThat(table.getBodies().get(0).getRows().get(2).getCell(onsetIndex).asNormalizedText()).isEqualTo("");
+		assertEquals("Onset", table.getHeader().getRows().get(0).getCell(onsetIndex).asNormalizedText());
+		assertEquals(new DateTimeType("2020-02-03T11:22:33Z").getValue().toString(), table.getBodies().get(0).getRows().get(0).getCell(onsetIndex).asNormalizedText());
+		assertEquals("Some Onset", table.getBodies().get(0).getRows().get(1).getCell(onsetIndex).asNormalizedText());
+		assertEquals("", table.getBodies().get(0).getRows().get(2).getCell(onsetIndex).asNormalizedText());
 	}
 
 	@Test
@@ -278,7 +278,7 @@ public class IpsGeneratorSvcImplTest {
 		MedicationStatement actualMedicationStatement = (MedicationStatement) outcome.getEntry().get(3).getResource();
 		Medication actualMedication = (Medication) outcome.getEntry().get(4).getResource();
 		assertThat(actualMedication.getId()).startsWith("urn:uuid:");
-		assertThat(actualMedicationStatement.getMedicationReference().getReference()).isEqualTo(actualMedication.getId());
+		assertEquals(actualMedication.getId(), actualMedicationStatement.getMedicationReference().getReference());
 
 		// Verify
 		Composition compositions = (Composition) outcome.getEntry().get(0).getResource();
@@ -291,10 +291,10 @@ public class IpsGeneratorSvcImplTest {
 		assertThat(tables).hasSize(1);
 		HtmlTable table = (HtmlTable) tables.get(0);
 		HtmlTableRow row = table.getBodies().get(0).getRows().get(0);
-		assertThat(row.getCell(0).asNormalizedText()).isEqualTo("Tylenol");
-		assertThat(row.getCell(1).asNormalizedText()).isEqualTo("Active");
-		assertThat(row.getCell(2).asNormalizedText()).isEqualTo("Oral");
-		assertThat(row.getCell(3).asNormalizedText()).isEqualTo("DAW");
+		assertEquals("Tylenol", row.getCell(0).asNormalizedText());
+		assertEquals("Active", row.getCell(1).asNormalizedText());
+		assertEquals("Oral", row.getCell(2).asNormalizedText());
+		assertEquals("DAW", row.getCell(3).asNormalizedText());
 		assertThat(row.getCell(4).asNormalizedText()).contains("2023");
 	}
 
@@ -328,10 +328,10 @@ public class IpsGeneratorSvcImplTest {
 		assertThat(tables).hasSize(1);
 		HtmlTable table = (HtmlTable) tables.get(0);
 		HtmlTableRow row = table.getBodies().get(0).getRows().get(0);
-		assertThat(row.getCell(0).asNormalizedText()).isEqualTo("");
-		assertThat(row.getCell(1).asNormalizedText()).isEqualTo("Active");
-		assertThat(row.getCell(2).asNormalizedText()).isEqualTo("");
-		assertThat(row.getCell(3).asNormalizedText()).isEqualTo("");
+		assertEquals("", row.getCell(0).asNormalizedText());
+		assertEquals("Active", row.getCell(1).asNormalizedText());
+		assertEquals("", row.getCell(2).asNormalizedText());
+		assertEquals("", row.getCell(3).asNormalizedText());
 	}
 
 	@Test
@@ -484,9 +484,9 @@ public class IpsGeneratorSvcImplTest {
 		assertThat(tables).hasSize(1);
 		HtmlTable table = (HtmlTable) tables.get(0);
 		HtmlTableRow row = table.getBodies().get(0).getRows().get(0);
-		assertThat(row.getCell(0).asNormalizedText()).isEqualTo("Pacemaker");
-		assertThat(row.getCell(1).asNormalizedText()).isEqualTo("ACTIVE");
-		assertThat(row.getCell(2).asNormalizedText()).isEqualTo("This is some note text");
+		assertEquals("Pacemaker", row.getCell(0).asNormalizedText());
+		assertEquals("ACTIVE", row.getCell(1).asNormalizedText());
+		assertEquals("This is some note text", row.getCell(2).asNormalizedText());
 	}
 
 	@Test
@@ -532,12 +532,12 @@ public class IpsGeneratorSvcImplTest {
 		assertThat(tables).hasSize(1);
 		HtmlTable table = (HtmlTable) tables.get(0);
 		HtmlTableRow row = table.getBodies().get(0).getRows().get(0);
-		assertThat(row.getCell(0).asNormalizedText()).isEqualTo("SpikeVax");
-		assertThat(row.getCell(1).asNormalizedText()).isEqualTo("COMPLETED");
-		assertThat(row.getCell(2).asNormalizedText()).isEqualTo("2 , 4");
-		assertThat(row.getCell(3).asNormalizedText()).isEqualTo("Pfizer Inc");
-		assertThat(row.getCell(4).asNormalizedText()).isEqualTo("35");
-		assertThat(row.getCell(5).asNormalizedText()).isEqualTo("Hello World");
+		assertEquals("SpikeVax", row.getCell(0).asNormalizedText());
+		assertEquals("COMPLETED", row.getCell(1).asNormalizedText());
+		assertEquals("2 , 4", row.getCell(2).asNormalizedText());
+		assertEquals("Pfizer Inc", row.getCell(3).asNormalizedText());
+		assertEquals("35", row.getCell(4).asNormalizedText());
+		assertEquals("Hello World", row.getCell(5).asNormalizedText());
 		assertThat(row.getCell(6).asNormalizedText()).contains("2023");
 	}
 
@@ -596,11 +596,11 @@ public class IpsGeneratorSvcImplTest {
 		assertThat(addedEncounter.getId()).startsWith("urn:uuid:");
 		MedicationStatement addedMedicationStatement = findEntryResource(outcome, MedicationStatement.class, 0, 1);
 		assertThat(addedMedicationStatement.getId()).startsWith("urn:uuid:");
-		assertThat(addedMedicationStatement.getMedicationCodeableConcept().getCodingFirstRep().getCode()).isEqualTo("no-medication-info");
-		assertThat(addedCondition.getSubject().getReference()).isEqualTo(addedPatient.getId());
-		assertThat(addedCondition.getEncounter().getReference()).isEqualTo(addedEncounter.getId());
-		assertThat(addedEncounter.getSubject().getReference()).isEqualTo(addedPatient.getId());
-		assertThat(addedMedicationStatement.getSubject().getReference()).isEqualTo(addedPatient.getId());
+		assertEquals("no-medication-info", addedMedicationStatement.getMedicationCodeableConcept().getCodingFirstRep().getCode());
+		assertEquals(addedPatient.getId(), addedCondition.getSubject().getReference());
+		assertEquals(addedEncounter.getId(), addedCondition.getEncounter().getReference());
+		assertEquals(addedPatient.getId(), addedEncounter.getSubject().getReference());
+		assertEquals(addedPatient.getId(), addedMedicationStatement.getSubject().getReference());
 
 		// Verify sections
 		ourLog.info("Resource: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));

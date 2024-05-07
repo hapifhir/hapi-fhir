@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client.apache;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -51,10 +52,10 @@ public class ApacheClientIntegrationTest {
 	@Test
 	public void testSearchWithParam() {
 		Bundle response = ourServer.getFhirClient().search().forResource(Patient.class).where(Patient.NAME.matches().value("FOO")).returnBundle(Bundle.class).execute();
-		assertThat(ourLastMethod).isEqualTo("search");
-		assertThat(ourLastName.getValue()).isEqualTo("FOO");
+		assertEquals("search", ourLastMethod);
+		assertEquals("FOO", ourLastName.getValue());
 		assertThat(response.getEntry()).hasSize(1);
-		assertThat(response.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo("123");
+		assertEquals("123", response.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
 	
 	@AfterAll

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -27,9 +28,9 @@ class ValueSetAutocompleteSearchTest {
 			makeCoding(entry);
 
 			assertNotNull(myCoding);
-			assertThat(myCoding.getSystem()).isEqualTo("http://loinc.org");
-			assertThat(myCoding.getCode()).isEqualTo("4544-3");
-			assertThat(myCoding.getDisplay()).isEqualTo("Hematocrit [Volume Fraction] of Blood by Automated count");
+			assertEquals("http://loinc.org", myCoding.getSystem());
+			assertEquals("4544-3", myCoding.getCode());
+			assertEquals("Hematocrit [Volume Fraction] of Blood by Automated count", myCoding.getDisplay());
 		}
 
 		@Test
@@ -40,8 +41,8 @@ class ValueSetAutocompleteSearchTest {
 
 			assertNotNull(myCoding);
 			assertNull(myCoding.getSystem());
-			assertThat(myCoding.getCode()).isEqualTo("some_code");
-			assertThat(myCoding.getDisplay()).isEqualTo("Some text");
+			assertEquals("some_code", myCoding.getCode());
+			assertEquals("Some text", myCoding.getDisplay());
 		}
 
 		@Test
@@ -52,7 +53,7 @@ class ValueSetAutocompleteSearchTest {
 
 			assertNotNull(myCoding);
 			assertNull(myCoding.getSystem());
-			assertThat(myCoding.getCode()).isEqualTo("some_code");
+			assertEquals("some_code", myCoding.getCode());
 			assertNull(myCoding.getDisplay());
 
 		}

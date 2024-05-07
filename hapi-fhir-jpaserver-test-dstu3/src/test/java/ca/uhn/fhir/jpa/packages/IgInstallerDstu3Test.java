@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.packages;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -229,7 +230,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 			);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1297) + "Package ID nictiz.fhir.nl.stu3.questionnaires doesn't match expected: blah");
+			assertEquals(Msg.code(1297) + "Package ID nictiz.fhir.nl.stu3.questionnaires doesn't match expected: blah", e.getMessage());
 		}
 
 	}
@@ -244,7 +245,7 @@ public class IgInstallerDstu3Test extends BaseJpaDstu3Test {
 			);
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1303) + "Received HTTP 404 from URL: " + myServer.getBaseUrl() + "/foo.tgz");
+			assertEquals(Msg.code(1303) + "Received HTTP 404 from URL: " + myServer.getBaseUrl() + "/foo.tgz", e.getMessage());
 		}
 
 	}

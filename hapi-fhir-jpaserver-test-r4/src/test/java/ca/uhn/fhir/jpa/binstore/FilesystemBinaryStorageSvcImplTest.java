@@ -74,7 +74,7 @@ public class FilesystemBinaryStorageSvcImplTest {
 		String contentType = "image/png";
 		String blobId = "ABCDEFGHIJKLMNOPQRSTUV";
 		StoredDetails outcome = mySvc.storeBinaryContent(id, blobId, contentType, new ByteArrayInputStream(SOME_BYTES), new ServletRequestDetails());
-		assertThat(outcome.getBinaryContentId()).isEqualTo(blobId);
+		assertEquals(blobId, outcome.getBinaryContentId());
 
 		ourLog.info("Got id: {}", outcome);
 
@@ -99,7 +99,7 @@ public class FilesystemBinaryStorageSvcImplTest {
 			mySvc.fetchBinaryContent(new IdType("Patient/123"), "1111111");
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1327) + "Unknown blob ID: 1111111 for resource ID Patient/123");
+			assertEquals(Msg.code(1327) + "Unknown blob ID: 1111111 for resource ID Patient/123", e.getMessage());
 		}
 	}
 
@@ -123,7 +123,7 @@ public class FilesystemBinaryStorageSvcImplTest {
 
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();
 		mySvc.writeBinaryContent(id, outcome.getBinaryContentId(), capture);
-		assertThat(capture.size()).isEqualTo(0);
+		assertEquals(0, capture.size());
 	}
 
 	@Test
@@ -137,7 +137,7 @@ public class FilesystemBinaryStorageSvcImplTest {
 			mySvc.storeBinaryContent(id, null, contentType, new ByteArrayInputStream(SOME_BYTES), new ServletRequestDetails());
 			fail("");
 		} catch (PayloadTooLargeException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1343) + "Binary size exceeds maximum: 5");
+			assertEquals(Msg.code(1343) + "Binary size exceeds maximum: 5", e.getMessage());
 		}
 
 

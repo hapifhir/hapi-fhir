@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -70,13 +71,13 @@ public class ExceptionInterceptorMethodTest {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=throwUnprocessableEntityException");
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			ourLog.info(IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8));
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(422);
+			assertEquals(422, status.getStatusLine().getStatusCode());
 		}
 
 		ArgumentCaptor<BaseServerResponseException> captor = ArgumentCaptor.forClass(BaseServerResponseException.class);
 		verify(myInterceptor, times(1)).handleException(any(RequestDetails.class), captor.capture(), any(HttpServletRequest.class), any(HttpServletResponse.class));
 
-		assertThat(captor.getValue().getClass()).isEqualTo(UnprocessableEntityException.class);
+		assertEquals(UnprocessableEntityException.class, captor.getValue().getClass());
 	}
 
 	@Test
@@ -98,8 +99,8 @@ public class ExceptionInterceptorMethodTest {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(405);
-			assertThat(responseContent).isEqualTo("HELP IM A BUG");
+			assertEquals(405, status.getStatusLine().getStatusCode());
+			assertEquals("HELP IM A BUG", responseContent);
 		}
 
 	}

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -116,18 +117,18 @@ public class OperationGenericServer2R4Test {
 		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/123/$OP_INSTANCE");
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
 			status.getEntity().getContent().close();
 
 			CodeType param1 = (CodeType) ourLastParam1;
-			assertThat(param1.getValue()).isEqualTo("PARAM1val");
+			assertEquals("PARAM1val", param1.getValue());
 
 			Coding param2 = (Coding) ourLastParam2;
-			assertThat(param2.getSystem()).isEqualTo("sys");
-			assertThat(param2.getCode()).isEqualTo("val");
-			assertThat(param2.getDisplay()).isEqualTo("dis");
+			assertEquals("sys", param2.getSystem());
+			assertEquals("val", param2.getCode());
+			assertEquals("dis", param2.getDisplay());
 		}
 
 	}
@@ -172,16 +173,16 @@ public class OperationGenericServer2R4Test {
 		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/123/$OP_INSTANCE");
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
 			status.getEntity().getContent().close();
 
 			List<IPrimitiveType<String>> param1 = (List<IPrimitiveType<String>>) ourLastParam1;
 			assertThat(param1).hasSize(2);
-			assertThat(param1.get(0).getClass()).isEqualTo(CodeType.class);
-			assertThat(param1.get(0).getValue()).isEqualTo("PARAM1val");
-			assertThat(param1.get(1).getValue()).isEqualTo("PARAM1val2");
+			assertEquals(CodeType.class, param1.get(0).getClass());
+			assertEquals("PARAM1val", param1.get(0).getValue());
+			assertEquals("PARAM1val2", param1.get(1).getValue());
 		}
 
 	}
@@ -231,16 +232,16 @@ public class OperationGenericServer2R4Test {
 		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/123/$OP_INSTANCE");
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
 			status.getEntity().getContent().close();
 
 			UriType param1 = (UriType) ourLastParam1;
-			assertThat(param1.getValue()).isEqualTo("PARAM1val");
+			assertEquals("PARAM1val", param1.getValue());
 
 			List<StringType> param2 = (List<StringType>) ourLastParam2;
-			assertThat(param2.get(0).getValue()).isEqualTo("PARAM2val");
+			assertEquals("PARAM2val", param2.get(0).getValue());
 		}
 
 	}
@@ -303,10 +304,10 @@ public class OperationGenericServer2R4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			status.getEntity().getContent().close();
 
-			assertThat(ourLastId.getIdPart()).isEqualTo("123");
+			assertEquals("123", ourLastId.getIdPart());
 		}
 
 	}
@@ -329,7 +330,7 @@ public class OperationGenericServer2R4Test {
 			ourServer.registerProvider(provider);
 			fail("");		} catch (ConfigurationException e) {
 			Throwable cause = e.getCause();
-			assertThat(cause.getMessage()).isEqualTo(Msg.code(423) + "Failed to bind method public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationGenericServer2R4Test$2PlainProvider.opInstance() - " + Msg.code(1684) + "Unknown resource name \"FOO\" (this name is not known in FHIR version \"R4\")");
+			assertEquals(Msg.code(423) + "Failed to bind method public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationGenericServer2R4Test$2PlainProvider.opInstance() - " + Msg.code(1684) + "Unknown resource name \"FOO\" (this name is not known in FHIR version \"R4\")", cause.getMessage());
 		}
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -60,7 +61,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		IBundleProvider result = myPatientDao.search(params);
 		assertThat(toUnqualifiedVersionlessIdValues(result)).containsExactlyInAnyOrder(pt0id.getValue());
 		pt0 = (Patient) result.getResources(0, 1).get(0);
-		assertThat(pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE)).isEqualTo("urn:source:0#a_request_id");
+		assertEquals("urn:source:0#a_request_id", pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE));
 
 		// Search by request ID
 		params = new SearchParameterMap();
@@ -169,7 +170,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		pt0 = myPatientDao.read(pt0id);
-		assertThat(pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE)).isEqualTo("urn:source:0");
+		assertEquals("urn:source:0", pt0.getMeta().getExtensionString(HapiExtensions.EXT_META_SOURCE));
 
 		pt0.getMeta().getExtension().clear();
 		pt0.setActive(false);
@@ -214,7 +215,7 @@ public class FhirResourceDaoDstu3SourceTest extends BaseJpaDstu3Test {
 		try {
 			myPatientDao.search(params);
 		} catch (InvalidRequestException e) {
-			assertThat(Msg.code(1216) + "The _source parameter is disabled on this server").isEqualTo(e.getMessage());
+			assertEquals(e.getMessage(), Msg.code(1216) + "The _source parameter is disabled on this server");
 		}
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -161,7 +162,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 				.setExpungeOldVersions(true), null);
 			fail("");
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(969) + "Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version");
+			assertEquals(Msg.code(969) + "Can not perform version-specific expunge of resource Patient/PT-TWOVERSION/_history/2 as this is the current version", e.getMessage());
 		}
 	}
 
@@ -297,7 +298,7 @@ public class ResourceProviderExpungeDstu3Test extends BaseResourceProviderDstu3T
 				.setLimit(0), null);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1087) + "Expunge limit may not be less than 1.  Received expunge limit 0.");
+			assertEquals(Msg.code(1087) + "Expunge limit may not be less than 1.  Received expunge limit 0.", e.getMessage());
 		}
 	}
 

@@ -137,7 +137,7 @@ public class ElementsParamR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, status.getStatusLine().getStatusCode());
 		}
 
 	}

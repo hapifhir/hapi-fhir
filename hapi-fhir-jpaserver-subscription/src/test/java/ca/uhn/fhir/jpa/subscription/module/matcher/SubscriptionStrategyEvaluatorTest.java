@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module.matcher;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.module.BaseSubscriptionDstu3Test;
@@ -45,11 +46,11 @@ public class SubscriptionStrategyEvaluatorTest extends BaseSubscriptionDstu3Test
 	}
 
 	private void assertDatabase(String theCriteria) {
-		assertThat(mySubscriptionStrategyEvaluator.determineStrategy(theCriteria)).isEqualTo(SubscriptionMatchingStrategy.DATABASE);
+		assertEquals(SubscriptionMatchingStrategy.DATABASE, mySubscriptionStrategyEvaluator.determineStrategy(theCriteria));
 	}
 
 	private void assertInMemory(String theCriteria) {
-		assertThat(mySubscriptionStrategyEvaluator.determineStrategy(theCriteria)).isEqualTo(SubscriptionMatchingStrategy.IN_MEMORY);
+		assertEquals(SubscriptionMatchingStrategy.IN_MEMORY, mySubscriptionStrategyEvaluator.determineStrategy(theCriteria));
 	}
 }
 

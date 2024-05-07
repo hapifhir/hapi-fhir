@@ -1,5 +1,6 @@
 package ca.uhn.fhir.android.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -91,7 +92,7 @@ public class GenericClientDstu3IT {
 	}
 
 	private void validateUserAgent(ArgumentCaptor<Request> capt) {
-		assertThat(capt.getAllValues().get(0).header("User-Agent")).isEqualTo(expectedUserAgent());
+		assertEquals(expectedUserAgent(), capt.getAllValues().get(0).header("User-Agent"));
 	}
 
 	@Test
@@ -127,13 +128,13 @@ public class GenericClientDstu3IT {
 		assertThat(request.url().toString()).startsWith("http://example.com/fhir/Binary");
 		validateUserAgent(capt);
 
-		assertThat(request.body().contentType().toString().toLowerCase().replace(" ", "")).isEqualTo(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8");
-		assertThat(request.header("Accept")).isEqualTo(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
+		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", request.body().contentType().toString().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, request.header("Accept"));
 		Binary output = ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt));
-		assertThat(output.getContentType()).isEqualTo(Constants.CT_FHIR_JSON);
+		assertEquals(Constants.CT_FHIR_JSON, output.getContentType());
 
 		Patient outputPt = (Patient) ourCtx.newJsonParser().parseResource(new String(output.getContent(), StandardCharsets.UTF_8));
-		assertThat(outputPt.getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">A PATIENT</div>");
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">A PATIENT</div>", outputPt.getText().getDivAsString());
 	}
 
 	/**
@@ -158,7 +159,7 @@ public class GenericClientDstu3IT {
       	.returnBundle(Bundle.class)
       	.execute();
 
-		assertThat(capt.getAllValues().get(idx).url().toString()).isEqualTo("http://example.com/fhir/Patient?_format=json");
+		assertEquals("http://example.com/fhir/Patient?_format=json", capt.getAllValues().get(idx).url().toString());
 		idx++;
 		
 	}
@@ -194,11 +195,11 @@ public class GenericClientDstu3IT {
 		Request request = capt.getAllValues().get(0);
 		ourLog.info(request.headers().toString());
 
-		assertThat(request.url().toString()).isEqualTo("http://example.com/fhir/Binary?_format=json");
+		assertEquals("http://example.com/fhir/Binary?_format=json", request.url().toString());
 		validateUserAgent(capt);
 
-		assertThat(request.body().contentType().toString().toLowerCase().replace(" ", "")).isEqualTo(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8");
-		assertThat(request.header("Accept")).isEqualTo(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY);
+		assertEquals(Constants.CT_FHIR_JSON_NEW + ";charset=utf-8", request.body().contentType().toString().toLowerCase().replace(" ", ""));
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_JSON_NON_LEGACY, request.header("Accept"));
 		assertThat(ourCtx.newJsonParser().parseResource(Binary.class, extractBodyAsString(capt)).getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 
 	}
@@ -269,8 +270,8 @@ public class GenericClientDstu3IT {
 		assertNotNull(outcome.getResource());
 
 		assertThat(capt.getAllValues()).hasSize(1);
-		assertThat(((Patient) outcome.getResource()).getText().getDivAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>");
-		assertThat(capt.getAllValues().get(0).url().toString()).isEqualTo("http://example.com/fhir/Patient?_format=json");
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">FINAL VALUE</div>", ((Patient) outcome.getResource()).getText().getDivAsString());
+		assertEquals("http://example.com/fhir/Patient?_format=json", capt.getAllValues().get(0).url().toString());
 	}
 
 	

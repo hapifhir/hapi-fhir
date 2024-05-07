@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jaxrs.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jaxrs.server.interceptor.JaxRsResponseException;
@@ -55,7 +56,7 @@ public class AbstractJaxRsProviderTest {
 		provider.setUriInfo(uriInfo);
 		final Response result = provider.handleException(theRequest, theException);
 		assertNotNull(result);
-		assertThat(result.getStatus()).isEqualTo(Constants.STATUS_HTTP_400_BAD_REQUEST);
+		assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, result.getStatus());
 	}
 
 	@Test
@@ -64,7 +65,7 @@ public class AbstractJaxRsProviderTest {
 		final JaxRsResponseException theException = new JaxRsResponseException(base);
 		final Response result = provider.handleException(theRequest, theException);
 		assertNotNull(result);
-		assertThat(result.getStatus()).isEqualTo(base.getStatusCode());
+		assertEquals(base.getStatusCode(), result.getStatus());
 	}
 
 	@Test
@@ -81,7 +82,7 @@ public class AbstractJaxRsProviderTest {
 		provider.setUriInfo(mockUriInfo);
 		final Response result = provider.handleException(theRequest, theException);
 		assertNotNull(result);
-		assertThat(result.getStatus()).isEqualTo(Constants.STATUS_HTTP_500_INTERNAL_ERROR);
+		assertEquals(Constants.STATUS_HTTP_500_INTERNAL_ERROR, result.getStatus());
 	}
 
 }

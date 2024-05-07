@@ -68,7 +68,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		tableCapt = ArgumentCaptor.forClass(IBaseResource.class);
 		verify(interceptor, times(1)).resourceCreated(detailsCapt.capture(), tableCapt.capture());
 		assertNotNull(tableCapt.getValue().getIdElement().getIdPart());
-		assertThat(tableCapt.getValue().getIdElement().getIdPartAsLong()).isEqualTo(id);
+		assertEquals(id, tableCapt.getValue().getIdElement().getIdPartAsLong());
 
 		detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		tableCapt = ArgumentCaptor.forClass(IBaseResource.class);
@@ -80,7 +80,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		p = new Patient();
 		p.addName().setFamily("PATIENT1");
 		Long id2 = myPatientDao.create(p, "Patient?family=PATIENT", mySrd).getId().getIdPartAsLong();
-		assertThat(id2).isEqualTo(id);
+		assertEquals(id, id2);
 
 		detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		tableCapt = ArgumentCaptor.forClass(IBaseResource.class);
@@ -120,7 +120,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		tableCapt = ArgumentCaptor.forClass(IBaseResource.class);
 		verify(interceptor, times(1)).resourceDeleted(detailsCapt.capture(), tableCapt.capture());
 		assertNotNull(tableCapt.getValue().getIdElement().getIdPart());
-		assertThat(tableCapt.getValue().getIdElement().getIdPartAsLong()).isEqualTo(id);
+		assertEquals(id, tableCapt.getValue().getIdElement().getIdPartAsLong());
 
 	}
 
@@ -136,7 +136,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		p.setId(new IdType(id));
 		p.addName().setFamily("PATIENT1");
 		Long id2 = myPatientDao.update(p, mySrd).getId().getIdPartAsLong();
-		assertThat(id2).isEqualTo(id);
+		assertEquals(id, id2);
 
 		ArgumentCaptor<RequestDetails> detailsCapt;
 		ArgumentCaptor<IBaseResource> tableCapt;
@@ -145,7 +145,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		tableCapt = ArgumentCaptor.forClass(IBaseResource.class);
 		verify(interceptor, times(1)).resourceUpdated(detailsCapt.capture(), tableCapt.capture());
 		assertNotNull(tableCapt.getValue().getIdElement().getIdPart());
-		assertThat(tableCapt.getValue().getIdElement().getIdPartAsLong()).isEqualTo(id);
+		assertEquals(id, tableCapt.getValue().getIdElement().getIdPartAsLong());
 
 		/*
 		 * Now do a conditional update
@@ -155,13 +155,13 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		p.setId(new IdType(id));
 		p.addName().setFamily("PATIENT2");
 		id2 = myPatientDao.update(p, "Patient?family=PATIENT1", mySrd).getId().getIdPartAsLong();
-		assertThat(id2).isEqualTo(id);
+		assertEquals(id, id2);
 
 		detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		tableCapt = ArgumentCaptor.forClass(IBaseResource.class);
 		verify(interceptor, times(1)).resourceCreated(detailsCapt.capture(), tableCapt.capture());
 		verify(interceptor, times(2)).resourceUpdated(detailsCapt.capture(), tableCapt.capture());
-		assertThat(tableCapt.getAllValues().get(2).getIdElement().getIdPartAsLong()).isEqualTo(id);
+		assertEquals(id, tableCapt.getAllValues().get(2).getIdElement().getIdPartAsLong());
 
 		/*
 		 * Now do a conditional update where none will match (so this is actually a create)
@@ -176,7 +176,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		tableCapt = ArgumentCaptor.forClass(IBaseResource.class);
 		verify(interceptor, times(2)).resourceUpdated(detailsCapt.capture(), tableCapt.capture());
 		verify(interceptor, times(2)).resourceCreated(detailsCapt.capture(), tableCapt.capture());
-		assertThat(tableCapt.getAllValues().get(3).getIdElement().getIdPartAsLong()).isEqualTo(id2);
+		assertEquals(id2, tableCapt.getAllValues().get(3).getIdElement().getIdPartAsLong());
 
 	}
 
@@ -194,7 +194,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
 		IIdType id = myPatientDao.create(p, mySrd).getId();
-		assertThat(id.getVersionIdPartAsLong().longValue()).isEqualTo(1L);
+		assertEquals(1L, id.getVersionIdPartAsLong().longValue());
 
 		verify(interceptor, times(1)).resourcePreCreate(any(), any());
 		verify(interceptor, times(1)).resourceCreated(any(), any());
@@ -216,7 +216,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		}).when(interceptor).resourceDeleted(any(), any());
 
 		IIdType newId = myPatientDao.delete(new IdType("Patient/" + id), mySrd).getId();
-		assertThat(newId.getVersionIdPartAsLong().longValue()).isEqualTo(2L);
+		assertEquals(2L, newId.getVersionIdPartAsLong().longValue());
 
 		verify(interceptor, times(1)).resourcePreDelete(any(), any());
 		verify(interceptor, times(1)).resourcePreCreate(any(), any());
@@ -289,7 +289,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		Bundle resp = mySystemDao.transaction(mySrd, xactBundle);
 
 		IdType newId = new IdType(resp.getEntry().get(0).getResponse().getLocation());
-		assertThat(newId.getVersionIdPartAsLong().longValue()).isEqualTo(1L);
+		assertEquals(1L, newId.getVersionIdPartAsLong().longValue());
 
 		verify(interceptor, times(1)).resourceCreated(any(), any());
 		verify(interceptor, times(1)).resourcePreCreate(any(), any());
@@ -324,7 +324,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		Bundle resp = mySystemDao.transaction(mySrd, xactBundle);
 
 		IdType newId = new IdType(resp.getEntry().get(0).getResponse().getLocation());
-		assertThat(newId.getVersionIdPartAsLong().longValue()).isEqualTo(2L);
+		assertEquals(2L, newId.getVersionIdPartAsLong().longValue());
 
 		verify(interceptor, times(1)).resourcePreDelete(any(), any());
 		verify(interceptor, times(1)).resourcePreCreate(any(), any());
@@ -415,7 +415,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		Bundle resp = mySystemDao.transaction(mySrd, xactBundle);
 
 		IdType newId = new IdType(resp.getEntry().get(0).getResponse().getLocation());
-		assertThat(newId.getVersionIdPartAsLong().longValue()).isEqualTo(2L);
+		assertEquals(2L, newId.getVersionIdPartAsLong().longValue());
 
 		verify(interceptor, times(1)).resourceUpdated(any(), any(), any());
 		verify(interceptor, times(1)).resourceCreated(any(), any());
@@ -446,7 +446,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		p.setId(new IdType("Patient/" + id));
 		p.addName().setFamily("PATIENT2");
 		IIdType newId = myPatientDao.update(p, mySrd).getId();
-		assertThat(newId.getVersionIdPartAsLong().longValue()).isEqualTo(2L);
+		assertEquals(2L, newId.getVersionIdPartAsLong().longValue());
 
 		verify(interceptor, times(1)).resourceUpdated(any(), any(), any());
 		verify(interceptor, times(1)).resourceCreated(any(), any());
@@ -463,7 +463,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
 		IIdType id = myPatientDao.create(p, (RequestDetails) null).getId();
-		assertThat(id.getVersionIdPartAsLong().longValue()).isEqualTo(1L);
+		assertEquals(1L, id.getVersionIdPartAsLong().longValue());
 
 		verify(interceptor, times(1)).resourceCreated(Mockito.isNull(), any());
 	}
@@ -478,7 +478,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
 		IIdType id = myPatientDao.create(p, (RequestDetails) null).getId();
-		assertThat(id.getVersionIdPartAsLong().longValue()).isEqualTo(1L);
+		assertEquals(1L, id.getVersionIdPartAsLong().longValue());
 
 		p.addName().setFamily("2");
 		myPatientDao.delete(p.getIdElement().toUnqualifiedVersionless());
@@ -508,7 +508,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = myPatientDao.read(id);
-		assertThat(p.getActive()).isEqualTo(true);
+		assertEquals(true, p.getActive());
 
 	}
 
@@ -538,7 +538,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 				myPatientDao.update(clientAssignedPatient, mySrd);
 				fail("");
 			} catch (ForbiddenOperationException e) {
-				assertThat(e.getMessage()).isEqualTo("Client assigned id rejected.");
+				assertEquals("Client assigned id rejected.", e.getMessage());
 			}
 		}
 	}
@@ -562,7 +562,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		IIdType id = myPatientDao.create(p, mySrd).getId().toUnqualifiedVersionless();
 
 		p = myPatientDao.read(id);
-		assertThat(p.getActive()).isEqualTo(true);
+		assertEquals(true, p.getActive());
 
 	}
 
@@ -582,14 +582,14 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 			IIdType id = myPatientDao.create(p).getId().toUnqualifiedVersionless();
 
 			p = myPatientDao.read(id);
-		assertThat(p.getActive()).isEqualTo(false);
+		assertEquals(false, p.getActive());
 
 			p.setId(p.getIdElement().toUnqualifiedVersionless());
 			p.addAddress().setCity("CITY");
 			myPatientDao.update(p, mySrd);
 
 			p = myPatientDao.read(id);
-		assertThat(p.getActive()).isEqualTo(true);
+		assertEquals(true, p.getActive());
 
 	}
 
@@ -611,11 +611,11 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		inorder.verify(interceptor, times(1)).resourcePreDelete(nullable(ServletRequestDetails.class), any(Patient.class));
 		inorder.verify(interceptor, times(1)).resourceDeleted(nullable(ServletRequestDetails.class), any(Patient.class));
 		// resourcePreDelete
-		assertThat(myIds.get(0).getIdPart()).isEqualTo(idPart);
-		assertThat(myIds.get(0).getVersionIdPart()).isEqualTo("1");
+		assertEquals(idPart, myIds.get(0).getIdPart());
+		assertEquals("1", myIds.get(0).getVersionIdPart());
 		// resourceDeleted
-		assertThat(myIds.get(1).getIdPart()).isEqualTo(idPart);
-		assertThat(myIds.get(1).getVersionIdPart()).isEqualTo("2");
+		assertEquals(idPart, myIds.get(1).getIdPart());
+		assertEquals("2", myIds.get(1).getVersionIdPart());
 
 	}
 
@@ -631,7 +631,7 @@ public class FhirResourceDaoR4InterceptorTest extends BaseJpaR4Test {
 		Patient p = new Patient();
 		p.addName().setFamily("PATIENT");
 		IIdType id = myPatientDao.create(p, (RequestDetails) null).getId();
-		assertThat(id.getVersionIdPartAsLong().longValue()).isEqualTo(1L);
+		assertEquals(1L, id.getVersionIdPartAsLong().longValue());
 
 		p.addName().setFamily("2");
 		myPatientDao.update(p);

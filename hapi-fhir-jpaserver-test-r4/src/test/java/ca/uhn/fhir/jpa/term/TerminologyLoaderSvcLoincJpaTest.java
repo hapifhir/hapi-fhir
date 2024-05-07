@@ -217,9 +217,9 @@ public class TerminologyLoaderSvcLoincJpaTest extends BaseJpaR4Test {
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 
 		IBundleProvider codeSystems = myCodeSystemDao.search(SearchParameterMap.newSynchronous());
-		assertThat(codeSystems.size()).isEqualTo(1);
+		assertEquals(1, codeSystems.size());
 		CodeSystem codeSystem = (CodeSystem) codeSystems.getResources(0, 1).get(0);
-		assertThat(codeSystem.getTitle()).isEqualTo("LOINC Code System (Testing Copy)");
+		assertEquals("LOINC Code System (Testing Copy)", codeSystem.getTitle());
 	}
 
 

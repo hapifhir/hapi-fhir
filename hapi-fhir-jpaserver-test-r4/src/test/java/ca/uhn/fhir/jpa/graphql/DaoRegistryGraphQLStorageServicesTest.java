@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.graphql;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -196,7 +197,7 @@ public class DaoRegistryGraphQLStorageServicesTest extends BaseJpaR4Test {
 
 		List<String> result = toUnqualifiedVersionlessIdValues(bundle);
 		assertThat(result).hasSize(1);
-		assertThat(result.get(0)).isEqualTo("Patient/hapi-1");
+		assertEquals("Patient/hapi-1", result.get(0));
 	}
 
 	@Test

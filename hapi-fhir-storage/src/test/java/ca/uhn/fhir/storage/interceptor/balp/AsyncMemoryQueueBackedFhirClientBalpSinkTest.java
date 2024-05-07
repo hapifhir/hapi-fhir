@@ -1,5 +1,6 @@
 package ca.uhn.fhir.storage.interceptor.balp;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -47,7 +48,7 @@ public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 				}
 			}
 
-			await().untilAsserted(() -> assertThat(myAuditEventProvider.getStoredResources().size()).isEqualTo(1000));
+			await().untilAsserted(() -> assertEquals(1000), myAuditEventProvider.getStoredResources().size());
 
 		} finally {
 			sink.stop();
@@ -129,8 +130,8 @@ public class AsyncMemoryQueueBackedFhirClientBalpSinkTest {
 			retVal.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
 
 			for (Bundle.BundleEntryComponent next : theInput.getEntry()) {
-				assertThat(next.getRequest().getMethod()).isEqualTo(Bundle.HTTPVerb.POST);
-				assertThat(next.getRequest().getUrl()).isEqualTo("AuditEvent");
+				assertEquals(Bundle.HTTPVerb.POST, next.getRequest().getMethod());
+				assertEquals("AuditEvent", next.getRequest().getUrl());
 				AuditEvent resource = (AuditEvent) next.getResource();
 				IIdType outcome = myAuditEventProvider.create(resource, theRequestDetails).getId();
 

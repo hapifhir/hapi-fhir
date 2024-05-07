@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.Include;
@@ -86,7 +87,7 @@ public class PagingTest {
 		HttpGet get = new HttpGet(base + "/Patient?");
 		String responseContent;
 		try (CloseableHttpResponse resp = ourClient.execute(get)) {
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
@@ -103,7 +104,7 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
 		try (CloseableHttpResponse resp = ourClient.execute(new HttpGet(nextLink))) {
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
@@ -125,7 +126,7 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
 		try (CloseableHttpResponse resp = ourClient.execute(new HttpGet(nextLink))) {
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
@@ -156,7 +157,7 @@ public class PagingTest {
 		HttpGet get = new HttpGet(base + "/Patient?_count=10");
 		String responseContent;
 		try (CloseableHttpResponse resp = ourClient.execute(get)) {
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
@@ -173,7 +174,7 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
 		try (CloseableHttpResponse resp = ourClient.execute(new HttpGet(nextLink))) {
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
@@ -195,7 +196,7 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
 		try (CloseableHttpResponse resp = ourClient.execute(new HttpGet(nextLink))) {
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
@@ -232,14 +233,14 @@ public class PagingTest {
 		HttpGet get = new HttpGet(base + "/Patient?_getpagesoffset=10");
 		String responseContent;
 		try (CloseableHttpResponse resp = ourClient.execute(get)) {
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
 			assertThat(bundle.getEntry()).isEmpty();
 		}
 		try (CloseableHttpResponse resp = ourClient.execute(get)) {
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
 
 			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);

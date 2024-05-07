@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
 import ca.uhn.fhir.jpa.entity.Search;
@@ -112,7 +113,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			searchUuid2 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid2);
 		}
-		assertThat(searchUuid2).isEqualTo(searchUuid1);
+		assertEquals(searchUuid1, searchUuid2);
 
 		ca.uhn.fhir.util.TestUtil.sleepAtLeast(reuseCachedSearchResultsForMillis + 1);
 
@@ -287,7 +288,7 @@ public class FhirResourceDaoR4SearchPageExpiryTest extends BaseJpaR4Test {
 			searchUuid2 = bundleProvider.getUuid();
 			Validate.notBlank(searchUuid2);
 		}
-		assertThat(searchUuid2).isEqualTo(searchUuid1);
+		assertEquals(searchUuid1, searchUuid2);
 
 		ca.uhn.fhir.util.TestUtil.sleepAtLeast(reuseCachedSearchResultsForMillis + 1);
 		myStaleSearchDeletingSvc.pollForStaleSearchesAndDeleteThem();

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model.primitive;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
@@ -107,9 +108,9 @@ public class BaseResourceReferenceDtTest {
 		ref.setReference("http://domain2.example.com/base/Patient/123");
 		Patient response = (Patient) ref.loadResource(client);
 
-		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://domain2.example.com/base/Patient/123");
-		assertThat(response.getName().get(0).getFamily().get(0).getValue()).isEqualTo("FAM");
-		assertThat(response.getId().getValue()).isEqualTo("http://domain2.example.com/base/Patient/123");
+		assertEquals("http://domain2.example.com/base/Patient/123", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals("FAM", response.getName().get(0).getFamily().get(0).getValue());
+		assertEquals("http://domain2.example.com/base/Patient/123", response.getId().getValue());
 	}
 
 	@Test
@@ -119,32 +120,32 @@ public class BaseResourceReferenceDtTest {
 		try {
 			new ResourceReferenceDt().loadResource(client);
 			fail("");		} catch (IllegalStateException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1905) + "Reference has no resource ID defined");
+			assertEquals(Msg.code(1905) + "Reference has no resource ID defined", e.getMessage());
 		}
 
 		try {
 			new ResourceReferenceDt("123").loadResource(client);
 			fail("");		} catch (IllegalStateException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1906) + "Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: 123");
+			assertEquals(Msg.code(1906) + "Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: 123", e.getMessage());
 		}
 
 		try {
 			new ResourceReferenceDt("Patient/123").loadResource(client);
 			fail("");		} catch (IllegalStateException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1906) + "Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: Patient/123");
+			assertEquals(Msg.code(1906) + "Reference is not complete (must be in the form [baseUrl]/[resource type]/[resource ID]) - Reference is: Patient/123", e.getMessage());
 		}
 
 		try {
 			new ResourceReferenceDt("http://foo/123123").loadResource(client);
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1684) + "Unknown resource name \"123123\" (this name is not known in FHIR version \"DSTU2\")");
+			assertEquals(Msg.code(1684) + "Unknown resource name \"123123\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 
 		try {
 			new ResourceReferenceDt("http://foo/Sometype/123123").loadResource(client);
 			fail("");		} catch (DataFormatException e) {
 			e.printStackTrace();
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1684) + "Unknown resource name \"Sometype\" (this name is not known in FHIR version \"DSTU2\")");
+			assertEquals(Msg.code(1684) + "Unknown resource name \"Sometype\" (this name is not known in FHIR version \"DSTU2\")", e.getMessage());
 		}
 	
 	}
@@ -175,8 +176,8 @@ public class BaseResourceReferenceDtTest {
 		ref.setReference("http://domain2.example.com/base/Patient/123");
 		Patient response = (Patient) ref.loadResource(client);
 
-		assertThat(response.getName().get(0).getFamily().get(0).getValue()).isEqualTo("FAM");
-		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://domain2.example.com/base/Patient/123");
+		assertEquals("FAM", response.getName().get(0).getFamily().get(0).getValue());
+		assertEquals("http://domain2.example.com/base/Patient/123", capt.getAllValues().get(0).getURI().toASCIIString());
 	}
 
 	@Test
@@ -189,8 +190,8 @@ public class BaseResourceReferenceDtTest {
 		ref.setReference("http://domain2.example.com/base/Patient/123");
 		Patient response = (Patient) ref.loadResource(client);
 
-		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://domain2.example.com/base/Patient/123");
-		assertThat(response.getName().get(0).getFamily().get(0).getValue()).isEqualTo("FAM");
+		assertEquals("http://domain2.example.com/base/Patient/123", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals("FAM", response.getName().get(0).getFamily().get(0).getValue());
 	}
 
 	@Test
@@ -203,8 +204,8 @@ public class BaseResourceReferenceDtTest {
 		ref.setReference("http://domain2.example.com/base/Patient/123");
 		Patient response = (Patient) ref.loadResource(client);
 
-		assertThat(capt.getAllValues().get(0).getURI().toASCIIString()).isEqualTo("http://domain2.example.com/base/Patient/123");
-		assertThat(response.getName().get(0).getFamily().get(0).getValue()).isEqualTo("FAM");
+		assertEquals("http://domain2.example.com/base/Patient/123", capt.getAllValues().get(0).getURI().toASCIIString());
+		assertEquals("FAM", response.getName().get(0).getFamily().get(0).getValue());
 	}
 
 	public interface IClientType extends IRestfulClient {

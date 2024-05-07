@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.dstu3.BaseResourceProviderDstu3Test;
@@ -154,17 +155,17 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
-		assertThat(received.get(0).getFrom().length).isEqualTo(1);
-		assertThat(((InternetAddress) received.get(0).getFrom()[0]).getAddress()).isEqualTo("123@hapifhir.io");
-		assertThat(received.get(0).getAllRecipients().length).isEqualTo(1);
-		assertThat(((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress()).isEqualTo("foo@example.com");
-		assertThat(received.get(0).getContentType()).isEqualTo("text/plain; charset=UTF-8");
-		assertThat(received.get(0).getHeader("X-FHIR-Subscription")[0]).isEqualTo(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue());
+		assertEquals(1, received.get(0).getFrom().length);
+		assertEquals("123@hapifhir.io", ((InternetAddress) received.get(0).getFrom()[0]).getAddress());
+		assertEquals(1, received.get(0).getAllRecipients().length);
+		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
+		assertEquals("text/plain; charset=UTF-8", received.get(0).getContentType());
+		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 
 		// Expect the body of the email subscription to be an Observation formatted as XML
 		Observation parsedObservation = (Observation) myClient.getFhirContext().newXmlParser().parseResource(received.get(0).getContent().toString().trim());
-		assertThat(parsedObservation.getCode().getCodingFirstRep().getSystem()).isEqualTo("SNOMED-CT");
-		assertThat(parsedObservation.getCode().getCodingFirstRep().getCode()).isEqualTo("1000000050");
+		assertEquals("SNOMED-CT", parsedObservation.getCode().getCodingFirstRep().getSystem());
+		assertEquals("1000000050", parsedObservation.getCode().getCodingFirstRep().getCode());
 	}
 
 	/**
@@ -200,18 +201,18 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
 		assertThat(received).hasSize(1);
-		assertThat(received.get(0).getFrom().length).isEqualTo(1);
-		assertThat(((InternetAddress) received.get(0).getFrom()[0]).getAddress()).isEqualTo("myfrom@from.com");
-		assertThat(received.get(0).getAllRecipients().length).isEqualTo(1);
-		assertThat(((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress()).isEqualTo("foo@example.com");
-		assertThat(received.get(0).getContentType()).isEqualTo("text/plain; charset=UTF-8");
-		assertThat(received.get(0).getSubject().trim()).isEqualTo("This is a subject");
-		assertThat(received.get(0).getHeader("X-FHIR-Subscription")[0]).isEqualTo(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue());
+		assertEquals(1, received.get(0).getFrom().length);
+		assertEquals("myfrom@from.com", ((InternetAddress) received.get(0).getFrom()[0]).getAddress());
+		assertEquals(1, received.get(0).getAllRecipients().length);
+		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
+		assertEquals("text/plain; charset=UTF-8", received.get(0).getContentType());
+		assertEquals("This is a subject", received.get(0).getSubject().trim());
+		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 
 		// Expect the body of the email subscription to be an Observation formatted as JSON
 		Observation parsedObservation = (Observation) myClient.getFhirContext().newJsonParser().parseResource(received.get(0).getContent().toString().trim());
-		assertThat(parsedObservation.getCode().getCodingFirstRep().getSystem()).isEqualTo("SNOMED-CT");
-		assertThat(parsedObservation.getCode().getCodingFirstRep().getCode()).isEqualTo("1000000050");
+		assertEquals("SNOMED-CT", parsedObservation.getCode().getCodingFirstRep().getSystem());
+		assertEquals("1000000050", parsedObservation.getCode().getCodingFirstRep().getCode());
 	}
 
 	/**
@@ -248,18 +249,18 @@ public class EmailSubscriptionDstu3Test extends BaseResourceProviderDstu3Test {
 
 		List<MimeMessage> received = Arrays.asList(ourGreenMail.getReceivedMessages());
 		assertThat(received).hasSize(1);
-		assertThat(received.get(0).getFrom().length).isEqualTo(1);
-		assertThat(((InternetAddress) received.get(0).getFrom()[0]).getAddress()).isEqualTo("myfrom@from.com");
-		assertThat(received.get(0).getAllRecipients().length).isEqualTo(1);
-		assertThat(((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress()).isEqualTo("foo@example.com");
-		assertThat(received.get(0).getContentType()).isEqualTo("text/plain; charset=UTF-8");
-		assertThat(received.get(0).getSubject().trim()).isEqualTo("This is a subject");
-		assertThat(received.get(0).getContent().toString().trim()).isEqualTo("");
-		assertThat(received.get(0).getHeader("X-FHIR-Subscription")[0]).isEqualTo(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue());
+		assertEquals(1, received.get(0).getFrom().length);
+		assertEquals("myfrom@from.com", ((InternetAddress) received.get(0).getFrom()[0]).getAddress());
+		assertEquals(1, received.get(0).getAllRecipients().length);
+		assertEquals("foo@example.com", ((InternetAddress) received.get(0).getAllRecipients()[0]).getAddress());
+		assertEquals("text/plain; charset=UTF-8", received.get(0).getContentType());
+		assertEquals("This is a subject", received.get(0).getSubject().trim());
+		assertEquals("", received.get(0).getContent().toString().trim());
+		assertEquals(mySubscriptionIds.get(0).toUnqualifiedVersionless().getValue(), received.get(0).getHeader("X-FHIR-Subscription")[0]);
 
 		Subscription subscription = myClient.read().resource(Subscription.class).withId(sub1.getIdElement().toUnqualifiedVersionless()).execute();
-		assertThat(subscription.getStatus()).isEqualTo(Subscription.SubscriptionStatus.ACTIVE);
-		assertThat(subscription.getIdElement().getVersionIdPart()).isEqualTo("2");
+		assertEquals(Subscription.SubscriptionStatus.ACTIVE, subscription.getStatus());
+		assertEquals("2", subscription.getIdElement().getVersionIdPart());
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -91,14 +92,14 @@ public class SearchPostDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 
-			assertThat(ourLastMethod).isEqualTo("search");
+			assertEquals("search", ourLastMethod);
 			assertNull(ourLastSortSpec);
 			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
-			assertThat(status.getEntity().getContentType().getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -122,14 +123,14 @@ public class SearchPostDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 
-			assertThat(ourLastMethod).isEqualTo("search");
+			assertEquals("search", ourLastMethod);
 			assertNull(ourLastSortSpec);
 			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
-			assertThat(status.getEntity().getContentType().getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_XML_NEW);
+			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+			assertEquals(Constants.CT_FHIR_XML_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -155,14 +156,14 @@ public class SearchPostDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 
-			assertThat(ourLastMethod).isEqualTo("search");
+			assertEquals("search", ourLastMethod);
 			assertNull(ourLastSortSpec);
 			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
-			assertThat(status.getEntity().getContentType().getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -188,14 +189,14 @@ public class SearchPostDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 
-			assertThat(ourLastMethod).isEqualTo("search");
+			assertEquals("search", ourLastMethod);
 			assertNull(ourLastSortSpec);
 			assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
-			assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
-			assertThat(status.getEntity().getContentType().getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_XML_NEW);
+			assertEquals("Smith", ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+			assertEquals(Constants.CT_FHIR_XML_NEW, status.getEntity().getContentType().getValue().replaceAll(";.*", ""));
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}

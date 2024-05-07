@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model.primitive;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.util.TestUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -50,10 +51,10 @@ public class DateDtTest {
 		cal.setTimeZone(TimeZone.getTimeZone("Europe/Berlin"));
 		cal.set(1990, Calendar.JANUARY, 5, 0, 0, 0);
 		DateDt dateDt = new DateDt(cal);
-		assertThat(dateDt.getValueAsString()).isEqualTo("1990-01-05");
+		assertEquals("1990-01-05", dateDt.getValueAsString());
 
 		dateDt = new DateDt(1990, 0, 5);
-		assertThat(dateDt.getValueAsString()).isEqualTo("1990-01-05");
+		assertEquals("1990-01-05", dateDt.getValueAsString());
 	}
 	
 	

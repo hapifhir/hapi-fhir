@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.fail;
@@ -21,7 +22,7 @@ public class ValidateUtilTest {
 			ValidateUtil.isTrueOrThrowInvalidRequest(false, "The message");
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1769) + "The message");
+			assertEquals(Msg.code(1769) + "The message", e.getMessage());
 		}
 	}
 
@@ -42,7 +43,7 @@ public class ValidateUtilTest {
 			ValidateUtil.isGreaterThan(1L, 1L, "The message");
 			fail("");
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1762) + "The message");
+			assertEquals(Msg.code(1762) + "The message", e.getMessage());
 		}
 	}
 
@@ -53,7 +54,7 @@ public class ValidateUtilTest {
 			ValidateUtil.isGreaterThanOrEqualTo(0L, 1L, "The message");
 			fail("");
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1763) + "The message");
+			assertEquals(Msg.code(1763) + "The message", e.getMessage());
 		}
 	}
 
@@ -65,21 +66,21 @@ public class ValidateUtilTest {
 			ValidateUtil.isNotBlankOrThrowInvalidRequest("", "The message");
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1765) + "The message");
+			assertEquals(Msg.code(1765) + "The message", e.getMessage());
 		}
 
 		try {
 			ValidateUtil.isNotBlankOrThrowInvalidRequest(null, "The message");
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1765) + "The message");
+			assertEquals(Msg.code(1765) + "The message", e.getMessage());
 		}
 
 		try {
 			ValidateUtil.isNotBlankOrThrowInvalidRequest(" ", "The message");
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1765) + "The message");
+			assertEquals(Msg.code(1765) + "The message", e.getMessage());
 		}
 	}
 
@@ -93,7 +94,7 @@ public class ValidateUtilTest {
 
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1767) + "The message 123");
+			assertEquals(Msg.code(1767) + "The message 123", e.getMessage());
 		}
 
 	}

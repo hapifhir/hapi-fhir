@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -122,7 +123,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		verify(interceptor, timeout(10000).times(0)).invoke(eq(Pointcut.JPA_PERFTRACE_SEARCH_FAILED), myParamsCaptor.capture());
 
 		SearchRuntimeDetails details = myParamsCaptor.getAllValues().get(0).get(SearchRuntimeDetails.class);
-		assertThat(details.getSearchStatus()).isEqualTo(SearchStatusEnum.PASSCMPLET);
+		assertEquals(SearchStatusEnum.PASSCMPLET, details.getSearchStatus());
 
 		// Load the next (and final) page
 		reset(interceptor);
@@ -170,7 +171,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		 */
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
-		assertThat(myParamsCaptor.getAllValues().get(0).get(RestOperationTypeEnum.class)).isEqualTo(RestOperationTypeEnum.TRANSACTION);
+		assertEquals(RestOperationTypeEnum.TRANSACTION, myParamsCaptor.getAllValues().get(0).get(RestOperationTypeEnum.class));
 
 		verify(interceptor, times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED), myParamsCaptor.capture());
 		verify(interceptor, times(0)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED), myParamsCaptor.capture());
@@ -194,14 +195,14 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was: {}", resp);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		}
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
-		assertThat(myParamsCaptor.getValue().get(RestOperationTypeEnum.class)).isEqualTo(RestOperationTypeEnum.CREATE);
-		assertThat(myParamsCaptor.getValue().get(RequestDetails.class).getResource().getIdElement().getResourceType()).isEqualTo("Patient");
+		assertEquals(RestOperationTypeEnum.CREATE, myParamsCaptor.getValue().get(RestOperationTypeEnum.class));
+		assertEquals("Patient", myParamsCaptor.getValue().get(RequestDetails.class).getResource().getIdElement().getResourceType());
 
 	}
 
@@ -228,7 +229,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		transaction(bundle);
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
-		assertThat(myParamsCaptor.getValue().get(RestOperationTypeEnum.class)).isEqualTo(RestOperationTypeEnum.TRANSACTION);
+		assertEquals(RestOperationTypeEnum.TRANSACTION, myParamsCaptor.getValue().get(RestOperationTypeEnum.class));
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED), myParamsCaptor.capture());
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED), myParamsCaptor.capture());
@@ -295,16 +296,16 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was: {}", resp);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		}
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
-		assertThat(myParamsCaptor.getValue().get(RestOperationTypeEnum.class)).isEqualTo(RestOperationTypeEnum.CREATE);
+		assertEquals(RestOperationTypeEnum.CREATE, myParamsCaptor.getValue().get(RestOperationTypeEnum.class));
 
 		Patient patient = (Patient) myParamsCaptor.getValue().get(RequestDetails.class).getResource();
-		assertThat(patient.getManagingOrganization().getReference()).isEqualTo(orgId.getValue());
+		assertEquals(orgId.getValue(), patient.getManagingOrganization().getReference());
 
 	}
 
@@ -337,7 +338,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		transaction(bundle);
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
-		assertThat(myParamsCaptor.getAllValues().get(0).get(RestOperationTypeEnum.class)).isEqualTo(RestOperationTypeEnum.TRANSACTION);
+		assertEquals(RestOperationTypeEnum.TRANSACTION, myParamsCaptor.getAllValues().get(0).get(RestOperationTypeEnum.class));
 		verify(interceptor, times(0)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED), any());
 		verify(interceptor, times(0)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED), any());
 
@@ -349,7 +350,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		HttpPost post = new HttpPost(myServerBase + "/");
 		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 		}
 	}
 

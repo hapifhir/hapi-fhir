@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -71,8 +72,8 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 
 		ourLog.debug("Response Parameters\n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParam));
 
-		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isEqualTo(true);
-		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValueAsString()).isEqualTo("Code v1 display");
+		assertEquals(true, ((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
+		assertEquals("Code v1 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
 	@Test
@@ -88,12 +89,12 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
-		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(("ACME Codes"));
-		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("display");
-		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo(("Systolic blood pressure--expiration"));
-		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("abstract");
-		assertThat(((BooleanType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo(false);
+		assertEquals("name", respParam.getParameter().get(0).getName());
+		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(1).getName());
+		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(2).getName());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 
 	@Test
@@ -111,8 +112,8 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 		ourLog.info(resp);
 
 		assertThat(respParam.getParameter()).hasSize(1);
-		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
-		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.SUBSUMES.toCode());
+		assertEquals("outcome", respParam.getParameter().get(0).getName());
+		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 	}
 
 	@Test
@@ -129,8 +130,8 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 		ourLog.info(resp);
 
 		assertThat(respParam.getParameter()).hasSize(1);
-		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("outcome");
-		assertThat(((CodeType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(ConceptSubsumptionOutcome.SUBSUMES.toCode());
+		assertEquals("outcome", respParam.getParameter().get(0).getName());
+		assertEquals(ConceptSubsumptionOutcome.SUBSUMES.toCode(), ((CodeType) respParam.getParameter().get(0).getValue()).getValue());
 	}
 
 
@@ -167,12 +168,12 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(respParam.getParameter().get(0).getName()).isEqualTo("name");
-		assertThat(((StringType) respParam.getParameter().get(0).getValue()).getValue()).isEqualTo(("ACME Codes"));
-		assertThat(respParam.getParameter().get(1).getName()).isEqualTo("display");
-		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValue()).isEqualTo(("Systolic blood pressure--expiration"));
-		assertThat(respParam.getParameter().get(2).getName()).isEqualTo("abstract");
-		assertThat(((BooleanType) respParam.getParameter().get(2).getValue()).getValue()).isEqualTo(false);
+		assertEquals("name", respParam.getParameter().get(0).getName());
+		assertEquals(("ACME Codes"), ((StringType) respParam.getParameter().get(0).getValue()).getValue());
+		assertEquals("display", respParam.getParameter().get(1).getName());
+		assertEquals(("Systolic blood pressure--expiration"), ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+		assertEquals("abstract", respParam.getParameter().get(2).getName());
+		assertEquals(false, ((BooleanType) respParam.getParameter().get(2).getValue()).getValue());
 	}
 
 	@Test
@@ -187,7 +188,7 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 		ourLog.info(resp);
 
 		assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		assertThat(((StringType) respParam.getParameter().get(1).getValue()).getValueAsString()).isEqualTo("Systolic blood pressure.inspiration - expiration");
+		assertEquals("Systolic blood pressure.inspiration - expiration", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
 	@Test
@@ -206,17 +207,17 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 			ourLog.info(resp);
 
 			Parameters.ParametersParameterComponent param0 = respParam.getParameter().get(0);
-			assertThat(param0.getName()).isEqualTo("name");
-			assertThat(((StringType) param0.getValue()).getValue()).isEqualTo("IdentifierType");
+			assertEquals("name", param0.getName());
+			assertEquals("IdentifierType", ((StringType) param0.getValue()).getValue());
 			Parameters.ParametersParameterComponent param1 = respParam.getParameter().get(1);
-			assertThat(param1.getName()).isEqualTo("version");
-			assertThat(((StringType) param1.getValue()).getValue()).isEqualTo("2.9.0");
+			assertEquals("version", param1.getName());
+			assertEquals("2.9.0", ((StringType) param1.getValue()).getValue());
 			Parameters.ParametersParameterComponent param2 = respParam.getParameter().get(2);
-			assertThat(param2.getName()).isEqualTo("display");
-			assertThat(((StringType) param2.getValue()).getValue()).isEqualTo("Accession ID");
+			assertEquals("display", param2.getName());
+			assertEquals("Accession ID", ((StringType) param2.getValue()).getValue());
 			Parameters.ParametersParameterComponent param3 = respParam.getParameter().get(3);
-			assertThat(param3.getName()).isEqualTo("abstract");
-			assertThat(((BooleanType) param3.getValue()).getValue()).isEqualTo(false);
+			assertEquals("abstract", param3.getName());
+			assertEquals(false, ((BooleanType) param3.getValue()).getValue());
 		}
 
 		// Repeat with version specified.
@@ -234,17 +235,17 @@ public class ResourceProviderR5CodeSystemTest extends BaseResourceProviderR5Test
 			ourLog.info(resp);
 
 			Parameters.ParametersParameterComponent param0 = respParam.getParameter().get(0);
-			assertThat(param0.getName()).isEqualTo("name");
-			assertThat(((StringType) param0.getValue()).getValue()).isEqualTo("IdentifierType");
+			assertEquals("name", param0.getName());
+			assertEquals("IdentifierType", ((StringType) param0.getValue()).getValue());
 			Parameters.ParametersParameterComponent param1 = respParam.getParameter().get(1);
-			assertThat(param1.getName()).isEqualTo("version");
-			assertThat(((StringType) param1.getValue()).getValue()).isEqualTo("2.9.0");
+			assertEquals("version", param1.getName());
+			assertEquals("2.9.0", ((StringType) param1.getValue()).getValue());
 			Parameters.ParametersParameterComponent param2 = respParam.getParameter().get(2);
-			assertThat(param2.getName()).isEqualTo("display");
-			assertThat(((StringType) param2.getValue()).getValue()).isEqualTo("Accession ID");
+			assertEquals("display", param2.getName());
+			assertEquals("Accession ID", ((StringType) param2.getValue()).getValue());
 			Parameters.ParametersParameterComponent param3 = respParam.getParameter().get(3);
-			assertThat(param3.getName()).isEqualTo("abstract");
-			assertThat(((BooleanType) param3.getValue()).getValue()).isEqualTo(false);
+			assertEquals("abstract", param3.getName());
+			assertEquals(false, ((BooleanType) param3.getValue()).getValue());
 		}
 	}
 

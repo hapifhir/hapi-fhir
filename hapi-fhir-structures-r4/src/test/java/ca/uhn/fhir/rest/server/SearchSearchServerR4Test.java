@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -99,10 +100,10 @@ public class SearchSearchServerR4Test {
     IOUtils.closeQuietly(status.getEntity().getContent());
     ourLog.info(responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
     String ref = patient.getManagingOrganization().getReference();
-		assertThat(ref).isEqualTo("Organization/555");
+		assertEquals("Organization/555", ref);
   }
 
   /**
@@ -129,7 +130,7 @@ public class SearchSearchServerR4Test {
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
@@ -154,17 +155,17 @@ public class SearchSearchServerR4Test {
     IOUtils.closeQuietly(status.getEntity().getContent());
     ourLog.info(responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertThat(ourLastAndList.getValuesAsQueryTokens()).hasSize(4);
 		assertThat(ourLastAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(2);
 		assertFalse(ourLastAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).isExact());
-		assertThat(ourLastAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("NE,NE");
-		assertThat(ourLastAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValue()).isEqualTo("NE,NE");
-		assertThat(ourLastAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("NE\\NE");
+		assertEquals("NE,NE", ourLastAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("NE,NE", ourLastAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(1).getValue());
+		assertEquals("NE\\NE", ourLastAndList.getValuesAsQueryTokens().get(1).getValuesAsQueryTokens().get(0).getValue());
 		assertTrue(ourLastAndList.getValuesAsQueryTokens().get(2).getValuesAsQueryTokens().get(0).isExact());
-		assertThat(ourLastAndList.getValuesAsQueryTokens().get(2).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("E$E");
-		assertThat(ourLastAndList.getValuesAsQueryTokens().get(3).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("E|E");
+		assertEquals("E$E", ourLastAndList.getValuesAsQueryTokens().get(2).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("E|E", ourLastAndList.getValuesAsQueryTokens().get(3).getValuesAsQueryTokens().get(0).getValue());
   }
 
   @Test
@@ -174,12 +175,12 @@ public class SearchSearchServerR4Test {
     CloseableHttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(10);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertThat(p.getIdentifierFirstRep().getValue()).isEqualTo("AAANamed");
+		assertEquals("AAANamed", p.getIdentifierFirstRep().getValue());
 
   }
 
@@ -195,16 +196,16 @@ public class SearchSearchServerR4Test {
     CloseableHttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
     ourLog.info(responseContent);
 
 		assertThat(bundle.getEntry()).hasSize(10);
-		assertThat(bundle.getLink("self").getUrl()).isEqualTo("https://blah.com/base/Patient?_query=findWithLinks");
+		assertEquals("https://blah.com/base/Patient?_query=findWithLinks", bundle.getLink("self").getUrl());
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertThat(p.getIdentifierFirstRep().getValue()).isEqualTo("AAANamed");
+		assertEquals("AAANamed", p.getIdentifierFirstRep().getValue());
 
     String linkNext = bundle.getLink("next").getUrl();
     ourLog.info(linkNext);
@@ -220,16 +221,16 @@ public class SearchSearchServerR4Test {
     status = ourClient.execute(httpGet);
     responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
     bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 
     ourLog.info(responseContent);
 
 		assertThat(bundle.getEntry()).hasSize(10);
-		assertThat(bundle.getLink("self").getUrl()).isEqualTo(linkNext);
+		assertEquals(linkNext, bundle.getLink("self").getUrl());
 
     p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertThat(p.getIdentifierFirstRep().getValue()).isEqualTo("AAANamed");
+		assertEquals("AAANamed", p.getIdentifierFirstRep().getValue());
 
   }
 
@@ -239,12 +240,12 @@ public class SearchSearchServerR4Test {
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertThat(p.getNameFirstRep().getFamily()).isEqualTo("idaaa");
+		assertEquals("idaaa", p.getNameFirstRep().getFamily());
   }
 
   @Test
@@ -260,7 +261,7 @@ public class SearchSearchServerR4Test {
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertThat(p.getNameFirstRep().getFamily()).isEqualTo("idaaa");
+		assertEquals("idaaa", p.getNameFirstRep().getFamily());
   }
 
   @Test
@@ -277,12 +278,12 @@ public class SearchSearchServerR4Test {
     HttpResponse status = ourClient.execute(filePost);
     String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertThat(p.getNameFirstRep().getFamily()).isEqualTo("idaaa");
+		assertEquals("idaaa", p.getNameFirstRep().getFamily());
   }
 
   /**
@@ -304,7 +305,7 @@ public class SearchSearchServerR4Test {
     String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     IOUtils.closeQuietly(status.getEntity().getContent());
     ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(446) + "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=UTF-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>");
   }
 
@@ -323,7 +324,7 @@ public class SearchSearchServerR4Test {
     String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     IOUtils.closeQuietly(status.getEntity().getContent());
     ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(448) + "No Content-Type header was provided in the request. This is required for &quot;CREATE&quot; operation\"/>");
   }
 
@@ -345,14 +346,14 @@ public class SearchSearchServerR4Test {
     String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     IOUtils.closeQuietly(status.getEntity().getContent());
     ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertThat(p.getName().get(0).getFamily()).isEqualTo("idaaa");
-		assertThat(p.getName().get(1).getGiven().get(0).getValue()).isEqualTo("nameCentral");
+		assertEquals("idaaa", p.getName().get(0).getFamily());
+		assertEquals("nameCentral", p.getName().get(1).getGiven().get(0).getValue());
 
   }
 
@@ -363,12 +364,12 @@ public class SearchSearchServerR4Test {
     String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     ourLog.info(responseContent);
     IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertThat(p.getIdentifierFirstRep().getValue()).isEqualTo("fooCompartment");
+		assertEquals("fooCompartment", p.getIdentifierFirstRep().getValue());
 		assertThat(bundle.getEntry().get(0).getResource().getIdElement().getValue()).contains("Patient/123");
   }
 
@@ -380,15 +381,15 @@ public class SearchSearchServerR4Test {
     String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Observation p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Observation.class).get(0);
-		assertThat(p.getSubject().getReference()).isEqualTo("Patient/100");
+		assertEquals("Patient/100", p.getSubject().getReference());
 		assertThat(p.getCode().getCoding()).hasSize(4);
-		assertThat(p.getCode().getCoding().get(0).getCode()).isEqualTo("3141-9");
-		assertThat(p.getCode().getCoding().get(1).getCode()).isEqualTo("8302-2");
+		assertEquals("3141-9", p.getCode().getCoding().get(0).getCode());
+		assertEquals("8302-2", p.getCode().getCoding().get(1).getCode());
 
   }
 
@@ -399,7 +400,7 @@ public class SearchSearchServerR4Test {
     CloseableHttpResponse status = ourClient.execute(httpGet);
     IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertThat(ourLastIncludes).hasSize(2);
 		assertThat(ourLastIncludes).containsExactlyInAnyOrder(new Include("foo", false), new Include("bar", true));
@@ -412,7 +413,7 @@ public class SearchSearchServerR4Test {
     CloseableHttpResponse status = ourClient.execute(httpGet);
     IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertThat(ourLastIncludes).hasSize(2);
 		assertThat(ourLastIncludes).containsExactlyInAnyOrder(new Include("foo", false), new Include("bar", true));
@@ -425,7 +426,7 @@ public class SearchSearchServerR4Test {
     CloseableHttpResponse status = ourClient.execute(httpGet);
     IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertThat(ourLastIncludes).isEmpty();
   }
@@ -436,13 +437,13 @@ public class SearchSearchServerR4Test {
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertThat(p.getIdentifier().get(0).getValue()).isEqualTo("aaa");
-		assertThat(p.getIdentifier().get(1).getValue()).isEqualTo("bbb");
+		assertEquals("aaa", p.getIdentifier().get(0).getValue());
+		assertEquals("bbb", p.getIdentifier().get(1).getValue());
   }
 
   @Test
@@ -452,13 +453,13 @@ public class SearchSearchServerR4Test {
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertThat(p.getNameFirstRep().getFamily()).isEqualTo("http://www.dmix.gov/vista/2957");
-		assertThat(p.getNameFirstRep().getGivenAsSingleString()).isEqualTo("301");
+		assertEquals("http://www.dmix.gov/vista/2957", p.getNameFirstRep().getFamily());
+		assertEquals("301", p.getNameFirstRep().getGivenAsSingleString());
   }
 
   @Test
@@ -468,12 +469,12 @@ public class SearchSearchServerR4Test {
     HttpResponse status = ourClient.execute(httpGet);
     String responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
     Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertThat(p.getIdentifierFirstRep().getValue()).isEqualTo("AAA");
+		assertEquals("AAA", p.getIdentifierFirstRep().getValue());
 
     // Now the named query
 
@@ -482,12 +483,12 @@ public class SearchSearchServerR4Test {
     status = ourClient.execute(httpGet);
     responseContent = IOUtils.toString(status.getEntity().getContent(), Charset.defaultCharset());
     IOUtils.closeQuietly(status.getEntity().getContent());
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
     bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
-		assertThat(p.getIdentifierFirstRep().getValue()).isEqualTo("AAANamed");
+		assertEquals("AAANamed", p.getIdentifierFirstRep().getValue());
   }
 
   @AfterAll

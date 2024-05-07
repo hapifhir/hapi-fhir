@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -75,9 +76,9 @@ public class PagingUsingNamedPagesR4Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
-			assertThat(ct).isEqualTo(theExpectEncoding);
+			assertEquals(theExpectEncoding, ct);
 			assert ct != null;
 			bundle = ct.newParser(ourCtx).parseResource(Bundle.class, responseContent);
 			assertThat(bundle.getEntry()).hasSize(10);
@@ -116,29 +117,29 @@ public class PagingUsingNamedPagesR4Test {
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=xml");
 		bundle = executeAndReturnBundle(httpGet, EncodingEnum.XML);
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
-		assertThat(linkSelf).isEqualTo(ourServer.getBaseUrl() + "/Patient?_format=xml");
+		assertEquals(ourServer.getBaseUrl() + "/Patient?_format=xml", linkSelf);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext).isEqualTo(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset");
+		assertEquals(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset", linkNext);
 		assertNull(bundle.getLink(Constants.LINK_PREVIOUS));
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeAndReturnBundle(httpGet, EncodingEnum.XML);
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
-		assertThat(linkSelf).isEqualTo(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset");
+		assertEquals(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset", linkSelf);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-		assertThat(linkNext).isEqualTo(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID2&_format=xml&_bundletype=searchset");
+		assertEquals(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID2&_format=xml&_bundletype=searchset", linkNext);
 		linkPrev = bundle.getLink(Constants.LINK_PREVIOUS).getUrl();
-		assertThat(linkPrev).isEqualTo(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=searchset");
+		assertEquals(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=searchset", linkPrev);
 
 		// Fetch the next page
 		httpGet = new HttpGet(linkNext);
 		bundle = executeAndReturnBundle(httpGet, EncodingEnum.XML);
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
-		assertThat(linkSelf).isEqualTo(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID2&_format=xml&_bundletype=searchset");
+		assertEquals(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID2&_format=xml&_bundletype=searchset", linkSelf);
 		assertNull(bundle.getLink(Constants.LINK_NEXT));
 		linkPrev = bundle.getLink(Constants.LINK_PREVIOUS).getUrl();
-		assertThat(linkPrev).isEqualTo(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset");
+		assertEquals(ourServer.getBaseUrl() + "?_getpages=SEARCHID0&_pageId=PAGEID1&_format=xml&_bundletype=searchset", linkPrev);
 	}
 
 	@Test
@@ -153,7 +154,7 @@ public class PagingUsingNamedPagesR4Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertThat(responseContent).doesNotContain("FOO\"");
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(410);
+			assertEquals(410, status.getStatusLine().getStatusCode());
 		}
 
 		// Without ID
@@ -162,7 +163,7 @@ public class PagingUsingNamedPagesR4Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertThat(responseContent).doesNotContain("FOO\"");
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(410);
+			assertEquals(410, status.getStatusLine().getStatusCode());
 		}
 
 	}
@@ -181,7 +182,7 @@ public class PagingUsingNamedPagesR4Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseContent);
 			assertThat(responseContent).doesNotContain("FOO\"");
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
 			assert ct != null;
 			Bundle bundle = EncodingEnum.XML.newParser(ourCtx).parseResource(Bundle.class, responseContent);

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProvider;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
@@ -43,28 +44,28 @@ public class JaxRsRequestTest {
 		String headerValue2 = "location_value_2";
 		assertTrue(StringUtils.isBlank(details.getHeader(headerKey)));
 		queryParameters.add(headerKey, headerValue);
-		assertThat(details.getHeader(headerKey)).isEqualTo(headerValue);
-		assertThat(details.getHeaders(headerKey)).isEqualTo(Arrays.asList(headerValue));
+		assertEquals(headerValue, details.getHeader(headerKey));
+		assertEquals(Arrays.asList(headerValue), details.getHeaders(headerKey));
 		
 		queryParameters.add(headerKey, headerValue2);
-		assertThat(details.getHeader(headerKey)).isEqualTo(headerValue);
-		assertThat(details.getHeaders(headerKey)).isEqualTo(Arrays.asList(headerValue, headerValue2));
+		assertEquals(headerValue, details.getHeader(headerKey));
+		assertEquals(Arrays.asList(headerValue, headerValue2), details.getHeaders(headerKey));
 	}
 	
 	@Test
 	public void testGetByteStreamRequestContents() {
-		assertThat(new String(details.getByteStreamRequestContents())).isEqualTo(RESOURCE_STRING);
+		assertEquals(RESOURCE_STRING, new String(details.getByteStreamRequestContents()));
 	}
 	
 	@Test
 	public void testServerBaseForRequest() {
-		assertThat(new String(details.getServerBaseForRequest())).isEqualTo(BASEURI);
+		assertEquals(BASEURI, new String(details.getServerBaseForRequest()));
 	}
 	
 	@Test
 	public void testGetResponse() {
 		JaxRsResponse response = (JaxRsResponse) details.getResponse();
-		assertThat(response.getRequestDetails()).isEqualTo(details);
+		assertEquals(details, response.getRequestDetails());
 		assertTrue(response == details.getResponse());
 	}
 
@@ -84,12 +85,12 @@ public class JaxRsRequestTest {
 
 	@Test
 	public void testGetServerBaseForRequest() {
-		assertThat(details.getFhirServerBase()).isEqualTo(JaxRsRequestTest.BASEURI);
+		assertEquals(JaxRsRequestTest.BASEURI, details.getFhirServerBase());
 	}
 
 	@Test
 	public void testGetServer() {
-		assertThat(details.getServer()).isEqualTo(this.provider);
+		assertEquals(this.provider, details.getServer());
 	}
 
 	public JaxRsRequest createRequestDetails() throws URISyntaxException {

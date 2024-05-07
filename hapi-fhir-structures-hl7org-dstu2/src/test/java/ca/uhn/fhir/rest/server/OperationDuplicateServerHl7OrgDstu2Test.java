@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -51,7 +52,7 @@ public class OperationDuplicateServerHl7OrgDstu2Test {
       HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/metadata?_pretty=true");
       HttpResponse status = ourClient.execute(httpGet);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
       String response = IOUtils.toString(status.getEntity().getContent());
       IOUtils.closeQuietly(status.getEntity().getContent());
       ourLog.info(response);
@@ -61,8 +62,8 @@ public class OperationDuplicateServerHl7OrgDstu2Test {
       ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 			assertThat(resp.getRest().get(0).getOperation()).hasSize(1);
-			assertThat(resp.getRest().get(0).getOperation().get(0).getName()).isEqualTo("$myoperation");
-			assertThat(resp.getRest().get(0).getOperation().get(0).getDefinition().getReference()).isEqualTo("OperationDefinition/OrganizationPatient-ts-myoperation");
+			assertEquals("$myoperation", resp.getRest().get(0).getOperation().get(0).getName());
+			assertEquals("OperationDefinition/OrganizationPatient-ts-myoperation", resp.getRest().get(0).getOperation().get(0).getDefinition().getReference());
     }
 
     // OperationDefinition
@@ -70,14 +71,14 @@ public class OperationDuplicateServerHl7OrgDstu2Test {
       HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true");
       HttpResponse status = ourClient.execute(httpGet);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
       String response = IOUtils.toString(status.getEntity().getContent());
       IOUtils.closeQuietly(status.getEntity().getContent());
       ourLog.info(response);
 
       OperationDefinition resp = ourCtx.newXmlParser().parseResource(OperationDefinition.class, response);
-			assertThat(resp.getCode()).isEqualTo("$myoperation");
-			assertThat(resp.getIdempotent()).isEqualTo(true);
+			assertEquals("$myoperation", resp.getCode());
+			assertEquals(true, resp.getIdempotent());
 			assertThat(resp.getType()).hasSize(2);
 			assertThat(resp.getParameter()).hasSize(1);
     }

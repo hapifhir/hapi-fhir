@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -77,11 +78,11 @@ public class CreateR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
+		assertEquals(201, status.getStatusLine().getStatusCode());
 
-		assertThat(status.getHeaders("Location").length).isEqualTo(1);
-		assertThat(status.getHeaders("Content-Location").length).isEqualTo(1);
-		assertThat(status.getFirstHeader("Location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/1");
+		assertEquals(1, status.getHeaders("Location").length);
+		assertEquals(1, status.getHeaders("Content-Location").length);
+		assertEquals(ourServer.getBaseUrl() + "/Patient/1", status.getFirstHeader("Location").getValue());
 
 	}
 
@@ -96,7 +97,7 @@ public class CreateR4Test {
 
 			ourLog.info("Response was:\n{}", responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, status.getStatusLine().getStatusCode());
 			assertThat(responseContent).contains("No Content-Type header was provided in the request. This is required for \\\"CREATE\\\" operation");
 
 		}
@@ -117,11 +118,11 @@ public class CreateR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
+		assertEquals(201, status.getStatusLine().getStatusCode());
 
-		assertThat(status.getHeaders("Location").length).isEqualTo(1);
-		assertThat(status.getHeaders("Content-Location").length).isEqualTo(1);
-		assertThat(status.getFirstHeader("Location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/1");
+		assertEquals(1, status.getHeaders("Location").length);
+		assertEquals(1, status.getHeaders("Content-Location").length);
+		assertEquals(ourServer.getBaseUrl() + "/Patient/1", status.getFirstHeader("Location").getValue());
 
 	}
 
@@ -139,7 +140,7 @@ public class CreateR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
+		assertEquals(201, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent).contains("DIAG");
 	}
@@ -158,8 +159,8 @@ public class CreateR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
-		assertThat(responseContent).isEqualTo(expectedResponseContent);
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals(expectedResponseContent, responseContent);
 	}
 
 	@Test
@@ -174,7 +175,7 @@ public class CreateR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
 		assertThat(responseContent).contains("Failed to parse request body as XML resource.");
@@ -193,7 +194,7 @@ public class CreateR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
 		assertThat(responseContent).contains("Failed to parse request body as XML resource.");
@@ -212,7 +213,7 @@ public class CreateR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent).contains("Failed to parse request body as JSON resource.");
 
@@ -233,7 +234,7 @@ public class CreateR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
 		assertThat(responseContent).contains(Msg.code(450) + "Failed to parse request body as XML resource. Error was: " + Msg.code(1852) + "com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F'");
@@ -255,8 +256,8 @@ public class CreateR4Test {
 		httpPost.setEntity(new StringEntity(body, ContentType.parse("application/fhir+json; charset=utf-8")));
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).isEqualTo("application/fhir+json;charset=utf-8");
+			assertEquals(201, status.getStatusLine().getStatusCode());
+			assertEquals("application/fhir+json;charset=utf-8", status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was:\n{}", responseContent);
@@ -279,8 +280,8 @@ public class CreateR4Test {
 		ourServer.getRestfulServer().setDefaultPreferReturn(PreferReturnEnum.OPERATION_OUTCOME);
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).isEqualTo("application/fhir+json;charset=utf-8");
+			assertEquals(201, status.getStatusLine().getStatusCode());
+			assertEquals("application/fhir+json;charset=utf-8", status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue());
 
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response was:\n{}", responseContent);
@@ -304,7 +305,7 @@ public class CreateR4Test {
 		ourServer.getRestfulServer().setDefaultPreferReturn(PreferReturnEnum.MINIMAL);
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertEquals(201, status.getStatusLine().getStatusCode());
 			assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
 
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
@@ -324,7 +325,7 @@ public class CreateR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		//@formatter:off
 		assertThat(responseContent).containsSubsequence(

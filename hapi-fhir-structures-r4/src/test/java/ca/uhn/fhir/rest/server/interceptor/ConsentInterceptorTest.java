@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -133,7 +134,7 @@ public class ConsentInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 		}
@@ -162,7 +163,7 @@ public class ConsentInterceptorTest {
 
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_total=accurate");
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 			assertThat(responseContent).contains(Msg.code(2037) + "_total=accurate is not permitted on this server");
@@ -173,7 +174,7 @@ public class ConsentInterceptorTest {
 		when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_total=estimated");
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 			assertThat(responseContent).doesNotContain("\"total\"");
@@ -181,7 +182,7 @@ public class ConsentInterceptorTest {
 
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_total=none");
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 			assertThat(responseContent).doesNotContain("\"total\"");
@@ -208,7 +209,7 @@ public class ConsentInterceptorTest {
 
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_summary=count");
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 			assertThat(responseContent).contains(Msg.code(2038) + "_summary=count is not permitted on this server");
@@ -219,7 +220,7 @@ public class ConsentInterceptorTest {
 		when(myConsentSvc.willSeeResource(any(), any(), any())).thenReturn(ConsentOutcome.PROCEED);
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_summary=data");
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 			assertThat(responseContent).doesNotContain("\"total\"");
@@ -228,7 +229,7 @@ public class ConsentInterceptorTest {
 		when(myConsentSvc.startOperation(any(), any())).thenReturn(ConsentOutcome.AUTHORIZED);
 		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_summary=data");
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 			assertThat(responseContent).contains("\"total\"");
@@ -240,14 +241,14 @@ public class ConsentInterceptorTest {
 	public void testMetadataCallHasChecksSkipped() throws IOException{
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/metadata");
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 		}
 
 		httpGet = new HttpGet("http://localhost:" + myPort + "/$meta");
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 		}
@@ -271,7 +272,7 @@ public class ConsentInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 			assertThat(responseContent).contains("PTA");
@@ -299,7 +300,7 @@ public class ConsentInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 			assertThat(responseContent).contains("PTA");
@@ -331,7 +332,7 @@ public class ConsentInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 			assertThat(responseContent).contains("A DIAG");
@@ -359,7 +360,7 @@ public class ConsentInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(204);
+			assertEquals(204, status.getStatusLine().getStatusCode());
 			assertNull(status.getEntity());
 			assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
 		}
@@ -394,14 +395,14 @@ public class ConsentInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 			Bundle response = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-			assertThat(response.getEntry().get(0).getResource().getClass()).isEqualTo(OperationOutcome.class);
-			assertThat(((OperationOutcome) response.getEntry().get(0).getResource()).getIssue().get(0).getDiagnostics()).isEqualTo("A DIAG");
-			assertThat(response.getEntry().get(1).getResource().getClass()).isEqualTo(Patient.class);
-			assertThat(response.getEntry().get(1).getResource().getIdElement().getIdPart()).isEqualTo("PTB");
+			assertEquals(OperationOutcome.class, response.getEntry().get(0).getResource().getClass());
+			assertEquals("A DIAG", ((OperationOutcome) response.getEntry().get(0).getResource()).getIssue().get(0).getDiagnostics());
+			assertEquals(Patient.class, response.getEntry().get(1).getResource().getClass());
+			assertEquals("PTB", response.getEntry().get(1).getResource().getIdElement().getIdPart());
 		}
 
 		verify(myConsentSvc, timeout(1000).times(1)).startOperation(any(), any());
@@ -434,15 +435,15 @@ public class ConsentInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 			Bundle response = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-			assertThat(response.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
-			assertThat(response.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo("PTA");
-			assertThat(((Patient) response.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem()).isEqualTo("REPLACEMENT");
-			assertThat(response.getEntry().get(1).getResource().getClass()).isEqualTo(Patient.class);
-			assertThat(response.getEntry().get(1).getResource().getIdElement().getIdPart()).isEqualTo("PTB");
+			assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
+			assertEquals("PTA", response.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertEquals("REPLACEMENT", ((Patient) response.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem());
+			assertEquals(Patient.class, response.getEntry().get(1).getResource().getClass());
+			assertEquals("PTB", response.getEntry().get(1).getResource().getIdElement().getIdPart());
 		}
 
 		verify(myConsentSvc, timeout(2000).times(1)).startOperation(any(), any());
@@ -472,15 +473,15 @@ public class ConsentInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient");
 
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 			Bundle response = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-			assertThat(response.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
-			assertThat(response.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo("PTA");
-			assertThat(((Patient) response.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem()).isEqualTo("REPLACEMENT");
-			assertThat(response.getEntry().get(1).getResource().getClass()).isEqualTo(Patient.class);
-			assertThat(response.getEntry().get(1).getResource().getIdElement().getIdPart()).isEqualTo("PTB");
+			assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
+			assertEquals("PTA", response.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertEquals("REPLACEMENT", ((Patient) response.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem());
+			assertEquals(Patient.class, response.getEntry().get(1).getResource().getClass());
+			assertEquals("PTB", response.getEntry().get(1).getResource().getIdElement().getIdPart());
 		}
 
 		verify(myConsentSvc, timeout(2000).times(1)).startOperation(any(), any());
@@ -508,7 +509,7 @@ public class ConsentInterceptorTest {
 		String nextPageLink;
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?_count=1");
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 			Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
@@ -532,13 +533,13 @@ public class ConsentInterceptorTest {
 
 		httpGet = new HttpGet(nextPageLink);
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 			Bundle response = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-			assertThat(response.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
-			assertThat(response.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo("PTB");
-			assertThat(((Patient) response.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem()).isEqualTo("REPLACEMENT");
+			assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
+			assertEquals("PTB", response.getEntry().get(0).getResource().getIdElement().getIdPart());
+			assertEquals("REPLACEMENT", ((Patient) response.getEntry().get(0).getResource()).getIdentifierFirstRep().getSystem());
 		}
 
 		verify(myConsentSvc, timeout(2000).times(1)).startOperation(any(), any());
@@ -608,7 +609,7 @@ public class ConsentInterceptorTest {
 
 			// Verify
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 			assertThat(responseContent).doesNotContain("\"entry\"");
@@ -843,7 +844,7 @@ public class ConsentInterceptorTest {
 		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?searchThrowNullPointerException=1");
 
 		try (CloseableHttpResponse status = myClient.execute(httpGet)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(500);
+			assertEquals(500, status.getStatusLine().getStatusCode());
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response: {}", responseContent);
 		}
@@ -851,7 +852,7 @@ public class ConsentInterceptorTest {
 		verify(myConsentSvc, timeout(2000).times(0)).completeOperationSuccess(any(), any());
 		verify(myConsentSvc, timeout(2000).times(1)).completeOperationFailure(any(), myExceptionCaptor.capture(), any());
 
-		assertThat(myExceptionCaptor.getValue().getMessage()).isEqualTo(Msg.code(389) + "Failed to call access method: java.lang.NullPointerException: A MESSAGE");
+		assertEquals(Msg.code(389) + "Failed to call access method: java.lang.NullPointerException: A MESSAGE", myExceptionCaptor.getValue().getMessage());
 	}
 
 
@@ -878,7 +879,7 @@ public class ConsentInterceptorTest {
 			.forResource(Patient.class)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(response.getTotal()).isEqualTo(2);
+		assertEquals(2, response.getTotal());
 	}
 
 	@Nested class CacheUsage {

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.email;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderDstu2Test;
 import ca.uhn.fhir.jpa.subscription.match.deliver.email.EmailSenderImpl;
@@ -131,18 +132,18 @@ public class EmailSubscriptionDstu2Test extends BaseResourceProviderDstu2Test {
 		assertTrue(ourGreenMail.waitForIncomingEmail(10000, 1));
 
 		MimeMessage[] messages = ourGreenMail.getReceivedMessages();
-		assertThat(messages.length).isEqualTo(2);
+		assertEquals(2, messages.length);
 		ourLog.info("Received: " + GreenMailUtil.getWholeMessage(messages[0]));
-		assertThat(messages[0].getSubject()).isEqualTo("HAPI FHIR Subscriptions");
-		assertThat(messages[0].getFrom().length).isEqualTo(1);
-		assertThat(((InternetAddress) messages[0].getFrom()[0]).getAddress()).isEqualTo("noreply@unknown.com");
-		assertThat(messages[0].getAllRecipients().length).isEqualTo(2);
-		assertThat(((InternetAddress) messages[0].getAllRecipients()[0]).getAddress()).isEqualTo("to1@example.com");
-		assertThat(((InternetAddress) messages[0].getAllRecipients()[1]).getAddress()).isEqualTo("to2@example.com");
-		assertThat(messages[0].getHeader("Content-Type").length).isEqualTo(1);
-		assertThat(messages[0].getHeader("Content-Type")[0]).isEqualTo("text/plain; charset=UTF-8");
+		assertEquals("HAPI FHIR Subscriptions", messages[0].getSubject());
+		assertEquals(1, messages[0].getFrom().length);
+		assertEquals("noreply@unknown.com", ((InternetAddress) messages[0].getFrom()[0]).getAddress());
+		assertEquals(2, messages[0].getAllRecipients().length);
+		assertEquals("to1@example.com", ((InternetAddress) messages[0].getAllRecipients()[0]).getAddress());
+		assertEquals("to2@example.com", ((InternetAddress) messages[0].getAllRecipients()[1]).getAddress());
+		assertEquals(1, messages[0].getHeader("Content-Type").length);
+		assertEquals("text/plain; charset=UTF-8", messages[0].getHeader("Content-Type")[0]);
 		String foundBody = GreenMailUtil.getBody(messages[0]);
-		assertThat(foundBody).isEqualTo("");
+		assertEquals("", foundBody);
 	}
 
 	private IMailSvc withMailService() {

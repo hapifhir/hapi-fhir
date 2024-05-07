@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -62,9 +63,9 @@ public class StringClientTest {
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.searchWithParam(new StringParam("hello"));
 
-		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
+		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
-		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient?withParam=hello");
+		assertEquals("http://foo/Patient?withParam=hello", get.getURI().toString());
 	}
 
 	@Test
@@ -78,9 +79,9 @@ public class StringClientTest {
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.searchWithoutParam("hello");
 
-		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
+		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
-		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient?withoutParam=hello");
+		assertEquals("http://foo/Patient?withoutParam=hello", get.getURI().toString());
 	}
 
 	@Test
@@ -94,9 +95,9 @@ public class StringClientTest {
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.searchWithParam(new StringParam("hello", true));
 
-		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
+		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
-		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient?withParam%3Aexact=hello");
+		assertEquals("http://foo/Patient?withParam%3Aexact=hello", get.getURI().toString());
 	}
 
 

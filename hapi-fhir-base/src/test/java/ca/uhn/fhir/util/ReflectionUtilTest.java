@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -20,12 +21,12 @@ public class ReflectionUtilTest {
 
 	@Test
 	public void testNewInstance() {
-		assertThat(ReflectionUtil.newInstance(ArrayList.class).getClass()).isEqualTo(ArrayList.class);
+		assertEquals(ArrayList.class, ReflectionUtil.newInstance(ArrayList.class).getClass());
 	}
 
 	@Test
 	public void testNewInstanceOrReturnNullString() {
-		assertThat(ReflectionUtil.newInstanceOrReturnNull(ArrayList.class.getName(), List.class).getClass()).isEqualTo(ArrayList.class);
+		assertEquals(ArrayList.class, ReflectionUtil.newInstanceOrReturnNull(ArrayList.class.getName(), List.class).getClass());
 	}
 
 	@Test
@@ -39,7 +40,7 @@ public class ReflectionUtilTest {
 			ReflectionUtil.newInstanceOrReturnNull("java.lang.String", List.class);
 			fail("");
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1787) + "java.lang.String is not assignable to interface java.util.List");
+			assertEquals(Msg.code(1787) + "java.lang.String is not assignable to interface java.util.List", e.getMessage());
 		}
 	}
 
@@ -49,7 +50,7 @@ public class ReflectionUtilTest {
 			ReflectionUtil.newInstance(List.class);
 			fail("");
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1784) + "Failed to instantiate java.util.List");
+			assertEquals(Msg.code(1784) + "Failed to instantiate java.util.List", e.getMessage());
 		}
 	}
 
@@ -63,7 +64,7 @@ public class ReflectionUtilTest {
 	public void testDescribeMethod() throws NoSuchMethodException {
 		Method method = String.class.getMethod("startsWith", String.class, int.class);
 		String description = ReflectionUtil.describeMethodInSortFriendlyWay(method);
-		assertThat(description).isEqualTo("startsWith returns(boolean) params(java.lang.String, int)");
+		assertEquals("startsWith returns(boolean) params(java.lang.String, int)", description);
 	}
 
 }

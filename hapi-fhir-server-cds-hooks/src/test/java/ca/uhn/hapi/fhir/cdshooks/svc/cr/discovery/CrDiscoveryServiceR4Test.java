@@ -1,5 +1,6 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.cr.discovery;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.hapi.fhir.cdshooks.module.CdsHooksObjectMapperFactory;
@@ -38,7 +39,7 @@ public class CrDiscoveryServiceR4Test extends BaseCrTest {
 			"    \"item5\" : \"Observation?subject=Patient/{{context.patientId}}&code=http://example.org/sdh/dtr/aslp/CodeSystem/aslp-codes|ASLP.A1.DE19\"\n" +
 			"  }\n" +
 			"}";
-		assertThat(actual).isEqualTo(expected);
+		assertEquals(expected, actual);
 	}
 
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.index;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -165,9 +166,9 @@ public class IdHelperServiceTest {
 		when(myResourceTableDao.findAndResolveByForcedIdWithNoTypeInPartition(any(), any(), any(), anyBoolean())).thenReturn(testForcedIdViews);
 
 		IResourceLookup<JpaPid> result = myHelperService.resolveResourceIdentity(partitionId, resourceType, resourceForcedId);
-		assertThat(result.getResourceType()).isEqualTo(forcedIdView[0]);
-		assertThat(result.getPersistentId().getId()).isEqualTo(forcedIdView[1]);
-		assertThat(result.getDeleted()).isEqualTo(forcedIdView[3]);
+		assertEquals(forcedIdView[0], result.getResourceType());
+		assertEquals(forcedIdView[1], result.getPersistentId().getId());
+		assertEquals(forcedIdView[3], result.getDeleted());
 	}
 
 	@Test
@@ -186,9 +187,9 @@ public class IdHelperServiceTest {
 		Map<String, JpaPid> result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, ids)
 			.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue()));
 		assertThat(result.keySet()).hasSize(3);
-		assertThat(result.get("A").getId()).isEqualTo(1L);
-		assertThat(result.get("B").getId()).isEqualTo(2L);
-		assertThat(result.get("C").getId()).isEqualTo(3L);
+		assertEquals(1L, result.get("A").getId());
+		assertEquals(2L, result.get("B").getId());
+		assertEquals(3L, result.get("C").getId());
 	}
 
 	@Test
@@ -201,6 +202,6 @@ public class IdHelperServiceTest {
 		when(myStorageSettings.getResourceClientIdStrategy()).thenReturn(JpaStorageSettings.ClientIdStrategyEnum.ANY);
 		when(myMemoryCacheService.getThenPutAfterCommit(any(), any(), any())).thenReturn(jpaPid1);
 		JpaPid result = myHelperService.resolveResourcePersistentIds(partitionId, resourceType, id.toString());
-		assertThat(result.getId()).isEqualTo(id);
+		assertEquals(id, result.getId());
 	}
 }

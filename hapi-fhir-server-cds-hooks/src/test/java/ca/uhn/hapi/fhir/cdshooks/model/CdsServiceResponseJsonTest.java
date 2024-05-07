@@ -1,4 +1,5 @@
-package ca.uhn.hapi.fhir.cdshooks.model;/*-
+package ca.uhn.hapi.fhir.cdshooks.model;import static org.junit.jupiter.api.Assertions.assertEquals;
+/*-
  * #%L
  * Smile CDR - CDR
  * %%
@@ -29,6 +30,6 @@ class CdsServiceResponseJsonTest {
 		// execute
 		final String actual = objectMapper.writeValueAsString(cdsServiceResponseJson);
 		// validate
-		assertThat(actual).isEqualTo(expected);
+		assertEquals(expected, actual);
 	}
 }

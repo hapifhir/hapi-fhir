@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser.i391;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -60,7 +61,7 @@ public class TestOutcomeTest {
 
 		assertNotNull(operationOutcome.getElement());
 		assertTrue(operationOutcome.getElement() instanceof BoundCodeDt);
-		assertThat(operationOutcome.getElement()).isEqualTo(outcome.getElement());
+		assertEquals(outcome.getElement(), operationOutcome.getElement());
 	}
 
 	@Test
@@ -75,7 +76,7 @@ public class TestOutcomeTest {
 
 		assertNotNull(operationOutcome.getElement());
 		assertTrue(operationOutcome.getElement() instanceof BoundCodeDt);
-		assertThat(operationOutcome.getElement()).isEqualTo(outcome.getElement());
+		assertEquals(outcome.getElement(), operationOutcome.getElement());
 	}
 
 	@AfterAll

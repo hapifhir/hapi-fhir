@@ -213,12 +213,12 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		// Make sure we can fetch the package by ID and Version
 		NpmPackage pkg = myPackageCacheManager.loadPackage("nictiz.fhir.nl.stu3.questionnaires", "1.0.2");
-		assertThat(pkg.description()).isEqualTo("Nictiz NL package of FHIR STU3 conformance resources for MedMij information standard Questionnaires. Includes dependency on Zib2017 and SDC.\\n\\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)");
+		assertEquals("Nictiz NL package of FHIR STU3 conformance resources for MedMij information standard Questionnaires. Includes dependency on Zib2017 and SDC.\\n\\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)", pkg.description());
 
 		// Make sure we can fetch the package by ID
 		pkg = myPackageCacheManager.loadPackage("nictiz.fhir.nl.stu3.questionnaires", null);
-		assertThat(pkg.version()).isEqualTo("1.0.2");
-		assertThat(pkg.description()).isEqualTo("Nictiz NL package of FHIR STU3 conformance resources for MedMij information standard Questionnaires. Includes dependency on Zib2017 and SDC.\\n\\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)");
+		assertEquals("1.0.2", pkg.version());
+		assertEquals("Nictiz NL package of FHIR STU3 conformance resources for MedMij information standard Questionnaires. Includes dependency on Zib2017 and SDC.\\n\\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)", pkg.description());
 
 		// Fetch resource by URL
 		FhirContext fhirContext = FhirContext.forDstu3Cached();
@@ -256,12 +256,12 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		// Make sure we can fetch the package by ID and Version
 		NpmPackage pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.12.0");
-		assertThat(pkg.description()).isEqualTo("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)");
+		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", pkg.description());
 
 		// Make sure we can fetch the package by ID
 		pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", null);
-		assertThat(pkg.version()).isEqualTo("0.12.0");
-		assertThat(pkg.description()).isEqualTo("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)");
+		assertEquals("0.12.0", pkg.version());
+		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", pkg.description());
 
 		// Make sure DB rows were saved
 		runInTransaction(() -> {
@@ -326,12 +326,12 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		// Make sure we can fetch the package by ID and Version
 		NpmPackage pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.12.0");
-		assertThat(pkg.description()).isEqualTo("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)");
+		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", pkg.description());
 
 		// Make sure we can fetch the package by ID
 		pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", null);
-		assertThat(pkg.version()).isEqualTo("0.12.0");
-		assertThat(pkg.description()).isEqualTo("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)");
+		assertEquals("0.12.0", pkg.version());
+		assertEquals("Describes FHIR Shorthand (FSH), a domain-specific language (DSL) for defining the content of FHIR Implementation Guides (IG). (built Wed, Apr 1, 2020 17:24+0000+00:00)", pkg.description());
 
 		// Make sure DB rows were saved
 		runInTransaction(() -> {
@@ -572,7 +572,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		// Ensure that we loaded the contents
 		IBundleProvider searchResult = myCodeSystemDao.search(SearchParameterMap.newSynchronous("url", new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system")));
-		assertThat(searchResult.sizeOrThrowNpe()).isEqualTo(1);
+		assertEquals(1, searchResult.sizeOrThrowNpe());
 
 	}
 
@@ -597,7 +597,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		// Ensure that we loaded the contents
 		IBundleProvider searchResult = myCodeSystemDao.search(SearchParameterMap.newSynchronous("url", new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system")));
-		assertThat(searchResult.sizeOrThrowNpe()).isEqualTo(1);
+		assertEquals(1, searchResult.sizeOrThrowNpe());
 	}
 
 	@Test
@@ -616,7 +616,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		// Make sure we can fetch the package by ID and Version
 		NpmPackage pkg = myPackageCacheManager.loadPackage("UK.Core.r4", "1.1.0");
 		assertNull(pkg.description());
-		assertThat(pkg.name()).isEqualTo("UK.Core.r4");
+		assertEquals("UK.Core.r4", pkg.name());
 
 	}
 
@@ -673,10 +673,10 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		NpmPackage pkg;
 
 		pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.11.x");
-		assertThat(pkg.version()).isEqualTo("0.11.1");
+		assertEquals("0.11.1", pkg.version());
 
 		pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.12.x");
-		assertThat(pkg.version()).isEqualTo("0.12.0");
+		assertEquals("0.12.0", pkg.version());
 
 	}
 
@@ -808,11 +808,11 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		myPackageInstallerSvc.install(spec);
 
 		IBundleProvider spSearch = mySearchParameterDao.search(SearchParameterMap.newSynchronous("code", new TokenParam("network-id")), new SystemRequestDetails());
-		assertThat(spSearch.sizeOrThrowNpe()).isEqualTo(1);
+		assertEquals(1, spSearch.sizeOrThrowNpe());
 		SearchParameter sp = (SearchParameter) spSearch.getResources(0, 1).get(0);
-		assertThat(sp.getCode()).isEqualTo("network-id");
-		assertThat(sp.getVersion()).isEqualTo("2.1");
-		assertThat(sp.getStatus()).isEqualTo(Enumerations.PublicationStatus.ACTIVE);
+		assertEquals("network-id", sp.getCode());
+		assertEquals("2.1", sp.getVersion());
+		assertEquals(Enumerations.PublicationStatus.ACTIVE, sp.getStatus());
 
 		Organization org = new Organization();
 		org.setName("Hello");
@@ -825,18 +825,18 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		SearchParameterMap map = SearchParameterMap.newSynchronous("network-id", new ReferenceParam(orgId.getValue()));
 
 		spSearch = myPractitionerRoleDao.search(map, new SystemRequestDetails());
-		assertThat(spSearch.sizeOrThrowNpe()).isEqualTo(1);
+		assertEquals(1, spSearch.sizeOrThrowNpe());
 
 		// Install newer version
 		spec = new PackageInstallationSpec().setName("test-exchange.fhir.us.com").setVersion("2.1.2").setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL);
 		myPackageInstallerSvc.install(spec);
 
 		spSearch = mySearchParameterDao.search(SearchParameterMap.newSynchronous("code", new TokenParam("network-id")));
-		assertThat(spSearch.sizeOrThrowNpe()).isEqualTo(1);
+		assertEquals(1, spSearch.sizeOrThrowNpe());
 		sp = (SearchParameter) spSearch.getResources(0, 1).get(0);
-		assertThat(sp.getCode()).isEqualTo("network-id");
-		assertThat(sp.getStatus()).isEqualTo(Enumerations.PublicationStatus.ACTIVE);
-		assertThat(sp.getVersion()).isEqualTo("2.2");
+		assertEquals("network-id", sp.getCode());
+		assertEquals(Enumerations.PublicationStatus.ACTIVE, sp.getStatus());
+		assertEquals("2.2", sp.getVersion());
 
 	}
 
@@ -855,9 +855,9 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.11.1").getBytes()).containsExactly(contents0111);
 		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.12.0").getBytes()).containsExactly(contents0120);
 		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "latest").getBytes()).containsExactly(contents0120);
-		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.11.1").getVersion()).isEqualTo("0.11.1");
-		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.12.0").getVersion()).isEqualTo("0.12.0");
-		assertThat(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "latest").getVersion()).isEqualTo("0.12.0");
+		assertEquals("0.11.1", myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.11.1").getVersion());
+		assertEquals("0.12.0", myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "0.12.0").getVersion());
+		assertEquals("0.12.0", myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "latest").getVersion());
 		assertNull(myPackageCacheManager.loadPackageContents("hl7.fhir.uv.shorthand", "1.2.3"));
 		assertNull(myPackageCacheManager.loadPackageContents("foo", "1.2.3"));
 	}

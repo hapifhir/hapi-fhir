@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -95,7 +96,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		try (CloseableHttpResponse response = ourHttpClient.execute(new HttpGet(uri))) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(MethodNotAllowedException.STATUS_CODE);
+			assertEquals(MethodNotAllowedException.STATUS_CODE, response.getStatusLine().getStatusCode());
 			assertThat(resp).contains(">" + Msg.code(984) + "Searching with _contained mode enabled is not enabled on this server");
 		}
 	}
@@ -106,7 +107,7 @@ public class ResourceProviderR4SearchContainedTest extends BaseResourceProviderR
 		try (CloseableHttpResponse response = ourHttpClient.execute(new HttpGet(uri))) {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(MethodNotAllowedException.STATUS_CODE);
+			assertEquals(MethodNotAllowedException.STATUS_CODE, response.getStatusLine().getStatusCode());
 			assertThat(resp).contains("Contained mode 'both' is not currently supported");
 		}
 	}

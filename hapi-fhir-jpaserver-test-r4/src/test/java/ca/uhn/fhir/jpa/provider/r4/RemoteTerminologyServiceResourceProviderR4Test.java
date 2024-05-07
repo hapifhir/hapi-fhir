@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -78,12 +79,12 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 		IValidationSupport.CodeValidationResult outcome = mySvc
 			.validateCode(null, null, CODE_SYSTEM, CODE, null, null);
 		assertNotNull(outcome);
-		assertThat(outcome.getCode()).isEqualTo(CODE);
+		assertEquals(CODE, outcome.getCode());
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
 
-		assertThat(ourCodeSystemProvider.myLastCode.getCode()).isEqualTo(CODE);
-		assertThat(ourCodeSystemProvider.myLastUrl.getValueAsString()).isEqualTo(CODE_SYSTEM);
+		assertEquals(CODE, ourCodeSystemProvider.myLastCode.getCode());
+		assertEquals(CODE_SYSTEM, ourCodeSystemProvider.myLastUrl.getValueAsString());
 	}
 
 	@Test
@@ -93,15 +94,15 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 		IValidationSupport.CodeValidationResult outcome = mySvc
 			.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, null);
 		assertNotNull(outcome);
-		assertThat(outcome.getCode()).isEqualTo(CODE);
-		assertThat(outcome.getDisplay()).isEqualTo(DISPLAY);
+		assertEquals(CODE, outcome.getCode());
+		assertEquals(DISPLAY, outcome.getDisplay());
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
 
-		assertThat(ourCodeSystemProvider.myLastCode.getCode()).isEqualTo(CODE);
-		assertThat(ourCodeSystemProvider.myLastDisplay.getValue()).isEqualTo(DISPLAY);
-		assertThat(ourCodeSystemProvider.myLastUrl.getValueAsString()).isEqualTo(CODE_SYSTEM);
-		assertThat(ourCodeSystemProvider.myNextReturnParams.getParameterValue("message").toString()).isEqualTo(SAMPLE_MESSAGE);
+		assertEquals(CODE, ourCodeSystemProvider.myLastCode.getCode());
+		assertEquals(DISPLAY, ourCodeSystemProvider.myLastDisplay.getValue());
+		assertEquals(CODE_SYSTEM, ourCodeSystemProvider.myLastUrl.getValueAsString());
+		assertEquals(SAMPLE_MESSAGE, ourCodeSystemProvider.myNextReturnParams.getParameterValue("message").toString());
 	}
 
 	@Test
@@ -111,8 +112,8 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 		IValidationSupport.CodeValidationResult outcome = mySvc
 			.validateCode(null, null, CODE_SYSTEM, CODE, null, null);
 		assertNotNull(outcome);
-		assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.ERROR);
-		assertThat(outcome.getMessage()).isEqualTo(SAMPLE_MESSAGE);
+		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
+		assertEquals(SAMPLE_MESSAGE, outcome.getMessage());
 
 		assertFalse(((BooleanType) ourCodeSystemProvider.myNextReturnParams.getParameterValue("result")).booleanValue());
 	}
@@ -124,12 +125,12 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 		IValidationSupport.CodeValidationResult outcome = mySvc
 			.validateCode(null, null, CODE_SYSTEM, CODE, null, VALUE_SET_URL);
 		assertNotNull(outcome);
-		assertThat(outcome.getCode()).isEqualTo(CODE);
+		assertEquals(CODE, outcome.getCode());
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
 
-		assertThat(ourValueSetProvider.myLastCode.getCode()).isEqualTo(CODE);
-		assertThat(ourValueSetProvider.myLastUrl.getValueAsString()).isEqualTo(VALUE_SET_URL);
+		assertEquals(CODE, ourValueSetProvider.myLastCode.getCode());
+		assertEquals(VALUE_SET_URL, ourValueSetProvider.myLastUrl.getValueAsString());
 	}
 
 	@Test
@@ -141,15 +142,15 @@ public class RemoteTerminologyServiceResourceProviderR4Test {
 		IValidationSupport.CodeValidationResult outcome = mySvc
 			.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
 		assertNotNull(outcome);
-		assertThat(outcome.getCode()).isEqualTo(CODE);
-		assertThat(outcome.getDisplay()).isEqualTo(DISPLAY);
+		assertEquals(CODE, outcome.getCode());
+		assertEquals(DISPLAY, outcome.getDisplay());
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
 
-		assertThat(ourValueSetProvider.myLastCode.getCode()).isEqualTo(CODE);
-		assertThat(ourValueSetProvider.myLastDisplay.getValue()).isEqualTo(DISPLAY);
-		assertThat(ourValueSetProvider.myLastUrl.getValueAsString()).isEqualTo(VALUE_SET_URL);
-		assertThat(ourValueSetProvider.myNextReturnParams.getParameterValue("message").toString()).isEqualTo(SAMPLE_MESSAGE);
+		assertEquals(CODE, ourValueSetProvider.myLastCode.getCode());
+		assertEquals(DISPLAY, ourValueSetProvider.myLastDisplay.getValue());
+		assertEquals(VALUE_SET_URL, ourValueSetProvider.myLastUrl.getValueAsString());
+		assertEquals(SAMPLE_MESSAGE, ourValueSetProvider.myNextReturnParams.getParameterValue("message").toString());
 	}
 
 	private void createNextCodeSystemReturnParameters(boolean theResult, String theDisplay, String theMessage) {

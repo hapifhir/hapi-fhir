@@ -144,21 +144,21 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 			// Send it the first time
 			Bundle outcome1 = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
-			assertThat(outcome1.getEntry().get(0).getResponse().getLocation()).isEqualTo("Patient/A/_history/1");
+			assertEquals("Patient/A/_history/1", outcome1.getEntry().get(0).getResponse().getLocation());
 			String eobId1 = outcome1.getEntry().get(1).getResponse().getLocation();
 			assertThat(eobId1).matches("ExplanationOfBenefit/[0-9]+/_history/1");
 
 			ExplanationOfBenefit eob1 = myExplanationOfBenefitDao.read(new IdType(eobId1), new SystemRequestDetails());
-			assertThat(eob1.getPatient().getReference()).isEqualTo("Patient/A/_history/1");
+			assertEquals("Patient/A/_history/1", eob1.getPatient().getReference());
 
 			// Send it again
 			Bundle outcome2 = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
-			assertThat(outcome2.getEntry().get(0).getResponse().getLocation()).isEqualTo("Patient/A/_history/1");
+			assertEquals("Patient/A/_history/1", outcome2.getEntry().get(0).getResponse().getLocation());
 			String eobId2 = outcome2.getEntry().get(1).getResponse().getLocation();
 			assertThat(eobId2).matches("ExplanationOfBenefit/[0-9]+/_history/1");
 
 			ExplanationOfBenefit eob2 = myExplanationOfBenefitDao.read(new IdType(eobId2), new SystemRequestDetails());
-			assertThat(eob2.getPatient().getReference()).isEqualTo("Patient/A/_history/1");
+			assertEquals("Patient/A/_history/1", eob2.getPatient().getReference());
 		}
 
 		@Test
@@ -192,29 +192,29 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 			// Send it the first time
 			Bundle outcome1 = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
-			assertThat(outcome1.getEntry().get(0).getResponse().getLocation()).isEqualTo("Organization/O/_history/1");
-			assertThat(outcome1.getEntry().get(1).getResponse().getLocation()).isEqualTo("Patient/A/_history/1");
+			assertEquals("Organization/O/_history/1", outcome1.getEntry().get(0).getResponse().getLocation());
+			assertEquals("Patient/A/_history/1", outcome1.getEntry().get(1).getResponse().getLocation());
 			String eobId1 = outcome1.getEntry().get(2).getResponse().getLocation();
 			assertThat(eobId1).matches("ExplanationOfBenefit/[0-9]+/_history/1");
 
 			ExplanationOfBenefit eob1 = myExplanationOfBenefitDao.read(new IdType(eobId1), new SystemRequestDetails());
-			assertThat(eob1.getPatient().getReference()).isEqualTo("Patient/A/_history/1");
+			assertEquals("Patient/A/_history/1", eob1.getPatient().getReference());
 
 			// Send it again
 			Bundle outcome2 = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
-			assertThat(outcome2.getEntry().get(0).getResponse().getLocation()).isEqualTo("Organization/O/_history/1");
+			assertEquals("Organization/O/_history/1", outcome2.getEntry().get(0).getResponse().getLocation());
 			// Technically the patient did not change - If this ever got optimized so that the version here
 			// was 1 that would be even better
 			String patientId = outcome2.getEntry().get(1).getResponse().getLocation();
-			assertThat(patientId).isEqualTo("Patient/A/_history/2");
+			assertEquals("Patient/A/_history/2", patientId);
 			String eobId2 = outcome2.getEntry().get(2).getResponse().getLocation();
 			assertThat(eobId2).matches("ExplanationOfBenefit/[0-9]+/_history/1");
 
 			Patient patient = myPatientDao.read(new IdType("Patient/A"), new SystemRequestDetails());
-			assertThat(patient.getId()).isEqualTo(patientId);
+			assertEquals(patientId, patient.getId());
 
 			ExplanationOfBenefit eob2 = myExplanationOfBenefitDao.read(new IdType(eobId2), new SystemRequestDetails());
-			assertThat(eob2.getPatient().getReference()).isEqualTo(patientId);
+			assertEquals(patientId, eob2.getPatient().getReference());
 		}
 
 		@Test
@@ -247,27 +247,27 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 			// Send it the first time
 			Bundle outcome1 = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
-			assertThat(outcome1.getEntry().get(0).getResponse().getLocation()).isEqualTo("Organization/O/_history/1");
-			assertThat(outcome1.getEntry().get(1).getResponse().getLocation()).isEqualTo("Patient/A/_history/1");
+			assertEquals("Organization/O/_history/1", outcome1.getEntry().get(0).getResponse().getLocation());
+			assertEquals("Patient/A/_history/1", outcome1.getEntry().get(1).getResponse().getLocation());
 			String eobId1 = outcome1.getEntry().get(2).getResponse().getLocation();
 			assertThat(eobId1).matches("ExplanationOfBenefit/[0-9]+/_history/1");
 
 			ExplanationOfBenefit eob1 = myExplanationOfBenefitDao.read(new IdType(eobId1), new SystemRequestDetails());
-			assertThat(eob1.getPatient().getReference()).isEqualTo("Patient/A/_history/1");
+			assertEquals("Patient/A/_history/1", eob1.getPatient().getReference());
 
 			// Send it again
 			Bundle outcome2 = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
-			assertThat(outcome2.getEntry().get(0).getResponse().getLocation()).isEqualTo("Organization/O/_history/2");
+			assertEquals("Organization/O/_history/2", outcome2.getEntry().get(0).getResponse().getLocation());
 			String patientId = outcome2.getEntry().get(1).getResponse().getLocation();
-			assertThat(patientId).isEqualTo("Patient/A/_history/2");
+			assertEquals("Patient/A/_history/2", patientId);
 			String eobId2 = outcome2.getEntry().get(2).getResponse().getLocation();
 			assertThat(eobId2).matches("ExplanationOfBenefit/[0-9]+/_history/1");
 
 			Patient patient = myPatientDao.read(new IdType("Patient/A"), new SystemRequestDetails());
-			assertThat(patient.getId()).isEqualTo(patientId);
+			assertEquals(patientId, patient.getId());
 
 			ExplanationOfBenefit eob2 = myExplanationOfBenefitDao.read(new IdType(eobId2), new SystemRequestDetails());
-			assertThat(eob2.getPatient().getReference()).isEqualTo(patientId);
+			assertEquals(patientId, eob2.getPatient().getReference());
 		}
 
 		@Test
@@ -275,7 +275,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			Patient p = new Patient();
 			p.setActive(true);
 			IIdType patientId = myPatientDao.create(p).getId().toUnqualified();
-			assertThat(patientId.getVersionIdPart()).isEqualTo("1");
+			assertEquals("1", patientId.getVersionIdPart());
 			assertNull(patientId.getBaseUrl());
 			String patientIdString = patientId.getValue();
 
@@ -287,7 +287,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 			// Read back and verify that reference is now versioned
 			observation = myObservationDao.read(observationId);
-			assertThat(observation.getSubject().getReference()).isEqualTo(patientIdString);
+			assertEquals(patientIdString, observation.getSubject().getReference());
 
 			myCaptureQueriesListener.clear();
 
@@ -304,7 +304,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 			// Read back and verify that reference is now versioned
 			observation = myObservationDao.read(observationId);
-			assertThat(observation.getSubject().getReference()).isEqualTo(patientIdString);
+			assertEquals(patientIdString, observation.getSubject().getReference());
 		}
 
 
@@ -339,8 +339,8 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 			// Read back and verify that reference is now versioned
 			observation = myObservationDao.read(observationId);
-			assertThat(observation.getSubject().getReference()).isEqualTo(patientId.getValue());
-			assertThat(observation.getEncounter().getReference()).isEqualTo(encounterId.toVersionless().getValue());
+			assertEquals(patientId.getValue(), observation.getSubject().getReference());
+			assertEquals(encounterId.toVersionless().getValue(), observation.getEncounter().getReference());
 		}
 
 
@@ -387,9 +387,9 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 			// Read back and verify that reference is now versioned
 			observation = myObservationDao.read(observationId);
-			assertThat(observation.getSubject().getReference()).isEqualTo(patientId.getValue());
-			assertThat(observation.getSubject().getReferenceElement().getVersionIdPart()).isEqualTo("2");
-			assertThat(observation.getEncounter().getReference()).isEqualTo(encounterId.toVersionless().getValue());
+			assertEquals(patientId.getValue(), observation.getSubject().getReference());
+			assertEquals("2", observation.getSubject().getReferenceElement().getVersionIdPart());
+			assertEquals(encounterId.toVersionless().getValue(), observation.getEncounter().getReference());
 		}
 
 
@@ -432,7 +432,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 			// Read back and verify that reference is now versioned
 			observation = myObservationDao.read(observationId);
-			assertThat(observation.getSubject().getReference()).isEqualTo(patientId.getValue());
+			assertEquals(patientId.getValue(), observation.getSubject().getReference());
 
 		}
 
@@ -467,7 +467,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 			// Read back and verify that reference is now versioned
 			observation = myObservationDao.read(observationId);
-			assertThat(observation.getSubject().getReference()).isEqualTo(patientId.getValue());
+			assertEquals(patientId.getValue(), observation.getSubject().getReference());
 		}
 
 		@Test
@@ -480,11 +480,11 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			Patient patient = new Patient();
 			patient.setId(patientId);
 			DaoMethodOutcome outcome = myPatientDao.update(patient);
-			assertThat(outcome.getResource().getIdElement().getValue()).isEqualTo(patientId + "/_history/1");
+			assertEquals(patientId + "/_history/1", outcome.getResource().getIdElement().getValue());
 
 			Patient returned = myPatientDao.read(idType);
 			assertNotNull(returned);
-			assertThat(returned.getId()).isEqualTo(patientId + "/_history/1");
+			assertEquals(patientId + "/_history/1", returned.getId());
 
 			// update to change version
 			patient.setActive(true);
@@ -555,7 +555,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 			// read back and verify that reference is versioned
 			messageHeader = myMessageHeaderDao.read(messageHeaderId);
-			assertThat(messageHeader.getFocus().get(0).getReference()).isEqualTo(patient.getIdElement().getValue());
+			assertEquals(patient.getIdElement().getValue(), messageHeader.getFocus().get(0).getReference());
 		}
 
 		@Test
@@ -653,7 +653,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		Patient p = new Patient();
 		p.setActive(true);
 		IIdType patientId = myPatientDao.create(p).getId().toUnqualified();
-		assertThat(patientId.getVersionIdPart()).isEqualTo("1");
+		assertEquals("1", patientId.getVersionIdPart());
 		assertNull(patientId.getBaseUrl());
 		String patientIdString = patientId.getValue();
 
@@ -663,7 +663,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		// Read back
 		observation = myObservationDao.read(observationId);
-		assertThat(observation.getSubject().getReference()).isEqualTo(patientIdString);
+		assertEquals(patientIdString, observation.getSubject().getReference());
 	}
 
 	@Test
@@ -678,7 +678,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		p.setActive(false);
 		IIdType patientId = myPatientDao.update(p).getId().toUnqualified();
 
-		assertThat(patientId.getVersionIdPart()).isEqualTo("2");
+		assertEquals("2", patientId.getVersionIdPart());
 		assertNull(patientId.getBaseUrl());
 
 		Observation observation = new Observation();
@@ -687,7 +687,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		// Read back
 		observation = myObservationDao.read(observationId);
-		assertThat(observation.getSubject().getReference()).isEqualTo(patientId.withVersion("1").getValue());
+		assertEquals(patientId.withVersion("1").getValue(), observation.getSubject().getReference());
 	}
 
 	@Test
@@ -703,7 +703,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// Update the patient
 		p.getIdentifier().get(0).setValue("2");
 		IIdType patientId = myPatientDao.update(p).getId().toUnqualified();
-		assertThat(patientId.getVersionIdPart()).isEqualTo("2");
+		assertEquals("2", patientId.getVersionIdPart());
 
 		Observation observation = new Observation();
 		observation.getSubject().setReference(patientId.withVersion("1").getValue());
@@ -712,21 +712,21 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// Search - Non Synchronous for *
 		{
 			IBundleProvider outcome = myObservationDao.search(new SearchParameterMap().addInclude(IBaseResource.INCLUDE_ALL));
-			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(1);
+			assertEquals(1, outcome.sizeOrThrowNpe());
 			List<IBaseResource> resources = outcome.getResources(0, 1);
 			assertThat(resources).hasSize(2);
-			assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(observationId.getValue());
-			assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(patientId.withVersion("1").getValue());
+			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
+			assertEquals(patientId.withVersion("1").getValue(), resources.get(1).getIdElement().getValue());
 		}
 
 		// Search - Non Synchronous for named include
 		{
 			IBundleProvider outcome = myObservationDao.search(new SearchParameterMap().addInclude(Observation.INCLUDE_PATIENT));
-			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(1);
+			assertEquals(1, outcome.sizeOrThrowNpe());
 			List<IBaseResource> resources = outcome.getResources(0, 1);
 			assertThat(resources).hasSize(2);
-			assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(observationId.getValue());
-			assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(patientId.withVersion("1").getValue());
+			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
+			assertEquals(patientId.withVersion("1").getValue(), resources.get(1).getIdElement().getValue());
 		}
 
 	}
@@ -744,7 +744,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// Update the patient
 		p.getIdentifier().get(0).setValue("2");
 		IIdType patientId = myPatientDao.update(p).getId().toUnqualified();
-		assertThat(patientId.getVersionIdPart()).isEqualTo("2");
+		assertEquals("2", patientId.getVersionIdPart());
 
 		Observation observation = new Observation();
 		observation.getSubject().setReference(patientId.withVersion("1").getValue());
@@ -753,21 +753,21 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// Search - Non Synchronous for *
 		{
 			IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous().addInclude(IBaseResource.INCLUDE_ALL));
-			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(2);
+			assertEquals(2, outcome.sizeOrThrowNpe());
 			List<IBaseResource> resources = outcome.getResources(0, 2);
 			assertThat(resources).hasSize(2);
-			assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(observationId.getValue());
-			assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(patientId.withVersion("1").getValue());
+			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
+			assertEquals(patientId.withVersion("1").getValue(), resources.get(1).getIdElement().getValue());
 		}
 
 		// Search - Non Synchronous for named include
 		{
 			IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous().addInclude(Observation.INCLUDE_PATIENT));
-			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(2);
+			assertEquals(2, outcome.sizeOrThrowNpe());
 			List<IBaseResource> resources = outcome.getResources(0, 2);
 			assertThat(resources).hasSize(2);
-			assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(observationId.getValue());
-			assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(patientId.withVersion("1").getValue());
+			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
+			assertEquals(patientId.withVersion("1").getValue(), resources.get(1).getIdElement().getValue());
 		}
 
 	}
@@ -791,12 +791,12 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		// Search for the Task using an _include=Task.basedOn and make sure we get the Condition resource in the Response
 		IBundleProvider outcome = myTaskDao.search(SearchParameterMap.newSynchronous().addInclude(Task.INCLUDE_BASED_ON));
-		assertThat(outcome.size()).isEqualTo(2);
+		assertEquals(2, outcome.size());
 		List<IBaseResource> resources = outcome.getResources(0, 2);
 		assertThat(resources.size()).as(resources.stream().map(t -> t.getIdElement().toUnqualified().getValue()).collect(Collectors.joining(", "))).isEqualTo(2);
-		assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(taskId.getValue());
-		assertThat(((Task) resources.get(0)).getBasedOn().get(0).getReference()).isEqualTo(conditionId.getValue());
-		assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(conditionId.withVersion("1").getValue());
+		assertEquals(taskId.getValue(), resources.get(0).getIdElement().getValue());
+		assertEquals(conditionId.getValue(), ((Task) resources.get(0)).getBasedOn().get(0).getReference());
+		assertEquals(conditionId.withVersion("1").getValue(), resources.get(1).getIdElement().getValue());
 
 		// Now, update the Condition to generate another version of it
 		condition.setRecordedDate(new Date(System.currentTimeMillis()));
@@ -804,12 +804,12 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		// Search for the Task again and make sure that we get the original version of the Condition resource in the Response
 		outcome = myTaskDao.search(SearchParameterMap.newSynchronous().addInclude(Task.INCLUDE_BASED_ON));
-		assertThat(outcome.size()).isEqualTo(2);
+		assertEquals(2, outcome.size());
 		resources = outcome.getResources(0, 2);
 		assertThat(resources).hasSize(2);
-		assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(taskId.getValue());
-		assertThat(((Task) resources.get(0)).getBasedOn().get(0).getReference()).isEqualTo(conditionId.getValue());
-		assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(conditionId.withVersion("1").getValue());
+		assertEquals(taskId.getValue(), resources.get(0).getIdElement().getValue());
+		assertEquals(conditionId.getValue(), ((Task) resources.get(0)).getBasedOn().get(0).getReference());
+		assertEquals(conditionId.withVersion("1").getValue(), resources.get(1).getIdElement().getValue());
 	}
 
 	@Test
@@ -839,12 +839,12 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		// Search for the Task using an _include=Task.basedOn and make sure we get the Condition resource in the Response
 		IBundleProvider outcome = myTaskDao.search(SearchParameterMap.newSynchronous().addInclude(Task.INCLUDE_BASED_ON));
-		assertThat(outcome.size()).isEqualTo(2);
+		assertEquals(2, outcome.size());
 		List<IBaseResource> resources = outcome.getResources(0, 2);
 		assertThat(resources.size()).as(resources.stream().map(t -> t.getIdElement().toUnqualified().getValue()).collect(Collectors.joining(", "))).isEqualTo(2);
-		assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(taskId.getValue());
-		assertThat(((Task) resources.get(0)).getBasedOn().get(0).getReference()).isEqualTo(conditionId.getValue());
-		assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(conditionId.withVersion("4").getValue());
+		assertEquals(taskId.getValue(), resources.get(0).getIdElement().getValue());
+		assertEquals(conditionId.getValue(), ((Task) resources.get(0)).getBasedOn().get(0).getReference());
+		assertEquals(conditionId.withVersion("4").getValue(), resources.get(1).getIdElement().getValue());
 	}
 
 	@Test
@@ -883,12 +883,12 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		// Search for the Task using an _include=Task.basedOn and make sure we get the Condition resource in the Response
 		IBundleProvider outcome = myTaskDao.search(SearchParameterMap.newSynchronous().addInclude(Task.INCLUDE_BASED_ON));
-		assertThat(outcome.size()).isEqualTo(2);
+		assertEquals(2, outcome.size());
 		List<IBaseResource> resources = outcome.getResources(0, 2);
 		assertThat(resources.size()).as(resources.stream().map(t -> t.getIdElement().toUnqualified().getValue()).collect(Collectors.joining(", "))).isEqualTo(2);
-		assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(taskId.getValue());
-		assertThat(((Task) resources.get(0)).getBasedOn().get(0).getReference()).isEqualTo(conditionId.getValue());
-		assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(conditionId.withVersion("4").getValue());
+		assertEquals(taskId.getValue(), resources.get(0).getIdElement().getValue());
+		assertEquals(conditionId.getValue(), ((Task) resources.get(0)).getBasedOn().get(0).getReference());
+		assertEquals(conditionId.withVersion("4").getValue(), resources.get(1).getIdElement().getValue());
 	}
 
 	@Test
@@ -904,7 +904,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// Update the patient
 		p.getIdentifier().get(0).setValue("2");
 		IIdType patientId = myPatientDao.update(p).getId().toUnqualified();
-		assertThat(patientId.getVersionIdPart()).isEqualTo("2");
+		assertEquals("2", patientId.getVersionIdPart());
 
 		Observation observation = new Observation();
 		observation.getSubject().setReference(patientId.withVersion("1").getValue());
@@ -913,21 +913,21 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// Search - Non Synchronous for *
 		{
 			IBundleProvider outcome = myObservationDao.search(new SearchParameterMap().addInclude(IBaseResource.INCLUDE_ALL));
-			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(1);
+			assertEquals(1, outcome.sizeOrThrowNpe());
 			List<IBaseResource> resources = outcome.getResources(0, 1);
 			assertThat(resources).hasSize(2);
-			assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(observationId.getValue());
-			assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(patientId.withVersion("2").getValue());
+			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
+			assertEquals(patientId.withVersion("2").getValue(), resources.get(1).getIdElement().getValue());
 		}
 
 		// Search - Non Synchronous for named include
 		{
 			IBundleProvider outcome = myObservationDao.search(new SearchParameterMap().addInclude(Observation.INCLUDE_PATIENT));
-			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(1);
+			assertEquals(1, outcome.sizeOrThrowNpe());
 			List<IBaseResource> resources = outcome.getResources(0, 1);
 			assertThat(resources).hasSize(2);
-			assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(observationId.getValue());
-			assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(patientId.withVersion("2").getValue());
+			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
+			assertEquals(patientId.withVersion("2").getValue(), resources.get(1).getIdElement().getValue());
 		}
 
 	}
@@ -945,7 +945,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		// Update the patient
 		p.getIdentifier().get(0).setValue("2");
 		IIdType patientId = myPatientDao.update(p).getId().toUnqualified();
-		assertThat(patientId.getVersionIdPart()).isEqualTo("2");
+		assertEquals("2", patientId.getVersionIdPart());
 
 		Observation observation = new Observation();
 		observation.getSubject().setReference(patientId.withVersion("1").getValue());
@@ -953,26 +953,26 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 		// Read the observation back
 		observation = myObservationDao.read(observationId);
-		assertThat(observation.getSubject().getReference()).isEqualTo(patientId.toVersionless().getValue());
+		assertEquals(patientId.toVersionless().getValue(), observation.getSubject().getReference());
 
 		// Search - Non Synchronous for *
 		{
 			IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous().addInclude(IBaseResource.INCLUDE_ALL));
-			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(2);
+			assertEquals(2, outcome.sizeOrThrowNpe());
 			List<IBaseResource> resources = outcome.getResources(0, 2);
 			assertThat(resources).hasSize(2);
-			assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(observationId.getValue());
-			assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(patientId.withVersion("2").getValue());
+			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
+			assertEquals(patientId.withVersion("2").getValue(), resources.get(1).getIdElement().getValue());
 		}
 
 		// Search - Non Synchronous for named include
 		{
 			IBundleProvider outcome = myObservationDao.search(SearchParameterMap.newSynchronous().addInclude(Observation.INCLUDE_PATIENT));
-			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(2);
+			assertEquals(2, outcome.sizeOrThrowNpe());
 			List<IBaseResource> resources = outcome.getResources(0, 2);
 			assertThat(resources).hasSize(2);
-			assertThat(resources.get(0).getIdElement().getValue()).isEqualTo(observationId.getValue());
-			assertThat(resources.get(1).getIdElement().getValue()).isEqualTo(patientId.withVersion("2").getValue());
+			assertEquals(observationId.getValue(), resources.get(0).getIdElement().getValue());
+			assertEquals(patientId.withVersion("2").getValue(), resources.get(1).getIdElement().getValue());
 		}
 	}
 
@@ -1008,7 +1008,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		DaoMethodOutcome update = myObservationDao.create(obs);
 		Observation resource = (Observation)update.getResource();
 		String versionedPatientReference = resource.getSubject().getReference();
-		assertThat(versionedPatientReference).isEqualTo("Patient/ABC");
+		assertEquals("Patient/ABC", versionedPatientReference);
 
 		Patient p = myPatientDao.read(new IdDt("Patient/ABC"));
 		assertNotNull(p);
@@ -1022,7 +1022,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		resource = (Observation)update.getResource();
 		versionedPatientReference = resource.getSubject().getReference();
 
-		assertThat(versionedPatientReference).isEqualTo("Patient/RED/_history/1");
+		assertEquals("Patient/RED/_history/1", versionedPatientReference);
 	}
 
 	@Test

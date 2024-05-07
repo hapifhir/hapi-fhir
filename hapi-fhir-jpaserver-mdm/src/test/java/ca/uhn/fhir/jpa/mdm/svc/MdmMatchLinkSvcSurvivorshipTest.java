@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.entity.MdmLink;
@@ -131,7 +132,7 @@ public class MdmMatchLinkSvcSurvivorshipTest extends BaseMdmR4Test {
 		assertThat(myMdmLinkDaoSvc.findMdmLinksByGoldenResource(golden)).hasSize(resourceCount);
 		assertThat(golden.getAddress()).hasSize(1);
 		assertThat(golden.getTelecom()).hasSize(1);
-		assertThat(golden.getTelecom().get(0).getValue()).isEqualTo(r.getTelecom().get(0).getValue());
+		assertEquals(r.getTelecom().get(0).getValue(), golden.getTelecom().get(0).getValue());
 
 		// test
 		// unmatch final link

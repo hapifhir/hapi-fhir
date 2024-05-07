@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -34,7 +35,7 @@ public class XverExtensionsValidationTest extends BaseValidationTestWithInlineMo
 
 		ValidationResult validationResult = validator.validateWithResult(med_req);
 
-		assertThat(validationResult.getMessages().stream().filter(errorMessagePredicate()).count()).isEqualTo(0);
+		assertEquals(0, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
 
@@ -46,7 +47,7 @@ public class XverExtensionsValidationTest extends BaseValidationTestWithInlineMo
 
 		ValidationResult validationResult = validator.validateWithResult(med_req);
 
-		assertThat(validationResult.getMessages().stream().filter(errorMessagePredicate()).count()).isEqualTo(0);
+		assertEquals(0, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
 	@Test
@@ -58,9 +59,9 @@ public class XverExtensionsValidationTest extends BaseValidationTestWithInlineMo
 
 		ValidationResult validationResult = validator.validateWithResult(med_req);
 
-		assertThat(validationResult.getMessages().stream().filter(errorMessagePredicate()).count()).isEqualTo(1);
+		assertEquals(1, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 		SingleValidationMessage errorMessage = validationResult.getMessages().stream().filter(errorMessagePredicate()).findFirst().get();
-		assertThat(errorMessage.getMessageId()).isEqualTo("Extension_EXT_Type");
+		assertEquals("Extension_EXT_Type", errorMessage.getMessageId());
 	}
 
 	@Nonnull

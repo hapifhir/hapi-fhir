@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -40,7 +41,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 	public void testCapabilityStatementValidates() throws IOException {
 		HttpGet get = new HttpGet(myServerBase + "/metadata?_pretty=true&_format=json");
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 
 			ourLog.debug(respString);
@@ -66,7 +67,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		try {
 			ourLog.info(resp.toString());
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.debug(respString);
@@ -140,7 +141,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 			.findFirst()
 			.orElseThrow(() -> new InternalErrorException("No patient"))
 			.getExtensionByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
-		assertThat(patientCountExt.getValueAsPrimitive().getValueAsString()).isEqualTo("1");
+		assertEquals("1", patientCountExt.getValueAsPrimitive().getValueAsString());
 
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -143,7 +144,7 @@ public class XmlParserDstu3Test {
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(mr);
 		ourLog.info(encoded);
 		mr = ourCtx.newXmlParser().parseResource(MedicationRequest.class, encoded);
-		assertThat(mr.getDosageInstructionFirstRep().getDoseSimpleQuantity().getValue()).isEqualTo(BigDecimal.valueOf(0.5));
+		assertEquals(BigDecimal.valueOf(0.5), mr.getDosageInstructionFirstRep().getDoseSimpleQuantity().getValue());
 		assertThat(encoded).contains("0.5");
 	}
 
@@ -192,13 +193,13 @@ public class XmlParserDstu3Test {
 			Patient p = new Patient();
 			p.addExtension().setValue(new StringType("foo"));
 			String encoded = ourCtx.newXmlParser().encodeResourceToString(p);
-			assertThat(encoded).isEqualTo("<Patient xmlns=\"http://hl7.org/fhir\"><extension><valueString value=\"foo\"/></extension></Patient>");
+			assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><extension><valueString value=\"foo\"/></extension></Patient>", encoded);
 		}
 		{
 			Patient p = new Patient();
 			p.getActiveElement().addExtension().setValue(new StringType("foo"));
 			String encoded = ourCtx.newXmlParser().encodeResourceToString(p);
-			assertThat(encoded).isEqualTo("<Patient xmlns=\"http://hl7.org/fhir\"><active><extension><valueString value=\"foo\"/></extension></active></Patient>");
+			assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><active><extension><valueString value=\"foo\"/></extension></active></Patient>", encoded);
 		}
 	}
 
@@ -220,7 +221,7 @@ public class XmlParserDstu3Test {
 
 		List<Extension> extlst = fhirPat.getExtensionsByUrl("x1");
 		assertThat(extlst).hasSize(1);
-		assertThat(((Reference) extlst.get(0).getValue()).getReference()).isEqualTo(refVal);
+		assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
 	}
 
 	/**
@@ -244,11 +245,11 @@ public class XmlParserDstu3Test {
 		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, encoded);
 		dm = (DocumentManifest) bundle.getEntry().get(0).getResource();
 
-		assertThat(dm.getSubject().getReference()).isEqualTo("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3");
+		assertEquals("urn:uuid:96e85cca-9797-45d6-834a-c4eb27f331d3", dm.getSubject().getReference());
 
 		Patient subject = (Patient) dm.getSubject().getResource();
 		assertNotNull(subject);
-		assertThat(subject.getNameFirstRep().getFamily()).isEqualTo("FAMILY");
+		assertEquals("FAMILY", subject.getNameFirstRep().getFamily());
 	}
 
 	@Test
@@ -291,11 +292,11 @@ public class XmlParserDstu3Test {
 			"</Bundle>";
 
 		Bundle b = ourCtx.newXmlParser().setParserErrorHandler(errorHandler).parseResource(Bundle.class, bundle);
-		assertThat(b.getTotal()).isEqualTo(1);
+		assertEquals(1, b.getTotal());
 
 		ArgumentCaptor<String> attributeCaptor = ArgumentCaptor.forClass(String.class);
 		verify(errorHandler, times(1)).unknownAttribute(any(), attributeCaptor.capture());
-		assertThat(attributeCaptor.getValue()).isEqualTo("foo");
+		assertEquals("foo", attributeCaptor.getValue());
 	}
 
 	@Test
@@ -310,11 +311,11 @@ public class XmlParserDstu3Test {
 			"</Bundle>";
 
 		Bundle b = ourCtx.newXmlParser().setParserErrorHandler(errorHandler).parseResource(Bundle.class, bundle);
-		assertThat(b.getTotal()).isEqualTo(1);
+		assertEquals(1, b.getTotal());
 
 		ArgumentCaptor<String> attributeCaptor = ArgumentCaptor.forClass(String.class);
 		verify(errorHandler, times(1)).unknownElement(any(), attributeCaptor.capture());
-		assertThat(attributeCaptor.getValue()).isEqualTo("foo");
+		assertEquals("foo", attributeCaptor.getValue());
 	}
 
 	@Test
@@ -333,12 +334,12 @@ public class XmlParserDstu3Test {
 			"</Bundle>";
 
 		Bundle b = ourCtx.newXmlParser().setParserErrorHandler(errorHandler).parseResource(Bundle.class, bundle);
-		assertThat(b.getTotal()).isEqualTo(1);
+		assertEquals(1, b.getTotal());
 
 		ArgumentCaptor<String> attributeCaptor = ArgumentCaptor.forClass(String.class);
 		verify(errorHandler, times(2)).unknownElement(any(), attributeCaptor.capture());
-		assertThat(attributeCaptor.getAllValues().get(0)).isEqualTo("extension");
-		assertThat(attributeCaptor.getAllValues().get(1)).isEqualTo("modifierExtension");
+		assertEquals("extension", attributeCaptor.getAllValues().get(0));
+		assertEquals("modifierExtension", attributeCaptor.getAllValues().get(1));
 	}
 
 
@@ -355,13 +356,13 @@ public class XmlParserDstu3Test {
 		ourLog.info(str);
 
 		p = ourCtx.newXmlParser().parseResource(Patient.class, str);
-		assertThat(p.getName().get(0).getFamily()).isEqualTo("PATIENT");
+		assertEquals("PATIENT", p.getName().get(0).getFamily());
 
 		List<Extension> exts = p.getExtensionsByUrl("urn:foo");
 		assertThat(exts).hasSize(1);
 		Reference rr = (Reference) exts.get(0).getValue();
 		o = (Organization) rr.getResource();
-		assertThat(o.getName()).isEqualTo("ORG");
+		assertEquals("ORG", o.getName());
 	}
 
 	@Test
@@ -373,7 +374,7 @@ public class XmlParserDstu3Test {
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(Bundle.class, string);
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [49,11]]: " + Msg.code(1819) + "Resource has contained child resource with no ID");
+			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [49,11]]: " + Msg.code(1819) + "Resource has contained child resource with no ID", e.getMessage());
 		}
 	}
 
@@ -425,20 +426,20 @@ public class XmlParserDstu3Test {
 
 		final String parsedPatient = xmlParser.encodeResourceToString(patient);
 		System.out.println(parsedPatient);
-		assertThat(parsedPatient).isEqualTo(expected);
+		assertEquals(expected, parsedPatient);
 
 		// Parse with string
 		MyPatientWithCustomUrlExtension newPatient = xmlParser.parseResource(MyPatientWithCustomUrlExtension.class, parsedPatient);
-		assertThat(newPatient.getPetName().getValue()).isEqualTo("myName");
+		assertEquals("myName", newPatient.getPetName().getValue());
 
 		// Parse with stream
 		newPatient = xmlParser.parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
-		assertThat(newPatient.getPetName().getValue()).isEqualTo("myName");
+		assertEquals("myName", newPatient.getPetName().getValue());
 
 		// Check no NPE if base server not configure
 		newPatient = ourCtx.newXmlParser().parseResource(MyPatientWithCustomUrlExtension.class, new StringReader(parsedPatient));
 		assertNull(newPatient.getPetName().getValue());
-		assertThat(((StringType) newPatient.getExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue()).isEqualTo("myName");
+		assertEquals("myName", ((StringType) newPatient.getExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
 	}
 
 	@Test
@@ -458,21 +459,21 @@ public class XmlParserDstu3Test {
 
 		final String parsedBundle = xmlParser.encodeResourceToString(bundle);
 		System.out.println(parsedBundle);
-		assertThat(parsedBundle).isEqualTo(expected);
+		assertEquals(expected, parsedBundle);
 
 		// Parse with string
 		Bundle newBundle = xmlParser.parseResource(Bundle.class, parsedBundle);
 		assertNotNull(newBundle);
 		assertThat(newBundle.getEntry()).hasSize(1);
 		Patient newPatient = (Patient) newBundle.getEntry().get(0).getResource();
-		assertThat(((StringType) newPatient.getExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue()).isEqualTo("myName");
+		assertEquals("myName", ((StringType) newPatient.getExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
 
 		// Parse with stream
 		newBundle = xmlParser.parseResource(Bundle.class, new StringReader(parsedBundle));
 		assertNotNull(newBundle);
 		assertThat(newBundle.getEntry()).hasSize(1);
 		newPatient = (Patient) newBundle.getEntry().get(0).getResource();
-		assertThat(((StringType) newPatient.getExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue()).isEqualTo("myName");
+		assertEquals("myName", ((StringType) newPatient.getExtensionsByUrl("http://www.example.com/petname").get(0).getValue()).getValue());
 
 	}
 
@@ -519,8 +520,8 @@ public class XmlParserDstu3Test {
 		pt = (Patient) bundle.getEntry().get(0).getResource();
 		org = (Organization) bundle.getEntry().get(1).getResource();
 
-		assertThat(org.getIdElement().getValue()).isEqualTo("Organization/orgid");
-		assertThat(pt.getManagingOrganization().getReferenceElement().getValue()).isEqualTo("Organization/orgid");
+		assertEquals("Organization/orgid", org.getIdElement().getValue());
+		assertEquals("Organization/orgid", pt.getManagingOrganization().getReferenceElement().getValue());
 		assertThat(pt.getManagingOrganization().getResource()).isSameAs(org);
 	}
 
@@ -537,8 +538,8 @@ public class XmlParserDstu3Test {
 
 		pat = ourCtx.newXmlParser().parseResource(PatientWithCustomCompositeExtension.class, enc);
 
-		assertThat(pat.getFooParentExtension().getChildA().getValue()).isEqualTo("ValueA");
-		assertThat(pat.getFooParentExtension().getChildB().getValue()).isEqualTo("ValueB");
+		assertEquals("ValueA", pat.getFooParentExtension().getChildA().getValue());
+		assertEquals("ValueB", pat.getFooParentExtension().getChildB().getValue());
 	}
 
 	@Test
@@ -576,12 +577,12 @@ public class XmlParserDstu3Test {
 
 		// Re-parse the bundle
 		patient = (Patient) xmlParser.parseResource(xmlParser.encodeResourceToString(patient));
-		assertThat(patient.getManagingOrganization().getReference()).isEqualTo("#1");
+		assertEquals("#1", patient.getManagingOrganization().getReference());
 
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertThat(org.getIdElement().getValue()).isEqualTo("#1");
-		assertThat(org.getName()).isEqualTo("Contained Test Organization");
+		assertEquals("#1", org.getIdElement().getValue());
+		assertEquals("Contained Test Organization", org.getName());
 
 		// And re-encode a second time
 		encoded = xmlParser.encodeResourceToString(patient);
@@ -654,11 +655,11 @@ public class XmlParserDstu3Test {
 		 */
 
 		dr = (CustomDiagnosticReport) parser.parseResource(output);
-		assertThat(dr.getStatus()).isEqualTo(DiagnosticReportStatus.FINAL);
+		assertEquals(DiagnosticReportStatus.FINAL, dr.getStatus());
 
-		assertThat(dr.getResult().get(0).getReference()).isEqualTo("#1");
+		assertEquals("#1", dr.getResult().get(0).getReference());
 		obs = (CustomObservation) dr.getResult().get(0).getResource();
-		assertThat(obs.getStatus()).isEqualTo(ObservationStatus.FINAL);
+		assertEquals(ObservationStatus.FINAL, obs.getStatus());
 
 		ourCtx = null;
 	}
@@ -699,11 +700,11 @@ public class XmlParserDstu3Test {
 		 */
 
 		dr = (DiagnosticReport) parser.parseResource(output);
-		assertThat(dr.getStatus()).isEqualTo(DiagnosticReportStatus.FINAL);
+		assertEquals(DiagnosticReportStatus.FINAL, dr.getStatus());
 
-		assertThat(dr.getResult().get(0).getReference()).isEqualTo("#1");
+		assertEquals("#1", dr.getResult().get(0).getReference());
 		obs = (Observation) dr.getResult().get(0).getResource();
-		assertThat(obs.getStatus()).isEqualTo(ObservationStatus.FINAL);
+		assertEquals(ObservationStatus.FINAL, obs.getStatus());
 
 		ourCtx = null;
 	}
@@ -723,7 +724,7 @@ public class XmlParserDstu3Test {
 		List<Extension> exts = o.getExtensionsByUrl("urn:foo");
 		assertThat(exts).hasSize(1);
 		CodeType code = (CodeType) exts.get(0).getValue();
-		assertThat(code.getValue()).isEqualTo("acode");
+		assertEquals("acode", code.getValue());
 
 	}
 
@@ -742,13 +743,13 @@ public class XmlParserDstu3Test {
 
 		de = ourCtx.newXmlParser().parseResource(DataElement.class, str);
 		b = de.getElement().get(0).getBinding();
-		assertThat(b.getDescription()).isEqualTo("BINDING");
+		assertEquals("BINDING", b.getDescription());
 
 		List<Extension> exts = b.getExtensionsByUrl("urn:foo");
 		assertThat(exts).hasSize(1);
 		Reference rr = (Reference) exts.get(0).getValue();
 		o = (Organization) rr.getResource();
-		assertThat(o.getName()).isEqualTo("ORG");
+		assertEquals("ORG", o.getName());
 
 	}
 
@@ -804,35 +805,35 @@ public class XmlParserDstu3Test {
 
 		Patient parsed = ourCtx.newXmlParser().parseResource(Patient.class, enc);
 		ext = parsed.getExtension().get(0);
-		assertThat(ext.getUrl()).isEqualTo("http://example.com/extensions#someext");
-		assertThat(((DateTimeType) ext.getValue()).getValueAsString()).isEqualTo("2011-01-02T11:13:15");
+		assertEquals("http://example.com/extensions#someext", ext.getUrl());
+		assertEquals("2011-01-02T11:13:15", ((DateTimeType) ext.getValue()).getValueAsString());
 
 		parent = patient.getExtension().get(1);
-		assertThat(parent.getUrl()).isEqualTo("http://example.com#parent");
+		assertEquals("http://example.com#parent", parent.getUrl());
 		assertNull(parent.getValue());
 		child1 = parent.getExtension().get(0);
-		assertThat(child1.getUrl()).isEqualTo("http://example.com#child");
-		assertThat(((StringType) child1.getValue()).getValueAsString()).isEqualTo("value1");
+		assertEquals("http://example.com#child", child1.getUrl());
+		assertEquals("value1", ((StringType) child1.getValue()).getValueAsString());
 		child2 = parent.getExtension().get(1);
-		assertThat(child2.getUrl()).isEqualTo("http://example.com#child");
-		assertThat(((StringType) child2.getValue()).getValueAsString()).isEqualTo("value2");
+		assertEquals("http://example.com#child", child2.getUrl());
+		assertEquals("value2", ((StringType) child2.getValue()).getValueAsString());
 
 		modExt = parsed.getModifierExtension().get(0);
-		assertThat(modExt.getUrl()).isEqualTo("http://example.com/extensions#modext");
-		assertThat(((DateType) modExt.getValue()).getValueAsString()).isEqualTo("1995-01-02");
+		assertEquals("http://example.com/extensions#modext", modExt.getUrl());
+		assertEquals("1995-01-02", ((DateType) modExt.getValue()).getValueAsString());
 
 		name = parsed.getName().get(0);
 
 		ext2 = name.getGiven().get(0).getExtension().get(0);
-		assertThat(ext2.getUrl()).isEqualTo("http://examples.com#givenext");
-		assertThat(((StringType) ext2.getValue()).getValueAsString()).isEqualTo("given");
+		assertEquals("http://examples.com#givenext", ext2.getUrl());
+		assertEquals("given", ((StringType) ext2.getValue()).getValueAsString());
 
 		given2ext = name.getGiven().get(1).getExtension().get(0);
-		assertThat(given2ext.getUrl()).isEqualTo("http://examples.com#givenext_parent");
+		assertEquals("http://examples.com#givenext_parent", given2ext.getUrl());
 		assertNull(given2ext.getValue());
 		Extension given2ext2 = given2ext.getExtension().get(0);
-		assertThat(given2ext2.getUrl()).isEqualTo("http://examples.com#givenext_child");
-		assertThat(((StringType) given2ext2.getValue()).getValue()).isEqualTo("CHILD");
+		assertEquals("http://examples.com#givenext_child", given2ext2.getUrl());
+		assertEquals("CHILD", ((StringType) given2ext2.getValue()).getValue());
 
 	}
 
@@ -861,8 +862,8 @@ public class XmlParserDstu3Test {
 			"</identifier>");
 
 		patient = ourCtx.newXmlParser().parseResource(Patient.class, out);
-		assertThat(patient.getIdentifier().get(0).getType().getCoding().get(0).getSystem()).isEqualTo("http://hl7.org/fhir/v2/0203");
-		assertThat(patient.getIdentifier().get(0).getType().getCoding().get(0).getCode()).isEqualTo("MR");
+		assertEquals("http://hl7.org/fhir/v2/0203", patient.getIdentifier().get(0).getType().getCoding().get(0).getSystem());
+		assertEquals("MR", patient.getIdentifier().get(0).getType().getCoding().get(0).getCode());
 	}
 
 	/**
@@ -877,7 +878,7 @@ public class XmlParserDstu3Test {
 		ourLog.info(encoded);
 
 		mo = ourCtx.newXmlParser().parseResource(MedicationRequest.class, encoded);
-		assertThat(mo.getAuthoredOnElement().getValueAsString()).isEqualTo("2015-10-05");
+		assertEquals("2015-10-05", mo.getAuthoredOnElement().getValueAsString());
 	}
 
 	@Test
@@ -921,27 +922,27 @@ public class XmlParserDstu3Test {
 		List<UriType> gotLabels = parsed.getMeta().getProfile();
 		assertThat(gotLabels).hasSize(2);
 		UriType label = gotLabels.get(0);
-		assertThat(label.getValue()).isEqualTo("http://foo/Profile1");
+		assertEquals("http://foo/Profile1", label.getValue());
 		label = gotLabels.get(1);
-		assertThat(label.getValue()).isEqualTo("http://foo/Profile2");
+		assertEquals("http://foo/Profile2", label.getValue());
 
 		List<Coding> tagList = parsed.getMeta().getTag();
 		assertThat(tagList).hasSize(2);
-		assertThat(tagList.get(0).getSystem()).isEqualTo("scheme1");
-		assertThat(tagList.get(0).getCode()).isEqualTo("term1");
-		assertThat(tagList.get(0).getDisplay()).isEqualTo("label1");
-		assertThat(tagList.get(1).getSystem()).isEqualTo("scheme2");
-		assertThat(tagList.get(1).getCode()).isEqualTo("term2");
-		assertThat(tagList.get(1).getDisplay()).isEqualTo("label2");
+		assertEquals("scheme1", tagList.get(0).getSystem());
+		assertEquals("term1", tagList.get(0).getCode());
+		assertEquals("label1", tagList.get(0).getDisplay());
+		assertEquals("scheme2", tagList.get(1).getSystem());
+		assertEquals("term2", tagList.get(1).getCode());
+		assertEquals("label2", tagList.get(1).getDisplay());
 
 		tagList = parsed.getMeta().getSecurity();
 		assertThat(tagList).hasSize(2);
-		assertThat(tagList.get(0).getSystem()).isEqualTo("sec_scheme1");
-		assertThat(tagList.get(0).getCode()).isEqualTo("sec_term1");
-		assertThat(tagList.get(0).getDisplay()).isEqualTo("sec_label1");
-		assertThat(tagList.get(1).getSystem()).isEqualTo("sec_scheme2");
-		assertThat(tagList.get(1).getCode()).isEqualTo("sec_term2");
-		assertThat(tagList.get(1).getDisplay()).isEqualTo("sec_label2");
+		assertEquals("sec_scheme1", tagList.get(0).getSystem());
+		assertEquals("sec_term1", tagList.get(0).getCode());
+		assertEquals("sec_label1", tagList.get(0).getDisplay());
+		assertEquals("sec_scheme2", tagList.get(1).getSystem());
+		assertEquals("sec_term2", tagList.get(1).getCode());
+		assertEquals("sec_label2", tagList.get(1).getDisplay());
 	}
 
 	@Test
@@ -978,12 +979,12 @@ public class XmlParserDstu3Test {
 
 		List<Coding> tagList = parsed.getMeta().getTag();
 		assertThat(tagList).hasSize(2);
-		assertThat(tagList.get(0).getSystem()).isEqualTo("scheme1");
-		assertThat(tagList.get(0).getCode()).isEqualTo("term1");
-		assertThat(tagList.get(0).getDisplay()).isEqualTo("label1");
-		assertThat(tagList.get(1).getSystem()).isEqualTo("scheme2");
-		assertThat(tagList.get(1).getCode()).isEqualTo("term2");
-		assertThat(tagList.get(1).getDisplay()).isEqualTo("label2");
+		assertEquals("scheme1", tagList.get(0).getSystem());
+		assertEquals("term1", tagList.get(0).getCode());
+		assertEquals("label1", tagList.get(0).getDisplay());
+		assertEquals("scheme2", tagList.get(1).getSystem());
+		assertEquals("term2", tagList.get(1).getCode());
+		assertEquals("label2", tagList.get(1).getDisplay());
 	}
 
 	/**
@@ -1010,36 +1011,36 @@ public class XmlParserDstu3Test {
 		ourLog.info("Expected: {}", expected);
 		ourLog.info("Actual  : {}", output);
 
-		assertThat(output).isEqualTo(expected);
+		assertEquals(expected, output);
 
 		p = ourCtx.newXmlParser().parseResource(Patient.class, output);
-		assertThat(p.getIdElement().getIdPart()).isEqualTo("patid");
+		assertEquals("patid", p.getIdElement().getIdPart());
 
 		name = p.getName().get(0);
-		assertThat(name.getId()).isEqualTo("nameid");
+		assertEquals("nameid", name.getId());
 		assertThat(name.getGiven()).hasSize(3);
 
 		assertNull(name.getGiven().get(0).getValue());
-		assertThat(name.getGiven().get(1).getValue()).isEqualTo("V1");
+		assertEquals("V1", name.getGiven().get(1).getValue());
 		assertNull(name.getGiven().get(2).getValue());
 
-		assertThat(name.getGiven().get(0).getId()).isEqualTo("f0");
-		assertThat(name.getGiven().get(1).getId()).isEqualTo("f1");
+		assertEquals("f0", name.getGiven().get(0).getId());
+		assertEquals("f1", name.getGiven().get(1).getId());
 		assertNull(name.getGiven().get(2).getId());
 
 		assertThat(name.getGiven().get(0).getExtension()).hasSize(1);
-		assertThat(name.getGiven().get(0).getExtension().get(0).getUrl()).isEqualTo("http://foo");
-		assertThat(((StringType) name.getGiven().get(0).getExtension().get(0).getValue()).getValue()).isEqualTo("FOOEXT0");
+		assertEquals("http://foo", name.getGiven().get(0).getExtension().get(0).getUrl());
+		assertEquals("FOOEXT0", ((StringType) name.getGiven().get(0).getExtension().get(0).getValue()).getValue());
 		assertNull(name.getGiven().get(0).getExtension().get(0).getId());
 
 		assertThat(name.getGiven().get(1).getExtension()).hasSize(1);
-		assertThat(name.getGiven().get(1).getExtension().get(0).getUrl()).isEqualTo("http://foo");
-		assertThat(((StringType) name.getGiven().get(1).getExtension().get(0).getValue()).getValue()).isEqualTo("FOOEXT1");
-		assertThat(name.getGiven().get(1).getExtension().get(0).getId()).isEqualTo("ext1id");
+		assertEquals("http://foo", name.getGiven().get(1).getExtension().get(0).getUrl());
+		assertEquals("FOOEXT1", ((StringType) name.getGiven().get(1).getExtension().get(0).getValue()).getValue());
+		assertEquals("ext1id", name.getGiven().get(1).getExtension().get(0).getId());
 
 		assertThat(name.getGiven().get(2).getExtension()).hasSize(1);
-		assertThat(name.getGiven().get(2).getExtension().get(0).getUrl()).isEqualTo("http://foo");
-		assertThat(((StringType) name.getGiven().get(2).getExtension().get(0).getValue()).getValue()).isEqualTo("FOOEXT3");
+		assertEquals("http://foo", name.getGiven().get(2).getExtension().get(0).getUrl());
+		assertEquals("FOOEXT3", ((StringType) name.getGiven().get(2).getExtension().get(0).getValue()).getValue());
 		assertNull(name.getGiven().get(2).getExtension().get(0).getId());
 
 	}
@@ -1054,7 +1055,7 @@ public class XmlParserDstu3Test {
 
 		mo = ourCtx.newXmlParser().parseResource(MedicationRequest.class, out);
 		Duration duration = (Duration) mo.getDosageInstruction().get(0).getTiming().getRepeat().getBounds();
-		assertThat(duration.getCode()).isEqualTo("code");
+		assertEquals("code", duration.getCode());
 	}
 
 	/**
@@ -1110,16 +1111,16 @@ public class XmlParserDstu3Test {
 		assertThat(gotLabels).hasSize(2);
 
 		Coding label = gotLabels.get(0);
-		assertThat(label.getSystem()).isEqualTo("SYSTEM1");
-		assertThat(label.getCode()).isEqualTo("CODE1");
-		assertThat(label.getDisplay()).isEqualTo("DISPLAY1");
-		assertThat(label.getVersion()).isEqualTo("VERSION1");
+		assertEquals("SYSTEM1", label.getSystem());
+		assertEquals("CODE1", label.getCode());
+		assertEquals("DISPLAY1", label.getDisplay());
+		assertEquals("VERSION1", label.getVersion());
 
 		label = gotLabels.get(1);
-		assertThat(label.getSystem()).isEqualTo("SYSTEM2");
-		assertThat(label.getCode()).isEqualTo("CODE2");
-		assertThat(label.getDisplay()).isEqualTo("DISPLAY2");
-		assertThat(label.getVersion()).isEqualTo("VERSION2");
+		assertEquals("SYSTEM2", label.getSystem());
+		assertEquals("CODE2", label.getCode());
+		assertEquals("DISPLAY2", label.getDisplay());
+		assertEquals("VERSION2", label.getVersion());
 	}
 
 	/**
@@ -1182,7 +1183,7 @@ public class XmlParserDstu3Test {
 		String output = ourCtx.newXmlParser().encodeResourceToString(b);
 		ourLog.info(output);
 
-		assertThat(output).isEqualTo("<Binary xmlns=\"http://hl7.org/fhir\"><content value=\"AQIDBA==\"/></Binary>");
+		assertEquals("<Binary xmlns=\"http://hl7.org/fhir\"><content value=\"AQIDBA==\"/></Binary>", output);
 	}
 
 	@Test
@@ -1239,13 +1240,13 @@ public class XmlParserDstu3Test {
 		patient = ourCtx.newXmlParser().parseResource(Patient.class, encoded);
 
 		child = (Organization) patient.getManagingOrganization().getResource();
-		assertThat(child.getName()).isEqualTo("child");
+		assertEquals("child", child.getName());
 
 		parent = (Organization) child.getPartOf().getResource();
-		assertThat(parent.getName()).isEqualTo("parent");
+		assertEquals("parent", parent.getName());
 
 		gp = (Organization) parent.getPartOf().getResource();
-		assertThat(gp.getName()).isEqualTo("grandparent");
+		assertEquals("grandparent", gp.getName());
 	}
 
 	/**
@@ -1531,7 +1532,7 @@ public class XmlParserDstu3Test {
 	@Test
 	public void testEncodeEmptyBinary() {
 		String output = ourCtx.newXmlParser().encodeResourceToString(new Binary());
-		assertThat(output).isEqualTo("<Binary xmlns=\"http://hl7.org/fhir\"/>");
+		assertEquals("<Binary xmlns=\"http://hl7.org/fhir\"/>", output);
 	}
 
 	/**
@@ -1586,7 +1587,7 @@ public class XmlParserDstu3Test {
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.encodeResourceToString(p);
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'Patient(res).extension'");
+			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'Patient(res).extension'", e.getMessage());
 		}
 
 	}
@@ -1617,7 +1618,7 @@ public class XmlParserDstu3Test {
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.encodeResourceToString(p);
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1827) + "[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions");
+			assertEquals(Msg.code(1827) + "[element=\"Patient(res).extension\"] Extension contains both a value and nested extensions", e.getMessage());
 		}
 
 	}
@@ -1667,8 +1668,8 @@ public class XmlParserDstu3Test {
 
 		obs = parser.parseResource(Observation.class, output);
 		assertThat(obs.getExtension()).hasSize(1);
-		assertThat(obs.getExtension().get(0).getUrl()).isEqualTo("http://exturl");
-		assertThat(((StringType) obs.getExtension().get(0).getValue()).getValue()).isEqualTo("ext_url_value");
+		assertEquals("http://exturl", obs.getExtension().get(0).getUrl());
+		assertEquals("ext_url_value", ((StringType) obs.getExtension().get(0).getValue()).getValue());
 	}
 
 	@Test
@@ -1702,10 +1703,10 @@ public class XmlParserDstu3Test {
 
 		obs = parser.parseResource(Observation.class, output);
 		assertThat(obs.getExtension()).hasSize(1);
-		assertThat(obs.getExtension().get(0).getUrl()).isEqualTo("http://exturl");
+		assertEquals("http://exturl", obs.getExtension().get(0).getUrl());
 		assertThat(obs.getExtension().get(0).getExtension()).hasSize(1);
-		assertThat(obs.getExtension().get(0).getExtension().get(0).getUrl()).isEqualTo("http://subext");
-		assertThat(((StringType) obs.getExtension().get(0).getExtension().get(0).getValue()).getValue()).isEqualTo("sub_ext_value");
+		assertEquals("http://subext", obs.getExtension().get(0).getExtension().get(0).getUrl());
+		assertEquals("sub_ext_value", ((StringType) obs.getExtension().get(0).getExtension().get(0).getValue()).getValue());
 	}
 
 	/**
@@ -1759,11 +1760,11 @@ public class XmlParserDstu3Test {
 		assertThat(val).contains("<extension url=\"urn:foo\"><valueReference><reference value=\"Organization/123\"/></valueReference></extension>");
 
 		Patient actual = parser.parseResource(Patient.class, val);
-		assertThat(patient.getAddress().get(0).getUse()).isEqualTo(AddressUse.HOME);
+		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
 		List<Extension> ext = actual.getExtension();
 		assertThat(ext).hasSize(1);
 		Reference ref = (Reference) ext.get(0).getValue();
-		assertThat(ref.getReference()).isEqualTo("Organization/123");
+		assertEquals("Organization/123", ref.getReference());
 
 	}
 
@@ -1872,7 +1873,7 @@ public class XmlParserDstu3Test {
 		String xml = parser.encodeResourceToString(patient);
 
 		ourLog.info(xml);
-		assertThat(xml).isEqualTo("<Patient xmlns=\"http://hl7.org/fhir\"/>");
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"/>", xml);
 	}
 
 	/**
@@ -1891,7 +1892,7 @@ public class XmlParserDstu3Test {
 		String xml = parser.encodeResourceToString(patient);
 
 		ourLog.info(xml);
-		assertThat(xml).isEqualTo("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://hello.world\"><valueString value=\"Hello World\"/></extension></Patient>");
+		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><extension url=\"http://hello.world\"><valueString value=\"Hello World\"/></extension></Patient>", xml);
 	}
 
 	@Test
@@ -2028,9 +2029,9 @@ public class XmlParserDstu3Test {
 		assertThat(val).contains("<extension url=\"urn:foo\"><valueCode value=\"home\"/></extension>");
 
 		MyPatientWithOneDeclaredEnumerationExtensionDstu3 actual = parser.parseResource(MyPatientWithOneDeclaredEnumerationExtensionDstu3.class, val);
-		assertThat(patient.getAddress().get(0).getUse()).isEqualTo(AddressUse.HOME);
+		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
 		Enumeration<AddressUse> ref = actual.getFoo();
-		assertThat(ref.getValue().toCode()).isEqualTo("home");
+		assertEquals("home", ref.getValue().toCode());
 
 	}
 
@@ -2336,8 +2337,8 @@ public class XmlParserDstu3Test {
 				Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
 				IIdType o1Id = o1.getIdElement();
 				assertFalse(o1Id.hasBaseUrl());
-				assertThat(o1Id.getResourceType()).isEqualTo("Patient");
-				assertThat(o1Id.getIdPart()).isEqualTo("patxuzos");
+				assertEquals("Patient", o1Id.getResourceType());
+				assertEquals("patxuzos", o1Id.getIdPart());
 				assertFalse(o1Id.hasVersionIdPart());
 			}
 		} finally {
@@ -2356,8 +2357,8 @@ public class XmlParserDstu3Test {
 				Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
 				IIdType o1Id = o1.getIdElement();
 				assertFalse(o1Id.hasBaseUrl());
-				assertThat(o1Id.getResourceType()).isEqualTo("Patient");
-				assertThat(o1Id.getIdPart()).isEqualTo("patxuzos");
+				assertEquals("Patient", o1Id.getResourceType());
+				assertEquals("patxuzos", o1Id.getIdPart());
 				assertFalse(o1Id.hasVersionIdPart());
 			}
 		} finally {
@@ -2372,26 +2373,26 @@ public class XmlParserDstu3Test {
 		String content = ClasspathUtil.loadResource("/bundle-example.xml");
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, content);
-		assertThat(parsed.getIdElement().getValue()).isEqualTo("Bundle/example/_history/1");
-		assertThat(parsed.getMeta().getVersionId()).isEqualTo("1");
-		assertThat(parsed.getIdElement().getVersionIdPart()).isEqualTo("1");
-		assertThat(parsed.getMeta().getLastUpdatedElement().getValueAsString()).isEqualTo(("2014-08-18T01:43:30Z"));
-		assertThat(parsed.getType().toCode()).isEqualTo("searchset");
-		assertThat(parsed.getTotal()).isEqualTo(3);
-		assertThat(parsed.getLink("next").getUrl()).isEqualTo("https://example.com/base/MedicationRequest?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2");
-		assertThat(parsed.getLink("self").getUrl()).isEqualTo("https://example.com/base/MedicationRequest?patient=347&_include=MedicationRequest.medication");
+		assertEquals("Bundle/example/_history/1", parsed.getIdElement().getValue());
+		assertEquals("1", parsed.getMeta().getVersionId());
+		assertEquals("1", parsed.getIdElement().getVersionIdPart());
+		assertEquals(("2014-08-18T01:43:30Z"), parsed.getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals("searchset", parsed.getType().toCode());
+		assertEquals(3, parsed.getTotal());
+		assertEquals("https://example.com/base/MedicationRequest?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLink("next").getUrl());
+		assertEquals("https://example.com/base/MedicationRequest?patient=347&_include=MedicationRequest.medication", parsed.getLink("self").getUrl());
 
 		assertThat(parsed.getEntry()).hasSize(2);
-		assertThat(parsed.getEntry().get(0).getLink("search").getUrl()).isEqualTo("http://foo?search");
+		assertEquals("http://foo?search", parsed.getEntry().get(0).getLink("search").getUrl());
 
-		assertThat(parsed.getEntry().get(0).getLink("alternate").getUrl()).isEqualTo("http://example.com/base/MedicationRequest/3123/_history/1");
+		assertEquals("http://example.com/base/MedicationRequest/3123/_history/1", parsed.getEntry().get(0).getLink("alternate").getUrl());
 		MedicationRequest p = (MedicationRequest) parsed.getEntry().get(0).getResource();
-		assertThat(p.getSubject().getReference()).isEqualTo("Patient/347");
-		assertThat(p.getMeta().getLastUpdatedElement().getValueAsString()).isEqualTo("2014-08-16T05:31:17Z");
-		assertThat(p.getId()).isEqualTo("http://example.com/base/MedicationRequest/3123/_history/1");
+		assertEquals("Patient/347", p.getSubject().getReference());
+		assertEquals("2014-08-16T05:31:17Z", p.getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals("http://example.com/base/MedicationRequest/3123/_history/1", p.getId());
 
 		Medication m = (Medication) parsed.getEntry().get(1).getResource();
-		assertThat(m.getId()).isEqualTo("http://example.com/base/Medication/example");
+		assertEquals("http://example.com/base/Medication/example", m.getId());
 		assertThat(m).isSameAs(((Reference) p.getMedication()).getResource());
 
 		String reencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed);
@@ -2408,27 +2409,27 @@ public class XmlParserDstu3Test {
 
 		IParser newXmlParser = ourCtx.newXmlParser();
 		Bundle parsed = newXmlParser.parseResource(Bundle.class, content);
-		assertThat(parsed.getIdElement().getValue()).isEqualTo("Bundle/example/_history/1");
-		assertThat(parsed.getIdElement().getVersionIdPart()).isEqualTo("1");
-		assertThat(parsed.getMeta().getLastUpdatedElement().getValueAsString()).isEqualTo("2014-08-18T01:43:30Z");
-		assertThat(parsed.getType()).isEqualTo("searchset");
-		assertThat(parsed.getTotal()).isEqualTo(3);
-		assertThat(parsed.getLink().get(0).getUrlElement().getValueAsString()).isEqualTo("https://example.com/base/MedicationRequest?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2");
-		assertThat(parsed.getLink().get(1).getUrlElement().getValueAsString()).isEqualTo("https://example.com/base/MedicationRequest?patient=347&_include=MedicationRequest.medication");
+		assertEquals("Bundle/example/_history/1", parsed.getIdElement().getValue());
+		assertEquals("1", parsed.getIdElement().getVersionIdPart());
+		assertEquals("2014-08-18T01:43:30Z", parsed.getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals("searchset", parsed.getType());
+		assertEquals(3, parsed.getTotal());
+		assertEquals("https://example.com/base/MedicationRequest?patient=347&searchId=ff15fd40-ff71-4b48-b366-09c706bed9d0&page=2", parsed.getLink().get(0).getUrlElement().getValueAsString());
+		assertEquals("https://example.com/base/MedicationRequest?patient=347&_include=MedicationRequest.medication", parsed.getLink().get(1).getUrlElement().getValueAsString());
 
 		assertThat(parsed.getEntry()).hasSize(2);
-		assertThat(parsed.getEntry().get(0).getLink().get(0).getRelation()).isEqualTo("alternate");
-		assertThat(parsed.getEntry().get(0).getLink().get(0).getUrl()).isEqualTo("http://example.com/base/MedicationRequest/3123/_history/1");
-		assertThat(parsed.getEntry().get(0).getRequest().getUrlElement().getValueAsString()).isEqualTo("http://foo?search");
+		assertEquals("alternate", parsed.getEntry().get(0).getLink().get(0).getRelation());
+		assertEquals("http://example.com/base/MedicationRequest/3123/_history/1", parsed.getEntry().get(0).getLink().get(0).getUrl());
+		assertEquals("http://foo?search", parsed.getEntry().get(0).getRequest().getUrlElement().getValueAsString());
 
 		MedicationRequest p = (MedicationRequest) parsed.getEntry().get(0).getResource();
-		assertThat(p.getSubject().getReference()).isEqualTo("Patient/347");
-		assertThat(p.getMeta().getLastUpdatedElement().getValueAsString()).isEqualTo("2014-08-16T05:31:17Z");
-		assertThat(p.getId()).isEqualTo("http://example.com/base/MedicationRequest/3123/_history/1");
+		assertEquals("Patient/347", p.getSubject().getReference());
+		assertEquals("2014-08-16T05:31:17Z", p.getMeta().getLastUpdatedElement().getValueAsString());
+		assertEquals("http://example.com/base/MedicationRequest/3123/_history/1", p.getId());
 		// assertEquals("3123", p.getId());
 
 		Medication m = (Medication) parsed.getEntry().get(1).getResource();
-		assertThat(m.getId()).isEqualTo("http://example.com/base/Medication/example");
+		assertEquals("http://example.com/base/Medication/example", m.getId());
 		assertThat(m).isSameAs(((Reference) p.getMedication()).getResource());
 
 		String reencoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(parsed);
@@ -2472,9 +2473,9 @@ public class XmlParserDstu3Test {
 
 		Patient res = ourCtx.newXmlParser().parseResource(Patient.class, input);
 		res.getFormatCommentsPre();
-		assertThat(res.getId()).isEqualTo("Patient/pat1");
-		assertThat(res.getIdentifier().get(0).getValue()).isEqualTo("654321");
-		assertThat(res.getActive()).isEqualTo(true);
+		assertEquals("Patient/pat1", res.getId());
+		assertEquals("654321", res.getIdentifier().get(0).getValue());
+		assertEquals(true, res.getActive());
 
 		assertThat(res.getIdElement().getFormatCommentsPre()).containsExactly("pre resource comment");
 		assertThat(res.getIdentifier().get(0).getFormatCommentsPre()).containsExactly("identifier comment 1", "identifier comment 2");
@@ -2785,20 +2786,20 @@ public class XmlParserDstu3Test {
 		// assertEquals("All codes representing the gender of a person.", b.getDescription());
 
 		Reference ref = (Reference) b.getValueSet();
-		assertThat(ref.getReference()).isEqualTo("#2179414");
+		assertEquals("#2179414", ref.getReference());
 
 		assertThat(ref.getExtension()).hasSize(2);
 		Extension ext = ref.getExtension().get(0);
-		assertThat(ext.getUrl()).isEqualTo("http://hl7.org/fhir/StructureDefinition/11179-permitted-value-valueset");
-		assertThat(ext.getValue().getClass()).isEqualTo(Reference.class);
-		assertThat(((Reference) ext.getValue()).getReference()).isEqualTo("#2179414-permitted");
-		assertThat(((Reference) ext.getValue()).getResource().getClass()).isEqualTo(ValueSet.class);
+		assertEquals("http://hl7.org/fhir/StructureDefinition/11179-permitted-value-valueset", ext.getUrl());
+		assertEquals(Reference.class, ext.getValue().getClass());
+		assertEquals("#2179414-permitted", ((Reference) ext.getValue()).getReference());
+		assertEquals(ValueSet.class, ((Reference) ext.getValue()).getResource().getClass());
 
 		ext = ref.getExtension().get(1);
-		assertThat(ext.getUrl()).isEqualTo("http://hl7.org/fhir/StructureDefinition/11179-permitted-value-conceptmap");
-		assertThat(ext.getValue().getClass()).isEqualTo(Reference.class);
-		assertThat(((Reference) ext.getValue()).getReference()).isEqualTo("#2179414-cm");
-		assertThat(((Reference) ext.getValue()).getResource().getClass()).isEqualTo(ConceptMap.class);
+		assertEquals("http://hl7.org/fhir/StructureDefinition/11179-permitted-value-conceptmap", ext.getUrl());
+		assertEquals(Reference.class, ext.getValue().getClass());
+		assertEquals("#2179414-cm", ((Reference) ext.getValue()).getReference());
+		assertEquals(ConceptMap.class, ((Reference) ext.getValue()).getResource().getClass());
 
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(de));
 
@@ -2821,7 +2822,7 @@ public class XmlParserDstu3Test {
 
 		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, input);
 		DateType bd = p.getBirthDateElement();
-		assertThat(bd.getValueAsString()).isEqualTo("2005-03-04");
+		assertEquals("2005-03-04", bd.getValueAsString());
 
 		List<Extension> exts = bd.getExtensionsByUrl("http://my.fancy.extension.url");
 		assertThat(exts).hasSize(1);
@@ -2831,7 +2832,7 @@ public class XmlParserDstu3Test {
 		exts = ext.getExtensionsByUrl("http://my.fancy.extension.url");
 		assertThat(exts).hasSize(1);
 		ext = exts.get(0);
-		assertThat(((StringType) ext.getValue()).getValue()).isEqualTo("myNestedValue");
+		assertEquals("myNestedValue", ((StringType) ext.getValue()).getValue());
 
 		String encoded = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(p);
 		ourLog.info(encoded);
@@ -2865,7 +2866,7 @@ public class XmlParserDstu3Test {
 			"</Bundle>\n";
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, input);
-		assertThat(parsed.getEntry().get(0).getResource().getIdElement().getValue()).isEqualTo("urn:oid:0.1.2.3");
+		assertEquals("urn:oid:0.1.2.3", parsed.getEntry().get(0).getResource().getIdElement().getValue());
 
 	}
 
@@ -2885,7 +2886,7 @@ public class XmlParserDstu3Test {
 			"</Bundle>\n";
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, input);
-		assertThat(parsed.getEntry().get(0).getResource().getIdElement().getValue()).isEqualTo("urn:oid:0.1.2.3");
+		assertEquals("urn:oid:0.1.2.3", parsed.getEntry().get(0).getResource().getIdElement().getValue());
 	}
 
 	@Test
@@ -2904,7 +2905,7 @@ public class XmlParserDstu3Test {
 			"</Bundle>\n";
 
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, input);
-		assertThat(parsed.getEntry().get(0).getResource().getIdElement().getValue()).isEqualTo("urn:uuid:0.1.2.3");
+		assertEquals("urn:uuid:0.1.2.3", parsed.getEntry().get(0).getResource().getIdElement().getValue());
 
 		input = "<Bundle xmlns=\"http://hl7.org/fhir\">\n" +
 			"    <id value=\"ringholm1430996763590912\"/>\n" +
@@ -2919,7 +2920,7 @@ public class XmlParserDstu3Test {
 			"</Bundle>\n";
 
 		parsed = ourCtx.newXmlParser().parseResource(Bundle.class, input);
-		assertThat(parsed.getEntry().get(0).getResource().getIdElement().getValue()).isEqualTo("urn:uuid:0.1.2.3");
+		assertEquals("urn:uuid:0.1.2.3", parsed.getEntry().get(0).getResource().getIdElement().getValue());
 
 	}
 
@@ -2972,7 +2973,7 @@ public class XmlParserDstu3Test {
 			"</Bundle>\n";
 
 		Bundle parsed = (Bundle) ourCtx.newXmlParser().parseResource(input);
-		assertThat(parsed.getEntry().get(0).getResource().getId()).isEqualTo("urn:oid:0.1.2.3");
+		assertEquals("urn:oid:0.1.2.3", parsed.getEntry().get(0).getResource().getId());
 
 	}
 
@@ -2990,13 +2991,13 @@ public class XmlParserDstu3Test {
 		Bundle parsed = ourCtx.newXmlParser().parseResource(Bundle.class, input);
 
 		BundleLinkComponent link = parsed.getLink().get(0);
-		assertThat(link.getRelation()).isEqualTo("just trying add link");
-		assertThat(link.getUrl()).isEqualTo("blarion");
+		assertEquals("just trying add link", link.getRelation());
+		assertEquals("blarion", link.getUrl());
 
 		BundleEntryComponent entry = parsed.getEntry().get(0);
 		link = entry.getLink().get(0);
-		assertThat(link.getRelation()).isEqualTo("orionhealth.edit");
-		assertThat(link.getUrl()).isEqualTo("Observation");
+		assertEquals("orionhealth.edit", link.getRelation());
+		assertEquals("Observation", link.getUrl());
 	}
 
 	@Test
@@ -3009,9 +3010,9 @@ public class XmlParserDstu3Test {
 			+ "</Bundle>\n";
 
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, input);
-		assertThat(bundle.getEntry().get(0).getResource().getIdElement().getValue()).isEqualTo("http://localhost:58402/fhir/context/Patient/1/_history/3");
-		assertThat(bundle.getEntry().get(1).getResource().getIdElement().getValue()).isEqualTo("http://localhost:58402/fhir/context/Patient/1/_history/2");
-		assertThat(bundle.getEntry().get(2).getResource().getIdElement().getValue()).isEqualTo("http://localhost:58402/fhir/context/Patient/1/_history/1");
+		assertEquals("http://localhost:58402/fhir/context/Patient/1/_history/3", bundle.getEntry().get(0).getResource().getIdElement().getValue());
+		assertEquals("http://localhost:58402/fhir/context/Patient/1/_history/2", bundle.getEntry().get(1).getResource().getIdElement().getValue());
+		assertEquals("http://localhost:58402/fhir/context/Patient/1/_history/1", bundle.getEntry().get(2).getResource().getIdElement().getValue());
 	}
 
 	/**
@@ -3043,11 +3044,11 @@ public class XmlParserDstu3Test {
 			"<reference value=\"#1\"/>");
 
 		o = parser.parseResource(Observation.class, enc);
-		assertThat(o.getCode().getText()).isEqualTo("obs text");
+		assertEquals("obs text", o.getCode().getText());
 
 		assertNotNull(o.getSubject().getResource());
 		p = (Patient) o.getSubject().getResource();
-		assertThat(p.getName().get(0).getFamily()).isEqualTo("patient family");
+		assertEquals("patient family", p.getName().get(0).getFamily());
 	}
 
 	/**
@@ -3106,7 +3107,7 @@ public class XmlParserDstu3Test {
 		extList = extList.get(0).getExtensionsByUrl("http://aaa.ch/fhir/Patient#mangedcare-aaa-id");
 		Extension ext = extList.get(0);
 		IdType value = (IdType) ext.getValue();
-		assertThat(value.getValueAsString()).isEqualTo("mc1");
+		assertEquals("mc1", value.getValueAsString());
 	}
 
 	/**
@@ -3164,11 +3165,11 @@ public class XmlParserDstu3Test {
 		try {
 			p.parseResource(resource);
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"active\"] Invalid attribute value \"1\": Invalid boolean string: '1'");
+			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"active\"] Invalid attribute value \"1\": Invalid boolean string: '1'", e.getMessage());
 		}
 
 		LenientErrorHandler errorHandler = new LenientErrorHandler();
-		assertThat(errorHandler.isErrorOnInvalidValue()).isEqualTo(true);
+		assertEquals(true, errorHandler.isErrorOnInvalidValue());
 		errorHandler.setErrorOnInvalidValue(false);
 		p.setParserErrorHandler(errorHandler);
 	}
@@ -3210,7 +3211,7 @@ public class XmlParserDstu3Test {
 		ArgumentCaptor<String> capt = ArgumentCaptor.forClass(String.class);
 		verify(errorHandler, times(1)).unknownAttribute(nullable(IParseLocation.class), capt.capture());
 
-		assertThat(capt.getValue()).isEqualTo("value");
+		assertEquals("value", capt.getValue());
 	}
 
 	@Test
@@ -3233,7 +3234,7 @@ public class XmlParserDstu3Test {
 		Bundle b = ourCtx.newXmlParser().parseResource(Bundle.class, input);
 
 		InstantType updated = b.getMeta().getLastUpdatedElement();
-		assertThat(updated.getValueAsString()).isEqualTo("2015-06-22T15:48:57.554-04:00");
+		assertEquals("2015-06-22T15:48:57.554-04:00", updated.getValueAsString());
 
 	}
 
@@ -3274,13 +3275,13 @@ public class XmlParserDstu3Test {
 
 		BundleEntryComponent entry = b.getEntry().get(0);
 		Patient pt = (Patient) entry.getResource();
-		assertThat(pt.getIdElement().getValue()).isEqualTo("http://foo/fhirBase2/Patient/1/_history/2");
-		assertThat(pt.getBirthDateElement().getValueAsString()).isEqualTo("2012-01-02");
-		assertThat(entry.getSearch().getScore().toString()).isEqualTo("0.123");
-		assertThat(entry.getSearch().getMode().toCode()).isEqualTo("match");
-		assertThat(entry.getRequest().getMethod().toCode()).isEqualTo("POST");
-		assertThat(entry.getRequest().getUrl()).isEqualTo("http://foo/Patient?identifier=value");
-		assertThat(pt.getMeta().getLastUpdatedElement().getValueAsString()).isEqualTo("2001-02-22T09:22:33-07:00");
+		assertEquals("http://foo/fhirBase2/Patient/1/_history/2", pt.getIdElement().getValue());
+		assertEquals("2012-01-02", pt.getBirthDateElement().getValueAsString());
+		assertEquals("0.123", entry.getSearch().getScore().toString());
+		assertEquals("match", entry.getSearch().getMode().toCode());
+		assertEquals("POST", entry.getRequest().getMethod().toCode());
+		assertEquals("http://foo/Patient?identifier=value", entry.getRequest().getUrl());
+		assertEquals("2001-02-22T09:22:33-07:00", pt.getMeta().getLastUpdatedElement().getValueAsString());
 
 		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
 		String reEncoded = p.encodeResourceToString(b);
@@ -3305,7 +3306,7 @@ public class XmlParserDstu3Test {
 			"</Patient>";
 
 		Patient p = ourCtx.newXmlParser().parseResource(Patient.class, res);
-		assertThat(p.getText().getDiv().getValueAsString()).isEqualTo(htmlNs);
+		assertEquals(htmlNs, p.getText().getDiv().getValueAsString());
 	}
 
 	@Test
@@ -3355,8 +3356,8 @@ public class XmlParserDstu3Test {
 		Bundle reincarnatedBundle = xmlParser.parseResource(Bundle.class, bundleText);
 		Patient reincarnatedPatient = (Patient) reincarnatedBundle.getEntry().get(0).getResource();
 
-		assertThat(patient.getIdElement().getResourceType()).isEqualTo("Patient");
-		assertThat(reincarnatedPatient.getIdElement().getResourceType()).isEqualTo("Patient");
+		assertEquals("Patient", patient.getIdElement().getResourceType());
+		assertEquals("Patient", reincarnatedPatient.getIdElement().getResourceType());
 	}
 
 	@Test
@@ -3368,7 +3369,7 @@ public class XmlParserDstu3Test {
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(Bundle.class, string);
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [39,9]]: " + Msg.code(1825) + "Unknown element 'encounter' found during parse");
+			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [39,9]]: " + Msg.code(1825) + "Unknown element 'encounter' found during parse", e.getMessage());
 		}
 	}
 
@@ -3395,10 +3396,10 @@ public class XmlParserDstu3Test {
 
 		DiagnosticReport resource = (DiagnosticReport) bundle.getEntry().get(0).getResource();
 		Observation obs = (Observation) resource.getResult().get(1).getResource();
-		assertThat(obs.getId()).isEqualTo("#2");
+		assertEquals("#2", obs.getId());
 		Reference performerFirstRep = obs.getPerformerFirstRep();
 		Practitioner performer = (Practitioner) performerFirstRep.getResource();
-		assertThat(performer.getId()).isEqualTo("#3");
+		assertEquals("#3", performer.getId());
 	}
 
 	/**
@@ -3418,14 +3419,14 @@ public class XmlParserDstu3Test {
 		Patient parsed = (Patient) parser.parseResource(input);
 		assertThat(parsed.getExtension()).hasSize(1);
 		assertNull(parsed.getExtension().get(0).getUrl());
-		assertThat(parsed.getExtension().get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("2011-01-02T11:13:15");
+		assertEquals("2011-01-02T11:13:15", parsed.getExtension().get(0).getValueAsPrimitive().getValueAsString());
 
 		try {
 			parser = ourCtx.newXmlParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(input);
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getCause().getMessage()).isEqualTo(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'extension'");
+			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'extension'", e.getCause().getMessage());
 		}
 
 	}
@@ -3447,14 +3448,14 @@ public class XmlParserDstu3Test {
 		Patient parsed = (Patient) parser.parseResource(input);
 		assertThat(parsed.getModifierExtension()).hasSize(1);
 		assertNull(parsed.getModifierExtension().get(0).getUrl());
-		assertThat(parsed.getModifierExtension().get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("2011-01-02T11:13:15");
+		assertEquals("2011-01-02T11:13:15", parsed.getModifierExtension().get(0).getValueAsPrimitive().getValueAsString());
 
 		try {
 			parser = ourCtx.newXmlParser();
 			parser.setParserErrorHandler(new StrictErrorHandler());
 			parser.parseResource(input);
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getCause().getMessage()).isEqualTo(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'modifierExtension'");
+			assertEquals(Msg.code(1822) + "Resource is missing required element 'url' in parent element 'modifierExtension'", e.getCause().getMessage());
 		}
 
 	}
@@ -3480,13 +3481,13 @@ public class XmlParserDstu3Test {
 		try {
 			p.parseResource(encoded.replace("Observation", "observation"));
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [1,1]]: " + Msg.code(1815) + "Unknown resource type 'observation': Resource names are case sensitive, found similar name: 'Observation'");
+			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [1,1]]: " + Msg.code(1815) + "Unknown resource type 'observation': Resource names are case sensitive, found similar name: 'Observation'", e.getMessage());
 		}
 
 		try {
 			p.parseResource(encoded.replace("valueSampledData", "valueSampleddata"));
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1825) + "Unknown element 'valueSampleddata' found during parse");
+			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1825) + "Unknown element 'valueSampleddata' found during parse", e.getMessage());
 		}
 	}
 
@@ -3524,7 +3525,7 @@ public class XmlParserDstu3Test {
 
 		p = ourCtx.newXmlParser().parseResource(Patient.class, encoded);
 
-		assertThat(p.getNameFirstRep().getFamily()).isEqualTo(largeString);
+		assertEquals(largeString, p.getNameFirstRep().getFamily());
 	}
 
 	/**

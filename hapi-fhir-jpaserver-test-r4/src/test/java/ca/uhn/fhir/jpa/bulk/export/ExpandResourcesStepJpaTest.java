@@ -96,12 +96,12 @@ public class ExpandResourcesStepJpaTest extends BaseJpaR4Test {
 		assertThat(expandedResourceList.getStringifiedResources().get(1)).contains("{\"system\":\"http://static\",\"version\":\"1\",\"code\":\"tag\",\"userSelected\":true}");
 
 		// Verify query counts
-		assertThat(myCaptureQueriesListener.countSelectQueries()).isEqualTo(theExpectedSelectQueries);
-		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countUpdateQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(2);
-		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
+		assertEquals(theExpectedSelectQueries, myCaptureQueriesListener.countSelectQueries());
+		assertEquals(0, myCaptureQueriesListener.countInsertQueries());
+		assertEquals(0, myCaptureQueriesListener.countUpdateQueries());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(2, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 	}
 

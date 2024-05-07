@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.embedded.PostgresEmbeddedDatabase;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrator;
@@ -66,7 +67,7 @@ public class MigrateColumBlobTypeToBinaryTypeTaskTest {
 
 		String storedContent = convertToString(stringObjectMap, "storage_content_bin");
 
-		assertThat(storedContent).isEqualTo(expectedString);
+		assertEquals(expectedString, storedContent);
 
 	}
 

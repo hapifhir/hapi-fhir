@@ -1,5 +1,6 @@
 package ca.uhn.fhir.interceptor.executor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -37,7 +38,7 @@ public class InterceptorServiceTest {
 		TestInterceptorWithAnnotationDefinedOnInterface_Class interceptor = new TestInterceptorWithAnnotationDefinedOnInterface_Class();
 		svc.registerInterceptor(interceptor);
 
-		assertThat(interceptor.getRegisterCount()).isEqualTo(1);
+		assertEquals(1, interceptor.getRegisterCount());
 	}
 
 	@Test
@@ -57,7 +58,7 @@ public class InterceptorServiceTest {
 			svc.callHooks(Pointcut.TEST_RB, new HookParams("A MESSAGE", "B"));
 			fail("");
 		} catch (AuthenticationException e) {
-			assertThat(e.getMessage()).isEqualTo("A MESSAGE");
+			assertEquals("A MESSAGE", e.getMessage());
 		}
 
 	}
@@ -86,11 +87,11 @@ public class InterceptorServiceTest {
 		interceptor0.myNextResponse = new InvalidRequestException("0");
 		interceptor1.myNextResponse = new InvalidRequestException("1");
 		Object response = svc.callHooksAndReturnObject(Pointcut.TEST_RO, new HookParams("", ""));
-		assertThat(((InvalidRequestException) response).getMessage()).isEqualTo("0");
+		assertEquals("0", ((InvalidRequestException) response).getMessage());
 
 		interceptor0.myNextResponse = null;
 		response = svc.callHooksAndReturnObject(Pointcut.TEST_RO, new HookParams("", ""));
-		assertThat(((InvalidRequestException) response).getMessage()).isEqualTo("1");
+		assertEquals("1", ((InvalidRequestException) response).getMessage());
 	}
 
 
@@ -131,7 +132,7 @@ public class InterceptorServiceTest {
 			svc.callHooks(Pointcut.TEST_RB, new HookParams("A MESSAGE", "B"));
 			fail("");
 		} catch (AuthenticationException e) {
-			assertThat(e.getMessage()).isEqualTo("A MESSAGE");
+			assertEquals("A MESSAGE", e.getMessage());
 		}
 
 	}
@@ -157,7 +158,7 @@ public class InterceptorServiceTest {
 			svc.callHooks(Pointcut.TEST_RB, new HookParams("A MESSAGE", "B"));
 			fail("");
 		} catch (AuthenticationException e) {
-			assertThat(e.getMessage()).isEqualTo("A MESSAGE");
+			assertEquals("A MESSAGE", e.getMessage());
 		}
 
 	}
@@ -358,7 +359,7 @@ public class InterceptorServiceTest {
 			.add(String.class, "A");
 		svc.callHooks(Pointcut.TEST_RB, params);
 		assertNull(interceptor.myValue0);
-		assertThat(interceptor.myValue1).isEqualTo("A");
+		assertEquals("A", interceptor.myValue1);
 		svc.unregisterAllInterceptors();
 
 		// Second null
@@ -368,7 +369,7 @@ public class InterceptorServiceTest {
 			.add(String.class, "A")
 			.add(String.class, null);
 		svc.callHooks(Pointcut.TEST_RB, params);
-		assertThat(interceptor.myValue0).isEqualTo("A");
+		assertEquals("A", interceptor.myValue0);
 		assertNull(interceptor.myValue1);
 		svc.unregisterAllInterceptors();
 
@@ -422,7 +423,7 @@ public class InterceptorServiceTest {
 			svc.callHooks(Pointcut.TEST_RB, params);
 			fail("");
 		} catch (NullPointerException e) {
-			assertThat(e.getMessage()).isEqualTo("AAA");
+			assertEquals("AAA", e.getMessage());
 		}
 
 		assertTrue(interceptor0.myHit);
@@ -467,7 +468,7 @@ public class InterceptorServiceTest {
 			svc.haveAppropriateParams(Pointcut.TEST_RB, params);
 			fail("");
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1909) + "Wrong number of params for pointcut " + Pointcut.TEST_RB + " - Wanted java.lang.String,java.lang.String but found [String]");
+			assertEquals(Msg.code(1909) + "Wrong number of params for pointcut " + Pointcut.TEST_RB + " - Wanted java.lang.String,java.lang.String but found [String]", e.getMessage());
 		}
 	}
 
@@ -487,7 +488,7 @@ public class InterceptorServiceTest {
 			svc.haveAppropriateParams(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
 			fail("");
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1909) + "Wrong number of params for pointcut STORAGE_PRECOMMIT_RESOURCE_UPDATED - Wanted ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum,ca.uhn.fhir.rest.api.server.RequestDetails,ca.uhn.fhir.rest.api.server.storage.TransactionDetails,ca.uhn.fhir.rest.server.servlet.ServletRequestDetails,org.hl7.fhir.instance.model.api.IBaseResource,org.hl7.fhir.instance.model.api.IBaseResource but found [String, String, String, String, String, String, String]");
+			assertEquals(Msg.code(1909) + "Wrong number of params for pointcut STORAGE_PRECOMMIT_RESOURCE_UPDATED - Wanted ca.uhn.fhir.rest.api.InterceptorInvocationTimingEnum,ca.uhn.fhir.rest.api.server.RequestDetails,ca.uhn.fhir.rest.api.server.storage.TransactionDetails,ca.uhn.fhir.rest.server.servlet.ServletRequestDetails,org.hl7.fhir.instance.model.api.IBaseResource,org.hl7.fhir.instance.model.api.IBaseResource but found [String, String, String, String, String, String, String]", e.getMessage());
 		}
 	}
 
@@ -507,7 +508,7 @@ public class InterceptorServiceTest {
 			svc.haveAppropriateParams(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, params);
 			fail("");
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo("Invalid params for pointcut " + Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED + " - class java.lang.Integer is not of type class java.lang.String");
+			assertEquals("Invalid params for pointcut " + Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED + " - class java.lang.Integer is not of type class java.lang.String", e.getMessage());
 		}
 	}
 
@@ -573,8 +574,8 @@ public class InterceptorServiceTest {
 			svc.registerInterceptor(new ObjectHook<>(new ResourceNotFoundException("first")));
 			svc.registerInterceptor(new ObjectHook<>(new ResourceNotFoundException("second")));
 
-			assertThat(((BaseServerResponseException) svc.callHooksAndReturnObject(Pointcut.TEST_RO, params)).getMessage()).isEqualTo("first");
-			assertThat(((BaseServerResponseException) svc.ifHasCallHooksAndReturnObject(Pointcut.TEST_RO, () -> params)).getMessage()).isEqualTo("first");
+			assertEquals("first", ((BaseServerResponseException) svc.callHooksAndReturnObject(Pointcut.TEST_RO, params)).getMessage());
+			assertEquals("first", ((BaseServerResponseException) svc.ifHasCallHooksAndReturnObject(Pointcut.TEST_RO, () -> params)).getMessage());
 		}
 
 		static class BooleanHook {

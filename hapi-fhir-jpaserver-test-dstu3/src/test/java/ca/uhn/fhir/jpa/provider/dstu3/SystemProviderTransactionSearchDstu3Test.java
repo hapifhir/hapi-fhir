@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -216,17 +217,17 @@ public class SystemProviderTransactionSearchDstu3Test extends BaseJpaDstu3Test {
 		ourLog.debug("Response: {}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 
 		//Validate over all bundle response entry contents.
-		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.TRANSACTIONRESPONSE);
+		assertEquals(Bundle.BundleType.TRANSACTIONRESPONSE, bundle.getType());
 		assertThat(bundle.getEntry()).hasSize(1);
 		Bundle.BundleEntryResponseComponent response = bundle.getEntry().get(0).getResponse();
-		assertThat(response.getStatus()).isEqualTo("200 OK");
+		assertEquals("200 OK", response.getStatus());
 		assertNotNull(response.getEtag());
 		assertNotNull(response.getLastModified());
-		assertThat(response.getLocation()).isEqualTo(pid1.getValue() + "/_history/2");
+		assertEquals(pid1.getValue() + "/_history/2", response.getLocation());
 
 		Patient newPt = ourClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("2");
-		assertThat(newPt.getActive()).isEqualTo(false);
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
 	}
 
 

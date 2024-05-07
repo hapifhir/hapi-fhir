@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
@@ -47,7 +48,7 @@ class ValueSetAutocompleteOptionsTest {
 
 		assertNotNull(myOptionsResult);
 		assertNull(myOptionsResult.getResourceType());
-		assertThat(myOptionsResult.getSearchParamCode()).isEqualTo("code");
+		assertEquals("code", myOptionsResult.getSearchParamCode());
 	}
 
 	@Test
@@ -57,8 +58,8 @@ class ValueSetAutocompleteOptionsTest {
 		parseOptions();
 
 		assertNotNull(myOptionsResult);
-		assertThat(myOptionsResult.getResourceType()).isEqualTo("Observation");
-		assertThat(myOptionsResult.getSearchParamCode()).isEqualTo("code");
+		assertEquals("Observation", myOptionsResult.getResourceType());
+		assertEquals("code", myOptionsResult.getSearchParamCode());
 		assertNull(myOptionsResult.getSearchParamModifier());
 	}
 
@@ -69,9 +70,9 @@ class ValueSetAutocompleteOptionsTest {
 		parseOptions();
 
 		assertNotNull(myOptionsResult);
-		assertThat(myOptionsResult.getResourceType()).isEqualTo("Observation");
-		assertThat(myOptionsResult.getSearchParamCode()).isEqualTo("code");
-		assertThat(myOptionsResult.getSearchParamModifier()).isEqualTo("text");
+		assertEquals("Observation", myOptionsResult.getResourceType());
+		assertEquals("code", myOptionsResult.getSearchParamCode());
+		assertEquals("text", myOptionsResult.getSearchParamModifier());
 	}
 
 	@Test
@@ -82,7 +83,7 @@ class ValueSetAutocompleteOptionsTest {
 		parseOptions();
 
 		assertNotNull(myOptionsResult);
-		assertThat(myOptionsResult.getFilter()).isEqualTo("blood");
+		assertEquals("blood", myOptionsResult.getFilter());
 	}
 
 	@Test
@@ -93,7 +94,7 @@ class ValueSetAutocompleteOptionsTest {
 		parseOptions();
 
 		assertNotNull(myOptionsResult);
-		assertThat(myOptionsResult.getFilter()).isEqualTo("");
+		assertEquals("", myOptionsResult.getFilter());
 	}
 
 	@Test
@@ -102,7 +103,7 @@ class ValueSetAutocompleteOptionsTest {
 
 		parseOptions();
 
-		assertThat(myOptionsResult.getCount()).isEqualTo(Optional.empty());
+		assertEquals(Optional.empty(), myOptionsResult.getCount());
 	}
 
 	@Test
@@ -113,7 +114,7 @@ class ValueSetAutocompleteOptionsTest {
 		parseOptions();
 
 		assertNotNull(myOptionsResult);
-		assertThat(myOptionsResult.getCount()).isEqualTo(Optional.of(50));
+		assertEquals(Optional.of(50), myOptionsResult.getCount());
 	}
 
 	@Nested

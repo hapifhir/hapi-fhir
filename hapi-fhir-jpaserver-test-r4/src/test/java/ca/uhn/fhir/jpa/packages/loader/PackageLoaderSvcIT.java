@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.packages.loader;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.packages.FakeNpmServlet;
@@ -75,7 +76,7 @@ public class PackageLoaderSvcIT {
 		// verify fetched resources
 		assertThat(resources).isNotEmpty();
 		assertThat(resources).hasSize(1);
-		assertThat(resources.get(0).fhirType()).isEqualTo("SearchParameter");
+		assertEquals("SearchParameter", resources.get(0).fhirType());
 	}
 
 	/**

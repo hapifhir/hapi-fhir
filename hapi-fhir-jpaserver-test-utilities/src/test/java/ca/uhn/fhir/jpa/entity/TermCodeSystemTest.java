@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.entity;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +13,7 @@ public class TermCodeSystemTest {
 		TermCodeSystem cs1 = new TermCodeSystem().setCodeSystemUri("http://foo");
 		TermCodeSystem cs2 = new TermCodeSystem().setCodeSystemUri("http://foo");
 		TermCodeSystem cs3 = new TermCodeSystem().setCodeSystemUri("http://foo2");
-		assertThat(cs2).isNotNull().isEqualTo(cs1);
+		assertNotNull(cs2).isEqualTo(cs1);
 		assertThat(cs3).isNotEqualTo(cs1);
 		assertThat("").isNotEqualTo(cs1);
 	}
@@ -20,6 +21,6 @@ public class TermCodeSystemTest {
 	@Test
 	public void testHashCode() {
 		TermCodeSystem cs = new TermCodeSystem().setCodeSystemUri("http://foo");
-		assertThat(cs.hashCode()).isEqualTo(155243497);
+		assertEquals(155243497, cs.hashCode());
 	}
 }

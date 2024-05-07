@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.dao.PatientEverythingParameters;
@@ -134,12 +135,12 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		//With MDM Expansion disabled, this should return 1 result.
 		myStorageSettings.setAllowMdmExpansion(false);
 		IBundleProvider search = myObservationDao.search(searchParameterMap);
-		assertThat(search.size()).isEqualTo(1);
+		assertEquals(1, search.size());
 
 		//Once MDM Expansion is allowed, this should now return 4 resourecs.
 		myStorageSettings.setAllowMdmExpansion(true);
 		search = myObservationDao.search(searchParameterMap);
-		assertThat(search.size()).isEqualTo(4);
+		assertEquals(4, search.size());
 		List<MdmLink> all = myMdmLinkDao.findAll();
 		Long goldenPid = all.get(0).getGoldenResourcePid();
 		IIdType goldenId = myIdHelperService.translatePidIdToForcedId(myFhirContext, "Patient", JpaPid.fromId(goldenPid));
@@ -152,7 +153,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		goldenSpMap.add(Observation.SP_SUBJECT, goldenReferenceOrListParam);
 
 		search = myObservationDao.search(goldenSpMap);
-		assertThat(search.size()).isEqualTo(resourceCount);
+		assertEquals(resourceCount, search.size());
 	}
 
 	@Test
@@ -170,12 +171,12 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		//With MDM Expansion disabled, this should return 1 result.
 		myStorageSettings.setAllowMdmExpansion(false);
 		IBundleProvider search = myObservationDao.search(searchParameterMap);
-		assertThat(search.size()).isEqualTo(1);
+		assertEquals(1, search.size());
 
 		//Once MDM Expansion is allowed, this should now return 4 resourecs.
 		myStorageSettings.setAllowMdmExpansion(true);
 		search = myObservationDao.search(searchParameterMap);
-		assertThat(search.size()).isEqualTo(4);
+		assertEquals(4, search.size());
 		List<MdmLink> all = myMdmLinkDao.findAll();
 		Long goldenPid = all.get(0).getGoldenResourcePid();
 		IIdType goldenId = myIdHelperService.translatePidIdToForcedId(myFhirContext, "Patient", JpaPid.fromId(goldenPid));
@@ -188,7 +189,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		goldenSpMap.add(Observation.SP_SUBJECT, goldenReferenceOrListParam);
 
 		search = myObservationDao.search(goldenSpMap);
-		assertThat(search.size()).isEqualTo(resourceCount);
+		assertEquals(resourceCount, search.size());
 	}
 
 	@Test
@@ -212,7 +213,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		assertNotNull(outcome);
 		// we know 4 cause that's how many patients are created
 		// plus one golden resource
-		assertThat(outcome.size()).isEqualTo(resourceCount + 1);
+		assertEquals(resourceCount + 1, outcome.size());
 		List<String> resourceIds = outcome.getAllResourceIds();
 		// check the patients - first 4 ids
 		for (int i = 0; i < resourceIds.size() - 1; i++) {
@@ -248,7 +249,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		// we expect all the linked ids to be returned too
 		assertNotNull(outcome);
 		// plus 1 for the golden resource
-		assertThat(outcome.size()).isEqualTo(expectedIds.size() + 1);
+		assertEquals(expectedIds.size() + 1, outcome.size());
 		List<String> returnedIds = outcome.getAllResourceIds();
 		for (String expected : expectedIds) {
 			assertThat(returnedIds).contains(expected);
@@ -267,7 +268,7 @@ public class MdmSearchExpandingInterceptorIT extends BaseMdmR4Test {
 		SearchParameterMap map = new SearchParameterMap();
 		map.add(Observation.SP_SUBJECT, new ReferenceParam("Patient/" + id).setMdmExpand(true));
 		IBundleProvider search = myObservationDao.search(map);
-		assertThat(search.size()).isEqualTo(1);
+		assertEquals(1, search.size());
 	}
 
 	private Observation createObservationWithSubject(String thePatientId) {

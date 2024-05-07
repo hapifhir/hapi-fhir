@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cli;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
@@ -159,7 +160,7 @@ public class UploadTerminologyCommandTest {
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
 		assertThat(listOfDescriptors).hasSize(1);
-		assertThat(listOfDescriptors.get(0).getFilename()).isEqualTo("file:/files.zip");
+		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
@@ -199,7 +200,7 @@ public class UploadTerminologyCommandTest {
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
 		assertThat(listOfDescriptors).hasSize(2);
-		assertThat(listOfDescriptors.get(0).getFilename()).isEqualTo("concepts.csv");
+		assertEquals("concepts.csv", listOfDescriptors.get(0).getFilename());
 		String uploadFile = IOUtils.toString(listOfDescriptors.get(0).getInputStream(), Charsets.UTF_8);
 		assertThat(uploadFile).as(uploadFile).contains("\"CODE\",\"Display\"");
 	}
@@ -269,15 +270,15 @@ public class UploadTerminologyCommandTest {
 		UploadTerminologyCommand uploadTerminologyCommand = new UploadTerminologyCommand();
 		uploadTerminologyCommand.setTransferSizeLimitHuman("1GB");
 		long bytes = uploadTerminologyCommand.getTransferSizeLimit();
-		assertThat(bytes).isEqualTo(1024L * 1024L * 1024L);
+		assertEquals(1024L * 1024L * 1024L, bytes);
 
 		uploadTerminologyCommand.setTransferSizeLimitHuman("500KB");
 		bytes = uploadTerminologyCommand.getTransferSizeLimit();
-		assertThat(bytes).isEqualTo(1024L * 500L);
+		assertEquals(1024L * 500L, bytes);
 
 		uploadTerminologyCommand.setTransferSizeLimitHuman("10MB");
 		bytes = uploadTerminologyCommand.getTransferSizeLimit();
-		assertThat(bytes).isEqualTo(1024L * 1024L * 10L);
+		assertEquals(1024L * 1024L * 10L, bytes);
 	}
 
 	@ParameterizedTest
@@ -353,7 +354,7 @@ public class UploadTerminologyCommandTest {
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
 		assertThat(listOfDescriptors).hasSize(1);
-		assertThat(listOfDescriptors.get(0).getFilename()).isEqualTo("file:/files.zip");
+		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 
@@ -384,7 +385,7 @@ public class UploadTerminologyCommandTest {
 
 		List<ITermLoaderSvc.FileDescriptor> listOfDescriptors = myDescriptorListCaptor.getValue();
 		assertThat(listOfDescriptors).hasSize(1);
-		assertThat(listOfDescriptors.get(0).getFilename()).isEqualTo("file:/files.zip");
+		assertEquals("file:/files.zip", listOfDescriptors.get(0).getFilename());
 		assertThat(IOUtils.toByteArray(listOfDescriptors.get(0).getInputStream()).length).isGreaterThan(100);
 	}
 

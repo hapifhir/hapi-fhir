@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.elastic;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchBackendSettings;
@@ -36,7 +37,7 @@ class ElasticsearchHibernatePropertiesBuilderTest {
 			myPropertiesBuilder.setHosts(protocolHost)
 				.apply(new Properties());
 			fail("");		} catch (ConfigurationException e ) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(2139) + failureMessage);
+			assertEquals(Msg.code(2139) + failureMessage, e.getMessage());
 		}
 
 		Properties properties = new Properties();
@@ -44,7 +45,7 @@ class ElasticsearchHibernatePropertiesBuilderTest {
 			.setHosts(host)
 			.apply(properties);
 
-		assertThat(properties.getProperty(BackendSettings.backendKey(ElasticsearchBackendSettings.HOSTS))).isEqualTo(host);
+		assertEquals(host, properties.getProperty(BackendSettings.backendKey(ElasticsearchBackendSettings.HOSTS)));
 
 	}
 }

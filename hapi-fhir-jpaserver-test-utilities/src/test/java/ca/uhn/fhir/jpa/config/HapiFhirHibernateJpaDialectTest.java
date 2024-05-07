@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.config;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -62,7 +63,7 @@ public class HapiFhirHibernateJpaDialectTest {
 	@Test
 	public void testTranslate() {
 		RuntimeException outcome = mySvc.translate(new PersistentObjectException("FOO"), "message");
-		assertThat(outcome.getMessage()).isEqualTo("FOO");
+		assertEquals("FOO", outcome.getMessage());
 
 		try {
 			PersistenceException exception = new PersistenceException("a message", new ConstraintViolationException("this is a message", new SQLException("reason"), ResourceTable.IDX_RES_TYPE_FHIR_ID));

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.cache;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
@@ -24,8 +25,8 @@ class ResourceVersionMapTest {
 		ResourceVersionMap resourceVersionMap = ResourceVersionMap.fromIdsWithVersions(ids);
 
 		// then
-		assertThat(resourceVersionMap.getSourceIds()).isEqualTo(Set.copyOf(ids));
-		assertThat(resourceVersionMap.get(new IdDt("Patient", "p1"))).isEqualTo(2);
+		assertEquals(Set.copyOf(ids), resourceVersionMap.getSourceIds());
+		assertEquals(2, resourceVersionMap.get(new IdDt("Patient", "p1")));
 	}
 
 }

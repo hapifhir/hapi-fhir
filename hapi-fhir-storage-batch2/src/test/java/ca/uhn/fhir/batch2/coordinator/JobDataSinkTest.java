@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.coordinator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
@@ -105,25 +106,25 @@ class JobDataSinkTest {
 		RunOutcome result = firstStepWorker.run(details, sink);
 
 		// verify
-		assertThat(result.getRecordsProcessed()).isEqualTo(PID_COUNT);
+		assertEquals(PID_COUNT, result.getRecordsProcessed());
 
 		// theDataSink.accept(output) called by firstStepWorker above calls two services.  Let's validate them both.
 
 		verify(myBatchJobSender).sendWorkChannelMessage(myJobWorkNotificationCaptor.capture());
 
 		JobWorkNotification notification = myJobWorkNotificationCaptor.getValue();
-		assertThat(notification.getJobDefinitionId()).isEqualTo(JOB_DEF_ID);
-		assertThat(notification.getInstanceId()).isEqualTo(JOB_INSTANCE_ID);
-		assertThat(notification.getChunkId()).isEqualTo(CHUNK_ID);
-		assertThat(notification.getJobDefinitionVersion()).isEqualTo(JOB_DEF_VERSION);
-		assertThat(notification.getTargetStepId()).isEqualTo(LAST_STEP_ID);
+		assertEquals(JOB_DEF_ID, notification.getJobDefinitionId());
+		assertEquals(JOB_INSTANCE_ID, notification.getInstanceId());
+		assertEquals(CHUNK_ID, notification.getChunkId());
+		assertEquals(JOB_DEF_VERSION, notification.getJobDefinitionVersion());
+		assertEquals(LAST_STEP_ID, notification.getTargetStepId());
 
 		WorkChunkCreateEvent batchWorkChunk = myBatchWorkChunkCaptor.getValue();
-		assertThat(batchWorkChunk.jobDefinitionVersion).isEqualTo(JOB_DEF_VERSION);
-		assertThat(batchWorkChunk.sequence).isEqualTo(0);
-		assertThat(batchWorkChunk.jobDefinitionId).isEqualTo(JOB_DEF_ID);
-		assertThat(batchWorkChunk.instanceId).isEqualTo(JOB_INSTANCE_ID);
-		assertThat(batchWorkChunk.targetStepId).isEqualTo(LAST_STEP_ID);
+		assertEquals(JOB_DEF_VERSION, batchWorkChunk.jobDefinitionVersion);
+		assertEquals(0, batchWorkChunk.sequence);
+		assertEquals(JOB_DEF_ID, batchWorkChunk.jobDefinitionId);
+		assertEquals(JOB_INSTANCE_ID, batchWorkChunk.instanceId);
+		assertEquals(LAST_STEP_ID, batchWorkChunk.targetStepId);
 		assertNotNull(batchWorkChunk.serializedData);
 		Step1Output stepOutput = JsonUtil.deserialize(batchWorkChunk.serializedData, Step1Output.class);
 		assertThat(stepOutput.getPids()).hasSize(PID_COUNT);

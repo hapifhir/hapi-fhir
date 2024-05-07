@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
@@ -95,11 +96,11 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.withId(pid1)
 			.withAdditionalHeader(Constants.HEADER_IF_MATCH, "W/\"1\"")
 			.execute();
-		assertThat(outcome.getId().getVersionIdPart()).isEqualTo("2");
+		assertEquals("2", outcome.getId().getVersionIdPart());
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("2");
-		assertThat(newPt.getActive()).isEqualTo(false);
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
 	}
 
 
@@ -134,8 +135,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("2");
-		assertThat(newPt.getActive()).isEqualTo(true);
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(true, newPt.getActive());
 	}
 
 
@@ -170,14 +171,14 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Request:\n{}", encodedRequest);
 		post.setEntity(new StringEntity(encodedRequest, ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("\"resourceType\":\"Bundle\"");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("2");
-		assertThat(newPt.getActive()).isEqualTo(false);
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
 	}
 
 	@Test
@@ -210,11 +211,11 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			.withBundle(input)
 			.execute();
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertThat(new IdType(outcome.getEntry().get(0).getResponse().getLocation()).getVersionIdPart()).isEqualTo("2");
+		assertEquals("2", new IdType(outcome.getEntry().get(0).getResponse().getLocation()).getVersionIdPart());
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("2");
-		assertThat(newPt.getActive()).isEqualTo(false);
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
 	}
 
 
@@ -257,8 +258,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("2");
-		assertThat(newPt.getActive()).isEqualTo(true);
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(true, newPt.getActive());
 	}
 
 
@@ -291,8 +292,8 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		myClient.transaction().withBundle(input).execute();
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("2");
-		assertThat(newPt.getActive()).isEqualTo(false);
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
 	}
 
 	@Test
@@ -327,14 +328,14 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			myClient.patch().withFhirPatch(patch).withId(id).execute();
 			fail("");
 		} catch (ResourceGoneException e) {
-			assertThat(e.getStatusCode()).isEqualTo(Constants.STATUS_HTTP_410_GONE);
+			assertEquals(Constants.STATUS_HTTP_410_GONE, e.getStatusCode());
 		}
 
 		try {
 			myClient.read().resource(Patient.class).withId(id).execute();
 			fail("");
 		} catch (ResourceGoneException e) {
-			assertThat(e.getStatusCode()).isEqualTo(Constants.STATUS_HTTP_410_GONE);
+			assertEquals(Constants.STATUS_HTTP_410_GONE, e.getStatusCode());
 		}
 	}
 
@@ -369,7 +370,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		patch.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON);
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response:\n{}", responseString);
 			assertThat(responseString).contains("\"derivedFrom\":[{\"reference\":\"Media/465eb73a-bce3-423a-b86e-5d0d267638f4\"}]");
@@ -394,15 +395,15 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("<OperationOutcome");
 			assertThat(responseString).contains("INFORMATION");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("2");
-		assertThat(newPt.getActive()).isEqualTo(false);
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
 	}
 
 
@@ -436,14 +437,14 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		ourLog.info("Request:\n{}", encodedRequest);
 		post.setEntity(new StringEntity(encodedRequest, ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("\"resourceType\":\"Bundle\"");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("2");
-		assertThat(newPt.getActive()).isEqualTo(false);
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
 	}
 
 
@@ -464,15 +465,15 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("<OperationOutcome");
 			assertThat(responseString).contains("INFORMATION");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("2");
-		assertThat(newPt.getActive()).isEqualTo(false);
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
 	}
 
 	@Test
@@ -492,14 +493,14 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(404);
+			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("<OperationOutcome");
 			assertThat(responseString).contains("Invalid match URL &quot;Patient?_id=" + pid1.getIdPart() + "FOO&quot; - No resources match this search");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("1");
+		assertEquals("1", newPt.getIdElement().getVersionIdPart());
 	}
 
 	@Test
@@ -525,7 +526,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(412);
+			assertEquals(412, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("<OperationOutcome");
 			assertThat(responseString).contains("Failed to PATCH resource with match URL &quot;Patient?active=true&quot; because this search matched 2 resources");
@@ -565,7 +566,7 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("<OperationOutcome");
 			assertThat(responseString).contains("was expecting double-quote to start field name");
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, response.getStatusLine().getStatusCode());
 		}
 
 	}
@@ -587,15 +588,15 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		patch.addHeader("If-Match", "W/\"9\"");
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(409);
+			assertEquals(409, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("<OperationOutcome");
 			assertThat(responseString).contains("<diagnostics value=\"" + Msg.code(550) + Msg.code(974) + "Version 9 is not the most recent version of this resource, unable to apply patch\"/>");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("1");
-		assertThat(newPt.getActive()).isEqualTo(true);
+		assertEquals("1", newPt.getIdElement().getVersionIdPart());
+		assertEquals(true, newPt.getActive());
 	}
 
 	@Test
@@ -616,15 +617,15 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		patch.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("<OperationOutcome");
 			assertThat(responseString).contains("INFORMATION");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("2");
-		assertThat(newPt.getActive()).isEqualTo(false);
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
 	}
 
 	@Test
@@ -645,15 +646,15 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		patch.setEntity(new StringEntity(patchString, ContentType.parse(Constants.CT_XML_PATCH + Constants.CHARSET_UTF8_CTSUFFIX)));
 
 		try (CloseableHttpResponse response = ourHttpClient.execute(patch)) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("<OperationOutcome");
 			assertThat(responseString).contains("INFORMATION");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("2");
-		assertThat(newPt.getActive()).isEqualTo(false);
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
 	}
 
 
@@ -688,14 +689,14 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 
 		post.setEntity(new StringEntity(encoded, ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("\"resourceType\":\"Bundle\"");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("2");
-		assertThat(newPt.getActive()).isEqualTo(false);
+		assertEquals("2", newPt.getIdElement().getVersionIdPart());
+		assertEquals(false, newPt.getActive());
 	}
 
 
@@ -727,14 +728,14 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		HttpPost post = new HttpPost(myServerBase);
 		post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("Missing or invalid content type for PATCH operation");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("1");
-		assertThat(newPt.getActive()).isEqualTo(true);
+		assertEquals("1", newPt.getIdElement().getVersionIdPart());
+		assertEquals(true, newPt.getActive());
 	}
 
 
@@ -765,14 +766,14 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		HttpPost post = new HttpPost(myServerBase);
 		post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("Unable to determine PATCH body from request");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("1");
-		assertThat(newPt.getActive()).isEqualTo(true);
+		assertEquals("1", newPt.getIdElement().getVersionIdPart());
+		assertEquals(true, newPt.getActive());
 	}
 
 
@@ -804,14 +805,14 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		HttpPost post = new HttpPost(myServerBase);
 		post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("Invalid Content-Type for PATCH operation: application/octet-stream");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("1");
-		assertThat(newPt.getActive()).isEqualTo(true);
+		assertEquals("1", newPt.getIdElement().getVersionIdPart());
+		assertEquals(true, newPt.getActive());
 	}
 
 	@Test
@@ -842,13 +843,13 @@ public class PatchProviderR4Test extends BaseResourceProviderR4Test {
 		HttpPost post = new HttpPost(myServerBase);
 		post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(input), ContentType.parse(Constants.CT_FHIR_JSON_NEW+ Constants.CHARSET_UTF8_CTSUFFIX)));
 		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains("Binary PATCH detected with FHIR content type. FHIR Patch should use Parameters resource.");
 		}
 
 		Patient newPt = myClient.read().resource(Patient.class).withId(pid1.getIdPart()).execute();
-		assertThat(newPt.getIdElement().getVersionIdPart()).isEqualTo("1");
-		assertThat(newPt.getActive()).isEqualTo(true);
+		assertEquals("1", newPt.getIdElement().getVersionIdPart());
+		assertEquals(true, newPt.getActive());
 	}
 }

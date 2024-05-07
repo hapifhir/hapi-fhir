@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -62,9 +63,9 @@ public class ReferenceClientTest {
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.search(new ReferenceParam("123"));
 
-		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
+		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
-		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient?general-practitioner=123");
+		assertEquals("http://foo/Patient?general-practitioner=123", get.getURI().toString());
 	}
 
 	@Test
@@ -78,9 +79,9 @@ public class ReferenceClientTest {
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.search(new ReferenceParam("chain", "123"));
 
-		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
+		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
-		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient?general-practitioner.chain=123");
+		assertEquals("http://foo/Patient?general-practitioner.chain=123", get.getURI().toString());
 	}
 	
 	@Test
@@ -94,9 +95,9 @@ public class ReferenceClientTest {
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.search(new ReferenceParam("Organization", "chain", "123"));
 
-		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
+		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
-		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient?general-practitioner%3AOrganization.chain=123");
+		assertEquals("http://foo/Patient?general-practitioner%3AOrganization.chain=123", get.getURI().toString());
 	}
 	
 	@Test
@@ -110,9 +111,9 @@ public class ReferenceClientTest {
 		IClient client = ctx.newRestfulClient(IClient.class, "http://foo");
 		client.search(new ReferenceParam("Organization", null, "123"));
 
-		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
+		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
-		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient?general-practitioner=Organization%2F123");
+		assertEquals("http://foo/Patient?general-practitioner=Organization%2F123", get.getURI().toString());
 	}
 
 	private String createBundle() {

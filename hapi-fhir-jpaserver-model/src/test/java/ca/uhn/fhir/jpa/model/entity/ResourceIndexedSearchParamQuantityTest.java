@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.model.entity;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.junit.jupiter.api.Test;
@@ -22,8 +23,8 @@ public class ResourceIndexedSearchParamQuantityTest {
 		token.calculateHashes();
 
 		// Make sure our hashing function gives consistent results
-		assertThat(token.getHashIdentity().longValue()).isEqualTo(834432764963581074L);
-		assertThat(token.getHashIdentityAndUnits().longValue()).isEqualTo(-1970227166134682431L);
+		assertEquals(834432764963581074L, token.getHashIdentity().longValue());
+		assertEquals(-1970227166134682431L, token.getHashIdentityAndUnits().longValue());
 	}
 
 
@@ -37,8 +38,8 @@ public class ResourceIndexedSearchParamQuantityTest {
 			.setValue(new BigDecimal(123));
 		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();
-		assertThat(val1).isNotNull().isEqualTo(val1);
-		assertThat(val2).isEqualTo(val1);
+		assertNotNull(val1).isEqualTo(val1);
+		assertEquals(val1, val2);
 		assertThat("").isNotEqualTo(val1);
 	}
 

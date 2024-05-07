@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -127,8 +128,8 @@ class TerserUtilTest {
 		TerserUtil.cloneIdentifierIntoResource(ourFhirContext, definition.getChildByName("identifier"), identifier, p2);
 
 		assertThat(p2.getIdentifier()).hasSize(1);
-		assertThat(p2.getIdentifier().get(0).getSystem()).isEqualTo(p1.getIdentifier().get(0).getSystem());
-		assertThat(p2.getIdentifier().get(0).getValue()).isEqualTo(p1.getIdentifier().get(0).getValue());
+		assertEquals(p1.getIdentifier().get(0).getSystem(), p2.getIdentifier().get(0).getSystem());
+		assertEquals(p1.getIdentifier().get(0).getValue(), p2.getIdentifier().get(0).getValue());
 	}
 
 	@Test
@@ -145,8 +146,8 @@ class TerserUtilTest {
 		TerserUtil.cloneIdentifierIntoResource(ourFhirContext, definition.getChildByName("identifier"), identifier, p2);
 
 		assertThat(p2.getIdentifier()).hasSize(1);
-		assertThat(p2.getIdentifier().get(0).getSystem()).isEqualTo(p1.getIdentifier().get(0).getSystem());
-		assertThat(p2.getIdentifier().get(0).getValue()).isEqualTo(p1.getIdentifier().get(0).getValue());
+		assertEquals(p1.getIdentifier().get(0).getSystem(), p2.getIdentifier().get(0).getSystem());
+		assertEquals(p1.getIdentifier().get(0).getValue(), p2.getIdentifier().get(0).getValue());
 	}
 
 	@Test
@@ -169,7 +170,7 @@ class TerserUtilTest {
 		TerserUtil.mergeAllFields(ourFhirContext, p1, p2);
 
 		assertTrue(p2.hasDeceased());
-		assertThat(p2.getDeceased().primitiveValue()).isEqualTo("true");
+		assertEquals("true", p2.getDeceased().primitiveValue());
 		assertThat(p2.getExtension()).hasSize(2);
 	}
 
@@ -183,8 +184,8 @@ class TerserUtilTest {
 		Organization org1 = (Organization) p1.getContained().get(0);
 		Organization org2 = (Organization) p2.getContained().get(0);
 		assertThat(org2).isNotEqualTo(org1);
-		assertThat(org1.getName()).isEqualTo("BUILDERS FIRST SOURCE");
-		assertThat(org2.getName()).isEqualTo("BUILDERS FIRST SOURCE");
+		assertEquals("BUILDERS FIRST SOURCE", org1.getName());
+		assertEquals("BUILDERS FIRST SOURCE", org2.getName());
 	}
 
 	@Test
@@ -221,10 +222,10 @@ class TerserUtilTest {
 
 		Patient p = p1Helper.getResource();
 		assertTrue(p.getActive());
-		assertThat(p.getGender()).isEqualTo(Enumerations.AdministrativeGender.MALE);
+		assertEquals(Enumerations.AdministrativeGender.MALE, p.getGender());
 
 		DateType check = TerserUtil.newElement(ourFhirContext, "date", "1999-01-01");
-		assertThat(p.getBirthDate()).isEqualTo(check.getValue());
+		assertEquals(check.getValue(), p.getBirthDate());
 	}
 
 
@@ -247,7 +248,7 @@ class TerserUtilTest {
 
 		assertNull(p2.getId());
 		assertThat(p2.getName()).hasSize(1);
-		assertThat(p2.getName().get(0).getNameAsSingleString()).isEqualTo(p1.getName().get(0).getNameAsSingleString());
+		assertEquals(p1.getName().get(0).getNameAsSingleString(), p2.getName().get(0).getNameAsSingleString());
 	}
 
 	@Test
@@ -324,8 +325,8 @@ class TerserUtilTest {
 		TerserUtil.mergeField(ourFhirContext, "address", p1, p2);
 
 		assertThat(p2.getAddress()).hasSize(2);
-		assertThat(p2.getAddress().get(0).getLine().toString()).isEqualTo("[10 Lenin Street]");
-		assertThat(p2.getAddress().get(1).getLine().toString()).isEqualTo("[10 Main Street]");
+		assertEquals("[10 Lenin Street]", p2.getAddress().get(0).getLine().toString());
+		assertEquals("[10 Main Street]", p2.getAddress().get(1).getLine().toString());
 		assertTrue(p2.getAddress().get(1).hasExtension());
 
 		p1 = new Patient();
@@ -361,7 +362,7 @@ class TerserUtilTest {
 		TerserUtil.replaceField(ourFhirContext, "address", p1, p2);
 
 		assertThat(p2.getAddress()).hasSize(1);
-		assertThat(p2.getAddress().get(0).getLine().toString()).isEqualTo("[10 Main Street]");
+		assertEquals("[10 Main Street]", p2.getAddress().get(0).getLine().toString());
 		assertTrue(p2.getAddress().get(0).hasExtension());
 	}
 
@@ -392,8 +393,8 @@ class TerserUtilTest {
 		TerserUtil.mergeField(ourFhirContext, "address", p1, p2);
 
 		assertThat(p2.getAddress()).hasSize(2);
-		assertThat(p2.getAddress().get(0).getLine().toString()).isEqualTo("[10 Main Street]");
-		assertThat(p2.getAddress().get(1).getLine().toString()).isEqualTo("[10 Main Street]");
+		assertEquals("[10 Main Street]", p2.getAddress().get(0).getLine().toString());
+		assertEquals("[10 Main Street]", p2.getAddress().get(1).getLine().toString());
 		assertTrue(p2.getAddress().get(1).hasExtension());
 	}
 
@@ -458,7 +459,7 @@ class TerserUtilTest {
 		Patient p1 = new Patient();
 		p1.addName().setFamily("Doe");
 
-		assertThat(((HumanName) TerserUtil.getValueFirstRep(ourFhirContext, p1, "name")).getFamily()).isEqualTo("Doe");
+		assertEquals("Doe", ((HumanName) TerserUtil.getValueFirstRep(ourFhirContext, p1, "name")).getFamily());
 		assertThat(TerserUtil.getValues(ourFhirContext, p1, "name")).isNotEmpty();
 		assertNull(TerserUtil.getValues(ourFhirContext, p1, "whoaIsThatReal"));
 		assertNull(TerserUtil.getValueFirstRep(ourFhirContext, p1, "whoaIsThatReal"));
@@ -474,7 +475,7 @@ class TerserUtilTest {
 		TerserUtil.replaceField(ourFhirContext, "name", p1, p2);
 
 		assertThat(p2.getName()).hasSize(1);
-		assertThat(p2.getName().get(0).getFamily()).isEqualTo("Doe");
+		assertEquals("Doe", p2.getName().get(0).getFamily());
 	}
 
 	@Test
@@ -487,7 +488,7 @@ class TerserUtilTest {
 		TerserUtil.replaceField(ourFhirContext, "name", p1, p2);
 
 		assertThat(p2.getName()).hasSize(1);
-		assertThat(p2.getName().get(0).getFamily()).isEqualTo("Doe");
+		assertEquals("Doe", p2.getName().get(0).getFamily());
 	}
 
 	@Test
@@ -517,10 +518,10 @@ class TerserUtilTest {
 
 		// expect p2 to have "Doe" and MALE after replace
 		assertThat(p2.getName()).hasSize(1);
-		assertThat(p2.getName().get(0).getFamily()).isEqualTo("Doe");
+		assertEquals("Doe", p2.getName().get(0).getFamily());
 
-		assertThat(p2.getGender()).isEqualTo(Enumerations.AdministrativeGender.MALE);
-		assertThat(p2.getBirthDate()).isEqualTo(dob);
+		assertEquals(Enumerations.AdministrativeGender.MALE, p2.getGender());
+		assertEquals(dob, p2.getBirthDate());
 	}
 
 	@Test
@@ -544,7 +545,7 @@ class TerserUtilTest {
 			TerserUtil.clearField(ourFhirContext, "line", a1);
 
 			assertThat(a1.getLine()).isEmpty();
-			assertThat(a1.getCity()).isEqualTo("Test");
+			assertEquals("Test", a1.getCity());
 		}
 	}
 
@@ -566,7 +567,7 @@ class TerserUtilTest {
 		a1.getPeriod().setStartElement(new DateTimeType("2021-01-01"));
 		p1.addAddress(a1);
 
-		assertThat(p1.getAddress().get(0).getPeriod().getStartElement().toHumanDisplay()).isEqualTo("2021-01-01");
+		assertEquals("2021-01-01", p1.getAddress().get(0).getPeriod().getStartElement().toHumanDisplay());
 		assertNotNull(p1.getAddress().get(0).getPeriod().getStart());
 
 		Address a2 = new Address();
@@ -585,8 +586,8 @@ class TerserUtilTest {
 		assertThat(p1.getAddress()).hasSize(2);
 		assertThat(p1.getAddress().get(0).getLine()).isEmpty();
 		assertThat(p1.getAddress().get(1).getLine()).isEmpty();
-		assertThat(p1.getAddress().get(0).getCity()).isEqualTo("Test");
-		assertThat(p1.getAddress().get(1).getCity()).isEqualTo("Test");
+		assertEquals("Test", p1.getAddress().get(0).getCity());
+		assertEquals("Test", p1.getAddress().get(1).getCity());
 	}
 
 	@Test
@@ -618,7 +619,7 @@ class TerserUtilTest {
 		TerserUtil.setField(ourFhirContext, "address", p1, address);
 
 		assertThat(p1.getAddress()).hasSize(1);
-		assertThat(p1.getAddress().get(0).getCity()).isEqualTo("CITY");
+		assertEquals("CITY", p1.getAddress().get(0).getCity());
 	}
 
 	@Test
@@ -631,7 +632,7 @@ class TerserUtilTest {
 		TerserUtil.setFieldByFhirPath(ourFhirContext, "address", p1, address);
 
 		assertThat(p1.getAddress()).hasSize(1);
-		assertThat(p1.getAddress().get(0).getCity()).isEqualTo("CITY");
+		assertEquals("CITY", p1.getAddress().get(0).getCity());
 	}
 
 	@Test
@@ -641,7 +642,7 @@ class TerserUtilTest {
 		TerserUtil.setFieldByFhirPath(ourFhirContext, "address.city", p1, new StringType("CITY"));
 
 		assertThat(p1.getAddress()).hasSize(1);
-		assertThat(p1.getAddress().get(0).getCity()).isEqualTo("CITY");
+		assertEquals("CITY", p1.getAddress().get(0).getCity());
 	}
 
 	@Test
@@ -651,14 +652,14 @@ class TerserUtilTest {
 
 		Patient p2 = TerserUtil.clone(ourFhirContext, p1);
 
-		assertThat(p2.getName().get(0).getNameAsSingleString()).isEqualTo(p1.getName().get(0).getNameAsSingleString());
+		assertEquals(p1.getName().get(0).getNameAsSingleString(), p2.getName().get(0).getNameAsSingleString());
 		assertTrue(p1.equalsDeep(p2));
 	}
 
 	@Test
 	public void testNewElement() {
 		assertNotNull((IBase)TerserUtil.newElement(ourFhirContext, "string"));
-		assertThat(((PrimitiveType) TerserUtil.newElement(ourFhirContext, "integer", "1")).getValue()).isEqualTo(1);
+		assertEquals(1, ((PrimitiveType) TerserUtil.newElement(ourFhirContext, "integer", "1")).getValue());
 
 		assertNotNull((IBase)TerserUtil.newElement(ourFhirContext, "string"));
 		assertNull(((PrimitiveType) TerserUtil.newElement(ourFhirContext, "integer")).getValue());
@@ -677,7 +678,7 @@ class TerserUtilTest {
 	public void testInstantiateBackboneElement() {
 		IBaseBackboneElement patientContact = TerserUtil.instantiateBackboneElement(ourFhirContext, "Patient", "contact");
 		assertNotNull(patientContact);
-		assertThat(patientContact.getClass()).isEqualTo(Patient.ContactComponent.class);
+		assertEquals(Patient.ContactComponent.class, patientContact.getClass());
 		assertTrue(patientContact.isEmpty());
 	}
 

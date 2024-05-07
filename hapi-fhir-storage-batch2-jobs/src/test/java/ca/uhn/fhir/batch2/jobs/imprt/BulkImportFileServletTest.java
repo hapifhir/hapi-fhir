@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.imprt;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -51,9 +52,9 @@ public class BulkImportFileServletTest {
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			String responseHeaderContentType = response.getFirstHeader("content-type").getValue();
 
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(responseHeaderContentType).isEqualTo(BulkImportFileServlet.DEFAULT_HEADER_CONTENT_TYPE);
-			assertThat(responseBody).isEqualTo(ourInput);
+			assertEquals(200, response.getStatusLine().getStatusCode());
+			assertEquals(BulkImportFileServlet.DEFAULT_HEADER_CONTENT_TYPE, responseHeaderContentType);
+			assertEquals(ourInput, responseBody);
 		}
 	}
 
@@ -66,51 +67,51 @@ public class BulkImportFileServletTest {
 
 		url = myServletExtension.getBaseUrl() + "/blah";
 		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(404);
+			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseBody).isEqualTo("Failed to handle response. See server logs for details.");
+			assertEquals("Failed to handle response. See server logs for details.", responseBody);
 		}
 
 		url = "http://localhost:" + myServletExtension.getPort() + "/context/base/path/foo";
 		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(404);
+			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseBody).isEqualTo("Failed to handle response. See server logs for details.");
+			assertEquals("Failed to handle response. See server logs for details.", responseBody);
 		}
 
 		url = myServletExtension.getBaseUrl() + "/download";
 		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(404);
+			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseBody).isEqualTo("Failed to handle response. See server logs for details.");
+			assertEquals("Failed to handle response. See server logs for details.", responseBody);
 		}
 
 		url = myServletExtension.getBaseUrl() + "/download?";
 		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(404);
+			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseBody).isEqualTo("Failed to handle response. See server logs for details.");
+			assertEquals("Failed to handle response. See server logs for details.", responseBody);
 		}
 
 		url = myServletExtension.getBaseUrl() + "/download?index=";
 		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(404);
+			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseBody).isEqualTo("Failed to handle response. See server logs for details.");
+			assertEquals("Failed to handle response. See server logs for details.", responseBody);
 		}
 
 		url = myServletExtension.getBaseUrl() + "/download?index=A";
 		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(404);
+			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseBody).isEqualTo("Failed to handle response. See server logs for details.");
+			assertEquals("Failed to handle response. See server logs for details.", responseBody);
 		}
 
 		url = myServletExtension.getBaseUrl() + "/download?index=22";
 		try (CloseableHttpResponse response = client.execute(new HttpGet(url))) {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(404);
+			assertEquals(404, response.getStatusLine().getStatusCode());
 			String responseBody = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseBody).isEqualTo("Failed to handle response. See server logs for details.");
+			assertEquals("Failed to handle response. See server logs for details.", responseBody);
 		}
 
 	}

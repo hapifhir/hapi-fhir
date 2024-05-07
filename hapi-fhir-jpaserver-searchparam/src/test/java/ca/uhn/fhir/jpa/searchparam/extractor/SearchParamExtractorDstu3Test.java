@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.extractor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -66,18 +67,18 @@ public class SearchParamExtractorDstu3Test {
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs);
 		assertThat(tokens).hasSize(1);
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
-		assertThat(token.getParamName()).isEqualTo("category");
-		assertThat(token.getSystem()).isEqualTo("SYSTEM");
-		assertThat(token.getValue()).isEqualTo("CODE");
+		assertEquals("category", token.getParamName());
+		assertEquals("SYSTEM", token.getSystem());
+		assertEquals("CODE", token.getValue());
 	}
 
 	@Test
 	public void testNormalizedStringIsShortened() {
 		// String with character that will change it's length on normalization
 		String value = IntStream.range(1, 200).mapToObj(v -> "a").collect(Collectors.joining()) + "ئ";
-		assertThat(200).isEqualTo(value.length());
-		assertThat(201).isEqualTo(Normalizer.normalize(value, Normalizer.Form.NFD).length());
-		assertThat(201).isEqualTo(StringUtil.normalizeStringForSearchIndexing(value).length());
+		assertEquals(value.length(), 200);
+		assertEquals(Normalizer.normalize(value, Normalizer.Form.NFD).length(), 201);
+		assertEquals(StringUtil.normalizeStringForSearchIndexing(value).length(), 201);
 
 		Questionnaire questionnaire = new Questionnaire();
 		questionnaire.setDescription(value);
@@ -107,7 +108,7 @@ public class SearchParamExtractorDstu3Test {
 		Set<ResourceIndexedSearchParamNumber> params = extractor.extractSearchParamNumber(enc);
 		assertThat(params).hasSize(1);
 		// Normalized to days
-		assertThat(params.iterator().next().getValue().toPlainString()).isEqualTo("2");
+		assertEquals("2", params.iterator().next().getValue().toPlainString());
 	}
 
 	@Test
@@ -117,14 +118,14 @@ public class SearchParamExtractorDstu3Test {
 		String threeSegmentPath = "Patient.telecom.where(system='phone' or system='email') | Patient.telecom.where(system='email') or Patient.telecom.where(system='mail' | system='phone')";
 
 		String[] expressions = extractor.split(threeSegmentPath);
-		assertThat(expressions.length).isEqualTo(3);
+		assertEquals(3, expressions.length);
 		assertThat(expressions[0]).contains("Patient.telecom.where(system='phone' or system='email')");
 		assertThat(expressions[1]).contains("Patient.telecom.where(system='email')");
 		assertThat(expressions[2]).contains("Patient.telecom.where(system='mail' | system='phone')");
 
 		String zeroPathSplit = "Patient.telecom.where(system='phone' or system='email')";
 		String[] singularExpression = extractor.split(zeroPathSplit);
-		assertThat(singularExpression.length).isEqualTo(1);
+		assertEquals(1, singularExpression.length);
 		assertThat(singularExpression[0]).contains("Patient.telecom.where(system='phone' or system='email')");
 	}
 
@@ -143,7 +144,7 @@ public class SearchParamExtractorDstu3Test {
 		Set<ResourceIndexedSearchParamNumber> params = extractor.extractSearchParamNumber(enc);
 		assertThat(params).hasSize(1);
 		// Normalized to days
-		assertThat(params.iterator().next().getValue().toPlainString()).isEqualTo("15");
+		assertEquals("15", params.iterator().next().getValue().toPlainString());
 	}
 
 	@Test
@@ -174,7 +175,7 @@ public class SearchParamExtractorDstu3Test {
 		resource.getCommunicationFirstRep().getLanguage().getCodingFirstRep().setCode("blah");
 		Set<ResourceIndexedSearchParamString> strings = extractor.extractSearchParamStrings(resource);
 		assertThat(strings).hasSize(1);
-		assertThat(strings.iterator().next().getValueNormalized()).isEqualTo("BLAH");
+		assertEquals("BLAH", strings.iterator().next().getValueNormalized());
 
 	}
 

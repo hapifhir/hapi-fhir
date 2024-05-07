@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvFileSource;
@@ -12,28 +13,28 @@ public class TitleStandardizerTest {
 
 	@Test
 	public void testSpecialCases() {
-		assertThat(myStandardizer.standardize("prescribeit")).isEqualTo("Prescribeit");
-		assertThat(myStandardizer.standardize("MEDDIALOG")).isEqualTo("Meddialog");
-		assertThat(myStandardizer.standardize("20 / 20")).isEqualTo("20 / 20");
-		assertThat(myStandardizer.standardize("20/20")).isEqualTo("20/20");
-		assertThat(myStandardizer.standardize("L.L.P.")).isEqualTo("L.L.P.");
-		assertThat(myStandardizer.standardize("GREEN TRACTORS CLOW FARM EQUIPMENT/")).isEqualTo("Green Tractors Clow Farm Equipment/");
-		assertThat(myStandardizer.standardize("Agilec - Barrie/Orillia (EPS)")).isEqualTo("Agilec - Barrie/Orillia (EPS)");
-		assertThat(myStandardizer.standardize("CLEMENT'S/CALLANDER IDA PHARMACIES")).isEqualTo("Clement's/Callander Ida Pharmacies");
-		assertThat(myStandardizer.standardize("LONGLEY/VICKAR L.L.P. BARRISTERS & SOLICITORS")).isEqualTo("Longley/Vickar L.L.P. Barristers & Solicitors");
-		assertThat(myStandardizer.standardize("~Blan")).isEqualTo("-Blan");
-		assertThat(myStandardizer.standardize("THE (C/O DR MARY COOKE)")).isEqualTo("The (C/O Dr Mary Cooke)");
-		assertThat(myStandardizer.standardize("SARAH ANN MARY POLLOCK")).isEqualTo("Sarah Ann Mary Pollock");
-		assertThat(myStandardizer.standardize("VOIR...ÊTRE VU! OPTICIENS")).isEqualTo("Voir...Être Vu! Opticiens");
-		assertThat(myStandardizer.standardize("BACK IN SYNC: WELLNESS CENTRE")).isEqualTo("Back in Sync: Wellness Centre");
-		assertThat(myStandardizer.standardize("PEARLE VISION 9861 (ORCHARD PARK S/C)")).isEqualTo("Pearle Vision 9861 (Orchard Park S/C)");
+		assertEquals("Prescribeit", myStandardizer.standardize("prescribeit"));
+		assertEquals("Meddialog", myStandardizer.standardize("MEDDIALOG"));
+		assertEquals("20 / 20", myStandardizer.standardize("20 / 20"));
+		assertEquals("20/20", myStandardizer.standardize("20/20"));
+		assertEquals("L.L.P.", myStandardizer.standardize("L.L.P."));
+		assertEquals("Green Tractors Clow Farm Equipment/", myStandardizer.standardize("GREEN TRACTORS CLOW FARM EQUIPMENT/"));
+		assertEquals("Agilec - Barrie/Orillia (EPS)", myStandardizer.standardize("Agilec - Barrie/Orillia (EPS)"));
+		assertEquals("Clement's/Callander Ida Pharmacies", myStandardizer.standardize("CLEMENT'S/CALLANDER IDA PHARMACIES"));
+		assertEquals("Longley/Vickar L.L.P. Barristers & Solicitors", myStandardizer.standardize("LONGLEY/VICKAR L.L.P. BARRISTERS & SOLICITORS"));
+		assertEquals("-Blan", myStandardizer.standardize("~Blan"));
+		assertEquals("The (C/O Dr Mary Cooke)", myStandardizer.standardize("THE (C/O DR MARY COOKE)"));
+		assertEquals("Sarah Ann Mary Pollock", myStandardizer.standardize("SARAH ANN MARY POLLOCK"));
+		assertEquals("Voir...Être Vu! Opticiens", myStandardizer.standardize("VOIR...ÊTRE VU! OPTICIENS"));
+		assertEquals("Back in Sync: Wellness Centre", myStandardizer.standardize("BACK IN SYNC: WELLNESS CENTRE"));
+		assertEquals("Pearle Vision 9861 (Orchard Park S/C)", myStandardizer.standardize("PEARLE VISION 9861 (ORCHARD PARK S/C)"));
 	}
 
 	@ParameterizedTest
 	@CsvFileSource(resources = "/organization_titles.csv", numLinesToSkip = 0)
 	public void testTitleOrganizationsStandardization(String theExpected, String theInput) {
 		String standardizedTitle = myStandardizer.standardize(theInput);
-		assertThat(standardizedTitle).isEqualTo(theExpected);
+		assertEquals(theExpected, standardizedTitle);
 	}
 
 }

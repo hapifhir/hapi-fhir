@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -242,7 +243,7 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 
 		List<HookParams> hookParams = mySubscriptionTopicsCheckedLatch.awaitExpected();
 		ResourceModifiedMessage lastMessage = PointcutLatch.getInvocationParameterOfType(hookParams, ResourceModifiedMessage.class);
-		assertThat(lastMessage.getPayloadId()).isEqualTo(theResource.getIdElement().toVersionless().toString());
+		assertEquals(theResource.getIdElement().toVersionless().toString(), lastMessage.getPayloadId());
 
 		if (theExpectDelivery) {
 			mySubscriptionDeliveredLatch.awaitExpected();
@@ -295,18 +296,18 @@ public abstract class BaseSubscriptionsR5Test extends BaseResourceProviderR5Test
 	}
 
 	protected static void validateSubscriptionStatus(Subscription subscription, IBaseResource sentResource, SubscriptionStatus ss, Long theExpectedEventNumber) {
-		assertThat(ss.getStatus()).isEqualTo(Enumerations.SubscriptionStatusCodes.ACTIVE);
-		assertThat(ss.getType()).isEqualTo(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION);
-		assertThat(ss.getEventsSinceSubscriptionStartElement().getValueAsString()).isEqualTo(theExpectedEventNumber.toString());
+		assertEquals(Enumerations.SubscriptionStatusCodes.ACTIVE, ss.getStatus());
+		assertEquals(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION, ss.getType());
+		assertEquals(theExpectedEventNumber.toString(), ss.getEventsSinceSubscriptionStartElement().getValueAsString());
 
 		List<SubscriptionStatus.SubscriptionStatusNotificationEventComponent> notificationEvents = ss.getNotificationEvent();
 		assertThat(notificationEvents).hasSize(1);
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent = notificationEvents.get(0);
-		assertThat(notificationEvent.getEventNumber()).isEqualTo(theExpectedEventNumber);
-		assertThat(notificationEvent.getFocus().getReferenceElement()).isEqualTo(sentResource.getIdElement().toUnqualifiedVersionless());
+		assertEquals(theExpectedEventNumber, notificationEvent.getEventNumber());
+		assertEquals(sentResource.getIdElement().toUnqualifiedVersionless(), notificationEvent.getFocus().getReferenceElement());
 
-		assertThat(ss.getSubscription().getReferenceElement()).isEqualTo(subscription.getIdElement().toUnqualifiedVersionless());
-		assertThat(ss.getTopic()).isEqualTo(subscription.getTopic());
+		assertEquals(subscription.getIdElement().toUnqualifiedVersionless(), ss.getSubscription().getReferenceElement());
+		assertEquals(subscription.getTopic(), ss.getTopic());
 	}
 
 	@BeforeAll

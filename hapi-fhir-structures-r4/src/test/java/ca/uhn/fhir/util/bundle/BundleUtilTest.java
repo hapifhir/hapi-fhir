@@ -62,7 +62,7 @@ public class BundleUtilTest {
 			Bundle b = new Bundle();
 			b.getLinkOrCreate("prev").setUrl("http://bar");
 			b.getLinkOrCreate("next").setUrl("http://foo");
-			assertThat(BundleUtil.getLinkUrlOfType(ourCtx, b, "next")).isEqualTo("http://foo");
+			assertEquals("http://foo", BundleUtil.getLinkUrlOfType(ourCtx, b, "next"));
 		}
 
 		@Test
@@ -79,7 +79,7 @@ public class BundleUtilTest {
 			public void testGetPrevious_exists_and_no_prev() {
 				Bundle b = new Bundle();
 				b.getLinkOrCreate(IBaseBundle.LINK_PREV).setUrl("http://bar");
-				assertThat(BundleUtil.getLinkUrlOfType(ourCtx, b, IBaseBundle.LINK_PREV)).isEqualTo("http://bar");
+				assertEquals("http://bar", BundleUtil.getLinkUrlOfType(ourCtx, b, IBaseBundle.LINK_PREV));
 			}
 
 			@Test
@@ -87,7 +87,7 @@ public class BundleUtilTest {
 				Bundle b = new Bundle();
 				b.getLinkOrCreate(IBaseBundle.LINK_PREV).setUrl("http://bar");
 				b.getLinkOrCreate("prev").setUrl("http://bar");
-				assertThat(BundleUtil.getLinkUrlOfType(ourCtx, b, IBaseBundle.LINK_PREV)).isEqualTo("http://bar");
+				assertEquals("http://bar", BundleUtil.getLinkUrlOfType(ourCtx, b, IBaseBundle.LINK_PREV));
 			}
 
 			@Test
@@ -100,7 +100,7 @@ public class BundleUtilTest {
 
 				String expectedExceptionMsg = Msg.code(2368) + DIFFERENT_LINK_ERROR_MSG
 					.replace("$PREVIOUS", "http://bar").replace("$PREV", "http://foo");
-				assertThat(thrown.getMessage()).isEqualTo(expectedExceptionMsg);
+				assertEquals(expectedExceptionMsg, thrown.getMessage());
 			}
 
 			@Test
@@ -113,14 +113,14 @@ public class BundleUtilTest {
 			public void testGetPrevious_doesnt_exist_but_prev_does() {
 				Bundle b = new Bundle();
 				b.getLinkOrCreate("prev").setUrl("http://bar");
-				assertThat(BundleUtil.getLinkUrlOfType(ourCtx, b, IBaseBundle.LINK_PREV)).isEqualTo("http://bar");
+				assertEquals("http://bar", BundleUtil.getLinkUrlOfType(ourCtx, b, IBaseBundle.LINK_PREV));
 			}
 
 			@Test
 			public void testGetPrev_exists_and_no_previous() {
 				Bundle b = new Bundle();
 				b.getLinkOrCreate("prev").setUrl("http://bar");
-				assertThat(BundleUtil.getLinkUrlOfType(ourCtx, b, "prev")).isEqualTo("http://bar");
+				assertEquals("http://bar", BundleUtil.getLinkUrlOfType(ourCtx, b, "prev"));
 			}
 
 			@Test
@@ -128,7 +128,7 @@ public class BundleUtilTest {
 				Bundle b = new Bundle();
 				b.getLinkOrCreate(IBaseBundle.LINK_PREV).setUrl("http://bar");
 				b.getLinkOrCreate("prev").setUrl("http://bar");
-				assertThat(BundleUtil.getLinkUrlOfType(ourCtx, b, "prev")).isEqualTo("http://bar");
+				assertEquals("http://bar", BundleUtil.getLinkUrlOfType(ourCtx, b, "prev"));
 			}
 
 			@Test
@@ -141,7 +141,7 @@ public class BundleUtilTest {
 
 				String expectedExceptionMsg = Msg.code(2368) + DIFFERENT_LINK_ERROR_MSG
 					.replace("$PREVIOUS", "http://bar").replace("$PREV", "http://foo");
-				assertThat(thrown.getMessage()).isEqualTo(expectedExceptionMsg);
+				assertEquals(expectedExceptionMsg, thrown.getMessage());
 			}
 
 			@Test
@@ -154,7 +154,7 @@ public class BundleUtilTest {
 			public void testGetPrev_doesnt_exist_but_previous_does() {
 				Bundle b = new Bundle();
 				b.getLinkOrCreate(IBaseBundle.LINK_PREV).setUrl("http://bar");
-				assertThat(BundleUtil.getLinkUrlOfType(ourCtx, b, "prev")).isEqualTo("http://bar");
+				assertEquals("http://bar", BundleUtil.getLinkUrlOfType(ourCtx, b, "prev"));
 			}
 		}
 	}
@@ -165,7 +165,7 @@ public class BundleUtilTest {
 		b.setTotal(999);
 		Integer total = BundleUtil.getTotal(ourCtx, b);
 		assertNotNull(total);
-		assertThat(total.intValue()).isEqualTo(999);
+		assertEquals(999, total.intValue());
 	}
 
 	@Test
@@ -178,8 +178,8 @@ public class BundleUtilTest {
 	public void testSetType() {
 		Bundle b = new Bundle();
 		BundleUtil.setBundleType(ourCtx, b, "transaction");
-		assertThat(b.getType()).isEqualTo(Bundle.BundleType.TRANSACTION);
-		assertThat(b.getTypeElement().getValueAsString()).isEqualTo("transaction");
+		assertEquals(Bundle.BundleType.TRANSACTION, b.getType());
+		assertEquals("transaction", b.getTypeElement().getValueAsString());
 	}
 
 
@@ -202,7 +202,7 @@ public class BundleUtilTest {
 		Consumer<ModifiableBundleEntry> consumer = e -> e.setFullUrl("http://hello/Patient/123");
 		BundleUtil.processEntries(ourCtx, bundle, consumer);
 
-		assertThat(bundle.getEntryFirstRep().getFullUrl()).isEqualTo("http://hello/Patient/123");
+		assertEquals("http://hello/Patient/123", bundle.getEntryFirstRep().getFullUrl());
 	}
 
 	@Test
@@ -213,7 +213,7 @@ public class BundleUtilTest {
 
 		Consumer<ModifiableBundleEntry> consumer = e -> e.setRequestUrl(ourCtx, e.getRequestUrl() + "?foo=bar");
 		BundleUtil.processEntries(ourCtx, bundle, consumer);
-		assertThat(bundle.getEntryFirstRep().getRequest().getUrl()).isEqualTo("Observation?foo=bar");
+		assertEquals("Observation?foo=bar", bundle.getEntryFirstRep().getRequest().getUrl());
 	}
 
 	@Test
@@ -354,16 +354,16 @@ public class BundleUtilTest {
 		List<Bundle.BundleEntryComponent> entry = b.getEntry();
 
 		// DELETEs first
-		assertThat(entry.get(0).getRequest().getMethod()).isEqualTo(DELETE);
-		assertThat(entry.get(1).getRequest().getMethod()).isEqualTo(DELETE);
+		assertEquals(DELETE, entry.get(0).getRequest().getMethod());
+		assertEquals(DELETE, entry.get(1).getRequest().getMethod());
 		// Then POSTs
-		assertThat(entry.get(2).getRequest().getMethod()).isEqualTo(POST);
-		assertThat(entry.get(3).getRequest().getMethod()).isEqualTo(POST);
-		assertThat(entry.get(4).getRequest().getMethod()).isEqualTo(POST);
+		assertEquals(POST, entry.get(2).getRequest().getMethod());
+		assertEquals(POST, entry.get(3).getRequest().getMethod());
+		assertEquals(POST, entry.get(4).getRequest().getMethod());
 		// Then PUTs
-		assertThat(entry.get(5).getRequest().getMethod()).isEqualTo(PUT);
+		assertEquals(PUT, entry.get(5).getRequest().getMethod());
 		// Then GETs
-		assertThat(entry.get(6).getRequest().getMethod()).isEqualTo(GET);
+		assertEquals(GET, entry.get(6).getRequest().getMethod());
 	}
 
 	@Test
@@ -452,10 +452,10 @@ public class BundleUtilTest {
 
 		//Then
 		assertThat(searchBundleEntryParts).hasSize(2);
-		assertThat(searchBundleEntryParts.get(0).getSearchMode()).isEqualTo(BundleEntrySearchModeEnum.MATCH);
+		assertEquals(BundleEntrySearchModeEnum.MATCH, searchBundleEntryParts.get(0).getSearchMode());
 		assertThat(searchBundleEntryParts.get(0).getFullUrl()).contains("Patient/pata");
 		assertNotNull(searchBundleEntryParts.get(0).getResource());
-		assertThat(searchBundleEntryParts.get(1).getSearchMode()).isEqualTo(BundleEntrySearchModeEnum.INCLUDE);
+		assertEquals(BundleEntrySearchModeEnum.INCLUDE, searchBundleEntryParts.get(1).getSearchMode());
 		assertThat(searchBundleEntryParts.get(1).getFullUrl()).contains("Condition/");
 		assertNotNull(searchBundleEntryParts.get(1).getResource());
 	}
@@ -498,9 +498,9 @@ public class BundleUtilTest {
 
 		//Then
 		assertThat(searchBundleEntryParts).hasSize(1);
-		assertThat(searchBundleEntryParts.get(0).getSearchMode()).isNull();
+		assertNull(searchBundleEntryParts.get(0).getSearchMode());
 		assertThat(searchBundleEntryParts.get(0).getFullUrl()).contains("Condition/1626");
-		assertThat(searchBundleEntryParts.get(0).getResource()).isNotNull();
+		assertNotNull(searchBundleEntryParts.get(0).getResource());
 	}
 
 	@Test
@@ -547,7 +547,7 @@ public class BundleUtilTest {
 		assertThat(searchBundleEntryParts).hasSize(1);
 		assertEquals(BundleEntrySearchModeEnum.OUTCOME, searchBundleEntryParts.get(0).getSearchMode());
 		assertThat(searchBundleEntryParts.get(0).getFullUrl()).contains("Condition/1626");
-		assertThat(searchBundleEntryParts.get(0).getResource()).isNotNull();
+		assertNotNull(searchBundleEntryParts.get(0).getResource());
 	}
 
 	@Test
@@ -600,11 +600,11 @@ public class BundleUtilTest {
 		Patient pat1 = new Patient();
 		pat1.setId("Patient/P1");
 		IBase bundleEntry = BundleUtil.createNewBundleEntryWithSingleField(ourCtx,"resource", pat1);
-		assertThat(((Bundle.BundleEntryComponent) bundleEntry).getResource().getIdElement().getValue()).isEqualTo(pat1.getId());
+		assertEquals(pat1.getId(), ((Bundle.BundleEntryComponent) bundleEntry).getResource().getIdElement().getValue());
 
 		UriType testUri = new UriType("http://foo");
 		bundleEntry = BundleUtil.createNewBundleEntryWithSingleField(ourCtx,"fullUrl", testUri);
-		assertThat(((Bundle.BundleEntryComponent) bundleEntry).getFullUrl()).isEqualTo(testUri.getValue());
+		assertEquals(testUri.getValue(), ((Bundle.BundleEntryComponent) bundleEntry).getFullUrl());
 	}
 
 	private int getIndexOfEntryWithId(String theResourceId, Bundle theBundle) {
@@ -628,7 +628,7 @@ public class BundleUtilTest {
 		// execute
 		final IBaseResource actual = BundleUtil.getResourceByReferenceAndResourceType(ourCtx, bundle, reference);
 		// validate
-		assertThat(actual).isEqualTo(expected);
+		assertEquals(expected, actual);
 	}
 
 	@Test

@@ -676,16 +676,16 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			StringParam v1 = new StringParam("testSearchCompositeParamS01");
 			CompositeParam<TokenParam, StringParam> val = new CompositeParam<TokenParam, StringParam>(v0, v1);
 			IBundleProvider result = myObservationDao.search(new SearchParameterMap(Observation.SP_CODE_VALUE_STRING, val).setLoadSynchronous(true));
-			assertThat(result.size().intValue()).isEqualTo(1);
-			assertThat(result.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless()).isEqualTo(id1.toUnqualifiedVersionless());
+			assertEquals(1, result.size().intValue());
+			assertEquals(id1.toUnqualifiedVersionless(), result.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
 		}
 		{
 			TokenParam v0 = new TokenParam("foo", "testSearchCompositeParamN01");
 			StringParam v1 = new StringParam("testSearchCompositeParamS02");
 			CompositeParam<TokenParam, StringParam> val = new CompositeParam<TokenParam, StringParam>(v0, v1);
 			IBundleProvider result = myObservationDao.search(new SearchParameterMap(Observation.SP_CODE_VALUE_STRING, val).setLoadSynchronous(true));
-			assertThat(result.size().intValue()).isEqualTo(1);
-			assertThat(result.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless()).isEqualTo(id2.toUnqualifiedVersionless());
+			assertEquals(1, result.size().intValue());
+			assertEquals(id2.toUnqualifiedVersionless(), result.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
 		}
 	}
 
@@ -706,8 +706,8 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			DateParam v1 = new DateParam("2001-01-01");
 			CompositeParam<TokenParam, DateParam> val = new CompositeParam<TokenParam, DateParam>(v0, v1);
 			IBundleProvider result = myObservationDao.search(new SearchParameterMap(Observation.SP_CODE_VALUE_DATE, val).setLoadSynchronous(true));
-			assertThat(result.size().intValue()).isEqualTo(1);
-			assertThat(result.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless()).isEqualTo(id1.toUnqualifiedVersionless());
+			assertEquals(1, result.size().intValue());
+			assertEquals(id1.toUnqualifiedVersionless(), result.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
 		}
 		{
 			TokenParam v0 = new TokenParam("foo", "testSearchCompositeParamDateN01");
@@ -715,7 +715,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			DateParam v1 = new DateParam(">2001-01-01T10:12:12Z");
 			CompositeParam<TokenParam, DateParam> val = new CompositeParam<TokenParam, DateParam>(v0, v1);
 			IBundleProvider result = myObservationDao.search(new SearchParameterMap(Observation.SP_CODE_VALUE_DATE, val).setLoadSynchronous(true));
-			assertThat(result.size().intValue()).isEqualTo(2);
+			assertEquals(2, result.size().intValue());
 			assertThat(toUnqualifiedVersionlessIds(result)).containsExactlyInAnyOrder(id1, id2);
 		}
 
@@ -822,7 +822,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			params.setLoadSynchronous(true);
 			params.add("_id", new StringParam("testSearchForUnknownAlphanumericId"));
 			IBundleProvider retrieved = myPatientDao.search(params);
-			assertThat(retrieved.size().intValue()).isEqualTo(0);
+			assertEquals(0, retrieved.size().intValue());
 		}
 	}
 
@@ -1015,7 +1015,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		params.add(Patient.SP_FAMILY, new StringDt("testSearchNameParam01Fam"));
 		List<Patient> patients = toList(myPatientDao.search(params));
 		assertThat(patients).hasSize(1);
-		assertThat(patients.get(0).getId().getIdPart()).isEqualTo(id1.getIdPart());
+		assertEquals(id1.getIdPart(), patients.get(0).getId().getIdPart());
 
 		// Given name shouldn't return for family param
 		params = new SearchParameterMap();
@@ -1029,14 +1029,14 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		params.add(Patient.SP_NAME, new StringDt("testSearchNameParam01Fam"));
 		patients = toList(myPatientDao.search(params));
 		assertThat(patients).hasSize(1);
-		assertThat(patients.get(0).getId().getIdPart()).isEqualTo(id1.getIdPart());
+		assertEquals(id1.getIdPart(), patients.get(0).getId().getIdPart());
 
 		params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
 		params.add(Patient.SP_NAME, new StringDt("testSearchNameParam01Giv"));
 		patients = toList(myPatientDao.search(params));
 		assertThat(patients).hasSize(1);
-		assertThat(patients.get(0).getId().getIdPart()).isEqualTo(id1.getIdPart());
+		assertEquals(id1.getIdPart(), patients.get(0).getId().getIdPart());
 
 		params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
@@ -1072,21 +1072,21 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		IIdType id2 = myEncounterDao.create(e2, mySrd).getId();
 		{
 			IBundleProvider found = myEncounterDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Encounter.SP_LENGTH, new NumberParam(">2")));
-			assertThat(found.size().intValue()).isEqualTo(2);
+			assertEquals(2, found.size().intValue());
 			assertThat(toUnqualifiedVersionlessIds(found)).containsExactlyInAnyOrder(id1.toUnqualifiedVersionless(), id2.toUnqualifiedVersionless());
 		}
 		{
 			IBundleProvider found = myEncounterDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Encounter.SP_LENGTH, new NumberParam("<1")));
-			assertThat(found.size().intValue()).isEqualTo(0);
+			assertEquals(0, found.size().intValue());
 		}
 		{
 			IBundleProvider found = myEncounterDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Encounter.SP_LENGTH, new NumberParam("4")));
-			assertThat(found.size().intValue()).isEqualTo(1);
+			assertEquals(1, found.size().intValue());
 			assertThat(toUnqualifiedVersionlessIds(found)).containsExactlyInAnyOrder(id1.toUnqualifiedVersionless());
 		}
 		{
 			IBundleProvider found = myEncounterDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Encounter.SP_LENGTH, new NumberParam("2")));
-			assertThat(found.size().intValue()).isEqualTo(0);
+			assertEquals(0, found.size().intValue());
 		}
 	}
 
@@ -1203,7 +1203,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 		List<Observation> result = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_IDENTIFIER, "urn:system|testSearchResourceLinkWithChain01"))));
 		assertThat(result).hasSize(1);
-		assertThat(result.get(0).getId().getIdPart()).isEqualTo(obsId01.getIdPart());
+		assertEquals(obsId01.getIdPart(), result.get(0).getId().getIdPart());
 
 		result = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_PATIENT, new ReferenceParam(patientId01.getIdPart()))));
 		assertThat(result).hasSize(1);
@@ -1249,26 +1249,26 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		ReferenceParam param;
 
 		found = myLocationDao.search(new SearchParameterMap().setLoadSynchronous(true).add("organization", new ReferenceParam(orgId01.getIdPart())));
-		assertThat(found.size().intValue()).isEqualTo(1);
-		assertThat(found.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless()).isEqualTo(locParentId);
+		assertEquals(1, found.size().intValue());
+		assertEquals(locParentId, found.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
 
 		param = new ReferenceParam(orgId01.getIdPart());
 		param.setChain("organization");
 		found = myLocationDao.search(new SearchParameterMap().setLoadSynchronous(true).add("partof", param));
-		assertThat(found.size().intValue()).isEqualTo(1);
-		assertThat(found.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless()).isEqualTo(locChildId);
+		assertEquals(1, found.size().intValue());
+		assertEquals(locChildId, found.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
 
 		param = new ReferenceParam(orgId01.getIdPart());
 		param.setChain("partof.organization");
 		found = myLocationDao.search(new SearchParameterMap().setLoadSynchronous(true).add("partof", param));
-		assertThat(found.size().intValue()).isEqualTo(1);
-		assertThat(found.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless()).isEqualTo(locGrandchildId);
+		assertEquals(1, found.size().intValue());
+		assertEquals(locGrandchildId, found.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
 
 		param = new ReferenceParam(methodName);
 		param.setChain("partof.organization.name");
 		found = myLocationDao.search(new SearchParameterMap().setLoadSynchronous(true).add("partof", param));
-		assertThat(found.size().intValue()).isEqualTo(1);
-		assertThat(found.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless()).isEqualTo(locGrandchildId);
+		assertEquals(1, found.size().intValue());
+		assertEquals(locGrandchildId, found.getResources(0, 1).get(0).getIdElement().toUnqualifiedVersionless());
 	}
 
 	@Test
@@ -1298,7 +1298,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 		result = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam("Patient", Patient.SP_NAME, "testSearchResourceLinkWithChainWithMultipleTypes01"))));
 		assertThat(result).hasSize(1);
-		assertThat(result.get(0).getId().getIdPart()).isEqualTo(obsId01.getIdPart());
+		assertEquals(obsId01.getIdPart(), result.get(0).getId().getIdPart());
 
 		result = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam(Patient.SP_NAME, "testSearchResourceLinkWithChainWithMultipleTypes01"))));
 		assertThat(result).hasSize(2);
@@ -1344,7 +1344,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 
 		List<Observation> result = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam("testSearchResourceLinkWithTextLogicalId01"))));
 		assertThat(result).hasSize(1);
-		assertThat(result.get(0).getId().getIdPart()).isEqualTo(obsId01.getIdPart());
+		assertEquals(obsId01.getIdPart(), result.get(0).getId().getIdPart());
 
 		result = toList(myObservationDao.search(new SearchParameterMap().setLoadSynchronous(true).add(Observation.SP_SUBJECT, new ReferenceParam("testSearchResourceLinkWithTextLogicalId99"))));
 		assertThat(result).isEmpty();
@@ -1518,53 +1518,53 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_LANGUAGE, new TokenParam(null, "testSearchTokenParamComText", true));
 			map.add(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testSearchTokenParam001"));
-			assertThat(myPatientDao.search(map).size().intValue()).isEqualTo(1);
+			assertEquals(1, myPatientDao.search(map).size().intValue());
 		}
 		{
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_LANGUAGE, new TokenParam(null, "testSearchTokenParamCode", true));
-			assertThat(myPatientDao.search(map).size().intValue()).isEqualTo(0);
+			assertEquals(0, myPatientDao.search(map).size().intValue());
 		}
 		{
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_LANGUAGE, new TokenParam(null, "testSearchTokenParamCode", true));
 			map.add(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testSearchTokenParam001"));
-			assertThat(myPatientDao.search(map).size().intValue()).isEqualTo(0);
+			assertEquals(0, myPatientDao.search(map).size().intValue());
 		}
 		{
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_IDENTIFIER, new IdentifierDt("urn:system", "testSearchTokenParam001"));
 			IBundleProvider retrieved = myPatientDao.search(map);
-			assertThat(retrieved.size().intValue()).isEqualTo(1);
+			assertEquals(1, retrieved.size().intValue());
 		}
 		{
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_IDENTIFIER, new IdentifierDt(null, "testSearchTokenParam001"));
 			IBundleProvider retrieved = myPatientDao.search(map);
-			assertThat(retrieved.size().intValue()).isEqualTo(1);
+			assertEquals(1, retrieved.size().intValue());
 		}
 		{
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_LANGUAGE, new IdentifierDt("testSearchTokenParamSystem", "testSearchTokenParamCode"));
-			assertThat(myPatientDao.search(map).size().intValue()).isEqualTo(1);
+			assertEquals(1, myPatientDao.search(map).size().intValue());
 		}
 		{
 			// Complete match
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_LANGUAGE, new TokenParam(null, "testSearchTokenParamComText", true));
-			assertThat(myPatientDao.search(map).size().intValue()).isEqualTo(1);
+			assertEquals(1, myPatientDao.search(map).size().intValue());
 		}
 		{
 			// Left match
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_LANGUAGE, new TokenParam(null, "testSearchTokenParamcomtex", true));
-			assertThat(myPatientDao.search(map).size().intValue()).isEqualTo(1);
+			assertEquals(1, myPatientDao.search(map).size().intValue());
 		}
 		{
 			// Right match
 			SearchParameterMap map = new SearchParameterMap();
 			map.add(Patient.SP_LANGUAGE, new TokenParam(null, "testSearchTokenParamComTex", true));
-			assertThat(myPatientDao.search(map).size().intValue()).isEqualTo(1);
+			assertEquals(1, myPatientDao.search(map).size().intValue());
 		}
 		{
 			SearchParameterMap map = new SearchParameterMap();
@@ -1573,7 +1573,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			listParam.add(new IdentifierDt("urn:system", "testSearchTokenParam002"));
 			map.add(Patient.SP_IDENTIFIER, listParam);
 			IBundleProvider retrieved = myPatientDao.search(map);
-			assertThat(retrieved.size().intValue()).isEqualTo(2);
+			assertEquals(2, retrieved.size().intValue());
 		}
 		{
 			SearchParameterMap map = new SearchParameterMap();
@@ -1582,7 +1582,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			listParam.add(new IdentifierDt("urn:system", "testSearchTokenParam002"));
 			map.add(Patient.SP_IDENTIFIER, listParam);
 			IBundleProvider retrieved = myPatientDao.search(map);
-			assertThat(retrieved.size().intValue()).isEqualTo(2);
+			assertEquals(2, retrieved.size().intValue());
 		}
 	}
 
@@ -1594,7 +1594,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			myPatientDao.search(params).getAllResources();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _content");
+			assertEquals(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _content", e.getMessage());
 		}
 	}
 
@@ -1606,7 +1606,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			myPatientDao.search(params).getAllResources();
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _text");
+			assertEquals(Msg.code(1192) + "Fulltext search is not enabled on this service, can not process parameter: _text", e.getMessage());
 		}
 	}
 
@@ -1654,7 +1654,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		criteriaUrl.setLastUpdated(range);
 		criteriaUrl.setSort(new SortSpec(Constants.PARAM_LASTUPDATED, SortOrderEnum.ASC));
 		IBundleProvider results = myObservationDao.search(criteriaUrl);
-		assertThat(results.size().intValue()).isEqualTo(0);
+		assertEquals(0, results.size().intValue());
 	}
 
 	@Test
@@ -1718,8 +1718,8 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			IBundleProvider search = myPatientDao.search(params);
 			List<IBaseResource> patients = toList(search);
 			assertThat(patients).hasSize(2);
-			assertThat(patients.get(0).getClass()).isEqualTo(Patient.class);
-			assertThat(patients.get(1).getClass()).isEqualTo(Organization.class);
+			assertEquals(Patient.class, patients.get(0).getClass());
+			assertEquals(Organization.class, patients.get(1).getClass());
 		}
 		{
 			// Named include with parent non-recursive
@@ -1730,8 +1730,8 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			IBundleProvider search = myPatientDao.search(params);
 			List<IResource> patients = toList(search);
 			assertThat(patients).hasSize(2);
-			assertThat(patients.get(0).getClass()).isEqualTo(Patient.class);
-			assertThat(patients.get(1).getClass()).isEqualTo(Organization.class);
+			assertEquals(Patient.class, patients.get(0).getClass());
+			assertEquals(Organization.class, patients.get(1).getClass());
 		}
 		{
 			// Named include with parent recursive
@@ -1742,9 +1742,9 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			IBundleProvider search = myPatientDao.search(params);
 			List<IResource> patients = toList(search);
 			assertThat(patients).hasSize(3);
-			assertThat(patients.get(0).getClass()).isEqualTo(Patient.class);
-			assertThat(patients.get(1).getClass()).isEqualTo(Organization.class);
-			assertThat(patients.get(2).getClass()).isEqualTo(Organization.class);
+			assertEquals(Patient.class, patients.get(0).getClass());
+			assertEquals(Organization.class, patients.get(1).getClass());
+			assertEquals(Organization.class, patients.get(2).getClass());
 		}
 		{
 			// * include non recursive
@@ -1754,8 +1754,8 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			IBundleProvider search = myPatientDao.search(params);
 			List<IResource> patients = toList(search);
 			assertThat(patients).hasSize(2);
-			assertThat(patients.get(0).getClass()).isEqualTo(Patient.class);
-			assertThat(patients.get(1).getClass()).isEqualTo(Organization.class);
+			assertEquals(Patient.class, patients.get(0).getClass());
+			assertEquals(Organization.class, patients.get(1).getClass());
 		}
 		{
 			// * include recursive
@@ -1765,9 +1765,9 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			IBundleProvider search = myPatientDao.search(params);
 			List<IResource> patients = toList(search);
 			assertThat(patients).hasSize(3);
-			assertThat(patients.get(0).getClass()).isEqualTo(Patient.class);
-			assertThat(patients.get(1).getClass()).isEqualTo(Organization.class);
-			assertThat(patients.get(2).getClass()).isEqualTo(Organization.class);
+			assertEquals(Patient.class, patients.get(0).getClass());
+			assertEquals(Organization.class, patients.get(1).getClass());
+			assertEquals(Organization.class, patients.get(2).getClass());
 		}
 		{
 			// Irrelevant include
@@ -1777,7 +1777,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			IBundleProvider search = myPatientDao.search(params);
 			List<IResource> patients = toList(search);
 			assertThat(patients).hasSize(1);
-			assertThat(patients.get(0).getClass()).isEqualTo(Patient.class);
+			assertEquals(Patient.class, patients.get(0).getClass());
 		}
 		{
 			// Untyped include
@@ -1986,8 +1986,8 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 		IBundleProvider search = myPatientDao.search(params);
 		List<IResource> patients = toList(search);
 		assertThat(patients).hasSize(2);
-		assertThat(patients.get(0).getClass()).isEqualTo(Patient.class);
-		assertThat(patients.get(1).getClass()).isEqualTo(Organization.class);
+		assertEquals(Patient.class, patients.get(0).getClass());
+		assertEquals(Organization.class, patients.get(1).getClass());
 
 		params = new SearchParameterMap();
 		params.add(Patient.SP_FAMILY, new StringDt("Tester_testSearchWithIncludesThatHaveTextId_P1"));
@@ -2176,7 +2176,7 @@ public class FhirResourceDaoDstu2SearchNoFtTest extends BaseJpaDstu2Test {
 			ourLog.info("Found: " + (value.getResources(0, 1).get(0).getIdElement()));
 			fail("", myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(value.getResources(0, 1).get(0)));
 		}
-		assertThat(value.size().intValue()).isEqualTo(0);
+		assertEquals(0, value.size().intValue());
 
 		List<IBaseResource> res = value.getResources(0, 0);
 		assertThat(res).isEmpty();

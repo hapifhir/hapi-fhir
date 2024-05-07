@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cli;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
@@ -88,7 +89,7 @@ public class HapiClearMigrationLockCommandTest extends ConsoleOutputCapturingBas
 		App.main(args);
 		int afterClearMigrationCount = dao.findAll().size();
 		int removedRows = beforeClearMigrationCount - afterClearMigrationCount;
-		assertThat(removedRows).isEqualTo(0);
+		assertEquals(0, removedRows);
 		assertThat(getConsoleOutput()).contains("Did not successfully remove lock entry. [uuid=" + lockUUID + "]");
 	}
 	@Test
@@ -112,7 +113,7 @@ public class HapiClearMigrationLockCommandTest extends ConsoleOutputCapturingBas
 		int afterClearMigrationCount = dao.findAll().size();
 		int removedRows = beforeClearMigrationCount - afterClearMigrationCount;
 
-		assertThat(removedRows).isEqualTo(1);
+		assertEquals(1, removedRows);
 		assertThat(getConsoleOutput()).contains("Successfully removed lock entry. [uuid=" + lockUUID + "]");
 	}
 

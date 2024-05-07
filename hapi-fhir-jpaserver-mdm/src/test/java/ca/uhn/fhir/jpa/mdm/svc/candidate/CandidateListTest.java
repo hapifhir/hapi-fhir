@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -49,7 +50,7 @@ public class CandidateListTest {
 			});
 		} else {
 			list.addAll(theStrategyEnum, candidatesToAdd);
-			assertThat(list.size()).isEqualTo(total);
+			assertEquals(total, list.size());
 		}
 	}
 
@@ -64,7 +65,7 @@ public class CandidateListTest {
 		size = populateCandidateList(theStrategy, size, candidateList);
 
 		// test
-		assertThat(candidateList.stream().count()).isEqualTo(size);
+		assertEquals(size, candidateList.stream().count());
 	}
 
 	private int populateCandidateList(CandidateStrategyEnum theStrategy, int theSize, CandidateList theCandidateList) {
@@ -100,7 +101,7 @@ public class CandidateListTest {
 		// tests
 		assertFalse(candidate.isEmpty());
 		assertTrue(candidate.exactlyOneMatch());
-		assertThat(candidate.size()).isEqualTo(1);
+		assertEquals(1, candidate.size());
 		assertNotNull(candidate.getFirstMatch());
 		assertNotNull(candidate.getOnlyMatch());
 	}
@@ -114,7 +115,7 @@ public class CandidateListTest {
 		int size = populateCandidateList(theStrategy, 10, candidateList);
 
 		// tests
-		assertThat(candidateList.size()).isEqualTo(size);
+		assertEquals(size, candidateList.size());
 		List<MatchedGoldenResourceCandidate> candidates = candidateList.getCandidates();
 		assertThat(candidates).hasSize(size);
 	}

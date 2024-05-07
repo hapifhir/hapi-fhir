@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
@@ -78,7 +79,7 @@ public class CustomTypeR4Test {
 		ourLog.info(encoded);
 		
 		pt = ourCtx.newXmlParser().parseResource(PatientWithExtensionWithTwoTypes.class, encoded);
-		assertThat(((DateTimeType) pt.getFoo()).getValueAsString()).isEqualTo("2011-01-01T00:00:00Z");
+		assertEquals("2011-01-01T00:00:00Z", ((DateTimeType) pt.getFoo()).getValueAsString());
 	}
 
 	@ResourceDef
@@ -106,7 +107,7 @@ public class CustomTypeR4Test {
 		ourLog.info(encoded);
 		
 		pt = ourCtx.newXmlParser().parseResource(PatientWithExtensionWithOneTypes.class, encoded);
-		assertThat(((DateTimeType) pt.getFoo()).getValueAsString()).isEqualTo("2011-01-01T00:00:00Z");
+		assertEquals("2011-01-01T00:00:00Z", ((DateTimeType) pt.getFoo()).getValueAsString());
 	}
 
 	/**
@@ -134,7 +135,7 @@ public class CustomTypeR4Test {
 		//@formatter:on
 
 		CustomResource364R4 parsedResource = parser.parseResource(CustomResource364R4.class, xml);
-		assertThat(((CustomResource364CustomDate) parsedResource.getBaseValues()).getDate().getValueAsString()).isEqualTo("2016-05-13");
+		assertEquals("2016-05-13", ((CustomResource364CustomDate) parsedResource.getBaseValues()).getDate().getValueAsString());
 	}
 
 	/**
@@ -161,7 +162,7 @@ public class CustomTypeR4Test {
 		//@formatter:on
 
 		CustomResource364R4 parsedResource = parser.parseResource(CustomResource364R4.class, xml);
-		assertThat(((StringType) parsedResource.getBaseValues()).getValueAsString()).isEqualTo("2016-05-13");
+		assertEquals("2016-05-13", ((StringType) parsedResource.getBaseValues()).getValueAsString());
 	}
 
 	@Test
@@ -177,14 +178,14 @@ public class CustomTypeR4Test {
 		assertThat(res0.getMeta().getProfile()).isEmpty();
 		List<org.hl7.fhir.r4.model.Extension> exts = res0.getExtensionsByUrl("http://example.com/Weight");
 		assertThat(exts).hasSize(1);
-		assertThat(((StringType) exts.get(0).getValue()).getValue()).isEqualTo("185 cm");
+		assertEquals("185 cm", ((StringType) exts.get(0).getValue()).getValue());
 
 		MyCustomPatient res1 = (MyCustomPatient) bundle.getEntry().get(1).getResource();
 		assertThat(res1.getMeta().getProfile()).hasSize(1);
-		assertThat(res1.getMeta().getProfile().get(0).getValue()).isEqualTo("http://example.com/foo");
+		assertEquals("http://example.com/foo", res1.getMeta().getProfile().get(0).getValue());
 		exts = res1.getExtensionsByUrl("http://example.com/Weight");
 		assertThat(exts).isEmpty();
-		assertThat(res1.getWeight().getValue()).isEqualTo("185 cm");
+		assertEquals("185 cm", res1.getWeight().getValue());
 	}
 
 	@Test
@@ -196,12 +197,12 @@ public class CustomTypeR4Test {
 
 		MyCustomPatient parsed = (MyCustomPatient) ctx.newXmlParser().parseResource(input);
 		assertThat(parsed.getMeta().getProfile()).hasSize(1);
-		assertThat(parsed.getMeta().getProfile().get(0).getValue()).isEqualTo("http://example.com/foo");
+		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
 
 		List<org.hl7.fhir.r4.model.Extension> exts = parsed.getExtensionsByUrl("http://example.com/Weight");
 		assertThat(exts).isEmpty();
 
-		assertThat(parsed.getWeight().getValue()).isEqualTo("185 cm");
+		assertEquals("185 cm", parsed.getWeight().getValue());
 	}
 
 	@Test
@@ -211,11 +212,11 @@ public class CustomTypeR4Test {
 		FhirContext ctx = FhirContext.forR4();
 		Patient parsed = (Patient) ctx.newXmlParser().parseResource(input);
 		assertThat(parsed.getMeta().getProfile()).hasSize(1);
-		assertThat(parsed.getMeta().getProfile().get(0).getValue()).isEqualTo("http://example.com/foo");
+		assertEquals("http://example.com/foo", parsed.getMeta().getProfile().get(0).getValue());
 
 		List<org.hl7.fhir.r4.model.Extension> exts = parsed.getExtensionsByUrl("http://example.com/Weight");
 		assertThat(exts).hasSize(1);
-		assertThat(((StringType) exts.get(0).getValue()).getValue()).isEqualTo("185 cm");
+		assertEquals("185 cm", ((StringType) exts.get(0).getValue()).getValue());
 	}
 
 	@Test
@@ -388,29 +389,29 @@ public class CustomTypeR4Test {
 		ctx.setDefaultTypeForProfile("http://fhir.something.com/StructureDefinition/our-medication", MyMedication.class);
 
 		MedicationRequest mo = ctx.newXmlParser().parseResource(MedicationRequest.class, input);
-		assertThat(mo.getContained().get(0).getClass()).isEqualTo(MyMedication.class);
+		assertEquals(MyMedication.class, mo.getContained().get(0).getClass());
 	}
 
 	@Test
 	public void testRegisterCustomResource_whenResourceListIsAlreadyGenerated() {
 		FhirContext newContext = new FhirContext(R4);
 		Set<String> resourceSet = newContext.getResourceTypes();
-		assertThat(resourceSet.contains("CustomResource")).isEqualTo(false);
+		assertEquals(false, resourceSet.contains("CustomResource"));
 		newContext.registerCustomType(CustomResource364R4.class);
 		newContext.getElementDefinition(CustomResource364R4.class);
 		resourceSet = newContext.getResourceTypes();
-		assertThat(resourceSet.contains("CustomResource")).isEqualTo(true);
+		assertEquals(true, resourceSet.contains("CustomResource"));
 	}
 
 	@Test
 	public void testRegisterCustomTypes_whenResourceListIsAlreadyGenerated(){
 		FhirContext newContext = new FhirContext(R4);
 		Set<String> resourceSet = newContext.getResourceTypes();
-		assertThat(resourceSet.contains("CustomResource")).isEqualTo(false);
+		assertEquals(false, resourceSet.contains("CustomResource"));
 		newContext.registerCustomTypes(Collections.singleton(CustomResource364R4.class));
 		newContext.getElementDefinition(CustomResource364R4.class);
 		resourceSet = newContext.getResourceTypes();
-		assertThat(resourceSet.contains("CustomResource")).isEqualTo(true);
+		assertEquals(true, resourceSet.contains("CustomResource"));
 	}
 
 	public static String createBundle(String... theResources) {

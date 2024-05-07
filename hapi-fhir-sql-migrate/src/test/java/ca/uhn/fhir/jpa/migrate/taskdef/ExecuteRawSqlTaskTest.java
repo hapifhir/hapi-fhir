@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.tasks.api.Builder;
@@ -201,7 +202,7 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 
 			fail("");
 		} catch (IllegalArgumentException exception) {
-			assertThat(exception.getMessage()).isEqualTo("HAPI-2455: Only SELECT statements (including CTEs) are allowed here.  Please check your SQL: [UPDATE SOMETABLE SET PID = 1]");
+			assertEquals("HAPI-2455: Only SELECT statements (including CTEs) are allowed here.  Please check your SQL: [UPDATE SOMETABLE SET PID = 1]", exception.getMessage());
 		}
 	}
 
@@ -232,7 +233,7 @@ public class ExecuteRawSqlTaskTest extends BaseTest {
 			getMigrator().migrate();
 			fail("");
 		} catch (IllegalArgumentException exception) {
-			assertThat(exception.getMessage()).isEqualTo("HAPI-2474: Failure due to query returning more than one result: [true, true] for SQL: [SELECT PID != 0 FROM SOMETABLE].");
+			assertEquals("HAPI-2474: Failure due to query returning more than one result: [true, true] for SQL: [SELECT PID != 0 FROM SOMETABLE].", exception.getMessage());
 		}
 	}
 }

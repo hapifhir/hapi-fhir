@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4b;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -85,12 +86,12 @@ public class FhirResourceDaoR4BSearchNoFtTest extends BaseJpaR4BTest {
 		SearchParameterMap map = SearchParameterMap
 			.newSynchronous("composition.patient.identifier", new TokenParam("http://foo", "bar"));
 		outcome = myBundleDao.search(map, mySrd);
-		assertThat(outcome.size()).isEqualTo(1);
+		assertEquals(1, outcome.size());
 
 		map = SearchParameterMap
 			.newSynchronous("composition", new ReferenceParam("patient.identifier", "http://foo|bar"));
 		outcome = myBundleDao.search(map, mySrd);
-		assertThat(outcome.size()).isEqualTo(1);
+		assertEquals(1, outcome.size());
 	}
 
 }

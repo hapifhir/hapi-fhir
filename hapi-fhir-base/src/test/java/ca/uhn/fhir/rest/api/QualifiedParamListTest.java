@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.api;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.util.TestUtil;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -14,15 +15,15 @@ public class QualifiedParamListTest {
 	public void testSplit1() {
 		List<String> actual = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null,"aaa");
 		assertThat(actual).hasSize(1);
-		assertThat(actual.get(0)).isEqualTo("aaa");
+		assertEquals("aaa", actual.get(0));
 	}
 	
 	@Test
 	public void testSplit2() {
 		List<String> actual = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null,"aaa,bbb");
 		assertThat(actual).hasSize(2);
-		assertThat(actual.get(0)).isEqualTo("aaa");
-		assertThat(actual.get(1)).isEqualTo("bbb");
+		assertEquals("aaa", actual.get(0));
+		assertEquals("bbb", actual.get(1));
 	}
 	
 	@Test
@@ -30,8 +31,8 @@ public class QualifiedParamListTest {
 		List<String> actual = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null,"aaa,b\\,bb");
 		System.out.println(actual);
 		assertThat(actual).hasSize(2);
-		assertThat(actual.get(0)).isEqualTo("aaa");
-		assertThat(actual.get(1)).isEqualTo("b,bb");
+		assertEquals("aaa", actual.get(0));
+		assertEquals("b,bb", actual.get(1));
 	}
 
 

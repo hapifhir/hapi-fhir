@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -44,14 +45,14 @@ public class RestfulServerUtilsTest {
 	@Test
 	public void testParsePreferReturn() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "return=representation");
-		assertThat(header.getReturn()).isEqualTo(PreferReturnEnum.REPRESENTATION);
+		assertEquals(PreferReturnEnum.REPRESENTATION, header.getReturn());
 		assertFalse(header.getRespondAsync());
 	}
 
 	@Test
 	public void testParsePreferReturnAndAsync() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "return=OperationOutcome; respond-async");
-		assertThat(header.getReturn()).isEqualTo(PreferReturnEnum.OPERATION_OUTCOME);
+		assertEquals(PreferReturnEnum.OPERATION_OUTCOME, header.getReturn());
 		assertTrue(header.getRespondAsync());
 	}
 
@@ -67,23 +68,23 @@ public class RestfulServerUtilsTest {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "handling=lenient");
 		assertNull(header.getReturn());
 		assertFalse(header.getRespondAsync());
-		assertThat(header.getHanding()).isEqualTo(PreferHandlingEnum.LENIENT);
+		assertEquals(PreferHandlingEnum.LENIENT, header.getHanding());
 	}
 
 	@Test
 	public void testParseHandlingLenientAndReturnRepresentation_CommaSeparatd() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "handling=lenient, return=representation");
-		assertThat(header.getReturn()).isEqualTo(PreferReturnEnum.REPRESENTATION);
+		assertEquals(PreferReturnEnum.REPRESENTATION, header.getReturn());
 		assertFalse(header.getRespondAsync());
-		assertThat(header.getHanding()).isEqualTo(PreferHandlingEnum.LENIENT);
+		assertEquals(PreferHandlingEnum.LENIENT, header.getHanding());
 	}
 
 	@Test
 	public void testParseHandlingLenientAndReturnRepresentation_SemicolonSeparatd() {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "handling=lenient; return=representation");
-		assertThat(header.getReturn()).isEqualTo(PreferReturnEnum.REPRESENTATION);
+		assertEquals(PreferReturnEnum.REPRESENTATION, header.getReturn());
 		assertFalse(header.getRespondAsync());
-		assertThat(header.getHanding()).isEqualTo(PreferHandlingEnum.LENIENT);
+		assertEquals(PreferHandlingEnum.LENIENT, header.getHanding());
 	}
 
 	@ParameterizedTest
@@ -123,8 +124,8 @@ public class RestfulServerUtilsTest {
 			}
 		} else {
 			RestfulServerUtils.DeleteCascadeDetails outcome = RestfulServerUtils.extractDeleteCascadeParameter(myRequestDetails);
-			assertThat(outcome.getMode()).isEqualTo(theExpectedMode);
-			assertThat(outcome.getMaxRounds()).isEqualTo(theExpectedMaxRounds);
+			assertEquals(theExpectedMode, outcome.getMode());
+			assertEquals(theExpectedMaxRounds, outcome.getMaxRounds());
 		}
 	}
 
@@ -174,7 +175,7 @@ public class RestfulServerUtilsTest {
 		//Then
 		String linkSelfWithoutGivenParameters = RestfulServerUtils.createLinkSelfWithoutGivenParameters(theServerBaseUrl, servletRequestDetails, null);
 		//Test
-		assertThat(linkSelfWithoutGivenParameters).isEqualTo(theExpectedUrl);
+		assertEquals(theExpectedUrl, linkSelfWithoutGivenParameters);
 	}
 	static Stream<Arguments> testParameters(){
 		return Stream.of(

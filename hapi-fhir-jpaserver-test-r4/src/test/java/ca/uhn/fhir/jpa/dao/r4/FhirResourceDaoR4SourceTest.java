@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -66,7 +67,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		IBundleProvider result = myPatientDao.search(params);
 		assertThat(toUnqualifiedVersionlessIdValues(result)).containsExactlyInAnyOrder(pt0id.getValue());
 		pt0 = (Patient) result.getResources(0, 1).get(0);
-		assertThat(pt0.getMeta().getSource()).isEqualTo("urn:source:0#a_request_id");
+		assertEquals("urn:source:0#a_request_id", pt0.getMeta().getSource());
 	}
 
 	@Test
@@ -98,7 +99,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		IIdType pt0id = myPatientDao.create(pt0, mySrd).getId().toUnqualifiedVersionless();
 
 		pt0 = myPatientDao.read(pt0id);
-		assertThat(pt0.getMeta().getSource()).isEqualTo("urn:source:0");
+		assertEquals("urn:source:0", pt0.getMeta().getSource());
 
 		pt0.getMeta().setSource(null);
 		pt0.setActive(false);
@@ -143,7 +144,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 		try {
 			myPatientDao.search(params);
 		} catch (InvalidRequestException e) {
-			assertThat(Msg.code(1216) + "The _source parameter is disabled on this server").isEqualTo(e.getMessage());
+			assertEquals(e.getMessage(), Msg.code(1216) + "The _source parameter is disabled on this server");
 		}
 	}
 
@@ -167,7 +168,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 			myCaptureQueriesListener.clear();
 			IBundleProvider result = myPatientDao.search(map);
 			myCaptureQueriesListener.logSelectQueries();
-			assertThat(result.size()).isEqualTo(0);
+			assertEquals(0, result.size());
 		}
 
 	}
@@ -183,7 +184,7 @@ public class FhirResourceDaoR4SourceTest extends BaseJpaR4Test {
 			myPatientDao.search(searchParameter);
 			fail("");
 		} catch (MethodNotAllowedException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(2417) + ":contains modifier is disabled on this server");
+			assertEquals(Msg.code(2417) + ":contains modifier is disabled on this server", e.getMessage());
 		}
 	}
 

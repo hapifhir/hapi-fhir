@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
@@ -28,7 +29,7 @@ public class SearchParameterMapTest extends BaseTest {
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("_has", new HasParam("Observation", "subject", "identifier", "urn:system|FOO"));
 		String criteria = params.toNormalizedQueryString(myContext);
-		assertThat("?_has:Observation:subject:identifier=urn%3Asystem%7CFOO").isEqualTo(criteria);
+		assertEquals(criteria, "?_has:Observation:subject:identifier=urn%3Asystem%7CFOO");
 	}
 
 	@Test
@@ -55,6 +56,6 @@ public class SearchParameterMapTest extends BaseTest {
 		String clonedQueryString = params2.toNormalizedQueryString(myContext);
 		ourLog.info("Cloned query string: {}", clonedQueryString);
 
-		assertThat(clonedQueryString).isEqualTo(originalQueryString);
+		assertEquals(originalQueryString, clonedQueryString);
 	}
 }

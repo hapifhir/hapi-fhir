@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -56,8 +57,8 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 		assertLinkCount(1);
 
 		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(myTargetPatient);
-		assertThat(links.get(0).getLinkSource()).isEqualTo(MdmLinkSourceEnum.MANUAL);
-		assertThat(links.get(0).getMatchResult()).isEqualTo(MdmMatchResultEnum.NO_MATCH);
+		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
+		assertEquals(MdmMatchResultEnum.NO_MATCH, links.get(0).getMatchResult());
 	}
 
 	@Test
@@ -98,8 +99,8 @@ public class MdmProviderNotDuplicateGoldenResourceR4Test extends BaseProviderR4T
 		assertLinkCount(1);
 
 		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(targetPatient);
-		assertThat(links.get(0).getLinkSource()).isEqualTo(MdmLinkSourceEnum.MANUAL);
-		assertThat(links.get(0).getMatchResult()).isEqualTo(MdmMatchResultEnum.NO_MATCH);
+		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
+		assertEquals(MdmMatchResultEnum.NO_MATCH, links.get(0).getMatchResult());
 	}
 
 	@Test

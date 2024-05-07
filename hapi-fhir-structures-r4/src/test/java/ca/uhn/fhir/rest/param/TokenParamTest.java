@@ -19,8 +19,8 @@ public class TokenParamTest {
 		TokenParam tokenParam1 = new TokenParam("foo", "bar");
 		TokenParam tokenParam2 = new TokenParam("foo", "bar");
 		TokenParam tokenParam3 = new TokenParam("foo", "baz");
-		assertThat(tokenParam1).isNotNull().isEqualTo(tokenParam1);
-		assertThat(tokenParam2).isEqualTo(tokenParam1);
+		assertNotNull(tokenParam1).isEqualTo(tokenParam1);
+		assertEquals(tokenParam1, tokenParam2);
 		assertThat(tokenParam3).isNotEqualTo(tokenParam1);
 		assertThat("").isNotEqualTo(tokenParam1);
 	}
@@ -28,7 +28,7 @@ public class TokenParamTest {
 	@Test
 	public void testHashCode() {
 		TokenParam tokenParam1 = new TokenParam("foo", "bar");
-		assertThat(tokenParam1.hashCode()).isEqualTo(4716638);
+		assertEquals(4716638, tokenParam1.hashCode());
 	}
 
 
@@ -37,16 +37,16 @@ public class TokenParamTest {
 		assertFalse(new TokenParam("foo", "bar").isEmpty());
 		assertTrue(new TokenParam("", "").isEmpty());
 		assertTrue(new TokenParam().isEmpty());
-		assertThat(new TokenParam().getValueNotNull()).isEqualTo("");
+		assertEquals("", new TokenParam().getValueNotNull());
 	}
 
 	@Test
 	public void testOfType() {
 		TokenParam param = new TokenParam();
 		param.setValueAsQueryToken(ourCtx, "identifier", Constants.PARAMQUALIFIER_TOKEN_OF_TYPE, "http://type-system|type-value|identifier-value");
-		assertThat(param.getModifier()).isEqualTo(TokenParamModifier.OF_TYPE);
-		assertThat(param.getSystem()).isEqualTo("http://type-system");
-		assertThat(param.getValue()).isEqualTo("type-value|identifier-value");
+		assertEquals(TokenParamModifier.OF_TYPE, param.getModifier());
+		assertEquals("http://type-system", param.getSystem());
+		assertEquals("type-value|identifier-value", param.getValue());
 	}
 
 	@Test

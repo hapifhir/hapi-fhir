@@ -131,7 +131,7 @@ public class TermCodeSystemVersionDeleteJobTest extends BaseJpaR4Test {
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(request);
 
 		JobInstance instance = myBatchJobHelper.awaitJobCompletion(response);
-		assertThat(instance.getStatus().name()).isEqualTo("COMPLETED");
+		assertEquals("COMPLETED", instance.getStatus().name());
 
 		runInTransaction(() -> {
 			assertEquals(1, myTermCodeSystemDao.count());

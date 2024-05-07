@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Extension;
@@ -20,7 +21,7 @@ class ExtensionUtilTest {
 		parent.addExtension("child2", new BooleanType(false));
 		parent.addExtension("child3", new Quantity(123));
 
-		assertThat(ExtensionUtil.extractChildPrimitiveExtensionValue(parent, "child2")).isEqualTo("false");
+		assertEquals("false", ExtensionUtil.extractChildPrimitiveExtensionValue(parent, "child2"));
 		assertNull(ExtensionUtil.extractChildPrimitiveExtensionValue(parent, "unknown"));
 		assertNull(ExtensionUtil.extractChildPrimitiveExtensionValue(parent, "child3"));
 

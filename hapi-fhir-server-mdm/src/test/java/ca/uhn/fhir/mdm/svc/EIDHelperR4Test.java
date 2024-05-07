@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
@@ -63,10 +64,10 @@ public class EIDHelperR4Test extends BaseR4Test {
 
 		List<CanonicalEID> externalEid = myEidHelper.getHapiEid(patient);
 
-		assertThat(externalEid.isEmpty()).isEqualTo(false);
-		assertThat(externalEid.get(0).getValue()).isEqualTo("simpletest");
-		assertThat(externalEid.get(0).getSystem()).isEqualTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM);
-		assertThat(externalEid.get(0).getUse()).isEqualTo("secondary");
+		assertEquals(false, externalEid.isEmpty());
+		assertEquals("simpletest", externalEid.get(0).getValue());
+		assertEquals(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM, externalEid.get(0).getSystem());
+		assertEquals("secondary", externalEid.get(0).getUse());
 	}
 
 	@Test
@@ -80,9 +81,9 @@ public class EIDHelperR4Test extends BaseR4Test {
 
 		List<CanonicalEID> externalEid = myEidHelper.getExternalEid(patient);
 
-		assertThat(externalEid.isEmpty()).isEqualTo(false);
-		assertThat(externalEid.get(0).getValue()).isEqualTo(uniqueID);
-		assertThat(externalEid.get(0).getSystem()).isEqualTo(EXTERNAL_ID_SYSTEM_FOR_TEST);
+		assertEquals(false, externalEid.isEmpty());
+		assertEquals(uniqueID, externalEid.get(0).getValue());
+		assertEquals(EXTERNAL_ID_SYSTEM_FOR_TEST, externalEid.get(0).getSystem());
 	}
 
 	@Test
@@ -90,7 +91,7 @@ public class EIDHelperR4Test extends BaseR4Test {
 
 		CanonicalEID internalEid = myEidHelper.createHapiEid();
 
-		assertThat(internalEid.getSystem()).isEqualTo(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM);
+		assertEquals(HAPI_ENTERPRISE_IDENTIFIER_SYSTEM, internalEid.getSystem());
 		assertThat(internalEid.getValue()).hasSize(36);
 		assertNull(internalEid.getUse());
 	}

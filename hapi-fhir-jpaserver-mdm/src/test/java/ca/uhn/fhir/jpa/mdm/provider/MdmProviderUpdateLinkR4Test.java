@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -52,10 +53,10 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(2);
 
 		List<MdmLink> links = (List<MdmLink>) getPatientLinks();
-		assertThat(links.get(0).getLinkSource()).isEqualTo(MdmLinkSourceEnum.MANUAL);
-		assertThat(links.get(0).getMatchResult()).isEqualTo(MdmMatchResultEnum.NO_MATCH);
-		assertThat(links.get(1).getLinkSource()).isEqualTo(MdmLinkSourceEnum.AUTO);
-		assertThat(links.get(1).getMatchResult()).isEqualTo(MdmMatchResultEnum.MATCH);
+		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
+		assertEquals(MdmMatchResultEnum.NO_MATCH, links.get(0).getMatchResult());
+		assertEquals(MdmLinkSourceEnum.AUTO, links.get(1).getLinkSource());
+		assertEquals(MdmMatchResultEnum.MATCH, links.get(1).getMatchResult());
 		assertThat(links.get(1).getGoldenResourcePid()).isNotEqualTo(links.get(0).getGoldenResourcePid());
 	}
 
@@ -66,8 +67,8 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 		assertLinkCount(1);
 
 		List<MdmLink> links = (List<MdmLink>) getPatientLinks();
-		assertThat(links.get(0).getLinkSource()).isEqualTo(MdmLinkSourceEnum.MANUAL);
-		assertThat(links.get(0).getMatchResult()).isEqualTo(MdmMatchResultEnum.MATCH);
+		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
+		assertEquals(MdmMatchResultEnum.MATCH, links.get(0).getMatchResult());
 	}
 
 	@Test
@@ -83,16 +84,16 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 		MdmLink link = (MdmLink) myMdmLinkDaoSvc.findMdmLinkBySource(patient).get();
 		link.setMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH);
 		saveLink(link);
-		assertThat(link.getLinkSource()).isEqualTo(MdmLinkSourceEnum.AUTO);
+		assertEquals(MdmLinkSourceEnum.AUTO, link.getLinkSource());
 		assertLinkCount(2);
 		myMdmProvider.updateLink(sourcePatientId, patientId, MATCH_RESULT, myRequestDetails);
 		assertLinkCount(2);
 
 		List<MdmLink> links = (List<MdmLink>) myMdmLinkDaoSvc.findMdmLinksBySourceResource(patient);
-		assertThat(links.get(0).getLinkSource()).isEqualTo(MdmLinkSourceEnum.MANUAL);
-		assertThat(links.get(0).getMatchResult()).isEqualTo(MdmMatchResultEnum.MATCH);
+		assertEquals(MdmLinkSourceEnum.MANUAL, links.get(0).getLinkSource());
+		assertEquals(MdmMatchResultEnum.MATCH, links.get(0).getMatchResult());
 		assertNotNull(links.get(0).getPartitionId());
-		assertThat(links.get(0).getPartitionId().getPartitionId()).isEqualTo(1);
+		assertEquals(1, links.get(0).getPartitionId().getPartitionId());
 	}
 
 	@Test
@@ -169,7 +170,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.updateLink(mySourcePatientId, myPatientId, POSSIBLE_MATCH_RESULT, myRequestDetails);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1495) + "$mdm-update-link illegal matchResult value 'POSSIBLE_MATCH'.  Must be NO_MATCH or MATCH");
+			assertEquals(Msg.code(1495) + "$mdm-update-link illegal matchResult value 'POSSIBLE_MATCH'.  Must be NO_MATCH or MATCH", e.getMessage());
 		}
 	}
 
@@ -179,7 +180,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.updateLink(mySourcePatientId, myPatientId, POSSIBLE_DUPLICATE_RESULT, myRequestDetails);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1495) + "$mdm-update-link illegal matchResult value 'POSSIBLE_DUPLICATE'.  Must be NO_MATCH or MATCH");
+			assertEquals(Msg.code(1495) + "$mdm-update-link illegal matchResult value 'POSSIBLE_DUPLICATE'.  Must be NO_MATCH or MATCH", e.getMessage());
 		}
 	}
 
@@ -221,7 +222,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			fail("");
 		} catch (InvalidRequestException e) {
 			String expectedMessage = myMessageHelper.getMessageForFailedGoldenResourceLoad("goldenResourceId", patient.getIdElement().getValue());
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1502) + expectedMessage);
+			assertEquals(Msg.code(1502) + expectedMessage, e.getMessage());
 		}
 	}
 
@@ -234,7 +235,7 @@ public class MdmProviderUpdateLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.updateLink(mySourcePatientId, new StringType(patient.getIdElement().getValue()), NO_MATCH_RESULT, myRequestDetails);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(744) + myMessageHelper.getMessageForUnsupportedSourceResource());
+			assertEquals(Msg.code(744) + myMessageHelper.getMessageForUnsupportedSourceResource(), e.getMessage());
 		}
 	}
 }

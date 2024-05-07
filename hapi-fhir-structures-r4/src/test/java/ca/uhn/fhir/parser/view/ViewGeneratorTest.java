@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser.view;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.TestUtil;
@@ -39,31 +40,31 @@ public class ViewGeneratorTest {
 		IParser parser = ourCtx.newXmlParser();
 		Patient nonExt = parser.parseResource(Patient.class, enc);
 
-		assertThat(nonExt.getClass()).isEqualTo(Patient.class);
-		assertThat(nonExt.getIdentifier().get(0).getSystem()).isEqualTo("urn:sys");
-		assertThat(nonExt.getIdentifier().get(0).getValue()).isEqualTo("id1");
-		assertThat(nonExt.getIdentifier().get(1).getSystem()).isEqualTo("urn:sys");
-		assertThat(nonExt.getIdentifier().get(1).getValue()).isEqualTo("id2");
+		assertEquals(Patient.class, nonExt.getClass());
+		assertEquals("urn:sys", nonExt.getIdentifier().get(0).getSystem());
+		assertEquals("id1", nonExt.getIdentifier().get(0).getValue());
+		assertEquals("urn:sys", nonExt.getIdentifier().get(1).getSystem());
+		assertEquals("id2", nonExt.getIdentifier().get(1).getValue());
 
 		List<Extension> ext = nonExt.getExtensionsByUrl("urn:ext");
 		assertThat(ext).hasSize(1);
-		assertThat(ext.get(0).getUrl()).isEqualTo("urn:ext");
-		assertThat(ext.get(0).getValueAsPrimitive().getClass()).isEqualTo(IntegerType.class);
-		assertThat(ext.get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("100");
+		assertEquals("urn:ext", ext.get(0).getUrl());
+		assertEquals(IntegerType.class, ext.get(0).getValueAsPrimitive().getClass());
+		assertEquals("100", ext.get(0).getValueAsPrimitive().getValueAsString());
 
 		List<Extension> modExt = nonExt.getExtensionsByUrl("urn:modExt");
 		assertThat(modExt).hasSize(1);
-		assertThat(modExt.get(0).getUrl()).isEqualTo("urn:modExt");
-		assertThat(modExt.get(0).getValueAsPrimitive().getClass()).isEqualTo(IntegerType.class);
-		assertThat(modExt.get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("200");
+		assertEquals("urn:modExt", modExt.get(0).getUrl());
+		assertEquals(IntegerType.class, modExt.get(0).getValueAsPrimitive().getClass());
+		assertEquals("200", modExt.get(0).getValueAsPrimitive().getValueAsString());
 
 		ExtPatient va = ourCtx.newViewGenerator().newView(nonExt, ExtPatient.class);
-		assertThat(va.getIdentifier().get(0).getSystem()).isEqualTo("urn:sys");
-		assertThat(va.getIdentifier().get(0).getValue()).isEqualTo("id1");
-		assertThat(va.getIdentifier().get(1).getSystem()).isEqualTo("urn:sys");
-		assertThat(va.getIdentifier().get(1).getValue()).isEqualTo("id2");
-		assertThat(va.getExt().getValue().intValue()).isEqualTo(100);
-		assertThat(va.getModExt().getValue().intValue()).isEqualTo(200);
+		assertEquals("urn:sys", va.getIdentifier().get(0).getSystem());
+		assertEquals("id1", va.getIdentifier().get(0).getValue());
+		assertEquals("urn:sys", va.getIdentifier().get(1).getSystem());
+		assertEquals("id2", va.getIdentifier().get(1).getValue());
+		assertEquals(100, va.getExt().getValue().intValue());
+		assertEquals(200, va.getModExt().getValue().intValue());
 
 		assertThat(va.getExtension()).isEmpty();
 	}
@@ -84,31 +85,31 @@ public class ViewGeneratorTest {
 		IParser parser = ourCtx.newJsonParser();
 		Patient nonExt = parser.parseResource(Patient.class, enc);
 
-		assertThat(nonExt.getClass()).isEqualTo(Patient.class);
-		assertThat(nonExt.getIdentifier().get(0).getSystem()).isEqualTo("urn:sys");
-		assertThat(nonExt.getIdentifier().get(0).getValue()).isEqualTo("id1");
-		assertThat(nonExt.getIdentifier().get(1).getSystem()).isEqualTo("urn:sys");
-		assertThat(nonExt.getIdentifier().get(1).getValue()).isEqualTo("id2");
+		assertEquals(Patient.class, nonExt.getClass());
+		assertEquals("urn:sys", nonExt.getIdentifier().get(0).getSystem());
+		assertEquals("id1", nonExt.getIdentifier().get(0).getValue());
+		assertEquals("urn:sys", nonExt.getIdentifier().get(1).getSystem());
+		assertEquals("id2", nonExt.getIdentifier().get(1).getValue());
 
 		List<Extension> ext = nonExt.getExtensionsByUrl("urn:ext");
 		assertThat(ext).hasSize(1);
-		assertThat(ext.get(0).getUrl()).isEqualTo("urn:ext");
-		assertThat(ext.get(0).getValueAsPrimitive().getClass()).isEqualTo(IntegerType.class);
-		assertThat(ext.get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("100");
+		assertEquals("urn:ext", ext.get(0).getUrl());
+		assertEquals(IntegerType.class, ext.get(0).getValueAsPrimitive().getClass());
+		assertEquals("100", ext.get(0).getValueAsPrimitive().getValueAsString());
 
 		List<Extension> modExt = nonExt.getExtensionsByUrl("urn:modExt");
 		assertThat(modExt).hasSize(1);
-		assertThat(modExt.get(0).getUrl()).isEqualTo("urn:modExt");
-		assertThat(modExt.get(0).getValueAsPrimitive().getClass()).isEqualTo(IntegerType.class);
-		assertThat(modExt.get(0).getValueAsPrimitive().getValueAsString()).isEqualTo("200");
+		assertEquals("urn:modExt", modExt.get(0).getUrl());
+		assertEquals(IntegerType.class, modExt.get(0).getValueAsPrimitive().getClass());
+		assertEquals("200", modExt.get(0).getValueAsPrimitive().getValueAsString());
 
 		ExtPatient va = ourCtx.newViewGenerator().newView(nonExt, ExtPatient.class);
-		assertThat(va.getIdentifier().get(0).getSystem()).isEqualTo("urn:sys");
-		assertThat(va.getIdentifier().get(0).getValue()).isEqualTo("id1");
-		assertThat(va.getIdentifier().get(1).getSystem()).isEqualTo("urn:sys");
-		assertThat(va.getIdentifier().get(1).getValue()).isEqualTo("id2");
-		assertThat(va.getExt().getValue().intValue()).isEqualTo(100);
-		assertThat(va.getModExt().getValue().intValue()).isEqualTo(200);
+		assertEquals("urn:sys", va.getIdentifier().get(0).getSystem());
+		assertEquals("id1", va.getIdentifier().get(0).getValue());
+		assertEquals("urn:sys", va.getIdentifier().get(1).getSystem());
+		assertEquals("id2", va.getIdentifier().get(1).getValue());
+		assertEquals(100, va.getExt().getValue().intValue());
+		assertEquals(200, va.getModExt().getValue().intValue());
 
 		assertThat(va.getExtension()).isEmpty();
 	}

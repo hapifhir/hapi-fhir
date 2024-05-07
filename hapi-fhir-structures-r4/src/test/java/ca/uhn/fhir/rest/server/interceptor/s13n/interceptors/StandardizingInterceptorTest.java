@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.s13n.interceptors;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,8 +59,8 @@ class StandardizingInterceptorTest {
 
 		myInterceptor.resourcePreUpdate(myRequestDetails, null, p);
 
-		assertThat(p.getName().get(0).getNameAsSingleString()).isEqualTo("John MacDouglas1");
-		assertThat(p.getName().get(1).getNameAsSingleString()).isEqualTo("Jim O'Brian");
+		assertEquals("John MacDouglas1", p.getName().get(0).getNameAsSingleString());
+		assertEquals("Jim O'Brian", p.getName().get(1).getNameAsSingleString());
 	}
 
 	@Test
@@ -89,7 +90,7 @@ class StandardizingInterceptorTest {
 
 		myInterceptor.resourcePreUpdate(myRequestDetails, null, p);
 
-		assertThat(p.getName().get(0).getNameAsSingleString()).isEqualTo("name non'normalized");
+		assertEquals("name non'normalized", p.getName().get(0).getNameAsSingleString());
 	}
 
 	@Test
@@ -101,6 +102,6 @@ class StandardizingInterceptorTest {
 		myInterceptor.resourcePreUpdate(myRequestDetails, null, p);
 
 		assertThat(p.getTelecom().get(0).getValue()).as("Expected email to remain the same").isEqualTo(" Email@email.com");
-		assertThat(p.getTelecom().get(1).getValue()).isEqualTo("123-456-7890");
+		assertEquals("123-456-7890", p.getTelecom().get(1).getValue());
 	}
 }

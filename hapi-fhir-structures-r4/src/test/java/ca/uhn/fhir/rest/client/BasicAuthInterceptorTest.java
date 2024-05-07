@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
@@ -77,8 +78,8 @@ public class BasicAuthInterceptorTest {
 
 		assertThat(capt.getAllValues()).hasSize(1);
 		HttpUriRequest req = capt.getAllValues().get(0);
-		assertThat(req.getHeaders("Authorization").length).isEqualTo(1);
-		assertThat(req.getFirstHeader("Authorization").getValue()).isEqualTo("Basic bXl1c2VyOm15cGFzcw==");
+		assertEquals(1, req.getHeaders("Authorization").length);
+		assertEquals("Basic bXl1c2VyOm15cGFzcw==", req.getFirstHeader("Authorization").getValue());
 
 		// Create a second client and make sure we get the same results
 
@@ -89,8 +90,8 @@ public class BasicAuthInterceptorTest {
 
 		assertThat(capt.getAllValues()).hasSize(2);
 		req = capt.getAllValues().get(1);
-		assertThat(req.getHeaders("Authorization").length).isEqualTo(1);
-		assertThat(req.getFirstHeader("Authorization").getValue()).isEqualTo("Basic bXl1c2VyOm15cGFzcw==");
+		assertEquals(1, req.getHeaders("Authorization").length);
+		assertEquals("Basic bXl1c2VyOm15cGFzcw==", req.getFirstHeader("Authorization").getValue());
 
 	}
 

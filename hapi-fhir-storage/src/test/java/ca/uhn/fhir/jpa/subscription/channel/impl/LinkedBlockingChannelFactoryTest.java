@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.channel.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelConsumerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.ChannelProducerSettings;
 import ca.uhn.fhir.jpa.subscription.channel.api.IChannelProducer;
@@ -68,7 +69,7 @@ class LinkedBlockingChannelFactoryTest {
 
 		// and we should now have received 1 message
 		assertThat(myReceivedPayloads).hasSize(1);
-		assertThat(myReceivedPayloads.get(0)).isEqualTo(TEST_PAYLOAD);
+		assertEquals(TEST_PAYLOAD, myReceivedPayloads.get(0));
 
 		// Unblock the second latch so message handling is allowed to proceed
 		finishProcessingMessage(1);
@@ -78,7 +79,7 @@ class LinkedBlockingChannelFactoryTest {
 
 		// and we should now have received 2 messages
 		assertThat(myReceivedPayloads).hasSize(2);
-		assertThat(myReceivedPayloads.get(1)).isEqualTo(TEST_PAYLOAD);
+		assertEquals(TEST_PAYLOAD, myReceivedPayloads.get(1));
 	}
 
 	@SuppressWarnings("ResultOfMethodCallIgnored")

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -73,11 +74,11 @@ public class 	BinaryServerR4Test {
 		get.addHeader("Content-Type", "application/foo");
 		CloseableHttpResponse status = ourClient.execute(get);
 		try {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(status.getEntity().getContentType().getValue()).isEqualTo("application/foo");
-			assertThat(status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue()).isEqualTo("Patient/1");
-			assertThat(status.getFirstHeader(Constants.HEADER_ETAG).getValue()).isEqualTo("W/\"222\"");
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(ourServer.getBaseUrl() + "/Binary/A/_history/222");
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("application/foo", status.getEntity().getContentType().getValue());
+			assertEquals("Patient/1", status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue());
+			assertEquals("W/\"222\"", status.getFirstHeader(Constants.HEADER_ETAG).getValue());
+			assertEquals(ourServer.getBaseUrl() + "/Binary/A/_history/222", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 			assertNull(status.getFirstHeader(Constants.HEADER_LOCATION));
 
 			byte[] content = IOUtils.toByteArray(status.getEntity().getContent());
@@ -102,15 +103,15 @@ public class 	BinaryServerR4Test {
 		get.addHeader("Accept", Constants.CT_FHIR_JSON);
 		CloseableHttpResponse status = ourClient.execute(get);
 		try {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(status.getEntity().getContentType().getValue()).isEqualTo("application/json+fhir;charset=utf-8");
-			assertThat(status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue()).isEqualTo("Patient/1");
-			assertThat(status.getFirstHeader(Constants.HEADER_ETAG).getValue()).isEqualTo("W/\"222\"");
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(ourServer.getBaseUrl() + "/Binary/A/_history/222");
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("application/json+fhir;charset=utf-8", status.getEntity().getContentType().getValue());
+			assertEquals("Patient/1", status.getFirstHeader(Constants.HEADER_X_SECURITY_CONTEXT).getValue());
+			assertEquals("W/\"222\"", status.getFirstHeader(Constants.HEADER_ETAG).getValue());
+			assertEquals(ourServer.getBaseUrl() + "/Binary/A/_history/222", status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 			assertNull(status.getFirstHeader(Constants.HEADER_LOCATION));
 
 			String content = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(content).isEqualTo("{\"resourceType\":\"Binary\",\"id\":\"A\",\"meta\":{\"versionId\":\"222\"},\"contentType\":\"application/foo\",\"securityContext\":{\"reference\":\"Patient/1\"},\"data\":\"AAECAwQ=\"}");
+			assertEquals("{\"resourceType\":\"Binary\",\"id\":\"A\",\"meta\":{\"versionId\":\"222\"},\"contentType\":\"application/foo\",\"securityContext\":{\"reference\":\"Patient/1\"},\"data\":\"AAECAwQ=\"}", content);
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -125,8 +126,8 @@ public class 	BinaryServerR4Test {
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
 			assertNull(ourLastId);
-			assertThat(ourLastBinary.getContentType()).isEqualTo("application/foo");
-			assertThat(ourLastBinary.getSecurityContext().getReference()).isEqualTo("Encounter/2");
+			assertEquals("application/foo", ourLastBinary.getContentType());
+			assertEquals("Encounter/2", ourLastBinary.getSecurityContext().getReference());
 			assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 			assertThat(ourLastBinaryBytes).containsExactly(new byte[]{0, 1, 2, 3, 4});
 		} finally {
@@ -142,7 +143,7 @@ public class 	BinaryServerR4Test {
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
 			assertNull(ourLastId);
-			assertThat(ourLastBinary.getContentType()).isEqualTo("application/foo");
+			assertEquals("application/foo", ourLastBinary.getContentType());
 			assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 			assertThat(ourLastBinaryBytes).containsExactly(new byte[]{0, 1, 2, 3, 4});
 		} finally {
@@ -166,7 +167,7 @@ public class 	BinaryServerR4Test {
 		post.addHeader("Content-Type", Constants.CT_FHIR_JSON);
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
-			assertThat(ourLastBinary.getContentType()).isEqualTo("application/foo");
+			assertEquals("application/foo", ourLastBinary.getContentType());
 			assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 		} finally {
 			IOUtils.closeQuietly(status);
@@ -189,9 +190,9 @@ public class 	BinaryServerR4Test {
 		post.addHeader("Content-Type", Constants.CT_FHIR_JSON);
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
-			assertThat(ourLastBinary.getContentType()).isEqualTo("application/xml+fhir");
+			assertEquals("application/xml+fhir", ourLastBinary.getContentType());
 			assertThat(ourLastBinary.getContent()).containsExactly(b.getContent());
-			assertThat(ourLastBinaryString).isEqualTo(encoded);
+			assertEquals(encoded, ourLastBinaryString);
 			assertThat(ourLastBinaryBytes).containsExactly(encoded.getBytes("UTF-8"));
 		} finally {
 			IOUtils.closeQuietly(status);
@@ -219,10 +220,10 @@ public class 	BinaryServerR4Test {
 		post.addHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Encounter/2");
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
-			assertThat(ourLastId.getValue()).isEqualTo("Binary/A");
-			assertThat(ourLastBinary.getId()).isEqualTo("Binary/A");
-			assertThat(ourLastBinary.getContentType()).isEqualTo("application/foo");
-			assertThat(ourLastBinary.getSecurityContext().getReference()).isEqualTo("Encounter/2");
+			assertEquals("Binary/A", ourLastId.getValue());
+			assertEquals("Binary/A", ourLastBinary.getId());
+			assertEquals("application/foo", ourLastBinary.getContentType());
+			assertEquals("Encounter/2", ourLastBinary.getSecurityContext().getReference());
 			assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 			assertThat(ourLastBinaryBytes).containsExactly(new byte[]{0, 1, 2, 3, 4});
 		} finally {

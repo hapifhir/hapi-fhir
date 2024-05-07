@@ -68,7 +68,7 @@ public class DatabaseBinaryContentStorageSvcImplTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 
 		assertThat(outcome.getBinaryContentId()).matches("^[a-zA-Z0-9]{100}$");
-		assertThat(outcome.getBytes()).isEqualTo(16);
+		assertEquals(16, outcome.getBytes());
 
 		/*
 		 * Read back the details
@@ -111,7 +111,7 @@ public class DatabaseBinaryContentStorageSvcImplTest extends BaseJpaR4Test {
 		String contentType = "image/png";
 		IdType resourceId = new IdType("Binary/123");
 		StoredDetails outcome = mySvc.storeBinaryContent(resourceId, "ABCDEFG", contentType, inputStream, new ServletRequestDetails());
-		assertThat(outcome.getBinaryContentId()).isEqualTo("ABCDEFG");
+		assertEquals("ABCDEFG", outcome.getBinaryContentId());
 
 		myCaptureQueriesListener.logAllQueriesForCurrentThread();
 
@@ -121,7 +121,7 @@ public class DatabaseBinaryContentStorageSvcImplTest extends BaseJpaR4Test {
 
 		myCaptureQueriesListener.clear();
 
-		assertThat(outcome.getBytes()).isEqualTo(16);
+		assertEquals(16, outcome.getBytes());
 
 		/*
 		 * Read back the details
@@ -173,7 +173,7 @@ public class DatabaseBinaryContentStorageSvcImplTest extends BaseJpaR4Test {
 
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();
 		assertFalse(mySvc.writeBinaryContent(resourceId, outcome.getBinaryContentId(), capture));
-		assertThat(capture.size()).isEqualTo(0);
+		assertEquals(0, capture.size());
 
 	}
 
@@ -191,12 +191,12 @@ public class DatabaseBinaryContentStorageSvcImplTest extends BaseJpaR4Test {
 		// Right ID
 		ByteArrayOutputStream capture = new ByteArrayOutputStream();
 		assertTrue(mySvc.writeBinaryContent(resourceId, outcome.getBinaryContentId(), capture));
-		assertThat(capture.size()).isEqualTo(16);
+		assertEquals(16, capture.size());
 
 		// Wrong ID
 		capture = new ByteArrayOutputStream();
 		assertFalse(mySvc.writeBinaryContent(new IdType("Patient/9999"), outcome.getBinaryContentId(), capture));
-		assertThat(capture.size()).isEqualTo(0);
+		assertEquals(0, capture.size());
 
 	}
 

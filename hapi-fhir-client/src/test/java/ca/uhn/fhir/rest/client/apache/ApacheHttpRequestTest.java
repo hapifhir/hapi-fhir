@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client.apache;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.apache.http.client.methods.HttpPost;
@@ -23,7 +24,7 @@ public class ApacheHttpRequestTest {
 
 		String result = new ApacheHttpRequest(null, apacheRequest).getRequestBodyFromStream();
 
-		assertThat(result).isEqualTo(ENTITY_CONTENT);
+		assertEquals(ENTITY_CONTENT, result);
 	}
 
 	@Test
@@ -34,6 +35,6 @@ public class ApacheHttpRequestTest {
 
 		String result = new ApacheHttpRequest(null, apacheRequest).getRequestBodyFromStream();
 
-		assertThat(result).isEqualTo(ENTITY_CONTENT);
+		assertEquals(ENTITY_CONTENT, result);
 	}
 }

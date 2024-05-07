@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.bulk.imprt.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
@@ -169,10 +170,10 @@ public class BulkDataImportR4Test extends BaseJpaR4Test implements ITestDataBuil
 
 		JobInstance instance = myBatch2JobHelper.awaitJobCompletion(activateJobOutcome.jobId, 60);
 		assertNotNull(instance);
-		assertThat(instance.getStatus()).isEqualTo(StatusEnum.COMPLETED);
+		assertEquals(StatusEnum.COMPLETED, instance.getStatus());
 
 		IBundleProvider searchResults = myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd);
-		assertThat(searchResults.sizeOrThrowNpe()).isEqualTo(transactionsPerFile * fileCount);
+		assertEquals(transactionsPerFile * fileCount, searchResults.sizeOrThrowNpe());
 	}
 
 	@Order(1)

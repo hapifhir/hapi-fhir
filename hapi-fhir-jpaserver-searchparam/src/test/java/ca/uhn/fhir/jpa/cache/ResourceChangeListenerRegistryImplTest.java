@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.cache;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -89,7 +90,7 @@ class ResourceChangeListenerRegistryImplTest {
 			myResourceChangeListenerRegistry.registerResourceResourceChangeListener("Foo", ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
 			fail("");
 		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1684) + "Unknown resource name \"Foo\" (this name is not known in FHIR version \"R4\")");
+			assertEquals(Msg.code(1684) + "Unknown resource name \"Foo\" (this name is not known in FHIR version \"R4\")", e.getMessage());
 		}
 	}
 
@@ -100,7 +101,7 @@ class ResourceChangeListenerRegistryImplTest {
 			myResourceChangeListenerRegistry.registerResourceResourceChangeListener(PATIENT_RESOURCE_NAME, ourMap, myTestListener, TEST_REFRESH_INTERVAL_MS);
 			fail("");
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(482) + "SearchParameterMap SearchParameterMap[] cannot be evaluated in-memory: TEST REASON.  Only search parameter maps that can be evaluated in-memory may be registered.");
+			assertEquals(Msg.code(482) + "SearchParameterMap SearchParameterMap[] cannot be evaluated in-memory: TEST REASON.  Only search parameter maps that can be evaluated in-memory may be registered.", e.getMessage());
 		}
 	}
 
@@ -122,11 +123,11 @@ class ResourceChangeListenerRegistryImplTest {
 
 		when(mySearchParamMatcher.match(any(), any())).thenReturn(InMemoryMatchResult.successfulMatch());
 
-		assertThat(myResourceChangeListenerRegistry.size()).isEqualTo(2);
+		assertEquals(2, myResourceChangeListenerRegistry.size());
 
 		IResourceChangeListener listener2 = mock(IResourceChangeListener.class);
 		myResourceChangeListenerRegistry.registerResourceResourceChangeListener(PATIENT_RESOURCE_NAME, ourMap, listener2, TEST_REFRESH_INTERVAL_MS);
-		assertThat(myResourceChangeListenerRegistry.size()).isEqualTo(3);
+		assertEquals(3, myResourceChangeListenerRegistry.size());
 
 		List<ResourceChangeListenerCache> entries = Lists.newArrayList(myResourceChangeListenerRegistry.iterator());
 		assertThat(entries).hasSize(3);
@@ -142,11 +143,11 @@ class ResourceChangeListenerRegistryImplTest {
 		assertTrue(ourMap != firstcache.getSearchParameterMap());
 
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(listener1);
-		assertThat(myResourceChangeListenerRegistry.size()).isEqualTo(1);
+		assertEquals(1, myResourceChangeListenerRegistry.size());
 		ResourceChangeListenerCache cache = myResourceChangeListenerRegistry.iterator().next();
-		assertThat(cache.getResourceName()).isEqualTo(PATIENT_RESOURCE_NAME);
-		assertThat(cache.getResourceChangeListener()).isEqualTo(listener2);
+		assertEquals(PATIENT_RESOURCE_NAME, cache.getResourceName());
+		assertEquals(listener2, cache.getResourceChangeListener());
 		myResourceChangeListenerRegistry.unregisterResourceResourceChangeListener(listener2);
-		assertThat(myResourceChangeListenerRegistry.size()).isEqualTo(0);
+		assertEquals(0, myResourceChangeListenerRegistry.size());
 	}
 }

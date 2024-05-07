@@ -1,5 +1,6 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -24,7 +25,7 @@ class PrefetchTemplateUtilTest {
 		context.put("patientId", TEST_PATIENT_ID);
 		context.put("userId", TEST_USER_ID);
 		String result = PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forR4());
-		assertThat(result).isEqualTo(TEST_USER_ID + " a " + TEST_PATIENT_ID + " b " + TEST_PATIENT_ID);
+		assertEquals(TEST_USER_ID + " a " + TEST_PATIENT_ID + " b " + TEST_PATIENT_ID, result);
 	}
 
 	@Test
@@ -36,7 +37,7 @@ class PrefetchTemplateUtilTest {
 			PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forR4());
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-2375: Either request context was empty or it did not provide a value for key <userId>.  Please make sure you are including a context with valid keys.");
+			assertEquals("HAPI-2375: Either request context was empty or it did not provide a value for key <userId>.  Please make sure you are including a context with valid keys.", e.getMessage());
 		}
 	}
 
@@ -50,7 +51,7 @@ class PrefetchTemplateUtilTest {
 			PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forR4());
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-2375: Either request context was empty or it did not provide a value for key <userId>.  Please make sure you are including a context with valid keys.");
+			assertEquals("HAPI-2375: Either request context was empty or it did not provide a value for key <userId>.  Please make sure you are including a context with valid keys.", e.getMessage());
 		}
 	}
 
@@ -63,7 +64,7 @@ class PrefetchTemplateUtilTest {
 			PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forR4());
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-2372: Request context did not provide a value for key <draftOrders>.  Available keys in context are: [patientId]");
+			assertEquals("HAPI-2372: Request context did not provide a value for key <draftOrders>.  Available keys in context are: [patientId]", e.getMessage());
 		}
 	}
 
@@ -78,7 +79,7 @@ class PrefetchTemplateUtilTest {
 		context.put("patientId", TEST_PATIENT_ID);
 		context.put("draftOrders", builder.getBundle());
 		String result = PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forDstu3());
-		assertThat(result).isEqualTo(OBSERVATION_ID + " a " + TEST_PATIENT_ID);
+		assertEquals(OBSERVATION_ID + " a " + TEST_PATIENT_ID, result);
 	}
 
 	@Test
@@ -91,7 +92,7 @@ class PrefetchTemplateUtilTest {
 		context.put("patientId", TEST_PATIENT_ID);
 		context.put("draftOrders", builder.getBundle());
 		String result = PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forR4());
-		assertThat(result).isEqualTo(SERVICE_ID1 + "," + SERVICE_ID2 + " a " + TEST_PATIENT_ID);
+		assertEquals(SERVICE_ID1 + "," + SERVICE_ID2 + " a " + TEST_PATIENT_ID, result);
 	}
 
 	@Test
@@ -105,7 +106,7 @@ class PrefetchTemplateUtilTest {
 		context.put("patientId", TEST_PATIENT_ID);
 		context.put("draftOrders", builder.getBundle());
 		String result = PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forR5());
-		assertThat(result).isEqualTo(SERVICE_ID1 + "," + SERVICE_ID2 + " a " + OBSERVATION_ID + " a " + TEST_PATIENT_ID);
+		assertEquals(SERVICE_ID1 + "," + SERVICE_ID2 + " a " + OBSERVATION_ID + " a " + TEST_PATIENT_ID, result);
 	}
 
 	@Test
@@ -119,7 +120,7 @@ class PrefetchTemplateUtilTest {
 			PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forR4());
 			fail("substituteTemplate call was successful with a null context field.");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-2373: Request context did not provide for resource(s) matching template. ResourceType missing is: ServiceRequest");
+			assertEquals("HAPI-2373: Request context did not provide for resource(s) matching template. ResourceType missing is: ServiceRequest", e.getMessage());
 		}
 	}
 
@@ -134,7 +135,7 @@ class PrefetchTemplateUtilTest {
 			PrefetchTemplateUtil.substituteTemplate(template, context, FhirContext.forR4());
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-2374: Request context did not provide valid " + fhirContextR4.getVersion().getVersion() + " Bundle resource for template key <draftOrders>");
+			assertEquals("HAPI-2374: Request context did not provide valid " + fhirContextR4.getVersion().getVersion() + " Bundle resource for template key <draftOrders>", e.getMessage());
 		}
 	}
 

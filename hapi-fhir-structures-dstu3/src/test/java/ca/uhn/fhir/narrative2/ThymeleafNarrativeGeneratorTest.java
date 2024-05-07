@@ -1,5 +1,6 @@
 package ca.uhn.fhir.narrative2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.IFhirPathEvaluationContext;
 import ca.uhn.fhir.narrative.CustomThymeleafNarrativeGenerator;
@@ -89,7 +90,7 @@ public class ThymeleafNarrativeGeneratorTest {
 	@Test
 	public void testTemplateCount() throws IOException {
 		NarrativeTemplateManifest manifest = NarrativeTemplateManifest.forManifestFileLocation("classpath:narrative2/narratives.properties");
-		assertThat(manifest.getNamedTemplateCount()).isEqualTo(4);
+		assertEquals(4, manifest.getNamedTemplateCount());
 	}
 
 
@@ -100,7 +101,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		String output = gen.generateResourceNarrative(ourCtx, new Bundle());
 		ourLog.info("Output:\n{}", output);
 
-		assertThat(output).isEqualTo("<html> This is some content <div> Fragment-1-content blah </div></html>");
+		assertEquals("<html> This is some content <div> Fragment-1-content blah </div></html>", output);
 	}
 
 	@Test
@@ -115,7 +116,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		String output = gen.generateResourceNarrative(ourCtx, ms);
 		ourLog.info("Output:\n{}", output);
 
-		assertThat(output).isEqualTo("<div> Some Text</div>");
+		assertEquals("<div> Some Text</div>", output);
 	}
 
 	@Test
@@ -144,7 +145,7 @@ public class ThymeleafNarrativeGeneratorTest {
 		String output = gen.generateResourceNarrative(ourCtx, ms);
 		ourLog.info("Output:\n{}", output);
 
-		assertThat(output).isEqualTo("<div> Other Med</div>");
+		assertEquals("<div> Other Med</div>", output);
 	}
 
 

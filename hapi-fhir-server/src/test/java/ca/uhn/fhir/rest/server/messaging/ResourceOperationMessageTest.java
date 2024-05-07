@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.messaging;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.messaging.json.ResourceOperationJsonMessage;
@@ -24,11 +25,11 @@ class ResourceOperationMessageTest {
 		String serialized = mapper.writeValueAsString(jsonMessage);
 		jsonMessage = mapper.readValue(serialized, ResourceOperationJsonMessage.class);
 
-		assertThat(jsonMessage.getHapiHeaders().getRetryCount()).isEqualTo(0);
+		assertEquals(0, jsonMessage.getHapiHeaders().getRetryCount());
 		assertNull(jsonMessage.getHapiHeaders().getFirstFailureTimestamp());
 		assertNull(jsonMessage.getHapiHeaders().getLastFailureTimestamp());
 
-		assertThat(jsonMessage.getHeaders().get(RETRY_COUNT_KEY)).isEqualTo(0);
+		assertEquals(0, jsonMessage.getHeaders().get(RETRY_COUNT_KEY));
 		assertNull(jsonMessage.getHeaders().get(FIRST_FAILURE_KEY));
 		assertNull(jsonMessage.getHeaders().get(LAST_FAILURE_KEY));
 	}

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -84,10 +85,10 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		Subscription subscription = createTopicSubscription();
 		waitForActivatedSubscriptionCount(1);
 
-		assertThat(ourTestSystemProvider.getCount()).isEqualTo(0);
+		assertEquals(0, ourTestSystemProvider.getCount());
 		Encounter sentEncounter = sendEncounterWithStatus(Encounter.EncounterStatus.FINISHED, true);
 
-		assertThat(ourTestSystemProvider.getCount()).isEqualTo(1);
+		assertEquals(1, ourTestSystemProvider.getCount());
 
 		Bundle receivedBundle = ourTestSystemProvider.getLastInput();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
@@ -97,8 +98,8 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		validateSubscriptionStatus(subscription, sentEncounter, ss);
 
 		Encounter encounter = (Encounter) resources.get(1);
-		assertThat(encounter.getStatus()).isEqualTo(Encounter.EncounterStatus.FINISHED);
-		assertThat(encounter.getIdElement()).isEqualTo(sentEncounter.getIdElement());
+		assertEquals(Encounter.EncounterStatus.FINISHED, encounter.getStatus());
+		assertEquals(sentEncounter.getIdElement(), encounter.getIdElement());
 	}
 
 	@Test
@@ -111,14 +112,14 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		Subscription subscription = createTopicSubscription();
 		waitForActivatedSubscriptionCount(1);
 
-		assertThat(ourTestSystemProvider.getCount()).isEqualTo(0);
+		assertEquals(0, ourTestSystemProvider.getCount());
 		Encounter sentEncounter = sendEncounterWithStatus(Encounter.EncounterStatus.PLANNED, false);
-		assertThat(ourTestSystemProvider.getCount()).isEqualTo(0);
+		assertEquals(0, ourTestSystemProvider.getCount());
 
 		sentEncounter.setStatus(Encounter.EncounterStatus.FINISHED);
 		updateEncounter(sentEncounter);
 
-		assertThat(ourTestSystemProvider.getCount()).isEqualTo(1);
+		assertEquals(1, ourTestSystemProvider.getCount());
 
 		Bundle receivedBundle = ourTestSystemProvider.getLastInput();
 		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirCtx, receivedBundle);
@@ -128,24 +129,24 @@ public class SubscriptionTopicR4BTest extends BaseSubscriptionsR4BTest {
 		validateSubscriptionStatus(subscription, sentEncounter, ss);
 
 		Encounter encounter = (Encounter) resources.get(1);
-		assertThat(encounter.getStatus()).isEqualTo(Encounter.EncounterStatus.FINISHED);
-		assertThat(encounter.getIdElement()).isEqualTo(sentEncounter.getIdElement());
+		assertEquals(Encounter.EncounterStatus.FINISHED, encounter.getStatus());
+		assertEquals(sentEncounter.getIdElement(), encounter.getIdElement());
 	}
 
 
 	private static void validateSubscriptionStatus(Subscription subscription, Encounter sentEncounter, SubscriptionStatus ss) {
-		assertThat(ss.getStatus()).isEqualTo(Enumerations.SubscriptionStatus.ACTIVE);
-		assertThat(ss.getType()).isEqualTo(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION);
-		assertThat(ss.getEventsSinceSubscriptionStartElement().getValueAsString()).isEqualTo("1");
+		assertEquals(Enumerations.SubscriptionStatus.ACTIVE, ss.getStatus());
+		assertEquals(SubscriptionStatus.SubscriptionNotificationType.EVENTNOTIFICATION, ss.getType());
+		assertEquals("1", ss.getEventsSinceSubscriptionStartElement().getValueAsString());
 
 		List<SubscriptionStatus.SubscriptionStatusNotificationEventComponent> notificationEvents = ss.getNotificationEvent();
 		assertThat(notificationEvents).hasSize(1);
 		SubscriptionStatus.SubscriptionStatusNotificationEventComponent notificationEvent = notificationEvents.get(0);
-		assertThat(notificationEvent.getEventNumber()).isEqualTo("1");
-		assertThat(notificationEvent.getFocus().getReferenceElement()).isEqualTo(sentEncounter.getIdElement().toUnqualifiedVersionless());
+		assertEquals("1", notificationEvent.getEventNumber());
+		assertEquals(sentEncounter.getIdElement().toUnqualifiedVersionless(), notificationEvent.getFocus().getReferenceElement());
 
-		assertThat(ss.getSubscription().getReferenceElement()).isEqualTo(subscription.getIdElement().toUnqualifiedVersionless());
-		assertThat(ss.getTopic()).isEqualTo(SUBSCRIPTION_TOPIC_TEST_URL);
+		assertEquals(subscription.getIdElement().toUnqualifiedVersionless(), ss.getSubscription().getReferenceElement());
+		assertEquals(SUBSCRIPTION_TOPIC_TEST_URL, ss.getTopic());
 	}
 
 	private Subscription createTopicSubscription() throws InterruptedException {

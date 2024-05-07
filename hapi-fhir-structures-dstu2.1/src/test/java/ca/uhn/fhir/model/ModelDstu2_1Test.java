@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
@@ -42,7 +43,7 @@ public class ModelDstu2_1Test {
 		Practitioner p = new Practitioner();
 		PractitionerPractitionerRoleComponent role = p.addPractitionerRole();
 		CodeableConcept roleField = role.getRole();
-		assertThat(roleField.getClass()).isEqualTo(CodeableConcept.class);
+		assertEquals(CodeableConcept.class, roleField.getClass());
 	}
 
 	@AfterAll
@@ -66,7 +67,7 @@ public class ModelDstu2_1Test {
 		try {
 			ourCtx.newXmlParser().encodeResourceToString(p);
 		} catch (ClassCastException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1794) + "Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase");
+			assertEquals(Msg.code(1794) + "Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase", e.getMessage());
 		}
 	}
 	

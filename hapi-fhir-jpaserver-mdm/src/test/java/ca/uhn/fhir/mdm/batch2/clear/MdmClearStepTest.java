@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.batch2.clear;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
@@ -101,7 +102,7 @@ class MdmClearStepTest extends BaseMdmR4Test {
 			assertPatientExists(myGoldenId);
 			fail("Resource cannot be found");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-2001: Resource " + myGoldenId + " is not known");
+			assertEquals("HAPI-2001: Resource " + myGoldenId + " is not known", e.getMessage());
 		}
 	}
 
@@ -141,6 +142,6 @@ class MdmClearStepTest extends BaseMdmR4Test {
 	}
 
 	private void assertPatientCount(int theExpectedCount) {
-		assertThat(myPatientDao.search(SearchParameterMap.newSynchronous()).size()).isEqualTo(theExpectedCount);
+		assertEquals(theExpectedCount, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
 	}
 }

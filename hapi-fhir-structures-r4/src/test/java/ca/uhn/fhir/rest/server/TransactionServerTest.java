@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
@@ -36,7 +37,7 @@ public class TransactionServerTest {
 		input.setType(Bundle.BundleType.TRANSACTION);
 		Bundle output = myServerRule.getFhirClient().transaction().withBundle(input).execute();
 
-		assertThat(output.getIdElement().getIdPart()).isEqualTo("ABC");
+		assertEquals("ABC", output.getIdElement().getIdPart());
 
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -68,9 +69,9 @@ public class AdditionalHeadersInterceptorTest {
 
 		client.search().forResource("Patient").returnBundle(Bundle.class).execute();
 
-		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
+		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
-		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient");
+		assertEquals("http://foo/Patient", get.getURI().toString());
 	}
 
 	@Test
@@ -94,9 +95,9 @@ public class AdditionalHeadersInterceptorTest {
 
 		client.search().forResource("Patient").returnBundle(Bundle.class).execute();
 
-		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
+		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
-		assertThat(get.getURI().toString()).isEqualTo("http://foo/Patient");
+		assertEquals("http://foo/Patient", get.getURI().toString());
 
 		assertThat(Arrays.stream(get.getHeaders("X-0")).map(Object::toString).collect(Collectors.toList())).containsExactly("X-0: X-0-VAL");
 		assertThat(Arrays.stream(get.getHeaders("X-1")).map(Object::toString).collect(Collectors.toList())).containsExactly("X-1: X-1-VAL");

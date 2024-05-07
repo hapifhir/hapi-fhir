@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +14,7 @@ public class SimpleBundleProviderTest {
 		assertNull(p.preferredPageSize());
 
 		p.setPreferredPageSize(100);
-		assertThat(p.preferredPageSize().intValue()).isEqualTo(100);
+		assertEquals(100, p.preferredPageSize().intValue());
 	}
 
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -52,7 +53,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		Patient patient = new Patient();
 		patient.setId("Patient/1");
 		MdmMatchResultEnum result = myMdmResourceMatcherSvc.getMatchResult(patient, patient).getMatchResultEnum();
-		assertThat(result).isEqualTo(MdmMatchResultEnum.NO_MATCH);
+		assertEquals(MdmMatchResultEnum.NO_MATCH, result);
 	}
 
 	@Test
@@ -138,7 +139,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 			myMdmLinkSvc.updateLink(goldenPatient, patient, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.AUTO, null);
 			fail("");
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(760) + "MDM system is not allowed to modify links on manually created links");
+			assertEquals(Msg.code(760) + "MDM system is not allowed to modify links on manually created links", e.getMessage());
 		}
 	}
 
@@ -152,7 +153,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 			myMdmLinkSvc.updateLink(goldenPatient, patient, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.AUTO, createContextForUpdate("Patient"));
 			fail("");
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(761) + "MDM system is not allowed to automatically NO_MATCH a resource");
+			assertEquals(Msg.code(761) + "MDM system is not allowed to automatically NO_MATCH a resource", e.getMessage());
 		}
 	}
 
@@ -161,7 +162,7 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		Patient goldenPatient = createGoldenPatient(buildJanePatient());
 		Patient patient1 = createPatient(buildJanePatient());
 		Patient patient2 = createPatient(buildJanePatient());
-		assertThat(myMdmLinkDao.count()).isEqualTo(0);
+		assertEquals(0, myMdmLinkDao.count());
 
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient1, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient2, MdmMatchOutcome.NO_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
@@ -190,12 +191,12 @@ public class MdmLinkSvcTest extends BaseMdmR4Test {
 		Patient patient1 = createPatient(buildJanePatient());
 		RequestPartitionId requestPartitionId = RequestPartitionId.fromPartitionId(1);
 		patient1.setUserData(Constants.RESOURCE_PARTITION_ID, requestPartitionId);
-		assertThat(myMdmLinkDao.count()).isEqualTo(0);
+		assertEquals(0, myMdmLinkDao.count());
 
 		myMdmLinkDaoSvc.createOrUpdateLinkEntity(goldenPatient, patient1, MdmMatchOutcome.NEW_GOLDEN_RESOURCE_MATCH, MdmLinkSourceEnum.MANUAL, createContextForCreate("Patient"));
 		List<? extends IMdmLink> targets = myMdmLinkDaoSvc.findMdmLinksByGoldenResource(goldenPatient);
 		assertThat(targets).isNotEmpty();
 		assertThat(targets).hasSize(1);
-		assertThat(targets.get(0).getPartitionId().getPartitionId()).isEqualTo(requestPartitionId.getFirstPartitionIdOrNull());
+		assertEquals(requestPartitionId.getFirstPartitionIdOrNull(), targets.get(0).getPartitionId().getPartitionId());
 	}
 }

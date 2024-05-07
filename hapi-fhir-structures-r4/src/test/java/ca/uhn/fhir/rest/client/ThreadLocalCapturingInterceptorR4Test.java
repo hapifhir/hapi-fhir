@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.Constants;
@@ -116,9 +117,9 @@ public class ThreadLocalCapturingInterceptorR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(interceptor.getRequestForCurrentThread().getUri()).isEqualTo("http://example.com/fhir/Device?_format=json");
-		assertThat(interceptor.getResponseForCurrentThread().getStatus()).isEqualTo(200);
-		assertThat(IOUtils.toString(interceptor.getResponseForCurrentThread().createReader())).isEqualTo(msg);
+		assertEquals("http://example.com/fhir/Device?_format=json", interceptor.getRequestForCurrentThread().getUri());
+		assertEquals(200, interceptor.getResponseForCurrentThread().getStatus());
+		assertEquals(msg, IOUtils.toString(interceptor.getResponseForCurrentThread().createReader()));
 	}
 
 
@@ -154,9 +155,9 @@ public class ThreadLocalCapturingInterceptorR4Test {
 			// good
 		}
 
-		assertThat(interceptor.getRequestForCurrentThread().getUri()).isEqualTo("http://example.com/fhir/Device?_format=json");
-		assertThat(interceptor.getResponseForCurrentThread().getStatus()).isEqualTo(400);
-		assertThat(IOUtils.toString(interceptor.getResponseForCurrentThread().createReader())).isEqualTo(msg);
+		assertEquals("http://example.com/fhir/Device?_format=json", interceptor.getRequestForCurrentThread().getUri());
+		assertEquals(400, interceptor.getResponseForCurrentThread().getStatus());
+		assertEquals(msg, IOUtils.toString(interceptor.getResponseForCurrentThread().createReader()));
 	}
 
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.fql.util.HfqlConstants;
 import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import org.apache.commons.io.IOUtils;
@@ -42,7 +43,7 @@ public class ResourceProviderR5FqlTest extends BaseResourceProviderR5Test {
 		try (CloseableHttpResponse response = ourHttpClient.execute(fetch)) {
 
 			// Verify
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(outcome).contains("0,Simpson0,Homer");
 			assertThat(outcome).contains("1,Simpson1,Homer");

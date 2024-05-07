@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -72,7 +73,7 @@ public class ClientServerValidationDstu2Test {
 	@Test
 	public void testClientUsesInterceptors() throws Exception {
 		String appropriateFhirVersion = "1.0.2";
-		assertThat(appropriateFhirVersion).isEqualTo(FhirVersionEnum.DSTU2.getFhirVersionString());
+		assertEquals(FhirVersionEnum.DSTU2.getFhirVersionString(), appropriateFhirVersion);
 		Conformance conf = new Conformance();
 		conf.setFhirVersion(appropriateFhirVersion);
 		final String confResource = myCtx.newXmlParser().encodeResourceToString(conf);
@@ -101,22 +102,22 @@ public class ClientServerValidationDstu2Test {
 		IGenericClient client = myCtx.newRestfulGenericClient("http://foo");
 		client.registerInterceptor(new BasicAuthInterceptor("USER", "PASS"));
 		Patient pt = (Patient) client.read(new UriDt("http://foo/Patient/123"));
-		assertThat(pt.getNameFirstRep().getFamilyAsSingleString()).isEqualTo("FAM");
+		assertEquals("FAM", pt.getNameFirstRep().getFamilyAsSingleString());
 
 		assertThat(capt.getAllValues()).hasSize(2);
 
 		Header auth = capt.getAllValues().get(0).getFirstHeader("Authorization");
 		assertNotNull(auth);
-		assertThat(auth.getValue()).isEqualTo("Basic VVNFUjpQQVNT");
+		assertEquals("Basic VVNFUjpQQVNT", auth.getValue());
 		auth = capt.getAllValues().get(1).getFirstHeader("Authorization");
 		assertNotNull(auth);
-		assertThat(auth.getValue()).isEqualTo("Basic VVNFUjpQQVNT");
+		assertEquals("Basic VVNFUjpQQVNT", auth.getValue());
 	}
 
 	@Test
 	public void testForceConformanceCheck() throws Exception {
 		String appropriateFhirVersion = "1.0.2";
-		assertThat(appropriateFhirVersion).isEqualTo(FhirVersionEnum.DSTU2.getFhirVersionString());
+		assertEquals(FhirVersionEnum.DSTU2.getFhirVersionString(), appropriateFhirVersion);
 		Conformance conf = new Conformance();
 		conf.setFhirVersion(appropriateFhirVersion);
 		final String confResource = myCtx.newXmlParser().encodeResourceToString(conf);
@@ -151,16 +152,16 @@ public class ClientServerValidationDstu2Test {
 		assertThat(capt.getAllValues()).hasSize(1);
 
 		Patient pt = (Patient) client.read(new UriDt("http://foo/Patient/123"));
-		assertThat(pt.getNameFirstRep().getFamilyAsSingleString()).isEqualTo("FAM");
+		assertEquals("FAM", pt.getNameFirstRep().getFamilyAsSingleString());
 
 		assertThat(capt.getAllValues()).hasSize(2);
 
 		Header auth = capt.getAllValues().get(0).getFirstHeader("Authorization");
 		assertNotNull(auth);
-		assertThat(auth.getValue()).isEqualTo("Basic VVNFUjpQQVNT");
+		assertEquals("Basic VVNFUjpQQVNT", auth.getValue());
 		auth = capt.getAllValues().get(1).getFirstHeader("Authorization");
 		assertNotNull(auth);
-		assertThat(auth.getValue()).isEqualTo("Basic VVNFUjpQQVNT");
+		assertEquals("Basic VVNFUjpQQVNT", auth.getValue());
 	}
 
 	@Test
@@ -227,7 +228,7 @@ public class ClientServerValidationDstu2Test {
 	@Test
 	public void testServerReturnsAppropriateVersionForDstu2() throws Exception {
 		String appropriateFhirVersion = "1.0.2";
-		assertThat(appropriateFhirVersion).isEqualTo(FhirVersionEnum.DSTU2.getFhirVersionString());
+		assertEquals(FhirVersionEnum.DSTU2.getFhirVersionString(), appropriateFhirVersion);
 		Conformance conf = new Conformance();
 		conf.setFhirVersion(appropriateFhirVersion);
 		final String confResource = myCtx.newXmlParser().encodeResourceToString(conf);
@@ -267,7 +268,7 @@ public class ClientServerValidationDstu2Test {
 	@Test
 	public void testServerReturnsWrongVersionForDstu2() throws Exception {
 		String wrongFhirVersion = FhirVersionEnum.DSTU3.getFhirVersionString();
-		assertThat(wrongFhirVersion).isEqualTo(FhirVersionEnum.DSTU3.getFhirVersionString()); // asserting that what we assume to be the DSTU3 FHIR version is still correct
+		assertEquals(FhirVersionEnum.DSTU3.getFhirVersionString(), wrongFhirVersion); // asserting that what we assume to be the DSTU3 FHIR version is still correct
 		Conformance conf = new Conformance();
 		conf.setFhirVersion(wrongFhirVersion);
 		String msg = myCtx.newXmlParser().encodeResourceToString(conf);

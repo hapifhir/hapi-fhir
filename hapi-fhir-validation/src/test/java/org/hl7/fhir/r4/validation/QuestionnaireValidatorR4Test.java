@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -77,7 +78,7 @@ public class QuestionnaireValidatorR4Test extends BaseValidationTestWithInlineMo
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
-			assertThat(errors.isSuccessful()).isEqualTo(true);
+			assertEquals(true, errors.isSuccessful());
 			assertThat(errors.getMessages().stream().filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal()).collect(Collectors.toList())).isEmpty();
 		}
 	}
@@ -98,7 +99,7 @@ public class QuestionnaireValidatorR4Test extends BaseValidationTestWithInlineMo
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
-			assertThat(errors.isSuccessful()).isEqualTo(true);
+			assertEquals(true, errors.isSuccessful());
 			assertThat(errors.getMessages()).isEmpty();
 		}
 	}
@@ -117,16 +118,16 @@ public class QuestionnaireValidatorR4Test extends BaseValidationTestWithInlineMo
 		ValidationResult errors = myVal.validateWithResult(q);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.isSuccessful()).isEqualTo(true);
+		assertEquals(true, errors.isSuccessful());
 		assertThat(errors.getMessages()).hasSize(1);
-		assertThat(ResultSeverityEnum.INFORMATION).isEqualTo(errors.getMessages().get(0).getSeverity());
+		assertEquals(errors.getMessages().get(0).getSeverity(), ResultSeverityEnum.INFORMATION);
 		assertThat(errors.getMessages().get(0).getMessage()).startsWith("Unknown extension " + extensionUrl);
 
 		myInstanceVal.setCustomExtensionDomains(extensionUrl);
 		errors = myVal.validateWithResult(q);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.isSuccessful()).isEqualTo(true);
+		assertEquals(true, errors.isSuccessful());
 		assertThat(errors.getMessages()).isEmpty();
 	}
 

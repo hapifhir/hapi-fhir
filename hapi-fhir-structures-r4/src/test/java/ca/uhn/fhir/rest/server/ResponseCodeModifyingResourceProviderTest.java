@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -42,14 +43,14 @@ public class ResponseCodeModifyingResourceProviderTest {
 	@Test
 	public void testCreatePatientReturnsModifiedResponseCode() {
 		MethodOutcome outcome = myClient.create().resource(myPatient).execute();
-		assertThat(outcome.getResponseStatusCode()).isEqualTo(CUSTOM_RESPONSE_CODE);
+		assertEquals(CUSTOM_RESPONSE_CODE, outcome.getResponseStatusCode());
 	}
 
 	@Test
 	public void testUpdatePatientReturnsModifiedResponseCode() {
 		myPatient.setId("1");
 		MethodOutcome outcome = myClient.update().resource(myPatient).execute();
-		assertThat(outcome.getResponseStatusCode()).isEqualTo(CUSTOM_RESPONSE_CODE);
+		assertEquals(CUSTOM_RESPONSE_CODE, outcome.getResponseStatusCode());
 	}
 
 	class TestResponseCodeModifyingPatientProvider implements IResourceProvider {

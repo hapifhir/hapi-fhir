@@ -51,7 +51,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 
 		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
 		IIdType outcomeId = myPatientDao.delete(new IdType("Patient/A"), mySrd).getId();
-		assertThat(outcomeId.getVersionIdPart()).isEqualTo("3");
+		assertEquals("3", outcomeId.getVersionIdPart());
 		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
 
 		// Make sure $meta-get can fetch the tags of the deleted resource
@@ -59,7 +59,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		Meta meta = myPatientDao.metaGetOperation(Meta.class, new IdType("Patient/A"), mySrd);
 		assertThat(toProfiles(meta)).as(toProfiles(meta).toString()).containsExactly("http://profile2");
 		assertThat(toTags(meta)).as(toTags(meta).toString()).containsExactlyInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2");
-		assertThat(meta.getVersionId()).isEqualTo("3");
+		assertEquals("3", meta.getVersionId());
 
 		// Revive and verify
 
@@ -142,7 +142,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 			.getBundleTyped();
 		output = mySystemDao.transaction(mySrd, input);
 		IIdType outcomeId = new IdType(output.getEntry().get(0).getResponse().getLocation());
-		assertThat(outcomeId.getVersionIdPart()).isEqualTo("3");
+		assertEquals("3", outcomeId.getVersionIdPart());
 		runInTransaction(() -> assertEquals(3, myResourceTagDao.count()));
 
 		// Make sure $meta-get can fetch the tags of the deleted resource
@@ -150,7 +150,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		Meta meta = myPatientDao.metaGetOperation(Meta.class, new IdType("Patient/A"), mySrd);
 		assertThat(toProfiles(meta)).as(toProfiles(meta).toString()).containsExactly("http://profile2");
 		assertThat(toTags(meta)).as(toTags(meta).toString()).containsExactlyInAnyOrder("http://tag1|vtag1|dtag1", "http://tag2|vtag2|dtag2");
-		assertThat(meta.getVersionId()).isEqualTo("3");
+		assertEquals("3", meta.getVersionId());
 
 		// Revive and verify
 
@@ -578,7 +578,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		patient.getMeta().addProfile("http://profile2");
 		patient.getMeta().addTag("http://tag2", "vtag2", "dtag2");
 		patient.setActive(false);
-		assertThat(myPatientDao.update(patient, mySrd).getId().getVersionIdPart()).isEqualTo("2");
+		assertEquals("2", myPatientDao.update(patient, mySrd).getId().getVersionIdPart());
 	}
 
 	private void initializeVersioned() {
@@ -596,7 +596,7 @@ public class FhirResourceDaoR4TagsTest extends BaseResourceProviderR4Test {
 		patient.getMeta().addProfile("http://profile2");
 		patient.getMeta().addTag("http://tag2", "vtag2", "dtag2");
 		patient.setActive(false);
-		assertThat(myPatientDao.update(patient, mySrd).getId().getVersionIdPart()).isEqualTo("2");
+		assertEquals("2", myPatientDao.update(patient, mySrd).getId().getVersionIdPart());
 	}
 
 	@Nonnull

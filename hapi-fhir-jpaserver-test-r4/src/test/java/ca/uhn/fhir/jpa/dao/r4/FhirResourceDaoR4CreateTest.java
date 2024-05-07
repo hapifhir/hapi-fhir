@@ -146,7 +146,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		});
 
 		myCaptureQueriesListener.clear();
-		assertThat(myObservationDao.search(SearchParameterMap.newSynchronous("patient", new ReferenceParam("Patient/A"))).sizeOrThrowNpe()).isEqualTo(1);
+		assertEquals(1, myObservationDao.search(SearchParameterMap.newSynchronous("patient", new ReferenceParam("Patient/A"))).sizeOrThrowNpe());
 		myCaptureQueriesListener.logSelectQueries();
 	}
 
@@ -373,7 +373,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			myObservationDao.create(obs, "identifier=A%20B", new SystemRequestDetails());
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
+			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
 		}
 	}
 
@@ -398,7 +398,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			mySystemDao.transaction(new SystemRequestDetails(), (Bundle) bb.getBundle());
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.");
+			assertEquals(Msg.code(929) + "Failed to process conditional create. The supplied resource did not satisfy the conditional URL.", e.getMessage());
 		}
 	}
 
@@ -419,9 +419,9 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertTrue(outcome.getCreated());
 		ResourceSearchUrlEntity searchUrlEntity = myResourceSearchUrlDao.findAll().get(0);
 		assertNotNull(searchUrlEntity);
-		assertThat(searchUrlEntity.getResourcePid()).isEqualTo(expectedResId);
+		assertEquals(expectedResId, searchUrlEntity.getResourcePid());
 		assertThat(searchUrlEntity.getCreatedTime(), DateMatchers.within(1, SECONDS, new Date()));
-		assertThat(searchUrlEntity.getSearchUrl()).isEqualTo(expectedNormalizedMatchUrl);
+		assertEquals(expectedNormalizedMatchUrl, searchUrlEntity.getSearchUrl());
 
 	}
 
@@ -463,7 +463,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertThat(id.getIdPart()).matches("[a-z0-9]{8}-.*");
 
 		p = myPatientDao.read(id);
-		assertThat(p.getNameFirstRep().getFamily()).isEqualTo("FAM");
+		assertEquals("FAM", p.getNameFirstRep().getFamily());
 
 	}
 
@@ -479,7 +479,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertThat(id.getIdPart()).matches("[a-z0-9]{8}-.*");
 
 		p = myPatientDao.read(id);
-		assertThat(p.getNameFirstRep().getFamily()).isEqualTo("FAM");
+		assertEquals("FAM", p.getNameFirstRep().getFamily());
 
 	}
 
@@ -495,14 +495,14 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		cs.setUrl("http://foo");
 		IIdType id = myCodeSystemDao.create(cs).getId();
 		cs = myCodeSystemDao.read(id);
-		assertThat(cs.getUrl()).isEqualTo("http://foo");
+		assertEquals("http://foo", cs.getUrl());
 
 		// purely numeric ID
 		cs.setId("123");
 		cs.setUrl("http://fooCS");
 		id = myCodeSystemDao.update(cs).getId();
 		cs = myCodeSystemDao.read(id);
-		assertThat(cs.getUrl()).isEqualTo("http://fooCS");
+		assertEquals("http://fooCS", cs.getUrl());
 	}
 
 	/**
@@ -529,7 +529,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			myPatientDao.update(p);
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(959) + "No resource exists on this server resource with ID[AAA], and client-assigned IDs are not enabled.");
+			assertEquals(Msg.code(959) + "No resource exists on this server resource with ID[AAA], and client-assigned IDs are not enabled.", e.getMessage());
 		}
 	}
 
@@ -555,11 +555,11 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM");
 		IIdType id1 = myPatientDao.update(p).getId();
 
-		assertThat(id1.getIdPart()).isEqualTo(Long.toString(newId));
-		assertThat(id1.getVersionIdPart()).isEqualTo("1");
+		assertEquals(Long.toString(newId), id1.getIdPart());
+		assertEquals("1", id1.getVersionIdPart());
 
 		p = myPatientDao.read(id1);
-		assertThat(p.getNameFirstRep().getFamily()).isEqualTo("FAM");
+		assertEquals("FAM", p.getNameFirstRep().getFamily());
 
 		// Update it
 		p = new Patient();
@@ -567,11 +567,11 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM2");
 		id1 = myPatientDao.update(p).getId();
 
-		assertThat(id1.getIdPart()).isEqualTo(Long.toString(newId));
-		assertThat(id1.getVersionIdPart()).isEqualTo("2");
+		assertEquals(Long.toString(newId), id1.getIdPart());
+		assertEquals("2", id1.getVersionIdPart());
 
 		p = myPatientDao.read(id1);
-		assertThat(p.getNameFirstRep().getFamily()).isEqualTo("FAM2");
+		assertEquals("FAM2", p.getNameFirstRep().getFamily());
 
 		// Try to create another server-assigned. This should fail since we have a
 		// a conflict.
@@ -615,12 +615,12 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM");
 		IIdType id1 = myPatientDao.update(p).getId();
 
-		assertThat(id1.getIdPart()).isEqualTo(Long.toString(newId));
-		assertThat(id1.getVersionIdPart()).isEqualTo("1");
+		assertEquals(Long.toString(newId), id1.getIdPart());
+		assertEquals("1", id1.getVersionIdPart());
 
 		// Read it back
 		p = myPatientDao.read(id1);
-		assertThat(p.getNameFirstRep().getFamily()).isEqualTo("FAM");
+		assertEquals("FAM", p.getNameFirstRep().getFamily());
 
 		// Update it
 		p = new Patient();
@@ -628,11 +628,11 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		p.addName().setFamily("FAM2");
 		id1 = myPatientDao.update(p).getId();
 
-		assertThat(id1.getIdPart()).isEqualTo(Long.toString(newId));
-		assertThat(id1.getVersionIdPart()).isEqualTo("2");
+		assertEquals(Long.toString(newId), id1.getIdPart());
+		assertEquals("2", id1.getVersionIdPart());
 
 		p = myPatientDao.read(id1);
-		assertThat(p.getNameFirstRep().getFamily()).isEqualTo("FAM2");
+		assertEquals("FAM2", p.getNameFirstRep().getFamily());
 
 		// Try to create another server-assigned. This should fail since we have a
 		// a conflict.
@@ -655,7 +655,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		DaoMethodOutcome result = myStructureDefinitionDao.create(sd);
 		assertTrue(result.getCreated());
 		StructureDefinition readSd = myStructureDefinitionDao.read(result.getId());
-		assertThat(readSd.getUrl()).isEqualTo("http://foo.com");
+		assertEquals("http://foo.com", readSd.getUrl());
 
 		logAllResources();
 		logAllResourceVersions();
@@ -675,7 +675,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		myCaptureQueriesListener.clear();
 		IBundleProvider bundle = myStructureDefinitionDao.search(map);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertThat(bundle.size()).isEqualTo(1);
+		assertEquals(1, bundle.size());
 	}
 
 	@Test
@@ -740,7 +740,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 		assertThat(encoded).contains("#1");
 
 		Organization org = (Organization) p.getManagingOrganization().getResource();
-		assertThat(org.getId()).isEqualTo("#1");
+		assertEquals("#1", org.getId());
 		assertThat(org.getMeta().getTag()).hasSize(1);
 
 	}
@@ -760,7 +760,7 @@ public class FhirResourceDaoR4CreateTest extends BaseJpaR4Test {
 			mySearchParameterDao.update(sp);
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1111) + "Can not override built-in search parameter Patient:birthdate because overriding is disabled on this server");
+			assertEquals(Msg.code(1111) + "Can not override built-in search parameter Patient:birthdate because overriding is disabled on this server", e.getMessage());
 		}
 
 	}

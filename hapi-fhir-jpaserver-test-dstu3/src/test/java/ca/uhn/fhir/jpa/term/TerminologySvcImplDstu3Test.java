@@ -266,13 +266,13 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		assertThat(codes).containsExactlyInAnyOrder("childAAB");
 
 		ValueSet.ValueSetExpansionContainsComponent concept = outcome.getExpansion().getContains().get(0);
-		assertThat(concept.getCode()).isEqualTo("childAAB");
-		assertThat(concept.getSystem()).isEqualTo("http://example.com/my_code_system");
+		assertEquals("childAAB", concept.getCode());
+		assertEquals("http://example.com/my_code_system", concept.getSystem());
 		assertNull(concept.getDisplay());
-		assertThat(concept.getDesignation().get(0).getUse().getSystem()).isEqualTo("D1S");
-		assertThat(concept.getDesignation().get(0).getUse().getCode()).isEqualTo("D1C");
-		assertThat(concept.getDesignation().get(0).getUse().getDisplay()).isEqualTo("D1D");
-		assertThat(concept.getDesignation().get(0).getValue()).isEqualTo("D1V");
+		assertEquals("D1S", concept.getDesignation().get(0).getUse().getSystem());
+		assertEquals("D1C", concept.getDesignation().get(0).getUse().getCode());
+		assertEquals("D1D", concept.getDesignation().get(0).getUse().getDisplay());
+		assertEquals("D1V", concept.getDesignation().get(0).getValue());
 	}
 
 	@Test
@@ -506,7 +506,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(897) + "Don't know how to handle op=ISA on property copyright");
+			assertEquals(Msg.code(897) + "Don't know how to handle op=ISA on property copyright", e.getMessage());
 		}
 	}
 
@@ -532,7 +532,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
+			assertEquals(Msg.code(895) + "Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 		}
 
 	}
@@ -558,7 +558,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(898) + "Don't know how to handle value=bogus on property copyright");
+			assertEquals(Msg.code(898) + "Don't know how to handle value=bogus on property copyright", e.getMessage());
 		}
 
 	}
@@ -772,7 +772,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(892) + "Don't know how to handle op=ISA on property ancestor");
+			assertEquals(Msg.code(892) + "Don't know how to handle op=ISA on property ancestor", e.getMessage());
 		}
 
 	}
@@ -799,7 +799,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
+			assertEquals(Msg.code(895) + "Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 		}
 
 	}
@@ -1014,7 +1014,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(893) + "Don't know how to handle op=ISA on property child");
+			assertEquals(Msg.code(893) + "Don't know how to handle op=ISA on property child", e.getMessage());
 		}
 
 	}
@@ -1041,7 +1041,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
+			assertEquals(Msg.code(895) + "Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 		}
 
 	}
@@ -1257,7 +1257,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(896) + "Don't know how to handle op=ISA on property descendant");
+			assertEquals(Msg.code(896) + "Don't know how to handle op=ISA on property descendant", e.getMessage());
 		}
 
 	}
@@ -1284,7 +1284,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
+			assertEquals(Msg.code(895) + "Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 		}
 
 	}
@@ -1498,7 +1498,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(893) + "Don't know how to handle op=ISA on property parent");
+			assertEquals(Msg.code(893) + "Don't know how to handle op=ISA on property parent", e.getMessage());
 		}
 
 	}
@@ -1525,7 +1525,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermSvc.expandValueSet(null, vs);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
+			assertEquals(Msg.code(895) + "Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 		}
 
 	}
@@ -1805,14 +1805,14 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 		assertThat(codes).containsExactlyInAnyOrder("childAAB");
 
 		ValueSet.ValueSetExpansionContainsComponent concept = outcome.getExpansion().getContains().get(0);
-		assertThat(concept.getCode()).isEqualTo("childAAB");
-		assertThat(concept.getSystem()).isEqualTo("http://example.com/my_code_system");
+		assertEquals("childAAB", concept.getCode());
+		assertEquals("http://example.com/my_code_system", concept.getSystem());
 		assertNull(concept.getDisplay());
-		assertThat(concept.getDesignation().get(0).getLanguage()).isEqualTo("D1L");
-		assertThat(concept.getDesignation().get(0).getUse().getSystem()).isEqualTo("D1S");
-		assertThat(concept.getDesignation().get(0).getUse().getCode()).isEqualTo("D1C");
-		assertThat(concept.getDesignation().get(0).getUse().getDisplay()).isEqualTo("D1D");
-		assertThat(concept.getDesignation().get(0).getValue()).isEqualTo("D1V");
+		assertEquals("D1L", concept.getDesignation().get(0).getLanguage());
+		assertEquals("D1S", concept.getDesignation().get(0).getUse().getSystem());
+		assertEquals("D1C", concept.getDesignation().get(0).getUse().getCode());
+		assertEquals("D1D", concept.getDesignation().get(0).getUse().getDisplay());
+		assertEquals("D1V", concept.getDesignation().get(0).getValue());
 	}
 
 	@Test
@@ -1844,7 +1844,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(table.getPersistentId(), CS_URL, "SYSTEM NAME", "SYSTEM VERSION", cs, table);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(849) + "CodeSystem contains circular reference around code parent");
+			assertEquals(Msg.code(849) + "CodeSystem contains circular reference around code parent", e.getMessage());
 		}
 	}
 
@@ -1987,7 +1987,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 			.map(t -> t.getCode())
 			.sorted()
 			.collect(Collectors.toList());
-		assertThat(expansionCodes).isEqualTo(Lists.newArrayList("A", "C"));
+		assertEquals(Lists.newArrayList("A", "C"), expansionCodes);
 
 	}
 
@@ -1997,7 +1997,7 @@ public class TerminologySvcImplDstu3Test extends BaseJpaDstu3Test {
 	public void testValidateCodeWithProperties() {
 		createCodeSystem();
 		IValidationSupport.CodeValidationResult code = myValidationSupport.validateCode(new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, "childAAB", null, null);
-		assertThat(code.isOk()).isEqualTo(true);
+		assertEquals(true, code.isOk());
 		assertThat(code.getProperties()).hasSize(2);
 	}
 

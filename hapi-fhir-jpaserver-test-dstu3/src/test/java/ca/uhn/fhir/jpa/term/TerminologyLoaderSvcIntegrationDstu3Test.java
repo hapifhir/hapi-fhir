@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -159,20 +160,20 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		Optional<Coding> propertyValue = findProperty(parameters, "SCALE_TYP");
 		assertThat(propertyValue).isPresent();
-		assertThat(propertyValue.get().getSystem()).isEqualTo(ITermLoaderSvc.LOINC_URI);
-		assertThat(propertyValue.get().getCode()).isEqualTo("LP7753-9");
-		assertThat(propertyValue.get().getDisplay()).isEqualTo("Qn");
+		assertEquals(ITermLoaderSvc.LOINC_URI, propertyValue.get().getSystem());
+		assertEquals("LP7753-9", propertyValue.get().getCode());
+		assertEquals("Qn", propertyValue.get().getDisplay());
 
 		propertyValue = findProperty(parameters, "COMPONENT");
 		assertThat(propertyValue).isPresent();
 
 		Optional<StringType> propertyValueString = findProperty(parameters, "ORDER_OBS");
 		assertThat(propertyValueString).isPresent();
-		assertThat(propertyValueString.get().getValue()).isEqualTo("Observation");
+		assertEquals("Observation", propertyValueString.get().getValue());
 
 		propertyValueString = findProperty(parameters, "CLASSTYPE");
 		assertThat(propertyValueString).isPresent();
-		assertThat(propertyValueString.get().getValue()).isEqualTo("2");
+		assertEquals("2", propertyValueString.get().getValue());
 
 	}
 
@@ -189,9 +190,9 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		Optional<Coding> propertyValue = findProperty(parameters, "COMPONENT");
 		assertThat(propertyValue).isPresent();
-		assertThat(propertyValue.get().getSystem()).isEqualTo(ITermLoaderSvc.LOINC_URI);
-		assertThat(propertyValue.get().getCode()).isEqualTo("LP31101-6");
-		assertThat(propertyValue.get().getDisplay()).isEqualTo("R' wave amplitude.lead I");
+		assertEquals(ITermLoaderSvc.LOINC_URI, propertyValue.get().getSystem());
+		assertEquals("LP31101-6", propertyValue.get().getCode());
+		assertEquals("R' wave amplitude.lead I", propertyValue.get().getDisplay());
 	}
 
 	@Test
@@ -208,9 +209,9 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		Optional<Coding> propertyValueCoding = findProperty(parameters, "SCALE_TYP");
 		assertThat(propertyValueCoding).isPresent();
-		assertThat(propertyValueCoding.get().getSystem()).isEqualTo(ITermLoaderSvc.LOINC_URI);
-		assertThat(propertyValueCoding.get().getCode()).isEqualTo("LP7753-9");
-		assertThat(propertyValueCoding.get().getDisplay()).isEqualTo("Qn");
+		assertEquals(ITermLoaderSvc.LOINC_URI, propertyValueCoding.get().getSystem());
+		assertEquals("LP7753-9", propertyValueCoding.get().getCode());
+		assertEquals("Qn", propertyValueCoding.get().getDisplay());
 
 		propertyValueCoding = findProperty(parameters, "COMPONENT");
 		assertFalse(propertyValueCoding.isPresent());
@@ -228,7 +229,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("R' wave amplitude in lead I");
+		assertEquals("R' wave amplitude in lead I", result.getDisplay());
 	}
 
 	@Test
@@ -241,7 +242,7 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(new UriType("http://loinc.org/vs"), null, new StringType("10013-1-9999999999"), new StringType(ITermLoaderSvc.LOINC_URI), null, null, null, mySrd);
 		assertFalse(result.isOk());
-		assertThat(result.getMessage()).isEqualTo("Unknown code 'http://loinc.org#10013-1-9999999999' for in-memory expansion of ValueSet 'http://loinc.org/vs'");
+		assertEquals("Unknown code 'http://loinc.org#10013-1-9999999999' for in-memory expansion of ValueSet 'http://loinc.org/vs'", result.getMessage());
 	}
 
 	private Set<String> toExpandedCodes(ValueSet theExpanded) {

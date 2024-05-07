@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -54,7 +55,7 @@ public class InjectionAttackTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(responseContent).doesNotContain("<script>");
 		}
 	}
@@ -73,9 +74,9 @@ public class InjectionAttackTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, status.getStatusLine().getStatusCode());
 			assertThat(responseContent).doesNotContain("<script>");
-			assertThat(status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim()).isEqualTo("text/html");
+			assertEquals("text/html", status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
 		// JSON HTML
@@ -85,9 +86,9 @@ public class InjectionAttackTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, status.getStatusLine().getStatusCode());
 			assertThat(responseContent).doesNotContain("<script>");
-			assertThat(status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim()).isEqualTo("text/html");
+			assertEquals("text/html", status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
 		// XML HTML
@@ -97,9 +98,9 @@ public class InjectionAttackTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, status.getStatusLine().getStatusCode());
 			assertThat(responseContent).doesNotContain("<script>");
-			assertThat(status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim()).isEqualTo(Constants.CT_FHIR_XML_NEW);
+			assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
 		// JSON Plain
@@ -109,9 +110,9 @@ public class InjectionAttackTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, status.getStatusLine().getStatusCode());
 			assertThat(responseContent).doesNotContain("<script>");
-			assertThat(status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim()).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 	}
 
@@ -128,9 +129,9 @@ public class InjectionAttackTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
+			assertEquals(404, status.getStatusLine().getStatusCode());
 			assertThat(responseContent).doesNotContain("<script>");
-			assertThat(status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim()).isEqualTo("text/html");
+			assertEquals("text/html", status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
 		// JSON HTML
@@ -140,9 +141,9 @@ public class InjectionAttackTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
+			assertEquals(404, status.getStatusLine().getStatusCode());
 			assertThat(responseContent).doesNotContain("<script>");
-			assertThat(status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim()).isEqualTo("text/html");
+			assertEquals("text/html", status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
 		// XML HTML
@@ -152,9 +153,9 @@ public class InjectionAttackTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
+			assertEquals(404, status.getStatusLine().getStatusCode());
 			assertThat(responseContent).doesNotContain("<script>");
-			assertThat(status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim()).isEqualTo(Constants.CT_FHIR_XML_NEW);
+			assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 
 		// JSON Plain
@@ -164,9 +165,9 @@ public class InjectionAttackTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
+			assertEquals(404, status.getStatusLine().getStatusCode());
 			assertThat(responseContent).doesNotContain("<script>");
-			assertThat(status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim()).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("Content-Type").getValue().toLowerCase().replaceAll(";.*", "").trim());
 		}
 	}
 
@@ -182,7 +183,7 @@ public class InjectionAttackTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(responseContent).doesNotContain("<script>");
 		}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.coordinator;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -280,7 +281,7 @@ public class WorkChunkProcessorTest {
 		// verify
 		assertNotNull(processedOutcomeSuccessfully);
 		// +1 because of the > MAX_CHUNK_ERROR_COUNT check
-		assertThat(counter).isEqualTo(WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT + 1);
+		assertEquals(WorkChunkProcessor.MAX_CHUNK_ERROR_COUNT + 1, counter);
 		assertFalse(processedOutcomeSuccessfully);
 	}
 

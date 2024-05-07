@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.index;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
@@ -81,7 +82,7 @@ public class IdHelperServiceTest {
 		when(myStorageSettings.isDeleteEnabled()).thenReturn(true);
 
 		final ResourceNotFoundException resourceNotFoundException = assertThrows(ResourceNotFoundException.class, () -> subject.resolveResourcePersistentIds(requestPartitionId, resourceType, ids, theExcludeDeleted));
-		assertThat(resourceNotFoundException.getMessage()).isEqualTo("HAPI-2001: Resource Patient/123 is not known");
+		assertEquals("HAPI-2001: Resource Patient/123 is not known", resourceNotFoundException.getMessage());
     }
 
     @Test

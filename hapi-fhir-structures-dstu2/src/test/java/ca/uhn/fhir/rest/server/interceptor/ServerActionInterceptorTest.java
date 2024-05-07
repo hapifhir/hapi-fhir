@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Observation;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
@@ -84,13 +85,13 @@ public class ServerActionInterceptorTest {
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.READ), detailsCapt.capture());
 
 		RequestDetails details = detailsCapt.getValue();
-		assertThat(details.getId().getValue()).isEqualTo("Patient/123");
+		assertEquals("Patient/123", details.getId().getValue());
 	}
 
 	@Test
@@ -99,13 +100,13 @@ public class ServerActionInterceptorTest {
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.VREAD), detailsCapt.capture());
 
 		RequestDetails details = detailsCapt.getValue();
-		assertThat(details.getId().getValue()).isEqualTo("Patient/123/_history/456");
+		assertEquals("Patient/123/_history/456", details.getId().getValue());
 	}
 
 	@Test
@@ -118,9 +119,9 @@ public class ServerActionInterceptorTest {
 		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.CREATE), detailsCapt.capture());
 
 		RequestDetails details = detailsCapt.getValue();
-		assertThat(details.getResourceName()).isEqualTo("Patient");
-		assertThat(details.getResource().getClass()).isEqualTo(Patient.class);
-		assertThat(((Patient) details.getResource()).getName().get(0).getFamily().get(0).getValue()).isEqualTo("FAMILY");
+		assertEquals("Patient", details.getResourceName());
+		assertEquals(Patient.class, details.getResource().getClass());
+		assertEquals("FAMILY", ((Patient) details.getResource()).getName().get(0).getFamily().get(0).getValue());
 	}
 
 	@Test
@@ -133,9 +134,9 @@ public class ServerActionInterceptorTest {
 		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.CREATE), detailsCapt.capture());
 
 		RequestDetails details = detailsCapt.getValue();
-		assertThat(details.getResourceName()).isEqualTo("Observation");
-		assertThat(details.getResource().getClass()).isEqualTo(Observation.class);
-		assertThat(((Observation) details.getResource()).getCode().getText()).isEqualTo("OBSCODE");
+		assertEquals("Observation", details.getResourceName());
+		assertEquals(Observation.class, details.getResource().getClass());
+		assertEquals("OBSCODE", ((Observation) details.getResource()).getCode().getText());
 	}
 
 	@Test
@@ -149,11 +150,11 @@ public class ServerActionInterceptorTest {
 		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.UPDATE), detailsCapt.capture());
 
 		RequestDetails details = detailsCapt.getValue();
-		assertThat(details.getResourceName()).isEqualTo("Patient");
-		assertThat(details.getId().getValue()).isEqualTo("Patient/123");
-		assertThat(details.getResource().getClass()).isEqualTo(Patient.class);
-		assertThat(((Patient) details.getResource()).getName().get(0).getFamily().get(0).getValue()).isEqualTo("FAMILY");
-		assertThat(((Patient) details.getResource()).getId().getValue()).isEqualTo("Patient/123");
+		assertEquals("Patient", details.getResourceName());
+		assertEquals("Patient/123", details.getId().getValue());
+		assertEquals(Patient.class, details.getResource().getClass());
+		assertEquals("FAMILY", ((Patient) details.getResource()).getName().get(0).getFamily().get(0).getValue());
+		assertEquals("Patient/123", ((Patient) details.getResource()).getId().getValue());
 	}
 
 	@Test
@@ -162,7 +163,7 @@ public class ServerActionInterceptorTest {
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.HISTORY_SYSTEM), detailsCapt.capture());
@@ -174,11 +175,11 @@ public class ServerActionInterceptorTest {
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.HISTORY_TYPE), detailsCapt.capture());
-		assertThat(detailsCapt.getValue().getResourceName()).isEqualTo("Patient");
+		assertEquals("Patient", detailsCapt.getValue().getResourceName());
 	}
 
 	@Test
@@ -187,12 +188,12 @@ public class ServerActionInterceptorTest {
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.HISTORY_INSTANCE), detailsCapt.capture());
-		assertThat(detailsCapt.getValue().getResourceName()).isEqualTo("Patient");
-		assertThat(detailsCapt.getValue().getId().getValue()).isEqualTo("Patient/123");
+		assertEquals("Patient", detailsCapt.getValue().getResourceName());
+		assertEquals("Patient/123", detailsCapt.getValue().getId().getValue());
 	}
 
 	@AfterAll

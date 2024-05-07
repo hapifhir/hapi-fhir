@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r5.database;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
@@ -110,7 +111,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		IIdType id = myPatientDao.create(patient, new SystemRequestDetails()).getId();
 
 		Patient actual = myPatientDao.read(id, new SystemRequestDetails());
-		assertThat(actual.getName().get(0).getFamily()).isEqualTo(name);
+		assertEquals(name, actual.getName().get(0).getFamily());
 	}
 
 

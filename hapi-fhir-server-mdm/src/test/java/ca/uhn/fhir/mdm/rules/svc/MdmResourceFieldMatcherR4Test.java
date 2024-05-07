@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.rules.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
@@ -86,12 +87,12 @@ public class MdmResourceFieldMatcherR4Test extends BaseMdmRulesR4Test {
 		try {
 			myComparator.match(encounter, myJohny);
 			fail("");		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo("Expecting resource type Patient got resource type Encounter");
+			assertEquals("Expecting resource type Patient got resource type Encounter", e.getMessage());
 		}
 		try {
 			myComparator.match(myJohn, encounter);
 			fail("");		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo("Expecting resource type Patient got resource type Encounter");
+			assertEquals("Expecting resource type Patient got resource type Encounter", e.getMessage());
 		}
 	}
 

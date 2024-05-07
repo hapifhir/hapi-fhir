@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
@@ -58,10 +59,10 @@ public class DeleteDstu2Test {
 
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(204);
+		assertEquals(204, status.getStatusLine().getStatusCode());
 
 		assertNull(ourLastIdParam);
-		assertThat(ourLastConditionalUrl).isEqualTo("Patient?identifier=system%7C001");
+		assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
 	}
 
 	@Test
@@ -73,10 +74,10 @@ public class DeleteDstu2Test {
 
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(204);
+		assertEquals(204, status.getStatusLine().getStatusCode());
 		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
 
-		assertThat(ourLastIdParam.toUnqualified().getValue()).isEqualTo("Patient/2");
+		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
 		assertNull(ourLastConditionalUrl);
 	}
 

@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -32,7 +33,7 @@ public class DefaultProfileValidationSupportR4Test extends BaseValidationTestWit
 		CodeSystem cs = (CodeSystem) mySvc.fetchCodeSystem("http://terminology.hl7.org/CodeSystem/v2-0291");
 		assertNotNull(cs);
 		String version = cs.getVersion();
-		assertThat(version).isEqualTo("2.9");
+		assertEquals("2.9", version);
 
 		cs = (CodeSystem) mySvc.fetchCodeSystem("http://terminology.hl7.org/CodeSystem/v2-0291|" + version);
 		assertNotNull(cs);

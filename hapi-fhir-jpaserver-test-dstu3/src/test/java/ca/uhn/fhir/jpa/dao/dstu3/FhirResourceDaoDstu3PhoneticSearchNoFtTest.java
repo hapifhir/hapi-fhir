@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.phonetic.ApacheEncoder;
 import ca.uhn.fhir.context.phonetic.NumericEncoder;
 import ca.uhn.fhir.context.phonetic.PhoneticEncoderEnum;
@@ -71,7 +72,7 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		Soundex soundex = new Soundex();
 
 		// The tests below depend on these assumptions:
-		assertThat(soundex.encode(GAIL)).isEqualTo(soundex.encode(GALE));
+		assertEquals(soundex.encode(GALE), soundex.encode(GAIL));
 		assertThat(GALE).isNotEqualTo(soundex.encode(GALE));
 		assertThat(GALE).isNotEqualTo(soundex.encode(GAIL));
 		assertThat(GAIL).isNotEqualTo(soundex.encode(GALE));
@@ -79,7 +80,7 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		ourLog.info("Encoded Gale: {}", soundex.encode(GALE));
 		ourLog.info("Encoded Gail: {}", soundex.encode(GAIL));
 		assertThat(soundex.encode(BOB)).isNotEqualTo(soundex.encode(GALE));
-		assertThat(soundex.encode(ADDRESS_CLOSE)).isEqualTo(soundex.encode(ADDRESS));
+		assertEquals(soundex.encode(ADDRESS), soundex.encode(ADDRESS_CLOSE));
 		assertThat(soundex.encode(ADDRESS_FAR)).isNotEqualTo(soundex.encode(ADDRESS));
 		ourLog.info("Encoded address: {}", soundex.encode(ADDRESS));
 	}
@@ -87,9 +88,9 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 	@Test
 	public void testNumeric() {
 		NumericEncoder numeric = new NumericEncoder();
-		assertThat(numeric.encode(PHONE_CLOSE)).isEqualTo(PHONE);
-		assertThat(numeric.encode(PHONE)).isEqualTo(PHONE);
-		assertThat(numeric.encode(PHONE_CLOSE)).isEqualTo(numeric.encode(PHONE));
+		assertEquals(PHONE, numeric.encode(PHONE_CLOSE));
+		assertEquals(PHONE, numeric.encode(PHONE));
+		assertEquals(numeric.encode(PHONE), numeric.encode(PHONE_CLOSE));
 		assertThat(numeric.encode(PHONE_FAR)).isNotEqualTo(numeric.encode(PHONE));
 	}
 
@@ -147,7 +148,7 @@ public class FhirResourceDaoDstu3PhoneticSearchNoFtTest extends BaseJpaDstu3Test
 		// verify
 		List<String> resultIds = result.getAllResourceIds();
 		assertThat(resultIds).hasSize(1);
-		assertThat(resultIds.get(0)).isEqualTo(patientId.getIdPart());
+		assertEquals(patientId.getIdPart(), resultIds.get(0));
 	}
 
 	private void assertSearchMatch(IIdType thePId1, String theSp, String theValue) {

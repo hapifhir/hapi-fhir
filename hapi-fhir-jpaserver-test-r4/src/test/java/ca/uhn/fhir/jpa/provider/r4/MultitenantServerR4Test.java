@@ -89,8 +89,8 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		myTenantClientInterceptor.setTenantId(TENANT_A);
 		CapabilityStatement cs = myClient.capabilities().ofType(CapabilityStatement.class).execute();
 
-		assertThat(cs.getSoftware().getName()).isEqualTo("HAPI FHIR Server");
-		assertThat(myCapturingInterceptor.getLastRequest().getUri()).isEqualTo(myServerBase + "/TENANT-A/metadata");
+		assertEquals("HAPI FHIR Server", cs.getSoftware().getName());
+		assertEquals(myServerBase + "/TENANT-A/metadata", myCapturingInterceptor.getLastRequest().getUri());
 	}
 
 	@Test
@@ -344,7 +344,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 
 	private void assertContainsSingleForcedId(Collection<Object[]> forcedIds, String patientId){
 		assertThat(forcedIds).hasSize(1);
-		assertThat(forcedIds.stream().toList().get(0)[2]).isEqualTo(patientId);
+		assertEquals(patientId, forcedIds.stream().toList().get(0)[2]);
 	}
 
 	private void deletePatient(String tenantId, IIdType patientId){
@@ -447,7 +447,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setTenantId(TENANT_B);
 		Patient patient1 = myPatientDao.read(new IdType("Patient/1234a"), requestDetails);
-		assertThat(patient1.getName().get(0).getFamily()).isEqualTo("Family");
+		assertEquals("Family", patient1.getName().get(0).getFamily());
 	}
 
 	@ParameterizedTest
@@ -471,7 +471,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 		assertThat(result.getEntry()).hasSize(1);
 		Patient retrievedPatient = (Patient) result.getEntry().get(0).getResource();
 		assertNotNull(retrievedPatient);
-		assertThat(retrievedPatient.getName().get(0).getFamily()).isEqualTo("Family");
+		assertEquals("Family", retrievedPatient.getName().get(0).getFamily());
 	}
 
 	@Test
@@ -531,7 +531,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			myPatientDao.update((Patient) patientA, requestDetails);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(2079) + "Resource " + ((Patient) patientA).getResourceType() + "/" + ((Patient) patientA).getIdElement().getIdPart() + " is not known");
+			assertEquals(Msg.code(2079) + "Resource " + ((Patient) patientA).getResourceType() + "/" + ((Patient) patientA).getIdElement().getIdPart() + " is not known", e.getMessage());
 		}
 	}
 
@@ -640,7 +640,7 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 			mySystemDao.transaction(requestDetails, input);
 			fail("");
 		} catch (MethodNotAllowedException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(531) + "Can not call transaction GET methods from this context");
+			assertEquals(Msg.code(531) + "Can not call transaction GET methods from this context", e.getMessage());
 		}
 
 	}

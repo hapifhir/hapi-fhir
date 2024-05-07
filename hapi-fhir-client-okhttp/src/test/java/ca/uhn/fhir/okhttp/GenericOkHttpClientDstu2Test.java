@@ -1,5 +1,6 @@
 package ca.uhn.fhir.okhttp;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -106,7 +107,7 @@ public class GenericOkHttpClientDstu2Test {
 			fail("");
 		} catch (IllegalStateException e) {
 			String factoryClassName = clientFactory.getClass().getSimpleName();
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1355) + factoryClassName + " does not have FhirContext defined. This must be set via " + factoryClassName + "#setFhirContext(FhirContext)");
+			assertEquals(Msg.code(1355) + factoryClassName + " does not have FhirContext defined. This must be set via " + factoryClassName + "#setFhirContext(FhirContext)", e.getMessage());
 		}
 	}
 
@@ -145,17 +146,17 @@ public class GenericOkHttpClientDstu2Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		client.fetchConformance().ofType(Conformance.class).execute();
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/metadata");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata", MY_SERVLET.ourRequestUri);
 		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept")).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue()).contains(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
 
 		client.fetchConformance().ofType(Conformance.class).encodedJson().execute();
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/metadata?_format=json");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata?_format=json", MY_SERVLET.ourRequestUri);
 		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept")).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
 
 		client.fetchConformance().ofType(Conformance.class).encodedXml().execute();
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/metadata?_format=xml");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata?_format=xml", MY_SERVLET.ourRequestUri);
 		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept")).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeaders.get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_XML);
 	}
@@ -177,13 +178,13 @@ public class GenericOkHttpClientDstu2Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		Patient resp = client.read(Patient.class, new IdDt("123"));
-		assertThat(resp.getName().get(0).getFamily().get(0).getValue()).isEqualTo("FAMILY");
-		assertThat(MY_SERVLET.ourRequestUriAll.get(0)).isEqualTo(ourServer.getBaseUrl() + "/fhir/metadata");
+		assertEquals("FAMILY", resp.getName().get(0).getFamily().get(0).getValue());
+		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata", MY_SERVLET.ourRequestUriAll.get(0));
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept")).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).contains(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_XML);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
-		assertThat(MY_SERVLET.ourRequestUriAll.get(1)).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123", MY_SERVLET.ourRequestUriAll.get(1));
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept")).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).contains(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_XML);
@@ -208,12 +209,12 @@ public class GenericOkHttpClientDstu2Test {
 		client.setEncoding(EncodingEnum.JSON);
 
 		Patient resp = client.read(Patient.class, new IdDt("123"));
-		assertThat(resp.getName().get(0).getFamily().get(0).getValue()).isEqualTo("FAMILY");
-		assertThat(MY_SERVLET.ourRequestUriAll.get(0)).isEqualTo(ourServer.getBaseUrl() + "/fhir/metadata?_format=json");
+		assertEquals("FAMILY", resp.getName().get(0).getFamily().get(0).getValue());
+		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata?_format=json", MY_SERVLET.ourRequestUriAll.get(0));
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept")).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(0).get("Accept").get(0).getValue()).doesNotContain(Constants.CT_FHIR_XML);
-		assertThat(MY_SERVLET.ourRequestUriAll.get(1)).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=json");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=json", MY_SERVLET.ourRequestUriAll.get(1));
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept")).hasSize(1);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).contains(Constants.CT_FHIR_JSON);
 		assertThat(MY_SERVLET.ourRequestHeadersAll.get(1).get("Accept").get(0).getValue()).doesNotContain(Constants.CT_FHIR_XML);
@@ -236,9 +237,9 @@ public class GenericOkHttpClientDstu2Test {
 
 		Conformance resp = (Conformance) client.capabilities().ofType(Conformance.class).execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/metadata");
-		assertThat(resp.getCopyright()).isEqualTo("COPY");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("GET");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/metadata", MY_SERVLET.ourRequestUri);
+		assertEquals("COPY", resp.getCopyright());
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 	}
 
 	@Test
@@ -253,8 +254,8 @@ public class GenericOkHttpClientDstu2Test {
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 		p.setId("123");
 
@@ -264,8 +265,8 @@ public class GenericOkHttpClientDstu2Test {
 		String body = MY_SERVLET.ourRequestBodyString;
 		assertThat(body).contains("<family value=\"FOOFAMILY\"/>");
 		assertThat(body).doesNotContain("123");
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 	}
 
 	@Test
@@ -282,25 +283,25 @@ public class GenericOkHttpClientDstu2Test {
 		String expectedContentTypeHeader = EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8;
 		assertContentTypeEquals(expectedContentTypeHeader);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient");
-		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue()).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?name=foo");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue());
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 		client.create().resource(p).conditionalByUrl("Patient?name=http://foo|bar").encodedXml().execute();
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(expectedContentTypeHeader);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient");
-		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue()).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar", MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue());
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 		client.create().resource(p).conditional().where(Patient.NAME.matches().value("foo")).encodedXml().execute();
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(expectedContentTypeHeader);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient");
-		assertThat(MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue()).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?name=foo");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", MY_SERVLET.ourRequestFirstHeaders.get(Constants.HEADER_IF_NONE_EXIST).getValue());
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 	}
 
 	private void assertContentTypeEquals(String expectedContentTypeHeader) {
@@ -320,11 +321,11 @@ public class GenericOkHttpClientDstu2Test {
 
 		client.create().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER)).hasSize(1);
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue()).isEqualTo(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL);
+		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 
 		client.create().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER)).hasSize(1);
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue()).isEqualTo(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 	}
 
 	@Test
@@ -345,7 +346,7 @@ public class GenericOkHttpClientDstu2Test {
 
 		MethodOutcome output = client.create().resource(p).execute();
 		assertNotNull(output.getResource());
-		assertThat(output.getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/123");
+		assertEquals("Patient/123", output.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
@@ -355,16 +356,16 @@ public class GenericOkHttpClientDstu2Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		client.delete().resourceById(new IdDt("Patient/123")).execute();
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("DELETE");
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123");
+		assertEquals("DELETE", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123", MY_SERVLET.ourRequestUri);
 
 		client.delete().resourceConditionalByUrl("Patient?name=foo").execute();
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("DELETE");
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?name=foo");
+		assertEquals("DELETE", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", MY_SERVLET.ourRequestUri);
 
 		client.delete().resourceConditionalByType("Patient").where(Patient.NAME.matches().value("foo")).execute();
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("DELETE");
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?name=foo");
+		assertEquals("DELETE", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", MY_SERVLET.ourRequestUri);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -375,8 +376,8 @@ public class GenericOkHttpClientDstu2Test {
 		IGenericClient client = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl() + "/fhir");
 
 		client.delete().resourceById(new IdDt("Patient/123")).execute();
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("DELETE");
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123");
+		assertEquals("DELETE", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123", MY_SERVLET.ourRequestUri);
 
 	}
 
@@ -397,7 +398,7 @@ public class GenericOkHttpClientDstu2Test {
 			.andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/_history");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/_history", MY_SERVLET.ourRequestUri);
 		assertThat(response.getEntry()).hasSize(1);
 
 		response = client
@@ -408,7 +409,7 @@ public class GenericOkHttpClientDstu2Test {
 			.count(null)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/_history");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/_history", MY_SERVLET.ourRequestUri);
 		assertThat(response.getEntry()).hasSize(1);
 
 		response = client
@@ -418,7 +419,7 @@ public class GenericOkHttpClientDstu2Test {
 			.since(new InstantDt())
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/_history");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/_history", MY_SERVLET.ourRequestUri);
 		assertThat(response.getEntry()).hasSize(1);
 
 		response = client
@@ -427,7 +428,7 @@ public class GenericOkHttpClientDstu2Test {
 			.andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/_history");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/_history", MY_SERVLET.ourRequestUri);
 		assertThat(response.getEntry()).hasSize(1);
 
 		response = client
@@ -436,7 +437,7 @@ public class GenericOkHttpClientDstu2Test {
 			.andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123/_history");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/_history", MY_SERVLET.ourRequestUri);
 		assertThat(response.getEntry()).hasSize(1);
 
 		response = client
@@ -485,10 +486,10 @@ public class GenericOkHttpClientDstu2Test {
 			.encodedXml()
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123/$meta-add");
-		assertThat(resp.getProfile().get(0).getValue()).isEqualTo("urn:profile:out");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
-		assertThat(MY_SERVLET.ourRequestBodyString).isEqualTo("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"meta\"/><valueMeta><profile value=\"urn:profile:in\"/></valueMeta></parameter></Parameters>");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$meta-add", MY_SERVLET.ourRequestUri);
+		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"meta\"/><valueMeta><profile value=\"urn:profile:in\"/></valueMeta></parameter></Parameters>", MY_SERVLET.ourRequestBodyString);
 	}
 
 	@Test
@@ -513,9 +514,9 @@ public class GenericOkHttpClientDstu2Test {
 			.fromServer()
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/$meta");
-		assertThat(resp.getProfile().get(0).getValue()).isEqualTo("urn:profile:out");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("GET");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$meta", MY_SERVLET.ourRequestUri);
+		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 		resp = client
 			.meta()
@@ -523,9 +524,9 @@ public class GenericOkHttpClientDstu2Test {
 			.fromType("Patient")
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/$meta");
-		assertThat(resp.getProfile().get(0).getValue()).isEqualTo("urn:profile:out");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("GET");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$meta", MY_SERVLET.ourRequestUri);
+		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 		resp = client
 			.meta()
@@ -533,9 +534,9 @@ public class GenericOkHttpClientDstu2Test {
 			.fromResource(new IdDt("Patient/123"))
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123/$meta");
-		assertThat(resp.getProfile().get(0).getValue()).isEqualTo("urn:profile:out");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("GET");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$meta", MY_SERVLET.ourRequestUri);
+		assertEquals("urn:profile:out", resp.getProfile().get(0).getValue());
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 	}
 
 	@Test
@@ -565,9 +566,9 @@ public class GenericOkHttpClientDstu2Test {
 			.useHttpGet()
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2");
-		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("GET");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", MY_SERVLET.ourRequestUri);
+		assertEquals(respString, p.encodeResourceToString(resp));
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 		resp = client
 			.operation()
@@ -577,9 +578,9 @@ public class GenericOkHttpClientDstu2Test {
 			.useHttpGet()
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2");
-		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("GET");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", MY_SERVLET.ourRequestUri);
+		assertEquals(respString, p.encodeResourceToString(resp));
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 		resp = client
 			.operation()
@@ -589,9 +590,9 @@ public class GenericOkHttpClientDstu2Test {
 			.useHttpGet()
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2");
-		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("GET");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", MY_SERVLET.ourRequestUri);
+		assertEquals(respString, p.encodeResourceToString(resp));
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 		resp = client
 			.operation()
@@ -600,7 +601,7 @@ public class GenericOkHttpClientDstu2Test {
 			.withParameters(inParams)
 			.useHttpGet()
 			.execute();
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION?param1=STRINGVALIN1&param1=STRINGVALIN1b&param2=STRINGVALIN2", MY_SERVLET.ourRequestUri);
 	}
 
 	@Test
@@ -625,9 +626,9 @@ public class GenericOkHttpClientDstu2Test {
 			.useHttpGet()
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION");
-		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("GET");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
+		assertEquals(respString, p.encodeResourceToString(resp));
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 		resp = client
 			.operation()
@@ -637,9 +638,9 @@ public class GenericOkHttpClientDstu2Test {
 			.useHttpGet()
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/$SOMEOPERATION");
-		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("GET");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
+		assertEquals(respString, p.encodeResourceToString(resp));
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 		resp = client
 			.operation()
@@ -649,9 +650,9 @@ public class GenericOkHttpClientDstu2Test {
 			.useHttpGet()
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION");
-		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("GET");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
+		assertEquals(respString, p.encodeResourceToString(resp));
+		assertEquals("GET", MY_SERVLET.ourRequestMethod);
 
 		resp = client
 			.operation()
@@ -660,7 +661,7 @@ public class GenericOkHttpClientDstu2Test {
 			.withNoParameters(Parameters.class)
 			.useHttpGet()
 			.execute();
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 	}
 
 	@Test
@@ -690,7 +691,7 @@ public class GenericOkHttpClientDstu2Test {
 		ca.uhn.fhir.model.dstu2.resource.Bundle responseBundle = (ca.uhn.fhir.model.dstu2.resource.Bundle) outParams.getParameter().get(0).getResource();
 
 		// Print the response bundle
-		assertThat(responseBundle.getId().getIdPart()).isEqualTo("8cef5f2a-0ba9-43a5-be26-c8dde9ff0e19");
+		assertEquals("8cef5f2a-0ba9-43a5-be26-c8dde9ff0e19", responseBundle.getId().getIdPart());
 	}
 
 	@Test
@@ -717,13 +718,13 @@ public class GenericOkHttpClientDstu2Test {
 			.named("$SOMEOPERATION")
 			.withParameters(inParams).encodedXml().execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-		assertThat(reqString).isEqualTo(MY_SERVLET.ourRequestBodyString);
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
+		assertEquals(MY_SERVLET.ourRequestBodyString, reqString);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 		assertThat(resp.getParameter()).hasSize(1);
-		assertThat(resp.getParameter().get(0).getResource().getClass()).isEqualTo(ca.uhn.fhir.model.dstu2.resource.Bundle.class);
+		assertEquals(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resp.getParameter().get(0).getResource().getClass());
 	}
 
 	@Test
@@ -749,12 +750,12 @@ public class GenericOkHttpClientDstu2Test {
 			.encodedXml()
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION");
-		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
+		assertEquals(respString, p.encodeResourceToString(resp));
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
-		assertThat((MY_SERVLET.ourRequestBodyString)).isEqualTo("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueString value=\"value1\"/></parameter><parameter><name value=\"name2\"/><valueString value=\"value1\"/></parameter></Parameters>");
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueString value=\"value1\"/></parameter><parameter><name value=\"name2\"/><valueString value=\"value1\"/></parameter></Parameters>", (MY_SERVLET.ourRequestBodyString));
 
 		/*
 		 * Composite type
@@ -769,12 +770,12 @@ public class GenericOkHttpClientDstu2Test {
 			.encodedXml()
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION");
-		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
+		assertEquals(respString, p.encodeResourceToString(resp));
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
-		assertThat((MY_SERVLET.ourRequestBodyString)).isEqualTo("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueIdentifier><system value=\"system1\"/><value value=\"value1\"/></valueIdentifier></parameter><parameter><name value=\"name2\"/><valueString value=\"value1\"/></parameter></Parameters>");
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueIdentifier><system value=\"system1\"/><value value=\"value1\"/></valueIdentifier></parameter><parameter><name value=\"name2\"/><valueString value=\"value1\"/></parameter></Parameters>", (MY_SERVLET.ourRequestBodyString));
 
 		/*
 		 * Resource
@@ -789,12 +790,12 @@ public class GenericOkHttpClientDstu2Test {
 			.encodedXml()
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION");
-		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
+		assertEquals(respString, p.encodeResourceToString(resp));
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
-		assertThat((MY_SERVLET.ourRequestBodyString)).isEqualTo("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueIdentifier><system value=\"system1\"/><value value=\"value1\"/></valueIdentifier></parameter><parameter><name value=\"name2\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><active value=\"true\"/></Patient></resource></parameter></Parameters>");
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"name1\"/><valueIdentifier><system value=\"system1\"/><value value=\"value1\"/></valueIdentifier></parameter><parameter><name value=\"name2\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><active value=\"true\"/></Patient></resource></parameter></Parameters>", (MY_SERVLET.ourRequestBodyString));
 	}
 
 	@Test
@@ -870,7 +871,7 @@ public class GenericOkHttpClientDstu2Test {
 			.useHttpGet()
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/1/$validate-code?code=8495-4&system=http%3A%2F%2Floinc.org");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/1/$validate-code?code=8495-4&system=http%3A%2F%2Floinc.org", MY_SERVLET.ourRequestUri);
 
 		client
 			.operation()
@@ -881,9 +882,9 @@ public class GenericOkHttpClientDstu2Test {
 			.encodedXml()
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/1/$validate-code");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/1/$validate-code", MY_SERVLET.ourRequestUri);
 		ourLog.info(MY_SERVLET.ourRequestBodyString);
-		assertThat(MY_SERVLET.ourRequestBodyString).isEqualTo("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"code\"/><valueCode value=\"8495-4\"/></parameter><parameter><name value=\"system\"/><valueUri value=\"http://loinc.org\"/></parameter></Parameters>");
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"code\"/><valueCode value=\"8495-4\"/></parameter><parameter><name value=\"system\"/><valueUri value=\"http://loinc.org\"/></parameter></Parameters>", MY_SERVLET.ourRequestBodyString);
 	}
 
 	@Test
@@ -911,12 +912,12 @@ public class GenericOkHttpClientDstu2Test {
 			.named("$SOMEOPERATION")
 			.withParameters(inParams).encodedXml().execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION");
-		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
+		assertEquals(respString, p.encodeResourceToString(resp));
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-		assertThat(reqString).isEqualTo(MY_SERVLET.ourRequestBodyString);
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
+		assertEquals(MY_SERVLET.ourRequestBodyString, reqString);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 		resp = client
 			.operation()
@@ -924,12 +925,12 @@ public class GenericOkHttpClientDstu2Test {
 			.named("$SOMEOPERATION")
 			.withParameters(inParams).encodedXml().execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/$SOMEOPERATION");
-		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
+		assertEquals(respString, p.encodeResourceToString(resp));
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-		assertThat(reqString).isEqualTo(MY_SERVLET.ourRequestBodyString);
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
+		assertEquals(MY_SERVLET.ourRequestBodyString, reqString);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 		resp = client
 			.operation()
@@ -937,16 +938,16 @@ public class GenericOkHttpClientDstu2Test {
 			.named("$SOMEOPERATION")
 			.withParameters(inParams).encodedXml().execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION");
-		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
+		assertEquals(respString, p.encodeResourceToString(resp));
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-		assertThat(reqString).isEqualTo(MY_SERVLET.ourRequestBodyString);
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
+		assertEquals(MY_SERVLET.ourRequestBodyString, reqString);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 		resp = client.operation().onInstance(new IdDt("http://foo.com/bar/baz/Patient/123/_history/22")).named("$SOMEOPERATION").withParameters(inParams).execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 	}
 
 	@Test
@@ -972,12 +973,12 @@ public class GenericOkHttpClientDstu2Test {
 			.named("$SOMEOPERATION")
 			.withNoParameters(Parameters.class).encodedXml().execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION");
-		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
+		assertEquals(respString, p.encodeResourceToString(resp));
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-		assertThat(reqString).isEqualTo(MY_SERVLET.ourRequestBodyString);
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
+		assertEquals(MY_SERVLET.ourRequestBodyString, reqString);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 		resp = client
 			.operation()
@@ -985,12 +986,12 @@ public class GenericOkHttpClientDstu2Test {
 			.named("$SOMEOPERATION")
 			.withNoParameters(Parameters.class).encodedXml().execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/$SOMEOPERATION");
-		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
+		assertEquals(respString, p.encodeResourceToString(resp));
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-		assertThat(reqString).isEqualTo(MY_SERVLET.ourRequestBodyString);
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
+		assertEquals(MY_SERVLET.ourRequestBodyString, reqString);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 		resp = client
 			.operation()
@@ -998,12 +999,12 @@ public class GenericOkHttpClientDstu2Test {
 			.named("$SOMEOPERATION")
 			.withNoParameters(Parameters.class).encodedXml().execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION");
-		assertThat(p.encodeResourceToString(resp)).isEqualTo(respString);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
+		assertEquals(respString, p.encodeResourceToString(resp));
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
-		assertThat(reqString).isEqualTo(MY_SERVLET.ourRequestBodyString);
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
+		assertEquals(MY_SERVLET.ourRequestBodyString, reqString);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 
 		resp = client
 			.operation()
@@ -1012,7 +1013,7 @@ public class GenericOkHttpClientDstu2Test {
 			.withNoParameters(Parameters.class)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123/$SOMEOPERATION", MY_SERVLET.ourRequestUri);
 	}
 
 	@Test
@@ -1032,7 +1033,7 @@ public class GenericOkHttpClientDstu2Test {
 			.execute();
 
 		assertThat(resp.getEntry()).hasSize(1);
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/next");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/next", MY_SERVLET.ourRequestUri);
 	}
 
 	@Test
@@ -1063,7 +1064,7 @@ public class GenericOkHttpClientDstu2Test {
 			.execute();
 
 		assertThat(resp.getEntry()).hasSize(1);
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/prev");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/prev", MY_SERVLET.ourRequestUri);
 
 		/*
 		 * Try with "prev" instead of "previous"
@@ -1078,7 +1079,7 @@ public class GenericOkHttpClientDstu2Test {
 			.execute();
 
 		assertThat(resp.getEntry()).hasSize(1);
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/prev");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/prev", MY_SERVLET.ourRequestUri);
 	}
 
 	@Test
@@ -1095,8 +1096,8 @@ public class GenericOkHttpClientDstu2Test {
 		Patient response;
 
 		response = (Patient) client.read(new UriDt(ourServer.getBaseUrl() + "/fhir/Patient/123"));
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123");
-		assertThat(response.getName().get(0).getFamily().get(0).getValue()).isEqualTo("FAM");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123", MY_SERVLET.ourRequestUri);
+		assertEquals("FAM", response.getName().get(0).getFamily().get(0).getValue());
 	}
 
 	@Test
@@ -1113,8 +1114,8 @@ public class GenericOkHttpClientDstu2Test {
 		Patient response;
 
 		response = (Patient) client.read().resource(Patient.class).withUrl(new IdDt(ourServer.getBaseUrl() + "/AAA/Patient/123")).execute();
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/AAA/Patient/123");
-		assertThat(response.getName().get(0).getFamily().get(0).getValue()).isEqualTo("FAM");
+		assertEquals(ourServer.getBaseUrl() + "/AAA/Patient/123", MY_SERVLET.ourRequestUri);
+		assertEquals("FAM", response.getName().get(0).getFamily().get(0).getValue());
 	}
 
 	@Test
@@ -1147,7 +1148,7 @@ public class GenericOkHttpClientDstu2Test {
 			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
 
-		assertThat(ResourceMetadataKeyEnum.UPDATED.get(response).getValueAsString()).isEqualTo("2015-06-22T15:48:57.554-04:00");
+		assertEquals("2015-06-22T15:48:57.554-04:00", ResourceMetadataKeyEnum.UPDATED.get(response).getValueAsString());
 	}
 
 	@Test
@@ -1167,7 +1168,7 @@ public class GenericOkHttpClientDstu2Test {
 
 		assertThat(MY_SERVLET.ourRequestUri, either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123?_elements=name%2Cidentifier"))
 			.or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient/123?_elements=identifier%2Cname")));
-		assertThat(response.getClass()).isEqualTo(Patient.class);
+		assertEquals(Patient.class, response.getClass());
 	}
 
 	@Test
@@ -1207,9 +1208,9 @@ public class GenericOkHttpClientDstu2Test {
 			.summaryMode(SummaryEnum.TEXT)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123?_summary=text");
-		assertThat(response.getClass()).isEqualTo(Patient.class);
-		assertThat(response.getText().getDiv().getValueAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELP IM A DIV</div>");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123?_summary=text", MY_SERVLET.ourRequestUri);
+		assertEquals(Patient.class, response.getClass());
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELP IM A DIV</div>", response.getText().getDiv().getValueAsString());
 	}
 
 	@Test
@@ -1227,8 +1228,8 @@ public class GenericOkHttpClientDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james");
-		assertThat(response.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=james", MY_SERVLET.ourRequestUri);
+		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 	}
 
 	@Test
@@ -1246,7 +1247,7 @@ public class GenericOkHttpClientDstu2Test {
 			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/AAA?name=http%3A//foo%7Cbar&_format=json");
+		assertEquals(ourServer.getBaseUrl() + "/AAA?name=http%3A//foo%7Cbar&_format=json", MY_SERVLET.ourRequestUri);
 		assertNotNull(response);
 
 		response = client.search()
@@ -1255,7 +1256,7 @@ public class GenericOkHttpClientDstu2Test {
 			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar&_format=json");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar&_format=json", MY_SERVLET.ourRequestUri);
 		assertNotNull(response);
 
 		response = client.search()
@@ -1264,7 +1265,7 @@ public class GenericOkHttpClientDstu2Test {
 			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar&_format=json");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar&_format=json", MY_SERVLET.ourRequestUri);
 		assertNotNull(response);
 
 		response = client.search()
@@ -1272,7 +1273,7 @@ public class GenericOkHttpClientDstu2Test {
 			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
 		assertNotNull(response);
 
 		response = client.search()
@@ -1280,13 +1281,13 @@ public class GenericOkHttpClientDstu2Test {
 			.returnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient", MY_SERVLET.ourRequestUri);
 		assertNotNull(response);
 
 		try {
 			client.search().byUrl("foo/bar?test=1");
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1393) + "Search URL must be either a complete URL starting with http: or https:, or a relative FHIR URL in the form [ResourceType]?[Params]");
+			assertEquals(Msg.code(1393) + "Search URL must be either a complete URL starting with http: or https:, or a relative FHIR URL in the form [ResourceType]?[Params]", e.getMessage());
 		}
 	}
 
@@ -1309,13 +1310,13 @@ public class GenericOkHttpClientDstu2Test {
 			.execute();
 
 		Link link = response.getLink().get(0);
-		assertThat(link.getRelation()).isEqualTo("just trying add link");
-		assertThat(link.getUrl()).isEqualTo("blarion");
+		assertEquals("just trying add link", link.getRelation());
+		assertEquals("blarion", link.getUrl());
 
 		Entry entry = response.getEntry().get(0);
 		link = entry.getLink().get(0);
-		assertThat(link.getRelation()).isEqualTo("orionhealth.edit");
-		assertThat(link.getUrl()).isEqualTo("Observation");
+		assertEquals("orionhealth.edit", link.getRelation());
+		assertEquals("Observation", link.getUrl());
 	}
 
 	@Test
@@ -1336,7 +1337,7 @@ public class GenericOkHttpClientDstu2Test {
 
 		assertThat(MY_SERVLET.ourRequestUri, either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier"))
 			.or(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=identifier%2Cname")));
-		assertThat(response.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
+		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 	}
 
 	@Test
@@ -1356,18 +1357,18 @@ public class GenericOkHttpClientDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/_search?_elements=identifier%2Cname");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/_search?_elements=identifier%2Cname", MY_SERVLET.ourRequestUri);
 
 		// assertThat(MY_SERVLET.ourRequestUri,
 		// either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() +
 		// "/fhir/Patient?name=james&_elements=identifier%2Cname")));
 
-		assertThat(response.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
+		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
-		assertThat(MY_SERVLET.ourRequestBodyString).isEqualTo("name=james");
+		assertEquals("name=james", MY_SERVLET.ourRequestBodyString);
 
-		assertThat(MY_SERVLET.ourRequestContentType.replace(";char", "; char").toLowerCase()).isEqualTo("application/x-www-form-urlencoded");
-		assertThat(MY_SERVLET.ourRequestFirstHeaders.get("Accept").getValue()).isEqualTo(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY);
+		assertEquals("application/x-www-form-urlencoded", MY_SERVLET.ourRequestContentType.replace(";char", "; char").toLowerCase());
+		assertEquals(Constants.HEADER_ACCEPT_VALUE_XML_OR_JSON_LEGACY, MY_SERVLET.ourRequestFirstHeaders.get("Accept").getValue());
 		assertThat(MY_SERVLET.ourRequestFirstHeaders.get("User-Agent").getValue()).isNotEmpty();
 	}
 
@@ -1397,12 +1398,12 @@ public class GenericOkHttpClientDstu2Test {
 		// either(equalTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_elements=name%2Cidentifier")).or(equalTo(ourServer.getBaseUrl() +
 		// "/fhir/Patient?name=james&_elements=identifier%2Cname")));
 
-		assertThat(response.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
+		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 
-		assertThat(MY_SERVLET.ourRequestBodyString).isEqualTo("name=james");
+		assertEquals("name=james", MY_SERVLET.ourRequestBodyString);
 
-		assertThat(MY_SERVLET.ourRequestContentType).isEqualTo("application/x-www-form-urlencoded");
-		assertThat(MY_SERVLET.ourRequestFirstHeaders.get("Accept").getValue()).isEqualTo(Constants.CT_FHIR_JSON);
+		assertEquals("application/x-www-form-urlencoded", MY_SERVLET.ourRequestContentType);
+		assertEquals(Constants.CT_FHIR_JSON, MY_SERVLET.ourRequestFirstHeaders.get("Accept").getValue());
 	}
 
 	@Test
@@ -1421,8 +1422,8 @@ public class GenericOkHttpClientDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_lastUpdated=ge2011-01-01&_lastUpdated=le2012-01-01");
-		assertThat(response.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_lastUpdated=ge2011-01-01&_lastUpdated=le2012-01-01", MY_SERVLET.ourRequestUri);
+		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 	}
 
 	@Test
@@ -1443,8 +1444,8 @@ public class GenericOkHttpClientDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?_security=system1%7Ccode1&_security=system2%7Ccode2&_profile=http%3A%2F%2Ffoo1&_profile=http%3A%2F%2Ffoo2");
-		assertThat(response.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?_security=system1%7Ccode1&_security=system2%7Ccode2&_profile=http%3A%2F%2Ffoo1&_profile=http%3A%2F%2Ffoo2", MY_SERVLET.ourRequestUri);
+		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 	}
 
 	@SuppressWarnings("unused")
@@ -1464,7 +1465,7 @@ public class GenericOkHttpClientDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?_revinclude=Provenance%3Atarget&_format=json");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?_revinclude=Provenance%3Atarget&_format=json", MY_SERVLET.ourRequestUri);
 	}
 
 	@Test
@@ -1483,8 +1484,8 @@ public class GenericOkHttpClientDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_summary=false");
-		assertThat(response.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=james&_summary=false", MY_SERVLET.ourRequestUri);
+		assertEquals(Patient.class, response.getEntry().get(0).getResource().getClass());
 	}
 
 	@Test
@@ -1511,7 +1512,7 @@ public class GenericOkHttpClientDstu2Test {
 			.withBundle(reqString)
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/", MY_SERVLET.ourRequestUri);
 		assertThat(response).contains("\"Bundle\"");
 		assertContentTypeEquals("application/json+fhir; charset=UTF-8");
 
@@ -1520,7 +1521,7 @@ public class GenericOkHttpClientDstu2Test {
 			.encodedXml()
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/", MY_SERVLET.ourRequestUri);
 		assertContentTypeEquals("application/xml+fhir; charset=UTF-8");
 	}
 
@@ -1552,11 +1553,11 @@ public class GenericOkHttpClientDstu2Test {
 			.encodedJson()
 			.execute();
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir");
+		assertEquals(ourServer.getBaseUrl() + "/fhir", MY_SERVLET.ourRequestUri);
 		assertThat(response.getEntry()).hasSize(2);
 
-		assertThat(response.getEntry().get(0).getResponse().getLocation()).isEqualTo("Patient/1/_history/1");
-		assertThat(response.getEntry().get(1).getResponse().getLocation()).isEqualTo("Patient/2/_history/2");
+		assertEquals("Patient/1/_history/1", response.getEntry().get(0).getResponse().getLocation());
+		assertEquals("Patient/2/_history/2", response.getEntry().get(1).getResponse().getLocation());
 	}
 
 	@Test
@@ -1572,36 +1573,36 @@ public class GenericOkHttpClientDstu2Test {
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("PUT");
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?name=foo");
+		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", MY_SERVLET.ourRequestUri);
 
 		client.update().resource(p).conditionalByUrl("Patient?name=http://foo|bar").encodedXml().execute();
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("PUT");
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar");
+		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=http%3A//foo%7Cbar", MY_SERVLET.ourRequestUri);
 
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditionalByUrl("Patient?name=foo").encodedXml().execute();
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("PUT");
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?name=foo");
+		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo", MY_SERVLET.ourRequestUri);
 
 		client.update().resource(p).conditional().where(Patient.NAME.matches().value("foo")).and(Patient.ADDRESS.matches().value("AAA|BBB")).encodedXml().execute();
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("PUT");
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?name=foo&address=AAA%5C%7CBBB");
+		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo&address=AAA%5C%7CBBB", MY_SERVLET.ourRequestUri);
 
 		client.update().resource(ourCtx.newXmlParser().encodeResourceToString(p)).conditional().where(Patient.NAME.matches().value("foo")).and(Patient.ADDRESS.matches().value("AAA|BBB")).encodedXml().execute();
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertContentTypeEquals(EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("PUT");
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient?name=foo&address=AAA%5C%7CBBB");
+		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient?name=foo&address=AAA%5C%7CBBB", MY_SERVLET.ourRequestUri);
 	}
 
 	private String getActualContentTypeHeader() {
@@ -1624,15 +1625,15 @@ public class GenericOkHttpClientDstu2Test {
 		String expectedContentTypeHeader = EncodingEnum.XML.getResourceContentType() + Constants.HEADER_SUFFIX_CT_UTF_8;
 		assertThat(getActualContentTypeHeader()).isEqualToIgnoringCase(expectedContentTypeHeader);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=xml");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("PUT");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=xml", MY_SERVLET.ourRequestUri);
+		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
 
 		client.update("123", p);
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_CONTENT_TYPE)).hasSize(1);
 		assertThat(getActualContentTypeHeader()).isEqualToIgnoringCase(expectedContentTypeHeader);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("<family value=\"FOOFAMILY\"/>");
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=xml");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("PUT");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/123?_format=xml", MY_SERVLET.ourRequestUri);
+		assertEquals("PUT", MY_SERVLET.ourRequestMethod);
 	}
 
 	@Test
@@ -1647,11 +1648,11 @@ public class GenericOkHttpClientDstu2Test {
 
 		client.update().resource(p).prefer(PreferReturnEnum.MINIMAL).execute();
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER)).hasSize(1);
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue()).isEqualTo(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL);
+		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_MINIMAL, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 
 		client.update().resource(p).prefer(PreferReturnEnum.REPRESENTATION).execute();
 		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER)).hasSize(1);
-		assertThat(MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue()).isEqualTo(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
+		assertEquals(Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION, MY_SERVLET.ourRequestHeaders.get(Constants.HEADER_PREFER).get(0).getValue());
 	}
 
 	@Test
@@ -1672,7 +1673,7 @@ public class GenericOkHttpClientDstu2Test {
 
 		MethodOutcome output = client.update().resource(p).execute();
 		assertNotNull(output.getResource());
-		assertThat(output.getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/123");
+		assertEquals("Patient/123", output.getResource().getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
@@ -1692,32 +1693,32 @@ public class GenericOkHttpClientDstu2Test {
 		MethodOutcome response;
 
 		response = client.validate().resource(p).encodedXml().execute();
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/$validate");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
-		assertThat(MY_SERVLET.ourRequestBodyString).isEqualTo("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$validate", MY_SERVLET.ourRequestUri);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", MY_SERVLET.ourRequestBodyString);
 		assertNotNull(response.getOperationOutcome());
-		assertThat(toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("FOOBAR");
+		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 
 		response = client.validate().resource(ourCtx.newXmlParser().encodeResourceToString(p)).execute();
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/$validate");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
-		assertThat(MY_SERVLET.ourRequestBodyString).isEqualTo("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$validate", MY_SERVLET.ourRequestUri);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", MY_SERVLET.ourRequestBodyString);
 		assertNotNull(response.getOperationOutcome());
-		assertThat(toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("FOOBAR");
+		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 
 		response = client.validate().resource(ourCtx.newJsonParser().encodeResourceToString(p)).execute();
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/$validate");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
-		assertThat(MY_SERVLET.ourRequestBodyString).isEqualTo("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"given\":[\"GIVEN\"]}]}}]}");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$validate", MY_SERVLET.ourRequestUri);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
+		assertEquals("{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"resource\",\"resource\":{\"resourceType\":\"Patient\",\"name\":[{\"given\":[\"GIVEN\"]}]}}]}", MY_SERVLET.ourRequestBodyString);
 		assertNotNull(response.getOperationOutcome());
-		assertThat(toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("FOOBAR");
+		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 
 		response = client.validate().resource(ourCtx.newJsonParser().encodeResourceToString(p)).prettyPrint().execute();
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/$validate?_pretty=true");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$validate?_pretty=true", MY_SERVLET.ourRequestUri);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
 		assertThat(MY_SERVLET.ourRequestBodyString).contains("\"resourceType\": \"Parameters\",\n");
 		assertNotNull(response.getOperationOutcome());
-		assertThat(toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("FOOBAR");
+		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 	}
 
 	@Test
@@ -1739,11 +1740,11 @@ public class GenericOkHttpClientDstu2Test {
 
 		response = client.validate(p);
 
-		assertThat(MY_SERVLET.ourRequestUri).isEqualTo(ourServer.getBaseUrl() + "/fhir/Patient/$validate?_format=xml");
-		assertThat(MY_SERVLET.ourRequestMethod).isEqualTo("POST");
-		assertThat(MY_SERVLET.ourRequestBodyString).isEqualTo("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>");
+		assertEquals(ourServer.getBaseUrl() + "/fhir/Patient/$validate?_format=xml", MY_SERVLET.ourRequestUri);
+		assertEquals("POST", MY_SERVLET.ourRequestMethod);
+		assertEquals("<Parameters xmlns=\"http://hl7.org/fhir\"><parameter><name value=\"resource\"/><resource><Patient xmlns=\"http://hl7.org/fhir\"><name><given value=\"GIVEN\"/></name></Patient></resource></parameter></Parameters>", MY_SERVLET.ourRequestBodyString);
 		assertNotNull(response.getOperationOutcome());
-		assertThat(toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue()).isEqualTo("FOOBAR");
+		assertEquals("FOOBAR", toOo(response.getOperationOutcome()).getIssueFirstRep().getDiagnosticsElement().getValue());
 	}
 
 	private OperationOutcome toOo(IBaseOperationOutcome theOperationOutcome) {

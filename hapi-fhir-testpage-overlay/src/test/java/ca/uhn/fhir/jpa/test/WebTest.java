@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutor;
@@ -147,9 +148,9 @@ public class WebTest {
 		HtmlTable controlsTable = searchResultPage.getHtmlElementById("resultControlsTable");
 		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
 		assertThat(controlRows).hasSize(5);
-		assertThat(controlRows.get(0).getCell(0).asNormalizedText()).isEqualTo("Read Update $summary $validate");
-		assertThat(controlRows.get(0).getCell(1).asNormalizedText()).isEqualTo("Patient/A0/_history/1");
-		assertThat(controlRows.get(4).getCell(1).asNormalizedText()).isEqualTo("Patient/A4/_history/1");
+		assertEquals("Read Update $summary $validate", controlRows.get(0).getCell(0).asNormalizedText());
+		assertEquals("Patient/A0/_history/1", controlRows.get(0).getCell(1).asNormalizedText());
+		assertEquals("Patient/A4/_history/1", controlRows.get(4).getCell(1).asNormalizedText());
 	}
 
 	@Test
@@ -172,8 +173,8 @@ public class WebTest {
 		List<HtmlTableRow> controlRows = controlsTable.getBodies().get(0).getRows();
 		assertThat(controlRows).hasSize(5);
 		ourLog.info(controlRows.get(0).asXml());
-		assertThat(controlRows.get(0).getCell(1).asNormalizedText()).isEqualTo("Patient/A4/_history/1");
-		assertThat(controlRows.get(4).getCell(1).asNormalizedText()).isEqualTo("Patient/A0/_history/1");
+		assertEquals("Patient/A4/_history/1", controlRows.get(0).getCell(1).asNormalizedText());
+		assertEquals("Patient/A0/_history/1", controlRows.get(4).getCell(1).asNormalizedText());
 	}
 
 	@Test
@@ -287,7 +288,7 @@ public class WebTest {
 		// Navigate to HFQL page
 		HtmlAnchor hfqlNavButton = page.getHtmlElementById("leftHfql");
 		HtmlPage hfqlPage = hfqlNavButton.click();
-		assertThat(hfqlPage.getTitleText()).isEqualTo("HFQL/SQL - HAPI FHIR");
+		assertEquals("HFQL/SQL - HAPI FHIR", hfqlPage.getTitleText());
 
 		// Prepare response
 		List<String> columnNames = List.of("Family", "Given");

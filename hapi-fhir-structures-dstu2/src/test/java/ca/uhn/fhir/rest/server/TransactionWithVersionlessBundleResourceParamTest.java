@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Bundle;
 import ca.uhn.fhir.model.dstu2.resource.Bundle.Entry;
@@ -70,7 +71,7 @@ public class TransactionWithVersionlessBundleResourceParamTest {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		ourLog.info(responseContent);
 
@@ -78,7 +79,7 @@ public class TransactionWithVersionlessBundleResourceParamTest {
 		assertThat(bundle.getEntry()).hasSize(1);
 
 		Entry entry0 = bundle.getEntry().get(0);
-		assertThat(entry0.getResponse().getLocation()).isEqualTo("Patient/81/_history/91");
+		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
 
 	}
 	

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.SearchCoordinatorSvcImpl;
@@ -278,7 +279,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		ourLog.info("Created: " + ids.toString());
 
 		IdType patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation());
-		assertThat(patientId.getResourceType()).isEqualTo("Patient");
+		assertEquals("Patient", patientId.getResourceType());
 
 		{
 			Parameters output = myClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
@@ -366,7 +367,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		IdType patientId = new IdType(resp.getEntry().get(0).getResponse().getLocation());
-		assertThat(patientId.getResourceType()).isEqualTo("Patient");
+		assertEquals("Patient", patientId.getResourceType());
 
 		Parameters output = myClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
 		b = (Bundle) output.getParameter().get(0).getResource();
@@ -443,7 +444,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		Parameters output = myClient.operation().onType(Patient.class).named("everything").withNoParameters(Parameters.class).execute();
 		Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
-		assertThat(b.getType()).isEqualTo(Bundle.BundleType.SEARCHSET);
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(o1Id, o2Id, p1Id, p2Id, c1Id, c2Id);
@@ -486,7 +487,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
 			Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
-			assertThat(b.getType()).isEqualTo(Bundle.BundleType.SEARCHSET);
+			assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 			assertThat(ids).containsExactlyInAnyOrder(o1Id, p1Id, c1Id);
@@ -505,7 +506,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
 			Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
-			assertThat(b.getType()).isEqualTo(Bundle.BundleType.SEARCHSET);
+			assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 			assertThat(ids).containsExactlyInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id);
@@ -520,7 +521,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
 			Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
-			assertThat(b.getType()).isEqualTo(Bundle.BundleType.SEARCHSET);
+			assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 			assertThat(ids).containsExactlyInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id);
@@ -538,7 +539,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			Parameters output = myClient.operation().onType(Patient.class).named("everything").withParameters(parameters).execute();
 			Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
-			assertThat(b.getType()).isEqualTo(Bundle.BundleType.SEARCHSET);
+			assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 			assertThat(ids).containsExactlyInAnyOrder(o1Id, p1Id, c1Id, o2Id, c2Id, p2Id, p3Id, o3Id, c3Id, p4Id, c4Id, o4Id);
@@ -558,7 +559,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 			String next = bundle.getLink("next").getUrl();
 			Bundle nextBundle = myClient.loadPage().byUrl(next).andReturnBundle(Bundle.class).execute();
-			assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.SEARCHSET);
+			assertEquals(Bundle.BundleType.SEARCHSET, bundle.getType());
 
 			assertThat(bundle.getEntry()).hasSize(6);
 			assertThat(nextBundle.getEntry()).hasSize(6);
@@ -597,7 +598,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		myCaptureQueriesListener.logSelectQueries();
 
-		assertThat(b.getType()).isEqualTo(Bundle.BundleType.SEARCHSET);
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
@@ -628,7 +629,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		myCaptureQueriesListener.logSelectQueries();
 
-		assertThat(b.getType()).isEqualTo(Bundle.BundleType.SEARCHSET);
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
@@ -667,7 +668,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		myCaptureQueriesListener.logSelectQueries();
 
-		assertThat(b.getType()).isEqualTo(Bundle.BundleType.SEARCHSET);
+		assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 		List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 
 		assertThat(ids).containsExactlyInAnyOrder(p1Id, c1Id, obs1Id);
@@ -709,7 +710,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			Bundle b = (Bundle) output.getParameter().get(0).getResource();
 
 			//Then
-			assertThat(b.getType()).isEqualTo(Bundle.BundleType.SEARCHSET);
+			assertEquals(Bundle.BundleType.SEARCHSET, b.getType());
 			List<IIdType> ids = toUnqualifiedVersionlessIds(b);
 			assertThat(ids).containsExactlyInAnyOrder(o1Id, pabcId, c1Id, pdefId, o2Id, c2Id);
 			assertThat(ids, not(hasItem(c3Id)));
@@ -760,7 +761,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		myCaptureQueriesListener.logSelectQueries();
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			response.getEntity().getContent().close();
 			ourLog.info(output);
@@ -775,7 +776,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 			+ new InstantType(new Date(time3)).getValueAsString());
 		response = ourHttpClient.execute(get);
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			response.getEntity().getContent().close();
 			ourLog.info(output);
@@ -896,7 +897,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		ourLog.info("Expected {} - {}", allIds.size(), allIds);
 		ourLog.info("Actual   {} - {}", idsSet.size(), idsSet);
-		assertThat(idsSet).isEqualTo(allIds);
+		assertEquals(allIds, idsSet);
 
 	}
 
@@ -1033,7 +1034,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		assertThat(response.getEntry()).hasSize(10);
 		if (response.getTotalElement().getValueAsString() != null) {
-			assertThat(response.getTotalElement().getValueAsString()).isEqualTo("21");
+			assertEquals("21", response.getTotalElement().getValueAsString());
 		}
 		assertThat(response.getLink("next").getUrl()).isNotEmpty();
 
@@ -1044,7 +1045,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		assertThat(response.getEntry()).hasSize(10);
 		if (response.getTotalElement().getValueAsString() != null) {
-			assertThat(response.getTotalElement().getValueAsString()).isEqualTo("21");
+			assertEquals("21", response.getTotalElement().getValueAsString());
 		}
 		assertThat(response.getLink("next").getUrl()).isNotEmpty();
 
@@ -1055,7 +1056,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		response = myClient.fetchResourceFromUrl(Bundle.class, nextUrl);
 
 		assertThat(response.getEntry()).hasSize(1);
-		assertThat(response.getTotalElement().getValueAsString()).isEqualTo("21");
+		assertEquals("21", response.getTotalElement().getValueAsString());
 		assertNull(response.getLink("next"));
 
 	}

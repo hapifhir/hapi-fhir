@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.config.JpaConfig;
@@ -115,8 +116,8 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameterValue("result")).booleanValue()).isEqualTo(true);
-		assertThat(respParam.getParameterValue("display").toString()).isEqualTo(DISPLAY);
+		assertEquals(true, ((BooleanType) respParam.getParameterValue("result")).booleanValue());
+		assertEquals(DISPLAY, respParam.getParameterValue("display").toString());
 	}
 
 	@Test
@@ -178,8 +179,8 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameterValue("result")).booleanValue()).isEqualTo(true);
-		assertThat(respParam.getParameterValue("display").toString()).isEqualTo(DISPLAY);
+		assertEquals(true, ((BooleanType) respParam.getParameterValue("result")).booleanValue());
+		assertEquals(DISPLAY, respParam.getParameterValue("display").toString());
 	}
 
 	@Test
@@ -202,8 +203,8 @@ public class ResourceProviderR4RemoteTerminologyTest extends BaseResourceProvide
 		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(respParam);
 		ourLog.info(resp);
 
-		assertThat(((BooleanType) respParam.getParameterValue("result")).booleanValue()).isEqualTo(true);
-		assertThat(respParam.getParameterValue("display").toString()).isEqualTo(DISPLAY_BODY_MASS_INDEX);
+		assertEquals(true, ((BooleanType) respParam.getParameterValue("result")).booleanValue());
+		assertEquals(DISPLAY_BODY_MASS_INDEX, respParam.getParameterValue("display").toString());
 	}
 
 	@Test

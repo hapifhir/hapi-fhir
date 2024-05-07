@@ -73,7 +73,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 			.where(ConceptMap.URL.matches().value(conceptMapUrl))
 			.execute();
 
-		assertThat(methodOutcome.getCreated()).isEqualTo(Boolean.TRUE);
+		assertEquals(Boolean.TRUE, methodOutcome.getCreated());
 	}
 
 	@Test
@@ -148,181 +148,181 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		assertThat(conceptMap.getId()).isEqualTo(myRestServerDstu3Helper.getBase() + "/ConceptMap/1/_history/1");
+		assertEquals(myRestServerDstu3Helper.getBase() + "/ConceptMap/1/_history/1", conceptMap.getId());
 
-		assertThat(conceptMap.getUrl()).isEqualTo(CM_URL);
-		assertThat(conceptMap.getSourceUriType().getValueAsString()).isEqualTo(VS_URL_1);
-		assertThat(conceptMap.getTargetUriType().getValueAsString()).isEqualTo(VS_URL_2);
+		assertEquals(CM_URL, conceptMap.getUrl());
+		assertEquals(VS_URL_1, conceptMap.getSourceUriType().getValueAsString());
+		assertEquals(VS_URL_2, conceptMap.getTargetUriType().getValueAsString());
 
 		assertThat(conceptMap.getGroup()).hasSize(3);
 
 		ConceptMapGroupComponent group = conceptMap.getGroup().get(0);
-		assertThat(group.getSource()).isEqualTo(CS_URL_1);
-		assertThat(group.getSourceVersion()).isEqualTo("Version 1s");
-		assertThat(group.getTarget()).isEqualTo(CS_URL_2);
-		assertThat(group.getTargetVersion()).isEqualTo("Version 2t");
+		assertEquals(CS_URL_1, group.getSource());
+		assertEquals("Version 1s", group.getSourceVersion());
+		assertEquals(CS_URL_2, group.getTarget());
+		assertEquals("Version 2t", group.getTargetVersion());
 
 		assertThat(group.getElement()).hasSize(4);
 
 		SourceElementComponent source = group.getElement().get(0);
-		assertThat(source.getCode()).isEqualTo("Code 1a");
-		assertThat(source.getDisplay()).isEqualTo("Display 1a");
+		assertEquals("Code 1a", source.getCode());
+		assertEquals("Display 1a", source.getDisplay());
 
 		assertThat(source.getTarget()).hasSize(1);
 
 		TargetElementComponent target = source.getTarget().get(0);
-		assertThat(target.getCode()).isEqualTo("Code 2a");
-		assertThat(target.getDisplay()).isEqualTo("Display 2a");
-		assertThat(target.getEquivalence()).isEqualTo(ConceptMapEquivalence.EQUAL);
-		assertThat(target.getComment()).isEqualTo("2a This is a comment.");
+		assertEquals("Code 2a", target.getCode());
+		assertEquals("Display 2a", target.getDisplay());
+		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+		assertEquals("2a This is a comment.", target.getComment());
 
 		source = group.getElement().get(1);
-		assertThat(source.getCode()).isEqualTo("Code 1b");
-		assertThat(source.getDisplay()).isEqualTo("Display 1b");
+		assertEquals("Code 1b", source.getCode());
+		assertEquals("Display 1b", source.getDisplay());
 
 		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
-		assertThat(target.getCode()).isEqualTo("Code 2b");
-		assertThat(target.getDisplay()).isEqualTo("Display 2b");
-		assertThat(target.getEquivalence()).isEqualTo(ConceptMapEquivalence.EQUAL);
-		assertThat(target.getComment()).isEqualTo("2b This is a comment.");
+		assertEquals("Code 2b", target.getCode());
+		assertEquals("Display 2b", target.getDisplay());
+		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+		assertEquals("2b This is a comment.", target.getComment());
 
 		source = group.getElement().get(2);
-		assertThat(source.getCode()).isEqualTo("Code 1c");
-		assertThat(source.getDisplay()).isEqualTo("Display 1c");
+		assertEquals("Code 1c", source.getCode());
+		assertEquals("Display 1c", source.getDisplay());
 
 		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
-		assertThat(target.getCode()).isEqualTo("Code 2c");
-		assertThat(target.getDisplay()).isEqualTo("Display 2c");
-		assertThat(target.getEquivalence()).isEqualTo(ConceptMapEquivalence.EQUAL);
-		assertThat(target.getComment()).isEqualTo("2c This is a comment.");
+		assertEquals("Code 2c", target.getCode());
+		assertEquals("Display 2c", target.getDisplay());
+		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+		assertEquals("2c This is a comment.", target.getComment());
 
 		source = group.getElement().get(3);
-		assertThat(source.getCode()).isEqualTo("Code 1d");
-		assertThat(source.getDisplay()).isEqualTo("Display 1d");
+		assertEquals("Code 1d", source.getCode());
+		assertEquals("Display 1d", source.getDisplay());
 
 		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
-		assertThat(target.getCode()).isEqualTo("Code 2d");
-		assertThat(target.getDisplay()).isEqualTo("Display 2d");
-		assertThat(target.getEquivalence()).isEqualTo(ConceptMapEquivalence.EQUAL);
-		assertThat(target.getComment()).isEqualTo("2d This is a comment.");
+		assertEquals("Code 2d", target.getCode());
+		assertEquals("Display 2d", target.getDisplay());
+		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+		assertEquals("2d This is a comment.", target.getComment());
 
 		group = conceptMap.getGroup().get(1);
-		assertThat(group.getSource()).isEqualTo(CS_URL_1);
-		assertThat(group.getSourceVersion()).isEqualTo("Version 1s");
-		assertThat(group.getTarget()).isEqualTo(CS_URL_3);
-		assertThat(group.getTargetVersion()).isEqualTo("Version 3t");
+		assertEquals(CS_URL_1, group.getSource());
+		assertEquals("Version 1s", group.getSourceVersion());
+		assertEquals(CS_URL_3, group.getTarget());
+		assertEquals("Version 3t", group.getTargetVersion());
 
 		assertThat(group.getElement()).hasSize(4);
 
 		source = group.getElement().get(0);
-		assertThat(source.getCode()).isEqualTo("Code 1a");
-		assertThat(source.getDisplay()).isEqualTo("Display 1a");
+		assertEquals("Code 1a", source.getCode());
+		assertEquals("Display 1a", source.getDisplay());
 
 		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
-		assertThat(target.getCode()).isEqualTo("Code 3a");
-		assertThat(target.getDisplay()).isEqualTo("Display 3a");
-		assertThat(target.getEquivalence()).isEqualTo(ConceptMapEquivalence.EQUAL);
-		assertThat(target.getComment()).isEqualTo("3a This is a comment.");
+		assertEquals("Code 3a", target.getCode());
+		assertEquals("Display 3a", target.getDisplay());
+		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+		assertEquals("3a This is a comment.", target.getComment());
 
 		source = group.getElement().get(1);
-		assertThat(source.getCode()).isEqualTo("Code 1b");
-		assertThat(source.getDisplay()).isEqualTo("Display 1b");
+		assertEquals("Code 1b", source.getCode());
+		assertEquals("Display 1b", source.getDisplay());
 
 		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
-		assertThat(target.getCode()).isEqualTo("Code 3b");
-		assertThat(target.getDisplay()).isEqualTo("Display 3b");
-		assertThat(target.getEquivalence()).isEqualTo(ConceptMapEquivalence.EQUAL);
-		assertThat(target.getComment()).isEqualTo("3b This is a comment.");
+		assertEquals("Code 3b", target.getCode());
+		assertEquals("Display 3b", target.getDisplay());
+		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+		assertEquals("3b This is a comment.", target.getComment());
 
 		source = group.getElement().get(2);
-		assertThat(source.getCode()).isEqualTo("Code 1c");
-		assertThat(source.getDisplay()).isEqualTo("Display 1c");
+		assertEquals("Code 1c", source.getCode());
+		assertEquals("Display 1c", source.getDisplay());
 
 		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
-		assertThat(target.getCode()).isEqualTo("Code 3c");
-		assertThat(target.getDisplay()).isEqualTo("Display 3c");
-		assertThat(target.getEquivalence()).isEqualTo(ConceptMapEquivalence.EQUAL);
-		assertThat(target.getComment()).isEqualTo("3c This is a comment.");
+		assertEquals("Code 3c", target.getCode());
+		assertEquals("Display 3c", target.getDisplay());
+		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+		assertEquals("3c This is a comment.", target.getComment());
 
 		source = group.getElement().get(3);
-		assertThat(source.getCode()).isEqualTo("Code 1d");
-		assertThat(source.getDisplay()).isEqualTo("Display 1d");
+		assertEquals("Code 1d", source.getCode());
+		assertEquals("Display 1d", source.getDisplay());
 
 		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
-		assertThat(target.getCode()).isEqualTo("Code 3d");
-		assertThat(target.getDisplay()).isEqualTo("Display 3d");
-		assertThat(target.getEquivalence()).isEqualTo(ConceptMapEquivalence.EQUAL);
-		assertThat(target.getComment()).isEqualTo("3d This is a comment.");
+		assertEquals("Code 3d", target.getCode());
+		assertEquals("Display 3d", target.getDisplay());
+		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+		assertEquals("3d This is a comment.", target.getComment());
 
 		group = conceptMap.getGroup().get(2);
-		assertThat(group.getSource()).isEqualTo(CS_URL_2);
-		assertThat(group.getSourceVersion()).isEqualTo("Version 2s");
-		assertThat(group.getTarget()).isEqualTo(CS_URL_3);
-		assertThat(group.getTargetVersion()).isEqualTo("Version 3t");
+		assertEquals(CS_URL_2, group.getSource());
+		assertEquals("Version 2s", group.getSourceVersion());
+		assertEquals(CS_URL_3, group.getTarget());
+		assertEquals("Version 3t", group.getTargetVersion());
 
 		assertEquals(5, group.getElement().size());
 
 		source = group.getElement().get(0);
-		assertThat(source.getCode()).isEqualTo("Code 2a");
-		assertThat(source.getDisplay()).isEqualTo("Display 2a");
+		assertEquals("Code 2a", source.getCode());
+		assertEquals("Display 2a", source.getDisplay());
 
 		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
-		assertThat(target.getCode()).isEqualTo("Code 3a");
-		assertThat(target.getDisplay()).isEqualTo("Display 3a");
-		assertThat(target.getEquivalence()).isEqualTo(ConceptMapEquivalence.EQUAL);
-		assertThat(target.getComment()).isEqualTo("3a This is a comment.");
+		assertEquals("Code 3a", target.getCode());
+		assertEquals("Display 3a", target.getDisplay());
+		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+		assertEquals("3a This is a comment.", target.getComment());
 
 		source = group.getElement().get(1);
-		assertThat(source.getCode()).isEqualTo("Code 2b");
-		assertThat(source.getDisplay()).isEqualTo("Display 2b");
+		assertEquals("Code 2b", source.getCode());
+		assertEquals("Display 2b", source.getDisplay());
 
 		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
-		assertThat(target.getCode()).isEqualTo("Code 3b");
-		assertThat(target.getDisplay()).isEqualTo("Display 3b");
-		assertThat(target.getEquivalence()).isEqualTo(ConceptMapEquivalence.EQUAL);
-		assertThat(target.getComment()).isEqualTo("3b This is a comment.");
+		assertEquals("Code 3b", target.getCode());
+		assertEquals("Display 3b", target.getDisplay());
+		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+		assertEquals("3b This is a comment.", target.getComment());
 
 		source = group.getElement().get(2);
-		assertThat(source.getCode()).isEqualTo("Code 2c");
-		assertThat(source.getDisplay()).isEqualTo("Display 2c");
+		assertEquals("Code 2c", source.getCode());
+		assertEquals("Display 2c", source.getDisplay());
 
 		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
-		assertThat(target.getCode()).isEqualTo("Code 3c");
-		assertThat(target.getDisplay()).isEqualTo("Display 3c");
-		assertThat(target.getEquivalence()).isEqualTo(ConceptMapEquivalence.EQUAL);
-		assertThat(target.getComment()).isEqualTo("3c This is a comment.");
+		assertEquals("Code 3c", target.getCode());
+		assertEquals("Display 3c", target.getDisplay());
+		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+		assertEquals("3c This is a comment.", target.getComment());
 
 		source = group.getElement().get(3);
-		assertThat(source.getCode()).isEqualTo("Code 2d");
-		assertThat(source.getDisplay()).isEqualTo("Display 2d");
+		assertEquals("Code 2d", source.getCode());
+		assertEquals("Display 2d", source.getDisplay());
 
 		assertThat(source.getTarget()).hasSize(1);
 
 		target = source.getTarget().get(0);
-		assertThat(target.getCode()).isEqualTo("Code 3d");
-		assertThat(target.getDisplay()).isEqualTo("Display 3d");
-		assertThat(target.getEquivalence()).isEqualTo(ConceptMapEquivalence.EQUAL);
-		assertThat(target.getComment()).isEqualTo("3d This is a comment.");
+		assertEquals("Code 3d", target.getCode());
+		assertEquals("Display 3d", target.getDisplay());
+		assertEquals(ConceptMapEquivalence.EQUAL, target.getEquivalence());
+		assertEquals("3d This is a comment.", target.getComment());
 
 		// ensure unmatched codes are handled correctly
 		source = group.getElement().get(4);
@@ -360,7 +360,7 @@ public class ImportCsvToConceptMapCommandDstu3Test {
 
 		conceptMap = (ConceptMap) response.getEntryFirstRep().getResource();
 
-		assertThat(conceptMap.getId()).isEqualTo(myRestServerDstu3Helper.getBase() + "/ConceptMap/1/_history/2");
+		assertEquals(myRestServerDstu3Helper.getBase() + "/ConceptMap/1/_history/2", conceptMap.getId());
 	}
 
 }

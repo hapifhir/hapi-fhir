@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -32,35 +33,35 @@ public class StopWatchTest {
 
 		// Less than half
 		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
-		assertThat(sw.getEstimatedTimeRemaining(0.1, 1.0)).isEqualTo("00:09:00");
+		assertEquals("00:09:00", sw.getEstimatedTimeRemaining(0.1, 1.0));
 
 		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
-		assertThat(sw.getEstimatedTimeRemaining(1, 10)).isEqualTo("00:09:00");
+		assertEquals("00:09:00", sw.getEstimatedTimeRemaining(1, 10));
 
 		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE + 100);
-		assertThat(sw.getEstimatedTimeRemaining(0.1, 1.0)).isEqualTo("00:09:00");
+		assertEquals("00:09:00", sw.getEstimatedTimeRemaining(0.1, 1.0));
 
 		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
-		assertThat(sw.getEstimatedTimeRemaining(0.05, 1.0)).isEqualTo("00:19:00");
+		assertEquals("00:19:00", sw.getEstimatedTimeRemaining(0.05, 1.0));
 
 		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
-		assertThat(sw.getEstimatedTimeRemaining(0.025, 1.0)).isEqualTo("00:39:00");
+		assertEquals("00:39:00", sw.getEstimatedTimeRemaining(0.025, 1.0));
 
 		// More than half
 		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
-		assertThat(sw.getEstimatedTimeRemaining(0.5, 1.0)).isEqualTo("00:01:00.000");
+		assertEquals("00:01:00.000", sw.getEstimatedTimeRemaining(0.5, 1.0));
 
 		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
-		assertThat(sw.getEstimatedTimeRemaining(0.501, 1.0)).isEqualTo("00:00:59.760");
+		assertEquals("00:00:59.760", sw.getEstimatedTimeRemaining(0.501, 1.0));
 
 		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
-		assertThat(sw.getEstimatedTimeRemaining(0.6, 1.0)).isEqualTo("00:00:40.000");
+		assertEquals("00:00:40.000", sw.getEstimatedTimeRemaining(0.6, 1.0));
 
 		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
-		assertThat(sw.getEstimatedTimeRemaining(0.9, 1.0)).isEqualTo("6666ms");
+		assertEquals("6666ms", sw.getEstimatedTimeRemaining(0.9, 1.0));
 
 		StopWatch.setNowForUnitTest(777777777L + DateUtils.MILLIS_PER_MINUTE);
-		assertThat(sw.getEstimatedTimeRemaining(0.999, 1.0)).isEqualTo("60ms");
+		assertEquals("60ms", sw.getEstimatedTimeRemaining(0.999, 1.0));
 
 	}
 
@@ -70,43 +71,43 @@ public class StopWatchTest {
 		StopWatch sw = new StopWatch();
 
 		StopWatch.setNowForUnitTest(777777777L + (10 * DateUtils.MILLIS_PER_MINUTE));
-		assertThat(sw.getEstimatedTimeRemaining(10, 100)).isEqualTo("01:30:00");
+		assertEquals("01:30:00", sw.getEstimatedTimeRemaining(10, 100));
 
 		StopWatch.setNowForUnitTest(777777777L + (DateUtils.MILLIS_PER_MINUTE));
-		assertThat(sw.getEstimatedTimeRemaining(20, 100)).isEqualTo("00:04:00");
+		assertEquals("00:04:00", sw.getEstimatedTimeRemaining(20, 100));
 
 		StopWatch.setNowForUnitTest(777777777L + (30 * DateUtils.MILLIS_PER_MINUTE));
-		assertThat(sw.getEstimatedTimeRemaining(30, 100)).isEqualTo("01:10:00");
+		assertEquals("01:10:00", sw.getEstimatedTimeRemaining(30, 100));
 
 		StopWatch.setNowForUnitTest(777777777L + (40 * DateUtils.MILLIS_PER_MINUTE));
-		assertThat(sw.getEstimatedTimeRemaining(40, 100)).isEqualTo("01:00:00");
+		assertEquals("01:00:00", sw.getEstimatedTimeRemaining(40, 100));
 
 		StopWatch.setNowForUnitTest(777777777L + (50 * DateUtils.MILLIS_PER_MINUTE));
-		assertThat(sw.getEstimatedTimeRemaining(50, 100)).isEqualTo("00:50:00");
+		assertEquals("00:50:00", sw.getEstimatedTimeRemaining(50, 100));
 
 		StopWatch.setNowForUnitTest(777777777L + (60 * DateUtils.MILLIS_PER_MINUTE));
-		assertThat(sw.getEstimatedTimeRemaining(60, 100)).isEqualTo("00:40:00");
+		assertEquals("00:40:00", sw.getEstimatedTimeRemaining(60, 100));
 
 		StopWatch.setNowForUnitTest(777777777L + (60 * DateUtils.MILLIS_PER_MINUTE));
-		assertThat(sw.getEstimatedTimeRemaining(99, 100)).isEqualTo("00:00:36.363");
+		assertEquals("00:00:36.363", sw.getEstimatedTimeRemaining(99, 100));
 
 		StopWatch.setNowForUnitTest(777777777L + (60 * DateUtils.MILLIS_PER_MINUTE));
-		assertThat(sw.getEstimatedTimeRemaining(99.99, 100)).isEqualTo("360ms");
+		assertEquals("360ms", sw.getEstimatedTimeRemaining(99.99, 100));
 
 	}
 
 	@Test
 	public void testFormatMillis() {
-		assertThat(StopWatch.formatMillis(0.1339d).replace(',', '.')).isEqualTo("0.134ms");
-		assertThat(StopWatch.formatMillis(DateUtils.MILLIS_PER_SECOND)).isEqualTo("1000ms");
-		assertThat(StopWatch.formatMillis(DateUtils.MILLIS_PER_MINUTE)).isEqualTo("00:01:00.000");
-		assertThat(StopWatch.formatMillis(DateUtils.MILLIS_PER_MINUTE + DateUtils.MILLIS_PER_SECOND)).isEqualTo("00:01:01");
-		assertThat(StopWatch.formatMillis(DateUtils.MILLIS_PER_HOUR)).isEqualTo("01:00:00");
-		assertThat(StopWatch.formatMillis(DateUtils.MILLIS_PER_DAY).replace(',', '.')).isEqualTo("1.0 day");
-		assertThat(StopWatch.formatMillis(DateUtils.MILLIS_PER_DAY * 2).replace(',', '.')).isEqualTo("2.0 days");
-		assertThat(StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY * 2) + 1).replace(',', '.')).isEqualTo("2.0 days");
-		assertThat(StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY * 2) + (10 * DateUtils.MILLIS_PER_HOUR)).replace(',', '.')).isEqualTo("2.4 days");
-		assertThat(StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY * 11) + (10 * DateUtils.MILLIS_PER_HOUR))).isEqualTo("11 days");
+		assertEquals("0.134ms", StopWatch.formatMillis(0.1339d).replace(',', '.'));
+		assertEquals("1000ms", StopWatch.formatMillis(DateUtils.MILLIS_PER_SECOND));
+		assertEquals("00:01:00.000", StopWatch.formatMillis(DateUtils.MILLIS_PER_MINUTE));
+		assertEquals("00:01:01", StopWatch.formatMillis(DateUtils.MILLIS_PER_MINUTE + DateUtils.MILLIS_PER_SECOND));
+		assertEquals("01:00:00", StopWatch.formatMillis(DateUtils.MILLIS_PER_HOUR));
+		assertEquals("1.0 day", StopWatch.formatMillis(DateUtils.MILLIS_PER_DAY).replace(',', '.'));
+		assertEquals("2.0 days", StopWatch.formatMillis(DateUtils.MILLIS_PER_DAY * 2).replace(',', '.'));
+		assertEquals("2.0 days", StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY * 2) + 1).replace(',', '.'));
+		assertEquals("2.4 days", StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY * 2) + (10 * DateUtils.MILLIS_PER_HOUR)).replace(',', '.'));
+		assertEquals("11 days", StopWatch.formatMillis((DateUtils.MILLIS_PER_DAY * 11) + (10 * DateUtils.MILLIS_PER_HOUR)));
 	}
 
 	@Test
@@ -122,7 +123,7 @@ public class StopWatchTest {
 		StopWatch.setNowForUnitTest(1600L);
 		String taskDurations = sw.formatTaskDurations();
 		ourLog.info(taskDurations);
-		assertThat(taskDurations).isEqualTo("TASK1: 500ms\nTASK2: 100ms");
+		assertEquals("TASK1: 500ms\nTASK2: 100ms", taskDurations);
 	}
 
 	@Test
@@ -163,7 +164,7 @@ public class StopWatchTest {
 		StopWatch.setNowForUnitTest(1600L);
 		String taskDurations = sw.formatTaskDurations();
 		ourLog.info(taskDurations);
-		assertThat(taskDurations).isEqualTo("Before first task: 1000ms\nTASK1: 500ms\nTASK2: 100ms");
+		assertEquals("Before first task: 1000ms\nTASK1: 500ms\nTASK2: 100ms", taskDurations);
 	}
 
 	@Test
@@ -172,7 +173,7 @@ public class StopWatchTest {
 
 		String taskDurations = sw.formatTaskDurations();
 		ourLog.info(taskDurations);
-		assertThat(taskDurations).isEqualTo("No tasks");
+		assertEquals("No tasks", taskDurations);
 	}
 
 	@Test
@@ -264,27 +265,27 @@ public class StopWatchTest {
 
 		b.setLength(0);
 		StopWatch.appendRightAlignedNumber(b, "PFX", 0, 100);
-		assertThat(b.toString()).isEqualTo("PFX100");
+		assertEquals("PFX100", b.toString());
 
 		b.setLength(0);
 		StopWatch.appendRightAlignedNumber(b, "PFX", 1, 100);
-		assertThat(b.toString()).isEqualTo("PFX100");
+		assertEquals("PFX100", b.toString());
 
 		b.setLength(0);
 		StopWatch.appendRightAlignedNumber(b, "PFX", 2, 100);
-		assertThat(b.toString()).isEqualTo("PFX100");
+		assertEquals("PFX100", b.toString());
 
 		b.setLength(0);
 		StopWatch.appendRightAlignedNumber(b, "PFX", 3, 100);
-		assertThat(b.toString()).isEqualTo("PFX100");
+		assertEquals("PFX100", b.toString());
 
 		b.setLength(0);
 		StopWatch.appendRightAlignedNumber(b, "PFX", 4, 100);
-		assertThat(b.toString()).isEqualTo("PFX0100");
+		assertEquals("PFX0100", b.toString());
 
 		b.setLength(0);
 		StopWatch.appendRightAlignedNumber(b, "PFX", 10, 100);
-		assertThat(b.toString()).isEqualTo("PFX0000000100");
+		assertEquals("PFX0000000100", b.toString());
 	}
 
 }

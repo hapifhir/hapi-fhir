@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.provider.r4.BaseMultitenantResourceProviderR4Test;
@@ -85,7 +86,7 @@ public class MultitenantOverridePathBasedReferentialIntegrityForDeletesIntercept
 
 		// Search should still work
 		IBundleProvider searchOutcome = myAuditEventDao.search(SearchParameterMap.newSynchronous(AuditEvent.SP_AGENT, new ReferenceParam("Patient/P")), requestDetails);
-		assertThat(searchOutcome.size()).isEqualTo(1);
+		assertEquals(1, searchOutcome.size());
 	}
 
 	@Test

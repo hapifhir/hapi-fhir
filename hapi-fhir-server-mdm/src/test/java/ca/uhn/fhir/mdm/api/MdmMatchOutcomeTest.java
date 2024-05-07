@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.api;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,7 +13,7 @@ class MdmMatchOutcomeTest {
 	@Test
 	void testNormalizedScore() {
 		MdmMatchOutcome outcome = new MdmMatchOutcome(0l, 0.0);
-		assertThat(outcome.getNormalizedScore()).isEqualTo(0.0);
+		assertEquals(0.0, outcome.getNormalizedScore());
 
 		outcome = new MdmMatchOutcome(null, 10.0);
 		outcome.setMdmRuleCount(10);

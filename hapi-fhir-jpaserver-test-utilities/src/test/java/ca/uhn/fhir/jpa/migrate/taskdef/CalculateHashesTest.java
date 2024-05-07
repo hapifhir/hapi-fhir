@@ -74,7 +74,7 @@ public class CalculateHashesTest extends BaseTest {
 			JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
 			return jdbcTemplate.queryForObject("SELECT count(*) FROM HFJ_SPIDX_TOKEN WHERE HASH_VALUE IS NULL", Long.class);
 		});
-		assertThat(count.longValue()).isEqualTo(777L);
+		assertEquals(777L, count.longValue());
 
 		CalculateHashesTask task = new CalculateHashesTask(VersionEnum.V3_5_0, "1");
 		task.setTableName("HFJ_SPIDX_TOKEN");
@@ -92,6 +92,6 @@ public class CalculateHashesTest extends BaseTest {
 			JdbcTemplate jdbcTemplate = getConnectionProperties().newJdbcTemplate();
 			return jdbcTemplate.queryForObject("SELECT count(*) FROM HFJ_SPIDX_TOKEN WHERE HASH_VALUE IS NULL", Long.class);
 		});
-		assertThat(count.longValue()).isEqualTo(0L);
+		assertEquals(0L, count.longValue());
 	}
 }

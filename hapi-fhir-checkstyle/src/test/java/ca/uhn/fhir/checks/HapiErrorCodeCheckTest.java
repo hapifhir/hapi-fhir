@@ -1,5 +1,6 @@
 package ca.uhn.fhir.checks;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.puppycrawl.tools.checkstyle.Checker;
 import com.puppycrawl.tools.checkstyle.DefaultConfiguration;
 import com.puppycrawl.tools.checkstyle.DefaultLogger;
@@ -40,7 +41,7 @@ class HapiErrorCodeCheckTest {
 		// validate
 		String[] errorLines = errors.toString().split("\r?\n");
 		Arrays.stream(errorLines).forEach(ourLog::info);
-		assertThat(errorLines.length).isEqualTo(4);
+		assertEquals(4, errorLines.length);
 		assertThat(errorLines[0])
 			.startsWith("[ERROR] ")
 			.endsWith("BadClass.java:7: Exception thrown that does not call Msg.code() [HapiErrorCode]");

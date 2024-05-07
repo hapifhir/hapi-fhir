@@ -122,7 +122,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			myClient.create().resource(sp).execute();
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 422 Unprocessable Entity: " + Msg.code(1112) + "SearchParameter.status is missing or invalid");
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(1112) + "SearchParameter.status is missing or invalid", e.getMessage());
 		}
 	}
 
@@ -139,7 +139,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 			myClient.create().resource(sp).execute();
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 422 Unprocessable Entity: " + Msg.code(1120) + "SearchParameter.expression value \"Patient\" is invalid due to missing/incorrect path");
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(1120) + "SearchParameter.expression value \"Patient\" is invalid due to missing/incorrect path", e.getMessage());
 		}
 	}
 
@@ -206,7 +206,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		map = extractSearchParams(conformance, "Patient");
 
 		param = map.get("foo");
-		assertThat(param.getName()).isEqualTo("foo");
+		assertEquals("foo", param.getName());
 
 		param = map.get("gender");
 		assertNull(param);
@@ -287,7 +287,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), Constants.CHARSET_UTF8);
 			ourLog.info(resp);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 
 			assertThat(resp).contains("<fullUrl value=\"http://localhost:" + myPort + "/fhir/context/Practitioner/");
 		} finally {
@@ -463,7 +463,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				.execute();
 
 		} catch (Exception e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1882) + "Invalid date/time format: \"01-01-2020\"");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1882) + "Invalid date/time format: \"01-01-2020\"", e.getMessage());
 		}
 
 		//Now with custom SP
@@ -476,7 +476,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				.execute();
 
 		} catch (Exception e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1882) + "Invalid date/time format: \"01-01-2020\"");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1882) + "Invalid date/time format: \"01-01-2020\"", e.getMessage());
 		}
 	}
 
@@ -580,7 +580,7 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 				assertEquals(SearchStatusEnum.FINISHED, search.getStatus(), message);
 			});
 
-			assertThat(foundCount).isEqualTo(200);
+			assertEquals(200, foundCount);
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
 		}

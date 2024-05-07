@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.stresstest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
@@ -295,9 +296,9 @@ public class GiantTransactionPerfTest {
 
 		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactly("ResourceTable");
 		assertThat(myEntityManager.myMergeCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactlyInAnyOrder("ResourceTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken");
-		assertThat(myEntityManager.myFlushCount).isEqualTo(1);
-		assertThat(myResourceVersionSvc.myGetVersionMap).isEqualTo(1);
-		assertThat(myResourceHistoryTableDao.mySaveCount).isEqualTo(1);
+		assertEquals(1, myEntityManager.myFlushCount);
+		assertEquals(1, myResourceVersionSvc.myGetVersionMap);
+		assertEquals(1, myResourceHistoryTableDao.mySaveCount);
 	}
 
 	@Test
@@ -331,9 +332,9 @@ public class GiantTransactionPerfTest {
 
 		assertThat(myEntityManager.myPersistCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactly("ResourceTable");
 		assertThat(myEntityManager.myMergeCount.stream().map(t -> t.getClass().getSimpleName()).collect(Collectors.toList())).containsExactlyInAnyOrder("ResourceTable", "ResourceIndexedSearchParamToken", "ResourceIndexedSearchParamToken");
-		assertThat(myEntityManager.myFlushCount).isEqualTo(1);
-		assertThat(myResourceVersionSvc.myGetVersionMap).isEqualTo(1);
-		assertThat(myResourceHistoryTableDao.mySaveCount).isEqualTo(1);
+		assertEquals(1, myEntityManager.myFlushCount);
+		assertEquals(1, myResourceVersionSvc.myGetVersionMap);
+		assertEquals(1, myResourceHistoryTableDao.mySaveCount);
 	}
 
 	private class MockResourceVersionSvc implements IResourceVersionSvc {

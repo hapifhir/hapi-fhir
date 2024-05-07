@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.address;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.server.interceptor.validation.helpers.AddressHelper;
 import org.hl7.fhir.r4.model.Address;
@@ -35,7 +36,7 @@ class AddressHelperTest {
 		a.setCountry("Test");
 
 		AddressHelper helper = new AddressHelper(null, a);
-		assertThat(helper.getCountry()).isEqualTo("Test");
+		assertEquals("Test", helper.getCountry());
 	}
 
 	@Test
@@ -45,11 +46,11 @@ class AddressHelperTest {
 
 		AddressHelper helper = new AddressHelper(null, a);
 		helper.setDelimiter("; ");
-		assertThat(helper.getParts()).isEqualTo("Hammer");
+		assertEquals("Hammer", helper.getParts());
 
 		a.addLine("Street");
 		a.setPostalCode("L9C6L6");
-		assertThat(helper.getParts()).isEqualTo("Hammer; L9C6L6");
+		assertEquals("Hammer; L9C6L6", helper.getParts());
 	}
 
 	@Test
@@ -59,10 +60,10 @@ class AddressHelperTest {
 		a.setCity("Hammer");
 
 		AddressHelper helper = new AddressHelper(null, a);
-		assertThat(helper.getLine()).isEqualTo("Unit 10");
+		assertEquals("Unit 10", helper.getLine());
 
 		a.addLine("100 Main St.");
-		assertThat(helper.getLine()).isEqualTo("Unit 10, 100 Main St.");
+		assertEquals("Unit 10, 100 Main St.", helper.getLine());
 	}
 
 	@Test
@@ -75,7 +76,7 @@ class AddressHelperTest {
 		helper.setState("State");
 		helper.setCountry("Country");
 		helper.setText("Some Text Too");
-		assertThat(helper.toString()).isEqualTo("Some Text Too, Line 1, Line 2, Hammer, State, Country");
+		assertEquals("Some Text Too, Line 1, Line 2, Hammer, State, Country", helper.toString());
 	}
 
 }

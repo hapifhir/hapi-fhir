@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client.tls;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tls.KeyStoreInfo;
@@ -17,15 +18,15 @@ public class StoreInfoTest {
 	@Test
 	public void testPathTypeFile(){
 		KeyStoreInfo keyStoreInfo = new KeyStoreInfo("file:///my-file.p12", "storePassword" , "keyPassword", "alias");
-		assertThat(keyStoreInfo.getFilePath()).isEqualTo("/my-file.p12");
-		assertThat(keyStoreInfo.getPathType()).isEqualTo(PathType.FILE);
+		assertEquals("/my-file.p12", keyStoreInfo.getFilePath());
+		assertEquals(PathType.FILE, keyStoreInfo.getPathType());
 	}
 
 	@Test
 	public void testPathTypeResource(){
 		KeyStoreInfo keyStoreInfo = new KeyStoreInfo("classpath:/my-file.p12", "storePassword" , "keyPassword", "alias");
-		assertThat(keyStoreInfo.getFilePath()).isEqualTo("/my-file.p12");
-		assertThat(keyStoreInfo.getPathType()).isEqualTo(PathType.RESOURCE);
+		assertEquals("/my-file.p12", keyStoreInfo.getFilePath());
+		assertEquals(PathType.RESOURCE, keyStoreInfo.getPathType());
 	}
 
 	@Test
@@ -33,20 +34,20 @@ public class StoreInfoTest {
 		try {
 			new KeyStoreInfo("invalid:///my-file.p12", "storePassword" , "keyPassword", "alias");
 			fail("");		} catch (Exception e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(2117) + "Invalid path prefix");
+			assertEquals(Msg.code(2117) + "Invalid path prefix", e.getMessage());
 		}
 	}
 
 	@Test
 	public void testFileTypeP12(){
 		KeyStoreInfo keyStoreInfo = new KeyStoreInfo("file:///my-file.p12", "storePassword" , "keyPassword", "alias");
-		assertThat(keyStoreInfo.getType()).isEqualTo(KeyStoreType.PKCS12);
+		assertEquals(KeyStoreType.PKCS12, keyStoreInfo.getType());
 	}
 
 	@Test
 	public void testFileTypeJks(){
 		KeyStoreInfo keyStoreInfo = new KeyStoreInfo("file:///my-file.jks", "storePassword" , "keyPassword", "alias");
-		assertThat(keyStoreInfo.getType()).isEqualTo(KeyStoreType.JKS);
+		assertEquals(KeyStoreType.JKS, keyStoreInfo.getType());
 	}
 
 	@Test
@@ -54,7 +55,7 @@ public class StoreInfoTest {
 		try {
 			new KeyStoreInfo("file:///my-file.invalid", "storePassword" , "keyPassword", "alias");
 			fail("");		} catch (Exception e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(2121) + "Invalid KeyStore Type");
+			assertEquals(Msg.code(2121) + "Invalid KeyStore Type", e.getMessage());
 		}
 	}
 
@@ -73,6 +74,6 @@ public class StoreInfoTest {
 	@Test
 	public void testAlias(){
 		KeyStoreInfo keyStoreInfo = new KeyStoreInfo("file:///my-file.p12", "storePassword" , "keyPassword", "alias");
-		assertThat(keyStoreInfo.getAlias()).isEqualTo("alias");
+		assertEquals("alias", keyStoreInfo.getAlias());
 	}
 }

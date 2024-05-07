@@ -1,5 +1,6 @@
 package ca.uhn.fhir.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -57,7 +58,7 @@ public class ParserWithValidationDstu3Test extends BaseValidationTestWithInlineM
 		}
 
 		// verify that the original and newly serialized match
-		assertThat(content).isEqualTo(origContent);
+		assertEquals(origContent, content);
 	}
 
 	/**
@@ -96,7 +97,7 @@ public class ParserWithValidationDstu3Test extends BaseValidationTestWithInlineM
 		}
 
 		// verify that the original and newly serialized match
-		assertThat(content).isEqualTo(origContent);
+		assertEquals(origContent, content);
 	}
 
 	@Test
@@ -132,7 +133,7 @@ public class ParserWithValidationDstu3Test extends BaseValidationTestWithInlineM
 		}
 
 		// verify that the original and newly serialized match
-		assertThat(content).isEqualTo(origContent);
+		assertEquals(origContent, content);
 	}
 
 	private IValidationSupport getValidationSupport() {
@@ -172,7 +173,7 @@ public class ParserWithValidationDstu3Test extends BaseValidationTestWithInlineM
 		}
 
 		// verify that the original and newly serialized match
-		assertThat(content).isEqualTo(origContent);
+		assertEquals(origContent, content);
 	}
 
 	@AfterAll

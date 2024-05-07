@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import com.google.common.base.Charsets;
 import org.junit.jupiter.api.Test;
@@ -17,19 +18,19 @@ public class StringUtilTest {
 	@Test
 	public void testLeft() {
 		assertNull(StringUtil.left(null, 1));
-		assertThat(StringUtil.left("", 10)).isEqualTo("");
-		assertThat(StringUtil.left("STR", 10)).isEqualTo("STR");
-		assertThat(StringUtil.left("...", 1)).isEqualTo(".");
+		assertEquals("", StringUtil.left("", 10));
+		assertEquals("STR", StringUtil.left("STR", 10));
+		assertEquals(".", StringUtil.left("...", 1));
 
 		// check supplementary chars
-		assertThat(StringUtil.left("\uD800\uDF01\uD800\uDF02", 1)).isEqualTo("\uD800\uDF01");
+		assertEquals("\uD800\uDF01", StringUtil.left("\uD800\uDF01\uD800\uDF02", 1));
 	}
 
 	@Test
 	public void testNormalizeString() {
-		assertThat(StringUtil.normalizeStringForSearchIndexing("TEST teSt")).isEqualTo("TEST TEST");
-		assertThat(StringUtil.normalizeStringForSearchIndexing("åéîøü")).isEqualTo("AEIØU");
-		assertThat(StringUtil.normalizeStringForSearchIndexing("杨浩")).isEqualTo("杨浩");
+		assertEquals("TEST TEST", StringUtil.normalizeStringForSearchIndexing("TEST teSt"));
+		assertEquals("AEIØU", StringUtil.normalizeStringForSearchIndexing("åéîøü"));
+		assertEquals("杨浩", StringUtil.normalizeStringForSearchIndexing("杨浩"));
 		assertNull(StringUtil.normalizeStringForSearchIndexing(null));
 	}
 
@@ -37,7 +38,7 @@ public class StringUtilTest {
 	public void testToStringNoBom() {
 		String input = "help i'm a bug";
 		String output = StringUtil.toUtf8String(input.getBytes(Charsets.UTF_8));
-		assertThat(output).isEqualTo(input);
+		assertEquals(input, output);
 	}
 
 	@Test
@@ -50,23 +51,23 @@ public class StringUtilTest {
 
 		byte[] bytes = bos.toByteArray();
 		String output = StringUtil.toUtf8String(bytes);
-		assertThat(output).isEqualTo("help i'm a bug");
+		assertEquals("help i'm a bug", output);
 	}
 
 
 	@Test
 	public void testChompCharacter() {
 		assertNull(StringUtil.chompCharacter(null, '/'));
-		assertThat(StringUtil.chompCharacter("", '/')).isEqualTo("");
-		assertThat(StringUtil.chompCharacter("/", '/')).isEqualTo("");
-		assertThat(StringUtil.chompCharacter("a/", '/')).isEqualTo("a");
-		assertThat(StringUtil.chompCharacter("a/a/", '/')).isEqualTo("a/a");
-		assertThat(StringUtil.chompCharacter("a/a////", '/')).isEqualTo("a/a");
+		assertEquals("", StringUtil.chompCharacter("", '/'));
+		assertEquals("", StringUtil.chompCharacter("/", '/'));
+		assertEquals("a", StringUtil.chompCharacter("a/", '/'));
+		assertEquals("a/a", StringUtil.chompCharacter("a/a/", '/'));
+		assertEquals("a/a", StringUtil.chompCharacter("a/a////", '/'));
 	}
 
 	@Test
 	public void testPrependLineNumbers() {
-		assertThat(StringUtil.prependLineNumbers("A\nB")).isEqualTo("0: A\n1: B\n");
+		assertEquals("0: A\n1: B\n", StringUtil.prependLineNumbers("A\nB"));
 	}
 
 }

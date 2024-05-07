@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jaxrs.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -82,10 +83,10 @@ public class JaxRsRestfulClientFactoryTest extends BaseFhirVersionParameterizedT
 			.request(MediaType.JSON_UTF_8.toString())
 			.get(Response.class);
 
-		assertThat(response.getStatus()).isEqualTo(200);
+		assertEquals(200, response.getStatus());
 		String json = response.readEntity(String.class);
 		IBaseResource bundle = fhirVersionParams.parseResource(json);
-		assertThat(bundle.getStructureFhirVersionEnum()).isEqualTo(fhirVersionParams.getFhirVersion());
+		assertEquals(fhirVersionParams.getFhirVersion(), bundle.getStructureFhirVersionEnum());
 	}
 
 	@ParameterizedTest

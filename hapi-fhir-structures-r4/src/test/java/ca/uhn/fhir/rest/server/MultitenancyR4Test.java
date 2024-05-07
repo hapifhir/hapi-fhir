@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -62,18 +63,18 @@ public class MultitenancyR4Test {
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(ourLastMethod).isEqualTo("search");
-			assertThat(ourLastTenantId).isEqualTo("TENANT2");
-			assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("foo");
-			assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("bar");
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("search", ourLastMethod);
+			assertEquals("TENANT2", ourLastTenantId);
+			assertEquals("foo", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
+			assertEquals("bar", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
 
 			Bundle resp = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 			ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
-			assertThat(resp.getLink("self").getUrl()).isEqualTo(ourServer.getBaseUrl() + "/TENANT2/Patient?identifier=foo%7Cbar");
-			assertThat(resp.getEntry().get(0).getFullUrl()).isEqualTo(ourServer.getBaseUrl() + "/TENANT2/Patient/0");
-			assertThat(resp.getEntry().get(0).getResource().getId()).isEqualTo(ourServer.getBaseUrl() + "/TENANT2/Patient/0");
+			assertEquals(ourServer.getBaseUrl() + "/TENANT2/Patient?identifier=foo%7Cbar", resp.getLink("self").getUrl());
+			assertEquals(ourServer.getBaseUrl() + "/TENANT2/Patient/0", resp.getEntry().get(0).getFullUrl());
+			assertEquals(ourServer.getBaseUrl() + "/TENANT2/Patient/0", resp.getEntry().get(0).getResource().getId());
 			assertThat(resp.getLink("next").getUrl()).startsWith(ourServer.getBaseUrl() + "/TENANT2?_getpages=");
 
 		} finally {
@@ -85,7 +86,7 @@ public class MultitenancyR4Test {
 		status = ourClient.execute(httpGet);
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, status.getStatusLine().getStatusCode());
 			assertThat(responseContent).contains("\"diagnostics\":\"" + Msg.code(307) + "This is the base URL of a multitenant FHIR server. Unable to handle this request, as it does not contain a tenant ID.\"");
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());

@@ -95,7 +95,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(926) + "Cycle detected around code Root");
+			assertEquals(Msg.code(926) + "Cycle detected around code Root", e.getMessage());
 		}
 	}
 
@@ -168,7 +168,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			"  ChildAAA seq=0",
 			"RootB seq=0"
 		);
-		assertThat(outcome.getUpdatedConceptCount()).isEqualTo(4);
+		assertEquals(4, outcome.getUpdatedConceptCount());
 
 		delta = new CustomTerminologySet();
 		delta.addRootConcept("RootB", "Root B")
@@ -182,7 +182,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			" ChildAA seq=0",
 			"  ChildAAA seq=0"
 		);
-		assertThat(outcome.getUpdatedConceptCount()).isEqualTo(2);
+		assertEquals(2, outcome.getUpdatedConceptCount());
 
 		runInTransaction(() -> {
 			TermConcept concept = myTermSvc.findCode("http://foo/cs", "ChildAA").orElseThrow(() -> new IllegalStateException());
@@ -212,10 +212,10 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		);
 
 		myCaptureQueriesListener.logDeleteQueries();
-		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		myCaptureQueriesListener.logInsertQueries();
 		// 2 concepts, 1 link
-		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(3);
+		assertEquals(3, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.clear();
 
 		delta = new CustomTerminologySet();
@@ -230,10 +230,10 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		);
 
 		myCaptureQueriesListener.logDeleteQueries();
-		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		myCaptureQueriesListener.logInsertQueries();
 		// 1 concept, 1 link
-		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(2);
+		assertEquals(2, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.clear();
 
 		delta = new CustomTerminologySet();
@@ -250,10 +250,10 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		);
 
 		myCaptureQueriesListener.logDeleteQueries();
-		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
 		myCaptureQueriesListener.logInsertQueries();
 		// 1 concept, 1 link
-		assertThat(myCaptureQueriesListener.countInsertQueries()).isEqualTo(2);
+		assertEquals(2, myCaptureQueriesListener.countInsertQueries());
 		myCaptureQueriesListener.clear();
 
 	}
@@ -364,14 +364,14 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		params.setLoadSynchronous(true);
 		params.add(CodeSystem.SP_URL, new UriParam("http://foo"));
 		IBundleProvider searchResult = myCodeSystemDao.search(params, mySrd);
-		assertThat(Objects.requireNonNull(searchResult.size()).intValue()).isEqualTo(1);
+		assertEquals(1, Objects.requireNonNull(searchResult.size()).intValue());
 		CodeSystem outcome = (CodeSystem) searchResult.getResources(0, 1).get(0);
 
-		assertThat(outcome.getUrl()).isEqualTo("http://foo");
-		assertThat(outcome.getContent()).isEqualTo(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		assertEquals("http://foo", outcome.getUrl());
+		assertEquals(CodeSystem.CodeSystemContentMode.NOTPRESENT, outcome.getContent());
 
 		IValidationSupport.LookupCodeResult lookup = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport), new LookupCodeRequest("http://foo", "CBC"));
-		assertThat(lookup.getCodeDisplay()).isEqualTo("Complete Blood Count");
+		assertEquals("Complete Blood Count", lookup.getCodeDisplay());
 	}
 
 
@@ -433,7 +433,7 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("codeb", "CODEB0");
 
 		UploadStatistics outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
-		assertThat(outcome.getUpdatedConceptCount()).isEqualTo(2);
+		assertEquals(2, outcome.getUpdatedConceptCount());
 		assertThat(myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport),
 			new LookupCodeRequest("http://foo", "codea")).getCodeDisplay()).isEqualTo("CODEA0");
 
@@ -442,13 +442,13 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("codea", "CODEA1");
 		delta.addRootConcept("codeb", "CODEB1");
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
-		assertThat(outcome.getUpdatedConceptCount()).isEqualTo(2);
+		assertEquals(2, outcome.getUpdatedConceptCount());
 		assertThat(myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport),
 			new LookupCodeRequest("http://foo", "codea")).getCodeDisplay()).isEqualTo("CODEA1");
 
 		// Add codes again with no changes
 		outcome = myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo", delta);
-		assertThat(outcome.getUpdatedConceptCount()).isEqualTo(2);
+		assertEquals(2, outcome.getUpdatedConceptCount());
 		assertThat(myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport),
 			new LookupCodeRequest("http://foo", "codea")).getCodeDisplay()).isEqualTo("CODEA1");
 	}
@@ -487,39 +487,39 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 
 		IValidationSupport.LookupCodeResult result = myTermSvc.lookupCode(new ValidationSupportContext(myValidationSupport),
 				new LookupCodeRequest("http://foo/cs", "lunch"));
-		assertThat(result.isFound()).isEqualTo(true);
-		assertThat(result.getSearchedForCode()).isEqualTo("lunch");
-		assertThat(result.getSearchedForSystem()).isEqualTo("http://foo/cs");
+		assertEquals(true, result.isFound());
+		assertEquals("lunch", result.getSearchedForCode());
+		assertEquals("http://foo/cs", result.getSearchedForSystem());
 
 		Parameters output = (Parameters) result.toParameters(myFhirContext, null);
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(output));
 
-		assertThat(((StringType) output.getParameterValue("name")).getValue()).isEqualTo("Description of my life");
-		assertThat(((StringType) output.getParameterValue("version")).getValue()).isEqualTo("1.2.3");
-		assertThat(output.getParameterBool("abstract")).isEqualTo(false);
+		assertEquals("Description of my life", ((StringType) output.getParameterValue("name")).getValue());
+		assertEquals("1.2.3", ((StringType) output.getParameterValue("version")).getValue());
+		assertEquals(false, output.getParameterBool("abstract"));
 
 		List<Parameters.ParametersParameterComponent> designations = output.getParameter().stream().filter(t -> t.getName().equals("designation")).collect(Collectors.toList());
-		assertThat(designations.get(0).getPart().get(0).getName()).isEqualTo("language");
-		assertThat(((CodeType) designations.get(0).getPart().get(0).getValue()).getValueAsString()).isEqualTo("fr");
-		assertThat(designations.get(0).getPart().get(1).getName()).isEqualTo("use");
-		assertThat(((Coding) designations.get(0).getPart().get(1).getValue()).getSystem()).isEqualTo("http://sys");
-		assertThat(((Coding) designations.get(0).getPart().get(1).getValue()).getCode()).isEqualTo("code");
-		assertThat(((Coding) designations.get(0).getPart().get(1).getValue()).getDisplay()).isEqualTo("display");
-		assertThat(designations.get(0).getPart().get(2).getName()).isEqualTo("value");
-		assertThat(((StringType) designations.get(0).getPart().get(2).getValue()).getValueAsString()).isEqualTo("Je mange une pomme");
+		assertEquals("language", designations.get(0).getPart().get(0).getName());
+		assertEquals("fr", ((CodeType) designations.get(0).getPart().get(0).getValue()).getValueAsString());
+		assertEquals("use", designations.get(0).getPart().get(1).getName());
+		assertEquals("http://sys", ((Coding) designations.get(0).getPart().get(1).getValue()).getSystem());
+		assertEquals("code", ((Coding) designations.get(0).getPart().get(1).getValue()).getCode());
+		assertEquals("display", ((Coding) designations.get(0).getPart().get(1).getValue()).getDisplay());
+		assertEquals("value", designations.get(0).getPart().get(2).getName());
+		assertEquals("Je mange une pomme", ((StringType) designations.get(0).getPart().get(2).getValue()).getValueAsString());
 
 		List<Parameters.ParametersParameterComponent> properties = output.getParameter().stream().filter(t -> t.getName().equals("property")).collect(Collectors.toList());
-		assertThat(properties.get(0).getPart().get(0).getName()).isEqualTo("code");
-		assertThat(((StringType) properties.get(0).getPart().get(0).getValue()).getValueAsString()).isEqualTo("flavour");
-		assertThat(properties.get(0).getPart().get(1).getName()).isEqualTo("value");
-		assertThat(((StringType) properties.get(0).getPart().get(1).getValue()).getValueAsString()).isEqualTo("Hints of lime");
+		assertEquals("code", properties.get(0).getPart().get(0).getName());
+		assertEquals("flavour", ((StringType) properties.get(0).getPart().get(0).getValue()).getValueAsString());
+		assertEquals("value", properties.get(0).getPart().get(1).getName());
+		assertEquals("Hints of lime", ((StringType) properties.get(0).getPart().get(1).getValue()).getValueAsString());
 
-		assertThat(properties.get(1).getPart().get(0).getName()).isEqualTo("code");
-		assertThat(((CodeType) properties.get(1).getPart().get(0).getValue()).getValueAsString()).isEqualTo("useless_sct_code");
-		assertThat(properties.get(1).getPart().get(1).getName()).isEqualTo("value");
-		assertThat(((Coding) properties.get(1).getPart().get(1).getValue()).getSystem()).isEqualTo("http://snomed.info");
-		assertThat(((Coding) properties.get(1).getPart().get(1).getValue()).getCode()).isEqualTo("1234567");
-		assertThat(((Coding) properties.get(1).getPart().get(1).getValue()).getDisplay()).isEqualTo("Choked on large meal (finding)");
+		assertEquals("code", properties.get(1).getPart().get(0).getName());
+		assertEquals("useless_sct_code", ((CodeType) properties.get(1).getPart().get(0).getValue()).getValueAsString());
+		assertEquals("value", properties.get(1).getPart().get(1).getName());
+		assertEquals("http://snomed.info", ((Coding) properties.get(1).getPart().get(1).getValue()).getSystem());
+		assertEquals("1234567", ((Coding) properties.get(1).getPart().get(1).getValue()).getCode());
+		assertEquals("Choked on large meal (finding)", ((Coding) properties.get(1).getPart().get(1).getValue()).getDisplay());
 
 	}
 
@@ -545,20 +545,20 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 		delta.addRootConcept("codeB", "displayB");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsAdd("http://foo/cs", delta);
 
-		assertThat(runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeB").isPresent())).isEqualTo(true);
-		assertThat(runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeA").isPresent())).isEqualTo(true);
-		assertThat(runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAA").isPresent())).isEqualTo(true);
-		assertThat(runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAAA").isPresent())).isEqualTo(true);
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeB").isPresent()));
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeA").isPresent()));
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAA").isPresent()));
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAAA").isPresent()));
 
 		// Remove CodeB
 		delta = new CustomTerminologySet();
 		delta.addRootConcept("codeB", "displayB");
 		myTermCodeSystemStorageSvc.applyDeltaCodeSystemsRemove("http://foo/cs", delta);
 
-		assertThat(runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeB").isPresent())).isEqualTo(false);
-		assertThat(runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeA").isPresent())).isEqualTo(true);
-		assertThat(runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAA").isPresent())).isEqualTo(true);
-		assertThat(runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAAA").isPresent())).isEqualTo(true);
+		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeB").isPresent()));
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeA").isPresent()));
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAA").isPresent()));
+		assertEquals(true, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAAA").isPresent()));
 
 		// Remove CodeA
 		runInTransaction(() -> {
@@ -578,10 +578,10 @@ public class TerminologySvcDeltaR4Test extends BaseJpaR4Test {
 			ourLog.info("Done removing. Have codes:\n * {}", myTermConceptDao.findAll().stream().map(t -> t.toString()).collect(Collectors.joining("\n * ")));
 		});
 
-		assertThat(runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeB").isPresent())).isEqualTo(false);
-		assertThat(runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeA").isPresent())).isEqualTo(false);
-		assertThat(runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAA").isPresent())).isEqualTo(false); //TODO GGG JA this assert fails. If you swap to `deleteByPid` it does not fail.
-		assertThat(runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAAA").isPresent())).isEqualTo(false);//And I assume this one does too.
+		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeB").isPresent()));
+		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeA").isPresent()));
+		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAA").isPresent())); //TODO GGG JA this assert fails. If you swap to `deleteByPid` it does not fail.
+		assertEquals(false, runInTransaction(() -> myTermSvc.findCode("http://foo/cs", "codeAAA").isPresent()));//And I assume this one does too.
 
 	}
 

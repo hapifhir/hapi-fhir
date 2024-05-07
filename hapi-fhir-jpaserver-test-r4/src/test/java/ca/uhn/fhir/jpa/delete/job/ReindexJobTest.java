@@ -266,7 +266,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		);
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
 		JobInstance outcome = myBatch2JobHelper.awaitJobCompletion(startResponse);
-		assertThat(outcome.getCombinedRecordsProcessed()).isEqualTo(10);
+		assertEquals(10, outcome.getCombinedRecordsProcessed());
 
 		try {
 			myPatientDao.read(patientId, mySrd);
@@ -290,7 +290,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		myReindexTestHelper.createAlleleSearchParameter();
 
-		assertThat(myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size()).isEqualTo(2);
+		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
 		// The search param value is on the observation, but it hasn't been indexed yet
 		assertThat(myReindexTestHelper.getAlleleObservationIds()).hasSize(0);
 
@@ -306,12 +306,12 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		myBatch2JobHelper.awaitJobCompletion(res);
 
 		// validate
-		assertThat(myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size()).isEqualTo(2);
+		assertEquals(2, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
 
 		// Now one of them should be indexed
 		List<String> alleleObservationIds = myReindexTestHelper.getAlleleObservationIds();
 		assertThat(alleleObservationIds).hasSize(1);
-		assertThat(alleleObservationIds.get(0)).isEqualTo(obsFinalId.getIdPart());
+		assertEquals(obsFinalId.getIdPart(), alleleObservationIds.get(0));
 
 		myStorageSettings.setMarkResourcesForReindexingUponSearchParameterChange(reindexPropertyCache);
 	}
@@ -322,7 +322,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		runInTransaction(() -> {
 			int entriesInSpIndexTokenTable = myResourceIndexedSearchParamTokenDao.countForResourceId(obsId.getIdPartAsLong());
-			assertThat(entriesInSpIndexTokenTable).isEqualTo(1);
+			assertEquals(1, entriesInSpIndexTokenTable);
 
 			// simulate resource deletion
 			ResourceTable resource = myResourceTableDao.findById(obsId.getIdPartAsLong()).orElseThrow();
@@ -347,7 +347,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		// then
 		runInTransaction(() -> {
 			int entriesInSpIndexTokenTablePostReindexing = myResourceIndexedSearchParamTokenDao.countForResourceId(obsId.getIdPartAsLong());
-			assertThat(entriesInSpIndexTokenTablePostReindexing).isEqualTo(0);
+			assertEquals(0, entriesInSpIndexTokenTablePostReindexing);
 		});
 	}
 
@@ -364,7 +364,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		myReindexTestHelper.createAlleleSearchParameter();
 		mySearchParamRegistry.forceRefresh();
 
-		assertThat(myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size()).isEqualTo(50);
+		assertEquals(50, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
 		// The search param value is on the observation, but it hasn't been indexed yet
 		assertThat(myReindexTestHelper.getAlleleObservationIds()).hasSize(0);
 
@@ -376,7 +376,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		myBatch2JobHelper.awaitJobCompletion(startResponse);
 
 		// validate
-		assertThat(myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size()).isEqualTo(50);
+		assertEquals(50, myObservationDao.search(SearchParameterMap.newSynchronous(), mySrd).size());
 		// Now all of them should be indexed
 		assertThat(myReindexTestHelper.getAlleleObservationIds()).hasSize(50);
 	}
@@ -394,7 +394,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 		Batch2JobStartResponse startResponse = myJobCoordinator.startInstance(startRequest);
 		JobInstance myJob = myBatch2JobHelper.awaitJobCompletion(startResponse);
 
-		assertThat(myJob.getStatus()).isEqualTo(StatusEnum.COMPLETED);
+		assertEquals(StatusEnum.COMPLETED, myJob.getStatus());
 		assertNotNull(myJob.getWarningMessages());
 		assertThat(myJob.getWarningMessages()).contains("Failed to reindex resource because unique search parameter " + searchParameter.getEntity().getIdDt().toVersionless().toString());
 	}
@@ -423,7 +423,7 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// Verify
 
-		assertThat(outcome.getStatus()).isEqualTo(StatusEnum.COMPLETED);
+		assertEquals(StatusEnum.COMPLETED, outcome.getStatus());
 		assertNull(outcome.getErrorMessage());
 	}
 
@@ -451,8 +451,8 @@ public class ReindexJobTest extends BaseJpaR4Test {
 
 		// Verify
 
-		assertThat(outcome.getStatus()).isEqualTo(StatusEnum.FAILED);
-		assertThat(outcome.getErrorMessage()).isEqualTo("java.lang.Error: foo message");
+		assertEquals(StatusEnum.FAILED, outcome.getStatus());
+		assertEquals("java.lang.Error: foo message", outcome.getErrorMessage());
 	}
 
 	@Test

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module.subscriber.websocket;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
@@ -93,17 +94,17 @@ public class WebsocketConnectionValidatorTest {
 		idType = new IdType();
 		response = myWebsocketConnectionValidator.validate(idType);
 		assertFalse(response.isValid());
-		assertThat(response.getMessage()).isEqualTo("Invalid bind request - No ID included: null");
+		assertEquals("Invalid bind request - No ID included: null", response.getMessage());
 
 		idType = new IdType(NON_EXISTENT_SUBSCRIPTION_ID);
 		response = myWebsocketConnectionValidator.validate(idType);
 		assertFalse(response.isValid());
-		assertThat(response.getMessage()).isEqualTo("Invalid bind request - Unknown subscription: Subscription/" + NON_EXISTENT_SUBSCRIPTION_ID);
+		assertEquals("Invalid bind request - Unknown subscription: Subscription/" + NON_EXISTENT_SUBSCRIPTION_ID, response.getMessage());
 
 		idType = new IdType(RESTHOOK_SUBSCRIPTION_ID);
 		response = myWebsocketConnectionValidator.validate(idType);
 		assertFalse(response.isValid());
-		assertThat(response.getMessage()).isEqualTo("Subscription Subscription/" + RESTHOOK_SUBSCRIPTION_ID + " is not a WEBSOCKET subscription");
+		assertEquals("Subscription Subscription/" + RESTHOOK_SUBSCRIPTION_ID + " is not a WEBSOCKET subscription", response.getMessage());
 
 		idType = new IdType(WEBSOCKET_SUBSCRIPTION_ID);
 		response = myWebsocketConnectionValidator.validate(idType);

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.stresstest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.ISearchCoordinatorSvc;
@@ -544,7 +545,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		myClient.transaction().withBundle(input).execute();
 
 		try (CloseableHttpResponse getMeta = ourHttpClient.execute(new HttpGet(myServerBase + "/metadata"))) {
-			assertThat(getMeta.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, getMeta.getStatusLine().getStatusCode());
 		}
 
 		List<BaseTask> tasks = Lists.newArrayList();
@@ -607,7 +608,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		int deleteCount = myCaptureQueriesListener.getDeleteQueries().size();
 
 		myCaptureQueriesListener.logDeleteQueries();
-		assertThat(deleteCount).isEqualTo(59);
+		assertEquals(59, deleteCount);
 	}
 
 	@Disabled("Stress test")
@@ -649,7 +650,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 		int deleteCount = myCaptureQueriesListener.getDeleteQueries().size();
 
 		myCaptureQueriesListener.logDeleteQueries();
-		assertThat(deleteCount).isEqualTo(30);
+		assertEquals(30, deleteCount);
 	}
 
 	private void validateNoErrors(List<BaseTask> tasks) {
@@ -691,7 +692,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					get.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
 					getResp = ourHttpClient.execute(get);
 					try {
-						assertThat(getResp.getStatusLine().getStatusCode()).isEqualTo(200);
+						assertEquals(200, getResp.getStatusLine().getStatusCode());
 						myTaskCount++;
 					} finally {
 						IOUtils.closeQuietly(getResp);

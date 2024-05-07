@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
@@ -60,7 +61,7 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 
 		value = ourCtx.newFhirPath().evaluate(o, "Observation.specimen.resolve().receivedTime", Base.class);
 		assertThat(value).hasSize(1);
-		assertThat(((DateTimeType) value.get(0)).getValueAsString()).isEqualTo("2011-01-01");
+		assertEquals("2011-01-01", ((DateTimeType) value.get(0)).getValueAsString());
 	}
 
 	@Test
@@ -91,19 +92,19 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 
 		List<Base> value = ourCtx.newFhirPath().evaluate(obs, "Observation.value.as(string)", Base.class);
 		assertThat(value).hasSize(1);
-		assertThat(((StringType) value.get(0)).getValue()).isEqualTo("FOO");
+		assertEquals("FOO", ((StringType) value.get(0)).getValue());
 
 		value = ourCtx.newFhirPath().evaluate(obs, "Observation.value.as(FHIR.string)", Base.class);
 		assertThat(value).hasSize(1);
-		assertThat(((StringType) value.get(0)).getValue()).isEqualTo("FOO");
+		assertEquals("FOO", ((StringType) value.get(0)).getValue());
 
 		value = ourCtx.newFhirPath().evaluate(obs, "Observation.value.as(String)", Base.class);
 		assertThat(value).hasSize(1);
-		assertThat(((StringType) value.get(0)).getValue()).isEqualTo("FOO");
+		assertEquals("FOO", ((StringType) value.get(0)).getValue());
 
 		value = ourCtx.newFhirPath().evaluate(obs, "Observation.value.as(FHIR.String)", Base.class);
 		assertThat(value).hasSize(1);
-		assertThat(((StringType) value.get(0)).getValue()).isEqualTo("FOO");
+		assertEquals("FOO", ((StringType) value.get(0)).getValue());
 	}
 	
 	@Test
@@ -134,7 +135,7 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 
 	private void testEquivalent(Patient thePatient, String theExpression, boolean theExpected) throws FHIRException {
 		List<Base> eval = ourCtx.newFhirPath().evaluate(thePatient, theExpression, Base.class);
-		assertThat(((BooleanType) eval.get(0)).getValue()).isEqualTo(theExpected);
+		assertEquals(theExpected, ((BooleanType) eval.get(0)).getValue());
 	}
 
 	@Test
@@ -153,7 +154,7 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 		Patient p = new Patient();
 		p.addName().setFamily("TEST");
 		String result = ourCtx.newFhirPath().evaluate(p, exp, IPrimitiveType.class).get(0).getValueAsString();
-		assertThat(result).isEqualTo("TEST.");
+		assertEquals("TEST.", result);
 	}
 
 	@Test
@@ -183,7 +184,7 @@ public class FhirPathEngineR4Test extends BaseValidationTestWithInlineMocks {
 
 		String path = "QuestionnaireResponse.item.where(linkId = 'PARENT').item.where(linkId = 'CHILD').answer.value.as(FHIR.dateTime)";
 		List<Base> answer = ourCtx.newFhirPath().evaluate(qr, path, Base.class);
-		assertThat(((DateTimeType) answer.get(0)).getValueAsString()).isEqualTo("2019-01-01");
+		assertEquals("2019-01-01", ((DateTimeType) answer.get(0)).getValueAsString());
 
 	}
 

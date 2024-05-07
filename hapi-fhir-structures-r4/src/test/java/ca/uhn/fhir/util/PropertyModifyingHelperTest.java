@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.r4.model.Address;
@@ -25,13 +26,13 @@ public class PropertyModifyingHelperTest {
 		address = (Address) helper.getBase();
 
 		assertThat(address.getLine()).hasSize(2);
-		assertThat(address.getCity()).isEqualTo("city");
+		assertEquals("city", address.getCity());
 		assertNull(address.getCountry());
 
 		helper.setDelimiter(";");
-		assertThat(helper.getFields("line", "city")).isEqualTo("line1;line2;city");
+		assertEquals("line1;line2;city", helper.getFields("line", "city"));
 		List<String> lines = helper.getMultiple("line");
-		assertThat(lines.toString()).isEqualTo("[line1, line2]");
+		assertEquals("[line1, line2]", lines.toString());
 	}
 
 }

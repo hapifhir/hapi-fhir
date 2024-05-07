@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import com.google.common.base.Strings;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -43,7 +44,7 @@ class MetadataSourceTest {
 		Mockito.when(myConnectionProperties.newJdbcTemplate()).thenReturn(myJdbcTemplate);
 		Mockito.when(myJdbcTemplate.queryForObject(Mockito.any(), Mockito.eq(String.class))).thenReturn(Strings.nullToEmpty(theEdition));
 
-		assertThat(myMetadataSource.isOnlineIndexSupported(myConnectionProperties)).isEqualTo(theSupportedFlag);
+		assertEquals(theSupportedFlag, myMetadataSource.isOnlineIndexSupported(myConnectionProperties));
 	}
 
 }

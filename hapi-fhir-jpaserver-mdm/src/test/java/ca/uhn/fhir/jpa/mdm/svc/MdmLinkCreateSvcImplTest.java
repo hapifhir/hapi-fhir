@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -85,8 +86,8 @@ class MdmLinkCreateSvcImplTest {
 
 		IMdmLink mdmLink = mdmLinkCaptor.getValue();
 
-		assertThat(mdmLink.getLinkSource()).isEqualTo(MdmLinkSourceEnum.MANUAL);
-		assertThat(mdmLink.getMdmSourceType()).isEqualTo("Patient");
+		assertEquals(MdmLinkSourceEnum.MANUAL, mdmLink.getLinkSource());
+		assertEquals("Patient", mdmLink.getMdmSourceType());
 
 	}
 

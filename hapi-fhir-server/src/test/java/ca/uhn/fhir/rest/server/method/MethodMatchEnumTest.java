@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.method;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -8,9 +9,9 @@ public class MethodMatchEnumTest {
 
 	@Test
 	public void testOrder() {
-		assertThat(MethodMatchEnum.NONE.ordinal()).isEqualTo(0);
-		assertThat(MethodMatchEnum.APPROXIMATE.ordinal()).isEqualTo(1);
-		assertThat(MethodMatchEnum.EXACT.ordinal()).isEqualTo(2);
+		assertEquals(0, MethodMatchEnum.NONE.ordinal());
+		assertEquals(1, MethodMatchEnum.APPROXIMATE.ordinal());
+		assertEquals(2, MethodMatchEnum.EXACT.ordinal());
 	}
 
 }

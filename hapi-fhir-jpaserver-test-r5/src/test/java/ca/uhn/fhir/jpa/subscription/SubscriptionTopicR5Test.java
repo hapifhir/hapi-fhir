@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.BundleUtil;
@@ -38,7 +39,7 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 
 		waitForActivatedSubscriptionCount(1);
 
-		assertThat(getSystemProviderCount()).isEqualTo(0);
+		assertEquals(0, getSystemProviderCount());
 
 		// execute
 		Encounter badSentEncounter = sendEncounterWithStatus(Enumerations.EncounterStatus.COMPLETED, false);
@@ -53,8 +54,8 @@ public class SubscriptionTopicR5Test extends BaseSubscriptionsR5Test {
 		validateSubscriptionStatus(subscription, goodSentEncounter, ss, 1L);
 
 		Encounter encounter = (Encounter) resources.get(1);
-		assertThat(encounter.getStatus()).isEqualTo(Enumerations.EncounterStatus.COMPLETED);
-		assertThat(encounter.getIdElement()).isEqualTo(goodSentEncounter.getIdElement());
+		assertEquals(Enumerations.EncounterStatus.COMPLETED, encounter.getStatus());
+		assertEquals(goodSentEncounter.getIdElement(), encounter.getIdElement());
 	}
 
 	private Subscription createTopicSubscription(String... theFilters) throws InterruptedException {

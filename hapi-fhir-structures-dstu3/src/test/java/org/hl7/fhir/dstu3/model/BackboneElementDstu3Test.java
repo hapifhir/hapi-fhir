@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -20,6 +21,6 @@ public class BackboneElementDstu3Test {
         String copiedPccID = copiedPcc.getId();
 
 			assertTrue(copiedPcc instanceof BackboneElement); // Just making sure this assumption still holds up, otherwise this test isn't very useful
-			assertThat(copiedPccID).isEqualTo("1001");
+			assertEquals("1001", copiedPccID);
     }
 }

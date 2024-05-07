@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.fql.parser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimePrimitiveDatatypeDefinition;
@@ -38,7 +39,7 @@ public class HfqlFhirPathParserTest {
 	void testDetermineDatatypeForPath(String theResourceType, String theFhirPath, HfqlDataTypeEnum theExpectedType) {
 		HfqlFhirPathParser svc = new HfqlFhirPathParser(FhirContext.forR4Cached());
 		HfqlDataTypeEnum actual = svc.determineDatatypeForPath(theResourceType, theFhirPath);
-		assertThat(actual).isEqualTo(theExpectedType);
+		assertEquals(theExpectedType, actual);
 	}
 
 
@@ -52,7 +53,7 @@ public class HfqlFhirPathParserTest {
 				foundCount++;
 			}
 		}
-		assertThat(foundCount).isEqualTo(21);
+		assertEquals(21, foundCount);
 	}
 
 

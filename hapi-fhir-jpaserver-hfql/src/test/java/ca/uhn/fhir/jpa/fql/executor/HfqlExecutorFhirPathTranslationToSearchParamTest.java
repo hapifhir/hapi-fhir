@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.fql.executor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -56,7 +57,7 @@ public class HfqlExecutorFhirPathTranslationToSearchParamTest extends BaseHfqlEx
 			assertThat(map.get("_id")).hasSize(1);
 			assertThat(map.get("_id").get(0)).hasSize(1);
 			assertNull(((TokenParam) map.get("_id").get(0).get(0)).getSystem());
-			assertThat(((TokenParam) map.get("_id").get(0).get(0)).getValue()).isEqualTo("ABC123");
+			assertEquals("ABC123", ((TokenParam) map.get("_id").get(0).get(0)).getValue());
 		} else {
 			assertNull(map.get("_id"));
 		}
@@ -93,8 +94,8 @@ public class HfqlExecutorFhirPathTranslationToSearchParamTest extends BaseHfqlEx
 		SearchParameterMap map = mySearchParameterMapCaptor.getValue();
 		assertThat(map.get("_lastUpdated")).hasSize(1);
 		assertThat(map.get("_lastUpdated").get(0)).hasSize(1);
-		assertThat(((DateParam) map.get("_lastUpdated").get(0).get(0)).getValueAsString()).isEqualTo(theExpectedParamValue);
-		assertThat(((DateParam) map.get("_lastUpdated").get(0).get(0)).getPrefix()).isEqualTo(theExpectedParamPrefix);
+		assertEquals(theExpectedParamValue, ((DateParam) map.get("_lastUpdated").get(0).get(0)).getValueAsString());
+		assertEquals(theExpectedParamPrefix, ((DateParam) map.get("_lastUpdated").get(0).get(0)).getPrefix());
 	}
 
 

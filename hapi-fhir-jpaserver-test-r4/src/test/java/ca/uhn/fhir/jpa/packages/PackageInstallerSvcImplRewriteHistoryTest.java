@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.packages;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -42,7 +43,7 @@ public class PackageInstallerSvcImplRewriteHistoryTest extends BaseJpaR4Test {
 
 		// verify
 		ConceptMap readConceptMap = myConceptMapDao.read(CONCEPT_MAP_TEST_ID);
-		assertThat(readConceptMap.getIdElement().toVersionless().toString()).isEqualTo(CONCEPT_MAP_TEST_ID.toString());
+		assertEquals(CONCEPT_MAP_TEST_ID.toString(), readConceptMap.getIdElement().toVersionless().toString());
 
 	}
 }

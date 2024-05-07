@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.util.NameUtil;
 import ca.uhn.fhir.util.FhirTerser;
@@ -29,7 +30,7 @@ public class NameUtilTestR4 {
 
 		{
 			String familyName = NameUtil.extractFamilyName(myFhirContext, name );
-			assertThat(familyName).isEqualTo("family");
+			assertEquals("family", familyName);
 		}
 
 		{

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.topic;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -54,7 +55,7 @@ class SubscriptionTopicUtilTest {
 		Bundle bundle = buildSubscriptionStatus(patient);
 
 		IBaseResource extractionResult = SubscriptionTopicUtil.extractResourceFromBundle(myContext, bundle);
-		assertThat(extractionResult).isEqualTo(patient);
+		assertEquals(patient, extractionResult);
 	}
 
 	@Test
@@ -119,6 +120,6 @@ class SubscriptionTopicUtilTest {
 
 		boolean actualResult = SubscriptionTopicUtil.isEmptyContentTopicSubscription(canonicalSubscription);
 
-		assertThat(actualResult).isEqualTo(theExpectedResult);
+		assertEquals(theExpectedResult, actualResult);
 	}
 }

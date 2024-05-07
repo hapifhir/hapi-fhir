@@ -126,7 +126,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		String criteria1 = "Observation?code=SNOMED-CT|" + code + "&_format=xml";
 		Subscription subscription = newSubscription(criteria1, payload);
 
-		assertThat(1).isEqualTo(mySrdInterceptorService.getAllRegisteredInterceptors().size());
+		assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
 
 		myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd);
 
@@ -137,10 +137,10 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
-		assertThat(BaseSubscriptionsR4Test.ourObservationProvider.getCountCreate()).isEqualTo(0);
+		assertEquals(0, BaseSubscriptionsR4Test.ourObservationProvider.getCountCreate());
 		BaseSubscriptionsR4Test.ourObservationProvider.waitForUpdateCount(1);
 
-		assertThat(BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, BaseSubscriptionsR4Test.ourRestfulServer.getRequestContentTypes().get(0));
 	}
 
 	@ParameterizedTest
@@ -153,7 +153,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		String criteria1 = "Patient?active=true";
 		Subscription subscription = newSubscription(criteria1, payload);
 
-		assertThat(1).isEqualTo(mySrdInterceptorService.getAllRegisteredInterceptors().size());
+		assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
 
 		myDaoRegistry.getResourceDao("Subscription").create(subscription, mySrd);
 
@@ -165,7 +165,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 
 		// Should see 0 subscription notification
 		waitForQueueToDrain();
-		assertThat(BaseSubscriptionsR4Test.ourPatientProvider.getCountCreate()).isEqualTo(0);
+		assertEquals(0, BaseSubscriptionsR4Test.ourPatientProvider.getCountCreate());
 
 		try {
 			BaseSubscriptionsR4Test.ourPatientProvider.waitForUpdateCount(1);
@@ -272,7 +272,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		// Create the subscription now
 		DaoMethodOutcome subscriptionOutcome = myDaoRegistry.getResourceDao("Subscription").create(newSubscription(criteria1, payload), mySrd);
 
-		assertThat(1).isEqualTo(mySrdInterceptorService.getAllRegisteredInterceptors().size());
+		assertEquals(mySrdInterceptorService.getAllRegisteredInterceptors().size(), 1);
 
 		Subscription subscription = (Subscription) subscriptionOutcome.getResource();
 
@@ -286,7 +286,7 @@ public class PartitionedSubscriptionTriggeringR4Test extends BaseSubscriptionsR4
 		mySubscriptionTriggeringSvc.runDeliveryPass();
 
 		waitForQueueToDrain();
-		assertThat(BaseSubscriptionsR4Test.ourObservationProvider.getCountUpdate()).isEqualTo(1);
+		assertEquals(1, BaseSubscriptionsR4Test.ourObservationProvider.getCountUpdate());
 
 		String responseValue = resultParameters.getParameter().get(0).getValue().primitiveValue();
 		assertThat(responseValue).contains("Subscription triggering job submitted as JOB ID");

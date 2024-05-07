@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.model.FetchJobInstancesRequest;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -77,8 +78,8 @@ public class JobInstanceRepositoryTest extends BaseJpaR4Test {
 		List<Batch2JobInstanceEntity> instancesByJobIdParamsAndStatus = runInTransaction(()->myJobInstanceRepository.findInstancesByJobIdParamsAndStatus(JOB_DEFINITION_ID, PARAMS, statuses, PageRequest.of(0, 10)));
 		assertThat(instancesByJobIdParamsAndStatus).hasSize(1);
 		Batch2JobInstanceEntity batch2JobInstanceEntity = instancesByJobIdParamsAndStatus.get(0);
-		assertThat(TRIGGERING_USER_NAME).isEqualTo(batch2JobInstanceEntity.getTriggeringUsername());
-		assertThat(TRIGGERING_CLIENT_ID).isEqualTo(batch2JobInstanceEntity.getTriggeringClientId());
+		assertEquals(batch2JobInstanceEntity.getTriggeringUsername(), TRIGGERING_USER_NAME);
+		assertEquals(batch2JobInstanceEntity.getTriggeringClientId(), TRIGGERING_CLIENT_ID);
 	}
 
 	@BeforeEach

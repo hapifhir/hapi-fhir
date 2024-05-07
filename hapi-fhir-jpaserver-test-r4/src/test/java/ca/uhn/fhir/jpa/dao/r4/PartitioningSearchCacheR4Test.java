@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
 import ca.uhn.fhir.jpa.search.cache.SearchCacheStatusEnum;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -31,8 +32,8 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			myCaptureQueriesListener.clear();
 			addReadPartition(1);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
-			assertThat(outcome.getCacheStatus()).isEqualTo(SearchCacheStatusEnum.MISS);
-			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(2);
+			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
+			assertEquals(2, outcome.sizeOrThrowNpe());
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);
@@ -48,8 +49,8 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			myCaptureQueriesListener.clear();
 			addReadPartition(2);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
-			assertThat(outcome.getCacheStatus()).isEqualTo(SearchCacheStatusEnum.MISS);
-			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(2);
+			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
+			assertEquals(2, outcome.sizeOrThrowNpe());
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);
@@ -65,8 +66,8 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			myCaptureQueriesListener.clear();
 			addReadPartition(2);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
-			assertThat(outcome.getCacheStatus()).isEqualTo(SearchCacheStatusEnum.HIT);
-			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(2);
+			assertEquals(SearchCacheStatusEnum.HIT, outcome.getCacheStatus());
+			assertEquals(2, outcome.sizeOrThrowNpe());
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.logSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);
@@ -92,8 +93,8 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			myCaptureQueriesListener.clear();
 			addReadPartition(1, null);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
-			assertThat(outcome.getCacheStatus()).isEqualTo(SearchCacheStatusEnum.MISS);
-			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(4);
+			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
+			assertEquals(4, outcome.sizeOrThrowNpe());
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);
@@ -109,8 +110,8 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			myCaptureQueriesListener.clear();
 			addReadPartition(2, 1);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
-			assertThat(outcome.getCacheStatus()).isEqualTo(SearchCacheStatusEnum.MISS);
-			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(4);
+			assertEquals(SearchCacheStatusEnum.MISS, outcome.getCacheStatus());
+			assertEquals(4, outcome.sizeOrThrowNpe());
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);
@@ -126,8 +127,8 @@ public class PartitioningSearchCacheR4Test extends BasePartitioningR4Test {
 			myCaptureQueriesListener.clear();
 			addReadPartition(1, null);
 			PersistedJpaBundleProvider outcome = (PersistedJpaBundleProvider) myPatientDao.search(new SearchParameterMap(), mySrd);
-			assertThat(outcome.getCacheStatus()).isEqualTo(SearchCacheStatusEnum.HIT);
-			assertThat(outcome.sizeOrThrowNpe()).isEqualTo(4);
+			assertEquals(SearchCacheStatusEnum.HIT, outcome.getCacheStatus());
+			assertEquals(4, outcome.sizeOrThrowNpe());
 
 			List<SqlQuery> selectQueries = myCaptureQueriesListener.getSelectQueries();
 			String searchSql = selectQueries.get(0).getSql(true, false);

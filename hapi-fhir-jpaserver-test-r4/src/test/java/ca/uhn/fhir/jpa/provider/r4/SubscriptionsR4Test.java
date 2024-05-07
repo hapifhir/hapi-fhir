@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.util.SubscriptionsRequireManualActivationInterceptorR4;
@@ -95,7 +96,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 			myClient.create().resource(subs).execute();
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 422 Unprocessable Entity: " + Msg.code(811) + "Subscription.status must be 'off' or 'requested' on a newly created subscription");
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(811) + "Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
 		}
 
 		subs.setId("ABC");
@@ -103,7 +104,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 			myClient.update().resource(subs).execute();
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 422 Unprocessable Entity: " + Msg.code(811) + "Subscription.status must be 'off' or 'requested' on a newly created subscription");
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(811) + "Subscription.status must be 'off' or 'requested' on a newly created subscription", e.getMessage());
 		}
 	}
 
@@ -126,7 +127,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 			myClient.update().resource(subs).execute();
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 422 Unprocessable Entity: " + Msg.code(809) + "Subscription.status can not be changed from 'requested' to 'active'");
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(809) + "Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
 		}
 
 		try {
@@ -157,7 +158,7 @@ public class SubscriptionsR4Test extends BaseResourceProviderR4Test {
 			myClient.update().resource(subs).execute();
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 422 Unprocessable Entity: " + Msg.code(809) + "Subscription.status can not be changed from 'requested' to 'active'");
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(809) + "Subscription.status can not be changed from 'requested' to 'active'", e.getMessage());
 		}
 
 		try {

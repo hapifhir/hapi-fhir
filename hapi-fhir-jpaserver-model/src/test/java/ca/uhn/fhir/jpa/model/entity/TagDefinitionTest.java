@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.model.entity;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -14,7 +15,7 @@ public class TagDefinitionTest {
 		def.setDisplay("my_display");
 		def.setVersion("V 1.0");
 		def.setUserSelected(true);
-		assertThat(def.toString()).isEqualTo("TagDefinition[id=<null>,system=my_system,code=my_code,display=my_display,version=V 1.0,userSelected=true]");
+		assertEquals("TagDefinition[id=<null>,system=my_system,code=my_code,display=my_display,version=V 1.0,userSelected=true]", def.toString());
 	}
 
 	@Test
@@ -29,7 +30,7 @@ public class TagDefinitionTest {
 		def2.setSystem("my_system");
 		def2.setDisplay("my_display");
 
-		assertThat(def).isEqualTo(def);
+		assertEquals(def, def);
 		assertThat(def2).isNotEqualTo(def);
 		assertThat("").isNotEqualTo(def);
 	}
@@ -42,6 +43,6 @@ public class TagDefinitionTest {
 		def.setDisplay("my_display");
 		def.setVersion("V 1.0");
 		def.setUserSelected(true);
-		assertThat(def.hashCode()).isEqualTo(434167707);
+		assertEquals(434167707, def.hashCode());
 	}
 }

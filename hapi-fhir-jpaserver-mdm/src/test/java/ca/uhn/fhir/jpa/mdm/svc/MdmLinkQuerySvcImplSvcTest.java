@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -42,7 +43,7 @@ class MdmLinkQuerySvcImplSvcTest extends BaseMdmR4Test {
 		// Patients with blank client IDs should have been assigned sequential PID, which range we don;t know, but we want to make sure
 		// that "123a", "456a" and "789a" are in this order
 		List<String> orderedClientIdsFromLinks = patientIdsFormLinks.stream().filter(id -> id.endsWith("a")).collect(Collectors.toList());
-		assertThat(orderedClientIdsFromLinks).isEqualTo(List.of("Patient/123a", "Patient/456a", "Patient/789a"));
+		assertEquals(List.of("Patient/123a", "Patient/456a", "Patient/789a"), orderedClientIdsFromLinks);
 	}
 
 	private String createMdmLinksWithLinkedPatientsWithId(List<String> thePatientIds) {

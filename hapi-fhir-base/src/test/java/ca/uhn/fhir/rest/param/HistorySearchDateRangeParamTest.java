@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.Test;
 
@@ -15,28 +16,28 @@ class HistorySearchDateRangeParamTest {
 	public void testSearchDateRangeParamWithInvalidSearchType() {
 		HistorySearchDateRangeParam param = new HistorySearchDateRangeParam(Map.of("Some key", new String[]{"value"}), dateRangeParam, theOffset);
 		assertNull(param.getHistorySearchType());
-		assertThat(param.getOffset()).isEqualTo(theOffset);
+		assertEquals(theOffset, param.getOffset());
 	}
 
 	@Test
 	public void testSearchDateRangeParamWithSearchTypeAsAt() {
 		HistorySearchDateRangeParam param = new HistorySearchDateRangeParam(Map.of("_at", new String[]{"value"}), dateRangeParam, theOffset);
-		assertThat(param.getHistorySearchType()).isEqualTo(HistorySearchStyleEnum.AT);
-		assertThat(param.getOffset()).isEqualTo(theOffset);
+		assertEquals(HistorySearchStyleEnum.AT, param.getHistorySearchType());
+		assertEquals(theOffset, param.getOffset());
 	}
 	@Test
 	public void testSearchDateRangeParamWithSearchTypeAsSince() {
 		HistorySearchDateRangeParam param = new HistorySearchDateRangeParam(Map.of("_since", new String[]{"value"}), dateRangeParam, theOffset);
-		assertThat(param.getHistorySearchType()).isEqualTo(HistorySearchStyleEnum.SINCE);
-		assertThat(param.getOffset()).isEqualTo(theOffset);
+		assertEquals(HistorySearchStyleEnum.SINCE, param.getHistorySearchType());
+		assertEquals(theOffset, param.getOffset());
 	}
 
 
 	@Test
 	public void testSearchDateRangeParamWithSearchTypeAsCount() {
 		HistorySearchDateRangeParam param = new HistorySearchDateRangeParam(Map.of("_count", new String[]{"value"}), dateRangeParam, theOffset);
-		assertThat(param.getHistorySearchType()).isEqualTo(HistorySearchStyleEnum.COUNT);
-		assertThat(param.getOffset()).isEqualTo(theOffset);
+		assertEquals(HistorySearchStyleEnum.COUNT, param.getHistorySearchType());
+		assertEquals(theOffset, param.getOffset());
 
 	}
 }

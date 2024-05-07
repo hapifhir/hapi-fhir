@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jaxrs.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProviderDstu3;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsMockPatientRestProviderDstu3;
@@ -64,7 +65,7 @@ public class AbstractJaxRsConformanceProviderDstu3Test {
 		providers.put(AbstractJaxRsConformanceProvider.class, provider);
 		providers.put(TestJaxRsMockPatientRestProviderDstu3.class, new TestJaxRsMockPatientRestProviderDstu3());
 		Response response = createConformanceProvider(providers).conformance();
-		assertThat(response.getStatus()).isEqualTo(Constants.STATUS_HTTP_200_OK);
+		assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatus());
 		assertThat(response.getEntity().toString()).contains("\"type\": \"Patient\"");
 		assertThat(response.getEntity().toString()).contains("\"someCustomOperation");
 		System.out.println(response);
@@ -77,7 +78,7 @@ public class AbstractJaxRsConformanceProviderDstu3Test {
 		providers.put(AbstractJaxRsConformanceProvider.class, provider);
 		providers.put(TestJaxRsMockPatientRestProviderDstu3.class, new TestJaxRsMockPatientRestProviderDstu3());
 		Response response = createConformanceProvider(providers).conformance();
-		assertThat(response.getStatus()).isEqualTo(Constants.STATUS_HTTP_200_OK);
+		assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatus());
 		System.out.println(response.getEntity());
 		assertThat(response.getEntity().toString()).contains(" <type value=\"Patient\"/>");
 		assertThat(response.getEntity().toString()).contains("\"someCustomOperation");

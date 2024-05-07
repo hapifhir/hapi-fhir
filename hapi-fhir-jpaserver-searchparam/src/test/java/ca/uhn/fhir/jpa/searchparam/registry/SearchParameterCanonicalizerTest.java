@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.registry;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.model.api.ExtensionDt;
@@ -143,9 +144,9 @@ public class SearchParameterCanonicalizerTest {
 		}
 
 		RuntimeSearchParam output = svc.canonicalizeSearchParameter(searchParamToCanonicalize);
-		assertThat(output.getName()).isEqualTo("chef");
-		assertThat(output.getParamType()).isEqualTo(RestSearchParameterTypeEnum.REFERENCE);
-		assertThat(output.getStatus()).isEqualTo(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+		assertEquals("chef", output.getName());
+		assertEquals(RestSearchParameterTypeEnum.REFERENCE, output.getParamType());
+		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, output.getStatus());
 		assertThat(output.getPathsSplit()).containsExactlyInAnyOrder("Meal.chef", "Observation.subject");
 		assertThat(output.getBase()).containsExactlyInAnyOrder("Meal", "Patient");
 		assertThat(output.getTargets()).containsExactly("Chef", "Observation");
@@ -181,9 +182,9 @@ public class SearchParameterCanonicalizerTest {
 		}
 
 		RuntimeSearchParam output = svc.canonicalizeSearchParameter(searchParamToCanonicalize);
-		assertThat(output.getName()).isEqualTo("chef");
-		assertThat(output.getParamType()).isEqualTo(RestSearchParameterTypeEnum.REFERENCE);
-		assertThat(output.getStatus()).isEqualTo(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+		assertEquals("chef", output.getName());
+		assertEquals(RestSearchParameterTypeEnum.REFERENCE, output.getParamType());
+		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, output.getStatus());
 		assertThat(output.getPathsSplit()).containsExactlyInAnyOrder("Meal.chef", "Observation.subject");
 		// DSTU2 Resources must only have 1 base
 		if ("Dstu2".equals(version)){

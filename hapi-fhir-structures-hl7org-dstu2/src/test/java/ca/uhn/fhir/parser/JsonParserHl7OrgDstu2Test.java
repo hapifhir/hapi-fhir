@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -94,9 +95,9 @@ public class JsonParserHl7OrgDstu2Test {
 			{
 				Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
 				IIdType o1Id = o1.getIdElement();
-				assertThat(o1Id.getBaseUrl()).isEqualTo("http://lalaland.org");
-				assertThat(o1Id.getResourceType()).isEqualTo("patient");
-				assertThat(o1Id.getIdPart()).isEqualTo("pat1");
+				assertEquals("http://lalaland.org", o1Id.getBaseUrl());
+				assertEquals("patient", o1Id.getResourceType());
+				assertEquals("pat1", o1Id.getIdPart());
 				assertFalse(o1Id.hasVersionIdPart());
 			}
 		} finally {
@@ -116,8 +117,8 @@ public class JsonParserHl7OrgDstu2Test {
 				Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
 				IIdType o1Id = o1.getIdElement();
 				assertFalse(o1Id.hasBaseUrl());
-				assertThat(o1Id.getResourceType()).isEqualTo("Patient");
-				assertThat(o1Id.getIdPart()).isEqualTo("patxuzos");
+				assertEquals("Patient", o1Id.getResourceType());
+				assertEquals("patxuzos", o1Id.getIdPart());
 				assertFalse(o1Id.hasVersionIdPart());
 			}
 		} finally {
@@ -136,8 +137,8 @@ public class JsonParserHl7OrgDstu2Test {
 				Patient o1 = (Patient) bundle.getEntry().get(0).getResource();
 				IIdType o1Id = o1.getIdElement();
 				assertFalse(o1Id.hasBaseUrl());
-				assertThat(o1Id.getResourceType()).isEqualTo("Patient");
-				assertThat(o1Id.getIdPart()).isEqualTo("patxuzos");
+				assertEquals("Patient", o1Id.getResourceType());
+				assertEquals("patxuzos", o1Id.getIdPart());
 				assertFalse(o1Id.hasVersionIdPart());
 			}
 		} finally {
@@ -161,9 +162,9 @@ public class JsonParserHl7OrgDstu2Test {
     assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueCode\":\"home\"}]"));
 
     MyPatientWithOneDeclaredEnumerationExtension actual = parser.parseResource(MyPatientWithOneDeclaredEnumerationExtension.class, val);
-		assertThat(patient.getAddress().get(0).getUse()).isEqualTo(AddressUse.HOME);
+		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
     Enumeration<AddressUse> ref = actual.getFoo();
-		assertThat(ref.getValue().toCode()).isEqualTo("home");
+		assertEquals("home", ref.getValue().toCode());
 
   }
 
@@ -240,35 +241,35 @@ public class JsonParserHl7OrgDstu2Test {
 
     Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, enc);
     ext = parsed.getExtension().get(0);
-		assertThat(ext.getUrl()).isEqualTo("http://example.com/extensions#someext");
-		assertThat(((DateTimeType) ext.getValue()).getValueAsString()).isEqualTo("2011-01-02T11:13:15");
+		assertEquals("http://example.com/extensions#someext", ext.getUrl());
+		assertEquals("2011-01-02T11:13:15", ((DateTimeType) ext.getValue()).getValueAsString());
 
     parent = patient.getExtension().get(1);
-		assertThat(parent.getUrl()).isEqualTo("http://example.com#parent");
+		assertEquals("http://example.com#parent", parent.getUrl());
 		assertNull(parent.getValue());
     child1 = parent.getExtension().get(0);
-		assertThat(child1.getUrl()).isEqualTo("http://example.com#child");
-		assertThat(((StringType) child1.getValue()).getValueAsString()).isEqualTo("value1");
+		assertEquals("http://example.com#child", child1.getUrl());
+		assertEquals("value1", ((StringType) child1.getValue()).getValueAsString());
     child2 = parent.getExtension().get(1);
-		assertThat(child2.getUrl()).isEqualTo("http://example.com#child");
-		assertThat(((StringType) child2.getValue()).getValueAsString()).isEqualTo("value2");
+		assertEquals("http://example.com#child", child2.getUrl());
+		assertEquals("value2", ((StringType) child2.getValue()).getValueAsString());
 
     modExt = parsed.getModifierExtension().get(0);
-		assertThat(modExt.getUrl()).isEqualTo("http://example.com/extensions#modext");
-		assertThat(((DateType) modExt.getValue()).getValueAsString()).isEqualTo("1995-01-02");
+		assertEquals("http://example.com/extensions#modext", modExt.getUrl());
+		assertEquals("1995-01-02", ((DateType) modExt.getValue()).getValueAsString());
 
     name = parsed.getName().get(0);
 
     ext2 = name.getGiven().get(0).getExtension().get(0);
-		assertThat(ext2.getUrl()).isEqualTo("http://examples.com#givenext");
-		assertThat(((StringType) ext2.getValue()).getValueAsString()).isEqualTo("given");
+		assertEquals("http://examples.com#givenext", ext2.getUrl());
+		assertEquals("given", ((StringType) ext2.getValue()).getValueAsString());
 
     given2ext = name.getGiven().get(1).getExtension().get(0);
-		assertThat(given2ext.getUrl()).isEqualTo("http://examples.com#givenext_parent");
+		assertEquals("http://examples.com#givenext_parent", given2ext.getUrl());
 		assertNull(given2ext.getValue());
     Extension given2ext2 = given2ext.getExtension().get(0);
-		assertThat(given2ext2.getUrl()).isEqualTo("http://examples.com#givenext_child");
-		assertThat(((StringType) given2ext2.getValue()).getValue()).isEqualTo("CHILD");
+		assertEquals("http://examples.com#givenext_child", given2ext2.getUrl());
+		assertEquals("CHILD", ((StringType) given2ext2.getValue()).getValue());
 
   }
 
@@ -280,7 +281,7 @@ public class JsonParserHl7OrgDstu2Test {
     patient.setContent(new byte[] { 1, 2, 3, 4 });
 
     String val = ourCtx.newJsonParser().encodeResourceToString(patient);
-		assertThat(val).isEqualTo("{\"resourceType\":\"Binary\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}");
+		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}", val);
 
   }
 
@@ -363,13 +364,13 @@ public class JsonParserHl7OrgDstu2Test {
 		assertThat(val, StringContains.containsString("\"tag\":[{\"system\":\"scheme\",\"code\":\"term\",\"display\":\"label\"}]"));
 		b = ourCtx.newJsonParser().parseResource(Bundle.class, val);
 		assertThat(b.getMeta().getTag()).hasSize(1);
-		assertThat(b.getMeta().getTag().get(0).getSystem()).isEqualTo("scheme");
-		assertThat(b.getMeta().getTag().get(0).getCode()).isEqualTo("term");
-		assertThat(b.getMeta().getTag().get(0).getDisplay()).isEqualTo("label");
+		assertEquals("scheme", b.getMeta().getTag().get(0).getSystem());
+		assertEquals("term", b.getMeta().getTag().get(0).getCode());
+		assertEquals("label", b.getMeta().getTag().get(0).getDisplay());
 
 		assertNotNull(b.getEntry().get(0).getResource());
 		Patient p = (Patient) b.getEntry().get(0).getResource();
-		assertThat(p.getIdentifier().get(0).getSystem()).isEqualTo("idsystem");
+		assertEquals("idsystem", p.getIdentifier().get(0).getSystem());
 
 	}
 
@@ -390,9 +391,9 @@ public class JsonParserHl7OrgDstu2Test {
 		b = ourCtx.newJsonParser().parseResource(Bundle.class, val);
 		assertThat(b.getEntry()).hasSize(1);
 		assertThat(b.getEntry().get(0).getResource().getMeta().getTag()).hasSize(1);
-		assertThat(b.getEntry().get(0).getResource().getMeta().getTag().get(0).getSystem()).isEqualTo("scheme");
-		assertThat(b.getEntry().get(0).getResource().getMeta().getTag().get(0).getCode()).isEqualTo("term");
-		assertThat(b.getEntry().get(0).getResource().getMeta().getTag().get(0).getDisplay()).isEqualTo("label");
+		assertEquals("scheme", b.getEntry().get(0).getResource().getMeta().getTag().get(0).getSystem());
+		assertEquals("term", b.getEntry().get(0).getResource().getMeta().getTag().get(0).getCode());
+		assertEquals("label", b.getEntry().get(0).getResource().getMeta().getTag().get(0).getDisplay());
 
 	}
 	
@@ -428,12 +429,12 @@ public class JsonParserHl7OrgDstu2Test {
 		
 		// Re-parse the bundle
 		patient = (Patient) jsonParser.parseResource(jsonParser.encodeResourceToString(patient));
-		assertThat(patient.getManagingOrganization().getReference()).isEqualTo("#1");
+		assertEquals("#1", patient.getManagingOrganization().getReference());
 
 		assertNotNull(patient.getManagingOrganization().getResource());
 		org = (Organization) patient.getManagingOrganization().getResource();
-		assertThat(org.getIdElement().getValue()).isEqualTo("#1");
-		assertThat(org.getName()).isEqualTo("Contained Test Organization");
+		assertEquals("#1", org.getIdElement().getValue());
+		assertEquals("Contained Test Organization", org.getName());
 		
 		// And re-encode a second time
 		encoded = jsonParser.encodeResourceToString(patient);
@@ -550,9 +551,9 @@ public class JsonParserHl7OrgDstu2Test {
 		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueAddress\":{\"line\":[\"line1\"]}}]"));
 
 		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
-		assertThat(patient.getAddress().get(0).getUse()).isEqualTo(AddressUse.HOME);
+		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
 		Address ref = actual.getFoo();
-		assertThat(ref.getLine().get(0).getValue()).isEqualTo("line1");
+		assertEquals("line1", ref.getLine().get(0).getValue());
 
 	}
 
@@ -569,9 +570,9 @@ public class JsonParserHl7OrgDstu2Test {
 		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueReference\":{\"reference\":\"Organization/123\"}}]"));
 
 		MyPatientWithOneDeclaredExtension actual = parser.parseResource(MyPatientWithOneDeclaredExtension.class, val);
-		assertThat(patient.getAddress().get(0).getUse()).isEqualTo(AddressUse.HOME);
+		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
 		Reference ref = actual.getFoo();
-		assertThat(ref.getReference()).isEqualTo("Organization/123");
+		assertEquals("Organization/123", ref.getReference());
 
 	}
 
@@ -592,7 +593,7 @@ public class JsonParserHl7OrgDstu2Test {
 		ourLog.info(encoded);
 
 		assertThat(encoded).contains("123456");
-		assertThat(encoded).isEqualTo("{\"resourceType\":\"ValueSet\",\"id\":\"123456\",\"codeSystem\":{\"concept\":[{\"extension\":[{\"url\":\"urn:alt\",\"valueString\":\"alt name\"}],\"code\":\"someCode\",\"display\":\"someDisplay\"}]}}");
+		assertEquals("{\"resourceType\":\"ValueSet\",\"id\":\"123456\",\"codeSystem\":{\"concept\":[{\"extension\":[{\"url\":\"urn:alt\",\"valueString\":\"alt name\"}],\"code\":\"someCode\",\"display\":\"someDisplay\"}]}}", encoded);
 
 	}
 
@@ -607,7 +608,7 @@ public class JsonParserHl7OrgDstu2Test {
 
 		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(c);
 		ourLog.info(encoded);
-		assertThat("{\"resourceType\":\"Conformance\",\"rest\":[{\"security\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}]}").isEqualTo(encoded);
+		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"rest\":[{\"security\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}]}");
 
 	}
 
@@ -624,7 +625,7 @@ public class JsonParserHl7OrgDstu2Test {
 
 		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(c);
 		ourLog.info(encoded);
-		assertThat("{\"resourceType\":\"Conformance\",\"_acceptUnknown\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}").isEqualTo(encoded);
+		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"_acceptUnknown\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}");
 
 		// Now with a value
 		ourLog.info("---------------");
@@ -638,7 +639,7 @@ public class JsonParserHl7OrgDstu2Test {
 
 		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(c);
 		ourLog.info(encoded);
-		assertThat("{\"resourceType\":\"Conformance\",\"acceptUnknown\":\"extensions\",\"_acceptUnknown\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}").isEqualTo(encoded);
+		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"acceptUnknown\":\"extensions\",\"_acceptUnknown\":{\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}}");
 
 	}
 
@@ -654,7 +655,7 @@ public class JsonParserHl7OrgDstu2Test {
 
 		encoded = ourCtx.newJsonParser().setPrettyPrint(false).encodeResourceToString(c);
 		ourLog.info(encoded);
-		assertThat("{\"resourceType\":\"Conformance\",\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}").isEqualTo(encoded);
+		assertEquals(encoded, "{\"resourceType\":\"Conformance\",\"extension\":[{\"url\":\"http://foo\",\"valueString\":\"AAA\"}]}");
 
 	}
 
@@ -683,11 +684,11 @@ public class JsonParserHl7OrgDstu2Test {
 		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueReference\":{\"reference\":\"Organization/123\"}}]"));
 
 		Patient actual = parser.parseResource(Patient.class, val);
-		assertThat(patient.getAddress().get(0).getUse()).isEqualTo(AddressUse.HOME);
+		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
 		List<Extension> ext = actual.getExtension();
 		assertThat(ext).hasSize(1);
 		Reference ref = (Reference) ext.get(0).getValue();
-		assertThat(ref.getReference()).isEqualTo("Organization/123");
+		assertEquals("Organization/123", ref.getReference());
 
 	}
 
@@ -706,7 +707,7 @@ public class JsonParserHl7OrgDstu2Test {
 		assertThat(enc).contains("\"id\": \"1\"");
 		
 		List_ parsed = ourCtx.newJsonParser().parseResource(List_.class,enc);
-		assertThat(parsed.getEntry().get(0).getItem().getResource().getClass()).isEqualTo(Patient.class);
+		assertEquals(Patient.class, parsed.getEntry().get(0).getItem().getResource().getClass());
 	}
 
 	@Test
@@ -850,9 +851,9 @@ public class JsonParserHl7OrgDstu2Test {
 		assertThat(val, StringContains.containsString("\"extension\":[{\"url\":\"urn:foo\",\"valueAddress\":{\"line\":[\"line1\"]}}]"));
 
 		MyPatientWithOneDeclaredAddressExtension actual = parser.parseResource(MyPatientWithOneDeclaredAddressExtension.class, val);
-		assertThat(patient.getAddress().get(0).getUse()).isEqualTo(AddressUse.HOME);
+		assertEquals(AddressUse.HOME, patient.getAddress().get(0).getUse());
 		Address ref = actual.getFoo();
-		assertThat(ref.getLine().get(0).getValue()).isEqualTo("line1");
+		assertEquals("line1", ref.getLine().get(0).getValue());
 
 	}
 
@@ -863,17 +864,17 @@ public class JsonParserHl7OrgDstu2Test {
 		p.getExtension().add(extension);
 		String str = ourCtx.newJsonParser().encodeResourceToString(p);
 
-		assertThat(str).isEqualTo("{\"resourceType\":\"Patient\"}");
+		assertEquals("{\"resourceType\":\"Patient\"}", str);
 
 		extension.setValue(new StringType());
 
 		str = ourCtx.newJsonParser().encodeResourceToString(p);
-		assertThat(str).isEqualTo("{\"resourceType\":\"Patient\"}");
+		assertEquals("{\"resourceType\":\"Patient\"}", str);
 
 		extension.setValue(new StringType(""));
 
 		str = ourCtx.newJsonParser().encodeResourceToString(p);
-		assertThat(str).isEqualTo("{\"resourceType\":\"Patient\"}");
+		assertEquals("{\"resourceType\":\"Patient\"}", str);
 
 	}
 
@@ -889,7 +890,7 @@ public class JsonParserHl7OrgDstu2Test {
 		given.getExtension().add(ext2);
 		String enc = ourCtx.newJsonParser().encodeResourceToString(patient);
 		ourLog.info(enc);
-		assertThat(enc).isEqualTo("{\"resourceType\":\"Patient\",\"name\":[{\"extension\":[{\"url\":\"http://examples.com#givenext\",\"valueString\":\"Hello\"}],\"family\":[\"Shmoe\"],\"given\":[\"Joe\"]}]}");
+		assertEquals("{\"resourceType\":\"Patient\",\"name\":[{\"extension\":[{\"url\":\"http://examples.com#givenext\",\"valueString\":\"Hello\"}],\"family\":[\"Shmoe\"],\"given\":[\"Joe\"]}]}", enc);
 
 		IParser newJsonParser = ourCtx.newJsonParser();
 		StringReader reader = new StringReader(enc);
@@ -899,7 +900,7 @@ public class JsonParserHl7OrgDstu2Test {
 
 		assertThat(parsed.getName().get(0).getExtension()).hasSize(1);
 		Extension ext = parsed.getName().get(0).getExtension().get(0);
-		assertThat(((IPrimitiveType<?>) ext.getValue()).getValue()).isEqualTo("Hello");
+		assertEquals("Hello", ((IPrimitiveType<?>) ext.getValue()).getValue());
 
 	}
 
@@ -941,7 +942,7 @@ public class JsonParserHl7OrgDstu2Test {
     Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, new StringReader(enc));
 		assertThat(parsed.getName().get(0).getFamily().get(0).getExtension()).hasSize(1);
     Extension ext = parsed.getName().get(0).getFamily().get(0).getExtension().get(0);
-		assertThat(((IPrimitiveType<?>) ext.getValue()).getValue()).isEqualTo("Hello");
+		assertEquals("Hello", ((IPrimitiveType<?>) ext.getValue()).getValue());
 
   }
 
@@ -1069,16 +1070,16 @@ public class JsonParserHl7OrgDstu2Test {
     int idx1 = str.indexOf("\"contained\"", idx0 + 1);
 
 		assertThat(idx0).isNotEqualTo(-1);
-		assertThat(idx1).isEqualTo(-1);
+		assertEquals(-1, idx1);
 
     Observation obs = ourCtx.newJsonParser().parseResource(Observation.class, str);
-		assertThat(obs.getCode().getTextElement().getValue()).isEqualTo("A");
+		assertEquals("A", obs.getCode().getTextElement().getValue());
 
     Observation obsB = (Observation) obs.getRelated().get(0).getTarget().getResource();
-		assertThat(obsB.getCode().getTextElement().getValue()).isEqualTo("B");
+		assertEquals("B", obsB.getCode().getTextElement().getValue());
 
     Observation obsC = (Observation) obsB.getRelated().get(0).getTarget().getResource();
-		assertThat(obsC.getCode().getTextElement().getValue()).isEqualTo("C");
+		assertEquals("C", obsC.getCode().getTextElement().getValue());
 
   }
 
@@ -1086,7 +1087,7 @@ public class JsonParserHl7OrgDstu2Test {
   public void testParseBinaryResource() {
 
     Binary val = ourCtx.newJsonParser().parseResource(Binary.class, "{\"resourceType\":\"Binary\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}");
-		assertThat(val.getContentType()).isEqualTo("foo");
+		assertEquals("foo", val.getContentType());
 		assertThat(val.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 
   }
@@ -1124,7 +1125,7 @@ public class JsonParserHl7OrgDstu2Test {
 
 		assertNotNull(b.getEntry().get(0).getResource());
     Patient p = (Patient) b.getEntry().get(0).getResource();
-		assertThat(p.getIdentifier().get(0).getSystem()).isEqualTo("idsystem");
+		assertEquals("idsystem", p.getIdentifier().get(0).getSystem());
   }
 
   /**
@@ -1136,7 +1137,7 @@ public class JsonParserHl7OrgDstu2Test {
     String jsonString = IOUtils.toString(JsonParser.class.getResourceAsStream("/example-patient-general-hl7orgdstu2.json"));
     jsonString = jsonString.replace("\"reference\"", "\"resource\"");
     Patient parsed = ourCtx.newJsonParser().parseResource(Patient.class, jsonString);
-		assertThat(parsed.getManagingOrganization().getReference()).isEqualTo("Organization/1");
+		assertEquals("Organization/1", parsed.getManagingOrganization().getReference());
   }
 
   @Test
@@ -1163,7 +1164,7 @@ public class JsonParserHl7OrgDstu2Test {
 
     List<Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
     Extension undeclaredExtension = undeclaredExtensions.get(0);
-		assertThat(undeclaredExtension.getUrl()).isEqualTo("http://hl7.org/fhir/Profile/iso-21090#qualifier");
+		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
     ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
@@ -1183,7 +1184,7 @@ public class JsonParserHl7OrgDstu2Test {
 
     ourLog.info("Expected: {}", exp);
     ourLog.info("Actual  : {}", act);
-		assertThat(act).isEqualTo(exp);
+		assertEquals(exp, act);
 
   }
 
@@ -1219,7 +1220,7 @@ public class JsonParserHl7OrgDstu2Test {
 	  Patient p = ourCtx.newJsonParser().parseResource(Patient.class, input);
 	  ContactComponent contact = p.getContact().get(0);
 	  StringType family = contact.getName().getFamily().get(0);
-		assertThat(family.getValueAsString()).isEqualTo("du");
+		assertEquals("du", family.getValueAsString());
 		assertThat(family.getExtension()).hasSize(1);
 	}
 	
@@ -1233,18 +1234,18 @@ public class JsonParserHl7OrgDstu2Test {
 		{
     ContactComponent contact = obs.getContact().get(0);
     StringType family = contact.getName().getFamily().get(0);
-			assertThat(family.getValueAsString()).isEqualTo("du");
+			assertEquals("du", family.getValueAsString());
 			assertThat(family.getExtension()).hasSize(1);
 		}
 
 		assertThat(obs.getExtension()).isEmpty();
-		assertThat(obs.getExtAtt().getContentType()).isEqualTo("aaaa");
-		assertThat(obs.getMoreExt().getStr1().getValue()).isEqualTo("str1");
-		assertThat(obs.getModExt().getValueAsString()).isEqualTo("2011-01-02");
+		assertEquals("aaaa", obs.getExtAtt().getContentType());
+		assertEquals("str1", obs.getMoreExt().getStr1().getValue());
+		assertEquals("2011-01-02", obs.getModExt().getValueAsString());
 
 		List<org.hl7.fhir.dstu2.model.Extension> undeclaredExtensions = obs.getContact().get(0).getName().getFamily().get(0).getExtension();
 		org.hl7.fhir.dstu2.model.Extension undeclaredExtension = undeclaredExtensions.get(0);
-		assertThat(undeclaredExtension.getUrl()).isEqualTo("http://hl7.org/fhir/Profile/iso-21090#qualifier");
+		assertEquals("http://hl7.org/fhir/Profile/iso-21090#qualifier", undeclaredExtension.getUrl());
 
 		IParser xmlParser = ourCtx.newXmlParser();
 		String encoded = xmlParser.encodeResourceToString(obs);
@@ -1280,7 +1281,7 @@ public class JsonParserHl7OrgDstu2Test {
 
 		List<Extension> extlst = fhirPat.getExtension();
 		assertThat(extlst).hasSize(1);
-		assertThat(((Reference) extlst.get(0).getValue()).getReference()).isEqualTo(refVal);
+		assertEquals(refVal, ((Reference) extlst.get(0).getValue()).getReference());
 	}
 
   @Test
@@ -1291,7 +1292,7 @@ public class JsonParserHl7OrgDstu2Test {
     QuestionAnswerComponent answer = r.getGroup().getQuestion().get(0).getAnswer().get(0);
 		assertNotNull(answer);
 		assertNotNull(answer.getValueReference());
-		assertThat(answer.getValueReference().getReference()).isEqualTo("Observation/testid");
+		assertEquals("Observation/testid", answer.getValueReference().getReference());
   }
 
   @ResourceDef(name = "Patient")

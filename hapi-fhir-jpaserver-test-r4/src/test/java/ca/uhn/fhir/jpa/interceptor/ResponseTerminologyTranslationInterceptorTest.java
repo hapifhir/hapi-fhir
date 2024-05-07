@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -214,7 +215,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 			assertThat(binaryIds).hasSize(1);
 			for (String binaryId : binaryIds) {
 				Binary binary = myBinaryDao.read(new IdType(binaryId));
-				assertThat(binary.getContentType()).isEqualTo(Constants.CT_FHIR_NDJSON);
+				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
 				String contents = new String(binary.getContent(), Constants.CHARSET_UTF8);
 				ourLog.info("Next contents for type {} :\n{}", binary.getResourceType(), contents);
 				if ("Observation".equals(resourceTypeInFile)) {

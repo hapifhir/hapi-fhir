@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
@@ -61,7 +62,7 @@ public class ClientServerValidationDstu3Test {
 	@Test
 	public void testServerReturnsAppropriateVersionDstu3() throws Exception {
 		String appropriateFhirVersion = "3.0.2";
-		assertThat(appropriateFhirVersion).isEqualTo(FhirVersionEnum.DSTU3.getFhirVersionString());
+		assertEquals(FhirVersionEnum.DSTU3.getFhirVersionString(), appropriateFhirVersion);
 		CapabilityStatement conf = new CapabilityStatement();
 		conf.setFhirVersion(appropriateFhirVersion);
 		final String confResource = myCtx.newXmlParser().encodeResourceToString(conf);
@@ -100,7 +101,7 @@ public class ClientServerValidationDstu3Test {
 	@Test
 	public void testServerReturnsWrongVersionDstu3() throws Exception {
 		String wrongFhirVersion = "1.0.2";
-		assertThat(wrongFhirVersion).isEqualTo(FhirVersionEnum.DSTU2.getFhirVersionString());
+		assertEquals(FhirVersionEnum.DSTU2.getFhirVersionString(), wrongFhirVersion);
 		CapabilityStatement conf = new CapabilityStatement();
 		conf.setFhirVersion(wrongFhirVersion);
 		String msg = myCtx.newXmlParser().encodeResourceToString(conf);
@@ -124,7 +125,7 @@ public class ClientServerValidationDstu3Test {
 	@Test
 	public void testServerReturnsRightVersionDstu3() throws Exception {
 		String appropriateFhirVersion = "3.0.2";
-		assertThat(appropriateFhirVersion).isEqualTo(FhirVersionEnum.DSTU3.getFhirVersionString());
+		assertEquals(FhirVersionEnum.DSTU3.getFhirVersionString(), appropriateFhirVersion);
 		CapabilityStatement conf = new CapabilityStatement();
 		conf.setFhirVersion(appropriateFhirVersion);
 		String msg = myCtx.newXmlParser().encodeResourceToString(conf);

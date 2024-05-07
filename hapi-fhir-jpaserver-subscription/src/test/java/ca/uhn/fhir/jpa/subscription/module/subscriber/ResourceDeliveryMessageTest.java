@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.subscription.model.ResourceDeliveryMessage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ public class ResourceDeliveryMessageTest {
 		msg = new ObjectMapper().readValue(encoded, ResourceDeliveryMessage.class);
 		assertThat(msg.getAttribute("foo1")).contains("bar");
 		assertThat(msg.getAttribute("foo2")).contains("baz");
-		assertThat(msg.getAttribute("foo3").isPresent()).isEqualTo(false);
+		assertEquals(false, msg.getAttribute("foo3").isPresent());
 	}
 
 }

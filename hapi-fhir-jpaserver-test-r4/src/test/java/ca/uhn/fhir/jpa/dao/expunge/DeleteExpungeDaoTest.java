@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -58,8 +59,8 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		IIdType o1c = createObservation(withReference("hasMember", o1b));
 
 		// validate precondition
-		assertThat(myPatientDao.search(SearchParameterMap.newSynchronous()).size()).isEqualTo(1);
-		assertThat(myObservationDao.search(SearchParameterMap.newSynchronous()).size()).isEqualTo(3);
+		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(3, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
 
 		// execute
 		String url = "Patient?" +
@@ -74,7 +75,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		JobInstance job = myBatch2JobHelper.awaitJobCompletion(jobId);
 
 		// Validate
-		assertThat(job.getCombinedRecordsProcessed()).isEqualTo(4);
+		assertEquals(4, job.getCombinedRecordsProcessed());
 		assertDoesntExist(p1);
 		assertDoesntExist(o1);
 		assertDoesntExist(o1b);
@@ -92,8 +93,8 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		IIdType o1c = createObservation(withReference("hasMember", o1b));
 
 		// validate precondition
-		assertThat(myPatientDao.search(SearchParameterMap.newSynchronous()).size()).isEqualTo(1);
-		assertThat(myObservationDao.search(SearchParameterMap.newSynchronous()).size()).isEqualTo(3);
+		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals(3, myObservationDao.search(SearchParameterMap.newSynchronous()).size());
 
 		String url = "Patient?" +
 			JpaConstants.PARAM_DELETE_EXPUNGE + "=true";
@@ -132,7 +133,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		JobInstance job = myBatch2JobHelper.awaitJobFailure(jobExecutionId);
 
 		// validate
-		assertThat(job.getStatus()).isEqualTo(StatusEnum.ERRORED);
+		assertEquals(StatusEnum.ERRORED, job.getStatus());
 		assertThat(job.getErrorMessage()).contains("DELETE with _expunge=true failed.  Unable to delete " + organizationId.toVersionless() + " because " + patientId.toVersionless() + " refers to it via the path Patient.managingOrganization");
 	}
 
@@ -167,7 +168,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		JobInstance job = myBatch2JobHelper.awaitJobFailure(jobId);
 
 		// validate
-		assertThat(job.getStatus()).isEqualTo(StatusEnum.ERRORED);
+		assertEquals(StatusEnum.ERRORED, job.getStatus());
 		assertThat(job.getErrorMessage()).contains("DELETE with _expunge=true failed.  Unable to delete ");
 	}
 
@@ -187,7 +188,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		String jobId = jobExecutionIdFromOutcome(outcome);
 		JobInstance job = myBatch2JobHelper.awaitJobCompletion(jobId);
 
-		assertThat(myBatch2JobHelper.getCombinedRecordsProcessed(jobId)).isEqualTo(10);
+		assertEquals(10, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
 
 		// TODO KHS replace these with a report
 //		assertEquals(30, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));
@@ -208,7 +209,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		// validate
 		String jobId = jobExecutionIdFromOutcome(outcome);
 		JobInstance job = myBatch2JobHelper.awaitJobCompletion(jobId);
-		assertThat(myBatch2JobHelper.getCombinedRecordsProcessed(jobId)).isEqualTo(10);
+		assertEquals(10, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
 
 		// TODO KHS replace these with a report
 //		assertEquals(30, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));
@@ -232,7 +233,7 @@ class DeleteExpungeDaoTest extends BaseJpaR4Test {
 		JobInstance job = myBatch2JobHelper.awaitJobCompletion(jobId);
 
 		// validate
-		assertThat(myBatch2JobHelper.getCombinedRecordsProcessed(jobId)).isEqualTo(2);
+		assertEquals(2, myBatch2JobHelper.getCombinedRecordsProcessed(jobId));
 
 		// TODO KHS replace these with a report
 //		assertEquals(7, job.getExecutionContext().getLong(SqlExecutorWriter.ENTITY_TOTAL_UPDATED_OR_DELETED));

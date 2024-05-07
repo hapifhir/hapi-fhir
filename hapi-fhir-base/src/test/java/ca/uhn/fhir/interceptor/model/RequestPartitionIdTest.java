@@ -1,5 +1,6 @@
 package ca.uhn.fhir.interceptor.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -18,12 +19,12 @@ public class RequestPartitionIdTest {
 
 	@Test
 	public void testHashCode() {
-		assertThat(RequestPartitionId.allPartitions().hashCode()).isEqualTo(31860737);
+		assertEquals(31860737, RequestPartitionId.allPartitions().hashCode());
 	}
 
 	@Test
 	public void testEquals() {
-		assertThat(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1))).isEqualTo(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
+		assertEquals(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)), RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
 		assertNotNull(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
 		assertThat("123").isNotEqualTo(RequestPartitionId.fromPartitionId(123, LocalDate.of(2020, 1, 1)));
 	}
@@ -61,9 +62,9 @@ public class RequestPartitionIdTest {
 		String json = start.asJson();
 		ourLog.info(json);
 		RequestPartitionId end = RequestPartitionId.fromJson(json);
-		assertThat(end).isEqualTo(start);
+		assertEquals(start, end);
 		String json2 = end.asJson();
-		assertThat(json2).isEqualTo(json);
+		assertEquals(json, json2);
 		return json;
 	}
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.util.jsonpatch;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.patch.JsonPatchUtils;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -107,7 +108,7 @@ public class JsonPatchUtilsTest extends BaseJpaR4Test {
 			JsonPatchUtils.apply(myFhirContext, toUpdate, patchText);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1271) + "Failed to apply JSON patch to Observation: " + Msg.code(1825) + "Unknown element 'derivedFromXXX' found during parse");
+			assertEquals(Msg.code(1271) + "Failed to apply JSON patch to Observation: " + Msg.code(1825) + "Unknown element 'derivedFromXXX' found during parse", e.getMessage());
 		}
 
 	}

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.Hook;
@@ -139,8 +140,8 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 		assertTrue(groupFound);
 		assertTrue(careTeamFound);
 		assertNotNull(patient);
-		assertThat(patient.getIdElement().getIdPart()).isEqualTo(pid.getIdPart());
-		assertThat(patient.getName().get(0).getFamily()).isEqualTo(methodName);
+		assertEquals(pid.getIdPart(), patient.getIdElement().getIdPart());
+		assertEquals(methodName, patient.getName().get(0).getFamily());
 
 		//Ensure that the revincludes are included in the query list of the sql trace.
 		//TODO GGG/KHS reduce this to something less than 6 by smarter iterating and getting the resource types earlier when needed.
@@ -173,9 +174,9 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 
 		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, bundle);
 		assertThat(foundResources).hasSize(3);
-		assertThat(foundResources.get(0).getIdElement().getIdPart()).isEqualTo(detectedIssueId.getIdPart());
-		assertThat(foundResources.get(1).getIdElement().getIdPart()).isEqualTo(practitionerId.getIdPart());
-		assertThat(foundResources.get(2).getIdElement().getIdPart()).isEqualTo(practitionerRoleId.getIdPart());
+		assertEquals(detectedIssueId.getIdPart(), foundResources.get(0).getIdElement().getIdPart());
+		assertEquals(practitionerId.getIdPart(), foundResources.get(1).getIdElement().getIdPart());
+		assertEquals(practitionerRoleId.getIdPart(), foundResources.get(2).getIdElement().getIdPart());
 	}
 
 	@Test
@@ -210,10 +211,10 @@ public class ResourceProviderRevIncludeTest extends BaseResourceProviderR4Test {
 
 		List<IBaseResource> foundResources = BundleUtil.toListOfResources(myFhirContext, bundle);
 		assertThat(foundResources).hasSize(4);
-		assertThat(foundResources.get(0).getIdElement().getIdPart()).isEqualTo(episodeOfCareId.getIdPart());
-		assertThat(foundResources.get(1).getIdElement().getIdPart()).isEqualTo(encounterId.getIdPart());
-		assertThat(foundResources.get(2).getIdElement().getIdPart()).isEqualTo(taskId.getIdPart());
-		assertThat(foundResources.get(3).getIdElement().getIdPart()).isEqualTo(pid.getIdPart());
+		assertEquals(episodeOfCareId.getIdPart(), foundResources.get(0).getIdElement().getIdPart());
+		assertEquals(encounterId.getIdPart(), foundResources.get(1).getIdElement().getIdPart());
+		assertEquals(taskId.getIdPart(), foundResources.get(2).getIdElement().getIdPart());
+		assertEquals(pid.getIdPart(), foundResources.get(3).getIdElement().getIdPart());
 	}
 
 }

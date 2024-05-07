@@ -1,5 +1,6 @@
 package ca.uhn.test.concurrency;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -29,7 +30,7 @@ class PointcutLatchTest {
 	public void testInvokeSameThread() throws InterruptedException {
 		myPointcutLatch.setExpectedCount(1);
 		Thread thread = invoke();
-		assertThat(Thread.currentThread()).isEqualTo(thread);
+		assertEquals(thread, Thread.currentThread());
 		myPointcutLatch.awaitExpected();
 	}
 
@@ -65,7 +66,7 @@ class PointcutLatchTest {
 			myPointcutLatch.awaitExpectedWithTimeout(1);
 			fail("");
 		} catch (LatchTimedOutError e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-1483: test-latch-name PointcutLatch timed out waiting 1 seconds for latch to countdown from 1 to 0.  Is 1.");
+			assertEquals("HAPI-1483: test-latch-name PointcutLatch timed out waiting 1 seconds for latch to countdown from 1 to 0.  Is 1.", e.getMessage());
 		}
 	}
 
@@ -75,7 +76,7 @@ class PointcutLatchTest {
 			myPointcutLatch.awaitExpected();
 			fail("");
 		} catch (PointcutLatchException e) {
-			assertThat(e.getMessage()).isEqualTo(TEST_LATCH_NAME + ": awaitExpected() called before setExpected() called.");
+			assertEquals(TEST_LATCH_NAME + ": awaitExpected() called before setExpected() called.", e.getMessage());
 		}
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,15 +11,15 @@ class TextStandardizerTest {
 
 	@Test
 	public void testCleanNoiseCharacters() {
-		assertThat(myStandardizer.standardize("\u0070\u0075\u0062\u006c\u0069\u0063\u0020\u0020\u0020\u0020")).isEqualTo("public");
-		assertThat(myStandardizer.standardize("\t\r\ntext┴\t┬\t├\t─\t┼!\\\\Ã #% \n")).isEqualTo("textÃ#");
-		assertThat(myStandardizer.standardize("nbsp \u00A0")).isEqualTo("nbsp");
+		assertEquals("public", myStandardizer.standardize("\u0070\u0075\u0062\u006c\u0069\u0063\u0020\u0020\u0020\u0020"));
+		assertEquals("textÃ#", myStandardizer.standardize("\t\r\ntext┴\t┬\t├\t─\t┼!\\\\Ã #% \n"));
+		assertEquals("nbsp", myStandardizer.standardize("nbsp \u00A0"));
 	}
 
 	@Test
 	public void testCleanBaseAscii() {
 		for (int i = 0; i < 31; i++) {
-			assertThat(myStandardizer.standardize(Character.toString((char) i))).isEqualTo("");
+			assertEquals("", myStandardizer.standardize(Character.toString((char) i)));
 		}
 	}
 
@@ -51,7 +52,7 @@ class TextStandardizerTest {
 			"𐒠𐒡𐒢𐒣𐒤𐒥𐒦𐒧𐒨𐒩", "𐒠𐒡𐒢𐒣𐒤𐒥𐒦𐒧𐒨𐒩"};
 
 		for (int i = 0; i < testLiterals.length; i += 2) {
-			assertThat(myStandardizer.standardize(testLiterals[i])).isEqualTo(testLiterals[i + 1]);
+			assertEquals(testLiterals[i + 1], myStandardizer.standardize(testLiterals[i]));
 		}
 	}
 }

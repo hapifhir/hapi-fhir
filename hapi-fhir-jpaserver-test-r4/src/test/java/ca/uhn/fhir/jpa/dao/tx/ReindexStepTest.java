@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.tx;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
@@ -60,6 +61,6 @@ public class ReindexStepTest {
 		RequestPartitionId methodArgumentRequestPartitionId = methodArgumentExceptionBuilder.getRequestPartitionIdForTesting();
 
 		assertThat(methodArgumentRequestPartitionId, notNullValue());
-		assertThat(methodArgumentRequestPartitionId.getFirstPartitionIdOrNull()).isEqualTo(theExpectedPartitionId);
+		assertEquals(theExpectedPartitionId, methodArgumentRequestPartitionId.getFirstPartitionIdOrNull());
 	}
 }

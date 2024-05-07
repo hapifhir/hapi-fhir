@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jaxrs.server.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jaxrs.server.test.TestJaxRsDummyPatientProviderDstu3;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -48,7 +49,7 @@ public class JaxRsMethodBindingsDstu3Test {
 			}
 		}
 		new TestFindPatientProvider();
-		assertThat(new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass()).isEqualTo(TestFindPatientProvider.class);
+		assertEquals(TestFindPatientProvider.class, new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass());
 	}
 
 	@Test
@@ -65,8 +66,8 @@ public class JaxRsMethodBindingsDstu3Test {
 				return null;
 			}
 		}
-		assertThat(new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass()).isEqualTo(TestFindPatientProvider.class);
-		assertThat(new TestUpdatePatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getDeclaringClass()).isEqualTo(TestUpdatePatientProvider.class);
+		assertEquals(TestFindPatientProvider.class, new TestFindPatientProvider().getBindings().getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getDeclaringClass());
+		assertEquals(TestUpdatePatientProvider.class, new TestUpdatePatientProvider().getBindings().getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getDeclaringClass());
 	}
 
 	@Test
@@ -115,10 +116,10 @@ public class JaxRsMethodBindingsDstu3Test {
 			}
 		}
 		JaxRsMethodBindings bindings = new TestFindPatientProvider().getBindings();
-		assertThat(bindings.getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getName()).isEqualTo("search");
-		assertThat(bindings.getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getName()).isEqualTo("update");
-		assertThat(bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$firstMethod").getMethod().getName()).isEqualTo("firstMethod");
-		assertThat(bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$secondMethod").getMethod().getName()).isEqualTo("secondMethod");
+		assertEquals("search", bindings.getBinding(RestOperationTypeEnum.SEARCH_TYPE, "").getMethod().getName());
+		assertEquals("update", bindings.getBinding(RestOperationTypeEnum.UPDATE, "").getMethod().getName());
+		assertEquals("firstMethod", bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$firstMethod").getMethod().getName());
+		assertEquals("secondMethod", bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$secondMethod").getMethod().getName());
 		try {
 			bindings.getBinding(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, "$thirdMethod");
 			fail("");

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Count;
@@ -56,9 +57,9 @@ public class SearchCountParamDstu3Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(ourLastMethod).isEqualTo("search");
-			assertThat(ourLastParam).isEqualTo(Integer.valueOf(2));
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("search", ourLastMethod);
+			assertEquals(Integer.valueOf(2), ourLastParam);
 
 			assertThat(responseContent).contains(
 				 "<link>",
@@ -82,9 +83,9 @@ public class SearchCountParamDstu3Test {
 		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(ourLastMethod).isEqualTo("search");
-			assertThat(ourLastParam).isEqualTo(Integer.valueOf(0));
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("search", ourLastMethod);
+			assertEquals(Integer.valueOf(0), ourLastParam);
 
 			assertThat(responseContent).contains(
 				 "<Bundle",
@@ -106,8 +107,8 @@ public class SearchCountParamDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(ourLastMethod).isEqualTo("searchWithNoCountParam");
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("searchWithNoCountParam", ourLastMethod);
 			assertNull(ourLastParam);
 
 			assertThat(responseContent).contains(

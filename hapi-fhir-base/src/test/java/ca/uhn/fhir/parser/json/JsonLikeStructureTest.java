@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser.json;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.parser.json.jackson.JacksonStructure;
 import org.junit.jupiter.api.Test;
@@ -46,7 +47,7 @@ public class JsonLikeStructureTest {
 		BaseJsonLikeObject rootObject = jsonStructure.getRootObject();
 
 		assertNotNull(rootObject);
-		assertThat(rootObject.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.OBJECT);
+		assertEquals(BaseJsonLikeValue.ValueType.OBJECT, rootObject.getJsonType());
 	}
 
 	private static final String TEST_JSONTYPES_DATA = 
@@ -80,65 +81,65 @@ public class JsonLikeStructureTest {
 		
 		BaseJsonLikeValue value = rootObject.get("object-value");
 		assertNotNull(value);
-		assertThat(value.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.OBJECT);
-		assertThat(value.isObject()).isEqualTo(true);
-		assertThat(value.isArray()).isEqualTo(false);
-		assertThat(value.isScalar()).isEqualTo(false);
-		assertThat(value.isNull()).isEqualTo(false);
+		assertEquals(BaseJsonLikeValue.ValueType.OBJECT, value.getJsonType());
+		assertEquals(true, value.isObject());
+		assertEquals(false, value.isArray());
+		assertEquals(false, value.isScalar());
+		assertEquals(false, value.isNull());
 
 		BaseJsonLikeObject obj = value.getAsObject();
 		assertNotNull(obj);
-		assertThat(obj.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.OBJECT);
-		assertThat(obj.isObject()).isEqualTo(true);
-		assertThat(obj.isArray()).isEqualTo(false);
-		assertThat(obj.isScalar()).isEqualTo(false);
-		assertThat(obj.isNull()).isEqualTo(false);
+		assertEquals(BaseJsonLikeValue.ValueType.OBJECT, obj.getJsonType());
+		assertEquals(true, obj.isObject());
+		assertEquals(false, obj.isArray());
+		assertEquals(false, obj.isScalar());
+		assertEquals(false, obj.isNull());
 		
 		value = rootObject.get("array-value");
 		assertNotNull(value);
-		assertThat(value.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.ARRAY);
-		assertThat(value.isObject()).isEqualTo(false);
-		assertThat(value.isArray()).isEqualTo(true);
-		assertThat(value.isScalar()).isEqualTo(false);
-		assertThat(value.isNull()).isEqualTo(false);
+		assertEquals(BaseJsonLikeValue.ValueType.ARRAY, value.getJsonType());
+		assertEquals(false, value.isObject());
+		assertEquals(true, value.isArray());
+		assertEquals(false, value.isScalar());
+		assertEquals(false, value.isNull());
 
 		BaseJsonLikeArray array = value.getAsArray();
 		assertNotNull(array);
-		assertThat(array.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.ARRAY);
-		assertThat(array.isObject()).isEqualTo(false);
-		assertThat(array.isArray()).isEqualTo(true);
-		assertThat(array.isScalar()).isEqualTo(false);
-		assertThat(array.isNull()).isEqualTo(false);
+		assertEquals(BaseJsonLikeValue.ValueType.ARRAY, array.getJsonType());
+		assertEquals(false, array.isObject());
+		assertEquals(true, array.isArray());
+		assertEquals(false, array.isScalar());
+		assertEquals(false, array.isNull());
 
 		value = rootObject.get("null-value");
 		assertNotNull(value);
-		assertThat(value.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.NULL);
-		assertThat(value.isObject()).isEqualTo(false);
-		assertThat(value.isArray()).isEqualTo(false);
-		assertThat(value.isScalar()).isEqualTo(false);
-		assertThat(value.isNull()).isEqualTo(true);
+		assertEquals(BaseJsonLikeValue.ValueType.NULL, value.getJsonType());
+		assertEquals(false, value.isObject());
+		assertEquals(false, value.isArray());
+		assertEquals(false, value.isScalar());
+		assertEquals(true, value.isNull());
 
 		value = rootObject.get("scalar-string");
 		assertNotNull(value);
-		assertThat(value.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.SCALAR);
-		assertThat(value.isObject()).isEqualTo(false);
-		assertThat(value.isArray()).isEqualTo(false);
-		assertThat(value.isScalar()).isEqualTo(true);
-		assertThat(value.isNull()).isEqualTo(false);
-		assertThat(value.getDataType()).isEqualTo(BaseJsonLikeValue.ScalarType.STRING);
-		assertThat("A scalar string").isEqualTo(value.getAsString());
+		assertEquals(BaseJsonLikeValue.ValueType.SCALAR, value.getJsonType());
+		assertEquals(false, value.isObject());
+		assertEquals(false, value.isArray());
+		assertEquals(true, value.isScalar());
+		assertEquals(false, value.isNull());
+		assertEquals(BaseJsonLikeValue.ScalarType.STRING, value.getDataType());
+		assertEquals(value.getAsString(), "A scalar string");
 
 		value = rootObject.get("scalar-number");
 		assertNotNull(value);
-		assertThat(value.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.SCALAR);
-		assertThat(value.getDataType()).isEqualTo(BaseJsonLikeValue.ScalarType.NUMBER);
-		assertThat("11111").isEqualTo(value.getAsString());
+		assertEquals(BaseJsonLikeValue.ValueType.SCALAR, value.getJsonType());
+		assertEquals(BaseJsonLikeValue.ScalarType.NUMBER, value.getDataType());
+		assertEquals(value.getAsString(), "11111");
 
 		value = rootObject.get("scalar-boolean");
 		assertNotNull(value);
-		assertThat(value.getJsonType()).isEqualTo(BaseJsonLikeValue.ValueType.SCALAR);
-		assertThat(value.getDataType()).isEqualTo(BaseJsonLikeValue.ScalarType.BOOLEAN);
-		assertThat("true").isEqualTo(value.getAsString());
+		assertEquals(BaseJsonLikeValue.ValueType.SCALAR, value.getJsonType());
+		assertEquals(BaseJsonLikeValue.ScalarType.BOOLEAN, value.getDataType());
+		assertEquals(value.getAsString(), "true");
 	}
 
 }

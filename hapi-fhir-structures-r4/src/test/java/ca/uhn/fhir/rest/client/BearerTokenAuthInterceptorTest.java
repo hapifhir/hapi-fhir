@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
@@ -79,7 +80,7 @@ public class BearerTokenAuthInterceptorTest {
 		client.getPatientById(new IdType("111"));
 
 		HttpUriRequest req = capt.getValue();
-		assertThat(req.getFirstHeader("Authorization").getValue()).isEqualTo("Bearer mytoken");
+		assertEquals("Bearer mytoken", req.getFirstHeader("Authorization").getValue());
 	}
 
 	@BeforeAll

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 
@@ -137,7 +138,7 @@ public final class TermTestUtil {
 				consumerNameDesignation = designation;
 			}
 		}
-		assertThat(consumerNameDesignation.getValue()).isEqualTo(theConsumerName);
+		assertEquals(theConsumerName, consumerNameDesignation.getValue());
 	}
 
 	static void verifyLinguisticVariant(
@@ -190,8 +191,8 @@ public final class TermTestUtil {
 	private static void verifyDesignation(
 			TermConceptDesignation theDesignation, String theUseSystem, String theUseCode, String theValue) {
 		if (theDesignation == null) return;
-		assertThat(theDesignation.getUseSystem()).isEqualTo(theUseSystem);
-		assertThat(theDesignation.getUseCode()).isEqualTo(theUseCode);
-		assertThat(theDesignation.getValue()).isEqualTo(theValue);
+		assertEquals(theUseSystem, theDesignation.getUseSystem());
+		assertEquals(theUseCode, theDesignation.getUseCode());
+		assertEquals(theValue, theDesignation.getValue());
 	}
 }

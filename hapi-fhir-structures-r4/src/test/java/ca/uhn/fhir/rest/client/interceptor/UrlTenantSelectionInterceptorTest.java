@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.BaseGenericClientR4Test;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -27,7 +28,7 @@ public class UrlTenantSelectionInterceptorTest extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(capt.getAllValues().get(0).getURI().toString()).isEqualTo("http://example.com/fhir/TENANT-A/Patient/_history");
+		assertEquals("http://example.com/fhir/TENANT-A/Patient/_history", capt.getAllValues().get(0).getURI().toString());
 	}
 
 	@Test
@@ -43,7 +44,7 @@ public class UrlTenantSelectionInterceptorTest extends BaseGenericClientR4Test {
 			.returnBundle(Bundle.class)
 			.execute();
 
-		assertThat(capt.getAllValues().get(0).getURI().toString()).isEqualTo("http://example.com:8000/TENANT-A/Patient/_history");
+		assertEquals("http://example.com:8000/TENANT-A/Patient/_history", capt.getAllValues().get(0).getURI().toString());
 	}
 
 	@Test
@@ -58,7 +59,7 @@ public class UrlTenantSelectionInterceptorTest extends BaseGenericClientR4Test {
 			.ofType(CapabilityStatement.class)
 			.execute();
 
-		assertThat(capt.getAllValues().get(0).getURI().toString()).isEqualTo("http://example.com:8000/TENANT-A/metadata");
+		assertEquals("http://example.com:8000/TENANT-A/metadata", capt.getAllValues().get(0).getURI().toString());
 	}
 
 	@Test
@@ -73,7 +74,7 @@ public class UrlTenantSelectionInterceptorTest extends BaseGenericClientR4Test {
 			.resource(new Patient().setActive(true))
 			.execute();
 
-		assertThat(capt.getAllValues().get(0).getURI().toString()).isEqualTo("http://example.com/fhir/TENANT-A/Patient");
+		assertEquals("http://example.com/fhir/TENANT-A/Patient", capt.getAllValues().get(0).getURI().toString());
 	}
 
 
@@ -92,7 +93,7 @@ public class UrlTenantSelectionInterceptorTest extends BaseGenericClientR4Test {
 			.next(bundle)
 			.execute();
 
-		assertThat(capt.getAllValues().get(0).getURI().toString()).isEqualTo("http://example.com/fhir/TENANT-A/?_getpages=123456");
+		assertEquals("http://example.com/fhir/TENANT-A/?_getpages=123456", capt.getAllValues().get(0).getURI().toString());
 	}
 
 	@Test
@@ -110,7 +111,7 @@ public class UrlTenantSelectionInterceptorTest extends BaseGenericClientR4Test {
 			.next(bundle)
 			.execute();
 
-		assertThat(capt.getAllValues().get(0).getURI().toString()).isEqualTo("http://example.com/fhir/TENANT-A?_getpages=123456");
+		assertEquals("http://example.com/fhir/TENANT-A?_getpages=123456", capt.getAllValues().get(0).getURI().toString());
 	}
 
 }

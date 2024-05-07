@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.hapi.ctx.HapiWorkerContext;
@@ -86,7 +87,7 @@ public class GraphQLEngineTest {
 			"    \"unit\":\"cm\"\n" +
 			"  }\n" +
 			"}";
-		assertThat(TestUtil.stripReturns(outputBuilder.toString())).isEqualTo(TestUtil.stripReturns(expected));
+		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
 
 	}
 
@@ -110,7 +111,7 @@ public class GraphQLEngineTest {
 		String expected = "{\n" +
 			"  \"id\":\"http://foo.com/Patient/PATA\"\n" +
 			"}";
-		assertThat(TestUtil.stripReturns(outputBuilder.toString())).isEqualTo(TestUtil.stripReturns(expected));
+		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
 	}
 
 	@Test
@@ -133,7 +134,7 @@ public class GraphQLEngineTest {
 			"  \"id\":\"http://foo.com/Patient/PATA\",\n" +
 			"  \"effectiveDateTime\":\"2022-01-01T12:12:12Z\"\n" +
 			"}";
-		assertThat(TestUtil.stripReturns(outputBuilder.toString())).isEqualTo(TestUtil.stripReturns(expected));
+		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
 	}
 
 
@@ -171,7 +172,7 @@ public class GraphQLEngineTest {
 			"    }\n" +
 			"  }\n" +
 			"}";
-		assertThat(TestUtil.stripReturns(outputBuilder.toString())).isEqualTo(TestUtil.stripReturns(expected));
+		assertEquals(TestUtil.stripReturns(expected), TestUtil.stripReturns(outputBuilder.toString()));
 
 	}
 

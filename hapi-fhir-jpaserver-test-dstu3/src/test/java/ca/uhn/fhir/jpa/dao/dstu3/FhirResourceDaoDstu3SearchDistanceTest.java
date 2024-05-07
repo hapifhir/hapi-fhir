@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -119,7 +120,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 			myLocationDao.search(map);
 			fail("");
 		} catch (InternalErrorException e) {
-			assertThat(e.getCause().getMessage()).isEqualTo(Msg.code(1228) + "Invalid position format '" + theCoords + "'.  Required format is 'latitude:longitude'");
+			assertEquals(Msg.code(1228) + "Invalid position format '" + theCoords + "'.  Required format is 'latitude:longitude'", e.getCause().getMessage());
 		}
 	}
 
@@ -132,7 +133,7 @@ public class FhirResourceDaoDstu3SearchDistanceTest extends BaseJpaDstu3Test {
 			myLocationDao.search(map);
 			fail("");
 		} catch (InternalErrorException e) {
-			assertThat(e.getCause().getMessage()).isEqualTo(Msg.code(1229) + "Invalid position format ':2'.  Both latitude and longitude must be provided.");
+			assertEquals(Msg.code(1229) + "Invalid position format ':2'.  Both latitude and longitude must be provided.", e.getCause().getMessage());
 		}
 	}
 

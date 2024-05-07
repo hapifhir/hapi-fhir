@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.api;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -38,7 +39,7 @@ public class CacheControlDirectiveTest {
 		ccd.parse(values);
 		assertFalse(ccd.isNoCache());
 		assertTrue(ccd.isNoStore());
-		assertThat(ccd.getMaxResults().intValue()).isEqualTo(5);
+		assertEquals(5, ccd.getMaxResults().intValue());
 	}
 
 	@Test

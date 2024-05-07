@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.partition;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -48,8 +49,8 @@ class RequestPartitionHelperSvcTest {
 		RequestPartitionId result = mySvc.determineReadPartitionForRequestForRead(srd, "Patient", new IdType("Patient/123"));
 
 		// verify
-		assertThat(result.getFirstPartitionIdOrNull()).isEqualTo(PARTITION_ID);
-		assertThat(result.getFirstPartitionNameOrNull()).isEqualTo(PARTITION_NAME);
+		assertEquals(PARTITION_ID, result.getFirstPartitionIdOrNull());
+		assertEquals(PARTITION_NAME, result.getFirstPartitionNameOrNull());
 	}
 
 	@Test
@@ -67,8 +68,8 @@ class RequestPartitionHelperSvcTest {
 		RequestPartitionId result = mySvc.determineCreatePartitionForRequest(srd, resource, "Patient");
 
 		// verify
-		assertThat(result.getFirstPartitionIdOrNull()).isEqualTo(PARTITION_ID);
-		assertThat(result.getFirstPartitionNameOrNull()).isEqualTo(PARTITION_NAME);
+		assertEquals(PARTITION_ID, result.getFirstPartitionIdOrNull());
+		assertEquals(PARTITION_NAME, result.getFirstPartitionNameOrNull());
 	}
 
 }

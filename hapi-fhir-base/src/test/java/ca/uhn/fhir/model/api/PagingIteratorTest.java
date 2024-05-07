@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model.api;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -72,7 +73,7 @@ public class PagingIteratorTest {
 				myPagingIterator.next();
 				count++;
 			}
-			assertThat(count).isEqualTo(size);
+			assertEquals(size, count);
 		}
 	}
 

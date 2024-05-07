@@ -1,5 +1,6 @@
 package ca.uhn.fhir.context;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.annotation.Block;
@@ -54,7 +55,7 @@ public class ModelScannerDstu3Test {
 		try {
 			ctx.getResourceDefinition(MyBundle.class);
 			fail("");		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1687) + "Resource type declares resource name Bundle but does not implement IBaseBundle");
+			assertEquals(Msg.code(1687) + "Resource type declares resource name Bundle but does not implement IBaseBundle", e.getMessage());
 		}
 	}
 
@@ -72,11 +73,11 @@ public class ModelScannerDstu3Test {
 		ctx.getResourceDefinition(MyPatient.class);
 
 		RuntimeResourceDefinition patient = ctx.getResourceDefinition("Patient");
-		assertThat(patient.getImplementingClass()).isEqualTo(Patient.class);
+		assertEquals(Patient.class, patient.getImplementingClass());
 
 		RuntimeResourceDefinition def = ctx.getResourceDefinition(MyPatient.class);
 		RuntimeResourceDefinition baseDef = def.getBaseDefinition();
-		assertThat(baseDef.getImplementingClass()).isEqualTo(Patient.class);
+		assertEquals(Patient.class, baseDef.getImplementingClass());
 	}
 
 	@Test
@@ -84,7 +85,7 @@ public class ModelScannerDstu3Test {
 		try {
 			FhirContext.forDstu3().getResourceDefinition(NoResourceDef.class);
 			fail("");		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1716) + "Resource class[ca.uhn.fhir.context.ModelScannerDstu3Test$NoResourceDef] does not contain any valid HAPI-FHIR annotations");
+			assertEquals(Msg.code(1716) + "Resource class[ca.uhn.fhir.context.ModelScannerDstu3Test$NoResourceDef] does not contain any valid HAPI-FHIR annotations", e.getMessage());
 		}
 	}
 
@@ -103,7 +104,7 @@ public class ModelScannerDstu3Test {
 		FhirContext ctx = FhirContext.forDstu3();
 		RuntimeResourceDefinition def = ctx.getResourceDefinition(ResourceWithExtensionsDstu3A.class);
 
-		assertThat(def.getChildByNameOrThrowDataFormatException("identifier").getClass()).isEqualTo(RuntimeChildCompositeDatatypeDefinition.class);
+		assertEquals(RuntimeChildCompositeDatatypeDefinition.class, def.getChildByNameOrThrowDataFormatException("identifier").getClass());
 
 		RuntimeChildDeclaredExtensionDefinition ext = def.getDeclaredExtension("http://foo/#f1", "");
 		assertNotNull(ext);
@@ -136,7 +137,7 @@ public class ModelScannerDstu3Test {
 		try {
 			ctx.getResourceDefinition(CustomDstu3ClassWithDstu2Base.class);
 			fail("");		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1717) + "@Block class for version DSTU3 should not extend BaseIdentifiableElement: ca.uhn.fhir.context.CustomDstu3ClassWithDstu2Base$Bar1");
+			assertEquals(Msg.code(1717) + "@Block class for version DSTU3 should not extend BaseIdentifiableElement: ca.uhn.fhir.context.CustomDstu3ClassWithDstu2Base$Bar1", e.getMessage());
 		}
 	}
 
@@ -149,7 +150,7 @@ public class ModelScannerDstu3Test {
 		try {
 			FhirContext.forDstu3().getResourceDefinition(CompartmentForNonReferenceParam.class);
 			fail("");		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo("Search param foo provides compartment membershit but is not of type 'reference'");
+			assertEquals("Search param foo provides compartment membershit but is not of type 'reference'", e.getMessage());
 		}
 	}
 
@@ -158,7 +159,7 @@ public class ModelScannerDstu3Test {
 		try {
 			FhirContext.forDstu3().getResourceDefinition(InvalidParamType.class);
 			fail("");		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1721) + "Search param foo has an invalid type: bar");
+			assertEquals(Msg.code(1721) + "Search param foo has an invalid type: bar", e.getMessage());
 		}
 	}
 
@@ -171,7 +172,7 @@ public class ModelScannerDstu3Test {
 		try {
 			ctx.getResourceDefinition(LetterTemplate.class);
 			fail("");		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1733) + "Class \"class ca.uhn.fhir.context.ModelScannerDstu3Test$LetterTemplate\" is invalid. This resource type is not a DomainResource, it must not have extensions");
+			assertEquals(Msg.code(1733) + "Class \"class ca.uhn.fhir.context.ModelScannerDstu3Test$LetterTemplate\" is invalid. This resource type is not a DomainResource, it must not have extensions", e.getMessage());
 		}
 	}
 
@@ -202,7 +203,7 @@ public class ModelScannerDstu3Test {
 		try {
 			scanner.scan(BadPatient.class);
 			fail("");		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1714) + "Resource type contains a @ResourceDef annotation but does not implement ca.uhn.fhir.model.api.IResource: ca.uhn.fhir.context.ModelScannerDstu3Test.BadPatient");
+			assertEquals(Msg.code(1714) + "Resource type contains a @ResourceDef annotation but does not implement ca.uhn.fhir.model.api.IResource: ca.uhn.fhir.context.ModelScannerDstu3Test.BadPatient", e.getMessage());
 		}
 	}
 
@@ -218,7 +219,7 @@ public class ModelScannerDstu3Test {
 		try {
 			scanner.scan(clazz);
 			fail("");		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1716) + "Resource class[java.lang.String] does not contain any valid HAPI-FHIR annotations");
+			assertEquals(Msg.code(1716) + "Resource class[java.lang.String] does not contain any valid HAPI-FHIR annotations", e.getMessage());
 		}
 	}
 
@@ -235,7 +236,7 @@ public class ModelScannerDstu3Test {
 		try {
 			scanner.scan(BadPatient.BadBlock.class);
 			fail("");		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1715) + "Type contains a @Block annotation but does not implement ca.uhn.fhir.model.api.IResourceBlock: ca.uhn.fhir.context.ModelScannerDstu3Test.BadPatient.BadBlock");
+			assertEquals(Msg.code(1715) + "Type contains a @Block annotation but does not implement ca.uhn.fhir.model.api.IResourceBlock: ca.uhn.fhir.context.ModelScannerDstu3Test.BadPatient.BadBlock", e.getMessage());
 		}
 	}
 

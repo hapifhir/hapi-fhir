@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.bulk.export.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -233,9 +234,9 @@ public class JpaBulkExportProcessorTest {
 		// verify
 		assertNotNull(pidIterator);
 		assertTrue(pidIterator.hasNext());
-		assertThat(pidIterator.next()).isEqualTo(pid);
+		assertEquals(pid, pidIterator.next());
 		assertTrue(pidIterator.hasNext());
-		assertThat(pidIterator.next()).isEqualTo(pid2);
+		assertEquals(pid2, pidIterator.next());
 		assertFalse(pidIterator.hasNext());
 		verify(searchBuilder, times(1)).createQuery(
 			eq(map),
@@ -353,13 +354,13 @@ public class JpaBulkExportProcessorTest {
 			boolean existing = pids.contains(JpaPid.fromId(idAsLong));
 			if (!existing) {
 				assertTrue(theMdm);
-				assertThat(idAsLong).isEqualTo(groupGoldenPid);
+				assertEquals(groupGoldenPid, idAsLong);
 			} else {
 				count++;
 			}
 		}
 		int total = pids.size();
-		assertThat(count).isEqualTo(total);
+		assertEquals(total, count);
 		if (theMdm) {
 			ArgumentCaptor<SystemRequestDetails> requestDetailsCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
 			verify(groupDao).read(eq(new IdDt(parameters.getGroupId())), requestDetailsCaptor.capture());
@@ -371,9 +372,9 @@ public class JpaBulkExportProcessorTest {
 
 		if (thePartitioned) {
 			assertNotNull(thePartitionId.getPartitionNames());
-			assertThat(thePartitionId.getPartitionNames().get(0)).isEqualTo("Partition-A");
+			assertEquals("Partition-A", thePartitionId.getPartitionNames().get(0));
 		} else {
-			assertThat(thePartitionId).isEqualTo(RequestPartitionId.allPartitions());
+			assertEquals(RequestPartitionId.allPartitions(), thePartitionId);
 		}
 
 	}
@@ -547,7 +548,7 @@ public class JpaBulkExportProcessorTest {
 			assertTrue(ret.equals(pid) || ret.equals(pid2));
 			count++;
 		}
-		assertThat(count).isEqualTo(2);
+		assertEquals(2, count);
 	}
 
 	@ParameterizedTest
@@ -583,7 +584,7 @@ public class JpaBulkExportProcessorTest {
 		// verify
 		assertNotNull(pidIterator);
 		assertTrue(pidIterator.hasNext());
-		assertThat(pidIterator.next()).isEqualTo(pid);
+		assertEquals(pid, pidIterator.next());
 		assertFalse(pidIterator.hasNext());
 		ArgumentCaptor<SystemRequestDetails> resourceDaoServletRequestDetailsCaptor = ArgumentCaptor.forClass(SystemRequestDetails.class);
 		verify(mockDao).read(any(IdDt.class), resourceDaoServletRequestDetailsCaptor.capture());

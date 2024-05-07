@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.junit.jupiter.api.Nested;
@@ -160,8 +161,8 @@ class TokenAutocompleteAggregationTest {
 				.getAsJsonObject();
 
 			TokenAutocompleteHit entry = myAutocompleteAggregation.bucketToEntry(bucket);
-			assertThat(entry.mySystemCode).isEqualTo("http://loinc.org|59460-6");
-			assertThat(entry.myDisplayText).isEqualTo("Fall risk total [Morse Fall Scale]");
+			assertEquals("http://loinc.org|59460-6", entry.mySystemCode);
+			assertEquals("Fall risk total [Morse Fall Scale]", entry.myDisplayText);
 
 		}
 

@@ -70,7 +70,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
     ourLog.debug(myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(retBundle));
 
-		assertThat(bundle.getEntry().get(0).getFullUrl()).isEqualTo("http://foo/");
+		assertEquals("http://foo/", bundle.getEntry().get(0).getFullUrl());
 	}
 
 	@Test
@@ -111,7 +111,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		int i=0;
 		for (BundleEntryComponent bundleEntry : bundleEntries) {
-			assertThat(bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(i++));
+			assertEquals(ids.get(i++), bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 		}
 
 	}
@@ -155,7 +155,7 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 
 		int i=0;
 		for (BundleEntryComponent bundleEntry : bundleEntries) {
-			assertThat(bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(i++));
+			assertEquals(ids.get(i++), bundleEntry.getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 		}
 
 
@@ -188,28 +188,28 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		List<BundleEntryComponent> bundleEntries = output.getEntry();
 
 		// patient 1
-		assertThat(bundleEntries.get(0).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(0));
+		assertEquals(ids.get(0), bundleEntries.get(0).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 		// patient 10 - error outcomes
 			assertThat(((OperationOutcome) bundleEntries.get(1).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics()).contains("Patient/1000");
 
 		// patient 2
-		assertThat(bundleEntries.get(2).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(1));
+		assertEquals(ids.get(1), bundleEntries.get(2).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 		// patient 3
-		assertThat(bundleEntries.get(3).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(2));
+		assertEquals(ids.get(2), bundleEntries.get(3).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 		// patient 20 - error outcomes
 			assertThat(((OperationOutcome) bundleEntries.get(4).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics()).contains("Patient/2000");
 
 		// patient 4
-		assertThat(bundleEntries.get(5).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(3));
+		assertEquals(ids.get(3), bundleEntries.get(5).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 		// patient 30 - error outcomes
 			assertThat(((OperationOutcome) bundleEntries.get(6).getResponse().getOutcome()).getIssueFirstRep().getDiagnostics()).contains("Patient/3000");
 
 		// patient 5
-		assertThat(bundleEntries.get(7).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(4));
+		assertEquals(ids.get(4), bundleEntries.get(7).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 	}
 	
@@ -258,25 +258,25 @@ public class ResourceProviderR4BundleTest extends BaseResourceProviderR4Test {
 		List<BundleEntryComponent> bundleEntries = output.getEntry();
 
 		// patient 1
-		assertThat(bundleEntries.get(0).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(0));
+		assertEquals(ids.get(0), bundleEntries.get(0).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 		// patient create
 			assertThat(bundleEntries.get(1).getResponse().getStatus()).contains("201");
 
 		// patient 2
-		assertThat(bundleEntries.get(2).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(1));
+		assertEquals(ids.get(1), bundleEntries.get(2).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 		// patient 3
-		assertThat(bundleEntries.get(3).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(2));
+		assertEquals(ids.get(2), bundleEntries.get(3).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 		// condition create
 			assertThat(bundleEntries.get(4).getResponse().getStatus()).contains("201");
 
 		// patient 4
-		assertThat(bundleEntries.get(5).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(3));
+		assertEquals(ids.get(3), bundleEntries.get(5).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 		// patient 5
-		assertThat(bundleEntries.get(6).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString()).isEqualTo(ids.get(4));
+		assertEquals(ids.get(4), bundleEntries.get(6).getResource().getIdElement().toUnqualifiedVersionless().getValueAsString());
 
 	}
 

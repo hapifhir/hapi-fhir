@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
@@ -58,9 +59,9 @@ public class SchemaMigratorTest extends BaseTest {
 			schemaMigrator.migrate();
 			fail("");
 		} catch (HapiMigrationException e) {
-			assertThat(e.getCause().getCause().getClass()).isEqualTo(org.springframework.jdbc.BadSqlGrammarException.class);
+			assertEquals(org.springframework.jdbc.BadSqlGrammarException.class, e.getCause().getCause().getClass());
 			MigrationResult failedResult = e.getResult();
-			assertThat(failedResult.changes).isEqualTo(0);
+			assertEquals(0, failedResult.changes);
 			assertThat(failedResult.succeededTasks).isEmpty();
 			assertThat(failedResult.failedTasks).hasSize(1);
 			assertThat(failedResult.executedStatements).isEmpty();
@@ -70,17 +71,17 @@ public class SchemaMigratorTest extends BaseTest {
 		schemaMigrator = createTableMigrator();
 
 		MigrationResult result = schemaMigrator.migrate();
-		assertThat(result.changes).isEqualTo(0);
+		assertEquals(0, result.changes);
 		assertThat(result.succeededTasks).hasSize(1);
 		assertThat(result.failedTasks).isEmpty();
 		assertThat(result.executedStatements).hasSize(1);
 
 		List<HapiMigrationEntity> entities = myHapiMigrationDao.findAll();
 		assertThat(entities).hasSize(2);
-		assertThat(entities.get(0).getPid()).isEqualTo(1);
-		assertThat(entities.get(0).getSuccess()).isEqualTo(false);
-		assertThat(entities.get(1).getPid()).isEqualTo(2);
-		assertThat(entities.get(1).getSuccess()).isEqualTo(true);
+		assertEquals(1, entities.get(0).getPid());
+		assertEquals(false, entities.get(0).getSuccess());
+		assertEquals(2, entities.get(1).getPid());
+		assertEquals(true, entities.get(1).getSuccess());
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")

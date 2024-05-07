@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.rest.api.Constants;
@@ -128,8 +129,8 @@ public abstract class BaseGenericClientR4Test {
 	}
 
 	protected void validateUserAgent(ArgumentCaptor<HttpUriRequest> capt) {
-		assertThat(capt.getAllValues().get(0).getHeaders("User-Agent").length).isEqualTo(1);
-		assertThat(capt.getAllValues().get(0).getHeaders("User-Agent")[0].getValue()).isEqualTo(expectedUserAgent());
+		assertEquals(1, capt.getAllValues().get(0).getHeaders("User-Agent").length);
+		assertEquals(expectedUserAgent(), capt.getAllValues().get(0).getHeaders("User-Agent")[0].getValue());
 	}
 
 	@AfterAll

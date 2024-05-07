@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -78,7 +79,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		ConceptValidationOptions options = new ConceptValidationOptions();
 		IValidationSupport.CodeValidationResult outcome = myValidationSupport.validateCode(context, options, "http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc", "378397893", null, "http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc");
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).isEqualTo("Unable to validate code http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc#378397893 - Supplied system URL is a ValueSet URL and not a CodeSystem URL, check if it is correct: http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc");
+		assertEquals("Unable to validate code http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc#378397893 - Supplied system URL is a ValueSet URL and not a CodeSystem URL, check if it is correct: http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc", outcome.getMessage());
 	}
 
 
@@ -95,7 +96,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		ConceptValidationOptions options = new ConceptValidationOptions();
 		IValidationSupport.CodeValidationResult outcome = myValidationSupport.validateCode(context, options, "http://payer-to-payer-exchange/fhir/CodeSystem/ndc", "378397893", null, "http://payer-to-payer-exchange/fhir/ValueSet/mental-health/ndc");
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).isEqualTo("Unable to validate code http://payer-to-payer-exchange/fhir/CodeSystem/ndc#378397893 - No codes in ValueSet belong to CodeSystem with URL http://payer-to-payer-exchange/fhir/CodeSystem/ndc");
+		assertEquals("Unable to validate code http://payer-to-payer-exchange/fhir/CodeSystem/ndc#378397893 - No codes in ValueSet belong to CodeSystem with URL http://payer-to-payer-exchange/fhir/CodeSystem/ndc", outcome.getMessage());
 	}
 
 
@@ -148,24 +149,24 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertThat(outcome.getSourceDetails()).isEqualTo("Code was validated against in-memory expansion of ValueSet: http://vs");
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).isEqualTo("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'");
+		assertEquals("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
 
 		// In memory - Enumerated in non-present CS
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "code1", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertThat(outcome.getSourceDetails()).isEqualTo("Code was validated against in-memory expansion of ValueSet: http://vs");
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).isEqualTo("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'");
+		assertEquals("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
 
 		// Precalculated
 
@@ -251,24 +252,24 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "child10", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertThat(outcome.getSourceDetails()).isEqualTo("Code was validated against in-memory expansion of ValueSet: http://vs");
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs", "childX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).isEqualTo("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'");
+		assertEquals("Unknown code 'http://cs#childX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
 
 		// In memory - Enumerated in non-present CS
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "code1", null, "http://vs");
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk());
-		assertThat(outcome.getSourceDetails()).isEqualTo("Code was validated against in-memory expansion of ValueSet: http://vs");
+		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
 
 		outcome = myValidationSupport.validateCode(ctx, options, "http://cs-np", "codeX", null, "http://vs");
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).isEqualTo("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'");
+		assertEquals("Unknown code 'http://cs-np#codeX' for in-memory expansion of ValueSet 'http://vs'", outcome.getMessage());
 
 		// Precalculated
 
@@ -316,7 +317,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 			myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(901) + "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
+			assertEquals(Msg.code(901) + "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.", e.getMessage());
 		}
 	}
 
@@ -331,7 +332,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@Test
@@ -345,8 +346,8 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
-		assertThat(result.getMessage()).isEqualTo("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for in-memory expansion of ValueSet: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
+		assertEquals("Concept Display \"Systolic blood pressure at First encounterXXXX\" does not match expected \"Systolic blood pressure at First encounter\" for in-memory expansion of ValueSet: http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2", result.getMessage());
 	}
 
 	@Test
@@ -360,7 +361,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@Test
@@ -375,7 +376,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		codeableConcept.addCoding().setSystem("http://acme.org").setCode("11378-7");
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@Test
@@ -392,17 +393,17 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		codeableConcept.addCoding().setSystem("http://acme.org").setCode("11378-7");
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@Test
@@ -416,7 +417,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@Test
@@ -432,17 +433,17 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		CodeableConcept codeableConcept = null;
 		IValidationSupport.CodeValidationResult result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		myTermSvc.preExpandDeferredValueSetsToTerminologyTables();
 		result = myValueSetDao.validateCode(valueSetIdentifier, id, code, system, display, coding, codeableConcept, mySrd);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@Test
@@ -451,7 +452,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 			myValueSetDao.expand(new IdType("http://foo"), null, mySrd);
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-2001: Resource ValueSet/foo is not known");
+			assertEquals("HAPI-2001: Resource ValueSet/foo is not known", e.getMessage());
 		}
 	}
 
@@ -529,7 +530,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 		ourLog.info(result.getMessage());
 		assertThat(result.isOk()).as(result.getMessage()).isTrue();
-		assertThat(result.getDisplay()).isEqualTo("Male");
+		assertEquals("Male", result.getDisplay());
 	}
 
 

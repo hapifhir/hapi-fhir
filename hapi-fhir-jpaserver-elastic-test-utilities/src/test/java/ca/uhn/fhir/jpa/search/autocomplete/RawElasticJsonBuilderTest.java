@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.junit.jupiter.api.Test;
@@ -40,7 +41,7 @@ class RawElasticJsonBuilderTest {
 	}
 
 	private void assertJson(String expected) {
-		assertThat(myJson).isEqualTo(JsonParser.parseString(expected).getAsJsonObject());
+		assertEquals(JsonParser.parseString(expected).getAsJsonObject(), myJson);
 	}
 
 

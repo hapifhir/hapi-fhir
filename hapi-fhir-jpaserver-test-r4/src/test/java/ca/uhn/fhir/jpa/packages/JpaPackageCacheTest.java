@@ -61,16 +61,16 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		NpmPackage pkg;
 
 		pkg = myPackageCacheManager.loadPackage("basisprofil.de", null);
-		assertThat(pkg.version()).isEqualTo("0.2.40");
+		assertEquals("0.2.40", pkg.version());
 
 		pkg = myPackageCacheManager.loadPackage("basisprofil.de", "0.2.40");
-		assertThat(pkg.version()).isEqualTo("0.2.40");
+		assertEquals("0.2.40", pkg.version());
 
 		try {
 			myPackageCacheManager.loadPackage("basisprofil.de", "99");
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1301) + "Unable to locate package basisprofil.de#99");
+			assertEquals(Msg.code(1301) + "Unable to locate package basisprofil.de#99", e.getMessage());
 		}
 	}
 
@@ -89,23 +89,23 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 			NpmPackage pkg;
 
 			pkg = myPackageCacheManager.loadPackage("basisprofil.de", null);
-			assertThat(pkg.version()).isEqualTo("0.2.40");
+			assertEquals("0.2.40", pkg.version());
 
 			pkg = myPackageCacheManager.loadPackage("basisprofil.de", "0.2.40");
-			assertThat(pkg.version()).isEqualTo("0.2.40");
+			assertEquals("0.2.40", pkg.version());
 
 			try {
 				myPackageCacheManager.loadPackage("basisprofil.de", "99");
 				fail("");
 			} catch (ResourceNotFoundException e) {
-				assertThat(e.getMessage()).isEqualTo(Msg.code(1301) + "Unable to locate package basisprofil.de#99");
+				assertEquals(Msg.code(1301) + "Unable to locate package basisprofil.de#99", e.getMessage());
 			}
 
 			logAllResources();
 
 			PackageDeleteOutcomeJson deleteOutcomeJson = myPackageCacheManager.uninstallPackage("basisprofil.de", "0.2.40");
 			List<String> deleteOutcomeMsgs = deleteOutcomeJson.getMessage();
-			assertThat(deleteOutcomeMsgs.get(0)).isEqualTo("Deleting package basisprofil.de#0.2.40");
+			assertEquals("Deleting package basisprofil.de#0.2.40", deleteOutcomeMsgs.get(0));
 		} finally {
 			myInterceptorService.unregisterInterceptor(myPatientIdPartitionInterceptor);
 			myInterceptorService.unregisterInterceptor(myRequestTenantPartitionInterceptor);
@@ -129,21 +129,21 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 			NpmPackage pkg;
 
 			pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", null);
-			assertThat(pkg.version()).isEqualTo("0.12.0");
+			assertEquals("0.12.0", pkg.version());
 
 			pkg = myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "0.12.0");
-			assertThat(pkg.version()).isEqualTo("0.12.0");
+			assertEquals("0.12.0", pkg.version());
 
 			try {
 				myPackageCacheManager.loadPackage("hl7.fhir.uv.shorthand", "99");
 				fail("");
 			} catch (ResourceNotFoundException e) {
-				assertThat(e.getMessage()).isEqualTo(Msg.code(1301) + "Unable to locate package hl7.fhir.uv.shorthand#99");
+				assertEquals(Msg.code(1301) + "Unable to locate package hl7.fhir.uv.shorthand#99", e.getMessage());
 			}
 
 			PackageDeleteOutcomeJson deleteOutcomeJson = myPackageCacheManager.uninstallPackage("hl7.fhir.uv.shorthand", "0.12.0");
 			List<String> deleteOutcomeMsgs = deleteOutcomeJson.getMessage();
-			assertThat(deleteOutcomeMsgs.get(0)).isEqualTo("Deleting package hl7.fhir.uv.shorthand#0.12.0");
+			assertEquals("Deleting package hl7.fhir.uv.shorthand#0.12.0", deleteOutcomeMsgs.get(0));
 		} finally {
 			myPartitionSettings.setUnnamedPartitionMode(isUnnamed);
 			myInterceptorService.unregisterInterceptor(myPatientIdPartitionInterceptor);
@@ -160,7 +160,7 @@ public class JpaPackageCacheTest extends BaseJpaR4Test {
 		NpmPackage pkg;
 
 		pkg = myPackageCacheManager.loadPackage("hl7.fhir.us.davinci-cdex", null);
-		assertThat(pkg.version()).isEqualTo("0.2.0");
+		assertEquals("0.2.0", pkg.version());
 
 		runInTransaction(()-> {
 			assertEquals("This IG provides detailed guidance that helps implementers use FHIR-based interactions and resources relevant to support specific exchanges of clinical information between provider and payers (or ...", myPackageDao.findByPackageId("hl7.fhir.us.davinci-cdex").get().getDescription());

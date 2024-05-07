@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ class RuleTargetTest {
 
 		Map<String, String[]> storedParams = target.getSearchParams();
 		assertThat(storedParams.keySet()).hasSize(2);
-		assertThat(storedParams.get("subject")[0]).isEqualTo("Patient/123");
-		assertThat(storedParams.get("performer")[0]).isEqualTo("Practioner/456");
+		assertEquals("Patient/123", storedParams.get("subject")[0]);
+		assertEquals("Practioner/456", storedParams.get("performer")[0]);
 	}
 }

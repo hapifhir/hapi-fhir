@@ -185,7 +185,7 @@ class BaseHapiFhirResourceDaoTest {
 			mySvc.validateResourceIdCreation(patient, sysRequest);
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(959) + "failedToCreateWithClientAssignedIdNotAllowed");
+			assertEquals(Msg.code(959) + "failedToCreateWithClientAssignedIdNotAllowed", e.getMessage());
 		}
 	}
 
@@ -199,7 +199,7 @@ class BaseHapiFhirResourceDaoTest {
 			mySvc.validateResourceIdCreation(patient, sysRequest);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(960) + "failedToCreateWithClientAssignedNumericId");
+			assertEquals(Msg.code(960) + "failedToCreateWithClientAssignedNumericId", e.getMessage());
 		}
 	}
 
@@ -257,7 +257,7 @@ class BaseHapiFhirResourceDaoTest {
 
 		// verify
 		assertNotNull(outcome);
-		assertThat(outcome.getId().getValue()).isEqualTo(id.getValue());
+		assertEquals(id.getValue(), outcome.getId().getValue());
 	}
 
 	@Test
@@ -283,8 +283,8 @@ class BaseHapiFhirResourceDaoTest {
 		ReindexJobParameters actualParameters = actualRequest.getParameters(ReindexJobParameters.class);
 
 		assertThat(actualParameters.getPartitionedUrls()).hasSize(2);
-		assertThat(actualParameters.getPartitionedUrls().get(0).getUrl()).isEqualTo("Patient?");
-		assertThat(actualParameters.getPartitionedUrls().get(1).getUrl()).isEqualTo("Group?");
+		assertEquals("Patient?", actualParameters.getPartitionedUrls().get(0).getUrl());
+		assertEquals("Group?", actualParameters.getPartitionedUrls().get(1).getUrl());
 	}
 
 	@Test
@@ -325,7 +325,7 @@ class BaseHapiFhirResourceDaoTest {
 		// verify
 		verify(myISearchBuilder).createQuery(mySearchParameterMapCaptor.capture(), any(), any(), any());
 		SearchParameterMap capturedSP = mySearchParameterMapCaptor.getValue();
-		assertThat(expectedSearchSize).isEqualTo(capturedSP.getLoadSynchronousUpTo());
+		assertEquals(capturedSP.getLoadSynchronousUpTo(), expectedSearchSize);
 	}
 
 	static Stream<Arguments> searchParameterMapProvider() {

@@ -232,8 +232,8 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		final JobInstance jobInstance = jobInstances.get(0);
 
-		assertThat(jobInstance.getStatus()).isEqualTo(StatusEnum.COMPLETED);
-		assertThat(jobInstance.getProgress()).isEqualTo(1.0);
+		assertEquals(StatusEnum.COMPLETED, jobInstance.getStatus());
+		assertEquals(1.0, jobInstance.getProgress());
 	}
 
 	@Test
@@ -463,7 +463,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		Optional<JobInstance> instanceOp = myJobPersistence.fetchInstance(instanceId);
 		assertThat(instanceOp).isPresent();
 		int secondStepCalls = secondStepInt.get();
-		assertThat(secondStepCalls).isEqualTo(2);
+		assertEquals(2, secondStepCalls);
 		JobInstance instance = instanceOp.get();
 		ourLog.info(JsonUtil.serialize(instance, true));
 		assertNotNull(instance.getReport());
@@ -478,8 +478,8 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 		final JobInstance jobInstance = jobInstances.get(0);
 
-		assertThat(jobInstance.getStatus()).isEqualTo(StatusEnum.COMPLETED);
-		assertThat(jobInstance.getProgress()).isEqualTo(1.0);
+		assertEquals(StatusEnum.COMPLETED, jobInstance.getStatus());
+		assertEquals(1.0, jobInstance.getProgress());
 	}
 
 	@Test
@@ -615,7 +615,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			StatusEnum.FAILED
 		);
 
-		assertThat(counter.get()).isEqualTo(MAX_CHUNK_ERROR_COUNT + 1);
+		assertEquals(MAX_CHUNK_ERROR_COUNT + 1, counter.get());
 
 		assertThat(instance.getStatus()).isSameAs(StatusEnum.FAILED);
 	}

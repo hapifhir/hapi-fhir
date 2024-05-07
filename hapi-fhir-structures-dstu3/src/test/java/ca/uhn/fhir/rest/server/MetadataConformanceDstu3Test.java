@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -53,7 +54,7 @@ public class MetadataConformanceDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			ourLog.info(output);
 			assertThat(output).contains("<CapabilityStatement");
 			assertThat(output).contains("<meta>", "SUBSETTED", "</meta>");
@@ -67,7 +68,7 @@ public class MetadataConformanceDstu3Test {
 		status = ourClient.execute(httpPost);
 		try {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			ourLog.info(output);
 			assertThat(output).contains("<CapabilityStatement");
 			assertThat(output).doesNotContain("<meta>", "SUBSETTED", "</meta>");
@@ -85,7 +86,7 @@ public class MetadataConformanceDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			ourLog.info(output);
 			assertThat(output).contains("<CapabilityStatement");
 			assertThat(output).contains("<meta>", "SUBSETTED", "</meta>");
@@ -101,7 +102,7 @@ public class MetadataConformanceDstu3Test {
 		HttpRequestBase httpOperation = new HttpGet(ourServer.getBaseUrl() + "/metadata");
 		try (CloseableHttpResponse status = ourClient.execute(httpOperation)) {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(output).contains("<CapabilityStatement");
 			assertThat(status.getFirstHeader("X-Powered-By").getValue()).contains("HAPI FHIR " + VersionUtil.getVersion());
 			assertThat(status.getFirstHeader("X-Powered-By").getValue()).contains("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")");
@@ -110,7 +111,7 @@ public class MetadataConformanceDstu3Test {
 		httpOperation = new HttpOptions(ourServer.getBaseUrl());
 		try (CloseableHttpResponse status = ourClient.execute(httpOperation)) {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(output).contains("<CapabilityStatement");
 			assertThat(status.getFirstHeader("X-Powered-By").getValue()).contains("HAPI FHIR " + VersionUtil.getVersion());
 			assertThat(status.getFirstHeader("X-Powered-By").getValue()).contains("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")");
@@ -119,8 +120,8 @@ public class MetadataConformanceDstu3Test {
 		httpOperation = new HttpPost(ourServer.getBaseUrl() + "/metadata");
 		try (CloseableHttpResponse status = ourClient.execute(httpOperation)) {
 			output = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(405);
-			assertThat(output).isEqualTo("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET\"/></issue></OperationOutcome>");
+			assertEquals(405, status.getStatusLine().getStatusCode());
+			assertEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET\"/></issue></OperationOutcome>", output);
 		}
 
 		/*
@@ -129,7 +130,7 @@ public class MetadataConformanceDstu3Test {
 		 */
 		httpOperation = new HttpGet(ourServer.getBaseUrl() + "/Patient/metadata");
 		try (CloseableHttpResponse status = ourClient.execute(httpOperation)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, status.getStatusLine().getStatusCode());
 		}
 	}
 

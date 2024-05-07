@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -46,7 +47,7 @@ public class ListR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		assertThat(results.getEntry()).hasSize(1);
-		assertThat(results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(orgInList.toUnqualifiedVersionless().getValue());
+		assertEquals(orgInList.toUnqualifiedVersionless().getValue(), results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
@@ -58,7 +59,7 @@ public class ListR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		assertThat(results.getEntry()).hasSize(1);
-		assertThat(results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(orgInList.toUnqualifiedVersionless().getValue());
+		assertEquals(orgInList.toUnqualifiedVersionless().getValue(), results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue());
 	}
 
 	@Test
@@ -69,6 +70,6 @@ public class ListR4Test extends BaseResourceProviderR4Test {
 			.execute();
 
 		assertThat(results.getEntry()).hasSize(1);
-		assertThat(results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(practitionerInList.toUnqualifiedVersionless().getValue());
+		assertEquals(practitionerInList.toUnqualifiedVersionless().getValue(), results.getEntryFirstRep().getResource().getIdElement().toUnqualifiedVersionless().getValue());
 	}
 }

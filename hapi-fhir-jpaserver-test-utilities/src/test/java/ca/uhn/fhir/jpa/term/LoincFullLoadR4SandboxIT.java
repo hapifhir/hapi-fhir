@@ -247,8 +247,8 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 		ourLog.info("askAtOrderEntryCount        :{}", String.format("%,6d", askAtOrderEntryCount));
 		ourLog.info("");
 
-		assertThat(askAtOrderEntryCount).isEqualTo(ASK_AT_ORDER_ENTRY_COUNT);
-		assertThat(associatedObservationsCount).isEqualTo(ASSOCIATED_OBSERVATIONS_COUNT);
+		assertEquals(ASK_AT_ORDER_ENTRY_COUNT, askAtOrderEntryCount);
+		assertEquals(ASSOCIATED_OBSERVATIONS_COUNT, associatedObservationsCount);
 
 		// ass asserts are used for some validation, but we want all problems to be displayed,
 		// we just collect assertions and execute them all et the end (here).
@@ -561,7 +561,7 @@ public class LoincFullLoadR4SandboxIT extends BaseJpaTest {
 			myTermConceptDao.countByCodeSystemVersion(tcsvId));
 		ourLog.info("=================> Number of stored concepts for version {}: {}",
 			CS_VERSION, ourDecimalFormat.format(dbVersionedTermConceptCount));
-		assertThat(dbVersionedTermConceptCount).isEqualTo(CS_CONCEPTS_COUNT);
+		assertEquals(CS_CONCEPTS_COUNT, dbVersionedTermConceptCount);
 	}
 
 

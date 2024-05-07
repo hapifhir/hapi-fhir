@@ -19,7 +19,7 @@ public class HashTest {
 	public void testHash() {
 		AddColumnTask task1 = buildTask();
 		AddColumnTask task2 = buildTask();
-		assertThat(task2.hashCode()).isEqualTo(task1.hashCode());
+		assertEquals(task1.hashCode(), task2.hashCode());
 	}
 
 	private AddColumnTask buildTask() {

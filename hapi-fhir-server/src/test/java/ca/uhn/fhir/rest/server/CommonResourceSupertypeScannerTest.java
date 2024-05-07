@@ -1,6 +1,7 @@
 
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import org.hl7.fhir.instance.model.api.IBaseMetaType;
@@ -58,7 +59,7 @@ public class CommonResourceSupertypeScannerTest {
   
   @Test
   public void testEmpty() {
-		assertThat(scanner.getLowestCommonSuperclass().isPresent()).isEqualTo(false);
+		assertEquals(false, scanner.getLowestCommonSuperclass().isPresent());
   }
   
   @ResourceDef(name = "Patient")

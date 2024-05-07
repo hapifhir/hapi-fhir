@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.module;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.subscription.channel.subscription.SubscriptionChannelRegistry;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.module.config.TestSubscriptionDstu3Config;
@@ -77,7 +78,7 @@ public abstract class BaseSubscriptionDstu3Test extends BaseSubscriptionTest {
 	}
 
 	protected void assertRegistrySize(int theSubscriptionRegistrySize, int theSubscriptionChannelRegistrySize) {
-		assertThat(mySubscriptionRegistry.size()).isEqualTo(theSubscriptionRegistrySize);
-		assertThat(mySubscriptionChannelRegistry.size()).isEqualTo(theSubscriptionChannelRegistrySize);
+		assertEquals(theSubscriptionRegistrySize, mySubscriptionRegistry.size());
+		assertEquals(theSubscriptionChannelRegistrySize, mySubscriptionChannelRegistry.size());
 	}
 }

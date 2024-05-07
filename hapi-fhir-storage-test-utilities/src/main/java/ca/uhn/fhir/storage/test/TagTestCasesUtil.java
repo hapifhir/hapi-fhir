@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.storage.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.dao.IFhirSystemDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -110,7 +111,7 @@ public class TagTestCasesUtil {
 		IIdType versionlessPatientId = createOutcome.getId().toVersionless();
 
 		DaoMethodOutcome updateOutcome = updatePatient(versionlessPatientId, theMetaInputOnUpdate);
-		assertThat(updateOutcome.isNop()).isEqualTo(theExpectNop);
+		assertEquals(theExpectNop, updateOutcome.isNop());
 
 		Patient patient = myPatientDao.read(versionlessPatientId, myRequestDetails);
 		verifyMeta(theExpectedMetaAfterUpdate, patient.getMeta());
@@ -133,7 +134,7 @@ public class TagTestCasesUtil {
 
 		Patient patient = myPatientDao.read(theResourceId, myRequestDetails);
 
-		assertThat(patient.getMeta().getVersionId()).isEqualTo(theExpectedVersion);
+		assertEquals(theExpectedVersion, patient.getMeta().getVersionId());
 
 		return patient;
 	}
@@ -282,7 +283,7 @@ public class TagTestCasesUtil {
 
 		IBaseResource resource = updateResourceAndVerifyMeta(metaInputOnCreate,  metaInputOnUpdate, expectedMetaAfterUpdate, false);
 		// expect the resource version to be 2, since the meta is updated
-		assertThat(resource.getMeta().getVersionId()).isEqualTo("2");
+		assertEquals("2", resource.getMeta().getVersionId());
 
 		//ensure version endpoint also returns tags sorted
 		IIdType version2Id = new IdType(String.format("%s/_history/2", resource.getIdElement().toVersionless()));
@@ -307,7 +308,7 @@ public class TagTestCasesUtil {
 	private void verifyMeta(IBaseMetaType theExpectedMeta, IBaseMetaType theActualMeta) {
 		assertCodingsEqualAndInOrder(theExpectedMeta.getTag(), theActualMeta.getTag());
 		assertCodingsEqualAndInOrder(theExpectedMeta.getSecurity(), theActualMeta.getSecurity());
-		assertThat(toStringList(theActualMeta.getProfile())).isEqualTo(toStringList(theExpectedMeta.getProfile()));
+		assertEquals(toStringList(theExpectedMeta.getProfile()), toStringList(theActualMeta.getProfile()));
 	}
 
 	public void setMetaOperationSupported(boolean theMetaOperationSupported) {

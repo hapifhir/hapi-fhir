@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
@@ -43,9 +44,9 @@ public class CustomResourceGenerationTest extends BaseValidationTestWithInlineMo
 		ourLog.info(outcome);
 
 		assertThat(result.getMessages()).hasSize(3);
-		assertThat(result.getMessages().get(0).getMessage()).isEqualTo("Error parsing JSON: the primitive value must be a boolean");
-		assertThat(result.getMessages().get(1).getMessage()).isEqualTo("The property name  must be a JSON Array, not a Primitive property (at CustomResource)");
-		assertThat(result.getMessages().get(2).getMessage()).isEqualTo("Unrecognized property 'id1'");
+		assertEquals("Error parsing JSON: the primitive value must be a boolean", result.getMessages().get(0).getMessage());
+		assertEquals("The property name  must be a JSON Array, not a Primitive property (at CustomResource)", result.getMessages().get(1).getMessage());
+		assertEquals("Unrecognized property 'id1'", result.getMessages().get(2).getMessage());
 
 	}
 

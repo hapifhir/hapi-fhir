@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
@@ -198,7 +199,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 			for (var nextBinaryId : binaryIds) {
 
 				Binary binary = myBinaryDao.read(new IdType(nextBinaryId), mySrd);
-				assertThat(binary.getContentType()).isEqualTo(Constants.CT_FHIR_NDJSON);
+				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
 
 				String nextNdJsonFileContent = new String(binary.getContent(), Constants.CHARSET_UTF8);
 				ourLog.trace("Export job {} file {} contents: {}", theInstanceId, nextBinaryId, nextNdJsonFileContent);
@@ -231,7 +232,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 			assertThat("export doesn't have expected ids", foundIds, not(hasItem(excludedString)));
 		}
 
-		assertThat(jobInfo.getCombinedRecordsProcessed()).isEqualTo(2);
+		assertEquals(2, jobInfo.getCombinedRecordsProcessed());
 
 		ourLog.info("Job {} ok", theInstanceId);
 	}

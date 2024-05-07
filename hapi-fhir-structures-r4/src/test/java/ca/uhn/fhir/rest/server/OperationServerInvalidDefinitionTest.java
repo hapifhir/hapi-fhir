@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.StringDt;
@@ -40,7 +41,7 @@ public class OperationServerInvalidDefinitionTest {
 		try {
 			myRestfulServerExtension.registerProvider(new OperationProvider());
 			fail("");		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-0288: Failure scanning class OperationProvider: HAPI-0360: Incorrect use of type StringDt as return type for method when theContext is for version R4 in method: public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationServerInvalidDefinitionTest$1OperationProvider.mdmMatch(org.hl7.fhir.instance.model.api.IBaseResource)");
+			assertEquals("HAPI-0288: Failure scanning class OperationProvider: HAPI-0360: Incorrect use of type StringDt as return type for method when theContext is for version R4 in method: public org.hl7.fhir.r4.model.Parameters ca.uhn.fhir.rest.server.OperationServerInvalidDefinitionTest$1OperationProvider.mdmMatch(org.hl7.fhir.instance.model.api.IBaseResource)", e.getMessage());
 		}
 
 	}

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -18,7 +19,7 @@ public class NumericParamRangeUtilTest {
 		BigDecimal bd = new BigDecimal(theNumber);
 		System.out.printf("%1$10s %2$2s %3$2s %4$2s %n",
 			theNumber, bd.scale(), bd.precision(), theExpectedSigDigs);
-		assertThat(bd.precision()).isEqualTo(theExpectedSigDigs);
+		assertEquals(theExpectedSigDigs, bd.precision());
 	}
 
 
@@ -34,8 +35,8 @@ public class NumericParamRangeUtilTest {
 			theExpectedRange.getLeft(), theExpectedRange.getRight(),
 			range.getLeft(), range.getRight() );
 
-		assertThat(range.getLeft().doubleValue()).isEqualTo(theExpectedRange.getLeft());
-		assertThat(range.getRight().doubleValue()).isEqualTo(theExpectedRange.getRight());
+		assertEquals(theExpectedRange.getLeft(), range.getLeft().doubleValue());
+		assertEquals(theExpectedRange.getRight(), range.getRight().doubleValue());
 	}
 
 

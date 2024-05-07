@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.tenant;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -58,7 +59,7 @@ public class UrlBaseTenantIdentificationStrategyTest {
 		String actual = ourTenantStrategy.massageServerBaseUrl(BASE_URL, myRequestDetails);
 
 		//then we should see /TENANT1 in the url
-		assertThat(actual).isEqualTo(BASE_URL + "/TENANT1");
+		assertEquals(BASE_URL + "/TENANT1", actual);
 	}
 
 	@Test
@@ -70,7 +71,7 @@ public class UrlBaseTenantIdentificationStrategyTest {
 		String actual = ourTenantStrategy.massageServerBaseUrl(BASE_URL, myRequestDetails);
 
 		//then nothing should happen
-		assertThat(actual).isEqualTo(BASE_URL);
+		assertEquals(BASE_URL, actual);
 	}
 
 	@CsvSource(value = {
@@ -115,7 +116,7 @@ public class UrlBaseTenantIdentificationStrategyTest {
 		ourTenantStrategy.extractTenant(myUrlTokenizer, ourSystemRequestDetails);
 
 		//then we should see that it defaulted to the DEFAULT partition
-		assertThat(ourSystemRequestDetails.getTenantId()).isEqualTo("DEFAULT");
+		assertEquals("DEFAULT", ourSystemRequestDetails.getTenantId());
 	}
 
 	@Test
@@ -127,7 +128,7 @@ public class UrlBaseTenantIdentificationStrategyTest {
 		ourTenantStrategy.extractTenant(myUrlTokenizer, ourSystemRequestDetails);
 
 		//then we should see MYTENANT
-		assertThat(ourSystemRequestDetails.getTenantId()).isEqualTo("MYTENANT");
+		assertEquals("MYTENANT", ourSystemRequestDetails.getTenantId());
 	}
 
 	@Test
@@ -193,6 +194,6 @@ public class UrlBaseTenantIdentificationStrategyTest {
 		ourTenantStrategy.extractTenant(myUrlTokenizer, ourSystemRequestDetails);
 
 		//then we should see that it defaulted to the DEFAULT partition
-		assertThat(ourSystemRequestDetails.getTenantId()).isEqualTo("DEFAULT");
+		assertEquals("DEFAULT", ourSystemRequestDetails.getTenantId());
 	}
 }

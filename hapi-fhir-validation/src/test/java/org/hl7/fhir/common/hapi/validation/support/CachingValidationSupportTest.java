@@ -1,5 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import com.google.common.collect.Lists;
@@ -74,7 +75,7 @@ public class CachingValidationSupportTest {
 		assertThat(fetched.get(0)).isSameAs(sd1);
 		assertThat(responses).hasSize(1);
 
-		assertThat(support.isEnabledValidationForCodingsLogicalAnd()).isEqualTo(theIsEnabledValidationForCodingsLogicalAnd != null && theIsEnabledValidationForCodingsLogicalAnd);
+		assertEquals(theIsEnabledValidationForCodingsLogicalAnd != null && theIsEnabledValidationForCodingsLogicalAnd, support.isEnabledValidationForCodingsLogicalAnd());
 	}
 
 	@ParameterizedTest
@@ -89,14 +90,14 @@ public class CachingValidationSupportTest {
 		final CachingValidationSupport support = getSupport(null, theIsEnabledValidationForCodingsLogicalAnd);
 
 		final byte[] firstActualBinary = support.fetchBinary(EXPECTED_BINARY_KEY);
-		assertThat(firstActualBinary).isEqualTo(EXPECTED_BINARY);
+		assertEquals(EXPECTED_BINARY, firstActualBinary);
 		verify(myValidationSupport, times(1)).fetchBinary(EXPECTED_BINARY_KEY);
 
 		final byte[] secondActualBinary = support.fetchBinary(EXPECTED_BINARY_KEY);
-		assertThat(secondActualBinary).isEqualTo(EXPECTED_BINARY);
+		assertEquals(EXPECTED_BINARY, secondActualBinary);
 		verify(myValidationSupport, times(1)).fetchBinary(EXPECTED_BINARY_KEY);
 
-		assertThat(support.isEnabledValidationForCodingsLogicalAnd()).isEqualTo(theIsEnabledValidationForCodingsLogicalAnd != null && theIsEnabledValidationForCodingsLogicalAnd);
+		assertEquals(theIsEnabledValidationForCodingsLogicalAnd != null && theIsEnabledValidationForCodingsLogicalAnd, support.isEnabledValidationForCodingsLogicalAnd());
 	}
 
 	@Nonnull

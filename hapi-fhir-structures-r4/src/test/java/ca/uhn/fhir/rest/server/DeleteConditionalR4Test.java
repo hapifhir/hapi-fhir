@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -60,7 +61,7 @@ public class DeleteConditionalR4Test {
 
 		assertTrue(ourLastRequestWasDelete);
 		assertNull(ourLastIdParam);
-		assertThat(ourLastConditionalUrl).isEqualTo("Patient?identifier=SOMESYS%7CSOMEID");
+		assertEquals("Patient?identifier=SOMESYS%7CSOMEID", ourLastConditionalUrl);
 
 	}
 

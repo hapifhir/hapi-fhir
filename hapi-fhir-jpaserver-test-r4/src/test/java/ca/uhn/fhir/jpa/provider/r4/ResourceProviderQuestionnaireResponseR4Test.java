@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -91,7 +92,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		spMap.addInclude(QuestionnaireResponse.INCLUDE_QUESTIONNAIRE);
 		spMap.add("_id", new TokenParam("my-questionnaire-response"));
 		IBundleProvider search = myQuestionnaireResponseDao.search(spMap);
-		assertThat(search.size()).isEqualTo(2);
+		assertEquals(2, search.size());
 	}
 
 	@SuppressWarnings("unused")
@@ -164,7 +165,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			.map(Bundle.BundleEntryComponent::getResource)
 			.map(resource -> resource.getIdElement().toUnqualifiedVersionless().toString())
 			.collect(Collectors.toList());
-		assertThat(actualIds).isEqualTo(expectedIds);
+		assertEquals(expectedIds, actualIds);
 	}
 
 	@Test
@@ -216,7 +217,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(ca.uhn.fhir.rest.api.Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/QuestionnaireResponse/");
 			id2 = new IdType(newIdString);
@@ -245,7 +246,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
 			assertThat(responseString).contains("No resource supplied for $validate operation");
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -266,7 +267,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -287,7 +288,7 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
 			assertThat(responseString).contains("Resource has no ID");
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(422);
+			assertEquals(422, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response);
 		}

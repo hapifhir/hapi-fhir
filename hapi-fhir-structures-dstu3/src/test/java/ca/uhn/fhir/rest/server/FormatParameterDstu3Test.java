@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -48,8 +49,8 @@ public class FormatParameterDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(responseContent).isEqualTo(VALUE_XML);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(VALUE_XML, responseContent);
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -68,8 +69,8 @@ public class FormatParameterDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(responseContent).isEqualTo(VALUE_XML);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(VALUE_XML, responseContent);
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -88,8 +89,8 @@ public class FormatParameterDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(responseContent).isEqualTo(VALUE_XML);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(VALUE_XML, responseContent);
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -109,8 +110,8 @@ public class FormatParameterDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(responseContent).isEqualTo(VALUE_XML);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(VALUE_XML, responseContent);
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -129,8 +130,8 @@ public class FormatParameterDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(responseContent).isEqualTo(VALUE_JSON);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(VALUE_JSON, responseContent);
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -149,8 +150,8 @@ public class FormatParameterDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(responseContent).isEqualTo(VALUE_JSON);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(VALUE_JSON, responseContent);
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -169,8 +170,8 @@ public class FormatParameterDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(responseContent).isEqualTo(VALUE_JSON);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(VALUE_JSON, responseContent);
 		} finally {
 			IOUtils.closeQuietly(status);
 		}
@@ -190,8 +191,8 @@ public class FormatParameterDstu3Test {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(responseContent).isEqualTo(VALUE_JSON);
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals(VALUE_JSON, responseContent);
 		} finally {
 			IOUtils.closeQuietly(status);
 		}

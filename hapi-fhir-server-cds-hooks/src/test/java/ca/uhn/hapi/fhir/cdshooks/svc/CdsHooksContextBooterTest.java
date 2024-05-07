@@ -1,5 +1,6 @@
 package ca.uhn.hapi.fhir.cdshooks.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.junit.jupiter.api.BeforeEach;
@@ -33,7 +34,7 @@ class CdsHooksContextBooterTest {
 		// execute
 		final UnprocessableEntityException actual = assertThrows(UnprocessableEntityException.class, () -> myFixture.validateJson("abc"));
 		// validate
-		assertThat(actual.getMessage()).isEqualTo(expected);
+		assertEquals(expected, actual.getMessage());
 	}
 
 	@Test
@@ -43,7 +44,7 @@ class CdsHooksContextBooterTest {
 		// execute
 		final String actual = myFixture.validateJson(expected);
 		// validate
-		assertThat(actual).isEqualTo(expected);
+		assertEquals(expected, actual);
 	}
 
 

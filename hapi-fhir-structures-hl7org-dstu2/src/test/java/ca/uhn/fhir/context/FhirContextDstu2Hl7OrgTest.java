@@ -1,5 +1,6 @@
 package ca.uhn.fhir.context;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -10,7 +11,7 @@ public class FhirContextDstu2Hl7OrgTest {
   @Test
   public void testAutoDetectVersion() {
     FhirContext ctx = new FhirContext();
-		assertThat(ctx.getVersion().getVersion()).isEqualTo(FhirVersionEnum.DSTU2_HL7ORG);
+		assertEquals(FhirVersionEnum.DSTU2_HL7ORG, ctx.getVersion().getVersion());
   }
 
 }

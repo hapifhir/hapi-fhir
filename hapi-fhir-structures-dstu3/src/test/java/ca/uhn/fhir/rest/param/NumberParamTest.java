@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.util.TestUtil;
@@ -17,27 +18,27 @@ public class NumberParamTest {
 	public void testFull() {
 		NumberParam p = new NumberParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "<5.4");
-		assertThat(p.getPrefix()).isEqualTo(ParamPrefixEnum.LESSTHAN);
-		assertThat(p.getValue().toPlainString()).isEqualTo("5.4");
-		assertThat(p.getValueAsQueryToken(ourCtx)).isEqualTo("lt5.4");
+		assertEquals(ParamPrefixEnum.LESSTHAN, p.getPrefix());
+		assertEquals("5.4", p.getValue().toPlainString());
+		assertEquals("lt5.4", p.getValueAsQueryToken(ourCtx));
 	}
 
 	@Test
 	public void testApproximateLegacy() {
 		NumberParam p = new NumberParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "~5.4");
-		assertThat(p.getPrefix()).isEqualTo(ParamPrefixEnum.APPROXIMATE);
-		assertThat(p.getValue().toPlainString()).isEqualTo("5.4");
-		assertThat(p.getValueAsQueryToken(ourCtx)).isEqualTo("ap5.4");
+		assertEquals(ParamPrefixEnum.APPROXIMATE, p.getPrefix());
+		assertEquals("5.4", p.getValue().toPlainString());
+		assertEquals("ap5.4", p.getValueAsQueryToken(ourCtx));
 	}
 
 	@Test
 	public void testApproximate() {
 		NumberParam p = new NumberParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "ap5.4");
-		assertThat(p.getPrefix()).isEqualTo(ParamPrefixEnum.APPROXIMATE);
-		assertThat(p.getValue().toPlainString()).isEqualTo("5.4");
-		assertThat(p.getValueAsQueryToken(ourCtx)).isEqualTo("ap5.4");
+		assertEquals(ParamPrefixEnum.APPROXIMATE, p.getPrefix());
+		assertEquals("5.4", p.getValue().toPlainString());
+		assertEquals("ap5.4", p.getValueAsQueryToken(ourCtx));
 	}
 	
 	@Test
@@ -45,8 +46,8 @@ public class NumberParamTest {
 		NumberParam p = new NumberParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "5.4");
 		assertNull(p.getPrefix());
-		assertThat(p.getValue().toPlainString()).isEqualTo("5.4");
-		assertThat(p.getValueAsQueryToken(ourCtx)).isEqualTo("5.4");
+		assertEquals("5.4", p.getValue().toPlainString());
+		assertEquals("5.4", p.getValueAsQueryToken(ourCtx));
 	}
 
 	
@@ -58,9 +59,9 @@ public class NumberParamTest {
 		NumberParam p = new NumberParam();
 		p.setValueAsQueryToken(ourCtx, null, null, "-5.4");
 		assertNull(p.getPrefix());
-		assertThat(p.getValue().toPlainString()).isEqualTo("-5.4");
-		assertThat(p.getValue()).isEqualTo(new BigDecimal("-5.4"));
-		assertThat(p.getValueAsQueryToken(ourCtx)).isEqualTo("-5.4");
+		assertEquals("-5.4", p.getValue().toPlainString());
+		assertEquals(new BigDecimal("-5.4"), p.getValue());
+		assertEquals("-5.4", p.getValueAsQueryToken(ourCtx));
 	}
 
 

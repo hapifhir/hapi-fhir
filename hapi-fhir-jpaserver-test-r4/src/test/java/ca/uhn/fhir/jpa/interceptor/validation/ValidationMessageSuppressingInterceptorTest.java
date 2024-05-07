@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.interceptor.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -125,7 +126,7 @@ public class ValidationMessageSuppressingInterceptorTest extends BaseResourcePro
 			Encounter encounter = new Encounter();
 			encounter.setSubject(new Reference("Patient/A"));
 			IIdType id = myEncounterDao.create(encounter).getId();
-			assertThat(id.getVersionIdPart()).isEqualTo("1");
+			assertEquals("1", id.getVersionIdPart());
 			fail("");
 		} catch (PreconditionFailedException e) {
 			String encode = encode(e.getOperationOutcome());

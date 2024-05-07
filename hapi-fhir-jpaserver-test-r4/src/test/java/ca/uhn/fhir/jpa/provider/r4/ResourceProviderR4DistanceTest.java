@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -69,7 +70,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.execute();
 
 			assertThat(actual.getEntry()).hasSize(1);
-			assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(locId.getIdPart());
+			assertEquals(locId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 		}
 		{ // Outside the box
 			double tooSmallDistance = CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN / 2;
@@ -112,7 +113,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			.execute();
 
 		assertThat(actual.getEntry()).hasSize(1);
-		assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(prId.getIdPart());
+		assertEquals(prId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
 
 	@Test
@@ -144,7 +145,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			myCaptureQueriesListener.logSelectQueries();
 
 			assertThat(actual.getEntry()).hasSize(1);
-			assertThat(actual.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo(prId.getIdPart());
+			assertEquals(prId.getIdPart(), actual.getEntry().get(0).getResource().getIdElement().getIdPart());
 		}
 
 		{ // Outside the box

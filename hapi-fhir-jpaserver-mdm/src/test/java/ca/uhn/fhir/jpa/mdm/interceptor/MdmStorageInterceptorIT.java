@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -121,7 +122,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myPatientDao.read(goldenPatient.getIdElement().toVersionless());
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getStatusCode()).isEqualTo(Constants.STATUS_HTTP_404_NOT_FOUND);
+			assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, e.getStatusCode());
 		}
 	}
 
@@ -367,7 +368,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doUpdateResource(organization, true);
 			fail("");
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-0764: The HAPI-MDM tag on a resource may not be changed once created.");
+			assertEquals("HAPI-0764: The HAPI-MDM tag on a resource may not be changed once created.", e.getMessage());
 		}
 	}
 
@@ -398,7 +399,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doUpdateResource(patient, true);
 			fail("");
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-0764: The HAPI-MDM tag on a resource may not be changed once created.");
+			assertEquals("HAPI-0764: The HAPI-MDM tag on a resource may not be changed once created.", e.getMessage());
 		}
 	}
 
@@ -433,7 +434,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 		assertNull(mdmTransactionLogMessages.getTransactionGuid());
 
 		List<String> messages = mdmTransactionLogMessages.getValues();
-		assertThat(messages.isEmpty()).isEqualTo(false);
+		assertEquals(false, messages.isEmpty());
 	}
 
 	@Test
@@ -452,7 +453,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 
 		List<CanonicalEID> externalEids = myEIDHelper.getExternalEid(patient);
 		assertThat(externalEids).hasSize(1);
-		assertThat("some_new_eid").isEqualTo(externalEids.get(0).getValue());
+		assertEquals(externalEids.get(0).getValue(), "some_new_eid");
 	}
 
 	@Test
@@ -467,7 +468,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doUpdateResource(jane, true);
 			fail("");
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-0763: While running with EID updates disabled, EIDs may not be updated on source resources");
+			assertEquals("HAPI-0763: While running with EID updates disabled, EIDs may not be updated on source resources", e.getMessage());
 		}
 		setPreventEidUpdates(false);
 	}
@@ -482,7 +483,7 @@ public class MdmStorageInterceptorIT extends BaseMdmR4Test {
 			myMdmHelper.doCreateResource(patient, true);
 			fail("");
 		} catch (ForbiddenOperationException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-0766: While running with multiple EIDs disabled, source resources may have at most one EID.");
+			assertEquals("HAPI-0766: While running with multiple EIDs disabled, source resources may have at most one EID.", e.getMessage());
 		}
 
 		setPreventMultipleEids(false);

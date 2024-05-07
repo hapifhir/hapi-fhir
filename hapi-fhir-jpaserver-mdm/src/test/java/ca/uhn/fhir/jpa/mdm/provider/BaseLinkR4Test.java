@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -49,7 +50,7 @@ public abstract class BaseLinkR4Test extends BaseProviderR4Test {
 		// Tests require our initial link to be a POSSIBLE_MATCH
 		myLink.setMatchResult(MdmMatchResultEnum.POSSIBLE_MATCH);
 		saveLink(myLink);
-		assertThat(myLink.getLinkSource()).isEqualTo(MdmLinkSourceEnum.AUTO);
+		assertEquals(MdmLinkSourceEnum.AUTO, myLink.getLinkSource());
 		myStorageSettings.setExpungeEnabled(true);
 		myStorageSettings.setAllowMultipleDelete(true);
 		myStorageSettings.setDeleteExpungeEnabled(true);

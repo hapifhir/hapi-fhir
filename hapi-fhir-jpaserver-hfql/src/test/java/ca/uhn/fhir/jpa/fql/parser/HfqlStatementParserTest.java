@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.fql.parser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
@@ -28,15 +29,15 @@ public class HfqlStatementParserTest {
 			""";
 
 		HfqlStatement statement = parse(input);
-		assertThat(statement.getFromResourceName()).isEqualTo("Patient");
+		assertEquals("Patient", statement.getFromResourceName());
 		assertThat(statement.getSelectClauses()).hasSize(3);
-		assertThat(statement.getSelectClauses().get(0).getClause()).isEqualTo("*");
-		assertThat(statement.getSelectClauses().get(0).getOperator()).isEqualTo(HfqlStatement.SelectClauseOperator.COUNT);
-		assertThat(statement.getSelectClauses().get(0).getAlias()).isEqualTo("Count(*)");
-		assertThat(statement.getSelectClauses().get(1).getClause()).isEqualTo("name.given");
-		assertThat(statement.getSelectClauses().get(1).getOperator()).isEqualTo(HfqlStatement.SelectClauseOperator.SELECT);
-		assertThat(statement.getSelectClauses().get(2).getClause()).isEqualTo("name.family");
-		assertThat(statement.getSelectClauses().get(2).getOperator()).isEqualTo(HfqlStatement.SelectClauseOperator.SELECT);
+		assertEquals("*", statement.getSelectClauses().get(0).getClause());
+		assertEquals(HfqlStatement.SelectClauseOperator.COUNT, statement.getSelectClauses().get(0).getOperator());
+		assertEquals("Count(*)", statement.getSelectClauses().get(0).getAlias());
+		assertEquals("name.given", statement.getSelectClauses().get(1).getClause());
+		assertEquals(HfqlStatement.SelectClauseOperator.SELECT, statement.getSelectClauses().get(1).getOperator());
+		assertEquals("name.family", statement.getSelectClauses().get(2).getClause());
+		assertEquals(HfqlStatement.SelectClauseOperator.SELECT, statement.getSelectClauses().get(2).getOperator());
 		assertThat(statement.getGroupByClauses()).hasSize(2);
 		assertThat(statement.getGroupByClauses()).containsExactly("name.given", "name.family");
 
@@ -53,13 +54,13 @@ public class HfqlStatementParserTest {
 			""";
 
 		HfqlStatement statement = parse(input);
-		assertThat(statement.getFromResourceName()).isEqualTo("Patient");
+		assertEquals("Patient", statement.getFromResourceName());
 		assertThat(statement.getSelectClauses()).hasSize(2);
-		assertThat(statement.getSelectClauses().get(0).getClause()).isEqualTo("name.given[0]");
-		assertThat(statement.getSelectClauses().get(0).getAlias()).isEqualTo("name.given[0]");
-		assertThat(statement.getSelectClauses().get(0).getOperator()).isEqualTo(HfqlStatement.SelectClauseOperator.SELECT);
-		assertThat(statement.getSelectClauses().get(1).getClause()).isEqualTo("name.family");
-		assertThat(statement.getSelectClauses().get(1).getAlias()).isEqualTo("name.family");
+		assertEquals("name.given[0]", statement.getSelectClauses().get(0).getClause());
+		assertEquals("name.given[0]", statement.getSelectClauses().get(0).getAlias());
+		assertEquals(HfqlStatement.SelectClauseOperator.SELECT, statement.getSelectClauses().get(0).getOperator());
+		assertEquals("name.family", statement.getSelectClauses().get(1).getClause());
+		assertEquals("name.family", statement.getSelectClauses().get(1).getAlias());
 	}
 
 	@Test
@@ -72,15 +73,15 @@ public class HfqlStatementParserTest {
 			""";
 
 		HfqlStatement statement = parse(input);
-		assertThat(statement.getFromResourceName()).isEqualTo("Patient");
+		assertEquals("Patient", statement.getFromResourceName());
 		assertThat(statement.getSelectClauses()).hasSize(1);
-		assertThat(statement.getSelectClauses().get(0).getClause()).isEqualTo("name.given");
-		assertThat(statement.getSelectClauses().get(0).getAlias()).isEqualTo("name.given");
-		assertThat(statement.getSelectClauses().get(0).getOperator()).isEqualTo(HfqlStatement.SelectClauseOperator.SELECT);
+		assertEquals("name.given", statement.getSelectClauses().get(0).getClause());
+		assertEquals("name.given", statement.getSelectClauses().get(0).getAlias());
+		assertEquals(HfqlStatement.SelectClauseOperator.SELECT, statement.getSelectClauses().get(0).getOperator());
 
 		assertThat(statement.getWhereClauses()).hasSize(1);
-		assertThat(statement.getWhereClauses().get(0).getLeft()).isEqualTo("id");
-		assertThat(statement.getWhereClauses().get(0).getOperator()).isEqualTo(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH);
+		assertEquals("id", statement.getWhereClauses().get(0).getLeft());
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH, statement.getWhereClauses().get(0).getOperator());
 		assertThat(statement.getWhereClauses().get(0).getRight()).containsExactly("'name'", "'A,B\\,B'");
 
 	}
@@ -98,23 +99,23 @@ public class HfqlStatementParserTest {
 			""";
 
 		HfqlStatement statement = parse(input);
-		assertThat(statement.getFromResourceName()).isEqualTo("Observation");
+		assertEquals("Observation", statement.getFromResourceName());
 		assertThat(statement.getWhereClauses()).hasSize(3);
 
-		assertThat(statement.getWhereClauses().get(0).getLeft()).isEqualTo("id");
-		assertThat(statement.getWhereClauses().get(0).getOperator()).isEqualTo(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH);
+		assertEquals("id", statement.getWhereClauses().get(0).getLeft());
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH, statement.getWhereClauses().get(0).getOperator());
 		assertThat(statement.getWhereClauses().get(0).getRight()).containsExactly("'value-quantity'", "'lt500'");
 
-		assertThat(statement.getWhereClauses().get(1).getLeft()).isEqualTo("Patient.meta.versionId");
-		assertThat(statement.getWhereClauses().get(1).getOperator()).isEqualTo(HfqlStatement.WhereClauseOperatorEnum.EQUALS);
+		assertEquals("Patient.meta.versionId", statement.getWhereClauses().get(1).getLeft());
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.EQUALS, statement.getWhereClauses().get(1).getOperator());
 		assertThat(statement.getWhereClauses().get(1).getRight()).containsExactly("'2'");
 
-		assertThat(statement.getWhereClauses().get(2).getLeft()).isEqualTo("value.ofType(string).lower().contains('running')");
-		assertThat(statement.getWhereClauses().get(2).getOperator()).isEqualTo(HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN);
+		assertEquals("value.ofType(string).lower().contains('running')", statement.getWhereClauses().get(2).getLeft());
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN, statement.getWhereClauses().get(2).getOperator());
 		assertThat(statement.getWhereClauses().get(2).getRight()).isEmpty();
 
 		assertThat(statement.getOrderByClauses()).hasSize(1);
-		assertThat(statement.getOrderByClauses().get(0).getClause()).isEqualTo("id");
+		assertEquals("id", statement.getOrderByClauses().get(0).getClause());
 		assertFalse(statement.getOrderByClauses().get(0).isAscending());
 	}
 
@@ -130,15 +131,15 @@ public class HfqlStatementParserTest {
 			""";
 
 		HfqlStatement statement = parse(input);
-		assertThat(statement.getFromResourceName()).isEqualTo("Observation");
+		assertEquals("Observation", statement.getFromResourceName());
 		assertThat(statement.getWhereClauses()).hasSize(2);
 
-		assertThat(statement.getWhereClauses().get(0).getLeft()).isEqualTo("id");
-		assertThat(statement.getWhereClauses().get(0).getOperator()).isEqualTo(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH);
+		assertEquals("id", statement.getWhereClauses().get(0).getLeft());
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH, statement.getWhereClauses().get(0).getOperator());
 		assertThat(statement.getWhereClauses().get(0).getRight()).containsExactly("'code'", "'http://loinc.org|34752-6'");
 
-		assertThat(statement.getWhereClauses().get(1).getLeft()).isEqualTo("value.ofType(string).lower().contains('running')");
-		assertThat(statement.getWhereClauses().get(1).getOperator()).isEqualTo(HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN);
+		assertEquals("value.ofType(string).lower().contains('running')", statement.getWhereClauses().get(1).getLeft());
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN, statement.getWhereClauses().get(1).getOperator());
 		assertThat(statement.getWhereClauses().get(1).getRight()).isEmpty();
 	}
 
@@ -153,12 +154,12 @@ public class HfqlStatementParserTest {
 			""";
 
 		HfqlStatement statement = parse(input);
-		assertThat(statement.getFromResourceName()).isEqualTo("Patient");
+		assertEquals("Patient", statement.getFromResourceName());
 		assertThat(statement.getSelectClauses()).hasSize(2);
-		assertThat(statement.getSelectClauses().get(0).getClause()).isEqualTo("name.given[0]");
-		assertThat(statement.getSelectClauses().get(0).getAlias()).isEqualTo("name.given[0]");
-		assertThat(statement.getSelectClauses().get(1).getClause()).isEqualTo("name.family");
-		assertThat(statement.getSelectClauses().get(1).getAlias()).isEqualTo("name.family");
+		assertEquals("name.given[0]", statement.getSelectClauses().get(0).getClause());
+		assertEquals("name.given[0]", statement.getSelectClauses().get(0).getAlias());
+		assertEquals("name.family", statement.getSelectClauses().get(1).getClause());
+		assertEquals("name.family", statement.getSelectClauses().get(1).getAlias());
 	}
 
 	@Test
@@ -169,10 +170,10 @@ public class HfqlStatementParserTest {
 			""";
 
 		HfqlStatement statement = parse(input);
-		assertThat(statement.getFromResourceName()).isEqualTo("Patient");
+		assertEquals("Patient", statement.getFromResourceName());
 		assertThat(statement.getSelectClauses()).hasSize(1);
-		assertThat(statement.getSelectClauses().get(0).getClause()).isEqualTo("Patient.name.given + ' ' + Patient.name.family");
-		assertThat(statement.getSelectClauses().get(0).getAlias()).isEqualTo("FullName");
+		assertEquals("Patient.name.given + ' ' + Patient.name.family", statement.getSelectClauses().get(0).getClause());
+		assertEquals("FullName", statement.getSelectClauses().get(0).getAlias());
 
 	}
 
@@ -188,14 +189,14 @@ public class HfqlStatementParserTest {
 			""";
 
 		HfqlStatement statement = parse(input);
-		assertThat(statement.getFromResourceName()).isEqualTo("Patient");
+		assertEquals("Patient", statement.getFromResourceName());
 		assertThat(statement.getSelectClauses()).hasSize(3);
-		assertThat(statement.getSelectClauses().get(0).getClause()).isEqualTo("identifier[0].system + '|' + identifier[0].value");
-		assertThat(statement.getSelectClauses().get(0).getAlias()).isEqualTo("COL1");
-		assertThat(statement.getSelectClauses().get(1).getClause()).isEqualTo("identifier[0].system + '|' + identifier[0].value");
-		assertThat(statement.getSelectClauses().get(1).getAlias()).isEqualTo("COL2");
-		assertThat(statement.getSelectClauses().get(2).getClause()).isEqualTo("identifier[0].system + '|' + identifier[0].value");
-		assertThat(statement.getSelectClauses().get(2).getAlias()).isEqualTo("identifier[0].system + '|' + identifier[0].value");
+		assertEquals("identifier[0].system + '|' + identifier[0].value", statement.getSelectClauses().get(0).getClause());
+		assertEquals("COL1", statement.getSelectClauses().get(0).getAlias());
+		assertEquals("identifier[0].system + '|' + identifier[0].value", statement.getSelectClauses().get(1).getClause());
+		assertEquals("COL2", statement.getSelectClauses().get(1).getAlias());
+		assertEquals("identifier[0].system + '|' + identifier[0].value", statement.getSelectClauses().get(2).getClause());
+		assertEquals("identifier[0].system + '|' + identifier[0].value", statement.getSelectClauses().get(2).getAlias());
 
 	}
 
@@ -209,14 +210,14 @@ public class HfqlStatementParserTest {
 			""";
 
 		HfqlStatement statement = parse(input);
-		assertThat(statement.getFromResourceName()).isEqualTo("Patient");
+		assertEquals("Patient", statement.getFromResourceName());
 		assertThat(statement.getSelectClauses()).hasSize(3);
-		assertThat(statement.getSelectClauses().get(0).getClause()).isEqualTo("name");
-		assertThat(statement.getSelectClauses().get(0).getAlias()).isEqualTo("name");
-		assertThat(statement.getSelectClauses().get(1).getClause()).isEqualTo("name");
-		assertThat(statement.getSelectClauses().get(1).getAlias()).isEqualTo("name2");
-		assertThat(statement.getSelectClauses().get(2).getClause()).isEqualTo("name");
-		assertThat(statement.getSelectClauses().get(2).getAlias()).isEqualTo("name3");
+		assertEquals("name", statement.getSelectClauses().get(0).getClause());
+		assertEquals("name", statement.getSelectClauses().get(0).getAlias());
+		assertEquals("name", statement.getSelectClauses().get(1).getClause());
+		assertEquals("name2", statement.getSelectClauses().get(1).getAlias());
+		assertEquals("name", statement.getSelectClauses().get(2).getClause());
+		assertEquals("name3", statement.getSelectClauses().get(2).getAlias());
 
 	}
 
@@ -228,10 +229,10 @@ public class HfqlStatementParserTest {
 			""";
 
 		HfqlStatement statement = parse(input);
-		assertThat(statement.getFromResourceName()).isEqualTo("Patient");
+		assertEquals("Patient", statement.getFromResourceName());
 		assertThat(statement.getSelectClauses()).hasSize(1);
-		assertThat(statement.getSelectClauses().get(0).getClause()).isEqualTo("Patient.name.given + ' ' + Patient.name.family");
-		assertThat(statement.getSelectClauses().get(0).getAlias()).isEqualTo("FullName");
+		assertEquals("Patient.name.given + ' ' + Patient.name.family", statement.getSelectClauses().get(0).getClause());
+		assertEquals("FullName", statement.getSelectClauses().get(0).getAlias());
 
 	}
 
@@ -246,9 +247,9 @@ public class HfqlStatementParserTest {
 
 		HfqlStatement statement = parse(input);
 		assertThat(statement.getWhereClauses()).hasSize(1);
-		assertThat(statement.getWhereClauses().get(0).getLeft()).isEqualTo("value.ofType(Quantity).value");
+		assertEquals("value.ofType(Quantity).value", statement.getWhereClauses().get(0).getLeft());
 		assertThat(statement.getWhereClauses().get(0).getRightAsStrings()).containsExactly(">", "100");
-		assertThat(statement.getWhereClauses().get(0).getOperator()).isEqualTo(HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN);
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.UNARY_BOOLEAN, statement.getWhereClauses().get(0).getOperator());
 	}
 
 	@Test
@@ -262,9 +263,9 @@ public class HfqlStatementParserTest {
 		HfqlStatement statement = parse(input);
 		assertThat(statement.getSelectClauses().stream().map(t -> t.getAlias()).collect(Collectors.toList())).containsExactly("id", "name.family");
 		assertThat(statement.getOrderByClauses()).hasSize(2);
-		assertThat(statement.getOrderByClauses().get(0).getClause()).isEqualTo("name.family");
+		assertEquals("name.family", statement.getOrderByClauses().get(0).getClause());
 		assertTrue(statement.getOrderByClauses().get(0).isAscending());
-		assertThat(statement.getOrderByClauses().get(1).getClause()).isEqualTo("count(*)");
+		assertEquals("count(*)", statement.getOrderByClauses().get(1).getClause());
 		assertTrue(statement.getOrderByClauses().get(1).isAscending());
 	}
 
@@ -279,9 +280,9 @@ public class HfqlStatementParserTest {
 		HfqlStatement statement = parse(input);
 		assertThat(statement.getSelectClauses().stream().map(t -> t.getAlias()).collect(Collectors.toList())).containsExactly("id", "name.family");
 		assertThat(statement.getOrderByClauses()).hasSize(2);
-		assertThat(statement.getOrderByClauses().get(0).getClause()).isEqualTo("name.family");
+		assertEquals("name.family", statement.getOrderByClauses().get(0).getClause());
 		assertFalse(statement.getOrderByClauses().get(0).isAscending());
-		assertThat(statement.getOrderByClauses().get(1).getClause()).isEqualTo("id");
+		assertEquals("id", statement.getOrderByClauses().get(1).getClause());
 		assertTrue(statement.getOrderByClauses().get(1).isAscending());
 	}
 
@@ -303,17 +304,17 @@ public class HfqlStatementParserTest {
 			""";
 
 		HfqlStatement statement = parse(input);
-		assertThat(statement.getFromResourceName()).isEqualTo("Patient");
+		assertEquals("Patient", statement.getFromResourceName());
 		assertThat(statement.getSelectClauses()).hasSize(2);
-		assertThat(statement.getSelectClauses().get(0).getClause()).isEqualTo("name.given[0]");
-		assertThat(statement.getSelectClauses().get(1).getClause()).isEqualTo("name.family");
+		assertEquals("name.given[0]", statement.getSelectClauses().get(0).getClause());
+		assertEquals("name.family", statement.getSelectClauses().get(1).getClause());
 		assertThat(statement.getWhereClauses()).hasSize(2);
-		assertThat(statement.getWhereClauses().get(0).getLeft()).isEqualTo("name.given");
-		assertThat(statement.getWhereClauses().get(0).getOperator()).isEqualTo(HfqlStatement.WhereClauseOperatorEnum.EQUALS);
+		assertEquals("name.given", statement.getWhereClauses().get(0).getLeft());
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.EQUALS, statement.getWhereClauses().get(0).getOperator());
 		assertThat(statement.getWhereClauses().get(0).getRight()).containsExactly("'Foo ' Chalmers'");
-		assertThat(statement.getWhereClauses().get(1).getLeft()).isEqualTo("name.family");
+		assertEquals("name.family", statement.getWhereClauses().get(1).getLeft());
 		assertThat(statement.getWhereClauses().get(1).getRight()).containsExactly("'blah'");
-		assertThat(statement.getWhereClauses().get(1).getOperator()).isEqualTo(HfqlStatement.WhereClauseOperatorEnum.EQUALS);
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.EQUALS, statement.getWhereClauses().get(1).getOperator());
 	}
 
 	@Test
@@ -332,18 +333,18 @@ public class HfqlStatementParserTest {
 			""";
 
 		HfqlStatement statement = parse(input);
-		assertThat(statement.getFromResourceName()).isEqualTo("Observation");
+		assertEquals("Observation", statement.getFromResourceName());
 		assertThat(statement.getSelectClauses()).hasSize(1);
-		assertThat(statement.getSelectClauses().get(0).getClause()).isEqualTo("id");
+		assertEquals("id", statement.getSelectClauses().get(0).getClause());
 		assertThat(statement.getWhereClauses()).hasSize(3);
-		assertThat(statement.getWhereClauses().get(0).getLeft()).isEqualTo("subject.name");
-		assertThat(statement.getWhereClauses().get(0).getOperator()).isEqualTo(HfqlStatement.WhereClauseOperatorEnum.IN);
+		assertEquals("subject.name", statement.getWhereClauses().get(0).getLeft());
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.IN, statement.getWhereClauses().get(0).getOperator());
 		assertThat(statement.getWhereClauses().get(0).getRight()).containsExactly("'foo'", "'bar'");
-		assertThat(statement.getWhereClauses().get(1).getLeft()).isEqualTo("id");
-		assertThat(statement.getWhereClauses().get(1).getOperator()).isEqualTo(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH);
+		assertEquals("id", statement.getWhereClauses().get(1).getLeft());
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH, statement.getWhereClauses().get(1).getOperator());
 		assertThat(statement.getWhereClauses().get(1).getRight()).containsExactly("'_id'", "'123'");
-		assertThat(statement.getWhereClauses().get(2).getLeft()).isEqualTo("status");
-		assertThat(statement.getWhereClauses().get(2).getOperator()).isEqualTo(HfqlStatement.WhereClauseOperatorEnum.EQUALS);
+		assertEquals("status", statement.getWhereClauses().get(2).getLeft());
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.EQUALS, statement.getWhereClauses().get(2).getOperator());
 		assertThat(statement.getWhereClauses().get(2).getRight()).containsExactly("'final'");
 
 	}
@@ -360,12 +361,12 @@ public class HfqlStatementParserTest {
 			""";
 
 		HfqlStatement statement = parse(input);
-		assertThat(statement.getFromResourceName()).isEqualTo("Observation");
+		assertEquals("Observation", statement.getFromResourceName());
 		assertThat(statement.getSelectClauses()).hasSize(1);
-		assertThat(statement.getSelectClauses().get(0).getClause()).isEqualTo("id");
+		assertEquals("id", statement.getSelectClauses().get(0).getClause());
 		assertThat(statement.getWhereClauses()).hasSize(1);
-		assertThat(statement.getWhereClauses().get(0).getLeft()).isEqualTo("id");
-		assertThat(statement.getWhereClauses().get(0).getOperator()).isEqualTo(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH);
+		assertEquals("id", statement.getWhereClauses().get(0).getLeft());
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH, statement.getWhereClauses().get(0).getOperator());
 		assertThat(statement.getWhereClauses().get(0).getRight()).containsExactly("'_has:Observation:subject:device.identifier'", "'1234-5'");
 
 	}
@@ -387,20 +388,20 @@ public class HfqlStatementParserTest {
 			""";
 
 		HfqlStatement statement = parse(input);
-		assertThat(statement.getFromResourceName()).isEqualTo("Observation");
+		assertEquals("Observation", statement.getFromResourceName());
 		assertThat(statement.getSelectClauses()).hasSize(1);
-		assertThat(statement.getSelectClauses().get(0).getClause()).isEqualTo("id");
+		assertEquals("id", statement.getSelectClauses().get(0).getClause());
 		assertThat(statement.getWhereClauses()).hasSize(3);
-		assertThat(statement.getWhereClauses().get(0).getLeft()).isEqualTo("id");
-		assertThat(statement.getWhereClauses().get(0).getOperator()).isEqualTo(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH);
+		assertEquals("id", statement.getWhereClauses().get(0).getLeft());
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH, statement.getWhereClauses().get(0).getOperator());
 		assertThat(statement.getWhereClauses().get(0).getRight()).containsExactly("'subject.name'", "'foo'", "'bar'");
-		assertThat(statement.getWhereClauses().get(1).getLeft()).isEqualTo("id");
-		assertThat(statement.getWhereClauses().get(1).getOperator()).isEqualTo(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH);
+		assertEquals("id", statement.getWhereClauses().get(1).getLeft());
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH, statement.getWhereClauses().get(1).getOperator());
 		assertThat(statement.getWhereClauses().get(1).getRight()).containsExactly("'_id'", "'123'");
-		assertThat(statement.getWhereClauses().get(2).getLeft()).isEqualTo("id");
-		assertThat(statement.getWhereClauses().get(2).getOperator()).isEqualTo(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH);
+		assertEquals("id", statement.getWhereClauses().get(2).getLeft());
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH, statement.getWhereClauses().get(2).getOperator());
 		assertThat(statement.getWhereClauses().get(2).getRight()).containsExactly("'status'", "'final'");
-		assertThat(statement.getLimit()).isEqualTo(123);
+		assertEquals(123, statement.getLimit());
 	}
 
 	@Test
@@ -413,12 +414,12 @@ public class HfqlStatementParserTest {
 			""";
 
 		HfqlStatement statement = parse(input);
-		assertThat(statement.getFromResourceName()).isEqualTo("Observation");
+		assertEquals("Observation", statement.getFromResourceName());
 		assertThat(statement.getSelectClauses()).hasSize(2);
-		assertThat(statement.getSelectClauses().get(0).getClause()).isEqualTo("value.ofType(Quantity).value");
-		assertThat(statement.getSelectClauses().get(0).getAlias()).isEqualTo("Weight");
-		assertThat(statement.getSelectClauses().get(1).getClause()).isEqualTo("value.ofType(Quantity).unit");
-		assertThat(statement.getSelectClauses().get(1).getAlias()).isEqualTo("Unit");
+		assertEquals("value.ofType(Quantity).value", statement.getSelectClauses().get(0).getClause());
+		assertEquals("Weight", statement.getSelectClauses().get(0).getAlias());
+		assertEquals("value.ofType(Quantity).unit", statement.getSelectClauses().get(1).getClause());
+		assertEquals("Unit", statement.getSelectClauses().get(1).getAlias());
 
 	}
 
@@ -436,15 +437,15 @@ public class HfqlStatementParserTest {
 			    URL:url
 			""";
 		HfqlStatement statement = parse(input);
-		assertThat(statement.getFromResourceName()).isEqualTo("StructureDefinition");
+		assertEquals("StructureDefinition", statement.getFromResourceName());
 		assertThat(statement.getSelectClauses()).hasSize(2);
-		assertThat(statement.getSelectClauses().get(0).getClause()).isEqualTo("name");
-		assertThat(statement.getSelectClauses().get(0).getAlias()).isEqualTo("Name");
-		assertThat(statement.getSelectClauses().get(1).getClause()).isEqualTo("url");
-		assertThat(statement.getSelectClauses().get(1).getAlias()).isEqualTo("URL");
+		assertEquals("name", statement.getSelectClauses().get(0).getClause());
+		assertEquals("Name", statement.getSelectClauses().get(0).getAlias());
+		assertEquals("url", statement.getSelectClauses().get(1).getClause());
+		assertEquals("URL", statement.getSelectClauses().get(1).getAlias());
 		assertThat(statement.getWhereClauses()).hasSize(1);
-		assertThat(statement.getWhereClauses().get(0).getLeft()).isEqualTo("id");
-		assertThat(statement.getWhereClauses().get(0).getOperator()).isEqualTo(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH);
+		assertEquals("id", statement.getWhereClauses().get(0).getLeft());
+		assertEquals(HfqlStatement.WhereClauseOperatorEnum.SEARCH_MATCH, statement.getWhereClauses().get(0).getOperator());
 		assertThat(statement.getWhereClauses().get(0).getRight()).containsExactly("'url'", "'foo'", "'bar'");
 
 	}
@@ -454,7 +455,7 @@ public class HfqlStatementParserTest {
 		String input = """
 			blah""";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertThat(ex.getMessage()).isEqualTo("Unexpected token (expected \"SELECT\") at position [line=0, column=0]: blah");
+		assertEquals("Unexpected token (expected \"SELECT\") at position [line=0, column=0]: blah", ex.getMessage());
 	}
 
 	@Test
@@ -464,7 +465,7 @@ public class HfqlStatementParserTest {
 			FROM Patient
 			""";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertThat(ex.getMessage()).isEqualTo("HAPI-2414: Duplicate SELECT column alias: id");
+		assertEquals("HAPI-2414: Duplicate SELECT column alias: id", ex.getMessage());
 	}
 
 	@Test
@@ -475,7 +476,7 @@ public class HfqlStatementParserTest {
 			order foo
 			""";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertThat(ex.getMessage()).isEqualTo("Unexpected token (expected \"BY\") at position [line=2, column=6]: foo");
+		assertEquals("Unexpected token (expected \"BY\") at position [line=2, column=6]: foo", ex.getMessage());
 	}
 
 	@Test
@@ -483,7 +484,7 @@ public class HfqlStatementParserTest {
 		String input = """
 			from Blah""";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertThat(ex.getMessage()).isEqualTo("Invalid FROM statement. Unknown resource type 'Blah' at position: [line=0, column=5]");
+		assertEquals("Invalid FROM statement. Unknown resource type 'Blah' at position: [line=0, column=5]", ex.getMessage());
 	}
 
 	@Test
@@ -494,7 +495,7 @@ public class HfqlStatementParserTest {
 			limit foo
 			""";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertThat(ex.getMessage()).isEqualTo("Unexpected token (expected integer value) at position [line=2, column=6]: foo");
+		assertEquals("Unexpected token (expected integer value) at position [line=2, column=6]: foo", ex.getMessage());
 	}
 
 	@Test
@@ -506,7 +507,7 @@ public class HfqlStatementParserTest {
 				  name.given = ('Foo')
 			""";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertThat(ex.getMessage()).isEqualTo("Unexpected token (expected quoted string) at position [line=3, column=3]: (");
+		assertEquals("Unexpected token (expected quoted string) at position [line=3, column=3]: (", ex.getMessage());
 	}
 
 	@Test
@@ -518,7 +519,7 @@ public class HfqlStatementParserTest {
 				  name.given in 'Foo'
 			""";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertThat(ex.getMessage()).isEqualTo("Unexpected token (expected \"(\") at position [line=3, column=14]: in");
+		assertEquals("Unexpected token (expected \"(\") at position [line=3, column=14]: in", ex.getMessage());
 	}
 
 	@Test
@@ -530,7 +531,7 @@ public class HfqlStatementParserTest {
 				  name.given in ('foo' 'bar')
 			""";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertThat(ex.getMessage()).isEqualTo("Unexpected token at position [line=3, column=22]: 'bar'");
+		assertEquals("Unexpected token at position [line=3, column=22]: 'bar'", ex.getMessage());
 	}
 
 	@Test
@@ -542,7 +543,7 @@ public class HfqlStatementParserTest {
 				  name.given in
 			""";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertThat(ex.getMessage()).isEqualTo("Unexpected end of stream");
+		assertEquals("Unexpected end of stream", ex.getMessage());
 	}
 
 	@Test
@@ -554,7 +555,7 @@ public class HfqlStatementParserTest {
 				  name.given in ('foo' | 'bar'
 			""";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertThat(ex.getMessage()).isEqualTo("Unexpected end of stream");
+		assertEquals("Unexpected end of stream", ex.getMessage());
 	}
 
 	@Test
@@ -572,7 +573,7 @@ public class HfqlStatementParserTest {
 			""";
 
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertThat(ex.getMessage()).isEqualTo("Unexpected token at position [line=4, column=0]: where");
+		assertEquals("Unexpected token at position [line=4, column=0]: where", ex.getMessage());
 	}
 
 	@Test
@@ -588,14 +589,14 @@ public class HfqlStatementParserTest {
 			""";
 
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertThat(ex.getMessage()).isEqualTo("Unexpected token at position [line=5, column=0]: from");
+		assertEquals("Unexpected token at position [line=5, column=0]: from", ex.getMessage());
 	}
 
 	@Test
 	public void testError_NoText() {
 		String input = "  \n  ";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertThat(ex.getMessage()).isEqualTo("Unexpected end of stream (expected \"FROM\")");
+		assertEquals("Unexpected end of stream (expected \"FROM\")", ex.getMessage());
 	}
 
 	@Test
@@ -603,7 +604,7 @@ public class HfqlStatementParserTest {
 		String input = """
 			from Patient where""";
 		DataFormatException ex = assertThrows(DataFormatException.class, () -> parse(input));
-		assertThat(ex.getMessage()).isEqualTo("Unexpected end of stream (expected \"SELECT\")");
+		assertEquals("Unexpected end of stream (expected \"SELECT\")", ex.getMessage());
 	}
 
 }

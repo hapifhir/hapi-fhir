@@ -1826,7 +1826,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 
         IIdType patientId = null;
         for (Bundle.BundleEntryComponent entry : responseBundle.getEntry()) {
-			assertThat(entry.getResponse().getStatus()).isEqualTo("201 Created");
+			assertEquals("201 Created", entry.getResponse().getStatus());
             if (entry.getResponse().getLocation().contains("Patient")) {
                 patientId = new IdType(entry.getResponse().getLocation());
             }
@@ -1874,7 +1874,7 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
         HttpGet get = new HttpGet(myClient.getServerBase() + "/" + patientId + "/$everything?_format=json");
         CloseableHttpResponse resp = ourHttpClient.execute(get);
         try {
-			assertThat(resp.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", "")).isEqualTo(EncodingEnum.JSON.getResourceContentTypeNonLegacy());
+			assertEquals(EncodingEnum.JSON.getResourceContentTypeNonLegacy(), resp.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().replaceAll(";.*", ""));
             bundle = EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8));
         } finally {
             IOUtils.closeQuietly(resp);

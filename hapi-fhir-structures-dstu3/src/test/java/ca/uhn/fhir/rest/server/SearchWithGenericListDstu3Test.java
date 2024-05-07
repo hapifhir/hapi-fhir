@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
@@ -55,8 +56,8 @@ public class SearchWithGenericListDstu3Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(responseContent);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-		assertThat(ourLastMethod).isEqualTo("searchByIdentifier");
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertEquals("searchByIdentifier", ourLastMethod);
 		assertThat(responseContent).contains("<family value=\"FAMILY\"");
 		assertThat(responseContent).contains("<fullUrl value=\"" + ourServer.getBaseUrl() + "/Patient/1\"/>");
 	}

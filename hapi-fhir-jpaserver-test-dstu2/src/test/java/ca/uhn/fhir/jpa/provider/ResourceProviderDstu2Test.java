@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -157,7 +158,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	private void checkParamMissing(String paramName) throws IOException {
 		HttpGet get = new HttpGet(myServerBase + "/Observation?" + paramName + ":missing=false");
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 		}
 	}
 
@@ -194,7 +195,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.where(new NumberClientParam("future-appointment-count").greaterThan().number(1))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(1).isEqualTo(futureAppointmentCountBundle2.getTotal().intValue());
+		assertEquals(futureAppointmentCountBundle2.getTotal().intValue(), 1);
 
 		Bundle futureAppointmentCountBundle3 = myClient
 			.search()
@@ -202,7 +203,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.where(new NumberClientParam("future-appointment-count").exactly().number(2))
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(1).isEqualTo(futureAppointmentCountBundle3.getTotal().intValue());
+		assertEquals(futureAppointmentCountBundle3.getTotal().intValue(), 1);
 
 	}
 
@@ -316,7 +317,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.totalMode(SearchTotalModeEnum.ACCURATE)
 			.returnBundle(Bundle.class)
 			.execute();
-		assertThat(found.getTotalElement().getValue().intValue()).isEqualTo(100);
+		assertEquals(100, found.getTotalElement().getValue().intValue());
 		assertThat(found.getEntry()).hasSize(10);
 
 		found = myClient
@@ -345,7 +346,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		IIdType resource = myClient.create().resource(binary).execute().getId();
 
 		Binary fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
-		assertThat(fromDB.getId().getVersionIdPart()).isEqualTo("1");
+		assertEquals("1", fromDB.getId().getVersionIdPart());
 
 		arr[0] = 2;
 		binary.setContent(arr);
@@ -353,14 +354,14 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		putRequest.setEntity(new ByteArrayEntity(arr, ContentType.parse("dansk")));
 		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
 		try {
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(resp.getFirstHeader("Content-Location").getValue()).isEqualTo(resource.withVersion("2").getValue());
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertEquals(resource.withVersion("2").getValue(), resp.getFirstHeader("Content-Location").getValue());
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
 
 		fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
-		assertThat(fromDB.getId().getVersionIdPart()).isEqualTo("2");
+		assertEquals("2", fromDB.getId().getVersionIdPart());
 
 		arr[0] = 3;
 		fromDB.setContent(arr);
@@ -369,14 +370,14 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
 		resp = ourHttpClient.execute(putRequest);
 		try {
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(resp.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()).isEqualTo(resource.withVersion("3").getValue());
+			assertEquals(200, resp.getStatusLine().getStatusCode());
+			assertEquals(resource.withVersion("3").getValue(), resp.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
 
 		fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
-		assertThat(fromDB.getId().getVersionIdPart()).isEqualTo("3");
+		assertEquals("3", fromDB.getId().getVersionIdPart());
 
 		// Now an update with the wrong ID in the body
 
@@ -388,13 +389,13 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
 		resp = ourHttpClient.execute(putRequest);
 		try {
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, resp.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(resp);
 		}
 
 		fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
-		assertThat(fromDB.getId().getVersionIdPart()).isEqualTo("3");
+		assertEquals("3", fromDB.getId().getVersionIdPart());
 
 	}
 
@@ -412,7 +413,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		IdDt id;
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdDt(newIdString);
@@ -425,9 +426,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		post.addHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName);
 		response = ourHttpClient.execute(post);
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString).isEqualTo(id.getValue()); // version should match for conditional create
+			assertEquals(id.getValue(), newIdString); // version should match for conditional create
 		} finally {
 			response.close();
 		}
@@ -447,7 +448,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		IdDt id;
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdDt(newIdString);
@@ -458,7 +459,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		IdDt id2;
 		response = ourHttpClient.execute(post);
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id2 = new IdDt(newIdString);
@@ -474,7 +475,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 //			.execute().getId();
 //		//@formatter:on
 
-		assertThat(id2.getValue()).isEqualTo(id.getValue());
+		assertEquals(id.getValue(), id2.getValue());
 	}
 
 	@Test
@@ -486,7 +487,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertEquals(201, response.getStatusLine().getStatusCode());
 			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response.toString());
 			ourLog.debug(respString);
@@ -509,7 +510,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertEquals(201, response.getStatusLine().getStatusCode());
 			String respString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response.toString());
 			ourLog.debug(respString);
@@ -531,9 +532,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseString);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)");
+			assertEquals(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
 		} finally {
 			response.getEntity().getContent().close();
 			response.close();
@@ -574,8 +575,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		p.setId(methodName);
 
 		IIdType optId = myClient.update().resource(p).execute().getId();
-		assertThat(optId.getIdPart()).isEqualTo(methodName);
-		assertThat(optId.getVersionIdPart()).isEqualTo("1");
+		assertEquals(methodName, optId.getIdPart());
+		assertEquals("1", optId.getVersionIdPart());
 	}
 
 	@Test
@@ -610,7 +611,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		assertThat(res.getEntry()).hasSize(3);
 		assertThat(BundleUtil.toListOfResourcesOfType(myFhirContext, res, Encounter.class)).hasSize(1);
-		assertThat(BundleUtil.toListOfResourcesOfType(myFhirContext, res, Encounter.class).get(0).getIdElement().toUnqualifiedVersionless()).isEqualTo(e1id.toUnqualifiedVersionless());
+		assertEquals(e1id.toUnqualifiedVersionless(), BundleUtil.toListOfResourcesOfType(myFhirContext, res, Encounter.class).get(0).getIdElement().toUnqualifiedVersionless());
 
 	}
 
@@ -640,7 +641,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			//@formatter:on
 			fail("");
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 412 Precondition Failed: " + Msg.code(962) + "Failed to DELETE resource with match URL \"Patient?identifier=testDeleteConditionalMultiple\" because this search matched 2 resources");
+			assertEquals("HTTP 412 Precondition Failed: " + Msg.code(962) + "Failed to DELETE resource with match URL \"Patient?identifier=testDeleteConditionalMultiple\" because this search matched 2 resources", e.getMessage());
 		}
 
 		// Not deleted yet..
@@ -678,7 +679,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseString);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, response.getStatusLine().getStatusCode());
 			assertThat(responseString).contains("Can not perform delete, no ID provided");
 		} finally {
 			response.close();
@@ -698,7 +699,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		IdDt id;
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdDt(newIdString);
@@ -709,7 +710,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		HttpDelete delete = new HttpDelete(myServerBase + "/Patient?name=" + methodName);
 		response = ourHttpClient.execute(delete);
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 		} finally {
 			response.close();
 		}
@@ -718,7 +719,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		response = ourHttpClient.execute(read);
 		try {
 			ourLog.info(response.toString());
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_410_GONE);
+			assertEquals(Constants.STATUS_HTTP_410_GONE, response.getStatusLine().getStatusCode());
 		} finally {
 			response.close();
 		}
@@ -742,7 +743,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		IdDt id;
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdDt(newIdString);
@@ -785,7 +786,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		response = ourHttpClient.execute(read);
 		try {
 			ourLog.info(response.toString());
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_410_GONE);
+			assertEquals(Constants.STATUS_HTTP_410_GONE, response.getStatusLine().getStatusCode());
 		} finally {
 			response.close();
 		}
@@ -820,7 +821,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.getEntry()
 			.size();
 
-		assertThat(newSize - initialSize).isEqualTo(1);
+		assertEquals(1, newSize - initialSize);
 
 	}
 
@@ -853,7 +854,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.getEntry()
 			.size();
 
-		assertThat(newSize - initialSize).isEqualTo(1);
+		assertEquals(1, newSize - initialSize);
 
 	}
 
@@ -883,7 +884,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.getEntry()
 			.size();
 
-		assertThat(newSize - initialSize).isEqualTo(1);
+		assertEquals(1, newSize - initialSize);
 
 	}
 
@@ -1087,7 +1088,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		ourLog.info("Created: " + ids.toString());
 
 		IdDt patientId = new IdDt(resp.getEntry().get(0).getResponse().getLocation());
-		assertThat(patientId.getResourceType()).isEqualTo("Patient");
+		assertEquals("Patient", patientId.getResourceType());
 
 		{
 			Parameters output = myClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
@@ -1175,7 +1176,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		IdDt patientId = new IdDt(resp.getEntry().get(0).getResponse().getLocation());
-		assertThat(patientId.getResourceType()).isEqualTo("Patient");
+		assertEquals("Patient", patientId.getResourceType());
 
 		Parameters output = myClient.operation().onInstance(patientId).named("everything").withNoParameters(Parameters.class).execute();
 		b = (ca.uhn.fhir.model.dstu2.resource.Bundle) output.getParameterFirstRep().getResource();
@@ -1308,7 +1309,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		HttpGet get = new HttpGet(myServerBase + "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantDt(new Date(time1)).getValueAsString());
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			ourLog.info(output);
@@ -1323,7 +1324,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			+ new InstantDt(new Date(time3)).getValueAsString());
 		response = ourHttpClient.execute(get);
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			ourLog.info(output);
@@ -1441,7 +1442,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		HttpGet get = new HttpGet(myServerBase + "/$get-resource-counts");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			ourLog.info(output);
@@ -1465,14 +1466,14 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		ca.uhn.fhir.model.dstu2.resource.Bundle history = myClient.history().onInstance(id).andReturnBundle(ca.uhn.fhir.model.dstu2.resource.Bundle.class).prettyPrint().summaryMode(SummaryEnum.DATA)
 			.execute();
 		assertThat(history.getEntry()).hasSize(3);
-		assertThat(history.getEntry().get(0).getResource().getId()).isEqualTo(id.withVersion("3"));
+		assertEquals(id.withVersion("3"), history.getEntry().get(0).getResource().getId());
 		assertThat(((Patient) history.getEntry().get(0).getResource()).getName()).hasSize(1);
 
-		assertThat(history.getEntry().get(1).getResource().getId()).isEqualTo(id.withVersion("2"));
-		assertThat(history.getEntry().get(1).getRequest().getMethodElement().getValueAsEnum()).isEqualTo(HTTPVerbEnum.DELETE);
+		assertEquals(id.withVersion("2"), history.getEntry().get(1).getResource().getId());
+		assertEquals(HTTPVerbEnum.DELETE, history.getEntry().get(1).getRequest().getMethodElement().getValueAsEnum());
 		assertThat(((Patient) history.getEntry().get(1).getResource()).getName()).isEmpty();
 
-		assertThat(history.getEntry().get(2).getResource().getId()).isEqualTo(id.withVersion("1"));
+		assertEquals(id.withVersion("1"), history.getEntry().get(2).getResource().getId());
 		assertThat(((Patient) history.getEntry().get(2).getResource()).getName()).hasSize(1);
 	}
 
@@ -1502,7 +1503,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.getEntry()
 			.size();
 
-		assertThat(newSize - initialSize).isEqualTo(1);
+		assertEquals(1, newSize - initialSize);
 
 	}
 
@@ -1530,7 +1531,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, response.getStatusLine().getStatusCode());
 			assertThat(output).contains("Input contains no parameter with name 'meta'");
 		} finally {
 			response.close();
@@ -1542,7 +1543,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String output = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(output);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, response.getStatusLine().getStatusCode());
 			assertThat(output).contains("Input contains no parameter with name 'meta'");
 		} finally {
 			response.close();
@@ -1580,7 +1581,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(resp).contains("THIS IS THE DESC");
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
@@ -1641,7 +1642,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		response = myClient.fetchResourceFromUrl(ca.uhn.fhir.model.dstu2.resource.Bundle.class, nextUrl);
 
 		assertThat(response.getEntry()).hasSize(1);
-		assertThat(response.getTotal().intValue()).isEqualTo(21);
+		assertEquals(21, response.getTotal().intValue());
 		assertNull(response.getLink("next"));
 	}
 
@@ -1725,7 +1726,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.encodedXml()
 				.execute();
 			assertThat(returned.getEntry().size()).isGreaterThan(1);
-			assertThat(returned.getTypeElement().getValueAsEnum()).isEqualTo(ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum.SEARCH_RESULTS);
+			assertEquals(ca.uhn.fhir.model.dstu2.valueset.BundleTypeEnum.SEARCH_RESULTS, returned.getTypeElement().getValueAsEnum());
 		}
 		{
 			Bundle returned = myClient
@@ -1748,7 +1749,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		IIdType newId = myClient.create().resource(p1).encodedJson().execute().getId();
 
 		Patient actual = myClient.read().resource(Patient.class).withId(newId).encodedJson().execute();
-		assertThat(actual.getText().getDiv().getValueAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO WORLD</div>");
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
 	}
 
 	@Test
@@ -1761,7 +1762,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		IIdType newId = myClient.create().resource(p1).encodedXml().execute().getId();
 
 		Patient actual = myClient.read().resource(Patient.class).withId(newId).encodedXml().execute();
-		assertThat(actual.getText().getDiv().getValueAsString()).isEqualTo("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO WORLD</div>");
+		assertEquals("<div xmlns=\"http://www.w3.org/1999/xhtml\">HELLO WORLD</div>", actual.getText().getDiv().getValueAsString());
 	}
 
 	@Test
@@ -1809,7 +1810,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String text = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(text);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_200_OK);
+			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
 			assertThat(text).doesNotContain("\"text\",\"type\"");
 		} finally {
 			response.close();
@@ -1866,9 +1867,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		//@formatter:on
 
 		assertThat(actual.getEntry()).hasSize(1);
-		assertThat(actual.getEntry().get(0).getFullUrl()).isEqualTo(myServerBase + "/Patient/" + p1Id.getIdPart());
-		assertThat(actual.getEntry().get(0).getResource().getId().getIdPart()).isEqualTo(p1Id.getIdPart());
-		assertThat(actual.getEntry().get(0).getSearch().getModeElement().getValueAsEnum()).isEqualTo(SearchEntryModeEnum.MATCH);
+		assertEquals(myServerBase + "/Patient/" + p1Id.getIdPart(), actual.getEntry().get(0).getFullUrl());
+		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getId().getIdPart());
+		assertEquals(SearchEntryModeEnum.MATCH, actual.getEntry().get(0).getSearch().getModeElement().getValueAsEnum());
 	}
 
 	@Test
@@ -1887,7 +1888,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		assertThat(actual.getEntry()).hasSize(1);
-		assertThat(actual.getEntry().get(0).getResource().getId().getIdPart()).isEqualTo(p1Id.getIdPart());
+		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getId().getIdPart());
 
 	}
 
@@ -1951,7 +1952,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		assertThat(actual.getEntry()).hasSize(1);
-		assertThat(actual.getEntry().get(0).getResource().getId().getIdPart()).isEqualTo(p1Id.getIdPart());
+		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getId().getIdPart());
 
 		actual = myClient
 			.search()
@@ -1962,7 +1963,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.returnBundle(Bundle.class)
 			.execute();
 		assertThat(actual.getEntry()).hasSize(1);
-		assertThat(actual.getEntry().get(0).getResource().getId().getIdPart()).isEqualTo(p1Id.getIdPart());
+		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getId().getIdPart());
 
 	}
 
@@ -2078,7 +2079,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		HttpGet get = new HttpGet(myServerBase + "/MedicationAdministration?medication.code=04823543");
 		CloseableHttpResponse response = ourHttpClient.execute(get);
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			assertThat(responseString).contains(moId.getIdPart());
 		} finally {
@@ -2148,11 +2149,11 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.execute();
 
 		assertThat(found.getEntry()).hasSize(2);
-		assertThat(found.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
-		assertThat(found.getEntry().get(0).getSearch().getModeElement().getValueAsEnum()).isEqualTo(SearchEntryModeEnum.MATCH);
+		assertEquals(Patient.class, found.getEntry().get(0).getResource().getClass());
+		assertEquals(SearchEntryModeEnum.MATCH, found.getEntry().get(0).getSearch().getModeElement().getValueAsEnum());
 		assertThat(found.getEntry().get(0).getResource().getText().getDiv().getValueAsString()).contains("<table class=\"hapiPropertyTable");
-		assertThat(found.getEntry().get(1).getResource().getClass()).isEqualTo(Organization.class);
-		assertThat(found.getEntry().get(1).getSearch().getModeElement().getValueAsEnum()).isEqualTo(SearchEntryModeEnum.INCLUDE);
+		assertEquals(Organization.class, found.getEntry().get(1).getResource().getClass());
+		assertEquals(SearchEntryModeEnum.INCLUDE, found.getEntry().get(1).getSearch().getModeElement().getValueAsEnum());
 	}
 
 	@Test
@@ -2178,11 +2179,11 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.execute();
 
 		assertThat(found.getEntry()).hasSize(2);
-		assertThat(found.getEntry().get(0).getResource().getClass()).isEqualTo(Patient.class);
-		assertThat(found.getEntry().get(0).getSearch().getModeElement().getValueAsEnum()).isEqualTo(SearchEntryModeEnum.MATCH);
+		assertEquals(Patient.class, found.getEntry().get(0).getResource().getClass());
+		assertEquals(SearchEntryModeEnum.MATCH, found.getEntry().get(0).getSearch().getModeElement().getValueAsEnum());
 		assertThat(found.getEntry().get(0).getResource().getText().getDiv().getValueAsString()).contains("<table class=\"hapiPropertyTable");
-		assertThat(found.getEntry().get(1).getResource().getClass()).isEqualTo(Organization.class);
-		assertThat(found.getEntry().get(1).getSearch().getModeElement().getValueAsEnum()).isEqualTo(SearchEntryModeEnum.INCLUDE);
+		assertEquals(Organization.class, found.getEntry().get(1).getResource().getClass());
+		assertEquals(SearchEntryModeEnum.INCLUDE, found.getEntry().get(1).getSearch().getModeElement().getValueAsEnum());
 	}
 
 	@Test
@@ -2260,10 +2261,10 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		
 		List<IIdType> list = toUnqualifiedVersionlessIds(found);
 		assertThat(found.getEntry()).hasSize(4);
-		assertThat(list.get(0)).isEqualTo(oid3);
-		assertThat(list.get(1)).isEqualTo(oid1);
-		assertThat(list.get(2)).isEqualTo(oid4);
-		assertThat(list.get(3)).isEqualTo(oid2);
+		assertEquals(oid3, list.get(0));
+		assertEquals(oid1, list.get(1));
+		assertEquals(oid4, list.get(2));
+		assertEquals(oid2, list.get(3));
 	}
 	
 	@Test
@@ -2524,7 +2525,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		post.setEntity(new StringEntity(contents, ContentType.create("application/xml+fhir", "UTF-8")));
 		CloseableHttpResponse resp = ourHttpClient.execute(post);
 		try {
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 			String output = IOUtils.toString(resp.getEntity().getContent());
 			ourLog.info(output);
 		} finally {
@@ -2562,7 +2563,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(responseString);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, response.getStatusLine().getStatusCode());
 			OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
 			assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])");
 		} finally {
@@ -2609,7 +2610,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		IdDt id;
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdDt(newIdString);
@@ -2623,9 +2624,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		response = ourHttpClient.execute(put);
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			IdDt newId = new IdDt(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue());
-			assertThat(newId.toVersionless()).isEqualTo(id.toVersionless()); // version shouldn't match for conditional update
+			assertEquals(id.toVersionless(), newId.toVersionless()); // version shouldn't match for conditional update
 			assertThat(newId).isNotEqualTo(id);
 		} finally {
 			response.close();
@@ -2646,7 +2647,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		IdDt id;
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdDt(newIdString);
@@ -2662,7 +2663,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		IdDt id2;
 		response = ourHttpClient.execute(put);
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id2 = new IdDt(newIdString);
@@ -2670,9 +2671,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			response.close();
 		}
 
-		assertThat(id2.getIdPart()).isEqualTo(id.getIdPart());
-		assertThat(id.getVersionIdPart()).isEqualTo("1");
-		assertThat(id2.getVersionIdPart()).isEqualTo("2");
+		assertEquals(id.getIdPart(), id2.getIdPart());
+		assertEquals("1", id.getVersionIdPart());
+		assertEquals("2", id2.getVersionIdPart());
 	}
 
 	@Test
@@ -2688,7 +2689,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		CloseableHttpResponse response = ourHttpClient.execute(post);
 		IdDt id;
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertEquals(201, response.getStatusLine().getStatusCode());
 			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
 			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 			id = new IdDt(newIdString);
@@ -2708,12 +2709,12 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		put.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		response = ourHttpClient.execute(put);
 		try {
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			IOUtils.closeQuietly(response.getEntity().getContent());
 
 			Patient respPt = myFhirContext.newXmlParser().parseResource(Patient.class, responseString);
-			assertThat(respPt.getId().getVersionIdPart()).isEqualTo("2");
+			assertEquals("2", respPt.getId().getVersionIdPart());
 
 			InstantDt updateTime = ResourceMetadataKeyEnum.UPDATED.get(respPt);
 			assertTrue(updateTime.getValue().after(before));
@@ -2729,7 +2730,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2");
 		MethodOutcome outcome = myClient.update().resource(p1).withId("testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2").execute();
-		assertThat(outcome.getCreated().booleanValue()).isEqualTo(true);
+		assertEquals(true, outcome.getCreated().booleanValue());
 		IdDt p1Id = (IdDt) outcome.getId();
 
 		assertThat(p1Id.getValue()).contains("Patient/testUpdateWithClientSuppliedIdWhichDoesntExistRpDstu2/_history");
@@ -2744,7 +2745,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			.execute();
 
 		assertThat(actual.getEntry()).hasSize(1);
-		assertThat(actual.getEntry().get(0).getResource().getId().getIdPart()).isEqualTo(p1Id.getIdPart());
+		assertEquals(p1Id.getIdPart(), actual.getEntry().get(0).getResource().getId().getIdPart());
 
 	}
 
@@ -2767,7 +2768,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertEquals(201, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
@@ -2786,7 +2787,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(resp).doesNotContain("Resource has no id");
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
@@ -2802,7 +2803,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
 			assertThat(responseString).contains("No resource supplied for $validate operation");
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -2848,7 +2849,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info("Response: {}", responseString);
 			assertThat(responseString).contains("Resource has no ID");
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(422);
+			assertEquals(422, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response);
 		}
@@ -2875,7 +2876,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(resp).doesNotContain("Resource has no id");
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
@@ -2903,7 +2904,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
@@ -2930,7 +2931,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(response.getEntity().getContent());
 			response.close();
@@ -2948,7 +2949,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			// @formatter:off
 			assertThat(resp).containsSubsequence(
 				"<ValueSet xmlns=\"http://hl7.org/fhir\">",
@@ -2980,7 +2981,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			//@formatter:off
 			assertThat(resp).containsSubsequence(
 				"<code value=\"11378-7\"/>",
@@ -3000,7 +3001,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(resp);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			//@formatter:off
 			assertThat(resp).containsSubsequence(
 				"<code value=\"11378-7\"/>",

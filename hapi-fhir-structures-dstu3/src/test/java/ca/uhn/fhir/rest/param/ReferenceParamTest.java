@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -24,15 +25,15 @@ public class ReferenceParamTest {
 		ReferenceParam param = new ReferenceParam();
 		param.setValueAsQueryToken(ourCtx, "derived-from", ":DocumentReference.contenttype", "application/vnd.mfer");
 
-		assertThat(param.getValueAsQueryToken(ourCtx)).isEqualTo("application/vnd.mfer");
-		assertThat(param.getQueryParameterQualifier()).isEqualTo(":DocumentReference.contenttype");
+		assertEquals("application/vnd.mfer", param.getValueAsQueryToken(ourCtx));
+		assertEquals(":DocumentReference.contenttype", param.getQueryParameterQualifier());
 
 		byte[] serialized = SerializationUtils.serialize(param);
 		ourLog.info("Serialized: {}", new String(serialized, Charsets.US_ASCII));
 		param = SerializationUtils.deserialize(serialized);
 
-		assertThat(param.getValueAsQueryToken(ourCtx)).isEqualTo("application/vnd.mfer");
-		assertThat(param.getQueryParameterQualifier()).isEqualTo(":DocumentReference.contenttype");
+		assertEquals("application/vnd.mfer", param.getValueAsQueryToken(ourCtx));
+		assertEquals(":DocumentReference.contenttype", param.getQueryParameterQualifier());
 	}
 
 	@Test
@@ -40,9 +41,9 @@ public class ReferenceParamTest {
 
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, null, "Location/123");
-		assertThat(rp.getResourceType()).isEqualTo("Location");
-		assertThat(rp.getIdPart()).isEqualTo("123");
-		assertThat(rp.getValue()).isEqualTo("Location/123");
+		assertEquals("Location", rp.getResourceType());
+		assertEquals("123", rp.getIdPart());
+		assertEquals("Location/123", rp.getValue());
 		assertNull(rp.getQueryParameterQualifier());
 
 	}
@@ -52,9 +53,9 @@ public class ReferenceParamTest {
 
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, null, "http://a.b/c/d/e");
-		assertThat(rp.getResourceType()).isEqualTo("d");
-		assertThat(rp.getIdPart()).isEqualTo("e");
-		assertThat(rp.getValue()).isEqualTo("http://a.b/c/d/e");
+		assertEquals("d", rp.getResourceType());
+		assertEquals("e", rp.getIdPart());
+		assertEquals("http://a.b/c/d/e", rp.getValue());
 		assertNull(rp.getQueryParameterQualifier());
 
 	}
@@ -65,10 +66,10 @@ public class ReferenceParamTest {
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ".name", "FOO");
 		assertNull(rp.getResourceType());
-		assertThat(rp.getIdPart()).isEqualTo("FOO");
-		assertThat(rp.getValue()).isEqualTo("FOO");
-		assertThat(rp.getQueryParameterQualifier()).isEqualTo(".name");
-		assertThat(rp.getChain()).isEqualTo("name");
+		assertEquals("FOO", rp.getIdPart());
+		assertEquals("FOO", rp.getValue());
+		assertEquals(".name", rp.getQueryParameterQualifier());
+		assertEquals("name", rp.getChain());
 
 	}
 
@@ -78,10 +79,10 @@ public class ReferenceParamTest {
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ".name", "Patient/1233");
 		assertNull(rp.getResourceType());
-		assertThat(rp.getIdPart()).isEqualTo("Patient/1233");
-		assertThat(rp.getValue()).isEqualTo("Patient/1233");
-		assertThat(rp.getQueryParameterQualifier()).isEqualTo(".name");
-		assertThat(rp.getChain()).isEqualTo("name");
+		assertEquals("Patient/1233", rp.getIdPart());
+		assertEquals("Patient/1233", rp.getValue());
+		assertEquals(".name", rp.getQueryParameterQualifier());
+		assertEquals("name", rp.getChain());
 
 	}
 
@@ -91,10 +92,10 @@ public class ReferenceParamTest {
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ".name", "http://something.strange/a/b/c");
 		assertNull(rp.getResourceType());
-		assertThat(rp.getIdPart()).isEqualTo("http://something.strange/a/b/c");
-		assertThat(rp.getValue()).isEqualTo("http://something.strange/a/b/c");
-		assertThat(rp.getQueryParameterQualifier()).isEqualTo(".name");
-		assertThat(rp.getChain()).isEqualTo("name");
+		assertEquals("http://something.strange/a/b/c", rp.getIdPart());
+		assertEquals("http://something.strange/a/b/c", rp.getValue());
+		assertEquals(".name", rp.getQueryParameterQualifier());
+		assertEquals("name", rp.getChain());
 
 	}
 
@@ -103,9 +104,9 @@ public class ReferenceParamTest {
 
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ":Location", "123");
-		assertThat(rp.getResourceType()).isEqualTo("Location");
-		assertThat(rp.getIdPart()).isEqualTo("123");
-		assertThat(rp.getValue()).isEqualTo("123");
+		assertEquals("Location", rp.getResourceType());
+		assertEquals("123", rp.getIdPart());
+		assertEquals("123", rp.getValue());
 		assertNull(rp.getQueryParameterQualifier());
 
 	}
@@ -119,9 +120,9 @@ public class ReferenceParamTest {
 
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ":Location", "Patient/123");
-		assertThat(rp.getResourceType()).isEqualTo("Patient");
-		assertThat(rp.getIdPart()).isEqualTo("123");
-		assertThat(rp.getValue()).isEqualTo("Patient/123");
+		assertEquals("Patient", rp.getResourceType());
+		assertEquals("123", rp.getIdPart());
+		assertEquals("Patient/123", rp.getValue());
 		assertNull(rp.getQueryParameterQualifier());
 
 	}
@@ -131,9 +132,9 @@ public class ReferenceParamTest {
 
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ":Patient", "Patient/123");
-		assertThat(rp.getResourceType()).isEqualTo("Patient");
-		assertThat(rp.getIdPart()).isEqualTo("123");
-		assertThat(rp.getValue()).isEqualTo("Patient/123");
+		assertEquals("Patient", rp.getResourceType());
+		assertEquals("123", rp.getIdPart());
+		assertEquals("Patient/123", rp.getValue());
 		assertNull(rp.getQueryParameterQualifier());
 
 	}
@@ -144,9 +145,9 @@ public class ReferenceParamTest {
 
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ":Location", "http://a.b/c/d/e");
-		assertThat(rp.getResourceType()).isEqualTo("Location");
-		assertThat(rp.getIdPart()).isEqualTo("http://a.b/c/d/e");
-		assertThat(rp.getValue()).isEqualTo("http://a.b/c/d/e");
+		assertEquals("Location", rp.getResourceType());
+		assertEquals("http://a.b/c/d/e", rp.getIdPart());
+		assertEquals("http://a.b/c/d/e", rp.getValue());
 		assertNull(rp.getQueryParameterQualifier());
 
 	}
@@ -157,11 +158,11 @@ public class ReferenceParamTest {
 
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ":Location.name", "FOO");
-		assertThat(rp.getResourceType()).isEqualTo("Location");
-		assertThat(rp.getIdPart()).isEqualTo("FOO");
-		assertThat(rp.getValue()).isEqualTo("FOO");
-		assertThat(rp.getQueryParameterQualifier()).isEqualTo(":Location.name");
-		assertThat(rp.getChain()).isEqualTo("name");
+		assertEquals("Location", rp.getResourceType());
+		assertEquals("FOO", rp.getIdPart());
+		assertEquals("FOO", rp.getValue());
+		assertEquals(":Location.name", rp.getQueryParameterQualifier());
+		assertEquals("name", rp.getChain());
 
 	}
 
@@ -170,11 +171,11 @@ public class ReferenceParamTest {
 
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ":Patient.identifier", "http://hey.there/a/b|123");
-		assertThat(rp.getResourceType()).isEqualTo("Patient");
-		assertThat(rp.getIdPart()).isEqualTo("http://hey.there/a/b|123");
-		assertThat(rp.getValue()).isEqualTo("http://hey.there/a/b|123");
-		assertThat(rp.getQueryParameterQualifier()).isEqualTo(":Patient.identifier");
-		assertThat(rp.getChain()).isEqualTo("identifier");
+		assertEquals("Patient", rp.getResourceType());
+		assertEquals("http://hey.there/a/b|123", rp.getIdPart());
+		assertEquals("http://hey.there/a/b|123", rp.getValue());
+		assertEquals(":Patient.identifier", rp.getQueryParameterQualifier());
+		assertEquals("identifier", rp.getChain());
 
 	}
 
@@ -183,11 +184,11 @@ public class ReferenceParamTest {
 
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ":Patient.identifier", "http://hey.there/a/b|");
-		assertThat(rp.getResourceType()).isEqualTo("Patient");
-		assertThat(rp.getValue()).isEqualTo("http://hey.there/a/b|");
-		assertThat(rp.getIdPart()).isEqualTo("http://hey.there/a/b|");
-		assertThat(rp.getQueryParameterQualifier()).isEqualTo(":Patient.identifier");
-		assertThat(rp.getChain()).isEqualTo("identifier");
+		assertEquals("Patient", rp.getResourceType());
+		assertEquals("http://hey.there/a/b|", rp.getValue());
+		assertEquals("http://hey.there/a/b|", rp.getIdPart());
+		assertEquals(":Patient.identifier", rp.getQueryParameterQualifier());
+		assertEquals("identifier", rp.getChain());
 
 	}
 
@@ -196,11 +197,11 @@ public class ReferenceParamTest {
 
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ":Patient.identifier", "|abc");
-		assertThat(rp.getResourceType()).isEqualTo("Patient");
-		assertThat(rp.getIdPart()).isEqualTo("|abc");
-		assertThat(rp.getValue()).isEqualTo("|abc");
-		assertThat(rp.getQueryParameterQualifier()).isEqualTo(":Patient.identifier");
-		assertThat(rp.getChain()).isEqualTo("identifier");
+		assertEquals("Patient", rp.getResourceType());
+		assertEquals("|abc", rp.getIdPart());
+		assertEquals("|abc", rp.getValue());
+		assertEquals(":Patient.identifier", rp.getQueryParameterQualifier());
+		assertEquals("identifier", rp.getChain());
 
 	}
 
@@ -209,7 +210,7 @@ public class ReferenceParamTest {
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, null, "123");
 
-		assertThat(rp.getIdPartAsBigDecimal().toPlainString()).isEqualTo("123");
+		assertEquals("123", rp.getIdPartAsBigDecimal().toPlainString());
 	}
 
 	@Test
@@ -218,7 +219,7 @@ public class ReferenceParamTest {
 		rp.setValueAsQueryToken(ourCtx, null, null, "123");
 
 		assertTrue(rp.isIdPartValidLong());
-		assertThat(rp.getIdPart()).isEqualTo("123");
+		assertEquals("123", rp.getIdPart());
 		assertNull(rp.getResourceType(ourCtx));
 	}
 
@@ -227,8 +228,8 @@ public class ReferenceParamTest {
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, ":Patient", "123");
 
-		assertThat(rp.getIdPart()).isEqualTo("123");
-		assertThat(rp.getResourceType(ourCtx).getSimpleName()).isEqualTo("Patient");
+		assertEquals("123", rp.getIdPart());
+		assertEquals("Patient", rp.getResourceType(ourCtx).getSimpleName());
 	}
 
 	@Test
@@ -236,8 +237,8 @@ public class ReferenceParamTest {
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValue("Patient/123");
 
-		assertThat(rp.getIdPart()).isEqualTo("123");
-		assertThat(rp.getResourceType(ourCtx).getSimpleName()).isEqualTo("Patient");
+		assertEquals("123", rp.getIdPart());
+		assertEquals("Patient", rp.getResourceType(ourCtx).getSimpleName());
 	}
 
 	@Test
@@ -245,7 +246,7 @@ public class ReferenceParamTest {
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValue("123");
 
-		assertThat(rp.getIdPart()).isEqualTo("123");
+		assertEquals("123", rp.getIdPart());
 		assertNull(rp.getResourceType(ourCtx));
 	}
 
@@ -254,7 +255,7 @@ public class ReferenceParamTest {
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, null, "123");
 
-		assertThat(rp.getIdPartAsLong().longValue()).isEqualTo(123L);
+		assertEquals(123L, rp.getIdPartAsLong().longValue());
 	}
 
 	@Test
@@ -262,7 +263,7 @@ public class ReferenceParamTest {
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, null, "123");
 
-		assertThat(rp.toStringParam(ourCtx).getValue()).isEqualTo("123");
+		assertEquals("123", rp.toStringParam(ourCtx).getValue());
 	}
 
 	@Test
@@ -270,7 +271,7 @@ public class ReferenceParamTest {
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, null, "123");
 
-		assertThat(rp.toTokenParam(ourCtx).getValue()).isEqualTo("123");
+		assertEquals("123", rp.toTokenParam(ourCtx).getValue());
 	}
 
 	@Test
@@ -278,7 +279,7 @@ public class ReferenceParamTest {
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, null, "2020-10-01");
 
-		assertThat(rp.toDateParam(ourCtx).getValueAsString()).isEqualTo("2020-10-01");
+		assertEquals("2020-10-01", rp.toDateParam(ourCtx).getValueAsString());
 	}
 
 	@Test
@@ -286,7 +287,7 @@ public class ReferenceParamTest {
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, null, "1.23");
 
-		assertThat(rp.toNumberParam(ourCtx).getValue().toPlainString()).isEqualTo("1.23");
+		assertEquals("1.23", rp.toNumberParam(ourCtx).getValue().toPlainString());
 	}
 
 	@Test
@@ -294,9 +295,9 @@ public class ReferenceParamTest {
 		ReferenceParam rp = new ReferenceParam();
 		rp.setValueAsQueryToken(ourCtx, null, null, "1.23|http://unitsofmeasure.org|cm");
 
-		assertThat(rp.toQuantityParam(ourCtx).getValue().toPlainString()).isEqualTo("1.23");
-		assertThat(rp.toQuantityParam(ourCtx).getSystem()).isEqualTo("http://unitsofmeasure.org");
-		assertThat(rp.toQuantityParam(ourCtx).getUnits()).isEqualTo("cm");
+		assertEquals("1.23", rp.toQuantityParam(ourCtx).getValue().toPlainString());
+		assertEquals("http://unitsofmeasure.org", rp.toQuantityParam(ourCtx).getSystem());
+		assertEquals("cm", rp.toQuantityParam(ourCtx).getUnits());
 	}
 
 	@AfterAll

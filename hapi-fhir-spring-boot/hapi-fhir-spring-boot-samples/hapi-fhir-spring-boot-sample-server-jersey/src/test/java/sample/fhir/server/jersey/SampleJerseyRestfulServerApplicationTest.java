@@ -1,5 +1,6 @@
 package sample.fhir.server.jersey;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +27,7 @@ public class SampleJerseyRestfulServerApplicationTest {
 		ResponseEntity<String> entity = this.restTemplate.getForEntity(
 			"/fhir/metadata",
 			String.class);
-		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertThat(entity.getBody()).contains("\"status\": \"active\"");
 	}
 
@@ -35,7 +36,7 @@ public class SampleJerseyRestfulServerApplicationTest {
 		ResponseEntity<String> entity = this.restTemplate.getForEntity(
 			"/fhir/Patient/1",
 			String.class);
-		assertThat(entity.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertEquals(HttpStatus.OK, entity.getStatusCode());
 		assertThat(entity.getBody()).contains("\"family\": \"Van Houte\"");
 	}
 

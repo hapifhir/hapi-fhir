@@ -1,5 +1,6 @@
 package ca.uhn.hapi.fhir.cdshooks.module;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestContextJson;
@@ -111,19 +112,19 @@ class SerializationTest {
 	@Test
 	void testDeserializeRequest() throws Exception {
 		CdsServiceRequestJson cdsServiceRequestJson = ourObjectMapper.readValue(myRequestJson, CdsServiceRequestJson.class);
-		assertThat(cdsServiceRequestJson.getHook()).isEqualTo(HOOK_NAME);
+		assertEquals(HOOK_NAME, cdsServiceRequestJson.getHook());
 
 		assertThat(cdsServiceRequestJson.getPrefetchKeys()).containsExactly(PATIENT_KEY, DAUGHTER_KEY, PARENT_KEY);
 		Patient patient = (Patient) cdsServiceRequestJson.getPrefetch(PATIENT_KEY);
-		assertThat(patient.getNameFirstRep().getFamily()).isEqualTo(FAMILY);
+		assertEquals(FAMILY, patient.getNameFirstRep().getFamily());
 
 		Patient daughter = (Patient) cdsServiceRequestJson.getPrefetch(DAUGHTER_KEY);
-		assertThat(daughter.getNameFirstRep().getFamily()).isEqualTo(DAUGHTER);
+		assertEquals(DAUGHTER, daughter.getNameFirstRep().getFamily());
 
 		Patient parent = (Patient) cdsServiceRequestJson.getPrefetch(PARENT_KEY);
 		assertNull(parent);
 
-		assertThat(cdsServiceRequestJson.getContext().getString(CONTEXT_PATIENT_KEY)).isEqualTo(CONTEXT_PATIENT_VALUE);
+		assertEquals(CONTEXT_PATIENT_VALUE, cdsServiceRequestJson.getContext().getString(CONTEXT_PATIENT_KEY));
 		List<String> selections = cdsServiceRequestJson.getContext().getArray(CONTEXT_SELECTIONS_KEY);
 		assertThat(selections).containsExactly(CONTEXT_SELECTIONS_VALUE1, CONTEXT_SELECTIONS_VALUE2);
 		cdsServiceRequestJson.getContext().getResource(CONTEXT_DRAFT_ORDERS_KEY);
@@ -157,7 +158,7 @@ class SerializationTest {
 	void testDeserializeResponse() throws Exception {
 		CdsServiceResponseJson cdsServiceResponseJson = ourObjectMapper.readValue(myResponseJson, CdsServiceResponseJson.class);
 		Patient patient = (Patient) cdsServiceResponseJson.getServiceActions().get(0).getResource();
-		assertThat(patient.getNameFirstRep().getFamily()).isEqualTo(FAMILY);
+		assertEquals(FAMILY, patient.getNameFirstRep().getFamily());
 	}
 
 	@Test
@@ -170,7 +171,7 @@ class SerializationTest {
 		// validate
 		final String actualAsJson = ourObjectMapper.writeValueAsString(actual);
 		assertNotSame(expected, actual);
-		assertThat(actualAsJson).isEqualTo(expectedAsJson);
+		assertEquals(expectedAsJson, actualAsJson);
 	}
 
 	@Test
@@ -184,7 +185,7 @@ class SerializationTest {
 		// validate
 		final String actualAsJson = ourObjectMapper.writeValueAsString(actual);
 		assertNotSame(expected, actual);
-		assertThat(actualAsJson).isEqualTo(expectedAsJson);
+		assertEquals(expectedAsJson, actualAsJson);
 	}
 
 }

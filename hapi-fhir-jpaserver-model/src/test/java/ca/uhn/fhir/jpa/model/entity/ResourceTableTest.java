@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.model.entity;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.primitive.IdDt;
 import org.hl7.fhir.r4.model.Patient;
@@ -39,6 +40,6 @@ public class ResourceTableTest {
 		IdDt actual = t.getIdDt();
 
 		// Then
-		assertThat(actual.getValueAsString()).isEqualTo(theExpected);
+		assertEquals(theExpected, actual.getValueAsString());
 	}
 }

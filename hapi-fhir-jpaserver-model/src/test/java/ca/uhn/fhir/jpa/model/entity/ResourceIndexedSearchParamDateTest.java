@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.model.entity;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -44,7 +45,7 @@ public class ResourceIndexedSearchParamDateTest {
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
-		assertThat(param2.hashCode()).isEqualTo(param.hashCode());
+		assertEquals(param.hashCode(), param2.hashCode());
 	}
 
 	@Test
@@ -54,7 +55,7 @@ public class ResourceIndexedSearchParamDateTest {
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
-		assertThat(param2.hashCode()).isEqualTo(param.hashCode());
+		assertEquals(param.hashCode(), param2.hashCode());
 	}
 
 	@Test
@@ -64,7 +65,7 @@ public class ResourceIndexedSearchParamDateTest {
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
-		assertThat(param2.hashCode()).isEqualTo(param.hashCode());
+		assertEquals(param.hashCode(), param2.hashCode());
 	}
 
 	// Scenario that occurs when updating a resource with a date search parameter. One date will be a java.util.Date, the
@@ -76,7 +77,7 @@ public class ResourceIndexedSearchParamDateTest {
 
 		assertTrue(param.equals(param2));
 		assertTrue(param2.equals(param));
-		assertThat(param2.hashCode()).isEqualTo(param.hashCode());
+		assertEquals(param.hashCode(), param2.hashCode());
 	}
 
 	@Test
@@ -132,8 +133,8 @@ public class ResourceIndexedSearchParamDateTest {
 			.setValueLow(new Date(111111111L));
 		val2.setPartitionSettings(new PartitionSettings());
 		val2.calculateHashes();
-		assertThat(val1).isNotNull().isEqualTo(val1);
-		assertThat(val2).isEqualTo(val1);
+		assertNotNull(val1).isEqualTo(val1);
+		assertEquals(val1, val2);
 		assertThat("").isNotEqualTo(val1);
 	}
 }

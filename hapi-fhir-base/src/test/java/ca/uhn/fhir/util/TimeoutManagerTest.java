@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.system.HapiSystemProperties;
@@ -78,8 +79,8 @@ class TimeoutManagerTest {
 		// verify
 		verify(myAppender, times(1)).doAppend(myLoggingEvent.capture());
 		ILoggingEvent event = myLoggingEvent.getValue();
-		assertThat(event.getLevel()).isEqualTo(Level.WARN);
-		assertThat(event.getFormattedMessage()).isEqualTo(TEST_SERVICE_NAME + " has run for 2.0 days");
+		assertEquals(Level.WARN, event.getLevel());
+		assertEquals(TEST_SERVICE_NAME + " has run for 2.0 days", event.getFormattedMessage());
 	}
 
 	@Test
@@ -92,12 +93,12 @@ class TimeoutManagerTest {
 		verify(myAppender, times(2)).doAppend(myLoggingEvent.capture());
 
 		ILoggingEvent event1 = myLoggingEvent.getAllValues().get(0);
-		assertThat(event1.getLevel()).isEqualTo(Level.WARN);
-		assertThat(event1.getFormattedMessage()).isEqualTo(TEST_SERVICE_NAME + " has run for 20 days");
+		assertEquals(Level.WARN, event1.getLevel());
+		assertEquals(TEST_SERVICE_NAME + " has run for 20 days", event1.getFormattedMessage());
 
 		ILoggingEvent event2 = myLoggingEvent.getAllValues().get(1);
-		assertThat(event2.getLevel()).isEqualTo(Level.ERROR);
-		assertThat(event2.getFormattedMessage()).isEqualTo(TEST_SERVICE_NAME + " has run for 20 days");
+		assertEquals(Level.ERROR, event2.getLevel());
+		assertEquals(TEST_SERVICE_NAME + " has run for 20 days", event2.getFormattedMessage());
 	}
 
 
@@ -111,14 +112,14 @@ class TimeoutManagerTest {
 			mySvc.checkTimeout();
 			fail("");
 		} catch (TimeoutException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-2133: TEST TIMEOUT timed out after running for 20 days");
+			assertEquals("HAPI-2133: TEST TIMEOUT timed out after running for 20 days", e.getMessage());
 		}
 		verify(myAppender, times(1)).doAppend(myLoggingEvent.capture());
 
 		verify(myAppender, times(1)).doAppend(myLoggingEvent.capture());
 		ILoggingEvent event = myLoggingEvent.getValue();
-		assertThat(event.getLevel()).isEqualTo(Level.WARN);
-		assertThat(event.getFormattedMessage()).isEqualTo(TEST_SERVICE_NAME + " has run for 20 days");
+		assertEquals(Level.WARN, event.getLevel());
+		assertEquals(TEST_SERVICE_NAME + " has run for 20 days", event.getFormattedMessage());
 	}
 
 }

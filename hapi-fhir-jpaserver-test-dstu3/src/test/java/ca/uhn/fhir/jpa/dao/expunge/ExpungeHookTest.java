@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.interceptor.api.HookParams;
@@ -130,6 +131,6 @@ public class ExpungeHookTest extends BaseJpaDstu3Test {
 		HookParams hookParams = myExpungeResourceLatch.awaitExpected().get(0);
 
 		IIdType hookId = hookParams.get(IIdType.class);
-		assertThat(hookId.getValue()).isEqualTo(expungeId.getValue());
+		assertEquals(expungeId.getValue(), hookId.getValue());
 	}
 }

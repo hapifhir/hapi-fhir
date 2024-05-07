@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model.dstu2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
@@ -43,8 +44,8 @@ public class ModelSerializationDstu2Test {
 		assertTrue(bytes.length > 0);
 
 		MaritalStatusCodesEnum deserialized = SerializationUtils.deserialize(bytes);
-		assertThat(deserialized.getCode()).isEqualTo(maritalStatus.getCode());
-		assertThat(deserialized.getSystem()).isEqualTo(maritalStatus.getSystem());
+		assertEquals(maritalStatus.getCode(), deserialized.getCode());
+		assertEquals(maritalStatus.getSystem(), deserialized.getSystem());
 	}
 
 	@Test
@@ -59,14 +60,14 @@ public class ModelSerializationDstu2Test {
 		/*
 		 * Make sure the binder still works for Code
 		 */
-		assertThat(out.getGenderElement().getValueAsEnum()).isEqualTo(AdministrativeGenderEnum.MALE);
+		assertEquals(AdministrativeGenderEnum.MALE, out.getGenderElement().getValueAsEnum());
 		out.getGenderElement().setValue("female");
-		assertThat(out.getGenderElement().getValueAsEnum()).isEqualTo(AdministrativeGenderEnum.FEMALE);
+		assertEquals(AdministrativeGenderEnum.FEMALE, out.getGenderElement().getValueAsEnum());
 
-		assertThat(out.getIdentifier().get(0).getType().getValueAsEnum().iterator().next()).isEqualTo(IdentifierTypeCodesEnum.DL);
+		assertEquals(IdentifierTypeCodesEnum.DL, out.getIdentifier().get(0).getType().getValueAsEnum().iterator().next());
 		out.getIdentifier().get(0).getType().setValueAsEnum(IdentifierTypeCodesEnum.MR);
-		assertThat(out.getIdentifier().get(0).getType().getCoding().get(0).getCode()).isEqualTo("MR");
-		assertThat(out.getIdentifier().get(0).getType().getCoding().get(0).getSystem()).isEqualTo("http://hl7.org/fhir/v2/0203");
+		assertEquals("MR", out.getIdentifier().get(0).getType().getCoding().get(0).getCode());
+		assertEquals("http://hl7.org/fhir/v2/0203", out.getIdentifier().get(0).getType().getCoding().get(0).getSystem());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -78,7 +79,7 @@ public class ModelSerializationDstu2Test {
 		assertTrue(obj != null);
 
 		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
-		assertThat(p.encodeResourceToString(obj)).isEqualTo(p.encodeResourceToString(theObject));
+		assertEquals(p.encodeResourceToString(theObject), p.encodeResourceToString(obj));
 
 		return (T) obj;
 	}

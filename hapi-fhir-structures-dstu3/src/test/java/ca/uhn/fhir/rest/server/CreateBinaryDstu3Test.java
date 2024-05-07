@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -56,7 +57,7 @@ public class CreateBinaryDstu3Test {
 		post.addHeader("Content-Type", "application/foo");
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
-			assertThat(ourLastBinary.getContentType()).isEqualTo("application/foo");
+			assertEquals("application/foo", ourLastBinary.getContentType());
 			assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 			assertThat(ourLastBinaryBytes).containsExactly(new byte[]{0, 1, 2, 3, 4});
 		} finally {
@@ -80,7 +81,7 @@ public class CreateBinaryDstu3Test {
 		post.addHeader("Content-Type", Constants.CT_FHIR_JSON);
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
-			assertThat(ourLastBinary.getContentType()).isEqualTo("application/foo");
+			assertEquals("application/foo", ourLastBinary.getContentType());
 			assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 		} finally {
 			IOUtils.closeQuietly(status);
@@ -103,9 +104,9 @@ public class CreateBinaryDstu3Test {
 		post.addHeader("Content-Type", Constants.CT_FHIR_JSON);
 		CloseableHttpResponse status = ourClient.execute(post);
 		try {
-			assertThat(ourLastBinary.getContentType()).isEqualTo("application/xml+fhir");
+			assertEquals("application/xml+fhir", ourLastBinary.getContentType());
 			assertThat(ourLastBinary.getContent()).containsExactly(b.getContent());
-			assertThat(ourLastBinaryString).isEqualTo(encoded);
+			assertEquals(encoded, ourLastBinaryString);
 			assertThat(ourLastBinaryBytes).containsExactly(encoded.getBytes("UTF-8"));
 		} finally {
 			IOUtils.closeQuietly(status);

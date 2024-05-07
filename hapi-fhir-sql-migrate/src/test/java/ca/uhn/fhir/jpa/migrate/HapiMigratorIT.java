@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
@@ -50,7 +51,7 @@ class HapiMigratorIT {
 	@AfterEach
 	void after() {
 		myJdbcTemplate.execute("DROP TABLE " + MIGRATION_TABLENAME);
-		assertThat(myDataSource.getNumActive()).isEqualTo(0);
+		assertEquals(0, myDataSource.getNumActive());
 		HapiMigrationLock.setMaxRetryAttempts(HapiMigrationLock.DEFAULT_MAX_RETRY_ATTEMPTS);
 		System.clearProperty(HapiMigrationLock.CLEAR_LOCK_TABLE_WITH_DESCRIPTION);
 	}
@@ -122,17 +123,17 @@ class HapiMigratorIT {
 		LatchMigrationTask latchMigrationTask = new LatchMigrationTask("first", "1");
 
 		HapiMigrator migrator = buildMigrator(latchMigrationTask);
-		assertThat(countLockRecords()).isEqualTo(0);
+		assertEquals(0, countLockRecords());
 
 		{
 			latchMigrationTask.setExpectedCount(1);
 			Future<MigrationResult> future = executor.submit(() -> migrator.migrate());
 			latchMigrationTask.awaitExpected();
-			assertThat(countLockRecords()).isEqualTo(1);
+			assertEquals(1, countLockRecords());
 			latchMigrationTask.release("1");
 
 			MigrationResult result = future.get();
-			assertThat(countLockRecords()).isEqualTo(0);
+			assertEquals(0, countLockRecords());
 			assertThat(result.succeededTasks).hasSize(1);
 		}
 
@@ -140,7 +141,7 @@ class HapiMigratorIT {
 			Future<MigrationResult> future = executor.submit(() -> migrator.migrate());
 
 			MigrationResult result = future.get();
-			assertThat(countLockRecords()).isEqualTo(0);
+			assertEquals(0, countLockRecords());
 			assertThat(result.succeededTasks).hasSize(0);
 		}
 
@@ -158,7 +159,7 @@ class HapiMigratorIT {
 			migrator.migrate();
 			fail("");
 		} catch (HapiMigrationException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-2153: Unable to obtain table lock - another database migration may be running.  If no other database migration is running, then the previous migration did not shut down properly and the lock record needs to be deleted manually.  The lock record is located in the TEST_MIGRATOR_TABLE table with INSTALLED_RANK = -100 and DESCRIPTION = " + description);
+			assertEquals("HAPI-2153: Unable to obtain table lock - another database migration may be running.  If no other database migration is running, then the previous migration did not shut down properly and the lock record needs to be deleted manually.  The lock record is located in the TEST_MIGRATOR_TABLE table with INSTALLED_RANK = -100 and DESCRIPTION = " + description, e.getMessage());
 		}
 	}
 

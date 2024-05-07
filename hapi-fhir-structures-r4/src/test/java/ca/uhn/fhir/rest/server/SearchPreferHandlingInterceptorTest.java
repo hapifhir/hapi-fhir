@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.ResourceMetadataKeyEnum;
 import ca.uhn.fhir.model.valueset.BundleEntrySearchModeEnum;
@@ -75,7 +76,7 @@ public class SearchPreferHandlingInterceptorTest {
 	public void testSearchWithUnknownResourceType() throws IOException {
 		try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
 			try (CloseableHttpResponse result = client.execute(new HttpGet("http://localhost:" + myPort + "/BadResource?foo=bar"))) {
-				assertThat(result.getStatusLine().getStatusCode()).isEqualTo(404);
+				assertEquals(404, result.getStatusLine().getStatusCode());
 				String response = IOUtils.toString(result.getEntity().getContent(), StandardCharsets.UTF_8);
 				assertThat(response).contains("Unknown resource type 'BadResource' - Server knows how to handle: [Patient]");
 			}
@@ -130,8 +131,8 @@ public class SearchPreferHandlingInterceptorTest {
 			.withAdditionalHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_HANDLING + "=" + Constants.HEADER_PREFER_HANDLING_LENIENT)
 			.encodedJson()
 			.execute();
-		assertThat(outcome.getTotal()).isEqualTo(200);
-		assertThat(outcome.getLink(Constants.LINK_SELF).getUrl()).isEqualTo("http://localhost:" + myPort + "/Patient?_format=json&_pretty=true&identifier=BLAH");
+		assertEquals(200, outcome.getTotal());
+		assertEquals("http://localhost:" + myPort + "/Patient?_format=json&_pretty=true&identifier=BLAH", outcome.getLink(Constants.LINK_SELF).getUrl());
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {

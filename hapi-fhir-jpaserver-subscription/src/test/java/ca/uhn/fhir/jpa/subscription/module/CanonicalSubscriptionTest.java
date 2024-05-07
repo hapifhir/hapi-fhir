@@ -46,8 +46,8 @@ public class CanonicalSubscriptionTest {
 
 		s = serializeAndDeserialize(s);
 
-		assertThat(s.getChannelExtension("key1")).isEqualTo("VALUE1");
-		assertThat(s.getChannelExtension("key2")).isEqualTo("VALUE2a");
+		assertEquals("VALUE1", s.getChannelExtension("key1"));
+		assertEquals("VALUE2a", s.getChannelExtension("key2"));
 		assertNull(s.getChannelExtension("key3"));
 	}
 
@@ -73,7 +73,7 @@ public class CanonicalSubscriptionTest {
 		SubscriptionCanonicalizer canonicalizer = new SubscriptionCanonicalizer(FhirContext.forR4(), new StorageSettings());
 		CanonicalSubscription sub1 = canonicalizer.canonicalize(makeMdmSubscription());
 		assertThat(sub1.getTags()).containsKey(TAG_SYSTEM);
-		assertThat(TAG_VALUE).isEqualTo(sub1.getTags().get(TAG_SYSTEM));
+		assertEquals(sub1.getTags().get(TAG_SYSTEM), TAG_VALUE);
    }
 
 	@Test
@@ -91,7 +91,7 @@ public class CanonicalSubscriptionTest {
 		subscription.addExtension(HapiExtensions.EXTENSION_SUBSCRIPTION_CROSS_PARTITION, new BooleanType().setValue(true));
 		CanonicalSubscription canonicalSubscription = canonicalizer.canonicalize(subscription);
 
-		assertThat(true).isEqualTo(canonicalSubscription.getCrossPartitionEnabled());
+		assertEquals(canonicalSubscription.getCrossPartitionEnabled(), true);
 	}
 
 	@ParameterizedTest
@@ -128,7 +128,7 @@ public class CanonicalSubscriptionTest {
 
 		CanonicalSubscription payload = resourceDeliveryMessage.getPayload().getSubscription();
 
-		assertThat(false).isEqualTo(payload.getCrossPartitionEnabled());
+		assertEquals(payload.getCrossPartitionEnabled(), false);
 	}
 
 	private Subscription makeEmailSubscription() {

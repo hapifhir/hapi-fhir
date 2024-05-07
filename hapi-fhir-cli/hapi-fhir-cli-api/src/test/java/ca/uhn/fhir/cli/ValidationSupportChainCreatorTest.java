@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cli;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.DefaultParser;
@@ -34,6 +35,6 @@ public class ValidationSupportChainCreatorTest {
 		ValidationSupportChain chain = ValidationSupportChainCreator.getValidationSupportChainR4(myContextR4, commandLine);
 		StructureDefinition structureDefinition = (StructureDefinition) chain.fetchStructureDefinition("https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient");
 
-		assertThat("Profile_MII_Patient_PatientIn").isEqualTo(structureDefinition.getName());
+		assertEquals(structureDefinition.getName(), "Profile_MII_Patient_PatientIn");
 	}
 }

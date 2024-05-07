@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -111,7 +112,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		try {
 			parser.parseResource(encoded);
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"birthDate\"] Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"");
+			assertEquals(Msg.code(1851) + "DataFormatException at [[row,col {unknown-source}]: [2,4]]: " + Msg.code(1821) + "[element=\"birthDate\"] Invalid attribute value \"2000-15-31\": Invalid date/time format: \"2000-15-31\"", e.getMessage());
 		}
 	}
 
@@ -179,7 +180,7 @@ public class ResourceValidatorDstu3Test extends BaseValidationTestWithInlineMock
 		List<SingleValidationMessage> all = logResultsAndReturnNonInformationalOnes(output);
 
 		assertThat(output.getMessages().get(0).getMessage()).contains("None of the codings provided are in the value set 'Marital Status Codes'");
-		assertThat(output.getMessages().get(0).getSeverity()).isEqualTo(ResultSeverityEnum.WARNING);
+		assertEquals(ResultSeverityEnum.WARNING, output.getMessages().get(0).getSeverity());
 	}
 
 	@Test

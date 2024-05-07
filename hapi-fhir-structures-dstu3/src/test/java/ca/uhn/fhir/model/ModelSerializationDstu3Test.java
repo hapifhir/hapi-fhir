@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
@@ -31,7 +32,7 @@ public class ModelSerializationDstu3Test {
 		assertTrue(bytes.length > 0);
 
 		AdministrativeGender deserialized = SerializationUtils.deserialize(bytes);
-		assertThat(deserialized).isEqualTo(AdministrativeGender.MALE);
+		assertEquals(AdministrativeGender.MALE, deserialized);
 	}
 
 	@AfterAll
@@ -50,9 +51,9 @@ public class ModelSerializationDstu3Test {
 		/*
 		 * Make sure the binder still works for Code
 		 */
-		assertThat(out.getGender()).isEqualTo(AdministrativeGender.MALE);
+		assertEquals(AdministrativeGender.MALE, out.getGender());
 		out.getGenderElement().setValueAsString("female");
-		assertThat(out.getGender()).isEqualTo(AdministrativeGender.FEMALE);
+		assertEquals(AdministrativeGender.FEMALE, out.getGender());
 
 	}
 
@@ -65,7 +66,7 @@ public class ModelSerializationDstu3Test {
 		assertTrue(obj != null);
 
 		IParser p = ourCtx.newXmlParser().setPrettyPrint(true);
-		assertThat(p.encodeResourceToString(obj)).isEqualTo(p.encodeResourceToString(theObject));
+		assertEquals(p.encodeResourceToString(theObject), p.encodeResourceToString(obj));
 
 		return (T) obj;
 	}

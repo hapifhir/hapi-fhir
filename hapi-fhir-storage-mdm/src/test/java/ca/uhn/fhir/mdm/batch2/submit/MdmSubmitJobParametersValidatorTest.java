@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.batch2.submit;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
@@ -45,7 +46,7 @@ class MdmSubmitJobParametersValidatorTest {
 		parameters.addUrl("Practitioner?name=foo");
 		List<String> errors = myValidator.validate(null, parameters);
 		assertThat(errors).hasSize(1);
-		assertThat(errors.get(0)).isEqualTo("Resource type Practitioner is not supported by MDM. Check your MDM settings");
+		assertEquals("Resource type Practitioner is not supported by MDM. Check your MDM settings", errors.get(0));
 	}
 
 	@Test
@@ -56,7 +57,7 @@ class MdmSubmitJobParametersValidatorTest {
 		parameters.addUrl("Practitioner?death-date=foo");
 		List<String> errors = myValidator.validate(null, parameters);
 		assertThat(errors).hasSize(1);
-		assertThat(errors.get(0)).isEqualTo("Invalid request detected: Can't find death-date!");
+		assertEquals("Invalid request detected: Can't find death-date!", errors.get(0));
 	}
 
 }

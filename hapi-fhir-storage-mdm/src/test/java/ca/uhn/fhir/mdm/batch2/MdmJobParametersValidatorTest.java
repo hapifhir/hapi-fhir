@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.batch2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.batch2.clear.MdmClearJobParameters;
@@ -40,7 +41,7 @@ class MdmClearJobParametersValidatorTest {
 
 		// verify
 		assertThat(result).hasSize(1);
-		assertThat(result.get(0)).isEqualTo("Mdm is not enabled on this server");
+		assertEquals("Mdm is not enabled on this server", result.get(0));
 	}
 
 	@Test
@@ -54,7 +55,7 @@ class MdmClearJobParametersValidatorTest {
 
 		// verify
 		assertThat(result).hasSize(1);
-		assertThat(result.get(0)).isEqualTo("Mdm Clear Job Parameters must define at least one resource type");
+		assertEquals("Mdm Clear Job Parameters must define at least one resource type", result.get(0));
 	}
 
 	@Test
@@ -71,8 +72,8 @@ class MdmClearJobParametersValidatorTest {
 
 		// verify
 		assertThat(result).hasSize(2);
-		assertThat(result.get(0)).isEqualTo("Resource type 'Immunization' is not supported on this server.");
-		assertThat(result.get(1)).isEqualTo("There are no mdm rules for resource type 'Immunization'");
+		assertEquals("Resource type 'Immunization' is not supported on this server.", result.get(0));
+		assertEquals("There are no mdm rules for resource type 'Immunization'", result.get(1));
 	}
 
 	@Test

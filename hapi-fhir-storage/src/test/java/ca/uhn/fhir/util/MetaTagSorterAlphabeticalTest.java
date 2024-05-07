@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.Meta;
 import org.junit.jupiter.api.Test;
@@ -166,7 +167,7 @@ class MetaTagSorterAlphabeticalTest {
 	public void testSortPrimitiveStringTypes(List<String> theInput, List<String> theExpected) {
 		List<CanonicalType> toBeSorted = toCanonicalTypeList(theInput);
 		myTagSorter.sortPrimitiveStrings(toBeSorted);
-		assertThat(toStringList(toBeSorted)).isEqualTo(theExpected);
+		assertEquals(theExpected, toStringList(toBeSorted));
 	}
 
 	@Test
@@ -181,7 +182,7 @@ class MetaTagSorterAlphabeticalTest {
 		List<String> expectedProfile = List.of("1", "2");
 		assertCodingsEqualAndInOrder(expectedCoding, meta.getTag());
 		assertCodingsEqualAndInOrder(expectedCoding, meta.getSecurity());
-		assertThat(toStringList(meta.getProfile())).isEqualTo(expectedProfile);
+		assertEquals(expectedProfile, toStringList(meta.getProfile()));
 	}
 
 

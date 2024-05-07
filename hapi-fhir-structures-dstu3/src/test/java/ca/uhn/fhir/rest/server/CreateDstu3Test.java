@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.Create;
@@ -73,11 +74,11 @@ public class CreateDstu3Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
+		assertEquals(201, status.getStatusLine().getStatusCode());
 
-		assertThat(status.getHeaders("Location").length).isEqualTo(1);
-		assertThat(status.getHeaders("Content-Location").length).isEqualTo(1);
-		assertThat(status.getFirstHeader("Location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/1");
+		assertEquals(1, status.getHeaders("Location").length);
+		assertEquals(1, status.getHeaders("Content-Location").length);
+		assertEquals(ourServer.getBaseUrl() + "/Patient/1", status.getFirstHeader("Location").getValue());
 
 	}
 
@@ -95,8 +96,8 @@ public class CreateDstu3Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
-		assertThat(responseContent).isEqualTo(expectedResponseContent);
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals(expectedResponseContent, responseContent);
 
 	}
 
@@ -115,7 +116,7 @@ public class CreateDstu3Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
 		assertThat(responseContent).contains("Failed to parse request body as XML resource. Error was: " + Msg.code(1852) + "com.ctc.wstx.exc.WstxUnexpectedCharException: Unexpected character 'F'");
@@ -134,7 +135,7 @@ public class CreateDstu3Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
 		assertThat(responseContent).contains("Failed to parse request body as XML resource.");
@@ -153,7 +154,7 @@ public class CreateDstu3Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"");
 		assertThat(responseContent).contains("Failed to parse request body as XML resource.");
@@ -172,7 +173,7 @@ public class CreateDstu3Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 
 		assertThat(responseContent).contains("Failed to parse request body as JSON resource.");
 
@@ -189,7 +190,7 @@ public class CreateDstu3Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		//@formatter:off
 		assertThat(responseContent).contains(

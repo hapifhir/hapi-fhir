@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.subscription.submit.svc.ResourceModifiedSubmitterSvc;
@@ -123,7 +124,7 @@ public class RestHookActivatesPreExistingSubscriptionsR4Test extends BaseResourc
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
 		waitForSize(1, ourUpdatedObservations);
-		assertThat(ourContentTypes.get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourContentTypes.get(0));
 	}
 
 	private void waitForQueueToDrain() throws InterruptedException {

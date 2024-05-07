@@ -1,5 +1,6 @@
 package ca.uhn.fhir.cli;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.RestServerR4Helper;
@@ -96,7 +97,7 @@ public class ExportConceptMapToCsvCommandR4Test {
 			"\"http://example.com/codesystem/2\",\"Version 2s\",\"http://example.com/codesystem/3\",\"Version 3t\",\"Code 2d\",\"Display 2d\",\"Code 3d\",\"Display 3d\",\"equal\",\"3d This is a comment.\"\n" +
 			"\"http://example.com/codesystem/2\",\"Version 2s\",\"http://example.com/codesystem/3\",\"Version 3t\",\"Code 2e\",\"Display 2e\",\"\",\"\",\"unmatched\",\"3e This is a comment.\"\n";
 		String result = IOUtils.toString(new FileInputStream(FILE), Charsets.UTF_8);
-		assertThat(result).isEqualTo(expected);
+		assertEquals(expected, result);
 
 		FileUtils.deleteQuietly(new File(FILE));
 	}

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.partition;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -32,10 +33,10 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		myPartitionConfigSvc.createPartition(partition, null);
 
 		partition = myPartitionConfigSvc.getPartitionById(123);
-		assertThat(partition.getName()).isEqualTo("NAME123");
+		assertEquals("NAME123", partition.getName());
 
 		partition = myPartitionConfigSvc.getPartitionByName("NAME123");
-		assertThat(partition.getName()).isEqualTo("NAME123");
+		assertEquals("NAME123", partition.getName());
 	}
 
 	@Test
@@ -49,7 +50,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		try {
 			myPartitionConfigSvc.createPartition(partition, null);
 		} catch (MethodNotAllowedException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1313) + "Can not invoke this operation in unnamed partition mode");
+			assertEquals(Msg.code(1313) + "Can not invoke this operation in unnamed partition mode", e.getMessage());
 		}
 	}
 
@@ -63,7 +64,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		myPartitionConfigSvc.createPartition(partition, null);
 
 		partition = myPartitionConfigSvc.getPartitionById(123);
-		assertThat(partition.getName()).isEqualTo("NAME123");
+		assertEquals("NAME123", partition.getName());
 
 		myPartitionConfigSvc.deletePartition(123);
 
@@ -71,7 +72,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 			myPartitionConfigSvc.getPartitionById(123);
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage()).isEqualTo("No partition exists with ID 123");
+			assertEquals("No partition exists with ID 123", e.getMessage());
 		}
 
 	}
@@ -99,7 +100,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 			myPartitionConfigSvc.updatePartition(partition);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1309) + "Partition name \"NAME123\" is already defined");
+			assertEquals(Msg.code(1309) + "Partition name \"NAME123\" is already defined", e.getMessage());
 		}
 	}
 
@@ -120,7 +121,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		}
 
 		catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(2366) + "Partition ID already exists");
+			assertEquals(Msg.code(2366) + "Partition ID already exists", e.getMessage());
 		}
 	}
 
@@ -134,7 +135,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 			myPartitionConfigSvc.updatePartition(partition);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1310) + "Partition must have an ID and a Name");
+			assertEquals(Msg.code(1310) + "Partition must have an ID and a Name", e.getMessage());
 		}
 	}
 
@@ -148,7 +149,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		myPartitionConfigSvc.createPartition(partition, null);
 
 		partition = myPartitionConfigSvc.getPartitionById(123);
-		assertThat(partition.getName()).isEqualTo("NAME123");
+		assertEquals("NAME123", partition.getName());
 
 		partition = new PartitionEntity();
 		partition.setId(123);
@@ -157,7 +158,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 		myPartitionConfigSvc.updatePartition(partition);
 
 		partition = myPartitionConfigSvc.getPartitionById(123);
-		assertThat(partition.getName()).isEqualTo("NAME-NEW");
+		assertEquals("NAME-NEW", partition.getName());
 	}
 
 	@Test
@@ -171,7 +172,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 			myPartitionConfigSvc.createPartition(partition, null);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1312) + "Partition name \"NAME 123\" is not valid");
+			assertEquals(Msg.code(1312) + "Partition name \"NAME 123\" is not valid", e.getMessage());
 		}
 
 	}
@@ -186,7 +187,7 @@ public class PartitionSettingsSvcImplTest extends BaseJpaR4Test {
 			myPartitionConfigSvc.updatePartition(partition);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1307) + "No partition exists with ID 123");
+			assertEquals(Msg.code(1307) + "No partition exists with ID 123", e.getMessage());
 		}
 
 	}

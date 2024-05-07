@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -76,7 +77,7 @@ class MdmLinkUpdaterSvcImplIT extends BaseMdmR4Test {
 			() -> myMdmLinkUpdaterSvc.updateLink(params));
 
 		String expectedExceptionMessage = Msg.code(2218) + myMessageHelper.getMessageForAlreadyAcceptedLink(goldenA, patientC);
-		assertThat(thrown.getMessage()).isEqualTo(expectedExceptionMessage);
+		assertEquals(expectedExceptionMessage, thrown.getMessage());
 	}
 
 	@Test

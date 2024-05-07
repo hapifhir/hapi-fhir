@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.nickname.NicknameSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
@@ -63,14 +64,14 @@ public abstract class BaseR4Test {
 	}
 
 	protected void assertMatch(MdmMatchResultEnum theExpectedMatchEnum, MdmMatchOutcome theMatchResult) {
-		assertThat(theMatchResult.getMatchResultEnum()).isEqualTo(theExpectedMatchEnum);
+		assertEquals(theExpectedMatchEnum, theMatchResult.getMatchResultEnum());
 	}
 
 	protected void assertMatchResult(MdmMatchResultEnum theExpectedMatchEnum, long theExpectedVector, double theExpectedScore, boolean theExpectedNewGoldenResource, boolean theExpectedEidMatch, MdmMatchOutcome theMatchResult) {
 		assertThat(theMatchResult.getScore()).isCloseTo(theExpectedScore, within(0.001));
-		assertThat(theMatchResult.getVector()).isEqualTo(theExpectedVector);
-		assertThat(theMatchResult.isEidMatch()).isEqualTo(theExpectedEidMatch);
-		assertThat(theMatchResult.isCreatedNewResource()).isEqualTo(theExpectedNewGoldenResource);
-		assertThat(theMatchResult.getMatchResultEnum()).isEqualTo(theExpectedMatchEnum);
+		assertEquals(theExpectedVector, theMatchResult.getVector());
+		assertEquals(theExpectedEidMatch, theMatchResult.isEidMatch());
+		assertEquals(theExpectedNewGoldenResource, theMatchResult.isCreatedNewResource());
+		assertEquals(theExpectedMatchEnum, theMatchResult.getMatchResultEnum());
 	}
 }

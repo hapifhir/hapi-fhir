@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.retry;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 
@@ -27,7 +28,7 @@ public class RetrierTest {
 		};
 		Retrier<Boolean> retrier = new Retrier<>(supplier, 5);
 		assertTrue(retrier.runWithRetry());
-		assertThat(counter.get()).isEqualTo(3);
+		assertEquals(3, counter.get());
 	}
 
 	@Test
@@ -43,7 +44,7 @@ public class RetrierTest {
 			retrier.runWithRetry();
 			fail("");
 		} catch (RetryRuntimeException e) {
-			assertThat(e.getMessage()).isEqualTo("test failure message");
+			assertEquals("test failure message", e.getMessage());
 		}
 	}
 
@@ -59,7 +60,7 @@ public class RetrierTest {
 			new Retrier<>(supplier, 0);
 			fail("");
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo("maxRetries must be above zero.");
+			assertEquals("maxRetries must be above zero.", e.getMessage());
 		}
 	}
 
@@ -75,9 +76,9 @@ public class RetrierTest {
 			new Retrier<>(supplier, -1);
 			fail("");
 		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo("maxRetries must be above zero.");
+			assertEquals("maxRetries must be above zero.", e.getMessage());
 		}
-		assertThat(counter.get()).isEqualTo(0);
+		assertEquals(0, counter.get());
 	}
 
 	class RetryRuntimeException extends RuntimeException {

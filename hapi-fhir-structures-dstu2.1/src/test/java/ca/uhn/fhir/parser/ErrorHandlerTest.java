@@ -1,5 +1,6 @@
 package ca.uhn.fhir.parser;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ScalarType;
 import ca.uhn.fhir.parser.json.BaseJsonLikeValue.ValueType;
@@ -65,7 +66,7 @@ public class ErrorHandlerTest {
 		try {
 			new StrictErrorHandler().unexpectedRepeatingElement(null, null);
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1823) + "Multiple repetitions of non-repeatable element 'null' found during parse");
+			assertEquals(Msg.code(1823) + "Multiple repetitions of non-repeatable element 'null' found during parse", e.getMessage());
 		}
 	}
 
@@ -74,7 +75,7 @@ public class ErrorHandlerTest {
 		try {
 			new StrictErrorHandler().unknownAttribute(null, null);
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1824) + "Unknown attribute 'null' found during parse");
+			assertEquals(Msg.code(1824) + "Unknown attribute 'null' found during parse", e.getMessage());
 		}
 	}
 
@@ -83,7 +84,7 @@ public class ErrorHandlerTest {
 		try {
 			new StrictErrorHandler().unknownElement(null, null);
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1825) + "Unknown element 'null' found during parse");
+			assertEquals(Msg.code(1825) + "Unknown element 'null' found during parse", e.getMessage());
 		}
 	}
 
@@ -92,7 +93,7 @@ public class ErrorHandlerTest {
 		try {
 			new StrictErrorHandler().containedResourceWithNoId(null);
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1819) + "Resource has contained child resource with no ID");
+			assertEquals(Msg.code(1819) + "Resource has contained child resource with no ID", e.getMessage());
 		}
 	}
 
@@ -101,7 +102,7 @@ public class ErrorHandlerTest {
 		try {
 			new StrictErrorHandler().unknownReference(null, null);
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1826) + "Resource has invalid reference: null");
+			assertEquals(Msg.code(1826) + "Resource has invalid reference: null", e.getMessage());
 		}
 	}
 
@@ -110,7 +111,7 @@ public class ErrorHandlerTest {
 		try {
 			new StrictErrorHandler().incorrectJsonType(null, null, ValueType.ARRAY, null, ValueType.SCALAR, null);
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1820) + "Found incorrect type for element null - Expected ARRAY and found SCALAR");
+			assertEquals(Msg.code(1820) + "Found incorrect type for element null - Expected ARRAY and found SCALAR", e.getMessage());
 		}
 	}
 
@@ -119,7 +120,7 @@ public class ErrorHandlerTest {
 		try {
 			new StrictErrorHandler().incorrectJsonType(null, null, ValueType.SCALAR, ScalarType.BOOLEAN, ValueType.SCALAR, ScalarType.STRING);
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1820) + "Found incorrect type for element null - Expected SCALAR (BOOLEAN) and found SCALAR (STRING)");
+			assertEquals(Msg.code(1820) + "Found incorrect type for element null - Expected SCALAR (BOOLEAN) and found SCALAR (STRING)", e.getMessage());
 		}
 	}
 
@@ -129,7 +130,7 @@ public class ErrorHandlerTest {
 		try {
 			new StrictErrorHandler().invalidValue(null, null, null);
 			fail("");		} catch (DataFormatException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1821) + "Invalid attribute value \"null\": null");
+			assertEquals(Msg.code(1821) + "Invalid attribute value \"null\": null", e.getMessage());
 		}
 	}
 

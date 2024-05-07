@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -212,7 +213,7 @@ public class MdmProviderBatchR4Test extends BaseLinkR4Test {
 			// Then
 			assertLinkCount(1);
 			String expectedMsg = Msg.code(2362) + "Old golden resource was null while updating MDM links with new golden resource. It is likely that a $mdm-clear was performed without a $mdm-submit. Link will not be updated.";
-			assertThat(e.getMessage()).isEqualTo(expectedMsg);
+			assertEquals(expectedMsg, e.getMessage());
 		}
 	}
 

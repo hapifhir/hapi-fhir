@@ -296,7 +296,7 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 		try {
 			CommonCodeSystemsTerminologyService.getCodeSystemUrl(myCtx, new org.hl7.fhir.dstu3.model.CodeSystem());
 			fail("");		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(696) + "Can not handle version: DSTU3");
+			assertEquals(Msg.code(696) + "Can not handle version: DSTU3", e.getMessage());
 		}
 	}
 
@@ -373,8 +373,8 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	private void validateCodeResultOk(final CodeValidationResult theResult, final String theCode, final String theDisplay) {
 		assertNotNull(theResult);
 		assertTrue(theResult.isOk());
-		assertThat(theResult.getCode()).isEqualTo(theCode);
-		assertThat(theResult.getDisplay()).isEqualTo(theDisplay);
+		assertEquals(theCode, theResult.getCode());
+		assertEquals(theDisplay, theResult.getDisplay());
 		assertNull(theResult.getSeverity());
 		assertNull(theResult.getMessage());
 	}
@@ -382,23 +382,23 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	private void validateCodeResultError(final CodeValidationResult theResult, final String theError) {
 		assertNotNull(theResult);
 		assertFalse(theResult.isOk());
-		assertThat(theResult.getSeverity()).isEqualTo(IssueSeverity.ERROR);
-		assertThat(theResult.getMessage()).isEqualTo(theError);
+		assertEquals(IssueSeverity.ERROR, theResult.getSeverity());
+		assertEquals(theError, theResult.getMessage());
 	}
 
 	private void lookupCodeResultOk(final LookupCodeResult theResult, final String theCode, final String theSystem, final String theDisplay) {
 		assertNotNull(theResult);
-		assertThat(theResult.getSearchedForSystem()).isEqualTo(theSystem);
-		assertThat(theResult.getSearchedForCode()).isEqualTo(theCode);
+		assertEquals(theSystem, theResult.getSearchedForSystem());
+		assertEquals(theCode, theResult.getSearchedForCode());
 		assertTrue(theResult.isFound());
-		assertThat(theResult.getCodeDisplay()).isEqualTo(theDisplay);
+		assertEquals(theDisplay, theResult.getCodeDisplay());
 	}
 
 	private void lookupCodeResultError(final LookupCodeResult theResult, final String theCode, final String theMessage) {
 		assertNotNull(theResult);
-		assertThat(theResult.getSearchedForCode()).isEqualTo(theCode);
+		assertEquals(theCode, theResult.getSearchedForCode());
 		assertFalse(theResult.isFound());
-		assertThat(theResult.getErrorMessage()).isEqualTo(theMessage);
+		assertEquals(theMessage, theResult.getErrorMessage());
 		assertNull(theResult.getCodeDisplay());
 	}
 

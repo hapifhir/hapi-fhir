@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -204,7 +205,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 			myPatientDao.read(redirectedGoldenPatientId, myRequestDetails);
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getStatusCode()).isEqualTo(Constants.STATUS_HTTP_404_NOT_FOUND);
+			assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, e.getStatusCode());
 			assertNoGoldenPatientsExist();
 		}
 	}
@@ -275,7 +276,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 
 		assertNoPatientLinksExist();
 		IBundleProvider search = myPatientDao.search(buildGoldenResourceParameterMap());
-		assertThat(search.size()).isEqualTo(0);
+		assertEquals(0, search.size());
 	}
 
 	/**
@@ -323,7 +324,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 
 		assertNoPatientLinksExist();
 		IBundleProvider search = myPatientDao.search(buildGoldenResourceParameterMap());
-		assertThat(search.size()).isEqualTo(0);
+		assertEquals(0, search.size());
 
 	}
 
@@ -354,7 +355,7 @@ public class MdmProviderClearLinkR4Test extends BaseLinkR4Test {
 			myMdmProvider.clearMdmLinks(getResourceNames("Observation"), null, myRequestDetails);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-1500: $mdm-clear does not support resource type: Observation");
+			assertEquals("HAPI-1500: $mdm-clear does not support resource type: Observation", e.getMessage());
 		}
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.api.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -26,7 +27,7 @@ public class SimplePreResourceShowDetailsTest {
 			SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(myResource1);
 			details.setResource(-1, myResource2);
 			fail("");		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo("Invalid index -1 - theIndex must not be < 0");
+			assertEquals("Invalid index -1 - theIndex must not be < 0", e.getMessage());
 		}
 	}
 
@@ -36,7 +37,7 @@ public class SimplePreResourceShowDetailsTest {
 			SimplePreResourceShowDetails details = new SimplePreResourceShowDetails(myResource1);
 			details.setResource(2, myResource2);
 			fail("");		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo("Invalid index {} - theIndex must be < 2");
+			assertEquals("Invalid index {} - theIndex must be < 2", e.getMessage());
 		}
 	}
 

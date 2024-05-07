@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import org.hl7.fhir.dstu3.model.CodeableConcept;
@@ -40,6 +41,6 @@ public class ResourceProviderDeleteSqlDstu3Test extends BaseResourceProviderDstu
 			.filter(query -> query.getSql(false, false).contains("HFJ_SPIDX_TOKEN"))
 			.collect(Collectors.summarizingInt(SqlQuery::getSize))
 			.getSum();
-		assertThat(deleteCount).isEqualTo(1);
+		assertEquals(1, deleteCount);
 	}
 }

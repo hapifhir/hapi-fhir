@@ -1,5 +1,6 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.prefetch;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.hapi.fhir.cdshooks.api.CdsResolutionStrategyEnum;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceRequestJson;
@@ -20,24 +21,24 @@ class CdsResolutionStrategySvcTest {
 	public void testScenarios() {
 		Set<CdsResolutionStrategyEnum> set = new HashSet<>();
 		set.add(CdsResolutionStrategyEnum.NONE);
-		assertThat(strategyWith(null, false, false)).isEqualTo(set);
-		assertThat(strategyWith(null, true, false)).isEqualTo(set);
+		assertEquals(set, strategyWith(null, false, false));
+		assertEquals(set, strategyWith(null, true, false));
 		set.clear();
 		set.addAll(Arrays.asList(CdsResolutionStrategyEnum.NONE, CdsResolutionStrategyEnum.DAO));
-		assertThat(strategyWith(myDaoRegistry, false, false)).isEqualTo(set);
-		assertThat(strategyWith(myDaoRegistry, true, false)).isEqualTo(set);
+		assertEquals(set, strategyWith(myDaoRegistry, false, false));
+		assertEquals(set, strategyWith(myDaoRegistry, true, false));
 		set.clear();
 		set.addAll(Arrays.asList(CdsResolutionStrategyEnum.NONE, CdsResolutionStrategyEnum.SERVICE));
-		assertThat(strategyWith(null, false, true)).isEqualTo(set);
+		assertEquals(set, strategyWith(null, false, true));
 		set.clear();
 		set.addAll(Arrays.asList(CdsResolutionStrategyEnum.NONE, CdsResolutionStrategyEnum.DAO, CdsResolutionStrategyEnum.SERVICE));
-		assertThat(strategyWith(myDaoRegistry, false, true)).isEqualTo(set);
+		assertEquals(set, strategyWith(myDaoRegistry, false, true));
 		set.clear();
 		set.addAll(Arrays.asList(CdsResolutionStrategyEnum.NONE, CdsResolutionStrategyEnum.SERVICE, CdsResolutionStrategyEnum.FHIR_CLIENT));
-		assertThat(strategyWith(null, true, true)).isEqualTo(set);
+		assertEquals(set, strategyWith(null, true, true));
 		set.clear();
 		set.addAll(Arrays.asList(CdsResolutionStrategyEnum.NONE, CdsResolutionStrategyEnum.DAO, CdsResolutionStrategyEnum.SERVICE, CdsResolutionStrategyEnum.FHIR_CLIENT));
-		assertThat(strategyWith(myDaoRegistry, true, true)).isEqualTo(set);
+		assertEquals(set, strategyWith(myDaoRegistry, true, true));
 		set.clear();
 	}
 

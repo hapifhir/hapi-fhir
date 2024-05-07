@@ -55,10 +55,10 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 
 		var result = theRepository
 			.create(new Patient().addName(new HumanName().setFamily("Test").addGiven("Name1")));
-		assertThat(result.getCreated()).isEqualTo(true);
+		assertEquals(true, result.getCreated());
 		var patient = (Patient) result.getResource();
 		assertThat(patient.getName()).hasSize(1);
-		assertThat(patient.getName().get(0).getFamily()).isEqualTo("Test");
+		assertEquals("Test", patient.getName().get(0).getFamily());
 		assertThat(patient.getName().get(0).getGiven()).hasSize(1);
 		patient.getName().get(0).addGiven("Name2");
 		theRepository.update(patient);
@@ -92,7 +92,7 @@ public class HapiFhirRepositoryR4Test extends BaseCrR4TestServer {
 		var result = theRepository.search(Bundle.class, Patient.class, withCountParam(20));
 		assertEquals(20, result.getEntry().size());
 		var next = result.getLink().get(1);
-		assertThat(next.getRelation()).isEqualTo("next");
+		assertEquals("next", next.getRelation());
 		var nextUrl = next.getUrl();
 		var nextResult = theRepository.link(Bundle.class, nextUrl);
 		assertEquals(20, nextResult.getEntry().size());

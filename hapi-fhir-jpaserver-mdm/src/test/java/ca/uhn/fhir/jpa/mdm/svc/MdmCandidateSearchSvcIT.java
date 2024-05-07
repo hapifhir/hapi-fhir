@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
@@ -77,9 +78,9 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 			SearchParameterMap map = myMatchUrlService.getResourceSearch("Practitioner?given:nickname=Bill&family=Shatner").getSearchParameterMap();
 			map.setLoadSynchronous(true);
 			IBundleProvider result = myPractitionerDao.search(map);
-			assertThat(result.size()).isEqualTo(1);
+			assertEquals(1, result.size());
 			Practitioner first = (Practitioner) result.getResources(0, 1).get(0);
-			assertThat(first.getNameFirstRep().getGivenAsSingleString()).isEqualTo("William");
+			assertEquals("William", first.getNameFirstRep().getGivenAsSingleString());
 		}
 
 		{
@@ -140,16 +141,16 @@ public class MdmCandidateSearchSvcIT extends BaseMdmR4Test {
 		Patient newJane = buildJanePatient();
 
 		createActivePatient();
-		assertThat(runInTransaction(() -> myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions()).size())).isEqualTo(1);
+		assertEquals(1, runInTransaction(() -> myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions()).size()));
 		createActivePatient();
-		assertThat(runInTransaction(() -> myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions()).size())).isEqualTo(2);
+		assertEquals(2, runInTransaction(() -> myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions()).size()));
 
 		try {
 			createActivePatient();
 			myMdmCandidateSearchSvc.findCandidates("Patient", newJane, RequestPartitionId.allPartitions());
 			fail("");
 		} catch (TooManyCandidatesException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-0762: More than 3 candidate matches found for Patient?identifier=http%3A%2F%2Fa.tv%2F%7CID.JANE.123&active=true.  Aborting mdm matching. Updating the candidate search parameters is strongly recommended for better performance of MDM.");
+			assertEquals("HAPI-0762: More than 3 candidate matches found for Patient?identifier=http%3A%2F%2Fa.tv%2F%7CID.JANE.123&active=true.  Aborting mdm matching. Updating the candidate search parameters is strongly recommended for better performance of MDM.", e.getMessage());
 		}
 	}
 

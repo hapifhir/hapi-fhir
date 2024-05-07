@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.nickname;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -10,6 +11,6 @@ class NicknameSvcTest {
 	@Test
 	public void testReadfile() throws IOException {
 		NicknameSvc nicknameSvc = new NicknameSvc();
-		assertThat(nicknameSvc.size()).isEqualTo(1082);
+		assertEquals(1082, nicknameSvc.size());
 	}
 }

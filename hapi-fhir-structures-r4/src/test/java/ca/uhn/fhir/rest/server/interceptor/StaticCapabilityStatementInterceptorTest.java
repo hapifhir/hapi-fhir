@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -31,7 +32,7 @@ public class StaticCapabilityStatementInterceptorTest {
 		try {
 
 			CapabilityStatement cs = myRestfulServer.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
-			assertThat(cs.getSoftware().getName()).isEqualTo("Help I'm a Bug");
+			assertEquals("Help I'm a Bug", cs.getSoftware().getName());
 
 		} finally {
 			myRestfulServer.getRestfulServer().unregisterInterceptor(interceptor);

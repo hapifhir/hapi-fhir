@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -73,9 +74,9 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(obs);
 		assertThat(tokens).hasSize(1);
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
-		assertThat(token.getParamName()).isEqualTo("category");
-		assertThat(token.getSystem()).isEqualTo("SYSTEM");
-		assertThat(token.getValue()).isEqualTo("CODE");
+		assertEquals("category", token.getParamName());
+		assertEquals("SYSTEM", token.getSystem());
+		assertEquals("CODE", token.getValue());
 	}
 
 	@Test
@@ -104,9 +105,9 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		Set<BaseResourceIndexedSearchParam> tokens = extractor.extractSearchParamTokens(sp);
 		assertThat(tokens).hasSize(1);
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.iterator().next();
-		assertThat(token.getParamName()).isEqualTo("context-type");
-		assertThat(token.getSystem()).isEqualTo("http://system");
-		assertThat(token.getValue()).isEqualTo("code");
+		assertEquals("context-type", token.getParamName());
+		assertEquals("http://system", token.getSystem());
+		assertEquals("code", token.getValue());
 	}
 
 	@Test
@@ -124,13 +125,13 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		assertThat(tokens).hasSize(2);
 
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
-		assertThat(token.getParamName()).isEqualTo("code");
-		assertThat(token.getSystem()).isEqualTo("http://system");
-		assertThat(token.getValue()).isEqualTo("code");
+		assertEquals("code", token.getParamName());
+		assertEquals("http://system", token.getSystem());
+		assertEquals("code", token.getValue());
 
 		ResourceIndexedSearchParamString string = (ResourceIndexedSearchParamString) tokens.get(1);
-		assertThat(string.getParamName()).isEqualTo("code");
-		assertThat(string.getValueExact()).isEqualTo("Help Im a Bug");
+		assertEquals("code", string.getParamName());
+		assertEquals("Help Im a Bug", string.getValueExact());
 	}
 
 	@Test
@@ -153,9 +154,9 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		assertThat(tokens).hasSize(1);
 
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
-		assertThat(token.getParamName()).isEqualTo("code");
-		assertThat(token.getSystem()).isEqualTo("http://system");
-		assertThat(token.getValue()).isEqualTo("code");
+		assertEquals("code", token.getParamName());
+		assertEquals("http://system", token.getSystem());
+		assertEquals("code", token.getValue());
 
 	}
 
@@ -177,9 +178,9 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		assertThat(tokens).hasSize(1);
 
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
-		assertThat(token.getParamName()).isEqualTo("code");
-		assertThat(token.getSystem()).isEqualTo("http://system");
-		assertThat(token.getValue()).isEqualTo("code");
+		assertEquals("code", token.getParamName());
+		assertEquals("http://system", token.getSystem());
+		assertEquals("code", token.getValue());
 
 	}
 
@@ -206,13 +207,13 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		assertThat(tokens).hasSize(2);
 
 		ResourceIndexedSearchParamToken token = (ResourceIndexedSearchParamToken) tokens.get(0);
-		assertThat(token.getParamName()).isEqualTo("code");
-		assertThat(token.getSystem()).isEqualTo("http://system");
-		assertThat(token.getValue()).isEqualTo("code");
+		assertEquals("code", token.getParamName());
+		assertEquals("http://system", token.getSystem());
+		assertEquals("code", token.getValue());
 
 		ResourceIndexedSearchParamString string = (ResourceIndexedSearchParamString) tokens.get(1);
-		assertThat(string.getParamName()).isEqualTo("code");
-		assertThat(string.getValueExact()).isEqualTo("Help Im a Bug");
+		assertEquals("code", string.getParamName());
+		assertEquals("Help Im a Bug", string.getValueExact());
 	}
 
 
@@ -226,9 +227,9 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(enc, false);
 		assertThat(links).hasSize(1);
-		assertThat(links.iterator().next().getSearchParamName()).isEqualTo("location");
-		assertThat(links.iterator().next().getPath()).isEqualTo("Encounter.location.location");
-		assertThat(((Reference) links.iterator().next().getRef()).getReference()).isEqualTo("Location/123");
+		assertEquals("location", links.iterator().next().getSearchParamName());
+		assertEquals("Encounter.location.location", links.iterator().next().getPath());
+		assertEquals("Location/123", ((Reference) links.iterator().next().getRef()).getReference());
 	}
 
 	@Test
@@ -241,8 +242,8 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		assertNotNull(param);
 		ISearchParamExtractor.SearchParamSet<PathAndRef> links = extractor.extractResourceLinks(consent, false);
 		assertThat(links).hasSize(1);
-		assertThat(links.iterator().next().getPath()).isEqualTo("Consent.source");
-		assertThat(((Reference) links.iterator().next().getRef()).getReference()).isEqualTo("Consent/999");
+		assertEquals("Consent.source", links.iterator().next().getPath());
+		assertEquals("Consent/999", ((Reference) links.iterator().next().getRef()).getReference());
 	}
 
 
@@ -257,9 +258,9 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 		ISearchParamExtractor.SearchParamSet<BaseResourceIndexedSearchParam> params = extractor.extractSearchParamTokens(p, param);
 		assertThat(params).hasSize(1);
 		ResourceIndexedSearchParamToken paramValue = (ResourceIndexedSearchParamToken) params.iterator().next();
-		assertThat(paramValue.getParamName()).isEqualTo("identifier");
-		assertThat(paramValue.getSystem()).isEqualTo("sys");
-		assertThat(paramValue.getValue()).isEqualTo("val");
+		assertEquals("identifier", paramValue.getParamName());
+		assertEquals("sys", paramValue.getSystem());
+		assertEquals("val", paramValue.getValue());
 	}
 
 
@@ -481,12 +482,12 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 			assertThat(indexedComponentsOfElement).as("component-code-value-concept has two sub-params").hasSize(2);
 
 			final ResourceIndexedSearchParamComposite.Component component0 = indexedComponentsOfElement.get(0);
-			assertThat(component0.getSearchParamName()).isEqualTo("component-code");
-			assertThat(component0.getSearchParameterType()).isEqualTo(RestSearchParameterTypeEnum.TOKEN);
+			assertEquals("component-code", component0.getSearchParamName());
+			assertEquals(RestSearchParameterTypeEnum.TOKEN, component0.getSearchParameterType());
 
 			final ResourceIndexedSearchParamComposite.Component component1 = indexedComponentsOfElement.get(1);
-			assertThat(component1.getSearchParamName()).isEqualTo("component-value-concept");
-			assertThat(component1.getSearchParameterType()).isEqualTo(RestSearchParameterTypeEnum.TOKEN);
+			assertEquals("component-value-concept", component1.getSearchParamName());
+			assertEquals(RestSearchParameterTypeEnum.TOKEN, component1.getSearchParameterType());
 		}
 
 		@Test
@@ -510,23 +511,23 @@ public class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 			ResourceIndexedSearchParamComposite.Component indexComponent0 = spEntry.getComponents().get(0);
 			assertNotNull(indexComponent0.getSearchParamName());
-			assertThat(indexComponent0.getSearchParamName()).isEqualTo("component-code");
-			assertThat(indexComponent0.getSearchParameterType()).isEqualTo(RestSearchParameterTypeEnum.TOKEN);
+			assertEquals("component-code", indexComponent0.getSearchParamName());
+			assertEquals(RestSearchParameterTypeEnum.TOKEN, indexComponent0.getSearchParameterType());
 			assertThat(indexComponent0.getParamIndexValues()).hasSize(2);
 			// token indexes both the token, and the display text
 			ResourceIndexedSearchParamToken tokenIdx0 = (ResourceIndexedSearchParamToken) indexComponent0.getParamIndexValues().stream()
 				.filter(i -> i instanceof ResourceIndexedSearchParamToken)
 				.findFirst().orElseThrow();
-			assertThat(tokenIdx0.getParamName()).isEqualTo("component-code");
-			assertThat(tokenIdx0.getResourceType()).isEqualTo("Observation");
-			assertThat(tokenIdx0.getValue()).isEqualTo("code_token");
+			assertEquals("component-code", tokenIdx0.getParamName());
+			assertEquals("Observation", tokenIdx0.getResourceType());
+			assertEquals("code_token", tokenIdx0.getValue());
 
 			ResourceIndexedSearchParamString tokenDisplayIdx0 = (ResourceIndexedSearchParamString) indexComponent0.getParamIndexValues().stream()
 				.filter(i -> i instanceof ResourceIndexedSearchParamString)
 				.findFirst().orElseThrow();
-			assertThat(tokenDisplayIdx0.getParamName()).isEqualTo("component-code");
-			assertThat(tokenDisplayIdx0.getResourceType()).isEqualTo("Observation");
-			assertThat(tokenDisplayIdx0.getValueExact()).isEqualTo("display value");
+			assertEquals("component-code", tokenDisplayIdx0.getParamName());
+			assertEquals("Observation", tokenDisplayIdx0.getResourceType());
+			assertEquals("display value", tokenDisplayIdx0.getValueExact());
 		}
 	}
 

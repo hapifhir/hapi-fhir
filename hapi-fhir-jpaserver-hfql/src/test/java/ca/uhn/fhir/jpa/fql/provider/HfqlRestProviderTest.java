@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.fql.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
@@ -101,13 +102,13 @@ public class HfqlRestProviderTest {
 				0,Simpson,Homer
 				3,Simpson,Marge
 				""".replace("THE-VERSION", VersionUtil.getVersion());
-			assertThat(outcome.trim()).isEqualTo(expected.trim());
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(expected.trim(), outcome.trim());
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(response.getEntity().getContentType().getValue()).startsWith("text/csv;");
 
 			verify(myFqlExecutor, times(1)).executeInitialSearch(myStatementCaptor.capture(), myLimitCaptor.capture(), notNull());
-			assertThat(myStatementCaptor.getValue()).isEqualTo(select);
-			assertThat(myLimitCaptor.getValue()).isEqualTo(100);
+			assertEquals(select, myStatementCaptor.getValue());
+			assertEquals(100, myLimitCaptor.getValue());
 		}
 	}
 
@@ -144,14 +145,14 @@ public class HfqlRestProviderTest {
 				4,Simpson,Homer
 				6,Simpson,Marge
 				""".replace("THE-VERSION", VersionUtil.getVersion());
-			assertThat(outcome.trim()).isEqualTo(expected.trim());
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(expected.trim(), outcome.trim());
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(response.getEntity().getContentType().getValue()).startsWith("text/csv;");
 
 			verify(myFqlExecutor, times(1)).executeContinuation(any(), myStatementCaptor.capture(), myOffsetCaptor.capture(), myLimitCaptor.capture(), notNull());
-			assertThat(myStatementCaptor.getValue()).isEqualTo(continuation);
+			assertEquals(continuation, myStatementCaptor.getValue());
 			assertNull(myLimitCaptor.getValue());
-			assertThat(myOffsetCaptor.getValue()).isEqualTo(99);
+			assertEquals(99, myOffsetCaptor.getValue());
 		}
 	}
 
@@ -187,8 +188,8 @@ public class HfqlRestProviderTest {
 				0,Account
 				6,Patient
 				""".replace("THE-VERSION", VersionUtil.getVersion());
-			assertThat(outcome.trim()).isEqualTo(expected.trim());
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(expected.trim(), outcome.trim());
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(response.getEntity().getContentType().getValue()).startsWith("text/csv;");
 		}
 
@@ -228,8 +229,8 @@ public class HfqlRestProviderTest {
 				0,FOO
 				6,BAR
 				""".replace("THE-VERSION", VersionUtil.getVersion());
-			assertThat(outcome.trim()).isEqualTo(expected.trim());
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(expected.trim(), outcome.trim());
+			assertEquals(200, response.getStatusLine().getStatusCode());
 			assertThat(response.getEntity().getContentType().getValue()).startsWith("text/csv;");
 		}
 

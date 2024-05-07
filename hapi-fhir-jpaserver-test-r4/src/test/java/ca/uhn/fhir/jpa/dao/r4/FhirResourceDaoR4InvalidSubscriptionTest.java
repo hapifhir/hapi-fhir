@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
@@ -46,14 +47,14 @@ public class FhirResourceDaoR4InvalidSubscriptionTest extends BaseJpaR4Test {
 		IIdType id = mySubscriptionDao.create(s).getId().toUnqualified();
 
 		s = mySubscriptionDao.read(id);
-		assertThat(s.getCriteria()).isEqualTo("FOO");
+		assertEquals("FOO", s.getCriteria());
 
 		s.setStatus(Subscription.SubscriptionStatus.REQUESTED);
 		try {
 			mySubscriptionDao.update(s);
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(13) + "Subscription.criteria contains invalid/unsupported resource type: FOO");
+			assertEquals(Msg.code(13) + "Subscription.criteria contains invalid/unsupported resource type: FOO", e.getMessage());
 		}
 	}
 

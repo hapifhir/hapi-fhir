@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.api.paging;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -16,7 +17,7 @@ class MdmPageLinkBuilderTest {
 		String builtUrl = MdmPageLinkBuilder.buildLinkWithOffsetAndCount(baseUrl, 1, 1);
 
 		//Then
-		assertThat(builtUrl).isEqualTo(expected);
+		assertEquals(expected, builtUrl);
 	}
 
 	@Test
@@ -29,6 +30,6 @@ class MdmPageLinkBuilderTest {
 		String builtUrl = MdmPageLinkBuilder.buildLinkWithOffsetAndCount(baseUrl, 1, 1);
 
 		//Then
-		assertThat(builtUrl).isEqualTo(expected);
+		assertEquals(expected, builtUrl);
 	}
 }

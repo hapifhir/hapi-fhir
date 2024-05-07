@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.cache;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.ISearchDao;
@@ -49,7 +50,7 @@ public class DatabaseSearchCacheSvcImplTest {
 		assertThat(outcome).isPresent();
 
 		verify(mySearchDao, times(1)).save(any());
-		assertThat(updated.getStatus()).isEqualTo(SearchStatusEnum.LOADING);
+		assertEquals(SearchStatusEnum.LOADING, updated.getStatus());
 	}
 
 	@Test

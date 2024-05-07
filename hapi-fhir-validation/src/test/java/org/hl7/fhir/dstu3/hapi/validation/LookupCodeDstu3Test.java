@@ -81,7 +81,7 @@ public class LookupCodeDstu3Test {
 		}
 
 		public void verifyProperty(BaseConceptProperty theConceptProperty, String theExpectedPropertName, IBaseDatatype theExpectedValue) {
-			assertThat(theConceptProperty.getPropertyName()).isEqualTo(theExpectedPropertName);
+			assertEquals(theExpectedPropertName, theConceptProperty.getPropertyName());
 			String type = theConceptProperty.getType();
 			switch (type) {
 				case IValidationSupport.TYPE_STRING -> {
@@ -94,16 +94,16 @@ public class LookupCodeDstu3Test {
 					// StringType stringValue = (StringType) theExpectedValue;
 					assertTrue(theConceptProperty instanceof StringConceptProperty);
 					StringConceptProperty stringConceptProperty = (StringConceptProperty) theConceptProperty;
-					assertThat(stringConceptProperty.getValue()).isEqualTo(stringValue.getValue());
+					assertEquals(stringValue.getValue(), stringConceptProperty.getValue());
 				}
 				case IValidationSupport.TYPE_CODING -> {
 					assertTrue(theExpectedValue instanceof Coding);
 					Coding coding = (Coding) theExpectedValue;
 					assertTrue(theConceptProperty instanceof CodingConceptProperty);
 					CodingConceptProperty codingConceptProperty = (CodingConceptProperty) theConceptProperty;
-					assertThat(codingConceptProperty.getCode()).isEqualTo(coding.getCode());
-					assertThat(codingConceptProperty.getCodeSystem()).isEqualTo(coding.getSystem());
-					assertThat(codingConceptProperty.getDisplay()).isEqualTo(coding.getDisplay());
+					assertEquals(coding.getCode(), codingConceptProperty.getCode());
+					assertEquals(coding.getSystem(), codingConceptProperty.getCodeSystem());
+					assertEquals(coding.getDisplay(), codingConceptProperty.getDisplay());
 				}
 				default -> {
 					IValidationSupport.StringConceptProperty stringConceptProperty = (IValidationSupport.StringConceptProperty) theConceptProperty;

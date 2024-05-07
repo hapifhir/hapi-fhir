@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -105,13 +106,13 @@ public class UpdateDstu2Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertNull(status.getFirstHeader("location"));
-		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 
 		assertNull(ourLastId.getValue());
 		assertNull(ourLastIdParam);
-		assertThat(ourLastConditionalUrl).isEqualTo("Patient?identifier=system%7C001");
+		assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
 
 	}
 
@@ -133,12 +134,12 @@ public class UpdateDstu2Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertNull(status.getFirstHeader("location"));
-		assertThat(status.getFirstHeader("content-location").getValue()).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
 
-		assertThat(ourLastId.toUnqualified().getValue()).isEqualTo("Patient/2");
-		assertThat(ourLastIdParam.toUnqualified().getValue()).isEqualTo("Patient/2");
+		assertEquals("Patient/2", ourLastId.toUnqualified().getValue());
+		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
 		assertNull(ourLastConditionalUrl);
 
 	}

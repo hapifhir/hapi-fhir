@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.server.exceptions.NotImplementedOperationException;
@@ -51,10 +52,10 @@ public class ResourceProviderDstu3BundleTest extends BaseResourceProviderDstu3Te
 			List<StringType> searchRevInclude = patient.get().getSearchRevInclude();
 
 			assertTrue(searchRevInclude.stream().map(PrimitiveType::getValue).anyMatch(stringRevIncludes -> stringRevIncludes.equals("Observation:subject")));
-			assertThat(152).isEqualTo(searchRevInclude.size());
+			assertEquals(searchRevInclude.size(), 152);
 
 			assertTrue(searchInclude.stream().map(PrimitiveType::getValue).anyMatch(stringRevIncludes -> stringRevIncludes.equals("Patient:general-practitioner")));
-			assertThat(4).isEqualTo(searchInclude.size());
+			assertEquals(searchInclude.size(), 4);
 		}
 	}
 

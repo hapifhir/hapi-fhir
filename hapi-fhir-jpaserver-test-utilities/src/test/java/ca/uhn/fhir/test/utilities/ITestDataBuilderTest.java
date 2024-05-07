@@ -1,5 +1,6 @@
 package ca.uhn.fhir.test.utilities;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -53,7 +54,7 @@ public class ITestDataBuilderTest {
 			assertThat(myCreatedList).hasSize(1);
 			Observation o = (Observation) myCreatedList.get(0);
 
-			assertThat(o.getEffectiveDateTimeType().getValueAsString()).isEqualTo("2020-01-01T12:34:56");
+			assertEquals("2020-01-01T12:34:56", o.getEffectiveDateTimeType().getValueAsString());
 		}
 
 		@Test
@@ -72,9 +73,9 @@ public class ITestDataBuilderTest {
 			assertThat(codeable.getCoding().size()).as("has one coding").isEqualTo(1);
 			Coding coding = codeable.getCoding().get(0);
 
-			assertThat(coding.getSystem()).isEqualTo("http://example.com");
-			assertThat(coding.getCode()).isEqualTo("a-code-value");
-			assertThat(coding.getDisplay()).isEqualTo("a code description");
+			assertEquals("http://example.com", coding.getSystem());
+			assertEquals("a-code-value", coding.getCode());
+			assertEquals("a code description", coding.getDisplay());
 
 		}
 
@@ -89,9 +90,9 @@ public class ITestDataBuilderTest {
 			Quantity valueQuantity = o.getValueQuantity();
 			assertNotNull(valueQuantity);
 
-			assertThat(valueQuantity.getValue().doubleValue()).isEqualTo(200);
-			assertThat(valueQuantity.getSystem()).isEqualTo("hulla");
-			assertThat(valueQuantity.getCode()).isEqualTo("bpm");
+			assertEquals(200, valueQuantity.getValue().doubleValue());
+			assertEquals("hulla", valueQuantity.getSystem());
+			assertEquals("bpm", valueQuantity.getCode());
 		}
 
 
@@ -116,8 +117,8 @@ public class ITestDataBuilderTest {
 			assertThat(o.getComponent()).hasSize(2);
 			Observation.ObservationComponentComponent secondComponent = o.getComponent().get(1);
 
-			assertThat(secondComponent.getCode().getCoding().get(0).getCode()).isEqualTo("yet-another-code-value");
-			assertThat(secondComponent.getValueQuantity().getValue().doubleValue()).isEqualTo(1000000.0);
+			assertEquals("yet-another-code-value", secondComponent.getCode().getCoding().get(0).getCode());
+			assertEquals(1000000.0, secondComponent.getValueQuantity().getValue().doubleValue());
 		}
 
 	}
@@ -133,7 +134,7 @@ public class ITestDataBuilderTest {
 		Group g = (Group) myCreatedList.get(0);
 		assertThat(g.getMember()).hasSize(1);
 		assertTrue(g.getMember().get(0).hasEntity());
-		assertThat(g.getMember().get(0).getEntity().getReference()).isEqualTo("Patient/123");
+		assertEquals("Patient/123", g.getMember().get(0).getEntity().getReference());
 	}
 
 }

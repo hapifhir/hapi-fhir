@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -36,7 +37,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(response));
 		assertThat(response.getEntry()).hasSize(1);
-		assertThat(response.getEntry().get(0).getResource().getIdElement().getIdPart()).isEqualTo("dhtest7");
+		assertEquals("dhtest7", response.getEntry().get(0).getResource().getIdElement().getIdPart());
 	}
 
 	@Test
@@ -94,7 +95,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 				.returnResourceType(StructureDefinition.class)
 				.execute();
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 400 Bad Request: " + Msg.code(1770) + "Must supply either an ID or a StructureDefinition or a URL (but not more than one of these things)");
+			assertEquals("HTTP 400 Bad Request: " + Msg.code(1770) + "Must supply either an ID or a StructureDefinition or a URL (but not more than one of these things)", e.getMessage());
 		}
 	}
 
@@ -109,7 +110,7 @@ public class ResourceProviderR4StructureDefinitionTest extends BaseResourceProvi
 				.returnResourceType(StructureDefinition.class)
 				.execute();
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 404 Not Found: " + Msg.code(1162) + "No StructureDefiniton found with url = 'http://hl7.org/fhir/StructureDefinition/FOO'");
+			assertEquals("HTTP 404 Not Found: " + Msg.code(1162) + "No StructureDefiniton found with url = 'http://hl7.org/fhir/StructureDefinition/FOO'", e.getMessage());
 		}
 	}
 

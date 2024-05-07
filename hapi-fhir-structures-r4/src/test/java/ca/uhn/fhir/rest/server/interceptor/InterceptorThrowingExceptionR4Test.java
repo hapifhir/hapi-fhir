@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.api.AddProfileTagEnum;
@@ -119,7 +120,7 @@ public class InterceptorThrowingExceptionR4Test {
 		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
 		status = ourClient.execute(httpGet);
 		response = extractResponseAndClose(status);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(response).contains("FAM");
 		assertTrue(ourHitMethod);
 

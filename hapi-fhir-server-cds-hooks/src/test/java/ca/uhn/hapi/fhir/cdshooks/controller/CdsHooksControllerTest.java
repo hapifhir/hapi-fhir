@@ -1,4 +1,5 @@
-package ca.uhn.hapi.fhir.cdshooks.controller;/*-
+package ca.uhn.hapi.fhir.cdshooks.controller;import static org.junit.jupiter.api.Assertions.assertEquals;
+/*-
  * #%L
  * Smile CDR - CDR
  * %%
@@ -238,7 +239,7 @@ public class CdsHooksControllerTest {
 			.andReturn();
 		//validate
 		final String actual = result.getResponse().getContentAsString();
-		assertThat(prettyJson(actual)).isEqualTo(prettyJson(expected));
+		assertEquals(prettyJson(expected), prettyJson(actual));
 	}
 
 

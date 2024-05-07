@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
@@ -164,7 +165,7 @@ public class RenameColumnTaskTest extends BaseTest {
 			getMigrator().migrate();
 			fail("");
 		} catch (HapiMigrationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(47) + "Failure executing task \"Drop an index\", aborting! Cause: java.sql.SQLException: " + Msg.code(54) + "Can not rename SOMETABLE.myTextCol to TEXTCOL because both columns exist and data exists in TEXTCOL");
+			assertEquals(Msg.code(47) + "Failure executing task \"Drop an index\", aborting! Cause: java.sql.SQLException: " + Msg.code(54) + "Can not rename SOMETABLE.myTextCol to TEXTCOL because both columns exist and data exists in TEXTCOL", e.getMessage());
 		}
 
 	}
@@ -247,7 +248,7 @@ public class RenameColumnTaskTest extends BaseTest {
 			getMigrator().migrate();
 			fail("");
 		} catch (HapiMigrationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(47) + "Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: " + Msg.code(56) + "Can not rename SOMETABLE.myTextCol to TEXTCOL because neither column exists!");
+			assertEquals(Msg.code(47) + "Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: " + Msg.code(56) + "Can not rename SOMETABLE.myTextCol to TEXTCOL because neither column exists!", e.getMessage());
 		}
 
 
@@ -287,7 +288,7 @@ public class RenameColumnTaskTest extends BaseTest {
 			getMigrator().migrate();
 			fail("");
 		} catch (HapiMigrationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(47) + "Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: " + Msg.code(55) + "Can not rename SOMETABLE.PID to PID2 because both columns exist!");
+			assertEquals(Msg.code(47) + "Failure executing task \"RenameColumnTask\", aborting! Cause: java.sql.SQLException: " + Msg.code(55) + "Can not rename SOMETABLE.PID to PID2 because both columns exist!", e.getMessage());
 		}
 
 

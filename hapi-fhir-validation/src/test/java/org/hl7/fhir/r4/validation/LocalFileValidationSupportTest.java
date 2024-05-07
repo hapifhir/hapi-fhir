@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import org.hl7.fhir.common.hapi.validation.support.LocalFileValidationSupport;
@@ -25,7 +26,7 @@ public class LocalFileValidationSupportTest extends BaseValidationTestWithInline
 		localFileValidationSupport.loadFile(patientProfile);
 		StructureDefinition structureDefinition = (StructureDefinition) localFileValidationSupport.fetchStructureDefinition("https://www.medizininformatik-initiative.de/fhir/core/modul-person/StructureDefinition/Patient");
 
-		assertThat("Profile_MII_Patient_PatientIn").isEqualTo(structureDefinition.getName());
+		assertEquals(structureDefinition.getName(), "Profile_MII_Patient_PatientIn");
 	}
 
 }

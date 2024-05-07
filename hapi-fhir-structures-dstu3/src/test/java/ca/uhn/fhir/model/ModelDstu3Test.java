@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.BaseRuntimeDeclaredChildDefinition;
@@ -52,19 +53,19 @@ public class ModelDstu3Test {
 
 	@Test
 	public void testbase64BinaryName() {
-		assertThat(ourCtx.getElementDefinition("base64binary").getName()).isEqualTo("base64Binary");
-		assertThat(ourCtx.getElementDefinition("base64Binary").getName()).isEqualTo("base64Binary");
+		assertEquals("base64Binary", ourCtx.getElementDefinition("base64binary").getName());
+		assertEquals("base64Binary", ourCtx.getElementDefinition("base64Binary").getName());
 	}
 
 	@Test
 	public void testModelBindings() {
 		FhirTerser t = ourCtx.newTerser();
 		RuntimeResourceDefinition def = ourCtx.getResourceDefinition(Patient.class);
-		assertThat(((BaseRuntimeDeclaredChildDefinition) def.getChildByName("gender")).getBindingValueSet()).isEqualTo("http://hl7.org/fhir/ValueSet/administrative-gender");
-		assertThat(((BaseRuntimeDeclaredChildDefinition) t.getDefinition(Patient.class, "Patient.link.type")).getBindingValueSet()).isEqualTo("http://hl7.org/fhir/ValueSet/link-type");
+		assertEquals("http://hl7.org/fhir/ValueSet/administrative-gender", ((BaseRuntimeDeclaredChildDefinition) def.getChildByName("gender")).getBindingValueSet());
+		assertEquals("http://hl7.org/fhir/ValueSet/link-type", ((BaseRuntimeDeclaredChildDefinition) t.getDefinition(Patient.class, "Patient.link.type")).getBindingValueSet());
 
 		def = ourCtx.getResourceDefinition(Appointment.class);
-		assertThat(((BaseRuntimeDeclaredChildDefinition) def.getChildByName("status")).getBindingValueSet()).isEqualTo("http://hl7.org/fhir/ValueSet/appointmentstatus");
+		assertEquals("http://hl7.org/fhir/ValueSet/appointmentstatus", ((BaseRuntimeDeclaredChildDefinition) def.getChildByName("status")).getBindingValueSet());
 	}
 
 	/**
@@ -75,7 +76,7 @@ public class ModelDstu3Test {
 		Practitioner p = new Practitioner();
 		PractitionerQualificationComponent qualification = p.addQualification();
 		CodeableConcept roleField = qualification.getCode();
-		assertThat(roleField.getClass()).isEqualTo(CodeableConcept.class);
+		assertEquals(CodeableConcept.class, roleField.getClass());
 	}
 
 	@AfterAll
@@ -99,7 +100,7 @@ public class ModelDstu3Test {
 		try {
 			ourCtx.newXmlParser().encodeResourceToString(p);
 		} catch (ClassCastException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1748) + "Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase");
+			assertEquals(Msg.code(1748) + "Found instance of class java.lang.String - Did you set a field value to the incorrect type? Expected org.hl7.fhir.instance.model.api.IBase", e.getMessage());
 		}
 	}
 	

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
@@ -92,7 +93,7 @@ public class FhirResourceDaoR4DeleteTest extends BaseJpaR4Test {
 			myPatientDao.delete(pId);
 			fail("");
 		} catch (PreconditionFailedException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(966) + "Resource deletion is not permitted on this server");
+			assertEquals(Msg.code(966) + "Resource deletion is not permitted on this server", e.getMessage());
 		}
 	}
 

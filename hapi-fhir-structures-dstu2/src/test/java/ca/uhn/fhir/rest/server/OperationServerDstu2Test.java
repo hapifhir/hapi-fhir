@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.IResource;
@@ -95,7 +96,7 @@ public class OperationServerDstu2Test {
 		List<String> opNames = toOpNames(ops);
 		assertThat(opNames, containsInRelativeOrder("OP_TYPE"));
 
-		assertThat(ops.get(opNames.indexOf("OP_TYPE")).getDefinition().getReference().getValue()).isEqualTo("OperationDefinition/Patient-t-OP_TYPE");
+		assertEquals("OperationDefinition/Patient-t-OP_TYPE", ops.get(opNames.indexOf("OP_TYPE")).getDefinition().getReference().getValue());
 	}
 
 	/**
@@ -113,25 +114,25 @@ public class OperationServerDstu2Test {
 //		@OperationParam(name="PARAM4", min=1) List<StringType> theParam4,
 
 		assertThat(def.getParameter()).hasSize(4);
-		assertThat(def.getParameter().get(0).getName()).isEqualTo("PARAM1");
-		assertThat(def.getParameter().get(0).getUse()).isEqualTo(OperationParameterUseEnum.IN.getCode());
-		assertThat(def.getParameter().get(0).getMin().intValue()).isEqualTo(0);
-		assertThat(def.getParameter().get(0).getMax()).isEqualTo("1");
+		assertEquals("PARAM1", def.getParameter().get(0).getName());
+		assertEquals(OperationParameterUseEnum.IN.getCode(), def.getParameter().get(0).getUse());
+		assertEquals(0, def.getParameter().get(0).getMin().intValue());
+		assertEquals("1", def.getParameter().get(0).getMax());
 
-		assertThat(def.getParameter().get(1).getName()).isEqualTo("PARAM2");
-		assertThat(def.getParameter().get(1).getUse()).isEqualTo(OperationParameterUseEnum.IN.getCode());
-		assertThat(def.getParameter().get(1).getMin().intValue()).isEqualTo(0);
-		assertThat(def.getParameter().get(1).getMax()).isEqualTo("1");
+		assertEquals("PARAM2", def.getParameter().get(1).getName());
+		assertEquals(OperationParameterUseEnum.IN.getCode(), def.getParameter().get(1).getUse());
+		assertEquals(0, def.getParameter().get(1).getMin().intValue());
+		assertEquals("1", def.getParameter().get(1).getMax());
 
-		assertThat(def.getParameter().get(2).getName()).isEqualTo("PARAM3");
-		assertThat(def.getParameter().get(2).getUse()).isEqualTo(OperationParameterUseEnum.IN.getCode());
-		assertThat(def.getParameter().get(2).getMin().intValue()).isEqualTo(2);
-		assertThat(def.getParameter().get(2).getMax()).isEqualTo("5");
+		assertEquals("PARAM3", def.getParameter().get(2).getName());
+		assertEquals(OperationParameterUseEnum.IN.getCode(), def.getParameter().get(2).getUse());
+		assertEquals(2, def.getParameter().get(2).getMin().intValue());
+		assertEquals("5", def.getParameter().get(2).getMax());
 
-		assertThat(def.getParameter().get(3).getName()).isEqualTo("PARAM4");
-		assertThat(def.getParameter().get(3).getUse()).isEqualTo(OperationParameterUseEnum.IN.getCode());
-		assertThat(def.getParameter().get(3).getMin().intValue()).isEqualTo(1);
-		assertThat(def.getParameter().get(3).getMax()).isEqualTo("*");
+		assertEquals("PARAM4", def.getParameter().get(3).getName());
+		assertEquals(OperationParameterUseEnum.IN.getCode(), def.getParameter().get(3).getUse());
+		assertEquals(1, def.getParameter().get(3).getMin().intValue());
+		assertEquals("*", def.getParameter().get(3).getMax());
 		
 	}
 
@@ -151,13 +152,13 @@ public class OperationServerDstu2Test {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/$everything");
 		CloseableHttpResponse status = ourClient.execute(httpGet);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(ourLastMethod).isEqualTo("instance $everything");
+		assertEquals("instance $everything", ourLastMethod);
 		assertThat(response).startsWith("<Bundle");
-		assertThat(ourLastId.toUnqualifiedVersionless().getValue()).isEqualTo("Patient/123");
+		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
 
 	}
 
@@ -166,8 +167,8 @@ public class OperationServerDstu2Test {
 		Parameters p = ourCtx.newRestfulGenericClient(ourServer.getBaseUrl()).operation().onInstance(new IdDt("Patient/123")).named("$everything").withParameters(new Parameters()).execute();
 		Bundle b = (Bundle) p.getParameterFirstRep().getResource();
 
-		assertThat(ourLastMethod).isEqualTo("instance $everything");
-		assertThat(ourLastId.toUnqualifiedVersionless().getValue()).isEqualTo("Patient/123");
+		assertEquals("instance $everything", ourLastMethod);
+		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
 
 	}
 
@@ -180,13 +181,13 @@ public class OperationServerDstu2Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(ourLastMethod).isEqualTo("instance $everything");
+		assertEquals("instance $everything", ourLastMethod);
 		assertThat(response).startsWith("<Bundle");
-		assertThat(ourLastId.toUnqualifiedVersionless().getValue()).isEqualTo("Patient/123");
+		assertEquals("Patient/123", ourLastId.toUnqualifiedVersionless().getValue());
 
 	}
 
@@ -195,11 +196,11 @@ public class OperationServerDstu2Test {
 		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/$OP_INSTANCE");
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED);
+		assertEquals(Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getFirstHeader(Constants.HEADER_ALLOW).getValue()).isEqualTo("POST");
+		assertEquals("POST", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
 		assertThat(response).contains("HTTP Method GET is not allowed");
 	}
 
@@ -232,17 +233,17 @@ public class OperationServerDstu2Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(ourLastParam1.getValue()).isEqualTo("PARAM1val");
-		assertThat(ourLastParam2.getActive().booleanValue()).isEqualTo(true);
-		assertThat(ourLastId.getIdPart()).isEqualTo("123");
-		assertThat(ourLastMethod).isEqualTo("$OP_INSTANCE");
+		assertEquals("PARAM1val", ourLastParam1.getValue());
+		assertEquals(true, ourLastParam2.getActive().booleanValue());
+		assertEquals("123", ourLastId.getIdPart());
+		assertEquals("$OP_INSTANCE", ourLastMethod);
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
-		assertThat(resp.getParameter().get(0).getName()).isEqualTo("RET1");
+		assertEquals("RET1", resp.getParameter().get(0).getName());
 
 		/*
 		 * Against type should fail
@@ -255,7 +256,7 @@ public class OperationServerDstu2Test {
 		response = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(response);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 
 	}
 
@@ -270,17 +271,17 @@ public class OperationServerDstu2Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(ourLastParam1.getValue()).isEqualTo("PARAM1val");
-		assertThat(ourLastParam2.getActive().booleanValue()).isEqualTo(true);
-		assertThat(ourLastId.getIdPart()).isEqualTo("123");
-		assertThat(ourLastMethod).isEqualTo("$OP_INSTANCE_OR_TYPE");
+		assertEquals("PARAM1val", ourLastParam1.getValue());
+		assertEquals(true, ourLastParam2.getActive().booleanValue());
+		assertEquals("123", ourLastId.getIdPart());
+		assertEquals("$OP_INSTANCE_OR_TYPE", ourLastMethod);
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
-		assertThat(resp.getParameter().get(0).getName()).isEqualTo("RET1");
+		assertEquals("RET1", resp.getParameter().get(0).getName());
 
 	}
 
@@ -295,17 +296,17 @@ public class OperationServerDstu2Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(ourLastParam1.getValue()).isEqualTo("PARAM1val");
-		assertThat(ourLastParam2.getActive().booleanValue()).isEqualTo(true);
+		assertEquals("PARAM1val", ourLastParam1.getValue());
+		assertEquals(true, ourLastParam2.getActive().booleanValue());
 		assertNull(ourLastId);
-		assertThat(ourLastMethod).isEqualTo("$OP_INSTANCE_OR_TYPE");
+		assertEquals("$OP_INSTANCE_OR_TYPE", ourLastMethod);
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
-		assertThat(resp.getParameter().get(0).getName()).isEqualTo("RET1");
+		assertEquals("RET1", resp.getParameter().get(0).getName());
 	}
 
 	@Test
@@ -319,16 +320,16 @@ public class OperationServerDstu2Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(ourLastParam1.getValue()).isEqualTo("PARAM1val");
-		assertThat(ourLastParam2.getActive().booleanValue()).isEqualTo(true);
-		assertThat(ourLastMethod).isEqualTo("$OP_SERVER");
+		assertEquals("PARAM1val", ourLastParam1.getValue());
+		assertEquals(true, ourLastParam2.getActive().booleanValue());
+		assertEquals("$OP_SERVER", ourLastMethod);
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
-		assertThat(resp.getParameter().get(0).getName()).isEqualTo("RET1");
+		assertEquals("RET1", resp.getParameter().get(0).getName());
 	}
 
 	@Test
@@ -342,16 +343,16 @@ public class OperationServerDstu2Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(ourLastParam1.getValue()).isEqualTo("PARAM1val");
-		assertThat(ourLastParam2.getActive().booleanValue()).isEqualTo(true);
-		assertThat(ourLastMethod).isEqualTo("$OP_TYPE");
+		assertEquals("PARAM1val", ourLastParam1.getValue());
+		assertEquals(true, ourLastParam2.getActive().booleanValue());
+		assertEquals("$OP_TYPE", ourLastMethod);
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
-		assertThat(resp.getParameter().get(0).getName()).isEqualTo("RET1");
+		assertEquals("RET1", resp.getParameter().get(0).getName());
 	}
 
 	@Test
@@ -365,16 +366,16 @@ public class OperationServerDstu2Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(ourLastParam1.getValue()).isEqualTo("PARAM1val");
-		assertThat(ourLastParam2.getActive().booleanValue()).isEqualTo(true);
-		assertThat(ourLastMethod).isEqualTo("$OP_TYPE_RET_BUNDLE");
+		assertEquals("PARAM1val", ourLastParam1.getValue());
+		assertEquals(true, ourLastParam2.getActive().booleanValue());
+		assertEquals("$OP_TYPE_RET_BUNDLE", ourLastMethod);
 
 		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, response);
-		assertThat(resp.getEntryFirstRep().getResponse().getStatus()).isEqualTo("100");
+		assertEquals("100", resp.getEntryFirstRep().getResponse().getStatus());
 	}
 
 	@Test
@@ -382,7 +383,7 @@ public class OperationServerDstu2Test {
 		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/$OP_INSTANCE_BUNDLE_PROVIDER?_pretty=true");
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info(response);
@@ -395,16 +396,16 @@ public class OperationServerDstu2Test {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$OP_TYPE?PARAM1=PARAM1val");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(ourLastParam1.getValue()).isEqualTo("PARAM1val");
+		assertEquals("PARAM1val", ourLastParam1.getValue());
 		assertNull(ourLastParam2);
-		assertThat(ourLastMethod).isEqualTo("$OP_TYPE");
+		assertEquals("$OP_TYPE", ourLastMethod);
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
-		assertThat(resp.getParameter().get(0).getName()).isEqualTo("RET1");
+		assertEquals("RET1", resp.getParameter().get(0).getName());
 	}
 
 	@Test
@@ -412,11 +413,11 @@ public class OperationServerDstu2Test {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$OP_TYPE?PARAM1=PARAM1val&PARAM2=foo");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(405);
+		assertEquals(405, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getFirstHeader(Constants.HEADER_ALLOW).getValue()).isEqualTo("POST");
+		assertEquals("POST", status.getFirstHeader(Constants.HEADER_ALLOW).getValue());
 		assertThat(response).contains("Can not invoke operation $OP_TYPE using HTTP GET because parameter PARAM2 is not a primitive datatype");
 	}
 
@@ -432,19 +433,19 @@ public class OperationServerDstu2Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(ourLastMethod).isEqualTo("$OP_SERVER_LIST_PARAM");
-		assertThat(ourLastParam2.getActive().booleanValue()).isEqualTo(true);
+		assertEquals("$OP_SERVER_LIST_PARAM", ourLastMethod);
+		assertEquals(true, ourLastParam2.getActive().booleanValue());
 		assertNull(ourLastParam1);
 		assertThat(ourLastParam3).hasSize(2);
-		assertThat(ourLastParam3.get(0).getValue()).isEqualTo("PARAM3val1");
-		assertThat(ourLastParam3.get(1).getValue()).isEqualTo("PARAM3val2");
+		assertEquals("PARAM3val1", ourLastParam3.get(0).getValue());
+		assertEquals("PARAM3val2", ourLastParam3.get(1).getValue());
 
 		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
-		assertThat(resp.getParameter().get(0).getName()).isEqualTo("RET1");
+		assertEquals("RET1", resp.getParameter().get(0).getName());
 	}
 
 	@Test
@@ -457,11 +458,11 @@ public class OperationServerDstu2Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(ourLastMethod).isEqualTo("$OP_PROFILE_DT");
-		assertThat(ourLastParamUnsignedInt1.getValueAsString()).isEqualTo("123");
+		assertEquals("$OP_PROFILE_DT", ourLastMethod);
+		assertEquals("123", ourLastParamUnsignedInt1.getValueAsString());
 	}
 
 	@Test
@@ -478,13 +479,13 @@ public class OperationServerDstu2Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(ourLastMethod).isEqualTo("$OP_PROFILE_DT2");
-		assertThat(ourLastParamMoney1.getCode()).isEqualTo("CODE");
-		assertThat(ourLastParamMoney1.getSystem()).isEqualTo("SYSTEM");
-		assertThat(ourLastParamMoney1.getValue().toString()).isEqualTo("123");
+		assertEquals("$OP_PROFILE_DT2", ourLastMethod);
+		assertEquals("CODE", ourLastParamMoney1.getCode());
+		assertEquals("SYSTEM", ourLastParamMoney1.getSystem());
+		assertEquals("123", ourLastParamMoney1.getValue().toString());
 	}
 
 	@Test
@@ -492,11 +493,11 @@ public class OperationServerDstu2Test {
 		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient/$OP_PROFILE_DT?PARAM1=123");
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(ourLastMethod).isEqualTo("$OP_PROFILE_DT");
-		assertThat(ourLastParamUnsignedInt1.getValueAsString()).isEqualTo("123");
+		assertEquals("$OP_PROFILE_DT", ourLastMethod);
+		assertEquals("123", ourLastParamUnsignedInt1.getValueAsString());
 	}
 
 	@Test
@@ -510,7 +511,7 @@ public class OperationServerDstu2Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
@@ -525,10 +526,10 @@ public class OperationServerDstu2Test {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123");
 		HttpResponse status = ourClient.execute(httpGet);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(ourLastMethod).isEqualTo("read");
+		assertEquals("read", ourLastMethod);
 	}
 
 	@AfterAll

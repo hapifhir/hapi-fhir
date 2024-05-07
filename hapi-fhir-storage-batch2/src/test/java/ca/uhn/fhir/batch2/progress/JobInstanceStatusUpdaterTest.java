@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.progress;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
 import ca.uhn.fhir.batch2.api.IJobInstance;
@@ -81,8 +82,8 @@ class JobInstanceStatusUpdaterTest {
 
 	private void assertCompleteCallbackCalled() {
 		JobCompletionDetails<TestParameters> receivedDetails = myDetails.get();
-		assertThat(receivedDetails.getInstance().getInstanceId()).isEqualTo(TEST_INSTANCE_ID);
-		assertThat(receivedDetails.getParameters().name).isEqualTo(TEST_NAME);
+		assertEquals(TEST_INSTANCE_ID, receivedDetails.getInstance().getInstanceId());
+		assertEquals(TEST_NAME, receivedDetails.getParameters().name);
 	}
 
 	private void setupCompleteCallback() {
@@ -125,12 +126,12 @@ class JobInstanceStatusUpdaterTest {
 
 	private void assertErrorCallbackCalled(StatusEnum expectedStatus) {
 		JobCompletionDetails<TestParameters> receivedDetails = myDetails.get();
-		assertThat(receivedDetails.getParameters().name).isEqualTo(TEST_NAME);
+		assertEquals(TEST_NAME, receivedDetails.getParameters().name);
 		IJobInstance instance = receivedDetails.getInstance();
-		assertThat(instance.getInstanceId()).isEqualTo(TEST_INSTANCE_ID);
-		assertThat(instance.getErrorMessage()).isEqualTo(TEST_ERROR_MESSAGE);
-		assertThat(instance.getErrorCount()).isEqualTo(TEST_ERROR_COUNT);
-		assertThat(instance.getStatus()).isEqualTo(expectedStatus);
+		assertEquals(TEST_INSTANCE_ID, instance.getInstanceId());
+		assertEquals(TEST_ERROR_MESSAGE, instance.getErrorMessage());
+		assertEquals(TEST_ERROR_COUNT, instance.getErrorCount());
+		assertEquals(expectedStatus, instance.getStatus());
 	}
 
 	private void setupErrorCallback() {

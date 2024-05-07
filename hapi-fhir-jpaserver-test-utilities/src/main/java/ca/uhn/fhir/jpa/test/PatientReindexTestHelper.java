@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexAppCtx;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
@@ -157,7 +158,7 @@ public class PatientReindexTestHelper {
 		List<IBaseResource> resources = myPatientDao.search(SearchParameterMap.newSynchronous(), requestDetails).getAllResources();
 		assertThat(resources).hasSize(theExpectedNumPatients);
 		for(IBaseResource resource : resources){
-			assertThat(resource.getClass()).isEqualTo(Patient.class);
+			assertEquals(Patient.class, resource.getClass());
 			Patient patient = (Patient) resource;
 			Long actualVersion = patient.getIdElement().getVersionIdPartAsLong();
 			if(theExpectedVersion != actualVersion){
@@ -181,7 +182,7 @@ public class PatientReindexTestHelper {
 	}
 
 	private void validateReindexJob(JobInstance theJobInstance, int theRecordsProcessed) {
-		assertThat(theJobInstance.getErrorCount()).isEqualTo(0);
-		assertThat(theJobInstance.getCombinedRecordsProcessed()).isEqualTo(theRecordsProcessed);
+		assertEquals(0, theJobInstance.getErrorCount());
+		assertEquals(theRecordsProcessed, theJobInstance.getCombinedRecordsProcessed());
 	}
 }

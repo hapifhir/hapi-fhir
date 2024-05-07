@@ -1,5 +1,6 @@
 package org.hl7.fhir.common.hapi.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -56,7 +57,7 @@ public interface ILookupCodeTest {
 			try {
 				getService().lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, ""));
 				fail("");			} catch (IllegalArgumentException e) {
-				assertThat(e.getMessage()).isEqualTo("theCode must be provided");
+				assertEquals("theCode must be provided", e.getMessage());
 			}
 		}
 
@@ -111,12 +112,12 @@ public interface ILookupCodeTest {
 
 			// verify
 			assertNotNull(outcome);
-			assertThat(getCodeSystemProvider().getCode()).isEqualTo(CODE);
-			assertThat(getCodeSystemProvider().getSystem()).isEqualTo(CODE_SYSTEM);
-			assertThat(outcome.getCodeSystemDisplayName()).isEqualTo(result.getCodeSystemDisplayName());
-			assertThat(outcome.getCodeDisplay()).isEqualTo(result.getCodeDisplay());
-			assertThat(outcome.getCodeSystemVersion()).isEqualTo(result.getCodeSystemVersion());
-			assertThat(outcome.isCodeIsAbstract()).isEqualTo(result.isCodeIsAbstract());
+			assertEquals(CODE, getCodeSystemProvider().getCode());
+			assertEquals(CODE_SYSTEM, getCodeSystemProvider().getSystem());
+			assertEquals(result.getCodeSystemDisplayName(), outcome.getCodeSystemDisplayName());
+			assertEquals(result.getCodeDisplay(), outcome.getCodeDisplay());
+			assertEquals(result.getCodeSystemVersion(), outcome.getCodeSystemVersion());
+			assertEquals(result.isCodeIsAbstract(), outcome.isCodeIsAbstract());
 		}
 
 		@ParameterizedTest
@@ -139,12 +140,12 @@ public interface ILookupCodeTest {
 
 			// verify
 			assertNotNull(outcome);
-			assertThat(getCodeSystemProvider().getCode()).isEqualTo(CODE);
-			assertThat(getCodeSystemProvider().getSystem()).isEqualTo(CODE_SYSTEM);
-			assertThat(outcome.getCodeSystemDisplayName()).isEqualTo(result.getCodeSystemDisplayName());
-			assertThat(outcome.getCodeDisplay()).isEqualTo(result.getCodeDisplay());
-			assertThat(outcome.getCodeSystemVersion()).isEqualTo(result.getCodeSystemVersion());
-			assertThat(outcome.isCodeIsAbstract()).isEqualTo(result.isCodeIsAbstract());
+			assertEquals(CODE, getCodeSystemProvider().getCode());
+			assertEquals(CODE_SYSTEM, getCodeSystemProvider().getSystem());
+			assertEquals(result.getCodeSystemDisplayName(), outcome.getCodeSystemDisplayName());
+			assertEquals(result.getCodeDisplay(), outcome.getCodeDisplay());
+			assertEquals(result.getCodeSystemVersion(), outcome.getCodeSystemVersion());
+			assertEquals(result.isCodeIsAbstract(), outcome.isCodeIsAbstract());
 
 			Optional<IValidationSupport.BaseConceptProperty> propertyOptional = outcome.getProperties().stream().findFirst().filter(a -> propertyName.equals(a.getPropertyName()));
 			assertThat(propertyOptional).isPresent();
@@ -171,11 +172,11 @@ public interface ILookupCodeTest {
 			assertThat(designations).hasSize(1);
 
 			IValidationSupport.ConceptDesignation designation = designations.iterator().next();
-			assertThat(designation.getValue()).isEqualTo(theConceptDesignation.getValue());
-			assertThat(designation.getLanguage()).isEqualTo(theConceptDesignation.getLanguage());
-			assertThat(designation.getUseCode()).isEqualTo(theConceptDesignation.getUseCode());
-			assertThat(designation.getUseSystem()).isEqualTo(theConceptDesignation.getUseSystem());
-			assertThat(designation.getUseDisplay()).isEqualTo(theConceptDesignation.getUseDisplay());
+			assertEquals(theConceptDesignation.getValue(), designation.getValue());
+			assertEquals(theConceptDesignation.getLanguage(), designation.getLanguage());
+			assertEquals(theConceptDesignation.getUseCode(), designation.getUseCode());
+			assertEquals(theConceptDesignation.getUseSystem(), designation.getUseSystem());
+			assertEquals(theConceptDesignation.getUseDisplay(), designation.getUseDisplay());
 		}
 
 		@Test
@@ -202,11 +203,11 @@ public interface ILookupCodeTest {
 
 			for (IValidationSupport.ConceptDesignation designation : designations) {
 				IValidationSupport.ConceptDesignation expectedDesignation = code1.equals(designation.getUseCode()) ? designation1 : designation2;
-				assertThat(designation.getValue()).isEqualTo(expectedDesignation.getValue());
-				assertThat(designation.getLanguage()).isEqualTo(expectedDesignation.getLanguage());
-				assertThat(designation.getUseCode()).isEqualTo(expectedDesignation.getUseCode());
-				assertThat(designation.getUseSystem()).isEqualTo(expectedDesignation.getUseSystem());
-				assertThat(designation.getUseDisplay()).isEqualTo(expectedDesignation.getUseDisplay());
+				assertEquals(expectedDesignation.getValue(), designation.getValue());
+				assertEquals(expectedDesignation.getLanguage(), designation.getLanguage());
+				assertEquals(expectedDesignation.getUseCode(), designation.getUseCode());
+				assertEquals(expectedDesignation.getUseSystem(), designation.getUseSystem());
+				assertEquals(expectedDesignation.getUseDisplay(), designation.getUseDisplay());
 			}
 		}
 	}

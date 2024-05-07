@@ -45,7 +45,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 	public void testCapabilityStatementValidates() throws IOException {
 		HttpGet get = new HttpGet(myServerBase + "/metadata?_pretty=true&_format=json");
 		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 
 			ourLog.debug(respString);
@@ -71,7 +71,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 		CloseableHttpResponse resp = ourHttpClient.execute(get);
 		try {
 			ourLog.info(resp.toString());
-			assertThat(resp.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, resp.getStatusLine().getStatusCode());
 
 			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.debug(respString);
@@ -145,7 +145,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 			.findFirst()
 			.orElseThrow(() -> new InternalErrorException("No patient"))
 			.getExtensionByUrl(ExtensionConstants.CONF_RESOURCE_COUNT);
-		assertThat(patientCountExt.getValueAsPrimitive().getValueAsString()).isEqualTo("1");
+		assertEquals("1", patientCountExt.getValueAsPrimitive().getValueAsString());
 
 	}
 

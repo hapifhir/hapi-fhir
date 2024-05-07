@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
@@ -29,9 +30,9 @@ class ExpungeEverythingServiceTest extends BaseJpaR4Test {
 		myPartitionLookupSvc.createPartition(partition, mySrd);
 
 		// validate precondition
-		assertThat(myPatientDao.search(SearchParameterMap.newSynchronous()).size()).isEqualTo(1);
-		assertThat(myPartitionLookupSvc.getPartitionById(123).getName()).isEqualTo("PART");
-		assertThat(myPartitionLookupSvc.getPartitionByName("PART").getId()).isEqualTo(123);
+		assertEquals(1, myPatientDao.search(SearchParameterMap.newSynchronous()).size());
+		assertEquals("PART", myPartitionLookupSvc.getPartitionById(123).getName());
+		assertEquals(123, myPartitionLookupSvc.getPartitionByName("PART").getId());
 
 		// execute
 		myExpungeEverythingService.expungeEverything(mySrd);
@@ -43,13 +44,13 @@ class ExpungeEverythingServiceTest extends BaseJpaR4Test {
 			myPartitionLookupSvc.getPartitionById(123);
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage()).isEqualTo("No partition exists with ID 123");
+			assertEquals("No partition exists with ID 123", e.getMessage());
 		}
 		try {
 			myPartitionLookupSvc.getPartitionByName("PART");
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage()).isEqualTo("Partition name \"PART\" is not valid");
+			assertEquals("Partition name \"PART\" is not valid", e.getMessage());
 		}
 		assertDoesntExist(p1);
 	}

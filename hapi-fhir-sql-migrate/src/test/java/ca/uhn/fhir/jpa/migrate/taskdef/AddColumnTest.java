@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.BaseMigrationTasks;
@@ -53,7 +54,7 @@ public class AddColumnTest extends BaseTest {
 		getMigrator().migrate();
 
 		JdbcUtils.ColumnType type = JdbcUtils.getColumnType(getConnectionProperties(), "SOMETABLE", "newcolint");
-		assertThat(type.getColumnTypeEnum()).isEqualTo(ColumnTypeEnum.INT);
+		assertEquals(ColumnTypeEnum.INT, type.getColumnTypeEnum());
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")

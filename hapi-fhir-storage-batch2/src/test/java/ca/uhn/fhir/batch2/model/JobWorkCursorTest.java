@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.batch2.coordinator.BaseBatch2Test;
 import ca.uhn.fhir.batch2.coordinator.TestJobParameters;
@@ -60,20 +61,20 @@ class JobWorkCursorTest extends BaseBatch2Test {
 			// verify
 			fail("");
 		} catch (InternalErrorException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-2042: Unknown step[" + targetStepId + "] for job definition ID[JOB_DEFINITION_ID] version[1]");
+			assertEquals("HAPI-2042: Unknown step[" + targetStepId + "] for job definition ID[JOB_DEFINITION_ID] version[1]", e.getMessage());
 		}
 	}
 
 	private void assertCursor(JobWorkCursor<TestJobParameters,?,?> theCursor, boolean theExpectedIsFirstStep, boolean theExpectedIsFinalStep, String theExpectedCurrentStep, String theExpectedNextStep) {
-		assertThat(theCursor.isFirstStep).isEqualTo(theExpectedIsFirstStep);
-		assertThat(theCursor.isFinalStep()).isEqualTo(theExpectedIsFinalStep);
-		assertThat(theCursor.currentStep.getStepId()).isEqualTo(theExpectedCurrentStep);
+		assertEquals(theExpectedIsFirstStep, theCursor.isFirstStep);
+		assertEquals(theExpectedIsFinalStep, theCursor.isFinalStep());
+		assertEquals(theExpectedCurrentStep, theCursor.currentStep.getStepId());
 		if (theExpectedNextStep == null) {
 			assertNull(theCursor.nextStep);
 		} else {
-			assertThat(theCursor.nextStep.getStepId()).isEqualTo(theExpectedNextStep);
+			assertEquals(theExpectedNextStep, theCursor.nextStep.getStepId());
 		}
-		assertThat(theCursor.jobDefinition.getJobDefinitionId()).isEqualTo(myDefinition.getJobDefinitionId());
-		assertThat(theCursor.jobDefinition.getJobDefinitionVersion()).isEqualTo(myDefinition.getJobDefinitionVersion());
+		assertEquals(myDefinition.getJobDefinitionId(), theCursor.jobDefinition.getJobDefinitionId());
+		assertEquals(myDefinition.getJobDefinitionVersion(), theCursor.jobDefinition.getJobDefinitionVersion());
 	}
 }

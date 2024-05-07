@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Transaction;
@@ -102,7 +103,7 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		ourLog.info(responseContent);
 
@@ -110,13 +111,13 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		assertThat(bundle.getEntry()).hasSize(3);
 
 		BundleEntryComponent entry0 = bundle.getEntry().get(0);
-		assertThat(entry0.getResponse().getLocation()).isEqualTo("Patient/81/_history/91");
+		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
 
 		BundleEntryComponent entry1 = bundle.getEntry().get(1);
-		assertThat(entry1.getResponse().getLocation()).isEqualTo("Patient/82/_history/92");
+		assertEquals("Patient/82/_history/92", entry1.getResponse().getLocation());
 
 		BundleEntryComponent entry2 = bundle.getEntry().get(2);
-		assertThat(entry2.getResponse().getLocation()).isEqualTo("Patient/123/_history/93");
+		assertEquals("Patient/123/_history/93", entry2.getResponse().getLocation());
 	}
 
 	@Test
@@ -149,7 +150,7 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		ourLog.info(responseContent);
 
@@ -157,13 +158,13 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		assertThat(bundle.getEntry()).hasSize(3);
 
 		BundleEntryComponent entry0 = bundle.getEntry().get(0);
-		assertThat(entry0.getResponse().getLocation()).isEqualTo("Patient/81/_history/91");
+		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
 
 		BundleEntryComponent entry1 = bundle.getEntry().get(1);
-		assertThat(entry1.getResponse().getLocation()).isEqualTo("Patient/82/_history/92");
+		assertEquals("Patient/82/_history/92", entry1.getResponse().getLocation());
 
 		BundleEntryComponent entry2 = bundle.getEntry().get(2);
-		assertThat(entry2.getResponse().getLocation()).isEqualTo("Patient/123/_history/93");
+		assertEquals("Patient/123/_history/93", entry2.getResponse().getLocation());
 	}
 
 	@Test
@@ -199,23 +200,23 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		ourLog.info(responseContent);
 
 		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(4);
 
-		assertThat(bundle.getEntry().get(0).getResource().getClass()).isEqualTo(OperationOutcome.class);
+		assertEquals(OperationOutcome.class, bundle.getEntry().get(0).getResource().getClass());
 
 		BundleEntryComponent entry0 = bundle.getEntry().get(1);
-		assertThat(entry0.getResponse().getLocation()).isEqualTo("Patient/81/_history/91");
+		assertEquals("Patient/81/_history/91", entry0.getResponse().getLocation());
 
 		BundleEntryComponent entry1 = bundle.getEntry().get(2);
-		assertThat(entry1.getResponse().getLocation()).isEqualTo("Patient/82/_history/92");
+		assertEquals("Patient/82/_history/92", entry1.getResponse().getLocation());
 
 		BundleEntryComponent entry2 = bundle.getEntry().get(3);
-		assertThat(entry2.getResponse().getLocation()).isEqualTo("Patient/3/_history/93");
+		assertEquals("Patient/3/_history/93", entry2.getResponse().getLocation());
 	}
 
 	@AfterAll

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.model.entity;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,14 +34,14 @@ public class ResourceIndexedSearchParamNumberTest {
 
 	@Test
 	void equalByReference() {
-		assertThat(PARAM_VALUE_10_FIRST).isEqualTo(PARAM_VALUE_10_FIRST);
-		assertThat(PARAM_VALUE_10_FIRST.hashCode()).isEqualTo(PARAM_VALUE_10_FIRST.hashCode());
+		assertEquals(PARAM_VALUE_10_FIRST, PARAM_VALUE_10_FIRST);
+		assertEquals(PARAM_VALUE_10_FIRST.hashCode(), PARAM_VALUE_10_FIRST.hashCode());
 	}
 
 	@Test
 	void equalByContract() {
-		assertThat(PARAM_VALUE_10_SECOND).isEqualTo(PARAM_VALUE_10_FIRST);
-		assertThat(PARAM_VALUE_10_FIRST).isEqualTo(PARAM_VALUE_10_SECOND);
-		assertThat(PARAM_VALUE_10_SECOND.hashCode()).isEqualTo(PARAM_VALUE_10_FIRST.hashCode());
+		assertEquals(PARAM_VALUE_10_FIRST, PARAM_VALUE_10_SECOND);
+		assertEquals(PARAM_VALUE_10_SECOND, PARAM_VALUE_10_FIRST);
+		assertEquals(PARAM_VALUE_10_FIRST.hashCode(), PARAM_VALUE_10_SECOND.hashCode());
 	}
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.i18n;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import java.util.Set;
@@ -12,9 +13,9 @@ public class HapiLocalizerTest {
 	public void testEscapePatterns() {
 		HapiLocalizer loc = new HapiLocalizer();
 
-		assertThat(loc.newMessageFormat("some message").format(new Object[]{})).isEqualTo("some message");
-		assertThat(loc.newMessageFormat("var1 {var2} var3 {var4}").format(new Object[]{})).isEqualTo("var1 {var2} var3 {var4}");
-		assertThat(loc.newMessageFormat("var1 {0} var3 {1}").format(new Object[]{"A", "B"})).isEqualTo("var1 A var3 B");
+		assertEquals("some message", loc.newMessageFormat("some message").format(new Object[]{}));
+		assertEquals("var1 {var2} var3 {var4}", loc.newMessageFormat("var1 {var2} var3 {var4}").format(new Object[]{}));
+		assertEquals("var1 A var3 B", loc.newMessageFormat("var1 {0} var3 {1}").format(new Object[]{"A", "B"}));
 	}
 
 	

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.util.FileUtil;
 import ca.uhn.fhir.util.TestUtil;
@@ -53,7 +54,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 				    "given":["GivenOnly1","GivenOnly2"]
 				  }]
 				}""";
-			assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX));
+			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
 		}
 
 	}
@@ -73,7 +74,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
             {
 			    "birthDate": "1965-08-09"
 				}""";
-			assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX));
+			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
 		}
 
 	}
@@ -92,7 +93,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 			try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 				String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info(resp);
-				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+				assertEquals(200, response.getStatusLine().getStatusCode());
 				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
 				assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
 				assertThat(resp).doesNotContain("\"name\":\"Observation\",\"args\":[{\"name\":\"id\"");
@@ -118,7 +119,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 			try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
 				String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info(resp);
-				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+				assertEquals(200, response.getStatusLine().getStatusCode());
 				assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
 				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
 				assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Query\",\"fields\":[{\"name\":\"PatientList\"");
@@ -145,7 +146,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 			try (CloseableHttpResponse response = ourHttpClient.execute(httpPost)) {
 				String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info("Response has size: {}", FileUtil.formatFileSize(resp.length()));
-				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+				assertEquals(200, response.getStatusLine().getStatusCode());
 				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
 				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
 				assertThat(resp).contains("\"name\":\"Observation\",\"args\":[{\"name\":\"id\"");
@@ -214,7 +215,7 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 				    }]
 				  }]
 				}""";
-			assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX));
+			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
 		}
 
 	}

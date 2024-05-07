@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.jpa.search.reindex.IInstanceReindexService;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
@@ -55,7 +56,7 @@ public class InstanceReindexProviderTest {
 			.withNoParameters(Parameters.class)
 			.useHttpGet()
 			.execute();
-		assertThat(outcome.getParameter().get(0).getName()).isEqualTo("foo");
+		assertEquals("foo", outcome.getParameter().get(0).getName());
 	}
 
 	@Test
@@ -72,7 +73,7 @@ public class InstanceReindexProviderTest {
 			.withParameter(Parameters.class, "code", new CodeType("blah"))
 			.useHttpGet()
 			.execute();
-		assertThat(outcome.getParameter().get(0).getName()).isEqualTo("foo");
+		assertEquals("foo", outcome.getParameter().get(0).getName());
 
 		verify(myDryRunService, times(1)).reindexDryRun(any(), any(), myCodeCaptor.capture());
 

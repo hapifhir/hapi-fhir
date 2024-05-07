@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.match.deliver;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
@@ -184,7 +185,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 			mySubscriber.handleMessage(new ResourceDeliveryJsonMessage(payload));
 			fail("");
 		} catch (MessagingException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(2) + "Failure handling subscription payload for subscription: Subscription/123");
+			assertEquals(Msg.code(2) + "Failure handling subscription payload for subscription: Subscription/123", e.getMessage());
 		}
 
 		verify(myGenericClient, times(1)).update();
@@ -278,12 +279,12 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		assertThat(messages).hasSize(1);
 
 		ResourceModifiedMessage receivedMessage = messages.get(0).getPayload();
-		assertThat("Bundle").isEqualTo(receivedMessage.getPayloadId());
+		assertEquals(receivedMessage.getPayloadId(), "Bundle");
 
 		Bundle receivedBundle = (Bundle) receivedMessage.getPayload(myCtx);
 		assertThat(receivedBundle.getEntry()).hasSize(2);
-		assertThat(receivedBundle.getEntry().get(0).getResource().getIdElement().getValue()).isEqualTo(p1.getIdElement().getValue());
-		assertThat(receivedBundle.getEntry().get(1).getResource().getIdElement().getValue()).isEqualTo(p2.getIdElement().getValue());
+		assertEquals(p1.getIdElement().getValue(), receivedBundle.getEntry().get(0).getResource().getIdElement().getValue());
+		assertEquals(p2.getIdElement().getValue(), receivedBundle.getEntry().get(1).getResource().getIdElement().getValue());
 
 	}
 
@@ -377,7 +378,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		ArgumentCaptor<ResourceModifiedJsonMessage> captor = ArgumentCaptor.forClass(ResourceModifiedJsonMessage.class);
 		verify(myChannelProducer).send(captor.capture());
 		final List<ResourceModifiedJsonMessage> params = captor.getAllValues();
-		assertThat(params.get(0).getPayload().getPartitionId()).isEqualTo(thePartitionId);
+		assertEquals(thePartitionId, params.get(0).getPayload().getPartitionId());
 	}
 
 	@Test
@@ -389,7 +390,7 @@ public class BaseSubscriptionDeliverySubscriberTest {
 		ourLog.info(jsonMessage.getPayload().getRequestPartitionId().asJson());
 
 		assertNotNull(jsonMessage.getPayload().getRequestPartitionId());
-		assertThat(RequestPartitionId.defaultPartition().toJson()).isEqualTo(jsonMessage.getPayload().getRequestPartitionId().toJson());
+		assertEquals(jsonMessage.getPayload().getRequestPartitionId().toJson(), RequestPartitionId.defaultPartition().toJson());
 	}
 
 	@Test

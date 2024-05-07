@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
@@ -82,7 +83,7 @@ public class MdmProviderCrossPartitionR4Test extends BaseProviderR4Test{
 		requestDetails.setTenantId(PARTITION_GOLDEN_RESOURCE);
 		IBundleProvider searchResult = myPatientDao.search(new SearchParameterMap(), requestDetails);
 
-		assertThat(1).isEqualTo(searchResult.getAllResources().size());
+		assertEquals(searchResult.getAllResources().size(), 1);
 
 		assertTrue(MdmResourceUtil.isGoldenRecord(searchResult.getAllResources().get(0)));
 	}

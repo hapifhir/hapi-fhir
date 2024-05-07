@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -58,8 +59,8 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
 		assertThat(resources).hasSize(790);
-		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
-		assertThat(resources.get(789).getIdElement().getValueAsString()).isEqualTo("799");
+		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
+		assertEquals("799", resources.get(789).getIdElement().getValueAsString());
 	}
 
 	@Test
@@ -81,7 +82,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
 		assertThat(resources).hasSize(10);
-		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("20");
+		assertEquals("20", resources.get(0).getIdElement().getValueAsString());
 	}
 
 	@Test
@@ -104,8 +105,8 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 
 		List<IBaseResource> resources = result.getResources(0, 1000);
 		assertThat(resources).hasSize(100);
-		assertThat(resources.get(0).getIdElement().getValueAsString()).isEqualTo("10");
-		assertThat(resources.get(99).getIdElement().getValueAsString()).isEqualTo("109");
+		assertEquals("10", resources.get(0).getIdElement().getValueAsString());
+		assertEquals("109", resources.get(99).getIdElement().getValueAsString());
 	}
 
 }

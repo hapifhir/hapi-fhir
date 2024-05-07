@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model.dstu2;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Patient;
 import ca.uhn.fhir.parser.IParser;
@@ -38,11 +39,11 @@ public class ModelParseTest {
 		List<? extends IBaseCoding> tags = bundleOut.getMeta().getTag();
 		assertThat(tags.size()).as("tag is present").isEqualTo(1);
 		IBaseCoding tagOut = tags.get(0);
-		assertThat(tagOut.getCode()).isEqualTo("code");
-		assertThat(tagOut.getDisplay()).isEqualTo("display");
-		assertThat(tagOut.getSystem()).isEqualTo("oid:123");
-		assertThat(tagOut.getVersion()).isEqualTo("v1");
-		assertThat(tagOut.getUserSelected()).isEqualTo(true);
+		assertEquals("code", tagOut.getCode());
+		assertEquals("display", tagOut.getDisplay());
+		assertEquals("oid:123", tagOut.getSystem());
+		assertEquals("v1", tagOut.getVersion());
+		assertEquals(true, tagOut.getUserSelected());
 	}
 
 	@ParameterizedTest
@@ -66,11 +67,11 @@ public class ModelParseTest {
 		List<? extends IBaseCoding> labels = bundleOut.getMeta().getSecurity();
 		assertThat(labels.size()).as("security is present").isEqualTo(1);
 		IBaseCoding codingOut = labels.get(0);
-		assertThat(codingOut.getCode()).isEqualTo("code");
-		assertThat(codingOut.getDisplay()).isEqualTo("display");
-		assertThat(codingOut.getSystem()).isEqualTo("oid:123");
-		assertThat(codingOut.getVersion()).isEqualTo("v1");
-		assertThat(codingOut.getUserSelected()).isEqualTo(true);
+		assertEquals("code", codingOut.getCode());
+		assertEquals("display", codingOut.getDisplay());
+		assertEquals("oid:123", codingOut.getSystem());
+		assertEquals("v1", codingOut.getVersion());
+		assertEquals(true, codingOut.getUserSelected());
 	}
 
 	public static List<IParser> getParsers() {

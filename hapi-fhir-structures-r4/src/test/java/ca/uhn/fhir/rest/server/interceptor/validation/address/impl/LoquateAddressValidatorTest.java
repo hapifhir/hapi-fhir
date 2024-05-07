@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.validation.address.impl;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -129,21 +130,21 @@ class LoquateAddressValidatorTest {
 		node.set("text2", new TextNode("This Is-Text,"));
 		node.set("text3", new TextNode("This Is-Text  with Invalid Formatting"));
 
-		assertThat(myValidator.standardize(myValidator.getString(node, "text1"))).isEqualTo("This, Is, Text");
-		assertThat(myValidator.standardize(myValidator.getString(node, "text2"))).isEqualTo("This Is-Text,");
-		assertThat(myValidator.standardize(myValidator.getString(node, "text3"))).isEqualTo("This Is-Text, with Invalid Formatting");
+		assertEquals("This, Is, Text", myValidator.standardize(myValidator.getString(node, "text1")));
+		assertEquals("This Is-Text,", myValidator.standardize(myValidator.getString(node, "text2")));
+		assertEquals("This Is-Text, with Invalid Formatting", myValidator.standardize(myValidator.getString(node, "text3")));
 	}
 
 	@Test
 	public void testEndpointOverride() {
-		assertThat(myValidator.getApiEndpoint()).isEqualTo(LoquateAddressValidator.DEFAULT_DATA_CLEANSE_ENDPOINT);
+		assertEquals(LoquateAddressValidator.DEFAULT_DATA_CLEANSE_ENDPOINT, myValidator.getApiEndpoint());
 
 		myProperties = new Properties();
 		myProperties.setProperty(LoquateAddressValidator.PROPERTY_SERVICE_KEY, "MY_KEY");
 		myProperties.setProperty(LoquateAddressValidator.PROPERTY_SERVICE_ENDPOINT, "HTTP://MY_ENDPOINT/LOQUATE");
 		myValidator = new LoquateAddressValidator(myProperties);
 
-		assertThat(myValidator.getApiEndpoint()).isEqualTo("HTTP://MY_ENDPOINT/LOQUATE");
+		assertEquals("HTTP://MY_ENDPOINT/LOQUATE", myValidator.getApiEndpoint());
 	}
 
 	@Test
@@ -166,7 +167,7 @@ class LoquateAddressValidatorTest {
 	@Test
 	public void testRequestBody() {
 		try {
-			assertThat(clear(myValidator.getRequestBody(ourCtx, getAddress()))).isEqualTo(clear(REQUEST));
+			assertEquals(clear(REQUEST), clear(myValidator.getRequestBody(ourCtx, getAddress())));
 		} catch (JsonProcessingException e) {
 			fail("");		}
 	}
@@ -213,7 +214,7 @@ class LoquateAddressValidatorTest {
 		res = myValidator.getValidationResult(new AddressValidationResult(),
 			new ObjectMapper().readTree(RESPONSE_VALID_ADDRESS), ourCtx);
 		assertTrue(res.isValid());
-		assertThat(res.getValidatedAddressString()).isEqualTo("My Valid Address");
+		assertEquals("My Valid Address", res.getValidatedAddressString());
 	}
 
 	@Test
@@ -227,20 +228,20 @@ class LoquateAddressValidatorTest {
 		IBaseExtension geocode = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.FHIR_GEOCODE_EXTENSION_URL);
 		assertNotNull(geocode);
 		assertThat(geocode.getExtension()).hasSize(2);
-		assertThat(((IBaseExtension) geocode.getExtension().get(0)).getUrl()).isEqualTo("latitude");
-		assertThat(((IBaseExtension) geocode.getExtension().get(1)).getUrl()).isEqualTo("longitude");
+		assertEquals("latitude", ((IBaseExtension) geocode.getExtension().get(0)).getUrl());
+		assertEquals("longitude", ((IBaseExtension) geocode.getExtension().get(1)).getUrl());
 
 		IBaseExtension quality = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.ADDRESS_QUALITY_EXTENSION_URL);
 		assertNotNull(quality);
-		assertThat(quality.getValue().toString()).isEqualTo("A");
+		assertEquals("A", quality.getValue().toString());
 
 		IBaseExtension verificationCode = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.ADDRESS_VERIFICATION_CODE_EXTENSION_URL);
 		assertNotNull(verificationCode);
-		assertThat(verificationCode.getValue().toString()).isEqualTo("V44-I44-P6-100");
+		assertEquals("V44-I44-P6-100", verificationCode.getValue().toString());
 
 		IBaseExtension geoAccuracy = ExtensionUtil.getExtensionByUrl(address, IAddressValidator.ADDRESS_GEO_ACCURACY_EXTENSION_URL);
 		assertNotNull(geoAccuracy);
-		assertThat(geoAccuracy.getValue().toString()).isEqualTo("Z1");
+		assertEquals("Z1", geoAccuracy.getValue().toString());
 	}
 
 	@Test

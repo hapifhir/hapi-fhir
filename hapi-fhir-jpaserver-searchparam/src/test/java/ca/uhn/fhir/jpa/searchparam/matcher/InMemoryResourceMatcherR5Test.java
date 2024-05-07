@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.searchparam.matcher;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
@@ -168,14 +169,14 @@ public class InMemoryResourceMatcherR5Test {
 		searchParams.myUriParams.add(extractSourceUriParam(myObservation));
 
 		InMemoryMatchResult resultInsidePeriod = myInMemoryResourceMatcher.match(theSearchCriteria, myObservation, searchParams, newRequest());
-		assertThat(resultInsidePeriod.matched()).isEqualTo(theShouldMatch);
+		assertEquals(theShouldMatch, resultInsidePeriod.matched());
 	}
 
 	@Test
 	public void testUnsupportedChained() {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("encounter.class=FOO", myObservation, mySearchParams, newRequest());
 		assertFalse(result.supported());
-		assertThat(result.getUnsupportedReason()).isEqualTo("Parameter: <encounter.class> Reason: Chained parameters are not supported");
+		assertEquals("Parameter: <encounter.class> Reason: Chained parameters are not supported", result.getUnsupportedReason());
 	}
 
 	@Test
@@ -266,7 +267,7 @@ public class InMemoryResourceMatcherR5Test {
 	private void testDateUnsupportedDateOp(ParamPrefixEnum theOperator) {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("date=" + theOperator.getValue() + OBSERVATION_DATETIME, myObservation, mySearchParams, newRequest());
 		assertFalse(result.supported());
-		assertThat(result.getUnsupportedReason()).isEqualTo("Parameter: <date> Reason: The prefix " + theOperator + " is not supported for param type DATE");
+		assertEquals("Parameter: <date> Reason: The prefix " + theOperator + " is not supported for param type DATE", result.getUnsupportedReason());
 	}
 
 	@Test
@@ -301,17 +302,17 @@ public class InMemoryResourceMatcherR5Test {
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + earlyDate, myObservation, mySearchParams, newRequest());
 			assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
-			assertThat(theEarly).isEqualTo(result.matched());
+			assertEquals(result.matched(), theEarly);
 		}
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + observationDate, myObservation, mySearchParams, newRequest());
 			assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
-			assertThat(theSame).isEqualTo(result.matched());
+			assertEquals(result.matched(), theSame);
 		}
 		{
 			InMemoryMatchResult result = myInMemoryResourceMatcher.match(equation + lateDate, myObservation, mySearchParams, newRequest());
 			assertThat(result.supported()).as(result.getUnsupportedReason()).isTrue();
-			assertThat(theLater).isEqualTo(result.matched());
+			assertEquals(result.matched(), theLater);
 		}
 	}
 

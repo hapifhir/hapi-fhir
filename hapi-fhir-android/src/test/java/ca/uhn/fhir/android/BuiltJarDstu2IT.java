@@ -1,5 +1,6 @@
 package ca.uhn.fhir.android;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.dstu2.composite.QuantityDt;
@@ -60,7 +61,7 @@ public class BuiltJarDstu2IT {
 			ctx.newXmlParser().encodeResourceToString(p);
 			fail("");
 		} catch (ca.uhn.fhir.context.ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1754) + "Unable to initialize StAX - XML processing is disabled");
+			assertEquals(Msg.code(1754) + "Unable to initialize StAX - XML processing is disabled", e.getMessage());
 		}
 	}
 
@@ -77,7 +78,7 @@ public class BuiltJarDstu2IT {
 		String str = ctx.newJsonParser().encodeResourceToString(o);
 		Observation p2 = ctx.newJsonParser().parseResource(Observation.class, str);
 
-		assertThat(p2.getCode().getText()).isEqualTo("TEXT");
+		assertEquals("TEXT", p2.getCode().getText());
 
 		QuantityDt dt = (QuantityDt) p2.getValue();
 		dt.getComparatorElement().getValueAsEnum();

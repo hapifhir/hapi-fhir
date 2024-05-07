@@ -1,5 +1,6 @@
 package ca.uhn.fhir.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import org.hl7.fhir.dstu3.model.DecimalType;
@@ -10,19 +11,19 @@ public class DecimalTypeTest {
 	@Test
 	public void testDoubleValue() {
 		DecimalType d = new DecimalType(1.2D);
-		assertThat(d.getValueAsString()).isEqualTo("1.2");
+		assertEquals("1.2", d.getValueAsString());
 		
 		d = new DecimalType();
 		d.setValue(1.2D);
-		assertThat(d.getValueAsString()).isEqualTo("1.2");
+		assertEquals("1.2", d.getValueAsString());
 
 		d = new DecimalType();
 		d.setValue(10);
-		assertThat(d.getValueAsString()).isEqualTo("10");
+		assertEquals("10", d.getValueAsString());
 
 		d = new DecimalType();
 		d.setValue(10L);
-		assertThat(d.getValueAsString()).isEqualTo("10");
+		assertEquals("10", d.getValueAsString());
 
 	}
 	

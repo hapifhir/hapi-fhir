@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -119,7 +120,7 @@ public class InterceptorDstu3Test {
 			HttpPost post = new HttpPost(ourServer.getBaseUrl() + "/Patient/$postOperation");
 			post.setEntity(new StringEntity(input, ContentType.create("application/fhir+json", Constants.CHARSET_UTF8)));
 			try (CloseableHttpResponse status = ourClient.execute(post)) {
-				assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+				assertEquals(200, status.getStatusLine().getStatusCode());
 				IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			}
 		} finally {
@@ -150,8 +151,8 @@ public class InterceptorDstu3Test {
 			try (CloseableHttpResponse status = ourClient.execute(get)) {
 				String response = IOUtils.toString(status.getEntity().getContent(), Constants.CHARSET_UTF8);
 				assertThat(response).contains("NAME1");
-				assertThat(status.getStatusLine().getStatusCode()).isEqualTo(202);
-				assertThat(status.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
+				assertEquals(202, status.getStatusLine().getStatusCode());
+				assertEquals("Accepted", status.getStatusLine().getReasonPhrase());
 			}
 
 		} finally {
@@ -203,7 +204,7 @@ public class InterceptorDstu3Test {
 		order.verify(myInterceptor1, times(1)).incomingRequestPreHandled(opTypeCapt.capture(), arTypeCapt.capture());
 		order.verify(myInterceptor2, times(1)).incomingRequestPreHandled(nullable(RestOperationTypeEnum.class), nullable(RequestDetails.class));
 
-		assertThat(opTypeCapt.getValue()).isEqualTo(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE);
+		assertEquals(RestOperationTypeEnum.EXTENDED_OPERATION_TYPE, opTypeCapt.getValue());
 		assertNotNull(arTypeCapt.getValue().getResource());
 	}
 
@@ -246,7 +247,7 @@ public class InterceptorDstu3Test {
 		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
 		httpPost.setEntity(new StringEntity(input, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
+			assertEquals(201, status.getStatusLine().getStatusCode());
 			IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 		}
 
@@ -295,7 +296,7 @@ public class InterceptorDstu3Test {
 		order.verify(myInterceptor1, times(1)).outgoingResponse(nullable(ServletRequestDetails.class), resourceCapt.capture());
 
 		assertThat(resourceCapt.getAllValues()).hasSize(1);
-		assertThat(resourceCapt.getAllValues().get(0).getClass()).isEqualTo(OperationOutcome.class);
+		assertEquals(OperationOutcome.class, resourceCapt.getAllValues().get(0).getClass());
 	}
 
 	@SuppressWarnings("deprecation")

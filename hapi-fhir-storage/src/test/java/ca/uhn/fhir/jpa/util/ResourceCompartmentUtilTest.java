@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
@@ -88,7 +89,7 @@ class ResourceCompartmentUtilTest {
 			MethodNotAllowedException thrown = assertThrows(MethodNotAllowedException.class,
 				() -> ResourceCompartmentUtil.getPatientCompartmentIdentity(myResource, myFhirContext, mySearchParamExtractor));
 
-			assertThat(thrown.getMessage()).isEqualTo(Msg.code(2475) + "Patient resource IDs must be client-assigned in patient compartment mode");
+			assertEquals(Msg.code(2475) + "Patient resource IDs must be client-assigned in patient compartment mode", thrown.getMessage());
 		}
 
 		@Test

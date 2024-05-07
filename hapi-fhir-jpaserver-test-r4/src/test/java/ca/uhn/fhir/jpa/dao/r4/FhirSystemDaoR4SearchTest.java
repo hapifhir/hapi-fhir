@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
@@ -29,8 +30,8 @@ public class FhirSystemDaoR4SearchTest extends BaseJpaR4SystemTest {
 		final String tokenSystem = resultSearchTokens.getSystem();
 		final String tokenValue = resultSearchTokens.getValue();
 
-		assertThat(tokenSystem).isEqualTo(identifierSystem);
-		assertThat(tokenValue).isEqualTo(identifierValue);
+		assertEquals(identifierSystem, tokenSystem);
+		assertEquals(identifierValue, tokenValue);
 
 		// verify hash
 		final long tokensHashSystem = resultSearchTokens.getHashSystem();
@@ -38,8 +39,8 @@ public class FhirSystemDaoR4SearchTest extends BaseJpaR4SystemTest {
 		final long tokensHashValue = resultSearchTokens.getHashValue();
 		final long expectedHashValue = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierValue);
 
-		assertThat(tokensHashSystem).isEqualTo(expectedHashSystem);
-		assertThat(tokensHashValue).isEqualTo(expectedHashValue);
+		assertEquals(expectedHashSystem, tokensHashSystem);
+		assertEquals(expectedHashValue, tokensHashValue);
 	}
 
 	@Test
@@ -60,8 +61,8 @@ public class FhirSystemDaoR4SearchTest extends BaseJpaR4SystemTest {
 		final String expectedSystem = StringUtil.truncate(identifierSystem, ResourceIndexedSearchParamToken.MAX_LENGTH);
 		final String expectedValue = StringUtil.truncate(identifierValue, ResourceIndexedSearchParamToken.MAX_LENGTH);
 
-		assertThat(tokenSystem).isEqualTo(expectedSystem);
-		assertThat(tokenValue).isEqualTo(expectedValue);
+		assertEquals(expectedSystem, tokenSystem);
+		assertEquals(expectedValue, tokenValue);
 
 		// verify hash
 		final long tokensHashSystem = resultSearchTokens.getHashSystem();
@@ -69,8 +70,8 @@ public class FhirSystemDaoR4SearchTest extends BaseJpaR4SystemTest {
 		final long tokensHashValue = resultSearchTokens.getHashValue();
 		final long expectedHashValue = ResourceIndexedSearchParamToken.calculateHashValue(new PartitionSettings(), RequestPartitionId.defaultPartition(), "Organization", "identifier", identifierValue);
 
-		assertThat(tokensHashSystem).isEqualTo(expectedHashSystem);
-		assertThat(tokensHashValue).isEqualTo(expectedHashValue);
+		assertEquals(expectedHashSystem, tokensHashSystem);
+		assertEquals(expectedHashValue, tokensHashValue);
 	}
 	
 	/*//@formatter:off

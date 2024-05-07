@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.s13n.standardizers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -12,10 +13,10 @@ public class PhoneStandardizerTest {
 
 	@Test
 	public void testPhoneNumberStandartization() {
-		assertThat(myStandardizer.standardize("(111) 222-33-33")).isEqualTo("111-222-3333");
-		assertThat(myStandardizer.standardize("1 1 1 2 2 2 - 3 3 3 3 ")).isEqualTo("111-222-3333");
-		assertThat(myStandardizer.standardize("111-222-3")).isEqualTo("111-222-3");
-		assertThat(myStandardizer.standardize("111⅕-222-3")).isEqualTo("111-222-3");
-		assertThat(myStandardizer.standardize("")).isEqualTo("");
+		assertEquals("111-222-3333", myStandardizer.standardize("(111) 222-33-33"));
+		assertEquals("111-222-3333", myStandardizer.standardize("1 1 1 2 2 2 - 3 3 3 3 "));
+		assertEquals("111-222-3", myStandardizer.standardize("111-222-3"));
+		assertEquals("111-222-3", myStandardizer.standardize("111⅕-222-3"));
+		assertEquals("", myStandardizer.standardize(""));
 	}
 }

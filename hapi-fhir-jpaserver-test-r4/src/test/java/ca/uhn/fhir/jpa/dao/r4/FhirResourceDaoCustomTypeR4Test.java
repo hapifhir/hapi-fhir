@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -31,12 +32,12 @@ public class FhirResourceDaoCustomTypeR4Test extends BaseJpaR4Test {
 		IIdType id = myObservationDao.create(obs).getId().toUnqualifiedVersionless();
 		
 		CustomObservationR4 read = (CustomObservationR4) myObservationDao.read(id);
-		assertThat(read.getEyeColour().getValue()).isEqualTo("blue");
+		assertEquals("blue", read.getEyeColour().getValue());
 		
 		IBundleProvider found = myObservationDao.search(new SearchParameterMap());
-		assertThat(found.size().intValue()).isEqualTo(1);
+		assertEquals(1, found.size().intValue());
 		CustomObservationR4 search = (CustomObservationR4) found.getResources(0, 1).get(0);
-		assertThat(search.getEyeColour().getValue()).isEqualTo("blue");
+		assertEquals("blue", search.getEyeColour().getValue());
 		
 	}
 	

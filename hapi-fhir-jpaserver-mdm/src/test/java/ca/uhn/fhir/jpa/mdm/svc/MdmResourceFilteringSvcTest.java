@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Patient;
@@ -21,7 +22,7 @@ class MdmResourceFilteringSvcTest extends BaseMdmR4Test {
 		//SUT
 		boolean shouldBeProcessed = myMdmResourceFilteringSvc.shouldBeProcessed(patient);
 
-		assertThat(shouldBeProcessed).isEqualTo(false);
+		assertEquals(false, shouldBeProcessed);
 	}
 
 	@Test
@@ -32,6 +33,6 @@ class MdmResourceFilteringSvcTest extends BaseMdmR4Test {
 		//SUT
 		boolean shouldBeProcessed = myMdmResourceFilteringSvc.shouldBeProcessed(patient);
 
-		assertThat(shouldBeProcessed).isEqualTo(true);
+		assertEquals(true, shouldBeProcessed);
 	}
 }

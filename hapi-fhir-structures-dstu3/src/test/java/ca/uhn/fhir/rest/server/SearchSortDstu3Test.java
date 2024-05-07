@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.annotation.Sort;
@@ -53,20 +54,20 @@ public class SearchSortDstu3Test {
 		try {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			ourLog.info(responseContent);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(ourLastMethod).isEqualTo("search");
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("search", ourLastMethod);
 
-			assertThat(ourLastSortSpec.getParamName()).isEqualTo("param1");
-			assertThat(ourLastSortSpec.getOrder()).isEqualTo(SortOrderEnum.ASC);
+			assertEquals("param1", ourLastSortSpec.getParamName());
+			assertEquals(SortOrderEnum.ASC, ourLastSortSpec.getOrder());
 
-			assertThat(ourLastSortSpec.getChain().getParamName()).isEqualTo("param2");
-			assertThat(ourLastSortSpec.getChain().getOrder()).isEqualTo(SortOrderEnum.DESC);
+			assertEquals("param2", ourLastSortSpec.getChain().getParamName());
+			assertEquals(SortOrderEnum.DESC, ourLastSortSpec.getChain().getOrder());
 
-			assertThat(ourLastSortSpec.getChain().getChain().getParamName()).isEqualTo("param3");
-			assertThat(ourLastSortSpec.getChain().getChain().getOrder()).isEqualTo(SortOrderEnum.ASC);
+			assertEquals("param3", ourLastSortSpec.getChain().getChain().getParamName());
+			assertEquals(SortOrderEnum.ASC, ourLastSortSpec.getChain().getChain().getOrder());
 
-			assertThat(ourLastSortSpec.getChain().getChain().getChain().getParamName()).isEqualTo("param4");
-			assertThat(ourLastSortSpec.getChain().getChain().getChain().getOrder()).isEqualTo(SortOrderEnum.DESC);
+			assertEquals("param4", ourLastSortSpec.getChain().getChain().getChain().getParamName());
+			assertEquals(SortOrderEnum.DESC, ourLastSortSpec.getChain().getChain().getChain().getOrder());
 
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());

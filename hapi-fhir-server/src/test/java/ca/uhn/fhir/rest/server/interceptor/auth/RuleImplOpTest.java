@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -21,7 +22,7 @@ public class RuleImplOpTest {
 
 	@Test
 	public void testToString() {
-		assertThat(new RuleImplOp("").toString()).isEqualTo("RuleImplOp[testers=<null>,op=<null>,transactionAppliesToOp=<null>,appliesTo=<null>,appliesToTypes=<null>,classifierCompartmentName=<null>,classifierCompartmentOwners=<null>,classifierType=<null>]");
+		assertEquals("RuleImplOp[testers=<null>,op=<null>,transactionAppliesToOp=<null>,appliesTo=<null>,appliesToTypes=<null>,classifierCompartmentName=<null>,classifierCompartmentOwners=<null>,classifierType=<null>]", new RuleImplOp("").toString());
 	}
 
 	@Test

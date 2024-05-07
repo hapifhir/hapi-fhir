@@ -100,7 +100,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 			myClient.create().resource(sp).execute();
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo("HTTP 422 Unprocessable Entity: " + Msg.code(1112) + "SearchParameter.status is missing or invalid");
+			assertEquals("HTTP 422 Unprocessable Entity: " + Msg.code(1112) + "SearchParameter.status is missing or invalid", e.getMessage());
 		}
 	}
 
@@ -168,7 +168,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		map = extractSearchParams(conformance, "Patient");
 
 		param = map.get("foo");
-		assertThat(param.getName()).isEqualTo("foo");
+		assertEquals("foo", param.getName());
 
 		param = map.get("gender");
 		assertNull(param);
@@ -187,9 +187,9 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		IIdType obsId = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
 		ResourceTable res = myResourceTableDao.findById(patId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-		assertThat(res.getIndexStatus().longValue()).isEqualTo(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
+		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
 		res = myResourceTableDao.findById(obsId.getIdPartAsLong()).orElseThrow(IllegalStateException::new);
-		assertThat(res.getIndexStatus().longValue()).isEqualTo(BaseHapiFhirDao.INDEX_STATUS_INDEXED);
+		assertEquals(BaseHapiFhirDao.INDEX_STATUS_INDEXED, res.getIndexStatus().longValue());
 
 		SearchParameter fooSp = new SearchParameter();
 		fooSp.addBase("Patient");
@@ -246,7 +246,7 @@ public class ResourceProviderCustomSearchParamDstu3Test extends BaseResourceProv
 		try {
 			String resp = IOUtils.toString(response.getEntity().getContent(), Constants.CHARSET_UTF8);
 			ourLog.info(resp);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, response.getStatusLine().getStatusCode());
 
 			assertThat(resp).contains("<fullUrl value=\"http://localhost:" + myPort + "/fhir/context/Practitioner/");
 		} finally {

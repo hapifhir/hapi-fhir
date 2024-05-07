@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -80,7 +81,7 @@ public class ValidateDstu3Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertThat(resp).contains("<OperationOutcome");
 	}
@@ -103,7 +104,7 @@ public class ValidateDstu3Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
@@ -124,7 +125,7 @@ public class ValidateDstu3Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+		assertEquals(400, status.getStatusLine().getStatusCode());
 
 		assertThat(resp).contains("Invalid mode value: &quot;AAA&quot;");
 	}
@@ -147,7 +148,7 @@ public class ValidateDstu3Test {
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertNull(ourLastPatient);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
@@ -161,12 +162,12 @@ public class ValidateDstu3Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertThat(resp).contains("<OperationOutcome", "FOOBAR");
 		assertNull(ourLastPatient);
-		assertThat(ourLastId.getResourceType()).isEqualTo("Patient");
-		assertThat(ourLastId.getIdPart()).isEqualTo("123");
+		assertEquals("Patient", ourLastId.getResourceType());
+		assertEquals("123", ourLastId.getIdPart());
 	}
 
 	@Test
@@ -183,10 +184,10 @@ public class ValidateDstu3Test {
 		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(params), ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
 
 		HttpResponse status = ourClient.execute(httpPost);
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertThat(ourLastResourceBody).contains("\"resourceType\":\"Organization\"", "\"identifier\"", "\"value\":\"001");
-		assertThat(ourLastEncoding).isEqualTo(EncodingEnum.JSON);
+		assertEquals(EncodingEnum.JSON, ourLastEncoding);
 
 	}
 
@@ -210,11 +211,11 @@ public class ValidateDstu3Test {
 		ourLog.info(resp);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertThat(resp).contains("<OperationOutcome");
-		assertThat(ourLastProfile).isEqualTo("http://foo");
-		assertThat(ourLastMode).isEqualTo(ValidationModeEnum.CREATE);
+		assertEquals("http://foo", ourLastProfile);
+		assertEquals(ValidationModeEnum.CREATE, ourLastMode);
 	}
 
 	@Test
@@ -237,7 +238,7 @@ public class ValidateDstu3Test {
 		String resp = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 
 		assertThat(resp).contains("<OperationOutcome", "FOOBAR");
 	}

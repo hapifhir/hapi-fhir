@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.elementmodel;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -32,7 +33,7 @@ public class PropertyTest {
 			property = new Property(workerContext, ed, sd);
 			property.getChildProperties("birthdate", null);
 		} catch (Error e) {
-				assertThat(e.getMessage()).isEqualTo("types == 0, and no children found on Patient.extension");
+				assertEquals("types == 0, and no children found on Patient.extension", e.getMessage());
 		}
     }
 
@@ -43,7 +44,7 @@ public class PropertyTest {
         final List<Property> result = property.getChildProperties("birthdate", null);
 			assertThat(result).isNotEmpty();
 			assertThat(result).hasSize(3);
-			assertThat(result.get(0).getDefinition().getPath()).isEqualTo("date.id");
+			assertEquals("date.id", result.get(0).getDefinition().getPath());
     }
 
     @Test
@@ -53,7 +54,7 @@ public class PropertyTest {
         final List<Property> result = property.getChildProperties("id", null);
 			assertThat(result).isNotEmpty();
 			assertThat(result).hasSize(3);
-			assertThat(result.get(0).getDefinition().getPath()).isEqualTo("id.id");
+			assertEquals("id.id", result.get(0).getDefinition().getPath());
     }
 
     @BeforeEach

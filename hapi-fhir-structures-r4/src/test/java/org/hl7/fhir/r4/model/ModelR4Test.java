@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import org.junit.jupiter.api.Test;
@@ -17,8 +18,8 @@ public class ModelR4Test {
 
 	@Test
 	public void testbase64BinaryName() {
-		assertThat(ourCtx.getElementDefinition("base64binary").getName()).isEqualTo("base64Binary");
-		assertThat(ourCtx.getElementDefinition("base64Binary").getName()).isEqualTo("base64Binary");
+		assertEquals("base64Binary", ourCtx.getElementDefinition("base64binary").getName());
+		assertEquals("base64Binary", ourCtx.getElementDefinition("base64Binary").getName());
 	}
 
 	@Test

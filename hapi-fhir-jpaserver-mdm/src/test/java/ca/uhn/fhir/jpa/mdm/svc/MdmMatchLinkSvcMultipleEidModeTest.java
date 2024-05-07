@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -69,17 +70,17 @@ public class MdmMatchLinkSvcMultipleEidModeTest extends BaseMdmR4Test {
 
 		//The collision should have kept the old identifier
 		Identifier firstIdentifier = identifier.get(0);
-		assertThat(firstIdentifier.getSystem()).isEqualTo(MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM);
-		assertThat(firstIdentifier.getValue()).isEqualTo(foundHapiEid);
+		assertEquals(MdmConstants.HAPI_ENTERPRISE_IDENTIFIER_SYSTEM, firstIdentifier.getSystem());
+		assertEquals(foundHapiEid, firstIdentifier.getValue());
 
 		//The collision should have added a new identifier with the external system.
 		Identifier secondIdentifier = identifier.get(1);
-		assertThat(secondIdentifier.getSystem()).isEqualTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"));
-		assertThat(secondIdentifier.getValue()).isEqualTo("12345");
+		assertEquals(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"), secondIdentifier.getSystem());
+		assertEquals("12345", secondIdentifier.getValue());
 
 		Identifier thirdIdentifier = identifier.get(2);
-		assertThat(thirdIdentifier.getSystem()).isEqualTo(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"));
-		assertThat(thirdIdentifier.getValue()).isEqualTo("67890");
+		assertEquals(myMdmSettings.getMdmRules().getEnterpriseEIDSystemForResourceType("Patient"), thirdIdentifier.getSystem());
+		assertEquals("67890", thirdIdentifier.getValue());
 	}
 
 	@Test

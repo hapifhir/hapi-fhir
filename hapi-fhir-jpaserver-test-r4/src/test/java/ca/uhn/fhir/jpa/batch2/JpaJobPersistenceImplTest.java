@@ -115,12 +115,12 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		});
 
 		JobInstance foundInstance = mySvc.fetchInstance(instanceId).orElseThrow(IllegalStateException::new);
-		assertThat(foundInstance.getInstanceId()).isEqualTo(instanceId);
-		assertThat(foundInstance.getJobDefinitionId()).isEqualTo(JOB_DEFINITION_ID);
-		assertThat(foundInstance.getJobDefinitionVersion()).isEqualTo(JOB_DEF_VER);
-		assertThat(foundInstance.getStatus()).isEqualTo(StatusEnum.QUEUED);
-		assertThat(foundInstance.getParameters()).isEqualTo(CHUNK_DATA);
-		assertThat(foundInstance.getReport()).isEqualTo(instance.getReport());
+		assertEquals(instanceId, foundInstance.getInstanceId());
+		assertEquals(JOB_DEFINITION_ID, foundInstance.getJobDefinitionId());
+		assertEquals(JOB_DEF_VER, foundInstance.getJobDefinitionVersion());
+		assertEquals(StatusEnum.QUEUED, foundInstance.getStatus());
+		assertEquals(CHUNK_DATA, foundInstance.getParameters());
+		assertEquals(instance.getReport(), foundInstance.getReport());
 
 		runInTransaction(() -> {
 			Batch2JobInstanceEntity instanceEntity = myJobInstanceRepository.findById(instanceId).orElseThrow(IllegalStateException::new);
@@ -224,7 +224,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		// Verify
 		boolean chunkStarted = workChunk.isPresent();
-		assertThat(theShouldBeStartedByConsumer).isEqualTo(chunkStarted);
+		assertEquals(chunkStarted, theShouldBeStartedByConsumer);
 	}
 
 	@Test
@@ -235,15 +235,15 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		JobOperationResultJson result = mySvc.cancelInstance(instanceId);
 
 		assertTrue(result.getSuccess());
-		assertThat(result.getMessage()).isEqualTo("Job instance <" + instanceId + "> successfully cancelled.");
+		assertEquals("Job instance <" + instanceId + "> successfully cancelled.", result.getMessage());
 
 		JobInstance foundInstance = mySvc.fetchInstance(instanceId).orElseThrow(IllegalStateException::new);
-		assertThat(foundInstance.getInstanceId()).isEqualTo(instanceId);
-		assertThat(foundInstance.getJobDefinitionId()).isEqualTo(JOB_DEFINITION_ID);
-		assertThat(foundInstance.getJobDefinitionVersion()).isEqualTo(JOB_DEF_VER);
-		assertThat(foundInstance.getStatus()).isEqualTo(StatusEnum.QUEUED);
+		assertEquals(instanceId, foundInstance.getInstanceId());
+		assertEquals(JOB_DEFINITION_ID, foundInstance.getJobDefinitionId());
+		assertEquals(JOB_DEF_VER, foundInstance.getJobDefinitionVersion());
+		assertEquals(StatusEnum.QUEUED, foundInstance.getStatus());
 		assertTrue(foundInstance.isCancelled());
-		assertThat(foundInstance.getParameters()).isEqualTo(CHUNK_DATA);
+		assertEquals(CHUNK_DATA, foundInstance.getParameters());
 
 	}
 
@@ -254,7 +254,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		List<JobInstance> foundInstances = mySvc.fetchInstancesByJobDefinitionId(JOB_DEFINITION_ID, 10, 0);
 		assertThat(foundInstances).hasSize(1);
-		assertThat(foundInstances.get(0).getInstanceId()).isEqualTo(instanceId);
+		assertEquals(instanceId, foundInstances.get(0).getInstanceId());
 	}
 
 	@Test
@@ -267,7 +267,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		statuses.add(StatusEnum.COMPLETED);
 		List<JobInstance> foundInstances = mySvc.fetchInstancesByJobDefinitionIdAndStatus(JOB_DEFINITION_ID, statuses, 10, 0);
 		assertThat(foundInstances).hasSize(1);
-		assertThat(foundInstances.get(0).getInstanceId()).isEqualTo(instanceId);
+		assertEquals(instanceId, foundInstances.get(0).getInstanceId());
 	}
 
 	@Test
@@ -278,7 +278,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// Test
 		request.setJobStatus("");
 		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
-		assertThat(foundInstances.getTotalElements()).isEqualTo(2L);
+		assertEquals(2L, foundInstances.getTotalElements());
 	}
 
 	@Test
@@ -289,7 +289,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		// Test
 		request.setJobStatus("COMPLETED");
 		Page<JobInstance> foundInstances = mySvc.fetchJobInstances(request);
-		assertThat(foundInstances.getTotalElements()).isEqualTo(1L);
+		assertEquals(1L, foundInstances.getTotalElements());
 	}
 
 	private JobInstanceFetchRequest createFetchRequest() {
@@ -397,13 +397,13 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		{
 			WorkChunk workChunk = chunks.get(0);
 			assertThat(workChunk.getData()).as("we skip the data").isNull();
-			assertThat(workChunk.getId()).isEqualTo(queuedId);
-			assertThat(workChunk.getJobDefinitionId()).isEqualTo(JOB_DEFINITION_ID);
-			assertThat(workChunk.getJobDefinitionVersion()).isEqualTo(JOB_DEF_VER);
-			assertThat(workChunk.getInstanceId()).isEqualTo(instanceId);
-			assertThat(workChunk.getTargetStepId()).isEqualTo(TARGET_STEP_ID);
-			assertThat(workChunk.getSequence()).isEqualTo(0);
-			assertThat(workChunk.getStatus()).isEqualTo(WorkChunkStatusEnum.QUEUED);
+			assertEquals(queuedId, workChunk.getId());
+			assertEquals(JOB_DEFINITION_ID, workChunk.getJobDefinitionId());
+			assertEquals(JOB_DEF_VER, workChunk.getJobDefinitionVersion());
+			assertEquals(instanceId, workChunk.getInstanceId());
+			assertEquals(TARGET_STEP_ID, workChunk.getTargetStepId());
+			assertEquals(0, workChunk.getSequence());
+			assertEquals(WorkChunkStatusEnum.QUEUED, workChunk.getStatus());
 
 
 			assertNotNull(workChunk.getCreateTime());
@@ -411,26 +411,26 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 			assertNotNull(workChunk.getUpdateTime());
 			assertNull(workChunk.getEndTime());
 			assertNull(workChunk.getErrorMessage());
-			assertThat(workChunk.getErrorCount()).isEqualTo(0);
+			assertEquals(0, workChunk.getErrorCount());
 			assertNull(workChunk.getRecordsProcessed());
 		}
 
 		{
 			WorkChunk workChunk1 = chunks.get(1);
-			assertThat(workChunk1.getStatus()).isEqualTo(WorkChunkStatusEnum.ERRORED);
-			assertThat(workChunk1.getErrorMessage()).isEqualTo("Our error message");
-			assertThat(workChunk1.getErrorCount()).isEqualTo(1);
+			assertEquals(WorkChunkStatusEnum.ERRORED, workChunk1.getStatus());
+			assertEquals("Our error message", workChunk1.getErrorMessage());
+			assertEquals(1, workChunk1.getErrorCount());
 			assertNull(workChunk1.getRecordsProcessed());
 			assertNotNull(workChunk1.getEndTime());
 		}
 
 		{
 			WorkChunk workChunk2 = chunks.get(2);
-			assertThat(workChunk2.getStatus()).isEqualTo(WorkChunkStatusEnum.COMPLETED);
+			assertEquals(WorkChunkStatusEnum.COMPLETED, workChunk2.getStatus());
 			assertNotNull(workChunk2.getEndTime());
-			assertThat(workChunk2.getRecordsProcessed()).isEqualTo(11);
+			assertEquals(11, workChunk2.getRecordsProcessed());
 			assertNull(workChunk2.getErrorMessage());
-			assertThat(workChunk2.getErrorCount()).isEqualTo(0);
+			assertEquals(0, workChunk2.getErrorCount());
 		}
 
 	}
@@ -447,10 +447,10 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		WorkChunk chunk = mySvc.onWorkChunkDequeue(id).orElseThrow(IllegalArgumentException::new);
 		assertThat(chunk.getInstanceId()).hasSize(36);
-		assertThat(chunk.getJobDefinitionId()).isEqualTo(JOB_DEFINITION_ID);
-		assertThat(chunk.getJobDefinitionVersion()).isEqualTo(JOB_DEF_VER);
-		assertThat(chunk.getStatus()).isEqualTo(WorkChunkStatusEnum.IN_PROGRESS);
-		assertThat(chunk.getData()).isEqualTo(CHUNK_DATA);
+		assertEquals(JOB_DEFINITION_ID, chunk.getJobDefinitionId());
+		assertEquals(JOB_DEF_VER, chunk.getJobDefinitionVersion());
+		assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
+		assertEquals(CHUNK_DATA, chunk.getData());
 
 		runInTransaction(() -> assertEquals(WorkChunkStatusEnum.IN_PROGRESS, myWorkChunkRepository.findById(id).orElseThrow(IllegalArgumentException::new).getStatus()));
 	}
@@ -467,8 +467,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		sleepUntilTimeChanges();
 
 		WorkChunk chunk = mySvc.onWorkChunkDequeue(chunkId).orElseThrow(IllegalArgumentException::new);
-		assertThat(chunk.getSequence()).isEqualTo(SEQUENCE_NUMBER);
-		assertThat(chunk.getStatus()).isEqualTo(WorkChunkStatusEnum.IN_PROGRESS);
+		assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
+		assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
 		assertNotNull(chunk.getCreateTime());
 		assertNotNull(chunk.getStartTime());
 		assertNull(chunk.getEndTime());
@@ -538,8 +538,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		sleepUntilTimeChanges();
 
 		WorkChunk chunk = mySvc.onWorkChunkDequeue(chunkId).orElseThrow(IllegalArgumentException::new);
-		assertThat(chunk.getSequence()).isEqualTo(SEQUENCE_NUMBER);
-		assertThat(chunk.getStatus()).isEqualTo(WorkChunkStatusEnum.IN_PROGRESS);
+		assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
+		assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
 
 		sleepUntilTimeChanges();
 
@@ -575,7 +575,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 		List<WorkChunk> chunks = ImmutableList.copyOf(mySvc.fetchAllWorkChunksIterator(instanceId, true));
 		assertThat(chunks).hasSize(1);
-		assertThat(chunks.get(0).getErrorCount()).isEqualTo(2);
+		assertEquals(2, chunks.get(0).getErrorCount());
 	}
 
 	@Test
@@ -590,8 +590,8 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		sleepUntilTimeChanges();
 
 		WorkChunk chunk = mySvc.onWorkChunkDequeue(chunkId).orElseThrow(IllegalArgumentException::new);
-		assertThat(chunk.getSequence()).isEqualTo(SEQUENCE_NUMBER);
-		assertThat(chunk.getStatus()).isEqualTo(WorkChunkStatusEnum.IN_PROGRESS);
+		assertEquals(SEQUENCE_NUMBER, chunk.getSequence());
+		assertEquals(WorkChunkStatusEnum.IN_PROGRESS, chunk.getStatus());
 
 		sleepUntilTimeChanges();
 
@@ -633,7 +633,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 		while (reducedChunks.hasNext()) {
 			WorkChunk reducedChunk = reducedChunks.next();
 			assertThat(chunkIds).contains(reducedChunk.getId());
-			assertThat(reducedChunk.getStatus()).isEqualTo(WorkChunkStatusEnum.COMPLETED);
+			assertEquals(WorkChunkStatusEnum.COMPLETED, reducedChunk.getStatus());
 		}
 	}
 
@@ -653,7 +653,7 @@ public class JpaJobPersistenceImplTest extends BaseJpaR4Test {
 
 			JobInstance foundInstance = mySvc.fetchInstance(instanceId).orElseThrow(IllegalStateException::new);
 
-			assertThat(foundInstance.getTriggeringUsername()).isEqualTo(expectedTriggeringUserName);
+			assertEquals(expectedTriggeringUserName, foundInstance.getTriggeringUsername());
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(prestorageBatchJobCreateInterceptor);

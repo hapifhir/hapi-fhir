@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
@@ -37,7 +38,7 @@ public class FhirPathEngineTest extends BaseValidationTestWithInlineMocks {
 
 		List<Base> value = ourEngine.evaluate(obs, "Observation.value.as(String)");
 		assertThat(value).hasSize(1);
-		assertThat(((StringType) value.get(0)).getValue()).isEqualTo("FOO");
+		assertEquals("FOO", ((StringType) value.get(0)).getValue());
 	}
 
 	@Test
@@ -54,7 +55,7 @@ public class FhirPathEngineTest extends BaseValidationTestWithInlineMocks {
 
 		List<Base> value = ourEngine.evaluate(o, "Observation.specimen.resolve().receivedTime");
 		assertThat(value).hasSize(1);
-		assertThat(((DateTimeType) value.get(0)).getValueAsString()).isEqualTo("2011-01-01");
+		assertEquals("2011-01-01", ((DateTimeType) value.get(0)).getValueAsString());
 	}
 
 	@Test

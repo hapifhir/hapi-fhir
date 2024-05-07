@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -74,13 +75,13 @@ public class HistoryR4Test {
 			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 				String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 				ourLog.info(responseContent);
-				assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+				assertEquals(200, status.getStatusLine().getStatusCode());
 			}
 
-			assertThat(ourLastAt.getLowerBound().getPrefix()).isEqualTo(ParamPrefixEnum.GREATERTHAN);
-			assertThat(ourLastAt.getLowerBound().getValueAsString()).isEqualTo("2001");
-			assertThat(ourLastAt.getUpperBound().getPrefix()).isEqualTo(ParamPrefixEnum.LESSTHAN);
-			assertThat(ourLastAt.getUpperBound().getValueAsString()).isEqualTo("2005");
+			assertEquals(ParamPrefixEnum.GREATERTHAN, ourLastAt.getLowerBound().getPrefix());
+			assertEquals("2001", ourLastAt.getLowerBound().getValueAsString());
+			assertEquals(ParamPrefixEnum.LESSTHAN, ourLastAt.getUpperBound().getPrefix());
+			assertEquals("2005", ourLastAt.getUpperBound().getValueAsString());
 		}
 	}
 
@@ -92,13 +93,13 @@ public class HistoryR4Test {
 			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 				responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 				ourLog.info(responseContent);
-				assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+				assertEquals(200, status.getStatusLine().getStatusCode());
 			}
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertThat(bundle.getEntry()).hasSize(2);
-			assertThat(bundle.getEntry().get(0).getResource().getId()).isEqualTo(ourServer.getBaseUrl() + "/Patient/ih1/_history/1");
-			assertThat(bundle.getEntry().get(1).getResource().getId()).isEqualTo(ourServer.getBaseUrl() + "/Patient/ih1/_history/2");
+			assertEquals(ourServer.getBaseUrl() + "/Patient/ih1/_history/1", bundle.getEntry().get(0).getResource().getId());
+			assertEquals(ourServer.getBaseUrl() + "/Patient/ih1/_history/2", bundle.getEntry().get(1).getResource().getId());
 
 		}
 	}
@@ -111,13 +112,13 @@ public class HistoryR4Test {
 			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 				responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 				ourLog.info(responseContent);
-				assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+				assertEquals(200, status.getStatusLine().getStatusCode());
 			}
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertThat(bundle.getEntry()).hasSize(2);
-			assertThat(bundle.getEntry().get(0).getResource().getId()).isEqualTo(ourServer.getBaseUrl() + "/Patient/h1/_history/1");
-			assertThat(bundle.getEntry().get(1).getResource().getId()).isEqualTo(ourServer.getBaseUrl() + "/Patient/h1/_history/2");
+			assertEquals(ourServer.getBaseUrl() + "/Patient/h1/_history/1", bundle.getEntry().get(0).getResource().getId());
+			assertEquals(ourServer.getBaseUrl() + "/Patient/h1/_history/2", bundle.getEntry().get(1).getResource().getId());
 
 		}
 	}
@@ -130,16 +131,16 @@ public class HistoryR4Test {
 			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 				responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 				ourLog.info(responseContent);
-				assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+				assertEquals(200, status.getStatusLine().getStatusCode());
 			}
 
 			assertNull(ourLastAt);
-			assertThat(ourLastSince.getValueAsString()).isEqualTo("2005");
-			assertThat(ourLastSince2.getValueAsString()).isEqualTo("2005");
+			assertEquals("2005", ourLastSince.getValueAsString());
+			assertEquals("2005", ourLastSince2.getValueAsString());
 			assertTrue(DateTimeType.class.equals(ourLastSince2.getClass()));
-			assertThat(ourLastSince3.getValueAsString()).isEqualTo("2005");
+			assertEquals("2005", ourLastSince3.getValueAsString());
 			assertTrue(StringType.class.equals(ourLastSince3.getClass()));
-			assertThat(ourLastSince4.getValueAsString()).isEqualTo("2005");
+			assertEquals("2005", ourLastSince4.getValueAsString());
 			assertTrue(StringType.class.equals(ourLastSince4.getClass()));
 		}
 	}
@@ -152,15 +153,15 @@ public class HistoryR4Test {
 			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 				responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 				ourLog.info(responseContent);
-				assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+				assertEquals(200, status.getStatusLine().getStatusCode());
 			}
 
 			assertNull(ourLastAt);
 
 			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertThat(bundle.getEntry()).hasSize(2);
-			assertThat(bundle.getEntry().get(0).getResource().getId()).isEqualTo(ourServer.getBaseUrl() + "/Patient/th1/_history/1");
-			assertThat(bundle.getEntry().get(1).getResource().getId()).isEqualTo(ourServer.getBaseUrl() + "/Patient/th1/_history/2");
+			assertEquals(ourServer.getBaseUrl() + "/Patient/th1/_history/1", bundle.getEntry().get(0).getResource().getId());
+			assertEquals(ourServer.getBaseUrl() + "/Patient/th1/_history/2", bundle.getEntry().get(1).getResource().getId());
 
 		}
 	}
@@ -176,11 +177,11 @@ public class HistoryR4Test {
 			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
 				responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
 				ourLog.info(responseContent);
-				assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+				assertEquals(200, status.getStatusLine().getStatusCode());
 			}
 
 			Patient bundle = ourCtx.newXmlParser().parseResource(Patient.class, responseContent);
-			assertThat(bundle.getNameFirstRep().getFamily()).isEqualTo("vread");
+			assertEquals("vread", bundle.getNameFirstRep().getFamily());
 		}
 	}
 

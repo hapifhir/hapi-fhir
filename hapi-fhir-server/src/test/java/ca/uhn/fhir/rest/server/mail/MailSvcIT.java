@@ -47,9 +47,9 @@ public class MailSvcIT {
 		boolean condition = ourGreenMail.waitForIncomingEmail(5000, 1);
 		assertTrue(condition);
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
-		assertThat(receivedMessages.length).isEqualTo(1);
-		assertThat(receivedMessages[0].getSubject()).isEqualTo(SUBJECT);
-		assertThat(GreenMailUtil.getBody(receivedMessages[0])).isEqualTo(BODY);
+		assertEquals(1, receivedMessages.length);
+		assertEquals(SUBJECT, receivedMessages[0].getSubject());
+		assertEquals(BODY, GreenMailUtil.getBody(receivedMessages[0]));
 	}
 
 	@Test
@@ -61,13 +61,13 @@ public class MailSvcIT {
 		// validate
 		assertTrue(ourGreenMail.waitForIncomingEmail(15000, emails.size()));
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
-		assertThat(receivedMessages.length).isEqualTo(emails.size());
-		assertThat(receivedMessages[0].getSubject()).isEqualTo(SUBJECT);
-		assertThat(GreenMailUtil.getBody(receivedMessages[0])).isEqualTo(BODY);
-		assertThat(receivedMessages[1].getSubject()).isEqualTo(SUBJECT);
-		assertThat(GreenMailUtil.getBody(receivedMessages[1])).isEqualTo(BODY);
-		assertThat(receivedMessages[2].getSubject()).isEqualTo(SUBJECT);
-		assertThat(GreenMailUtil.getBody(receivedMessages[2])).isEqualTo(BODY);
+		assertEquals(emails.size(), receivedMessages.length);
+		assertEquals(SUBJECT, receivedMessages[0].getSubject());
+		assertEquals(BODY, GreenMailUtil.getBody(receivedMessages[0]));
+		assertEquals(SUBJECT, receivedMessages[1].getSubject());
+		assertEquals(BODY, GreenMailUtil.getBody(receivedMessages[1]));
+		assertEquals(SUBJECT, receivedMessages[2].getSubject());
+		assertEquals(BODY, GreenMailUtil.getBody(receivedMessages[2]));
 	}
 
 	@Test
@@ -81,7 +81,7 @@ public class MailSvcIT {
 		// validate
 		assertTrue(ourGreenMail.waitForIncomingEmail(5000, 0));
 		final MimeMessage[] receivedMessages = ourGreenMail.getReceivedMessages();
-		assertThat(receivedMessages.length).isEqualTo(0);
+		assertEquals(0, receivedMessages.length);
 	}
 
 	@Test

@@ -93,9 +93,9 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		inputBundle.addEntry().setResource(msgHeader);
 
 		RuntimeSearchParam sp = mySearchParamRegistry.getActiveSearchParam("Bundle", "message");
-		assertThat(sp.getPath()).isEqualTo("Bundle.entry[0].resource");
+		assertEquals("Bundle.entry[0].resource", sp.getPath());
 		assertThat(sp.getBase()).containsExactly("Bundle");
-		assertThat(sp.getStatus()).isEqualTo(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE);
+		assertEquals(RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, sp.getStatus());
 
 		// Test
 		myBundleDao.create(inputBundle, mySrd);
@@ -1540,7 +1540,7 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 			myTestDaoSearch.searchForIds(url);
 			fail("Expected an exception to be thrown");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(2007) + "The search chain subject.organization.partof.partof.name is too long. Only chains up to three references are supported.");
+			assertEquals(Msg.code(2007) + "The search chain subject.organization.partof.partof.name is too long. Only chains up to three references are supported.", e.getMessage());
 		}
 	}
 

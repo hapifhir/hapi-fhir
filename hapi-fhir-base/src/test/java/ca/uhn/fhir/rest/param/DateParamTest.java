@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.model.primitive.DateTimeDt;
 import ca.uhn.fhir.model.primitive.InstantDt;
@@ -31,9 +32,9 @@ public class DateParamTest {
 		// too bad value is a j.u.Date instead of a new JSR-310 type
 		// DataParam parses using default tz, so go backwards.
 		ZonedDateTime zonedDateTime = input.getValue().toInstant().atZone(ZoneId.systemDefault());
-		assertThat(zonedDateTime.getYear()).isEqualTo(2020);
-		assertThat(zonedDateTime.getMonth()).isEqualTo(Month.JANUARY);
-		assertThat(zonedDateTime.getDayOfMonth()).isEqualTo(1);
+		assertEquals(2020, zonedDateTime.getYear());
+		assertEquals(Month.JANUARY, zonedDateTime.getMonth());
+		assertEquals(1, zonedDateTime.getDayOfMonth());
 		assertNull(input.getPrefix());
 	}
 
@@ -51,7 +52,7 @@ public class DateParamTest {
 	public void testPrefixParse() {
 		DateParam input = new DateParam("gt2020-01-01");
 
-		assertThat(input.getPrefix()).isEqualTo(ParamPrefixEnum.GREATERTHAN);
+		assertEquals(ParamPrefixEnum.GREATERTHAN, input.getPrefix());
 	}
 
 	/**
@@ -61,12 +62,12 @@ public class DateParamTest {
  	 */
 	@Test
 	public void testLegacyPrefixParse() {
-		assertThat(translateLegacyPrefix(">=")).isEqualTo(ParamPrefixEnum.GREATERTHAN_OR_EQUALS);
-		assertThat(translateLegacyPrefix(">")).isEqualTo(ParamPrefixEnum.GREATERTHAN);
-		assertThat(translateLegacyPrefix("<=")).isEqualTo(ParamPrefixEnum.LESSTHAN_OR_EQUALS);
-		assertThat(translateLegacyPrefix("<")).isEqualTo(ParamPrefixEnum.LESSTHAN);
-		assertThat(translateLegacyPrefix("~")).isEqualTo(ParamPrefixEnum.APPROXIMATE);
-		assertThat(translateLegacyPrefix("=")).isEqualTo(ParamPrefixEnum.EQUAL);
+		assertEquals(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, translateLegacyPrefix(">="));
+		assertEquals(ParamPrefixEnum.GREATERTHAN, translateLegacyPrefix(">"));
+		assertEquals(ParamPrefixEnum.LESSTHAN_OR_EQUALS, translateLegacyPrefix("<="));
+		assertEquals(ParamPrefixEnum.LESSTHAN, translateLegacyPrefix("<"));
+		assertEquals(ParamPrefixEnum.APPROXIMATE, translateLegacyPrefix("~"));
+		assertEquals(ParamPrefixEnum.EQUAL, translateLegacyPrefix("="));
 	}
 
 	private ParamPrefixEnum translateLegacyPrefix(String legacyPrefix) {
@@ -104,15 +105,15 @@ public class DateParamTest {
 		DateParam param = new DateParam();
 		param.setValueAsString("gt2016-06-09T20:38:14.591-05:00");
 
-		assertThat(param.getPrefix()).isEqualTo(ParamPrefixEnum.GREATERTHAN);
-		assertThat(param.getValueAsString()).isEqualTo("2016-06-09T20:38:14.591-05:00");
+		assertEquals(ParamPrefixEnum.GREATERTHAN, param.getPrefix());
+		assertEquals("2016-06-09T20:38:14.591-05:00", param.getValueAsString());
 
 		ourLog.debug("PRE:  " + param.getValue());
 		ourLog.debug("PRE:  " + param.getValue().getTime());
 		InstantDt dt = new InstantDt(new Date(param.getValue().getTime()));
 		dt.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
 		ourLog.debug("POST: " + dt.getValue());
-		assertThat(dt.getValueAsString()).isEqualTo("2016-06-09T21:38:14.591-04:00");
+		assertEquals("2016-06-09T21:38:14.591-04:00", dt.getValueAsString());
 	}
 
 	@Test
@@ -121,7 +122,7 @@ public class DateParamTest {
 		param.setValueAsString("2016-06-09T20:38Z");
 
 		assertNull(param.getPrefix());
-		assertThat(param.getValueAsString()).isEqualTo("2016-06-09T20:38Z");
+		assertEquals("2016-06-09T20:38Z", param.getValueAsString());
 
 		ourLog.debug("PRE:  " + param.getValue());
 		ourLog.debug("PRE:  " + param.getValue().getTime());
@@ -129,7 +130,7 @@ public class DateParamTest {
 		InstantDt dt = new InstantDt(new Date(param.getValue().getTime()));
 		dt.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
 		ourLog.debug("POST: " + dt.getValue());
-		assertThat(dt.getValueAsString()).isEqualTo("2016-06-09T16:38:00.000-04:00");
+		assertEquals("2016-06-09T16:38:00.000-04:00", dt.getValueAsString());
 	}
 
 	@Test
@@ -138,7 +139,7 @@ public class DateParamTest {
 		param.setValueAsString("2016-06-09T20:38");
 
 		assertNull(param.getPrefix());
-		assertThat(param.getValueAsString()).isEqualTo("2016-06-09T20:38");
+		assertEquals("2016-06-09T20:38", param.getValueAsString());
 
 		ourLog.debug("PRE:  " + param.getValue());
 		ourLog.debug("PRE:  " + param.getValue().getTime());
@@ -155,8 +156,8 @@ public class DateParamTest {
 		DateParam param = new DateParam();
 		param.setValueAsString("gt2016-06-09T20:38Z");
 
-		assertThat(param.getPrefix()).isEqualTo(ParamPrefixEnum.GREATERTHAN);
-		assertThat(param.getValueAsString()).isEqualTo("2016-06-09T20:38Z");
+		assertEquals(ParamPrefixEnum.GREATERTHAN, param.getPrefix());
+		assertEquals("2016-06-09T20:38Z", param.getValueAsString());
 
 		ourLog.debug("PRE:  " + param.getValue());
 		ourLog.debug("PRE:  " + param.getValue().getTime());
@@ -164,25 +165,25 @@ public class DateParamTest {
 		InstantDt dt = new InstantDt(new Date(param.getValue().getTime()));
 		dt.setTimeZone(TimeZone.getTimeZone("America/Toronto"));
 		ourLog.debug("POST: " + dt.getValue());
-		assertThat(dt.getValueAsString()).isEqualTo("2016-06-09T16:38:00.000-04:00");
+		assertEquals("2016-06-09T16:38:00.000-04:00", dt.getValueAsString());
 	}
 
 	@Test
 	public void testParseLegacyPrefixes() {
-		assertThat(new DateParam("ap2012").getPrefix()).isEqualTo(ParamPrefixEnum.APPROXIMATE);
-		assertThat(new DateParam("gt2012").getPrefix()).isEqualTo(ParamPrefixEnum.GREATERTHAN);
-		assertThat(new DateParam("ge2012").getPrefix()).isEqualTo(ParamPrefixEnum.GREATERTHAN_OR_EQUALS);
-		assertThat(new DateParam("lt2012").getPrefix()).isEqualTo(ParamPrefixEnum.LESSTHAN);
-		assertThat(new DateParam("le2012").getPrefix()).isEqualTo(ParamPrefixEnum.LESSTHAN_OR_EQUALS);
+		assertEquals(ParamPrefixEnum.APPROXIMATE, new DateParam("ap2012").getPrefix());
+		assertEquals(ParamPrefixEnum.GREATERTHAN, new DateParam("gt2012").getPrefix());
+		assertEquals(ParamPrefixEnum.GREATERTHAN_OR_EQUALS, new DateParam("ge2012").getPrefix());
+		assertEquals(ParamPrefixEnum.LESSTHAN, new DateParam("lt2012").getPrefix());
+		assertEquals(ParamPrefixEnum.LESSTHAN_OR_EQUALS, new DateParam("le2012").getPrefix());
 	}
 
 	@Test()
 	public void testEqualsAndHashCode() {
 		Date now = new Date();
 		Date later = new Date(now.getTime() + SECONDS.toMillis(666));
-		assertThat(new DateParam(null)).isEqualTo(new DateParam());
-		assertThat(new DateParam(NOT_EQUAL, now.getTime())).isEqualTo(new DateParam(NOT_EQUAL, now));
-		assertThat(new DateParam(EQUAL, now.getTime())).isEqualTo(new DateParam(EQUAL, now));
-		assertThat(new DateParam(EQUAL, later.getTime())).isEqualTo(new DateParam(EQUAL, later));
+		assertEquals(new DateParam(), new DateParam(null));
+		assertEquals(new DateParam(NOT_EQUAL, now), new DateParam(NOT_EQUAL, now.getTime()));
+		assertEquals(new DateParam(EQUAL, now), new DateParam(EQUAL, now.getTime()));
+		assertEquals(new DateParam(EQUAL, later), new DateParam(EQUAL, later.getTime()));
 	}
 }

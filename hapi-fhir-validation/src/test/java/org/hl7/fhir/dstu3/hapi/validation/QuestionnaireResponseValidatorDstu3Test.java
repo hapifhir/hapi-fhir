@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -1010,14 +1011,14 @@ public class QuestionnaireResponseValidatorDstu3Test {
 		ValidationResult errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
 		assertThat(errors.getMessages()).hasSize(1);
-		assertThat(errors.getMessages().get(0).getSeverity()).isEqualTo(ResultSeverityEnum.WARNING);
+		assertEquals(ResultSeverityEnum.WARNING, errors.getMessages().get(0).getSeverity());
 
 		qa.setStatus(QuestionnaireResponseStatus.COMPLETED);
 
 		errors = myVal.validateWithResult(qa);
 		ourLog.info(errors.toString());
 		assertThat(errors.getMessages()).hasSize(1);
-		assertThat(errors.getMessages().get(0).getSeverity()).isEqualTo(ResultSeverityEnum.ERROR);
+		assertEquals(ResultSeverityEnum.ERROR, errors.getMessages().get(0).getSeverity());
 	}
 
 	@Test

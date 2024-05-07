@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
@@ -136,7 +137,7 @@ public class FetchResourceIdsStepTest {
 		RunOutcome outcome = myFirstStep.run(input, sink);
 
 		// verify
-		assertThat(outcome).isEqualTo(RunOutcome.SUCCESS);
+		assertEquals(RunOutcome.SUCCESS, outcome);
 		ArgumentCaptor<ResourceIdList> resultCaptor = ArgumentCaptor.forClass(ResourceIdList.class);
 		verify(sink, times(parameters.getResourceTypes().size()))
 			.accept(resultCaptor.capture());
@@ -172,8 +173,8 @@ public class FetchResourceIdsStepTest {
 		ArgumentCaptor<ExportPIDIteratorParameters> mapppedParamsCaptor = ArgumentCaptor.forClass(ExportPIDIteratorParameters.class);
 		verify(myBulkExportProcessor, times(2)).getResourcePidIterator(mapppedParamsCaptor.capture());
 		List<ExportPIDIteratorParameters> capturedParameters = mapppedParamsCaptor.getAllValues();
-		assertThat(capturedParameters.get(0).getPartitionIdOrAllPartitions()).isEqualTo(parameters.getPartitionId());
-		assertThat(capturedParameters.get(1).getPartitionIdOrAllPartitions()).isEqualTo(parameters.getPartitionId());
+		assertEquals(parameters.getPartitionId(), capturedParameters.get(0).getPartitionIdOrAllPartitions());
+		assertEquals(parameters.getPartitionId(), capturedParameters.get(1).getPartitionIdOrAllPartitions());
 	}
 
 	@Test
@@ -208,7 +209,7 @@ public class FetchResourceIdsStepTest {
 
 		// verify
 		ArgumentCaptor<ResourceIdList> captor = ArgumentCaptor.forClass(ResourceIdList.class);
-		assertThat(outcome).isEqualTo(RunOutcome.SUCCESS);
+		assertEquals(RunOutcome.SUCCESS, outcome);
 
 		verify(sink, times(2))
 			.accept(captor.capture());

@@ -1,5 +1,6 @@
 package ca.uhn.hapi.fhir.cdshooks.svc.cr.resolution;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -79,7 +80,7 @@ public class CdsCrServiceR4Test extends BaseCrTest {
 		final CdsServiceResponseJson cdsServiceResponseJson = new CdsCrServiceR4(requestDetails, repository, myCdsConfigService).encodeResponse(responseBundle);
 
 		assertTrue(cdsServiceResponseJson.getServiceActions().size() == 1);
-		assertThat(cdsServiceResponseJson.getServiceActions().get(0).getType()).isEqualTo(ActionType.CREATE);
+		assertEquals(ActionType.CREATE, cdsServiceResponseJson.getServiceActions().get(0).getType());
 		assertNotNull(cdsServiceResponseJson.getServiceActions().get(0).getResource());
 	}
 }

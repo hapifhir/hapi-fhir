@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.index;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.BaseResourceIndex;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamNumber;
@@ -67,8 +68,8 @@ public class DaoSearchParamSynchronizerTest {
 	void synchronizeSearchParamsNumberOnlyValuesDifferent() {
 		final AddRemoveCount addRemoveCount = subject.synchronizeSearchParamsToDatabase(theParams, theEntity, existingParams);
 
-		assertThat(addRemoveCount.getRemoveCount()).isEqualTo(0);
-		assertThat(addRemoveCount.getAddCount()).isEqualTo(1);
+		assertEquals(0, addRemoveCount.getRemoveCount());
+		assertEquals(1, addRemoveCount.getAddCount());
 
 		verify(entityManager, never()).remove(any(BaseResourceIndex.class));
 		verify(entityManager, times(1)).merge(THE_SEARCH_PARAM_NUMBER);

@@ -1,5 +1,6 @@
 package org.hl7.fhir.r4.model;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ public class DomainResourceR4Test {
        Narrative.NarrativeStatus copiedPatientTextStatus = copiedPatient.getText().getStatus();
 
 			assertTrue(copiedPatient instanceof DomainResource); // Just making sure this assumption still holds up, otherwise this test isn't very useful
-			assertThat(copiedPatientID).isEqualTo("1001");
-			assertThat(copiedPatientTextStatus).isEqualTo(new Narrative().setStatus(Narrative.NarrativeStatus.ADDITIONAL).getStatus());
+			assertEquals("1001", copiedPatientID);
+			assertEquals(new Narrative().setStatus(Narrative.NarrativeStatus.ADDITIONAL).getStatus(), copiedPatientTextStatus);
     }
 }

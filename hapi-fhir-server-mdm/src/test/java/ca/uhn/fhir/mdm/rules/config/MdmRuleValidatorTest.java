@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.rules.config;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
@@ -36,7 +37,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 		try {
 			setMdmRuleJson("bad-rules-bad-url.json");
 			fail("");		} catch (ConfigurationException e){
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1519) + "Enterprise Identifier System (eidSystem) must be a valid URI");
+			assertEquals(Msg.code(1519) + "Enterprise Identifier System (eidSystem) must be a valid URI", e.getMessage());
 		}
    }
 
@@ -45,7 +46,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 		try {
 			setMdmRuleJson("bad-rules-missing-name.json");
 			fail("");		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1523) + "There is no matchField with name foo");
+			assertEquals(Msg.code(1523) + "There is no matchField with name foo", e.getMessage());
 		}
 	}
 
@@ -54,7 +55,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 		try {
 			setMdmRuleJson("bad-rules-missing-threshold.json");
 			fail("");		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1514) + "MatchField given-name similarity COSINE requires a matchThreshold");
+			assertEquals(Msg.code(1514) + "MatchField given-name similarity COSINE requires a matchThreshold", e.getMessage());
 		}
 	}
 
@@ -155,7 +156,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 			setMdmRuleJson("bad-rules-illegal-resource-type-eid.json");
 		}
 		catch (ConfigurationException e){
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1508) + "not-a-resource is not a valid resource type, but is set in the eidSystems field.");
+			assertEquals(Msg.code(1508) + "not-a-resource is not a valid resource type, but is set in the eidSystems field.", e.getMessage());
 		}
 	}
 	@Test
@@ -164,7 +165,7 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 			setMdmRuleJson("bad-rules-illegal-missing-resource-type.json");
 		}
 		catch (ConfigurationException e){
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1507) + "There is an eidSystem set for [Patient] but that is not one of the mdmTypes. Valid options are [Organization, *].");
+			assertEquals(Msg.code(1507) + "There is an eidSystem set for [Patient] but that is not one of the mdmTypes. Valid options are [Organization, *].", e.getMessage());
 		}
 	}
 

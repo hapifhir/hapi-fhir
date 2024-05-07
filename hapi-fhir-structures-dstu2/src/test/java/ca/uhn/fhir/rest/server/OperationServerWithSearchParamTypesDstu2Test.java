@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
@@ -104,24 +105,24 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(ourLastParamValStr).hasSize(2);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);
-		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALSTR1A");
-		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(1).getValue()).isEqualTo("VALSTR1B");
-		assertThat(ourLastParamValStr.get(1).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALSTR2A");
-		assertThat(ourLastParamValStr.get(1).getValuesAsQueryTokens().get(1).getValue()).isEqualTo("VALSTR2B");
+		assertEquals("VALSTR1A", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("VALSTR1B", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(1).getValue());
+		assertEquals("VALSTR2A", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("VALSTR2B", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(1).getValue());
 		assertThat(ourLastParamValTok).hasSize(2);
 		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("VALTOK1A");
-		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALTOK1B");
-		assertThat(ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("VALTOK2A");
-		assertThat(ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALTOK2B");
-		assertThat(ourLastMethod).isEqualTo("type $orlist");
+		assertEquals("VALTOK1A", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
+		assertEquals("VALTOK1B", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("VALTOK2A", ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getSystem());
+		assertEquals("VALTOK2B", ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("type $orlist", ourLastMethod);
 	}
 
 	@Test
@@ -130,24 +131,24 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 				+ UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B"));
 		HttpResponse status = ourClient.execute(httpGet);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(ourLastParamValStr).hasSize(2);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);
-		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALSTR1A");
-		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(1).getValue()).isEqualTo("VALSTR1B");
-		assertThat(ourLastParamValStr.get(1).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALSTR2A");
-		assertThat(ourLastParamValStr.get(1).getValuesAsQueryTokens().get(1).getValue()).isEqualTo("VALSTR2B");
+		assertEquals("VALSTR1A", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("VALSTR1B", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(1).getValue());
+		assertEquals("VALSTR2A", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("VALSTR2B", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(1).getValue());
 		assertThat(ourLastParamValTok).hasSize(2);
 		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("VALTOK1A");
-		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALTOK1B");
-		assertThat(ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("VALTOK2A");
-		assertThat(ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALTOK2B");
-		assertThat(ourLastMethod).isEqualTo("type $orlist");
+		assertEquals("VALTOK1A", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
+		assertEquals("VALTOK1B", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("VALTOK2A", ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getSystem());
+		assertEquals("VALTOK2B", ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("type $orlist", ourLastMethod);
 	}
 
 	@Test
@@ -213,19 +214,19 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(ourLastParamValStr).hasSize(1);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALSTR");
+		assertEquals("VALSTR", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertThat(ourLastParamValTok).hasSize(1);
 		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("VALTOKA");
-		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALTOKB");
-		assertThat(ourLastMethod).isEqualTo("type $nonrepeating");
+		assertEquals("VALTOKA", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
+		assertEquals("VALTOKB", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("type $nonrepeating", ourLastMethod);
 	}
 
 	@Test
@@ -233,19 +234,19 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$nonrepeating?valstr=VALSTR&valtok=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB"));
 		HttpResponse status = ourClient.execute(httpGet);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(ourLastParamValStr).hasSize(1);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALSTR");
+		assertEquals("VALSTR", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertThat(ourLastParamValTok).hasSize(1);
 		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("VALTOKA");
-		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALTOKB");
-		assertThat(ourLastMethod).isEqualTo("type $nonrepeating");
+		assertEquals("VALTOKA", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
+		assertEquals("VALTOKB", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("type $nonrepeating", ourLastMethod);
 	}
 
 	@Test
@@ -253,21 +254,21 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$nonrepeating?valstr:exact=VALSTR&valtok:not=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB"));
 		HttpResponse status = ourClient.execute(httpGet);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(ourLastParamValStr).hasSize(1);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALSTR");
+		assertEquals("VALSTR", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
 		assertTrue(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).isExact());
 		assertThat(ourLastParamValTok).hasSize(1);
 		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("VALTOKA");
-		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALTOKB");
-		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getModifier()).isEqualTo(TokenParamModifier.NOT);
-		assertThat(ourLastMethod).isEqualTo("type $nonrepeating");
+		assertEquals("VALTOKA", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
+		assertEquals("VALTOKB", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals(TokenParamModifier.NOT, ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getModifier());
+		assertEquals("type $nonrepeating", ourLastMethod);
 	}
 
 	@Test
@@ -283,24 +284,24 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		HttpResponse status = ourClient.execute(httpPost);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(ourLastParamValStr).hasSize(2);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);
-		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALSTR1A");
-		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(1).getValue()).isEqualTo("VALSTR1B");
-		assertThat(ourLastParamValStr.get(1).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALSTR2A");
-		assertThat(ourLastParamValStr.get(1).getValuesAsQueryTokens().get(1).getValue()).isEqualTo("VALSTR2B");
+		assertEquals("VALSTR1A", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("VALSTR1B", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(1).getValue());
+		assertEquals("VALSTR2A", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("VALSTR2B", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(1).getValue());
 		assertThat(ourLastParamValTok).hasSize(2);
 		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("VALTOK1A");
-		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALTOK1B");
-		assertThat(ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("VALTOK2A");
-		assertThat(ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALTOK2B");
-		assertThat(ourLastMethod).isEqualTo("type $orlist");
+		assertEquals("VALTOK1A", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
+		assertEquals("VALTOK1B", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("VALTOK2A", ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getSystem());
+		assertEquals("VALTOK2B", ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("type $orlist", ourLastMethod);
 	}
 
 	@Test
@@ -309,24 +310,24 @@ public class OperationServerWithSearchParamTypesDstu2Test {
 				+ UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B"));
 		HttpResponse status = ourClient.execute(httpGet);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		String response = IOUtils.toString(status.getEntity().getContent());
 		ourLog.info(response);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
 		assertThat(ourLastParamValStr).hasSize(2);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);
-		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALSTR1A");
-		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens().get(1).getValue()).isEqualTo("VALSTR1B");
-		assertThat(ourLastParamValStr.get(1).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALSTR2A");
-		assertThat(ourLastParamValStr.get(1).getValuesAsQueryTokens().get(1).getValue()).isEqualTo("VALSTR2B");
+		assertEquals("VALSTR1A", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("VALSTR1B", ourLastParamValStr.get(0).getValuesAsQueryTokens().get(1).getValue());
+		assertEquals("VALSTR2A", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("VALSTR2B", ourLastParamValStr.get(1).getValuesAsQueryTokens().get(1).getValue());
 		assertThat(ourLastParamValTok).hasSize(2);
 		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens()).hasSize(1);
-		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("VALTOK1A");
-		assertThat(ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALTOK1B");
-		assertThat(ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("VALTOK2A");
-		assertThat(ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("VALTOK2B");
-		assertThat(ourLastMethod).isEqualTo("type $orlist");
+		assertEquals("VALTOK1A", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getSystem());
+		assertEquals("VALTOK1B", ourLastParamValTok.get(0).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("VALTOK2A", ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getSystem());
+		assertEquals("VALTOK2B", ourLastParamValTok.get(1).getValuesAsQueryTokens().get(0).getValue());
+		assertEquals("type $orlist", ourLastMethod);
 	}
 
 	@AfterAll

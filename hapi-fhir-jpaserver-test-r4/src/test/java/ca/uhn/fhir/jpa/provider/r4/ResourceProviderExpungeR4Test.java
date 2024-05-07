@@ -149,8 +149,8 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.withParameters(input)
 			.execute();
 
-		assertThat(output.getParameter().get(0).getName()).isEqualTo("count");
-		assertThat(((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue()).isEqualTo(1);
+		assertEquals("count", output.getParameter().get(0).getName());
+		assertEquals(1, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -190,7 +190,7 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 				.execute();
 			fail("");
 		} catch (MethodNotAllowedException e){
-			assertThat(e.getMessage()).isEqualTo("HTTP 405 Method Not Allowed: " + Msg.code(968) + "$expunge is not enabled on this server");
+			assertEquals("HTTP 405 Method Not Allowed: " + Msg.code(968) + "$expunge is not enabled on this server", e.getMessage());
 		}
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -261,8 +261,8 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.withParameters(input)
 			.execute();
 
-		assertThat(output.getParameter().get(0).getName()).isEqualTo("count");
-		assertThat(((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue()).isEqualTo(3);
+		assertEquals("count", output.getParameter().get(0).getName());
+		assertEquals(3, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);
@@ -307,8 +307,8 @@ public class ResourceProviderExpungeR4Test extends BaseResourceProviderR4Test {
 			.withParameters(input)
 			.execute();
 
-		assertThat(output.getParameter().get(0).getName()).isEqualTo("count");
-		assertThat(((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue()).isEqualTo(1);
+		assertEquals("count", output.getParameter().get(0).getName());
+		assertEquals(1, ((IntegerType) output.getParameter().get(0).getValue()).getValue().intValue());
 
 		// Only deleted and prior patients
 		assertStillThere(myOneVersionPatientId);

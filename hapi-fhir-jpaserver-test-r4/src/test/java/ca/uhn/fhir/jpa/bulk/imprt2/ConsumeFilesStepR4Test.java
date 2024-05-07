@@ -149,11 +149,11 @@ public class ConsumeFilesStepR4Test extends BasePartitioningR4Test {
 		} else {
 			assertEquals(6, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		}
-		assertThat(myCaptureQueriesListener.countInsertQueriesForCurrentThread()).isEqualTo(2);
-		assertThat(myCaptureQueriesListener.countUpdateQueriesForCurrentThread()).isEqualTo(4);
-		assertThat(myCaptureQueriesListener.countDeleteQueries()).isEqualTo(0);
-		assertThat(myCaptureQueriesListener.countCommits()).isEqualTo(1);
-		assertThat(myCaptureQueriesListener.countRollbacks()).isEqualTo(0);
+		assertEquals(2, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
+		assertEquals(4, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
+		assertEquals(0, myCaptureQueriesListener.countDeleteQueries());
+		assertEquals(1, myCaptureQueriesListener.countCommits());
+		assertEquals(0, myCaptureQueriesListener.countRollbacks());
 
 		patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertTrue(patient.getActive());

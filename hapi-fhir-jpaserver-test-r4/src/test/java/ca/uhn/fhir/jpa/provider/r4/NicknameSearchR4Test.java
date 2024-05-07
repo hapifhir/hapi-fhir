@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.nickname.NicknameInterceptor;
 import ca.uhn.fhir.util.BundleUtil;
@@ -51,6 +52,6 @@ public class NicknameSearchR4Test extends BaseResourceProviderR4Test {
 
 		List<Patient> resources = BundleUtil.toListOfResourcesOfType(myFhirContext,result, Patient.class);
 		assertThat(resources).hasSize(1);
-		assertThat(resources.get(0).getNameFirstRep().getGivenAsSingleString()).isEqualTo("ken");
+		assertEquals("ken", resources.get(0).getNameFirstRep().getGivenAsSingleString());
 	}
 }

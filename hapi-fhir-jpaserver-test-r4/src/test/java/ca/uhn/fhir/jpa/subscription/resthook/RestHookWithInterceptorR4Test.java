@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.resthook;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -113,8 +114,8 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 		ourObservationProvider.waitForCreateCount(0);
 		ourObservationProvider.waitForUpdateCount(1);
-		assertThat(ourRestfulServer.getRequestContentTypes().get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
-		assertThat(ourObservationProvider.getStoredResources().get(0).getId()).isEqualTo("Observation/A/_history/1");
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
+		assertEquals("Observation/A/_history/1", ourObservationProvider.getStoredResources().get(0).getId());
 		assertTrue(ourHitBeforeRestHookDelivery);
 		assertTrue(ourHitAfterRestHookDelivery);
 	}
@@ -135,7 +136,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 
 		ourObservationProvider.waitForCreateCount(0);
 		ourObservationProvider.waitForUpdateCount(1);
-		assertThat(ourRestfulServer.getRequestContentTypes().get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 		assertTrue(ourHitBeforeRestHookDelivery);
 		assertTrue(ourHitAfterRestHookDelivery);
 		assertThat(ourRestfulServer.getRequestHeaders().get(0)).contains("X-Foo: Bar");
@@ -163,7 +164,7 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 			assertThat(lastDelivery.getAttribute("ATTR1")).contains("Some value 1");
 			assertThat(lastDelivery.getAttribute("ATTR2")).contains("Some value 2");
 			assertThat(lastDelivery.getAttribute("ATTRBLANK")).contains("");
-			assertThat(lastDelivery.getAttribute("ATTRNONEXISTENT").isPresent()).isEqualTo(false);
+			assertEquals(false, lastDelivery.getAttribute("ATTRNONEXISTENT").isPresent());
 
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
@@ -255,9 +256,9 @@ public class RestHookWithInterceptorR4Test extends BaseSubscriptionsR4Test {
 			waitForQueueToDrain();
 			ourObservationProvider.waitForCreateCount(0);
 			ourObservationProvider.waitForUpdateCount(1);
-			assertThat(ourRestfulServer.getRequestContentTypes().get(0)).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+			assertEquals(Constants.CT_FHIR_JSON_NEW, ourRestfulServer.getRequestContentTypes().get(0));
 
-			assertThat(ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart()).isEqualTo("1");
+			assertEquals("1", ourObservationProvider.getStoredResources().get(0).getIdElement().getVersionIdPart());
 
 			Subscription subscriptionTemp = myClient.read(Subscription.class, subscription2.getId());
 			assertNotNull(subscriptionTemp);

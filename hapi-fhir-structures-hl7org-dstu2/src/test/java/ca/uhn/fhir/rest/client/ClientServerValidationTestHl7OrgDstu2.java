@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
@@ -60,7 +61,7 @@ public class ClientServerValidationTestHl7OrgDstu2 {
 	@Test
 	public void testServerReturnsAppropriateVersionForDstu2() throws Exception {
 		String appropriateFhirVersion = "1.0.2";
-		assertThat(appropriateFhirVersion).isEqualTo(FhirVersionEnum.DSTU2_HL7ORG.getFhirVersionString());
+		assertEquals(FhirVersionEnum.DSTU2_HL7ORG.getFhirVersionString(), appropriateFhirVersion);
 		Conformance conf = new Conformance();
 		conf.setFhirVersion(appropriateFhirVersion);
 		final String confResource = myCtx.newXmlParser().encodeResourceToString(conf);
@@ -99,7 +100,7 @@ public class ClientServerValidationTestHl7OrgDstu2 {
 	@Test
 	public void testServerReturnsWrongVersionForDstu2() throws Exception {
 		String wrongFhirVersion = "3.0.2";
-		assertThat(wrongFhirVersion).isEqualTo(FhirVersionEnum.DSTU3.getFhirVersionString()); // asserting that what we assume to be the DSTU3 FHIR version is still correct
+		assertEquals(FhirVersionEnum.DSTU3.getFhirVersionString(), wrongFhirVersion); // asserting that what we assume to be the DSTU3 FHIR version is still correct
 		Conformance conf = new Conformance();
 		conf.setFhirVersion(wrongFhirVersion);
 		String msg = myCtx.newXmlParser().encodeResourceToString(conf);
@@ -123,7 +124,7 @@ public class ClientServerValidationTestHl7OrgDstu2 {
    @Test
    public void testServerReturnsRightVersionForDstu2() throws Exception {
      String appropriateFhirVersion = "1.0.2";
-		 assertThat(appropriateFhirVersion).isEqualTo(FhirVersionEnum.DSTU2_HL7ORG.getFhirVersionString());
+		 assertEquals(FhirVersionEnum.DSTU2_HL7ORG.getFhirVersionString(), appropriateFhirVersion);
      Conformance conf = new Conformance();
      conf.setFhirVersion(appropriateFhirVersion);
      String msg = myCtx.newXmlParser().encodeResourceToString(conf);

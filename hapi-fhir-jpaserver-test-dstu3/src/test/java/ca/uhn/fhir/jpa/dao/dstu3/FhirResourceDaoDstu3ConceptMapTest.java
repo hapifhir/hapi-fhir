@@ -108,7 +108,7 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 		Pageable page = PageRequest.of(0, 1);
 		List<TermConceptMap> theExpConceptMapList = runInTransaction(()->myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, CM_URL));
 		assertThat(theExpConceptMapList).hasSize(1);
-		assertThat(theExpConceptMapList.get(0).getUrl()).isEqualTo(CM_URL);
+		assertEquals(CM_URL, theExpConceptMapList.get(0).getUrl());
 
 	}
 
@@ -129,20 +129,20 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 		Optional<TermConceptMap> theExpConceptMapV2 = runInTransaction(()->myTermConceptMapDao.findTermConceptMapByUrlAndVersion(theUrl, "v2"));
 
 		assertThat(theExpConceptMapV1).isPresent();
-		assertThat(theExpConceptMapV1.get().getUrl()).isEqualTo(theUrl);
-		assertThat(theExpConceptMapV1.get().getVersion()).isEqualTo("v1");
+		assertEquals(theUrl, theExpConceptMapV1.get().getUrl());
+		assertEquals("v1", theExpConceptMapV1.get().getVersion());
 
 		assertThat(theExpConceptMapV2).isPresent();
-		assertThat(theExpConceptMapV2.get().getUrl()).isEqualTo(theUrl);
-		assertThat(theExpConceptMapV2.get().getVersion()).isEqualTo("v2");
+		assertEquals(theUrl, theExpConceptMapV2.get().getUrl());
+		assertEquals("v2", theExpConceptMapV2.get().getVersion());
 
 		// should return the latest one which is v2
 		Pageable page = PageRequest.of(0, 1);
 		List<TermConceptMap> theExpSecondOne = runInTransaction(()->myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, theUrl));
 
 		assertThat(theExpSecondOne).hasSize(1);
-		assertThat(theExpSecondOne.get(0).getUrl()).isEqualTo(theUrl);
-		assertThat(theExpSecondOne.get(0).getVersion()).isEqualTo("v2");
+		assertEquals(theUrl, theExpSecondOne.get(0).getUrl());
+		assertEquals("v2", theExpSecondOne.get(0).getVersion());
 	}
 
 	@Test
@@ -161,15 +161,15 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 		Optional<TermConceptMap> theExpConceptMapV1 = runInTransaction(()->myTermConceptMapDao.findTermConceptMapByUrlAndVersion(theUrl, "v1"));
 
 		assertThat(theExpConceptMapV1).isPresent();
-		assertThat(theExpConceptMapV1.get().getUrl()).isEqualTo(theUrl);
-		assertThat(theExpConceptMapV1.get().getVersion()).isEqualTo("v1");
+		assertEquals(theUrl, theExpConceptMapV1.get().getUrl());
+		assertEquals("v1", theExpConceptMapV1.get().getVersion());
 
 		// should return the latest one which in this case is not versioned
 		Pageable page = PageRequest.of(0, 1);
 		List<TermConceptMap> theExpSecondOne = runInTransaction(()->myTermConceptMapDao.getTermConceptMapEntitiesByUrlOrderByMostRecentUpdate(page, theUrl));
 
 		assertThat(theExpSecondOne).hasSize(1);
-		assertThat(theExpSecondOne.get(0).getUrl()).isEqualTo(theUrl);
+		assertEquals(theUrl, theExpSecondOne.get(0).getUrl());
 		assertNull(theExpSecondOne.get(0).getVersion());
 	}
 }

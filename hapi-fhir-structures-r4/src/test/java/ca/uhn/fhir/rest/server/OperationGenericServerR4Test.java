@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -74,18 +75,18 @@ public class OperationGenericServerR4Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			status.getEntity().getContent().close();
 
-			assertThat(ourLastParam1.getValue()).isEqualTo("PARAM1val");
-			assertThat(ourLastParam2.getActive()).isEqualTo(true);
-			assertThat(ourLastId.getIdPart()).isEqualTo("123");
-			assertThat(ourLastMethod).isEqualTo("$OP_INSTANCE");
-			assertThat(ourLastResourceParam.getParameterFirstRep().getName()).isEqualTo("PARAM1");
+			assertEquals("PARAM1val", ourLastParam1.getValue());
+			assertEquals(true, ourLastParam2.getActive());
+			assertEquals("123", ourLastId.getIdPart());
+			assertEquals("$OP_INSTANCE", ourLastMethod);
+			assertEquals("PARAM1", ourLastResourceParam.getParameterFirstRep().getName());
 
 			Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
-			assertThat(resp.getParameter().get(0).getName()).isEqualTo("RET1");
+			assertEquals("RET1", resp.getParameter().get(0).getName());
 		} finally {
 			status.getEntity().getContent().close();
 		}
@@ -104,16 +105,16 @@ public class OperationGenericServerR4Test {
 		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 
-			assertThat(ourLastResourceParam.getParameterFirstRep().getName()).isEqualTo("PARAM1");
-			assertThat(ourLastParam1.getValue()).isEqualTo("PARAM1val");
-			assertThat(ourLastParam2.getActive()).isEqualTo(true);
-			assertThat(ourLastMethod).isEqualTo("$OP_SERVER");
+			assertEquals("PARAM1", ourLastResourceParam.getParameterFirstRep().getName());
+			assertEquals("PARAM1val", ourLastParam1.getValue());
+			assertEquals(true, ourLastParam2.getActive());
+			assertEquals("$OP_SERVER", ourLastMethod);
 
 			Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
-			assertThat(resp.getParameter().get(0).getName()).isEqualTo("RET1");
+			assertEquals("RET1", resp.getParameter().get(0).getName());
 		} finally {
 			status.getEntity().getContent().close();
 		}
@@ -133,16 +134,16 @@ public class OperationGenericServerR4Test {
 		try {
 			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			status.getEntity().getContent().close();
 
-			assertThat(ourLastResourceParam.getParameterFirstRep().getName()).isEqualTo("PARAM1");
-			assertThat(ourLastParam1.getValue()).isEqualTo("PARAM1val");
-			assertThat(ourLastParam2.getActive()).isEqualTo(true);
-			assertThat(ourLastMethod).isEqualTo("$OP_TYPE");
+			assertEquals("PARAM1", ourLastResourceParam.getParameterFirstRep().getName());
+			assertEquals("PARAM1val", ourLastParam1.getValue());
+			assertEquals(true, ourLastParam2.getActive());
+			assertEquals("$OP_TYPE", ourLastMethod);
 
 			Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
-			assertThat(resp.getParameter().get(0).getName()).isEqualTo("RET1");
+			assertEquals("RET1", resp.getParameter().get(0).getName());
 		} finally {
 			status.getEntity().getContent().close();
 		}
@@ -156,17 +157,17 @@ public class OperationGenericServerR4Test {
 		try {
 			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
 			ourLog.info(response);
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			status.getEntity().getContent().close();
 
 			assertNull(ourLastResourceParam);
-			assertThat(ourLastParam1.getValue()).isEqualTo("PARAM1val");
+			assertEquals("PARAM1val", ourLastParam1.getValue());
 
 			assertNull(ourLastParam2);
-			assertThat(ourLastMethod).isEqualTo("$OP_TYPE");
+			assertEquals("$OP_TYPE", ourLastMethod);
 
 			Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
-			assertThat(resp.getParameter().get(0).getName()).isEqualTo("RET1");
+			assertEquals("RET1", resp.getParameter().get(0).getName());
 		} finally {
 			status.getEntity().getContent().close();
 		}
@@ -178,13 +179,13 @@ public class OperationGenericServerR4Test {
 		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient");
 		CloseableHttpResponse status = ourClient.execute(httpPost);
 		try {
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			status.getEntity().getContent().close();
 		} finally {
 			status.getEntity().getContent().close();
 		}
 
-		assertThat(ourLastMethod).isEqualTo("Patient/search");
+		assertEquals("Patient/search", ourLastMethod);
 	}
 
 

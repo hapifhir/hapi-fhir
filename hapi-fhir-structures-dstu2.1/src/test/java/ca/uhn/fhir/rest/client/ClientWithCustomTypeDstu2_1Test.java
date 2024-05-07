@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
@@ -96,13 +97,13 @@ public class ClientWithCustomTypeDstu2_1Test {
 
 		HttpUriRequest request = capt.getAllValues().get(0);
 
-		assertThat(request.getURI().toASCIIString()).isEqualTo("http://example.com/fhir/Patient/123");
-		assertThat(request.getMethod()).isEqualTo("GET");
+		assertEquals("http://example.com/fhir/Patient/123", request.getURI().toASCIIString());
+		assertEquals("GET", request.getMethod());
 
 		assertThat(value.getName()).hasSize(1);
-		assertThat(value.getName().get(0).getFamilyAsSingleString()).isEqualTo("FAMILY");
-		assertThat(value.getStringExt().getValue()).isEqualTo("STRINGVAL");
-		assertThat(value.getDateExt().getValueAsString()).isEqualTo("2011-01-02");
+		assertEquals("FAMILY", value.getName().get(0).getFamilyAsSingleString());
+		assertEquals("STRINGVAL", value.getStringExt().getValue());
+		assertEquals("2011-01-02", value.getDateExt().getValueAsString());
 		
 	}
 

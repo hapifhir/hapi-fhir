@@ -36,7 +36,7 @@ public class BaseTransactionProcessorTest {
 		IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
 		idSubstitutions.put(new IdType("urn:uuid:1234"), new IdType("Patient/123"));
 		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "Patient?foo=urn:uuid:1234&bar=baz");
-		assertThat(outcome).isEqualTo("Patient?foo=Patient/123&bar=baz");
+		assertEquals("Patient?foo=Patient/123&bar=baz", outcome);
 	}
 
 	/**
@@ -47,7 +47,7 @@ public class BaseTransactionProcessorTest {
 		IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
 		idSubstitutions.put(new IdType("urn:uuid:7ea4f3a6-d2a3-4105-9f31-374d525085d4"), new IdType("Patient/123/_history/1"));
 		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "Patient?name=FAMILY1&organization=urn%3Auuid%3A7ea4f3a6-d2a3-4105-9f31-374d525085d4");
-		assertThat(outcome).isEqualTo("Patient?name=FAMILY1&organization=Patient/123");
+		assertEquals("Patient?name=FAMILY1&organization=Patient/123", outcome);
 	}
 
 	@Test
@@ -55,7 +55,7 @@ public class BaseTransactionProcessorTest {
 		IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
 		idSubstitutions.put(new IdType("urn:uuid:1234"), new IdType("Patient/123"));
 		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "Patient?foo=" + UrlUtil.escapeUrlParam("urn:uuid:1234") + "&bar=baz");
-		assertThat(outcome).isEqualTo("Patient?foo=Patient/123&bar=baz");
+		assertEquals("Patient?foo=Patient/123&bar=baz", outcome);
 	}
 
 	@Test
@@ -63,7 +63,7 @@ public class BaseTransactionProcessorTest {
 		IdSubstitutionMap idSubstitutions = new IdSubstitutionMap();
 		idSubstitutions.put(new IdType("urn:uuid:1234"), new IdType("Patient/123"));
 		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, "Patient?urn:uuid:1234=foo&bar=baz");
-		assertThat(outcome).isEqualTo("Patient?urn:uuid:1234=foo&bar=baz");
+		assertEquals("Patient?urn:uuid:1234=foo&bar=baz", outcome);
 	}
 
 	@Test
@@ -72,7 +72,7 @@ public class BaseTransactionProcessorTest {
 		idSubstitutions.put(new IdType("urn:uuid:1234"), new IdType("Patient/123"));
 		String input = "Patient";
 		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, input);
-		assertThat(outcome).isEqualTo(input);
+		assertEquals(input, outcome);
 	}
 
 	@Test
@@ -81,7 +81,7 @@ public class BaseTransactionProcessorTest {
 		idSubstitutions.put(new IdType("urn:uuid:1234"), new IdType("Patient/123"));
 		String input = "Patient?foo&bar=&baz";
 		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, input);
-		assertThat(outcome).isEqualTo(input);
+		assertEquals(input, outcome);
 	}
 
 	@Test
@@ -91,7 +91,7 @@ public class BaseTransactionProcessorTest {
 		String input = "Patient?foo=urn:uuid:1234&bar=urn:uuid:1234&baz=urn:uuid:1234";
 		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, input);
 		String expected = "Patient?foo=Patient/abcdefghijklmnopqrstuvwxyz0123456789&bar=Patient/abcdefghijklmnopqrstuvwxyz0123456789&baz=Patient/abcdefghijklmnopqrstuvwxyz0123456789";
-		assertThat(outcome).isEqualTo(expected);
+		assertEquals(expected, outcome);
 	}
 
 	@Test
@@ -100,7 +100,7 @@ public class BaseTransactionProcessorTest {
 		idSubstitutions.put(new IdType("Patient/123"), new IdType("Patient/456"));
 		String input = "Patient?foo=Patient/123";
 		String outcome = BaseTransactionProcessor.performIdSubstitutionsInMatchUrl(idSubstitutions, input);
-		assertThat(outcome).isEqualTo(input);
+		assertEquals(input, outcome);
 	}
 
 	@Test

@@ -52,15 +52,15 @@ public class ReadTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class,responseContent).getIdentifierFirstRep();
 
-			assertThat(dt.getSystemElement().getValueAsString()).isEqualTo("1");
+			assertEquals("1", dt.getSystemElement().getValueAsString());
 			assertNull(dt.getValueElement().getValueAsString());
 			
 			org.apache.http.Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
 			assertNotNull(cl);
-			assertThat(cl.getValue()).isEqualTo("http://localhost:" + ourPort + "/Patient/1/_history/1");
+			assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/1", cl.getValue());
 			
 		}
 		
@@ -76,18 +76,18 @@ public class ReadTest {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
-			assertThat(status.getEntity().getContentType().getValue()).isEqualTo("application/x-foo");
+			assertEquals(200, status.getStatusLine().getStatusCode());
+			assertEquals("application/x-foo", status.getEntity().getContentType().getValue());
 			
 			org.apache.http.Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
 			assertNotNull(cl);
-			assertThat(cl.getValue()).isEqualTo("http://localhost:" + ourPort + "/Binary/1/_history/1");
+			assertEquals("http://localhost:" + ourPort + "/Binary/1/_history/1", cl.getValue());
 			
 			org.apache.http.Header cd = status.getFirstHeader("content-disposition");
 			assertNotNull(cd);
-			assertThat(cd.getValue()).isEqualTo("Attachment;");
+			assertEquals("Attachment;", cd.getValue());
 
-			assertThat(responseContent.length).isEqualTo(4);
+			assertEquals(4, responseContent.length);
 			for (int i = 0; i < 4; i++) {
 				assertEquals(i+1, responseContent[i]); // should be 1,2,3,4
 			}
@@ -104,14 +104,14 @@ public class ReadTest {
 			String responseContent = IOUtils.toString(status.getEntity().getContent());
 			IOUtils.closeQuietly(status.getEntity().getContent());
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class,responseContent).getIdentifierFirstRep();
-			assertThat(dt.getSystemElement().getValueAsString()).isEqualTo("1");
-			assertThat(dt.getValueElement().getValueAsString()).isEqualTo("2");
+			assertEquals("1", dt.getSystemElement().getValueAsString());
+			assertEquals("2", dt.getValueElement().getValueAsString());
 
 			org.apache.http.Header cl = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION_LC);
 			assertNotNull(cl);
-			assertThat(cl.getValue()).isEqualTo("http://localhost:" + ourPort + "/Patient/1/_history/1");
+			assertEquals("http://localhost:" + ourPort + "/Patient/1/_history/1", cl.getValue());
 		}
 	}
 

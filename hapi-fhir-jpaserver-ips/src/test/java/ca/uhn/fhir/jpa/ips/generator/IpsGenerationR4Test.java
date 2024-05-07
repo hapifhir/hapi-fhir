@@ -102,7 +102,7 @@ public class IpsGenerationR4Test extends BaseResourceProviderR4Test {
 		String patientId = findFirstEntryResource(output, Patient.class, 1).getIdElement().toUnqualifiedVersionless().getValue();
 		assertEquals("Patient/f15d2419-fbff-464a-826d-0afe8f095771", patientId);
 		MedicationStatement medicationStatement = findFirstEntryResource(output, MedicationStatement.class, 2);
-		assertThat(medicationStatement.getSubject().getReference()).isEqualTo(patientId);
+		assertEquals(patientId, medicationStatement.getSubject().getReference());
 		assertNull(medicationStatement.getInformationSource().getReference());
 
 		List<String> sectionTitles = extractSectionTitles(output);

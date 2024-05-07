@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
@@ -91,7 +92,7 @@ public class ResourceModifiedSubmitterSvcTest {
 
 		// then
 		ChannelProducerSettings capturedChannelProducerSettings = getCapturedChannelProducerSettings();
-		assertThat(capturedChannelProducerSettings.isQualifyChannelName()).isEqualTo(expectedResult);
+		assertEquals(expectedResult, capturedChannelProducerSettings.isQualifyChannelName());
 
 	}
 
@@ -106,8 +107,8 @@ public class ResourceModifiedSubmitterSvcTest {
 		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(new ResourceModifiedEntity());
 
 		// then
-		assertThat(wasProcessed).isEqualTo(Boolean.TRUE);
-		assertThat(myCapturingTransactionStatus.isRollbackOnly()).isEqualTo(Boolean.FALSE);
+		assertEquals(Boolean.TRUE, wasProcessed);
+		assertEquals(Boolean.FALSE, myCapturingTransactionStatus.isRollbackOnly());
 		verify(myChannelProducer, times(1)).send(any());
 	}
 
@@ -207,8 +208,8 @@ public class ResourceModifiedSubmitterSvcTest {
 		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(new ResourceModifiedEntity());
 
 		// then
-		assertThat(wasProcessed).isEqualTo(Boolean.TRUE);
-		assertThat(myCapturingTransactionStatus.isRollbackOnly()).isEqualTo(Boolean.FALSE);
+		assertEquals(Boolean.TRUE, wasProcessed);
+		assertEquals(Boolean.FALSE, myCapturingTransactionStatus.isRollbackOnly());
 		// we do not send a message which was already sent
 		verify(myChannelProducer, times(0)).send(any());
 
@@ -227,8 +228,8 @@ public class ResourceModifiedSubmitterSvcTest {
 		boolean wasProcessed = myResourceModifiedSubmitterSvc.submitPersisedResourceModifiedMessage(new ResourceModifiedEntity());
 
 		// then
-		assertThat(wasProcessed).isEqualTo(Boolean.FALSE);
-		assertThat(myCapturingTransactionStatus.isRollbackOnly()).isEqualTo(Boolean.TRUE);
+		assertEquals(Boolean.FALSE, wasProcessed);
+		assertEquals(Boolean.TRUE, myCapturingTransactionStatus.isRollbackOnly());
 
 	}
 

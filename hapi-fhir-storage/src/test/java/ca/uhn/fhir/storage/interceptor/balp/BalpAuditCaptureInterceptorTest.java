@@ -1,5 +1,6 @@
 package ca.uhn.fhir.storage.interceptor.balp;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
@@ -110,13 +111,13 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 	}
 
 	private static void assertType(AuditEvent theAuditEvent) {
-		assertThat(theAuditEvent.getType().getSystem()).isEqualTo(CS_AUDIT_EVENT_TYPE);
-		assertThat(theAuditEvent.getType().getCode()).isEqualTo("rest");
+		assertEquals(CS_AUDIT_EVENT_TYPE, theAuditEvent.getType().getSystem());
+		assertEquals("rest", theAuditEvent.getType().getCode());
 	}
 
 	private static void assertSubType(AuditEvent theAuditEvent, String theSubType) {
-		assertThat(theAuditEvent.getSubtypeFirstRep().getSystem()).isEqualTo(CS_RESTFUL_INTERACTION);
-		assertThat(theAuditEvent.getSubtypeFirstRep().getCode()).isEqualTo(theSubType);
+		assertEquals(CS_RESTFUL_INTERACTION, theAuditEvent.getSubtypeFirstRep().getSystem());
+		assertEquals(theSubType, theAuditEvent.getSubtypeFirstRep().getCode());
 		assertThat(theAuditEvent.getSubtype()).hasSize(1);
 	}
 
@@ -222,9 +223,9 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.BASIC_CREATE);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "create");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.C);
+		assertEquals(AuditEvent.AuditEventAction.C, auditEvent.getAction());
 		assertHasSystemObjectEntities(auditEvent, csId.getValue());
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent);
 	}
 
@@ -252,9 +253,9 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_CREATE);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "create");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.C);
+		assertEquals(AuditEvent.AuditEventAction.C, auditEvent.getAction());
 		assertHasSystemObjectEntities(auditEvent, obsId.getValue());
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 	}
 
@@ -282,9 +283,9 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_CREATE);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "create");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.C);
+		assertEquals(AuditEvent.AuditEventAction.C, auditEvent.getAction());
 		assertHasSystemObjectEntities(auditEvent, patientId.getValue());
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, patientId.toUnqualified().getValue());
 	}
 
@@ -315,9 +316,9 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.BASIC_DELETE);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "delete");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.D);
+		assertEquals(AuditEvent.AuditEventAction.D, auditEvent.getAction());
 		assertHasSystemObjectEntities(auditEvent, csId.withVersion("1").getValue());
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent);
 	}
 
@@ -347,9 +348,9 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_DELETE);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "delete");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.D);
+		assertEquals(AuditEvent.AuditEventAction.D, auditEvent.getAction());
 		assertHasSystemObjectEntities(auditEvent, obsId.withVersion("1").getValue());
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 	}
 
@@ -379,9 +380,9 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_DELETE);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "delete");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.D);
+		assertEquals(AuditEvent.AuditEventAction.D, auditEvent.getAction());
 		assertHasSystemObjectEntities(auditEvent, patientId.withVersion("1").getValue());
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, patientId.toUnqualified().withVersion("1").getValue());
 	}
 
@@ -401,7 +402,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertThat(patient.getNameFirstRep().getFamily()).isEqualTo("Simpson");
+		assertEquals("Simpson", patient.getNameFirstRep().getFamily());
 
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
@@ -411,9 +412,9 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_READ);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "read");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.R);
+		assertEquals(AuditEvent.AuditEventAction.R, auditEvent.getAction());
 		assertHasSystemObjectEntities(auditEvent, patient.getId());
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, patient.getIdElement().toUnqualified().getValue());
 	}
 
@@ -435,7 +436,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertThat(actual.getUrl()).isEqualTo("http://foo");
+		assertEquals("http://foo", actual.getUrl());
 
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
@@ -445,9 +446,9 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.BASIC_READ);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "read");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.R);
+		assertEquals(AuditEvent.AuditEventAction.R, auditEvent.getAction());
 		assertHasSystemObjectEntities(auditEvent, ourServer.getBaseUrl() + "/" + csId.getValue());
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent);
 	}
 
@@ -467,7 +468,7 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 
 		// Verify
 
-		assertThat(observation.getSubject().getReference()).isEqualTo("Patient/P1");
+		assertEquals("Patient/P1", observation.getSubject().getReference());
 
 		verify(myAuditEventSink, times(1)).recordAuditEvent(myAuditEventCaptor.capture());
 
@@ -476,9 +477,9 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "read");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.R);
+		assertEquals(AuditEvent.AuditEventAction.R, auditEvent.getAction());
 		assertHasSystemObjectEntities(auditEvent, observation.getId());
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 	}
 
@@ -512,9 +513,9 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertAuditEventValidatesAgainstBalpProfile(auditEvent);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "vread");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.R);
+		assertEquals(AuditEvent.AuditEventAction.R, auditEvent.getAction());
 		assertHasSystemObjectEntities(auditEvent, ourServer.getBaseUrl() + "/" + listId.getValue());
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 	}
 
@@ -545,8 +546,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_QUERY);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "search-type");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.E);
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventAction.E, auditEvent.getAction());
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 		assertQuery(auditEvent, ourServer.getBaseUrl() + "/Observation?subject=Patient%2FP1");
 		assertQueryDescription(auditEvent, "GET " + ourServer.getBaseUrl() + "/Observation?subject=Patient%2FP1");
@@ -582,8 +583,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.BASIC_QUERY);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "search-type");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.E);
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventAction.E, auditEvent.getAction());
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent);
 		assertQuery(auditEvent, ourServer.getBaseUrl() + "/CodeSystem");
 		assertQueryDescription(auditEvent, "GET " + ourServer.getBaseUrl() + "/CodeSystem");
@@ -622,8 +623,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_QUERY);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "search-type");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.E);
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventAction.E, auditEvent.getAction());
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 		assertQuery(auditEvent, ourServer.getBaseUrl() + "/Observation?_count=5&subject=Patient%2FP1");
 		assertQueryDescription(auditEvent, "GET " + ourServer.getBaseUrl() + "/Observation?subject=Patient%2FP1&_count=5");
@@ -634,8 +635,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_QUERY);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "search-type");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.E);
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventAction.E, auditEvent.getAction());
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 	}
 
@@ -667,8 +668,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_QUERY);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "search-type");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.E);
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventAction.E, auditEvent.getAction());
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 		assertQuery(auditEvent, ourServer.getBaseUrl() + "/Observation/_search?subject=Patient%2FP1");
 		assertQueryDescription(auditEvent, "POST " + ourServer.getBaseUrl() + "/Observation/_search");
@@ -702,8 +703,8 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_QUERY);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "search-type");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.E);
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventAction.E, auditEvent.getAction());
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 		assertQuery(auditEvent, ourServer.getBaseUrl() + "/Observation/_search?subject=Patient%2FP1");
 		assertQueryDescription(auditEvent, "GET " + ourServer.getBaseUrl() + "/Observation/_search?subject=Patient%2FP1");
@@ -736,9 +737,9 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.BASIC_UPDATE);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "update");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.U);
+		assertEquals(AuditEvent.AuditEventAction.U, auditEvent.getAction());
 		assertHasSystemObjectEntities(auditEvent, csId.getValue());
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent);
 	}
 
@@ -768,9 +769,9 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_UPDATE);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "update");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.U);
+		assertEquals(AuditEvent.AuditEventAction.U, auditEvent.getAction());
 		assertHasSystemObjectEntities(auditEvent, obsId.getValue());
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, "Patient/P1");
 	}
 
@@ -800,9 +801,9 @@ public class BalpAuditCaptureInterceptorTest implements ITestDataBuilder {
 		assertHasProfile(auditEvent, BalpProfileEnum.PATIENT_UPDATE);
 		assertType(auditEvent);
 		assertSubType(auditEvent, "update");
-		assertThat(auditEvent.getAction()).isEqualTo(AuditEvent.AuditEventAction.U);
+		assertEquals(AuditEvent.AuditEventAction.U, auditEvent.getAction());
 		assertHasSystemObjectEntities(auditEvent, patientId.getValue());
-		assertThat(auditEvent.getOutcome()).isEqualTo(AuditEvent.AuditEventOutcome._0);
+		assertEquals(AuditEvent.AuditEventOutcome._0, auditEvent.getOutcome());
 		assertHasPatientEntities(auditEvent, patientId.toUnqualified().getValue());
 	}
 

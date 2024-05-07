@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.match.matcher.subscriber;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
@@ -114,7 +115,7 @@ public class SubscriptionActivatingSubscriberTest {
 		Mockito.verify(dao).update(captor.capture(), Mockito.any(SystemRequestDetails.class));
 		IBaseResource savedResource = captor.getValue();
 		assertTrue(savedResource instanceof Subscription);
-		assertThat(((Subscription) savedResource).getStatus()).isEqualTo(Subscription.SubscriptionStatus.ERROR);
+		assertEquals(Subscription.SubscriptionStatus.ERROR, ((Subscription) savedResource).getStatus());
 
 		ArgumentCaptor<ILoggingEvent> appenderCaptor = ArgumentCaptor.forClass(ILoggingEvent.class);
 		Mockito.verify(myAppender, Mockito.times(totalInfoLogs))

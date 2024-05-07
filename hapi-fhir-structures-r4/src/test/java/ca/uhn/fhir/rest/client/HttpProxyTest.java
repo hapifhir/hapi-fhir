@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
@@ -86,7 +87,7 @@ public class HttpProxyTest {
 			IdType id = new IdType("Patient", "123");
 			client.read().resource(Patient.class).withId(id).execute();
 
-			assertThat(myAuthHeader).isEqualTo("Basic dXNlcm5hbWU6cGFzc3dvcmQ=");
+			assertEquals("Basic dXNlcm5hbWU6cGFzc3dvcmQ=", myAuthHeader);
 			
 		} finally {
 			JettyUtil.closeServer(server);

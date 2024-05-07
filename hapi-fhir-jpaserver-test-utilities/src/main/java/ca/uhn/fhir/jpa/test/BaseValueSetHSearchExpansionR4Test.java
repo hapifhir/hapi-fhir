@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -611,7 +612,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				myTermSvc.expandValueSet(null, vs);
 				fail("");
 			} catch (InvalidRequestException e) {
-				assertThat(e.getMessage()).isEqualTo(Msg.code(897) + "Don't know how to handle op=ISA on property copyright");
+				assertEquals(Msg.code(897) + "Don't know how to handle op=ISA on property copyright", e.getMessage());
 			}
 		}
 
@@ -637,7 +638,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				myTermSvc.expandValueSet(null, vs);
 				fail("");
 			} catch (InvalidRequestException e) {
-				assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
+				assertEquals(Msg.code(895) + "Invalid filter, property copyright is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 			}
 
 		}
@@ -663,7 +664,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				myTermSvc.expandValueSet(null, vs);
 				fail("");
 			} catch (InvalidRequestException e) {
-				assertThat(e.getMessage()).isEqualTo(Msg.code(898) + "Don't know how to handle value=bogus on property copyright");
+				assertEquals(Msg.code(898) + "Don't know how to handle value=bogus on property copyright", e.getMessage());
 			}
 
 		}
@@ -877,7 +878,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				myTermSvc.expandValueSet(null, vs);
 				fail("");
 			} catch (InvalidRequestException e) {
-				assertThat(e.getMessage()).isEqualTo(Msg.code(892) + "Don't know how to handle op=ISA on property ancestor");
+				assertEquals(Msg.code(892) + "Don't know how to handle op=ISA on property ancestor", e.getMessage());
 			}
 
 		}
@@ -904,7 +905,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				myTermSvc.expandValueSet(null, vs);
 				fail("");
 			} catch (InvalidRequestException e) {
-				assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
+				assertEquals(Msg.code(895) + "Invalid filter, property ancestor is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 			}
 
 		}
@@ -1119,7 +1120,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				myTermSvc.expandValueSet(null, vs);
 				fail("");
 			} catch (InvalidRequestException e) {
-				assertThat(e.getMessage()).isEqualTo(Msg.code(893) + "Don't know how to handle op=ISA on property child");
+				assertEquals(Msg.code(893) + "Don't know how to handle op=ISA on property child", e.getMessage());
 			}
 
 		}
@@ -1146,7 +1147,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				myTermSvc.expandValueSet(null, vs);
 				fail("");
 			} catch (InvalidRequestException e) {
-				assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
+				assertEquals(Msg.code(895) + "Invalid filter, property child is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 			}
 
 		}
@@ -1362,7 +1363,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				myTermSvc.expandValueSet(null, vs);
 				fail("");
 			} catch (InvalidRequestException e) {
-				assertThat(e.getMessage()).isEqualTo(Msg.code(896) + "Don't know how to handle op=ISA on property descendant");
+				assertEquals(Msg.code(896) + "Don't know how to handle op=ISA on property descendant", e.getMessage());
 			}
 
 		}
@@ -1389,7 +1390,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				myTermSvc.expandValueSet(null, vs);
 				fail("");
 			} catch (InvalidRequestException e) {
-				assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
+				assertEquals(Msg.code(895) + "Invalid filter, property descendant is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 			}
 
 		}
@@ -1603,7 +1604,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				myTermSvc.expandValueSet(null, vs);
 				fail("");
 			} catch (InvalidRequestException e) {
-				assertThat(e.getMessage()).isEqualTo(Msg.code(893) + "Don't know how to handle op=ISA on property parent");
+				assertEquals(Msg.code(893) + "Don't know how to handle op=ISA on property parent", e.getMessage());
 			}
 
 		}
@@ -1630,7 +1631,7 @@ public abstract class BaseValueSetHSearchExpansionR4Test extends BaseJpaTest {
 				myTermSvc.expandValueSet(null, vs);
 				fail("");
 			} catch (InvalidRequestException e) {
-				assertThat(e.getMessage()).isEqualTo(Msg.code(895) + "Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system");
+				assertEquals(Msg.code(895) + "Invalid filter, property parent is LOINC-specific and cannot be used with system: http://example.com/my_code_system", e.getMessage());
 			}
 
 		}

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Count;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -115,13 +116,13 @@ public class SearchClientR4Test {
 
 		assertThat(matches.getEntry()).hasSize(1);
     BundleEntryComponent entry = matches.getEntry().get(0);
-		assertThat(((Location) entry.getResource()).getName()).isEqualTo("Sample Clinic");
+		assertEquals("Sample Clinic", ((Location) entry.getResource()).getName());
 
     List<Extension> ext = entry.getSearch().getExtensionsByUrl("http://hl7.org/fhir/StructureDefinition/algorithmic-match");
 		assertThat(ext).hasSize(1);
 
     HttpGet value = (HttpGet) capt.getValue();
-		assertThat(value.getURI().toString()).isEqualTo("http://localhost:8081/hapi-fhir/fhir/Location?_query=match&name=smith&_count=100");
+		assertEquals("http://localhost:8081/hapi-fhir/fhir/Location?_query=match&name=smith&_count=100", value.getURI().toString());
   }
 
   @Test
@@ -145,7 +146,7 @@ public class SearchClientR4Test {
     IGenericClient client = ourCtx.newRestfulGenericClient("http://localhost:8081/hapi-fhir/fhir");
 
     CapabilityStatement actual = client.capabilities().ofType(CapabilityStatement.class).execute();
-		assertThat(actual.getName()).isEqualTo("FOO");
+		assertEquals("FOO", actual.getName());
   }
 
   /**
@@ -170,10 +171,10 @@ public class SearchClientR4Test {
 
     List<Location> matches = client.getMatches(new StringParam("smith"), 100);
 		assertThat(matches).hasSize(1);
-		assertThat(matches.get(0).getName()).isEqualTo("Sample Clinic");
+		assertEquals("Sample Clinic", matches.get(0).getName());
 
     HttpGet value = (HttpGet) capt.getValue();
-		assertThat(value.getURI().toString()).isEqualTo("http://localhost:8081/hapi-fhir/fhir/Location?_query=match&name=smith&_count=100");
+		assertEquals("http://localhost:8081/hapi-fhir/fhir/Location?_query=match&name=smith&_count=100", value.getURI().toString());
   }
 
   @Test
@@ -204,10 +205,10 @@ public class SearchClientR4Test {
       int idx = 0;
 
       client.search("STRING1", new StringType("STRING2"), date, cal);
-			assertThat(UrlUtil.unescape(((HttpGet) capt.getAllValues().get(idx++)).getURI().toString())).isEqualTo("http://localhost/fhir/Bundle?stringParam=STRING1&stringTypeParam=STRING2&dateParam=1970-10-04T10:23:55.986-04:00&calParam=1970-10-04T10:23:55.986-04:00");
+			assertEquals("http://localhost/fhir/Bundle?stringParam=STRING1&stringTypeParam=STRING2&dateParam=1970-10-04T10:23:55.986-04:00&calParam=1970-10-04T10:23:55.986-04:00", UrlUtil.unescape(((HttpGet) capt.getAllValues().get(idx++)).getURI().toString()));
 
       client.search(null, null, null, null);
-			assertThat(UrlUtil.unescape(((HttpGet) capt.getAllValues().get(idx++)).getURI().toString())).isEqualTo("http://localhost/fhir/Bundle");
+			assertEquals("http://localhost/fhir/Bundle", UrlUtil.unescape(((HttpGet) capt.getAllValues().get(idx++)).getURI().toString()));
     } finally {
       TimeZone.setDefault(tz);
     }
@@ -236,10 +237,10 @@ public class SearchClientR4Test {
     int idx = 0;
 
     client.search(new SortSpec("param1", SortOrderEnum.ASC));
-		assertThat(((HttpGet) capt.getAllValues().get(idx++)).getURI().toString()).isEqualTo("http://localhost/fhir/Bundle?_sort=param1");
+		assertEquals("http://localhost/fhir/Bundle?_sort=param1", ((HttpGet) capt.getAllValues().get(idx++)).getURI().toString());
 
     client.search(new SortSpec("param1", SortOrderEnum.ASC).setChain(new SortSpec("param2", SortOrderEnum.DESC)));
-		assertThat(((HttpGet) capt.getAllValues().get(idx++)).getURI().toString()).isEqualTo("http://localhost/fhir/Bundle?_sort=param1%2C-param2");
+		assertEquals("http://localhost/fhir/Bundle?_sort=param1%2C-param2", ((HttpGet) capt.getAllValues().get(idx++)).getURI().toString());
   }
 
   @AfterAll

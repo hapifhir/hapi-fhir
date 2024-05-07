@@ -1,6 +1,7 @@
 package ca.uhn.fhir.cr.r4;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -65,7 +66,7 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 		Parameters params = parameters(stringPart("expression", "5 * 5"));
 		Parameters results = runCqlExecution(params);
 		assertTrue(results.getParameter("return").getValue() instanceof IntegerType);
-		assertThat(((IntegerType) results.getParameter("return").getValue()).asStringValue()).isEqualTo("25");
+		assertEquals("25", ((IntegerType) results.getParameter("return").getValue()).asStringValue());
 	}
 
 	void evaluateLibraryProviderTestLibraryWithSubject() {
@@ -186,7 +187,7 @@ public class CpgOperationProviderTest extends BaseCrR4TestServer{
 
 		assertTrue(results.hasParameter());
 		assertTrue(results.getParameterFirstRep().hasName());
-		assertThat(results.getParameterFirstRep().getName()).isEqualTo("evaluation error");
+		assertEquals("evaluation error", results.getParameterFirstRep().getName());
 		assertTrue(results.getParameterFirstRep().hasResource());
 		assertTrue(results.getParameterFirstRep().getResource() instanceof OperationOutcome);
 		assertThat(((OperationOutcome) results.getParameterFirstRep().getResource()).getIssueFirstRep().getDetails()

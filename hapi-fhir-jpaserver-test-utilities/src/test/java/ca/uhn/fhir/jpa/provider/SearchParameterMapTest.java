@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -43,8 +44,8 @@ public class SearchParameterMapTest {
 		
 		String queryString = map.toNormalizedQueryString(ourCtx);
 		ourLog.info(queryString);
-		assertThat(queryString).isEqualTo("?birthdate=ge2001&birthdate=lt2002&name=bouvier,simpson&name=homer,jay&name:exact=ZZZ%3F");
-		assertThat(UrlUtil.unescape(queryString)).isEqualTo("?birthdate=ge2001&birthdate=lt2002&name=bouvier,simpson&name=homer,jay&name:exact=ZZZ?");
+		assertEquals("?birthdate=ge2001&birthdate=lt2002&name=bouvier,simpson&name=homer,jay&name:exact=ZZZ%3F", queryString);
+		assertEquals("?birthdate=ge2001&birthdate=lt2002&name=bouvier,simpson&name=homer,jay&name:exact=ZZZ?", UrlUtil.unescape(queryString));
 	}
 
 	@Test
@@ -71,8 +72,8 @@ public class SearchParameterMapTest {
 		
 		String queryString = map.toNormalizedQueryString(ourCtx);
 		ourLog.info(queryString);
-		assertThat(queryString).isEqualTo("?");
-		assertThat(UrlUtil.unescape(queryString)).isEqualTo("?");
+		assertEquals("?", queryString);
+		assertEquals("?", UrlUtil.unescape(queryString));
 	}
 
 	@Test
@@ -89,8 +90,8 @@ public class SearchParameterMapTest {
 		String queryString = map.toNormalizedQueryString(ourCtx);
 		ourLog.info(queryString);
 		ourLog.info(UrlUtil.unescape(queryString));
-		assertThat(queryString).isEqualTo("?birthdate=ap2011&_include:recurse=Patient:aartvark&_include=Patient:aartvark:a&_include=Patient:aartvark:z&_include=Patient:subject");
-		assertThat(UrlUtil.unescape(queryString)).isEqualTo("?birthdate=ap2011&_include:recurse=Patient:aartvark&_include=Patient:aartvark:a&_include=Patient:aartvark:z&_include=Patient:subject");
+		assertEquals("?birthdate=ap2011&_include:recurse=Patient:aartvark&_include=Patient:aartvark:a&_include=Patient:aartvark:z&_include=Patient:subject", queryString);
+		assertEquals("?birthdate=ap2011&_include:recurse=Patient:aartvark&_include=Patient:aartvark:a&_include=Patient:aartvark:z&_include=Patient:subject", UrlUtil.unescape(queryString));
 	}
 
 	@Test
@@ -107,8 +108,8 @@ public class SearchParameterMapTest {
 		String queryString = map.toNormalizedQueryString(ourCtx);
 		ourLog.info(queryString);
 		ourLog.info(UrlUtil.unescape(queryString));
-		assertThat(queryString).isEqualTo("?birthdate=ap2011&_revinclude:recurse=Patient:aartvark&_revinclude=Patient:aartvark:a&_revinclude=Patient:aartvark:z&_revinclude=Patient:subject");
-		assertThat(UrlUtil.unescape(queryString)).isEqualTo("?birthdate=ap2011&_revinclude:recurse=Patient:aartvark&_revinclude=Patient:aartvark:a&_revinclude=Patient:aartvark:z&_revinclude=Patient:subject");
+		assertEquals("?birthdate=ap2011&_revinclude:recurse=Patient:aartvark&_revinclude=Patient:aartvark:a&_revinclude=Patient:aartvark:z&_revinclude=Patient:subject", queryString);
+		assertEquals("?birthdate=ap2011&_revinclude:recurse=Patient:aartvark&_revinclude=Patient:aartvark:a&_revinclude=Patient:aartvark:z&_revinclude=Patient:subject", UrlUtil.unescape(queryString));
 	}
 
 	@Test
@@ -125,8 +126,8 @@ public class SearchParameterMapTest {
 		ourLog.info(queryString);
 		ourLog.info(UrlUtil.unescape(queryString));
 
-		assertThat(queryString).isEqualTo("?identifier=SYS%7C%5C%7CVAL&_sort=name,-identifier");
-		assertThat(UrlUtil.unescape(queryString)).isEqualTo("?identifier=SYS|\\|VAL&_sort=name,-identifier");
+		assertEquals("?identifier=SYS%7C%5C%7CVAL&_sort=name,-identifier", queryString);
+		assertEquals("?identifier=SYS|\\|VAL&_sort=name,-identifier", UrlUtil.unescape(queryString));
 	}
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchParameterMapTest.class);
@@ -136,10 +137,10 @@ public class SearchParameterMapTest {
 	 */
 	@Test
 	public void testEverythingOrdinals() {
-		assertThat(EverythingModeEnum.ENCOUNTER_INSTANCE.ordinal()).isEqualTo(0);
-		assertThat(EverythingModeEnum.ENCOUNTER_TYPE.ordinal()).isEqualTo(1);
-		assertThat(EverythingModeEnum.PATIENT_INSTANCE.ordinal()).isEqualTo(2);
-		assertThat(EverythingModeEnum.PATIENT_TYPE.ordinal()).isEqualTo(3);
+		assertEquals(0, EverythingModeEnum.ENCOUNTER_INSTANCE.ordinal());
+		assertEquals(1, EverythingModeEnum.ENCOUNTER_TYPE.ordinal());
+		assertEquals(2, EverythingModeEnum.PATIENT_INSTANCE.ordinal());
+		assertEquals(3, EverythingModeEnum.PATIENT_TYPE.ordinal());
 	}
 	
 }

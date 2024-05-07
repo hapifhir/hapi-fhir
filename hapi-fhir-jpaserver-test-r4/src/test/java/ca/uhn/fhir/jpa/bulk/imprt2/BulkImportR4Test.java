@@ -293,8 +293,8 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 
 		JobInstance instance = myJobCoordinator.getInstance(instanceId);
 		ourLog.info("Instance details:\n{}", JsonUtil.serialize(instance, true));
-		assertThat(instance.getErrorCount()).isEqualTo(1);
-		assertThat(instance.getStatus()).isEqualTo(StatusEnum.FAILED);
+		assertEquals(1, instance.getErrorCount());
+		assertEquals(StatusEnum.FAILED, instance.getStatus());
 		assertNotNull(instance.getCreateTime());
 		assertNotNull(instance.getStartTime());
 		assertNotNull(instance.getEndTime());
@@ -367,7 +367,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 
 			// Verify
-			assertThat(e.getMessage()).isEqualTo("HAPI-2065: No parameters supplied");
+			assertEquals("HAPI-2065: No parameters supplied", e.getMessage());
 
 		}
 	}
@@ -393,7 +393,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			String expected = """
 				HAPI-2039: Failed to validate parameters for job of type BULK_IMPORT_PULL:\s
 				 * myNdJsonUrls - At least one NDJSON URL must be provided""";
-			assertThat(e.getMessage()).isEqualTo(expected);
+			assertEquals(expected, e.getMessage());
 
 		}
 	}
@@ -420,7 +420,7 @@ public class BulkImportR4Test extends BaseJpaR4Test {
 			String expected = """
 				HAPI-2039: Failed to validate parameters for job of type BULK_IMPORT_PULL:\s
 				 * myNdJsonUrls[0].<list element> - Must be a valid URL""";
-			assertThat(e.getMessage()).isEqualTo(expected);
+			assertEquals(expected, e.getMessage());
 
 		}
 	}

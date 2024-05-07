@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.step;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.chunk.PartitionedUrlChunkRangeJson;
@@ -81,10 +82,10 @@ public class LoadIdsStepTest {
 		for (int i = 0; i < expectedLoops ; i++) {
 			String expected = createIdChunk(i * 500, (i * 500) + 500).toString();
 			String actual = allCapturedValues.get(i).toString();
-			assertThat(actual).isEqualTo(expected);
+			assertEquals(expected, actual);
 		}
 		final ResourceIdListWorkChunkJson expectedIdChunk = createIdChunk(19500, 20000);
-		assertThat(allCapturedValues.get(expectedLoops - 1).toString()).isEqualTo(expectedIdChunk.toString());
+		assertEquals(expectedIdChunk.toString(), allCapturedValues.get(expectedLoops - 1).toString());
 	}
 
 	@Nonnull

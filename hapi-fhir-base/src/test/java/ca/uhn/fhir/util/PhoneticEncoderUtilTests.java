@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
@@ -38,7 +39,7 @@ public class PhoneticEncoderUtilTests {
 		IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(enumString);
 
 		assertNotNull(encoder);
-		assertThat(encoder.name()).isEqualTo(enumVal.name());
+		assertEquals(enumVal.name(), encoder.name());
 	}
 
 	@Test
@@ -48,7 +49,7 @@ public class PhoneticEncoderUtilTests {
 			IPhoneticEncoder encoder = PhoneticEncoderUtil.getEncoder(enumVal.name());
 
 			assertNotNull(encoder);
-			assertThat(encoder.name()).isEqualTo(enumVal.name());
+			assertEquals(enumVal.name(), encoder.name());
 		}
 	}
 
@@ -69,7 +70,7 @@ public class PhoneticEncoderUtilTests {
 		Mockito.verify(myListAppender).doAppend(loggingCaptor.capture());
 		assertThat(loggingCaptor.getAllValues()).hasSize(1);
 		ILoggingEvent event = loggingCaptor.getValue();
-		assertThat(event.getMessage()).isEqualTo("Invalid encoder max character length: " + num);
+		assertEquals("Invalid encoder max character length: " + num, event.getMessage());
 	}
 
 	@Test
@@ -87,7 +88,7 @@ public class PhoneticEncoderUtilTests {
 			.doAppend(captor.capture());
 		assertThat(captor.getAllValues()).hasSize(1);
 		ILoggingEvent event = captor.getValue();
-		assertThat(event.getMessage()).isEqualTo("Invalid phonetic param string " + theString);
+		assertEquals("Invalid phonetic param string " + theString, event.getMessage());
 	}
 
 	@Test
@@ -130,7 +131,7 @@ public class PhoneticEncoderUtilTests {
 		);
 
 		assertNotNull(encoder);
-		assertThat(encoder.name()).isEqualTo(PhoneticEncoderEnum.METAPHONE.name());
+		assertEquals(PhoneticEncoderEnum.METAPHONE.name(), encoder.name());
 	}
 
 	/**
@@ -142,6 +143,6 @@ public class PhoneticEncoderUtilTests {
 		Mockito.verify(myListAppender).doAppend(loggingCaptor.capture());
 		assertThat(loggingCaptor.getAllValues()).hasSize(1);
 		ILoggingEvent event = loggingCaptor.getValue();
-		assertThat(event.getMessage()).isEqualTo("Invalid encoder max character length: " + theNumberParam);
+		assertEquals("Invalid encoder max character length: " + theNumberParam, event.getMessage());
 	}
 }

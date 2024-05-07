@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.packages;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
@@ -65,10 +66,10 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		final ValueSet actualValueSet1 = getFirstValueSet();
 
-		assertThat(actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("ValueSet/" + VALUE_SET_OID_FIRST);
-		assertThat(actualValueSet1.getUrl()).isEqualTo(FIRST_IG_URL_FIRST_OID);
-		assertThat(actualValueSet1.getVersion()).isEqualTo(version1);
-		assertThat(actualValueSet1.getCopyright()).isEqualTo(copyright1);
+		assertEquals("ValueSet/" + VALUE_SET_OID_FIRST, actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(FIRST_IG_URL_FIRST_OID, actualValueSet1.getUrl());
+		assertEquals(version1, actualValueSet1.getVersion());
+		assertEquals(copyright1, actualValueSet1.getCopyright());
 	}
 
 	@Test
@@ -81,14 +82,14 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		final TermValueSet termValueSet = getFirstTermValueSet();
 
-		assertThat(termValueSet.getUrl()).isEqualTo(FIRST_IG_URL_FIRST_OID);
+		assertEquals(FIRST_IG_URL_FIRST_OID, termValueSet.getUrl());
 
 		final ValueSet actualValueSet1 = getFirstValueSet();
 
-		assertThat(actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("ValueSet/" + VALUE_SET_OID_FIRST);
-		assertThat(actualValueSet1.getUrl()).isEqualTo(FIRST_IG_URL_FIRST_OID);
-		assertThat(actualValueSet1.getVersion()).isEqualTo(version1);
-		assertThat(actualValueSet1.getCopyright()).isEqualTo(copyright1);
+		assertEquals("ValueSet/" + VALUE_SET_OID_FIRST, actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(FIRST_IG_URL_FIRST_OID, actualValueSet1.getUrl());
+		assertEquals(version1, actualValueSet1.getVersion());
+		assertEquals(copyright1, actualValueSet1.getCopyright());
 	}
 
 	@Test
@@ -103,10 +104,10 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		final ValueSet actualValueSet1 = getFirstValueSet();
 
-		assertThat(actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("ValueSet/" + VALUE_SET_OID_FIRST);
-		assertThat(actualValueSet1.getUrl()).isEqualTo(FIRST_IG_URL_FIRST_OID);
-		assertThat(actualValueSet1.getVersion()).isEqualTo(version2);
-		assertThat(actualValueSet1.getCopyright()).isEqualTo(copyright2);
+		assertEquals("ValueSet/" + VALUE_SET_OID_FIRST, actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(FIRST_IG_URL_FIRST_OID, actualValueSet1.getUrl());
+		assertEquals(version2, actualValueSet1.getVersion());
+		assertEquals(copyright2, actualValueSet1.getCopyright());
 	}
 
 	@Test
@@ -126,8 +127,8 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 		final TermValueSet termValueSet1 = all2.get(0);
 		final TermValueSet termValueSet2 = all2.get(1);
 
-		assertThat(termValueSet1.getUrl()).isEqualTo(FIRST_IG_URL_FIRST_OID);
-		assertThat(termValueSet2.getUrl()).isEqualTo(SECOND_IG_URL_SECOND_OID);
+		assertEquals(FIRST_IG_URL_FIRST_OID, termValueSet1.getUrl());
+		assertEquals(SECOND_IG_URL_SECOND_OID, termValueSet2.getUrl());
 
 		final List<ValueSet> allValueSets = getAllValueSets();
 
@@ -135,17 +136,17 @@ public class PackageInstallerSvcImplCreateTest extends BaseJpaR4Test {
 
 		final ValueSet actualValueSet1 = allValueSets.get(0);
 
-		assertThat(actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("ValueSet/" + VALUE_SET_OID_FIRST);
-		assertThat(actualValueSet1.getUrl()).isEqualTo(FIRST_IG_URL_FIRST_OID);
-		assertThat(actualValueSet1.getVersion()).isEqualTo(version1);
-		assertThat(actualValueSet1.getCopyright()).isEqualTo(copyright1);
+		assertEquals("ValueSet/" + VALUE_SET_OID_FIRST, actualValueSet1.getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(FIRST_IG_URL_FIRST_OID, actualValueSet1.getUrl());
+		assertEquals(version1, actualValueSet1.getVersion());
+		assertEquals(copyright1, actualValueSet1.getCopyright());
 
 		final ValueSet actualValueSet2 = allValueSets.get(1);
 
-		assertThat(actualValueSet2.getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("ValueSet/" + VALUE_SET_OID_SECOND);
-		assertThat(actualValueSet2.getUrl()).isEqualTo(SECOND_IG_URL_SECOND_OID);
-		assertThat(actualValueSet2.getVersion()).isEqualTo(version2);
-		assertThat(actualValueSet2.getCopyright()).isEqualTo(copyright2);
+		assertEquals("ValueSet/" + VALUE_SET_OID_SECOND, actualValueSet2.getIdElement().toUnqualifiedVersionless().getValue());
+		assertEquals(SECOND_IG_URL_SECOND_OID, actualValueSet2.getUrl());
+		assertEquals(version2, actualValueSet2.getVersion());
+		assertEquals(copyright2, actualValueSet2.getCopyright());
 	}
 
 	@Nonnull

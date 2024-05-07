@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.reindex;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -60,9 +61,9 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		// Verify
 		HtmlPage narrativeHtml = extractNarrative(outcome);
 		HtmlTable table = (HtmlTable) narrativeHtml.getElementById("NonUniqueIndexesTable");
-		assertThat(getBodyCellValue(table, 0, 0)).isEqualTo("ADD");
-		assertThat(getBodyCellValue(table, 0, 1)).isEqualTo("ComboTokenNonUnique");
-		assertThat(getBodyCellValue(table, 0, 2)).isEqualTo("Patient?identifier=123");
+		assertEquals("ADD", getBodyCellValue(table, 0, 0));
+		assertEquals("ComboTokenNonUnique", getBodyCellValue(table, 0, 1));
+		assertEquals("Patient?identifier=123", getBodyCellValue(table, 0, 2));
 	}
 
 	@Test
@@ -78,9 +79,9 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		// Verify
 		HtmlPage narrativeHtml = extractNarrative(outcome);
 		HtmlTable table = (HtmlTable) narrativeHtml.getElementById("UniqueIndexesTable");
-		assertThat(getBodyCellValue(table, 0, 0)).isEqualTo("ADD");
-		assertThat(getBodyCellValue(table, 0, 1)).isEqualTo("ComboStringUnique");
-		assertThat(getBodyCellValue(table, 0, 2)).isEqualTo("Patient?identifier=123");
+		assertEquals("ADD", getBodyCellValue(table, 0, 0));
+		assertEquals("ComboStringUnique", getBodyCellValue(table, 0, 1));
+		assertEquals("Patient?identifier=123", getBodyCellValue(table, 0, 2));
 	}
 
 	@Test
@@ -101,14 +102,14 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		// Verify
 		HtmlPage narrativeHtml = extractNarrative(outcome);
 		HtmlTable table = (HtmlTable) narrativeHtml.getElementById("MissingIndexesTable");
-		assertThat(getBodyCellValue(table, 0, 0)).isEqualTo("identifier");
-		assertThat(getBodyCellValue(table, 0, 1)).isEqualTo("ADD");
-		assertThat(getBodyCellValue(table, 0, 2)).isEqualTo("Token");
-		assertThat(getBodyCellValue(table, 0, 3)).isEqualTo("true");
-		assertThat(getBodyCellValue(table, 1, 0)).isEqualTo("subject");
-		assertThat(getBodyCellValue(table, 1, 1)).isEqualTo("ADD");
-		assertThat(getBodyCellValue(table, 1, 2)).isEqualTo("Reference");
-		assertThat(getBodyCellValue(table, 1, 3)).isEqualTo("true");
+		assertEquals("identifier", getBodyCellValue(table, 0, 0));
+		assertEquals("ADD", getBodyCellValue(table, 0, 1));
+		assertEquals("Token", getBodyCellValue(table, 0, 2));
+		assertEquals("true", getBodyCellValue(table, 0, 3));
+		assertEquals("subject", getBodyCellValue(table, 1, 0));
+		assertEquals("ADD", getBodyCellValue(table, 1, 1));
+		assertEquals("Reference", getBodyCellValue(table, 1, 2));
+		assertEquals("true", getBodyCellValue(table, 1, 3));
 	}
 
 	@Test
@@ -124,10 +125,10 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		// Verify
 		HtmlPage narrativeHtml = extractNarrative(outcome);
 		HtmlTable table = (HtmlTable) narrativeHtml.getElementById("NumberIndexesTable");
-		assertThat(getBodyCellValue(table, 0, 0)).isEqualTo("dose");
-		assertThat(getBodyCellValue(table, 0, 1)).isEqualTo("ADD");
-		assertThat(getBodyCellValue(table, 0, 2)).isEqualTo("Number");
-		assertThat(getBodyCellValue(table, 0, 3)).isEqualTo("1");
+		assertEquals("dose", getBodyCellValue(table, 0, 0));
+		assertEquals("ADD", getBodyCellValue(table, 0, 1));
+		assertEquals("Number", getBodyCellValue(table, 0, 2));
+		assertEquals("1", getBodyCellValue(table, 0, 3));
 	}
 
 	@Test
@@ -143,11 +144,11 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		// Verify
 		HtmlPage narrativeHtml = extractNarrative(outcome);
 		HtmlTable table = (HtmlTable) narrativeHtml.getElementById("ResourceLinksTable");
-		assertThat(getBodyCellValue(table, 0, 0)).isEqualTo("Observation.subject");
-		assertThat(getBodyCellValue(table, 0, 1)).isEqualTo("ADD");
-		assertThat(getBodyCellValue(table, 0, 2)).isEqualTo("Reference");
-		assertThat(getBodyCellValue(table, 0, 3)).isEqualTo("Patient/123");
-		assertThat(getBodyCellValue(table, 0, 4)).isEqualTo("555");
+		assertEquals("Observation.subject", getBodyCellValue(table, 0, 0));
+		assertEquals("ADD", getBodyCellValue(table, 0, 1));
+		assertEquals("Reference", getBodyCellValue(table, 0, 2));
+		assertEquals("Patient/123", getBodyCellValue(table, 0, 3));
+		assertEquals("555", getBodyCellValue(table, 0, 4));
 	}
 
 	@Test
@@ -163,12 +164,12 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		// Verify
 		HtmlPage narrativeHtml = extractNarrative(outcome);
 		HtmlTable table = (HtmlTable) narrativeHtml.getElementById("ResourceLinksTable");
-		assertThat(getBodyCellValue(table, 0, 0)).isEqualTo("Observation.subject");
-		assertThat(getBodyCellValue(table, 0, 1)).isEqualTo("ADD");
-		assertThat(getBodyCellValue(table, 0, 2)).isEqualTo("Reference");
-		assertThat(getBodyCellValue(table, 0, 3)).isEqualTo("");
-		assertThat(getBodyCellValue(table, 0, 4)).isEqualTo("");
-		assertThat(getBodyCellValue(table, 0, 5)).isEqualTo("http://foo/base/Patient/456");
+		assertEquals("Observation.subject", getBodyCellValue(table, 0, 0));
+		assertEquals("ADD", getBodyCellValue(table, 0, 1));
+		assertEquals("Reference", getBodyCellValue(table, 0, 2));
+		assertEquals("", getBodyCellValue(table, 0, 3));
+		assertEquals("", getBodyCellValue(table, 0, 4));
+		assertEquals("http://foo/base/Patient/456", getBodyCellValue(table, 0, 5));
 	}
 
 	@Test
@@ -184,12 +185,12 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		// Verify
 		HtmlPage narrativeHtml = extractNarrative(outcome);
 		HtmlTable table = (HtmlTable) narrativeHtml.getElementById("ResourceLinksTable");
-		assertThat(getBodyCellValue(table, 0, 0)).isEqualTo("Observation.subject");
-		assertThat(getBodyCellValue(table, 0, 1)).isEqualTo("ADD");
-		assertThat(getBodyCellValue(table, 0, 2)).isEqualTo("Reference");
-		assertThat(getBodyCellValue(table, 0, 3)).isEqualTo("");
-		assertThat(getBodyCellValue(table, 0, 4)).isEqualTo("");
-		assertThat(getBodyCellValue(table, 0, 5)).isEqualTo("http://foo/base/Patient/123");
+		assertEquals("Observation.subject", getBodyCellValue(table, 0, 0));
+		assertEquals("ADD", getBodyCellValue(table, 0, 1));
+		assertEquals("Reference", getBodyCellValue(table, 0, 2));
+		assertEquals("", getBodyCellValue(table, 0, 3));
+		assertEquals("", getBodyCellValue(table, 0, 4));
+		assertEquals("http://foo/base/Patient/123", getBodyCellValue(table, 0, 5));
 	}
 
 	@Test
@@ -205,12 +206,12 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		// Verify
 		HtmlPage narrativeHtml = extractNarrative(outcome);
 		HtmlTable table = (HtmlTable) narrativeHtml.getElementById("QuantityIndexesTable");
-		assertThat(getBodyCellValue(table, 0, 0)).isEqualTo("value-quantity");
-		assertThat(getBodyCellValue(table, 0, 1)).isEqualTo("ADD");
-		assertThat(getBodyCellValue(table, 0, 2)).isEqualTo("Quantity");
-		assertThat(getBodyCellValue(table, 0, 3)).isEqualTo("123");
-		assertThat(getBodyCellValue(table, 0, 4)).isEqualTo("http://unitsofmeasure.org");
-		assertThat(getBodyCellValue(table, 0, 5)).isEqualTo("kg");
+		assertEquals("value-quantity", getBodyCellValue(table, 0, 0));
+		assertEquals("ADD", getBodyCellValue(table, 0, 1));
+		assertEquals("Quantity", getBodyCellValue(table, 0, 2));
+		assertEquals("123", getBodyCellValue(table, 0, 3));
+		assertEquals("http://unitsofmeasure.org", getBodyCellValue(table, 0, 4));
+		assertEquals("kg", getBodyCellValue(table, 0, 5));
 	}
 
 	@Test
@@ -226,12 +227,12 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		// Verify
 		HtmlPage narrativeHtml = extractNarrative(outcome);
 		HtmlTable table = (HtmlTable) narrativeHtml.getElementById("QuantityIndexesTable");
-		assertThat(getBodyCellValue(table, 0, 0)).isEqualTo("value-quantity");
-		assertThat(getBodyCellValue(table, 0, 1)).isEqualTo("ADD");
-		assertThat(getBodyCellValue(table, 0, 2)).isEqualTo("QuantityNormalized");
-		assertThat(getBodyCellValue(table, 0, 3)).isEqualTo("123.0");
-		assertThat(getBodyCellValue(table, 0, 4)).isEqualTo("http://unitsofmeasure.org");
-		assertThat(getBodyCellValue(table, 0, 5)).isEqualTo("kg");
+		assertEquals("value-quantity", getBodyCellValue(table, 0, 0));
+		assertEquals("ADD", getBodyCellValue(table, 0, 1));
+		assertEquals("QuantityNormalized", getBodyCellValue(table, 0, 2));
+		assertEquals("123.0", getBodyCellValue(table, 0, 3));
+		assertEquals("http://unitsofmeasure.org", getBodyCellValue(table, 0, 4));
+		assertEquals("kg", getBodyCellValue(table, 0, 5));
 	}
 
 	@Test
@@ -247,11 +248,11 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		// Verify
 		HtmlPage narrativeHtml = extractNarrative(outcome);
 		HtmlTable table = (HtmlTable) narrativeHtml.getElementById("StringIndexesTable");
-		assertThat(getBodyCellValue(table, 0, 0)).isEqualTo("family");
-		assertThat(getBodyCellValue(table, 0, 1)).isEqualTo("ADD");
-		assertThat(getBodyCellValue(table, 0, 2)).isEqualTo("String");
-		assertThat(getBodyCellValue(table, 0, 3)).isEqualTo("Simpson");
-		assertThat(getBodyCellValue(table, 0, 4)).isEqualTo("SIMPSON");
+		assertEquals("family", getBodyCellValue(table, 0, 0));
+		assertEquals("ADD", getBodyCellValue(table, 0, 1));
+		assertEquals("String", getBodyCellValue(table, 0, 2));
+		assertEquals("Simpson", getBodyCellValue(table, 0, 3));
+		assertEquals("SIMPSON", getBodyCellValue(table, 0, 4));
 	}
 
 	@Test
@@ -267,11 +268,11 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		// Verify
 		HtmlPage narrativeHtml = extractNarrative(outcome);
 		HtmlTable table = (HtmlTable) narrativeHtml.getElementById("TokenIndexesTable");
-		assertThat(getBodyCellValue(table, 0, 0)).isEqualTo("identifier");
-		assertThat(getBodyCellValue(table, 0, 1)).isEqualTo("ADD");
-		assertThat(getBodyCellValue(table, 0, 2)).isEqualTo("Token");
-		assertThat(getBodyCellValue(table, 0, 3)).isEqualTo("http://id-system");
-		assertThat(getBodyCellValue(table, 0, 4)).isEqualTo("id-value");
+		assertEquals("identifier", getBodyCellValue(table, 0, 0));
+		assertEquals("ADD", getBodyCellValue(table, 0, 1));
+		assertEquals("Token", getBodyCellValue(table, 0, 2));
+		assertEquals("http://id-system", getBodyCellValue(table, 0, 3));
+		assertEquals("id-value", getBodyCellValue(table, 0, 4));
 	}
 
 	@Test
@@ -287,10 +288,10 @@ public class InstanceReindexServiceImplNarrativeR5Test {
 		// Verify
 		HtmlPage narrativeHtml = extractNarrative(outcome);
 		HtmlTable table = (HtmlTable) narrativeHtml.getElementById("UriIndexesTable");
-		assertThat(getBodyCellValue(table, 0, 0)).isEqualTo("uri");
-		assertThat(getBodyCellValue(table, 0, 1)).isEqualTo("ADD");
-		assertThat(getBodyCellValue(table, 0, 2)).isEqualTo("Uri");
-		assertThat(getBodyCellValue(table, 0, 3)).isEqualTo("http://some-codesystem");
+		assertEquals("uri", getBodyCellValue(table, 0, 0));
+		assertEquals("ADD", getBodyCellValue(table, 0, 1));
+		assertEquals("Uri", getBodyCellValue(table, 0, 2));
+		assertEquals("http://some-codesystem", getBodyCellValue(table, 0, 3));
 	}
 
 	@Nonnull

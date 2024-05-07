@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -35,10 +36,10 @@ public class TaskChunkerTest {
 
 		// Verify
 		verify(myConsumer, times(4)).accept(myConsumerCaptor.capture());
-		assertThat(myConsumerCaptor.getAllValues().get(0)).isEqualTo(newIntRangeList(0, 10));
-		assertThat(myConsumerCaptor.getAllValues().get(1)).isEqualTo(newIntRangeList(10, 20));
-		assertThat(myConsumerCaptor.getAllValues().get(2)).isEqualTo(newIntRangeList(20, 30));
-		assertThat(myConsumerCaptor.getAllValues().get(3)).isEqualTo(newIntRangeList(30, 35));
+		assertEquals(newIntRangeList(0, 10), myConsumerCaptor.getAllValues().get(0));
+		assertEquals(newIntRangeList(10, 20), myConsumerCaptor.getAllValues().get(1));
+		assertEquals(newIntRangeList(20, 30), myConsumerCaptor.getAllValues().get(2));
+		assertEquals(newIntRangeList(30, 35), myConsumerCaptor.getAllValues().get(3));
 
 	}
 

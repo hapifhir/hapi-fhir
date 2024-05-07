@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -98,9 +99,9 @@ public class ServerMimetypeR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
-		assertThat(status.getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON);
-		assertThat(responseContent).isEqualTo(expectedResponseContent);
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals(Constants.CT_FHIR_JSON, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(expectedResponseContent, responseContent);
 	}
 
 	@Test
@@ -120,9 +121,9 @@ public class ServerMimetypeR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
-		assertThat(status.getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON_NEW);
-		assertThat(responseContent).isEqualTo(expectedResponseContent);
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(expectedResponseContent, responseContent);
 	}
 
 	@Test
@@ -142,9 +143,9 @@ public class ServerMimetypeR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
-		assertThat(status.getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON_NEW);
-		assertThat(responseContent).isEqualTo(expectedResponseContent);
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(expectedResponseContent, responseContent);
 	}
 
 	@Test
@@ -164,9 +165,9 @@ public class ServerMimetypeR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
-		assertThat(status.getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_XML);
-		assertThat(responseContent).isEqualTo(expectedResponseContent);
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals(Constants.CT_FHIR_XML, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(expectedResponseContent, responseContent);
 	}
 
 	@Test
@@ -185,9 +186,9 @@ public class ServerMimetypeR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
-		assertThat(status.getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_XML_NEW);
-		assertThat(responseContent).isEqualTo(expectedResponseContent);
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(expectedResponseContent, responseContent);
 	}
 
 	@Test
@@ -207,9 +208,9 @@ public class ServerMimetypeR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(201);
-		assertThat(status.getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_XML_NEW);
-		assertThat(responseContent).isEqualTo(expectedResponseContent);
+		assertEquals(201, status.getStatusLine().getStatusCode());
+		assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		assertEquals(expectedResponseContent, responseContent);
 	}
 
 	@Test
@@ -218,7 +219,7 @@ public class ServerMimetypeR4Test {
 		CloseableHttpResponse status = ourClient.execute(req);
 		try {
 			ourLog.info(status.toString());
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, status.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -237,7 +238,7 @@ public class ServerMimetypeR4Test {
 		CloseableHttpResponse status = ourClient.execute(req);
 		try {
 			ourLog.info(status.toString());
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, status.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -251,19 +252,19 @@ public class ServerMimetypeR4Test {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.XML);
 
 		// None given
-		assertThat(readAndReturnContentType(null)).isEqualTo("application/fhir+xml");
+		assertEquals("application/fhir+xml", readAndReturnContentType(null));
 
 		// Legacy given
-		assertThat(readAndReturnContentType("application/json+fhir")).isEqualTo("application/json+fhir");
+		assertEquals("application/json+fhir", readAndReturnContentType("application/json+fhir"));
 
 		// Everything else JSON
-		assertThat(readAndReturnContentType("application/fhir+json")).isEqualTo("application/fhir+json");
-		assertThat(readAndReturnContentType("application/json")).isEqualTo("application/fhir+json");
-		assertThat(readAndReturnContentType("application/fhir+json,application/json;q=0.9")).isEqualTo("application/fhir+json");
-		assertThat(readAndReturnContentType("json")).isEqualTo("application/fhir+json");
+		assertEquals("application/fhir+json", readAndReturnContentType("application/fhir+json"));
+		assertEquals("application/fhir+json", readAndReturnContentType("application/json"));
+		assertEquals("application/fhir+json", readAndReturnContentType("application/fhir+json,application/json;q=0.9"));
+		assertEquals("application/fhir+json", readAndReturnContentType("json"));
 
 		// Invalid
-		assertThat(readAndReturnContentType("text/plain")).isEqualTo("application/fhir+xml");
+		assertEquals("application/fhir+xml", readAndReturnContentType("text/plain"));
 	}
 
 	/**
@@ -274,19 +275,19 @@ public class ServerMimetypeR4Test {
 		ourServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
 		// None given
-		assertThat(readAndReturnContentType(null)).isEqualTo("application/fhir+json");
+		assertEquals("application/fhir+json", readAndReturnContentType(null));
 
 		// Legacy given
-		assertThat(readAndReturnContentType("application/xml+fhir")).isEqualTo("application/xml+fhir");
+		assertEquals("application/xml+fhir", readAndReturnContentType("application/xml+fhir"));
 
 		// Everything else JSON
-		assertThat(readAndReturnContentType("application/fhir+xml")).isEqualTo("application/fhir+xml");
-		assertThat(readAndReturnContentType("application/xml")).isEqualTo("application/fhir+xml");
-		assertThat(readAndReturnContentType("application/fhir+xml,application/xml;q=0.9")).isEqualTo("application/fhir+xml");
-		assertThat(readAndReturnContentType("xml")).isEqualTo("application/fhir+xml");
+		assertEquals("application/fhir+xml", readAndReturnContentType("application/fhir+xml"));
+		assertEquals("application/fhir+xml", readAndReturnContentType("application/xml"));
+		assertEquals("application/fhir+xml", readAndReturnContentType("application/fhir+xml,application/xml;q=0.9"));
+		assertEquals("application/fhir+xml", readAndReturnContentType("xml"));
 
 		// Invalid
-		assertThat(readAndReturnContentType("text/plain")).isEqualTo("application/fhir+json");
+		assertEquals("application/fhir+json", readAndReturnContentType("text/plain"));
 	}
 
 	@Test
@@ -300,9 +301,9 @@ public class ServerMimetypeR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("\"resourceType\"");
-		assertThat(status.getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON);
+		assertEquals(Constants.CT_FHIR_JSON, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
 	@Test
@@ -315,9 +316,9 @@ public class ServerMimetypeR4Test {
 
 			ourLog.info("Response was:\n{}", responseContent);
 
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+			assertEquals(200, status.getStatusLine().getStatusCode());
 			assertThat(responseContent).contains("\"resourceType\"");
-			assertThat(status.getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+			assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 		}
 	}
 
@@ -332,9 +333,9 @@ public class ServerMimetypeR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("\"resourceType\"");
-		assertThat(status.getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+		assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
 	@Test
@@ -348,10 +349,10 @@ public class ServerMimetypeR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<Patient xmlns=\"http://hl7.org/fhir\">");
 		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");
-		assertThat(status.getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_XML);
+		assertEquals(Constants.CT_FHIR_XML, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
 	@Test
@@ -365,10 +366,10 @@ public class ServerMimetypeR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<Patient xmlns=\"http://hl7.org/fhir\">");
 		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");
-		assertThat(status.getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_XML_NEW);
+		assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
 	@Test
@@ -382,10 +383,10 @@ public class ServerMimetypeR4Test {
 
 		ourLog.info("Response was:\n{}", responseContent);
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(responseContent).contains("<Patient xmlns=\"http://hl7.org/fhir\">");
 		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");
-		assertThat(status.getFirstHeader("content-type").getValue().replaceAll(";.*", "")).isEqualTo(Constants.CT_FHIR_XML_NEW);
+		assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
 	}
 
 	private List<String> toStrings(List<CodeType> theFormat) {

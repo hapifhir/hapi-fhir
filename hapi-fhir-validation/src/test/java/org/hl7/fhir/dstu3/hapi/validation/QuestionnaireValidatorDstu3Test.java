@@ -1,5 +1,6 @@
 package org.hl7.fhir.dstu3.hapi.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -78,7 +79,7 @@ public class QuestionnaireValidatorDstu3Test extends BaseValidationTestWithInlin
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
-			assertThat(errors.isSuccessful()).isEqualTo(true);
+			assertEquals(true, errors.isSuccessful());
 			assertThat(errors.getMessages().stream().filter(t -> t.getSeverity().ordinal() > ResultSeverityEnum.INFORMATION.ordinal()).collect(Collectors.toList())).isEmpty();
 		}
 
@@ -101,7 +102,7 @@ public class QuestionnaireValidatorDstu3Test extends BaseValidationTestWithInlin
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
-			assertThat(errors.isSuccessful()).isEqualTo(true);
+			assertEquals(true, errors.isSuccessful());
 			assertThat(errors.getMessages()).isEmpty();
 		}
 		for (String extensionDomainToTest : extensionDomainsToTest) {
@@ -116,7 +117,7 @@ public class QuestionnaireValidatorDstu3Test extends BaseValidationTestWithInlin
 
 			ValidationResult errors = myVal.validateWithResult(q);
 			ourLog.info(errors.toString());
-			assertThat(errors.isSuccessful()).isEqualTo(true);
+			assertEquals(true, errors.isSuccessful());
 			assertThat(errors.getMessages().get(0).getMessage()).contains("and a coding should come from this value set unless it has no suitable code (note that the validator cannot judge what is suitable) (codes = null#text-box)");
 		}
 	}
@@ -136,16 +137,16 @@ public class QuestionnaireValidatorDstu3Test extends BaseValidationTestWithInlin
 		ValidationResult errors = myVal.validateWithResult(q);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.isSuccessful()).isEqualTo(true);
+		assertEquals(true, errors.isSuccessful());
 		assertThat(errors.getMessages()).hasSize(1);
-		assertThat(ResultSeverityEnum.INFORMATION).isEqualTo(errors.getMessages().get(0).getSeverity());
+		assertEquals(errors.getMessages().get(0).getSeverity(), ResultSeverityEnum.INFORMATION);
 		assertThat(errors.getMessages().get(0).getMessage()).startsWith("Unknown extension " + extensionUrl);
 
 		myInstanceVal.setCustomExtensionDomains(Collections.singletonList(extensionUrl));
 		errors = myVal.validateWithResult(q);
 
 		ourLog.info(errors.toString());
-		assertThat(errors.isSuccessful()).isEqualTo(true);
+		assertEquals(true, errors.isSuccessful());
 		assertThat(errors.getMessages()).isEmpty();
 	}
 

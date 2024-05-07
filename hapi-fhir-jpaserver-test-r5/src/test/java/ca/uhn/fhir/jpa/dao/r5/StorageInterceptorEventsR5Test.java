@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r5;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.ExpungeOptions;
@@ -62,7 +63,7 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		assertThat(search instanceof PersistedJpaBundleProvider).as(search.getClass().toString()).isTrue();
 		List<IBaseResource> found = search.getResources(0, 100);
 		assertThat(found).hasSize(3);
-		assertThat(showedCounter.get()).isEqualTo(3);
+		assertEquals(3, showedCounter.get());
 
 		// Delete and expunge one
 		myPatientDao.delete(new IdType("Patient/P1"));
@@ -73,7 +74,7 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		params = new SearchParameterMap();
 		found = myPatientDao.search(params, mySrd).getResources(0, 100);
 		assertThat(found).hasSize(2);
-		assertThat(showedCounter.get()).isEqualTo(2);
+		assertEquals(2, showedCounter.get());
 	}
 
 	@Test
@@ -106,7 +107,7 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		assertThat(search instanceof SimpleBundleProvider).as(search.getClass().toString()).isTrue();
 		List<IBaseResource> found = search.getResources(0, 100);
 		assertThat(found).hasSize(3);
-		assertThat(showedCounter.get()).isEqualTo(3);
+		assertEquals(3, showedCounter.get());
 
 		// Delete and expunge one
 		myPatientDao.delete(new IdType("Patient/P1"));
@@ -117,7 +118,7 @@ public class StorageInterceptorEventsR5Test extends BaseJpaR5Test {
 		params = new SearchParameterMap();
 		found = myPatientDao.search(params, mySrd).getResources(0, 100);
 		assertThat(found).hasSize(2);
-		assertThat(showedCounter.get()).isEqualTo(2);
+		assertEquals(2, showedCounter.get());
 	}
 
 	@AfterEach

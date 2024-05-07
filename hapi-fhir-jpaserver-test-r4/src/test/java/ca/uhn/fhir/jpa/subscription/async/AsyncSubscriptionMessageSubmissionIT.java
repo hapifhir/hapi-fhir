@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.async;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.subscription.BaseSubscriptionsR4Test;
@@ -99,8 +100,8 @@ public class AsyncSubscriptionMessageSubmissionIT extends BaseSubscriptionsR4Tes
 		Observation observation = (Observation) fetchSingleResourceFromSubscriptionTerminalEndpoint();
 		Coding coding = observation.getCode().getCodingFirstRep();
 
-		assertThat(coding.getCode()).isEqualTo(aCode);
-		assertThat(coding.getSystem()).isEqualTo(aSystem);
+		assertEquals(aCode, coding.getCode());
+		assertEquals(aSystem, coding.getSystem());
 
 	}
 

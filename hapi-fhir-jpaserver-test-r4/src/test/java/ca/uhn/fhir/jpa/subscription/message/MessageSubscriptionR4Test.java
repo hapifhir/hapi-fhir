@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.subscription.message;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.IResourceModifiedDao;
@@ -123,7 +124,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 
 		//Quick validation source stored.
 		Observation readObs = myObservationDao.read(obs.getIdElement().toUnqualifiedVersionless());
-		assertThat(readObs.getMeta().getSource()).isEqualTo(theExpectedSourceValue);
+		assertEquals(theExpectedSourceValue, readObs.getMeta().getSource());
 
 		// Should see 1 subscription notification
 		waitForQueueToDrain();
@@ -132,7 +133,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		IBaseResource resource = fetchSingleResourceFromSubscriptionTerminalEndpoint();
 		assertThat(resource).isInstanceOf(Observation.class);
 		Observation receivedObs = (Observation) resource;
-		assertThat(receivedObs.getMeta().getSource()).isEqualTo(theExpectedSourceValue);
+		assertEquals(theExpectedSourceValue, receivedObs.getMeta().getSource());
 	}
 
 
@@ -227,7 +228,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		boolean wasDeleted = transactionTemplate.execute(tx -> myResourceModifiedMessagePersistenceSvc.deleteByPK(persistedResourceModifiedMessage.getPersistedResourceModifiedMessagePk()));
 
 		// then
-		assertThat(wasDeleted).isEqualTo(Boolean.TRUE);
+		assertEquals(Boolean.TRUE, wasDeleted);
 		assertThat(myResourceModifiedMessagePersistenceSvc.findAllOrderedByCreatedTime()).hasSize(0);
 	}
 
@@ -243,7 +244,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 		boolean wasDeleted = transactionTemplate.execute(tx -> myResourceModifiedMessagePersistenceSvc.deleteByPK(nonExistentResourceWithPk));
 
 		// then
-		assertThat(wasDeleted).isEqualTo(Boolean.FALSE);
+		assertEquals(Boolean.FALSE, wasDeleted);
 	}
 
 	@Test
@@ -285,14 +286,14 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	private static void assertEquals(ResourceModifiedMessage theMsg, ResourceModifiedMessage theComparedTo){
-		assertThat(theMsg.getPayloadId()).isEqualTo(theComparedTo.getPayloadId());
-		assertThat(theMsg.getOperationType()).isEqualTo(theComparedTo.getOperationType());
-		assertThat(theMsg.getPayloadString()).isEqualTo(theComparedTo.getPayloadString());
-		assertThat(theMsg.getSubscriptionId()).isEqualTo(theComparedTo.getSubscriptionId());
-		assertThat(theMsg.getMediaType()).isEqualTo(theComparedTo.getMediaType());
-		assertThat(theMsg.getMessageKeyOrNull()).isEqualTo(theComparedTo.getMessageKeyOrNull());
-		assertThat(theMsg.getTransactionId()).isEqualTo(theComparedTo.getTransactionId());
-		assertThat(theMsg.getAttributes()).isEqualTo(theComparedTo.getAttributes());
+		assertEquals(theComparedTo.getPayloadId(), theMsg.getPayloadId());
+		assertEquals(theComparedTo.getOperationType(), theMsg.getOperationType());
+		assertEquals(theComparedTo.getPayloadString(), theMsg.getPayloadString());
+		assertEquals(theComparedTo.getSubscriptionId(), theMsg.getSubscriptionId());
+		assertEquals(theComparedTo.getMediaType(), theMsg.getMediaType());
+		assertEquals(theComparedTo.getMessageKeyOrNull(), theMsg.getMessageKeyOrNull());
+		assertEquals(theComparedTo.getTransactionId(), theMsg.getTransactionId());
+		assertEquals(theComparedTo.getAttributes(), theMsg.getAttributes());
 	}
 
 	private void maybeAddHeaderInterceptor(IGenericClient theClient, List<Header> theHeaders) {
@@ -335,7 +336,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 	}
 
 	private static void assertEquals(String theMsg, String theComparedTo){
-		assertThat(theMsg).isEqualTo(theComparedTo);
+		assertEquals(theComparedTo, theMsg);
 	}
 
 	private static String toJson(Object theRequest) {
@@ -359,7 +360,7 @@ public class MessageSubscriptionR4Test extends BaseSubscriptionsR4Test {
 			.map(IPersistedResourceModifiedMessage::getPersistedResourceModifiedMessagePk)
 			.collect(Collectors.toList());
 
-		assertThat(compareToPks).isEqualTo(fetchedPks);
+		assertEquals(fetchedPks, compareToPks);
 
 	}
 }

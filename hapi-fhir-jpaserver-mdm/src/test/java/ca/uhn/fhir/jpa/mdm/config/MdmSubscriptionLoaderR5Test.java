@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.config;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -79,10 +80,10 @@ class MdmSubscriptionLoaderR5Test {
 
         SubscriptionTopic subscriptionTopic = subscriptionTopicCaptor.getValue();
 		assertNotNull(subscriptionTopic);
-		assertThat(subscriptionTopic.getId()).isEqualTo("mdm-subscription-topic");
+		assertEquals("mdm-subscription-topic", subscriptionTopic.getId());
 		assertThat(subscriptionTopic.getResourceTrigger()).hasSize(1);
 		SubscriptionTopic.SubscriptionTopicResourceTriggerComponent triggerComponent = subscriptionTopic.getResourceTrigger().get(0);
-		assertThat(triggerComponent.getResource()).isEqualTo("Patient");
+		assertEquals("Patient", triggerComponent.getResource());
 
 		// verify Subscription
 		ArgumentCaptor<Subscription> subscriptionCaptor = ArgumentCaptor.forClass(Subscription.class);
@@ -90,6 +91,6 @@ class MdmSubscriptionLoaderR5Test {
 
         Subscription subscription = subscriptionCaptor.getValue();
 		assertNotNull(subscription);
-		assertThat(subscription.getId()).isEqualTo("mdm-subscription");
+		assertEquals("mdm-subscription", subscription.getId());
 	}
 }

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.i18n.Msg;
@@ -63,13 +64,13 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 			myToGoldenPatientId, myFromGoldenPatient, myRequestDetails);
 
 		assertThat(mergedSourcePatient.getName()).hasSize(myFromGoldenPatient.getName().size());
-		assertThat(mergedSourcePatient.getName().get(0).getNameAsSingleString()).isEqualTo(myFromGoldenPatient.getName().get(0).getNameAsSingleString());
+		assertEquals(myFromGoldenPatient.getName().get(0).getNameAsSingleString(), mergedSourcePatient.getName().get(0).getNameAsSingleString());
 		assertThat(mergedSourcePatient.getCommunication()).hasSize(myFromGoldenPatient.getCommunication().size());
 		assertThat(mergedSourcePatient.getExtension()).hasSize(myFromGoldenPatient.getExtension().size());
 
 		Patient toGoldenPatient = myPatientDao.read(myToGoldenPatient.getIdElement().toUnqualifiedVersionless());
 		assertThat(mergedSourcePatient.getName()).hasSize(toGoldenPatient.getName().size());
-		assertThat(mergedSourcePatient.getName().get(0).getNameAsSingleString()).isEqualTo(toGoldenPatient.getName().get(0).getNameAsSingleString());
+		assertEquals(toGoldenPatient.getName().get(0).getNameAsSingleString(), mergedSourcePatient.getName().get(0).getNameAsSingleString());
 	}
 
 
@@ -84,7 +85,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		assertTrue(MdmResourceUtil.isGoldenRecord(mergedSourcePatient));
 		assertFalse(MdmResourceUtil.isGoldenRecordRedirected(mergedSourcePatient));
 
-		assertThat(mergedSourcePatient.getIdElement()).isEqualTo(myToGoldenPatient.getIdElement());
+		assertEquals(myToGoldenPatient.getIdElement(), mergedSourcePatient.getIdElement());
 		assertThat(mergedSourcePatient, sameGoldenResourceAs(myToGoldenPatient));
 		assertThat(getAllRedirectedGoldenPatients()).hasSize(1);
 		assertThat(getAllGoldenPatients()).hasSize(1);
@@ -102,10 +103,10 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		assertThat(links).hasSize(1);
 
 		MdmLink link = links.get(0);
-		assertThat(myToGoldenPatient.getIdElement().toUnqualifiedVersionless().getIdPartAsLong()).isEqualTo(link.getSourcePid());
-		assertThat(myFromGoldenPatient.getIdElement().toUnqualifiedVersionless().getIdPartAsLong()).isEqualTo(link.getGoldenResourcePid());
-		assertThat(MdmMatchResultEnum.REDIRECT).isEqualTo(link.getMatchResult());
-		assertThat(MdmLinkSourceEnum.MANUAL).isEqualTo(link.getLinkSource());
+		assertEquals(link.getSourcePid(), myToGoldenPatient.getIdElement().toUnqualifiedVersionless().getIdPartAsLong());
+		assertEquals(link.getGoldenResourcePid(), myFromGoldenPatient.getIdElement().toUnqualifiedVersionless().getIdPartAsLong());
+		assertEquals(link.getMatchResult(), MdmMatchResultEnum.REDIRECT);
+		assertEquals(link.getLinkSource(), MdmLinkSourceEnum.MANUAL);
 	}
 
 	@Test
@@ -127,7 +128,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		assertTrue(MdmResourceUtil.isGoldenRecord(mergedSourcePatient));
 		assertFalse(MdmResourceUtil.isGoldenRecordRedirected(mergedSourcePatient));
 
-		assertThat(mergedSourcePatient.getIdElement()).isEqualTo(toGoldenPatient.getIdElement());
+		assertEquals(toGoldenPatient.getIdElement(), mergedSourcePatient.getIdElement());
 		assertThat(mergedSourcePatient, sameGoldenResourceAs(toGoldenPatient));
 		assertThat(getAllRedirectedGoldenPatients()).hasSize(1);
 		// 2 from the set-up and only one from this test should be golden resource
@@ -137,10 +138,10 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		assertThat(links).hasSize(1);
 
 		MdmLink link = links.get(0);
-		assertThat(toGoldenPatient.getIdElement().toUnqualifiedVersionless().getIdPartAsLong()).isEqualTo(link.getSourcePid());
-		assertThat(fromGoldenPatient.getIdElement().toUnqualifiedVersionless().getIdPartAsLong()).isEqualTo(link.getGoldenResourcePid());
-		assertThat(MdmMatchResultEnum.REDIRECT).isEqualTo(link.getMatchResult());
-		assertThat(MdmLinkSourceEnum.MANUAL).isEqualTo(link.getLinkSource());
+		assertEquals(link.getSourcePid(), toGoldenPatient.getIdElement().toUnqualifiedVersionless().getIdPartAsLong());
+		assertEquals(link.getGoldenResourcePid(), fromGoldenPatient.getIdElement().toUnqualifiedVersionless().getIdPartAsLong());
+		assertEquals(link.getMatchResult(), MdmMatchResultEnum.REDIRECT);
+		assertEquals(link.getLinkSource(), MdmLinkSourceEnum.MANUAL);
 	}
 
 	@Test
@@ -174,7 +175,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 			myToGoldenPatientId, // to
 			patient, myRequestDetails);
 
-		assertThat(mergedSourcePatient.getIdElement()).isEqualTo(myToGoldenPatient.getIdElement());
+		assertEquals(myToGoldenPatient.getIdElement(), mergedSourcePatient.getIdElement());
 		assertThat(mergedSourcePatient, sameGoldenResourceAs(myToGoldenPatient));
 		assertThat(getAllRedirectedGoldenPatients()).hasSize(1);
 		assertThat(getAllGoldenPatients()).hasSize(1);
@@ -187,10 +188,10 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 		assertThat(links).hasSize(1);
 
 		MdmLink link = links.get(0);
-		assertThat(myToGoldenPatient.getIdElement().toUnqualifiedVersionless().getIdPartAsLong()).isEqualTo(link.getSourcePid());
-		assertThat(myFromGoldenPatient.getIdElement().toUnqualifiedVersionless().getIdPartAsLong()).isEqualTo(link.getGoldenResourcePid());
-		assertThat(MdmMatchResultEnum.REDIRECT).isEqualTo(link.getMatchResult());
-		assertThat(MdmLinkSourceEnum.MANUAL).isEqualTo(link.getLinkSource());
+		assertEquals(link.getSourcePid(), myToGoldenPatient.getIdElement().toUnqualifiedVersionless().getIdPartAsLong());
+		assertEquals(link.getGoldenResourcePid(), myFromGoldenPatient.getIdElement().toUnqualifiedVersionless().getIdPartAsLong());
+		assertEquals(link.getMatchResult(), MdmMatchResultEnum.REDIRECT);
+		assertEquals(link.getLinkSource(), MdmLinkSourceEnum.MANUAL);
 	}
 
 	@Test
@@ -202,7 +203,7 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 			fail("");
 		} catch (InvalidRequestException e) {
 			String message = myMessageHelper.getMessageForFailedGoldenResourceLoad("fromGoldenResourceId", fromGoldenResourceId.getValue());
-			assertThat(Msg.code(1502) + message).isEqualTo(e.getMessage());
+			assertEquals(e.getMessage(), Msg.code(1502) + message);
 		}
 	}
 
@@ -212,19 +213,19 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 			myMdmProvider.mergeGoldenResources(null, null, null, myRequestDetails);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1494) + "fromGoldenResourceId cannot be null");
+			assertEquals(Msg.code(1494) + "fromGoldenResourceId cannot be null", e.getMessage());
 		}
 		try {
 			myMdmProvider.mergeGoldenResources(null, myToGoldenPatientId, null, myRequestDetails);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1494) + "fromGoldenResourceId cannot be null");
+			assertEquals(Msg.code(1494) + "fromGoldenResourceId cannot be null", e.getMessage());
 		}
 		try {
 			myMdmProvider.mergeGoldenResources(myFromGoldenPatientId, null, null, myRequestDetails);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1494) + "toGoldenResourceId cannot be null");
+			assertEquals(Msg.code(1494) + "toGoldenResourceId cannot be null", e.getMessage());
 		}
 	}
 
@@ -234,35 +235,35 @@ public class MdmProviderMergeGoldenResourcesR4Test extends BaseProviderR4Test {
 			myMdmProvider.mergeGoldenResources(new StringType("Patient/1"), new StringType("Patient/1"), null, myRequestDetails);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1493) + "fromGoldenResourceId must be different from toGoldenResourceId");
+			assertEquals(Msg.code(1493) + "fromGoldenResourceId must be different from toGoldenResourceId", e.getMessage());
 		}
 
 		try {
 			myMdmProvider.mergeGoldenResources(new StringType("Patient/abc"), myToGoldenPatientId, null, myRequestDetails);
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(2001) + "Resource Patient/abc is not known");
+			assertEquals(Msg.code(2001) + "Resource Patient/abc is not known", e.getMessage());
 		}
 
 		try {
 			myMdmProvider.mergeGoldenResources(new StringType("Patient/abc"), myToGoldenPatientId, null, myRequestDetails);
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(2001) + "Resource Patient/abc is not known");
+			assertEquals(Msg.code(2001) + "Resource Patient/abc is not known", e.getMessage());
 		}
 
 		try {
 			myMdmProvider.mergeGoldenResources(new StringType("Organization/abc"), myToGoldenPatientId, null, myRequestDetails);
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(2001) + "Resource Organization/abc is not known");
+			assertEquals(Msg.code(2001) + "Resource Organization/abc is not known", e.getMessage());
 		}
 
 		try {
 			myMdmProvider.mergeGoldenResources(myFromGoldenPatientId, new StringType("Patient/abc"), null, myRequestDetails);
 			fail("");
 		} catch (ResourceNotFoundException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(2001) + "Resource Patient/abc is not known");
+			assertEquals(Msg.code(2001) + "Resource Patient/abc is not known", e.getMessage());
 		}
 	}
 }

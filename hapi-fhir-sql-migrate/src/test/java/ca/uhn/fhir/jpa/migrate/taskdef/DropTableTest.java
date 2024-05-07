@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.MigrationResult;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -85,7 +86,7 @@ public class DropTableTest extends BaseTest {
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties()), (hasItems("SOMETABLE")));
 
 		MigrationResult result = getMigrator().migrate();
-		assertThat(result.changes).isEqualTo(0);
+		assertEquals(0, result.changes);
 		assertThat(result.executedStatements).hasSize(1);
 		assertThat(result.succeededTasks).hasSize(1);
 		assertThat(result.failedTasks).isEmpty();

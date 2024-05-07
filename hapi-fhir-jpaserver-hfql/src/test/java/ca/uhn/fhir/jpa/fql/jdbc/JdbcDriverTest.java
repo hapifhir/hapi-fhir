@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.fql.jdbc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
@@ -113,7 +114,7 @@ public class JdbcDriverTest {
 
 		String expectedAuthHeader = Constants.HEADER_AUTHORIZATION_VALPREFIX_BASIC + Base64Utils.encodeToString((SOME_USERNAME + ":" + SOME_PASSWORD).getBytes(StandardCharsets.UTF_8));
 		String actual = ourHeaderCaptureInterceptor.getCapturedHeaders().get(0).get(Constants.HEADER_AUTHORIZATION).get(0);
-		assertThat(actual).isEqualTo(expectedAuthHeader);
+		assertEquals(expectedAuthHeader, actual);
 	}
 
 	@Test
@@ -140,8 +141,8 @@ public class JdbcDriverTest {
 			jdbcTemplate.query(input, new ColumnMapRowMapper());
 			fail("");
 		} catch (UncategorizedSQLException e) {
-			assertThat(e.getCause().getClass()).isEqualTo(SQLException.class);
-			assertThat(e.getCause().getMessage()).isEqualTo(Msg.code(2395) + "this is an error!");
+			assertEquals(SQLException.class, e.getCause().getClass());
+			assertEquals(Msg.code(2395) + "this is an error!", e.getCause().getMessage());
 		}
 	}
 
@@ -181,27 +182,27 @@ public class JdbcDriverTest {
 
 		// Verify
 		assertTrue(resultSet.next());
-		assertThat(resultSet.getString("col.string")).isEqualTo("a-string");
-		assertThat(resultSet.getDate("col.date")).isEqualTo(new DateType("2023-02-02").getValue());
-		assertThat(resultSet.getBoolean("col.boolean")).isEqualTo(true);
-		assertThat(resultSet.getTime("col.time").toString()).isEqualTo("12:23:22");
-		assertThat(resultSet.getBigDecimal("col.decimal")).isEqualTo(new BigDecimal("100.123"));
-		assertThat(resultSet.getBigDecimal("col.decimal", 100)).isEqualTo(new BigDecimal("100.123"));
-		assertThat(resultSet.getFloat("col.decimal")).isEqualTo(100.123f);
-		assertThat(resultSet.getDouble("col.decimal")).isEqualTo(100.123d);
-		assertThat(resultSet.getInt("col.integer")).isEqualTo(123);
-		assertThat(resultSet.getLong("col.longint")).isEqualTo(987L);
-		assertThat(resultSet.getTimestamp("col.timestamp")).isEqualTo(new Timestamp(new DateTimeType("2023-02-12T10:01:02.234Z").getValue().getTime()));
+		assertEquals("a-string", resultSet.getString("col.string"));
+		assertEquals(new DateType("2023-02-02").getValue(), resultSet.getDate("col.date"));
+		assertEquals(true, resultSet.getBoolean("col.boolean"));
+		assertEquals("12:23:22", resultSet.getTime("col.time").toString());
+		assertEquals(new BigDecimal("100.123"), resultSet.getBigDecimal("col.decimal"));
+		assertEquals(new BigDecimal("100.123"), resultSet.getBigDecimal("col.decimal", 100));
+		assertEquals(100.123f, resultSet.getFloat("col.decimal"));
+		assertEquals(100.123d, resultSet.getDouble("col.decimal"));
+		assertEquals(123, resultSet.getInt("col.integer"));
+		assertEquals(987L, resultSet.getLong("col.longint"));
+		assertEquals(new Timestamp(new DateTimeType("2023-02-12T10:01:02.234Z").getValue().getTime()), resultSet.getTimestamp("col.timestamp"));
 
 		// Using getObject
-		assertThat(resultSet.getObject("col.string")).isEqualTo("a-string");
-		assertThat(resultSet.getObject("col.date")).isEqualTo(new DateType("2023-02-02").getValue());
-		assertThat(resultSet.getObject("col.boolean")).isEqualTo(true);
-		assertThat(resultSet.getObject("col.time").toString()).isEqualTo("12:23:22");
-		assertThat(resultSet.getObject("col.decimal")).isEqualTo(new BigDecimal("100.123"));
-		assertThat(resultSet.getObject("col.integer")).isEqualTo(123);
-		assertThat(resultSet.getObject("col.longint")).isEqualTo(987L);
-		assertThat(resultSet.getObject("col.timestamp")).isEqualTo(new Timestamp(new DateTimeType("2023-02-12T10:01:02.234Z").getValue().getTime()));
+		assertEquals("a-string", resultSet.getObject("col.string"));
+		assertEquals(new DateType("2023-02-02").getValue(), resultSet.getObject("col.date"));
+		assertEquals(true, resultSet.getObject("col.boolean"));
+		assertEquals("12:23:22", resultSet.getObject("col.time").toString());
+		assertEquals(new BigDecimal("100.123"), resultSet.getObject("col.decimal"));
+		assertEquals(123, resultSet.getObject("col.integer"));
+		assertEquals(987L, resultSet.getObject("col.longint"));
+		assertEquals(new Timestamp(new DateTimeType("2023-02-12T10:01:02.234Z").getValue().getTime()), resultSet.getObject("col.timestamp"));
 
 		assertThatExceptionOfType(SQLException.class).isThrownBy(() -> resultSet.getString(0));
 		assertThatExceptionOfType(SQLException.class).isThrownBy(() -> resultSet.getString(999));
@@ -237,15 +238,15 @@ public class JdbcDriverTest {
 
 		// Verify
 		assertTrue(resultSet.next());
-		assertThat(resultSet.getTime("col.time").toString()).isEqualTo("12:23:00");
+		assertEquals("12:23:00", resultSet.getTime("col.time").toString());
 		assertTrue(resultSet.next());
-		assertThat(resultSet.getTime("col.time").toString()).isEqualTo("12:23:10");
+		assertEquals("12:23:10", resultSet.getTime("col.time").toString());
 		assertTrue(resultSet.next());
-		assertThat(resultSet.getTime("col.time").toString()).isEqualTo("12:23:11");
+		assertEquals("12:23:11", resultSet.getTime("col.time").toString());
 		assertTrue(resultSet.next());
-		assertThat(resultSet.getTime("col.time").toString()).isEqualTo("12:23:12");
+		assertEquals("12:23:12", resultSet.getTime("col.time").toString());
 		assertTrue(resultSet.next());
-		assertThat(resultSet.getTime("col.time").toString()).isEqualTo("12:23:13");
+		assertEquals("12:23:13", resultSet.getTime("col.time").toString());
 		assertFalse(resultSet.next());
 
 		verify(myFqlExecutor, times(1)).executeInitialSearch(any(), any(), any());
@@ -268,8 +269,8 @@ public class JdbcDriverTest {
 		assertTrue(tables.isBeforeFirst());
 		assertTrue(tables.next());
 		assertFalse(tables.isBeforeFirst());
-		assertThat(tables.getString(1)).isEqualTo("Account");
-		assertThat(tables.getString("TABLE_NAME")).isEqualTo("Account");
+		assertEquals("Account", tables.getString(1));
+		assertEquals("Account", tables.getString("TABLE_NAME"));
 	}
 
 
@@ -292,18 +293,18 @@ public class JdbcDriverTest {
 
 		// Row 1
 		assertTrue(tables.next());
-		assertThat(tables.getString(1)).isEqualTo("foo");
-		assertThat(tables.getString("COLUMN_NAME")).isEqualTo("foo");
+		assertEquals("foo", tables.getString(1));
+		assertEquals("foo", tables.getString("COLUMN_NAME"));
 		assertFalse(tables.wasNull());
-		assertThat(tables.getInt(2)).isEqualTo(Types.VARCHAR);
-		assertThat(tables.getInt("DATA_TYPE")).isEqualTo(Types.VARCHAR);
+		assertEquals(Types.VARCHAR, tables.getInt(2));
+		assertEquals(Types.VARCHAR, tables.getInt("DATA_TYPE"));
 		assertFalse(tables.wasNull());
 		// Row 2
 		assertTrue(tables.next());
-		assertThat(tables.getString(1)).isEqualTo("bar");
-		assertThat(tables.getString("COLUMN_NAME")).isEqualTo("bar");
-		assertThat(tables.getInt(2)).isEqualTo(0);
-		assertThat(tables.getInt("DATA_TYPE")).isEqualTo(0);
+		assertEquals("bar", tables.getString(1));
+		assertEquals("bar", tables.getString("COLUMN_NAME"));
+		assertEquals(0, tables.getInt(2));
+		assertEquals(0, tables.getInt("DATA_TYPE"));
 		assertTrue(tables.wasNull());
 		// No more rows
 		assertFalse(tables.next());

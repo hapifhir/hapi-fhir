@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -152,7 +153,7 @@ public class FhirPathFilterInterceptorR4Test {
 		try (CloseableHttpResponse response = myHttpClient.execute(request)) {
 			String responseText = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
 			ourLog.info("Response:\n{}", responseText);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+			assertEquals(400, response.getStatusLine().getStatusCode());
 			assertThat(responseText).contains("left operand to * can only have 1 value, but has 8 values");
 		}
 
@@ -216,7 +217,7 @@ public class FhirPathFilterInterceptorR4Test {
 			assertNotNull(parameterComponent);
 			assertThat(parameterComponent.getPart()).hasSize(2);
 			Parameters.ParametersParameterComponent resultComponent = parameterComponent.getPart().get(1);
-			assertThat(resultComponent.getName()).isEqualTo("result");
+			assertEquals("result", resultComponent.getName());
 			assertThat(responseText).contains(expectedResult);
 		}
 

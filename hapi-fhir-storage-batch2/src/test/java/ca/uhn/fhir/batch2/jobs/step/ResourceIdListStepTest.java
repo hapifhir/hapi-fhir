@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.jobs.step;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -86,14 +87,14 @@ class ResourceIdListStepTest {
 
 		// Ensure that all chunks except the very last one are MAX_BATCH_OF_IDS in length
 		for (int i = 0; i < expectedBatchCount - 1; i++) {
-			assertThat(allDataChunks.get(i).size()).isEqualTo(ResourceIdListStep.MAX_BATCH_OF_IDS);
+			assertEquals(ResourceIdListStep.MAX_BATCH_OF_IDS, allDataChunks.get(i).size());
 		}
 
 		// The very last chunk should be whatever is left over (if there is a remainder):
 		int expectedLastBatchSize = theListSize % ResourceIdListStep.MAX_BATCH_OF_IDS;
 		expectedLastBatchSize = (expectedLastBatchSize == 0) ? ResourceIdListStep.MAX_BATCH_OF_IDS : expectedLastBatchSize;
 		if (!allDataChunks.isEmpty()) {
-			assertThat(allDataChunks.get(allDataChunks.size() - 1).size()).isEqualTo(expectedLastBatchSize);
+			assertEquals(expectedLastBatchSize, allDataChunks.get(allDataChunks.size() - 1).size());
 		}
 	}
 

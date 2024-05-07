@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -97,19 +98,19 @@ public class OperationClientR4Test {
 			.andSearchParameter("valtok", new TokenParam("sys2", "val2"))
 			.execute();
 		Parameters response = ourAnnClient.nonrepeating(new StringParam("str"), new TokenParam("sys", "val"));
-		assertThat(response.getParameter().get(0).getName()).isEqualTo("FOO");
+		assertEquals("FOO", response.getParameter().get(0).getName());
 
 		HttpPost value = (HttpPost) capt.getAllValues().get(0);
 		String requestBody = IOUtils.toString(value.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(value.getEntity().getContent());
 		ourLog.info(requestBody);
 		Parameters request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
-		assertThat(value.getURI().toASCIIString()).isEqualTo("http://foo/$nonrepeating");
+		assertEquals("http://foo/$nonrepeating", value.getURI().toASCIIString());
 		assertThat(request.getParameter()).hasSize(2);
-		assertThat(request.getParameter().get(0).getName()).isEqualTo("valstr");
-		assertThat(((StringType) request.getParameter().get(0).getValue()).getValue()).isEqualTo("str");
-		assertThat(request.getParameter().get(1).getName()).isEqualTo("valtok");
-		assertThat(((StringType) request.getParameter().get(1).getValue()).getValue()).isEqualTo("sys2|val2");
+		assertEquals("valstr", request.getParameter().get(0).getName());
+		assertEquals("str", ((StringType) request.getParameter().get(0).getValue()).getValue());
+		assertEquals("valtok", request.getParameter().get(1).getName());
+		assertEquals("sys2|val2", ((StringType) request.getParameter().get(1).getValue()).getValue());
 	}
 
 	@Test
@@ -123,10 +124,10 @@ public class OperationClientR4Test {
 			.useHttpGet()
 			.execute();
 		Parameters response = ourAnnClient.nonrepeating(new StringParam("str"), new TokenParam("sys", "val"));
-		assertThat(response.getParameter().get(0).getName()).isEqualTo("FOO");
+		assertEquals("FOO", response.getParameter().get(0).getName());
 
 		HttpGet value = (HttpGet) capt.getAllValues().get(0);
-		assertThat(value.getURI().toASCIIString()).isEqualTo("http://foo/$nonrepeating?valstr=str&valtok=sys2%7Cval2");
+		assertEquals("http://foo/$nonrepeating?valstr=str&valtok=sys2%7Cval2", value.getURI().toASCIIString());
 	}
 
 	@Test
@@ -141,10 +142,10 @@ public class OperationClientR4Test {
 			.useHttpGet()
 			.execute();
 		Parameters response = ourAnnClient.nonrepeating(new StringParam("str"), new TokenParam("sys", "val"));
-		assertThat(response.getParameter().get(0).getName()).isEqualTo("FOO");
+		assertEquals("FOO", response.getParameter().get(0).getName());
 
 		HttpGet value = (HttpGet) capt.getAllValues().get(0);
-		assertThat(value.getURI().toASCIIString()).isEqualTo("http://foo/$nonrepeating?valstr=str&valtok=sys2%7Cval2");
+		assertEquals("http://foo/$nonrepeating?valstr=str&valtok=sys2%7Cval2", value.getURI().toASCIIString());
 	}
 
 	@Test
@@ -157,26 +158,26 @@ public class OperationClientR4Test {
 				.withSearchParameter(Parameters.class, "valstr", new StringParam("str"))
 				.execute();
 			fail("");		} catch (IllegalArgumentException e) {
-			assertThat(e.getMessage()).isEqualTo("Can not invoke operation \"$nonrepeating\" on instance \"123\" - No resource type specified");
+			assertEquals("Can not invoke operation \"$nonrepeating\" on instance \"123\" - No resource type specified", e.getMessage());
 		}
 	}
 
 	@Test
 	public void testNonRepeatingUsingParameters() throws Exception {
 		Parameters response = ourAnnClient.nonrepeating(new StringParam("str"), new TokenParam("sys", "val"));
-		assertThat(response.getParameter().get(0).getName()).isEqualTo("FOO");
+		assertEquals("FOO", response.getParameter().get(0).getName());
 
 		HttpPost value = (HttpPost) capt.getAllValues().get(0);
 		String requestBody = IOUtils.toString(value.getEntity().getContent(), Charsets.UTF_8);
 		IOUtils.closeQuietly(value.getEntity().getContent());
 		ourLog.info(requestBody);
 		Parameters request = ourCtx.newJsonParser().parseResource(Parameters.class, requestBody);
-		assertThat(value.getURI().toASCIIString()).isEqualTo("http://foo/$nonrepeating");
+		assertEquals("http://foo/$nonrepeating", value.getURI().toASCIIString());
 		assertThat(request.getParameter()).hasSize(2);
-		assertThat(request.getParameter().get(0).getName()).isEqualTo("valstr");
-		assertThat(((StringType) request.getParameter().get(0).getValue()).getValue()).isEqualTo("str");
-		assertThat(request.getParameter().get(1).getName()).isEqualTo("valtok");
-		assertThat(((StringType) request.getParameter().get(1).getValue()).getValue()).isEqualTo("sys|val");
+		assertEquals("valstr", request.getParameter().get(0).getName());
+		assertEquals("str", ((StringType) request.getParameter().get(0).getValue()).getValue());
+		assertEquals("valtok", request.getParameter().get(1).getName());
+		assertEquals("sys|val", ((StringType) request.getParameter().get(1).getValue()).getValue());
 	}
 
 	public interface IOpClient extends IBasicClient {

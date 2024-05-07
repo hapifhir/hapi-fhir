@@ -282,7 +282,7 @@ public class FhirResourceDaoR4ContainedTest extends BaseJpaR4Test {
 			outcome.getResources(0, 1).get(0);
 			fail("");
 		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1214) + "Invalid parameter chain: subject.marital-status");
+			assertEquals(Msg.code(1214) + "Invalid parameter chain: subject.marital-status", e.getMessage());
 		}
 		
 	}

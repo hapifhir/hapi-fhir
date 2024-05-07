@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -366,7 +367,7 @@ class ITermReadSvcTest {
 
 				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
 
-				assertThat(retMaxConnectionSize).isEqualTo(1);
+				assertEquals(1, retMaxConnectionSize);
 			}
 
 			@Test
@@ -375,7 +376,7 @@ class ITermReadSvcTest {
 
 				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
 
-				assertThat(retMaxConnectionSize).isEqualTo(5);
+				assertEquals(5, retMaxConnectionSize);
 			}
 
 			@Test
@@ -384,7 +385,7 @@ class ITermReadSvcTest {
 
 				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
 
-				assertThat(retMaxConnectionSize).isEqualTo(MAX_MASS_INDEXER_OBJECT_LOADING_THREADS);
+				assertEquals(MAX_MASS_INDEXER_OBJECT_LOADING_THREADS, retMaxConnectionSize);
 			}
 
 		}
@@ -404,7 +405,7 @@ class ITermReadSvcTest {
 			void testDefaultWhenCantGetMaxConnections() {
 				int retMaxConnectionSize = myTermReadSvc.calculateObjectLoadingThreadNumber();
 
-				assertThat(retMaxConnectionSize).isEqualTo(DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS);
+				assertEquals(DEFAULT_MASS_INDEXER_OBJECT_LOADING_THREADS, retMaxConnectionSize);
 			}
 
 		}

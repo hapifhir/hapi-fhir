@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.openapi;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -114,7 +115,7 @@ public class OpenApiInterceptorTest {
 
 			org.hl7.fhir.r4.model.CapabilityStatement cs = myServer.getFhirClient().capabilities().ofType(org.hl7.fhir.r4.model.CapabilityStatement.class).execute();
 			org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent patientResource = findPatientResource(cs);
-			assertThat(patientResource.getDocumentation()).isEqualTo("This is **bolded** documentation");
+			assertEquals("This is **bolded** documentation", patientResource.getDocumentation());
 
 			String url = "http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/";
 			String resp = fetchSwaggerUi(url);
@@ -223,20 +224,20 @@ public class OpenApiInterceptorTest {
 			PathItem fooOpPath = parsed.getPaths().get("/$foo-op");
 			assertNull(fooOpPath.getGet());
 			assertNotNull(fooOpPath.getPost());
-			assertThat(fooOpPath.getPost().getDescription()).isEqualTo("Foo Op Description");
-			assertThat(fooOpPath.getPost().getSummary()).isEqualTo("Foo Op Short");
+			assertEquals("Foo Op Description", fooOpPath.getPost().getDescription());
+			assertEquals("Foo Op Short", fooOpPath.getPost().getSummary());
 
 			PathItem lastNPath = parsed.getPaths().get("/Observation/$lastn");
 			assertNotNull(lastNPath.getPost());
-			assertThat(lastNPath.getPost().getDescription()).isEqualTo("LastN Description");
-			assertThat(lastNPath.getPost().getSummary()).isEqualTo("LastN Short");
+			assertEquals("LastN Description", lastNPath.getPost().getDescription());
+			assertEquals("LastN Short", lastNPath.getPost().getSummary());
 			assertNull(lastNPath.getPost().getParameters());
 			assertNotNull(lastNPath.getPost().getRequestBody());
 			assertNotNull(lastNPath.getGet());
-			assertThat(lastNPath.getGet().getDescription()).isEqualTo("LastN Description");
-			assertThat(lastNPath.getGet().getSummary()).isEqualTo("LastN Short");
+			assertEquals("LastN Description", lastNPath.getGet().getDescription());
+			assertEquals("LastN Short", lastNPath.getGet().getSummary());
 			assertThat(lastNPath.getGet().getParameters()).hasSize(4);
-			assertThat(lastNPath.getGet().getParameters().get(0).getDescription()).isEqualTo("Subject description");
+			assertEquals("Subject description", lastNPath.getGet().getParameters().get(0).getDescription());
 		}
 
 		@Test
@@ -247,7 +248,7 @@ public class OpenApiInterceptorTest {
 
 			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/");
 			try (CloseableHttpResponse response = myClient.execute(get)) {
-				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+				assertEquals(400, response.getStatusLine().getStatusCode());
 			}
 
 			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/");
@@ -256,20 +257,20 @@ public class OpenApiInterceptorTest {
 				String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
 				ourLog.info("Response: {}", response);
 				ourLog.info("Response: {}", responseString);
-				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+				assertEquals(200, response.getStatusLine().getStatusCode());
 				assertThat(responseString).contains("<title>Swagger UI</title>");
 			}
 
 			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/?foo=foo");
 			get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML);
 			try (CloseableHttpResponse response = myClient.execute(get)) {
-				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+				assertEquals(400, response.getStatusLine().getStatusCode());
 			}
 
 			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir?foo=foo");
 			get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML);
 			try (CloseableHttpResponse response = myClient.execute(get)) {
-				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
+				assertEquals(400, response.getStatusLine().getStatusCode());
 			}
 
 		}
@@ -316,7 +317,7 @@ public class OpenApiInterceptorTest {
 				font-size: 1.1em;
 				}
 				""";
-			assertThat(removeCtrlR(resp)).isEqualTo(removeCtrlR(expected));
+			assertEquals(removeCtrlR(expected), removeCtrlR(resp));
 		}
 
 		protected String removeCtrlR(String source) {
@@ -349,9 +350,9 @@ public class OpenApiInterceptorTest {
 			String url2 = interceptor.removeTrailingSlash("http://localhost:8000/");
 			String url3 = interceptor.removeTrailingSlash("http://localhost:8000//");
 			String expect = "http://localhost:8000";
-			assertThat(url1).isEqualTo(expect);
-			assertThat(url2).isEqualTo(expect);
-			assertThat(url3).isEqualTo(expect);
+			assertEquals(expect, url1);
+			assertEquals(expect, url2);
+			assertEquals(expect, url3);
 		}
 
 		@Test
@@ -368,7 +369,7 @@ public class OpenApiInterceptorTest {
 
 			HttpGet get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/oauth2-redirect.html");
 			try (CloseableHttpResponse response = myClient.execute(get)) {
-				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(200);
+				assertEquals(200, response.getStatusLine().getStatusCode());
 			}
 		}
 

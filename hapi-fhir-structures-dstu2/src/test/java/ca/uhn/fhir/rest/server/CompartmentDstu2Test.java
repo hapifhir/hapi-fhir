@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.ResourceReferenceDt;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
@@ -65,9 +66,9 @@ public class CompartmentDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
-		assertThat(ourLastMethod).isEqualTo("read");
-		assertThat(ourLastId.getResourceType()).isEqualTo("Patient");
-		assertThat(ourLastId.getIdPart()).isEqualTo("123");
+		assertEquals("read", ourLastMethod);
+		assertEquals("Patient", ourLastId.getResourceType());
+		assertEquals("123", ourLastId.getIdPart());
 		assertThat(responseContent).startsWith("<Patient");
 	}
 
@@ -78,9 +79,9 @@ public class CompartmentDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
-		assertThat(ourLastMethod).isEqualTo("searchEncounterCompartment");
-		assertThat(ourLastId.getResourceType()).isEqualTo("Patient");
-		assertThat(ourLastId.getIdPart()).isEqualTo("123");
+		assertEquals("searchEncounterCompartment", ourLastMethod);
+		assertEquals("Patient", ourLastId.getResourceType());
+		assertEquals("123", ourLastId.getIdPart());
 		assertThat(responseContent).startsWith("<Bundle");
 		assertThat(responseContent).contains("<Encounter");
 	}
@@ -92,9 +93,9 @@ public class CompartmentDstu2Test {
 		String responseContent = IOUtils.toString(status.getEntity().getContent());
 		IOUtils.closeQuietly(status.getEntity().getContent());
 		ourLog.info("Response was:\n{}", responseContent);
-		assertThat(ourLastMethod).isEqualTo("searchObservationCompartment");
-		assertThat(ourLastId.getResourceType()).isEqualTo("Patient");
-		assertThat(ourLastId.getIdPart()).isEqualTo("123");
+		assertEquals("searchObservationCompartment", ourLastMethod);
+		assertEquals("Patient", ourLastId.getResourceType());
+		assertEquals("123", ourLastId.getIdPart());
 		assertThat(responseContent).startsWith("<Bundle");
 		assertThat(responseContent).contains("<Observation");
 	}

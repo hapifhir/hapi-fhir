@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
@@ -125,10 +126,10 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
 		//Ensure each entry has a URL.
 
-		assertThat(bundle.getType()).isEqualTo(Bundle.BundleType.DOCUMENT);
+		assertEquals(Bundle.BundleType.DOCUMENT, bundle.getType());
 		bundle.getEntry().stream()
 				.forEach(entry -> {
-			assertThat(entry.getFullUrl()).isEqualTo(entry.getResource().getIdElement().toVersionless().toString());
+			assertEquals(entry.getResource().getIdElement().toVersionless().toString(), entry.getFullUrl());
 				});
 		assertNull(bundle.getLink("next"));
 

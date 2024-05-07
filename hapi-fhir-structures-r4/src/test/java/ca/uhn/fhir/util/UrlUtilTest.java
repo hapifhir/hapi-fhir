@@ -27,36 +27,36 @@ public class UrlUtilTest {
 
 	@Test
 	public void testNormalizeCanonicalUrl() {
-		assertThat(UrlUtil.normalizeCanonicalUrlForComparison("http://foo/")).isEqualTo("http://foo");
-		assertThat(UrlUtil.normalizeCanonicalUrlForComparison("http://foo")).isEqualTo("http://foo");
-		assertThat(UrlUtil.normalizeCanonicalUrlForComparison("http://foo|1.23")).isEqualTo("http://foo");
-		assertThat(UrlUtil.normalizeCanonicalUrlForComparison("http://foo|1.23#333")).isEqualTo("http://foo");
-		assertThat(UrlUtil.normalizeCanonicalUrlForComparison("abc")).isEqualTo("abc");
-		assertThat(UrlUtil.normalizeCanonicalUrlForComparison("abc/")).isEqualTo("abc");
+		assertEquals("http://foo", UrlUtil.normalizeCanonicalUrlForComparison("http://foo/"));
+		assertEquals("http://foo", UrlUtil.normalizeCanonicalUrlForComparison("http://foo"));
+		assertEquals("http://foo", UrlUtil.normalizeCanonicalUrlForComparison("http://foo|1.23"));
+		assertEquals("http://foo", UrlUtil.normalizeCanonicalUrlForComparison("http://foo|1.23#333"));
+		assertEquals("abc", UrlUtil.normalizeCanonicalUrlForComparison("abc"));
+		assertEquals("abc", UrlUtil.normalizeCanonicalUrlForComparison("abc/"));
 	}
 
 	@Test
 	public void testConstructAbsoluteUrl() {
-		assertThat(UrlUtil.constructAbsoluteUrl(null, "http://foo/bar/baz")).isEqualTo("http://foo/bar/baz");
-		assertThat(UrlUtil.constructAbsoluteUrl("http://foo/bar/", "baz")).isEqualTo("http://foo/bar/baz");
-		assertThat(UrlUtil.constructAbsoluteUrl("http://foo/bar/", "baz/")).isEqualTo("http://foo/bar/baz/");
-		assertThat(UrlUtil.constructAbsoluteUrl("http://foo/bar/", "./baz/")).isEqualTo("http://foo/bar/baz/");
+		assertEquals("http://foo/bar/baz", UrlUtil.constructAbsoluteUrl(null, "http://foo/bar/baz"));
+		assertEquals("http://foo/bar/baz", UrlUtil.constructAbsoluteUrl("http://foo/bar/", "baz"));
+		assertEquals("http://foo/bar/baz/", UrlUtil.constructAbsoluteUrl("http://foo/bar/", "baz/"));
+		assertEquals("http://foo/bar/baz/", UrlUtil.constructAbsoluteUrl("http://foo/bar/", "./baz/"));
 
-		assertThat(UrlUtil.constructAbsoluteUrl("http://foo/bar/", "../baz/")).isEqualTo("http://foo/baz/");
-		assertThat(UrlUtil.constructAbsoluteUrl("http://foo/bar/", "/baz/")).isEqualTo("http://foo/baz/");
+		assertEquals("http://foo/baz/", UrlUtil.constructAbsoluteUrl("http://foo/bar/", "../baz/"));
+		assertEquals("http://foo/baz/", UrlUtil.constructAbsoluteUrl("http://foo/bar/", "/baz/"));
 	}
 
 	@Test
 	public void testConstructRelativeUrl() {
-		assertThat(UrlUtil.constructRelativeUrl("http://boo/far/faz", "http://foo/bar/baz")).isEqualTo("http://foo/bar/baz");
-		assertThat(UrlUtil.constructRelativeUrl("http://foo/far/faz", "http://foo/bar/baz")).isEqualTo("http://foo/bar/baz");
-		assertThat(UrlUtil.constructRelativeUrl("http://foo/bar/boo", "http://foo/bar/baz")).isEqualTo("baz");
+		assertEquals("http://foo/bar/baz", UrlUtil.constructRelativeUrl("http://boo/far/faz", "http://foo/bar/baz"));
+		assertEquals("http://foo/bar/baz", UrlUtil.constructRelativeUrl("http://foo/far/faz", "http://foo/bar/baz"));
+		assertEquals("baz", UrlUtil.constructRelativeUrl("http://foo/bar/boo", "http://foo/bar/baz"));
 	}
 
 	@Test
 	public void testEscape() {
-		assertThat(UrlUtil.escapeUrlParam("A B")).isEqualTo("A%20B");
-		assertThat(UrlUtil.escapeUrlParam("A+B")).isEqualTo("A%2BB");
+		assertEquals("A%20B", UrlUtil.escapeUrlParam("A B"));
+		assertEquals("A%2BB", UrlUtil.escapeUrlParam("A+B"));
 	}
 
 	@Test
@@ -92,27 +92,27 @@ public class UrlUtilTest {
 
 	@Test
 	public void testParseUrl() {
-		assertThat(UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde").getResourceType()).isEqualTo("ConceptMap");
-		assertThat(UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde").getResourceType()).isEqualTo("ConceptMap");
-		assertThat(UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde").getResourceId()).isEqualTo("ussgfht-loincde");
+		assertEquals("ConceptMap", UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde").getResourceType());
+		assertEquals("ConceptMap", UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde").getResourceType());
+		assertEquals("ussgfht-loincde", UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde").getResourceId());
 		assertNull(UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde?").getParams());
-		assertThat(UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde?a=b").getParams()).isEqualTo("a=b");
+		assertEquals("a=b", UrlUtil.parseUrl("http://hl7.org/fhir/ConceptMap/ussgfht-loincde?a=b").getParams());
 
-		assertThat(UrlUtil.parseUrl("ConceptMap/ussgfht-loincde?a=b").getParams()).isEqualTo("a=b");
-		assertThat(UrlUtil.parseUrl("/ConceptMap?a=b").getParams()).isEqualTo("a=b");
-		assertThat(UrlUtil.parseUrl("/ConceptMap/ussgfht-loincde?a=b").getParams()).isEqualTo("a=b");
+		assertEquals("a=b", UrlUtil.parseUrl("ConceptMap/ussgfht-loincde?a=b").getParams());
+		assertEquals("a=b", UrlUtil.parseUrl("/ConceptMap?a=b").getParams());
+		assertEquals("a=b", UrlUtil.parseUrl("/ConceptMap/ussgfht-loincde?a=b").getParams());
 
 	}
 
 	@Test
 	public void testSanitize() {
-		assertThat(UrlUtil.sanitizeUrlPart(" ' ")).isEqualTo(" &apos; ");
-		assertThat(UrlUtil.sanitizeUrlPart(" < ")).isEqualTo(" &lt; ");
-		assertThat(UrlUtil.sanitizeUrlPart(" > ")).isEqualTo(" &gt; ");
-		assertThat(UrlUtil.sanitizeUrlPart(" \" ")).isEqualTo(" &quot; ");
-		assertThat(UrlUtil.sanitizeUrlPart(" \n ")).isEqualTo(" &#10; ");
-		assertThat(UrlUtil.sanitizeUrlPart(" \r ")).isEqualTo(" &#13; ");
-		assertThat(UrlUtil.sanitizeUrlPart(" \0 ")).isEqualTo("  ");
+		assertEquals(" &apos; ", UrlUtil.sanitizeUrlPart(" ' "));
+		assertEquals(" &lt; ", UrlUtil.sanitizeUrlPart(" < "));
+		assertEquals(" &gt; ", UrlUtil.sanitizeUrlPart(" > "));
+		assertEquals(" &quot; ", UrlUtil.sanitizeUrlPart(" \" "));
+		assertEquals(" &#10; ", UrlUtil.sanitizeUrlPart(" \n "));
+		assertEquals(" &#13; ", UrlUtil.sanitizeUrlPart(" \r "));
+		assertEquals("  ", UrlUtil.sanitizeUrlPart(" \0 "));
 	}
 
 	@Test
@@ -165,7 +165,7 @@ public class UrlUtilTest {
 		if (theExpected.equals("null")) {
 			assertNull(actual);
 		} else {
-			assertThat(actual).isEqualTo(theExpected);
+			assertEquals(theExpected, actual);
 		}
 	}
 
@@ -196,7 +196,7 @@ public class UrlUtilTest {
 		try {
 			UrlUtil.getAboveUriCandidates(theUri);
 			fail("");		} catch (InvalidRequestException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(2419) + "Provided URI is not valid: " + theUri);
+			assertEquals(Msg.code(2419) + "Provided URI is not valid: " + theUri, e.getMessage());
 		}
 	}
 }

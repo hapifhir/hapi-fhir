@@ -1,5 +1,6 @@
 package ca.uhn.fhir.validation;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,8 +31,8 @@ class FhirValidatorTest {
 
 		// validate
 		assertThat(resultMessages).hasSize(1);
-		assertThat(resultMessages.get(0).getMessage()).isEqualTo(MESSAGE);
-		assertThat(resultMessages.get(0).getLocationString()).isEqualTo(PREFIX + ".name.first");
+		assertEquals(MESSAGE, resultMessages.get(0).getMessage());
+		assertEquals(PREFIX + ".name.first", resultMessages.get(0).getLocationString());
 	}
 
 	@Test
@@ -44,8 +45,8 @@ class FhirValidatorTest {
 
 		// validate
 		assertThat(resultMessages).hasSize(1);
-		assertThat(resultMessages.get(0).getMessage()).isEqualTo(MESSAGE);
-		assertThat(resultMessages.get(0).getLocationString()).isEqualTo(PREFIX + ".name");
+		assertEquals(MESSAGE, resultMessages.get(0).getMessage());
+		assertEquals(PREFIX + ".name", resultMessages.get(0).getLocationString());
 	}
 
 	@Test
@@ -58,8 +59,8 @@ class FhirValidatorTest {
 
 		// validate
 		assertThat(resultMessages).hasSize(1);
-		assertThat(resultMessages.get(0).getMessage()).isEqualTo(MESSAGE);
-		assertThat(resultMessages.get(0).getLocationString()).isEqualTo(PREFIX);
+		assertEquals(MESSAGE, resultMessages.get(0).getMessage());
+		assertEquals(PREFIX, resultMessages.get(0).getLocationString());
 	}
 
 	@Test
@@ -72,8 +73,8 @@ class FhirValidatorTest {
 
 		// validate
 		assertThat(resultMessages).hasSize(1);
-		assertThat(resultMessages.get(0).getMessage()).isEqualTo(MESSAGE);
-		assertThat(resultMessages.get(0).getLocationString()).isEqualTo(PREFIX + ".patient");
+		assertEquals(MESSAGE, resultMessages.get(0).getMessage());
+		assertEquals(PREFIX + ".patient", resultMessages.get(0).getLocationString());
 	}
 
 	private List<FhirValidator.ConcurrentValidationTask> buildTasks(String theLocation) {

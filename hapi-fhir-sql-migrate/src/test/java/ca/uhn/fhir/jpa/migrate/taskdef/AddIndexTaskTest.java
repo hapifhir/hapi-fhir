@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import org.junit.jupiter.api.BeforeEach;
@@ -138,12 +139,12 @@ public class AddIndexTaskTest extends BaseTest {
 				// MSSQL supports include clause
 				myTask.setDriverType(DriverTypeEnum.MSSQL_2012);
 				mySql = myTask.generateSql();
-				assertThat(mySql).isEqualTo("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) INCLUDE (FOO1, FOO2)");
+				assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) INCLUDE (FOO1, FOO2)", mySql);
 
 				// Oracle does not support include clause
 				myTask.setDriverType(DriverTypeEnum.ORACLE_12C);
 				mySql = myTask.generateSql();
-				assertThat(mySql).isEqualTo("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)");
+				assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 			}
 
 		}
@@ -169,7 +170,7 @@ public class AddIndexTaskTest extends BaseTest {
 			public void noAffectOff(DriverTypeEnum theDriver) {
 				myTask.setDriverType(theDriver);
 				mySql = myTask.generateSql();
-				assertThat(mySql).isEqualTo("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)");
+				assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 			}
 
 			@ParameterizedTest(name = "{index}: {0}")
@@ -183,17 +184,17 @@ public class AddIndexTaskTest extends BaseTest {
 				switch (theDriver) {
 					case POSTGRES_9_4:
 					case COCKROACHDB_21_1:
-						assertThat(mySql).isEqualTo("create index CONCURRENTLY IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)");
+						assertEquals("create index CONCURRENTLY IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 						break;
 					case ORACLE_12C:
-						assertThat(mySql).isEqualTo("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) ONLINE DEFERRED INVALIDATION");
+						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) ONLINE DEFERRED INVALIDATION", mySql);
 						break;
 					case MSSQL_2012:
-						assertThat(mySql).isEqualTo("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) WITH (ONLINE = ON)");
+						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) WITH (ONLINE = ON)", mySql);
 						break;
 					default:
 						// unsupported is ok.  But it means we lock the table for a bit.
-						assertThat(mySql).isEqualTo("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)");
+						assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 						break;
 				}
 			}
@@ -208,9 +209,9 @@ public class AddIndexTaskTest extends BaseTest {
 
 				mySql = myTask.generateSql();
 				if (theSupportedFlag) {
-					assertThat(mySql).isEqualTo("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) WITH (ONLINE = ON)");
+					assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) WITH (ONLINE = ON)", mySql);
 				} else {
-					assertThat(mySql).isEqualTo("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)");
+					assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 				}
 			}
 
@@ -224,9 +225,9 @@ public class AddIndexTaskTest extends BaseTest {
 
 				mySql = myTask.generateSql();
 				if (theSupportedFlag) {
-					assertThat(mySql).isEqualTo("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) ONLINE DEFERRED INVALIDATION");
+					assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL) ONLINE DEFERRED INVALIDATION", mySql);
 				} else {
-					assertThat(mySql).isEqualTo("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)");
+					assertEquals("create index IDX_ANINDEX on SOMETABLE(PID, TEXTCOL)", mySql);
 				}
 			}
 		}

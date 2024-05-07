@@ -1,5 +1,6 @@
 package ca.uhn.fhir.context;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Patient;
@@ -21,7 +22,7 @@ public class BaseRuntimeElementDefinitionTest {
 		try {
 			def.newInstance(123);
 			fail("");		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1696) + "Failed to instantiate type:org.hl7.fhir.r4.model.StringType");
+			assertEquals(Msg.code(1696) + "Failed to instantiate type:org.hl7.fhir.r4.model.StringType", e.getMessage());
 		}
 	}
 
@@ -32,14 +33,14 @@ public class BaseRuntimeElementDefinitionTest {
 		patient.addName().setFamily("A2");
 
 		assertThat(patient.getName()).hasSize(2);
-		assertThat(patient.getName().get(0).getFamily()).isEqualTo("A1");
+		assertEquals("A1", patient.getName().get(0).getFamily());
 		RuntimeResourceDefinition def = ourFhirContext.getResourceDefinition(patient);
 		BaseRuntimeChildDefinition child = def.getChildByName("name");
 		BaseRuntimeChildDefinition.IMutator mutator = child.getMutator();
 
 		mutator.remove(patient, 0);
 		assertThat(patient.getName()).hasSize(1);
-		assertThat(patient.getName().get(0).getFamily()).isEqualTo("A2");
+		assertEquals("A2", patient.getName().get(0).getFamily());
 	}
 
 	@Test
@@ -53,7 +54,7 @@ public class BaseRuntimeElementDefinitionTest {
 		try {
 			mutator.remove(patient, 0);
 			fail("");		} catch (UnsupportedOperationException e) {
-			assertThat(e.getMessage()).isEqualTo("HAPI-2142: Remove by index can only be called on a list-valued field.  'gender' is a single-valued field.");
+			assertEquals("HAPI-2142: Remove by index can only be called on a list-valued field.  'gender' is a single-valued field.", e.getMessage());
 		}
 	}
 }

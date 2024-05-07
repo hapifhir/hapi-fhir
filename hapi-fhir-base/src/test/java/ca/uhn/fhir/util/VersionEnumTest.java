@@ -1,5 +1,6 @@
 package ca.uhn.fhir.util;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
@@ -22,7 +23,7 @@ public class VersionEnumTest {
 		version = version.replace("-SNAPSHOT", "");
 
 		String[] parts = version.split("\\.");
-		assertThat(parts.length).isEqualTo(3);
+		assertEquals(3, parts.length);
 		int major = Integer.parseInt(parts[0]);
 		int minor = Integer.parseInt(parts[1]);
 		int patch = Integer.parseInt(parts[2]);

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.mdm.svc;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -176,7 +177,7 @@ class MdmLinkExpandSvcTest {
 	@ParameterizedTest
 	@MethodSource("partitionsAndTuples")
 	void flattenTuple(RequestPartitionId theRequestPartitionId, MdmPidTuple<JpaPid> theTuple, Set<JpaPid> theExpectedResourceIds) {
-		assertThat(MdmLinkExpandSvc.flattenTuple(theRequestPartitionId, theTuple)).isEqualTo(theExpectedResourceIds);
+		assertEquals(theExpectedResourceIds, MdmLinkExpandSvc.flattenTuple(theRequestPartitionId, theTuple));
 	}
 
 	@Nonnull

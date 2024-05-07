@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
@@ -17,7 +18,7 @@ class TokenParamModifierTest {
 			TokenParamModifier.NOT_IN
 		);
 
-		assertThat(theTokenParamModifier.isNegative()).isEqualTo(negativeSet.contains(theTokenParamModifier));
+		assertEquals(negativeSet.contains(theTokenParamModifier), theTokenParamModifier.isNegative());
 	}
 
 }

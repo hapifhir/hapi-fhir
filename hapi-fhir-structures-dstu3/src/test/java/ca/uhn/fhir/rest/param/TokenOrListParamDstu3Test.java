@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.param;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.util.TestUtil;
@@ -21,8 +22,8 @@ public class TokenOrListParamDstu3Test {
 		params.setValuesAsQueryTokens(ourCtx, null, QualifiedParamList.singleton("system|code-include-but-not-end-with-comma\\,suffix"));
 
 		assertThat(params.getListAsCodings()).hasSize(1);
-		assertThat(params.getListAsCodings().get(0).getSystemElement().getValue()).isEqualTo("system");
-		assertThat(params.getListAsCodings().get(0).getCodeElement().getValue()).isEqualTo("code-include-but-not-end-with-comma,suffix");
+		assertEquals("system", params.getListAsCodings().get(0).getSystemElement().getValue());
+		assertEquals("code-include-but-not-end-with-comma,suffix", params.getListAsCodings().get(0).getCodeElement().getValue());
 	}
 
 	@AfterAll

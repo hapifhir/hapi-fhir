@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.client;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -64,11 +65,11 @@ public class BinaryClientTest {
 		IClient client = mtCtx.newRestfulClient(IClient.class, "http://foo");
 		Binary resp = client.read(new IdType("http://foo/Patient/123"));
 
-		assertThat(capt.getValue().getClass()).isEqualTo(HttpGet.class);
+		assertEquals(HttpGet.class, capt.getValue().getClass());
 		HttpGet get = (HttpGet) capt.getValue();
-		assertThat(get.getURI().toString()).isEqualTo("http://foo/Binary/123");
+		assertEquals("http://foo/Binary/123", get.getURI().toString());
 
-		assertThat(resp.getContentType()).isEqualTo("foo/bar");
+		assertEquals("foo/bar", resp.getContentType());
 		assertThat(resp.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 	}
 
@@ -87,11 +88,11 @@ public class BinaryClientTest {
 		IClient client = mtCtx.newRestfulClient(IClient.class, "http://foo");
 		client.create(res);
 
-		assertThat(capt.getValue().getClass()).isEqualTo(HttpPost.class);
+		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
-		assertThat(post.getURI().toString()).isEqualTo("http://foo/Binary");
+		assertEquals("http://foo/Binary", post.getURI().toString());
 
-		assertThat(capt.getValue().getFirstHeader("Content-Type").getValue()).isEqualTo("text/plain");
+		assertEquals("text/plain", capt.getValue().getFirstHeader("Content-Type").getValue());
 		assertThat(IOUtils.toByteArray(post.getEntity().getContent())).containsExactly(new byte[]{1, 2, 3, 4});
 
 	}
@@ -110,12 +111,12 @@ public class BinaryClientTest {
 		IClient client = mtCtx.newRestfulClient(IClient.class, "http://foo");
 		client.create(res);
 
-		assertThat(capt.getValue().getClass()).isEqualTo(HttpPost.class);
+		assertEquals(HttpPost.class, capt.getValue().getClass());
 		HttpPost post = (HttpPost) capt.getValue();
-		assertThat(post.getURI().toString()).isEqualTo("http://foo/Binary");
+		assertEquals("http://foo/Binary", post.getURI().toString());
 
 		assertThat(capt.getValue().getFirstHeader("Content-Type").getValue()).contains(Constants.CT_FHIR_JSON_NEW);
-		assertThat(IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8)).isEqualTo("{\"resourceType\":\"Binary\",\"contentType\":\"image/png\"}");
+		assertEquals("{\"resourceType\":\"Binary\",\"contentType\":\"image/png\"}", IOUtils.toString(post.getEntity().getContent(), Charsets.UTF_8));
 
 	}
 

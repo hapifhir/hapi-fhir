@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -51,7 +52,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(req);
 		try {
 			ourLog.info(status.toString());
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(405);
+			assertEquals(405, status.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -64,7 +65,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		assertNull(status.getEntity());	
  		ourLog.info(status.toString());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(404);
+		assertEquals(404, status.getStatusLine().getStatusCode());
 		assertThat(status.getFirstHeader("x-powered-by").getValue()).contains("HAPI");	
 	}
 	
@@ -75,7 +76,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		assertNull(status.getEntity());	
  		ourLog.info(status.toString());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 		assertThat(status.getFirstHeader("x-powered-by").getValue()).contains("HAPI");	
 	}
 	
@@ -92,7 +93,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(req);
 		try {
 			ourLog.info(status.toString());
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(405);
+			assertEquals(405, status.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -111,7 +112,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		CloseableHttpResponse status = ourClient.execute(req);
 		try {
 			ourLog.info(status.toString());
-			assertThat(status.getStatusLine().getStatusCode()).isEqualTo(501);
+			assertEquals(501, status.getStatusLine().getStatusCode());
 		} finally {
 			IOUtils.closeQuietly(status.getEntity().getContent());
 		}
@@ -124,7 +125,7 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		HttpResponse status = ourClient.execute(httpGet);
 		IOUtils.closeQuietly(status.getEntity().getContent());
 
-		assertThat(status.getStatusLine().getStatusCode()).isEqualTo(200);
+		assertEquals(200, status.getStatusLine().getStatusCode());
 	}
 	
 	@AfterAll

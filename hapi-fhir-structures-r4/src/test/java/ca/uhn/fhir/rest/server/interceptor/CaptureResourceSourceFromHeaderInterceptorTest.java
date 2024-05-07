@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
@@ -54,7 +55,7 @@ public class CaptureResourceSourceFromHeaderInterceptorTest {
 		ourServerRule.getFhirClient().create().resource(resource).execute();
 
 		Patient stored = myPatientProviderRule.getStoredResources().get(0);
-		assertThat(stored.getMeta().getSource()).isEqualTo("http://source");
+		assertEquals("http://source", stored.getMeta().getSource());
 	}
 
 	@Test
@@ -70,7 +71,7 @@ public class CaptureResourceSourceFromHeaderInterceptorTest {
 			.execute();
 
 		Patient stored = myPatientProviderRule.getStoredResources().get(0);
-		assertThat(stored.getMeta().getSource()).isEqualTo("http://header");
+		assertEquals("http://header", stored.getMeta().getSource());
 	}
 
 	@Test
@@ -87,7 +88,7 @@ public class CaptureResourceSourceFromHeaderInterceptorTest {
 			.execute();
 
 		Patient stored = myPatientProviderRule.getStoredResources().get(0);
-		assertThat(stored.getMeta().getSource()).isEqualTo("http://header");
+		assertEquals("http://header", stored.getMeta().getSource());
 	}
 
 	@Test

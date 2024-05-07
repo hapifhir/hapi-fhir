@@ -82,7 +82,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			});
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(838) + "ConceptMap[url='http://example.com/my_concept_map'] contains at least one group without a value in ConceptMap.group.source");
+			assertEquals(Msg.code(838) + "ConceptMap[url='http://example.com/my_concept_map'] contains at least one group without a value in ConceptMap.group.source", e.getMessage());
 		}
 
 	}
@@ -107,7 +107,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			});
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(839) + "ConceptMap[url='http://example.com/my_concept_map'] contains at least one group without a value in ConceptMap.group.target");
+			assertEquals(Msg.code(839) + "ConceptMap[url='http://example.com/my_concept_map'] contains at least one group without a value in ConceptMap.group.target", e.getMessage());
 		}
 
 	}
@@ -131,7 +131,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			});
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(1766) + "ConceptMap has no value for ConceptMap.url");
+			assertEquals(Msg.code(1766) + "ConceptMap has no value for ConceptMap.url", e.getMessage());
 		}
 
 	}
@@ -225,7 +225,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			loadAndPersistCodeSystem();
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(848) + "Can not create multiple CodeSystem resources with CodeSystem.url \"http://acme.org\", already have one with resource ID: CodeSystem/" + myExtensionalCsId.getIdPart());
+			assertEquals(Msg.code(848) + "Can not create multiple CodeSystem resources with CodeSystem.url \"http://acme.org\", already have one with resource ID: CodeSystem/" + myExtensionalCsId.getIdPart(), e.getMessage());
 		}
 	}
 
@@ -241,7 +241,7 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			loadAndPersistValueSet(HttpVerb.POST);
 			fail("");
 		} catch (UnprocessableEntityException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(902) + "Can not create multiple ValueSet resources with ValueSet.url \"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2\", already have one with resource ID: ValueSet/" + myExtensionalVsId.getIdPart());
+			assertEquals(Msg.code(902) + "Can not create multiple ValueSet resources with ValueSet.url \"http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2\", already have one with resource ID: ValueSet/" + myExtensionalVsId.getIdPart(), e.getMessage());
 		}
 
 	}
@@ -283,27 +283,27 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", null, null, null);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		Coding coding = new Coding("http://acme.org", "11378-7", "Systolic blood pressure at First encounter");
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, coding, null);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(new Coding("BOGUS", "BOGUS", "BOGUS"));
 		codeableConcept.addCoding(coding);
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, codeableConcept);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@Test
@@ -332,27 +332,27 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", null, null, null);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsGuess, valueSet, null, "11378-7", "Systolic blood pressure at First encounter", null, null);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, "http://acme.org", "11378-7", null, null, null);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		Coding coding = new Coding("http://acme.org", "11378-7", "Systolic blood pressure at First encounter");
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, coding, null);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 
 		CodeableConcept codeableConcept = new CodeableConcept();
 		codeableConcept.addCoding(new Coding("BOGUS", "BOGUS", "BOGUS"));
 		codeableConcept.addCoding(coding);
 		result = myTermSvc.validateCodeIsInPreExpandedValueSet(optsNoGuess, valueSet, null, null, null, null, codeableConcept);
 		assertTrue(result.isOk());
-		assertThat(result.getDisplay()).isEqualTo("Systolic blood pressure at First encounter");
+		assertEquals("Systolic blood pressure at First encounter", result.getDisplay());
 	}
 
 	@Test

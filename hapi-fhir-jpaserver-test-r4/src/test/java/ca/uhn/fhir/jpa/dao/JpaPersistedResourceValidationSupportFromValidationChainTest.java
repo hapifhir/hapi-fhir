@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -74,7 +75,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithBadLibrary);
 
-		assertThat(validationResult.getMessages().stream().filter(errorMessagePredicate()).count()).isEqualTo(10);
+		assertEquals(10, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
 	@Test
@@ -91,7 +92,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureOnly );
 
-		assertThat(validationResult.getMessages().stream().filter(errorMessagePredicate()).count()).isEqualTo(8);
+		assertEquals(8, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
 	@Test
@@ -105,7 +106,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureOnlyNoLibraryReference);
 
-		assertThat(validationResult.getMessages().stream().filter(errorMessagePredicate()).count()).isEqualTo(7);
+		assertEquals(7, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
 	@Test
@@ -120,7 +121,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithLibraryOnly);
 
-		assertThat(validationResult.getMessages().stream().filter(errorMessagePredicate()).count()).isEqualTo(2);
+		assertEquals(2, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
 	/*
@@ -148,7 +149,7 @@ public class JpaPersistedResourceValidationSupportFromValidationChainTest {
 
 		final ValidationResult validationResult = validator.validateWithResult(bundleWithMeasureReportToReport);
 
-		assertThat(validationResult.getMessages().stream().filter(errorMessagePredicate()).count()).isEqualTo(29);
+		assertEquals(29, validationResult.getMessages().stream().filter(errorMessagePredicate()).count());
 	}
 
 	@Nonnull

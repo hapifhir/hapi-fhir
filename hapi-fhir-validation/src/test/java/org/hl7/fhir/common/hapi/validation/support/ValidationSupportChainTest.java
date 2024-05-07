@@ -1,5 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.context.FhirContext;
@@ -26,7 +27,7 @@ public class ValidationSupportChainTest extends BaseValidationTestWithInlineMock
 		try {
 			new ValidationSupportChain(ctx3, ctx4);
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(709) + "Trying to add validation support of version R4 to chain with 1 entries of version DSTU3");
+			assertEquals(Msg.code(709) + "Trying to add validation support of version R4 to chain with 1 entries of version DSTU3", e.getMessage());
 		}
 
 	}
@@ -37,7 +38,7 @@ public class ValidationSupportChainTest extends BaseValidationTestWithInlineMock
 		try {
 			new ValidationSupportChain(ctx);
 		} catch (ConfigurationException e) {
-			assertThat(e.getMessage()).isEqualTo(Msg.code(708) + "Can not add validation support: getFhirContext() returns null");
+			assertEquals(Msg.code(708) + "Can not add validation support: getFhirContext() returns null", e.getMessage());
 		}
 	}
 

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Metadata;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -38,7 +39,7 @@ public class CapabilityStatementCacheR4Test {
 		CapabilityStatement response3 = myServerExtension.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
 		CapabilityStatement response4 = myServerExtension.getFhirClient().capabilities().ofType(CapabilityStatement.class).execute();
 
-		assertThat(response2.getId()).isEqualTo(response.getId());
+		assertEquals(response.getId(), response2.getId());
 
 		List<String> threadNames = Thread.getAllStackTraces().keySet().stream().map(t -> t.getName()).filter(t -> t.startsWith(ConformanceMethodBinding.CACHE_THREAD_PREFIX)).sorted().collect(Collectors.toList());
 		assertThat(threadNames).hasSize(1);

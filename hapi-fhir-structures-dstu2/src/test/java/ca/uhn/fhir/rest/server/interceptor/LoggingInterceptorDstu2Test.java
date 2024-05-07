@@ -1,5 +1,6 @@
 package ca.uhn.fhir.rest.server.interceptor;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.dstu2.composite.HumanNameDt;
@@ -84,7 +85,7 @@ public class LoggingInterceptorDstu2Test {
 		interceptor.setLogExceptions(true);
 		assertTrue(interceptor.isLogExceptions());
 		interceptor.setErrorMessageFormat("ERROR - ${requestVerb} ${requestUrl}");
-		assertThat(interceptor.getErrorMessageFormat()).isEqualTo("ERROR - ${requestVerb} ${requestUrl}");
+		assertEquals("ERROR - ${requestVerb} ${requestUrl}", interceptor.getErrorMessageFormat());
 
 		ourServer.getInterceptorService().registerInterceptor(interceptor);
 
@@ -138,7 +139,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue()).isEqualTo("extended-operation-instance - $everything - Patient/123");
+		assertEquals("extended-operation-instance - $everything - Patient/123", captor.getValue());
 	}
 
 
@@ -159,7 +160,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue()).isEqualTo("read -  - Patient/1 - ");
+		assertEquals("read -  - Patient/1 - ", captor.getValue());
 	}
 
 	@Test
@@ -244,7 +245,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue()).isEqualTo("read -  - Patient/1 - ");
+		assertEquals("read -  - Patient/1 - ", captor.getValue());
 	}
 
 	@Test
@@ -271,7 +272,7 @@ public class LoggingInterceptorDstu2Test {
 		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue()).isEqualTo("create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>");
+		assertEquals("create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>", captor.getValue());
 	}
 
 	@Test
@@ -301,7 +302,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue()).isEqualTo("ERROR - create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>");
+		assertEquals("ERROR - create -  - Patient - <Patient xmlns=\"http://hl7.org/fhir\"><identifier><value value=\"VAL\"/></identifier></Patient>", captor.getValue());
 	}
 
 	@Test
@@ -322,7 +323,7 @@ public class LoggingInterceptorDstu2Test {
 
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue()).isEqualTo("extended-operation-server - $everything - ");
+		assertEquals("extended-operation-server - $everything - ", captor.getValue());
 	}
 
 	@Test
@@ -343,7 +344,7 @@ public class LoggingInterceptorDstu2Test {
 		
 		ArgumentCaptor<String> captor = ArgumentCaptor.forClass(String.class);
 		verify(logger, timeout(1000).times(1)).info(captor.capture());
-		assertThat(captor.getValue()).isEqualTo("extended-operation-type - $everything - Patient");
+		assertEquals("extended-operation-type - $everything - Patient", captor.getValue());
 	}
 
 	@Test

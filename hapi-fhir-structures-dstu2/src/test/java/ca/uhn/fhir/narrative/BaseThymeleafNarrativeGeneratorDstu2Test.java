@@ -1,5 +1,6 @@
 package ca.uhn.fhir.narrative;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,7 +56,7 @@ public class BaseThymeleafNarrativeGeneratorDstu2Test {
 
 		ourLog.info(actual);
 
-		assertThat(actual).isEqualTo(expected);
+		assertEquals(expected, actual);
 	}
 
 

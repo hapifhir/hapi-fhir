@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.search.builder.predicate;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -65,20 +66,20 @@ public class ResourceLinkPredicateBuilderTest {
 	public void createEverythingPredicate_withListOfPids_returnsInPredicate() {
 		when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE + "1", PLACEHOLDER_BASE + "2"));
 		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), 1l, 2l);
-		assertThat(condition.getClass()).isEqualTo(InCondition.class);
+		assertEquals(InCondition.class, condition.getClass());
 	}
 
 	@Test
 	public void createEverythingPredicate_withSinglePid_returnsInCondition() {
 		when(myResourceLinkPredicateBuilder.generatePlaceholders(anyCollection())).thenReturn(List.of(PLACEHOLDER_BASE + "1"));
 		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), 1l);
-		assertThat(condition.getClass()).isEqualTo(BinaryCondition.class);
+		assertEquals(BinaryCondition.class, condition.getClass());
 	}
 
 	@Test
 	public void createEverythingPredicate_withNoPids_returnsBinaryCondition() {
 		Condition condition = myResourceLinkPredicateBuilder.createEverythingPredicate("Patient", new ArrayList<>(), new Long[0]);
-		assertThat(condition.getClass()).isEqualTo(BinaryCondition.class);
+		assertEquals(BinaryCondition.class, condition.getClass());
 	}
 
 	@Test
