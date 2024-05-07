@@ -1,5 +1,6 @@
 package ca.uhn.fhir.testmindeps;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.context.FhirContext;
@@ -88,7 +89,7 @@ public class ReadTest {
 
 			assertThat(responseContent.length).isEqualTo(4);
 			for (int i = 0; i < 4; i++) {
-				assertThat(responseContent[i]).isEqualTo(i + 1); // should be 1,2,3,4
+				assertEquals(i+1, responseContent[i]); // should be 1,2,3,4
 			}
 			
 		}
