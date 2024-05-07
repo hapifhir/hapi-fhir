@@ -262,6 +262,7 @@ public class ConsentInterceptorTest {
 		verify(myConsentSvc, timeout(2000).times(0)).willSeeResource(any(), any(), any());
 		verify(myConsentSvc, timeout(2000).times(0)).startOperation(any(), any());
 		verify(myConsentSvc, timeout(2000).times(2)).completeOperationSuccess(any(), any());
+		verifyNoMoreInteractions(myConsentSvc);
 	}
 
 
