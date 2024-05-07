@@ -1,6 +1,7 @@
 package ca.uhn.fhir.cr.r4;
 
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePackageProvider;
@@ -64,6 +65,6 @@ public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 
 		assertNotNull(result);
 		assertThat(result.getEntry()).hasSize(11);
-		assertThat(result.getEntry().get(0).getResource().fhirType()).isEqualTo(Enumerations.FHIRAllTypes.QUESTIONNAIRE);
+		assertEquals(Enumerations.FHIRAllTypes.QUESTIONNAIRE.toCode(), result.getEntry().get(0).getResource().fhirType());
 	}
 }
