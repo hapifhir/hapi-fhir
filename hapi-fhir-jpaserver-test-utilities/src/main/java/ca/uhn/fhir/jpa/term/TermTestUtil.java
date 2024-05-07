@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.term;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.jpa.term.api.ITermLoaderSvc;
 
@@ -53,7 +52,7 @@ import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_TOP2000
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UNIVERSAL_LAB_ORDER_VALUESET_FILE_DEFAULT;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_UPLOAD_PROPERTIES_FILE;
 import static ca.uhn.fhir.jpa.term.loinc.LoincUploadPropertiesEnum.LOINC_XML_FILE;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public final class TermTestUtil {
 	public static final String URL_MY_CODE_SYSTEM = "http://example.com/my_code_system";

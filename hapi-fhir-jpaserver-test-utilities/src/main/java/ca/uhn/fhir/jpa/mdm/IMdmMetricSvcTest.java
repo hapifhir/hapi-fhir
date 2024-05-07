@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.mdm;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.mdm.models.GenerateMetricsTestParameters;
 import ca.uhn.fhir.jpa.mdm.models.LinkMetricTestParameters;
 import ca.uhn.fhir.jpa.mdm.models.LinkScoreMetricTestParams;
@@ -40,6 +39,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
