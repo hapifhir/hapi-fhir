@@ -134,6 +134,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				.withRequestPartitionId(theParams.getPartitionIdOrAllPartitions())
 				.readOnly()
 				.execute(() -> {
+					if ("Device".equals(theParams.getResourceType())) {
+						ourLog.info("5697: version: {}, getResourcePidIterator(): Device", myContext.getVersion().getVersion());
+					}
 					String resourceType = theParams.getResourceType();
 					String jobId = theParams.getInstanceId();
 					String chunkId = theParams.getChunkId();
@@ -161,6 +164,9 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			String theChunkId,
 			RuntimeResourceDefinition def)
 			throws IOException {
+		if ("Device".equals(theParams.getResourceType())) {
+			ourLog.info("5697: version: {}, getPidsForPatientStyleExport(): Device", myContext.getVersion().getVersion());
+		}
 		LinkedHashSet<JpaPid> pids = new LinkedHashSet<>();
 		// Patient
 		if (myStorageSettings.getIndexMissingFields() == JpaStorageSettings.IndexEnabledEnum.DISABLED) {

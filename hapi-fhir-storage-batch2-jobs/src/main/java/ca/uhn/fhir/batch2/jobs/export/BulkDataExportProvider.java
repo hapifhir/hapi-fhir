@@ -25,6 +25,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
@@ -347,7 +348,10 @@ public class BulkDataExportProvider {
 		if (myCompartmentResources == null) {
 			myCompartmentResources =
 					new HashSet<>(SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myFhirContext));
-			myCompartmentResources.add("Device");
+			// LUKETODO:  unit test this
+			if (FhirVersionEnum.R4 == myFhirContext.getVersion().getVersion()) {
+				myCompartmentResources.add("Device");
+			}
 		}
 		return myCompartmentResources;
 	}

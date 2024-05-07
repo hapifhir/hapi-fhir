@@ -90,7 +90,12 @@ public class FetchResourceIdsStep implements IFirstJobStepWorker<BulkExportJobPa
 			/*
 			 * We will fetch ids for each resource type in the ResourceTypes (_type filter).
 			 */
+			// LUKETODO:  why are we iterating over single resource type here??????
 			for (String resourceType : params.getResourceTypes()) {
+//				if ("Device".equals(resourceType)) {
+//					// LUKETODO:  try to see if this fixes it
+//					continue;
+//				}
 				providerParams.setResourceType(resourceType);
 
 				// filters are the filters for searching

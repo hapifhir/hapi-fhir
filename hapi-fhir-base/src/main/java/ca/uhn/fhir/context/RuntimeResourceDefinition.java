@@ -26,6 +26,8 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IDomainResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,8 +36,10 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefinition<IBaseResource> {
+	private static final Logger ourLog = LoggerFactory.getLogger(RuntimeResourceDefinition.class);
 
 	private Class<? extends IBaseResource> myBaseType;
 	private Map<String, List<RuntimeSearchParam>> myCompartmentNameToSearchParams;
@@ -94,6 +98,10 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	}
 
 	public void addSearchParam(RuntimeSearchParam theParam) {
+//		if (myBaseType != null && myBaseType.getName().endsWith("Device") || "patient".equals(theParam.getName()) || theParam.getUri().contains("Device-patient") ) {
+		if (theParam.getUri().contains("Device-patient") ) {
+			ourLog.info("5697: version:{}, getName(): {}, baseTypeName: {}, paramName: {}, addSearchParam():  {}", myContext.getVersion().getVersion(), getName(), Optional.ofNullable(myBaseType).map(Class::getName).orElse(null), theParam.getName(), theParam);
+		}
 		myNameToSearchParam.put(theParam.getName(), theParam);
 	}
 
@@ -163,7 +171,11 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 
 	public RuntimeSearchParam getSearchParam(String theName) {
 		validateSealed();
-		return myNameToSearchParam.get(theName);
+		final RuntimeSearchParam runtimeSearchParam = myNameToSearchParam.get(theName);
+		if (myBaseType.getName().endsWith("Device")) {
+			ourLog.info("5697: version:{}, getSearchParam() runtimeSearchParams: {}", myContext.getVersion().getVersion(), runtimeSearchParam);
+		}
+		return runtimeSearchParam;
 	}
 
 	public List<RuntimeSearchParam> getSearchParams() {
@@ -177,6 +189,9 @@ public class RuntimeResourceDefinition extends BaseRuntimeElementCompositeDefini
 	public List<RuntimeSearchParam> getSearchParamsForCompartmentName(String theCompartmentName) {
 		validateSealed();
 		List<RuntimeSearchParam> retVal = myCompartmentNameToSearchParams.get(theCompartmentName);
+		if (myBaseType.getName().endsWith("Device")) {
+			ourLog.info("5697: version:{}, getSearchParamsForCompartmentName() runtimeSearchParams: {}", myContext.getVersion().getVersion(), retVal);
+		}
 		if (retVal == null) {
 			return Collections.emptyList();
 		}
