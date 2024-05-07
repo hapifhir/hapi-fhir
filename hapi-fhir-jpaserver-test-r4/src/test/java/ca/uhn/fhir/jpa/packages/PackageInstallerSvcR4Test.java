@@ -568,7 +568,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		myPackageInstallerSvc.install(spec);
 		outcome = myPackageInstallerSvc.install(spec);
-		assertThat(outcome.getResourcesInstalled()).containsEntry("CodeSystem", null);
+		assertNull(outcome.getResourcesInstalled().get("CodeSystem"));
 
 		// Ensure that we loaded the contents
 		IBundleProvider searchResult = myCodeSystemDao.search(SearchParameterMap.newSynchronous("url", new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system")));
@@ -593,7 +593,7 @@ public class PackageInstallerSvcR4Test extends BaseJpaR4Test {
 
 		myPackageInstallerSvc.install(spec);
 		outcome = myPackageInstallerSvc.install(spec);
-		assertThat(outcome.getResourcesInstalled()).containsEntry("CodeSystem", null);
+		assertNull(outcome.getResourcesInstalled().get("CodeSystem"));
 
 		// Ensure that we loaded the contents
 		IBundleProvider searchResult = myCodeSystemDao.search(SearchParameterMap.newSynchronous("url", new UriParam("http://hl7.org/fhir/uv/shorthand/CodeSystem/shorthand-code-system")));

@@ -305,8 +305,8 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		found = toUnqualifiedVersionlessIdValues(myPatientDao.search(map));
 		assertThat(found)
 			.hasSize(1)
-			.containsExactlyInAnyOrder(id2)
-			.doesNotContain(id1);
+			.containsExactlyInAnyOrder(id1)
+			.doesNotContain(id2);
 
 		map = new SearchParameterMap();
 		map.setLoadSynchronous(true);

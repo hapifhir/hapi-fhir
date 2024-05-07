@@ -383,8 +383,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 			// then
 			assertThat(matched).hasSize(1);
-			assertThat(matched).extracting(ResourceIndexedSearchParamUri::getUri).isNull();
-			;
+			assertNull(matched.get(0).getUri());
 		});
 	}
 

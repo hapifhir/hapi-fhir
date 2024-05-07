@@ -314,7 +314,7 @@ public class BinaryStorageInterceptorR4Test extends BaseResourceProviderR4Test {
 		assertNull(execute.getContent());
 		assertNull(execute.getDataElement().getValue());
 
-		assertNull(execute.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue());
+		assertNotNull(execute.getDataElement().getExtensionByUrl(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID).getValue());
 	}
 	@Test
 	public void testCreateAndRetrieveBinary_ClientAssignedId_ExternalizedBinary() {

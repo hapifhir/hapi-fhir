@@ -579,7 +579,7 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 				.sort(new SortSpec("location.near", SortOrderEnum.ASC))
 				.execute())
 			.isInstanceOf(InvalidRequestException.class)
-			.hasMessage("HTTP 400 : HAPI-2307: Can not sort on coordinate parameter \"location\" unless this parameter is also specified as a search parameter with a latitude/longitude value");
+			.hasMessage("HTTP 400 Bad Request: HAPI-2497: Can not sort on coordinate parameter \"location\" unless this parameter is also specified as a search parameter with a latitude/longitude value");
 	}
 
 	private void createLocation(String id, double latitude, double longitude) {

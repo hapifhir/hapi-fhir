@@ -480,7 +480,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			for (String id : valueSet) {
 				// should start with our value from the key-value pairs
 				assertThat(id).startsWith(value);
-				assertThat(ids).contains(id);
+				assertThat(ids).contains(id.substring(value.length()));
 			}
 		} finally {
 			myInterceptorRegistry.unregisterInterceptor(interceptor);
