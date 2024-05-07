@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.batch2;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
-import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -10,10 +9,13 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Binary;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Group;
@@ -36,13 +38,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.equalTo;
@@ -64,6 +69,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 
 	@BeforeEach
 	void beforeEach() {
+		ourLog.info("BulkDataErrorAbuseTest.beforeEach");
 		afterPurgeDatabase();
 	}
 
@@ -93,7 +99,7 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		duAbuseTest(Integer.MAX_VALUE);
 	}
 
-	private void duAbuseTest(int taskExecutions) throws InterruptedException, ExecutionException {
+	private void duAbuseTest(int taskExecutions) {
 		// Create some resources
 		Patient patient = new Patient();
 		patient.setId("PING1");
@@ -133,18 +139,19 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 		ExecutorService executorService = new ThreadPoolExecutor(workerCount, workerCount,
 			0L, TimeUnit.MILLISECONDS,
 			workQueue);
+		CompletionService<Boolean> completionService = new ExecutorCompletionService<>(executorService);
 
 		ourLog.info("Starting task creation");
 
-		List<Future<Boolean>> futures = new ArrayList<>();
+		int maxFuturesToProcess = 500;
 		for (int i = 0; i < taskExecutions; i++) {
-			futures.add(executorService.submit(() -> {
+			completionService.submit(() -> {
 				String instanceId = null;
 				try {
 					instanceId = startJob(options);
 
 					// Run a scheduled pass to build the export
-					myBatch2JobHelper.awaitJobCompletion(instanceId, 60);
+					myBatch2JobHelper.awaitJobCompletion(instanceId, 10);
 
 					verifyBulkExportResults(instanceId, List.of("Patient/PING1", "Patient/PING2"), Collections.singletonList("Patient/PNING3"));
 
@@ -153,14 +160,11 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 					ourLog.error("Caught an error during processing instance {}", instanceId, theError);
 					throw new InternalErrorException("Caught an error during processing instance " + instanceId, theError);
 				}
-			}));
+			});
 
 			// Don't let the list of futures grow so big we run out of memory
-			if (futures.size() > 1000) {
-				while (futures.size() > 500) {
-					// This should always return true, but it'll throw an exception if we failed
-					assertTrue(futures.remove(0).get());
-				}
+			if (i != 0 && i % maxFuturesToProcess == 0) {
+				executeFutures(completionService, maxFuturesToProcess);
 			}
 		}
 
@@ -168,16 +172,51 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 
 		// wait for completion to avoid stranding background tasks.
 		executorService.shutdown();
-		assertTrue(executorService.awaitTermination(60, TimeUnit.SECONDS), "Finished before timeout");
+		await()
+			.atMost(60, TimeUnit.SECONDS)
+			.until(() -> {
+				return executorService.isTerminated() && executorService.isShutdown();
+			});
 
 		// verify that all requests succeeded
 		ourLog.info("All tasks complete.  Verify results.");
-		for (var next : futures) {
-			// This should always return true, but it'll throw an exception if we failed
-			assertTrue(next.get());
-		}
+		executeFutures(completionService, taskExecutions % maxFuturesToProcess);
+
+		executorService.shutdown();
+		await()
+			.atMost(60, TimeUnit.SECONDS)
+				.until(() -> {
+					return executorService.isTerminated() && executorService.isShutdown();
+				});
 
 		ourLog.info("Finished task execution");
+	}
+
+	private void executeFutures(CompletionService<Boolean> theCompletionService, int theTotal) {
+		List<String> errors = new ArrayList<>();
+		int count = 0;
+
+		while (count + errors.size() < theTotal) {
+			try {
+				Future<Boolean> future = theCompletionService.take();
+				boolean r = future.get();
+				assertTrue(r);
+				count++;
+			} catch (Exception ex) {
+				// we will run all the threads to completion, even if we have errors;
+				// this is so we don't have background threads kicking around with
+				// partial changes.
+				// we either do this, or shutdown the completion service in an
+				// "inelegant" manner, dropping all threads (which we aren't doing)
+				ourLog.error("Failed after checking " + count + " futures");
+				errors.add(ex.getMessage());
+			}
+		}
+
+		if (!errors.isEmpty()) {
+			fail(String.format("Failed to execute futures. Found %d errors :\n", errors.size())
+				+ String.join(", ", errors));
+		}
 	}
 
 
@@ -196,7 +235,6 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 			String resourceType = file.getKey();
 			List<String> binaryIds = file.getValue();
 			for (var nextBinaryId : binaryIds) {
-
 				Binary binary = myBinaryDao.read(new IdType(nextBinaryId), mySrd);
 				assertEquals(Constants.CT_FHIR_NDJSON, binary.getContentType());
 
@@ -207,18 +245,17 @@ public class BulkDataErrorAbuseTest extends BaseResourceProviderR4Test {
 					.lines().toList();
 				ourLog.debug("Export job {} file {} line-count: {}", theInstanceId, nextBinaryId, lines.size());
 
-				lines.stream()
-					.map(line -> myFhirContext.newJsonParser().parseResource(line))
-					.map(r -> r.getIdElement().toUnqualifiedVersionless())
-					.forEach(nextId -> {
-						if (!resourceType.equals(nextId.getResourceType())) {
-							fail("Found resource of type " + nextId.getResourceType() + " in file for type " + resourceType);
-						} else {
-							if (!foundIds.add(nextId.getValue())) {
-								fail("Found duplicate ID: " + nextId.getValue());
-							}
+				for (String line : lines) {
+					IBaseResource resource = myFhirContext.newJsonParser().parseResource(line);
+					IIdType nextId = resource.getIdElement().toUnqualifiedVersionless();
+					if (!resourceType.equals(nextId.getResourceType())) {
+						fail("Found resource of type " + nextId.getResourceType() + " in file for type " + resourceType);
+					} else {
+						if (!foundIds.add(nextId.getValue())) {
+							fail("Found duplicate ID: " + nextId.getValue());
 						}
-					});
+					}
+				}
 			}
 		}
 

@@ -505,7 +505,7 @@ public class SubscriptionMatchingSubscriberTest extends BaseBlockingQueueSubscri
 
 			subscriber.matchActiveSubscriptionsAndDeliver(message);
 
-			verify(myCanonicalSubscription, atLeastOnce()).getSendDeleteMessages();
+			verify(myCanonicalSubscription).getSendDeleteMessages();
 		}
 
 		@Test
