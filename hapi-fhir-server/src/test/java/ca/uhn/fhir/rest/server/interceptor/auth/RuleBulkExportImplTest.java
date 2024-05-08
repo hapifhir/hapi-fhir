@@ -5,6 +5,8 @@ import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -106,6 +108,149 @@ public class RuleBulkExportImplTest {
 
 		assertAbstain(verdict);
 	}
+	@Nested
+	class StyleChecks {
+		BulkExportJobParameters myOptions = new BulkExportJobParameters();
+		RuleBulkExportImpl myRule = new RuleBulkExportImpl("a");
+		@BeforeEach
+		void setUp() {
+			myRule.setMode(PolicyEnum.ALLOW);
+			when(myRequestDetails.getAttribute(any())).thenReturn(myOptions);
+		}
+		@Nested class RuleAnyStyle {
+			@BeforeEach
+			void setUp(){
+				myRule.setAppliesToAny();
+			}
+
+			@Test
+			public void testRuleAnyStyle_Matches_SystemStyle() {
+				myOptions.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+				AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+				assertAllow(verdict);
+			}
+			@Test
+			public void testRuleAnyStyle_Matches_PatientStyle() {
+				myOptions.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+				AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+				assertAllow(verdict);
+
+			}
+			@Test
+			public void testRuleAnyStyle_Matches_GroupStyle() {
+				myOptions.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+				AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+				assertAllow(verdict);
+
+			}
+
+		}
+
+		@Nested
+		class RuleSystemStyle {
+			@BeforeEach
+			void setUp() {
+				myRule.setAppliesToSystem();
+			}
+
+			@Test
+			public void test_Matches_SystemStyle() {
+				myOptions.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+				AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+				assertAllow(verdict);
+			}
+
+			@Test
+			public void test_DoesntMatch_GroupStyle() {
+				myOptions.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+				AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+				assertAbstain(verdict);
+			}
+
+			@Test
+			public void test_DoesntMatch_PatientStyle() {
+				myOptions.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+				AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+				assertAbstain(verdict);
+			}
+		}
+
+		@Nested
+		class RuleGroupStyle {
+			@BeforeEach
+			void setUp() {
+				myRule.setAppliesToGroupExportOnGroup("Group/123");
+			}
+
+			@Test
+			public void test_DoesntMatch_SystemStyle() {
+				myOptions.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+				AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+				assertAbstain(verdict);
+			}
+
+			@Test
+			public void test_Matches_GroupStyle() {
+				myOptions.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+				myOptions.setGroupId("Group/123");
+
+				AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+				assertAllow(verdict);
+			}
+
+			@Test
+			public void test_DoesntMatch_PatientStyle() {
+				myOptions.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+				AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+				assertAbstain(verdict);
+			}
+		}
+
+		@Nested
+		class RulePatientStyle {
+			@BeforeEach
+			void setUp() {
+				myRule.setAppliesToPatientExport("Patient/123");
+			}
+
+			@Test
+			public void test_DoesntMatch_SystemStyle() {
+				myOptions.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+				AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+				assertAbstain(verdict);
+			}
+
+			@Test
+			public void test_DoesntMatch_GroupStyle() {
+				myOptions.setExportStyle(BulkExportJobParameters.ExportStyle.GROUP);
+				myOptions.setGroupId("Group/123");
+
+				AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+				assertAbstain(verdict);
+			}
+
+			@Test
+			public void test_DoesntMatch_PatientStyle() {
+				myOptions.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
+				myOptions.setPatientIds(Set.of("Patient/123"));
+				AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+				assertAllow(verdict);
+			}
+		}
+	}
+
 	@Test
 	public void testWrongGroupIdDelegatesToNextRule() {
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("a");
