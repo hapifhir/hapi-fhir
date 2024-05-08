@@ -21,7 +21,6 @@ package ca.uhn.hapi.fhir.batch2.test;
 
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
-import ca.uhn.test.concurrency.PointcutLatch;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

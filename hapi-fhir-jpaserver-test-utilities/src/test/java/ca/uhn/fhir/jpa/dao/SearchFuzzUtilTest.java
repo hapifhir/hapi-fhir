@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.dao.predicate.SearchFuzzUtil;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import org.junit.jupiter.api.Test;
@@ -11,6 +10,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchFuzzUtilTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchFuzzUtilTest.class);

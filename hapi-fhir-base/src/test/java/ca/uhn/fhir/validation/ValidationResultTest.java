@@ -1,6 +1,5 @@
 package ca.uhn.fhir.validation;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.FhirContext;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -9,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.mock;
 
 class ValidationResultTest {

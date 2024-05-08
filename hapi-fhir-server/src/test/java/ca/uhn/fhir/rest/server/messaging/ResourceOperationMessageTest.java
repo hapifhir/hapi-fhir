@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.server.messaging;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.messaging.json.ResourceOperationJsonMessage;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -11,7 +9,8 @@ import org.junit.jupiter.api.Test;
 import static ca.uhn.fhir.rest.server.messaging.json.HapiMessageHeaders.FIRST_FAILURE_KEY;
 import static ca.uhn.fhir.rest.server.messaging.json.HapiMessageHeaders.LAST_FAILURE_KEY;
 import static ca.uhn.fhir.rest.server.messaging.json.HapiMessageHeaders.RETRY_COUNT_KEY;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 class ResourceOperationMessageTest {
 

@@ -21,11 +21,11 @@ package ca.uhn.fhir.util;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.HashMap;
-import java.util.Map;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PrettyPrintWriterWrapper implements XMLStreamWriter {
 

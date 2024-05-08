@@ -1,14 +1,13 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.IdentifierMatcher;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.r4.model.Identifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class IdentifierMatcherR4Test extends BaseMatcherR4Test {
 	public static final String MATCHING_SYSTEM = "http://match";

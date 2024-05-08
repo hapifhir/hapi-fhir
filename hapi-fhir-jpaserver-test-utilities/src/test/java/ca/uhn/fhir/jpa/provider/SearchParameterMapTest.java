@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap.EverythingModeEnum;
@@ -22,6 +21,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class SearchParameterMapTest {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();

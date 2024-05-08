@@ -1,7 +1,5 @@
 package ca.uhn.fhir.mdm.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Organization;
@@ -13,6 +11,8 @@ import java.util.List;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class MdmResourceUtilTest {
 

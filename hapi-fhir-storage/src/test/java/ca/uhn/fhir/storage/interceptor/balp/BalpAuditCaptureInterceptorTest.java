@@ -1,7 +1,5 @@
 package ca.uhn.fhir.storage.interceptor.balp;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.rest.api.MethodOutcome;
@@ -17,11 +15,27 @@ import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
-import org.hl7.fhir.common.hapi.validation.support.*;
+import jakarta.annotation.Nonnull;
+import org.hl7.fhir.common.hapi.validation.support.CachingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.NpmPackageValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.SnapshotGeneratingValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.r4.model.*;
+import org.hl7.fhir.r4.model.AuditEvent;
+import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CapabilityStatement;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.ListResource;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.PrimitiveType;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Order;
@@ -33,7 +47,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -42,13 +55,24 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.*;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_AUDIT_ENTITY_TYPE;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_AUDIT_ENTITY_TYPE_1_PERSON;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_AUDIT_ENTITY_TYPE_2_SYSTEM_OBJECT;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_AUDIT_EVENT_TYPE;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_OBJECT_ROLE;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_OBJECT_ROLE_1_PATIENT;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_OBJECT_ROLE_24_QUERY;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_OBJECT_ROLE_4_DOMAIN_RESOURCE;
+import static ca.uhn.fhir.storage.interceptor.balp.BalpConstants.CS_RESTFUL_INTERACTION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.assertj.core.api.Assertions.fail;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 @SuppressWarnings("unchecked")
 @ExtendWith(MockitoExtension.class)

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.cr.r4;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.cr.r4.questionnaireresponse.QuestionnaireResponseExtractProvider;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Questionnaire;
@@ -11,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class QuestionnaireResponseOperationsProviderTest extends BaseCrR4TestServer {
 	@Autowired

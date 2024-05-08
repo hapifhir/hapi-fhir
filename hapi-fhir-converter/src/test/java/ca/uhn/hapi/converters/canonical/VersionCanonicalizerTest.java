@@ -1,7 +1,5 @@
 package ca.uhn.hapi.converters.canonical;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.model.dstu2.composite.CodingDt;
 import ca.uhn.fhir.model.dstu2.resource.Conformance;
@@ -21,6 +19,8 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.ExtensionUtil.getExtensionPrimitiveValues;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class VersionCanonicalizerTest {
 	@Nested

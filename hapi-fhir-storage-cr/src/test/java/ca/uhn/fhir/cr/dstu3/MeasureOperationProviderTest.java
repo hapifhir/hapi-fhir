@@ -3,7 +3,6 @@ package ca.uhn.fhir.cr.dstu3;
 
 import ca.uhn.fhir.cr.dstu3.measure.MeasureOperationsProvider;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import org.hamcrest.Matchers;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.DateType;
 import org.hl7.fhir.dstu3.model.MeasureReport;

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.search.elastic;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
 import org.hibernate.search.backend.elasticsearch.cfg.ElasticsearchBackendSettings;
@@ -11,9 +10,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Properties;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.spy;
 
 @ExtendWith(MockitoExtension.class)

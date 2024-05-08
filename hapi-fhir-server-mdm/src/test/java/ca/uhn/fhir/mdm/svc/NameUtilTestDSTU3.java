@@ -1,6 +1,5 @@
 package ca.uhn.fhir.mdm.svc;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.util.NameUtil;
 import ca.uhn.fhir.util.FhirTerser;
@@ -12,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NameUtilTestDSTU3 {
 

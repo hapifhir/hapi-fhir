@@ -1,14 +1,13 @@
 package ca.uhn.fhir.rest.client.apache;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ApacheHttpRequestTest {
 

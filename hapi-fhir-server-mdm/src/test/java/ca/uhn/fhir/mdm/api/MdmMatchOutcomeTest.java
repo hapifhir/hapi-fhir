@@ -1,10 +1,10 @@
 package ca.uhn.fhir.mdm.api;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.within;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MdmMatchOutcomeTest {
 

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.mdm.rules.similarity.HapiNumericSimilarity;
 import ca.uhn.fhir.mdm.rules.similarity.HapiStringSimilarity;
 import ca.uhn.fhir.mdm.rules.similarity.IMdmFieldSimilarity;
@@ -13,7 +12,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NumericSimilarityR4Test extends StringSimilarityR4Test {
 	private static final HapiStringSimilarity NUMERIC_JARO_WINKLER = new HapiNumericSimilarity(new JaroWinkler());

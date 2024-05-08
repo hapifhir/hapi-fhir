@@ -1,6 +1,5 @@
 package ca.uhn.fhir.mdm.api;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.mdm.api.paging.MdmPageRequest;
 import ca.uhn.fhir.mdm.api.params.MdmQuerySearchParameters;
 import org.junit.jupiter.api.Test;
@@ -8,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class MdmQuerySearchParametersTest {
 

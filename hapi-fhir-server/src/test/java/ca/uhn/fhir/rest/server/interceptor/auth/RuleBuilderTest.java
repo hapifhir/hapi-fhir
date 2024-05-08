@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.model.primitive.IdDt;
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.Test;
@@ -10,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 
 public class RuleBuilderTest {

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.util;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -9,6 +8,7 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class StopWatchTest {
 

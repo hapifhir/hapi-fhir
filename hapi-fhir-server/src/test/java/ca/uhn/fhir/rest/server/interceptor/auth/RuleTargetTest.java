@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.junit.jupiter.api.Test;
@@ -8,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class RuleTargetTest {
 

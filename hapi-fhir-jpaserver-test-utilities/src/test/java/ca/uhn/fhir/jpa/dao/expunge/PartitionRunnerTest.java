@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.expunge;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -19,8 +18,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.isOneOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class PartitionRunnerTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(PartitionRunnerTest.class);

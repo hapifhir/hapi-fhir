@@ -1,12 +1,11 @@
 package ca.uhn.fhir.jpa.sched;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import org.junit.jupiter.api.Test;
 import org.quartz.SchedulerException;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BaseHapiSchedulerTest {
 

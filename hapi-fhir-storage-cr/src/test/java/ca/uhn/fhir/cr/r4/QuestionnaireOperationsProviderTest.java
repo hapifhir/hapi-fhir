@@ -1,9 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePackageProvider;
 import ca.uhn.fhir.cr.r4.questionnaire.QuestionnairePopulateProvider;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -14,6 +11,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class QuestionnaireOperationsProviderTest extends BaseCrR4TestServer {
 	@Autowired

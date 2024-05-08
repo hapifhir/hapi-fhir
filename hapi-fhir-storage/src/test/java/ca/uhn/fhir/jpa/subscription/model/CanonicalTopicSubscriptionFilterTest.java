@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.subscription.model;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.junit.jupiter.api.Test;
 
@@ -9,6 +8,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CanonicalTopicSubscriptionFilterTest {
 

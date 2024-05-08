@@ -1,7 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import ca.uhn.fhir.cr.r4.activitydefinition.ActivityDefinitionApplyProvider;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IdType;
@@ -9,7 +8,7 @@ import org.hl7.fhir.r4.model.MedicationRequest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class ActivityDefinitionOperationsProviderTest extends BaseCrR4TestServer {
 

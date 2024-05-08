@@ -1,7 +1,5 @@
 package ca.uhn.fhir.rest.client.tls;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.tls.KeyStoreInfo;
 import ca.uhn.fhir.tls.TlsAuthentication;
@@ -20,6 +18,8 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 public class TlsAuthenticationSvcTest {

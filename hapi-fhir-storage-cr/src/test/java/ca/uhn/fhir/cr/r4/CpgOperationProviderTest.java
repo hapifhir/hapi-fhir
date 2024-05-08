@@ -1,10 +1,6 @@
 package ca.uhn.fhir.cr.r4;
 
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -21,11 +17,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.booleanPart;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.canonicalPart;
+import static org.opencds.cqf.fhir.utility.r4.Parameters.datePart;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.parameters;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.part;
-import static org.opencds.cqf.fhir.utility.r4.Parameters.datePart;
 import static org.opencds.cqf.fhir.utility.r4.Parameters.stringPart;
 
 public class CpgOperationProviderTest extends BaseCrR4TestServer{

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.cli;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.cli.BaseRequestGeneratingCommand.BaseRequestGeneratingCommandOptions;
 import com.google.common.collect.Lists;
 import org.apache.commons.cli.CommandLine;
@@ -20,6 +19,7 @@ import static ca.uhn.fhir.cli.BaseRequestGeneratingCommand.BaseRequestGenerating
 import static ca.uhn.fhir.cli.BaseRequestGeneratingCommand.BaseRequestGeneratingCommandOptions.VERSION;
 import static ca.uhn.fhir.cli.BaseRequestGeneratingCommand.BaseRequestGeneratingCommandOptions.values;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BaseRequestGeneratingCommandTest {

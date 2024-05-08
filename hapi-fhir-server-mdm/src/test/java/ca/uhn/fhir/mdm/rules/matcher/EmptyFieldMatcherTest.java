@@ -1,12 +1,11 @@
 package ca.uhn.fhir.mdm.rules.matcher;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.mdm.rules.matcher.fieldmatchers.EmptyFieldMatcher;
 import ca.uhn.fhir.model.primitive.StringDt;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EmptyFieldMatcherTest extends BaseMatcherR4Test {
 

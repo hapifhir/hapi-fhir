@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.search.autocomplete;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import org.junit.jupiter.api.Nested;
@@ -10,6 +9,7 @@ import java.util.List;
 
 import static net.javacrumbs.jsonunit.assertj.JsonAssertions.assertThatJson;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TokenAutocompleteAggregationTest {
 

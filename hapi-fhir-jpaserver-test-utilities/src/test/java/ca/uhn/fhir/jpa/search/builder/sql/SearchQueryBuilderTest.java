@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
@@ -28,6 +27,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.Locale;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {SearchQueryBuilderTest.MyConfig.class})

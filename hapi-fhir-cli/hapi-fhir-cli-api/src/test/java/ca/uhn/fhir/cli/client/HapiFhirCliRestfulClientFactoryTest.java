@@ -1,6 +1,5 @@
 package ca.uhn.fhir.cli.client;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
@@ -18,6 +17,7 @@ import javax.net.ssl.SSLHandshakeException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class HapiFhirCliRestfulClientFactoryTest extends BaseFhirVersionParameterizedTest{
