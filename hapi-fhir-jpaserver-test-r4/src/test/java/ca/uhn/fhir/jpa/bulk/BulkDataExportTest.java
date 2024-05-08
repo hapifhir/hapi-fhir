@@ -16,7 +16,6 @@ import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.JpaJobPersistenceImpl;
 import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
-import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
@@ -34,7 +33,6 @@ import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.LineIterator;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -75,7 +73,6 @@ import org.mockito.Spy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -88,10 +85,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
-import static ca.uhn.fhir.batch2.jobs.export.BulkExportAppCtx.CREATE_REPORT_STEP;
-import static ca.uhn.fhir.batch2.jobs.export.BulkExportAppCtx.WRITE_TO_BINARIES;
 import static ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4TagsInlineTest.createSearchParameterForInlineSecurity;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -476,8 +472,9 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		try {
 			verifyBulkExportResults(options, ids, new ArrayList<>());
 
-			assertThat(valueSet).isNotEmpty();
-			assertThat(valueSet).hasSize(ids.size());
+			assertFalse(valueSet.isEmpty());
+			assertEquals(ids.size(), valueSet.size(),
+				"Expected " + String.join(", ", ids) + ". Actual : " + String.join(", ", valueSet));
 			for (String id : valueSet) {
 				// should start with our value from the key-value pairs
 				assertThat(id).startsWith(value);
@@ -898,6 +895,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		options.setResourceTypes(Sets.newHashSet("Patient", "Observation", "CarePlan", "MedicationAdministration", "ServiceRequest"));
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+
 		verifyBulkExportResults(options, List.of("Patient/P1", carePlanId, medAdminId, sevReqId, obsSubId, obsPerId), Collections.emptyList());
 	}
 
@@ -1096,7 +1094,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			String resourceType = file.getKey();
 			List<String> binaryIds = file.getValue();
 			for (var nextBinaryId : binaryIds) {
-
 				String nextBinaryIdPart = new IdType(nextBinaryId).getIdPart();
 				assertThat(nextBinaryIdPart).matches("[a-zA-Z0-9]{32}");
 
@@ -1105,6 +1102,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 
 				String nextNdJsonFileContent = new String(binary.getContent(), Constants.CHARSET_UTF8);
 				try (var iter = new LineIterator(new StringReader(nextNdJsonFileContent))) {
+					AtomicBoolean gate = new AtomicBoolean(false);
 					iter.forEachRemaining(t -> {
 						if (isNotBlank(t)) {
 							IBaseResource next = myFhirContext.newJsonParser().parseResource(t);
@@ -1117,7 +1115,10 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 								}
 							}
 						}
+						gate.set(true);
 					});
+					await().atMost(400, TimeUnit.MILLISECONDS)
+						.until(gate::get);
 				} catch (IOException e) {
 					fail("", e.toString());
 				}

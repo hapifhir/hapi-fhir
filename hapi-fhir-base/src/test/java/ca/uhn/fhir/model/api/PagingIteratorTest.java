@@ -63,7 +63,7 @@ public class PagingIteratorTest {
 	public void next_fetchTest_fetchesAndReturns() {
 		// 3 cases to make sure we get the edge cases
 		for (int adj : new int[] { -1, 0, 1 }) {
-			int size = PagingIterator.PAGE_SIZE + adj;
+			int size = PagingIterator.DEFAULT_PAGE_SIZE + adj;
 
 			myPagingIterator = createPagingIterator(size);
 

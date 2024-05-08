@@ -81,6 +81,7 @@ import static org.assertj.core.api.Assertions.fail;
 public class TestR4Config {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(TestR4Config.class);
+
 	public static Integer ourMaxThreads;
 	private final AtomicInteger myBorrowedConnectionCount = new AtomicInteger(0);
 	private final AtomicInteger myReturnedConnectionCount = new AtomicInteger(0);
@@ -92,7 +93,7 @@ public class TestR4Config {
 		 * starvation
 		 */
 		if (ourMaxThreads == null) {
-			ourMaxThreads = (int) (Math.random() * 6.0) + 3;
+			ourMaxThreads = (int) (Math.random() * 6.0) + 4;
 
 			if (HapiTestSystemProperties.isSingleDbConnectionEnabled()) {
 				ourMaxThreads = 1;
@@ -104,7 +105,7 @@ public class TestR4Config {
 		ourLog.warn("ourMaxThreads={}", ourMaxThreads);
 	}
 
-	private Map<Connection, Exception> myConnectionRequestStackTraces = Collections.synchronizedMap(new LinkedHashMap<>());
+	private final Map<Connection, Exception> myConnectionRequestStackTraces = Collections.synchronizedMap(new LinkedHashMap<>());
 
 	@Autowired
 	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
@@ -296,5 +297,4 @@ public class TestR4Config {
 	public static int getMaxThreads() {
 		return ourMaxThreads;
 	}
-
 }

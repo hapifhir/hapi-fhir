@@ -441,8 +441,9 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		}.setValidationSupport(myValidationSupport));
 
 		// Should be ok
-		myClient.read().resource(Observation.class).withId("Observation/allowed").execute();
+		Observation result = myClient.read().resource(Observation.class).withId("Observation/allowed").execute();
 
+		assertNotNull(result);
 	}
 
 	@Test
@@ -464,8 +465,10 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		}.setValidationSupport(myValidationSupport));
 
 		// Should be ok
-		myClient.read().resource(Patient.class).withId("Patient/P").execute();
-		myClient.read().resource(Observation.class).withId("Observation/O").execute();
+		Patient pat = myClient.read().resource(Patient.class).withId("Patient/P").execute();
+		Observation obs = myClient.read().resource(Observation.class).withId("Observation/O").execute();
+		assertNotNull(pat);
+		assertNotNull(obs);
 	}
 
 	/**

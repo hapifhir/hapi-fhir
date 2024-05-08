@@ -75,6 +75,12 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			return;
 		}
 
+		/**
+		 * Jobs are completed in {@link ca.uhn.fhir.batch2.progress.JobInstanceProgressCalculator#calculateInstanceProgress}
+		 * We determine if the job is complete based on if there are *any* completed work chunks.
+		 * So if there are no COMPLETED work chunks (ie, first step produces no work chunks)
+		 * we must complete it here.
+		 */
 		if (stepExecutorOutput.getDataSink().firstStepProducedNothing() && !myDefinition.isLastStepReduction()) {
 			ourLog.info(
 					"First step of job myInstance {} produced no work chunks and last step is not a reduction, "

@@ -26,6 +26,8 @@ import ca.uhn.fhir.batch2.maintenance.JobInstanceProcessor;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -40,6 +42,31 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTestConstants {
 	Logger ourLog = LoggerFactory.getLogger(IInstanceStateTransitions.class);
+
+	@Test
+	default void createInstance_createsInQueuedWithChunkInReady() {
+		// given
+		JobDefinition<?> jd = getTestManager().withJobDefinition(false);
+
+		// when
+		IJobPersistence.CreateResult createResult =
+			getTestManager().newTxTemplate().execute(status->
+				getTestManager().getSvc().onCreateWithFirstChunk(jd, "{}"));
+
+		// then
+		ourLog.info("job and chunk created {}", createResult);
+		assertNotNull(createResult);
+		assertThat(createResult.jobInstanceId, not(emptyString()));
+		assertThat(createResult.workChunkId, not(emptyString()));
+
+		JobInstance jobInstance = getTestManager().freshFetchJobInstance(createResult.jobInstanceId);
+		assertThat(jobInstance.getStatus(), equalTo(StatusEnum.QUEUED));
+		assertThat(jobInstance.getParameters(), equalTo("{}"));
+
+		WorkChunk firstChunk = getTestManager().freshFetchWorkChunk(createResult.workChunkId);
+		assertThat(firstChunk.getStatus(), equalTo(WorkChunkStatusEnum.READY));
+		assertNull(firstChunk.getData(), "First chunk data is null - only uses parameters");
+	}
 
 	@Test
 	default void testCreateInstance_firstChunkDequeued_movesToInProgress() {

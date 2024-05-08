@@ -31,6 +31,8 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import jakarta.annotation.Nonnull;
+
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -41,6 +43,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
+import static org.exparity.hamcrest.date.DateMatchers.within;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -96,7 +101,17 @@ public class BulkDataExportJobSchedulingHelperImplTest {
 		verify(myJpaJobPersistence, never()).deleteInstanceAndChunks(anyString());
 
 		final Date cutoffDate = myCutoffCaptor.getValue();
-		assertEquals(DateUtils.truncate(computeDateFromConfig(expectedRetentionHours), Calendar.SECOND), DateUtils.truncate(cutoffDate, Calendar.SECOND));
+		Date expectedCutoff = computeDateFromConfig(expectedRetentionHours);
+		verifyDatesWithinSeconds(expectedCutoff, cutoffDate, 2);
+	}
+
+	private void verifyDatesWithinSeconds(Date theExpected, Date theActual, int theSeconds) {
+		Instant expectedInstant = theExpected.toInstant();
+		Instant actualInstant = theActual.toInstant();
+
+		String msg = String.format("Expected time not within %d s", theSeconds);
+		assertTrue(expectedInstant.plus(theSeconds, ChronoUnit.SECONDS).isAfter(actualInstant), msg);
+		assertTrue(expectedInstant.minus(theSeconds, ChronoUnit.SECONDS).isBefore(actualInstant), msg);
 	}
 
 	@Test

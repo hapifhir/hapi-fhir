@@ -28,6 +28,7 @@ import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.test.concurrency.IPointcutLatch;
 import ca.uhn.test.concurrency.PointcutLatch;
+import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -40,7 +41,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -355,10 +355,10 @@ public class Batch2JobMaintenanceDatabaseIT extends BaseJpaR4Test {
 
 		WorkChunkExpectation expectation = new WorkChunkExpectation(
 			"""
-chunk1, FIRST, COMPLETED
-chunk2, SECOND, QUEUED
-chunk3, LAST, QUEUED
-""",
+					chunk1, FIRST, COMPLETED
+					chunk2, SECOND, QUEUED
+					chunk3, LAST, QUEUED
+				""",
 			""
 		);
 
