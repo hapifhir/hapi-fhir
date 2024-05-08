@@ -558,11 +558,15 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 			if ("fragment".equals(codeSystemResourceContentMode)) {
 				severity = ValidationMessage.IssueSeverity.WARNING;
 				message = "Unknown code in fragment CodeSystem '"
-					+ getFormattedCodeSystemAndCodeForMessage(theCodeSystemUrlAndVersionToValidate, theCodeToValidate) + "'";
+						+ getFormattedCodeSystemAndCodeForMessage(
+								theCodeSystemUrlAndVersionToValidate, theCodeToValidate)
+						+ "'";
 			} else {
 				severity = ValidationMessage.IssueSeverity.ERROR;
 				message = "Unknown code '"
-						+ getFormattedCodeSystemAndCodeForMessage(theCodeSystemUrlAndVersionToValidate, theCodeToValidate) + "'";
+						+ getFormattedCodeSystemAndCodeForMessage(
+								theCodeSystemUrlAndVersionToValidate, theCodeToValidate)
+						+ "'";
 			}
 			if (isNotBlank(theValueSetUrl)) {
 				message += " for in-memory expansion of ValueSet '" + theValueSetUrl + "'";
@@ -579,11 +583,10 @@ public class InMemoryTerminologyServerValidationSupport implements IValidationSu
 		return codeValidationResult;
 	}
 
-	private static String getFormattedCodeSystemAndCodeForMessage(String theCodeSystemUrlAndVersionToValidate, String theCodeToValidate) {
-		return (isNotBlank(theCodeSystemUrlAndVersionToValidate)
-			? theCodeSystemUrlAndVersionToValidate + "#"
-			: "")
-			+ theCodeToValidate;
+	private static String getFormattedCodeSystemAndCodeForMessage(
+			String theCodeSystemUrlAndVersionToValidate, String theCodeToValidate) {
+		return (isNotBlank(theCodeSystemUrlAndVersionToValidate) ? theCodeSystemUrlAndVersionToValidate + "#" : "")
+				+ theCodeToValidate;
 	}
 
 	private IValidationSupport.IssueSeverity getIssueSeverityFromCodeValidationIssue(
