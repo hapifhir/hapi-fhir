@@ -82,10 +82,8 @@ public class RuleBulkExportImpl extends BaseRule {
 			if (isEmpty(inboundBulkExportRequestOptions.getResourceTypes())) {
 				return null;
 			}
-			for (String next : inboundBulkExportRequestOptions.getResourceTypes()) {
-				if (!myResourceTypes.contains(next)) { // fixme - should abstain return null;
-					return null;
-				}
+			if (!myResourceTypes.containsAll(inboundBulkExportRequestOptions.getResourceTypes())) {
+				return null;
 			}
 		}
 

@@ -28,10 +28,11 @@ public class RuleBulkExportImplTest {
 	@Mock
 	private Set<AuthorizationFlagsEnum> myFlags;
 
+
 	@Test
 	public void testDenyBulkRequestWithInvalidResourcesTypes() {
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("a");
-
+		myRule.setMode(PolicyEnum.ALLOW);
 		Set<String> myTypes = new HashSet<>();
 		myTypes.add("Patient");
 		myTypes.add("Practitioner");
@@ -42,7 +43,26 @@ public class RuleBulkExportImplTest {
 
 		BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setResourceTypes(myWantTypes);
-		
+
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+		assertAbstain(verdict);
+	}
+
+
+	@Test
+	public void test_RuleSpecifiesResourceTypes_RequestDoesNot_Abstains() {
+		RuleBulkExportImpl myRule = new RuleBulkExportImpl("a");
+		myRule.setAppliesToPatientExportAllPatients();
+		myRule.setMode(PolicyEnum.ALLOW);
+		Set<String> myTypes = new HashSet<>();
+		myTypes.add("Patient");
+		myRule.setResourceTypes(myTypes);
+
+
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.PATIENT);
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
 		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
@@ -50,23 +70,15 @@ public class RuleBulkExportImplTest {
 	}
 
 	@Test
-	public void testBulkRequestWithValidResourcesTypes() {
+	public void testBulkExportSystem_ruleHasTypes_RequestWithTypes_allow() {
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("a");
-		myRule.setAppliesToSystem();
 		myRule.setMode(PolicyEnum.ALLOW);
-
-		Set<String> myTypes = new HashSet<>();
-		myTypes.add("Patient");
-		myTypes.add("Practitioner");
-		myRule.setResourceTypes(myTypes);
-
-		Set<String> myWantTypes = new HashSet<>();
-		myWantTypes.add("Patient");
-		myWantTypes.add("Practitioner");
+		myRule.setAppliesToSystem();
+		myRule.setResourceTypes(Set.of("Patient", "Practitioner"));
 
 		BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
-		options.setResourceTypes(myWantTypes);
+		options.setResourceTypes(Set.of("Patient", "Practitioner"));
 		
 		when(myRequestDetails.getAttribute(any())).thenReturn(options);
 
@@ -75,6 +87,25 @@ public class RuleBulkExportImplTest {
 		assertAllow(verdict);
 	}
 
+
+	@Test
+	public void testBulkExportSystem_ruleHasTypes_RequestWithTooManyTypes_abstain() {
+		RuleBulkExportImpl myRule = new RuleBulkExportImpl("a");
+		myRule.setMode(PolicyEnum.ALLOW);
+		myRule.setAppliesToSystem();
+		myRule.setResourceTypes(Set.of("Patient", "Practitioner"));
+
+
+		BulkExportJobParameters options = new BulkExportJobParameters();
+		options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
+		options.setResourceTypes(Set.of("Patient", "Practitioner", "Encounter"));
+
+		when(myRequestDetails.getAttribute(any())).thenReturn(options);
+
+		AuthorizationInterceptor.Verdict verdict = myRule.applyRule(myOperation, myRequestDetails, null, null, null, myRuleApplier, myFlags, myPointcut);
+
+		assertAbstain(verdict);
+	}
 	@Test
 	public void testWrongGroupIdDelegatesToNextRule() {
 		RuleBulkExportImpl myRule = new RuleBulkExportImpl("a");
